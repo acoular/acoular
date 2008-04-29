@@ -6,7 +6,7 @@ A minimal usage example would be:
 
 >>    m=MicGeom(from_file='mic_geom.xml')
 >>    g=RectGrid(x_min=-0.8,x_max=-0.2,y_min=-0.1,y_max=0.3,z=0.8,increment=0.01)
->>    t1=TimeSamples(name='measured_data.td')
+>>    t1=TimeSamples(name='measured_data.h5')
 >>    cal=Calib(from_file='calibration_data.xml')
 >>    f1=EigSpectra(time_data=t1,block_size=256,window="Hanning",overlap='75%',calib=cal)
 >>    e1=BeamformerBase(freq_data=f1,grid=g,mpos=m,r_diag=False)
@@ -246,7 +246,7 @@ class bk_mat_import( time_data_import ):
     def get_data (self,td):
         """
         main work is done here: imports the data from pulse .mat file into
-        time_data object td and saves also a '*.td' file so this import
+        time_data object td and saves also a '*.h5' file so this import
         need not be performed every time the data is needed
         """
         if not path.isfile(self.from_file):
@@ -282,7 +282,7 @@ class TimeSamples( HasPrivateTraits ):
     and provides information about this data
     """
 
-    # name of the .td file with data
+    # name of the .h5 file with data
     name = File(filter=['*.h5'],
         desc="name of data file")
 

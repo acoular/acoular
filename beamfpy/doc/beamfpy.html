@@ -36,7 +36,7 @@ A minimal usage example would be:
 
 &gt;&gt;    m=MicGeom(from_file='mic_geom.xml')
 &gt;&gt;    g=RectGrid(x_min=-0.8,x_max=-0.2,y_min=-0.1,y_max=0.3,z=0.8,increment=0.01)
-&gt;&gt;    t1=TimeSamples(name='measured_data.td')
+&gt;&gt;    t1=TimeSamples(name='measured_data.h5')
 &gt;&gt;    cal=Calib(from_file='calibration_data.xml')
 &gt;&gt;    f1=EigSpectra(time_data=t1,block_size=256,window="Hanning",overlap='75%',calib=cal)
 &gt;&gt;    e1=BeamformerBase(freq_data=f1,grid=g,mpos=m,r_diag=False)
@@ -98,8 +98,6 @@ Contents:
 
 
 
-<li><a href="#section-variables">Variables</a></li>
-
 
 
 <li><a href="#section-classes">Classes</a></li>
@@ -117,20 +115,6 @@ Contents:
 
 
 
-
-
-<h2 id="section-variables">Variables</h2>
-<ul class="doclist">
-
-  <li class="attribute" id="cache_dir">cache_dir<pre></pre><pre>cache_dir = path.join(path.curdir, 'cache')
-
-</pre></li>
-
-  <li class="attribute" id="td_dir">td_dir<pre></pre><pre>td_dir = path.join(path.curdir, 'td')
-
-</pre></li>
-
-</ul>
 
 
 
@@ -207,6 +191,8 @@ Contents:
   <tr id="CArray"><td>CArray</td><td>enthought.traits.api.CArray</td></tr>
 
   <tr id="cPickle"><td>cPickle</td><td>cPickle</td></tr>
+
+  <tr id="environ"><td>environ</td><td>os.environ</td></tr>
 
   <tr id="File"><td>File</td><td>enthought.traits.api.File</td></tr>
 
