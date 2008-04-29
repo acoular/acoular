@@ -24,7 +24,7 @@ from threading import Thread
 from time import sleep
 from pylab import imread
 from os import path
-from numpy import ravel
+from numpy import ravel, array, arange, log10
 
 calib_default=''
 geom_default=path.join( path.split(beamfpy.__file__)[0],'xml','acousticam_2c.xml')
@@ -104,7 +104,10 @@ class ResultExplorer( HasPrivateTraits ):
             self.synth_freq_enum = list(self.beamformer.freq_data.fftfreq())
         else:
             (minf,maxf)=self.beamformer.freq_data.freq_range
-            minf=self.beamformer.freq_data.fftfreq()[2]
+            try:
+                minf=self.beamformer.freq_data.fftfreq()[2]
+            except:
+                pass
             factors=array([1.0,1.25,1.6,2.0,2.5,3.15,4.0,5.0,6.3,8.0])
             values=map(lambda x: divmod(int(10*x),10),arange(round(log10(minf),1),round(log10(maxf),1),0.1))
             self.synth_freq_enum = list(map(lambda x: factors[x[1]]*10**x[0],values))
@@ -207,6 +210,7 @@ class MainWindow(SplitApplicationWindow):
                     Action(name='Ort&ho', style='radio', on_perform=self.set_Eig),
                     Action(name='&Capon', style='radio', on_perform=self.set_Capon),
                     Action(name='&Music', style='radio', on_perform=self.set_Music),
+                    Action(name='D&amas', style='radio', on_perform=self.set_Damas),
                 ),
                 name = '&Options',
             )
@@ -267,6 +271,10 @@ class MainWindow(SplitApplicationWindow):
     def set_Music (self):
         b=self.panel.beamformer
         self.panel.beamformer=BeamformerMusic(freq_data=b.freq_data,grid=b.grid,mpos=b.mpos)
+
+    def set_Damas (self):
+        b=self.panel.beamformer
+        self.panel.beamformer=BeamformerDamas(beamformer=b)
 
 if __name__ == '__main__':
     m=MicGeom(from_file=geom_default)

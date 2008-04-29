@@ -66,14 +66,14 @@ __version__ = "1.0beta"
 from scipy import io
 from numpy import *
 from threading import Thread, Lock
-from enthought.traits.api import HasTraits, HasPrivateTraits, Float, Int, Long, File, CArray, Property, Instance, Trait, Bool, Range
+from enthought.traits.api import HasTraits, HasPrivateTraits, Float, Int, Long, File, CArray, Property, Instance, Trait, Bool, Range, Delegate
 from enthought.traits.ui.api import View, Item, Group
 from enthought.traits.ui.menu import OKCancelButtons
 from enthought.pyface.api import GUI
 from beamformer import * # ok to use *
 from os import path, mkdir, environ
 from string import join
-from time import sleep
+from time import sleep, time
 import md5
 import cPickle
 import tables
@@ -490,7 +490,7 @@ class PowerSpectra( HasPrivateTraits ):
         desc="cross spectral matrix")
 
     # internal identifier
-    digest = Property( depends_on = ['time_data.digest','calib.digest', 'block_size', 'window', 'overlap'],
+    digest = Property( depends_on = ['time_data.digest','calib.digest','block_size','window','overlap','ind_low','ind_high'],
         cached = True)
 
     traits_view = View(
@@ -518,7 +518,10 @@ class PowerSpectra( HasPrivateTraits ):
 
     def _get_freq_range ( self ):
         if self._freq_range is None and not self.time_data is None:
-            self._freq_range=self.fftfreq()[[0,-1]]
+            try:
+                self._freq_range=self.fftfreq()[[0,-1]]
+            except IndexError:
+                self._freq_range=array([0.,0])
         return self._freq_range
 
     def _get_csm_flag ( self ):
@@ -596,7 +599,7 @@ class PowerSpectra( HasPrivateTraits ):
         if self.time_data.sample_freq>0:
             return fft.fftfreq(self.block_size,1./self.time_data.sample_freq)[:self.block_size/2+1][self.ind_low:self.ind_high]
         else:
-            return array([],'d')
+            return array([0.],'d')
 
 class EigSpectra( PowerSpectra ):
     """
@@ -1229,6 +1232,129 @@ class BeamformerMusic( BeamformerEig ):
             h=(h.T/h.max(1)).T
             self._result=reshape(h,(len(f),self.grid.nxsteps,self.grid.nysteps))*4e-10
             self._result.dump(cache_name)
+
+class BeamformerDamas (BeamformerBase):
+    """
+    DAMAS Deconvolution
+    """
+
+    # BeamformerBase object that provides data for deconvolution
+    beamformer = Trait(BeamformerBase)
+
+    # PowerSpectra object that provides the cross spectral matrix
+    freq_data = Delegate('beamformer')
+
+    # RectGrid object that provides the grid locations
+    grid = Delegate('beamformer')
+
+    # MicGeom object that provides the microphone locations
+    mpos = Delegate('beamformer')
+
+    # the speed of sound, defaults to 343 m/s
+    c =  Delegate('beamformer')
+
+    # flag, if true (default), the main diagonal is removed before beamforming
+    r_diag =  Delegate('beamformer')
+
+    # iherited
+    # result_flag, result
+
+    # number of iterations
+    n_iter = Int(100,
+        desc="assumed number of sources")
+
+    # internal identifier
+    digest = Property( depends_on = ['beamformer.digest','n_iter'],
+        cached = True)
+
+    # thread
+    calc_thread = Instance( Thread )
+
+    traits_view = View(
+        [
+            [Item('beamformer{}',style='custom')],
+            [Item('n_iter{Number of iterations}')],
+            '|'
+        ],
+        title='Beamformer denconvolution options',
+        buttons = OKCancelButtons
+        )
+
+    def _get_result_flag ( self ):
+        #print "get result flag",self.r_diag
+        if self._result_flag is None:
+            self._result_flag=1
+            self._result=None
+        return self._result_flag
+
+    def _get_result ( self ):
+        #print "get_result",self.r_diag
+        if self._result_flag==1:
+            #print "calc_result",self.r_diag
+            self.calc_result()
+            self._result_flag=2
+        return self._result
+
+    def _get_digest( self ):
+        if self._digest is None:
+            try:
+                s=[self.beamformer.digest,
+                    str(self.n_iter)
+                    ]
+            except AttributeError:
+                s=['',]
+            self._digest = md5.new(join(s)).hexdigest()
+        return self._digest
+
+    def calc_result ( self ):
+        """main work is done here:
+        beamform result is either loaded from cache or
+        calculated and additionally saved to cache
+        this runs automatically and may take some time
+        the result is discarded if the digest changes during the calculation
+        """
+        # check validity of input data
+        if self.freq_data is None or self.grid is None or self.mpos is None or self.beamformer.result is None:
+            return
+        numchannels=self.freq_data.time_data.numchannels
+        if  numchannels != self.mpos.num_mics:
+            print "channel counts in time data (%i) and mic geometry (%i) do not fit" % (numchannels,self.mpos.num_mics)
+            return
+        # store digest value for later comparison
+        digest=self.digest
+        # check for HD-cached values
+        cache_name = path.join(cache_dir,'x_'+self.digest+'.cache')
+        if path.isfile(cache_name):
+            self._result=load(cache_name)
+            return
+        # prepare calculation
+        f = self.freq_data.fftfreq()
+        numfreq = len(f)
+        kj = 2j*pi*f/self.c
+        gs = self.grid.size
+        bpos = self.grid.pos()
+        hh = zeros((numfreq,gs,gs),'d')
+        e = zeros((numchannels),'D')
+        e1 = e.copy()
+        t=time()
+        print 1,t
+        beam_psf(e,e1,hh,bpos,self.mpos.mpos,kj)
+        print 2,t-time()
+        bresult = self.beamformer.result
+        result = empty_like(bresult)
+        for i in range(numfreq):
+            h = hh[i]
+            A = h/diag(h)[:,newaxis]
+            y = bresult[i].flatten()
+            x = y.copy()
+            gseidel(A,y,x,self.n_iter,1.0)
+            result[i] = x.reshape((self.grid.nxsteps,self.grid.nysteps))
+        print 3,t-time()
+        # all data still the same
+        if digest==self.digest:
+            self._result=result #reshape(h,(len(f),self.grid.nxsteps,self.grid.nysteps))/adiv
+            self._result.dump(cache_name)
+##            self._result_flag=2
 
 def L_p ( x ):
     """

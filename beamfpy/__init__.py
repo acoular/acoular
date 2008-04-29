@@ -8,7 +8,7 @@ from beamfpy import time_data_import, csv_import, td_import, bk_mat_import
 from nidaqimport import nidaq_import
 from beamfpy import TimeSamples, Calib, PowerSpectra, EigSpectra
 from beamfpy import RectGrid, MicGeom
-from beamfpy import BeamformerBase, BeamformerCapon, BeamformerEig, BeamformerMusic
+from beamfpy import BeamformerBase, BeamformerCapon, BeamformerEig, BeamformerMusic, BeamformerDamas
 
 from beamfpy import L_p
 
