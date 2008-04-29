@@ -11,6 +11,7 @@ __version__ = "1.2"
 
 
 from beamfpy import *
+from beamfpy.nidaqimport import nidaq_import
 from enthought.traits.api import HasTraits, HasPrivateTraits, Float, Int, File, CArray, Property, Instance, Trait, Bool, Any, List, Str
 from enthought.traits.ui.api import EnumEditor, View, Item
 try:
@@ -193,6 +194,10 @@ class MainWindow(SplitApplicationWindow):
                     Action(name='td file', on_perform=self.import_td),
                     name = '&Import'
                 ),
+                MenuManager(
+                    Action(name='NI-DAQmx', on_perform=self.import_nidaqmx),
+                    name = '&Acquire'
+                ),
                 Action(name='E&xit', on_perform=self.close),
                 name = '&File',
             ),
@@ -221,30 +226,31 @@ class MainWindow(SplitApplicationWindow):
         ti=csv_import()
         ti.from_file='C:\\tyto\\array\\07.03.2007 16_45_59,203.txt'
         ti.configure_traits(kind='modal')
-        print ti.from_file,t.name
         t.name=""
         ti.get_data(t)
-        print ti.from_file,t.name
 
     def import_bk_mat_data (self):
         t=self.panel.beamformer.freq_data.time_data
         ti=bk_mat_import()
         ti.from_file='C:\\work\\1_90.mat'
         ti.configure_traits(kind='modal')
-        print ti.from_file,t.name
         t.name=""
         ti.get_data(t)
-        print ti.from_file,t.name
 
     def import_td (self):
         t=self.panel.beamformer.freq_data.time_data
         ti=td_import()
         ti.from_file='C:\\work\\x.td'
         ti.configure_traits(kind='modal')
-        print ti.from_file,t.name
         t.name=""
         ti.get_data(t)
-        print ti.from_file,t.name
+
+    def import_nidaqmx (self):
+        t=self.panel.beamformer.freq_data.time_data
+        ti=nidaq_import()
+        ti.configure_traits(kind='modal')
+        t.name=""
+        ti.get_data(t)
 
     def set_Base (self):
         b=self.panel.beamformer
