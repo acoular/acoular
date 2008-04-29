@@ -71,20 +71,26 @@ from enthought.traits.ui.api import View, Item, Group
 from enthought.traits.ui.menu import OKCancelButtons
 from enthought.pyface.api import GUI
 from beamformer import * # ok to use *
-from os import path, mkdir
+from os import path, mkdir, environ
 from string import join
 from time import sleep
 import md5
 import cPickle
 import tables
 
-
-
-cache_dir=path.join(path.curdir,'cache')
+# path to cache directory, possibly in temp
+try:
+    cache_dir=path.join(environ['TEMP'],'beamfpy_cache')
+except:
+    cache_dir=path.join(path.curdir,'cache')
 if not path.exists(cache_dir):
     mkdir(cache_dir)
 
-td_dir=path.join(path.curdir,'td')
+# path to td directory (used for import to *.h5 files)
+try:
+    td_dir=path.join(environ['HOMEPATH'],'beamfpy_td')
+except:
+    td_dir=path.join(path.curdir,'td')
 if not path.exists(td_dir):
     mkdir(td_dir)
 
