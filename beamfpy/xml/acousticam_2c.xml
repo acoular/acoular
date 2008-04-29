@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<BKArray name="acousticam_2c">
+    <pos Name="Point 1" x="-0.145527" y="0.633500" z="0"/>
+    <pos Name="Point 2" x="-0.066774" y="0.236764" z="0"/>
+    <pos Name="Point 3" x="-0.376879" y="0.529587" z="0"/>
+    <pos Name="Point 4" x="-0.152297" y="0.193188" z="0"/>
+    <pos Name="Point 5" x="-0.550855" y="0.345049" z="0"/>
+    <pos Name="Point 6" x="-0.214634" y="0.120201" z="0"/>
+    <pos Name="Point 7" x="-0.640968" y="0.107980" z="0"/>
+    <pos Name="Point 8" x="-0.244295" y="0.028914" z="0"/>
+    <pos Name="Point 9" x="-0.633500" y="-0.145527" z="0"/>
+    <pos Name="Point 10" x="-0.236764" y="-0.066774" z="0"/>
+    <pos Name="Point 11" x="-0.529587" y="-0.376879" z="0"/>
+    <pos Name="Point 12" x="-0.193188" y="-0.152297" z="0"/>
+    <pos Name="Point 13" x="-0.345049" y="-0.550855" z="0"/>
+    <pos Name="Point 14" x="-0.120201" y="-0.214634" z="0"/>
+    <pos Name="Point 15" x="-0.107980" y="-0.640968" z="0"/>
+    <pos Name="Point 16" x="-0.028914" y="-0.244295" z="0"/>
+    <pos Name="Point 17" x="0.145527" y="-0.633500" z="0"/>
+    <pos Name="Point 18" x="0.066774" y="-0.236764" z="0"/>
+    <pos Name="Point 19" x="0.376879" y="-0.529587" z="0"/>
+    <pos Name="Point 20" x="0.152297" y="-0.193188" z="0"/>
+    <pos Name="Point 21" x="0.550855" y="-0.345049" z="0"/>
+    <pos Name="Point 22" x="0.214634" y="-0.120201" z="0"/>
+    <pos Name="Point 23" x="0.640968" y="-0.107980" z="0"/>
+    <pos Name="Point 24" x="0.244295" y="-0.028914" z="0"/>
+    <pos Name="Point 25" x="0.633500" y="0.145527" z="0"/>
+    <pos Name="Point 26" x="0.236764" y="0.066774" z="0"/>
+    <pos Name="Point 27" x="0.529587" y="0.376879" z="0"/>
+    <pos Name="Point 28" x="0.193188" y="0.152297" z="0"/>
+    <pos Name="Point 29" x="0.345049" y="0.550855" z="0"/>
+    <pos Name="Point 30" x="0.120201" y="0.214634" z="0"/>
+    <pos Name="Point 31" x="0.107980" y="0.640968" z="0"/>
+    <pos Name="Point 32" x="0.028914" y="0.244295" z="0"/>
+</BKArray>

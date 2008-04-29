@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Calib name="vw_ring32">
+	<pos Name="Point 1" factor="0.011"/>
+	<pos Name="Point 2" factor="0.010"/>
+	<pos Name="Point 3" factor="0.009"/>
+	<pos Name="Point 4" factor="0.011"/>
+	<pos Name="Point 5" factor="0.01"/>
+	<pos Name="Point 6" factor="0.011"/>
+	<pos Name="Point 7" factor="0.010"/>
+	<pos Name="Point 8" factor="0.010"/>
+	<pos Name="Point 9" factor="0.010"/>
+	<pos Name="Point 10" factor="0.010"/>
+	<pos Name="Point 11" factor="0.011"/>
+	<pos Name="Point 12" factor="0.012"/>
+	<pos Name="Point 13" factor="0.010"/>
+	<pos Name="Point 14" factor="0.011"/>
+	<pos Name="Point 15" factor="0.010"/>
+	<pos Name="Point 16" factor="0.010"/>
+	<pos Name="Point 17" factor="0.010"/>
+	<pos Name="Point 18" factor="0.010"/>
+	<pos Name="Point 19" factor="0.010"/>
+	<pos Name="Point 20" factor="0.010"/>
+	<pos Name="Point 21" factor="0.012"/>
+	<pos Name="Point 22" factor="0.011"/>
+	<pos Name="Point 23" factor="0.01"/>
+	<pos Name="Point 24" factor="0.010"/>
+	<pos Name="Point 25" factor="0.011"/>
+	<pos Name="Point 26" factor="0.011"/>
+	<pos Name="Point 27" factor="0.010"/>
+	<pos Name="Point 28" factor="0.010"/>
+	<pos Name="Point 29" factor="0.011"/>
+	<pos Name="Point 30" factor="0.010"/>
+	<pos Name="Point 31" factor="0.010"/>
+	<pos Name="Point 32" factor="0.010"/>
+</Calib>

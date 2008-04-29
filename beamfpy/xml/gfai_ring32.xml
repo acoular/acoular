@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<BKArray name="gfai_ring32">
+    <pos Name="Point 1" x="-0.035 " y="-0.361" z="0"/>
+    <pos Name="Point 2" x="-0.105 " y="-0.347" z="0"/>
+    <pos Name="Point 3" x="-0.171 " y="-0.320" z="0"/>
+    <pos Name="Point 4" x="-0.230 " y="-0.281" z="0"/>
+    <pos Name="Point 5" x="-0.281 " y="-0.230" z="0"/>
+    <pos Name="Point 6" x="-0.320 " y="-0.171" z="0"/>
+    <pos Name="Point 7" x="-0.347 " y="-0.105" z="0"/>
+    <pos Name="Point 8" x="-0.361 " y="-0.035" z="0"/>
+    <pos Name="Point 9" x="-0.361 " y="0.035" z="0"/>
+    <pos Name="Point 10" x="-0.347 " y="0.105" z="0"/>
+    <pos Name="Point 11" x="-0.320 " y="0.171" z="0"/>
+    <pos Name="Point 12" x="-0.281 " y="0.230" z="0"/>
+    <pos Name="Point 13" x="-0.230 " y="0.281" z="0"/>
+    <pos Name="Point 14" x="-0.171 " y="0.320" z="0"/>
+    <pos Name="Point 15" x="-0.105 " y="0.347" z="0"/>
+    <pos Name="Point 16" x="-0.035 " y="0.361" z="0"/>
+    <pos Name="Point 17" x="0.035 " y="0.361" z="0"/>
+    <pos Name="Point 18" x="0.105 " y="0.347" z="0"/>
+    <pos Name="Point 19" x="0.171 " y="0.320" z="0"/>
+    <pos Name="Point 20" x="0.230 " y="0.281" z="0"/>
+    <pos Name="Point 21" x="0.281 " y="0.230" z="0"/>
+    <pos Name="Point 22" x="0.320 " y="0.171" z="0"/>
+    <pos Name="Point 23" x="0.347 " y="0.105" z="0"/>
+    <pos Name="Point 24" x="0.361 " y="0.035" z="0"/>
+    <pos Name="Point 25" x="0.361 " y="-0.035" z="0"/>
+    <pos Name="Point 26" x="0.347 " y="-0.105" z="0"/>
+    <pos Name="Point 27" x="0.320 " y="-0.171" z="0"/>
+    <pos Name="Point 28" x="0.281 " y="-0.230" z="0"/>
+    <pos Name="Point 29" x="0.230 " y="-0.281" z="0"/>
+    <pos Name="Point 30" x="0.171 " y="-0.320" z="0"/>
+    <pos Name="Point 31" x="0.105 " y="-0.347" z="0"/>
+    <pos Name="Point 32" x="0.035 " y="-0.361" z="0"/>
+</BKArray>
