@@ -20,9 +20,9 @@ from enthought.traits.ui.api import EnumEditor
 from enthought.traits.ui.api import View, Item, Group
 from enthought.traits.ui.menu import OKCancelButtons
 from datetime import datetime
+from os import path
 
 nidaq = ctypes.windll.nicaiu # load the DLL
-
 # type definitions
 int32 = ctypes.c_long
 uInt32 = ctypes.c_ulong
@@ -59,7 +59,7 @@ DAQmxClearTask = ECFactory(nidaq.DAQmxClearTask)
 DAQmxStartTask = ECFactory(nidaq.DAQmxStartTask)
 DAQmxStopTask = ECFactory(nidaq.DAQmxStopTask)
 DAQmxGetTaskDevices = ECFactory(nidaq.DAQmxGetTaskDevices)
-DAQmxGetTaskNumDevices = ECFactory(nidaq.DAQmxGetTaskNumDevices)
+#DAQmxGetTaskNumDevices = ECFactory(nidaq.DAQmxGetTaskNumDevices)
 DAQmxGetTaskNumChans = ECFactory(nidaq.DAQmxGetTaskNumChans)
 DAQmxGetTaskChannels = ECFactory(nidaq.DAQmxGetTaskChannels)
 DAQmxGetBufInputBufSize = ECFactory(nidaq.DAQmxGetBufInputBufSize)
@@ -148,12 +148,14 @@ class nidaq_import( time_data_import ):
             return
         DAQmxGetTaskNumChans(taskHandle,ctypes.byref(num))
         self.numchannels = num.value
-        DAQmxGetTaskNumDevices(taskHandle,ctypes.byref(num))
-        self.numdevices = num.value
+        # commented for compatibility with older NIDAQmx
+        #~ DAQmxGetTaskNumDevices(taskHandle,ctypes.byref(num))
+        #~ self.numdevices = num.value
         DAQmxGetTaskChannels(taskHandle,ctypes.byref(buf),buf_size)
         self.namechannels = buf.value.split(', ')
         DAQmxGetTaskDevices(taskHandle,ctypes.byref(buf),buf_size)
         self.namedevices = buf.value.split(', ')
+        self.numdevices = len(self.namedevices)
         DAQmxGetSampClkRate(taskHandle,ctypes.byref(fnum))
         self.sample_freq = fnum.value
         DAQmxGetSampQuantSampMode(taskHandle,ctypes.byref(num))
