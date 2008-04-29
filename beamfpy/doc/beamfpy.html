@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html
+          PUBLIC
+          "-//W3C//DTD XHTML 1.1//EN"
+          "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Module beamfpy</title>
+    <link rel="stylesheet" type="text/css" href="module.css"/>
+    <script type="text/javascript" src="scr.js"></script>
+    
+  </head>
+  <body>
+    
+    
+    <div id="header">
+
+    <div id="nav-bar">
+    <ul>
+    <li><a href="index.html">Module Index</a></li>
+    <li><a href="class_hierarchy.html">Class Hierarchy</a></li>
+    <li><a href="class_index.html">Class Index</a></li>
+    <li><a href="namespace_index.html">Namespace Index</a></li>
+    </ul>
+    </div>
+    <h1>Module <span class="prefix"></span><a href="beamfpy.html">beamfpy</a></h1>
+    
+    </div>
+
+    
+
+<pre>
+Several classes for the implemetation of acoustic beamforming
+
+A minimal usage example would be:
+
+&gt;&gt;    m=MicGeom(from_file='mic_geom.xml')
+&gt;&gt;    g=RectGrid(x_min=-0.8,x_max=-0.2,y_min=-0.1,y_max=0.3,z=0.8,increment=0.01)
+&gt;&gt;    t1=TimeSamples(name='measured_data.td')
+&gt;&gt;    cal=Calib(from_file='calibration_data.xml')
+&gt;&gt;    f1=EigSpectra(time_data=t1,block_size=256,window="Hanning",overlap='75%',calib=cal)
+&gt;&gt;    e1=BeamformerBase(freq_data=f1,grid=g,mpos=m,r_diag=False)
+&gt;&gt;    fr=4000
+&gt;&gt;    L1=L_p(e1.synthetic(fr,0))
+
+The classes in the module possess a number of automatic data update
+capabilities. That is, only the traits must be set to get the results.
+The calculation need not be triggered explictely.
+    BEWARE: sometimes this gives problems with timing and results will not
+    be available immediately
+The classes are also GUI-aware, they know how to display a graphical user
+interface. So by calling
+&gt;&gt;    object_name.configure_traits()
+on object "object_name" the relevant traits of each instance object may
+be edited graphically.
+The traits could also be set explicitely in the program, either in the
+constructor of an object:
+&gt;&gt;    m=MicGeom(from_file='mic_geom.xml')
+or a later time
+&gt;&gt;    m.from_file='another_mic_geom.xml'
+where all objects that depend upon the specific trait will update their
+output if necessary.
+
+Classes
+=======
+csv_import      - import comma delimited time data as saved by NI VI Logger
+bk_mat_import   - import mat file data as saved by BK pulse
+
+TimeSamples     - management of time data
+
+Calib           - management of calibration data from .xml-files
+
+PowerSpectra    - efficient calculation of full cross spectral matrix
+EigSpectra      - eigen-decomposition of cross spectral matrix
+
+RectGrid        - rectangular grid coordinates
+
+MicGeom         - management of microphone locations from .xml-files
+
+BeamformerBase  - delay-and-sum beamformer
+BeamformerCapon - minimum variance / Capon beamformer
+BeamformerEig   - orthogonal beamformer
+BeamformerMusic - MUSIC beamformer
+
+Functions
+=========
+L_p(x)          - calculate SPL from p^2
+
+beamfpy.py (c) Ennes Sarradj 2007-2008, all rights reserved
+</pre>
+
+
+
+
+<div id="contents">
+<ul>
+Contents:
+
+
+
+<li><a href="#section-variables">Variables</a></li>
+
+
+
+<li><a href="#section-classes">Classes</a></li>
+
+
+<li><a href="#section-functions">Functions</a></li>
+
+
+<li><a href="#section-imports">Imported Names</a></li>
+
+</ul>
+</div>
+
+
+
+
+
+
+
+<h2 id="section-variables">Variables</h2>
+<ul class="doclist">
+
+  <li class="attribute" id="cache_dir">cache_dir<pre></pre><pre>cache_dir = path.join(path.curdir, 'cache')
+
+</pre></li>
+
+  <li class="attribute" id="td_dir">td_dir<pre></pre><pre>td_dir = path.join(path.curdir, 'td')
+
+</pre></li>
+
+</ul>
+
+
+
+
+
+
+<h2 id="section-classes">Classes</h2>
+<ul class="doclist">
+  
+  <li id="BeamformerBase" class="class"><a href="beamfpy.BeamformerBase.html">BeamformerBase</a></li>
+  
+  <li id="BeamformerCapon" class="class"><a href="beamfpy.BeamformerCapon.html">BeamformerCapon</a></li>
+  
+  <li id="BeamformerEig" class="class"><a href="beamfpy.BeamformerEig.html">BeamformerEig</a></li>
+  
+  <li id="BeamformerMusic" class="class"><a href="beamfpy.BeamformerMusic.html">BeamformerMusic</a></li>
+  
+  <li id="Calib" class="class"><a href="beamfpy.Calib.html">Calib</a></li>
+  
+  <li id="EigSpectra" class="class"><a href="beamfpy.EigSpectra.html">EigSpectra</a></li>
+  
+  <li id="MicGeom" class="class"><a href="beamfpy.MicGeom.html">MicGeom</a></li>
+  
+  <li id="PowerSpectra" class="class"><a href="beamfpy.PowerSpectra.html">PowerSpectra</a></li>
+  
+  <li id="RectGrid" class="class"><a href="beamfpy.RectGrid.html">RectGrid</a></li>
+  
+  <li id="TimeSamples" class="class"><a href="beamfpy.TimeSamples.html">TimeSamples</a></li>
+  
+  <li id="bk_mat_import" class="class"><a href="beamfpy.bk_mat_import.html">bk_mat_import</a></li>
+  
+  <li id="csv_import" class="class"><a href="beamfpy.csv_import.html">csv_import</a></li>
+  
+  <li id="td_import" class="class"><a href="beamfpy.td_import.html">td_import</a></li>
+  
+  <li id="time_data_import" class="class"><a href="beamfpy.time_data_import.html">time_data_import</a></li>
+  
+</ul>
+
+
+
+
+<h2 id="section-functions">Function summary</h2>
+<ul class="function-summary">
+  
+  <li class="function"><a href="#L_p">L_p</a>(x)</li>
+  
+</ul>
+
+
+<h2>Functions</h2>
+<ul class="doclist">
+  
+  <li id="L_p" class="function">L_p(x)<pre>
+    calculates the sound pressure level from the sound pressure squared:
+
+    L_p = 10 lg x/4e-10
+    </pre></li>
+  
+</ul>
+
+
+
+
+<h2 id="section-imports">Imported Names</h2>
+<table summary="imported names" class="imported-names">
+  <thead>
+    <tr><th>Local name</th><th>Refers to</th></tr>
+  </thead>
+  <tbody>
+
+  <tr id="Bool"><td>Bool</td><td>enthought.traits.api.Bool</td></tr>
+
+  <tr id="CArray"><td>CArray</td><td>enthought.traits.api.CArray</td></tr>
+
+  <tr id="cPickle"><td>cPickle</td><td>cPickle</td></tr>
+
+  <tr id="File"><td>File</td><td>enthought.traits.api.File</td></tr>
+
+  <tr id="Float"><td>Float</td><td>enthought.traits.api.Float</td></tr>
+
+  <tr id="Group"><td>Group</td><td>enthought.traits.ui.api.Group</td></tr>
+
+  <tr id="GUI"><td>GUI</td><td>enthought.pyface.api.GUI</td></tr>
+
+  <tr id="HasPrivateTraits"><td>HasPrivateTraits</td><td>enthought.traits.api.HasPrivateTraits</td></tr>
+
+  <tr id="HasTraits"><td>HasTraits</td><td>enthought.traits.api.HasTraits</td></tr>
+
+  <tr id="Instance"><td>Instance</td><td>enthought.traits.api.Instance</td></tr>
+
+  <tr id="Int"><td>Int</td><td>enthought.traits.api.Int</td></tr>
+
+  <tr id="io"><td>io</td><td>scipy.io</td></tr>
+
+  <tr id="Item"><td>Item</td><td>enthought.traits.ui.api.Item</td></tr>
+
+  <tr id="join"><td>join</td><td>string.join</td></tr>
+
+  <tr id="Lock"><td>Lock</td><td>threading.Lock</td></tr>
+
+  <tr id="Long"><td>Long</td><td>enthought.traits.api.Long</td></tr>
+
+  <tr id="md5"><td>md5</td><td>md5</td></tr>
+
+  <tr id="mkdir"><td>mkdir</td><td>os.mkdir</td></tr>
+
+  <tr id="OKCancelButtons"><td>OKCancelButtons</td><td>enthought.traits.ui.menu.OKCancelButtons</td></tr>
+
+  <tr id="path"><td>path</td><td>os.path</td></tr>
+
+  <tr id="Property"><td>Property</td><td>enthought.traits.api.Property</td></tr>
+
+  <tr id="Range"><td>Range</td><td>enthought.traits.api.Range</td></tr>
+
+  <tr id="sleep"><td>sleep</td><td>time.sleep</td></tr>
+
+  <tr id="tables"><td>tables</td><td>tables</td></tr>
+
+  <tr id="Thread"><td>Thread</td><td>threading.Thread</td></tr>
+
+  <tr id="Trait"><td>Trait</td><td>enthought.traits.api.Trait</td></tr>
+
+  <tr id="View"><td>View</td><td>enthought.traits.ui.api.View</td></tr>
+
+  </tbody>
+</table>
+
+
+
+</div>  <!-- #main -->
+
+
+    
+    
+  </body>
+</html>
+

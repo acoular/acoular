@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html
+          PUBLIC
+          "-//W3C//DTD XHTML 1.1//EN"
+          "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Class beamfpy.BeamformerCapon</title>
+    <link rel="stylesheet" type="text/css" href="class.css"/>
+    <script type="text/javascript" src="scr.js"></script>
+    
+  </head>
+  <body>
+    
+    
+    <div id="header">
+
+    <div id="nav-bar">
+    <ul>
+    <li><a href="index.html">Module Index</a></li>
+    <li><a href="class_hierarchy.html">Class Hierarchy</a></li>
+    <li><a href="class_index.html">Class Index</a></li>
+    <li><a href="namespace_index.html">Namespace Index</a></li>
+    </ul>
+    </div>
+    <h1>Class <span class="prefix"><a href="beamfpy.html">beamfpy</a>.&#8203;</span><a href="beamfpy.BeamformerCapon.html">BeamformerCapon</a></h1>
+    
+    </div>
+
+    
+
+<pre>
+    beamforming using the minimum variance or Capon algorithm
+    </pre>
+
+
+
+
+<div id="contents">
+<ul>
+Contents:
+
+<li><a href="#section-superclasses">Base classes</a></li>
+
+
+<li><a href="#section-variables">Attributes</a></li>
+
+
+
+
+<li><a href="#section-functions">Methods</a></li>
+
+</ul>
+</div>
+
+
+<div id="main">
+
+
+<h2 id="section-superclasses">Inherits from</h2>
+<ul class="doclist">
+  
+    <li><a href="beamfpy.BeamformerBase.html">BeamformerBase</a>: beamfpy.BeamformerBase</li>
+  
+</ul>
+
+
+
+
+<h2 id="section-variables">Attributes</h2>
+<ul class="doclist">
+
+  <li class="attribute" id="traits_view">traits_view<pre></pre><pre>traits_view = View([ [ Item('mpos{}', style = 'custom') ], [ Item('grid', style = 'custom'), '-&lt;&gt;' ], '|' ], title = 'Beamformer options', buttons = OKCancelButtons)
+
+</pre></li>
+
+</ul>
+
+
+
+
+
+
+
+
+
+<h2 id="section-functions">Method summary</h2>
+<ul class="function-summary">
+  
+  <li class="function"><a href="#calc_result">calc_result</a>(self)</li>
+  
+</ul>
+
+
+
+
+<h2>Methods</h2>
+<ul class="doclist">
+  
+  <li id="calc_result" class="function">calc_result(self)<pre>main work is done here:
+        beamform result is either loaded from cache or
+        calculated and additionally saved to cache
+        this runs automatically and may take some time
+        the result is discarded if the digest changes during the calculation
+        </pre></li>
+  
+</ul>
+
+
+
+
+</div>  <!-- #main -->
+
+
+    
+    
+  </body>
+</html>
+

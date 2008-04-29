@@ -1,18 +1,18 @@
-from setuptools import setup, find_packages
-from os import walk, path
+from distutils.core import setup
+#~ from distutils.command.install import INSTALL_SCHEMES
 
-docfiles = walk('doc')
-
+#~ for scheme in INSTALL_SCHEMES.values():
+    #~ scheme['data'] = scheme['purelib'] 
+    
 setup(name="beamfpy",
       version="1.0beta",
       description="Library for the acoustic beamforming",
       author="Ennes Sarradj",
       author_email="ennes.sarradj@gmx.de",
       url="",
-      packages = find_packages('.'),
-#      packages_dir = {'': 'beamfpy'},
- #     py_modules=['beamfpy','nidaqimport','mplwidget'],
+      packages = ['beamfpy','beamfpy.scripts'],
       scripts=['ResultExplorer.py'],
-      data_files=[#('doc', ),
-                    ('beamfpy',['beamformer.pyd'])]
+      include_package_data = True,      
+      package_data={'beamfpy': ['doc/*.*','*.pyd']}
+#                    ('beamfpy',['./beamfpy/beamformer.pyd'])]
      )

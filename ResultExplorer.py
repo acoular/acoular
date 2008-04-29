@@ -12,13 +12,18 @@ __version__ = "1.2"
 
 from beamfpy import *
 from enthought.traits.api import HasTraits, HasPrivateTraits, Float, Int, File, CArray, Property, Instance, Trait, Bool, Any, List, Str
-from enthought.traits.ui.api import EnumEditor
-from mplwidget import MPLWidget
+from enthought.traits.ui.api import EnumEditor, View, Item
+try:
+    from mplwidget import MPLWidget
+except:
+    from beamfpy.mplwidget import MPLWidget
 from enthought.pyface.api import ApplicationWindow, SplitApplicationWindow, GUI
 from enthought.pyface.action.api import Action, MenuManager, MenuBarManager, Group
 from threading import Thread
 from time import sleep
 from pylab import imread
+from os import path
+from numpy import ravel
 
 calib_default=''
 geom_default=path.join(path.curdir,'acousticam_2c.xml')

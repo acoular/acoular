@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html
+          PUBLIC
+          "-//W3C//DTD XHTML 1.1//EN"
+          "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Class beamfpy.TimeSamples</title>
+    <link rel="stylesheet" type="text/css" href="class.css"/>
+    <script type="text/javascript" src="scr.js"></script>
+    
+  </head>
+  <body>
+    
+    
+    <div id="header">
+
+    <div id="nav-bar">
+    <ul>
+    <li><a href="index.html">Module Index</a></li>
+    <li><a href="class_hierarchy.html">Class Hierarchy</a></li>
+    <li><a href="class_index.html">Class Index</a></li>
+    <li><a href="namespace_index.html">Namespace Index</a></li>
+    </ul>
+    </div>
+    <h1>Class <span class="prefix"><a href="beamfpy.html">beamfpy</a>.&#8203;</span><a href="beamfpy.TimeSamples.html">TimeSamples</a></h1>
+    
+    </div>
+
+    
+
+<pre>
+    Container for time data, loads time data
+    and provides information about this data
+    </pre>
+
+
+
+
+<div id="contents">
+<ul>
+Contents:
+
+<li><a href="#section-superclasses">Base classes</a></li>
+
+
+<li><a href="#section-variables">Attributes</a></li>
+
+
+
+
+<li><a href="#section-functions">Methods</a></li>
+
+</ul>
+</div>
+
+
+<div id="main">
+
+
+<h2 id="section-superclasses">Inherits from</h2>
+<ul class="doclist">
+  
+    <li>HasPrivateTraits: enthought.traits.api.HasPrivateTraits</li>
+  
+</ul>
+
+
+
+
+<h2 id="section-variables">Attributes</h2>
+<ul class="doclist">
+
+  <li class="attribute" id="data">data<pre>the time data as (numsamples,numchannels) array of floats
+</pre><pre>data = Property(depends_on = [  ], cached = True, desc = 'the actual time data array')
+
+</pre></li>
+
+  <li class="attribute" id="digest">digest<pre>internal identifier
+</pre><pre>digest = Property(depends_on = [ 'name' ], cached = True)
+
+</pre></li>
+
+  <li class="attribute" id="h5f">h5f<pre>hdf5 file object
+</pre><pre>h5f = Instance(tables.File)
+
+</pre></li>
+
+  <li class="attribute" id="load_thread">load_thread<pre>thread (internal use)
+</pre><pre>load_thread = Instance(Thread)
+
+</pre></li>
+
+  <li class="attribute" id="name">name<pre>name of the .td file with data
+</pre><pre>name = File(filter = [ '*.h5' ], desc = 'name of data file')
+
+</pre></li>
+
+  <li class="attribute" id="numchannels">numchannels<pre>number of channels, is set automatically
+</pre><pre>numchannels = Long(1, desc = 'number of input channels')
+
+</pre></li>
+
+  <li class="attribute" id="numsamples">numsamples<pre>number of time data samples, is set automatically
+</pre><pre>numsamples = Long(1, desc = 'number of samples')
+
+</pre></li>
+
+  <li class="attribute" id="sample_freq">sample_freq<pre>sampling frequency of the data, is set automatically
+</pre><pre>sample_freq = Float(1.0, desc = 'sampling frequency')
+
+</pre></li>
+
+  <li class="attribute" id="traits_view">traits_view<pre></pre><pre>traits_view = View([ 'name{File name}', [ 'sample_freq~{Sampling frequency}', 'numchannels~{Number of channels}', 'numsamples~{Number of samples}', '|[Properties]' ], '|' ], title = 'Time data', buttons = OKCancelButtons)
+
+</pre></li>
+
+</ul>
+
+
+
+
+
+
+
+
+
+<h2 id="section-functions">Method summary</h2>
+<ul class="function-summary">
+  
+  <li class="function"><a href="#load_data">load_data</a>(self)</li>
+  
+</ul>
+
+
+
+
+<h2>Methods</h2>
+<ul class="doclist">
+  
+  <li id="load_data" class="function">load_data(self)<pre> loads the data from .h5 file,
+        will be started in an extra thread (this must be changed)
+        </pre></li>
+  
+</ul>
+
+
+
+
+</div>  <!-- #main -->
+
+
+    
+    
+  </body>
+</html>
+

@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html
+          PUBLIC
+          "-//W3C//DTD XHTML 1.1//EN"
+          "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Class beamfpy.Calib</title>
+    <link rel="stylesheet" type="text/css" href="class.css"/>
+    <script type="text/javascript" src="scr.js"></script>
+    
+  </head>
+  <body>
+    
+    
+    <div id="header">
+
+    <div id="nav-bar">
+    <ul>
+    <li><a href="index.html">Module Index</a></li>
+    <li><a href="class_hierarchy.html">Class Hierarchy</a></li>
+    <li><a href="class_index.html">Class Index</a></li>
+    <li><a href="namespace_index.html">Namespace Index</a></li>
+    </ul>
+    </div>
+    <h1>Class <span class="prefix"><a href="beamfpy.html">beamfpy</a>.&#8203;</span><a href="beamfpy.Calib.html">Calib</a></h1>
+    
+    </div>
+
+    
+
+<pre>
+    container for calibration data that is loaded from
+    an .xml-file
+    </pre>
+
+
+
+
+<div id="contents">
+<ul>
+Contents:
+
+<li><a href="#section-superclasses">Base classes</a></li>
+
+
+<li><a href="#section-variables">Attributes</a></li>
+
+
+
+
+<li><a href="#section-functions">Methods</a></li>
+
+</ul>
+</div>
+
+
+<div id="main">
+
+
+<h2 id="section-superclasses">Inherits from</h2>
+<ul class="doclist">
+  
+    <li>HasPrivateTraits: enthought.traits.api.HasPrivateTraits</li>
+  
+</ul>
+
+
+
+
+<h2 id="section-variables">Attributes</h2>
+<ul class="doclist">
+
+  <li class="attribute" id="data">data<pre>array of calibration factors
+</pre><pre>data = Property(depends_on = [ 'from_file' ], cached = True, desc = 'calibration data')
+
+</pre></li>
+
+  <li class="attribute" id="digest">digest<pre>internal identifier
+</pre><pre>digest = Property(depends_on = [ 'data' ], cached = True)
+
+</pre></li>
+
+  <li class="attribute" id="from_file">from_file<pre>name of the .xml file
+</pre><pre>from_file = File(filter = [ '*.xml' ], desc = 'name of the xml file to import')
+
+</pre></li>
+
+  <li class="attribute" id="num_mics">num_mics<pre>number of microphones in the calibration data (auto-set)
+</pre><pre>num_mics = Int(0, desc = 'number of microphones in the geometry')
+
+</pre></li>
+
+  <li class="attribute" id="traits_view">traits_view<pre></pre><pre>traits_view = View([ 'from_file{File name}', [ 'num_mics~{Number of microphones}', '|[Properties]' ] ], title = 'Calibration data', buttons = OKCancelButtons)
+
+</pre></li>
+
+</ul>
+
+
+
+
+
+
+
+
+
+<h2 id="section-functions">Method summary</h2>
+<ul class="function-summary">
+  
+  <li class="function"><a href="#import_data">import_data</a>(self)</li>
+  
+</ul>
+
+
+
+
+<h2>Methods</h2>
+<ul class="doclist">
+  
+  <li id="import_data" class="function">import_data(self)<pre>loads the calibration data from .xml file</pre></li>
+  
+</ul>
+
+
+
+
+</div>  <!-- #main -->
+
+
+    
+    
+  </body>
+</html>
+

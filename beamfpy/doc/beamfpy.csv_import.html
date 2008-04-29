@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html
+          PUBLIC
+          "-//W3C//DTD XHTML 1.1//EN"
+          "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Class beamfpy.csv_import</title>
+    <link rel="stylesheet" type="text/css" href="class.css"/>
+    <script type="text/javascript" src="scr.js"></script>
+    
+  </head>
+  <body>
+    
+    
+    <div id="header">
+
+    <div id="nav-bar">
+    <ul>
+    <li><a href="index.html">Module Index</a></li>
+    <li><a href="class_hierarchy.html">Class Hierarchy</a></li>
+    <li><a href="class_index.html">Class Index</a></li>
+    <li><a href="namespace_index.html">Namespace Index</a></li>
+    </ul>
+    </div>
+    <h1>Class <span class="prefix"><a href="beamfpy.html">beamfpy</a>.&#8203;</span><a href="beamfpy.csv_import.html">csv_import</a></h1>
+    
+    </div>
+
+    
+
+<pre>
+    import of CSV data as saved by NI VI Logger
+    </pre>
+
+
+
+
+<div id="contents">
+<ul>
+Contents:
+
+<li><a href="#section-superclasses">Base classes</a></li>
+
+
+<li><a href="#section-variables">Attributes</a></li>
+
+
+
+
+<li><a href="#section-functions">Methods</a></li>
+
+</ul>
+</div>
+
+
+<div id="main">
+
+
+<h2 id="section-superclasses">Inherits from</h2>
+<ul class="doclist">
+  
+    <li><a href="beamfpy.time_data_import.html">time_data_import</a>: beamfpy.time_data_import</li>
+  
+</ul>
+
+
+
+
+<h2 id="section-variables">Attributes</h2>
+<ul class="doclist">
+
+  <li class="attribute" id="dummy_columns">dummy_columns<pre>number of leading columns, defaults to 1
+</pre><pre>dummy_columns = Int(1, desc = 'number of leading columns to ignore during import')
+
+</pre></li>
+
+  <li class="attribute" id="from_file">from_file<pre>name of the comma delimited file to import
+</pre><pre>from_file = File(filter = [ '*.txt' ], desc = 'name of the comma delimited file to import')
+
+</pre></li>
+
+  <li class="attribute" id="header_length">header_length<pre>header length, defaults to 6
+</pre><pre>header_length = Int(6, desc = 'length of the header to ignore during import')
+
+</pre></li>
+
+  <li class="attribute" id="traits_view">traits_view<pre></pre><pre>traits_view = View([ 'from_file', [ 'header_length', 'dummy_columns', '-' ], '|[Import]' ], title = 'Time data', buttons = OKCancelButtons)
+
+</pre></li>
+
+</ul>
+
+
+
+
+
+
+
+
+
+<h2 id="section-functions">Method summary</h2>
+<ul class="function-summary">
+  
+  <li class="function"><a href="#get_data">get_data</a>(self, td)</li>
+  
+</ul>
+
+
+
+
+<h2>Methods</h2>
+<ul class="doclist">
+  
+  <li id="get_data" class="function">get_data(self, td)<pre>
+        main work is done here: imports the data from CSV file into
+        TimeSamples object td and saves also a '*.h5' file so this import
+        need not be performed every time the data is needed
+        </pre></li>
+  
+</ul>
+
+
+
+
+</div>  <!-- #main -->
+
+
+    
+    
+  </body>
+</html>
+
