@@ -26,7 +26,7 @@ from os import path
 from numpy import ravel
 
 calib_default=''
-geom_default=path.join(path.curdir,'acousticam_2c.xml')
+geom_default=path.join( path.split(beamfpy.__file__)[0],'xml','acousticam_2c.xml')
 td_default=''
 
 
