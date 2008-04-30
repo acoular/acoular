@@ -11,7 +11,10 @@ __version__ = "1.2"
 
 
 from beamfpy import *
-from beamfpy.nidaqimport import nidaq_import
+try:
+	from beamfpy.nidaqimport import nidaq_import
+except:
+	pass
 from enthought.traits.api import HasTraits, HasPrivateTraits, Float, Int, File, CArray, Property, Instance, Trait, Bool, Any, List, Str
 from enthought.traits.ui.api import EnumEditor, View, Item
 try:
