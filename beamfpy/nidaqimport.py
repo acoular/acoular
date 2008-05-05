@@ -119,7 +119,8 @@ class nidaq_import( time_data_import ):
         buttons = OKCancelButtons
                     )
 
-    def __init__(self):
+    def __init__ ( self, **traits ):
+        time_data_import.__init__(self, **traits )
         taskHandle = TaskHandle(0)
         buf_size = 1024
         buf = ctypes.create_string_buffer('\000' * buf_size)
