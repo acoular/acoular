@@ -1,20 +1,27 @@
 from beamfpy import *
-from numpy import set_printoptions
+from numpy import *
 from pylab import *
-from time import time
+from time import time, sleep
+from beamfpy.beamfpy import td_dir
+from beamfpy.beamformer import *
+from os import path
 set_printoptions(precision=2)
+
+ion()
+
 td=TimeSamples()
 #~ td.name=".\\td\\24.01.2008 18_31_09,468.td"
-td.name=".\\td\\15.11.2007 12_12_02,218.h5"
-
+#~ td.name=path.join(td_dir,"07.03.2007 16_45_59,203.h5")
+td.name=path.join(td_dir,"15.11.2007 12_12_02,218.h5")
 #~ td.configure_traits()
 print td.data[0,0]
-f=EigSpectra(window="Hanning",overlap="50%",block_size=1024)
+cal=Calib(from_file=path.join(td_dir,'calib_07_03_2007.xml'))
+f=EigSpectra(window="Hanning",overlap="50%",block_size=1024,calib=cal)
 f.time_data=td
-m=MicGeom(from_file='acousticam_2c.xml')
+m=MicGeom(from_file=path.join(td_dir,'acousticam_2c.xml'))
 #~ m=MicGeom(from_file='W90_D105_f10.xml')
-g=RectGrid(x_min=-1,x_max=1,y_min=-1,y_max=1,z=0.68,increment=0.05)
-#~ g=RectGrid(x_min=-0.6,x_max=0.4,y_min=-0.5,y_max=0.5,z=0.68,increment=0.025)
+#~ g=RectGrid(x_min=-1,x_max=0.5,y_min=-0.5,y_max=0.5,z=0.68,increment=0.05)
+g=RectGrid(x_min=-0.6,x_max=0.4,y_min=-0.5,y_max=0.5,z=0.68,increment=0.025)
 #~ g=RectGrid(x_min=-0.6,x_max=-0.1,y_min=-0.25,y_max=0.25,z=0.68,increment=0.03)
 #~ g=RectGrid(x_min=-0.5,x_max=0.5,y_min=-0.5,y_max=0.5,z=1.0,increment=0.025)
 #~ g=RectGrid(x_min=-0.6,x_max=0.6,y_min=-0.6,y_max=0.6,z=0.855,increment=0.05)
@@ -61,28 +68,49 @@ print 'stop',time()-t
 #~ L2=L_p(h2[215]+h2[300])
 #~ im=imshow(L2.swapaxes(0,1),vmin= max(ravel(L2))-30,vmax=max(ravel(L2)),origin='lower',extent=g.extend(),interpolation='bicubic')
 #~ from scipy.linalg.iterative import gmres
-figure(8)
+#~ figure(8)
 p=h.copy()
 p=p/diag(p)[:,newaxis]
-imshow(p)
+#~ imshow(p)
 N=g.size
 y=h1.flatten()
 A=h/diag(h)[:,newaxis]-diag(ones(N,'d'))
 
 j=1
 err=[]
+w=sum(f.eva[fN])/32
+figure(20)
+#~ x=dot(p,x)
+L2=L_p(y.reshape((g.nxsteps,g.nysteps)))
+im=imshow(L2.swapaxes(0,1),vmin= max(ravel(L2))-30,vmax=max(ravel(L2)),origin='lower',extent=g.extend())#,interpolation='bicubic')
+colorbar()
+ax=gca()
 for om in arange(1.,2,1.4):
-    x=zeros(N,'d')
+    x=y.copy()#zeros(N,'d')
     print time()-t
     #~ x=y
-    gseidel(A,y,x,500,1.0)
-    #~ for i in range(500):
-       #~ for n in range(N):
+    #~ gseidel(A,y,x,500,1.0)
+    for i in range(500):
+        x0=x.copy()
+        for n in range(N):
+            x[n]=y[n]-dot(A[n],x)
+            if x[n]<0:
+                x[n]=0
+        #~ if w<x.sum():
+            #~ x=w*x/x.sum()
+        #~ for n in range(N-1,-1,-1):
             #~ x[n]=y[n]-dot(A[n],x)
             #~ if x[n]<0:
                 #~ x[n]=0
+        err.append(abs(x0-x).sum())
+        #~ if w<x.sum():
+            #~ x=w*x/x.sum()
+        L2=L_p(x.reshape((g.nxsteps,g.nysteps)))
+        im.set_data(L2.swapaxes(0,1))
+        gcf().canvas.draw()
+        #~ sleep(0.2)
+        print i
         #~ err.append(x.nonzero()[0].size)
-        #~ err.append(x.sum())
         #~ if i in (100,):
             #~ j+=1
             #~ subplot(2,2,j)
@@ -108,7 +136,7 @@ figure(2)
 #~ x=dot(p,x)
 L2=L_p(x.reshape((g.nxsteps,g.nysteps)))
 im=imshow(L2.swapaxes(0,1),vmin= max(ravel(L2))-10,vmax=max(ravel(L2)),origin='lower',extent=g.extend())#,interpolation='bicubic')
-#~ colorbar()
+colorbar()
 print x.sum(),sum(f.eva[fN])/32,sum(diag(f.csm[fN]))/32
 
 #~ j=0
@@ -125,16 +153,16 @@ print x.sum(),sum(f.eva[fN])/32,sum(diag(f.csm[fN]))/32
         #~ im=imshow(L2.swapaxes(0,1),vmin= max(ravel(L2))-30,vmax=max(ravel(L2)),origin='lower',extent=g.extend())#,interpolation='bicubic')
         #~ colorbar()
 
-#~ figure(3)
-#~ u=dot(p,u)
-#~ L2=L_p(u.reshape((g.nxsteps,g.nysteps)))
-#~ im=imshow(L2.swapaxes(0,1),vmin= max(ravel(L2))-10,vmax=max(ravel(L2)),origin='lower',extent=g.extend())#,interpolation='bicubic')
-#~ colorbar()
-#~ print u.sum()
+figure(30)
+u=dot(p,x)
+L2=L_p(u.reshape((g.nxsteps,g.nysteps)))
+im=imshow(L2.swapaxes(0,1),vmin= max(ravel(L2))-10,vmax=max(ravel(L2)),origin='lower',extent=g.extend())#,interpolation='bicubic')
+colorbar()
+print u.sum()
 
-#~ figure(3)
+figure(3)
 #~ e=abs(array(err)-sum(f.eva[fN])/32)/(sum(f.eva[fN])/32)
-#~ semilogy(abs(e[:-1]-e[1:]))
+semilogy(err)
 #~ figure(4)
 #~ semilogy(err)
 #~ print time()-t
@@ -157,4 +185,6 @@ print x.sum(),sum(f.eva[fN])/32,sum(diag(f.csm[fN]))/32
 #~ colorbar()
 #~ print x.sum(),sum(f.eva[fN])/32,sum(diag(f.csm[fN]))/32
 
+#~ show()
+ioff()
 show()
