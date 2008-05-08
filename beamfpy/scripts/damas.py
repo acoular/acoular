@@ -1,6 +1,7 @@
 from beamfpy import *
 from numpy import *
 from pylab import *
+from numpy import where
 from time import time, sleep
 from beamfpy.beamfpy import td_dir
 from beamfpy.beamformer import *
@@ -15,17 +16,17 @@ td=TimeSamples()
 td.name=path.join(td_dir,"15.11.2007 12_12_02,218.h5")
 #~ td.configure_traits()
 print td.data[0,0]
-cal=Calib(from_file=path.join(td_dir,'calib_07_03_2007.xml'))
+cal=Calib(from_file=path.join(td_dir,'calib_12_11_2007.xml'))
 f=EigSpectra(window="Hanning",overlap="50%",block_size=1024,calib=cal)
 f.time_data=td
-m=MicGeom(from_file=path.join(td_dir,'acousticam_2c.xml'))
+m=MicGeom(from_file=path.join( path.split(beamfpy.__file__)[0],'xml','acousticam_2c.xml'))
 #~ m=MicGeom(from_file='W90_D105_f10.xml')
 #~ g=RectGrid(x_min=-1,x_max=0.5,y_min=-0.5,y_max=0.5,z=0.68,increment=0.05)
 g=RectGrid(x_min=-0.6,x_max=0.4,y_min=-0.5,y_max=0.5,z=0.68,increment=0.025)
 #~ g=RectGrid(x_min=-0.6,x_max=-0.1,y_min=-0.25,y_max=0.25,z=0.68,increment=0.03)
 #~ g=RectGrid(x_min=-0.5,x_max=0.5,y_min=-0.5,y_max=0.5,z=1.0,increment=0.025)
 #~ g=RectGrid(x_min=-0.6,x_max=0.6,y_min=-0.6,y_max=0.6,z=0.855,increment=0.05)
-b=BeamformerBase(freq_data=f,grid=g,mpos=m)
+b=BeamformerBase(freq_data=f,grid=g,mpos=m,r_diag=True)
 #~ b=BeamformerEig(freq_data=f,grid=g,mpos=m,n=31)
 
 fN=31
@@ -40,7 +41,12 @@ xlim(g.extend()[0:2])
 ylim(g.extend()[2:4])
 ma=h1.max()/100
 print len(h1.flatten()),sum(where(h1.flatten()>ma,1,0))
+print where
 
+y=h1.flatten()
+
+ylim=y.max()/100
+ind=where(y>ylim)
 
 t=time()
 #~ figure(2)
@@ -73,43 +79,60 @@ p=h.copy()
 p=p/diag(p)[:,newaxis]
 #~ imshow(p)
 N=g.size
+#~ A=h/diag(h)[:,newaxis]-diag(ones(N,'d'))
+w=sum(f.eva[fN])/32
+A=p-diag(diag(p))
 y=h1.flatten()
-A=h/diag(h)[:,newaxis]-diag(ones(N,'d'))
 
+ylim=y.max()/100
+ind=where(y>ylim)[0]
+yr=y[ind]
+Ar=A[ix_(ind,ind)]
 j=1
 err=[]
-w=sum(f.eva[fN])/32
 figure(20)
 #~ x=dot(p,x)
 L2=L_p(y.reshape((g.nxsteps,g.nysteps)))
 im=imshow(L2.swapaxes(0,1),vmin= max(ravel(L2))-30,vmax=max(ravel(L2)),origin='lower',extent=g.extend())#,interpolation='bicubic')
 colorbar()
 ax=gca()
+la=1/w
 for om in arange(1.,2,1.4):
-    x=y.copy()#zeros(N,'d')
+    x=zeros(N,'d')
     print time()-t
     #~ x=y
-    #~ gseidel(A,y,x,500,1.0)
-    for i in range(500):
-        x0=x.copy()
-        for n in range(N):
-            x[n]=y[n]-dot(A[n],x)
-            if x[n]<0:
-                x[n]=0
+    xr=yr.copy()
+    gseidel(Ar,yr,xr,500,1.0)
+    x[ind]=xr
+    #~ for i in range(100):
+        #~ x0=x.copy()
+        #~ gseidel(A,y,x,10,1.0)
+        #~ for n in range(N):
+            #~ x[n]=y[n]-dot(A[n],x)
+            #~ if x[n]<0:
+                #~ x[n]=0
+            #~ S=-yr[n]+dot(A[n],x)
+            #~ if S>la:
+                #~ x[n]=(la-S)/B[n]
+            #~ elif S<-la:
+                #~ x[n]=(-la-S)/B[n]
+            #~ else:
+                #~ x[n]=0
         #~ if w<x.sum():
             #~ x=w*x/x.sum()
         #~ for n in range(N-1,-1,-1):
             #~ x[n]=y[n]-dot(A[n],x)
             #~ if x[n]<0:
                 #~ x[n]=0
-        err.append(abs(x0-x).sum())
+        #~ y1=dot(p,x)
+        #~ err.append(abs(y-y1).sum()/y1.sum())
         #~ if w<x.sum():
             #~ x=w*x/x.sum()
-        L2=L_p(x.reshape((g.nxsteps,g.nysteps)))
-        im.set_data(L2.swapaxes(0,1))
-        gcf().canvas.draw()
+        #~ L2=L_p(x.reshape((g.nxsteps,g.nysteps)))
+        #~ im.set_data(L2.swapaxes(0,1))
+        #~ gcf().canvas.draw()
         #~ sleep(0.2)
-        print i
+        #~ print i
         #~ err.append(x.nonzero()[0].size)
         #~ if i in (100,):
             #~ j+=1
