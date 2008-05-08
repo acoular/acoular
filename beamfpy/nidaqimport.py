@@ -178,6 +178,7 @@ class nidaq_import( time_data_import ):
             pass
         DAQmxGetSampClkRate(taskHandle,ctypes.byref(fnum))
         self.sample_freq = fnum.value
+        DAQmxClearTask(taskHandle)
         print self.sample_freq
 
 
