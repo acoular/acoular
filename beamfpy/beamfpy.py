@@ -1233,6 +1233,75 @@ class BeamformerMusic( BeamformerEig ):
             self._result=reshape(h,(len(f),self.grid.nxsteps,self.grid.nysteps))*4e-10
             self._result.dump(cache_name)
 
+class PointSpreadFunction (HasPrivateTraits):
+    """
+    Array point spread function
+    """
+    # RectGrid object that provides the grid locations
+    grid = Trait(RectGrid,
+        desc="beamforming grid")
+
+    # MicGeom object that provides the microphone locations
+    mpos = Trait(MicGeom,
+        desc="microphone geometry")
+
+    # the speed of sound, defaults to 343 m/s
+    c = Float(343.,
+        desc="speed of sound")
+
+    # frequency list
+    freqs = CArray(desc="frequencies")
+
+    # internal identifier
+    digest = Property( depends_on = ['mpos.digest', 'grid.digest', 'freqs', 'c'],
+        cached = True)
+
+    def _get_digest( self ):
+        if self._digest is None:
+            try:
+                s=[self.mpos.digest,
+                   self.grid.digest,
+                   str(self.freqs),
+                    str(self.c)
+                    ]
+            except AttributeError:
+                s=['',]
+            self._digest = md5.new(join(s)).hexdigest()
+        return self._digest
+
+    def psf ( self ):
+        """
+        point spread function as calculated or loaded from cache
+        """
+        # check validity of input data
+        if self.freqs is None or self.grid is None or self.mpos is None:
+            return
+        numchannels = self.mpos.num_mics
+        # store digest value for later comparison
+        digest=self.digest
+        # check for HD-cached values
+        cache_name = path.join(cache_dir,'p_'+self.digest+'.cache')
+        if path.isfile(cache_name):
+            return load(cache_name)
+        # prepare calculation
+        f = self.freqs
+        numfreq = len(f)
+        kj = 2j*pi*f/self.c
+        gs = self.grid.size
+        bpos = self.grid.pos()
+        hh = zeros((numfreq,gs,gs),'d')
+        e = zeros((numchannels),'D')
+        e1 = e.copy()
+        t=time()
+        print 1,t
+        beam_psf(e,e1,hh,bpos,self.mpos.mpos,kj)
+        print 2,t-time()
+        for i in range(numfreq):
+            h = hh[i]
+            hh[i] = h/diag(h)[:,newaxis]
+        hh.dump(cache_name)
+        return hh
+
 class BeamformerDamas (BeamformerBase):
     """
     DAMAS Deconvolution
@@ -1330,37 +1399,28 @@ class BeamformerDamas (BeamformerBase):
         # prepare calculation
         f = self.freq_data.fftfreq()
         numfreq = len(f)
-        kj = 2j*pi*f/self.c
-        gs = self.grid.size
-        bpos = self.grid.pos()
-        hh = zeros((numfreq,gs,gs),'d')
-        e = zeros((numchannels),'D')
-        e1 = e.copy()
-        t=time()
-        print 1,t
-        beam_psf(e,e1,hh,bpos,self.mpos.mpos,kj)
-        print 2,t-time()
+        hh = PointSpreadFunction(mpos=self.mpos, grid=self.grid, c=self.c, freqs=f).psf()
         bresult = self.beamformer.result
         result = empty_like(bresult)
+        t=time()
         for i in range(numfreq):
-            h = hh[i]
-            A = h/diag(h)[:,newaxis]
             y = bresult[i].flatten()
             x = y.copy()
-            gseidel(A,y,x,self.n_iter,1.0)
+            gseidel(hh[i],y,x,self.n_iter,1.0)
             result[i] = x.reshape((self.grid.nxsteps,self.grid.nysteps))
         print 3,t-time()
         # all data still the same
         if digest==self.digest:
             self._result=result #reshape(h,(len(f),self.grid.nxsteps,self.grid.nysteps))/adiv
             self._result.dump(cache_name)
-##            self._result_flag=2
 
 def L_p ( x ):
     """
     calculates the sound pressure level from the sound pressure squared:
 
     L_p = 10 lg x/4e-10
+
+    if x<0, return -1000. dB
     """
-    return 10*log10(x/4e-10)
+    return where(x>0, 10*log10(x/4e-10), -1000.)
 
