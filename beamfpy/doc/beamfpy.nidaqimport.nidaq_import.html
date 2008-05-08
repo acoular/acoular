@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html
+          PUBLIC
+          "-//W3C//DTD XHTML 1.1//EN"
+          "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Class beamfpy.nidaqimport.nidaq_import</title>
+    <link rel="stylesheet" type="text/css" href="class.css"/>
+    <script type="text/javascript" src="scr.js"></script>
+    
+  </head>
+  <body>
+    
+    
+    <div id="header">
+
+    <div id="nav-bar">
+    <ul>
+    <li><a href="index.html">Module Index</a></li>
+    <li><a href="class_hierarchy.html">Class Hierarchy</a></li>
+    <li><a href="class_index.html">Class Index</a></li>
+    <li><a href="namespace_index.html">Namespace Index</a></li>
+    </ul>
+    </div>
+    <h1>Class <span class="prefix"><a href="beamfpy.html">beamfpy</a>.&#8203;<a href="beamfpy.nidaqimport.html">nidaqimport</a>.&#8203;</span><a href="beamfpy.nidaqimport.nidaq_import.html">nidaq_import</a></h1>
+    
+    </div>
+
+    
+
+<pre>
+    import of data from measurement using NI-DAQmx
+    </pre>
+
+
+
+
+<div id="contents">
+<ul>
+Contents:
+
+
+<li><a href="#section-variables">Attributes</a></li>
+
+
+
+
+<li><a href="#section-functions">Methods</a></li>
+
+</ul>
+</div>
+
+
+<div id="main">
+
+
+
+
+<h2 id="section-variables">Attributes</h2>
+<ul class="doclist">
+
+  <li class="attribute" id="namechannels">namechannels<pre>name of channels, is set automatically
+</pre><pre>namechannels = List(desc = 'names of channels in the task')
+
+</pre></li>
+
+  <li class="attribute" id="namedevices">namedevices<pre>number of devices, is set automatically
+</pre><pre>namedevices = List(desc = 'names of devices in the task')
+
+</pre></li>
+
+  <li class="attribute" id="numchannels">numchannels<pre>number of channels, is set automatically
+</pre><pre>numchannels = Long(0, desc = 'number of channels in the task')
+
+</pre></li>
+
+  <li class="attribute" id="numdevices">numdevices<pre>number of devices, is set automatically
+</pre><pre>numdevices = Long(0, desc = 'number of devices in the task')
+
+</pre></li>
+
+  <li class="attribute" id="numsamples">numsamples<pre>number of time data samples
+</pre><pre>numsamples = Long(48000, desc = 'number of samples')
+
+</pre></li>
+
+  <li class="attribute" id="sample_freq">sample_freq<pre>sample rate
+</pre><pre>sample_freq = Float(48000.0, desc = 'sampling frequency')
+
+</pre></li>
+
+  <li class="attribute" id="taskname">taskname<pre>name of the NI task to use
+</pre><pre>taskname = Str(desc = 'name of the NI task to use for the measurement')
+
+</pre></li>
+
+  <li class="attribute" id="tasknames">tasknames<pre>name of available and valid tasks
+</pre><pre>tasknames = List
+
+</pre></li>
+
+  <li class="attribute" id="traits_view">traits_view<pre></pre><pre>traits_view = View([ Item('taskname{Task name}', editor = EnumEditor(name = 'tasknames')), [ 'sample_freq', 'numsamples', '-' ], [ [ 'numdevices~{count}', Item('namedevices~{names}', height = 3), '-[Devices]' ], [ 'numchannels~{count}', Item('namechannels~{names}', height = 3), '-[Channels]' ] ], '|[Task]' ], title = 'NI-DAQmx data aquisition', buttons = OKCancelButtons)
+
+</pre></li>
+
+</ul>
+
+
+
+
+
+
+
+
+
+<h2 id="section-functions">Method summary</h2>
+<ul class="function-summary">
+  
+  <li class="function"><a href="#__init__">__init__</a>(self, **<span class="param-name">traits</span>)</li>
+  
+  <li class="function"><a href="#get_data">get_data</a>(self, td)</li>
+  
+</ul>
+
+
+
+
+<h2>Methods</h2>
+<ul class="doclist">
+  
+  <li id="__init__" class="function">__init__(self, **<span class="param-name">traits</span>)<pre></pre></li>
+  
+  <li id="get_data" class="function">get_data(self, td)<pre>
+        main work is done here: imports the data from CSV file into
+        TimeSamples object td and saves also a '*.h5' file so this import
+        need not be performed every time the data is needed
+        </pre></li>
+  
+</ul>
+
+
+
+
+</div>  <!-- #main -->
+
+
+    
+    
+  </body>
+</html>
+

@@ -5,7 +5,7 @@
           "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <title>Class beamfpy.time_data_import</title>
+    <title>Class beamfpy.beamfpy.td_import</title>
     <link rel="stylesheet" type="text/css" href="class.css"/>
     <script type="text/javascript" src="scr.js"></script>
     
@@ -23,14 +23,14 @@
     <li><a href="namespace_index.html">Namespace Index</a></li>
     </ul>
     </div>
-    <h1>Class <span class="prefix"><a href="beamfpy.html">beamfpy</a>.&#8203;</span><a href="beamfpy.time_data_import.html">time_data_import</a></h1>
+    <h1>Class <span class="prefix"><a href="beamfpy.html">beamfpy</a>.&#8203;<a href="beamfpy.beamfpy.html">beamfpy</a>.&#8203;</span><a href="beamfpy.beamfpy.td_import.html">td_import</a></h1>
     
     </div>
 
     
 
 <pre>
-    base class for import of time data
+    import of *.td data as saved by earlier versions
     </pre>
 
 
@@ -42,6 +42,8 @@ Contents:
 
 <li><a href="#section-superclasses">Base classes</a></li>
 
+
+<li><a href="#section-variables">Attributes</a></li>
 
 
 
@@ -58,10 +60,26 @@ Contents:
 <h2 id="section-superclasses">Inherits from</h2>
 <ul class="doclist">
   
-    <li>HasPrivateTraits: enthought.traits.api.HasPrivateTraits</li>
+    <li><a href="beamfpy.beamfpy.time_data_import.html">time_data_import</a>: beamfpy.beamfpy.time_data_import</li>
   
 </ul>
 
+
+
+
+<h2 id="section-variables">Attributes</h2>
+<ul class="doclist">
+
+  <li class="attribute" id="from_file">from_file<pre>name of the comma delimited file to import
+</pre><pre>from_file = File(filter = [ '*.td' ], desc = 'name of the *.td file to import')
+
+</pre></li>
+
+  <li class="attribute" id="traits_view">traits_view<pre></pre><pre>traits_view = View([ 'from_file', '|[Import]' ], title = 'Time data', buttons = OKCancelButtons)
+
+</pre></li>
+
+</ul>
 
 
 
@@ -85,8 +103,9 @@ Contents:
 <ul class="doclist">
   
   <li id="get_data" class="function">get_data(self, td)<pre>
-        imports the data into time_data object td
-        (this is a dummy function)
+        main work is done here: imports the data from *.td file into
+        TimeSamples object td and saves also a '*.h5' file so this import
+        need not be performed only once
         </pre></li>
   
 </ul>

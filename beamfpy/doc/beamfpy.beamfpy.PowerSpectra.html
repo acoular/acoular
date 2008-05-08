@@ -5,7 +5,7 @@
           "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <title>Class beamfpy.PowerSpectra</title>
+    <title>Class beamfpy.beamfpy.PowerSpectra</title>
     <link rel="stylesheet" type="text/css" href="class.css"/>
     <script type="text/javascript" src="scr.js"></script>
     
@@ -23,7 +23,7 @@
     <li><a href="namespace_index.html">Namespace Index</a></li>
     </ul>
     </div>
-    <h1>Class <span class="prefix"><a href="beamfpy.html">beamfpy</a>.&#8203;</span><a href="beamfpy.PowerSpectra.html">PowerSpectra</a></h1>
+    <h1>Class <span class="prefix"><a href="beamfpy.html">beamfpy</a>.&#8203;<a href="beamfpy.beamfpy.html">beamfpy</a>.&#8203;</span><a href="beamfpy.beamfpy.PowerSpectra.html">PowerSpectra</a></h1>
     
     </div>
 
@@ -79,7 +79,7 @@ defaults to 1024
 
   <li class="attribute" id="calib">calib<pre>the Calib object that provides the calibration data,
 defaults to no calibration, i.e. the raw time data is used
-</pre><pre>calib = Instance(<a href="beamfpy.Calib.html">Calib</a>)
+</pre><pre>calib = Instance(<a href="beamfpy.beamfpy.Calib.html">Calib</a>)
 
 </pre></li>
 
@@ -95,7 +95,7 @@ defaults to no calibration, i.e. the raw time data is used
 </pre></li>
 
   <li class="attribute" id="digest">digest<pre>internal identifier
-</pre><pre>digest = Property(depends_on = [ 'time_data.digest', 'calib.digest', 'block_size', 'window', 'overlap' ], cached = True)
+</pre><pre>digest = Property(depends_on = [ 'time_data.digest', 'calib.digest', 'block_size', 'window', 'overlap', 'ind_low', 'ind_high' ], cached = True)
 
 </pre></li>
 
@@ -127,7 +127,7 @@ defaults to 0
 </pre></li>
 
   <li class="attribute" id="time_data">time_data<pre>the TimeSamples object that provides the data
-</pre><pre>time_data = Trait(<a href="beamfpy.TimeSamples.html">TimeSamples</a>, desc = 'time data object')
+</pre><pre>time_data = Trait(<a href="beamfpy.beamfpy.TimeSamples.html">TimeSamples</a>, desc = 'time data object')
 
 </pre></li>
 
