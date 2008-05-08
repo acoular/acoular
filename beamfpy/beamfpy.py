@@ -460,8 +460,8 @@ class PowerSpectra( HasPrivateTraits ):
         desc="index of highest frequency line")
 
     # window function for FFT, one of:
-    # 'Retangular' (default),'Hanning','Hamming','Bartlett','Blackman'
-    window = Trait('Retangular',{'Retangular':ones,'Hanning':hanning,'Hamming':hamming,'Bartlett':bartlett,'Blackman':blackman},
+    # 'Rectangular' (default),'Hanning','Hamming','Bartlett','Blackman'
+    window = Trait('Rectangular',{'Rectangular':ones,'Hanning':hanning,'Hamming':hamming,'Bartlett':bartlett,'Blackman':blackman},
         desc="type of window for FFT")
 
     # overlap factor for averaging: 'None'(default),'50%','75%','87.5%'
