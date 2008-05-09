@@ -782,8 +782,8 @@ class RectGrid( HasPrivateTraits ):
         returns the slices to index a recangular subdomain,
         useful for inspecting subdomains in a result already calculated
         """
-        xi1,yi1 = self.index(x1,y1)
-        xi2,yi2 = self.index(x2,y2)
+        xi1,yi1 = self.index(min(x1,x2),min(y1,y2))
+        xi2,yi2 = self.index(max(x1,x2),max(y1,y2))
         return s_[xi1:xi2+1],s_[yi1:yi2+1]
 
     def extend (self) :
@@ -1008,6 +1008,15 @@ class BeamformerBase( HasPrivateTraits ):
         except:
             return ones((1,1),'d')
 
+    def integrate(self,sector):
+        """
+        integrates result map over the given sector
+        where sector is a tuple with arguments for grid.indices
+        e.g. (xmin,ymin,xmin,xmax)
+        """
+        ind = self.grid.indices(*sector)
+        h = self.result[ (s_[:],) + ind ]
+        return h.reshape(h.shape[0],prod(h.shape[1:])).sum(axis=1)
 
 class BeamformerCapon( BeamformerBase ):
     """
@@ -1289,7 +1298,7 @@ class PointSpreadFunction (HasPrivateTraits):
         kj = 2j*pi*f/self.c
         gs = self.grid.size
         bpos = self.grid.pos()
-        hh = zeros((numfreq,gs,gs),'d')
+        hh = ones((numfreq,gs,gs),'d')
         e = zeros((numchannels),'D')
         e1 = e.copy()
         t=time()
@@ -1299,6 +1308,7 @@ class PointSpreadFunction (HasPrivateTraits):
         for i in range(numfreq):
             h = hh[i]
             hh[i] = h/diag(h)[:,newaxis]
+        print hh.nbytes
         hh.dump(cache_name)
         return hh
 
@@ -1399,14 +1409,14 @@ class BeamformerDamas (BeamformerBase):
         # prepare calculation
         f = self.freq_data.fftfreq()
         numfreq = len(f)
-        hh = PointSpreadFunction(mpos=self.mpos, grid=self.grid, c=self.c, freqs=f).psf()
         bresult = self.beamformer.result
         result = empty_like(bresult)
         t=time()
         for i in range(numfreq):
             y = bresult[i].flatten()
             x = y.copy()
-            gseidel(hh[i],y,x,self.n_iter,1.0)
+            hh = PointSpreadFunction(mpos=self.mpos, grid=self.grid, c=self.c, freqs=f[i,newaxis]).psf()
+            gseidel(hh[0],y,x,self.n_iter,1.0)
             result[i] = x.reshape((self.grid.nxsteps,self.grid.nysteps))
         print 3,t-time()
         # all data still the same
