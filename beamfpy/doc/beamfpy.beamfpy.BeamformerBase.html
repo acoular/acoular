@@ -135,6 +135,8 @@ as (number of frequencies, nxsteps,nysteps) array of float
   
   <li class="function"><a href="#calc_result">calc_result</a>(self)</li>
   
+  <li class="function"><a href="#integrate">integrate</a>(self, sector)</li>
+  
   <li class="function"><a href="#synthetic">synthetic</a>(self, freq, <span class="param-name">num</span> = <span class="param-default">0</span>)</li>
   
 </ul>
@@ -150,6 +152,13 @@ as (number of frequencies, nxsteps,nysteps) array of float
         calculated and additionally saved to cache
         this runs automatically and may take some time
         the result is discarded if the digest changes during the calculation
+        </pre></li>
+  
+  <li id="integrate" class="function">integrate(self, sector)<pre>
+        integrates result map over the given sector
+        where sector is a tuple with arguments for grid.indices
+        e.g. (xmin,ymin,xmin,xmax)
+        returns spectrum
         </pre></li>
   
   <li id="synthetic" class="function">synthetic(self, freq, <span class="param-name">num</span> = <span class="param-default">0</span>)<pre>

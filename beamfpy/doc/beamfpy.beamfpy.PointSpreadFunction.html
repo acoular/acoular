@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html
+          PUBLIC
+          "-//W3C//DTD XHTML 1.1//EN"
+          "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Class beamfpy.beamfpy.PointSpreadFunction</title>
+    <link rel="stylesheet" type="text/css" href="class.css"/>
+    <script type="text/javascript" src="scr.js"></script>
+    
+  </head>
+  <body>
+    
+    
+    <div id="header">
+
+    <div id="nav-bar">
+    <ul>
+    <li><a href="index.html">Module Index</a></li>
+    <li><a href="class_hierarchy.html">Class Hierarchy</a></li>
+    <li><a href="class_index.html">Class Index</a></li>
+    <li><a href="namespace_index.html">Namespace Index</a></li>
+    </ul>
+    </div>
+    <h1>Class <span class="prefix"><a href="beamfpy.html">beamfpy</a>.&#8203;<a href="beamfpy.beamfpy.html">beamfpy</a>.&#8203;</span><a href="beamfpy.beamfpy.PointSpreadFunction.html">PointSpreadFunction</a></h1>
+    
+    </div>
+
+    
+
+<pre>
+    Array point spread function
+    </pre>
+
+
+
+
+<div id="contents">
+<ul>
+Contents:
+
+<li><a href="#section-superclasses">Base classes</a></li>
+
+
+<li><a href="#section-variables">Attributes</a></li>
+
+
+
+
+<li><a href="#section-functions">Methods</a></li>
+
+</ul>
+</div>
+
+
+<div id="main">
+
+
+<h2 id="section-superclasses">Inherits from</h2>
+<ul class="doclist">
+  
+    <li>HasPrivateTraits: enthought.traits.api.HasPrivateTraits</li>
+  
+</ul>
+
+
+
+
+<h2 id="section-variables">Attributes</h2>
+<ul class="doclist">
+
+  <li class="attribute" id="c">c<pre>the speed of sound, defaults to 343 m/s
+</pre><pre>c = Float(343.0, desc = 'speed of sound')
+
+</pre></li>
+
+  <li class="attribute" id="digest">digest<pre>internal identifier
+</pre><pre>digest = Property(depends_on = [ 'mpos.digest', 'grid.digest', 'freqs', 'c' ], cached = True)
+
+</pre></li>
+
+  <li class="attribute" id="freqs">freqs<pre>frequency list
+</pre><pre>freqs = CArray(desc = 'frequencies')
+
+</pre></li>
+
+  <li class="attribute" id="grid">grid<pre>RectGrid object that provides the grid locations
+</pre><pre>grid = Trait(<a href="beamfpy.beamfpy.RectGrid.html">RectGrid</a>, desc = 'beamforming grid')
+
+</pre></li>
+
+  <li class="attribute" id="mpos">mpos<pre>MicGeom object that provides the microphone locations
+</pre><pre>mpos = Trait(<a href="beamfpy.beamfpy.MicGeom.html">MicGeom</a>, desc = 'microphone geometry')
+
+</pre></li>
+
+</ul>
+
+
+
+
+
+
+
+
+
+<h2 id="section-functions">Method summary</h2>
+<ul class="function-summary">
+  
+  <li class="function"><a href="#psf">psf</a>(self)</li>
+  
+</ul>
+
+
+
+
+<h2>Methods</h2>
+<ul class="doclist">
+  
+  <li id="psf" class="function">psf(self)<pre>
+        point spread function as calculated or loaded from cache
+        </pre></li>
+  
+</ul>
+
+
+
+
+</div>  <!-- #main -->
+
+
+    
+    
+  </body>
+</html>
+

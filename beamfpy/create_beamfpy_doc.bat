@@ -1,1 +1,1 @@
-C:\Python25\Scripts\endo -r beamfpy=.
+endo -r beamfpy=.

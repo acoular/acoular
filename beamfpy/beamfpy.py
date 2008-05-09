@@ -1013,6 +1013,7 @@ class BeamformerBase( HasPrivateTraits ):
         integrates result map over the given sector
         where sector is a tuple with arguments for grid.indices
         e.g. (xmin,ymin,xmin,xmax)
+        returns spectrum
         """
         ind = self.grid.indices(*sector)
         h = self.result[ (s_[:],) + ind ]
@@ -1074,7 +1075,7 @@ class BeamformerCapon( BeamformerBase ):
 
 class BeamformerEig( BeamformerBase ):
     """
-    othogonal beamforming using eigenvalue and eigenvector techniques
+    orthogonal beamforming using eigenvalue and eigenvector techniques
     """
 
     # EigSpectra object that provides the cross spectral matrix and eigenvalues
@@ -1301,14 +1302,10 @@ class PointSpreadFunction (HasPrivateTraits):
         hh = ones((numfreq,gs,gs),'d')
         e = zeros((numchannels),'D')
         e1 = e.copy()
-        t=time()
-        print 1,t
         beam_psf(e,e1,hh,bpos,self.mpos.mpos,kj)
-        print 2,t-time()
         for i in range(numfreq):
             h = hh[i]
             hh[i] = h/diag(h)[:,newaxis]
-        print hh.nbytes
         hh.dump(cache_name)
         return hh
 
@@ -1340,7 +1337,7 @@ class BeamformerDamas (BeamformerBase):
 
     # number of iterations
     n_iter = Int(100,
-        desc="assumed number of sources")
+        desc="number of iterations")
 
     # internal identifier
     digest = Property( depends_on = ['beamformer.digest','n_iter'],
@@ -1411,17 +1408,127 @@ class BeamformerDamas (BeamformerBase):
         numfreq = len(f)
         bresult = self.beamformer.result
         result = empty_like(bresult)
-        t=time()
         for i in range(numfreq):
             y = bresult[i].flatten()
             x = y.copy()
             hh = PointSpreadFunction(mpos=self.mpos, grid=self.grid, c=self.c, freqs=f[i,newaxis]).psf()
             gseidel(hh[0],y,x,self.n_iter,1.0)
             result[i] = x.reshape((self.grid.nxsteps,self.grid.nysteps))
-        print 3,t-time()
         # all data still the same
         if digest==self.digest:
             self._result=result #reshape(h,(len(f),self.grid.nxsteps,self.grid.nysteps))/adiv
+            self._result.dump(cache_name)
+
+class BeamformerOrth (BeamformerBase):
+    """
+    Estimation using orthogonal beamforming
+    """
+
+    # BeamformerEig object that provides data for deconvolution
+    beamformer = Trait(BeamformerEig)
+
+    # EigSpectra object that provides the cross spectral matrix and Eigenvalues
+    freq_data = Delegate('beamformer')
+
+    # RectGrid object that provides the grid locations
+    grid = Delegate('beamformer')
+
+    # MicGeom object that provides the microphone locations
+    mpos = Delegate('beamformer')
+
+    # the speed of sound, defaults to 343 m/s
+    c =  Delegate('beamformer')
+
+    # flag, if true (default), the main diagonal is removed before beamforming
+    r_diag =  Delegate('beamformer')
+
+    # iherited
+    # result_flag, result
+
+    # list of components to consider
+    eva_list = CArray(
+        desc="components")
+
+    # internal identifier
+    digest = Property( depends_on = ['beamformer.digest','eva_list'],
+        cached = True)
+
+    # thread
+    calc_thread = Instance( Thread )
+
+    traits_view = View(
+        [
+            [Item('beamformer{}',style='custom')],
+            [Item('eva_list{Components}')],
+            '|'
+        ],
+        title='Options',
+        buttons = OKCancelButtons
+        )
+
+    def _get_result_flag ( self ):
+        #print "get result flag",self.r_diag
+        if self._result_flag is None:
+            self._result_flag=1
+            self._result=None
+        return self._result_flag
+
+    def _get_result ( self ):
+        #print "get_result",self.r_diag
+        if self._result_flag==1:
+            #print "calc_result",self.r_diag
+            self.calc_result()
+            self._result_flag=2
+        return self._result
+
+    def _get_digest( self ):
+        if self._digest is None:
+            try:
+                s=[self.mpos.digest,
+                    self.grid.digest,
+                    self.freq_data.digest,
+                    str(self.c),
+                    str(self.r_diag),
+                    str(self.eva_list)
+                    ]
+            except AttributeError:
+                s=['',]
+            self._digest = md5.new(join(s)).hexdigest()
+        return self._digest
+
+    def calc_result ( self ):
+        """main work is done here:
+        result is either loaded from cache or
+        calculated and additionally saved to cache
+        this runs automatically and may take some time
+        the result is discarded if the digest changes during the calculation
+        """
+        # check validity of input data
+        if self.freq_data is None or self.grid is None or self.mpos is None or self.beamformer.result is None:
+            return
+        numchannels=self.freq_data.time_data.numchannels
+        if  numchannels != self.mpos.num_mics:
+            print "channel counts in time data (%i) and mic geometry (%i) do not fit" % (numchannels,self.mpos.num_mics)
+            return
+        # store digest value for later comparison
+        digest=self.digest
+        # check for HD-cached values
+        cache_name = path.join(cache_dir,'o_'+self.digest+'.cache')
+        if path.isfile(cache_name):
+            self._result=load(cache_name)
+            return
+        # prepare calculation
+        f = self.freq_data.fftfreq()
+        numfreq = len(f)
+        e = self.beamformer
+        result = zeros_like(e.result)
+        for i in self.eva_list:
+            self.beamformer.n = i
+            for j in range(numfreq):
+                result[j].flat[e.result[j].argmax()]=e.freq_data.eva[j,i]/numchannels
+        if digest==self.digest:
+            print "dump"
+            self._result=result
             self._result.dump(cache_name)
 
 def L_p ( x ):
