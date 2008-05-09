@@ -1541,3 +1541,23 @@ def L_p ( x ):
     """
     return where(x>0, 10*log10(x/4e-10), -1000.)
 
+def synthetic (data, freqs, f, num=3):
+    """
+    returns synthesized frequency band values of data
+    num = 0: function simply returns the unaltered data, no processing
+    num = 1: octave bands
+    num = 3: third octave bands
+    etc.
+
+    freqs: the frequencies that correspond to the input data
+
+    f: band center frequencies
+
+    """
+    if num==0:
+        return data
+    find1 = searchsorted(freqs, f*2.**(-0.5/num))
+    find2 = searchsorted(freqs, f*2.**(+0.5/num))
+    return array(map(lambda i,j : data[i:j].sum(),find1,find2))
+
+

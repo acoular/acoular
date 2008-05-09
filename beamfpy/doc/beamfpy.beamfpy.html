@@ -168,6 +168,8 @@ Contents:
   
   <li class="function"><a href="#L_p">L_p</a>(x)</li>
   
+  <li class="function"><a href="#synthetic">synthetic</a>(data, freqs, f, <span class="param-name">num</span> = <span class="param-default">3</span>)</li>
+  
 </ul>
 
 
@@ -180,6 +182,19 @@ Contents:
     L_p = 10 lg x/4e-10
 
     if x&lt;0, return -1000. dB
+    </pre></li>
+  
+  <li id="synthetic" class="function">synthetic(data, freqs, f, <span class="param-name">num</span> = <span class="param-default">3</span>)<pre>
+    returns synthesized frequency band values of data
+    num = 0: function simply returns the unaltered data, no processing
+    num = 1: octave bands
+    num = 3: third octave bands
+    etc.
+
+    freqs: the frequencies that correspond to the input data
+
+    f: band center frequencies
+
     </pre></li>
   
 </ul>
