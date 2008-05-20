@@ -137,7 +137,7 @@ class ResultExplorer( HasPrivateTraits ):
                 maxv=self.max_level
             if self.pic_flag:
                 a=imread(str(self.pict))
-                (ay,ax,az)=shape(a)
+                (ay,ax,az)=a.shape
                 self.mplw.axes.imshow(a,
                     extent=[self.pic_x_min,self.pic_x_min+ax/self.pic_scale,self.pic_y_min,self.pic_y_min+ay/self.pic_scale])
                 x=self.mplw.axes.imshow(self.bmap.swapaxes(0,1),
