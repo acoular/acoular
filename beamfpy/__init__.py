@@ -12,7 +12,7 @@ except:
 from beamfpy import TimeSamples, Calib, PowerSpectra, EigSpectra
 from beamfpy import RectGrid, MicGeom
 from beamfpy import BeamformerBase, BeamformerCapon, BeamformerEig, BeamformerMusic, BeamformerDamas, BeamformerOrth
-
-from beamfpy import L_p
+from beamfpy import td_dir
+from beamfpy import L_p, synthetic
 
 
