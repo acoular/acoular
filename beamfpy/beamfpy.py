@@ -1525,7 +1525,7 @@ class BeamformerOrth (BeamformerBase):
         for i in self.eva_list:
             self.beamformer.n = i
             for j in range(numfreq):
-                result[j].flat[e.result[j].argmax()]=e.freq_data.eva[j,i]/numchannels
+                result[j].flat[e.result[j].argmax()]+=e.freq_data.eva[j,i]/numchannels
         if digest==self.digest:
             self._result=result
             self._result.dump(cache_name)

@@ -9,7 +9,7 @@ from scipy.io import loadmat
 name='Sarradj_WK80dreieck10'
 
 h=loadmat(name+'.mat')
-sample_freq = 192000.0
+sample_freq = 96000.0
 data = numpy.float32(h['Data'])
 (numsamples,numchannels)=data.shape
 
