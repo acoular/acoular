@@ -10,3 +10,4 @@ class spectrum( HasPrivateTraits ):
 
     #data
     values = CArray(typecode='f',desc="data values for lines in the spectrum")
+    

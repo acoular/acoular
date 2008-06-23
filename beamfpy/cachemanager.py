@@ -18,17 +18,18 @@ def limit_cache(siz=20000000000L, dir=cache_dir):
 	indices = lexsort(l.T)
 	sz = sum(array(l[:,1],dtype=int64))
 	print sz
-	diff = sz - siz
-	i = 0
-	while diff>0:
-		name,sz,t = l.take(indices,axis=0)[i]
-		try:
-			os.remove(os.path.join(dir,name))
-			diff -= int(sz)
-		except:
-			pass
-		i+=1
-		print diff,name,sz,t
+	if sz>siz:
+		diff = sz - siz*0.8
+		i = 0
+		while diff>0:
+			name,sz,t = l.take(indices,axis=0)[i]
+			try:
+				os.remove(os.path.join(dir,name))
+				diff -= int(sz)
+			except:
+				pass
+			i+=1
+			print diff,name,sz,t
 		
 if __name__=='__main__':
 	limit_cache()
