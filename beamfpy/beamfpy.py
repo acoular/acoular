@@ -1012,7 +1012,7 @@ class BeamformerBase( HasPrivateTraits ):
         """
         integrates result map over the given sector
         where sector is a tuple with arguments for grid.indices
-        e.g. (xmin,ymin,xmin,xmax)
+        e.g. (xmin,ymin,xmin,ymax)
         returns spectrum
         """
         ind = self.grid.indices(*sector)
