@@ -69,7 +69,7 @@ from threading import Thread, Lock
 from enthought.traits.api import HasTraits, HasPrivateTraits, Float, Int, Long, File, CArray, Property, Instance, Trait, Bool, Range, Delegate
 from enthought.traits.ui.api import View, Item, Group
 from enthought.traits.ui.menu import OKCancelButtons
-from enthought.pyface.api import GUI
+#from enthought.pyface.api import GUI # unnecessary import
 from beamformer import * # ok to use *
 from os import path, mkdir, environ
 from string import join
