@@ -6,8 +6,8 @@ class spectrum( HasPrivateTraits ):
     """
     
     #frequencies
-    freqs = CArray( typecode='f',desc="frequency values for lines in the spectrum")
+    freqs = CArray( dtype=float32,desc="frequency values for lines in the spectrum")
 
     #data
-    values = CArray(typecode='f',desc="data values for lines in the spectrum")
+    values = CArray(dtype=float32,desc="data values for lines in the spectrum")
     
