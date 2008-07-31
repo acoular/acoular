@@ -214,6 +214,7 @@ class MainWindow(SplitApplicationWindow):
                     Action(name='&Capon', style='radio', on_perform=self.set_Capon),
                     Action(name='&Music', style='radio', on_perform=self.set_Music),
                     Action(name='D&amas', style='radio', on_perform=self.set_Damas),
+                    Action(name='C&lean-SC', style='radio', on_perform=self.set_Cleansc),
                 ),
                 name = '&Options',
             )
@@ -278,6 +279,10 @@ class MainWindow(SplitApplicationWindow):
     def set_Damas (self):
         b=self.panel.beamformer
         self.panel.beamformer=BeamformerDamas(beamformer=b)
+
+    def set_Cleansc (self):
+        b=self.panel.beamformer
+        self.panel.beamformer=BeamformerCleansc(freq_data=b.freq_data,grid=b.grid,mpos=b.mpos)
 
 if __name__ == '__main__':
     m=MicGeom(from_file=geom_default)

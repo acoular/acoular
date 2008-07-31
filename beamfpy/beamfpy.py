@@ -1075,7 +1075,7 @@ class BeamformerCapon( BeamformerBase ):
 
 class BeamformerEig( BeamformerBase ):
     """
-    orthogonal beamforming using eigenvalue and eigenvector techniques
+    beamforming using eigenvalue and eigenvector techniques
     """
 
     # EigSpectra object that provides the cross spectral matrix and eigenvalues
@@ -1528,6 +1528,163 @@ class BeamformerOrth (BeamformerBase):
                 result[j].flat[e.result[j].argmax()]+=e.freq_data.eva[j,i]/numchannels
         if digest==self.digest:
             self._result=result
+            self._result.dump(cache_name)
+
+class BeamformerCleansc( BeamformerBase ):
+    """
+    beamforming using CLEAN-SC (Sijtsma)
+    """
+
+    # EigSpectra object that provides the cross spectral matrix and eigenvalues
+    freq_data = Trait(PowerSpectra,
+        desc="freq data object")
+
+    # no of CLEAN-SC iterations
+    # defaults to 0, i.e. automatic (max 2*numchannels)
+    n = Int(0,
+        desc="no of iterations")
+
+    # iteration damping factor
+    # defaults to 0.6
+    damp = Range(0.01,1.0,0.6,
+        desc="damping factor")
+
+    # iteration stop criterion for automatic detection
+    # iteration stops if power[i]>power[i-stopn]
+    # defaults to 3
+    stopn = Int(3,
+        desc="stop criterion index")
+
+    # internal use
+    result_flag = Property( depends_on = [ 'digest' ],
+        cached     = True,
+        desc="flag=1 if result is invalid")
+
+    # internal identifier
+    digest = Property( depends_on = ['mpos.digest', 'grid.digest', 'freq_data.digest', 'c', 'n'],
+        cached = True)
+
+    traits_view = View(
+        [
+            [Item('mpos{}',style='custom')],
+            [Item('grid',style='custom'),'-<>'],
+            [Item('n',label='no of iterations',style='text')],
+            [Item('r_diag',label='diagonal removed')],
+            '|'
+        ],
+        title='Beamformer options',
+        buttons = OKCancelButtons
+        )
+
+    def on_n_changed ( self, new ):
+        if new>=self.mpos.num_mics:
+            self.n=self.mpos.num_mics-1
+        elif new<-1:
+            self.n=-1
+
+    def _get_result_flag ( self ):
+        if self._result_flag is None:
+            self._result_flag=1
+            self._result=None
+        return self._csm_flag
+
+    def _get_digest( self ):
+        if self._digest is None:
+            try:
+                s=[self.mpos.digest,
+                    self.grid.digest,
+                    self.freq_data.digest,
+                    str(self.c),
+                    str(self.n),
+                    str(self.dampn),
+                    str(self.stopn),
+                    str(self.r_diag)
+                    ]
+            except AttributeError:
+                s=['',]
+            self._digest = md5.new(join(s)).hexdigest()
+        return self._digest
+
+    def calc_result ( self ):
+        """main work is done here:
+        beamform result is either loaded from cache or
+        calculated and additionally saved to cache
+        this runs automatically and may take some time
+        the result is discarded if the digest changes during the calculation
+        """
+        # check validity of input data
+        if self.freq_data is None or self.grid is None or self.mpos is None:
+            return
+        numchannels=self.freq_data.time_data.numchannels
+        if  numchannels != self.mpos.num_mics:
+            print "channel counts in time data (%i) and mic geometry (%i) do not fit" % (numchannels,self.mpos.num_mics)
+            return
+        # store digest value for later comparison
+        digest=self.digest
+        # check for HD-cached values
+        cache_name = path.join(cache_dir,'s_'+self.digest+'.cache')
+        if path.isfile(cache_name):
+            self._result = load(cache_name)
+            return
+        # prepare calculation
+        f=self.freq_data.fftfreq()
+        kjall=2j*pi*f/self.c
+        bpos=self.grid.pos()
+        mpos=self.mpos.mpos
+        e=zeros((numchannels),'D')
+        result = zeros((f.size,self.grid.size),'d')
+        if self.r_diag:
+           adiv=1.0*(numchannels*numchannels-numchannels)
+           fullbeamfunc=beamdiag
+           orthbeamfunc=beamortho_sum_diag1
+        else:
+           adiv=1.0*(numchannels*numchannels)
+           fullbeamfunc=beamfull
+           orthbeamfunc=beamortho_sum
+        if not self.n:
+            J=numchannels*2
+        else:
+            J=self.n
+        powers=zeros(J,'d')
+        #ind=zeros(J)
+        h=zeros((1,shape(bpos)[1]),'d')
+        h1=h.copy()
+        # loop over frequencies
+        for nf in range(f.size):
+            kj=kjall[nf,newaxis]
+            csm=self.freq_data.csm[nf,newaxis,:,:].copy()
+            fullbeamfunc(csm,e,h,bpos,mpos,kj)
+            h=h/adiv
+            # CLEANSC Iteration
+            for j in range(J):
+                xi_max=h.argmax()
+                powers[j]=hmax=h[0,xi_max]
+                result[nf,xi_max]+=hmax
+                if  j>2 and hmax>powers[j-3]:
+                    #print j
+                    break
+                rm=bpos[:,xi_max,newaxis]-mpos
+                rm=sum(rm*rm,0)
+                rm=sqrt(rm)
+                r0=sum(bpos[:,xi_max]*bpos[:,xi_max],0)
+                r0=sqrt(r0)
+                rs=(r0*(1/(rm*rm)).sum(0))
+                wmax=numchannels/sqrt(adiv)*exp(-kj[0]*(r0-rm))/(rm*rs)
+                hh=wmax.copy()
+                D1=dot(csm[0]-diag(diag(csm[0])),wmax)/hmax
+                ww=wmax.conj()*wmax
+                for i in range(20):
+                    H=hh.conj()*hh
+                    hh=(D1+H*wmax)/sqrt(1+dot(ww,H))
+                hh=hh[:,newaxis]
+                csm1=hmax*(hh*hh.conj().T)[newaxis,:,:]
+                h1=zeros((1,shape(bpos)[1]),'d')
+                orthbeamfunc(e,h1,bpos,mpos,kj,array((hmax,))[newaxis,:],hh[newaxis,:],0,1)
+                h-=self.damp*h1/adiv
+                csm-=self.damp*csm1
+        # all data still the same
+        if digest==self.digest:
+            self._result=reshape(result,(len(f),self.grid.nxsteps,self.grid.nysteps))
             self._result.dump(cache_name)
 
 def L_p ( x ):
