@@ -1,4 +1,5 @@
 from enthought.traits.api import HasPrivateTraits, CArray
+from numpy import float32
 
 class spectrum( HasPrivateTraits ):
     """
