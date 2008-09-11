@@ -21,8 +21,9 @@ try:
     from mplwidget import MPLWidget
 except:
     from beamfpy.mplwidget import MPLWidget
-from enthought.pyface.api import ApplicationWindow, SplitApplicationWindow, GUI
+from enthought.pyface.api import ApplicationWindow, SplitApplicationWindow, GUI, FileDialog
 from enthought.pyface.action.api import Action, MenuManager, MenuBarManager, Group
+from pickle import load, dump
 from threading import Thread
 from time import sleep
 from pylab import imread
@@ -67,16 +68,19 @@ class ResultExplorer( HasPrivateTraits ):
     pic_scale = Float(400,
         desc="maximum  x-value picture plane")
 
-
-
     pic_flag = Bool(False,
         desc="show picture ?")
 
-    get_map_thread = Instance( Thread )
+    map_interp = Trait('bicubic',
+        ( 'nearest', 'bilinear', 'bicubic',  'spline16',  'spline36', 'hanning', 'hamming', 'hermite', 'kaiser', 'quadric', 'catrom', 'gaussian', 'bessel', 'mitchell', 'sinc', 'lanczos', 'blackman'),
+        #( 'bicubic', 'bilinear', 'blackman100', 'blackman256', 'blackman64','nearest', 'sinc144', 'sinc256', 'sinc64', 'spline16', 'spline36'),
+        desc="method of interpolation applied to map")
+
+    get_map_thread = Instance( Thread, transient=True )
 
     mplw = Instance(MPLWidget)
 
-    bmap_flag = Property( depends_on = ['beamformer.result_flag','synth_type','synth_freq','dynamic_range','max_level','pic_x_min','pic_y_min','pic_scale','pic_flag'],
+    bmap_flag = Property( depends_on = ['beamformer.result_flag','synth_type','synth_freq','dynamic_range','max_level','pic_x_min','pic_y_min','pic_scale','pic_flag','map_interp'],
         cached = True)
 
     bmap = Any(
@@ -92,6 +96,9 @@ class ResultExplorer( HasPrivateTraits ):
                         '|[Display options]'
                     ],
                     [
+                        Item('map_interp{Interpolation Type}')
+                    ],
+                    [
                         Item('pict{Picture File}'),
                         ['pic_x_min','pic_y_min','|'],
                         ['pic_scale','|'],
@@ -101,6 +108,13 @@ class ResultExplorer( HasPrivateTraits ):
                  [ Item( 'beamformer', style = 'custom' ), '-<>[Beamform]' ],
                  [Item('freq_data', style = 'custom', object ='bf'),'-<>[Data]']
                 )
+    
+    # pickling is too complicated at the moment, wait for Traits 3
+    #~ def __getstate__(self):
+        #~ state = super(ResultExplorer,self).__getstate__()
+        #~ print state.keys()
+        #~ del state['get_map_thread']
+        #~ return state
 
     def _synth_type_changed ( self ):
         if self.synth_type_==0:
@@ -145,7 +159,7 @@ class ResultExplorer( HasPrivateTraits ):
                     vmin= maxv-self.dynamic_range,
                     origin='lower',
                     extent=self.beamformer.grid.extend(),
-                    interpolation='bicubic',
+                    interpolation=self.map_interp,
                     alpha=0.8
                     )
                 x.norm.clip=False
@@ -156,7 +170,7 @@ class ResultExplorer( HasPrivateTraits ):
                     vmin= maxv-self.dynamic_range,
                     origin='lower',
                     extent=self.beamformer.grid.extend(),
-                    interpolation='bicubic'
+                    interpolation=self.map_interp
                     )
             y=self.mplw.figure.colorbar(x,self.mplw.caxes)
             self.mplw.caxes=y.ax
@@ -194,6 +208,11 @@ class MainWindow(SplitApplicationWindow):
         # Add a menu bar.
         self.menu_bar_manager = MenuBarManager(
             MenuManager(
+                #~ MenuManager(
+                    #~ Action(name='Open', on_perform=self.load),
+                    #~ Action(name='Save as', on_perform=self.save_as),
+                    #~ name = '&Project'
+                #~ ),
                 MenuManager(
                     Action(name='VI logger csv', on_perform=self.import_time_data),
                     Action(name='Pulse mat', on_perform=self.import_bk_mat_data),
@@ -204,6 +223,7 @@ class MainWindow(SplitApplicationWindow):
                     Action(name='NI-DAQmx', on_perform=self.import_nidaqmx),
                     name = '&Acquire'
                 ),
+                Action(name='R&un script', on_perform=self.run_script),
                 Action(name='E&xit', on_perform=self.close),
                 name = '&File',
             ),
@@ -228,6 +248,33 @@ class MainWindow(SplitApplicationWindow):
     def _create_rhs(self, parent):
         self.panel = ResultExplorer(beamformer=b,mplw=self.mplwidget)
         return self.panel.edit_traits(parent = parent, kind="subpanel", context = {'object': self.panel, 'bf': self.panel.beamformer}).control
+
+    def save_as(self):
+        dlg = FileDialog( action='save as', wildcard='*.rep')
+        dlg.open()
+        if dlg.filename!='':
+            fi = file(dlg.filename,'w')
+            dump(self.panel,fi)
+            fi.close()
+
+    def load(self):
+        dlg = FileDialog( action='open', wildcard='*.rep')
+        dlg.open()
+        if dlg.filename!='':
+            fi = file(dlg.filename,'rb')
+            self.panel = load(dlg.filename)
+            fi.close()
+                
+    def run_script(self):
+        dlg = FileDialog( action='open', wildcard='*.py')
+        dlg.open()
+        if dlg.filename!='':
+            #~ try:
+            rx = self.panel
+            b = rx.beamformer
+            execfile(dlg.filename)
+            #~ except:
+                #~ pass
 
     def import_time_data (self):
         t=self.panel.beamformer.freq_data.time_data

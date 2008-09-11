@@ -26,35 +26,10 @@ be edited graphically.
 The traits could also be set explicitely in the program, either in the
 constructor of an object:
 >>    m=MicGeom(from_file='mic_geom.xml')
-or a later time
+or at a later time
 >>    m.from_file='another_mic_geom.xml'
 where all objects that depend upon the specific trait will update their
 output if necessary.
-
-Classes
-=======
-csv_import      - import comma delimited time data as saved by NI VI Logger
-bk_mat_import   - import mat file data as saved by BK pulse
-
-TimeSamples     - management of time data
-
-Calib           - management of calibration data from .xml-files
-
-PowerSpectra    - efficient calculation of full cross spectral matrix
-EigSpectra      - eigen-decomposition of cross spectral matrix
-
-RectGrid        - rectangular grid coordinates
-
-MicGeom         - management of microphone locations from .xml-files
-
-BeamformerBase  - delay-and-sum beamformer
-BeamformerCapon - minimum variance / Capon beamformer
-BeamformerEig   - orthogonal beamformer
-BeamformerMusic - MUSIC beamformer
-
-Functions
-=========
-L_p(x)          - calculate SPL from p^2
 
 beamfpy.py (c) Ennes Sarradj 2007-2008, all rights reserved
 """
@@ -66,7 +41,7 @@ __version__ = "1.0beta"
 from scipy import io
 from numpy import *
 from threading import Thread, Lock
-from enthought.traits.api import HasTraits, HasPrivateTraits, Float, Int, Long, File, CArray, Property, Instance, Trait, Bool, Range, Delegate
+from enthought.traits.api import HasTraits, HasPrivateTraits, Float, Int, Long, File, CArray, Property, Instance, Trait, Bool, Range, Delegate, Any, Str
 from enthought.traits.ui.api import View, Item, Group
 from enthought.traits.ui.menu import OKCancelButtons
 #from enthought.pyface.api import GUI # unnecessary import
@@ -77,6 +52,8 @@ from time import sleep, time
 import md5
 import cPickle
 import tables
+import ConfigParser
+import struct
 
 # path to cache directory, possibly in temp
 try:
@@ -257,24 +234,190 @@ class bk_mat_import( time_data_import ):
         from scipy.io import loadmat
         m=loadmat(self.from_file)
         fh=m['File_Header']
-        n=int(fh.NumberOfChannels)
+        numchannels=int(fh.NumberOfChannels)
         l=int(fh.NumberOfSamplesPerChannel)
         sample_freq=float(fh.SampleFrequency.replace(',','.'))
-        data=empty((l,n),'f')
-        for i in range(n):
+        data=empty((l,numchannels),'f')
+        for i in range(numchannels):
             # map SignalName "Point xx" to channel xx-1
             ii=int(m["Channel_%i_Header" % (i+1)].SignalName[-2:])-1
             data[:,ii]=m["Channel_%i_Data" % (i+1)]
-        h={}
-        h['sample_freq'] = sample_freq
-        h['data'] = data
         name = td.name
         if name=="":
             name = path.join(td_dir,path.splitext(path.basename(self.from_file))[0]+'.h5')
-        f=open(name,'wb')
-        cPickle.dump(h,f,-1)
-        f.close()
+        else:
+            if td.h5f != None:
+                td.h5f.close()
+        # TODO problems with already open h5 files from other instances
+        f5h=tables.openFile(name,mode='w')
+        ac=f5h.createEArray(f5h.root,'time_data',tables.atom.Float32Atom(),(0,numchannels))
+        ac.setAttr('sample_freq',sample_freq)
+        ac.append(data)
+        f5h.close()
         td.name = name
+        td.load_data()
+
+class datx_d_file(HasPrivateTraits):
+    """
+    helper class for import of .datx data, represents
+    datx data file
+    """
+    # file name
+    name = File(filter=['*.datx'],
+        desc="name of datx data file")
+
+    # file object
+    f = Any()
+
+    # properties
+    data_offset = Int()
+    channel_count = Int()
+    num_samples_per_block = Int()
+    bytes_per_sample = Int()
+    block_size = Property()
+
+    # number of blocks to read in one pull
+    blocks = Int()
+    # the actual block data
+    data = CArray()
+
+    def _get_block_size( self ):
+        return self.channel_count*self.num_samples_per_block*self.bytes_per_sample
+
+    def get_next_blocks( self ):
+        s=self.f.read(self.blocks*self.block_size)
+        ls=len(s)
+        if ls==0:
+            return -1
+        bl_no=ls/self.block_size
+        self.data=fromstring(s, dtype='Int16').reshape((bl_no,self.channel_count,self.num_samples_per_block)).swapaxes(0,1).reshape((self.channel_count,bl_no*self.num_samples_per_block))
+
+    def __init__(self,name,blocks=128):
+        self.name=name
+        self.f=file(self.name,'rb')
+        s=self.f.read(32)
+        # header
+        s0=struct.unpack('IIIIIIHHf',s)        # Getting information about Properties of data-file 3=Offset to data 4=channel count 5=number of samples per block 6=bytes per sample
+        self.data_offset = s0[3]
+        self.channel_count = s0[4]
+        self.num_samples_per_block = s0[5]
+        self.bytes_per_sample = s0[6]
+        self.blocks = blocks
+        self.f.seek(self.data_offset)
+
+class datx_channel(HasPrivateTraits):
+    """
+    helper class for import of .datx data, represents
+    one channel
+    """
+
+    label = Str()
+    d_file = Str()
+    ch_no = Int()
+    ch_K = Str()
+    volts_per_count = Float()
+    msl_ccf = Float()
+    cal_corr_factor = Float()
+    internal_gain = Float()
+    external_gain = Float()
+    tare_volts = Float()
+    cal_coeff_2 = Float()
+    cal_coeff_1 = Float()
+    tare_eu = Float()
+    z0 = Float()
+
+
+    def __init__(self,config,channel):
+        d_file,ch_no,ch_K=config.get('channels',channel).split(',') # Extraction and Splitting of Channel information
+        self.d_file=d_file
+        self.ch_no=int(ch_no)
+        self.label=config.get(ch_K,'channel_label')
+        self.ch_K=ch_K
+        # V                                                     # Reading conversion factors
+        self.volts_per_count=float(config.get(ch_K,'volts_per_count'))
+        self.msl_ccf=float(config.get(ch_K,'msl_ccf'))
+        self.cal_corr_factor=float(config.get(ch_K,'cal_corr_factor'))
+        self.internal_gain=float(config.get(ch_K,'internal_gain'))
+        self.external_gain=float(config.get(ch_K,'external_gain'))
+        self.tare_volts=float(config.get(ch_K,'tare_volts'))
+        # EU
+        self.cal_coeff_2 = float(config.get(ch_K,'cal_coeff_2'))
+        self.cal_coeff_1 = float(config.get(ch_K,'cal_coeff_1'))
+        self.tare_eu = float(config.get(ch_K,'tare_eu'))
+        self.z0 = (self.volts_per_count * self.msl_ccf * self.cal_corr_factor) / (self.internal_gain * self.external_gain)
+
+    def scale(self,x):
+        return (x * self.z0 - self.tare_volts) * self.cal_coeff_2 + self.cal_coeff_1 - self.tare_eu
+
+class datx_import(time_data_import):
+    """
+    import of .datx data
+    """
+
+    # name of the mat file to import
+    from_file = File(filter=['*.datx_index'],
+        desc="name of the datx index file to import")
+
+    traits_view = View(
+        ['from_file',
+            '|[Import]'
+        ],
+        title='Time data',
+        buttons = OKCancelButtons
+                    )
+
+    def get_data (self,td):
+        """
+        main work is done here: imports the data from datx files into
+        time_data object td and saves also a '*.h5' file so this import
+        need not be performed every time the data is needed
+        """
+        if not path.isfile(self.from_file):
+            # no file there
+            time_data_import.getdata(self,td)
+            return
+        #browse datx information
+        f0=open(self.from_file)
+        config=ConfigParser.ConfigParser()
+        config.readfp(f0)
+        sample_rate=float(config.get('keywords','sample_rate'))           # reading sample-rate from index-file
+        channels=[]
+        d_files={}
+        for channel in sort(config.options('channels')):                                         # Loop over all channels assigned in index-file
+            ch=datx_channel(config,channel)
+            if ch.label.find('Mic')>=0:
+                channels.append(ch)
+                if not d_files.has_key(ch.d_file):
+                    d_files[ch.d_file]=datx_d_file(path.join(path.dirname(self.from_file),config.get(ch.d_file,'fn')),32)
+        numchannels=len(channels)
+        # prepare hdf5
+        name = td.name
+        if name=="":
+            name = path.join(td_dir,path.splitext(path.basename(self.from_file))[0]+'.h5')
+        else:
+            if td.h5f != None:
+                td.h5f.close()
+        # TODO problems with already open h5 files from other instances
+        f5h=tables.openFile(name,mode='w')
+        ac=f5h.createEArray(f5h.root,'time_data',tables.atom.Float32Atom(),(0,numchannels))
+        ac.setAttr('sample_freq',sample_rate)
+        block_data=zeros((128*d_files[channels[0].d_file].num_samples_per_block,numchannels),'Float32')
+        flag=0
+        while(not flag):
+            for i in d_files.values():
+                flag=i.get_next_blocks()
+            if flag:
+                continue
+            for i in range(numchannels):
+                data=d_files[channels[i].d_file].data[channels[i].ch_no]
+                block_data[:data.size,i]=channels[i].scale(data)
+            ac.append(block_data[:data.size])
+        f5h.close()
+        f0.close()
+        for i in d_files.values():
+            i.f.close()
+        td.name = name
+        td.load_data()
 
 class TimeSamples( HasPrivateTraits ):
     """
@@ -1596,7 +1739,7 @@ class BeamformerCleansc( BeamformerBase ):
                     self.freq_data.digest,
                     str(self.c),
                     str(self.n),
-                    str(self.dampn),
+                    str(self.damp),
                     str(self.stopn),
                     str(self.r_diag)
                     ]
