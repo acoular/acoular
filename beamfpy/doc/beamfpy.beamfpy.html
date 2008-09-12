@@ -56,35 +56,10 @@ be edited graphically.
 The traits could also be set explicitely in the program, either in the
 constructor of an object:
 &gt;&gt;    m=MicGeom(from_file='mic_geom.xml')
-or a later time
+or at a later time
 &gt;&gt;    m.from_file='another_mic_geom.xml'
 where all objects that depend upon the specific trait will update their
 output if necessary.
-
-Classes
-=======
-csv_import      - import comma delimited time data as saved by NI VI Logger
-bk_mat_import   - import mat file data as saved by BK pulse
-
-TimeSamples     - management of time data
-
-Calib           - management of calibration data from .xml-files
-
-PowerSpectra    - efficient calculation of full cross spectral matrix
-EigSpectra      - eigen-decomposition of cross spectral matrix
-
-RectGrid        - rectangular grid coordinates
-
-MicGeom         - management of microphone locations from .xml-files
-
-BeamformerBase  - delay-and-sum beamformer
-BeamformerCapon - minimum variance / Capon beamformer
-BeamformerEig   - orthogonal beamformer
-BeamformerMusic - MUSIC beamformer
-
-Functions
-=========
-L_p(x)          - calculate SPL from p^2
 
 beamfpy.py (c) Ennes Sarradj 2007-2008, all rights reserved
 </pre>
@@ -156,6 +131,12 @@ Contents:
   
   <li id="csv_import" class="class"><a href="beamfpy.beamfpy.csv_import.html">csv_import</a></li>
   
+  <li id="datx_channel" class="class"><a href="beamfpy.beamfpy.datx_channel.html">datx_channel</a></li>
+  
+  <li id="datx_d_file" class="class"><a href="beamfpy.beamfpy.datx_d_file.html">datx_d_file</a></li>
+  
+  <li id="datx_import" class="class"><a href="beamfpy.beamfpy.datx_import.html">datx_import</a></li>
+  
   <li id="td_import" class="class"><a href="beamfpy.beamfpy.td_import.html">td_import</a></li>
   
   <li id="time_data_import" class="class"><a href="beamfpy.beamfpy.time_data_import.html">time_data_import</a></li>
@@ -211,9 +192,13 @@ Contents:
   </thead>
   <tbody>
 
+  <tr id="Any"><td>Any</td><td>enthought.traits.api.Any</td></tr>
+
   <tr id="Bool"><td>Bool</td><td>enthought.traits.api.Bool</td></tr>
 
   <tr id="CArray"><td>CArray</td><td>enthought.traits.api.CArray</td></tr>
+
+  <tr id="ConfigParser"><td>ConfigParser</td><td>ConfigParser</td></tr>
 
   <tr id="cPickle"><td>cPickle</td><td>cPickle</td></tr>
 
@@ -258,6 +243,10 @@ Contents:
   <tr id="Range"><td>Range</td><td>enthought.traits.api.Range</td></tr>
 
   <tr id="sleep"><td>sleep</td><td>time.sleep</td></tr>
+
+  <tr id="Str"><td>Str</td><td>enthought.traits.api.Str</td></tr>
+
+  <tr id="struct"><td>struct</td><td>struct</td></tr>
 
   <tr id="tables"><td>tables</td><td>tables</td></tr>
 

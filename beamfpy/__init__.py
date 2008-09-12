@@ -4,7 +4,7 @@ Several classes for the implemetation of acoustic beamforming
 """
 from beamfpy import __author__, __date__, __version__
 
-from beamfpy import time_data_import, csv_import, td_import, bk_mat_import
+from beamfpy import time_data_import, csv_import, td_import, bk_mat_import, datx_import
 try:
 	from nidaqimport import nidaq_import
 except:
