@@ -6,8 +6,8 @@ ResultExplorer.py (c) Ennes Sarradj 2007-2008, all rights reserved
 """
 
 __author__ = "Ennes Sarradj, ennes.sarradj@gmx.de"
-__date__ = "31 March 2008"
-__version__ = "1.2"
+__date__ = "12 September 2008"
+__version__ = "1.3"
 
 
 from beamfpy import *
@@ -325,7 +325,7 @@ class MainWindow(SplitApplicationWindow):
 
     def set_Damas (self):
         b=self.panel.beamformer
-        self.panel.beamformer=BeamformerDamas(beamformer=b)
+        self.panel.beamformer=BeamformerDamas(beamformer=BeamformerBase(freq_data=b.freq_data,grid=b.grid,mpos=b.mpos))
 
     def set_Cleansc (self):
         b=self.panel.beamformer
