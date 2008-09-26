@@ -35,8 +35,8 @@ beamfpy.py (c) Ennes Sarradj 2007-2008, all rights reserved
 """
 
 __author__ = "Ennes Sarradj, ennes.sarradj@gmx.de"
-__date__ = "26 April 2008"
-__version__ = "1.0beta"
+__date__ = "26 Sept 2008"
+__version__ = "1.3beta"
 
 from scipy import io
 from numpy import *
@@ -65,7 +65,7 @@ if not path.exists(cache_dir):
 
 # path to td directory (used for import to *.h5 files)
 try:
-    td_dir=path.join(environ['HOMEPATH'],'beamfpy_td')
+    td_dir=path.join(environ['HOMEDRIVE'],environ['HOMEPATH'],'beamfpy_td')
 except:
     td_dir=path.join(path.curdir,'td')
 if not path.exists(td_dir):

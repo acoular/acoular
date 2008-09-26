@@ -44,6 +44,7 @@ synth_freq_enum = List
 # synth_type
 synth_type = Trait('Oktave', { Const('Single frequency') : Const(0), Const('Oktave') : Const(1), Const('Third octave') : Const(3) }, desc = 'type of frequency band for synthesis')
 """
+print script
 rx.beamformer.grid = RectGrid(x_min=-1.5,x_max=3.0,y_min=0.0,y_max=2.1,z=5.0,increment=0.1)
 rx.beamformer.mpos.from_file = path.join( path.split(beamfpy.__file__)[0],'xml','HW90D240_f10.xml')
 rx.beamformer.freq_data.time_data.name = path.join(td_dir,'2_15_3mm_VA.h5')
