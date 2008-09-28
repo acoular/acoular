@@ -272,8 +272,8 @@ class MainWindow(SplitApplicationWindow):
             #~ try:
             rx = self.panel
             b = rx.beamformer
-            script = dlg.filename
-            execfile(dlg.filename)
+            script = dlg.path
+            execfile(dlg.path)
             #~ except:
                 #~ pass
 
