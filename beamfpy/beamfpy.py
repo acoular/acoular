@@ -622,7 +622,7 @@ class PowerSpectra( HasPrivateTraits ):
         desc = "frequency range" )
 
     # flag for internal use
-    csm_flag = Property( depends_on = [ 'time_data.digest','calib.digest', 'block_size', 'window', 'overlap'],
+    csm_flag = Property( depends_on = [ 'digest'],
         cached     = True,
         desc="flag=1 if csm is invalid")
 
