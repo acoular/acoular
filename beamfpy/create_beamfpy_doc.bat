@@ -1,1 +1,1 @@
-endo -r beamfpy=.
+endo --verbose

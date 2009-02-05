@@ -19,7 +19,7 @@ def limit_cache(siz=20000000000L, dir=cache_dir):
 	sz = sum(array(l[:,1],dtype=int64))
 	print sz
 	if sz>siz:
-		diff = sz - siz*4L/5L
+		diff = sz - siz*0.8
 		i = 0
 		while diff>0:
 			name,sz,t = l.take(indices,axis=0)[i]

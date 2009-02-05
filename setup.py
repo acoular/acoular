@@ -5,7 +5,7 @@ from distutils.core import setup
     #~ scheme['data'] = scheme['purelib'] 
     
 setup(name="beamfpy",
-      version="1.0beta",
+      version="2.0alpha",
       description="Library for the acoustic beamforming",
       author="Ennes Sarradj",
       author_email="ennes.sarradj@gmx.de",
