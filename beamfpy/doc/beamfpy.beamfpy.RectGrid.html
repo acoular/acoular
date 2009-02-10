@@ -47,6 +47,8 @@ Contents:
 <li><a href="#section-variables">Attributes</a></li>
 
 
+<li><a href="#section-traits">Traits</a></li>
+
 
 
 <li><a href="#section-functions">Methods</a></li>
@@ -71,58 +73,70 @@ Contents:
 <h2 id="section-variables">Attributes</h2>
 <ul class="doclist">
 
-  <li class="attribute" id="digest">digest<pre>internal identifier
-</pre><pre>digest = Property(depends_on = [ 'x_min', 'x_max', 'y_min', 'y_max', 'z', 'increment' ], cached = True)
-
-</pre></li>
-
-  <li class="attribute" id="increment">increment<pre>increment in x- and y- direction
-</pre><pre>increment = Float(0.10000000000000001, desc = 'step size')
-
-</pre></li>
-
-  <li class="attribute" id="nxsteps">nxsteps<pre>number of grid points alog x-axis (auto-set)
-</pre><pre>nxsteps = Property(depends_on = [ 'x_min', 'x_max', 'increment' ], desc = 'number of grid points alog x-axis')
-
-</pre></li>
-
-  <li class="attribute" id="nysteps">nysteps<pre>number of grid points alog y-axis (auto-set)
-</pre><pre>nysteps = Property(depends_on = [ 'y_min', 'y_max', 'increment' ], desc = 'number of grid points alog y-axis')
-
-</pre></li>
-
-  <li class="attribute" id="size">size<pre>overall number of grid points (auto-set)
-</pre><pre>size = Property(depends_on = [ 'nxsteps', 'nysteps' ], desc = 'overall number of grid points')
-
-</pre></li>
-
   <li class="attribute" id="traits_view">traits_view<pre></pre><pre>traits_view = View([ [ 'x_min', 'y_min', '|' ], [ 'x_max', 'y_max', 'z', 'increment', 'size~{grid size}', '|' ], '-[Map extension]' ])
-
-</pre></li>
-
-  <li class="attribute" id="x_max">x_max<pre></pre><pre>x_max = Float(1.0, desc = 'maximum  x-value')
-
-</pre></li>
-
-  <li class="attribute" id="x_min">x_min<pre></pre><pre>x_min = Float(-Const(1.0), desc = 'minimum  x-value')
-
-</pre></li>
-
-  <li class="attribute" id="y_max">y_max<pre></pre><pre>y_max = Float(1.0, desc = 'maximum  y-value')
-
-</pre></li>
-
-  <li class="attribute" id="y_min">y_min<pre></pre><pre>y_min = Float(-Const(1.0), desc = 'minimum  y-value')
-
-</pre></li>
-
-  <li class="attribute" id="z">z<pre></pre><pre>z = Float(1.0, desc = 'position on z-axis')
 
 </pre></li>
 
 </ul>
 
 
+
+
+
+<h2 id="section-traits">Traits</h2>
+<ul class="doclist">
+
+  <li class="trait" id="digest">digest<pre>internal identifier
+</pre><pre>digest = Property(depends_on = [ 'x_min', 'x_max', 'y_min', 'y_max', 'z', 'increment' ])
+
+</pre></li>
+
+  <li class="trait" id="increment">increment<pre>increment in x- and y- direction
+</pre><pre>increment = Float(0.10000000000000001, desc = 'step size')
+
+</pre></li>
+
+  <li class="trait" id="nxsteps">nxsteps<pre>number of grid points alog x-axis (auto-set)
+</pre><pre>nxsteps = Property(desc = 'number of grid points alog x-axis')
+
+</pre></li>
+
+  <li class="trait" id="nysteps">nysteps<pre>number of grid points alog y-axis (auto-set)
+</pre><pre>nysteps = Property(desc = 'number of grid points alog y-axis')
+
+</pre></li>
+
+  <li class="trait" id="shape">shape<pre>shape of grid
+</pre><pre>shape = Property(desc = 'grid shape as tuple')
+
+</pre></li>
+
+  <li class="trait" id="size">size<pre>overall number of grid points (auto-set)
+</pre><pre>size = Property(desc = 'overall number of grid points')
+
+</pre></li>
+
+  <li class="trait" id="x_max">x_max<pre></pre><pre>x_max = Float(1.0, desc = 'maximum  x-value')
+
+</pre></li>
+
+  <li class="trait" id="x_min">x_min<pre></pre><pre>x_min = Float(-Const(1.0), desc = 'minimum  x-value')
+
+</pre></li>
+
+  <li class="trait" id="y_max">y_max<pre></pre><pre>y_max = Float(1.0, desc = 'maximum  y-value')
+
+</pre></li>
+
+  <li class="trait" id="y_min">y_min<pre></pre><pre>y_min = Float(-Const(1.0), desc = 'minimum  y-value')
+
+</pre></li>
+
+  <li class="trait" id="z">z<pre></pre><pre>z = Float(1.0, desc = 'position on z-axis')
+
+</pre></li>
+
+</ul>
 
 
 

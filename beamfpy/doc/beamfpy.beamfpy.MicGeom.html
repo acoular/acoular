@@ -48,6 +48,8 @@ Contents:
 <li><a href="#section-variables">Attributes</a></li>
 
 
+<li><a href="#section-traits">Traits</a></li>
+
 
 
 <li><a href="#section-functions">Methods</a></li>
@@ -72,26 +74,6 @@ Contents:
 <h2 id="section-variables">Attributes</h2>
 <ul class="doclist">
 
-  <li class="attribute" id="digest">digest<pre>internal identifier
-</pre><pre>digest = Property(depends_on = [ 'mpos' ], cached = True)
-
-</pre></li>
-
-  <li class="attribute" id="from_file">from_file<pre>name of the .xml-file
-</pre><pre>from_file = File(filter = [ '*.xml' ], desc = 'name of the xml file to import')
-
-</pre></li>
-
-  <li class="attribute" id="mpos">mpos<pre>positions as (3,num_mics) array
-</pre><pre>mpos = Property(depends_on = [ 'from_file' ], cached = True, desc = 'x,y,z position of microphones')
-
-</pre></li>
-
-  <li class="attribute" id="num_mics">num_mics<pre>number of mics
-</pre><pre>num_mics = Int(0, desc = 'number of microphones in the geometry')
-
-</pre></li>
-
   <li class="attribute" id="traits_view">traits_view<pre></pre><pre>traits_view = View([ 'from_file', 'num_mics~', '|[Microphone geometry]' ], buttons = OKCancelButtons)
 
 </pre></li>
@@ -99,6 +81,38 @@ Contents:
 </ul>
 
 
+
+
+
+<h2 id="section-traits">Traits</h2>
+<ul class="doclist">
+
+  <li class="trait" id="basename">basename<pre>basename of the .xml-file
+</pre><pre>basename = Property(depends_on = 'from_file', desc = 'basename of xml file')
+
+</pre></li>
+
+  <li class="trait" id="digest">digest<pre>internal identifier
+</pre><pre>digest = Property(depends_on = [ 'mpos' ])
+
+</pre></li>
+
+  <li class="trait" id="from_file">from_file<pre>name of the .xml-file
+</pre><pre>from_file = File(filter = [ '*.xml' ], desc = 'name of the xml file to import')
+
+</pre></li>
+
+  <li class="trait" id="mpos">mpos<pre>positions as (3,num_mics) array
+</pre><pre>mpos = Any(desc = 'x,y,z position of microphones')
+
+</pre></li>
+
+  <li class="trait" id="num_mics">num_mics<pre>number of mics
+</pre><pre>num_mics = Int(0, desc = 'number of microphones in the geometry')
+
+</pre></li>
+
+</ul>
 
 
 
@@ -120,7 +134,7 @@ Contents:
 <ul class="doclist">
   
   <li id="import_mpos" class="function">import_mpos(self)<pre>import the microphone positions from .xml file,
-        called automatically
+        called when basename changes
         </pre></li>
   
 </ul>

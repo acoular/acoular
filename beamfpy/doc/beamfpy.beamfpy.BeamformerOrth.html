@@ -46,6 +46,8 @@ Contents:
 <li><a href="#section-variables">Attributes</a></li>
 
 
+<li><a href="#section-traits">Traits</a></li>
+
 
 
 <li><a href="#section-functions">Methods</a></li>
@@ -70,58 +72,70 @@ Contents:
 <h2 id="section-variables">Attributes</h2>
 <ul class="doclist">
 
-  <li class="attribute" id="beamformer">beamformer<pre>BeamformerEig object that provides data for deconvolution
-</pre><pre>beamformer = Trait(<a href="beamfpy.beamfpy.BeamformerEig.html">BeamformerEig</a>)
-
-</pre></li>
-
-  <li class="attribute" id="c">c<pre>the speed of sound, defaults to 343 m/s
-</pre><pre>c = Delegate('beamformer')
-
-</pre></li>
-
-  <li class="attribute" id="calc_thread">calc_thread<pre>thread
-</pre><pre>calc_thread = Instance(Thread)
-
-</pre></li>
-
-  <li class="attribute" id="digest">digest<pre>internal identifier
-</pre><pre>digest = Property(depends_on = [ 'beamformer.digest', 'eva_list' ], cached = True)
-
-</pre></li>
-
-  <li class="attribute" id="eva_list">eva_list<pre>list of components to consider
-</pre><pre>eva_list = CArray(desc = 'components')
-
-</pre></li>
-
-  <li class="attribute" id="freq_data">freq_data<pre>EigSpectra object that provides the cross spectral matrix and Eigenvalues
-</pre><pre>freq_data = Delegate('beamformer')
-
-</pre></li>
-
-  <li class="attribute" id="grid">grid<pre>RectGrid object that provides the grid locations
-</pre><pre>grid = Delegate('beamformer')
-
-</pre></li>
-
-  <li class="attribute" id="mpos">mpos<pre>MicGeom object that provides the microphone locations
-</pre><pre>mpos = Delegate('beamformer')
-
-</pre></li>
-
-  <li class="attribute" id="r_diag">r_diag<pre>flag, if true (default), the main diagonal is removed before beamforming
-</pre><pre>r_diag = Delegate('beamformer')
-
-</pre></li>
-
-  <li class="attribute" id="traits_view">traits_view<pre></pre><pre>traits_view = View([ [ Item('beamformer{}', style = 'custom') ], [ Item('eva_list{Components}') ], '|' ], title = 'Options', buttons = OKCancelButtons)
+  <li class="attribute" id="traits_view">traits_view<pre></pre><pre>traits_view = View([ [ Item('mpos{}', style = 'custom') ], [ Item('grid', style = 'custom'), '-&lt;&gt;' ], [ Item('n', label = 'number of components', style = 'text') ], [ Item('r_diag', label = 'diagonal removed') ], '|' ], title = 'Beamformer options', buttons = OKCancelButtons)
 
 </pre></li>
 
 </ul>
 
 
+
+
+
+<h2 id="section-traits">Traits</h2>
+<ul class="doclist">
+
+  <li class="trait" id="beamformer">beamformer<pre>BeamformerEig object that provides data for deconvolution
+</pre><pre>beamformer = Trait(<a href="beamfpy.beamfpy.BeamformerEig.html">BeamformerEig</a>)
+
+</pre></li>
+
+  <li class="trait" id="c">c<pre>the speed of sound, defaults to 343 m/s
+</pre><pre>c = Delegate('beamformer')
+
+</pre></li>
+
+  <li class="trait" id="digest">digest<pre>internal identifier
+</pre><pre>digest = Property(depends_on = [ 'beamformer.digest', 'eva_list' ])
+
+</pre></li>
+
+  <li class="trait" id="eva_list">eva_list<pre>list of components to consider
+</pre><pre>eva_list = CArray(desc = 'components')
+
+</pre></li>
+
+  <li class="trait" id="ext_digest">ext_digest<pre>internal identifier
+</pre><pre>ext_digest = Property(depends_on = [ <a href="beamfpy.internal.html#digest">'digest'</a>, 'beamformer.ext_digest' ])
+
+</pre></li>
+
+  <li class="trait" id="freq_data">freq_data<pre>EigSpectra object that provides the cross spectral matrix and Eigenvalues
+</pre><pre>freq_data = Delegate('beamformer')
+
+</pre></li>
+
+  <li class="trait" id="grid">grid<pre>RectGrid object that provides the grid locations
+</pre><pre>grid = Delegate('beamformer')
+
+</pre></li>
+
+  <li class="trait" id="mpos">mpos<pre>MicGeom object that provides the microphone locations
+</pre><pre>mpos = Delegate('beamformer')
+
+</pre></li>
+
+  <li class="trait" id="n">n<pre>helper: number of components to consider
+</pre><pre>n = Int(1)
+
+</pre></li>
+
+  <li class="trait" id="r_diag">r_diag<pre>flag, if true (default), the main diagonal is removed before beamforming
+</pre><pre>r_diag = Delegate('beamformer')
+
+</pre></li>
+
+</ul>
 
 
 
@@ -132,7 +146,9 @@ Contents:
 <h2 id="section-functions">Method summary</h2>
 <ul class="function-summary">
   
-  <li class="function"><a href="#calc_result">calc_result</a>(self)</li>
+  <li class="function"><a href="#calc">calc</a>(self, ac, fr)</li>
+  
+  <li class="function"><a href="#set_eva_list">set_eva_list</a>(self)</li>
   
 </ul>
 
@@ -142,12 +158,12 @@ Contents:
 <h2>Methods</h2>
 <ul class="doclist">
   
-  <li id="calc_result" class="function">calc_result(self)<pre>main work is done here:
-        result is either loaded from cache or
-        calculated and additionally saved to cache
-        this runs automatically and may take some time
-        the result is discarded if the digest changes during the calculation
+  <li id="calc" class="function">calc(self, ac, fr)<pre>
+        calculation of orthogonal beamforming result 
+        for all missing frequencies
         </pre></li>
+  
+  <li id="set_eva_list" class="function">set_eva_list(self)<pre></pre></li>
   
 </ul>
 

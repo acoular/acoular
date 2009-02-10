@@ -47,6 +47,8 @@ Contents:
 <li><a href="#section-variables">Attributes</a></li>
 
 
+<li><a href="#section-traits">Traits</a></li>
+
 
 
 <li><a href="#section-functions">Methods</a></li>
@@ -71,71 +73,85 @@ Contents:
 <h2 id="section-variables">Attributes</h2>
 <ul class="doclist">
 
-  <li class="attribute" id="block_size">block_size<pre>FFT block size, one of: 128,256,512,1024,2048 or 4096
-defaults to 1024
-</pre><pre>block_size = Trait(1024, 128, 256, 512, 1024, 2048, 4096, desc = 'number of samples per FFT block')
+  <li class="attribute" id="traits_view">traits_view<pre></pre><pre>traits_view = View([ 'time_data@{}', 'calib@{}', [ 'block_size', 'window', 'overlap', [ 'ind_low{Low Index}', 'ind_high{High Index}', '-[Frequency range indices]' ], [ 'num_blocks~{Number of blocks}', 'freq_range~{Frequency range}', '-' ], '[FFT-parameters]' ] ], buttons = OKCancelButtons)
 
 </pre></li>
 
-  <li class="attribute" id="calib">calib<pre>the Calib object that provides the calibration data,
+</ul>
+
+
+
+
+
+<h2 id="section-traits">Traits</h2>
+<ul class="doclist">
+
+  <li class="trait" id="block_size">block_size<pre>FFT block size, one of: 128,256,512,1024,2048 ... 16384
+defaults to 1024
+</pre><pre>block_size = Trait(1024, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, desc = 'number of samples per FFT block')
+
+</pre></li>
+
+  <li class="trait" id="calib">calib<pre>the Calib object that provides the calibration data,
 defaults to no calibration, i.e. the raw time data is used
 </pre><pre>calib = Instance(<a href="beamfpy.beamfpy.Calib.html">Calib</a>)
 
 </pre></li>
 
-  <li class="attribute" id="csm">csm<pre>the cross spectral matrix as
+  <li class="trait" id="csm">csm<pre>the cross spectral matrix as
 (number of frequencies,numchannels,numchannels) array of complex
-</pre><pre>csm = Property(depends_on = [  ], cached = True, desc = 'cross spectral matrix')
+</pre><pre>csm = Property(desc = 'cross spectral matrix')
 
 </pre></li>
 
-  <li class="attribute" id="csm_flag">csm_flag<pre>flag for internal use
-</pre><pre>csm_flag = Property(depends_on = [ 'time_data.digest', 'calib.digest', 'block_size', 'window', 'overlap' ], cached = True, desc = 'flag=1 if csm is invalid')
+  <li class="trait" id="digest">digest<pre>internal identifier
+</pre><pre>digest = Property(depends_on = [ 'time_data.digest', 'calib.digest', 'block_size', 'window', 'overlap' ])
 
 </pre></li>
 
-  <li class="attribute" id="digest">digest<pre>internal identifier
-</pre><pre>digest = Property(depends_on = [ 'time_data.digest', 'calib.digest', 'block_size', 'window', 'overlap', 'ind_low', 'ind_high' ], cached = True)
+  <li class="trait" id="freq_range">freq_range<pre>frequency range
+</pre><pre>freq_range = Property(desc = 'frequency range')
 
 </pre></li>
 
-  <li class="attribute" id="freq_range">freq_range<pre>frequency range
-</pre><pre>freq_range = Property(depends_on = [ 'time_data.digest', 'block_size', 'ind_low', 'ind_high' ], cached = True, desc = 'frequency range')
+  <li class="trait" id="h5f">h5f<pre>hdf5 cache file
+</pre><pre>h5f = Instance(tables.File)
 
 </pre></li>
 
-  <li class="attribute" id="ind_high">ind_high<pre>index of highest frequency line
+  <li class="trait" id="ind_high">ind_high<pre>index of highest frequency line
 defaults to -1 (last possible line for default block_size)
 </pre><pre>ind_high = Int(-Const(1), desc = 'index of highest frequency line')
 
 </pre></li>
 
-  <li class="attribute" id="ind_low">ind_low<pre>index of lowest frequency line
+  <li class="trait" id="ind_low">ind_low<pre>index of lowest frequency line
 defaults to 0
-</pre><pre>ind_low = Range(0, desc = 'index of lowest frequency line')
+</pre><pre>ind_low = Range(1, desc = 'index of lowest frequency line')
 
 </pre></li>
 
-  <li class="attribute" id="num_blocks">num_blocks<pre>number of FFT blocks to average (auto-set from block_size and overlap)
-</pre><pre>num_blocks = Property(depends_on = [ 'time_data.numsamples', 'block_size', 'overlap' ], cached = True, desc = 'overall number of FFT blocks')
+  <li class="trait" id="indices">indices<pre>frequency range
+</pre><pre>indices = Property(desc = 'index range')
 
 </pre></li>
 
-  <li class="attribute" id="overlap">overlap<pre>overlap factor for averaging: 'None'(default),'50%','75%','87.5%'
+  <li class="trait" id="num_blocks">num_blocks<pre>number of FFT blocks to average (auto-set from block_size and overlap)
+</pre><pre>num_blocks = Property(desc = 'overall number of FFT blocks')
+
+</pre></li>
+
+  <li class="trait" id="overlap">overlap<pre>overlap factor for averaging: 'None'(default),'50%','75%','87.5%'
 </pre><pre>overlap = Trait('None', { Const('None') : Const(1), Const('50%') : Const(2), Const('75%') : Const(4), Const('87.5%') : Const(8) }, desc = 'overlap of FFT blocks')
 
 </pre></li>
 
-  <li class="attribute" id="time_data">time_data<pre>the TimeSamples object that provides the data
+  <li class="trait" id="time_data">time_data<pre>the TimeSamples object that provides the data
 </pre><pre>time_data = Trait(<a href="beamfpy.beamfpy.TimeSamples.html">TimeSamples</a>, desc = 'time data object')
 
 </pre></li>
 
-  <li class="attribute" id="traits_view">traits_view<pre></pre><pre>traits_view = View([ 'time_data@{}', 'calib@{}', [ 'block_size', 'window', 'overlap', [ 'ind_low{Low Index}', 'ind_high{High Index}', '-[Frequency range indices]' ], [ 'num_blocks~{Number of blocks}', 'freq_range~{Frequency range}', '-' ], '[FFT-parameters]' ] ], buttons = OKCancelButtons)
-
-</pre></li>
-
-  <li class="attribute" id="window">window<pre>window function for FFT, one of:
+  <li class="trait" id="window">window<pre>window function for FFT, one of:
 'Rectangular' (default),'Hanning','Hamming','Bartlett','Blackman'
 </pre><pre>window = Trait('Rectangular', { Const('Rectangular') : Name('ones'), Const('Hanning') : Name('hanning'), Const('Hamming') : Name('hamming'), Const('Bartlett') : Name('bartlett'), Const('Blackman') : Name('blackman') }, desc = 'type of window for FFT')
 
@@ -149,12 +165,8 @@ defaults to 0
 
 
 
-
-
 <h2 id="section-functions">Method summary</h2>
 <ul class="function-summary">
-  
-  <li class="function"><a href="#calc_csm">calc_csm</a>(self)</li>
   
   <li class="function"><a href="#fftfreq">fftfreq</a>(self)</li>
   
@@ -165,12 +177,6 @@ defaults to 0
 
 <h2>Methods</h2>
 <ul class="doclist">
-  
-  <li id="calc_csm" class="function">calc_csm(self)<pre>main work is done here:
-        cross spectral matrix is either loaded from cache file or
-        calculated and then additionally stored into cache
-        !! is called automatically
-        </pre></li>
   
   <li id="fftfreq" class="function">fftfreq(self)<pre>
         returns an array of the frequencies for

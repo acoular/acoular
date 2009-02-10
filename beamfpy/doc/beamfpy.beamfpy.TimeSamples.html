@@ -47,6 +47,8 @@ Contents:
 <li><a href="#section-variables">Attributes</a></li>
 
 
+<li><a href="#section-traits">Traits</a></li>
+
 
 
 <li><a href="#section-functions">Methods</a></li>
@@ -71,46 +73,6 @@ Contents:
 <h2 id="section-variables">Attributes</h2>
 <ul class="doclist">
 
-  <li class="attribute" id="data">data<pre>the time data as (numsamples,numchannels) array of floats
-</pre><pre>data = Property(depends_on = [  ], cached = True, desc = 'the actual time data array')
-
-</pre></li>
-
-  <li class="attribute" id="digest">digest<pre>internal identifier
-</pre><pre>digest = Property(depends_on = [ 'name' ], cached = True)
-
-</pre></li>
-
-  <li class="attribute" id="h5f">h5f<pre>hdf5 file object
-</pre><pre>h5f = Instance(tables.File)
-
-</pre></li>
-
-  <li class="attribute" id="load_thread">load_thread<pre>thread (internal use)
-</pre><pre>load_thread = Instance(Thread)
-
-</pre></li>
-
-  <li class="attribute" id="name">name<pre>name of the .h5 file with data
-</pre><pre>name = File(filter = [ '*.h5' ], desc = 'name of data file')
-
-</pre></li>
-
-  <li class="attribute" id="numchannels">numchannels<pre>number of channels, is set automatically
-</pre><pre>numchannels = Long(1, desc = 'number of input channels')
-
-</pre></li>
-
-  <li class="attribute" id="numsamples">numsamples<pre>number of time data samples, is set automatically
-</pre><pre>numsamples = Long(1, desc = 'number of samples')
-
-</pre></li>
-
-  <li class="attribute" id="sample_freq">sample_freq<pre>sampling frequency of the data, is set automatically
-</pre><pre>sample_freq = Float(1.0, desc = 'sampling frequency')
-
-</pre></li>
-
   <li class="attribute" id="traits_view">traits_view<pre></pre><pre>traits_view = View([ 'name{File name}', [ 'sample_freq~{Sampling frequency}', 'numchannels~{Number of channels}', 'numsamples~{Number of samples}', '|[Properties]' ], '|' ], title = 'Time data', buttons = OKCancelButtons)
 
 </pre></li>
@@ -118,6 +80,53 @@ Contents:
 </ul>
 
 
+
+
+
+<h2 id="section-traits">Traits</h2>
+<ul class="doclist">
+
+  <li class="trait" id="basename">basename<pre>basename of the .h5 file with data
+</pre><pre>basename = Property(depends_on = 'name', desc = 'basename of data file')
+
+</pre></li>
+
+  <li class="trait" id="data">data<pre>the time data as (numsamples,numchannels) array of floats
+</pre><pre>data = Any(desc = 'the actual time data array')
+
+</pre></li>
+
+  <li class="trait" id="digest">digest<pre>internal identifier
+</pre><pre>digest = Property(depends_on = [ 'basename' ])
+
+</pre></li>
+
+  <li class="trait" id="h5f">h5f<pre>hdf5 file object
+</pre><pre>h5f = Instance(tables.File)
+
+</pre></li>
+
+  <li class="trait" id="name">name<pre>full name of the .h5 file with data
+</pre><pre>name = File(filter = [ '*.h5' ], desc = 'name of data file')
+
+</pre></li>
+
+  <li class="trait" id="numchannels">numchannels<pre>number of channels, is set automatically
+</pre><pre>numchannels = Long(0L, desc = 'number of input channels')
+
+</pre></li>
+
+  <li class="trait" id="numsamples">numsamples<pre>number of time data samples, is set automatically
+</pre><pre>numsamples = Long(0L, desc = 'number of samples')
+
+</pre></li>
+
+  <li class="trait" id="sample_freq">sample_freq<pre>sampling frequency of the data, is set automatically
+</pre><pre>sample_freq = Float(1.0, desc = 'sampling frequency')
+
+</pre></li>
+
+</ul>
 
 
 
@@ -138,8 +147,7 @@ Contents:
 <h2>Methods</h2>
 <ul class="doclist">
   
-  <li id="load_data" class="function">load_data(self)<pre> loads the data from .h5 file,
-        will be started in an extra thread (this must be changed)
+  <li id="load_data" class="function">load_data(self)<pre> open the .h5 file and setting attributes
         </pre></li>
   
 </ul>

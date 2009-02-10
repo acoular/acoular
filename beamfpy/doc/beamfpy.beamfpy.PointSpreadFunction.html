@@ -43,12 +43,10 @@ Contents:
 <li><a href="#section-superclasses">Base classes</a></li>
 
 
-<li><a href="#section-variables">Attributes</a></li>
+
+<li><a href="#section-traits">Traits</a></li>
 
 
-
-
-<li><a href="#section-functions">Methods</a></li>
 
 </ul>
 </div>
@@ -67,31 +65,43 @@ Contents:
 
 
 
-<h2 id="section-variables">Attributes</h2>
+
+
+<h2 id="section-traits">Traits</h2>
 <ul class="doclist">
 
-  <li class="attribute" id="c">c<pre>the speed of sound, defaults to 343 m/s
+  <li class="trait" id="c">c<pre>the speed of sound, defaults to 343 m/s
 </pre><pre>c = Float(343.0, desc = 'speed of sound')
 
 </pre></li>
 
-  <li class="attribute" id="digest">digest<pre>internal identifier
-</pre><pre>digest = Property(depends_on = [ 'mpos.digest', 'grid.digest', 'freqs', 'c' ], cached = True)
+  <li class="trait" id="digest">digest<pre>internal identifier
+</pre><pre>digest = Property(depends_on = [ 'mpos.digest', 'grid.digest', 'c' ], cached = True)
 
 </pre></li>
 
-  <li class="attribute" id="freqs">freqs<pre>frequency list
-</pre><pre>freqs = CArray(desc = 'frequencies')
+  <li class="trait" id="freq">freq<pre>frequency 
+</pre><pre>freq = Float(1.0, desc = 'frequency')
 
 </pre></li>
 
-  <li class="attribute" id="grid">grid<pre>RectGrid object that provides the grid locations
+  <li class="trait" id="grid">grid<pre>RectGrid object that provides the grid locations
 </pre><pre>grid = Trait(<a href="beamfpy.beamfpy.RectGrid.html">RectGrid</a>, desc = 'beamforming grid')
 
 </pre></li>
 
-  <li class="attribute" id="mpos">mpos<pre>MicGeom object that provides the microphone locations
+  <li class="trait" id="h5f">h5f<pre>hdf5 cache file
+</pre><pre>h5f = Instance(tables.File)
+
+</pre></li>
+
+  <li class="trait" id="mpos">mpos<pre>MicGeom object that provides the microphone locations
 </pre><pre>mpos = Trait(<a href="beamfpy.beamfpy.MicGeom.html">MicGeom</a>, desc = 'microphone geometry')
+
+</pre></li>
+
+  <li class="trait" id="psf">psf<pre>the actual point spread function
+</pre><pre>psf = Property(desc = 'point spread function')
 
 </pre></li>
 
@@ -100,29 +110,6 @@ Contents:
 
 
 
-
-
-
-
-
-<h2 id="section-functions">Method summary</h2>
-<ul class="function-summary">
-  
-  <li class="function"><a href="#psf">psf</a>(self)</li>
-  
-</ul>
-
-
-
-
-<h2>Methods</h2>
-<ul class="doclist">
-  
-  <li id="psf" class="function">psf(self)<pre>
-        point spread function as calculated or loaded from cache
-        </pre></li>
-  
-</ul>
 
 
 
