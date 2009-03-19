@@ -10,7 +10,8 @@ __date__ = "17 April 2008"
 __version__ = "1.0beta"
 
 
-from beamfpy import time_data_import, TimeSamples, td_dir
+from beamfpy import TimeSamples, td_dir
+from fileimport import time_data_import
 import ctypes
 import numpy
 import time
