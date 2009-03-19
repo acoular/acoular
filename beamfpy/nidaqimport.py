@@ -138,7 +138,7 @@ class nidaq_import( time_data_import ):
 
     def _taskname_changed ( self ):
         taskHandle = TaskHandle(0)
-        buf_size = 1024
+        buf_size = 1024*4
         buf = ctypes.create_string_buffer('\000' * buf_size)
         num = uInt32()
         fnum = float64()
