@@ -1,3 +1,4 @@
+#! /usr/bin/python
 # coding=UTF-8
 """
 GUI for viewing and analysing beamforming results
