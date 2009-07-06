@@ -551,37 +551,37 @@ class ResultExplorer(HasTraits):
         
     def set_Base (self):
         b = self.Beamformer
-        self.Beamformer = BeamformerBase(freq_data=b.freq_data,grid=b.grid,mpos=b.mpos)
+        self.Beamformer = BeamformerBase(freq_data=b.freq_data,grid=b.grid,mpos=b.mpos,c=b.c,env=b.env)
         self.invalid = True
 
     def set_Eig (self):
         b = self.Beamformer
-        self.Beamformer = BeamformerEig(freq_data=b.freq_data,grid=b.grid,mpos=b.mpos)
+        self.Beamformer = BeamformerEig(freq_data=b.freq_data,grid=b.grid,mpos=b.mpos,c=b.c,env=b.env)
         self.invalid = True
 
     def set_Capon (self):
         b = self.Beamformer
-        self.Beamformer = BeamformerCapon(freq_data=b.freq_data,grid=b.grid,mpos=b.mpos)
+        self.Beamformer = BeamformerCapon(freq_data=b.freq_data,grid=b.grid,mpos=b.mpos,c=b.c,env=b.env)
         self.invalid = True
 
     def set_Music (self):
         b = self.Beamformer
-        self.Beamformer = BeamformerMusic(freq_data=b.freq_data,grid=b.grid,mpos=b.mpos)
+        self.Beamformer = BeamformerMusic(freq_data=b.freq_data,grid=b.grid,mpos=b.mpos,c=b.c,env=b.env)
         self.invalid = True
 
     def set_Damas (self):
         b = self.Beamformer
-        self.Beamformer = BeamformerDamas(beamformer=BeamformerBase(freq_data=b.freq_data,grid=b.grid,mpos=b.mpos))
+        self.Beamformer = BeamformerDamas(beamformer=BeamformerBase(freq_data=b.freq_data,grid=b.grid,mpos=b.mpos,c=b.c,env=b.env))
         self.invalid = True
 
     def set_Cleansc (self):
         b = self.Beamformer
-        self.Beamformer = BeamformerCleansc(freq_data=b.freq_data,grid=b.grid,mpos=b.mpos)
+        self.Beamformer = BeamformerCleansc(freq_data=b.freq_data,grid=b.grid,mpos=b.mpos,c=b.c,env=b.env)
         self.invalid = True
         
     def set_Ortho (self):
         b = self.Beamformer
-        self.Beamformer = BeamformerOrth(beamformer=BeamformerEig(freq_data=b.freq_data,grid=b.grid,mpos=b.mpos))
+        self.Beamformer = BeamformerOrth(beamformer=BeamformerEig(freq_data=b.freq_data,grid=b.grid,mpos=b.mpos,c=b.c,env=b.env))
         self.Beamformer.n = 10
         self.invalid = True
     
@@ -609,6 +609,7 @@ if __name__ == '__main__':
     f.time_data=t
     cal=Calib(from_file=calib_default)
     f.calib=cal
-    b=BeamformerBase(freq_data=f,grid=g,mpos=m)
+    env = UniformFlowEnvironment()
+    b=BeamformerBase(freq_data=f,grid=g,mpos=m,env=env)
     re = ResultExplorer(Beamformer = b)
     re.configure_traits()

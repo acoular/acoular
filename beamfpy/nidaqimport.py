@@ -1,4 +1,4 @@
-﻿# coding=UTF-8
+# coding=UTF-8
 """
 import filter for nidaq-mx
 
@@ -202,7 +202,9 @@ class nidaq_import( time_data_import ):
             time_data_import.getdata(self,td)
             return
         #import data
-        name = datetime.now().isoformat('_').replace(':','-').replace('.','_')
+        name = td.name
+        if name=='':
+            name = datetime.now().isoformat('_').replace(':','-').replace('.','_')
         name = path.join(td_dir,name+'.h5')
         f5h = tables.openFile(name,mode='w')
         ac = f5h.createEArray(f5h.root,'time_data',tables.atom.Float32Atom(),(0,self.numchannels))
