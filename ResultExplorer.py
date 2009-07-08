@@ -37,7 +37,7 @@ from time import sleep, time
 
 # defaults
 calib_default=''
-geom_default=path.join( path.split(beamfpy.__file__)[0],'xml','array_56.xml')
+geom_default=path.join( path.split(beamfpy.__file__)[0],'xml','array_84_10_9.xml')
 td_default=''
 
 # Thread, to do not block the GUI
@@ -602,7 +602,7 @@ class ResultExplorer(HasTraits):
 
 if __name__ == '__main__':
     m=MicGeom(from_file=geom_default)
-    g = RectGrid(x_min=-0.6,x_max=-0.0,y_min=-0.3,y_max=0.3,z=0.68,increment=0.02)
+    g = RectGrid(x_min=-2.0,x_max=2.0,y_min=-2.0,y_max=2.0,z=4.0,increment=0.2)
     t=TimeSamples()
     t.name=td_default
     f=EigSpectra(window="Hanning",overlap="50%",block_size=128)

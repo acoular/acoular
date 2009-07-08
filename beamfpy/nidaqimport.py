@@ -205,7 +205,7 @@ class nidaq_import( time_data_import ):
         name = td.name
         if name=='':
             name = datetime.now().isoformat('_').replace(':','-').replace('.','_')
-        name = path.join(td_dir,name+'.h5')
+            name = path.join(td_dir,name+'.h5')
         f5h = tables.openFile(name,mode='w')
         ac = f5h.createEArray(f5h.root,'time_data',tables.atom.Float32Atom(),(0,self.numchannels))
         ac.setAttr('sample_freq',self.sample_freq)
@@ -226,6 +226,42 @@ class nidaq_import( time_data_import ):
         f5h.close()
         td.name = name
         td.load_data()
+        
+    def get_single (self):
+        """
+        gets one block of data
+        """
+        taskHandle = TaskHandle(0)
+        read = uInt32()
+        fnum = float64()
+        lnum = uInt64()
+        try:
+            DAQmxLoadTask(self.taskname,ctypes.byref(taskHandle))
+            if self.numchannels<1:
+                raise RuntimeError
+        except RuntimeError:
+            # no valid task
+            time_data_import.getdata(self,td)
+            return
+        #import data
+        ac = numpy.empty((self.numsamples,self.numchannels),numpy.float32)
+        DAQmxGetSampQuantSampPerChan(taskHandle,ctypes.byref(lnum))
+        max_num_samples = lnum.value
+        data = numpy.empty((max_num_samples,self.numchannels),dtype=numpy.float64)
+        DAQmxStartTask(taskHandle)
+        count = 0L
+        numsamples = self.numsamples
+        while count<numsamples:
+            DAQmxReadAnalogF64(taskHandle,-1,float64(10.0),
+                                     DAQmx_Val_GroupByScanNumber,data.ctypes.data,
+                                     data.size,ctypes.byref(read),None)
+            anz = min(read.value,numsamples-count)
+            ac[count:count+anz]=numpy.array(data[:anz],dtype=numpy.float32)
+            count+=read.value
+        DAQmxStopTask(taskHandle)
+        DAQmxClearTask(taskHandle)
+        return ac
+        
 
 if __name__=='__main__':
     x=nidaq_import()
