@@ -610,7 +610,7 @@ def build_beamformer():
 	mod.add_function(func)
 
 
-	mod.compile(extra_compile_args=['-O3','-ffast-math'],#'-mfpmath=sse'],#'-msse','-m3dnow'],#
+	mod.compile(extra_compile_args=['-O3','-ffast-math','-march=prescott','-msse2'],#'-mfpmath=sse'],#'-msse','-m3dnow'],#
 				verbose=2,
 				compiler='mingw32')
 
