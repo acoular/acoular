@@ -4,7 +4,7 @@ from numpy import *
 from os import path
 
 ti = nidaq_import()
-m = MicGeom(from_file=path.join( path.split(beamfpy.__file__)[0],'xml','array_84_10_9.xml'))
+m = MicGeom(from_file=path.join( path.split(beamfpy.__file__)[0],'xml','array92x.xml'))
 #m.configure_traits()
 ti.configure_traits()
 ti.numsamples = int(ti.sample_freq/10.0)

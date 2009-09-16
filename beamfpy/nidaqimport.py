@@ -45,7 +45,7 @@ def ECFactory(func):
     def func_new(*args):
         err = func(*args)
         if err < 0:
-            buf_size = 128
+            buf_size = 256
             buf = ctypes.create_string_buffer('\000' * buf_size)
             nidaq.DAQmxGetErrorString(err,ctypes.byref(buf),buf_size)
             buf1 = ctypes.create_string_buffer('\000' * buf_size)
@@ -68,6 +68,7 @@ DAQmxReadAnalogF64 = ECFactory(nidaq.DAQmxReadAnalogF64)
 DAQmxIsTaskDone = ECFactory(nidaq.DAQmxIsTaskDone)
 DAQmxGetSampQuantSampMode = ECFactory(nidaq.DAQmxGetSampQuantSampMode)
 DAQmxGetSampQuantSampPerChan = ECFactory(nidaq.DAQmxGetSampQuantSampPerChan)
+DAQmxSetSampQuantSampPerChan = ECFactory(nidaq.DAQmxSetSampQuantSampPerChan)
 DAQmxGetSampClkRate = ECFactory(nidaq.DAQmxGetSampClkRate)
 DAQmxSetSampClkRate = ECFactory(nidaq.DAQmxSetSampClkRate)
 
@@ -209,18 +210,25 @@ class nidaq_import( time_data_import ):
         f5h = tables.openFile(name,mode='w')
         ac = f5h.createEArray(f5h.root,'time_data',tables.atom.Float32Atom(),(0,self.numchannels))
         ac.setAttr('sample_freq',self.sample_freq)
+        DAQmxSetSampQuantSampPerChan(taskHandle,uInt64(100000))
         DAQmxGetSampQuantSampPerChan(taskHandle,ctypes.byref(lnum))
         max_num_samples = lnum.value
+        print "Puffergroesse: %i" % max_num_samples
         data = numpy.empty((max_num_samples,self.numchannels),dtype=numpy.float64)
         DAQmxStartTask(taskHandle)
         count = 0L
         numsamples = self.numsamples
         while count<numsamples:
-            DAQmxReadAnalogF64(taskHandle,-1,float64(10.0),
+            #~ DAQmxReadAnalogF64(taskHandle,-1,float64(10.0),
+                                     #~ DAQmx_Val_GroupByScanNumber,data.ctypes.data,
+                                     #~ data.size,ctypes.byref(read),None)
+            DAQmxReadAnalogF64(taskHandle,1024,float64(10.0),
                                      DAQmx_Val_GroupByScanNumber,data.ctypes.data,
                                      data.size,ctypes.byref(read),None)
             ac.append(numpy.array(data[:min(read.value,numsamples-count)],dtype=numpy.float32))
             count+=read.value
+            #~ if read.value>200:
+                #~ print count, read.value
         DAQmxStopTask(taskHandle)
         DAQmxClearTask(taskHandle)
         f5h.close()
