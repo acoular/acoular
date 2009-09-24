@@ -198,6 +198,7 @@ class nidaq_import( time_data_import ):
             DAQmxLoadTask(self.taskname,ctypes.byref(taskHandle))
             if self.numchannels<1:
                 raise RuntimeError
+            DAQmxSetSampClkRate(taskHandle,float64(self.sample_freq))
         except RuntimeError:
             # no valid task
             time_data_import.getdata(self,td)
