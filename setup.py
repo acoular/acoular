@@ -13,6 +13,6 @@ setup(name="beamfpy",
       packages = ['beamfpy','beamfpy.scripts'],
       scripts=['ResultExplorer.py'],
       include_package_data = True,      
-      package_data={'beamfpy': ['doc/*.*','*.pyd','xml/*.xml']}
+      package_data={'beamfpy': ['doc/*.*','*.pyd','*.so','xml/*.xml']}
 #                    ('beamfpy',['./beamfpy/beamformer.pyd'])]
      )

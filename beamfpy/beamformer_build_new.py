@@ -3,8 +3,8 @@ sys.path.insert(0,'..')
 from scipy.weave import ext_tools, converters
 from numpy import *
 
-#~ import distutils
-#~ print distutils.ccompiler.show_compilers()
+import distutils
+print distutils.ccompiler.show_compilers()
 
 def build_beamformer():
 	mod = ext_tools.ext_module('beamformer')
@@ -609,10 +609,14 @@ def build_beamformer():
 	func = ext_tools.ext_function('gseidel1',code,['A','y','x','n'],type_converters=converters.blitz)
 	mod.add_function(func)
 
-
-	mod.compile(extra_compile_args=['-O3','-ffast-math'],#'-mfpmath=sse'],#'-msse','-m3dnow'],#
+	if sys.platform[:5] == 'linux':
+		compiler = 'unix'
+	else:	
+		compiler = 'mingw32'
+	print compiler
+	mod.compile(extra_compile_args=['-O3','-ffast-math','-march=native'],#'-mfpmath=sse'],#'-msse','-m3dnow'],#
 				verbose=2,
-				compiler='mingw32')
+				compiler=compiler)
 
 if __name__ == "__main__":
 	#~ try:
