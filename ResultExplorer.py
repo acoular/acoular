@@ -349,7 +349,7 @@ class ResultExplorer(HasTraits):
         # spectrum plot tools
         self.cursor = CursorTool(px, drag_button="left", color='blue', show_value_line=False)
         px.overlays.append(self.cursor)
-        self.map_plot.tools.append(SaveTool(self.map_plot, filename='pic.png'))
+        #~ self.map_plot.tools.append(SaveTool(self.map_plot, filename='pic.png'))
         
         # layout                     
         self.set_map_details()
@@ -358,6 +358,7 @@ class ResultExplorer(HasTraits):
         subcontainer.add(self.colorbar)
         container.add(self.spec_plot)
         container.add(subcontainer)
+        container.tools.append(SaveTool(container, filename='pic.png'))
         self.last_valid_digest = self.Beamformer.ext_digest
      
     def _get_rmesg(self):
