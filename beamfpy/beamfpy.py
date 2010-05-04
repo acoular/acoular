@@ -1,14 +1,16 @@
-# coding=UTF-8
+# -*- coding: utf-8 -*-
 """
 Several classes for the implemetation of acoustic beamforming
 
 A minimal usage example would be:
 
 >>    m=MicGeom(from_file='mic_geom.xml')
->>    g=RectGrid(x_min=-0.8,x_max=-0.2,y_min=-0.1,y_max=0.3,z=0.8,increment=0.01)
+>>    g=RectGrid(x_min=-0.8,x_max=-0.2,y_min=-0.1,y_max=0.3,z=0.8
+        ,increment=0.01)
 >>    t1=TimeSamples(name='measured_data.h5')
 >>    cal=Calib(from_file='calibration_data.xml')
->>    f1=EigSpectra(time_data=t1,block_size=256,window="Hanning",overlap='75%',calib=cal)
+>>    f1=EigSpectra(time_data=t1,block_size=256,window="Hanning",overlap='75%'
+        ,calib=cal)
 >>    e1=BeamformerBase(freq_data=f1,grid=g,mpos=m,r_diag=False)
 >>    fr=4000
 >>    L1=L_p(e1.synthetic(fr,0))
@@ -16,8 +18,6 @@ A minimal usage example would be:
 The classes in the module possess a number of automatic data update
 capabilities. That is, only the traits must be set to get the results.
 The calculation need not be triggered explictely.
-    BEWARE: sometimes this gives problems with timing and results will not
-    be available immediately
 The classes are also GUI-aware, they know how to display a graphical user
 interface. So by calling
 >>    object_name.configure_traits()
@@ -31,34 +31,26 @@ or at a later time
 where all objects that depend upon the specific trait will update their
 output if necessary.
 
-beamfpy.py (c) Ennes Sarradj 2007-2008, all rights reserved
+beamfpy.py (c) Ennes Sarradj 2007-2010, all rights reserved
 """
 
 __author__ = "Ennes Sarradj, ennes.sarradj@gmx.de"
-__date__ = "22 Dez 2008"
+__date__ = "5 May 2010"
 __version__ = "3.0beta"
 
-from scipy import io
 from numpy import *
-from threading import Thread, Lock
-from enthought.traits.api import HasTraits, HasPrivateTraits, Float, Int, Long,\
+from enthought.traits.api import HasPrivateTraits, Float, Int, Long,\
 File, CArray, Property, Instance, Trait, Bool, Range, Delegate, Any, Str,\
 cached_property, on_trait_change, property_depends_on
-from enthought.traits.ui.api import View, Item, Group
+from enthought.traits.ui.api import View, Item
 from enthought.traits.ui.menu import OKCancelButtons
 from beamformer import * # ok to use *
 from os import path, mkdir, environ
-from string import join
-from time import sleep, time
-import md5
-import cPickle
 import tables
-from weakref import WeakValueDictionary, getweakrefcount
-import ConfigParser
-import struct
+from weakref import WeakValueDictionary
 
 from internal import digest
-
+from timedomain import TimeSamples
 
 # path to cache directory, possibly in temp
 try:
@@ -75,18 +67,6 @@ except:
     td_dir=path.join(path.curdir,'td')
 if not path.exists(td_dir):
     mkdir(td_dir)
-
-
-#import pp
-#~ ppservers = ()
-#ppservers = ("141.43.128.41",)
-#job_server = pp.Server(ncpus=1,ppservers=ppservers)
-#~ job_server = pp.Server(ncpus=4,ppservers=ppservers)
-#~ job_server = pp.Server(ppservers=ppservers)
-
-#print "Starting pp with", job_server.get_ncpus(), "workers"
-
-
 
 class H5cache_class(HasPrivateTraits):
     """
@@ -129,83 +109,6 @@ class H5cache_class(HasPrivateTraits):
         
         
 H5cache = H5cache_class(cache_dir=cache_dir)
-
-class TimeSamples( HasPrivateTraits ):
-    """
-    Container for time data, loads time data
-    and provides information about this data
-    """
-
-    # full name of the .h5 file with data
-    name = File(filter=['*.h5'],
-        desc="name of data file")
-
-    # basename of the .h5 file with data
-    basename = Property( depends_on = 'name',#filter=['*.h5'],
-        desc="basename of data file")
-    
-    # sampling frequency of the data, is set automatically
-    sample_freq = Float(1.0,
-        desc="sampling frequency")
-
-    # number of channels, is set automatically
-    numchannels = Long(0L,
-        desc="number of input channels")
-
-    # number of time data samples, is set automatically
-    numsamples = Long(0L,
-        desc="number of samples")
-
-    # the time data as (numsamples,numchannels) array of floats
-    data = Any(
-        desc="the actual time data array")
-
-    # hdf5 file object
-    h5f = Instance(tables.File)
-    
-    # internal identifier
-    digest = Property( depends_on = ['basename',])
-
-    traits_view = View(
-        ['name{File name}',
-            ['sample_freq~{Sampling frequency}',
-            'numchannels~{Number of channels}',
-            'numsamples~{Number of samples}',
-            '|[Properties]'],
-            '|'
-        ],
-        title='Time data',
-        buttons = OKCancelButtons
-                    )
-
-    @cached_property
-    def _get_digest( self ):
-        return digest(self)
-    
-    @cached_property
-    def _get_basename( self ):
-        return path.splitext(path.basename(self.name))[0]
-    
-    @on_trait_change('basename')
-    def load_data( self ):
-        """ open the .h5 file and setting attributes
-        """
-        if not path.isfile(self.name):
-            # no file there
-            self.numsamples = 0
-            self.numchannels = 0
-            self.sample_freq = 0
-            return None
-        if self.h5f!=None:
-            try:
-                self.h5f.close()
-            except:
-                pass
-        self.h5f = tables.openFile(self.name)
-        self.data = self.h5f.root.time_data
-        self.sample_freq = self.data.getAttr('sample_freq')
-        (self.numsamples,self.numchannels) = self.data.shape
-#        self.basename = path.basename(self.name)
 
 class Calib( HasPrivateTraits ):
     """
@@ -250,7 +153,7 @@ class Calib( HasPrivateTraits ):
     @cached_property
     def _get_basename( self ):
         if not path.isfile(self.from_file):
-                return ''
+            return ''
         return path.splitext(path.basename(self.from_file))[0]
     
     @on_trait_change('basename')
@@ -360,21 +263,22 @@ class PowerSpectra( HasPrivateTraits ):
     
     @property_depends_on('time_data.numsamples,block_size,overlap')
     def _get_num_blocks ( self ):
-        return self.overlap_*self.time_data.numsamples/self.block_size-self.overlap_+1
+        return self.overlap_*self.time_data.numsamples/self.block_size-\
+        self.overlap_+1
 
     @property_depends_on( 'time_data.sample_freq,block_size,ind_low,ind_high' )
     def _get_freq_range ( self ):
-            try:
-                return self.fftfreq()[[ self.ind_low, self.ind_high ]]
-            except IndexError:
-                return array([0.,0])
+        try:
+            return self.fftfreq()[[ self.ind_low, self.ind_high ]]
+        except IndexError:
+            return array([0.,0])
 
     @property_depends_on( 'block_size,ind_low,ind_high' )
     def _get_indices ( self ):
-            try:
-                return range(self.block_size/2+1)[ self.ind_low: self.ind_high ]
-            except IndexError:
-                return range(0)
+        try:
+            return range(self.block_size/2+1)[ self.ind_low: self.ind_high ]
+        except IndexError:
+            return range(0)
 
     @cached_property
     def _get_digest( self ):
@@ -403,21 +307,21 @@ class PowerSpectra( HasPrivateTraits ):
                 if self.calib.num_mics==t.numchannels:
                     wind = wind * self.calib.data[newaxis,:]
                 else:
-                    print "warning: calibration data not compatible:",self.calib.num_mics,t.numchannels
+                    print "warning: calibration data not compatible:", \
+                    self.calib.num_mics,t.numchannels
             for block in range(self.num_blocks):
                 pos = block*self.block_size/self.overlap_
-                ft = fft.rfft(self.time_data.data[pos:(pos+self.block_size)]*wind,None,0)
+                ft = fft.rfft(
+                    self.time_data.data[pos:(pos+self.block_size)]*wind,None,0)
                 faverage(csm,ft)
-            csm=csm*(2.0/self.block_size/weight/self.num_blocks) #2.0=sqrt(2)^2 wegen der halbseitigen FFT
+            csm=csm*(2.0/self.block_size/weight/self.num_blocks) #2.0=sqrt(2)^2 
+                                                    # because onesided spectrum
             atom = tables.ComplexAtom(8)
-            #filters = tables.Filters(complevel=5, complib='zlib')
-            ac = self.h5f.createCArray(self.h5f.root, name, atom, csm_shape)#, filters=filters)
+            ac = self.h5f.createCArray(self.h5f.root, name, atom, csm_shape)
             ac[:] = csm
             return ac
         else:
             return self.h5f.getNode('/',name)
-#        except:
- #           return None
 
     def fftfreq ( self ):
         """
@@ -429,6 +333,49 @@ class PowerSpectra( HasPrivateTraits ):
 #            return fft.fftfreq(self.block_size,1./self.time_data.sample_freq)[:self.block_size/2+1][self.ind_low:self.ind_high]
 #        else:
 #            return array([0.],'d')
+
+class PowerSpectra1( PowerSpectra ):
+    
+    @property_depends_on('digest')
+    def _get_csm ( self ):
+        """main work is done here:
+        cross spectral matrix is either loaded from cache file or
+        calculated and then additionally stored into cache
+        """
+  #      try:
+        name = 'csm_' + self.digest
+        H5cache.get_cache( self, self.time_data.basename )
+        if not name in self.h5f.root:
+            t = self.time_data
+            td = t.data
+            wind = self.window_( self.block_size )
+            weight = dot( wind, wind )
+            wind = wind[newaxis,:].swapaxes( 0, 1 )
+            numfreq = self.block_size/2 + 1
+            csm_shape = (numfreq,t.numchannels,t.numchannels)
+            csm = zeros(csm_shape,'D')
+            print "num blocks",self.num_blocks
+            if self.calib:
+                if self.calib.num_mics==t.numchannels:
+                    wind = wind * self.calib.data[newaxis,:]
+                else:
+                    print "warning: calibration data not compatible:", \
+                    self.calib.num_mics,t.numchannels
+            for block in range(self.num_blocks):
+                pos = block*self.block_size/self.overlap_
+                ft = fft.rfft(
+                    self.time_data.data[pos:(pos+self.block_size)]*wind,None,0)
+                faverage(csm,ft)
+            csm=csm*(2.0/self.block_size/weight/self.num_blocks) #2.0=sqrt(2)^2 
+                                                    # because onesided spectrum
+            atom = tables.ComplexAtom(8)
+            ac = self.h5f.createCArray(self.h5f.root, name, atom, csm_shape)
+            ac[:] = csm
+            return ac
+        else:
+            return self.h5f.getNode('/',name)
+
+
 
 class EigSpectra( PowerSpectra ):
     """
@@ -615,6 +562,89 @@ class RectGrid( HasPrivateTraits ):
         useful for the imshow function from pylab
         """
         return (self.x_min,self.x_max,self.y_min,self.y_max)
+
+class RectGrid3D( RectGrid):
+    """
+    constructs a quadratic 3D grid for the beamforming results
+    """
+
+    z_min = Float(-1.0,
+        desc="minimum  z-value")
+
+    z_max = Float(1.0,
+        desc="maximum  z-value")
+    
+    # number of grid points alog x-axis (auto-set)
+    nzsteps = Property( 
+        desc="number of grid points alog x-axis")
+
+    # internal identifier
+    digest = Property( 
+        depends_on = ['x_min', 'x_max', 'y_min', 'y_max', 'z_min','z_max', 'increment']
+        )
+
+    traits_view = View(
+            [
+                ['x_min','y_min','z_min','|'],
+                ['x_max','y_max','z_max','increment','size~{grid size}','|'],
+                '-[Map extension]'
+            ]
+        )
+
+    @property_depends_on('nxsteps,nysteps,nzsteps')
+    def _get_size ( self ):
+        return self.nxsteps*self.nysteps*self.nzsteps
+
+    @property_depends_on('nxsteps,nysteps,nzsteps')
+    def _get_shape ( self ):
+        return (self.nxsteps,self.nysteps,self.nzsteps)
+
+    @property_depends_on('z_min,z_max,increment')
+    def _get_nzsteps ( self ):
+        i=abs(self.increment)
+        if i!=0:
+            return int(round((abs(self.z_max-self.z_min)+i)/i))
+        return 1
+
+    @cached_property
+    def _get_digest( self ):
+        return digest( self )
+
+    def pos ( self ):
+        """
+        returns an (3,size) array with the grid point x,y,z-coordinates
+        """
+        i=self.increment
+        xi=1j*round((self.x_max-self.x_min+i)/i)
+        yi=1j*round((self.y_max-self.y_min+i)/i)
+        zi=1j*round((self.z_max-self.z_min+i)/i)
+        bpos=mgrid[self.x_min:self.x_max:xi,self.y_min:self.y_max:yi,self.z_min:self.z_max:zi]
+        bpos.resize((3,self.size))
+        return bpos
+
+    def index ( self,x,y,z ):
+        """
+        returns the indices for a certain x,y,z co-ordinate
+        """
+        if x<self.x_min or x>self.x_max:
+            raise ValueError, "x-value out of range"
+        if y<self.y_min or y>self.y_max:
+            raise ValueError, "y-value out of range"
+        if z<self.z_min or z>self.z_max:
+            raise ValueError, "z-value out of range"
+        xi=round((x-self.x_min)/self.increment)
+        yi=round((y-self.y_min)/self.increment)
+        zi=round((z-self.z_min)/self.increment)
+        return xi,yi,zi
+
+    def indices ( self,x1,y1,z1,x2,y2,z2 ):
+        """
+        returns the slices to index a rectangular subdomain,
+        useful for inspecting subdomains in a result already calculated
+        """
+        xi1,yi1,zi1 = self.index(min(x1,x2),min(y1,y2),min(z1,z2))
+        xi2,yi2,zi2 = self.index(max(x1,x2),max(y1,y2),max(z1,z2))
+        return s_[xi1:xi2+1],s_[yi1:yi2+1],s_[zi1:zi2+1]
 
 class MicGeom( HasPrivateTraits ):
     """
@@ -952,12 +982,6 @@ class BeamformerBase( HasPrivateTraits ):
         mapshape = (rshape[0],) + gshape
         h = r[:].reshape(mapshape)[ (s_[:],) + ind ]
         return h.reshape(h.shape[0],prod(h.shape[1:])).sum(axis=1)
-
-def cfunc(csm,kji,bpos,mpos,numchannels):
-    e = numpy.zeros((numchannels),'D')
-    h = numpy.zeros((1,bpos.shape[1]),'d')
-    beamfpy.beamformer.beamdiag(csm,e,h,bpos,mpos,kji)
-    return h
 
 class BeamformerCapon( BeamformerBase ):
     """
@@ -1411,13 +1435,13 @@ class BeamformerCleansc( BeamformerBase ):
         e = zeros((numchannels),'D')
         result = zeros((self.grid.size),'f')
         if self.r_diag:
-           adiv = 1.0/(numchannels*numchannels-numchannels)
-           fullbeamfunc = r_beamdiag
-           orthbeamfunc = r_beamortho_sum_diag
+            adiv = 1.0/(numchannels*numchannels-numchannels)
+            fullbeamfunc = r_beamdiag
+            orthbeamfunc = r_beamortho_sum_diag
         else:
-           adiv = 1.0/(numchannels*numchannels)
-           fullbeamfunc = r_beamfull
-           orthbeamfunc = r_beamortho_sum
+            adiv = 1.0/(numchannels*numchannels)
+            fullbeamfunc = r_beamfull
+            orthbeamfunc = r_beamortho_sum
         if not self.n:
             J = numchannels*2
         else:

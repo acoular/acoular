@@ -1,5 +1,11 @@
-from beamfpy import *
+import beamfpy
+print beamfpy.__file__
+
+from beamfpy import td_dir, L_p, TimeSamples, Calib, MicGeom, EigSpectra,\
+RectGrid, BeamformerBase, BeamformerEig, BeamformerOrth, BeamformerCleansc
 from os import path
+
+
 
 t = TimeSamples(name=path.join(td_dir,'2008-05-16_11-36-00_468000.h5'))
 
@@ -25,16 +31,16 @@ map = b.synthetic(8000,1)
 print map.shape
 print map[0,0]
 
-from pylab import subplot, imshow, show, colorbar, plot,transpose
+from pylab import subplot, imshow, show, colorbar, plot, transpose, figure
 subplot(1,3,1)
 imshow(L_p(transpose(map)),vmin=30,interpolation='nearest',extent=g.extend())
 colorbar()
 subplot(1,3,2)
-#~ map = bs.synthetic(8000,1)
+map = bs.synthetic(8000,1)
 imshow(L_p(transpose(map)),vmin=30,interpolation='nearest',extent=g.extend())
 colorbar()
 subplot(1,3,3)
-#~ map = bo.synthetic(8000,1)
+map = bo.synthetic(8000,1)
 imshow(L_p(transpose(map)),vmin=30,interpolation='nearest',extent=g.extend())
 colorbar()
 #for i in range(2,10):
@@ -45,8 +51,9 @@ colorbar()
 #    imshow(L_p(transpose(map)),vmax=0,vmin=-20,interpolation='nearest',extent=g.extend())
 #    colorbar()
 #imshow(transpose(map))
-#plot(L_p(b.integrate((-0.3,-0.1,-0.1,0.1)))[f.ind_low:f.ind_high])
-#plot(L_p(b.integrate((-0.24,0.2,-0.22,0.3)))[f.ind_low:f.ind_high])
+figure(2)
+plot(L_p(b.integrate((-0.3,-0.1,-0.1,0.1)))[f.ind_low:f.ind_high])
+plot(L_p(b.integrate((-0.24,0.2,-0.22,0.3)))[f.ind_low:f.ind_high])
 show()
 
 

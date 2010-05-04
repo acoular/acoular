@@ -4,15 +4,17 @@ Several classes for the implemetation of acoustic beamforming
 """
 from beamfpy import __author__, __date__, __version__
 
-from fileimport import time_data_import, csv_import, td_import, bk_mat_import, datx_import
+from fileimport import time_data_import, csv_import, td_import,\
+bk_mat_import, datx_import
 try:
-	from nidaqimport import nidaq_import
+    from nidaqimport import nidaq_import
 except:
-	pass
-from beamfpy import TimeSamples, Calib, PowerSpectra, EigSpectra
-from beamfpy import RectGrid, MicGeom, Environment, UniformFlowEnvironment
-from beamfpy import BeamformerBase, BeamformerCapon, BeamformerEig, BeamformerMusic, BeamformerDamas, BeamformerOrth,BeamformerCleansc
-from beamfpy import td_dir, cache_dir
-from beamfpy import L_p, synthetic
+    pass
+
+from beamfpy import TimeSamples, Calib, PowerSpectra, EigSpectra, RectGrid,\
+RectGrid3D, MicGeom, Environment, UniformFlowEnvironment,\
+BeamformerBase, BeamformerCapon, BeamformerEig, BeamformerMusic,\
+BeamformerDamas, BeamformerOrth,BeamformerCleansc, \
+td_dir, cache_dir, L_p, synthetic
 
 
