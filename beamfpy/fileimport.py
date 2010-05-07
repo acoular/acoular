@@ -2,7 +2,7 @@
 fileimport.py (c) Ennes Sarradj 2007-2008, all rights reserved
 """
 
-from beamfpy import td_dir
+from h5cache import td_dir
 from scipy import io
 from numpy import *
 from enthought.traits.api import HasTraits, HasPrivateTraits, Float, Int, Long, File, CArray, Property, Instance, Trait, Bool, Range, Delegate, Any, Str

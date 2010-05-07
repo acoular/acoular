@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+#pylint: disable-msg=E0611,C0111,R0901,R0902,R0903,R0904,W0232
 """
 Several classes for the implemetation of acoustic beamforming
 
@@ -39,140 +40,19 @@ __date__ = "5 May 2010"
 __version__ = "3.0beta"
 
 from numpy import *
-from enthought.traits.api import HasPrivateTraits, Float, Int, Long,\
-File, CArray, Property, Instance, Trait, Bool, Range, Delegate, Any, Str,\
+from enthought.traits.api import HasPrivateTraits, Float, Int, \
+CArray, Property, Instance, Trait, Bool, Range, Delegate, \
 cached_property, on_trait_change, property_depends_on
 from enthought.traits.ui.api import View, Item
 from enthought.traits.ui.menu import OKCancelButtons
 from beamformer import * # ok to use *
-from os import path, mkdir, environ
 import tables
-from weakref import WeakValueDictionary
 
+from h5cache import H5cache
 from internal import digest
-from timedomain import TimeSamples
+from grids import RectGrid, MicGeom, Environment
+from timedomain import TimeSamples, Calib
 
-# path to cache directory, possibly in temp
-try:
-    cache_dir=path.join(environ['TEMP'],'beamfpy_cache')
-except:
-    cache_dir=path.join(path.curdir,'cache')
-if not path.exists(cache_dir):
-    mkdir(cache_dir)
-
-# path to td directory (used for import to *.h5 files)
-try:
-    td_dir=path.join(environ['HOMEDRIVE'],environ['HOMEPATH'],'beamfpy_td')
-except:
-    td_dir=path.join(path.curdir,'td')
-if not path.exists(td_dir):
-    mkdir(td_dir)
-
-class H5cache_class(HasPrivateTraits):
-    """
-    cache class that handles opening and closing tables.File objects
-    """
-    # cache directory
-    cache_dir = Str
-    
-    busy = Bool(False)
-    
-    open_files = WeakValueDictionary()
-    
-    open_count = dict()
-    
-    def get_cache( self, object, name, mode='a' ):
-        while self.busy:
-            pass
-        self.busy = True
-        cname = name + '_cache.h5'
-        if isinstance(object.h5f,tables.File):
-            oname = path.basename(object.h5f.filename)
-            if oname == cname:
-                self.busy = False
-                return
-            else:
-                self.open_count[oname] = self.open_count[oname] - 1
-                # close if no references to file left
-                if not self.open_count[oname]:
-                    object.h5f.close()
-        # open each file only once
-        if not self.open_files.has_key(cname):
-            object.h5f = tables.openFile(path.join(self.cache_dir,cname),mode)
-            self.open_files[cname] = object.h5f
-        else:
-            object.h5f = self.open_files[cname]
-            object.h5f.flush()
-        self.open_count[cname] = self.open_count.get(cname,0) + 1
-        print self.open_count.items()
-        self.busy = False
-        
-        
-H5cache = H5cache_class(cache_dir=cache_dir)
-
-class Calib( HasPrivateTraits ):
-    """
-    container for calibration data that is loaded from
-    an .xml-file
-    """
-
-    # name of the .xml file
-    from_file = File(filter=['*.xml'],
-        desc="name of the xml file to import")
-
-    # basename of the .xml-file
-    basename = Property( depends_on = 'from_file',
-        desc="basename of xml file")
-    
-    # number of microphones in the calibration data 
-    num_mics = Int( 1,
-        desc="number of microphones in the geometry")
-
-    # array of calibration factors
-    data = CArray(
-        desc="calibration data")
-
-    # internal identifier
-    digest = Property( depends_on = ['basename',] )
-
-    test = Any
-    traits_view = View(
-        ['from_file{File name}',
-            ['num_mics~{Number of microphones}',
-                '|[Properties]'
-            ]
-        ],
-        title='Calibration data',
-        buttons = OKCancelButtons
-                    )
-
-    @cached_property
-    def _get_digest( self ):
-        return digest(self)
-    
-    @cached_property
-    def _get_basename( self ):
-        if not path.isfile(self.from_file):
-            return ''
-        return path.splitext(path.basename(self.from_file))[0]
-    
-    @on_trait_change('basename')
-    def import_data( self ):
-        "loads the calibration data from .xml file"
-        if not path.isfile(self.from_file):
-            # no file there
-            self.data=array([1.0,],'d')
-            self.num_mics=1
-            return
-        import xml.dom.minidom
-        doc=xml.dom.minidom.parse(self.from_file)
-        names=[]
-        data=[]
-        for el in doc.getElementsByTagName('pos'):
-            names.append(el.getAttribute('Name'))
-            data.append(float(el.getAttribute('factor')))
-        self.data=array(data,'d')
-        self.num_mics=shape(self.data)[0]
 
 class PowerSpectra( HasPrivateTraits ):
     """
@@ -290,12 +170,10 @@ class PowerSpectra( HasPrivateTraits ):
         cross spectral matrix is either loaded from cache file or
         calculated and then additionally stored into cache
         """
-  #      try:
         name = 'csm_' + self.digest
         H5cache.get_cache( self, self.time_data.basename )
         if not name in self.h5f.root:
             t = self.time_data
-            td = t.data
             wind = self.window_( self.block_size )
             weight = dot( wind, wind )
             wind = wind[newaxis,:].swapaxes( 0, 1 )
@@ -309,13 +187,22 @@ class PowerSpectra( HasPrivateTraits ):
                 else:
                     print "warning: calibration data not compatible:", \
                     self.calib.num_mics,t.numchannels
-            for block in range(self.num_blocks):
-                pos = block*self.block_size/self.overlap_
-                ft = fft.rfft(
-                    self.time_data.data[pos:(pos+self.block_size)]*wind,None,0)
-                faverage(csm,ft)
-            csm=csm*(2.0/self.block_size/weight/self.num_blocks) #2.0=sqrt(2)^2 
-                                                    # because onesided spectrum
+            bs = self.block_size
+            temp = empty((2*bs,t.numchannels))
+            pos = bs
+            posinc = bs/self.overlap_
+            for data in t.result(bs):
+                ns, nc = data.shape
+                temp[bs:bs+ns] = data
+                while pos+bs<=bs+ns:
+                    ft = fft.rfft(temp[pos:(pos+bs)]*wind,None,0)
+                    faverage(csm,ft)
+                    pos += posinc
+                temp[0:bs] = temp[bs:]
+                pos -= bs
+            # onesided spectrum: multiplication by 2.0=sqrt(2)^2
+            csm=csm*(2.0/self.block_size/weight/self.num_blocks)
+            print (2.0/self.block_size/weight/self.num_blocks)
             atom = tables.ComplexAtom(8)
             ac = self.h5f.createCArray(self.h5f.root, name, atom, csm_shape)
             ac[:] = csm
@@ -325,57 +212,14 @@ class PowerSpectra( HasPrivateTraits ):
 
     def fftfreq ( self ):
         """
-        returns an array of the frequencies for
-        the spectra in the cross spectral matrix
+        returns an array of the frequencies for the spectra in the 
+        cross spectral matrix from 0 to fs/2
         """
         return abs(fft.fftfreq(self.block_size,1./self.time_data.sample_freq)[:self.block_size/2+1])
 #        if self.time_data.sample_freq>0:
 #            return fft.fftfreq(self.block_size,1./self.time_data.sample_freq)[:self.block_size/2+1][self.ind_low:self.ind_high]
 #        else:
 #            return array([0.],'d')
-
-class PowerSpectra1( PowerSpectra ):
-    
-    @property_depends_on('digest')
-    def _get_csm ( self ):
-        """main work is done here:
-        cross spectral matrix is either loaded from cache file or
-        calculated and then additionally stored into cache
-        """
-  #      try:
-        name = 'csm_' + self.digest
-        H5cache.get_cache( self, self.time_data.basename )
-        if not name in self.h5f.root:
-            t = self.time_data
-            td = t.data
-            wind = self.window_( self.block_size )
-            weight = dot( wind, wind )
-            wind = wind[newaxis,:].swapaxes( 0, 1 )
-            numfreq = self.block_size/2 + 1
-            csm_shape = (numfreq,t.numchannels,t.numchannels)
-            csm = zeros(csm_shape,'D')
-            print "num blocks",self.num_blocks
-            if self.calib:
-                if self.calib.num_mics==t.numchannels:
-                    wind = wind * self.calib.data[newaxis,:]
-                else:
-                    print "warning: calibration data not compatible:", \
-                    self.calib.num_mics,t.numchannels
-            for block in range(self.num_blocks):
-                pos = block*self.block_size/self.overlap_
-                ft = fft.rfft(
-                    self.time_data.data[pos:(pos+self.block_size)]*wind,None,0)
-                faverage(csm,ft)
-            csm=csm*(2.0/self.block_size/weight/self.num_blocks) #2.0=sqrt(2)^2 
-                                                    # because onesided spectrum
-            atom = tables.ComplexAtom(8)
-            ac = self.h5f.createCArray(self.h5f.root, name, atom, csm_shape)
-            ac[:] = csm
-            return ac
-        else:
-            return self.h5f.getNode('/',name)
-
-
 
 class EigSpectra( PowerSpectra ):
     """
@@ -442,336 +286,6 @@ class EigSpectra( PowerSpectra ):
                 return self.eva[f1]
             else:
                 return sum(self.eva[f1:f2],0)
-
-#TODO: construct a base class for this
-class RectGrid( HasPrivateTraits ):
-    """
-    constructs a quadratic 2D grid for the beamforming results
-    that is on a plane perpendicular to the z-axis
-    """
-
-    x_min = Float(-1.0,
-        desc="minimum  x-value")
-
-    x_max = Float(1.0,
-        desc="maximum  x-value")
-
-    y_min = Float(-1.0,
-        desc="minimum  y-value")
-
-    y_max = Float(1.0,
-        desc="maximum  y-value")
-
-    z = Float(1.0,
-        desc="position on z-axis")
-
-    # increment in x- and y- direction
-    increment = Float(0.1,
-        desc="step size")
-
-    # overall number of grid points (auto-set)
-    size = Property( 
-        desc="overall number of grid points")
-        
-    # shape of grid
-    shape = Property(
-        desc="grid shape as tuple")
-    
-    # number of grid points alog x-axis (auto-set)
-    nxsteps = Property( 
-        desc="number of grid points alog x-axis")
-
-    # number of grid points alog y-axis (auto-set)
-    nysteps = Property( 
-        desc="number of grid points alog y-axis")
-
-    # internal identifier
-    digest = Property( 
-        depends_on = ['x_min', 'x_max', 'y_min', 'y_max', 'z', 'increment']
-        )
-
-    traits_view = View(
-            [
-                ['x_min','y_min','|'],
-                ['x_max','y_max','z','increment','size~{grid size}','|'],
-                '-[Map extension]'
-            ]
-        )
-
-    @property_depends_on('nxsteps,nysteps')
-    def _get_size ( self ):
-        return self.nxsteps*self.nysteps
-
-    @property_depends_on('nxsteps,nysteps')
-    def _get_shape ( self ):
-        return (self.nxsteps,self.nysteps)
-
-    @property_depends_on('x_min,x_max,increment')
-    def _get_nxsteps ( self ):
-        i=abs(self.increment)
-        if i!=0:
-            return int(round((abs(self.x_max-self.x_min)+i)/i))
-        return 1
-
-    @property_depends_on('y_min,y_max,increment')
-    def _get_nysteps ( self ):
-        i=abs(self.increment)
-        if i!=0:
-            return int(round((abs(self.y_max-self.y_min)+i)/i))
-        return 1
-
-    @cached_property
-    def _get_digest( self ):
-        return digest( self )
-
-    def pos ( self ):
-        """
-        returns an (3,size) array with the grid point x,y,z-coordinates
-        """
-        i=self.increment
-        xi=1j*round((self.x_max-self.x_min+i)/i)
-        yi=1j*round((self.y_max-self.y_min+i)/i)
-        bpos=mgrid[self.x_min:self.x_max:xi,self.y_min:self.y_max:yi,self.z:self.z+1]
-        bpos.resize((3,self.size))
-        return bpos
-
-    def index ( self,x,y ):
-        """
-        returns the indices for a certain x,y co-ordinate
-        """
-        if x<self.x_min or x>self.x_max:
-            raise ValueError, "x-value out of range"
-        if y<self.y_min or y>self.y_max:
-            raise ValueError, "y-value out of range"
-        xi=round((x-self.x_min)/self.increment)
-        yi=round((y-self.y_min)/self.increment)
-        return xi,yi
-
-    def indices ( self,x1,y1,x2,y2 ):
-        """
-        returns the slices to index a recangular subdomain,
-        useful for inspecting subdomains in a result already calculated
-        """
-        xi1,yi1 = self.index(min(x1,x2),min(y1,y2))
-        xi2,yi2 = self.index(max(x1,x2),max(y1,y2))
-        return s_[xi1:xi2+1],s_[yi1:yi2+1]
-
-    def extend (self) :
-        """
-        returns the x,y extension of the grid,
-        useful for the imshow function from pylab
-        """
-        return (self.x_min,self.x_max,self.y_min,self.y_max)
-
-class RectGrid3D( RectGrid):
-    """
-    constructs a quadratic 3D grid for the beamforming results
-    """
-
-    z_min = Float(-1.0,
-        desc="minimum  z-value")
-
-    z_max = Float(1.0,
-        desc="maximum  z-value")
-    
-    # number of grid points alog x-axis (auto-set)
-    nzsteps = Property( 
-        desc="number of grid points alog x-axis")
-
-    # internal identifier
-    digest = Property( 
-        depends_on = ['x_min', 'x_max', 'y_min', 'y_max', 'z_min','z_max', 'increment']
-        )
-
-    traits_view = View(
-            [
-                ['x_min','y_min','z_min','|'],
-                ['x_max','y_max','z_max','increment','size~{grid size}','|'],
-                '-[Map extension]'
-            ]
-        )
-
-    @property_depends_on('nxsteps,nysteps,nzsteps')
-    def _get_size ( self ):
-        return self.nxsteps*self.nysteps*self.nzsteps
-
-    @property_depends_on('nxsteps,nysteps,nzsteps')
-    def _get_shape ( self ):
-        return (self.nxsteps,self.nysteps,self.nzsteps)
-
-    @property_depends_on('z_min,z_max,increment')
-    def _get_nzsteps ( self ):
-        i=abs(self.increment)
-        if i!=0:
-            return int(round((abs(self.z_max-self.z_min)+i)/i))
-        return 1
-
-    @cached_property
-    def _get_digest( self ):
-        return digest( self )
-
-    def pos ( self ):
-        """
-        returns an (3,size) array with the grid point x,y,z-coordinates
-        """
-        i=self.increment
-        xi=1j*round((self.x_max-self.x_min+i)/i)
-        yi=1j*round((self.y_max-self.y_min+i)/i)
-        zi=1j*round((self.z_max-self.z_min+i)/i)
-        bpos=mgrid[self.x_min:self.x_max:xi,self.y_min:self.y_max:yi,self.z_min:self.z_max:zi]
-        bpos.resize((3,self.size))
-        return bpos
-
-    def index ( self,x,y,z ):
-        """
-        returns the indices for a certain x,y,z co-ordinate
-        """
-        if x<self.x_min or x>self.x_max:
-            raise ValueError, "x-value out of range"
-        if y<self.y_min or y>self.y_max:
-            raise ValueError, "y-value out of range"
-        if z<self.z_min or z>self.z_max:
-            raise ValueError, "z-value out of range"
-        xi=round((x-self.x_min)/self.increment)
-        yi=round((y-self.y_min)/self.increment)
-        zi=round((z-self.z_min)/self.increment)
-        return xi,yi,zi
-
-    def indices ( self,x1,y1,z1,x2,y2,z2 ):
-        """
-        returns the slices to index a rectangular subdomain,
-        useful for inspecting subdomains in a result already calculated
-        """
-        xi1,yi1,zi1 = self.index(min(x1,x2),min(y1,y2),min(z1,z2))
-        xi2,yi2,zi2 = self.index(max(x1,x2),max(y1,y2),max(z1,z2))
-        return s_[xi1:xi2+1],s_[yi1:yi2+1],s_[zi1:zi2+1]
-
-class MicGeom( HasPrivateTraits ):
-    """
-    container for the geometric arrangement of microphones
-    reads data from xml-source with element tag names 'pos'
-    and attributes Name,x,y and z
-    """
-
-    # name of the .xml-file
-    from_file = File(filter=['*.xml'],
-        desc="name of the xml file to import")
-
-    # basename of the .xml-file
-    basename = Property( depends_on = 'from_file',
-        desc="basename of xml file")
-    
-    # number of mics
-    num_mics = Int( 0,
-        desc="number of microphones in the geometry")
-
-    # positions as (3,num_mics) array
-    mpos = Any(
-        desc="x,y,z position of microphones")
-
-    # internal identifier
-    digest = Property( depends_on = ['mpos',])
-
-    traits_view = View(
-        ['from_file',
-        'num_mics~',
-        '|[Microphone geometry]'
-        ],
-#        title='Microphone geometry',
-        buttons = OKCancelButtons
-                    )
-
-    @cached_property
-    def _get_digest( self ):
-        return digest(self)
-
-    @cached_property
-    def _get_basename( self ):
-        return path.splitext(path.basename(self.from_file))[0]
-
-    @on_trait_change('basename')
-    def import_mpos( self ):
-        """import the microphone positions from .xml file,
-        called when basename changes
-        """
-        if not path.isfile(self.from_file):
-            # no file there
-            self.mpos=array([],'d')
-            self.num_mics=0
-            return
-        import xml.dom.minidom
-        doc=xml.dom.minidom.parse(self.from_file)
-        names=[]
-        xyz=[]
-        for el in doc.getElementsByTagName('pos'):
-            names.append(el.getAttribute('Name'))
-            xyz.append(map(lambda a : float(el.getAttribute(a)),'xyz'))
-        self.mpos=array(xyz,'d').swapaxes(0,1)
-        self.num_mics=self.mpos.shape[1]
-
-class Environment( HasPrivateTraits ):
-    """
-    environment description base class
-    """
-    # internal identifier
-    digest = Property
-
-    traits_view = View(
-        )
-        
-    def _get_digest( self ):
-        return ''
-    
-    def r( self, c, gpos, mpos=0.0):
-        if isscalar(mpos):
-            mpos = array((0,0,0),dtype = float32)[:,newaxis]            
-        mpos=mpos[:,newaxis,:]
-        rmv=gpos[:,:,newaxis]-mpos
-        rm=sqrt(sum(rmv*rmv,0))
-        if rm.shape[1]==1:
-            rm = rm[:,0]
-        return rm
-
-class UniformFlowEnvironment( Environment):
-    """
-    uniform flow enviroment
-    """
-    # the Mach number
-    ma = Float(0.0,
-        desc="flow mach number")
-        
-    # the flow direction vector
-    fdv = CArray( dtype = float64, shape = (3,), value = array((1.0,0,0)), 
-        desc="flow direction")
-
-    # internal identifier
-    digest = Property( 
-        depends_on = ['ma', 'fdv'],
-        )
-
-    traits_view = View(
-            [
-                ['ma{flow Mach number}','fdv{flow vector}'],
-                '|[Uniform Flow]'
-            ]
-        )
-
-    @cached_property
-    def _get_digest( self ):
-        return digest( self )
-    
-    def r( self, c, gpos, mpos=0.0):
-        if isscalar(mpos):
-            mpos = array((0,0,0),dtype = float32)[:,newaxis]
-        fdv = self.fdv/sqrt((self.fdv*self.fdv).sum())
-        mpos=mpos[:,newaxis,:]
-        rmv=gpos[:,:,newaxis]-mpos
-        rm=sqrt(sum(rmv*rmv,0))
-        macostheta = (self.ma*sum(rmv.reshape((3,-1))*self.fdv[:,newaxis],0)/rm.reshape(-1)).reshape(rm.shape)        
-        rm *= 1/(-macostheta + sqrt(macostheta*macostheta-self.ma*self.ma+1))
-        if rm.shape[1]==1:
-            rm = rm[:,0]
-        return rm
 
 class BeamformerBase( HasPrivateTraits ):
     """
