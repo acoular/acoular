@@ -8,7 +8,7 @@ Created on Tue May  4 12:25:10 2010
 # imports from other packages
 from numpy import mgrid, s_, array, isscalar, float32, float64, newaxis, sqrt
 from enthought.traits.api import HasPrivateTraits, Float, Property, File, \
-Any, Int, CArray, \
+Any, Int, CArray, List, \
 property_depends_on, cached_property, on_trait_change
 from enthought.traits.ui.api import View
 from enthought.traits.ui.menu import OKCancelButtons
@@ -239,12 +239,20 @@ class MicGeom( HasPrivateTraits ):
     basename = Property( depends_on = 'from_file', 
         desc="basename of xml file")
     
+    # invalid channels  
+    invalid_channels = List(
+        desc="list of invalid channels")
+    
     # number of mics
-    num_mics = Int( 0, 
+    num_mics = Property( depends_on = ['mpos', ], 
         desc="number of microphones in the geometry")
 
     # positions as (3, num_mics) array
-    mpos = Any(
+    mpos_tot = CArray(
+        desc="x, y, z position of all microphones")
+
+    # positions as (3, num_mics) array
+    mpos = Property( depends_on = ['mpos_tot', 'invalid_channels'], 
         desc="x, y, z position of microphones")
 
     # internal identifier
@@ -267,6 +275,20 @@ class MicGeom( HasPrivateTraits ):
     def _get_basename( self ):
         return path.splitext(path.basename(self.from_file))[0]
 
+    @cached_property
+    def _get_mpos( self ):
+        if len(self.invalid_channels)==0:
+            return self.mpos_tot
+        allr = range(self.mpos_tot.shape[-1])
+        for channel in self.invalid_channels:
+            if channel in allr:
+                allr.remove(channel)
+        return self.mpos_tot[:,array(allr)]
+
+    @cached_property
+    def _get_num_mics( self ):
+        return self.mpos.shape[-1]
+
     @on_trait_change('basename')
     def import_mpos( self ):
         """import the microphone positions from .xml file, 
@@ -284,8 +306,8 @@ class MicGeom( HasPrivateTraits ):
         for el in doc.getElementsByTagName('pos'):
             names.append(el.getAttribute('Name'))
             xyz.append(map(lambda a : float(el.getAttribute(a)), 'xyz'))
-        self.mpos = array(xyz, 'd').swapaxes(0, 1)
-        self.num_mics = self.mpos.shape[1]
+        self.mpos_tot = array(xyz, 'd').swapaxes(0, 1)
+#        self.num_mics = self.mpos.shape[1]
 
 class Environment( HasPrivateTraits ):
     """
