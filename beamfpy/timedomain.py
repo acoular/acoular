@@ -10,13 +10,13 @@ from numpy import array, newaxis, empty, empty_like, pi, sin, sqrt, arange, \
 clip, sort, r_, zeros, int16
 from scipy.interpolate import splprep, splev
 from enthought.traits.api import HasPrivateTraits, Float, Int, Long, \
-File, CArray, Property, Instance, Trait, Bool, Range, Delegate, Any, Str, \
+File, CArray, Property, Instance, Trait, Bool, Delegate, Any, \
 cached_property, on_trait_change, property_depends_on, List, Dict, Tuple
 from enthought.traits.ui.api import View, Item
 from enthought.traits.ui.menu import OKCancelButtons
 from os import path
 import tables
-from scipy.signal import butter, cheby1, lfilter, filtfilt
+from scipy.signal import butter, lfilter, filtfilt
 
 # beamfpy imports
 from internal import digest
@@ -496,7 +496,7 @@ class FiltOctave( FiltFiltOctave ):
 
     def result(self, n):
         b, a = self.ba(3) # filter order = 3
-        zi = zeros((max(a.size,b.size)-1,self.source.numchannels))
+        zi = zeros((max(len(a), len(b))-1, self.source.numchannels))
         for block in self.source.result(n):
             block, zi = lfilter(b, a, block, axis=0, zi=zi)
             yield block
@@ -573,8 +573,8 @@ class BeamformerTime( TimeInOut ):
         d_interp2 = 1-d_interp1 # 2nd coeff for lin interpolation 
         d_index2 = arange(self.mpos.num_mics)
 #        amp = (self.rm/self.r0[:, newaxis]) # multiplication factor
-        amp = self.r0[:, newaxis]/(self.rm*self.rm) # multiplication factor
-        amp *= 1.0/(self.source.numchannels) # division by number of source ch.
+        amp = (1.0/(self.rm*self.rm)).sum(1) * self.r0
+        amp = 1.0/(amp[:, newaxis]*self.rm) # multiplication factor
         d_interp1 *= amp # premultiplication, to save later ops
         d_interp2 *= amp
         dmin = d_index.min() # minimum index
@@ -649,13 +649,13 @@ class BeamformerTimeSq( BeamformerTime ):
         d_interp2 = 1-d_interp1 # 2nd coeff for lin interpolation 
         d_index2 = arange(self.mpos.num_mics)
 #        amp = (self.rm/self.r0[:, newaxis]) # multiplication factor
-        amp = self.r0[:, newaxis]/(self.rm*self.rm) # multiplication factor
-        amp *= 1.0/(self.source.numchannels) # division by number of source ch.
+        amp = (1.0/(self.rm*self.rm)).sum(1) * self.r0
+        amp = 1.0/(amp[:, newaxis]*self.rm) # multiplication factor
         d_interp1 *= amp # premultiplication, to save later ops
         d_interp2 *= amp
         dmin = d_index.min() # minimum index
         dmax = d_index.max()+1 # maximum index
-        print dmin, dmax
+#        print dmin, dmax
         aoff = dmax-dmin # index span
         #working copy of data:
         zi = empty((aoff+n, self.source.numchannels), dtype=float)
@@ -828,8 +828,8 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
                 d_interp1 = delays % 1 # 1st coeff for lin interpolation
                 d_interp2 = 1-d_interp1 # 2nd coeff for lin interpolation
 #                amp = rm/r0[:, newaxis] # multiplication factor
-                amp = r0[:, newaxis]/(rm*rm) # multiplication factor
-                amp *= 1.0/(self.source.numchannels) # div. by source ch. count
+                amp = (1.0/(rm*rm)).sum(1) * r0
+                amp = 1.0/(amp[:, newaxis]*rm) # multiplication factor
                 # the next line needs to be implemented faster
                 temp[:, :] = (zi[offset+d_index, d_index2]*d_interp1 \
                             + zi[offset+d_index+1, d_index2]*d_interp2)*amp
@@ -881,7 +881,7 @@ class TimeCache( TimeInOut ):
         obj = self.source # start width source
         basename = 'void' # if no file source is found
         while obj:
-            print obj
+#            print obj
             if 'basename' in obj.all_trait_names(): # at original source?
                 basename = obj.basename # get the name
                 break
@@ -970,13 +970,10 @@ class WriteWAV( TimeInOut ):
         mx = 0.0
         ind = array(self.channels)
         for data in self.source.result(1024):
-            mx = max(abs(data[:,ind]).max(),mx)
+            mx = max(abs(data[:, ind]).max(), mx)
         scale = 0.9*2**15/mx
-        count = 0
         for data in self.source.result(1024):
-            count += 1024
-            wf.writeframesraw(array(data[:,ind]*scale,dtype=int16).tostring())
-        print count, self.numsamples, array(data[:,ind]*scale,dtype=int16).shape, wf.tell()
+            wf.writeframesraw(array(data[:, ind]*scale, dtype=int16).tostring())
         wf.close()
         
 

@@ -38,16 +38,29 @@ for bildnr,x,y,z in traj:
 print bild, stopbild, 2.0/((stopbild-bild)/bildfreq)
 
 td=MaskedTimeSamples()
-td.invalid_channels = arange(64,92,1).tolist()
+m = MicGeom(from_file=path.join(td_dir,'array_92x_x3_9_y-1_7_mod.xml'))
 c0 = 343.0
-if sys.argv[2]=='92':
-    m = MicGeom(from_file=path.join(td_dir,'array_92x_x3_9_y-1_7_mod.xml'))
-m = MicGeom(from_file=path.join(td_dir,'array_64x_x3_9_y-1_7_mod.xml'))
+inv_ch=[]
+if sys.argv[2]=='64':
+    inv_ch = arange(64,92,1).tolist()
+elif sys.argv[2]=='28':
+    inv_ch = arange(0,64,1).tolist()
+elif sys.argv[2]=='low':
+    inv_ch = [0,2,3,4,6,7,9,10,11,12,13,14,15,16,18,19,20,22,23,24,26,27,28,30,\
+    31,32,34,35,36,38,39,40,42,43,44,46,47,48,50,51,52,54,55,56,58,59,60,62,63]
+elif sys.argv[2]=='center':
+    inv_ch = arange(0,92,1).tolist()
+    inv_ch.remove(8)
+
+
+td.invalid_channels = inv_ch
+m.invalid_channels = inv_ch
 g = RectGrid(x_min=-1,x_max=1.0,y_min=-1,y_max=1,z=1.0,increment=0.0625)
 #~ g = RectGrid(x_min=-1,x_max=1.0,y_min=-1,y_max=1,z=0.0,increment=0.125)
 #g = RectGrid(x_min=-2,x_max=2.0,y_min=-2,y_max=2,z=1.0,increment=0.25)
 td.name=path.join(td_dir,h5)
 cal=Calib(from_file=path.join(td_dir,'calib92x20091012_64-6_28-3_inverted.xml'))
+print cal.num_mics
 td.calib = cal
 td.start = (bild)*2048
 td.stop= (stopbild)*2048
@@ -55,7 +68,7 @@ ww = WriteWAV(source = td)
 #ww.channels = [70,84]
 ww.channels = [0,]
 ww.save()
-fi = FiltFiltOctave(source = td)
+fi = FiltFiltOctave(source = td)#, fraction='Third octave')
 fi.band = float(sys.argv[3])#4000
 b = BeamformerTimeSqTraj(source = fi,grid=g, mpos=m, trajectory=tr)
 #b = BeamformerTimeSq(source = fi,grid=g, mpos=m)
@@ -106,11 +119,18 @@ for res in r:
 #        mn = mx-15
         mx1 = L_p(mx1)
         print x, sqrt(r2), mx1
-        im = a.imshow(L_p(r2*map.reshape(sh).T),vmin=mn,vmax=mx,extent=g.extend())
+        im = a.imshow(L_p(r2*map.reshape(sh).T),vmin=mn,vmax=mx,
+        extent=g.extend(),interpolation='nearest')
+        a.set_xticks([])
+        a.set_yticks([])
         a.grid(b=True)
         plnr += 1
     fignr += 1
-    
+figure(fignr)
+x = m.mpos[0]
+y = m.mpos[1]
+scatter(x,y)
+
 
 #f=figure()
 #a=f.add_subplot(211)
