@@ -6,13 +6,11 @@ Created on Tue May 11 10:04:22 2010
 """
 #pylint: disable-msg=E0611, E1101, C0103, C0111, R0901, R0902, R0903, R0904, W0232
 # imports from other packages
-from numpy import array, newaxis, empty, empty_like, pi, sin, sqrt, arange, \
-clip, sort, r_, zeros, int16, fft, exp
+from numpy import array, newaxis, pi, fft, exp
 from numpy.random import normal, seed
-from scipy.interpolate import splprep, splev
-from enthought.traits.api import HasPrivateTraits, Float, Int, Long, \
-File, CArray, Property, Instance, Trait, Bool, Range, Delegate, Any, Str, \
-cached_property, on_trait_change, property_depends_on, List, Dict, Tuple
+from enthought.traits.api import Float, Int, Long, \
+Property, Trait, Delegate, \
+cached_property, Tuple
 from enthought.traits.ui.api import View, Item
 from enthought.traits.ui.menu import OKCancelButtons
 from os import path
@@ -76,8 +74,6 @@ class PointSource( TimeSamples ):
         signal = fft.fft(normal(scale=self.rms, size=self.numsamples))
         pos = array(self.loc, dtype=float).reshape(3,1)
         rm = self.env.r(self.c,pos,self.mpos.mpos)
-#        print "rm:", sqrt((self.env.r(self.c,pos,self.mpos.mpos)**2).mean())
-#        delays = self.env.r(self.c,pos,self.mpos.mpos)/self.c
         delays = exp(-2j*pi*(rm/self.c)*\
             fft.fftfreq(int(self.numsamples),1.0/self.sample_freq)[:,newaxis])
         out = fft.ifft(signal[:,newaxis]*delays,axis=0).real/rm

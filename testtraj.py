@@ -4,8 +4,8 @@ print beamfpy.__file__
 from beamfpy import td_dir, L_p, TimeSamples, Calib, MicGeom, RectGrid, \
 MaskedTimeSamples, FiltFiltOctave, Trajectory, BeamformerTimeSq, TimeAverage, \
 TimeCache, FiltOctave, BeamformerTime, TimePower, BeamformerTimeSqTraj, \
-WriteWAV
-from numpy import empty, loadtxt, arange, where
+WriteWAV, IntegratorSectorTime
+from numpy import empty, loadtxt, arange, where, array
 from os import path
 import sys
 
@@ -45,6 +45,9 @@ if sys.argv[2]=='64':
     inv_ch = arange(64,92,1).tolist()
 elif sys.argv[2]=='28':
     inv_ch = arange(0,64,1).tolist()
+elif sys.argv[2]=='29':
+    inv_ch = arange(0,64,1).tolist()
+    inv_ch.remove(8)
 elif sys.argv[2]=='low':
     inv_ch = [0,2,3,4,6,7,9,10,11,12,13,14,15,16,18,19,20,22,23,24,26,27,28,30,\
     31,32,34,35,36,38,39,40,42,43,44,46,47,48,50,51,52,54,55,56,58,59,60,62,63]
@@ -93,12 +96,20 @@ k += 1
 #~ r[:,0]  = r.mean(1)
 sh = g.shape
 
+Inte = IntegratorSectorTime(source=cach, 
+                            sectors=[ array((-0.5,-0.5, 0.5, 0.5)),
+                            (-0,-0.5, 0.5, 0.5),(-0.5,-0.5, 0.0, 0.5)], 
+                            grid=g)
+#for i in Inte.result(4):
+#    print L_p(i)
+
 from pylab import *
 print cach.sample_freq
 fignr = 1
 for res in r:
     f = figure(fignr)
     gtr = tr.traj(1/cach.sample_freq)
+    gin = Inte.result(1)
     a = f.add_subplot(5,6,30)
     map = L_p(res[:10].mean(axis=0))
     mx = map.max()
@@ -118,18 +129,20 @@ for res in r:
 #        mx = 25
 #        mn = mx-15
         mx1 = L_p(mx1)
-        print x, sqrt(r2), mx1
+        print x, sqrt(r2), L_p(gin.next())
         im = a.imshow(L_p(r2*map.reshape(sh).T),vmin=mn,vmax=mx,
         extent=g.extend(),interpolation='nearest')
+        x1,y1,x2,y2 = Inte.sectors[0]
+        a.plot((x1,x2,x2,x1,x1),(y1,y1,y2,y2,y1))
         a.set_xticks([])
         a.set_yticks([])
         a.grid(b=True)
         plnr += 1
     fignr += 1
-figure(fignr)
-x = m.mpos[0]
-y = m.mpos[1]
-scatter(x,y)
+#figure(fignr)
+#x = m.mpos[0]
+#y = m.mpos[1]
+#scatter(x,y)
 
 
 #f=figure()

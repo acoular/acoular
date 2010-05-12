@@ -4,14 +4,14 @@ print beamfpy.__file__
 from beamfpy import td_dir, L_p, TimeSamples, Calib, MicGeom, PowerSpectra, \
 RectGrid, BeamformerBase, BeamformerEig, BeamformerOrth, BeamformerCleansc, \
 MaskedTimeSamples, FiltFiltOctave, Trajectory, BeamformerTimeSq, TimeAverage, \
-TimeCache, FiltOctave, BeamformerTime, TimePower
-from numpy import empty, clip, sqrt, arange, log10, sort
+TimeCache, FiltOctave, BeamformerTime, TimePower, IntegratorSectorTime
+from numpy import empty, clip, sqrt, arange, log10, sort, array
 from os import path
 import sys
 
 from beamfpy.sources import PointSource
 
-loc = (0.0,0.0,1.0)
+loc = (-1.0,0.0,1.0)
 
 m = MicGeom(from_file=path.join(td_dir,'array_92x_x3_9_y-1_7_mod.xml'))
 c0 = 343.0
@@ -32,26 +32,26 @@ elif sys.argv[2]=='center':
 m.invalid_channels = inv_ch
 
 #m = MicGeom(from_file=path.join( path.split(beamfpy.__file__)[0],'xml','array_56.xml'))
-t = PointSource(sample_freq=32000.0,numsamples=4096,mpos=m, loc=loc)
+t = PointSource(sample_freq=64000.0,numsamples=4096,mpos=m, loc=loc)
 f = PowerSpectra(window='Hanning',overlap='50%',block_size=128,ind_low=1,ind_high=30)
 f.time_data = t
 g = RectGrid(x_min=-0.3,x_max=+0.3,y_min=-0.3,y_max=+0.3,z=loc[2],increment=0.05)
-g = RectGrid(x_min=-1.0,x_max=+1.0,y_min=-1.0,y_max=+1.0,z=loc[2],increment=0.0625)
+g = RectGrid(x_min=-2.0,x_max=+0.0,y_min=-1.0,y_max=+1.0,z=loc[2],increment=0.0625)
 b = BeamformerBase(freq_data=f,grid=g,mpos=m,r_diag=False,c=343)
 
-cfreq = 500
+cfreq = 1000
 
 map = b.synthetic(cfreq,1)
 print map.shape
-print map[0,0]
+print m.mpos[:,0]
 
 ft = FiltFiltOctave(source = t)
 ft.band = cfreq
 pt = TimePower(source=ft)
 avgt = TimeAverage(source=pt,naverage=4096)
-for i in avgt.result(1):
-    print L_p(i)
-
+for ft.band in (500,1000,2000,4000,8000):
+    for i in avgt.result(1):
+        print L_p(i[0,0])," dB"
 
 bt = BeamformerTime(source = t,grid=g, mpos=m, c=343)
 ft = FiltFiltOctave(source = bt)
@@ -68,9 +68,9 @@ tr.points[4.0/30.0]=(-0.3,0,0)
 #~ b = BeamformerTimeSqTraj(source = fi,grid=g, mpos=m, trajectory=tr)
 bts = BeamformerTimeSq(source = fi,grid=g, mpos=m, r_diag=False,c=346.04)
 avg = TimeAverage(source = bts)
-avg.naverage = 64
+avg.naverage = 512
 avgt.naverage = avg.naverage
-cach = TimeCache( source = avgt)
+cach = TimeCache( source = avg)
 res = empty((t.numsamples/avg.naverage,g.size))
 for fi.band in (cfreq,):#(500,1000,2000):#,4000,8000):
     j = 0
@@ -79,6 +79,14 @@ for fi.band in (cfreq,):#(500,1000,2000):#,4000,8000):
         res[j:j+s] = i
         j += s
 res = res[:j]
+print j
+g0 = RectGrid(x_min=-1.0,x_max=+1.0,y_min=-1.0,y_max=+1.0,z=loc[2],increment=0.0625)
+Inte = IntegratorSectorTime(source=cach, 
+                            sectors=[ (-0.5,-0.5, 0.5, 0.5),(-0.5,-0.5, 0.5, 0.5)], 
+                            grid=g0)
+print L_p(array([i for i in Inte.result(2)]))#.reshape(-1,1).mean(0))
+    
+
 
 from pylab import subplot, imshow, show, colorbar, plot, transpose, figure, psd
 subplot(1,3,1)

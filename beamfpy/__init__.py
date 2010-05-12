@@ -15,7 +15,7 @@ from h5cache import td_dir, cache_dir
 
 from timedomain import Calib, SamplesGenerator, TimeSamples, \
 MaskedTimeSamples, TimeInOut, TimeAverage, TimeReverse, \
-TimePower, FiltFiltOctave, FiltOctave, Trajectory, \
+TimePower, FiltFiltOctave, FiltOctave, Trajectory, IntegratorSectorTime, \
 BeamformerTime, BeamformerTimeSq, BeamformerTimeSqTraj, TimeCache, WriteWAV 
 from grids import RectGrid, RectGrid3D, MicGeom, \
 Environment, UniformFlowEnvironment

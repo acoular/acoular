@@ -7,7 +7,7 @@ Created on Tue May  4 12:25:10 2010
 #pylint: disable-msg=E0611, E1101, C0103, C0111, R0901, R0902, R0903, R0904, W0232
 # imports from other packages
 from numpy import array, newaxis, empty, empty_like, pi, sin, sqrt, arange, \
-clip, sort, r_, zeros, int16
+clip, sort, r_, s_, zeros, int16
 from scipy.interpolate import splprep, splev
 from enthought.traits.api import HasPrivateTraits, Float, Int, Long, \
 File, CArray, Property, Instance, Trait, Bool, Delegate, Any, \
@@ -976,5 +976,59 @@ class WriteWAV( TimeInOut ):
             wf.writeframesraw(array(data[:, ind]*scale, dtype=int16).tostring())
         wf.close()
         
+class IntegratorSectorTime( TimeInOut ):
+    """
+    Provides a basic time domain beamformer with time signal output
+    for a spatially fixed grid
+    """
+
+    # RectGrid object that provides the grid locations
+    grid = Trait(RectGrid, 
+        desc="beamforming grid")
+        
+    # List of sectors in grid
+    sectors = List()
+
+    # number of channels in output
+    numchannels = Property( depends_on = ['sectors',])
+
+    # internal identifier
+    digest = Property( 
+        depends_on = ['sectors', 'grid.digest', 'source.digest', \
+        '__class__'], 
+        )
+
+    traits_view = View(
+        [
+            [Item('sectors', style='custom')], 
+            [Item('grid', style='custom'), '-<>'], 
+            '|'
+        ], 
+        title='Integrator', 
+        buttons = OKCancelButtons
+        )
+
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+        
+    @cached_property
+    def _get_numchannels ( self ):
+        return len(self.sectors)
+
+    # generator, delivers the beamformer result
+    def result( self, n=1 ):
+        inds = [self.grid.indices(*sector) for sector in self.sectors]
+        gshape = self.grid.shape
+        o = empty((n, self.numchannels), dtype=float) # output array
+        for r in self.source.result(n):
+            ns, nc = r.shape
+            mapshape = (ns,) + gshape
+            i = 0
+            for ind in inds:
+                h = r[:].reshape(mapshape)[ (s_[:],) + ind ]
+                o[:ns,i] = h.reshape(h.shape[0],-1).sum(axis=1)
+                i += 1
+            yield o[:ns]
 
 
