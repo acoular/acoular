@@ -7,7 +7,7 @@ Created on Tue May  4 12:25:10 2010
 #pylint: disable-msg=E0611, E1101, C0103, C0111, R0901, R0902, R0903, R0904, W0232
 # imports from other packages
 from numpy import array, newaxis, empty, empty_like, pi, sin, sqrt, arange, \
-clip, sort, r_, s_, zeros, int16
+clip, sort, r_, s_, zeros, int16, histogram, unique1d, log10
 from scipy.interpolate import splprep, splev
 from enthought.traits.api import HasPrivateTraits, Float, Int, Long, \
 File, CArray, Property, Instance, Trait, Bool, Delegate, Any, \
@@ -419,7 +419,7 @@ class TimeReverse( TimeInOut ):
         nsh = h.shape[0]
         temp[:nsh] = h[::-1]
         for h in l[::-1]:
-            print nsh, nst
+#            print nsh, nst
             temp[nsh:] = h[:nsh-1:-1]
             yield temp
             temp[:nsh] = h[nsh-1::-1]
@@ -501,6 +501,29 @@ class FiltOctave( FiltFiltOctave ):
             block, zi = lfilter(b, a, block, axis=0, zi=zi)
             yield block
 
+def const_power_weight( bf ):
+    """
+    provides microphone weighting for BeamformerTime
+    to make the power per unit area of the
+    microphone array geometry constant 
+    """
+    r = bf.env.r( bf.c, zeros((3,1)), bf.mpos.mpos) # distances to center
+    # round the distances to be 
+    r = (r/r.max()).round(decimals=1)
+#    r = r.round(decimals=int(2-log10(r.max())))
+#    print r.shape,r
+    ru,ind = unique1d(r,return_inverse=True)
+    ru = (ru[1:]+ru[:-1])/2
+    count,bins = histogram(r,r_[0,ru,1.5*r.max()-0.5*ru[-1]])
+#    print count, bins
+    bins *= bins
+    weights = sqrt((bins[1:]-bins[:-1])/count)
+    weights /= weights.mean()
+    return weights[ind]
+
+possible_weights = {'None':None, 
+                    'constant power per unit area':const_power_weight}
+
 
 class BeamformerTime( TimeInOut ):
     """
@@ -522,6 +545,10 @@ class BeamformerTime( TimeInOut ):
     # Environment object that provides speed of sound and grid-mic distances
     env = Trait(Environment(), Environment)
 
+    # spatial weighting function
+    weights = Trait('None', possible_weights, 
+        desc="spatial weighting function")
+
     # the speed of sound, defaults to 343 m/s
     c = Float(343., 
         desc="speed of sound")
@@ -537,7 +564,7 @@ class BeamformerTime( TimeInOut ):
     # internal identifier
     digest = Property( 
         depends_on = ['mpos.digest', 'grid.digest', 'source.digest', 'c', \
-        'env.digest', '__class__'], 
+        'env.digest', 'weights', '__class__'], 
         )
 
     traits_view = View(
@@ -546,6 +573,7 @@ class BeamformerTime( TimeInOut ):
             [Item('grid', style='custom'), '-<>'], 
             [Item('c', label='speed of sound')], 
             [Item('env{}', style='custom')], 
+            [Item('weights{}', style='custom')], 
             '|'
         ], 
         title='Beamformer options', 
@@ -566,6 +594,10 @@ class BeamformerTime( TimeInOut ):
 
     # generator, delivers the beamformer result
     def result( self, n=2048 ):
+        if self.weights_:
+            w = self.weights_(self)[newaxis]
+        else:
+            w = 1.0
         c = self.c/self.sample_freq
         delays = self.rm/c
         d_index = array(delays, dtype=int) # integer index
@@ -573,7 +605,7 @@ class BeamformerTime( TimeInOut ):
         d_interp2 = 1-d_interp1 # 2nd coeff for lin interpolation 
         d_index2 = arange(self.mpos.num_mics)
 #        amp = (self.rm/self.r0[:, newaxis]) # multiplication factor
-        amp = (1.0/(self.rm*self.rm)).sum(1) * self.r0
+        amp = (w/(self.rm*self.rm)).sum(1) * self.r0
         amp = 1.0/(amp[:, newaxis]*self.rm) # multiplication factor
         d_interp1 *= amp # premultiplication, to save later ops
         d_interp2 *= amp
@@ -588,7 +620,7 @@ class BeamformerTime( TimeInOut ):
         for block in self.source.result(n):
             ns = block.shape[0] # numbers of samples and channels
             maxoffset = ns-dmin # ns - aoff +aoff -dmin
-            zi[aoff:aoff+ns] = block # copy data to working array
+            zi[aoff:aoff+ns] = block * w # copy data to working array
             # loop over data samples 
             while offset < maxoffset:
                 # yield output array if full
@@ -620,7 +652,7 @@ class BeamformerTimeSq( BeamformerTime ):
     # internal identifier
     digest = Property( 
         depends_on = ['mpos.digest', 'grid.digest', 'source.digest', 'r_diag', \
-        'c', 'env.digest', '__class__'], 
+        'c', 'env.digest', 'weights', '__class__'], 
         )
 
     traits_view = View(
@@ -630,6 +662,7 @@ class BeamformerTimeSq( BeamformerTime ):
             [Item('r_diag', label='diagonal removed')], 
             [Item('c', label='speed of sound')], 
             [Item('env{}', style='custom')], 
+            [Item('weights{}', style='custom')], 
             '|'
         ], 
         title='Beamformer options', 
@@ -642,6 +675,10 @@ class BeamformerTimeSq( BeamformerTime ):
         
     # generator, delivers the beamformer result
     def result( self, n=2048 ):
+        if self.weights_:
+            w = self.weights_(self)[newaxis]
+        else:
+            w = 1.0
         c = self.c/self.source.sample_freq
         delays = self.rm/c
         d_index = array(delays, dtype=int) # integer index
@@ -649,7 +686,7 @@ class BeamformerTimeSq( BeamformerTime ):
         d_interp2 = 1-d_interp1 # 2nd coeff for lin interpolation 
         d_index2 = arange(self.mpos.num_mics)
 #        amp = (self.rm/self.r0[:, newaxis]) # multiplication factor
-        amp = (1.0/(self.rm*self.rm)).sum(1) * self.r0
+        amp = (w/(self.rm*self.rm)).sum(1) * self.r0
         amp = 1.0/(amp[:, newaxis]*self.rm) # multiplication factor
         d_interp1 *= amp # premultiplication, to save later ops
         d_interp2 *= amp
@@ -666,7 +703,7 @@ class BeamformerTimeSq( BeamformerTime ):
         for block in self.source.result(n):
             ns = block.shape[0] # numbers of samples and channels
             maxoffset = ns-dmin # ns - aoff +aoff -dmin
-            zi[aoff:aoff+ns] = block # copy data to working array
+            zi[aoff:aoff+ns] = block * w # copy data to working array
             # loop over data samples 
             while offset < maxoffset:
                 # yield output array if full
@@ -763,7 +800,7 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
     # internal identifier
     digest = Property( 
         depends_on = ['mpos.digest', 'grid.digest', 'source.digest', 'r_diag', \
-                      'c', 'env.digest', 'trajectory.digest', '__class__'], 
+            'c', 'weights', 'env.digest', 'trajectory.digest', '__class__'], 
         )
 
     traits_view = View(
@@ -774,6 +811,7 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
             [Item('r_diag', label='diagonal removed')], 
             [Item('c', label='speed of sound')], 
             [Item('env{}', style='custom')], 
+            [Item('weights{}', style='custom')], 
             '|'
         ], 
         title='Beamformer options', 
@@ -786,6 +824,10 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
         
     # generator, delivers the beamformer result
     def result( self, n=2048 ):
+        if self.weights_:
+            w = self.weights_(self)[newaxis]
+        else:
+            w = 1.0
         c = self.c/self.source.sample_freq
         gpos = self.grid.pos()
         # determine the maximum delay
@@ -793,11 +835,11 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
         # maximum microphone distance to center:
         max2 = (self.mpos.mpos**2).sum(-1).max() 
         trpos = array(self.trajectory.location(self.trajectory.interval))**2
-        print trpos.shape
+#        print trpos.shape
         # + maximum trajectory displacement:
         dmax = int((max1+max2+max(sqrt(trpos.sum(0))))/c)+1 
         dmin = 0 # minimum: no delay
-        print dmin, dmax
+#        print dmin, dmax
         aoff = dmax-dmin # index span
         #working copy of data:
         zi = empty((aoff+n, self.source.numchannels), dtype=float) 
@@ -811,7 +853,7 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
         for block in self.source.result(n):
             ns = block.shape[0] # numbers of samples and channels
             maxoffset = ns-dmin # ns - aoff +aoff -dmin
-            zi[aoff:aoff+ns] = block # copy data to working array
+            zi[aoff:aoff+ns] = block * w# copy data to working array
             # loop over data samples 
             while offset < maxoffset:
                 # yield output array if full
@@ -828,7 +870,7 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
                 d_interp1 = delays % 1 # 1st coeff for lin interpolation
                 d_interp2 = 1-d_interp1 # 2nd coeff for lin interpolation
 #                amp = rm/r0[:, newaxis] # multiplication factor
-                amp = (1.0/(rm*rm)).sum(1) * r0
+                amp = (w/(rm*rm)).sum(1) * r0
                 amp = 1.0/(amp[:, newaxis]*rm) # multiplication factor
                 # the next line needs to be implemented faster
                 temp[:, :] = (zi[offset+d_index, d_index2]*d_interp1 \
@@ -940,7 +982,7 @@ class WriteWAV( TimeInOut ):
         obj = self.source # start width source
         basename = 'void' # if no file source is found
         while obj:
-            print obj
+#            print obj
             if 'basename' in obj.all_trait_names(): # at original source?
                 basename = obj.basename # get the name
                 break

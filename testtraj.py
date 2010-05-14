@@ -30,10 +30,12 @@ for bildnr,x,y,z in traj:
 #    print x
     if ((-0.5 < x < 1.0) and richtung == "rl") or\
             ((-1.0 < x < 0.5) and richtung == "lr"):
+#    if (-1.0 < x < 1.0):
         if bild==0:
             bild=int(bildnr)
+        print -x
         tr.points[(bildnr-bild)/bildfreq]=(-x,y,z-1.0)
-        stopbild = int(bildnr)
+        stopbild = int(bildnr)+1
         
 print bild, stopbild, 2.0/((stopbild-bild)/bildfreq)
 
@@ -59,7 +61,7 @@ elif sys.argv[2]=='center':
 td.invalid_channels = inv_ch
 m.invalid_channels = inv_ch
 g = RectGrid(x_min=-1,x_max=1.0,y_min=-1,y_max=1,z=1.0,increment=0.0625)
-#~ g = RectGrid(x_min=-1,x_max=1.0,y_min=-1,y_max=1,z=0.0,increment=0.125)
+g = RectGrid(x_min=-1,x_max=1.0,y_min=-1,y_max=1,z=0.0,increment=0.125)
 #g = RectGrid(x_min=-2,x_max=2.0,y_min=-2,y_max=2,z=1.0,increment=0.25)
 td.name=path.join(td_dir,h5)
 cal=Calib(from_file=path.join(td_dir,'calib92x20091012_64-6_28-3_inverted.xml'))
@@ -67,14 +69,15 @@ print cal.num_mics
 td.calib = cal
 td.start = (bild)*2048
 td.stop= (stopbild)*2048
-ww = WriteWAV(source = td)
-#ww.channels = [70,84]
-ww.channels = [0,]
-ww.save()
+#ww = WriteWAV(source = td)
+##ww.channels = [70,84]
+#ww.channels = [0,]
+#ww.save()
 fi = FiltFiltOctave(source = td)#, fraction='Third octave')
 fi.band = float(sys.argv[3])#4000
 b = BeamformerTimeSqTraj(source = fi,grid=g, mpos=m, trajectory=tr)
 #b = BeamformerTimeSq(source = fi,grid=g, mpos=m)
+#b.weights = 'constant power per unit area'
 avg = TimeAverage(source = b)
 avg.naverage=512
 cach = TimeCache( source = avg)
@@ -92,7 +95,7 @@ for i in cach.result(4):
     j += s
     print j
 k += 1
-#r=r[:,1:j]
+r=r[:,:j]
 #~ r[:,0]  = r.mean(1)
 sh = g.shape
 
@@ -110,20 +113,20 @@ for res in r:
     f = figure(fignr)
     gtr = tr.traj(1/cach.sample_freq)
     gin = Inte.result(1)
-    a = f.add_subplot(5,6,30)
-    map = L_p(res[:10].mean(axis=0))
+    a = f.add_subplot(6,6,36)
+    map = L_p(res[:16].mean(axis=0))
     mx = map.max()
     mn = mx -10
     im = a.imshow(map.reshape(sh).T,vmin=mn,vmax=mx,extent=g.extend())
     colorbar(im,ax=a)
     plnr = 1
     for map in res:
-        if plnr==5*6:
+        if plnr==6*6:
             break
         x,y,z = gtr.next()
         r2 = x*x + y*y + (z+1)*(z+1)
 #        print x,y,z+1,sqrt(r2)
-        a = f.add_subplot(5,6,plnr)
+        a = f.add_subplot(6,6,plnr)
         mx1 = map.max()
 #        map1 = where(map>mx1/10,map,0)
 #        mx = 25
