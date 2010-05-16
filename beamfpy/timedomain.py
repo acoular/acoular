@@ -508,21 +508,18 @@ def const_power_weight( bf ):
     microphone array geometry constant 
     """
     r = bf.env.r( bf.c, zeros((3,1)), bf.mpos.mpos) # distances to center
-    # round the distances to be 
+    # round the relative distances to one decimal place
     r = (r/r.max()).round(decimals=1)
-#    r = r.round(decimals=int(2-log10(r.max())))
-#    print r.shape,r
     ru,ind = unique1d(r,return_inverse=True)
     ru = (ru[1:]+ru[:-1])/2
     count,bins = histogram(r,r_[0,ru,1.5*r.max()-0.5*ru[-1]])
-#    print count, bins
     bins *= bins
     weights = sqrt((bins[1:]-bins[:-1])/count)
     weights /= weights.mean()
     return weights[ind]
 
-possible_weights = {'None':None, 
-                    'constant power per unit area':const_power_weight}
+possible_weights = {'none':None, 
+                    'power':const_power_weight}
 
 
 class BeamformerTime( TimeInOut ):
@@ -545,7 +542,7 @@ class BeamformerTime( TimeInOut ):
     # Environment object that provides speed of sound and grid-mic distances
     env = Trait(Environment(), Environment)
 
-    # spatial weighting function
+    # spatial weighting function (from timedomain.possible_weights)
     weights = Trait('None', possible_weights, 
         desc="spatial weighting function")
 

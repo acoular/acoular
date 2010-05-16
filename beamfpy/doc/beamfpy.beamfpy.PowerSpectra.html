@@ -94,7 +94,7 @@ defaults to 1024
 
   <li class="trait" id="calib">calib<pre>the Calib object that provides the calibration data,
 defaults to no calibration, i.e. the raw time data is used
-</pre><pre>calib = Instance(<a href="beamfpy.beamfpy.Calib.html">Calib</a>)
+</pre><pre>calib = Instance(<a href="beamfpy.timedomain.Calib.html">Calib</a>)
 
 </pre></li>
 
@@ -147,7 +147,7 @@ defaults to 0
 </pre></li>
 
   <li class="trait" id="time_data">time_data<pre>the TimeSamples object that provides the data
-</pre><pre>time_data = Trait(<a href="beamfpy.beamfpy.TimeSamples.html">TimeSamples</a>, desc = 'time data object')
+</pre><pre>time_data = Trait(<a href="beamfpy.timedomain.TimeSamples.html">TimeSamples</a>, desc = 'time data object')
 
 </pre></li>
 
@@ -179,8 +179,8 @@ defaults to 0
 <ul class="doclist">
   
   <li id="fftfreq" class="function">fftfreq(self)<pre>
-        returns an array of the frequencies for
-        the spectra in the cross spectral matrix
+        returns an array of the frequencies for the spectra in the 
+        cross spectral matrix from 0 to fs/2
         </pre></li>
   
 </ul>

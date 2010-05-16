@@ -35,10 +35,12 @@ Several classes for the implemetation of acoustic beamforming
 A minimal usage example would be:
 
 &gt;&gt;    m=MicGeom(from_file='mic_geom.xml')
-&gt;&gt;    g=RectGrid(x_min=-0.8,x_max=-0.2,y_min=-0.1,y_max=0.3,z=0.8,increment=0.01)
+&gt;&gt;    g=RectGrid(x_min=-0.8,x_max=-0.2,y_min=-0.1,y_max=0.3,z=0.8
+        ,increment=0.01)
 &gt;&gt;    t1=TimeSamples(name='measured_data.h5')
 &gt;&gt;    cal=Calib(from_file='calibration_data.xml')
-&gt;&gt;    f1=EigSpectra(time_data=t1,block_size=256,window="Hanning",overlap='75%',calib=cal)
+&gt;&gt;    f1=EigSpectra(time_data=t1,block_size=256,window="Hanning",overlap='75%'
+        ,calib=cal)
 &gt;&gt;    e1=BeamformerBase(freq_data=f1,grid=g,mpos=m,r_diag=False)
 &gt;&gt;    fr=4000
 &gt;&gt;    L1=L_p(e1.synthetic(fr,0))
@@ -46,8 +48,6 @@ A minimal usage example would be:
 The classes in the module possess a number of automatic data update
 capabilities. That is, only the traits must be set to get the results.
 The calculation need not be triggered explictely.
-    BEWARE: sometimes this gives problems with timing and results will not
-    be available immediately
 The classes are also GUI-aware, they know how to display a graphical user
 interface. So by calling
 &gt;&gt;    object_name.configure_traits()
@@ -61,7 +61,7 @@ or at a later time
 where all objects that depend upon the specific trait will update their
 output if necessary.
 
-beamfpy.py (c) Ennes Sarradj 2007-2008, all rights reserved
+beamfpy.py (c) Ennes Sarradj 2007-2010, all rights reserved
 </pre>
 
 
@@ -72,8 +72,6 @@ beamfpy.py (c) Ennes Sarradj 2007-2008, all rights reserved
 Contents:
 
 
-
-<li><a href="#section-variables">Variables</a></li>
 
 
 
@@ -92,16 +90,6 @@ Contents:
 
 
 
-
-
-<h2 id="section-variables">Variables</h2>
-<ul class="doclist">
-
-  <li class="attribute" id="H5cache">H5cache<pre></pre><pre>H5cache = <a href="beamfpy.beamfpy.H5cache_class.html">H5cache_class</a>(cache_dir = cache_dir)
-
-</pre></li>
-
-</ul>
 
 
 
@@ -125,21 +113,11 @@ Contents:
   
   <li id="BeamformerOrth" class="class"><a href="beamfpy.beamfpy.BeamformerOrth.html">BeamformerOrth</a></li>
   
-  <li id="Calib" class="class"><a href="beamfpy.beamfpy.Calib.html">Calib</a></li>
-  
   <li id="EigSpectra" class="class"><a href="beamfpy.beamfpy.EigSpectra.html">EigSpectra</a></li>
-  
-  <li id="H5cache_class" class="class"><a href="beamfpy.beamfpy.H5cache_class.html">H5cache_class</a></li>
-  
-  <li id="MicGeom" class="class"><a href="beamfpy.beamfpy.MicGeom.html">MicGeom</a></li>
   
   <li id="PointSpreadFunction" class="class"><a href="beamfpy.beamfpy.PointSpreadFunction.html">PointSpreadFunction</a></li>
   
   <li id="PowerSpectra" class="class"><a href="beamfpy.beamfpy.PowerSpectra.html">PowerSpectra</a></li>
-  
-  <li id="RectGrid" class="class"><a href="beamfpy.beamfpy.RectGrid.html">RectGrid</a></li>
-  
-  <li id="TimeSamples" class="class"><a href="beamfpy.beamfpy.TimeSamples.html">TimeSamples</a></li>
   
 </ul>
 
@@ -148,8 +126,6 @@ Contents:
 
 <h2 id="section-functions">Function summary</h2>
 <ul class="function-summary">
-  
-  <li class="function"><a href="#cfunc">cfunc</a>(csm, kji, bpos, mpos, numchannels)</li>
   
   <li class="function"><a href="#L_p">L_p</a>(x)</li>
   
@@ -160,8 +136,6 @@ Contents:
 
 <h2>Functions</h2>
 <ul class="doclist">
-  
-  <li id="cfunc" class="function">cfunc(csm, kji, bpos, mpos, numchannels)<pre></pre></li>
   
   <li id="L_p" class="function">L_p(x)<pre>
     calculates the sound pressure level from the sound pressure squared:
@@ -196,59 +170,37 @@ Contents:
   </thead>
   <tbody>
 
-  <tr id="Any"><td>Any</td><td>enthought.traits.api.Any</td></tr>
-
   <tr id="Bool"><td>Bool</td><td>enthought.traits.api.Bool</td></tr>
 
   <tr id="cached_property"><td>cached_property</td><td>enthought.traits.api.cached_property</td></tr>
 
+  <tr id="Calib"><td>Calib</td><td><a href="beamfpy.timedomain.Calib.html">beamfpy.timedomain.Calib</a></td></tr>
+
   <tr id="CArray"><td>CArray</td><td>enthought.traits.api.CArray</td></tr>
-
-  <tr id="ConfigParser"><td>ConfigParser</td><td>ConfigParser</td></tr>
-
-  <tr id="cPickle"><td>cPickle</td><td>cPickle</td></tr>
 
   <tr id="Delegate"><td>Delegate</td><td>enthought.traits.api.Delegate</td></tr>
 
   <tr id="digest"><td>digest</td><td><a href="beamfpy.internal.html#digest">beamfpy.internal.digest</a></td></tr>
 
-  <tr id="environ"><td>environ</td><td>os.environ</td></tr>
-
-  <tr id="File"><td>File</td><td>enthought.traits.api.File</td></tr>
+  <tr id="Environment"><td>Environment</td><td><a href="beamfpy.grids.Environment.html">beamfpy.grids.Environment</a></td></tr>
 
   <tr id="Float"><td>Float</td><td>enthought.traits.api.Float</td></tr>
 
-  <tr id="getweakrefcount"><td>getweakrefcount</td><td>weakref.getweakrefcount</td></tr>
-
-  <tr id="Group"><td>Group</td><td>enthought.traits.ui.api.Group</td></tr>
+  <tr id="H5cache"><td>H5cache</td><td><a href="beamfpy.h5cache.html#H5cache">beamfpy.h5cache.H5cache</a></td></tr>
 
   <tr id="HasPrivateTraits"><td>HasPrivateTraits</td><td>enthought.traits.api.HasPrivateTraits</td></tr>
-
-  <tr id="HasTraits"><td>HasTraits</td><td>enthought.traits.api.HasTraits</td></tr>
 
   <tr id="Instance"><td>Instance</td><td>enthought.traits.api.Instance</td></tr>
 
   <tr id="Int"><td>Int</td><td>enthought.traits.api.Int</td></tr>
 
-  <tr id="io"><td>io</td><td>scipy.io</td></tr>
-
   <tr id="Item"><td>Item</td><td>enthought.traits.ui.api.Item</td></tr>
 
-  <tr id="join"><td>join</td><td>string.join</td></tr>
-
-  <tr id="Lock"><td>Lock</td><td>threading.Lock</td></tr>
-
-  <tr id="Long"><td>Long</td><td>enthought.traits.api.Long</td></tr>
-
-  <tr id="md5"><td>md5</td><td>md5</td></tr>
-
-  <tr id="mkdir"><td>mkdir</td><td>os.mkdir</td></tr>
+  <tr id="MicGeom"><td>MicGeom</td><td><a href="beamfpy.grids.MicGeom.html">beamfpy.grids.MicGeom</a></td></tr>
 
   <tr id="OKCancelButtons"><td>OKCancelButtons</td><td>enthought.traits.ui.menu.OKCancelButtons</td></tr>
 
   <tr id="on_trait_change"><td>on_trait_change</td><td>enthought.traits.api.on_trait_change</td></tr>
-
-  <tr id="path"><td>path</td><td>os.path</td></tr>
 
   <tr id="Property"><td>Property</td><td>enthought.traits.api.Property</td></tr>
 
@@ -256,23 +208,15 @@ Contents:
 
   <tr id="Range"><td>Range</td><td>enthought.traits.api.Range</td></tr>
 
-  <tr id="sleep"><td>sleep</td><td>time.sleep</td></tr>
-
-  <tr id="Str"><td>Str</td><td>enthought.traits.api.Str</td></tr>
-
-  <tr id="struct"><td>struct</td><td>struct</td></tr>
+  <tr id="RectGrid"><td>RectGrid</td><td><a href="beamfpy.grids.RectGrid.html">beamfpy.grids.RectGrid</a></td></tr>
 
   <tr id="tables"><td>tables</td><td>tables</td></tr>
 
-  <tr id="Thread"><td>Thread</td><td>threading.Thread</td></tr>
-
-  <tr id="time"><td>time</td><td>time.time</td></tr>
+  <tr id="TimeSamples"><td>TimeSamples</td><td><a href="beamfpy.timedomain.TimeSamples.html">beamfpy.timedomain.TimeSamples</a></td></tr>
 
   <tr id="Trait"><td>Trait</td><td>enthought.traits.api.Trait</td></tr>
 
   <tr id="View"><td>View</td><td>enthought.traits.ui.api.View</td></tr>
-
-  <tr id="WeakValueDictionary"><td>WeakValueDictionary</td><td>weakref.WeakValueDictionary</td></tr>
 
   </tbody>
 </table>

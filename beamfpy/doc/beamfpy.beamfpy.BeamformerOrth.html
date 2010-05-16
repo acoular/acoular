@@ -72,7 +72,7 @@ Contents:
 <h2 id="section-variables">Attributes</h2>
 <ul class="doclist">
 
-  <li class="attribute" id="traits_view">traits_view<pre></pre><pre>traits_view = View([ [ Item('mpos{}', style = 'custom') ], [ Item('grid', style = 'custom'), '-&lt;&gt;' ], [ Item('n', label = 'number of components', style = 'text') ], [ Item('r_diag', label = 'diagonal removed') ], '|' ], title = 'Beamformer options', buttons = OKCancelButtons)
+  <li class="attribute" id="traits_view">traits_view<pre></pre><pre>traits_view = View([ [ Item('mpos{}', style = 'custom') ], [ Item('grid', style = 'custom'), '-&lt;&gt;' ], [ Item('n', label = 'number of components', style = 'text') ], [ Item('r_diag', label = 'diagonal removed') ], [ Item('c', label = 'speed of sound') ], [ Item('env{}', style = 'custom') ], '|' ], title = 'Beamformer options', buttons = OKCancelButtons)
 
 </pre></li>
 
@@ -97,6 +97,11 @@ Contents:
 
   <li class="trait" id="digest">digest<pre>internal identifier
 </pre><pre>digest = Property(depends_on = [ 'beamformer.digest', 'eva_list' ])
+
+</pre></li>
+
+  <li class="trait" id="env">env<pre>environment
+</pre><pre>env = Delegate('beamformer')
 
 </pre></li>
 

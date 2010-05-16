@@ -1,6 +1,6 @@
 # coding=UTF-8
 """
-Several classes for the implemetation of acoustic beamforming
+Several classes for the implementation of acoustic beamforming
 """
 from beamfpy import __author__, __date__, __version__
 

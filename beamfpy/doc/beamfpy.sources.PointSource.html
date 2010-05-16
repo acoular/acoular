@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html
+          PUBLIC
+          "-//W3C//DTD XHTML 1.1//EN"
+          "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Class beamfpy.sources.PointSource</title>
+    <link rel="stylesheet" type="text/css" href="class.css"/>
+    <script type="text/javascript" src="scr.js"></script>
+    
+  </head>
+  <body>
+    
+    
+    <div id="header">
+
+    <div id="nav-bar">
+    <ul>
+    <li><a href="index.html">Module Index</a></li>
+    <li><a href="class_hierarchy.html">Class Hierarchy</a></li>
+    <li><a href="class_index.html">Class Index</a></li>
+    <li><a href="namespace_index.html">Namespace Index</a></li>
+    </ul>
+    </div>
+    <h1>Class <span class="prefix"><a href="beamfpy.html">beamfpy</a>.&#8203;<a href="beamfpy.sources.html">sources</a>.&#8203;</span><a href="beamfpy.sources.PointSource.html">PointSource</a></h1>
+    
+    </div>
+
+    
+
+<pre>
+    point source class for simulations
+    generates output via the generator 'result'
+    </pre>
+
+
+
+
+<div id="contents">
+<ul>
+Contents:
+
+<li><a href="#section-superclasses">Base classes</a></li>
+
+
+<li><a href="#section-variables">Attributes</a></li>
+
+
+<li><a href="#section-traits">Traits</a></li>
+
+
+
+<li><a href="#section-functions">Methods</a></li>
+
+</ul>
+</div>
+
+
+<div id="main">
+
+
+<h2 id="section-superclasses">Inherits from</h2>
+<ul class="doclist">
+  
+    <li><a href="beamfpy.timedomain.TimeSamples.html">TimeSamples</a>: beamfpy.timedomain.TimeSamples</li>
+  
+</ul>
+
+
+
+
+<h2 id="section-variables">Attributes</h2>
+
+<div class="smallbox">
+<h3>Inherited from base classes</h3>
+<ul>
+
+<li><a href="beamfpy.timedomain.TimeSamples.html#traits_view">traits_view</a></li>
+
+</ul>
+</div>
+
+
+
+
+<h2 id="section-traits">Traits</h2>
+<ul class="doclist">
+
+  <li class="trait" id="c">c<pre>the speed of sound, defaults to 343 m/s
+</pre><pre>c = Float(343.0, desc = 'speed of sound')
+
+</pre></li>
+
+  <li class="trait" id="digest">digest<pre>internal identifier
+</pre><pre>digest = Property(depends_on = [ 'mpos.digest', 'rms', 'loc', 'c', 'numsamples', 'sample_freq', 'seed', 'env.digest', '__class__' ])
+
+</pre></li>
+
+  <li class="trait" id="env">env<pre>Environment object that provides speed of sound and grid-mic distances
+</pre><pre>env = Trait(<a href="beamfpy.grids.Environment.html">Environment</a>(), <a href="beamfpy.grids.Environment.html">Environment</a>)
+
+</pre></li>
+
+  <li class="trait" id="loc">loc<pre>location of source 
+</pre><pre>loc = Tuple((0.0, 0.0, 1.0), desc = 'source location')
+
+</pre></li>
+
+  <li class="trait" id="mpos">mpos<pre>MicGeom object that provides the microphone locations
+</pre><pre>mpos = Trait(<a href="beamfpy.grids.MicGeom.html">MicGeom</a>, desc = 'microphone geometry')
+
+</pre></li>
+
+  <li class="trait" id="numchannels">numchannels<pre>number of channels in output
+</pre><pre>numchannels = Delegate('mpos', 'num_mics')
+
+</pre></li>
+
+  <li class="trait" id="numsamples">numsamples<pre>number of samples 
+</pre><pre>numsamples = Long
+
+</pre></li>
+
+  <li class="trait" id="rms">rms<pre>rms amplitude of source signal in 1 m  distance
+</pre><pre>rms = Float(1.0, desc = 'rms amplitude')
+
+</pre></li>
+
+  <li class="trait" id="seed">seed<pre>seed for random number generator, defaults to 0
+</pre><pre>seed = Int(0, desc = 'random seed value')
+
+</pre></li>
+
+</ul>
+
+<div class="smallbox">
+<h3>Inherited from base classes</h3>
+<ul>
+
+<li><a href="beamfpy.timedomain.TimeSamples.html#basename">basename</a></li>
+
+<li><a href="beamfpy.timedomain.TimeSamples.html#data">data</a></li>
+
+<li><a href="beamfpy.timedomain.TimeSamples.html#h5f">h5f</a></li>
+
+<li><a href="beamfpy.timedomain.TimeSamples.html#name">name</a></li>
+
+<li><a href="beamfpy.timedomain.SamplesGenerator.html#sample_freq">sample_freq</a></li>
+
+</ul>
+</div>
+
+
+
+
+
+
+<h2 id="section-functions">Method summary</h2>
+<ul class="function-summary">
+  
+  <li class="function"><a href="#result">result</a>(self, <span class="param-name">num</span> = <span class="param-default">128</span>)</li>
+  
+</ul>
+
+<div class="smallbox">
+<h3>Inherited from base classes</h3>
+<ul>
+
+<li><a href="beamfpy.timedomain.TimeSamples.html#load_data">load_data</a>(self)</li>
+
+</ul>
+</div>
+
+
+
+<h2>Methods</h2>
+<ul class="doclist">
+  
+  <li id="result" class="function">result(self, <span class="param-name">num</span> = <span class="param-default">128</span>)<pre></pre></li>
+  
+</ul>
+
+
+
+
+</div>  <!-- #main -->
+
+
+    
+    
+  </body>
+</html>
+

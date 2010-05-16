@@ -5,7 +5,7 @@
           "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <title>Class beamfpy.beamfpy.BeamformerMusic</title>
+    <title>Class beamfpy.timedomain.WriteWAV</title>
     <link rel="stylesheet" type="text/css" href="class.css"/>
     <script type="text/javascript" src="scr.js"></script>
     
@@ -23,14 +23,14 @@
     <li><a href="namespace_index.html">Namespace Index</a></li>
     </ul>
     </div>
-    <h1>Class <span class="prefix"><a href="beamfpy.html">beamfpy</a>.&#8203;<a href="beamfpy.beamfpy.html">beamfpy</a>.&#8203;</span><a href="beamfpy.beamfpy.BeamformerMusic.html">BeamformerMusic</a></h1>
+    <h1>Class <span class="prefix"><a href="beamfpy.html">beamfpy</a>.&#8203;<a href="beamfpy.timedomain.html">timedomain</a>.&#8203;</span><a href="beamfpy.timedomain.WriteWAV.html">WriteWAV</a></h1>
     
     </div>
 
     
 
 <pre>
-    beamforming using MUSIC algoritm
+    saves time signal from one or two channels as mono or stereo wav file
     </pre>
 
 
@@ -62,7 +62,7 @@ Contents:
 <h2 id="section-superclasses">Inherits from</h2>
 <ul class="doclist">
   
-    <li><a href="beamfpy.beamfpy.BeamformerEig.html">BeamformerEig</a>: beamfpy.beamfpy.BeamformerEig</li>
+    <li><a href="beamfpy.timedomain.TimeInOut.html">TimeInOut</a>: beamfpy.timedomain.TimeInOut</li>
   
 </ul>
 
@@ -72,7 +72,7 @@ Contents:
 <h2 id="section-variables">Attributes</h2>
 <ul class="doclist">
 
-  <li class="attribute" id="traits_view">traits_view<pre></pre><pre>traits_view = View([ [ Item('mpos{}', style = 'custom') ], [ Item('grid', style = 'custom'), '-&lt;&gt;' ], [ Item('n', label = 'no of sources', style = 'text') ], [ Item('c', label = 'speed of sound') ], [ Item('env{}', style = 'custom') ], '|' ], title = 'Beamformer options', buttons = OKCancelButtons)
+  <li class="attribute" id="traits_view">traits_view<pre></pre><pre>traits_view = View([ Item('source', style = 'custom'), [ 'name~{Cache file name}', '|[Properties]' ], '|' ], title = 'Linear average', buttons = OKCancelButtons)
 
 </pre></li>
 
@@ -85,9 +85,18 @@ Contents:
 <h2 id="section-traits">Traits</h2>
 <ul class="doclist">
 
-  <li class="trait" id="n">n<pre>assumed number of sources, should be set to a value not too small
-defaults to 1
-</pre><pre>n = Int(1, desc = 'assumed number of sources')
+  <li class="trait" id="basename">basename<pre>basename for cache
+</pre><pre>basename = Property(depends_on = <a href="beamfpy.internal.html#digest">'digest'</a>)
+
+</pre></li>
+
+  <li class="trait" id="channels">channels<pre>channel(s) to save
+</pre><pre>channels = List(desc = 'channel to save')
+
+</pre></li>
+
+  <li class="trait" id="digest">digest<pre>internal identifier
+</pre><pre>digest = Property(depends_on = [ 'source.digest', 'channels', '__class__' ])
 
 </pre></li>
 
@@ -102,7 +111,9 @@ defaults to 1
 <h2 id="section-functions">Method summary</h2>
 <ul class="function-summary">
   
-  <li class="function"><a href="#calc">calc</a>(self, ac, fr)</li>
+  <li class="function"><a href="#result">result</a>(self, n)</li>
+  
+  <li class="function"><a href="#save">save</a>(self)</li>
   
 </ul>
 
@@ -112,10 +123,9 @@ defaults to 1
 <h2>Methods</h2>
 <ul class="doclist">
   
-  <li id="calc" class="function">calc(self, ac, fr)<pre>
-        calculation of MUSIC beamforming result 
-        for all missing frequencies
-        </pre></li>
+  <li id="result" class="function">result(self, n)<pre></pre></li>
+  
+  <li id="save" class="function">save(self)<pre></pre></li>
   
 </ul>
 

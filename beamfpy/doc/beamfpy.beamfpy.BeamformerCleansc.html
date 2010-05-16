@@ -72,7 +72,7 @@ Contents:
 <h2 id="section-variables">Attributes</h2>
 <ul class="doclist">
 
-  <li class="attribute" id="traits_view">traits_view<pre></pre><pre>traits_view = View([ [ Item('mpos{}', style = 'custom') ], [ Item('grid', style = 'custom'), '-&lt;&gt;' ], [ Item('n', label = 'no of iterations', style = 'text') ], [ Item('r_diag', label = 'diagonal removed') ], '|' ], title = 'Beamformer options', buttons = OKCancelButtons)
+  <li class="attribute" id="traits_view">traits_view<pre></pre><pre>traits_view = View([ [ Item('mpos{}', style = 'custom') ], [ Item('grid', style = 'custom'), '-&lt;&gt;' ], [ Item('n', label = 'no of iterations', style = 'text') ], [ Item('r_diag', label = 'diagonal removed') ], [ Item('c', label = 'speed of sound') ], [ Item('env{}', style = 'custom') ], '|' ], title = 'Beamformer options', buttons = OKCancelButtons)
 
 </pre></li>
 
@@ -92,7 +92,7 @@ defaults to 0.6
 </pre></li>
 
   <li class="trait" id="digest">digest<pre>internal identifier
-</pre><pre>digest = Property(depends_on = [ 'mpos.digest', 'grid.digest', 'freq_data.digest', 'c', 'n' ])
+</pre><pre>digest = Property(depends_on = [ 'mpos.digest', 'grid.digest', 'freq_data.digest', 'c', 'env.digest', 'n' ])
 
 </pre></li>
 

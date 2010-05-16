@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html
+          PUBLIC
+          "-//W3C//DTD XHTML 1.1//EN"
+          "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Class beamfpy.fileimport.datx_d_file</title>
+    <link rel="stylesheet" type="text/css" href="class.css"/>
+    <script type="text/javascript" src="scr.js"></script>
+    
+  </head>
+  <body>
+    
+    
+    <div id="header">
+
+    <div id="nav-bar">
+    <ul>
+    <li><a href="index.html">Module Index</a></li>
+    <li><a href="class_hierarchy.html">Class Hierarchy</a></li>
+    <li><a href="class_index.html">Class Index</a></li>
+    <li><a href="namespace_index.html">Namespace Index</a></li>
+    </ul>
+    </div>
+    <h1>Class <span class="prefix"><a href="beamfpy.html">beamfpy</a>.&#8203;<a href="beamfpy.fileimport.html">fileimport</a>.&#8203;</span><a href="beamfpy.fileimport.datx_d_file.html">datx_d_file</a></h1>
+    
+    </div>
+
+    
+
+<pre>
+    helper class for import of .datx data, represents
+    datx data file
+    </pre>
+
+
+
+
+<div id="contents">
+<ul>
+Contents:
+
+<li><a href="#section-superclasses">Base classes</a></li>
+
+
+
+<li><a href="#section-traits">Traits</a></li>
+
+
+
+<li><a href="#section-functions">Methods</a></li>
+
+</ul>
+</div>
+
+
+<div id="main">
+
+
+<h2 id="section-superclasses">Inherits from</h2>
+<ul class="doclist">
+  
+    <li>HasPrivateTraits: enthought.traits.api.HasPrivateTraits</li>
+  
+</ul>
+
+
+
+
+
+
+<h2 id="section-traits">Traits</h2>
+<ul class="doclist">
+
+  <li class="trait" id="block_size">block_size<pre></pre><pre>block_size = Property()
+
+</pre></li>
+
+  <li class="trait" id="blocks">blocks<pre>number of blocks to read in one pull
+</pre><pre>blocks = Int()
+
+</pre></li>
+
+  <li class="trait" id="bytes_per_sample">bytes_per_sample<pre></pre><pre>bytes_per_sample = Int()
+
+</pre></li>
+
+  <li class="trait" id="channel_count">channel_count<pre></pre><pre>channel_count = Int()
+
+</pre></li>
+
+  <li class="trait" id="data">data<pre>the actual block data
+</pre><pre>data = CArray()
+
+</pre></li>
+
+  <li class="trait" id="data_offset">data_offset<pre>properties
+</pre><pre>data_offset = Int()
+
+</pre></li>
+
+  <li class="trait" id="f">f<pre>file object
+</pre><pre>f = Any()
+
+</pre></li>
+
+  <li class="trait" id="name">name<pre>file name
+</pre><pre>name = File(filter = [ '*.datx' ], desc = 'name of datx data file')
+
+</pre></li>
+
+  <li class="trait" id="num_samples_per_block">num_samples_per_block<pre></pre><pre>num_samples_per_block = Int()
+
+</pre></li>
+
+</ul>
+
+
+
+
+
+
+
+<h2 id="section-functions">Method summary</h2>
+<ul class="function-summary">
+  
+  <li class="function"><a href="#__init__">__init__</a>(self, name, <span class="param-name">blocks</span> = <span class="param-default">128</span>)</li>
+  
+  <li class="function"><a href="#get_next_blocks">get_next_blocks</a>(self)</li>
+  
+</ul>
+
+
+
+
+<h2>Methods</h2>
+<ul class="doclist">
+  
+  <li id="__init__" class="function">__init__(self, name, <span class="param-name">blocks</span> = <span class="param-default">128</span>)<pre></pre></li>
+  
+  <li id="get_next_blocks" class="function">get_next_blocks(self)<pre></pre></li>
+  
+</ul>
+
+
+
+
+</div>  <!-- #main -->
+
+
+    
+    
+  </body>
+</html>
+

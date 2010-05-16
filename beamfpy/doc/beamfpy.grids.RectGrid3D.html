@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html
+          PUBLIC
+          "-//W3C//DTD XHTML 1.1//EN"
+          "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Class beamfpy.grids.RectGrid3D</title>
+    <link rel="stylesheet" type="text/css" href="class.css"/>
+    <script type="text/javascript" src="scr.js"></script>
+    
+  </head>
+  <body>
+    
+    
+    <div id="header">
+
+    <div id="nav-bar">
+    <ul>
+    <li><a href="index.html">Module Index</a></li>
+    <li><a href="class_hierarchy.html">Class Hierarchy</a></li>
+    <li><a href="class_index.html">Class Index</a></li>
+    <li><a href="namespace_index.html">Namespace Index</a></li>
+    </ul>
+    </div>
+    <h1>Class <span class="prefix"><a href="beamfpy.html">beamfpy</a>.&#8203;<a href="beamfpy.grids.html">grids</a>.&#8203;</span><a href="beamfpy.grids.RectGrid3D.html">RectGrid3D</a></h1>
+    
+    </div>
+
+    
+
+<pre>
+    constructs a quadratic 3D grid for the beamforming results
+    </pre>
+
+
+
+
+<div id="contents">
+<ul>
+Contents:
+
+<li><a href="#section-superclasses">Base classes</a></li>
+
+
+<li><a href="#section-variables">Attributes</a></li>
+
+
+<li><a href="#section-traits">Traits</a></li>
+
+
+
+<li><a href="#section-functions">Methods</a></li>
+
+</ul>
+</div>
+
+
+<div id="main">
+
+
+<h2 id="section-superclasses">Inherits from</h2>
+<ul class="doclist">
+  
+    <li><a href="beamfpy.grids.RectGrid.html">RectGrid</a>: beamfpy.grids.RectGrid</li>
+  
+</ul>
+
+
+
+
+<h2 id="section-variables">Attributes</h2>
+<ul class="doclist">
+
+  <li class="attribute" id="traits_view">traits_view<pre></pre><pre>traits_view = View([ [ 'x_min', 'y_min', 'z_min', '|' ], [ 'x_max', 'y_max', 'z_max', 'increment', 'size~{grid size}', '|' ], '-[Map extension]' ])
+
+</pre></li>
+
+</ul>
+
+
+
+
+
+<h2 id="section-traits">Traits</h2>
+<ul class="doclist">
+
+  <li class="trait" id="digest">digest<pre>internal identifier
+</pre><pre>digest = Property(depends_on = [ 'x_min', 'x_max', 'y_min', 'y_max', 'z_min', 'z_max', 'increment' ])
+
+</pre></li>
+
+  <li class="trait" id="nzsteps">nzsteps<pre>number of grid points alog x-axis (auto-set)
+</pre><pre>nzsteps = Property(desc = 'number of grid points alog x-axis')
+
+</pre></li>
+
+  <li class="trait" id="z_max">z_max<pre></pre><pre>z_max = Float(1.0, desc = 'maximum  z-value')
+
+</pre></li>
+
+  <li class="trait" id="z_min">z_min<pre></pre><pre>z_min = Float(-Const(1.0), desc = 'minimum  z-value')
+
+</pre></li>
+
+</ul>
+
+
+
+
+
+
+
+<h2 id="section-functions">Method summary</h2>
+<ul class="function-summary">
+  
+  <li class="function"><a href="#index">index</a>(self, x, y, z)</li>
+  
+  <li class="function"><a href="#indices">indices</a>(self, x1, y1, z1, x2, y2, z2)</li>
+  
+  <li class="function"><a href="#pos">pos</a>(self)</li>
+  
+</ul>
+
+
+
+
+<h2>Methods</h2>
+<ul class="doclist">
+  
+  <li id="index" class="function">index(self, x, y, z)<pre>
+        returns the indices for a certain x, y, z co-ordinate
+        </pre></li>
+  
+  <li id="indices" class="function">indices(self, x1, y1, z1, x2, y2, z2)<pre>
+        returns the slices to index a rectangular subdomain, 
+        useful for inspecting subdomains in a result already calculated
+        </pre></li>
+  
+  <li id="pos" class="function">pos(self)<pre>
+        returns an (3, size) array with the grid point x, y, z-coordinates
+        </pre></li>
+  
+</ul>
+
+
+
+
+</div>  <!-- #main -->
+
+
+    
+    
+  </body>
+</html>
+

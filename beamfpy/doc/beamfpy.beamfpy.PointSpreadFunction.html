@@ -76,7 +76,12 @@ Contents:
 </pre></li>
 
   <li class="trait" id="digest">digest<pre>internal identifier
-</pre><pre>digest = Property(depends_on = [ 'mpos.digest', 'grid.digest', 'c' ], cached = True)
+</pre><pre>digest = Property(depends_on = [ 'mpos.digest', 'grid.digest', 'c', 'env.digest' ], cached = True)
+
+</pre></li>
+
+  <li class="trait" id="env">env<pre>Environment object that provides speed of sound and grid-mic distances
+</pre><pre>env = Trait(<a href="beamfpy.grids.Environment.html">Environment</a>(), <a href="beamfpy.grids.Environment.html">Environment</a>)
 
 </pre></li>
 
@@ -86,7 +91,7 @@ Contents:
 </pre></li>
 
   <li class="trait" id="grid">grid<pre>RectGrid object that provides the grid locations
-</pre><pre>grid = Trait(<a href="beamfpy.beamfpy.RectGrid.html">RectGrid</a>, desc = 'beamforming grid')
+</pre><pre>grid = Trait(<a href="beamfpy.grids.RectGrid.html">RectGrid</a>, desc = 'beamforming grid')
 
 </pre></li>
 
@@ -96,12 +101,22 @@ Contents:
 </pre></li>
 
   <li class="trait" id="mpos">mpos<pre>MicGeom object that provides the microphone locations
-</pre><pre>mpos = Trait(<a href="beamfpy.beamfpy.MicGeom.html">MicGeom</a>, desc = 'microphone geometry')
+</pre><pre>mpos = Trait(<a href="beamfpy.grids.MicGeom.html">MicGeom</a>, desc = 'microphone geometry')
 
 </pre></li>
 
   <li class="trait" id="psf">psf<pre>the actual point spread function
 </pre><pre>psf = Property(desc = 'point spread function')
+
+</pre></li>
+
+  <li class="trait" id="r0">r0<pre>sound travel distances from microphone array center to grid points
+</pre><pre>r0 = Property(desc = 'array center to grid distances')
+
+</pre></li>
+
+  <li class="trait" id="rm">rm<pre>sound travel distances from array microphones to grid points
+</pre><pre>rm = Property(desc = 'array center to grid distances')
 
 </pre></li>
 

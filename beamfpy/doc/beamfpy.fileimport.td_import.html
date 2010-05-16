@@ -5,7 +5,7 @@
           "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <title>Class beamfpy.beamfpy.BeamformerCapon</title>
+    <title>Class beamfpy.fileimport.td_import</title>
     <link rel="stylesheet" type="text/css" href="class.css"/>
     <script type="text/javascript" src="scr.js"></script>
     
@@ -23,14 +23,14 @@
     <li><a href="namespace_index.html">Namespace Index</a></li>
     </ul>
     </div>
-    <h1>Class <span class="prefix"><a href="beamfpy.html">beamfpy</a>.&#8203;<a href="beamfpy.beamfpy.html">beamfpy</a>.&#8203;</span><a href="beamfpy.beamfpy.BeamformerCapon.html">BeamformerCapon</a></h1>
+    <h1>Class <span class="prefix"><a href="beamfpy.html">beamfpy</a>.&#8203;<a href="beamfpy.fileimport.html">fileimport</a>.&#8203;</span><a href="beamfpy.fileimport.td_import.html">td_import</a></h1>
     
     </div>
 
     
 
 <pre>
-    beamforming using the minimum variance or Capon algorithm
+    import of *.td data as saved by earlier versions
     </pre>
 
 
@@ -46,6 +46,8 @@ Contents:
 <li><a href="#section-variables">Attributes</a></li>
 
 
+<li><a href="#section-traits">Traits</a></li>
+
 
 
 <li><a href="#section-functions">Methods</a></li>
@@ -60,7 +62,7 @@ Contents:
 <h2 id="section-superclasses">Inherits from</h2>
 <ul class="doclist">
   
-    <li><a href="beamfpy.beamfpy.BeamformerBase.html">BeamformerBase</a>: beamfpy.beamfpy.BeamformerBase</li>
+    <li><a href="beamfpy.fileimport.time_data_import.html">time_data_import</a>: beamfpy.fileimport.time_data_import</li>
   
 </ul>
 
@@ -70,7 +72,21 @@ Contents:
 <h2 id="section-variables">Attributes</h2>
 <ul class="doclist">
 
-  <li class="attribute" id="traits_view">traits_view<pre></pre><pre>traits_view = View([ [ Item('mpos{}', style = 'custom') ], [ Item('grid', style = 'custom'), '-&lt;&gt;' ], [ Item('c', label = 'speed of sound') ], [ Item('env{}', style = 'custom') ], '|' ], title = 'Beamformer options', buttons = OKCancelButtons)
+  <li class="attribute" id="traits_view">traits_view<pre></pre><pre>traits_view = View([ 'from_file', '|[Import]' ], title = 'Time data', buttons = OKCancelButtons)
+
+</pre></li>
+
+</ul>
+
+
+
+
+
+<h2 id="section-traits">Traits</h2>
+<ul class="doclist">
+
+  <li class="trait" id="from_file">from_file<pre>name of the comma delimited file to import
+</pre><pre>from_file = File(filter = [ '*.td' ], desc = 'name of the *.td file to import')
 
 </pre></li>
 
@@ -82,12 +98,10 @@ Contents:
 
 
 
-
-
 <h2 id="section-functions">Method summary</h2>
 <ul class="function-summary">
   
-  <li class="function"><a href="#calc">calc</a>(self, ac, fr)</li>
+  <li class="function"><a href="#get_data">get_data</a>(self, td)</li>
   
 </ul>
 
@@ -97,9 +111,10 @@ Contents:
 <h2>Methods</h2>
 <ul class="doclist">
   
-  <li id="calc" class="function">calc(self, ac, fr)<pre>
-        calculation of Capon (Mininimum Variance) beamforming result 
-        for all missing frequencies
+  <li id="get_data" class="function">get_data(self, td)<pre>
+        main work is done here: imports the data from *.td file into
+        TimeSamples object td and saves also a '*.h5' file so this import
+        need not be performed only once
         </pre></li>
   
 </ul>
