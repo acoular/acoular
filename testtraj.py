@@ -61,7 +61,7 @@ elif sys.argv[2]=='center':
 td.invalid_channels = inv_ch
 m.invalid_channels = inv_ch
 g = RectGrid(x_min=-1,x_max=1.0,y_min=-1,y_max=1,z=1.0,increment=0.0625)
-g = RectGrid(x_min=-1,x_max=1.0,y_min=-1,y_max=1,z=0.0,increment=0.125)
+#g = RectGrid(x_min=-1,x_max=1.0,y_min=-1,y_max=1,z=1.0,increment=0.125)
 #g = RectGrid(x_min=-2,x_max=2.0,y_min=-2,y_max=2,z=1.0,increment=0.25)
 td.name=path.join(td_dir,h5)
 cal=Calib(from_file=path.join(td_dir,'calib92x20091012_64-6_28-3_inverted.xml'))
@@ -75,9 +75,11 @@ td.stop= (stopbild)*2048
 #ww.save()
 fi = FiltFiltOctave(source = td)#, fraction='Third octave')
 fi.band = float(sys.argv[3])#4000
-b = BeamformerTimeSqTraj(source = fi,grid=g, mpos=m, trajectory=tr)
-#b = BeamformerTimeSq(source = fi,grid=g, mpos=m)
-#b.weights = 'constant power per unit area'
+#b = BeamformerTimeSqTraj(source = fi,grid=g, mpos=m, trajectory=tr)
+b = BeamformerTimeSq(source = fi,grid=g, mpos=m)
+if sys.argv[4]=='w':
+    b.weights = 'constant power per unit area'
+    
 avg = TimeAverage(source = b)
 avg.naverage=512
 cach = TimeCache( source = avg)
@@ -123,7 +125,10 @@ for res in r:
     for map in res:
         if plnr==6*6:
             break
-        x,y,z = gtr.next()
+        try:
+            x,y,z = gtr.next()
+        except:
+            pass
         r2 = x*x + y*y + (z+1)*(z+1)
 #        print x,y,z+1,sqrt(r2)
         a = f.add_subplot(6,6,plnr)
@@ -132,11 +137,12 @@ for res in r:
 #        mx = 25
 #        mn = mx-15
         mx1 = L_p(mx1)
-        print x, sqrt(r2), L_p(gin.next())
+        print x, y, sqrt(r2), L_p(gin.next())
         im = a.imshow(L_p(r2*map.reshape(sh).T),vmin=mn,vmax=mx,
         extent=g.extend(),interpolation='nearest')
         x1,y1,x2,y2 = Inte.sectors[0]
         a.plot((x1,x2,x2,x1,x1),(y1,y1,y2,y2,y1))
+        a.plot((x,),(y,),'or')
         a.set_xticks([])
         a.set_yticks([])
         a.grid(b=True)
@@ -176,4 +182,6 @@ for res in r:
 #update.i=0
 #import wx
 #wx.EVT_KEY_DOWN(wx.GetApp(), update)
+name = '../'+sys.argv[1]+'_'+sys.argv[2]+'_'+sys.argv[3]+'_'+sys.argv[4]+'.png'
+#savefig(name)
 show()
