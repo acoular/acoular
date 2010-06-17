@@ -7,7 +7,7 @@ Created on Tue May  4 12:25:10 2010
 #pylint: disable-msg=E0611, E1101, C0103, C0111, R0901, R0902, R0903, R0904, W0232
 # imports from other packages
 from numpy import array, newaxis, empty, empty_like, pi, sin, sqrt, arange, \
-clip, sort, r_, s_, zeros, int16, histogram, unique1d, log10
+clip, sort, r_, s_, zeros, int16, histogram, unique1d, log10, where
 from scipy.interpolate import splprep, splev
 from enthought.traits.api import HasPrivateTraits, Float, Int, Long, \
 File, CArray, Property, Instance, Trait, Bool, Delegate, Any, \
@@ -373,6 +373,9 @@ class TimeAverage( TimeInOut ) :
     # sample_freq of output signal
     sample_freq = Property( depends_on = 'source.sample_freq, naverage')
     
+    # number of samples in output signal
+    numsamples = Property( depends_on = 'source.numsamples, naverage')
+    
     # internal identifier
     digest = Property( depends_on = ['source.digest', '__class__', 'naverage'])
 
@@ -395,6 +398,11 @@ class TimeAverage( TimeInOut ) :
     def _get_sample_freq ( self ):
         if self.source:
             return 1.0 * self.source.sample_freq / self.naverage
+
+    @cached_property
+    def _get_numsamples ( self ):
+        if self.source:
+            return self.source.numsamples / self.naverage
 
     # result generator: delivers average of input
     def result(self, n):
@@ -543,7 +551,7 @@ class BeamformerTime( TimeInOut ):
     env = Trait(Environment(), Environment)
 
     # spatial weighting function (from timedomain.possible_weights)
-    weights = Trait('None', possible_weights, 
+    weights = Trait('none', possible_weights, 
         desc="spatial weighting function")
 
     # the speed of sound, defaults to 343 m/s
@@ -828,13 +836,21 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
         c = self.c/self.source.sample_freq
         gpos = self.grid.pos()
         # determine the maximum delay
-        max1 = self.r0.max() # maximum grid point distance to center
+        tmin, tmax = self.trajectory.interval
+        tpos = gpos + array(self.trajectory.location(tmin))[:, newaxis]
+        dmax1 = array(self.env.r( self.c, tpos, self.mpos.mpos)/c, \
+            dtype=int).max()
+        tpos = gpos + array(self.trajectory.location(tmax))[:, newaxis]
+        dmax2 = array(self.env.r( self.c, tpos, self.mpos.mpos)/c, \
+            dtype=int).max()
+        dmax = max(dmax1,dmax2)
+        #max1 = self.r0.max() # maximum grid point distance to center
         # maximum microphone distance to center:
-        max2 = (self.mpos.mpos**2).sum(-1).max() 
-        trpos = array(self.trajectory.location(self.trajectory.interval))**2
+        #max2 = (self.mpos.mpos**2).sum(-1).max() 
+        #trpos = array(self.trajectory.location(self.trajectory.interval))**2
 #        print trpos.shape
         # + maximum trajectory displacement:
-        dmax = int((max1+max2+max(sqrt(trpos.sum(0))))/c)+1 
+        #dmax = int((max1+max2+max(sqrt(trpos.sum(0))))/c)+1 
         dmin = 0 # minimum: no delay
 #        print dmin, dmax
         aoff = dmax-dmin # index span
@@ -1017,8 +1033,7 @@ class WriteWAV( TimeInOut ):
         
 class IntegratorSectorTime( TimeInOut ):
     """
-    Provides a basic time domain beamformer with time signal output
-    for a spatially fixed grid
+    Provides an Integrator
     """
 
     # RectGrid object that provides the grid locations
@@ -1028,12 +1043,15 @@ class IntegratorSectorTime( TimeInOut ):
     # List of sectors in grid
     sectors = List()
 
+    # Clipping, in Dezibel relative to maximum (negative values)
+    clip = Float(-1000.0)
+
     # number of channels in output
     numchannels = Property( depends_on = ['sectors',])
 
     # internal identifier
     digest = Property( 
-        depends_on = ['sectors', 'grid.digest', 'source.digest', \
+        depends_on = ['sectors', 'clip', 'grid.digest', 'source.digest', \
         '__class__'], 
         )
 
@@ -1063,6 +1081,9 @@ class IntegratorSectorTime( TimeInOut ):
         for r in self.source.result(n):
             ns, nc = r.shape
             mapshape = (ns,) + gshape
+            rmax = r.max()
+            rmin = rmax * 10**(self.clip/10.0)
+            r = where(r>rmin,r,0.0)
             i = 0
             for ind in inds:
                 h = r[:].reshape(mapshape)[ (s_[:],) + ind ]

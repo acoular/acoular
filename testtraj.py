@@ -61,7 +61,7 @@ elif sys.argv[2]=='center':
 td.invalid_channels = inv_ch
 m.invalid_channels = inv_ch
 g = RectGrid(x_min=-1,x_max=1.0,y_min=-1,y_max=1,z=1.0,increment=0.0625)
-#g = RectGrid(x_min=-1,x_max=1.0,y_min=-1,y_max=1,z=1.0,increment=0.125)
+g = RectGrid(x_min=-1,x_max=1.0,y_min=-1,y_max=1,z=1.0,increment=0.125)
 #g = RectGrid(x_min=-2,x_max=2.0,y_min=-2,y_max=2,z=1.0,increment=0.25)
 td.name=path.join(td_dir,h5)
 cal=Calib(from_file=path.join(td_dir,'calib92x20091012_64-6_28-3_inverted.xml'))
@@ -75,14 +75,16 @@ td.stop= (stopbild)*2048
 #ww.save()
 fi = FiltFiltOctave(source = td)#, fraction='Third octave')
 fi.band = float(sys.argv[3])#4000
-#b = BeamformerTimeSqTraj(source = fi,grid=g, mpos=m, trajectory=tr)
-b = BeamformerTimeSq(source = fi,grid=g, mpos=m)
+b = BeamformerTimeSqTraj(source = fi,grid=g, mpos=m, trajectory=tr)
+#b = BeamformerTimeSq(source = fi,grid=g, mpos=m)
 if sys.argv[4]=='w':
-    b.weights = 'constant power per unit area'
-    
+    b.weights = 'power'
+
+print b.weights_
 avg = TimeAverage(source = b)
 avg.naverage=512
 cach = TimeCache( source = avg)
+print cach.numsamples, cach.numchannels
 r = empty((1,td.numsamples/avg.naverage,g.size))
 k = 0
 #for fi.band in (2000,):

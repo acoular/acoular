@@ -105,7 +105,7 @@ class RectGrid( HasPrivateTraits ):
         xi = 1j*round((self.x_max-self.x_min+i)/i)
         yi = 1j*round((self.y_max-self.y_min+i)/i)
         bpos = mgrid[self.x_min:self.x_max:xi, self.y_min:self.y_max:yi, \
-            self.z:self.z+1]
+            self.z:self.z+0.1]
         bpos.resize((3, self.size))
         return bpos
 

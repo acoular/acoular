@@ -5,15 +5,16 @@ from beamfpy import td_dir, L_p, TimeSamples, Calib, MicGeom, PowerSpectra, \
 RectGrid, BeamformerBase, BeamformerEig, BeamformerOrth, BeamformerCleansc, \
 MaskedTimeSamples, FiltFiltOctave, Trajectory, BeamformerTimeSq, TimeAverage, \
 TimeCache, FiltOctave, BeamformerTime, TimePower, IntegratorSectorTime
-from numpy import empty, clip, sqrt, arange, log10, sort, array, pi, zeros
+from numpy import empty, clip, sqrt, arange, log10, sort, array, pi, zeros, hypot
 from os import path
 import sys
 
 from beamfpy.sources import PointSource
 
-loc = (-1.0,0.0,1.0)
+loc = (-0.0,0.0,1.2)
 
 m = MicGeom(from_file=path.join(td_dir,'array_92x_x3_9_y-1_7_mod.xml'))
+xyz = m.mpos
 c0 = 343.0
 inv_ch=[]
 if sys.argv[2]=='64':
@@ -33,16 +34,23 @@ else:
     for i in range(92):
         if dist[0,i]<rmax:
             inv_ch.remove(i)
+#    inv_ch = [0,2,3,4,6,7,9,10,11,12,13,14,15,16,18,19,20,22,23,24,26,27,28,30,\
+#    31,32,34,35,36,38,39,40,42,43,44,46,47,48,50,51,52,54,55,56,58,59,60,62,63]\
+#    + inv_ch
+    inv_ch = [0,2,4,6,7,9,10,11,12,13,14,15,16,18,20,22,23,24,26,28,30,\
+    31,32,34,36,38,39,40,42,44,46,47,48,50,52,54,55,56,58,60,62,63]\
+    + inv_ch
 
 m.invalid_channels = inv_ch
-
+print m.num_mics
 #m = MicGeom(from_file=path.join( path.split(beamfpy.__file__)[0],'xml','array_56.xml'))
-t = PointSource(sample_freq=32000.0,numsamples=4096,mpos=m, loc=loc)
+t = PointSource(sample_freq=61440.0,numsamples=8192,mpos=m, loc=loc)
 f = PowerSpectra(window='Hanning',overlap='50%',block_size=128,ind_low=1,ind_high=30)
 f.time_data = t
 g = RectGrid(x_min=-0.3,x_max=+0.3,y_min=-0.3,y_max=+0.3,z=loc[2],increment=0.05)
 g = RectGrid(x_min=-1.0,x_max=+1.0,y_min=-1.0,y_max=+1.0,z=loc[2],increment=0.0625)
-g = RectGrid(x_min=-2.0,x_max=+0.0,y_min=-1.0,y_max=+1.0,z=loc[2],increment=0.0625)
+g = RectGrid(x_min=-1.0,x_max=+1.0,y_min=-1.0,y_max=+1.0,z=loc[2],increment=0.08)
+#g = RectGrid(x_min=-2.0,x_max=+0.0,y_min=-1.0,y_max=+1.0,z=loc[2],increment=0.0625)
 #g = RectGrid(x_min=-3.0,x_max=+1.0,y_min=-2.0,y_max=+2.0,z=loc[2],increment=0.125)
 b = BeamformerBase(freq_data=f,grid=g,mpos=m,r_diag=False,c=343)
 
@@ -75,7 +83,7 @@ tr.points[0]=(1,0,0)
 tr.points[4.0/30.0]=(-0.3,0,0)
 #~ b = BeamformerTimeSqTraj(source = fi,grid=g, mpos=m, trajectory=tr)
 bts = BeamformerTimeSq(source = fi,grid=g, mpos=m, r_diag=False,c=346.04)
-bts.weights = 'constant power per unit area'
+bts.weights = 'none'
 #bts.weights = 'constant power per unit radius'
 #print bts.weights, bts.weights_
 
@@ -119,13 +127,23 @@ for x in (map,map1):
     x3 = 10*log10(sort(x1.flat)[-6:])
     print g.increment*sqrt(4/pi*(2*x>x.max()).nonzero()[0].shape[0]),x3
 
-imshow(L_p(transpose(map1[1:-1,1:-1] * b)),vmax=max1, vmin=mx-10,interpolation='nearest',extent=g.extend())
+#imshow(L_p(transpose(map1[1:-1,1:-1] * b)),vmax=max1, vmin=mx-10,interpolation='nearest',extent=g.extend())
+imshow(L_p(transpose(map1)),vmax=max1, vmin=max1-10,interpolation='nearest',extent=g.extend())
 colorbar()
 subplot(1,3,3)
 map2 = clip(L_p(map)-L_p(map1),-20,20)
 print L_p(map.max())-L_p(map1.max())
 imshow((transpose(map2)),vmax=10, vmin=-10,interpolation='nearest',extent=g.extend())
 colorbar()
+print inv_ch
+#figure(2)
+#plot(xyz[0],xyz[1],'yo')
+#j = 0
+#for h in xyz.T:
+#    print j,hypot(h[0],h[1])
+#    j+=1
+#    
+#plot(m.mpos[0],m.mpos[1],'ro')
 show()
 
 
