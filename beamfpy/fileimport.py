@@ -1,15 +1,14 @@
 """
 fileimport.py (c) Ennes Sarradj 2007-2008, all rights reserved
 """
-
+#pylint: disable-msg = E0611, E1101, C0103, C0111, R0901, R0902, R0903, R0904, W0232
 from h5cache import td_dir
-from scipy import io
-from numpy import *
-from enthought.traits.api import HasTraits, HasPrivateTraits, Float, Int, Long, File, CArray, Property, Instance, Trait, Bool, Range, Delegate, Any, Str
-from enthought.traits.ui.api import View, Item, Group
+from numpy import fromstring, float32, newaxis, empty, sort, zeros
+from enthought.traits.api import HasPrivateTraits, Float, Int, \
+File, CArray, Property, Any, Str
+from enthought.traits.ui.api import View
 from enthought.traits.ui.menu import OKCancelButtons
-from os import path, mkdir, environ
-from string import join
+from os import path
 import cPickle
 import tables
 import ConfigParser
@@ -20,7 +19,7 @@ class time_data_import( HasPrivateTraits ):
     base class for import of time data
     """
 
-    def get_data (self,td):
+    def get_data (self, td):
         """
         imports the data into time_data object td
         (this is a dummy function)
@@ -36,27 +35,27 @@ class csv_import( time_data_import ):
     """
 
     # name of the comma delimited file to import
-    from_file = File(filter=['*.txt'],
-        desc="name of the comma delimited file to import")
+    from_file = File(filter = ['*.txt'], 
+        desc = "name of the comma delimited file to import")
 
     # header length, defaults to 6
-    header_length =  Int(6,
-        desc="length of the header to ignore during import")
+    header_length =  Int(6, 
+        desc = "length of the header to ignore during import")
 
     # number of leading columns, defaults to 1
-    dummy_columns = Int(1,
-        desc="number of leading columns to ignore during import")
+    dummy_columns = Int(1, 
+        desc = "number of leading columns to ignore during import")
 
     traits_view = View(
-        ['from_file',
-            ['header_length','dummy_columns','-'],
+        ['from_file', 
+            ['header_length', 'dummy_columns', '-'], 
             '|[Import]'
-        ],
-        title='Time data',
+        ], 
+        title = 'Time data', 
         buttons = OKCancelButtons
                     )
 
-    def get_data (self,td):
+    def get_data (self, td):
         """
         main work is done here: imports the data from CSV file into
         TimeSamples object td and saves also a '*.h5' file so this import
@@ -64,36 +63,38 @@ class csv_import( time_data_import ):
         """
         if not path.isfile(self.from_file):
             # no file there
-            time_data_import.getdata(self,td)
+            time_data_import.getdata(self, td)
             return
         #import data
-        c=self.header_length
-        d=self.dummy_columns
-        f=file(self.from_file)
+        c = self.header_length
+        d = self.dummy_columns
+        f = file(self.from_file)
         #read header
         for line in f:
-            c-=1
-            h=line.split(':')
-            if h[0]=='Scan rate':
+            c -= 1
+            h = line.split(':')
+            if h[0] == 'Scan rate':
                 sample_freq = int(1./float(h[1].split(' ')[1]))
-            if c==0:
+            if c == 0:
                 break
-        line=f.next()
-        data=fromstring(line,dtype=float32,sep=',')[d:]
-        numchannels=len(data)
+        line = f.next()
+        data = fromstring(line, dtype = float32, sep = ', ')[d:]
+        numchannels = len(data)
         name = td.name
-        if name=="":
-            name = path.join(td_dir,path.splitext(path.basename(self.from_file))[0]+'.h5')
+        if name == "":
+            name = path.join(td_dir, \
+                path.splitext(path.basename(self.from_file))[0]+'.h5')
         else:
-            if td.h5f != None:
+            if td.h5f !=  None:
                 td.h5f.close()
         # TODO problems with already open h5 files from other instances
-        f5h=tables.openFile(name,mode='w')
-        ac=f5h.createEArray(f5h.root,'time_data',tables.atom.Float32Atom(),(0,numchannels))
-        ac.setAttr('sample_freq',sample_freq)
-        ac.append(data[newaxis,:])
+        f5h = tables.openFile(name, mode = 'w')
+        ac = f5h.createEArray(f5h.root, 'time_data', \
+            tables.atom.Float32Atom(), (0, numchannels))
+        ac.setAttr('sample_freq', sample_freq)
+        ac.append(data[newaxis, :])
         for line in f:
-            ac.append(fromstring(line,dtype=float32,sep=',')[newaxis,d:])
+            ac.append(fromstring(line, dtype=float32, sep=', ')[newaxis, d:])
         f5h.close()
         td.name = name
         td.load_data()
@@ -104,18 +105,18 @@ class td_import( time_data_import ):
     """
 
     # name of the comma delimited file to import
-    from_file = File(filter=['*.td'],
-        desc="name of the *.td file to import")
+    from_file = File(filter = ['*.td'], 
+        desc = "name of the *.td file to import")
 
     traits_view = View(
-        ['from_file',
+        ['from_file', 
             '|[Import]'
-        ],
-        title='Time data',
+        ], 
+        title  = 'Time data', 
         buttons = OKCancelButtons
                     )
 
-    def get_data (self,td):
+    def get_data (self, td):
         """
         main work is done here: imports the data from *.td file into
         TimeSamples object td and saves also a '*.h5' file so this import
@@ -123,24 +124,26 @@ class td_import( time_data_import ):
         """
         if not path.isfile(self.from_file):
             # no file there
-            time_data_import.getdata(self,td)
+            time_data_import.getdata(self, td)
             return
-        f=file(self.from_file,'rb')
-        h=cPickle.load(f)
+        f = file(self.from_file, 'rb')
+        h = cPickle.load(f)
         f.close()
         sample_freq = h['sample_freq']
         data = h['data']
-        (numsamples,numchannels)=data.shape
+        numsamples, numchannels = data.shape
         name = td.name
-        if name=="":
-            name = path.join(td_dir,path.splitext(path.basename(self.from_file))[0]+'.h5')
+        if name == "":
+            name = path.join(td_dir, \
+                        path.splitext(path.basename(self.from_file))[0]+'.h5')
         else:
-            if td.h5f != None:
+            if td.h5f !=  None:
                 td.h5f.close()
         # TODO problems with already open h5 files from other instances
-        f5h=tables.openFile(name,mode='w')
-        ac=f5h.createEArray(f5h.root,'time_data',tables.atom.Float32Atom(),(0,numchannels))
-        ac.setAttr('sample_freq',sample_freq)
+        f5h = tables.openFile(name, mode = 'w')
+        ac = f5h.createEArray(f5h.root, 'time_data', \
+            tables.atom.Float32Atom(), (0, numchannels))
+        ac.setAttr('sample_freq', sample_freq)
         ac.append(data)
         f5h.close()
         td.name = name
@@ -153,18 +156,18 @@ class bk_mat_import( time_data_import ):
     """
 
     # name of the mat file to import
-    from_file = File(filter=['*.mat'],
-        desc="name of the BK pulse mat file to import")
+    from_file = File(filter = ['*.mat'], 
+        desc = "name of the BK pulse mat file to import")
 
     traits_view = View(
-        ['from_file',
+        ['from_file', 
             '|[Import]'
-        ],
-        title='Time data',
+        ], 
+        title = 'Time data', 
         buttons = OKCancelButtons
                     )
 
-    def get_data (self,td):
+    def get_data (self, td):
         """
         main work is done here: imports the data from pulse .mat file into
         time_data object td and saves also a '*.h5' file so this import
@@ -172,30 +175,32 @@ class bk_mat_import( time_data_import ):
         """
         if not path.isfile(self.from_file):
             # no file there
-            time_data_import.getdata(self,td)
+            time_data_import.getdata(self, td)
             return
         #import data
         from scipy.io import loadmat
-        m=loadmat(self.from_file)
-        fh=m['File_Header']
-        numchannels=int(fh.NumberOfChannels)
-        l=int(fh.NumberOfSamplesPerChannel)
-        sample_freq=float(fh.SampleFrequency.replace(',','.'))
-        data=empty((l,numchannels),'f')
+        m = loadmat(self.from_file)
+        fh = m['File_Header']
+        numchannels = int(fh.NumberOfChannels)
+        l = int(fh.NumberOfSamplesPerChannel)
+        sample_freq = float(fh.SampleFrequency.replace(', ', '.'))
+        data = empty((l, numchannels), 'f')
         for i in range(numchannels):
             # map SignalName "Point xx" to channel xx-1
-            ii=int(m["Channel_%i_Header" % (i+1)].SignalName[-2:])-1
-            data[:,ii]=m["Channel_%i_Data" % (i+1)]
+            ii = int(m["Channel_%i_Header" % (i+1)].SignalName[-2:])-1
+            data[:, ii] = m["Channel_%i_Data" % (i+1)]
         name = td.name
-        if name=="":
-            name = path.join(td_dir,path.splitext(path.basename(self.from_file))[0]+'.h5')
+        if name == "":
+            name = path.join(td_dir, \
+                path.splitext(path.basename(self.from_file))[0]+'.h5')
         else:
-            if td.h5f != None:
+            if td.h5f !=  None:
                 td.h5f.close()
         # TODO problems with already open h5 files from other instances
-        f5h=tables.openFile(name,mode='w')
-        ac=f5h.createEArray(f5h.root,'time_data',tables.atom.Float32Atom(),(0,numchannels))
-        ac.setAttr('sample_freq',sample_freq)
+        f5h = tables.openFile(name, mode = 'w')
+        ac = f5h.createEArray(f5h.root, 'time_data', \
+            tables.atom.Float32Atom(), (0, numchannels))
+        ac.setAttr('sample_freq', sample_freq)
         ac.append(data)
         f5h.close()
         td.name = name
@@ -207,8 +212,8 @@ class datx_d_file(HasPrivateTraits):
     datx data file
     """
     # file name
-    name = File(filter=['*.datx'],
-        desc="name of datx data file")
+    name = File(filter = ['*.datx'], 
+        desc = "name of datx data file")
 
     # file object
     f = Any()
@@ -226,22 +231,28 @@ class datx_d_file(HasPrivateTraits):
     data = CArray()
 
     def _get_block_size( self ):
-        return self.channel_count*self.num_samples_per_block*self.bytes_per_sample
+        return self.channel_count*self.num_samples_per_block*\
+                self.bytes_per_sample
 
     def get_next_blocks( self ):
-        s=self.f.read(self.blocks*self.block_size)
-        ls=len(s)
-        if ls==0:
+        s = self.f.read(self.blocks*self.block_size)
+        ls = len(s)
+        if ls == 0:
             return -1
-        bl_no=ls/self.block_size
-        self.data=fromstring(s, dtype='Int16').reshape((bl_no,self.channel_count,self.num_samples_per_block)).swapaxes(0,1).reshape((self.channel_count,bl_no*self.num_samples_per_block))
+        bl_no = ls/self.block_size
+        self.data = fromstring(s, dtype = 'Int16').reshape((bl_no, \
+            self.channel_count, self.num_samples_per_block)).swapaxes(0, \
+            1).reshape((self.channel_count, bl_no*self.num_samples_per_block))
 
-    def __init__(self,name,blocks=128):
-        self.name=name
-        self.f=file(self.name,'rb')
-        s=self.f.read(32)
+    def __init__(self, name, blocks = 128):
+        self.name = name
+        self.f = file(self.name, 'rb')
+        s = self.f.read(32)
         # header
-        s0=struct.unpack('IIIIIIHHf',s)        # Getting information about Properties of data-file 3=Offset to data 4=channel count 5=number of samples per block 6=bytes per sample
+        s0 = struct.unpack('IIIIIIHHf', s)        
+        # Getting information about Properties of data-file 
+        # 3 = Offset to data 4 = channel count 
+        # 5 = number of samples per block 6 = bytes per sample
         self.data_offset = s0[3]
         self.channel_count = s0[4]
         self.num_samples_per_block = s0[5]
@@ -271,27 +282,31 @@ class datx_channel(HasPrivateTraits):
     z0 = Float()
 
 
-    def __init__(self,config,channel):
-        d_file,ch_no,ch_K=config.get('channels',channel).split(',') # Extraction and Splitting of Channel information
-        self.d_file=d_file
-        self.ch_no=int(ch_no)
-        self.label=config.get(ch_K,'channel_label')
-        self.ch_K=ch_K
-        # V                                                     # Reading conversion factors
-        self.volts_per_count=float(config.get(ch_K,'volts_per_count'))
-        self.msl_ccf=float(config.get(ch_K,'msl_ccf'))
-        self.cal_corr_factor=float(config.get(ch_K,'cal_corr_factor'))
-        self.internal_gain=float(config.get(ch_K,'internal_gain'))
-        self.external_gain=float(config.get(ch_K,'external_gain'))
-        self.tare_volts=float(config.get(ch_K,'tare_volts'))
+    def __init__(self, config, channel):
+        d_file, ch_no, ch_K = config.get('channels', channel).split(', ') 
+        # Extraction and Splitting of Channel information
+        self.d_file = d_file
+        self.ch_no = int(ch_no)
+        self.label = config.get(ch_K, 'channel_label')
+        self.ch_K = ch_K
+        # V                                                     
+        # Reading conversion factors
+        self.volts_per_count = float(config.get(ch_K, 'volts_per_count'))
+        self.msl_ccf = float(config.get(ch_K, 'msl_ccf'))
+        self.cal_corr_factor = float(config.get(ch_K, 'cal_corr_factor'))
+        self.internal_gain = float(config.get(ch_K, 'internal_gain'))
+        self.external_gain = float(config.get(ch_K, 'external_gain'))
+        self.tare_volts = float(config.get(ch_K, 'tare_volts'))
         # EU
-        self.cal_coeff_2 = float(config.get(ch_K,'cal_coeff_2'))
-        self.cal_coeff_1 = float(config.get(ch_K,'cal_coeff_1'))
-        self.tare_eu = float(config.get(ch_K,'tare_eu'))
-        self.z0 = (self.volts_per_count * self.msl_ccf * self.cal_corr_factor) / (self.internal_gain * self.external_gain)
+        self.cal_coeff_2 = float(config.get(ch_K, 'cal_coeff_2'))
+        self.cal_coeff_1 = float(config.get(ch_K, 'cal_coeff_1'))
+        self.tare_eu = float(config.get(ch_K, 'tare_eu'))
+        self.z0 = (self.volts_per_count * self.msl_ccf * self.cal_corr_factor) \
+                    / (self.internal_gain * self.external_gain)
 
-    def scale(self,x):
-        return (x * self.z0 - self.tare_volts) * self.cal_coeff_2 + self.cal_coeff_1 - self.tare_eu
+    def scale(self, x):
+        return (x * self.z0 - self.tare_volts) * self.cal_coeff_2 + \
+                self.cal_coeff_1 - self.tare_eu
 
 class datx_import(time_data_import):
     """
@@ -299,18 +314,18 @@ class datx_import(time_data_import):
     """
 
     # name of the mat file to import
-    from_file = File(filter=['*.datx_index'],
-        desc="name of the datx index file to import")
+    from_file = File(filter = ['*.datx_index'], 
+        desc = "name of the datx index file to import")
 
     traits_view = View(
-        ['from_file',
+        ['from_file', 
             '|[Import]'
-        ],
-        title='Time data',
+        ], 
+        title = 'Time data', 
         buttons = OKCancelButtons
                     )
 
-    def get_data (self,td):
+    def get_data (self, td):
         """
         main work is done here: imports the data from datx files into
         time_data object td and saves also a '*.h5' file so this import
@@ -318,43 +333,51 @@ class datx_import(time_data_import):
         """
         if not path.isfile(self.from_file):
             # no file there
-            time_data_import.getdata(self,td)
+            time_data_import.getdata(self, td)
             return
         #browse datx information
-        f0=open(self.from_file)
-        config=ConfigParser.ConfigParser()
+        f0 = open(self.from_file)
+        config = ConfigParser.ConfigParser()
         config.readfp(f0)
-        sample_rate=float(config.get('keywords','sample_rate'))           # reading sample-rate from index-file
-        channels=[]
-        d_files={}
-        for channel in sort(config.options('channels')):                                         # Loop over all channels assigned in index-file
-            ch=datx_channel(config,channel)
-            if ch.label.find('Mic')>=0:
+        sample_rate = float(config.get('keywords', 'sample_rate'))
+        # reading sample-rate from index-file
+        channels = []
+        d_files = {}
+        # Loop over all channels assigned in index-file
+        for channel in sort(config.options('channels')):
+            ch = datx_channel(config, channel)
+            if ch.label.find('Mic') >= 0:
                 channels.append(ch)
                 if not d_files.has_key(ch.d_file):
-                    d_files[ch.d_file]=datx_d_file(path.join(path.dirname(self.from_file),config.get(ch.d_file,'fn')),32)
-        numchannels=len(channels)
+                    d_files[ch.d_file] = \
+                        datx_d_file(path.join(path.dirname(self.from_file), \
+                            config.get(ch.d_file, 'fn')), 32)
+        numchannels = len(channels)
         # prepare hdf5
         name = td.name
-        if name=="":
-            name = path.join(td_dir,path.splitext(path.basename(self.from_file))[0]+'.h5')
+        if name == "":
+            name = path.join(td_dir, \
+                path.splitext(path.basename(self.from_file))[0]+'.h5')
         else:
-            if td.h5f != None:
+            if td.h5f !=  None:
                 td.h5f.close()
         # TODO problems with already open h5 files from other instances
-        f5h=tables.openFile(name,mode='w')
-        ac=f5h.createEArray(f5h.root,'time_data',tables.atom.Float32Atom(),(0,numchannels))
-        ac.setAttr('sample_freq',sample_rate)
-        block_data=zeros((128*d_files[channels[0].d_file].num_samples_per_block,numchannels),'Float32')
-        flag=0
+        f5h = tables.openFile(name, mode = 'w')
+        ac = f5h.createEArray(f5h.root, 'time_data', \
+            tables.atom.Float32Atom(), (0, numchannels))
+        ac.setAttr('sample_freq', sample_rate)
+        block_data = \
+            zeros((128*d_files[channels[0].d_file].num_samples_per_block, \
+                numchannels), 'Float32')
+        flag = 0
         while(not flag):
             for i in d_files.values():
-                flag=i.get_next_blocks()
+                flag = i.get_next_blocks()
             if flag:
                 continue
             for i in range(numchannels):
-                data=d_files[channels[i].d_file].data[channels[i].ch_no]
-                block_data[:data.size,i]=channels[i].scale(data)
+                data = d_files[channels[i].d_file].data[channels[i].ch_no]
+                block_data[:data.size, i] = channels[i].scale(data)
             ac.append(block_data[:data.size])
         f5h.close()
         f0.close()

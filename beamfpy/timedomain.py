@@ -7,7 +7,7 @@ Created on Tue May  4 12:25:10 2010
 #pylint: disable-msg=E0611, E1101, C0103, C0111, R0901, R0902, R0903, R0904, W0232
 # imports from other packages
 from numpy import array, newaxis, empty, empty_like, pi, sin, sqrt, arange, \
-clip, sort, r_, s_, zeros, int16, histogram, unique1d, log10, where
+clip, sort, r_, s_, zeros, int16, histogram, unique1d, where
 from scipy.interpolate import splprep, splev
 from enthought.traits.api import HasPrivateTraits, Float, Int, Long, \
 File, CArray, Property, Instance, Trait, Bool, Delegate, Any, \
@@ -16,6 +16,7 @@ from enthought.traits.ui.api import View, Item
 from enthought.traits.ui.menu import OKCancelButtons
 from os import path
 import tables
+import wave
 from scipy.signal import butter, lfilter, filtfilt
 
 # beamfpy imports
@@ -124,6 +125,10 @@ class TimeSamples( SamplesGenerator ):
     basename = Property( depends_on = 'name', #filter=['*.h5'], 
         desc="basename of data file")
     
+    # calibration data
+    calib = Trait( Calib, 
+        desc="Calibration data")
+    
     # number of channels, is set automatically
     numchannels = Long(0L, 
         desc="number of input channels")
@@ -140,7 +145,7 @@ class TimeSamples( SamplesGenerator ):
     h5f = Instance(tables.File)
     
     # internal identifier
-    digest = Property( depends_on = ['basename', ])
+    digest = Property( depends_on = ['basename', 'calib.digest'])
 
     traits_view = View(
         ['name{File name}', 
@@ -185,9 +190,19 @@ class TimeSamples( SamplesGenerator ):
     # generator function
     def result(self, num=128):
         i = 0
-        while i < self.numsamples:
-            yield self.data[i:i+num]
-            i += num
+        if self.calib:
+            if self.calib.num_mics == self.numchannels:
+                cal_factor = self.calib.data[newaxis]
+            else:
+                raise ValueError("calibration data not compatible: %i, %i" % \
+                            (self.calib.num_mics, self.numchannels))
+            while i < self.numsamples:
+                yield self.data[i:i+num]*cal_factor
+                i += num
+        else:
+            while i < self.numsamples:
+                yield self.data[i:i+num]
+                i += num
 
 class MaskedTimeSamples( TimeSamples ):
     """
@@ -213,10 +228,6 @@ class MaskedTimeSamples( TimeSamples ):
     channels = Property(depends_on = ['invalid_channels', 'numchannels_total'], 
         desc="channel mask")
         
-    # calibration data
-    calib = Trait( Calib, 
-        desc="Calibration data")
-    
     # number of channels, is set automatically
     numchannels_total = Long(0L, 
         desc="total number of input channels")
@@ -312,7 +323,8 @@ class MaskedTimeSamples( TimeSamples ):
             elif self.calib.num_mics == self.numchannels:
                 cal_factor = self.calib.data[newaxis]
             else:
-                cal_factor = 1.0
+                raise ValueError("calibration data not compatible: %i, %i" % \
+                            (self.calib.num_mics, self.numchannels))
         while i < stop:
             yield self.data[i:min(i+num, stop)][:, self.channels]*cal_factor
             i += num
@@ -422,12 +434,10 @@ class TimeReverse( TimeInOut ):
         l = []
         l.extend(self.source.result(n))
         temp = empty_like(l[0])
-        nst = temp.shape[0]
         h = l.pop()
         nsh = h.shape[0]
         temp[:nsh] = h[::-1]
         for h in l[::-1]:
-#            print nsh, nst
             temp[nsh:] = h[:nsh-1:-1]
             yield temp
             temp[:nsh] = h[nsh-1::-1]
@@ -515,12 +525,12 @@ def const_power_weight( bf ):
     to make the power per unit area of the
     microphone array geometry constant 
     """
-    r = bf.env.r( bf.c, zeros((3,1)), bf.mpos.mpos) # distances to center
+    r = bf.env.r( bf.c, zeros((3, 1)), bf.mpos.mpos) # distances to center
     # round the relative distances to one decimal place
     r = (r/r.max()).round(decimals=1)
-    ru,ind = unique1d(r,return_inverse=True)
+    ru, ind = unique1d(r, return_inverse=True)
     ru = (ru[1:]+ru[:-1])/2
-    count,bins = histogram(r,r_[0,ru,1.5*r.max()-0.5*ru[-1]])
+    count, bins = histogram(r, r_[0, ru, 1.5*r.max()-0.5*ru[-1]])
     bins *= bins
     weights = sqrt((bins[1:]-bins[:-1])/count)
     weights /= weights.mean()
@@ -843,7 +853,7 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
         tpos = gpos + array(self.trajectory.location(tmax))[:, newaxis]
         dmax2 = array(self.env.r( self.c, tpos, self.mpos.mpos)/c, \
             dtype=int).max()
-        dmax = max(dmax1,dmax2)
+        dmax = max(dmax1, dmax2)
         #max1 = self.r0.max() # maximum grid point distance to center
         # maximum microphone distance to center:
         #max2 = (self.mpos.mpos**2).sum(-1).max() 
@@ -1016,7 +1026,6 @@ class WriteWAV( TimeInOut ):
         for nr in self.channels:
             name += '_%i' % nr
         name += '.wav'
-        import wave
         wf = wave.open(name,'w')
         wf.setnchannels(nc)
         wf.setsampwidth(2)
@@ -1047,7 +1056,7 @@ class IntegratorSectorTime( TimeInOut ):
     clip = Float(-1000.0)
 
     # number of channels in output
-    numchannels = Property( depends_on = ['sectors',])
+    numchannels = Property( depends_on = ['sectors', ])
 
     # internal identifier
     digest = Property( 
@@ -1083,11 +1092,11 @@ class IntegratorSectorTime( TimeInOut ):
             mapshape = (ns,) + gshape
             rmax = r.max()
             rmin = rmax * 10**(self.clip/10.0)
-            r = where(r>rmin,r,0.0)
+            r = where(r>rmin, r, 0.0)
             i = 0
             for ind in inds:
                 h = r[:].reshape(mapshape)[ (s_[:],) + ind ]
-                o[:ns,i] = h.reshape(h.shape[0],-1).sum(axis=1)
+                o[:ns, i] = h.reshape(h.shape[0], -1).sum(axis=1)
                 i += 1
             yield o[:ns]
 

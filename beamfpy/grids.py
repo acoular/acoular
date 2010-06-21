@@ -8,8 +8,7 @@ Created on Tue May  4 12:25:10 2010
 # imports from other packages
 from numpy import mgrid, s_, array, isscalar, float32, float64, newaxis, sqrt
 from enthought.traits.api import HasPrivateTraits, Float, Property, File, \
-Any, Int, CArray, List, \
-property_depends_on, cached_property, on_trait_change
+CArray, List, property_depends_on, cached_property, on_trait_change
 from enthought.traits.ui.api import View
 from enthought.traits.ui.menu import OKCancelButtons
 from os import path
@@ -283,7 +282,7 @@ class MicGeom( HasPrivateTraits ):
         for channel in self.invalid_channels:
             if channel in allr:
                 allr.remove(channel)
-        return self.mpos_tot[:,array(allr)]
+        return self.mpos_tot[:, array(allr)]
 
     @cached_property
     def _get_num_mics( self ):

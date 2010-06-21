@@ -11,21 +11,16 @@ from numpy.random import normal, seed
 from enthought.traits.api import Float, Int, Long, \
 Property, Trait, Delegate, \
 cached_property, Tuple
-from enthought.traits.ui.api import View, Item
-from enthought.traits.ui.menu import OKCancelButtons
-from os import path
-import tables
 from scipy.signal import butter, cheby1, lfilter, filtfilt
 
 # beamfpy imports
 from timedomain import TimeSamples, TimeInOut
 from internal import digest
-from h5cache import H5cache
-from grids import RectGrid, MicGeom, Environment
+from grids import MicGeom, Environment
 
 class PointSource( TimeSamples ):
     """
-    point source class for simulations
+    fixed point source class for simulations
     generates output via the generator 'result'
     """
 
@@ -38,7 +33,7 @@ class PointSource( TimeSamples ):
         desc="random seed value")
     
     # location of source 
-    loc = Tuple((0.0,0.0,1.0),
+    loc = Tuple((0.0, 0.0, 1.0),
         desc="source location")
                
     # number of channels in output
@@ -72,11 +67,11 @@ class PointSource( TimeSamples ):
     def result(self, num=128):
         seed(self.seed)
         signal = fft.fft(normal(scale=self.rms, size=self.numsamples))
-        pos = array(self.loc, dtype=float).reshape(3,1)
-        rm = self.env.r(self.c,pos,self.mpos.mpos)
+        pos = array(self.loc, dtype=float).reshape(3, 1)
+        rm = self.env.r(self.c, pos, self.mpos.mpos)
         delays = exp(-2j*pi*(rm/self.c)*\
             fft.fftfreq(int(self.numsamples),1.0/self.sample_freq)[:,newaxis])
-        out = fft.ifft(signal[:,newaxis]*delays,axis=0).real/rm
+        out = fft.ifft(signal[:, newaxis]*delays, axis=0).real/rm
         i = 0
         while i < self.numsamples:
             yield out[i:i+num]

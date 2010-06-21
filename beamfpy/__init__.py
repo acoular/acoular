@@ -8,7 +8,7 @@ from fileimport import time_data_import, csv_import, td_import, \
 bk_mat_import, datx_import
 try:
     from nidaqimport import nidaq_import
-except:
+except ImportError:
     pass
 
 from h5cache import td_dir, cache_dir
@@ -23,4 +23,4 @@ from beamfpy import  PowerSpectra, EigSpectra, \
 BeamformerBase, BeamformerCapon, BeamformerEig, BeamformerMusic,\
 BeamformerDamas, BeamformerOrth,BeamformerCleansc, \
 L_p, synthetic
-
+from sources import PointSource

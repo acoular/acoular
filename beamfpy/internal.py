@@ -1,16 +1,16 @@
 """
 internal.py (c) Ennes Sarradj 2008, all rights reserved
 """
-import md5
+import hashlib
 
-def digest( object, name='digest'):
-    s = []
-    for do in object.trait(name).depends_on:
-        v = object
+def digest( obj, name='digest'):
+    str_ = []
+    for do_ in obj.trait(name).depends_on:
+        vobj = obj
         try:
-            for x in do.split('.'):               
-                v = v.get(x).values()[0]
-            s.append(str(v))
+            for i in do_.split('.'):               
+                vobj = vobj.get(i).values()[0]
+            str_.append(str(vobj))
         except:
             pass
-    return '_'+md5.new(''.join(s)).hexdigest()
+    return '_' + hashlib.md5(''.join(str_)).hexdigest()

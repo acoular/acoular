@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
-#pylint: disable-msg=E0611,C0111,R0901,R0902,R0903,R0904,W0232
+#pylint: disable-msg=E0611, E1101, C0103, C0111, R0901, R0902, R0903, R0904, W0232
 """
 Several classes for the implemetation of acoustic beamforming
 
 A minimal usage example would be:
 
 >>    m=MicGeom(from_file='mic_geom.xml')
->>    g=RectGrid(x_min=-0.8,x_max=-0.2,y_min=-0.1,y_max=0.3,z=0.8
-        ,increment=0.01)
+>>    g=RectGrid(x_min=-0.8, x_max=-0.2, y_min=-0.1, y_max=0.3, z=0.8
+        , increment=0.01)
 >>    t1=TimeSamples(name='measured_data.h5')
 >>    cal=Calib(from_file='calibration_data.xml')
->>    f1=EigSpectra(time_data=t1,block_size=256,window="Hanning",overlap='75%'
-        ,calib=cal)
->>    e1=BeamformerBase(freq_data=f1,grid=g,mpos=m,r_diag=False)
+>>    f1=EigSpectra(time_data=t1, block_size=256, window="Hanning", 
+                    overlap='75%', calib=cal)
+>>    e1=BeamformerBase(freq_data=f1, grid=g, mpos=m, r_diag=False)
 >>    fr=4000
->>    L1=L_p(e1.synthetic(fr,0))
+>>    L1=L_p(e1.synthetic(fr, 0))
 
 The classes in the module possess a number of automatic data update
 capabilities. That is, only the traits must be set to get the results.
@@ -39,13 +39,16 @@ __author__ = "Ennes Sarradj, ennes.sarradj@gmx.de"
 __date__ = "5 May 2010"
 __version__ = "3.0beta"
 
-from numpy import *
+from numpy import array, ones, hanning, hamming, bartlett, blackman, \
+dot, newaxis, zeros, empty, fft, float32, float64, complex64, linalg, where, \
+searchsorted, pi, multiply, sign, s_, prod, diag, arange, sqrt, exp, log10
 from enthought.traits.api import HasPrivateTraits, Float, Int, \
 CArray, Property, Instance, Trait, Bool, Range, Delegate, \
 cached_property, on_trait_change, property_depends_on
 from enthought.traits.ui.api import View, Item
 from enthought.traits.ui.menu import OKCancelButtons
-from beamformer import * # ok to use *
+from beamformer import faverage, gseidel, r_beam_psf, \
+r_beamdiag, r_beamfull, r_beamortho_sum, r_beamortho_sum_diag
 import tables
 
 from h5cache import H5cache
@@ -61,40 +64,40 @@ class PowerSpectra( HasPrivateTraits ):
     """
 
     # the TimeSamples object that provides the data
-    time_data = Trait(TimeSamples,
+    time_data = Trait(TimeSamples, 
         desc="time data object")
 
-    # the Calib object that provides the calibration data,
+    # the Calib object that provides the calibration data, 
     # defaults to no calibration, i.e. the raw time data is used
     calib = Instance(Calib)
 
-    # FFT block size, one of: 128,256,512,1024,2048 ... 16384
+    # FFT block size, one of: 128, 256, 512, 1024, 2048 ... 16384
     # defaults to 1024
-    block_size = Trait(1024,128,256,512,1024,2048,4096,8192,16384,
+    block_size = Trait(1024, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 
         desc="number of samples per FFT block")
 
     # index of lowest frequency line
     # defaults to 0
-    ind_low = Range(1,
+    ind_low = Range(1, 
         desc="index of lowest frequency line")
 
     # index of highest frequency line
     # defaults to -1 (last possible line for default block_size)
-    ind_high = Int(-1,
+    ind_high = Int(-1, 
         desc="index of highest frequency line")
 
     # window function for FFT, one of:
-    # 'Rectangular' (default),'Hanning','Hamming','Bartlett','Blackman'
-    window = Trait('Rectangular',
-        {'Rectangular':ones,
-        'Hanning':hanning,
-        'Hamming':hamming,
-        'Bartlett':bartlett,
-        'Blackman':blackman},
+    # 'Rectangular' (default), 'Hanning', 'Hamming', 'Bartlett', 'Blackman'
+    window = Trait('Rectangular', 
+        {'Rectangular':ones, 
+        'Hanning':hanning, 
+        'Hamming':hamming, 
+        'Bartlett':bartlett, 
+        'Blackman':blackman}, 
         desc="type of window for FFT")
 
-    # overlap factor for averaging: 'None'(default),'50%','75%','87.5%'
-    overlap = Trait('None',{'None':1,'50%':2,'75%':4,'87.5%':8},
+    # overlap factor for averaging: 'None'(default), '50%', '75%', '87.5%'
+    overlap = Trait('None', {'None':1, '50%':2, '75%':4, '87.5%':8}, 
         desc="overlap of FFT blocks")
 
     # number of FFT blocks to average (auto-set from block_size and overlap)
@@ -110,50 +113,50 @@ class PowerSpectra( HasPrivateTraits ):
         desc = "index range" )
         
     # the cross spectral matrix as
-    # (number of frequencies,numchannels,numchannels) array of complex
+    # (number of frequencies, numchannels, numchannels) array of complex
     csm = Property( 
         desc="cross spectral matrix")
 
     # internal identifier
     digest = Property( 
-        depends_on = ['time_data.digest','calib.digest','block_size',
-            'window','overlap'],
+        depends_on = ['time_data.digest', 'calib.digest', 'block_size', 
+            'window', 'overlap'], 
         )
 
     # hdf5 cache file
     h5f = Instance(tables.File)
     
     traits_view = View(
-        ['time_data@{}',
-         'calib@{}',
-            ['block_size',
-                'window',
-                'overlap',
-                    ['ind_low{Low Index}',
-                    'ind_high{High Index}',
-                    '-[Frequency range indices]'],
-                    ['num_blocks~{Number of blocks}',
-                    'freq_range~{Frequency range}',
-                    '-'],
+        ['time_data@{}', 
+         'calib@{}', 
+            ['block_size', 
+                'window', 
+                'overlap', 
+                    ['ind_low{Low Index}', 
+                    'ind_high{High Index}', 
+                    '-[Frequency range indices]'], 
+                    ['num_blocks~{Number of blocks}', 
+                    'freq_range~{Frequency range}', 
+                    '-'], 
                 '[FFT-parameters]'
-            ],
-        ],
+            ], 
+        ], 
         buttons = OKCancelButtons
         )
     
-    @property_depends_on('time_data.numsamples,block_size,overlap')
+    @property_depends_on('time_data.numsamples, block_size, overlap')
     def _get_num_blocks ( self ):
         return self.overlap_*self.time_data.numsamples/self.block_size-\
         self.overlap_+1
 
-    @property_depends_on( 'time_data.sample_freq,block_size,ind_low,ind_high' )
+    @property_depends_on('time_data.sample_freq, block_size, ind_low, ind_high')
     def _get_freq_range ( self ):
         try:
             return self.fftfreq()[[ self.ind_low, self.ind_high ]]
         except IndexError:
-            return array([0.,0])
+            return array([0., 0])
 
-    @property_depends_on( 'block_size,ind_low,ind_high' )
+    @property_depends_on( 'block_size, ind_low, ind_high' )
     def _get_indices ( self ):
         try:
             return range(self.block_size/2+1)[ self.ind_low: self.ind_high ]
@@ -170,56 +173,64 @@ class PowerSpectra( HasPrivateTraits ):
         cross spectral matrix is either loaded from cache file or
         calculated and then additionally stored into cache
         """
+        print self.time_data.calib, self.calib
+        # dual calibration
+        if self.time_data.calib and self.calib:
+            if self.time_data.calib.digest == self.calib.digest:
+                self.calib = None # ignore it silently
+            else:
+                raise ValueError("nonidentical dual calibration for both "\
+                                "TimeSamples and PowerSpectra object")
+        print self.time_data.calib, self.calib
         name = 'csm_' + self.digest
         H5cache.get_cache( self, self.time_data.basename )
         if not name in self.h5f.root:
             t = self.time_data
             wind = self.window_( self.block_size )
             weight = dot( wind, wind )
-            wind = wind[newaxis,:].swapaxes( 0, 1 )
+            wind = wind[newaxis, :].swapaxes( 0, 1 )
             numfreq = self.block_size/2 + 1
-            csm_shape = (numfreq,t.numchannels,t.numchannels)
-            csm = zeros(csm_shape,'D')
-            print "num blocks",self.num_blocks
+            csm_shape = (numfreq, t.numchannels, t.numchannels)
+            csm = zeros(csm_shape, 'D')
+            print "num blocks", self.num_blocks
+            # for backward compatibilty
             if self.calib:
-                if self.calib.num_mics==t.numchannels:
-                    wind = wind * self.calib.data[newaxis,:]
+                if self.calib.num_mics == t.numchannels:
+                    wind = wind * self.calib.data[newaxis, :]
                 else:
-                    print "warning: calibration data not compatible:", \
-                    self.calib.num_mics,t.numchannels
+                    raise ValueError(
+                            "calibration data not compatible: %i, %i" % \
+                            (self.calib.num_mics, t.numchannels))
             bs = self.block_size
-            temp = empty((2*bs,t.numchannels))
+            temp = empty((2*bs, t.numchannels))
             pos = bs
             posinc = bs/self.overlap_
             for data in t.result(bs):
                 ns, nc = data.shape
                 temp[bs:bs+ns] = data
-                while pos+bs<=bs+ns:
-                    ft = fft.rfft(temp[pos:(pos+bs)]*wind,None,0)
-                    faverage(csm,ft)
+                while pos+bs <= bs+ns:
+                    ft = fft.rfft(temp[pos:(pos+bs)]*wind, None, 0)
+                    faverage(csm, ft)
                     pos += posinc
                 temp[0:bs] = temp[bs:]
                 pos -= bs
             # onesided spectrum: multiplication by 2.0=sqrt(2)^2
-            csm=csm*(2.0/self.block_size/weight/self.num_blocks)
+            csm = csm*(2.0/self.block_size/weight/self.num_blocks)
             print (2.0/self.block_size/weight/self.num_blocks)
             atom = tables.ComplexAtom(8)
             ac = self.h5f.createCArray(self.h5f.root, name, atom, csm_shape)
             ac[:] = csm
             return ac
         else:
-            return self.h5f.getNode('/',name)
+            return self.h5f.getNode('/', name)
 
     def fftfreq ( self ):
         """
         returns an array of the frequencies for the spectra in the 
         cross spectral matrix from 0 to fs/2
         """
-        return abs(fft.fftfreq(self.block_size,1./self.time_data.sample_freq)[:self.block_size/2+1])
-#        if self.time_data.sample_freq>0:
-#            return fft.fftfreq(self.block_size,1./self.time_data.sample_freq)[:self.block_size/2+1][self.ind_low:self.ind_high]
-#        else:
-#            return array([0.],'d')
+        return abs(fft.fftfreq(self.block_size, 1./self.time_data.sample_freq)\
+                    [:self.block_size/2+1])
 
 class EigSpectra( PowerSpectra ):
     """
@@ -253,18 +264,21 @@ class EigSpectra( PowerSpectra ):
         csm = self.csm #trigger calculation
         if (not name_eva in self.h5f.root) or (not name_eve in self.h5f.root):
             csm_shape = self.csm.shape
-            eva = empty(csm_shape[0:2],float32)
-            eve = empty(csm_shape,complex64)
+            eva = empty(csm_shape[0:2], float32)
+            eve = empty(csm_shape, complex64)
             for i in range(csm_shape[0]):
-                (eva[i],eve[i])=linalg.eigh(self.csm[i])
+                (eva[i], eve[i])=linalg.eigh(self.csm[i])
             atom_eva = tables.Float32Atom()
             atom_eve = tables.ComplexAtom(8)
             #filters = tables.Filters(complevel=5, complib='zlib')
-            ac_eva = self.h5f.createCArray(self.h5f.root, name_eva, atom_eva, eva.shape)#, filters=filters)
-            ac_eve = self.h5f.createCArray(self.h5f.root, name_eve, atom_eve, eve.shape)#, filters=filters)
+            ac_eva = self.h5f.createCArray(self.h5f.root, name_eva, atom_eva, \
+                eva.shape)#, filters=filters)
+            ac_eve = self.h5f.createCArray(self.h5f.root, name_eve, atom_eve, \
+                eve.shape)#, filters=filters)
             ac_eva[:] = eva
             ac_eve[:] = eve
-        return (self.h5f.getNode('/',name_eva),self.h5f.getNode('/',name_eve))
+        return (self.h5f.getNode('/', name_eva), \
+                    self.h5f.getNode('/', name_eve))
             
 
     def synthetic_ev( self, freq, num=0):
@@ -275,17 +289,17 @@ class EigSpectra( PowerSpectra ):
         num = 3: third octave band
         etc.
         """
-        f=self.fftfreq()
-        if num==0:
+        f = self.fftfreq()
+        if num == 0:
             # single frequency line
-            return self.eva[searchsorted(f,freq)]
+            return self.eva[searchsorted(f, freq)]
         else:
-            f1=searchsorted(f,freq*2.**(-0.5/num))
-            f2=searchsorted(f,freq*2.**(0.5/num))
-            if f1==f2:
+            f1 = searchsorted(f, freq*2.**(-0.5/num))
+            f2 = searchsorted(f, freq*2.**(0.5/num))
+            if f1 == f2:
                 return self.eva[f1]
             else:
-                return sum(self.eva[f1:f2],0)
+                return sum(self.eva[f1:f2], 0)
 
 class BeamformerBase( HasPrivateTraits ):
     """
@@ -293,33 +307,33 @@ class BeamformerBase( HasPrivateTraits ):
     """
 
     # PowerSpectra object that provides the cross spectral matrix
-    freq_data = Trait(PowerSpectra,
+    freq_data = Trait(PowerSpectra, 
         desc="freq data object")
 
     # RectGrid object that provides the grid locations
-    grid = Trait(RectGrid,
+    grid = Trait(RectGrid, 
         desc="beamforming grid")
 
     # MicGeom object that provides the microphone locations
-    mpos = Trait(MicGeom,
+    mpos = Trait(MicGeom, 
         desc="microphone geometry")
         
     # Environment object that provides speed of sound and grid-mic distances
-    env = Trait(Environment(),Environment)
+    env = Trait(Environment(), Environment)
 
     # the speed of sound, defaults to 343 m/s
-    c = Float(343.,
+    c = Float(343., 
         desc="speed of sound")
 
     # flag, if true (default), the main diagonal is removed before beamforming
-    r_diag = Bool(True,
+    r_diag = Bool(True, 
         desc="removal of diagonal")
 
     # hdf5 cache file
     h5f = Instance(tables.File)
     
     # the result, sound pressure squared in all grid locations
-    # as (number of frequencies, nxsteps,nysteps) array of float
+    # as (number of frequencies, nxsteps, nysteps) array of float
     result = Property(
         desc="beamforming result")
         
@@ -333,24 +347,25 @@ class BeamformerBase( HasPrivateTraits ):
     
     # internal identifier
     digest = Property( 
-        depends_on = ['mpos.digest', 'grid.digest', 'freq_data.digest', 'c', 'r_diag','env.digest'],
+        depends_on = ['mpos.digest', 'grid.digest', 'freq_data.digest', 'c', \
+            'r_diag', 'env.digest'], 
         )
 
     # internal identifier
     ext_digest = Property( 
-        depends_on = ['digest','freq_data.ind_low','freq_data.ind_high'],
+        depends_on = ['digest', 'freq_data.ind_low', 'freq_data.ind_high'], 
         )
 
     traits_view = View(
         [
-            [Item('mpos{}',style='custom')],
-            [Item('grid',style='custom'),'-<>'],
-            [Item('r_diag',label='diagonal removed')],
-            [Item('c',label='speed of sound')],
-            [Item('env{}',style='custom')],
+            [Item('mpos{}', style='custom')], 
+            [Item('grid', style='custom'), '-<>'], 
+            [Item('r_diag', label='diagonal removed')], 
+            [Item('c', label='speed of sound')], 
+            [Item('env{}', style='custom')], 
             '|'
-        ],
-        title='Beamformer options',
+        ], 
+        title='Beamformer options', 
         buttons = OKCancelButtons
         )
 
@@ -376,35 +391,35 @@ class BeamformerBase( HasPrivateTraits ):
         beamforming result is either loaded or calculated
         """
         #try:
-        digest=''
-        while self.digest!=digest:
+        digest = ''
+        while self.digest != digest:
             digest = self.digest
             name = self.__class__.__name__ + self.digest
-            print 1,name
+            print 1, name
             numchannels = self.freq_data.time_data.numchannels
-            print "nch",numchannels
-            if  numchannels != self.mpos.num_mics or numchannels==0:
+            print "nch", numchannels
+            if  numchannels != self.mpos.num_mics or numchannels == 0:
                 return None#zeros(1)
                 raise ValueError()
             numfreq = self.freq_data.block_size/2 + 1
             H5cache.get_cache( self, self.freq_data.time_data.basename)
             if not name in self.h5f.root:
                 group = self.h5f.createGroup(self.h5f.root, name)
-                shape = (numfreq,self.grid.size)
+                shape = (numfreq, self.grid.size)
                 atom = tables.Float32Atom()
                 #filters = tables.Filters(complevel=5, complib='zlib')
-                ac = self.h5f.createCArray(group, 'result', atom, shape)#, filters=filters)
-                shape = (numfreq,)
+                ac = self.h5f.createCArray(group, 'result', atom, shape)
+                shape = (numfreq, )
                 atom = tables.BoolAtom()
-                fr = self.h5f.createCArray(group, 'freqs', atom, shape)#, filters=filters)
+                fr = self.h5f.createCArray(group, 'freqs', atom, shape)
             else:
-                ac = self.h5f.getNode('/'+name,'result')
-                fr = self.h5f.getNode('/'+name,'freqs')
-            # print self.freq_data.h5f#csm[5,1,1]
+                ac = self.h5f.getNode('/'+name, 'result')
+                fr = self.h5f.getNode('/'+name, 'freqs')
+            # print self.freq_data.h5f#csm[5, 1, 1]
             if not fr[self.freq_data.ind_low:self.freq_data.ind_high].all():
-                self.calc(ac,fr)
+                self.calc(ac, fr)
                 self.h5f.flush()
-            print 2,name
+            print 2, name
         return ac
      #   except:
       #      import sys
@@ -419,40 +434,26 @@ class BeamformerBase( HasPrivateTraits ):
         # prepare calculation
         kj = 2j*pi*self.freq_data.fftfreq()/self.c
         numchannels = self.freq_data.time_data.numchannels
-        e = zeros((numchannels),'D')
+        e = zeros((numchannels), 'D')
         r0 = self.r0
         rm = self.rm
-        h = zeros((1,self.grid.size),'d')
+        h = zeros((1, self.grid.size), 'd')
         # function
         if self.r_diag:
             beamfunc = r_beamdiag
             adiv = 1.0/(numchannels*numchannels-numchannels)
-            scalefunc = lambda h : adiv*multiply(h,(sign(h)+1-1e-35)/2)
+            scalefunc = lambda h : adiv*multiply(h, (sign(h)+1-1e-35)/2)
         else:
             beamfunc = r_beamfull
-            adiv= 1.0/(numchannels*numchannels)
+            adiv = 1.0/(numchannels*numchannels)
             scalefunc = lambda h : adiv*h
-   #     frange=range(self.freq_data.ind_low,self.freq_data.ind_high)
-  #      from time import time
-       # t=time()
-        #~ jobs = [
-            #~ (i, job_server.submit(cfunc, 
-            #~ (array(self.freq_data.csm[i][newaxis],dtype='complex128'),kj[i,newaxis],bpos,self.mpos.mpos,numchannels), ( ),
-            #~ ("beamfpy.beamformer", "numpy",))) 
-            #~ for i in frange if not fr[i]]
-        #~ for i, h in jobs:
-            #~ ac[i] = scalefunc(h())
-            #~ fr[i] = True
-        #~ print time()-t
-        #~ job_server.print_stats()
         for i in self.freq_data.indices:
             if not fr[i]:
-                csm = array(self.freq_data.csm[i][newaxis],dtype='complex128')
-                kji = kj[i,newaxis]
-                beamfunc(csm,e,h,r0,rm,kji)
+                csm = array(self.freq_data.csm[i][newaxis], dtype='complex128')
+                kji = kj[i, newaxis]
+                beamfunc(csm, e, h, r0, rm, kji)
                 ac[i] = scalefunc(h)
                 fr[i] = True
-#        print time()-t
     
     def synthetic( self, freq, num=0):
         """
@@ -462,40 +463,40 @@ class BeamformerBase( HasPrivateTraits ):
         num = 3: third octave band
         etc.
         """
-        r = self.result # trigger calculation
-        #print "synth",num
-        f=self.freq_data.fftfreq()
-        if len(f)==0:
-            return None#array([[1,],],'d')
+        res = self.result # trigger calculation
+        #print "synth", num
+        f = self.freq_data.fftfreq()
+        if len(f) == 0:
+            return None#array([[1, ], ], 'd')
         try:
-            if num==0:
+            if num == 0:
                 # single frequency line
-                h = self.result[searchsorted(f,freq)]
+                h = self.result[searchsorted(f, freq)]
             else:
-                f1=searchsorted(f,freq*2.**(-0.5/num))
-                f2=searchsorted(f,freq*2.**(0.5/num))
-                if f1==f2:
+                f1 = searchsorted(f, freq*2.**(-0.5/num))
+                f2 = searchsorted(f, freq*2.**(0.5/num))
+                if f1 == f2:
                     h = self.result[f1]
                 else:
-                    h = sum(self.result[f1:f2],0)
+                    h = sum(self.result[f1:f2], 0)
             return h.reshape(self.grid.shape)
         except:
-            return None#ones((1,1),'d')
+            return None#ones((1, 1), 'd')
 
-    def integrate(self,sector):
+    def integrate(self, sector):
         """
         integrates result map over the given sector
         where sector is a tuple with arguments for grid.indices
-        e.g. (xmin,ymin,xmin,ymax)
+        e.g. (xmin, ymin, xmin, ymax)
         returns spectrum
         """
         ind = self.grid.indices(*sector)
         gshape = self.grid.shape
         r = self.result
         rshape = r.shape
-        mapshape = (rshape[0],) + gshape
-        h = r[:].reshape(mapshape)[ (s_[:],) + ind ]
-        return h.reshape(h.shape[0],prod(h.shape[1:])).sum(axis=1)
+        mapshape = (rshape[0], ) + gshape
+        h = r[:].reshape(mapshape)[ (s_[:], ) + ind ]
+        return h.reshape(h.shape[0], prod(h.shape[1:])).sum(axis=1)
 
 class BeamformerCapon( BeamformerBase ):
     """
@@ -503,13 +504,13 @@ class BeamformerCapon( BeamformerBase ):
     """
     traits_view = View(
         [
-            [Item('mpos{}',style='custom')],
-            [Item('grid',style='custom'),'-<>'],
-            [Item('c',label='speed of sound')],
-            [Item('env{}',style='custom')],
+            [Item('mpos{}', style='custom')], 
+            [Item('grid', style='custom'), '-<>'], 
+            [Item('c', label='speed of sound')], 
+            [Item('env{}', style='custom')], 
             '|'
-        ],
-        title='Beamformer options',
+        ], 
+        title='Beamformer options', 
         buttons = OKCancelButtons
         )
 
@@ -521,14 +522,15 @@ class BeamformerCapon( BeamformerBase ):
         # prepare calculation
         kj = 2j*pi*self.freq_data.fftfreq()/self.c
         numchannels = self.freq_data.time_data.numchannels
-        e = zeros((numchannels),'D')
-        h = zeros((1,self.grid.size),'d')
-        adiv= 1.0/(numchannels*numchannels)
+        e = zeros((numchannels), 'D')
+        h = zeros((1, self.grid.size), 'd')
+        adiv = 1.0/(numchannels*numchannels)
         for i in self.freq_data.indices:
             if not fr[i]:
-                csm = linalg.inv(array(self.freq_data.csm[i],dtype='complex128'))[newaxis]
-                kji = kj[i,newaxis]
-                r_beamfull(csm,e,h,self.r0,self.rm,kji)
+                csm = linalg.inv(array(self.freq_data.csm[i], \
+                        dtype='complex128'))[newaxis]
+                kji = kj[i, newaxis]
+                r_beamfull(csm, e, h, self.r0, self.rm, kji)
                 ac[i] = adiv/h
                 fr[i] = True
 
@@ -538,12 +540,12 @@ class BeamformerEig( BeamformerBase ):
     """
 
     # EigSpectra object that provides the cross spectral matrix and eigenvalues
-    freq_data = Trait(EigSpectra,
+    freq_data = Trait(EigSpectra, 
         desc="freq data object")
 
     # no of component to calculate 0 (smallest) ... numchannels-1
     # defaults to -1, i.e. numchannels-1
-    n = Int(-1,
+    n = Int(-1, 
         desc="no of eigenvalue")
 
     # actual component to calculate
@@ -552,20 +554,21 @@ class BeamformerEig( BeamformerBase ):
 
     # internal identifier
     digest = Property( 
-        depends_on = ['mpos.digest', 'grid.digest', 'freq_data.digest', 'c', 'r_diag', 'env.digest','na'],
+        depends_on = ['mpos.digest', 'grid.digest', 'freq_data.digest', 'c', \
+            'r_diag', 'env.digest', 'na'], 
         )
 
     traits_view = View(
         [
-            [Item('mpos{}',style='custom')],
-            [Item('grid',style='custom'),'-<>'],
-            [Item('n',label='component no',style='text')],
-            [Item('r_diag',label='diagonal removed')],
-            [Item('c',label='speed of sound')],
-            [Item('env{}',style='custom')],
+            [Item('mpos{}', style='custom')], 
+            [Item('grid', style='custom'), '-<>'], 
+            [Item('n', label='component no', style='text')], 
+            [Item('r_diag', label='diagonal removed')], 
+            [Item('c', label='speed of sound')], 
+            [Item('env{}', style='custom')], 
             '|'
-        ],
-        title='Beamformer options',
+        ], 
+        title='Beamformer options', 
         buttons = OKCancelButtons
         )
     
@@ -577,8 +580,8 @@ class BeamformerEig( BeamformerBase ):
     def _get_na( self ):
         na = self.n
         nm = self.mpos.num_mics
-        if na<0:
-            na = max(nm + na,0)
+        if na < 0:
+            na = max(nm + na, 0)
         return min(nm - 1, na)
 
     def calc(self, ac, fr):
@@ -588,25 +591,25 @@ class BeamformerEig( BeamformerBase ):
         """
         # prepare calculation
         kj = 2j*pi*self.freq_data.fftfreq()/self.c
-        na = self.na
+        na = int(self.na)
         numchannels = self.freq_data.time_data.numchannels
-        e = zeros((numchannels),'D')
-        h = empty((1,self.grid.size),'d')
+        e = zeros((numchannels), 'D')
+        h = empty((1, self.grid.size), 'd')
         # function
         if self.r_diag:
             beamfunc = r_beamortho_sum_diag
             adiv = 1.0/(numchannels*numchannels-numchannels)
-            scalefunc = lambda h : adiv*multiply(h,(sign(h)+1-1e-35)/2)
+            scalefunc = lambda h : adiv*multiply(h, (sign(h)+1-1e-35)/2)
         else:
             beamfunc = r_beamortho_sum
-            adiv= 1.0/(numchannels*numchannels)
+            adiv = 1.0/(numchannels*numchannels)
             scalefunc = lambda h : adiv*h
         for i in self.freq_data.indices:        
             if not fr[i]:
-                eva = array(self.freq_data.eva[i][newaxis],dtype='float64')
-                eve = array(self.freq_data.eve[i][newaxis],dtype='complex128')
-                kji = kj[i,newaxis]
-                beamfunc(e,h,self.r0,self.rm,kji,eva,eve,na,na+1)
+                eva = array(self.freq_data.eva[i][newaxis], dtype='float64')
+                eve = array(self.freq_data.eve[i][newaxis], dtype='complex128')
+                kji = kj[i, newaxis]
+                beamfunc(e, h, self.r0, self.rm, kji, eva, eve, na, na+1)
                 ac[i] = scalefunc(h)
                 fr[i] = True
 
@@ -617,19 +620,19 @@ class BeamformerMusic( BeamformerEig ):
 
     # assumed number of sources, should be set to a value not too small
     # defaults to 1
-    n = Int(1,
+    n = Int(1, 
         desc="assumed number of sources")
 
     traits_view = View(
         [
-            [Item('mpos{}',style='custom')],
-            [Item('grid',style='custom'),'-<>'],
-            [Item('n',label='no of sources',style='text')],
-            [Item('c',label='speed of sound')],
-            [Item('env{}',style='custom')],
+            [Item('mpos{}', style='custom')], 
+            [Item('grid', style='custom'), '-<>'], 
+            [Item('n', label='no of sources', style='text')], 
+            [Item('c', label='speed of sound')], 
+            [Item('env{}', style='custom')], 
             '|'
-        ],
-        title='Beamformer options',
+        ], 
+        title='Beamformer options', 
         buttons = OKCancelButtons
         )
 
@@ -642,15 +645,15 @@ class BeamformerMusic( BeamformerEig ):
         kj = 2j*pi*self.freq_data.fftfreq()/self.c
         n = self.mpos.num_mics-self.na
         numchannels = self.freq_data.time_data.numchannels
-        e = zeros((numchannels),'D')
-        h = empty((1,self.grid.size),'d')
+        e = zeros((numchannels), 'D')
+        h = empty((1, self.grid.size), 'd')
         # function
         for i in self.freq_data.indices:        
             if not fr[i]:
-                eva = array(self.freq_data.eva[i][newaxis],dtype='float64')
-                eve = array(self.freq_data.eve[i][newaxis],dtype='complex128')
-                kji = kj[i,newaxis]
-                r_beamortho_sum(e,h,self.r0,self.rm,kji,eva,eve,0,n)
+                eva = array(self.freq_data.eva[i][newaxis], dtype='float64')
+                eve = array(self.freq_data.eve[i][newaxis], dtype='complex128')
+                kji = kj[i, newaxis]
+                r_beamortho_sum(e, h, self.r0, self.rm, kji, eva, eve, 0, n)
                 ac[i] = 4e-10*h.min()/h
                 fr[i] = True
 
@@ -659,22 +662,22 @@ class PointSpreadFunction (HasPrivateTraits):
     Array point spread function
     """
     # RectGrid object that provides the grid locations
-    grid = Trait(RectGrid,
+    grid = Trait(RectGrid, 
         desc="beamforming grid")
 
     # MicGeom object that provides the microphone locations
-    mpos = Trait(MicGeom,
+    mpos = Trait(MicGeom, 
         desc="microphone geometry")
 
     # Environment object that provides speed of sound and grid-mic distances
-    env = Trait(Environment(),Environment)
+    env = Trait(Environment(), Environment)
 
     # the speed of sound, defaults to 343 m/s
-    c = Float(343.,
+    c = Float(343., 
         desc="speed of sound")
 
     # frequency 
-    freq = Float(1.0,
+    freq = Float(1.0, 
         desc="frequency")
         
     # sound travel distances from microphone array center to grid points
@@ -693,8 +696,8 @@ class PointSpreadFunction (HasPrivateTraits):
     h5f = Instance(tables.File)
     
     # internal identifier
-    digest = Property( depends_on = ['mpos.digest', 'grid.digest', 'c', 'env.digest'],
-        cached = True)
+    digest = Property( depends_on = ['mpos.digest', 'grid.digest', 'c', \
+        'env.digest'], cached = True)
 
     @cached_property
     def _get_digest( self ):
@@ -708,7 +711,7 @@ class PointSpreadFunction (HasPrivateTraits):
     def _get_rm ( self ):
         return self.env.r( self.c, self.grid.pos(), self.mpos.mpos)
     
-    @property_depends_on('digest,freq')
+    @property_depends_on('digest, freq')
     def _get_psf ( self ):
         """
         point spread function is either calculated or loaded from cache
@@ -716,18 +719,18 @@ class PointSpreadFunction (HasPrivateTraits):
         #try:           
         name = 'psf' + self.digest
         H5cache.get_cache( self, name)
-        fr = ('Hz_%.2f' % self.freq).replace('.','_')
+        fr = ('Hz_%.2f' % self.freq).replace('.', '_')
         if not fr in self.h5f.root:
-            kj = array((2j*pi*self.freq/self.c,))
+            kj = array((2j*pi*self.freq/self.c, ))
             gs = self.grid.size
-            bpos = self.grid.pos()
-            hh = ones((1,gs,gs),'d')
-            e = zeros((self.mpos.num_mics),'D')
+            #bpos = self.grid.pos()
+            hh = ones((1, gs, gs), 'd')
+            e = zeros((self.mpos.num_mics), 'D')
             e1 = e.copy()
-            r_beam_psf(e,e1,hh,self.r0,self.rm,kj)
+            r_beam_psf(e, e1, hh, self.r0, self.rm, kj)
             ac = self.h5f.createArray('/', fr, hh[0]/diag(hh[0]))
         else:
-            ac = self.h5f.getNode('/',fr)
+            ac = self.h5f.getNode('/', fr)
         return ac
 
 class BeamformerDamas (BeamformerBase):
@@ -754,26 +757,26 @@ class BeamformerDamas (BeamformerBase):
     r_diag =  Delegate('beamformer')
 
     # number of iterations
-    n_iter = Int(100,
+    n_iter = Int(100, 
         desc="number of iterations")
 
     # internal identifier
     digest = Property( 
-        depends_on = ['beamformer.digest','n_iter'],
+        depends_on = ['beamformer.digest', 'n_iter'], 
         )
 
     # internal identifier
     ext_digest = Property( 
-        depends_on = ['digest','beamformer.ext_digest'],
+        depends_on = ['digest', 'beamformer.ext_digest'], 
         )
     
     traits_view = View(
         [
-            [Item('beamformer{}',style='custom')],
-            [Item('n_iter{Number of iterations}')],
+            [Item('beamformer{}', style='custom')], 
+            [Item('n_iter{Number of iterations}')], 
             '|'
-        ],
-        title='Beamformer denconvolution options',
+        ], 
+        title='Beamformer denconvolution options', 
         buttons = OKCancelButtons
         )
     
@@ -796,10 +799,10 @@ class BeamformerDamas (BeamformerBase):
         for i in self.freq_data.indices:        
             if not fr[i]:
                 p.freq = freqs[i]
-                y = array(self.beamformer.result[i],dtype=float64)
+                y = array(self.beamformer.result[i], dtype=float64)
                 x = y.copy()
                 psf = p.psf[:]
-                gseidel(psf,y,x,self.n_iter,1.0)
+                gseidel(psf, y, x, self.n_iter, 1.0)
                 ac[i] = x
                 fr[i] = True
 
@@ -838,25 +841,25 @@ class BeamformerOrth (BeamformerBase):
 
     # internal identifier
     digest = Property( 
-        depends_on = ['beamformer.digest','eva_list'],
+        depends_on = ['beamformer.digest', 'eva_list'], 
         )
 
     # internal identifier
     ext_digest = Property( 
-        depends_on = ['digest','beamformer.ext_digest'],
+        depends_on = ['digest', 'beamformer.ext_digest'], 
         )
     
     traits_view = View(
         [
-            [Item('mpos{}',style='custom')],
-            [Item('grid',style='custom'),'-<>'],
-            [Item('n',label='number of components',style='text')],
-            [Item('r_diag',label='diagonal removed')],
-            [Item('c',label='speed of sound')],
-            [Item('env{}',style='custom')],
+            [Item('mpos{}', style='custom')], 
+            [Item('grid', style='custom'), '-<>'], 
+            [Item('n', label='number of components', style='text')], 
+            [Item('r_diag', label='diagonal removed')], 
+            [Item('c', label='speed of sound')], 
+            [Item('env{}', style='custom')], 
             '|'
-        ],
-        title='Beamformer options',
+        ], 
+        title='Beamformer options', 
         buttons = OKCancelButtons
         )
 
@@ -870,7 +873,7 @@ class BeamformerOrth (BeamformerBase):
     
     @on_trait_change('n')
     def set_eva_list(self):
-        self.eva_list = arange(-1,-1-self.n,-1)
+        self.eva_list = arange(-1, -1-self.n, -1)
 
     def calc(self, ac, fr):
         """
@@ -887,7 +890,7 @@ class BeamformerOrth (BeamformerBase):
         for n in self.eva_list:
             e.n = n
             for i in ii:
-                ac[i,e.result[i].argmax()]+=e.freq_data.eva[i,n]/numchannels
+                ac[i, e.result[i].argmax()]+=e.freq_data.eva[i, n]/numchannels
         for i in ii:
             fr[i] = True
     
@@ -898,36 +901,36 @@ class BeamformerCleansc( BeamformerBase ):
 
     # no of CLEAN-SC iterations
     # defaults to 0, i.e. automatic (max 2*numchannels)
-    n = Int(0,
+    n = Int(0, 
         desc="no of iterations")
 
     # iteration damping factor
     # defaults to 0.6
-    damp = Range(0.01,1.0,0.6,
+    damp = Range(0.01, 1.0, 0.6, 
         desc="damping factor")
 
     # iteration stop criterion for automatic detection
     # iteration stops if power[i]>power[i-stopn]
     # defaults to 3
-    stopn = Int(3,
+    stopn = Int(3, 
         desc="stop criterion index")
 
     # internal identifier
     digest = Property( 
-        depends_on = ['mpos.digest', 'grid.digest', 'freq_data.digest', 'c', 'env.digest', 'n'],
-        )
+        depends_on = ['mpos.digest', 'grid.digest', 'freq_data.digest', 'c', \
+        'env.digest', 'n'], )
 
     traits_view = View(
         [
-            [Item('mpos{}',style='custom')],
-            [Item('grid',style='custom'),'-<>'],
-            [Item('n',label='no of iterations',style='text')],
-            [Item('r_diag',label='diagonal removed')],
-            [Item('c',label='speed of sound')],
-            [Item('env{}',style='custom')],
+            [Item('mpos{}', style='custom')], 
+            [Item('grid', style='custom'), '-<>'], 
+            [Item('n', label='no of iterations', style='text')], 
+            [Item('r_diag', label='diagonal removed')], 
+            [Item('c', label='speed of sound')], 
+            [Item('env{}', style='custom')], 
             '|'
-        ],
-        title='Beamformer options',
+        ], 
+        title='Beamformer options', 
         buttons = OKCancelButtons
         )
 
@@ -944,10 +947,10 @@ class BeamformerCleansc( BeamformerBase ):
         numchannels = self.freq_data.time_data.numchannels
         f = self.freq_data.fftfreq()
         kjall = 2j*pi*f/self.c
-        bpos = self.grid.pos()
-        mpos = self.mpos.mpos
-        e = zeros((numchannels),'D')
-        result = zeros((self.grid.size),'f')
+        #bpos = self.grid.pos()
+        #mpos = self.mpos.mpos
+        e = zeros((numchannels), 'D')
+        result = zeros((self.grid.size), 'f')
         if self.r_diag:
             adiv = 1.0/(numchannels*numchannels-numchannels)
             fullbeamfunc = r_beamdiag
@@ -960,23 +963,24 @@ class BeamformerCleansc( BeamformerBase ):
             J = numchannels*2
         else:
             J = self.n
-        powers = zeros(J,'d')
-        h = zeros((1,self.grid.size),'d')
+        powers = zeros(J, 'd')
+        h = zeros((1, self.grid.size), 'd')
         h1 = h.copy()
         # loop over frequencies
         for i in self.freq_data.indices:        
             if not fr[i]:
-                kj = kjall[i,newaxis]
-                csm = array(self.freq_data.csm[i][newaxis],dtype='complex128',copy=1)
-                fullbeamfunc(csm,e,h,self.r0,self.rm,kj)
+                kj = kjall[i, newaxis]
+                csm = array(self.freq_data.csm[i][newaxis], \
+                    dtype='complex128', copy=1)
+                fullbeamfunc(csm, e, h, self.r0, self.rm, kj)
                 h = h*adiv
                 # CLEANSC Iteration
                 result *= 0.0
                 for j in range(J):
                     xi_max = h.argmax() #index of maximum
-                    powers[j] = hmax = h[0,xi_max] #maximum
+                    powers[j] = hmax = h[0, xi_max] #maximum
                     result[xi_max] += hmax
-                    if  j>2 and hmax>powers[j-self.stopn]:
+                    if  j > 2 and hmax > powers[j-self.stopn]:
                         #print j
                         break
                     rm = self.rm[xi_max]
@@ -984,14 +988,15 @@ class BeamformerCleansc( BeamformerBase ):
                     rs = (r0*(1/(rm*rm)).sum(0))
                     wmax = numchannels*sqrt(adiv)*exp(-kj[0]*(r0-rm))/(rm*rs)
                     hh = wmax.copy()
-                    D1 = dot(csm[0]-diag(diag(csm[0])),wmax)/hmax
+                    D1 = dot(csm[0]-diag(diag(csm[0])), wmax)/hmax
                     ww = wmax.conj()*wmax
                     for m in range(20):
                         H = hh.conj()*hh
-                        hh = (D1+H*wmax)/sqrt(1+dot(ww,H))
-                    hh = hh[:,newaxis]
-                    csm1 = hmax*(hh*hh.conj().T)[newaxis,:,:]
-                    orthbeamfunc(e,h1,self.r0,self.rm,kj,array((hmax,))[newaxis,:],hh[newaxis,:],0,1)
+                        hh = (D1+H*wmax)/sqrt(1+dot(ww, H))
+                    hh = hh[:, newaxis]
+                    csm1 = hmax*(hh*hh.conj().T)[newaxis, :, :]
+                    orthbeamfunc(e, h1, self.r0, self.rm, kj, \
+                        array((hmax, ))[newaxis, :], hh[newaxis, :], 0, 1)
                     h -= self.damp*h1*adiv
                     csm -= self.damp*csm1
                 ac[i] = result
@@ -1020,10 +1025,10 @@ def synthetic (data, freqs, f, num=3):
     f: band center frequencies
 
     """
-    if num==0:
+    if num == 0:
         return data
     find1 = searchsorted(freqs, f*2.**(-0.5/num))
     find2 = searchsorted(freqs, f*2.**(+0.5/num))
-    return array(map(lambda i,j : data[i:j].sum(),find1,find2))
+    return array(map(lambda i, j : data[i:j].sum(), find1, find2))
 
 
