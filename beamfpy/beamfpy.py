@@ -173,7 +173,6 @@ class PowerSpectra( HasPrivateTraits ):
         cross spectral matrix is either loaded from cache file or
         calculated and then additionally stored into cache
         """
-        print self.time_data.calib, self.calib
         # dual calibration
         if self.time_data.calib and self.calib:
             if self.time_data.calib.digest == self.calib.digest:
@@ -181,7 +180,6 @@ class PowerSpectra( HasPrivateTraits ):
             else:
                 raise ValueError("nonidentical dual calibration for both "\
                                 "TimeSamples and PowerSpectra object")
-        print self.time_data.calib, self.calib
         name = 'csm_' + self.digest
         H5cache.get_cache( self, self.time_data.basename )
         if not name in self.h5f.root:

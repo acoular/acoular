@@ -176,7 +176,7 @@ class TimeSamples( SamplesGenerator ):
             self.numsamples = 0
             self.numchannels = 0
             self.sample_freq = 0
-            return None
+            raise IOError("No such file: %s" % self.name)
         if self.h5f != None:
             try:
                 self.h5f.close()
@@ -189,6 +189,8 @@ class TimeSamples( SamplesGenerator ):
 
     # generator function
     def result(self, num=128):
+        if self.numsamples == 0:
+            raise IOError("no samples available")
         i = 0
         if self.calib:
             if self.calib.num_mics == self.numchannels:
@@ -300,7 +302,7 @@ class MaskedTimeSamples( TimeSamples ):
             self.numsamples_total = 0
             self.numchannels_total = 0
             self.sample_freq = 0
-            return None
+            raise IOError("No such file: %s" % self.name)
         if self.h5f != None:
             try:
                 self.h5f.close()
@@ -310,13 +312,15 @@ class MaskedTimeSamples( TimeSamples ):
         self.data = self.h5f.root.time_data
         self.sample_freq = self.data.getAttr('sample_freq')
         (self.numsamples_total, self.numchannels_total) = self.data.shape
-        
+
     # generator function
     def result(self, num=128):
         sli = slice(self.start, self.stop).indices(self.numsamples_total)
         i = sli[0]
         stop = sli[1]
         cal_factor = 1.0
+        if i >= stop:
+            raise IOError("no samples available")
         if self.calib:
             if self.calib.num_mics == self.numchannels_total:
                 cal_factor = self.calib.data[self.channels][newaxis]
@@ -365,9 +369,63 @@ class TimeInOut( SamplesGenerator ):
             # effectively no processing
             yield temp
 
+class Mixer( TimeInOut ):
+    """
+    mixes the signals from several sources
+    """
+
+    # data source, object that has a property sample_freq and 
+    # a python generator result(N) that will generate data blocks of N samples
+    source = Trait(SamplesGenerator)
+
+    # list of additional data source objects
+    sources = List( Instance(SamplesGenerator, ()) ) 
+
+    # sample_freq of output signal
+    sample_freq = Delegate('source')
+    
+    # number of channels in output
+    numchannels = Delegate('source')
+               
+    # number of channels in output
+    numsamples = Delegate('source')
+    # internal identifier
+    digest = Property( depends_on = ['source.digest', '__class__'])
+
+    traits_view = View(
+        Item('source', style='custom')
+                    )
+
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+
+    @on_trait_change('sources')
+    def validate_sources( self ):
+        for s in self.sources:
+            if self.sample_freq != s.sample_freq:
+                raise ValueError("Sample frequency of %s does not fit" % s)
+            if self.numchannels != s.numchannels:
+                raise ValueError("Channel count of %s does not fit" % s)
+
+    # result generator: delivers output in blocks of N
+    def result(self, n):
+        gens = [i.result(n) for i in self.sources]
+        for temp in self.source.result(n):
+            sh = temp.shape[0]
+            for g in gens:
+                temp1 = g.next()
+                if temp.shape[0] > temp1.shape[0]:
+                   temp = temp[:temp1.shape[0]]
+                temp += temp1[:temp.shape[0]]
+            yield temp
+            if sh > temp.shape[0]:
+                break
+
+
 class TimePower( TimeInOut ):
     """
-    calculates time-depend power of the signal
+    calculates time-depended power of the signal
     """
     # result generator: delivers squared input
     def result(self, n):
@@ -376,7 +434,7 @@ class TimePower( TimeInOut ):
     
 class TimeAverage( TimeInOut ) :
     """
-    calculates time-depend power of the signal
+    calculates time-depended average of the signal
     """
     # number of samples to average over
     naverage = Int(64, 
