@@ -54,7 +54,7 @@ import tables
 from h5cache import H5cache
 from internal import digest
 from grids import RectGrid, MicGeom, Environment
-from timedomain import TimeSamples, Calib
+from timedomain import SamplesGenerator, Calib
 
 
 class PowerSpectra( HasPrivateTraits ):
@@ -63,8 +63,8 @@ class PowerSpectra( HasPrivateTraits ):
     container for data and properties of this matrix
     """
 
-    # the TimeSamples object that provides the data
-    time_data = Trait(TimeSamples, 
+    # the SamplesGenerator object that provides the data
+    time_data = Trait(SamplesGenerator, 
         desc="time data object")
 
     # the Calib object that provides the calibration data, 
@@ -112,6 +112,10 @@ class PowerSpectra( HasPrivateTraits ):
     indices = Property(
         desc = "index range" )
         
+    # basename for cache file
+    basename = Property( depends_on = 'time_data.digest', 
+        desc="basename for cache file")
+
     # the cross spectral matrix as
     # (number of frequencies, numchannels, numchannels) array of complex
     csm = Property( 
@@ -167,21 +171,39 @@ class PowerSpectra( HasPrivateTraits ):
     def _get_digest( self ):
         return digest( self )
 
+    @cached_property
+    def _get_basename( self ):
+        if 'basename' in self.time_data.all_trait_names():
+            return self.time_data.basename
+        else: 
+            return self.time_data.__class__.__name__ + self.time_data.digest
+
     @property_depends_on('digest')
     def _get_csm ( self ):
         """main work is done here:
         cross spectral matrix is either loaded from cache file or
         calculated and then additionally stored into cache
         """
-        # dual calibration
-        if self.time_data.calib and self.calib:
-            if self.time_data.calib.digest == self.calib.digest:
-                self.calib = None # ignore it silently
+        # test for dual calibration
+        obj = self.time_data # start with time_data obj
+        while obj:
+            print obj
+            if 'calib' in obj.all_trait_names(): # at original source?
+                if obj.calib and self.calib:
+                    if obj.calib.digest == self.calib.digest:
+                        self.calib = None # ignore it silently
+                    else:
+                        raise ValueError("nonidentical dual calibration for "\
+                                    "both TimeSamples and PowerSpectra object")
+                obj = None
             else:
-                raise ValueError("nonidentical dual calibration for both "\
-                                "TimeSamples and PowerSpectra object")
+                try:
+                    obj = obj.source # traverse down until original data source
+                except AttributeError:
+                    obj = None
         name = 'csm_' + self.digest
-        H5cache.get_cache( self, self.time_data.basename )
+        H5cache.get_cache( self, self.basename )
+        print self.basename
         if not name in self.h5f.root:
             t = self.time_data
             wind = self.window_( self.block_size )
@@ -400,7 +422,7 @@ class BeamformerBase( HasPrivateTraits ):
                 return None#zeros(1)
                 raise ValueError()
             numfreq = self.freq_data.block_size/2 + 1
-            H5cache.get_cache( self, self.freq_data.time_data.basename)
+            H5cache.get_cache( self, self.freq_data.basename)
             if not name in self.h5f.root:
                 group = self.h5f.createGroup(self.h5f.root, name)
                 shape = (numfreq, self.grid.size)

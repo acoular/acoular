@@ -389,24 +389,36 @@ class Mixer( TimeInOut ):
                
     # number of channels in output
     numsamples = Delegate('source')
+
     # internal identifier
-    digest = Property( depends_on = ['source.digest', '__class__'])
+    ldigest = Property( depends_on = ['sources.digest', ])
+
+    # internal identifier
+    digest = Property( depends_on = ['source.digest', 'ldigest','__class__'])
 
     traits_view = View(
         Item('source', style='custom')
                     )
 
     @cached_property
+    def _get_ldigest( self ):
+        res = ''
+        for s in self.sources:
+            res += s.digest
+        return res
+
+    @cached_property
     def _get_digest( self ):
         return digest(self)
 
-    @on_trait_change('sources')
+    @on_trait_change('sources,source')
     def validate_sources( self ):
-        for s in self.sources:
-            if self.sample_freq != s.sample_freq:
-                raise ValueError("Sample frequency of %s does not fit" % s)
-            if self.numchannels != s.numchannels:
-                raise ValueError("Channel count of %s does not fit" % s)
+        if self.source:
+            for s in self.sources:
+                if self.sample_freq != s.sample_freq:
+                    raise ValueError("Sample frequency of %s does not fit" % s)
+                if self.numchannels != s.numchannels:
+                    raise ValueError("Channel count of %s does not fit" % s)
 
     # result generator: delivers output in blocks of N
     def result(self, n):
@@ -1001,15 +1013,17 @@ class TimeCache( TimeInOut ):
 
     @cached_property
     def _get_basename ( self ):
-        obj = self.source # start width source
+        obj = self.source # start with source
         basename = 'void' # if no file source is found
         while obj:
-#            print obj
             if 'basename' in obj.all_trait_names(): # at original source?
                 basename = obj.basename # get the name
                 break
             else:
-                obj = obj.source # traverse down until original data source
+                try:
+                    obj = obj.source # traverse down until original data source
+                except AttributeError:
+                    obj = None
         return basename
 
     # result generator: delivers input, possibly from cache

@@ -23,4 +23,4 @@ from beamfpy import  PowerSpectra, EigSpectra, \
 BeamformerBase, BeamformerCapon, BeamformerEig, BeamformerMusic,\
 BeamformerDamas, BeamformerOrth,BeamformerCleansc, \
 L_p, synthetic
-from sources import PointSource
+from sources import PointSource, PointSourceSine

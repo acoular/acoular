@@ -6,7 +6,7 @@ Created on Tue May 11 10:04:22 2010
 """
 #pylint: disable-msg=E0611, E1101, C0103, C0111, R0901, R0902, R0903, R0904, W0232
 # imports from other packages
-from numpy import array, newaxis, pi, fft, exp
+from numpy import array, newaxis, pi, fft, exp, arange, sin
 from numpy.random import normal, seed
 from enthought.traits.api import Float, Int, Long, \
 Property, Trait, Delegate, \
@@ -77,3 +77,43 @@ class PointSource( TimeSamples ):
             yield out[i:i+num]
             i += num
         
+class PointSourceSine( PointSource ):
+    """
+    fixed point source class for simulations
+    generates output via the generator 'result'
+    """
+
+    # Sine wave frequency
+    freq = Float(1000.0, 
+        desc="Frequency")
+
+    # Sine wave phase
+    phase = Float(0.0, 
+        desc="Phase")
+        
+    # internal identifier
+    digest = Property( 
+        depends_on = ['mpos.digest', 'rms', 'loc', 'c', 'numsamples', \
+        'sample_freq', 'freq', 'phase', 'env.digest', '__class__'], 
+        )
+               
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+
+    # result generator: delivers output in blocks of num samples
+    def result(self, num=128):
+        seed(self.seed)
+        t = arange(self.numsamples, dtype=float)/self.sample_freq
+        signal = fft.fft(self.rms*sin(2*pi*self.freq*t+self.phase))
+        pos = array(self.loc, dtype=float).reshape(3, 1)
+        rm = self.env.r(self.c, pos, self.mpos.mpos)
+        delays = exp(-2j*pi*(rm/self.c)*\
+            fft.fftfreq(int(self.numsamples),1.0/self.sample_freq)[:,newaxis])
+        out = fft.ifft(signal[:, newaxis]*delays, axis=0).real/rm
+        i = 0
+        while i < self.numsamples:
+            yield out[i:i+num]
+            i += num
+        
+    
