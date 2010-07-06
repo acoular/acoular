@@ -9,14 +9,14 @@ from beamfpy import td_dir, L_p, TimeSamples, Calib, MicGeom, PowerSpectra, \
 RectGrid, BeamformerBase, BeamformerEig, BeamformerOrth, BeamformerCleansc, \
 MaskedTimeSamples, FiltFiltOctave, Trajectory, BeamformerTimeSq, TimeAverage, \
 TimeCache, FiltOctave, BeamformerTime, TimePower, IntegratorSectorTime, \
-PointSource, PointSourceSine, Mixer
+PointSource, SineGenerator, Mixer
 
 
 geo = '10.0'
 freq = '150'
 
-R = 1.#2.5
-Z = 1
+R = 2.5
+Z = 4
 #
 loc0 = (-R,0.0,Z)
 loc1 = (+R,0.0,Z)
@@ -57,15 +57,19 @@ c0 = 343.0
 # m.invalid_channels = inv_ch
 # 
 #===============================================================================
-p1 = PointSourceSine(sample_freq=6144.0,numsamples=8192,mpos=m, freq=6144.0*3/128.0, loc=loc0)
-p2 = PointSourceSine(sample_freq=6144.0,numsamples=8192,mpos=m, freq=6144.0*3/128.0, loc=loc1)
-p3 = PointSourceSine(sample_freq=6144.0,numsamples=8192,mpos=m, freq=6144.0*3/128.0, loc=loc2)
-p4 = PointSourceSine(sample_freq=6144.0,numsamples=8192,mpos=m, freq=6144.0*3/128.0, loc=loc3)
-p5 = PointSourceSine(sample_freq=6144.0,numsamples=8192,mpos=m, freq=6144.0*3/128.0, loc=loc4, phase=pi)
-p6 = PointSourceSine(sample_freq=6144.0,numsamples=8192,mpos=m, freq=6144.0*3/128.0, loc=loc5, phase=pi)
-p7 = PointSourceSine(sample_freq=6144.0,numsamples=8192,mpos=m, freq=6144.0*3/128.0, loc=loc6, phase=pi)
-p8 = PointSourceSine(sample_freq=6144.0,numsamples=8192,mpos=m, freq=6144.0*3/128.0, loc=loc7, phase=pi)
+s1 = SineGenerator(sample_freq=6144.0,numsamples=8192,freq=6144.0*3/128.0)
+s2 = SineGenerator(sample_freq=6144.0,numsamples=8192,freq=6144.0*3/128.0,phase=pi)
+p1 = PointSource(signal=s1, mpos=m,  loc=loc0)
+p2 = PointSource(signal=s1, mpos=m,  loc=loc1)
+p3 = PointSource(signal=s1, mpos=m,  loc=loc2)
+p4 = PointSource(signal=s1, mpos=m,  loc=loc3)
+p5 = PointSource(signal=s2, mpos=m,  loc=loc4)
+p6 = PointSource(signal=s2, mpos=m,  loc=loc5)
+p7 = PointSource(signal=s2, mpos=m,  loc=loc6)
+p8 = PointSource(signal=s2, mpos=m,  loc=loc7)
 t = Mixer(source = p1, sources = [p2, p3, p4, p5, p6, p7, p8 ])
+print p1.sample_freq
+
 
 f = PowerSpectra(window='Hanning',overlap='50%',block_size=128,ind_low=1,ind_high=30)
 f.time_data = t
