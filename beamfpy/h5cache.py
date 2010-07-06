@@ -1,10 +1,15 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Tue May  4 12:25:10 2010
-
-@author: sarradj
-"""
 #pylint: disable-msg=E0611,C0111,C0103,R0901,R0902,R0903,R0904,W0232
+"""
+h5cache.py
+
+Part of the beamfpy library: several classes for the implemetation of 
+acoustic beamforming
+
+(c) Ennes Sarradj 2007-2010, all rights reserved
+ennes.sarradj@gmx.de
+"""
+
 # imports from other packages
 from enthought.traits.api import HasPrivateTraits, Bool, Str
 from os import path, mkdir, environ

@@ -30,7 +30,40 @@
     
 
 <pre>
-Several classes for the implementation of acoustic beamforming
+The beamfpy library: several classes for the implemetation of 
+acoustic beamforming
+
+(c) Ennes Sarradj 2007-2010, all rights reserved
+ennes.sarradj@gmx.de
+
+A minimal usage example would be:
+
+&gt;&gt;    m=MicGeom(from_file='mic_geom.xml')
+&gt;&gt;    g=RectGrid(x_min=-0.8, x_max=-0.2, y_min=-0.1, y_max=0.3, z=0.8
+        , increment=0.01)
+&gt;&gt;    t1=TimeSamples(name='measured_data.h5')
+&gt;&gt;    cal=Calib(from_file='calibration_data.xml')
+&gt;&gt;    f1=EigSpectra(time_data=t1, block_size=256, window="Hanning", 
+                    overlap='75%', calib=cal)
+&gt;&gt;    e1=BeamformerBase(freq_data=f1, grid=g, mpos=m, r_diag=False)
+&gt;&gt;    fr=4000
+&gt;&gt;    L1=L_p(e1.synthetic(fr, 0))
+
+The classes in the module possess a number of automatic data update
+capabilities. That is, only the traits must be set to get the results.
+The calculation need not be triggered explictely.
+The classes are also GUI-aware, they know how to display a graphical user
+interface. So by calling
+&gt;&gt;    object_name.configure_traits()
+on object "object_name" the relevant traits of each instance object may
+be edited graphically.
+The traits could also be set explicitely in the program, either in the
+constructor of an object:
+&gt;&gt;    m=MicGeom(from_file='mic_geom.xml')
+or at a later time
+&gt;&gt;    m.from_file='another_mic_geom.xml'
+where all objects that depend upon the specific trait will update their
+output if necessary.
 </pre>
 
 
@@ -128,11 +161,21 @@ Contents:
 
   <tr id="MicGeom"><td>MicGeom</td><td><a href="beamfpy.grids.MicGeom.html">beamfpy.grids.MicGeom</a></td></tr>
 
+  <tr id="Mixer"><td>Mixer</td><td><a href="beamfpy.timedomain.Mixer.html">beamfpy.timedomain.Mixer</a></td></tr>
+
+  <tr id="MovingPointSource"><td>MovingPointSource</td><td><a href="beamfpy.sources.MovingPointSource.html">beamfpy.sources.MovingPointSource</a></td></tr>
+
+  <tr id="PointSource"><td>PointSource</td><td><a href="beamfpy.sources.PointSource.html">beamfpy.sources.PointSource</a></td></tr>
+
   <tr id="RectGrid"><td>RectGrid</td><td><a href="beamfpy.grids.RectGrid.html">beamfpy.grids.RectGrid</a></td></tr>
 
   <tr id="RectGrid3D"><td>RectGrid3D</td><td><a href="beamfpy.grids.RectGrid3D.html">beamfpy.grids.RectGrid3D</a></td></tr>
 
   <tr id="SamplesGenerator"><td>SamplesGenerator</td><td><a href="beamfpy.timedomain.SamplesGenerator.html">beamfpy.timedomain.SamplesGenerator</a></td></tr>
+
+  <tr id="SignalGenerator"><td>SignalGenerator</td><td><a href="beamfpy.sources.SignalGenerator.html">beamfpy.sources.SignalGenerator</a></td></tr>
+
+  <tr id="SineGenerator"><td>SineGenerator</td><td><a href="beamfpy.sources.SineGenerator.html">beamfpy.sources.SineGenerator</a></td></tr>
 
   <tr id="td_import"><td>td_import</td><td><a href="beamfpy.fileimport.td_import.html">beamfpy.fileimport.td_import</a></td></tr>
 
@@ -153,6 +196,8 @@ Contents:
   <tr id="Trajectory"><td>Trajectory</td><td><a href="beamfpy.timedomain.Trajectory.html">beamfpy.timedomain.Trajectory</a></td></tr>
 
   <tr id="UniformFlowEnvironment"><td>UniformFlowEnvironment</td><td><a href="beamfpy.grids.UniformFlowEnvironment.html">beamfpy.grids.UniformFlowEnvironment</a></td></tr>
+
+  <tr id="WNoiseGenerator"><td>WNoiseGenerator</td><td><a href="beamfpy.sources.WNoiseGenerator.html">beamfpy.sources.WNoiseGenerator</a></td></tr>
 
   <tr id="WriteWAV"><td>WriteWAV</td><td><a href="beamfpy.timedomain.WriteWAV.html">beamfpy.timedomain.WriteWAV</a></td></tr>
 

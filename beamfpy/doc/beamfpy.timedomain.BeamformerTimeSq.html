@@ -108,7 +108,7 @@ Contents:
 <h2 id="section-functions">Method summary</h2>
 <ul class="function-summary">
   
-  <li class="function"><a href="#result">result</a>(self, <span class="param-name">n</span> = <span class="param-default">2048</span>)</li>
+  <li class="function"><a href="#result">result</a>(self, <span class="param-name">num</span> = <span class="param-default">2048</span>)</li>
   
 </ul>
 
@@ -118,7 +118,12 @@ Contents:
 <h2>Methods</h2>
 <ul class="doclist">
   
-  <li id="result" class="function">result(self, <span class="param-name">n</span> = <span class="param-default">2048</span>)<pre></pre></li>
+  <li id="result" class="function">result(self, <span class="param-name">num</span> = <span class="param-default">2048</span>)<pre> 
+        python generator: delivers the _squared_ beamformer result with optional
+        removal of autocorrelation, yields samples in blocks of shape 
+        (num, numchannels), the last block may be shorter than num; 
+        numchannels is usually very large (number of grid points)
+        </pre></li>
   
 </ul>
 

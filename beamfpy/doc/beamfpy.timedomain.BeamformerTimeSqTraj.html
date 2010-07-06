@@ -88,7 +88,12 @@ Contents:
 <ul class="doclist">
 
   <li class="trait" id="digest">digest<pre>internal identifier
-</pre><pre>digest = Property(depends_on = [ 'mpos.digest', 'grid.digest', 'source.digest', 'r_diag', 'c', 'weights', 'env.digest', 'trajectory.digest', '__class__' ])
+</pre><pre>digest = Property(depends_on = [ 'mpos.digest', 'grid.digest', 'source.digest', 'r_diag', 'c', 'weights', 'rvec', 'env.digest', 'trajectory.digest', '__class__' ])
+
+</pre></li>
+
+  <li class="trait" id="rvec">rvec<pre>reference vector, perpendicular to the y-axis of moving grid
+</pre><pre>rvec = CArray(dtype = float, shape = (3), value = array((0, 0, 0)), desc = 'reference vector')
 
 </pre></li>
 
@@ -108,7 +113,7 @@ Contents:
 <h2 id="section-functions">Method summary</h2>
 <ul class="function-summary">
   
-  <li class="function"><a href="#result">result</a>(self, <span class="param-name">n</span> = <span class="param-default">2048</span>)</li>
+  <li class="function"><a href="#result">result</a>(self, <span class="param-name">num</span> = <span class="param-default">2048</span>)</li>
   
 </ul>
 
@@ -118,7 +123,13 @@ Contents:
 <h2>Methods</h2>
 <ul class="doclist">
   
-  <li id="result" class="function">result(self, <span class="param-name">n</span> = <span class="param-default">2048</span>)<pre></pre></li>
+  <li id="result" class="function">result(self, <span class="param-name">num</span> = <span class="param-default">2048</span>)<pre> 
+        python generator: delivers the _squared_ beamformer result with optional
+        removal of autocorrelation for a moving (translated and optionally 
+        rotated grid), yields samples in blocks of shape (num, numchannels), 
+        the last block may be shorter than num; numchannels is usually very 
+        large (number of grid points)
+        </pre></li>
   
 </ul>
 

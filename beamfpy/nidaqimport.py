@@ -1,13 +1,13 @@
 # coding=UTF-8
 """
-import filter for nidaq-mx
+nidaqimport.py: interface to nidaq mx
 
-nidaqimport.py (c) Ennes Sarradj 2008, all rights reserved
+Part of the beamfpy library: several classes for the implemetation of 
+acoustic beamforming
+
+(c) Ennes Sarradj 2007-2010, all rights reserved
+ennes.sarradj@gmx.de
 """
-
-__author__ = "Ennes Sarradj, ennes.sarradj@gmx.de"
-__date__ = "17 April 2008"
-__version__ = "1.0beta"
 
 
 from beamfpy import TimeSamples, td_dir

@@ -5,7 +5,7 @@
           "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <title>Class beamfpy.fileimport.datx_import</title>
+    <title>Class beamfpy.sources.WNoiseGenerator</title>
     <link rel="stylesheet" type="text/css" href="class.css"/>
     <script type="text/javascript" src="scr.js"></script>
     
@@ -23,14 +23,14 @@
     <li><a href="namespace_index.html">Namespace Index</a></li>
     </ul>
     </div>
-    <h1>Class <span class="prefix"><a href="beamfpy.html">beamfpy</a>.&#8203;<a href="beamfpy.fileimport.html">fileimport</a>.&#8203;</span><a href="beamfpy.fileimport.datx_import.html">datx_import</a></h1>
+    <h1>Class <span class="prefix"><a href="beamfpy.html">beamfpy</a>.&#8203;<a href="beamfpy.sources.html">sources</a>.&#8203;</span><a href="beamfpy.sources.WNoiseGenerator.html">WNoiseGenerator</a></h1>
     
     </div>
 
     
 
 <pre>
-    import of .datx data
+    Simple one-channel white noise signal generator
     </pre>
 
 
@@ -42,8 +42,6 @@ Contents:
 
 <li><a href="#section-superclasses">Base classes</a></li>
 
-
-<li><a href="#section-variables">Attributes</a></li>
 
 
 <li><a href="#section-traits">Traits</a></li>
@@ -62,21 +60,10 @@ Contents:
 <h2 id="section-superclasses">Inherits from</h2>
 <ul class="doclist">
   
-    <li><a href="beamfpy.fileimport.time_data_import.html">time_data_import</a>: beamfpy.fileimport.time_data_import</li>
+    <li><a href="beamfpy.sources.SignalGenerator.html">SignalGenerator</a>: beamfpy.sources.SignalGenerator</li>
   
 </ul>
 
-
-
-
-<h2 id="section-variables">Attributes</h2>
-<ul class="doclist">
-
-  <li class="attribute" id="traits_view">traits_view<pre></pre><pre>traits_view = View([ 'from_file', '|[Import]' ], title = 'Time data', buttons = OKCancelButtons)
-
-</pre></li>
-
-</ul>
 
 
 
@@ -85,8 +72,13 @@ Contents:
 <h2 id="section-traits">Traits</h2>
 <ul class="doclist">
 
-  <li class="trait" id="from_file">from_file<pre>name of the mat file to import
-</pre><pre>from_file = File(filter = [ '*.datx_index' ], desc = 'name of the datx index file to import')
+  <li class="trait" id="digest">digest<pre>internal identifier
+</pre><pre>digest = Property(depends_on = [ 'rms', 'numsamples', 'sample_freq', 'seed', '__class__' ])
+
+</pre></li>
+
+  <li class="trait" id="seed">seed<pre>seed for random number generator, defaults to 0
+</pre><pre>seed = Int(0, desc = 'random seed value')
 
 </pre></li>
 
@@ -101,7 +93,7 @@ Contents:
 <h2 id="section-functions">Method summary</h2>
 <ul class="function-summary">
   
-  <li class="function"><a href="#get_data">get_data</a>(self, td)</li>
+  <li class="function"><a href="#signal">signal</a>(self)</li>
   
 </ul>
 
@@ -111,11 +103,7 @@ Contents:
 <h2>Methods</h2>
 <ul class="doclist">
   
-  <li id="get_data" class="function">get_data(self, td)<pre>
-        main work is done here: imports the data from datx files into
-        time_data object td and saves also a '*.h5' file so this import
-        need not be performed every time the data is needed
-        </pre></li>
+  <li id="signal" class="function">signal(self)<pre>delivers the signal as an array of length numsamples</pre></li>
   
 </ul>
 

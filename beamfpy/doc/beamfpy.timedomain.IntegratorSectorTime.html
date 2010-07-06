@@ -30,8 +30,7 @@
     
 
 <pre>
-    Provides a basic time domain beamformer with time signal output
-    for a spatially fixed grid
+    Provides an Integrator
     </pre>
 
 
@@ -86,8 +85,13 @@ Contents:
 <h2 id="section-traits">Traits</h2>
 <ul class="doclist">
 
+  <li class="trait" id="clip">clip<pre>Clipping, in Dezibel relative to maximum (negative values)
+</pre><pre>clip = Float(-Const(1000.0))
+
+</pre></li>
+
   <li class="trait" id="digest">digest<pre>internal identifier
-</pre><pre>digest = Property(depends_on = [ 'sectors', 'grid.digest', 'source.digest', '__class__' ])
+</pre><pre>digest = Property(depends_on = [ 'sectors', 'clip', 'grid.digest', 'source.digest', '__class__' ])
 
 </pre></li>
 
@@ -117,7 +121,7 @@ Contents:
 <h2 id="section-functions">Method summary</h2>
 <ul class="function-summary">
   
-  <li class="function"><a href="#result">result</a>(self, <span class="param-name">n</span> = <span class="param-default">1</span>)</li>
+  <li class="function"><a href="#result">result</a>(self, <span class="param-name">num</span> = <span class="param-default">1</span>)</li>
   
 </ul>
 
@@ -127,7 +131,11 @@ Contents:
 <h2>Methods</h2>
 <ul class="doclist">
   
-  <li id="result" class="function">result(self, <span class="param-name">n</span> = <span class="param-default">1</span>)<pre></pre></li>
+  <li id="result" class="function">result(self, <span class="param-name">num</span> = <span class="param-default">1</span>)<pre> 
+        python generator: delivers the source output integrateds over the given 
+        sectors, yields samples in blocks of shape (num, numchannels), the last 
+        block may be shorter than num; numchannels is the number of sectors
+        </pre></li>
   
 </ul>
 

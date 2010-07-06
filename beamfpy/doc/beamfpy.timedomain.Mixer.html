@@ -5,7 +5,7 @@
           "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <title>Class beamfpy.timedomain.TimeAverage</title>
+    <title>Class beamfpy.timedomain.Mixer</title>
     <link rel="stylesheet" type="text/css" href="class.css"/>
     <script type="text/javascript" src="scr.js"></script>
     
@@ -23,14 +23,14 @@
     <li><a href="namespace_index.html">Namespace Index</a></li>
     </ul>
     </div>
-    <h1>Class <span class="prefix"><a href="beamfpy.html">beamfpy</a>.&#8203;<a href="beamfpy.timedomain.html">timedomain</a>.&#8203;</span><a href="beamfpy.timedomain.TimeAverage.html">TimeAverage</a></h1>
+    <h1>Class <span class="prefix"><a href="beamfpy.html">beamfpy</a>.&#8203;<a href="beamfpy.timedomain.html">timedomain</a>.&#8203;</span><a href="beamfpy.timedomain.Mixer.html">Mixer</a></h1>
     
     </div>
 
     
 
 <pre>
-    calculates time-depended average of the signal
+    mixes the signals from several sources
     </pre>
 
 
@@ -72,7 +72,7 @@ Contents:
 <h2 id="section-variables">Attributes</h2>
 <ul class="doclist">
 
-  <li class="attribute" id="traits_view">traits_view<pre></pre><pre>traits_view = View([ Item('source', style = 'custom'), 'naverage{Samples to average}', [ 'sample_freq~{Output sampling frequency}', '|[Properties]' ], '|' ], title = 'Linear average', buttons = OKCancelButtons)
+  <li class="attribute" id="traits_view">traits_view<pre></pre><pre>traits_view = View(Item('source', style = 'custom'))
 
 </pre></li>
 
@@ -86,22 +86,38 @@ Contents:
 <ul class="doclist">
 
   <li class="trait" id="digest">digest<pre>internal identifier
-</pre><pre>digest = Property(depends_on = [ 'source.digest', '__class__', 'naverage' ])
+</pre><pre>digest = Property(depends_on = [ 'source.digest', 'ldigest', '__class__' ])
 
 </pre></li>
 
-  <li class="trait" id="naverage">naverage<pre>number of samples to average over
-</pre><pre>naverage = Int(64, desc = 'number of samples to average over')
+  <li class="trait" id="ldigest">ldigest<pre>internal identifier
+</pre><pre>ldigest = Property(depends_on = [ 'sources.digest' ])
 
 </pre></li>
 
-  <li class="trait" id="numsamples">numsamples<pre>number of samples in output signal
-</pre><pre>numsamples = Property(depends_on = 'source.numsamples, naverage')
+  <li class="trait" id="numchannels">numchannels<pre>number of channels in output
+</pre><pre>numchannels = Delegate('source')
+
+</pre></li>
+
+  <li class="trait" id="numsamples">numsamples<pre>number of channels in output
+</pre><pre>numsamples = Delegate('source')
 
 </pre></li>
 
   <li class="trait" id="sample_freq">sample_freq<pre>sample_freq of output signal
-</pre><pre>sample_freq = Property(depends_on = 'source.sample_freq, naverage')
+</pre><pre>sample_freq = Delegate('source')
+
+</pre></li>
+
+  <li class="trait" id="source">source<pre>data source, object that has a property sample_freq and 
+a python generator result(N) that will generate data blocks of N samples
+</pre><pre>source = Trait(<a href="beamfpy.timedomain.SamplesGenerator.html">SamplesGenerator</a>)
+
+</pre></li>
+
+  <li class="trait" id="sources">sources<pre>list of additional data source objects
+</pre><pre>sources = List(Instance(<a href="beamfpy.timedomain.SamplesGenerator.html">SamplesGenerator</a>, ()))
 
 </pre></li>
 
@@ -118,6 +134,8 @@ Contents:
   
   <li class="function"><a href="#result">result</a>(self, num)</li>
   
+  <li class="function"><a href="#validate_sources">validate_sources</a>(self)</li>
+  
 </ul>
 
 
@@ -127,10 +145,12 @@ Contents:
 <ul class="doclist">
   
   <li id="result" class="function">result(self, num)<pre> 
-        python generator: delivers the blockwise average of the output of 
-        source, yields samples in blocks of shape (num, numchannels), the last 
-        block may be shorter than num
+        python generator: adds the output from the source and those in the list 
+        sources, yields samples in blocks of shape (num, numchannels), 
+        the last block may be shorter than num
         </pre></li>
+  
+  <li id="validate_sources" class="function">validate_sources(self)<pre> validates if sources fit together </pre></li>
   
 </ul>
 

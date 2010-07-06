@@ -1,7 +1,14 @@
+#pylint: disable-msg = E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
 """
-fileimport.py (c) Ennes Sarradj 2007-2008, all rights reserved
+fileimport.py: classes for importing data in several file formats
+
+Part of the beamfpy library: several classes for the implemetation of 
+acoustic beamforming
+
+(c) Ennes Sarradj 2007-2010, all rights reserved
+ennes.sarradj@gmx.de
 """
-#pylint: disable-msg = E0611, E1101, C0103, C0111, R0901, R0902, R0903, R0904, W0232
+
 from h5cache import td_dir
 from numpy import fromstring, float32, newaxis, empty, sort, zeros
 from enthought.traits.api import HasPrivateTraits, Float, Int, \
@@ -131,7 +138,7 @@ class td_import( time_data_import ):
         f.close()
         sample_freq = h['sample_freq']
         data = h['data']
-        numsamples, numchannels = data.shape
+        numchannels = data.shape[1]
         name = td.name
         if name == "":
             name = path.join(td_dir, \
@@ -235,6 +242,7 @@ class datx_d_file(HasPrivateTraits):
                 self.bytes_per_sample
 
     def get_next_blocks( self ):
+        """ pulls next blocks """
         s = self.f.read(self.blocks*self.block_size)
         ls = len(s)
         if ls == 0:
@@ -305,6 +313,7 @@ class datx_channel(HasPrivateTraits):
                     / (self.internal_gain * self.external_gain)
 
     def scale(self, x):
+        """ scale function to produce output in engineering units """
         return (x * self.z0 - self.tare_volts) * self.cal_coeff_2 + \
                 self.cal_coeff_1 - self.tare_eu
 

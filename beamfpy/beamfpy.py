@@ -1,43 +1,14 @@
 # -*- coding: utf-8 -*-
-#pylint: disable-msg=E0611, E1101, C0103, C0111, R0901, R0902, R0903, R0904, W0232
+#pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
 """
-Several classes for the implemetation of acoustic beamforming
+beamfpy.py: classes for calculations in the frequency domain
 
-A minimal usage example would be:
+Part of the beamfpy library: several classes for the implemetation of 
+acoustic beamforming
 
->>    m=MicGeom(from_file='mic_geom.xml')
->>    g=RectGrid(x_min=-0.8, x_max=-0.2, y_min=-0.1, y_max=0.3, z=0.8
-        , increment=0.01)
->>    t1=TimeSamples(name='measured_data.h5')
->>    cal=Calib(from_file='calibration_data.xml')
->>    f1=EigSpectra(time_data=t1, block_size=256, window="Hanning", 
-                    overlap='75%', calib=cal)
->>    e1=BeamformerBase(freq_data=f1, grid=g, mpos=m, r_diag=False)
->>    fr=4000
->>    L1=L_p(e1.synthetic(fr, 0))
-
-The classes in the module possess a number of automatic data update
-capabilities. That is, only the traits must be set to get the results.
-The calculation need not be triggered explictely.
-The classes are also GUI-aware, they know how to display a graphical user
-interface. So by calling
->>    object_name.configure_traits()
-on object "object_name" the relevant traits of each instance object may
-be edited graphically.
-The traits could also be set explicitely in the program, either in the
-constructor of an object:
->>    m=MicGeom(from_file='mic_geom.xml')
-or at a later time
->>    m.from_file='another_mic_geom.xml'
-where all objects that depend upon the specific trait will update their
-output if necessary.
-
-beamfpy.py (c) Ennes Sarradj 2007-2010, all rights reserved
+(c) Ennes Sarradj 2007-2010, all rights reserved
+ennes.sarradj@gmx.de
 """
-
-__author__ = "Ennes Sarradj, ennes.sarradj@gmx.de"
-__date__ = "5 May 2010"
-__version__ = "3.0beta"
 
 from numpy import array, ones, hanning, hamming, bartlett, blackman, \
 dot, newaxis, zeros, empty, fft, float32, float64, complex64, linalg, where, \
@@ -226,7 +197,7 @@ class PowerSpectra( HasPrivateTraits ):
             pos = bs
             posinc = bs/self.overlap_
             for data in t.result(bs):
-                ns, nc = data.shape
+                ns = data.shape[0]
                 temp[bs:bs+ns] = data
                 while pos+bs <= bs+ns:
                     ft = fft.rfft(temp[pos:(pos+bs)]*wind, None, 0)
@@ -410,17 +381,17 @@ class BeamformerBase( HasPrivateTraits ):
         """
         beamforming result is either loaded or calculated
         """
-        #try:
-        digest = ''
-        while self.digest != digest:
-            digest = self.digest
+        _digest = ''
+        while self.digest != _digest:
+            _digest = self.digest
             name = self.__class__.__name__ + self.digest
             print 1, name
             numchannels = self.freq_data.time_data.numchannels
             print "nch", numchannels
             if  numchannels != self.mpos.num_mics or numchannels == 0:
-                return None#zeros(1)
-                raise ValueError()
+                #return None
+                raise ValueError("%i channels do not fit %i mics" % \
+                    (numchannels, self.mpos.num_mics))
             numfreq = self.freq_data.block_size/2 + 1
             H5cache.get_cache( self, self.freq_data.basename)
             if not name in self.h5f.root:
@@ -435,16 +406,11 @@ class BeamformerBase( HasPrivateTraits ):
             else:
                 ac = self.h5f.getNode('/'+name, 'result')
                 fr = self.h5f.getNode('/'+name, 'freqs')
-            # print self.freq_data.h5f#csm[5, 1, 1]
             if not fr[self.freq_data.ind_low:self.freq_data.ind_high].all():
                 self.calc(ac, fr)
                 self.h5f.flush()
             print 2, name
         return ac
-     #   except:
-      #      import sys
-       #     print sys.exc_info()
-       #     return None
 
     def calc(self, ac, fr):
         """
@@ -484,7 +450,6 @@ class BeamformerBase( HasPrivateTraits ):
         etc.
         """
         res = self.result # trigger calculation
-        #print "synth", num
         f = self.freq_data.fftfreq()
         if len(f) == 0:
             return None#array([[1, ], ], 'd')
@@ -500,8 +465,8 @@ class BeamformerBase( HasPrivateTraits ):
                 else:
                     h = sum(self.result[f1:f2], 0)
             return h.reshape(self.grid.shape)
-        except:
-            return None#ones((1, 1), 'd')
+        except IndexError:
+            return None
 
     def integrate(self, sector):
         """
@@ -893,6 +858,7 @@ class BeamformerOrth (BeamformerBase):
     
     @on_trait_change('n')
     def set_eva_list(self):
+        """ sets the list of eigenvalues to consider """
         self.eva_list = arange(-1, -1-self.n, -1)
 
     def calc(self, ac, fr):

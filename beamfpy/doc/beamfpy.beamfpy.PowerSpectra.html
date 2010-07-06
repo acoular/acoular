@@ -86,20 +86,25 @@ Contents:
 <h2 id="section-traits">Traits</h2>
 <ul class="doclist">
 
-  <li class="trait" id="block_size">block_size<pre>FFT block size, one of: 128,256,512,1024,2048 ... 16384
+  <li class="trait" id="basename">basename<pre>basename for cache file
+</pre><pre>basename = Property(depends_on = 'time_data.digest', desc = 'basename for cache file')
+
+</pre></li>
+
+  <li class="trait" id="block_size">block_size<pre>FFT block size, one of: 128, 256, 512, 1024, 2048 ... 16384
 defaults to 1024
 </pre><pre>block_size = Trait(1024, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, desc = 'number of samples per FFT block')
 
 </pre></li>
 
-  <li class="trait" id="calib">calib<pre>the Calib object that provides the calibration data,
+  <li class="trait" id="calib">calib<pre>the Calib object that provides the calibration data, 
 defaults to no calibration, i.e. the raw time data is used
 </pre><pre>calib = Instance(<a href="beamfpy.timedomain.Calib.html">Calib</a>)
 
 </pre></li>
 
   <li class="trait" id="csm">csm<pre>the cross spectral matrix as
-(number of frequencies,numchannels,numchannels) array of complex
+(number of frequencies, numchannels, numchannels) array of complex
 </pre><pre>csm = Property(desc = 'cross spectral matrix')
 
 </pre></li>
@@ -141,18 +146,18 @@ defaults to 0
 
 </pre></li>
 
-  <li class="trait" id="overlap">overlap<pre>overlap factor for averaging: 'None'(default),'50%','75%','87.5%'
+  <li class="trait" id="overlap">overlap<pre>overlap factor for averaging: 'None'(default), '50%', '75%', '87.5%'
 </pre><pre>overlap = Trait('None', { Const('None') : Const(1), Const('50%') : Const(2), Const('75%') : Const(4), Const('87.5%') : Const(8) }, desc = 'overlap of FFT blocks')
 
 </pre></li>
 
-  <li class="trait" id="time_data">time_data<pre>the TimeSamples object that provides the data
-</pre><pre>time_data = Trait(<a href="beamfpy.timedomain.TimeSamples.html">TimeSamples</a>, desc = 'time data object')
+  <li class="trait" id="time_data">time_data<pre>the SamplesGenerator object that provides the data
+</pre><pre>time_data = Trait(<a href="beamfpy.timedomain.SamplesGenerator.html">SamplesGenerator</a>, desc = 'time data object')
 
 </pre></li>
 
   <li class="trait" id="window">window<pre>window function for FFT, one of:
-'Rectangular' (default),'Hanning','Hamming','Bartlett','Blackman'
+'Rectangular' (default), 'Hanning', 'Hamming', 'Bartlett', 'Blackman'
 </pre><pre>window = Trait('Rectangular', { Const('Rectangular') : Name('ones'), Const('Hanning') : Name('hanning'), Const('Hamming') : Name('hamming'), Const('Bartlett') : Name('bartlett'), Const('Blackman') : Name('blackman') }, desc = 'type of window for FFT')
 
 </pre></li>

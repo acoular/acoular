@@ -91,13 +91,18 @@ Contents:
 
 </pre></li>
 
+  <li class="trait" id="calib">calib<pre>calibration data
+</pre><pre>calib = Trait(<a href="beamfpy.timedomain.Calib.html">Calib</a>, desc = 'Calibration data')
+
+</pre></li>
+
   <li class="trait" id="data">data<pre>the time data as (numsamples, numchannels) array of floats
 </pre><pre>data = Any(desc = 'the actual time data array')
 
 </pre></li>
 
   <li class="trait" id="digest">digest<pre>internal identifier
-</pre><pre>digest = Property(depends_on = [ 'basename' ])
+</pre><pre>digest = Property(depends_on = [ 'basename', 'calib.digest' ])
 
 </pre></li>
 
@@ -147,7 +152,10 @@ Contents:
   <li id="load_data" class="function">load_data(self)<pre> open the .h5 file and setting attributes
         </pre></li>
   
-  <li id="result" class="function">result(self, <span class="param-name">num</span> = <span class="param-default">128</span>)<pre></pre></li>
+  <li id="result" class="function">result(self, <span class="param-name">num</span> = <span class="param-default">128</span>)<pre> 
+        python generator: yields samples in blocks of shape (num, numchannels), 
+        the last block may be shorter than num
+        </pre></li>
   
 </ul>
 

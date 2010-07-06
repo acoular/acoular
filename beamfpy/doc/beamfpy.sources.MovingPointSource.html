@@ -5,7 +5,7 @@
           "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <title>Class beamfpy.sources.PointSource</title>
+    <title>Class beamfpy.sources.MovingPointSource</title>
     <link rel="stylesheet" type="text/css" href="class.css"/>
     <script type="text/javascript" src="scr.js"></script>
     
@@ -23,14 +23,14 @@
     <li><a href="namespace_index.html">Namespace Index</a></li>
     </ul>
     </div>
-    <h1>Class <span class="prefix"><a href="beamfpy.html">beamfpy</a>.&#8203;<a href="beamfpy.sources.html">sources</a>.&#8203;</span><a href="beamfpy.sources.PointSource.html">PointSource</a></h1>
+    <h1>Class <span class="prefix"><a href="beamfpy.html">beamfpy</a>.&#8203;<a href="beamfpy.sources.html">sources</a>.&#8203;</span><a href="beamfpy.sources.MovingPointSource.html">MovingPointSource</a></h1>
     
     </div>
 
     
 
 <pre>
-    fixed point source class for simulations
+    point source class for simulations that moves along a given trajectory
     generates output via the generator 'result'
     </pre>
 
@@ -61,7 +61,7 @@ Contents:
 <h2 id="section-superclasses">Inherits from</h2>
 <ul class="doclist">
   
-    <li><a href="beamfpy.timedomain.SamplesGenerator.html">SamplesGenerator</a>: beamfpy.timedomain.SamplesGenerator</li>
+    <li><a href="beamfpy.sources.PointSource.html">PointSource</a>: beamfpy.sources.PointSource</li>
   
 </ul>
 
@@ -73,48 +73,13 @@ Contents:
 <h2 id="section-traits">Traits</h2>
 <ul class="doclist">
 
-  <li class="trait" id="c">c<pre>the speed of sound, defaults to 343 m/s
-</pre><pre>c = Float(343.0, desc = 'speed of sound')
-
-</pre></li>
-
   <li class="trait" id="digest">digest<pre>internal identifier
-</pre><pre>digest = Property(depends_on = [ 'mpos.digest', 'signal.digest', 'loc', 'c', 'env.digest', '__class__' ])
+</pre><pre>digest = Property(depends_on = [ 'mpos.digest', 'signal.digest', 'c', 'env.digest', 'trajectory.digest', '__class__' ])
 
 </pre></li>
 
-  <li class="trait" id="env">env<pre>Environment object that provides speed of sound and grid-mic distances
-</pre><pre>env = Trait(<a href="beamfpy.grids.Environment.html">Environment</a>(), <a href="beamfpy.grids.Environment.html">Environment</a>)
-
-</pre></li>
-
-  <li class="trait" id="loc">loc<pre>location of source 
-</pre><pre>loc = Tuple((0.0, 0.0, 1.0), desc = 'source location')
-
-</pre></li>
-
-  <li class="trait" id="mpos">mpos<pre>MicGeom object that provides the microphone locations
-</pre><pre>mpos = Trait(<a href="beamfpy.grids.MicGeom.html">MicGeom</a>, desc = 'microphone geometry')
-
-</pre></li>
-
-  <li class="trait" id="numchannels">numchannels<pre>number of channels in output
-</pre><pre>numchannels = Delegate('mpos', 'num_mics')
-
-</pre></li>
-
-  <li class="trait" id="numsamples">numsamples<pre>number of samples 
-</pre><pre>numsamples = Delegate('signal')
-
-</pre></li>
-
-  <li class="trait" id="sample_freq">sample_freq<pre>sample_freq of signal
-</pre><pre>sample_freq = Delegate('signal')
-
-</pre></li>
-
-  <li class="trait" id="signal">signal<pre>signal generator
-</pre><pre>signal = Trait(<a href="beamfpy.sources.SignalGenerator.html">SignalGenerator</a>)
+  <li class="trait" id="trajectory">trajectory<pre>trajectory, start time is assumed to be the same as for the samples
+</pre><pre>trajectory = Trait(<a href="beamfpy.timedomain.Trajectory.html">Trajectory</a>, desc = 'trajectory of the source')
 
 </pre></li>
 

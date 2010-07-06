@@ -1,13 +1,18 @@
 # -*- coding: utf-8 -*-
+#pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
 """
-Created on Tue May  4 12:25:10 2010
+beamfpy.py: classes for calculations in the time domain
 
-@author: sarradj
+Part of the beamfpy library: several classes for the implemetation of 
+acoustic beamforming
+
+(c) Ennes Sarradj 2007-2010, all rights reserved
+ennes.sarradj@gmx.de
 """
-#pylint: disable-msg=E0611, E1101, C0103, C0111, R0901, R0902, R0903, R0904, W0232
+
 # imports from other packages
 from numpy import array, newaxis, empty, empty_like, pi, sin, sqrt, arange, \
-clip, sort, r_, s_, zeros, int16, histogram, unique1d, where
+clip, sort, r_, s_, zeros, int16, histogram, unique1d, where, cross, dot
 from scipy.interpolate import splprep, splev
 from enthought.traits.api import HasPrivateTraits, Float, Int, Long, \
 File, CArray, Property, Instance, Trait, Bool, Delegate, Any, \
@@ -107,8 +112,8 @@ class SamplesGenerator( HasPrivateTraits ):
     # internal identifier
     digest = ''
                
-    # result generator: delivers output in blocks of num samples
     def result(self, num):
+        """ python generator: yields output in blocks of num samples """
         pass
 
 class TimeSamples( SamplesGenerator ):
@@ -187,8 +192,11 @@ class TimeSamples( SamplesGenerator ):
         self.sample_freq = self.data.getAttr('sample_freq')
         (self.numsamples, self.numchannels) = self.data.shape
 
-    # generator function
     def result(self, num=128):
+        """ 
+        python generator: yields samples in blocks of shape (num, numchannels), 
+        the last block may be shorter than num
+        """
         if self.numsamples == 0:
             raise IOError("no samples available")
         i = 0
@@ -313,8 +321,11 @@ class MaskedTimeSamples( TimeSamples ):
         self.sample_freq = self.data.getAttr('sample_freq')
         (self.numsamples_total, self.numchannels_total) = self.data.shape
 
-    # generator function
     def result(self, num=128):
+        """ 
+        python generator: yields samples in blocks of shape (num, numchannels), 
+        the last block may be shorter than num
+        """
         sli = slice(self.start, self.stop).indices(self.numsamples_total)
         i = sli[0]
         stop = sli[1]
@@ -363,9 +374,13 @@ class TimeInOut( SamplesGenerator ):
     def _get_digest( self ):
         return digest(self)
 
-    # result generator: delivers output in blocks of N
-    def result(self, n):
-        for temp in self.source.result(n):
+    def result(self, num):
+        """ 
+        python generator: dummy function, just echoes the output of source,
+        yields samples in blocks of shape (num, numchannels), the last block
+        may be shorter than num
+        """
+        for temp in self.source.result(num):
             # effectively no processing
             yield temp
 
@@ -394,7 +409,7 @@ class Mixer( TimeInOut ):
     ldigest = Property( depends_on = ['sources.digest', ])
 
     # internal identifier
-    digest = Property( depends_on = ['source.digest', 'ldigest','__class__'])
+    digest = Property( depends_on = ['source.digest', 'ldigest', '__class__'])
 
     traits_view = View(
         Item('source', style='custom')
@@ -413,6 +428,7 @@ class Mixer( TimeInOut ):
 
     @on_trait_change('sources,source')
     def validate_sources( self ):
+        """ validates if sources fit together """
         if self.source:
             for s in self.sources:
                 if self.sample_freq != s.sample_freq:
@@ -420,15 +436,19 @@ class Mixer( TimeInOut ):
                 if self.numchannels != s.numchannels:
                     raise ValueError("Channel count of %s does not fit" % s)
 
-    # result generator: delivers output in blocks of N
-    def result(self, n):
-        gens = [i.result(n) for i in self.sources]
-        for temp in self.source.result(n):
+    def result(self, num):
+        """ 
+        python generator: adds the output from the source and those in the list 
+        sources, yields samples in blocks of shape (num, numchannels), 
+        the last block may be shorter than num
+        """
+        gens = [i.result(num) for i in self.sources]
+        for temp in self.source.result(num):
             sh = temp.shape[0]
             for g in gens:
                 temp1 = g.next()
                 if temp.shape[0] > temp1.shape[0]:
-                   temp = temp[:temp1.shape[0]]
+                    temp = temp[:temp1.shape[0]]
                 temp += temp1[:temp.shape[0]]
             yield temp
             if sh > temp.shape[0]:
@@ -439,9 +459,14 @@ class TimePower( TimeInOut ):
     """
     calculates time-depended power of the signal
     """
-    # result generator: delivers squared input
-    def result(self, n):
-        for temp in self.source.result(n):
+
+    def result(self, num):
+        """ 
+        python generator: echoes the squared output of source, yields samples 
+        in blocks of shape (num, numchannels), the last block may be shorter 
+        than num
+        """
+        for temp in self.source.result(num):
             yield temp*temp
     
 class TimeAverage( TimeInOut ) :
@@ -486,10 +511,14 @@ class TimeAverage( TimeInOut ) :
         if self.source:
             return self.source.numsamples / self.naverage
 
-    # result generator: delivers average of input
-    def result(self, n):
+    def result(self, num):
+        """ 
+        python generator: delivers the blockwise average of the output of 
+        source, yields samples in blocks of shape (num, numchannels), the last 
+        block may be shorter than num
+        """
         nav = self.naverage
-        for temp in self.source.result(n*nav):
+        for temp in self.source.result(num*nav):
             ns, nc = temp.shape
             nso = ns/nav
             if nso > 0:
@@ -499,10 +528,14 @@ class TimeReverse( TimeInOut ):
     """
     reverses time 
     """
-    # result generator: delivers output in blocks of N
-    def result(self, n):
+    def result(self, num):
+        """ 
+        python generator: delivers the time-reversed output of source, yields 
+        samples in blocks of shape (num, numchannels), the last block may be 
+        shorter than num
+        """
         l = []
-        l.extend(self.source.result(n))
+        l.extend(self.source.result(num))
         temp = empty_like(l[0])
         h = l.pop()
         nsh = h.shape[0]
@@ -547,6 +580,7 @@ class FiltFiltOctave( TimeInOut ):
         return digest(self)
         
     def ba(self, order):
+        """ internal filter design routine, return filter coeffs """
         # filter design
         fs = self.sample_freq
         # adjust filter edge frequencies
@@ -556,16 +590,21 @@ class FiltFiltOctave( TimeInOut ):
         alpha = (1+sqrt(1+beta*beta))/beta
         fr = 2*self.band/fs
         if fr > 1/sqrt(2):
-            raise ValueError("band frequency too high")
+            raise ValueError("band frequency too high:%f,%f" % (self.band, fs))
         om1 = fr/alpha 
         om2 = fr*alpha
         return butter(order, [om1, om2], 'bandpass') 
         
-    def result(self, n):
+    def result(self, num):
+        """ 
+        python generator: delivers the zero-phase bandpass filtered output of 
+        source, yields samples in blocks of shape (num, numchannels), the last 
+        block may be shorter than num
+        """
         b, a = self.ba(3) # filter order = 3
         data = empty((self.source.numsamples, self.source.numchannels))
         j = 0
-        for block in self.source.result(n):
+        for block in self.source.result(num):
             ns, nc = block.shape
             data[j:j+ns] = block
             j += ns
@@ -574,18 +613,23 @@ class FiltFiltOctave( TimeInOut ):
         j = 0
         ns = data.shape[0]
         while j < ns:
-            yield data[j:j+n]
-            j += n
+            yield data[j:j+num]
+            j += num
 
 class FiltOctave( FiltFiltOctave ):
     """
     octave or fractional octave filter (not zero-phase)
     """
 
-    def result(self, n):
+    def result(self, num):
+        """ 
+        python generator: delivers the bandpass filtered output of source,
+        yields samples in blocks of shape (num, numchannels), the last 
+        block may be shorter than num
+        """
         b, a = self.ba(3) # filter order = 3
         zi = zeros((max(len(a), len(b))-1, self.source.numchannels))
-        for block in self.source.result(n):
+        for block in self.source.result(num):
             block, zi = lfilter(b, a, block, axis=0, zi=zi)
             yield block
 
@@ -606,6 +650,7 @@ def const_power_weight( bf ):
     weights /= weights.mean()
     return weights[ind]
 
+# possible choices for spatial weights
 possible_weights = {'none':None, 
                     'power':const_power_weight}
 
@@ -677,8 +722,12 @@ class BeamformerTime( TimeInOut ):
     def _get_rm ( self ):
         return self.env.r( self.c, self.grid.pos(), self.mpos.mpos)
 
-    # generator, delivers the beamformer result
-    def result( self, n=2048 ):
+    def result( self, num=2048 ):
+        """ 
+        python generator: delivers the beamformer result, yields samples in 
+        blocks of shape (num, numchannels), the last block may be shorter 
+        than num; numchannels is usually very large (number of grid points)
+        """
         if self.weights_:
             w = self.weights_(self)[newaxis]
         else:
@@ -698,18 +747,18 @@ class BeamformerTime( TimeInOut ):
         dmax = d_index.max()+1 # maximum index
         aoff = dmax-dmin # index span
         #working copy of data:
-        zi = empty((aoff+n, self.source.numchannels), dtype=float) 
-        o = empty((n, self.grid.size), dtype=float) # output array
+        zi = empty((aoff+num, self.source.numchannels), dtype=float) 
+        o = empty((num, self.grid.size), dtype=float) # output array
         offset = aoff # start offset for working array
         ooffset = 0 # offset for output array
-        for block in self.source.result(n):
+        for block in self.source.result(num):
             ns = block.shape[0] # numbers of samples and channels
             maxoffset = ns-dmin # ns - aoff +aoff -dmin
             zi[aoff:aoff+ns] = block * w # copy data to working array
             # loop over data samples 
             while offset < maxoffset:
                 # yield output array if full
-                if ooffset == n:
+                if ooffset == num:
                     yield o
                     ooffset = 0
                 # the next line needs to be implemented faster
@@ -719,7 +768,7 @@ class BeamformerTime( TimeInOut ):
                 ooffset += 1
             # copy remaining samples in front of next block
             zi[0:aoff] = zi[-aoff:]
-            offset -= n
+            offset -= num
         # remaining data chunk 
         yield o[:ooffset]
             
@@ -759,7 +808,13 @@ class BeamformerTimeSq( BeamformerTime ):
         return digest(self)
         
     # generator, delivers the beamformer result
-    def result( self, n=2048 ):
+    def result( self, num=2048 ):
+        """ 
+        python generator: delivers the _squared_ beamformer result with optional
+        removal of autocorrelation, yields samples in blocks of shape 
+        (num, numchannels), the last block may be shorter than num; 
+        numchannels is usually very large (number of grid points)
+        """
         if self.weights_:
             w = self.weights_(self)[newaxis]
         else:
@@ -780,19 +835,19 @@ class BeamformerTimeSq( BeamformerTime ):
 #        print dmin, dmax
         aoff = dmax-dmin # index span
         #working copy of data:
-        zi = empty((aoff+n, self.source.numchannels), dtype=float)
-        o = empty((n, self.grid.size), dtype=float) # output array
+        zi = empty((aoff+num, self.source.numchannels), dtype=float)
+        o = empty((num, self.grid.size), dtype=float) # output array
         temp = empty((self.grid.size, self.source.numchannels), dtype=float)
         offset = aoff # start offset for working array
         ooffset = 0 # offset for output array
-        for block in self.source.result(n):
+        for block in self.source.result(num):
             ns = block.shape[0] # numbers of samples and channels
             maxoffset = ns-dmin # ns - aoff +aoff -dmin
             zi[aoff:aoff+ns] = block * w # copy data to working array
             # loop over data samples 
             while offset < maxoffset:
                 # yield output array if full
-                if ooffset == n:
+                if ooffset == num:
                     yield o
                     ooffset = 0
                 # the next line needs to be implemented faster
@@ -809,7 +864,7 @@ class BeamformerTimeSq( BeamformerTime ):
                 ooffset += 1
             # copy remaining samples in front of next block
             zi[0:aoff] = zi[-aoff:]
-            offset -= n
+            offset -= num
         # remaining data chunk 
         yield o[:ooffset]
 
@@ -857,19 +912,22 @@ class Trajectory( HasPrivateTraits ):
         tcku = splprep(xp, u=t, s=0, k=k)
         return tcku[0]
     
-    # returns (x, y, z) for t, x, y and z have the same shape as t
-    def location(self, t):
-        return splev(t, self.tck)
+    def location(self, t, der=0):
+        """ returns (x, y, z) for t, x, y and z have the same shape as t """
+        return splev(t, self.tck, der)
     
-    # generator, gives locations along the trajectory
-    # x.traj(0.1)  every 0.1s within self.interval
-    # x.traj(2.5, 4.5, 0.1)  every 0.1s between 2.5s and 4.5s
-    def traj(self, t_start, t_end=None, delta_t=None):
+    def traj(self, t_start, t_end=None, delta_t=None, der=0):
+        """
+        python generator, yields gives locations along the trajectory
+        x.traj(0.1)  every 0.1s within self.interval
+        x.traj(2.5, 4.5, 0.1)  every 0.1s between 2.5s and 4.5s
+        x.traj(0.1, der=1)  1st derivative every 0.1s within self.interval
+        """
         if not delta_t:
             delta_t = t_start
             t_start, t_end = self.interval
         for t in arange(t_start, t_end, delta_t):
-            yield self.location(t)
+            yield self.location(t, der)
         
 class BeamformerTimeSqTraj( BeamformerTimeSq ):
     """
@@ -882,10 +940,15 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
     trajectory = Trait(Trajectory, 
         desc="trajectory of the grid center")
 
+    # reference vector, perpendicular to the y-axis of moving grid
+    rvec = CArray( dtype=float, shape=(3, ), value=array((0, 0, 0)), 
+        desc="reference vector")
+    
     # internal identifier
     digest = Property( 
         depends_on = ['mpos.digest', 'grid.digest', 'source.digest', 'r_diag', \
-            'c', 'weights', 'env.digest', 'trajectory.digest', '__class__'], 
+            'c', 'weights', 'rvec', 'env.digest', 'trajectory.digest', \
+            '__class__'], 
         )
 
     traits_view = View(
@@ -907,8 +970,14 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
     def _get_digest( self ):
         return digest(self)
         
-    # generator, delivers the beamformer result
-    def result( self, n=2048 ):
+    def result( self, num=2048 ):
+        """ 
+        python generator: delivers the _squared_ beamformer result with optional
+        removal of autocorrelation for a moving (translated and optionally 
+        rotated grid), yields samples in blocks of shape (num, numchannels), 
+        the last block may be shorter than num; numchannels is usually very 
+        large (number of grid points)
+        """
         if self.weights_:
             w = self.weights_(self)[newaxis]
         else:
@@ -916,53 +985,51 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
         c = self.c/self.source.sample_freq
         gpos = self.grid.pos()
         # determine the maximum delay
-        tmin, tmax = self.trajectory.interval
-        tpos = gpos + array(self.trajectory.location(tmin))[:, newaxis]
-        dmax1 = array(self.env.r( self.c, tpos, self.mpos.mpos)/c, \
-            dtype=int).max()
-        tpos = gpos + array(self.trajectory.location(tmax))[:, newaxis]
-        dmax2 = array(self.env.r( self.c, tpos, self.mpos.mpos)/c, \
-            dtype=int).max()
-        dmax = max(dmax1, dmax2)
-        #max1 = self.r0.max() # maximum grid point distance to center
-        # maximum microphone distance to center:
-        #max2 = (self.mpos.mpos**2).sum(-1).max() 
-        #trpos = array(self.trajectory.location(self.trajectory.interval))**2
-#        print trpos.shape
-        # + maximum trajectory displacement:
-        #dmax = int((max1+max2+max(sqrt(trpos.sum(0))))/c)+1 
+        maxrg = sqrt((gpos*gpos).sum(0)).max() # max grid radius
+        maxrm = self.env.r( self.c, array(self.trajectory.points.values()).T, 
+                      self.mpos.mpos).max() # max trajectory-mic distance
+        dmax = int((maxrm+maxrg)/c) + 10 # +10 for roundoff errors
         dmin = 0 # minimum: no delay
-#        print dmin, dmax
         aoff = dmax-dmin # index span
-        #working copy of data:
-        zi = empty((aoff+n, self.source.numchannels), dtype=float) 
-        o = empty((n, self.grid.size), dtype=float) # output array
+        zi = empty((aoff+num, self.source.numchannels), \
+            dtype=float) #working copy of data
+        o = empty((num, self.grid.size), dtype=float) # output array
         temp = empty((self.grid.size, self.source.numchannels), dtype=float)
-        d_index2 = arange(self.mpos.num_mics, dtype=int)
+        d_index2 = arange(self.mpos.num_mics, dtype=int) # second index (static)
         offset = aoff # start offset for working array
-        ooffset = 0 # offset for output array
-        # generator for trajectory:
-        g = self.trajectory.traj(1/self.source.sample_freq) 
-        for block in self.source.result(n):
+        ooffset = 0 # offset for output array      
+        # generators for trajectory
+        g = self.trajectory.traj(1/self.source.sample_freq)
+        g1 = self.trajectory.traj(1/self.source.sample_freq, der=1)
+        rflag = (self.rvec == 0).all() #flag translation vs. rotation
+        for block in self.source.result(num):
             ns = block.shape[0] # numbers of samples and channels
             maxoffset = ns-dmin # ns - aoff +aoff -dmin
             zi[aoff:aoff+ns] = block * w# copy data to working array
-            # loop over data samples 
+            # loop over data samples
             while offset < maxoffset:
                 # yield output array if full
-                if ooffset == n:
+                if ooffset == num:
                     yield o
                     ooffset = 0
-                #
-                #~ print gpos.shape, array(g.next()).shape
-                tpos = gpos + array(g.next())[:, newaxis]
+                if rflag:
+                    # grid is only translated, not rotated
+                    tpos = gpos + array(g.next())[:, newaxis]
+                else:
+                    # grid is both translated and rotated
+                    loc = array(g.next()) #translation
+                    dx = array(g1.next()) #direction vector (new x-axis)
+                    dy = cross(self.rvec, dx) # new y-axis
+                    dz = cross(dx, dy) # new z-axis
+                    RM = array((dx, dy, dz)).T # rotation matrix
+                    RM /= sqrt((RM*RM).sum(0)) # column normalized
+                    tpos = dot(RM, gpos)+loc[:, newaxis] # rotation+translation
                 rm = self.env.r( self.c, tpos, self.mpos.mpos)
                 r0 = self.env.r( self.c, tpos)
                 delays = rm/c
                 d_index = array(delays, dtype=int) # integer index
                 d_interp1 = delays % 1 # 1st coeff for lin interpolation
                 d_interp2 = 1-d_interp1 # 2nd coeff for lin interpolation
-#                amp = rm/r0[:, newaxis] # multiplication factor
                 amp = (w/(rm*rm)).sum(1) * r0
                 amp = 1.0/(amp[:, newaxis]*rm) # multiplication factor
                 # the next line needs to be implemented faster
@@ -979,7 +1046,7 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
                 ooffset += 1
             # copy remaining samples in front of next block
             zi[0:aoff] = zi[-aoff:]
-            offset -= n
+            offset -= num
         # remaining data chunk 
         yield o[:ooffset]
                 
@@ -1027,7 +1094,13 @@ class TimeCache( TimeInOut ):
         return basename
 
     # result generator: delivers input, possibly from cache
-    def result(self, n):
+    def result(self, num):
+        """ 
+        python generator: just echos the source output, but reads it from cache
+        when available and prevents unnecassary recalculation, yields samples 
+        in blocks of shape (num, numchannels), the last block may be shorter 
+        than num
+        """
         name = 'tc_' + self.digest
         H5cache.get_cache( self, self.basename )
         if not name in self.h5f.root:
@@ -1035,15 +1108,15 @@ class TimeCache( TimeInOut ):
                                        tables.atom.Float32Atom(), \
                                         (0, self.numchannels))
             ac.setAttr('sample_freq', self.sample_freq)
-            for data in self.source.result(n):
+            for data in self.source.result(num):
                 ac.append(data)
                 yield data
         else:
             ac = self.h5f.getNode('/', name)
             i = 0
             while i < ac.shape[0]:
-                yield ac[i:i+n]
-                i += n
+                yield ac[i:i+num]
+                i += num
 
 class WriteWAV( TimeInOut ):
     """
@@ -1075,21 +1148,20 @@ class WriteWAV( TimeInOut ):
     @cached_property
     def _get_basename ( self ):
         obj = self.source # start width source
-        basename = 'void' # if no file source is found
-        while obj:
-#            print obj
-            if 'basename' in obj.all_trait_names(): # at original source?
-                basename = obj.basename # get the name
-                break
-            else:
-                obj = obj.source # traverse down until original data source
+        try:
+            while obj:
+    #            print obj
+                if 'basename' in obj.all_trait_names(): # at original source?
+                    basename = obj.basename # get the name
+                    break
+                else:
+                    obj = obj.source # traverse down until original data source
+        except AttributeError:
+            basename = 'void' # if no file source is found
         return basename
 
-    # result generator: delivers nothing
-    def result(self, n):
-        pass
-
     def save(self):
+        """ saves source output to one- or two-channel .wav file """
         nc = len(self.channels)
         if not (0 < nc < 3):
             raise ValueError("one or two channels allowed, %i channels given" %\
@@ -1154,13 +1226,17 @@ class IntegratorSectorTime( TimeInOut ):
     def _get_numchannels ( self ):
         return len(self.sectors)
 
-    # generator, delivers the beamformer result
-    def result( self, n=1 ):
+    def result( self, num=1 ):
+        """ 
+        python generator: delivers the source output integrateds over the given 
+        sectors, yields samples in blocks of shape (num, numchannels), the last 
+        block may be shorter than num; numchannels is the number of sectors
+        """
         inds = [self.grid.indices(*sector) for sector in self.sectors]
         gshape = self.grid.shape
-        o = empty((n, self.numchannels), dtype=float) # output array
-        for r in self.source.result(n):
-            ns, nc = r.shape
+        o = empty((num, self.numchannels), dtype=float) # output array
+        for r in self.source.result(num):
+            ns = r.shape[0]
             mapshape = (ns,) + gshape
             rmax = r.max()
             rmin = rmax * 10**(self.clip/10.0)

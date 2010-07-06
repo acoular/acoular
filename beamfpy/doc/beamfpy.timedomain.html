@@ -30,9 +30,13 @@
     
 
 <pre>
-Created on Tue May  4 12:25:10 2010
+beamfpy.py: classes for calculations in the time domain
 
-@author: sarradj
+Part of the beamfpy library: several classes for the implemetation of 
+acoustic beamforming
+
+(c) Ennes Sarradj 2007-2010, all rights reserved
+ennes.sarradj@gmx.de
 </pre>
 
 
@@ -68,7 +72,8 @@ Contents:
 <h2 id="section-variables">Variables</h2>
 <ul class="doclist">
 
-  <li class="attribute" id="possible_weights">possible_weights<pre></pre><pre>possible_weights = { Const('none') : Name('None'), Const('power') : Name('const_power_weight') }
+  <li class="attribute" id="possible_weights">possible_weights<pre>possible choices for spatial weights
+</pre><pre>possible_weights = { Const('none') : Name('None'), Const('power') : Name('const_power_weight') }
 
 </pre></li>
 
@@ -97,6 +102,8 @@ Contents:
   <li id="IntegratorSectorTime" class="class"><a href="beamfpy.timedomain.IntegratorSectorTime.html">IntegratorSectorTime</a></li>
   
   <li id="MaskedTimeSamples" class="class"><a href="beamfpy.timedomain.MaskedTimeSamples.html">MaskedTimeSamples</a></li>
+  
+  <li id="Mixer" class="class"><a href="beamfpy.timedomain.Mixer.html">Mixer</a></li>
   
   <li id="SamplesGenerator" class="class"><a href="beamfpy.timedomain.SamplesGenerator.html">SamplesGenerator</a></li>
   
@@ -166,11 +173,15 @@ Contents:
 
   <tr id="clip"><td>clip</td><td>numpy.clip</td></tr>
 
+  <tr id="cross"><td>cross</td><td>numpy.cross</td></tr>
+
   <tr id="Delegate"><td>Delegate</td><td>enthought.traits.api.Delegate</td></tr>
 
   <tr id="Dict"><td>Dict</td><td>enthought.traits.api.Dict</td></tr>
 
   <tr id="digest"><td>digest</td><td><a href="beamfpy.internal.html#digest">beamfpy.internal.digest</a></td></tr>
+
+  <tr id="dot"><td>dot</td><td>numpy.dot</td></tr>
 
   <tr id="empty"><td>empty</td><td>numpy.empty</td></tr>
 
@@ -201,8 +212,6 @@ Contents:
   <tr id="lfilter"><td>lfilter</td><td>scipy.signal.lfilter</td></tr>
 
   <tr id="List"><td>List</td><td>enthought.traits.api.List</td></tr>
-
-  <tr id="log10"><td>log10</td><td>numpy.log10</td></tr>
 
   <tr id="Long"><td>Long</td><td>enthought.traits.api.Long</td></tr>
 
@@ -247,6 +256,10 @@ Contents:
   <tr id="unique1d"><td>unique1d</td><td>numpy.unique1d</td></tr>
 
   <tr id="View"><td>View</td><td>enthought.traits.ui.api.View</td></tr>
+
+  <tr id="wave"><td>wave</td><td>wave</td></tr>
+
+  <tr id="where"><td>where</td><td>numpy.where</td></tr>
 
   <tr id="zeros"><td>zeros</td><td>numpy.zeros</td></tr>
 

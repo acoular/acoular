@@ -127,7 +127,7 @@ Contents:
 </pre></li>
 
   <li class="trait" id="weights">weights<pre>spatial weighting function (from timedomain.possible_weights)
-</pre><pre>weights = Trait('None', <a href="beamfpy.timedomain.html#possible_weights">possible_weights</a>, desc = 'spatial weighting function')
+</pre><pre>weights = Trait('none', <a href="beamfpy.timedomain.html#possible_weights">possible_weights</a>, desc = 'spatial weighting function')
 
 </pre></li>
 
@@ -142,7 +142,7 @@ Contents:
 <h2 id="section-functions">Method summary</h2>
 <ul class="function-summary">
   
-  <li class="function"><a href="#result">result</a>(self, <span class="param-name">n</span> = <span class="param-default">2048</span>)</li>
+  <li class="function"><a href="#result">result</a>(self, <span class="param-name">num</span> = <span class="param-default">2048</span>)</li>
   
 </ul>
 
@@ -152,7 +152,11 @@ Contents:
 <h2>Methods</h2>
 <ul class="doclist">
   
-  <li id="result" class="function">result(self, <span class="param-name">n</span> = <span class="param-default">2048</span>)<pre></pre></li>
+  <li id="result" class="function">result(self, <span class="param-name">num</span> = <span class="param-default">2048</span>)<pre> 
+        python generator: delivers the beamformer result, yields samples in 
+        blocks of shape (num, numchannels), the last block may be shorter 
+        than num; numchannels is usually very large (number of grid points)
+        </pre></li>
   
 </ul>
 

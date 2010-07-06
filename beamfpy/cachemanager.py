@@ -1,3 +1,13 @@
+"""
+cachemanager.py (depreceated)
+
+Part of the beamfpy library: several classes for the implemetation of 
+acoustic beamforming
+
+(c) Ennes Sarradj 2007-2010, all rights reserved
+ennes.sarradj@gmx.de
+"""
+
 from beamfpy import cache_dir
 from numpy import *
 import os

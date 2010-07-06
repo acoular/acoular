@@ -30,9 +30,13 @@
     
 
 <pre>
-Created on Tue May 11 10:04:22 2010
+sources.py: classes for simulated signals and sources
 
-@author: sarradj
+Part of the beamfpy library: several classes for the implemetation of 
+acoustic beamforming
+
+(c) Ennes Sarradj 2007-2010, all rights reserved
+ennes.sarradj@gmx.de
 </pre>
 
 
@@ -68,7 +72,15 @@ Contents:
 <h2 id="section-classes">Classes</h2>
 <ul class="doclist">
   
+  <li id="MovingPointSource" class="class"><a href="beamfpy.sources.MovingPointSource.html">MovingPointSource</a></li>
+  
   <li id="PointSource" class="class"><a href="beamfpy.sources.PointSource.html">PointSource</a></li>
+  
+  <li id="SignalGenerator" class="class"><a href="beamfpy.sources.SignalGenerator.html">SignalGenerator</a></li>
+  
+  <li id="SineGenerator" class="class"><a href="beamfpy.sources.SineGenerator.html">SineGenerator</a></li>
+  
+  <li id="WNoiseGenerator" class="class"><a href="beamfpy.sources.WNoiseGenerator.html">WNoiseGenerator</a></li>
   
 </ul>
 
@@ -84,9 +96,9 @@ Contents:
   </thead>
   <tbody>
 
-  <tr id="array"><td>array</td><td>numpy.array</td></tr>
+  <tr id="arange"><td>arange</td><td>numpy.arange</td></tr>
 
-  <tr id="butter"><td>butter</td><td>scipy.signal.butter</td></tr>
+  <tr id="array"><td>array</td><td>numpy.array</td></tr>
 
   <tr id="cached_property"><td>cached_property</td><td>enthought.traits.api.cached_property</td></tr>
 
@@ -102,15 +114,11 @@ Contents:
 
   <tr id="fft"><td>fft</td><td>numpy.fft</td></tr>
 
-  <tr id="filtfilt"><td>filtfilt</td><td>scipy.signal.filtfilt</td></tr>
-
   <tr id="Float"><td>Float</td><td>enthought.traits.api.Float</td></tr>
 
-  <tr id="H5cache"><td>H5cache</td><td><a href="beamfpy.h5cache.html#H5cache">beamfpy.h5cache.H5cache</a></td></tr>
+  <tr id="HasPrivateTraits"><td>HasPrivateTraits</td><td>enthought.traits.api.HasPrivateTraits</td></tr>
 
   <tr id="Int"><td>Int</td><td>enthought.traits.api.Int</td></tr>
-
-  <tr id="Item"><td>Item</td><td>enthought.traits.ui.api.Item</td></tr>
 
   <tr id="lfilter"><td>lfilter</td><td>scipy.signal.lfilter</td></tr>
 
@@ -122,29 +130,23 @@ Contents:
 
   <tr id="normal"><td>normal</td><td>numpy.random.normal</td></tr>
 
-  <tr id="OKCancelButtons"><td>OKCancelButtons</td><td>enthought.traits.ui.menu.OKCancelButtons</td></tr>
-
-  <tr id="path"><td>path</td><td>os.path</td></tr>
-
   <tr id="pi"><td>pi</td><td>numpy.pi</td></tr>
 
   <tr id="Property"><td>Property</td><td>enthought.traits.api.Property</td></tr>
 
-  <tr id="RectGrid"><td>RectGrid</td><td><a href="beamfpy.grids.RectGrid.html">beamfpy.grids.RectGrid</a></td></tr>
+  <tr id="SamplesGenerator"><td>SamplesGenerator</td><td><a href="beamfpy.timedomain.SamplesGenerator.html">beamfpy.timedomain.SamplesGenerator</a></td></tr>
 
   <tr id="seed"><td>seed</td><td>numpy.random.seed</td></tr>
 
-  <tr id="tables"><td>tables</td><td>tables</td></tr>
-
-  <tr id="TimeInOut"><td>TimeInOut</td><td><a href="beamfpy.timedomain.TimeInOut.html">beamfpy.timedomain.TimeInOut</a></td></tr>
-
-  <tr id="TimeSamples"><td>TimeSamples</td><td><a href="beamfpy.timedomain.TimeSamples.html">beamfpy.timedomain.TimeSamples</a></td></tr>
+  <tr id="sin"><td>sin</td><td>numpy.sin</td></tr>
 
   <tr id="Trait"><td>Trait</td><td>enthought.traits.api.Trait</td></tr>
 
+  <tr id="Trajectory"><td>Trajectory</td><td><a href="beamfpy.timedomain.Trajectory.html">beamfpy.timedomain.Trajectory</a></td></tr>
+
   <tr id="Tuple"><td>Tuple</td><td>enthought.traits.api.Tuple</td></tr>
 
-  <tr id="View"><td>View</td><td>enthought.traits.ui.api.View</td></tr>
+  <tr id="zeros"><td>zeros</td><td>numpy.zeros</td></tr>
 
   </tbody>
 </table>

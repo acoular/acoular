@@ -88,11 +88,6 @@ Contents:
 <h2 id="section-traits">Traits</h2>
 <ul class="doclist">
 
-  <li class="trait" id="calib">calib<pre>calibration data
-</pre><pre>calib = Trait(<a href="beamfpy.timedomain.Calib.html">Calib</a>, desc = 'Calibration data')
-
-</pre></li>
-
   <li class="trait" id="channels">channels<pre>channel mask to serve as an index for all valid channels
 </pre><pre>channels = Property(depends_on = [ 'invalid_channels', 'numchannels_total' ], desc = 'channel mask')
 
@@ -164,7 +159,10 @@ Contents:
   <li id="load_data" class="function">load_data(self)<pre> open the .h5 file and setting attributes
         </pre></li>
   
-  <li id="result" class="function">result(self, <span class="param-name">num</span> = <span class="param-default">128</span>)<pre></pre></li>
+  <li id="result" class="function">result(self, <span class="param-name">num</span> = <span class="param-default">128</span>)<pre> 
+        python generator: yields samples in blocks of shape (num, numchannels), 
+        the last block may be shorter than num
+        </pre></li>
   
 </ul>
 

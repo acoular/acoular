@@ -1,10 +1,15 @@
 # -*- coding: utf-8 -*-
+#pylint: disable-msg=E0611, C0103, R0901, R0902, R0903, R0904, W0232
 """
-Created on Tue May  4 12:25:10 2010
+grids.py: classes providing support for grids and microphone geometries
 
-@author: sarradj
+Part of the beamfpy library: several classes for the implemetation of 
+acoustic beamforming
+
+(c) Ennes Sarradj 2007-2010, all rights reserved
+ennes.sarradj@gmx.de
 """
-#pylint: disable-msg=E0611, C0111, C0103, R0901, R0902, R0903, R0904, W0232
+
 # imports from other packages
 from numpy import mgrid, s_, array, isscalar, float32, float64, newaxis, sqrt
 from enthought.traits.api import HasPrivateTraits, Float, Property, File, \
@@ -322,6 +327,7 @@ class Environment( HasPrivateTraits ):
         return ''
     
     def r( self, c, gpos, mpos=0.0):
+        """ calculates distances between grid points and mics or origin """
         if isscalar(mpos):
             mpos = array((0, 0, 0), dtype = float32)[:, newaxis]            
         mpos = mpos[:, newaxis, :]
@@ -360,6 +366,8 @@ class UniformFlowEnvironment( Environment):
         return digest( self )
     
     def r( self, c, gpos, mpos=0.0):
+        """ 
+        calculates virtual distances between grid points and mics or origin """
         if isscalar(mpos):
             mpos = array((0, 0, 0), dtype = float32)[:, newaxis]
         fdv = self.fdv/sqrt((self.fdv*self.fdv).sum())

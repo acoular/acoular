@@ -30,38 +30,13 @@
     
 
 <pre>
-Several classes for the implemetation of acoustic beamforming
+beamfpy.py: classes for calculations in the frequency domain
 
-A minimal usage example would be:
+Part of the beamfpy library: several classes for the implemetation of 
+acoustic beamforming
 
-&gt;&gt;    m=MicGeom(from_file='mic_geom.xml')
-&gt;&gt;    g=RectGrid(x_min=-0.8,x_max=-0.2,y_min=-0.1,y_max=0.3,z=0.8
-        ,increment=0.01)
-&gt;&gt;    t1=TimeSamples(name='measured_data.h5')
-&gt;&gt;    cal=Calib(from_file='calibration_data.xml')
-&gt;&gt;    f1=EigSpectra(time_data=t1,block_size=256,window="Hanning",overlap='75%'
-        ,calib=cal)
-&gt;&gt;    e1=BeamformerBase(freq_data=f1,grid=g,mpos=m,r_diag=False)
-&gt;&gt;    fr=4000
-&gt;&gt;    L1=L_p(e1.synthetic(fr,0))
-
-The classes in the module possess a number of automatic data update
-capabilities. That is, only the traits must be set to get the results.
-The calculation need not be triggered explictely.
-The classes are also GUI-aware, they know how to display a graphical user
-interface. So by calling
-&gt;&gt;    object_name.configure_traits()
-on object "object_name" the relevant traits of each instance object may
-be edited graphically.
-The traits could also be set explicitely in the program, either in the
-constructor of an object:
-&gt;&gt;    m=MicGeom(from_file='mic_geom.xml')
-or at a later time
-&gt;&gt;    m.from_file='another_mic_geom.xml'
-where all objects that depend upon the specific trait will update their
-output if necessary.
-
-beamfpy.py (c) Ennes Sarradj 2007-2010, all rights reserved
+(c) Ennes Sarradj 2007-2010, all rights reserved
+ennes.sarradj@gmx.de
 </pre>
 
 
@@ -170,6 +145,14 @@ Contents:
   </thead>
   <tbody>
 
+  <tr id="arange"><td>arange</td><td>numpy.arange</td></tr>
+
+  <tr id="array"><td>array</td><td>numpy.array</td></tr>
+
+  <tr id="bartlett"><td>bartlett</td><td>numpy.bartlett</td></tr>
+
+  <tr id="blackman"><td>blackman</td><td>numpy.blackman</td></tr>
+
   <tr id="Bool"><td>Bool</td><td>enthought.traits.api.Bool</td></tr>
 
   <tr id="cached_property"><td>cached_property</td><td>enthought.traits.api.cached_property</td></tr>
@@ -178,15 +161,39 @@ Contents:
 
   <tr id="CArray"><td>CArray</td><td>enthought.traits.api.CArray</td></tr>
 
+  <tr id="complex64"><td>complex64</td><td>numpy.complex64</td></tr>
+
   <tr id="Delegate"><td>Delegate</td><td>enthought.traits.api.Delegate</td></tr>
+
+  <tr id="diag"><td>diag</td><td>numpy.diag</td></tr>
 
   <tr id="digest"><td>digest</td><td><a href="beamfpy.internal.html#digest">beamfpy.internal.digest</a></td></tr>
 
+  <tr id="dot"><td>dot</td><td>numpy.dot</td></tr>
+
+  <tr id="empty"><td>empty</td><td>numpy.empty</td></tr>
+
   <tr id="Environment"><td>Environment</td><td><a href="beamfpy.grids.Environment.html">beamfpy.grids.Environment</a></td></tr>
+
+  <tr id="exp"><td>exp</td><td>numpy.exp</td></tr>
+
+  <tr id="faverage"><td>faverage</td><td>beamformer.faverage</td></tr>
+
+  <tr id="fft"><td>fft</td><td>numpy.fft</td></tr>
 
   <tr id="Float"><td>Float</td><td>enthought.traits.api.Float</td></tr>
 
+  <tr id="float32"><td>float32</td><td>numpy.float32</td></tr>
+
+  <tr id="float64"><td>float64</td><td>numpy.float64</td></tr>
+
+  <tr id="gseidel"><td>gseidel</td><td>beamformer.gseidel</td></tr>
+
   <tr id="H5cache"><td>H5cache</td><td><a href="beamfpy.h5cache.html#H5cache">beamfpy.h5cache.H5cache</a></td></tr>
+
+  <tr id="hamming"><td>hamming</td><td>numpy.hamming</td></tr>
+
+  <tr id="hanning"><td>hanning</td><td>numpy.hanning</td></tr>
 
   <tr id="HasPrivateTraits"><td>HasPrivateTraits</td><td>enthought.traits.api.HasPrivateTraits</td></tr>
 
@@ -196,27 +203,63 @@ Contents:
 
   <tr id="Item"><td>Item</td><td>enthought.traits.ui.api.Item</td></tr>
 
+  <tr id="linalg"><td>linalg</td><td>numpy.linalg</td></tr>
+
+  <tr id="log10"><td>log10</td><td>numpy.log10</td></tr>
+
   <tr id="MicGeom"><td>MicGeom</td><td><a href="beamfpy.grids.MicGeom.html">beamfpy.grids.MicGeom</a></td></tr>
+
+  <tr id="multiply"><td>multiply</td><td>numpy.multiply</td></tr>
+
+  <tr id="newaxis"><td>newaxis</td><td>numpy.newaxis</td></tr>
 
   <tr id="OKCancelButtons"><td>OKCancelButtons</td><td>enthought.traits.ui.menu.OKCancelButtons</td></tr>
 
   <tr id="on_trait_change"><td>on_trait_change</td><td>enthought.traits.api.on_trait_change</td></tr>
 
+  <tr id="ones"><td>ones</td><td>numpy.ones</td></tr>
+
+  <tr id="pi"><td>pi</td><td>numpy.pi</td></tr>
+
+  <tr id="prod"><td>prod</td><td>numpy.prod</td></tr>
+
   <tr id="Property"><td>Property</td><td>enthought.traits.api.Property</td></tr>
 
   <tr id="property_depends_on"><td>property_depends_on</td><td>enthought.traits.api.property_depends_on</td></tr>
+
+  <tr id="r_beam_psf"><td>r_beam_psf</td><td>beamformer.r_beam_psf</td></tr>
+
+  <tr id="r_beamdiag"><td>r_beamdiag</td><td>beamformer.r_beamdiag</td></tr>
+
+  <tr id="r_beamfull"><td>r_beamfull</td><td>beamformer.r_beamfull</td></tr>
+
+  <tr id="r_beamortho_sum"><td>r_beamortho_sum</td><td>beamformer.r_beamortho_sum</td></tr>
+
+  <tr id="r_beamortho_sum_diag"><td>r_beamortho_sum_diag</td><td>beamformer.r_beamortho_sum_diag</td></tr>
 
   <tr id="Range"><td>Range</td><td>enthought.traits.api.Range</td></tr>
 
   <tr id="RectGrid"><td>RectGrid</td><td><a href="beamfpy.grids.RectGrid.html">beamfpy.grids.RectGrid</a></td></tr>
 
-  <tr id="tables"><td>tables</td><td>tables</td></tr>
+  <tr id="s_"><td>s_</td><td>numpy.s_</td></tr>
 
-  <tr id="TimeSamples"><td>TimeSamples</td><td><a href="beamfpy.timedomain.TimeSamples.html">beamfpy.timedomain.TimeSamples</a></td></tr>
+  <tr id="SamplesGenerator"><td>SamplesGenerator</td><td><a href="beamfpy.timedomain.SamplesGenerator.html">beamfpy.timedomain.SamplesGenerator</a></td></tr>
+
+  <tr id="searchsorted"><td>searchsorted</td><td>numpy.searchsorted</td></tr>
+
+  <tr id="sign"><td>sign</td><td>numpy.sign</td></tr>
+
+  <tr id="sqrt"><td>sqrt</td><td>numpy.sqrt</td></tr>
+
+  <tr id="tables"><td>tables</td><td>tables</td></tr>
 
   <tr id="Trait"><td>Trait</td><td>enthought.traits.api.Trait</td></tr>
 
   <tr id="View"><td>View</td><td>enthought.traits.ui.api.View</td></tr>
+
+  <tr id="where"><td>where</td><td>numpy.where</td></tr>
+
+  <tr id="zeros"><td>zeros</td><td>numpy.zeros</td></tr>
 
   </tbody>
 </table>

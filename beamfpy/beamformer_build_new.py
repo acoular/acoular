@@ -1,3 +1,13 @@
+"""
+beamformer_build_new.py: auxillary to compile fast extensions
+
+Part of the beamfpy library: several classes for the implemetation of 
+acoustic beamforming
+
+(c) Ennes Sarradj 2007-2010, all rights reserved
+ennes.sarradj@gmx.de
+"""
+
 import sys
 sys.path.insert(0,'..')
 from scipy.weave import ext_tools, converters

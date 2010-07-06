@@ -5,7 +5,7 @@
           "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <title>Class beamfpy.timedomain.FiltOctave</title>
+    <title>Class beamfpy.sources.SineGenerator</title>
     <link rel="stylesheet" type="text/css" href="class.css"/>
     <script type="text/javascript" src="scr.js"></script>
     
@@ -23,14 +23,14 @@
     <li><a href="namespace_index.html">Namespace Index</a></li>
     </ul>
     </div>
-    <h1>Class <span class="prefix"><a href="beamfpy.html">beamfpy</a>.&#8203;<a href="beamfpy.timedomain.html">timedomain</a>.&#8203;</span><a href="beamfpy.timedomain.FiltOctave.html">FiltOctave</a></h1>
+    <h1>Class <span class="prefix"><a href="beamfpy.html">beamfpy</a>.&#8203;<a href="beamfpy.sources.html">sources</a>.&#8203;</span><a href="beamfpy.sources.SineGenerator.html">SineGenerator</a></h1>
     
     </div>
 
     
 
 <pre>
-    octave or fractional octave filter (not zero-phase)
+    Simple one-channel sine signal generator
     </pre>
 
 
@@ -60,7 +60,7 @@ Contents:
 <h2 id="section-superclasses">Inherits from</h2>
 <ul class="doclist">
   
-    <li><a href="beamfpy.timedomain.FiltFiltOctave.html">FiltFiltOctave</a>: beamfpy.timedomain.FiltFiltOctave</li>
+    <li><a href="beamfpy.sources.SignalGenerator.html">SignalGenerator</a>: beamfpy.sources.SignalGenerator</li>
   
 </ul>
 
@@ -70,6 +70,24 @@ Contents:
 
 
 <h2 id="section-traits">Traits</h2>
+<ul class="doclist">
+
+  <li class="trait" id="digest">digest<pre>internal identifier
+</pre><pre>digest = Property(depends_on = [ 'rms', 'numsamples', 'sample_freq', 'freq', 'phase', '__class__' ])
+
+</pre></li>
+
+  <li class="trait" id="freq">freq<pre>Sine wave frequency
+</pre><pre>freq = Float(1000.0, desc = 'Frequency')
+
+</pre></li>
+
+  <li class="trait" id="phase">phase<pre>Sine wave phase
+</pre><pre>phase = Float(0.0, desc = 'Phase')
+
+</pre></li>
+
+</ul>
 
 
 
@@ -80,7 +98,7 @@ Contents:
 <h2 id="section-functions">Method summary</h2>
 <ul class="function-summary">
   
-  <li class="function"><a href="#result">result</a>(self, num)</li>
+  <li class="function"><a href="#signal">signal</a>(self)</li>
   
 </ul>
 
@@ -90,11 +108,7 @@ Contents:
 <h2>Methods</h2>
 <ul class="doclist">
   
-  <li id="result" class="function">result(self, num)<pre> 
-        python generator: delivers the bandpass filtered output of source,
-        yields samples in blocks of shape (num, numchannels), the last 
-        block may be shorter than num
-        </pre></li>
+  <li id="signal" class="function">signal(self)<pre>delivers the signal as an array of length numsamples</pre></li>
   
 </ul>
 

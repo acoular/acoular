@@ -1,5 +1,11 @@
 """
-internal.py (c) Ennes Sarradj 2008, all rights reserved
+internal.py
+
+Part of the beamfpy library: several classes for the implemetation of 
+acoustic beamforming
+
+(c) Ennes Sarradj 2007-2010, all rights reserved
+ennes.sarradj@gmx.de
 """
 import hashlib
 

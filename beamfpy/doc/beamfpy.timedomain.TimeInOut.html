@@ -123,7 +123,7 @@ a python generator result(N) that will generate data blocks of N samples
 <h2 id="section-functions">Method summary</h2>
 <ul class="function-summary">
   
-  <li class="function"><a href="#result">result</a>(self, n)</li>
+  <li class="function"><a href="#result">result</a>(self, num)</li>
   
 </ul>
 
@@ -133,7 +133,11 @@ a python generator result(N) that will generate data blocks of N samples
 <h2>Methods</h2>
 <ul class="doclist">
   
-  <li id="result" class="function">result(self, n)<pre></pre></li>
+  <li id="result" class="function">result(self, num)<pre> 
+        python generator: dummy function, just echoes the output of source,
+        yields samples in blocks of shape (num, numchannels), the last block
+        may be shorter than num
+        </pre></li>
   
 </ul>
 
