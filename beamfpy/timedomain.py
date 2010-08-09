@@ -384,7 +384,7 @@ class TimeInOut( SamplesGenerator ):
             # effectively no processing
             yield temp
 
-class Mixer( TimeInOut ):
+class Mixer( TimeInOut, TimeSamples ):
     """
     mixes the signals from several sources
     """
@@ -428,6 +428,15 @@ class Mixer( TimeInOut ):
 
     @on_trait_change('sources,source')
     def validate_sources( self ):
+<<<<<<< .mine
+        if self.source:
+            for s in self.sources:
+                print s.sample_freq
+                if self.sample_freq != s.sample_freq:
+                    raise ValueError("Sample frequency of %s does not fit" % s)
+                if self.numchannels != s.numchannels:
+                    raise ValueError("Channel count of %s does not fit" % s)
+=======
         """ validates if sources fit together """
         if self.source:
             for s in self.sources:
@@ -435,6 +444,7 @@ class Mixer( TimeInOut ):
                     raise ValueError("Sample frequency of %s does not fit" % s)
                 if self.numchannels != s.numchannels:
                     raise ValueError("Channel count of %s does not fit" % s)
+>>>>>>> .r113
 
     def result(self, num):
         """ 
