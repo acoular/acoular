@@ -10,7 +10,8 @@ ennes.sarradj@gmx.de
 """
 
 
-from beamfpy import TimeSamples, td_dir
+from timedomain import TimeSamples
+from h5cache import td_dir
 from fileimport import time_data_import
 import ctypes
 import numpy
@@ -274,6 +275,7 @@ class nidaq_import( time_data_import ):
 
 if __name__=='__main__':
     x=nidaq_import()
+    x.taskname = 'test1'
     x.configure_traits()
     td=TimeSamples()
     x.get_data(td)
