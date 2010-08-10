@@ -122,24 +122,26 @@ avgts = TimeAverage(source=bts, naverage = 1024)
 cachts = TimeCache( source = avgts) # cache to prevent recalculation
 
 #===============================================================================
-# plot result maps for different beamformers in frequency domain
+# plot result maps for different beamformers in time domain
 #===============================================================================
 i2 = 2 # no of figure
 for b in (cacht, cachts):
+    # first, plot time-dependent result (block-wise)
     figure(i2)
     i2 += 1
-    res = zeros(g.size)
+    res = zeros(g.size) # init accumulator for average
     i3 = 1 # no of subplot
     for r in b.result(1):  #one single block
         subplot(4,4,i3)
         i3 += 1
-        res += r[0]
+        res += r[0] # average accum.
         map = r[0].reshape(g.shape)
         mx = L_p(map.max())
         imshow(L_p(map.T), vmax=mx, vmin=mx-15, 
                interpolation='nearest', extent=g.extend())
         title('%i' % ((i3-1)*1024))
-    res /= i3-1
+    res /= i3-1 # average
+    # second, plot overall result (average over all blocks)
     figure(1)
     subplot(3,3,i1)
     i1 += 1

@@ -1,3 +1,14 @@
+"""
+Example 2 for beamfpy library
+
+demonstrates use of beamfpy for a point source moving on a circle trajectory
+
+uses synthesized data
+
+(c) Ennes Sarradj 2007-2010, all rights reserved
+ennes.sarradj@gmx.de
+"""
+
 import beamfpy
 print beamfpy.__file__
 
@@ -13,200 +24,157 @@ BeamformerTimeSqTraj, \
 TimeCache, FiltOctave, BeamformerTime, TimePower, IntegratorSectorTime, \
 PointSource, MovingPointSource, SineGenerator, WNoiseGenerator, Mixer, WriteWAV
 
-
 from pylab import subplot, imshow, show, colorbar, plot, transpose, figure, \
-psd, axis, xlim, ylim
+psd, axis, xlim, ylim, title, suptitle
 
-freq = 6144.0*3/128.0
+#===============================================================================
+# some important definitions
+#===============================================================================
 
-R = 2.5
-Z = 4
-#
-loc0 = (-R,0.0,Z)
-loc1 = (+R,0.0,Z)
-loc2 = (0.0,+R,Z)
-loc3 = (0.0,-R,Z)
-loc4 = (R/sqrt(2),R/sqrt(2),Z)
-loc5 = (R/sqrt(2),-R/sqrt(2),Z)
-loc6 = (-R/sqrt(2),-R/sqrt(2),Z)
-loc7 = (-R/sqrt(2),R/sqrt(2),Z)
+freq = 6144.0*3/128.0 # frequency of interest (114 Hz)
+sfreq = 6144.0/2 # sampling frequency (3072 Hz)
+c0 = 343.0 # speed of sound
+r = 3.0 # array radius
+R = 2.5 # radius of source trajectory
+Z = 4 # distance of source trajectory from 
+rps = 15.0/60. # revolutions per second
+U = 3.0 # total number of revolutions
 
-rps = 5.0/60.
+#===============================================================================
+# construct the trajectory for the source
+#===============================================================================
+
 tr = Trajectory()
 tr1 = Trajectory()
-delta_t = min(1./rps/16.0,3.0)
-for t in arange(0,6.01,delta_t):
-    i = t* rps * 2 * pi
-    tr1.points[t] = (R*sin(i-pi/4),R*cos(i-pi/4),Z)
-    tr.points[t] = (R*sin(i+pi/4),R*cos(i+pi/4),Z)
-    print t,i,tr.points[t]
+tmax = U/rps
+delta_t = 1./rps/16.0 # 16 steps per revolution
+for t in arange(0, tmax*1.001, delta_t):
+    i = t* rps * 2 * pi #angle
+    # define points for trajectory spline
+    tr.points[t] = (R*cos(i), R*sin(i), Z) # anti-clockwise rotation
+    tr1.points[t] = (R*cos(i*1.1), R*sin(i*1.1), Z) # anti-clockwise rotation
 
-#print array(tr.points.values())
-g = RectGrid(x_min=-3.0,x_max=+3.0,y_min=-3.0,y_max=+3.0,z=4,increment=1.5)
-gpos = g.pos()
-g1 = tr.traj(0.2,der=1)
-i=1
-figure(2)
-for locl in tr.traj(0.2):
-    subplot(5,6,i)
-    i += 1
-    loc = array(locl)
-#    loc = array(g.next()) #translation
-    dx = array(g1.next()) #direction vector (new x-axis)
-    dy = cross(array((0,0,1.0)),dx) # new y-axis
-    dz = cross(dx,dy) # new z-axis
-    RM = array((dx,dy,dz)).T # rotation matrix
-    RM /= sqrt((RM*RM).sum(1)) # column normalized
-#    tpos = dot(RM,gpos)+loc[:, newaxis] # rotation+translation
-#    dv = array(dr.next())
-#    x = array((loc,loc+dv))
-#    dz = array((0,0,1.0))
-#    dh= cross(dz,dv)
-#    y = array((loc,loc+dh))
-#    ds = cross(dv,dh)
-#    RM = array((dv,dh,dz)).T
-#    RM /= sqrt((RM*RM).sum(1))
-#    plot(loc[0],loc[1],'or')
-#    plot(x[:,0],x[:,1],'r')
-#    plot(y[:,0],y[:,1],'b')
-    gpos1 = dot(RM,gpos)+loc[:, newaxis]
-    plot(gpos1[0],gpos1[1],'r.')
-    axis('scaled')
-    xlim(-6,6)
-    ylim(-6,6)
-    l = gpos1[:,0]-gpos1[:,-1]
-#    print RM
-#show()
-figure(1)
-for t in tr.traj(0.1,der=1):
-    print t
+#===============================================================================
+# define circular microphone array
+#===============================================================================
 
 m = MicGeom()
-r = 3
-m.mpos_tot = array([(r*sin(2*pi*i+pi/4),r*cos(2*pi*i+pi/4),0) for i in linspace(0.0,1.0,28,False)]).T
-xyz = m.mpos
-c0 = 343.0
+# set 28 microphone positions
+m.mpos_tot = array([(r*sin(2*pi*i+pi/4), r*cos(2*pi*i+pi/4), 0) \
+    for i in linspace(0.0, 1.0, 28, False)]).T
 
+#===============================================================================
+# define the different source signals
+#===============================================================================
 
-n1 = WNoiseGenerator(sample_freq=6144.0/2,numsamples=6144*3)
-s1 = SineGenerator(sample_freq=6144.0/2,numsamples=6144*3,freq=6144.0*3/128.0)
-s2 = SineGenerator(sample_freq=6144.0/2,numsamples=8192,freq=6144.0*3/128.0,phase=pi)
-p0 = MovingPointSource(signal=s1, mpos=m, trajectory=tr)
-p1 = MovingPointSource(signal=s1, mpos=m, trajectory=tr1)
-#ww = WriteWAV(source = p0)
+nsamples = long(sfreq*tmax)
+n1 = WNoiseGenerator(sample_freq=sfreq, numsamples=nsamples)
+s1 = SineGenerator(sample_freq=sfreq, numsamples=nsamples, freq=freq)
+s2 = SineGenerator(sample_freq=sfreq, numsamples=nsamples, freq=freq, \
+    phase=pi)
+
+#===============================================================================
+# define the moving source and one fixed source
+#===============================================================================
+
+p0 = MovingPointSource(signal=s1, mpos=m, trajectory=tr1)
+t = p0
+#p1 = PointSource(signal=n1, mpos=m,  loc=(0,R,Z))
+#t = Mixer(source = p0, sources = [p1,]) # mix both signals
+
+# uncomment to save the signal to a wave file
+#ww = WriteWAV(source = t)
 #ww.channels = [0,14]
 #ww.save()
-#for i in p0.result(4196):
-#    psd(i[:,0])
-#    plot(i[:,0])
-#    plot(i[:,14])
-#show()
 
+#===============================================================================
+# fixed focus frequency domain beamforming
+#===============================================================================
 
-#p1 = PointSource(signal=s1, mpos=m,  loc=loc0)
-#p2 = PointSource(signal=s1, mpos=m,  loc=loc1)
-#p3 = PointSource(signal=s1, mpos=m,  loc=loc2)
-#p4 = PointSource(signal=s1, mpos=m,  loc=loc3)
-#p5 = PointSource(signal=s2, mpos=m,  loc=loc4)
-#p6 = PointSource(signal=s2, mpos=m,  loc=loc5)
-#p7 = PointSource(signal=s2, mpos=m,  loc=loc6)
-#p8 = PointSource(signal=s2, mpos=m,  loc=loc7)
-#t = Mixer(source = p1, sources = [p2, p3, p4, p5, p6, p7, p8 ])
-#print p1.sample_freq
+f = PowerSpectra(time_data=t, window='Hanning', overlap='50%', block_size=128, \
+    ind_low=1,ind_high=30) # CSM calculation 
+g = RectGrid(x_min=-3.0, x_max=+3.0, y_min=-3.0, y_max=+3.0, z=Z, increment=0.3)
+b = BeamformerBase(freq_data=f, grid=g, mpos=m, r_diag=True, c=c0)
+map1 = b.synthetic(freq,3)
 
-t = Mixer(source = p0, sources = [p1,])
-f = PowerSpectra(window='Hanning',overlap='50%',block_size=128,ind_low=1,ind_high=30)
-f.time_data = t
-#g = RectGrid(x_min=-0.3,x_max=+0.3,y_min=-0.3,y_max=+0.3,z=loc[2],increment=0.05)
-#g = RectGrid(x_min=-1.0,x_max=+1.0,y_min=-1.0,y_max=+1.0,z=loc[2],increment=0.0625)
-#g = RectGrid(x_min=-1.0,x_max=+1.0,y_min=-1.0,y_max=+1.0,z=loc[2],increment=0.08)
-#g = RectGrid(x_min=-2.0,x_max=+0.0,y_min=-1.0,y_max=+1.0,z=loc[2],increment=0.0625)
-g = RectGrid(x_min=-3.0,x_max=+3.0,y_min=-3.0,y_max=+3.0,z=4,increment=0.3)
-g1 = RectGrid(x_min=-5.0,x_max=+1.0,y_min=-5.0,y_max=+1.0,z=0,increment=0.3)
-b = BeamformerBase(freq_data=f,grid=g,mpos=m,r_diag=True,c=343)
+#===============================================================================
+# fixed focus time domain beamforming
+#===============================================================================
 
-cfreq = float(freq)#1000
+fi = FiltFiltOctave(source=t, band=freq, fraction='Third octave')
+bt = BeamformerTimeSq(source=fi, grid=g, mpos=m, r_diag=True, c=c0)
+avgt = TimeAverage(source=bt, naverage=int(sfreq*tmax/16)) # 16 single images
+cacht = TimeCache(source=avgt) # cache to prevent recalculation
+map2 = zeros(g.shape) # accumulator for average
+# plot single frames
+figure(1)
+i = 0
+for res in cacht.result(1):
+    res0 = res[0].reshape(g.shape)
+    map2 += res0 # average
+    i += 1  
+    subplot(4,4,i)
+    mx = L_p(res0.max())
+    imshow(L_p(transpose(res0)), vmax=mx, vmin=mx-10, interpolation='nearest',\
+        extent=g.extend(), origin='lower')
+    colorbar()
+map2 /= i
+suptitle('fixed focus')
 
-map = b.synthetic(cfreq,3)
-#print map.shape
-#print m.mpos[:,0]
+#===============================================================================
+# moving focus time domain beamforming
+#===============================================================================
 
-ft = FiltFiltOctave(source = t)
-ft.band = cfreq
-pt = TimePower(source=ft)
-avgt = TimeAverage(source=pt,naverage=4096)
-#for ft.band in (500,1000,2000,4000,8000):
-#    for i in avgt.result(1):
-#        print L_p(i[0,0])," dB"
+# new grid needed, the trajectory starts at origin and is oriented towards +x
+# thus, with the circular movement assumed, the center of rotation is at (0,2.5)
+g1 = RectGrid(x_min=-3.0, x_max=+3.0, y_min=-1.0, y_max=+5.0, z=0, \
+    increment=0.3)# grid point of origin is at trajectory (thus z=0)
+# beamforming with trajectory (rvec axis perpendicular to trajectory)
+bts = BeamformerTimeSqTraj(source=fi, grid=g1, mpos=m, trajectory=tr, \
+    rvec = array((0,0,1.0)))
+avgts = TimeAverage(source=bts, naverage=int(sfreq*tmax/16)) # 16 single images
+cachts = TimeCache(source=avgts) # cache to prevent recalculation
+map3 = zeros(g1.shape) # accumulator for average
+# plot single frames
+figure(2)
+i = 0
+for res in cachts.result(1):
+    res0 = res[0].reshape(g1.shape)
+    map3 += res0 # average
+    i += 1  
+    subplot(4,4,i)
+    mx = L_p(res0.max())
+    imshow(L_p(transpose(res0)), vmax=mx, vmin=mx-10, interpolation='nearest',\
+        extent=g1.extend(), origin='lower')
+    colorbar()
+map3 /= i
+suptitle('moving focus')
 
-bt = BeamformerTime(source = t,grid=g, mpos=m, c=343)
-ft = FiltFiltOctave(source = bt)
-ft.band = cfreq
-pt = TimePower(source=ft)
-avgt = TimeAverage(source=pt)
+#===============================================================================
+# compare all three results
+#===============================================================================
 
-
-fi = FiltFiltOctave(source = t)
-fi.band = cfreq
-fi.fraction = 'Third octave'
-bts = BeamformerTimeSqTraj(source = fi,grid=g1, mpos=m, trajectory=tr)
-bts.rvec = array((0,0,1.0))
-#bts = BeamformerTimeSq(source = fi,grid=g, mpos=m, r_diag=True,c=343)
-bts.weights = 'none'
-#bts.weights = 'constant power per unit radius'
-#print bts.weights, bts.weights_
-
-avg = TimeAverage(source = bts)
-avg.naverage = 512
-avgt.naverage = avg.naverage
-cach = TimeCache( source = avg)
-res = empty((t.numsamples/avg.naverage,g.size))
-for fi.band in (cfreq,):#(500,1000,2000):#,4000,8000):
-    j = 0
-    for i in cach.result(4):
-        s = i.shape[0]
-        res[j:j+s] = i
-        j += s
-res = res[:j]
-#print j
-#g0 = RectGrid(x_min=-1.0,x_max=+1.0,y_min=-1.0,y_max=+1.0,z=loc[2],increment=0.0625)
-#Inte = IntegratorSectorTime(source=cach, 
-#                            sectors=[ (-0.5,-0.5, 0.5, 0.5),(-0.5,-0.5, 0.5, 0.5)], 
-#                            grid=g0)
-##                            grid=g)
-#print L_p(array([i.copy() for i in Inte.result(1)]))#.reshape(-1,1).mean(0))
-    
-
-
+figure(3)
 subplot(1,3,1)
-f.time_data = t
-map = b.synthetic(cfreq,1)
-mx = L_p(map.max())
-imshow(L_p(transpose(map)),vmax=mx, vmin=mx-10,interpolation='nearest',extent=g.extend(),origin='lower')
+mx = L_p(map1.max())
+imshow(L_p(transpose(map1)), vmax=mx, vmin=mx-10, interpolation='nearest',\
+    extent=g.extend(), origin='lower')
 colorbar()
+title('frequency domain\n fixed focus')
 subplot(1,3,2)
-map1 = res.mean(axis=0).reshape(g.shape)
-max1 = L_p(map1.max())
-#print (L_p(map)+3>mx).nonzero()[0].shape,
-#print (L_p(map1)+3>max1).nonzero()[0].shape
-for x in (map,map1):
-    b = (x[1:-1,1:-1]>x[0:-2,1:-1]) * (x[1:-1,1:-1]>x[2:,1:-1]) * (x[1:-1,1:-1]>x[1:-1,0:-2]) * (x[1:-1,1:-1]>x[1:-1,2:])
-    x1 = x[1:-1,1:-1] * b / x.max()
-    x3 = 10*log10(sort(x1.flat)[-6:])
-    #print g.increment*sqrt(4/pi*(2*x>x.max()).nonzero()[0].shape[0]),x3
-
-#imshow(L_p(transpose(map1[1:-1,1:-1] * b)),vmax=max1, vmin=mx-10,interpolation='nearest',extent=g.extend())
-imshow(L_p(transpose(map1)),vmax=max1, vmin=max1-10,interpolation='nearest',extent=g.extend(),origin='lower')
+mx = L_p(map2.max())
+imshow(L_p(transpose(map2)), vmax=mx, vmin=mx-10, interpolation='nearest',\
+    extent=g.extend(), origin='lower')
 colorbar()
+title('time domain\n fixed focus')
 subplot(1,3,3)
-map2 = clip(L_p(map)-L_p(map1),-20,20)
-#print L_p(map.max())-L_p(map1.max())
-imshow((transpose(map2)),vmax=10, vmin=-10,interpolation='nearest',extent=g.extend(),origin='lower')
+mx = L_p(map3.max())
+imshow(L_p(transpose(map3)), vmax=mx, vmin=mx-10, interpolation='nearest',\
+    extent=g.extend(), origin='lower')
 colorbar()
-#print inv_ch
-#figure(2)
-#plot(m.mpos[0],m.mpos[1],'or')
-#print m.mpos
+title('time domain\n moving focus')
+
+
 show()
 
 
