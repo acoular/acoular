@@ -184,8 +184,8 @@ class PowerSpectra( HasPrivateTraits ):
             csm_shape = (numfreq, t.numchannels, t.numchannels)
             csm = zeros(csm_shape, 'D')
             print "num blocks", self.num_blocks
-            # for backward compatibilty
-            if self.calib:
+            # for backward compatibility
+            if self.calib and self.calib.num_mics>0:
                 if self.calib.num_mics == t.numchannels:
                     wind = wind * self.calib.data[newaxis, :]
                 else:

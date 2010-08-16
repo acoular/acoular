@@ -44,7 +44,7 @@ class Calib( HasPrivateTraits ):
         desc="basename of xml file")
     
     # number of microphones in the calibration data 
-    num_mics = Int( 1, 
+    num_mics = Int( 0, 
         desc="number of microphones in the geometry")
 
     # array of calibration factors
@@ -79,9 +79,14 @@ class Calib( HasPrivateTraits ):
     def import_data( self ):
         "loads the calibration data from .xml file"
         if not path.isfile(self.from_file):
+            # empty calibration
+            if self.basename=='':
+                self.data = None 
+                self.num_mics = 0
             # no file there
-            self.data = array([1.0, ], 'd')
-            self.num_mics = 1
+            else:
+                self.data = array([1.0, ], 'd')
+                self.num_mics = 1
             return
         import xml.dom.minidom
         doc = xml.dom.minidom.parse(self.from_file)
