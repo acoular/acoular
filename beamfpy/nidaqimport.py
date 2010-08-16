@@ -24,7 +24,10 @@ from enthought.traits.ui.menu import OKCancelButtons
 from datetime import datetime
 from os import path
 
-nidaq = ctypes.windll.nicaiu # load the DLL
+try:
+	nidaq = ctypes.windll.nicaiu # load the DLL
+except AttributeError:
+	raise ImportError
 # type definitions
 int32 = ctypes.c_long
 uInt32 = ctypes.c_ulong
