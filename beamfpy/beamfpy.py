@@ -475,14 +475,21 @@ class BeamformerBase( HasPrivateTraits ):
         e.g. (xmin, ymin, xmin, ymax)
         returns spectrum
         """
+#        ind = self.grid.indices(*sector)
+#        gshape = self.grid.shape
+#        r = self.result
+#        rshape = r.shape
+#        mapshape = (rshape[0], ) + gshape
+#        h = r[:].reshape(mapshape)[ (s_[:], ) + ind ]
+#        return h.reshape(h.shape[0], prod(h.shape[1:])).sum(axis=1)
         ind = self.grid.indices(*sector)
         gshape = self.grid.shape
         r = self.result
-        rshape = r.shape
-        mapshape = (rshape[0], ) + gshape
-        h = r[:].reshape(mapshape)[ (s_[:], ) + ind ]
-        return h.reshape(h.shape[0], prod(h.shape[1:])).sum(axis=1)
-
+        h = zeros(r.shape[0])
+        for i in range(r.shape[0]):
+            h[i] = r[i].reshape(gshape)[ind].sum()
+        return h
+            
 class BeamformerCapon( BeamformerBase ):
     """
     beamforming using the minimum variance or Capon algorithm
