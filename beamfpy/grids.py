@@ -209,11 +209,14 @@ class RectGrid3D( RectGrid):
         returns the indices for a certain x, y, z co-ordinate
         """
         if x < self.x_min or x > self.x_max:
-            raise ValueError, "x-value out of range"
+            raise ValueError, "x-value out of range %f (%f, %f)" % \
+                (x,self.x_min,self.x_max)
         if y < self.y_min or y > self.y_max:
-            raise ValueError, "y-value out of range"
+            raise ValueError, "y-value out of range %f (%f, %f)" % \
+                (y,self.y_min,self.y_max)
         if z < self.z_min or z > self.z_max:
-            raise ValueError, "z-value out of range"
+            raise ValueError, "z-value out of range %f (%f, %f)" % \
+                (z,self.z_min,self.z_max)
         xi = round((x-self.x_min)/self.increment)
         yi = round((y-self.y_min)/self.increment)
         zi = round((z-self.z_min)/self.increment)

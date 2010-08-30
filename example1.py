@@ -14,10 +14,10 @@ ennes.sarradj@gmx.de
 
 # imports from beamfpy
 import beamfpy
-from beamfpy import td_dir, L_p, TimeSamples, Calib, MicGeom, EigSpectra, \
+from beamfpy import td_dir, L_p, Calib, MicGeom, EigSpectra, \
 RectGrid, BeamformerBase, BeamformerEig, BeamformerOrth, BeamformerCleansc, \
-MaskedTimeSamples, FiltFiltOctave, Trajectory, BeamformerTimeSq, TimeAverage, \
-TimeCache, FiltOctave, BeamformerTime, TimePower, \
+MaskedTimeSamples, FiltFiltOctave, BeamformerTimeSq, TimeAverage, \
+TimeCache, BeamformerTime, TimePower, \
 BeamformerCapon, BeamformerMusic, BeamformerDamas
 
 # other imports
