@@ -52,7 +52,7 @@ for t in arange(0, tmax*1.001, delta_t):
     i = t* rps * 2 * pi #angle
     # define points for trajectory spline
     tr.points[t] = (R*cos(i), R*sin(i), Z) # anti-clockwise rotation
-    tr1.points[t] = (R*cos(i*1.1), R*sin(i*1.1), Z) # anti-clockwise rotation
+    tr1.points[t] = (R*cos(i), R*sin(i), Z) # anti-clockwise rotation
 
 #===============================================================================
 # define circular microphone array

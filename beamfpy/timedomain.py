@@ -613,7 +613,7 @@ class FiltFiltOctave( TimeInOut ):
             ns, nc = block.shape
             data[j:j+ns] = block
             j += ns
-        for j in range(nc):
+        for j in range(self.source.numchannels):
             data[:, j] = filtfilt(b, a, data[:, j])
         j = 0
         ns = data.shape[0]
