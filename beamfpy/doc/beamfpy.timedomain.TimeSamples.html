@@ -97,7 +97,7 @@ Contents:
 </pre></li>
 
   <li class="trait" id="data">data<pre>the time data as (numsamples, numchannels) array of floats
-</pre><pre>data = Any(desc = 'the actual time data array')
+</pre><pre>data = Any(transient = True, desc = 'the actual time data array')
 
 </pre></li>
 
@@ -107,7 +107,7 @@ Contents:
 </pre></li>
 
   <li class="trait" id="h5f">h5f<pre>hdf5 file object
-</pre><pre>h5f = Instance(tables.File)
+</pre><pre>h5f = Instance(tables.File, transient = True)
 
 </pre></li>
 

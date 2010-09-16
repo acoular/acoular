@@ -90,8 +90,13 @@ Contents:
 
 </pre></li>
 
+  <li class="trait" id="cached">cached<pre>flag, if true (default), the result is cached in h5 files
+</pre><pre>cached = Bool(True, desc = 'cached flag')
+
+</pre></li>
+
   <li class="trait" id="digest">digest<pre>internal identifier
-</pre><pre>digest = Property(depends_on = [ 'mpos.digest', 'grid.digest', 'freq_data.digest', 'c', 'r_diag', 'env.digest' ])
+</pre><pre>digest = Property(depends_on = [ 'mpos.digest', 'grid.digest', 'freq_data.digest', 'c', 'r_diag', 'env.digest', 'steer' ])
 
 </pre></li>
 
@@ -116,7 +121,7 @@ Contents:
 </pre></li>
 
   <li class="trait" id="h5f">h5f<pre>hdf5 cache file
-</pre><pre>h5f = Instance(tables.File)
+</pre><pre>h5f = Instance(tables.File, transient = True)
 
 </pre></li>
 
@@ -146,6 +151,11 @@ as (number of frequencies, nxsteps, nysteps) array of float
 
 </pre></li>
 
+  <li class="trait" id="steer">steer<pre>type of steering vectors
+</pre><pre>steer = Trait('true level', 'true location', 'classic', 'inverse', desc = 'type of steering vectors used')
+
+</pre></li>
+
 </ul>
 
 
@@ -158,6 +168,8 @@ as (number of frequencies, nxsteps, nysteps) array of float
 <ul class="function-summary">
   
   <li class="function"><a href="#calc">calc</a>(self, ac, fr)</li>
+  
+  <li class="function"><a href="#get_beamfunc">get_beamfunc</a>(self, <span class="param-name">os</span> = <span class="param-default">''</span>)</li>
   
   <li class="function"><a href="#integrate">integrate</a>(self, sector)</li>
   
@@ -174,6 +186,10 @@ as (number of frequencies, nxsteps, nysteps) array of float
   <li id="calc" class="function">calc(self, ac, fr)<pre>
         calculation of delay-and-sum beamforming result 
         for all missing frequencies
+        </pre></li>
+  
+  <li id="get_beamfunc" class="function">get_beamfunc(self, <span class="param-name">os</span> = <span class="param-default">''</span>)<pre>
+        returns the proper low-level beamforming routine
         </pre></li>
   
   <li id="integrate" class="function">integrate(self, sector)<pre>
