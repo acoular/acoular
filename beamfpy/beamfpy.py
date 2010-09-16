@@ -12,14 +12,17 @@ ennes.sarradj@gmx.de
 
 from numpy import array, ones, hanning, hamming, bartlett, blackman, \
 dot, newaxis, zeros, empty, fft, float32, float64, complex64, linalg, where, \
-searchsorted, pi, multiply, sign, s_, prod, diag, arange, sqrt, exp, log10
+searchsorted, pi, multiply, sign, diag, arange, sqrt, exp, log10
 from enthought.traits.api import HasPrivateTraits, Float, Int, \
-CArray, Property, Instance, Trait, Bool, Range, Delegate, \
+CArray, Property, Instance, Trait, Bool, Range, Delegate, Enum, \
 cached_property, on_trait_change, property_depends_on
 from enthought.traits.ui.api import View, Item
 from enthought.traits.ui.menu import OKCancelButtons
 from beamformer import faverage, gseidel, r_beam_psf, \
-r_beamdiag, r_beamfull, r_beamortho_sum, r_beamortho_sum_diag
+r_beamfull, r_beamfull_3d, r_beamfull_classic, \
+r_beamdiag, r_beamdiag_3d, r_beamdiag_classic, \
+r_beamfull_os, r_beamfull_os_3d, r_beamfull_os_classic, \
+r_beamdiag_os, r_beamdiag_os_3d, r_beamdiag_os_classic
 import tables
 
 from h5cache import H5cache
@@ -158,7 +161,7 @@ class PowerSpectra( HasPrivateTraits ):
         # test for dual calibration
         obj = self.time_data # start with time_data obj
         while obj:
-            print obj
+            #print obj
             if 'calib' in obj.all_trait_names(): # at original source?
                 if obj.calib and self.calib:
                     if obj.calib.digest == self.calib.digest:
@@ -174,7 +177,7 @@ class PowerSpectra( HasPrivateTraits ):
                     obj = None
         name = 'csm_' + self.digest
         H5cache.get_cache( self, self.basename )
-        print self.basename
+        #print self.basename
         if not name in self.h5f.root:
             t = self.time_data
             wind = self.window_( self.block_size )
@@ -183,9 +186,9 @@ class PowerSpectra( HasPrivateTraits ):
             numfreq = self.block_size/2 + 1
             csm_shape = (numfreq, t.numchannels, t.numchannels)
             csm = zeros(csm_shape, 'D')
-            print "num blocks", self.num_blocks
+            #print "num blocks", self.num_blocks
             # for backward compatibility
-            if self.calib and self.calib.num_mics>0:
+            if self.calib and self.calib.num_mics > 0:
                 if self.calib.num_mics == t.numchannels:
                     wind = wind * self.calib.data[newaxis, :]
                 else:
@@ -207,7 +210,6 @@ class PowerSpectra( HasPrivateTraits ):
                 pos -= bs
             # onesided spectrum: multiplication by 2.0=sqrt(2)^2
             csm = csm*(2.0/self.block_size/weight/self.num_blocks)
-            print (2.0/self.block_size/weight/self.num_blocks)
             atom = tables.ComplexAtom(8)
             ac = self.h5f.createCArray(self.h5f.root, name, atom, csm_shape)
             ac[:] = csm
@@ -319,7 +321,11 @@ class BeamformerBase( HasPrivateTraits ):
     # flag, if true (default), the main diagonal is removed before beamforming
     r_diag = Bool(True, 
         desc="removal of diagonal")
-
+    
+    # type of steering vectors
+    steer = Trait('true level', 'true location', 'classic',
+                  desc="type of steering vectors used")
+                  
     # hdf5 cache file
     h5f = Instance(tables.File)
     
@@ -339,7 +345,7 @@ class BeamformerBase( HasPrivateTraits ):
     # internal identifier
     digest = Property( 
         depends_on = ['mpos.digest', 'grid.digest', 'freq_data.digest', 'c', \
-            'r_diag', 'env.digest'], 
+            'r_diag', 'env.digest', 'steer'], 
         )
 
     # internal identifier
@@ -385,9 +391,9 @@ class BeamformerBase( HasPrivateTraits ):
         while self.digest != _digest:
             _digest = self.digest
             name = self.__class__.__name__ + self.digest
-            print 1, name
+            #print 1, name
             numchannels = self.freq_data.time_data.numchannels
-            print "nch", numchannels
+            #print "nch", numchannels
             if  numchannels != self.mpos.num_mics or numchannels == 0:
                 #return None
                 raise ValueError("%i channels do not fit %i mics" % \
@@ -409,8 +415,17 @@ class BeamformerBase( HasPrivateTraits ):
             if not fr[self.freq_data.ind_low:self.freq_data.ind_high].all():
                 self.calc(ac, fr)
                 self.h5f.flush()
-            print 2, name
+            #print 2, name
         return ac
+        
+    def get_beamfunc( self, os='' ):
+        """
+        returns the proper low-level beamforming routine
+        """
+        r_diag = {True: 'diag', False: 'full'}[self.r_diag]
+        steer = {'true level': '', 'true location': '_3d', \
+            'classic': '_classic'}[self.steer]
+        return eval('r_beam'+r_diag+os+steer)
 
     def calc(self, ac, fr):
         """
@@ -425,12 +440,11 @@ class BeamformerBase( HasPrivateTraits ):
         rm = self.rm
         h = zeros((1, self.grid.size), 'd')
         # function
+        beamfunc = self.get_beamfunc()
         if self.r_diag:
-            beamfunc = r_beamdiag
             adiv = 1.0/(numchannels*numchannels-numchannels)
             scalefunc = lambda h : adiv*multiply(h, (sign(h)+1-1e-35)/2)
         else:
-            beamfunc = r_beamfull
             adiv = 1.0/(numchannels*numchannels)
             scalefunc = lambda h : adiv*h
         for i in self.freq_data.indices:
@@ -494,6 +508,10 @@ class BeamformerCapon( BeamformerBase ):
     """
     beamforming using the minimum variance or Capon algorithm
     """
+    # flag for main diagonal removal is set to False
+    r_diag = Enum(False, 
+        desc="removal of diagonal")
+
     traits_view = View(
         [
             [Item('mpos{}', style='custom')], 
@@ -516,14 +534,14 @@ class BeamformerCapon( BeamformerBase ):
         numchannels = self.freq_data.time_data.numchannels
         e = zeros((numchannels), 'D')
         h = zeros((1, self.grid.size), 'd')
-        adiv = 1.0/(numchannels*numchannels)
+        beamfunc = self.get_beamfunc()
         for i in self.freq_data.indices:
             if not fr[i]:
                 csm = linalg.inv(array(self.freq_data.csm[i], \
                         dtype='complex128'))[newaxis]
                 kji = kj[i, newaxis]
-                r_beamfull(csm, e, h, self.r0, self.rm, kji)
-                ac[i] = adiv/h
+                beamfunc(csm, e, h, self.r0, self.rm, kji)
+                ac[i] = 1.0/h
                 fr[i] = True
 
 class BeamformerEig( BeamformerBase ):
@@ -547,7 +565,7 @@ class BeamformerEig( BeamformerBase ):
     # internal identifier
     digest = Property( 
         depends_on = ['mpos.digest', 'grid.digest', 'freq_data.digest', 'c', \
-            'r_diag', 'env.digest', 'na'], 
+            'r_diag', 'env.digest', 'na', 'steer'], 
         )
 
     traits_view = View(
@@ -588,12 +606,11 @@ class BeamformerEig( BeamformerBase ):
         e = zeros((numchannels), 'D')
         h = empty((1, self.grid.size), 'd')
         # function
+        beamfunc = self.get_beamfunc('_os')
         if self.r_diag:
-            beamfunc = r_beamortho_sum_diag
             adiv = 1.0/(numchannels*numchannels-numchannels)
             scalefunc = lambda h : adiv*multiply(h, (sign(h)+1-1e-35)/2)
         else:
-            beamfunc = r_beamortho_sum
             adiv = 1.0/(numchannels*numchannels)
             scalefunc = lambda h : adiv*h
         for i in self.freq_data.indices:        
@@ -609,6 +626,10 @@ class BeamformerMusic( BeamformerEig ):
     """
     beamforming using MUSIC algoritm
     """
+
+    # flag for main diagonal removal is set to False
+    r_diag = Enum(False, 
+        desc="removal of diagonal")
 
     # assumed number of sources, should be set to a value not too small
     # defaults to 1
@@ -639,13 +660,14 @@ class BeamformerMusic( BeamformerEig ):
         numchannels = self.freq_data.time_data.numchannels
         e = zeros((numchannels), 'D')
         h = empty((1, self.grid.size), 'd')
+        beamfunc = self.get_beamfunc('_os')
         # function
         for i in self.freq_data.indices:        
             if not fr[i]:
                 eva = array(self.freq_data.eva[i][newaxis], dtype='float64')
                 eve = array(self.freq_data.eve[i][newaxis], dtype='complex128')
                 kji = kj[i, newaxis]
-                r_beamortho_sum(e, h, self.r0, self.rm, kji, eva, eve, 0, n)
+                beamfunc(e, h, self.r0, self.rm, kji, eva, eve, 0, n)
                 ac[i] = 4e-10*h.min()/h
                 fr[i] = True
 
@@ -911,7 +933,7 @@ class BeamformerCleansc( BeamformerBase ):
     # internal identifier
     digest = Property( 
         depends_on = ['mpos.digest', 'grid.digest', 'freq_data.digest', 'c', \
-        'env.digest', 'n'], )
+        'env.digest', 'n', 'damp', 'stopn', 'steer'], )
 
     traits_view = View(
         [
@@ -940,18 +962,14 @@ class BeamformerCleansc( BeamformerBase ):
         numchannels = self.freq_data.time_data.numchannels
         f = self.freq_data.fftfreq()
         kjall = 2j*pi*f/self.c
-        #bpos = self.grid.pos()
-        #mpos = self.mpos.mpos
         e = zeros((numchannels), 'D')
         result = zeros((self.grid.size), 'f')
+        fullbeamfunc = self.get_beamfunc()
+        orthbeamfunc = self.get_beamfunc('_os')
         if self.r_diag:
             adiv = 1.0/(numchannels*numchannels-numchannels)
-            fullbeamfunc = r_beamdiag
-            orthbeamfunc = r_beamortho_sum_diag
         else:
             adiv = 1.0/(numchannels*numchannels)
-            fullbeamfunc = r_beamfull
-            orthbeamfunc = r_beamortho_sum
         if not self.n:
             J = numchannels*2
         else:
@@ -972,13 +990,18 @@ class BeamformerCleansc( BeamformerBase ):
                 for j in range(J):
                     xi_max = h.argmax() #index of maximum
                     powers[j] = hmax = h[0, xi_max] #maximum
-                    result[xi_max] += hmax
+                    result[xi_max] += self.damp * hmax
                     if  j > 2 and hmax > powers[j-self.stopn]:
                         #print j
                         break
                     rm = self.rm[xi_max]
                     r0 = self.r0[xi_max]
-                    rs = (r0*(1/(rm*rm)).sum(0))
+                    if self.steer == 'true level':
+                        rs = (r0*(1/(rm*rm)).sum(0))
+                    elif self.steer == 'true location':
+                        rs = sqrt((1/(rm*rm)).sum(0)*numchannels)
+                    elif self.steer == 'classic':
+                        rs = 1.0/r0
                     wmax = numchannels*sqrt(adiv)*exp(-kj[0]*(r0-rm))/(rm*rs)
                     hh = wmax.copy()
                     D1 = dot(csm[0]-diag(diag(csm[0])), wmax)/hmax
