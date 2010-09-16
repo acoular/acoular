@@ -1031,7 +1031,7 @@ def L_p ( x ):
 def synthetic (data, freqs, f, num=3):
     """
     returns synthesized frequency band values of data
-    num = 0: function simply returns the unaltered data, no processing
+    num = 0: single frequency line
     num = 1: octave bands
     num = 3: third octave bands
     etc.
@@ -1042,9 +1042,10 @@ def synthetic (data, freqs, f, num=3):
 
     """
     if num == 0:
-        return data
-    find1 = searchsorted(freqs, f*2.**(-0.5/num))
-    find2 = searchsorted(freqs, f*2.**(+0.5/num))
-    return array(map(lambda i, j : data[i:j].sum(), find1, find2))
+        res = [ data[searchsorted(freqs, i)] for i in f]        
+    else:
+        res = [ data[searchsorted(freqs, i*2.**(-0.5/num)):\
+                    searchsorted(freqs, i*2.**(+0.5/num))].sum(0) for i in f]
+    return array(res)
 
 
