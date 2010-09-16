@@ -54,7 +54,6 @@ class Calib( HasPrivateTraits ):
     # internal identifier
     digest = Property( depends_on = ['basename', ] )
 
-    test = Any
     traits_view = View(
         ['from_file{File name}', 
             ['num_mics~{Number of microphones}', 
@@ -148,11 +147,11 @@ class TimeSamples( SamplesGenerator ):
         desc="number of samples")
 
     # the time data as (numsamples, numchannels) array of floats
-    data = Any(
+    data = Any( transient = True, 
         desc="the actual time data array")
 
     # hdf5 file object
-    h5f = Instance(tables.File)
+    h5f = Instance(tables.File, transient = True)
     
     # internal identifier
     digest = Property( depends_on = ['basename', 'calib.digest'])
@@ -1064,7 +1063,7 @@ class TimeCache( TimeInOut ):
     basename = Property( depends_on = 'digest')
     
     # hdf5 cache file
-    h5f = Instance(tables.File)
+    h5f = Instance(tables.File,  transient = True)
     
     # internal identifier
     digest = Property( depends_on = ['source.digest', '__class__'])

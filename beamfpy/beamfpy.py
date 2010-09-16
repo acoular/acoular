@@ -102,7 +102,7 @@ class PowerSpectra( HasPrivateTraits ):
         )
 
     # hdf5 cache file
-    h5f = Instance(tables.File)
+    h5f = Instance(tables.File, transient = True )
     
     traits_view = View(
         ['time_data@{}', 
@@ -331,7 +331,7 @@ class BeamformerBase( HasPrivateTraits ):
         desc="cached flag")
                   
     # hdf5 cache file
-    h5f = Instance(tables.File)
+    h5f = Instance(tables.File, transient = True )
     
     # the result, sound pressure squared in all grid locations
     # as (number of frequencies, nxsteps, nysteps) array of float
@@ -716,7 +716,7 @@ class PointSpreadFunction (HasPrivateTraits):
         desc="point spread function")
 
     # hdf5 cache file
-    h5f = Instance(tables.File)
+    h5f = Instance(tables.File, transient = True)
     
     # internal identifier
     digest = Property( depends_on = ['mpos.digest', 'grid.digest', 'c', \
