@@ -12,7 +12,7 @@ ennes.sarradj@gmx.de
 
 from numpy import array, ones, hanning, hamming, bartlett, blackman, \
 dot, newaxis, zeros, empty, fft, float32, float64, complex64, linalg, where, \
-searchsorted, pi, multiply, sign, diag, arange, sqrt, exp, log10
+searchsorted, pi, multiply, sign, diag, arange, sqrt, exp, log10, int
 from enthought.traits.api import HasPrivateTraits, Float, Int, \
 CArray, Property, Instance, Trait, Bool, Range, Delegate, Enum, \
 cached_property, on_trait_change, property_depends_on
@@ -326,6 +326,10 @@ class BeamformerBase( HasPrivateTraits ):
     steer = Trait('true level', 'true location', 'classic',
                   desc="type of steering vectors used")
                   
+    # flag, if true (default), the result is cached in h5 files
+    cached = Bool(True, 
+        desc="cached flag")
+                  
     # hdf5 cache file
     h5f = Instance(tables.File)
     
@@ -399,22 +403,27 @@ class BeamformerBase( HasPrivateTraits ):
                 raise ValueError("%i channels do not fit %i mics" % \
                     (numchannels, self.mpos.num_mics))
             numfreq = self.freq_data.block_size/2 + 1
-            H5cache.get_cache( self, self.freq_data.basename)
-            if not name in self.h5f.root:
-                group = self.h5f.createGroup(self.h5f.root, name)
-                shape = (numfreq, self.grid.size)
-                atom = tables.Float32Atom()
-                #filters = tables.Filters(complevel=5, complib='zlib')
-                ac = self.h5f.createCArray(group, 'result', atom, shape)
-                shape = (numfreq, )
-                atom = tables.BoolAtom()
-                fr = self.h5f.createCArray(group, 'freqs', atom, shape)
+            if self.cached:
+                H5cache.get_cache( self, self.freq_data.basename)
+                if not name in self.h5f.root:
+                    group = self.h5f.createGroup(self.h5f.root, name)
+                    shape = (numfreq, self.grid.size)
+                    atom = tables.Float32Atom()
+                    #filters = tables.Filters(complevel=5, complib='zlib')
+                    ac = self.h5f.createCArray(group, 'result', atom, shape)
+                    shape = (numfreq, )
+                    atom = tables.BoolAtom()
+                    fr = self.h5f.createCArray(group, 'freqs', atom, shape)
+                else:
+                    ac = self.h5f.getNode('/'+name, 'result')
+                    fr = self.h5f.getNode('/'+name, 'freqs')
+                if not fr[self.freq_data.ind_low:self.freq_data.ind_high].all():
+                    self.calc(ac, fr)                  
+                    self.h5f.flush()
             else:
-                ac = self.h5f.getNode('/'+name, 'result')
-                fr = self.h5f.getNode('/'+name, 'freqs')
-            if not fr[self.freq_data.ind_low:self.freq_data.ind_high].all():
-                self.calc(ac, fr)
-                self.h5f.flush()
+                ac = zeros((numfreq, self.grid.size), dtype=float32)
+                fr = zeros(numfreq, dtype=int)
+                self.calc(ac,fr)
             #print 2, name
         return ac
         
