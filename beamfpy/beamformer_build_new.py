@@ -172,6 +172,48 @@ def r_beamfull_classic(mod):
     func = ext_tools.ext_function('r_beamfull_classic',code,['csm','e','h','r0','rm','kj'],type_converters=converters.blitz)
     mod.add_function(func)
 
+def r_beamfull_inverse(mod):
+    # ****r_beamfull_inverse****
+    # mit Steering-Vektoren nach Brooks
+    # und mit vorberechneten Abstaenden
+    code="""
+    using namespace blitz;
+    std::complex<double> temp2,kjj;
+    int numpoints=Nr0[0];
+    int nc=Nrm[1];   
+    int numfreq=Nkj[0];
+    double temp1,rs,r01,rm1;
+    for (int i=0; i<numfreq; ++i) {
+        kjj=kj(i);
+        for (int p=0; p<numpoints; ++p) {
+            r01=r0(p);
+            for (int ii=0; ii<nc; ++ii) {
+                rm1=rm(p,ii);
+                e(ii)=exp(kjj*(-rm1))*rm1;
+            }
+            rs=r01;
+            temp1=0.0; 
+            for (int ii=0; ii<nc; ++ii) {
+                temp2=0.0;
+                for (int jj=0; jj<nc; ++jj) {
+                     temp2+=csm(i,ii,jj)*conj(e(jj));
+                }
+                temp1+=(temp2*e(ii)).real();
+            }
+            h(i,p)=temp1/(rs*rs);
+        }
+    }
+    
+    """
+    csm=zeros((2,2,2),'D') # cross spectral matrix
+    e=zeros((2),'D') #hilfsvektor
+    h=zeros((2,2),'d') #ausgabe
+    r0=zeros((10),'d') #abstand aufpunkte-arraymittelpunkt
+    rm=zeros((10,2),'d') #abstand aufpunkte-arraymikrofone
+    kj=zeros((2),'D') # wellenzahl * j
+    func = ext_tools.ext_function('r_beamfull_inverse',code,['csm','e','h','r0','rm','kj'],type_converters=converters.blitz)
+    mod.add_function(func)
+
 def r_beamfull_3d(mod):
     # ****r_beamfull_3d****
     # mit 3d' Steering-Vektoren
@@ -358,6 +400,51 @@ def r_beamdiag_classic(mod):
     rm=zeros((10,2),'d') #abstand aufpunkte-arraymikrofone
     kj=zeros((2),'D') # wellenzahl * j
     func = ext_tools.ext_function('r_beamdiag_classic',code,['csm','e','h','r0','rm','kj'],type_converters=converters.blitz)
+    mod.add_function(func)
+
+def r_beamdiag_inverse(mod):
+    # ****r_beamdiag_inverse****
+    # mit Steering-Vektoren nach Brooks
+    # und mit vorberechneten Abstaenden
+    code="""
+    std::complex<double> temp2,kjj;
+    int numpoints=Nr0[0];
+    int nc=Nrm[1];   
+    int numfreq=Nkj[0];
+    double temp1,rs,r01,rm1,temp3;
+    for (int i=0; i<numfreq; ++i) {
+        kjj=kj(i);
+        for (int p=0; p<numpoints; ++p) {
+            r01=r0(p);
+            for (int ii=0; ii<nc; ++ii) {
+                rm1=rm(p,ii);
+//                temp3=(kjj*(r01-rm1)).imag();
+//                e(ii)=std::complex<double>(cos(temp3),sin(temp3))/rm1;
+                e(ii)=exp(kjj*(-rm1))*rm1;
+            }
+            rs=r01;
+            temp1=0.0; 
+            for (int ii=0; ii<nc; ++ii) {
+                temp2=0.0;
+                for (int jj=0; jj<ii; ++jj) {
+                    temp2+=csm(i,ii,jj)*conj(e(jj));
+                }
+                for (int jj=ii+1; jj<nc; ++jj) {
+                    temp2+=csm(i,ii,jj)*conj(e(jj));
+                }
+                temp1+=(temp2*e(ii)).real();
+            }
+            h(i,p)=temp1/(rs*rs);
+        }
+    }
+    """
+    csm=zeros((2,2,2),'D') # cross spectral matrix
+    e=zeros((2),'D') #hilfsvektor
+    h=zeros((2,2),'d') #ausgabe
+    r0=zeros((10),'d') #abstand aufpunkte-arraymittelpunkt
+    rm=zeros((10,2),'d') #abstand aufpunkte-arraymikrofone
+    kj=zeros((2),'D') # wellenzahl * j
+    func = ext_tools.ext_function('r_beamdiag_inverse',code,['csm','e','h','r0','rm','kj'],type_converters=converters.blitz)
     mod.add_function(func)
 
 def r_beamdiag_3d(mod):
@@ -551,7 +638,7 @@ def r_beamdiag_os_classic(mod):
                 e(ii)=std::complex<double>(cos(temp2),sin(temp2))/rm1;
 //                e(ii)=exp(kjj*(r01-rm1))/rm1;
             }
-            rs=r01/nc;
+            rs=1.0/r01;
             for (int nn=nmin; nn<nmax; ++nn) {
                 temp1=0.0;
                 temp2=0.0;
@@ -577,6 +664,61 @@ def r_beamdiag_os_classic(mod):
     nmin=1 # erster eigenwert
     nmax=1 # letzer eigenwert
     func = ext_tools.ext_function('r_beamdiag_os_classic',code,['e','h','r0','rm','kj','eva','eve','nmin','nmax'],type_converters=converters.blitz)
+    mod.add_function(func)
+
+def r_beamdiag_os_inverse(mod):
+    # ****r_beamdiag_os_inverse****
+    # mit diag removal
+    # mit vorberechneten Abstaenden
+    code="""
+    std::complex<double> temp1,temp3,kjj;
+    int numpoints=Nr0[0];
+    int nc=Nrm[1];   
+    int numfreq=Nkj[0];
+    double rs,r01,rm1,temp2;
+    if (nmin<0) {
+        nmin=0;
+        }
+    if (nmax>nc) {
+        nmax=nc;
+        }
+    for (int i=0; i<numfreq; ++i) {
+        kjj=kj(i);
+        for (int p=0; p<numpoints; ++p) {
+            h(i,p)=0.0;
+            r01=r0(p);
+            for (int ii=0; ii<nc; ++ii) {
+                rm1=rm(p,ii);
+                temp2=(kjj*(r01-rm1)).imag();
+                e(ii)=std::complex<double>(cos(temp2),sin(temp2))*rm1;
+//                e(ii)=exp(kjj*(r01-rm1))/rm1;
+            }
+            rs=r01;
+            for (int nn=nmin; nn<nmax; ++nn) {
+                temp1=0.0;
+                temp2=0.0;
+                for (int ii=0; ii<nc; ++ii) {
+                    temp3=eve(i,ii,nn)*e(ii);
+                    temp1+=temp3;
+                    temp2+=(temp3*conj(temp3)).real();
+                }
+                h(i,p)+=((temp1*conj(temp1)-temp2)*eva(i,nn)).real();
+            }
+            h(i,p)*=1./(rs*rs);
+        }
+    }
+    
+    """
+    e=zeros((2),'D') #hilfsvektor
+    h=zeros((2,2),'d') #ausgabe
+    r0=zeros((10),'d') #abstand aufpunkte-arraymittelpunkt
+    rm=zeros((10,2),'d') #abstand aufpunkte-arraymikrofone
+    kj=zeros((2),'D') # wellenzahl * j
+    eva=zeros((2,2),'d') #eigenwerte
+    eve=zeros((2,2,2),'D') #eigenvektoren
+    nmin=1 # erster eigenwert
+    nmax=1 # letzer eigenwert
+    func = ext_tools.ext_function('r_beamdiag_os_inverse',code,['e','h','r0','rm','kj','eva','eve','nmin','nmax'],type_converters=converters.blitz)
     mod.add_function(func)
 
 def r_beamdiag_os_3d(mod):
@@ -774,7 +916,7 @@ def r_beamfull_os_classic(mod):
                 e(ii)=std::complex<double>(cos(temp2),sin(temp2))/rm1;
 //                e(ii)=exp(kjj*(r01-rm1))/rm1;
             }
-            rs=r01/nc;
+            rs=1.0/r01;
             for (int nn=nmin; nn<nmax; ++nn) {
                 temp1=0.0;
                 for (int ii=0; ii<nc; ++ii) {
@@ -797,6 +939,58 @@ def r_beamfull_os_classic(mod):
     nmin=1 # erster eigenwert
     nmax=1 # letzer eigenwert
     func = ext_tools.ext_function('r_beamfull_os_classic',code,['e','h','r0','rm','kj','eva','eve','nmin','nmax'],type_converters=converters.blitz)
+    mod.add_function(func)
+
+def r_beamfull_os_inverse(mod):
+    # ****r_beamfull_os_inverse****
+    # ohne diag removal
+    # mit vorberechneten Abstaenden
+    code="""
+    std::complex<double> temp1,temp3,kjj;
+    int numpoints=Nr0[0];
+    int nc=Nrm[1];   
+    int numfreq=Nkj[0];
+    double rs,r01,rm1,temp2;
+    if (nmin<0) {
+        nmin=0;
+        }
+    if (nmax>nc) {
+        nmax=nc;
+        }
+    for (int i=0; i<numfreq; ++i) {
+        kjj=kj(i);
+        for (int p=0; p<numpoints; ++p) {
+            h(i,p)=0.0;
+            r01=r0(p);
+            for (int ii=0; ii<nc; ++ii) {
+                rm1=rm(p,ii);
+                temp2=(kjj*(r01-rm1)).imag();
+                e(ii)=std::complex<double>(cos(temp2),sin(temp2))*rm1;
+//                e(ii)=exp(kjj*(r01-rm1))/rm1;
+            }
+            rs=r01;
+            for (int nn=nmin; nn<nmax; ++nn) {
+                temp1=0.0;
+                for (int ii=0; ii<nc; ++ii) {
+                    temp1+=eve(i,ii,nn)*e(ii);
+                }
+                h(i,p)+=((temp1*conj(temp1))*eva(i,nn)).real();
+            }
+            h(i,p)*=1./(rs*rs);
+        }
+    }
+    
+    """
+    e=zeros((2),'D') #hilfsvektor
+    h=zeros((2,2),'d') #ausgabe
+    r0=zeros((10),'d') #abstand aufpunkte-arraymittelpunkt
+    rm=zeros((10,2),'d') #abstand aufpunkte-arraymikrofone
+    kj=zeros((2),'D') # wellenzahl * j
+    eva=zeros((2,2),'d') #eigenwerte
+    eve=zeros((2,2,2),'D') #eigenvektoren
+    nmin=1 # erster eigenwert
+    nmax=1 # letzer eigenwert
+    func = ext_tools.ext_function('r_beamfull_os_inverse',code,['e','h','r0','rm','kj','eva','eve','nmin','nmax'],type_converters=converters.blitz)
     mod.add_function(func)
 
 def r_beamfull_os_3d(mod):
@@ -1023,15 +1217,19 @@ def build_beamformer():
     faverage(mod)
     r_beamfull(mod)
     r_beamfull_classic(mod)
+    r_beamfull_inverse(mod)
     r_beamfull_3d(mod)
     r_beamdiag(mod)
     r_beamdiag_classic(mod)
+    r_beamdiag_inverse(mod)
     r_beamdiag_3d(mod)
     r_beamfull_os(mod)
     r_beamfull_os_classic(mod)
+    r_beamfull_os_inverse(mod)
     r_beamfull_os_3d(mod)
     r_beamdiag_os(mod)
     r_beamdiag_os_classic(mod)
+    r_beamdiag_os_inverse(mod)
     r_beamdiag_os_3d(mod)
     r_beam_psf(mod)
     gseidel(mod)

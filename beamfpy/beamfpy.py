@@ -19,10 +19,10 @@ cached_property, on_trait_change, property_depends_on
 from enthought.traits.ui.api import View, Item
 from enthought.traits.ui.menu import OKCancelButtons
 from beamformer import faverage, gseidel, r_beam_psf, \
-r_beamfull, r_beamfull_3d, r_beamfull_classic, \
-r_beamdiag, r_beamdiag_3d, r_beamdiag_classic, \
-r_beamfull_os, r_beamfull_os_3d, r_beamfull_os_classic, \
-r_beamdiag_os, r_beamdiag_os_3d, r_beamdiag_os_classic
+r_beamfull, r_beamfull_3d, r_beamfull_classic, r_beamfull_inverse, \
+r_beamdiag, r_beamdiag_3d, r_beamdiag_classic, r_beamdiag_inverse, \
+r_beamfull_os, r_beamfull_os_3d, r_beamfull_os_classic, r_beamfull_os_inverse, \
+r_beamdiag_os, r_beamdiag_os_3d, r_beamdiag_os_classic, r_beamdiag_os_inverse
 import tables
 
 from h5cache import H5cache
@@ -323,7 +323,7 @@ class BeamformerBase( HasPrivateTraits ):
         desc="removal of diagonal")
     
     # type of steering vectors
-    steer = Trait('true level', 'true location', 'classic',
+    steer = Trait('true level', 'true location', 'classic', 'inverse', 
                   desc="type of steering vectors used")
                   
     # flag, if true (default), the result is cached in h5 files
@@ -432,8 +432,10 @@ class BeamformerBase( HasPrivateTraits ):
         returns the proper low-level beamforming routine
         """
         r_diag = {True: 'diag', False: 'full'}[self.r_diag]
-        steer = {'true level': '', 'true location': '_3d', \
-            'classic': '_classic'}[self.steer]
+        steer = {'true level': '', \
+                'true location': '_3d', \
+                'classic': '_classic', \
+                'inverse': '_inverse'}[self.steer]
         return eval('r_beam'+r_diag+os+steer)
 
     def calc(self, ac, fr):
@@ -1011,6 +1013,8 @@ class BeamformerCleansc( BeamformerBase ):
                         rs = sqrt((1/(rm*rm)).sum(0)*numchannels)
                     elif self.steer == 'classic':
                         rs = 1.0/r0
+                    elif self.steer == 'inverse':
+                        rs = r0/(rm*rm)
                     wmax = numchannels*sqrt(adiv)*exp(-kj[0]*(r0-rm))/(rm*rs)
                     hh = wmax.copy()
                     D1 = dot(csm[0]-diag(diag(csm[0])), wmax)/hmax

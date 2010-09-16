@@ -349,16 +349,17 @@ class ResultExplorer(HasTraits):
         # spectrum plot tools
         self.cursor = CursorTool(px, drag_button="left", color='blue', show_value_line=False)
         px.overlays.append(self.cursor)
-        #~ self.map_plot.tools.append(SaveTool(self.map_plot, filename='pic.png'))
+#        self.map_plot.tools.append(SaveTool(self.map_plot, filename='pic.png'))
         
         # layout                     
         self.set_map_details()
         self.reset_sector()
         subcontainer.add(self.map_plot)
         subcontainer.add(self.colorbar)
+#        subcontainer.tools.append(SaveTool(subcontainer, filename='pic.png'))
         container.add(self.spec_plot)
         container.add(subcontainer)
-        container.tools.append(SaveTool(container, filename='pic.png'))
+        container.tools.append(SaveTool(container, filename='pic.pdf'))
         self.last_valid_digest = self.Beamformer.ext_digest
      
     def _get_rmesg(self):
