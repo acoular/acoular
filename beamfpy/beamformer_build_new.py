@@ -316,10 +316,12 @@ def r_beamdiag(mod):
     # und mit vorberechneten Abstaenden
     code="""
     std::complex<double> temp2,kjj;
+    std::complex<double>* temp4;
     int numpoints=Nr0[0];
     int nc=Nrm[1];   
     int numfreq=Nkj[0];
-    double temp1,rs,r01,rm1,temp3;
+    double temp1,rs,r01,rm1;
+    float temp3;
     for (int i=0; i<numfreq; ++i) {
         kjj=kj(i);
         for (int p=0; p<numpoints; ++p) {
@@ -328,21 +330,25 @@ def r_beamdiag(mod):
             for (int ii=0; ii<nc; ++ii) {
                 rm1=rm(p,ii);
                 rs+=1.0/(rm1*rm1);
-//                temp3=(kjj*(r01-rm1)).imag();
-//                e(ii)=std::complex<double>(cos(temp3),sin(temp3))/rm1;
-                e(ii)=exp(kjj*(r01-rm1))/rm1;
+                temp3=(float)(kjj.imag()*(r01-rm1));
+                e(ii)=std::complex<double>(cosf(temp3),-sinf(temp3))/rm1;
+//                e(ii)=exp(kjj*(r01-rm1))/rm1;
             }
             rs*=r01/nc;
             temp1=0.0; 
             for (int ii=0; ii<nc; ++ii) {
                 temp2=0.0;
+                temp4=&csm(i,ii);
                 for (int jj=0; jj<ii; ++jj) {
-                    temp2+=csm(i,ii,jj)*conj(e(jj));
+//                    temp2+=csm(i,ii,jj)*conj(e(jj));
+                    temp2+=(*(temp4++))*(e(jj));
                 }
+                temp4++;
                 for (int jj=ii+1; jj<nc; ++jj) {
-                    temp2+=csm(i,ii,jj)*conj(e(jj));
+//                    temp2+=csm(i,ii,jj)*conj(e(jj));
+                    temp2+=(*(temp4++))*(e(jj));
                 }
-                temp1+=(temp2*e(ii)).real();
+                temp1+=(temp2*conj(e(ii))).real();
             }
             h(i,p)=temp1/(rs*rs);
         }
