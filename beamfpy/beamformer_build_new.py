@@ -37,527 +37,111 @@ def faverage(mod):
     func = ext_tools.ext_function('faverage',code,['csm','ft'],type_converters=converters.blitz)
     mod.add_function(func)
 
-def beamfull(mod):
-    # ****beamfull****
-    # mit modifizierten Steering-Vektoren
-    code="""
-    std::complex<double> temp2,kjj;
-    int numpoints=Nbpos[1];
-    int nc=Nmpos[1];   
-    int numfreq=Nkj[0];
-    double temp1,r0,rm,rs,b0,b1,b2,m0,m1,m2;
-    for (int i=0; i<numfreq; ++i) {
-        kjj=kj(i);
-        for (int p=0; p<numpoints; ++p) {
-            b0=bpos(0,p);
-            b1=bpos(1,p);
-            b2=bpos(2,p);
-            rs=0;
-            r0=sqrt(b0*b0+b1*b1+b2*b2);
-            for (int ii=0; ii<nc; ++ii) {
-                m0=b0-mpos(0,ii);
-                m1=b1-mpos(1,ii);
-                m2=b2-mpos(2,ii);
-                rm=m0*m0+m1*m1+m2*m2;
-                rs+=1.0/rm;
-                rm=sqrt(rm);
-                e(ii)=exp(kjj*(r0-rm))/rm;
-            }
-            rs*=r0/nc;
-            temp1=0.0; 
-            for (int ii=0; ii<nc; ++ii) {
-                temp2=0.0;
-                for (int jj=0; jj<nc; ++jj) {
-                     temp2+=csm(i,ii,jj)*conj(e(jj));
-                }
-                temp1+=(temp2*e(ii)).real();
-            }
-            h(i,p)=temp1/(rs*rs);
-        }
-    }
-    
-    """
-    csm=zeros((2,2,2),'D') # cross spectral matrix
-    e=zeros((2),'D') #hilfsvektor
-    h=zeros((2,2),'d') #ausgabe
-    bpos=zeros((3,100),'d') #ortsvektoren aufpunkt
-    mpos=zeros((3,2),'d') #mikrofonpositionen
-    kj=zeros((2),'D') # wellenzahl * j
-    func = ext_tools.ext_function('beamfull',code,['csm','e','h','bpos','mpos','kj'],type_converters=converters.blitz)
-    mod.add_function(func)
-
-def r_beamfull(mod):
-    # ****r_beamfull****
-    # mit modifizierten Steering-Vektoren
-    # und mit vorberechneten Abstaenden
-    code="""
-    using namespace blitz;
-    std::complex<double> temp2,kjj;
-    int numpoints=Nr0[0];
-    int nc=Nrm[1];   
-    int numfreq=Nkj[0];
-    double temp1,rs,r01,rm1;
-    for (int i=0; i<numfreq; ++i) {
-        kjj=kj(i);
-        for (int p=0; p<numpoints; ++p) {
-            rs=0;
-            r01=r0(p);
-            for (int ii=0; ii<nc; ++ii) {
-                rm1=rm(p,ii);
-                rs+=1.0/(rm1*rm1);
-                e(ii)=exp(kjj*(r01-rm1))/(rm1);
-            }
-            rs*=r01/nc;
-            temp1=0.0; 
-            for (int ii=0; ii<nc; ++ii) {
-                temp2=0.0;
-                for (int jj=0; jj<nc; ++jj) {
-                     temp2+=csm(i,ii,jj)*conj(e(jj));
-                }
-                temp1+=(temp2*e(ii)).real();
-            }
-            h(i,p)=temp1/(rs*rs);
-        }
-    }
-    
-    """
-    csm=zeros((2,2,2),'D') # cross spectral matrix
-    e=zeros((2),'D') #hilfsvektor
-    h=zeros((2,2),'d') #ausgabe
-    r0=zeros((10),'d') #abstand aufpunkte-arraymittelpunkt
-    rm=zeros((10,2),'d') #abstand aufpunkte-arraymikrofone
-    kj=zeros((2),'D') # wellenzahl * j
-    func = ext_tools.ext_function('r_beamfull',code,['csm','e','h','r0','rm','kj'],type_converters=converters.blitz)
-    mod.add_function(func)
-
-def r_beamfull_classic(mod):
-    # ****r_beamfull_classic****
-    # mit classic Steering-Vektoren
-    # und mit vorberechneten Abstaenden
-    code="""
-    using namespace blitz;
-    std::complex<double> temp2,kjj;
-    int numpoints=Nr0[0];
-    int nc=Nrm[1];   
-    int numfreq=Nkj[0];
-    double temp1,rs,r01,rm1;
-    for (int i=0; i<numfreq; ++i) {
-        kjj=kj(i);
-        for (int p=0; p<numpoints; ++p) {
-            r01=r0(p);
-            for (int ii=0; ii<nc; ++ii) {
-                rm1=rm(p,ii);
-                e(ii)=exp(kjj*(-rm1))/rm1;
-            }
-            rs=1.0/r01;
-            temp1=0.0; 
-            for (int ii=0; ii<nc; ++ii) {
-                temp2=0.0;
-                for (int jj=0; jj<nc; ++jj) {
-                     temp2+=csm(i,ii,jj)*conj(e(jj));
-                }
-                temp1+=(temp2*e(ii)).real();
-            }
-            h(i,p)=temp1/(rs*rs);
-        }
-    }
-    
-    """
-    csm=zeros((2,2,2),'D') # cross spectral matrix
-    e=zeros((2),'D') #hilfsvektor
-    h=zeros((2,2),'d') #ausgabe
-    r0=zeros((10),'d') #abstand aufpunkte-arraymittelpunkt
-    rm=zeros((10,2),'d') #abstand aufpunkte-arraymikrofone
-    kj=zeros((2),'D') # wellenzahl * j
-    func = ext_tools.ext_function('r_beamfull_classic',code,['csm','e','h','r0','rm','kj'],type_converters=converters.blitz)
-    mod.add_function(func)
-
-def r_beamfull_inverse(mod):
-    # ****r_beamfull_inverse****
-    # mit Steering-Vektoren nach Brooks
-    # und mit vorberechneten Abstaenden
-    code="""
-    using namespace blitz;
-    std::complex<double> temp2,kjj;
-    int numpoints=Nr0[0];
-    int nc=Nrm[1];   
-    int numfreq=Nkj[0];
-    double temp1,rs,r01,rm1;
-    for (int i=0; i<numfreq; ++i) {
-        kjj=kj(i);
-        for (int p=0; p<numpoints; ++p) {
-            r01=r0(p);
-            for (int ii=0; ii<nc; ++ii) {
-                rm1=rm(p,ii);
-                e(ii)=exp(kjj*(-rm1))*rm1;
-            }
-            rs=r01;
-            temp1=0.0; 
-            for (int ii=0; ii<nc; ++ii) {
-                temp2=0.0;
-                for (int jj=0; jj<nc; ++jj) {
-                     temp2+=csm(i,ii,jj)*conj(e(jj));
-                }
-                temp1+=(temp2*e(ii)).real();
-            }
-            h(i,p)=temp1/(rs*rs);
-        }
-    }
-    
-    """
-    csm=zeros((2,2,2),'D') # cross spectral matrix
-    e=zeros((2),'D') #hilfsvektor
-    h=zeros((2,2),'d') #ausgabe
-    r0=zeros((10),'d') #abstand aufpunkte-arraymittelpunkt
-    rm=zeros((10,2),'d') #abstand aufpunkte-arraymikrofone
-    kj=zeros((2),'D') # wellenzahl * j
-    func = ext_tools.ext_function('r_beamfull_inverse',code,['csm','e','h','r0','rm','kj'],type_converters=converters.blitz)
-    mod.add_function(func)
-
-def r_beamfull_3d(mod):
-    # ****r_beamfull_3d****
-    # mit 3d' Steering-Vektoren
-    # und mit vorberechneten Abstaenden
-    code="""
-    using namespace blitz;
-    std::complex<double> temp2,kjj;
-    int numpoints=Nr0[0];
-    int nc=Nrm[1];   
-    int numfreq=Nkj[0];
-    double temp1,rs,r01,rm1;
-    for (int i=0; i<numfreq; ++i) {
-        kjj=kj(i);
-        for (int p=0; p<numpoints; ++p) {
-            rs=0;
-            r01=r0(p);
-            for (int ii=0; ii<nc; ++ii) {
-                rm1=rm(p,ii);
-                rs+=1.0/(rm1*rm1);
-                e(ii)=exp(kjj*(-rm1))/rm1;
-            }
-            rs*=1.0/nc;
-            temp1=0.0; 
-            for (int ii=0; ii<nc; ++ii) {
-                temp2=0.0;
-                for (int jj=0; jj<nc; ++jj) {
-                     temp2+=csm(i,ii,jj)*conj(e(jj));
-                }
-                temp1+=(temp2*e(ii)).real();
-            }
-            h(i,p)=temp1/(rs);
-        }
-    }
-    
-    """
-    csm=zeros((2,2,2),'D') # cross spectral matrix
-    e=zeros((2),'D') #hilfsvektor
-    h=zeros((2,2),'d') #ausgabe
-    r0=zeros((10),'d') #abstand aufpunkte-arraymittelpunkt
-    rm=zeros((10,2),'d') #abstand aufpunkte-arraymikrofone
-    kj=zeros((2),'D') # wellenzahl * j
-    func = ext_tools.ext_function('r_beamfull_3d',code,['csm','e','h','r0','rm','kj'],type_converters=converters.blitz)
-    mod.add_function(func)
-
-def beamdiag(mod):
-    # ****beamdiag****
-    # mit modifizierten Steering-Vektoren
-    code="""
-    std::complex<double> temp2,kjj;
-    int numpoints=Nbpos[1];
-    int nc=Nmpos[1];   
-    int numfreq=Nkj[0];
-    double temp1,r0,rm,rs,b0,b1,b2,m0,m1,m2;
-    for (int i=0; i<numfreq; ++i) {
-        kjj=kj(i);
-        for (int p=0; p<numpoints; ++p) {
-            b0=bpos(0,p);
-            b1=bpos(1,p);
-            b2=bpos(2,p);
-            rs=0;
-            r0=sqrt(b0*b0+b1*b1+b2*b2);
-            for (int ii=0; ii<nc; ++ii) {
-                m0=b0-mpos(0,ii);
-                m1=b1-mpos(1,ii);
-                m2=b2-mpos(2,ii);
-                rm=m0*m0+m1*m1+m2*m2;
-                rs+=1.0/rm;
-                rm=sqrt(rm);
-                e(ii)=exp(kjj*(r0-rm))/rm;
-            }
-            rs*=r0/nc;            
-            temp1=0.0; 
-            for (int ii=0; ii<nc; ++ii) {
-                temp2=0.0;
-                for (int jj=0; jj<ii; ++jj) {
-                    temp2+=csm(i,ii,jj)*conj(e(jj));
-                }
-                for (int jj=ii+1; jj<nc; ++jj) {
-                    temp2+=csm(i,ii,jj)*conj(e(jj));
-                }
-                temp1+=(temp2*e(ii)).real();
-            }
-            h(i,p)=temp1/(rs*rs);
-        }
-    }
-    
-    """
-    csm=zeros((2,2,2),'D') # cross spectral matrix
-    e=zeros((2),'D') #hilfsvektor
-    h=zeros((2,2),'d') #ausgabe
-    bpos=zeros((3,100),'d') #ortsvektoren aufpunkt
-    mpos=zeros((3,2),'d') #mikrofonpositionen
-    kj=zeros((2),'D') # wellenzahl * j
-    func = ext_tools.ext_function('beamdiag',code,['csm','e','h','bpos','mpos','kj'],type_converters=converters.blitz)
-    mod.add_function(func)
-
-def r_beamdiag(mod):
+def r_beamfuncs(mod):
     # ****r_beamdiag****
     # mit modifizierten Steering-Vektoren
     # und mit vorberechneten Abstaenden
     code="""
-    std::complex<double> temp2,kjj;
+    std::complex<double> temp2;
     std::complex<double>* temp4;
     int numpoints=Nr0[0];
     int nc=Nrm[1];   
     int numfreq=Nkj[0];
-    double temp1,rs,r01,rm1;
+    double temp1,rs,r01,rm1,kjj;
     float temp3;
     for (int i=0; i<numfreq; ++i) {
-        kjj=kj(i);
+        kjj=kj(i).imag();
         for (int p=0; p<numpoints; ++p) {
             rs=0;
             r01=r0(p);
             for (int ii=0; ii<nc; ++ii) {
                 rm1=rm(p,ii);
                 rs+=1.0/(rm1*rm1);
-                temp3=(float)(kjj.imag()*(r01-rm1));
-                e(ii)=std::complex<double>(cosf(temp3),-sinf(temp3))/rm1;
-//                e(ii)=exp(kjj*(r01-rm1))/rm1;
-            }
-            rs*=r01/nc;
+                temp3=(float)(kjj*(r01-rm1));
+                temp2=std::complex<double>(cosf(temp3),-sinf(temp3));
+                %s
             temp1=0.0; 
             for (int ii=0; ii<nc; ++ii) {
                 temp2=0.0;
                 temp4=&csm(i,ii);
                 for (int jj=0; jj<ii; ++jj) {
-//                    temp2+=csm(i,ii,jj)*conj(e(jj));
                     temp2+=(*(temp4++))*(e(jj));
                 }
-                temp4++;
-                for (int jj=ii+1; jj<nc; ++jj) {
-//                    temp2+=csm(i,ii,jj)*conj(e(jj));
-                    temp2+=(*(temp4++))*(e(jj));
-                }
-                temp1+=(temp2*conj(e(ii))).real();
-            }
-            h(i,p)=temp1/(rs*rs);
-        }
-    }
-    """
-    csm=zeros((2,2,2),'D') # cross spectral matrix
-    e=zeros((2),'D') #hilfsvektor
-    h=zeros((2,2),'d') #ausgabe
-    r0=zeros((10),'d') #abstand aufpunkte-arraymittelpunkt
-    rm=zeros((10,2),'d') #abstand aufpunkte-arraymikrofone
-    kj=zeros((2),'D') # wellenzahl * j
-    func = ext_tools.ext_function('r_beamdiag',code,['csm','e','h','r0','rm','kj'],type_converters=converters.blitz)
-    mod.add_function(func)
-
-def r_beamdiag_classic(mod):
-    # ****r_beamdiag_classic****
-    # mit classic' Steering-Vektoren
-    # und mit vorberechneten Abstaenden
-    code="""
-    std::complex<double> temp2,kjj;
-    int numpoints=Nr0[0];
-    int nc=Nrm[1];   
-    int numfreq=Nkj[0];
-    double temp1,rs,r01,rm1,temp3;
-    for (int i=0; i<numfreq; ++i) {
-        kjj=kj(i);
-        for (int p=0; p<numpoints; ++p) {
-            r01=r0(p);
-            for (int ii=0; ii<nc; ++ii) {
-                rm1=rm(p,ii);
-//                temp3=(kjj*(r01-rm1)).imag();
-//                e(ii)=std::complex<double>(cos(temp3),sin(temp3))/rm1;
-                e(ii)=exp(kjj*(-rm1))/rm1;
-            }
-            rs=1.0/r01;
-            temp1=0.0; 
-            for (int ii=0; ii<nc; ++ii) {
-                temp2=0.0;
-                for (int jj=0; jj<ii; ++jj) {
-                    temp2+=csm(i,ii,jj)*conj(e(jj));
-                }
-                for (int jj=ii+1; jj<nc; ++jj) {
-                    temp2+=csm(i,ii,jj)*conj(e(jj));
-                }
-                temp1+=(temp2*e(ii)).real();
-            }
-            h(i,p)=temp1/(rs*rs);
-        }
-    }
-    """
-    csm=zeros((2,2,2),'D') # cross spectral matrix
-    e=zeros((2),'D') #hilfsvektor
-    h=zeros((2,2),'d') #ausgabe
-    r0=zeros((10),'d') #abstand aufpunkte-arraymittelpunkt
-    rm=zeros((10,2),'d') #abstand aufpunkte-arraymikrofone
-    kj=zeros((2),'D') # wellenzahl * j
-    func = ext_tools.ext_function('r_beamdiag_classic',code,['csm','e','h','r0','rm','kj'],type_converters=converters.blitz)
-    mod.add_function(func)
-
-def r_beamdiag_inverse(mod):
-    # ****r_beamdiag_inverse****
-    # mit Steering-Vektoren nach Brooks
-    # und mit vorberechneten Abstaenden
-    code="""
-    std::complex<double> temp2,kjj;
-    int numpoints=Nr0[0];
-    int nc=Nrm[1];   
-    int numfreq=Nkj[0];
-    double temp1,rs,r01,rm1,temp3;
-    for (int i=0; i<numfreq; ++i) {
-        kjj=kj(i);
-        for (int p=0; p<numpoints; ++p) {
-            r01=r0(p);
-            for (int ii=0; ii<nc; ++ii) {
-                rm1=rm(p,ii);
-//                temp3=(kjj*(r01-rm1)).imag();
-//                e(ii)=std::complex<double>(cos(temp3),sin(temp3))/rm1;
-                e(ii)=exp(kjj*(-rm1))*rm1;
-            }
-            rs=r01;
-            temp1=0.0; 
-            for (int ii=0; ii<nc; ++ii) {
-                temp2=0.0;
-                for (int jj=0; jj<ii; ++jj) {
-                    temp2+=csm(i,ii,jj)*conj(e(jj));
-                }
-                for (int jj=ii+1; jj<nc; ++jj) {
-                    temp2+=csm(i,ii,jj)*conj(e(jj));
-                }
-                temp1+=(temp2*e(ii)).real();
-            }
-            h(i,p)=temp1/(rs*rs);
-        }
-    }
-    """
-    csm=zeros((2,2,2),'D') # cross spectral matrix
-    e=zeros((2),'D') #hilfsvektor
-    h=zeros((2,2),'d') #ausgabe
-    r0=zeros((10),'d') #abstand aufpunkte-arraymittelpunkt
-    rm=zeros((10,2),'d') #abstand aufpunkte-arraymikrofone
-    kj=zeros((2),'D') # wellenzahl * j
-    func = ext_tools.ext_function('r_beamdiag_inverse',code,['csm','e','h','r0','rm','kj'],type_converters=converters.blitz)
-    mod.add_function(func)
-
-def r_beamdiag_3d(mod):
-    # ****r_beamdiag_3d****
-    # mit 3d' Steering-Vektoren
-    # und mit vorberechneten Abstaenden
-    code="""
-    std::complex<double> temp2,kjj;
-    int numpoints=Nr0[0];
-    int nc=Nrm[1];   
-    int numfreq=Nkj[0];
-    double temp1,rs,r01,rm1,temp3;
-    for (int i=0; i<numfreq; ++i) {
-        kjj=kj(i);
-        for (int p=0; p<numpoints; ++p) {
-            rs=0;
-            r01=r0(p);
-            for (int ii=0; ii<nc; ++ii) {
-                rm1=rm(p,ii);
-                rs+=1.0/(rm1*rm1);
-                e(ii)=exp(kjj*(-rm1))/(rm1);
-            }
-            rs*=1.0/nc;
-            temp1=0.0; 
-            for (int ii=0; ii<nc; ++ii) {
-                temp2=0.0;
-                for (int jj=0; jj<ii; ++jj) {
-                    temp2+=csm(i,ii,jj)*conj(e(jj));
-                }
-                for (int jj=ii+1; jj<nc; ++jj) {
-                    temp2+=csm(i,ii,jj)*conj(e(jj));
-                }
-                temp1+=(temp2*e(ii)).real();
+                temp1+=2*(temp2*conj(e(ii))).real();
+                %s
             }
             h(i,p)=temp1/rs;
         }
     }
     """
+    # true level
+    code_lev = """
+                e(ii)=temp2/rm1;
+            }
+            rs*=r01/nc;
+            rs*=rs;
+    """
+    # true location
+    code_loc = """
+                e(ii)=temp2/rm1;
+            }
+            rs*=r01/nc;
+            rs*=rs;
+    """
+    # classic
+    code_cla = """
+                e(ii)=temp2/rm1;
+            }
+            rs=1.0/r01;
+            rs*=rs;
+    """
+    # inverse
+    code_inv = """
+                e(ii)=temp2*rm1;
+            }
+            rs=r01;
+            rs*=rs;
+    """
+    code_d="""
+                temp1+=(csm(i,ii,ii)*conj(e(ii))*e(ii)).real();
+    """
     csm=zeros((2,2,2),'D') # cross spectral matrix
     e=zeros((2),'D') #hilfsvektor
     h=zeros((2,2),'d') #ausgabe
     r0=zeros((10),'d') #abstand aufpunkte-arraymittelpunkt
     rm=zeros((10,2),'d') #abstand aufpunkte-arraymikrofone
     kj=zeros((2),'D') # wellenzahl * j
-    func = ext_tools.ext_function('r_beamdiag_3d',code,['csm','e','h','r0','rm','kj'],type_converters=converters.blitz)
+    func = ext_tools.ext_function('r_beamdiag',
+                                  code % (code_lev,''),
+                                  ['csm','e','h','r0','rm','kj'],type_converters=converters.blitz)
     mod.add_function(func)
-
-def beamdiag_os(mod):
-    # ****beamdiag_os****
-    # mit diag removal
-    code="""
-    std::complex<double> temp1,temp3,kjj;
-    int numpoints=Nbpos[1];
-    int nc=Nmpos[1];   
-    int numfreq=Nkj[0];
-    double r0,rm,rs,b0,b1,b2,m0,m1,m2,temp2;
-    if (nmin<0) {
-        nmin=0;
-        }
-    if (nmax>nc) {
-        nmax=nc;
-        }
-    for (int i=0; i<numfreq; ++i) {
-        kjj=kj(i);
-        for (int p=0; p<numpoints; ++p) {
-            b0=bpos(0,p);
-            b1=bpos(1,p);
-            b2=bpos(2,p);
-            rs=0;
-            r0=sqrt(b0*b0+b1*b1+b2*b2);
-            temp1=0.0;
-            temp2=0.0;
-            for (int ii=0; ii<nc; ++ii) {
-                m0=b0-mpos(0,ii);
-                m1=b1-mpos(1,ii);
-                m2=b2-mpos(2,ii);
-                rm=m0*m0+m1*m1+m2*m2;
-                rs+=1.0/rm;
-                rm=sqrt(rm);
-                e(ii)=exp(kjj*(r0-rm))/rm;
-            }
-            rs*=r0/nc;
-            for (int nn=nmin; nn<nmax; ++nn) {
-                temp1=0.0;
-                temp2=0.0;
-                for (int ii=0; ii<nc; ++ii) {
-                    temp3=eve(i,ii,nn)*e(ii);
-                    temp1+=temp3;
-                    temp2+=(temp3*conj(temp3)).real();
-                }
-                h(i,p)+=((temp1*conj(temp1)-temp2)*eva(i,nn)).real();
-            }
-            h(i,p)*=1./(rs*rs);
-        }
-    }
-    
-    """
-    e=zeros((2),'D') #hilfsvektor
-    h=zeros((2,2),'d') #ausgabe
-    bpos=zeros((3,100),'d') #ortsvektoren aufpunkt
-    mpos=zeros((3,2),'d') #mikrofonpositionen
-    kj=zeros((2),'D') # wellenzahl * j
-    eva=zeros((2,2),'d') #eigenwerte
-    eve=zeros((2,2,2),'D') #eigenvektoren
-    nmin=1 # erster eigenwert
-    nmax=1 # letzer eigenwert
-    func = ext_tools.ext_function('beamdiag_os',code,['e','h','bpos','mpos','kj','eva','eve','nmin','nmax'],type_converters=converters.blitz)
+    func = ext_tools.ext_function('r_beamfull',
+                                  code % (code_lev,code_d),
+                                  ['csm','e','h','r0','rm','kj'],type_converters=converters.blitz)
+    mod.add_function(func)
+    func = ext_tools.ext_function('r_beamdiag_3d',
+                                  code % (code_loc,''),
+                                  ['csm','e','h','r0','rm','kj'],type_converters=converters.blitz)
+    mod.add_function(func)
+    func = ext_tools.ext_function('r_beamfull_3d',
+                                  code % (code_loc,code_d),
+                                  ['csm','e','h','r0','rm','kj'],type_converters=converters.blitz)
+    mod.add_function(func)
+    func = ext_tools.ext_function('r_beamdiag_classic',
+                                  code % (code_cla,''),
+                                  ['csm','e','h','r0','rm','kj'],type_converters=converters.blitz)
+    mod.add_function(func)
+    func = ext_tools.ext_function('r_beamfull_classic',
+                                  code % (code_cla,code_d),
+                                  ['csm','e','h','r0','rm','kj'],type_converters=converters.blitz)
+    mod.add_function(func)
+    func = ext_tools.ext_function('r_beamdiag_inverse',
+                                  code % (code_inv,''),
+                                  ['csm','e','h','r0','rm','kj'],type_converters=converters.blitz)
+    mod.add_function(func)
+    func = ext_tools.ext_function('r_beamfull_inverse',
+                                  code % (code_inv,code_d),
+                                  ['csm','e','h','r0','rm','kj'],type_converters=converters.blitz)
     mod.add_function(func)
     
 def r_beamdiag_os(mod):
@@ -565,11 +149,13 @@ def r_beamdiag_os(mod):
     # mit diag removal
     # mit vorberechneten Abstaenden
     code="""
-    std::complex<double> temp1,temp3,kjj;
+    std::complex<double> temp1,temp3;
+    std::complex<double>* temp5;    
     int numpoints=Nr0[0];
     int nc=Nrm[1];   
     int numfreq=Nkj[0];
-    double rs,r01,rm1,temp2;
+    double rs,r01,rm1,temp2,kjj;
+    float temp4;
     if (nmin<0) {
         nmin=0;
         }
@@ -577,7 +163,7 @@ def r_beamdiag_os(mod):
         nmax=nc;
         }
     for (int i=0; i<numfreq; ++i) {
-        kjj=kj(i);
+        kjj=kj(i).imag();
         for (int p=0; p<numpoints; ++p) {
             rs=0;
             h(i,p)=0.0;
@@ -585,18 +171,19 @@ def r_beamdiag_os(mod):
             for (int ii=0; ii<nc; ++ii) {
                 rm1=rm(p,ii);
                 rs+=1.0/(rm1*rm1);
-                temp2=(kjj*(r01-rm1)).imag();
-                e(ii)=std::complex<double>(cos(temp2),sin(temp2))/rm1;
-//                e(ii)=exp(kjj*(r01-rm1))/rm1;
+                temp4 = (float)(kjj*(r01-rm1));
+                temp1 = std::complex<double>(cosf(temp4),sinf(temp4));
+                e(ii) = temp1/rm1;
             }
             rs*=r01/nc;
             for (int nn=nmin; nn<nmax; ++nn) {
                 temp1=0.0;
                 temp2=0.0;
+                temp5 = &e(0);
                 for (int ii=0; ii<nc; ++ii) {
-                    temp3=eve(i,ii,nn)*e(ii);
+                    temp3=eve(i,ii,nn)*(*(temp5++));
                     temp1+=temp3;
-                    temp2+=(temp3*conj(temp3)).real();
+                    temp2 += temp3.real()*temp3.real() + temp3.imag()*temp3.imag();
                 }
                 h(i,p)+=((temp1*conj(temp1)-temp2)*eva(i,nn)).real();
             }
@@ -1221,14 +808,7 @@ def gseidel(mod):
 def build_beamformer():
     mod = ext_tools.ext_module('beamformer')
     faverage(mod)
-    r_beamfull(mod)
-    r_beamfull_classic(mod)
-    r_beamfull_inverse(mod)
-    r_beamfull_3d(mod)
-    r_beamdiag(mod)
-    r_beamdiag_classic(mod)
-    r_beamdiag_inverse(mod)
-    r_beamdiag_3d(mod)
+    r_beamfuncs(mod)
     r_beamfull_os(mod)
     r_beamfull_os_classic(mod)
     r_beamfull_os_inverse(mod)
@@ -1244,7 +824,8 @@ def build_beamformer():
     else:    
         compiler = 'mingw32'
     print compiler
-    mod.compile(extra_compile_args=['-O3','-ffast-math','-march=native'],#'-mfpmath=sse'],#'-msse','-m3dnow'],#
+    mod.compile(extra_compile_args=['-O3','-ffast-math','-march=native', \
+        '-Wno-write-strings'],#'-mfpmath=sse'],#'-msse','-m3dnow'],#
                 verbose=2,
                 compiler=compiler)
 
