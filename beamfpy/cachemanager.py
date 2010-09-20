@@ -8,7 +8,7 @@ acoustic beamforming
 ennes.sarradj@gmx.de
 """
 
-from beamfpy import cache_dir
+from h5cache import cache_dir
 from numpy import *
 import os
 
