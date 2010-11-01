@@ -85,8 +85,7 @@ def r_beamfuncs(mod):
     code_loc = """
                 e(ii)=temp2/rm1;
             }
-            rs*=r01/nc;
-            rs*=rs;
+            rs*=1.0/nc;
     """
     # classic
     code_cla = """
