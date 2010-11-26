@@ -89,10 +89,9 @@ def r_beamfuncs(mod):
     """
     # classic
     code_cla = """
-                e(ii)=temp2/rm1;
+                e(ii)=temp2;
             }
-            rs=1.0/r01;
-            rs*=rs;
+            rs=1.0;
     """
     # inverse
     code_inv = """
@@ -101,6 +100,7 @@ def r_beamfuncs(mod):
             rs=r01;
             rs*=rs;
     """
+    # extra code when diagonal is included
     code_d="""
                 temp1+=(csm(i,ii,ii)*conj(e(ii))*e(ii)).real();
     """
@@ -227,10 +227,10 @@ def r_beamdiag_os_classic(mod):
             for (int ii=0; ii<nc; ++ii) {
                 rm1=rm(p,ii);
                 temp2=(kjj*(r01-rm1)).imag();
-                e(ii)=std::complex<double>(cos(temp2),sin(temp2))/rm1;
+                e(ii)=std::complex<double>(cos(temp2),sin(temp2));//rm1;
 //                e(ii)=exp(kjj*(r01-rm1))/rm1;
             }
-            rs=1.0/r01;
+            rs=1.0;//r01;
             for (int nn=nmin; nn<nmax; ++nn) {
                 temp1=0.0;
                 temp2=0.0;
@@ -505,10 +505,10 @@ def r_beamfull_os_classic(mod):
             for (int ii=0; ii<nc; ++ii) {
                 rm1=rm(p,ii);
                 temp2=(kjj*(r01-rm1)).imag();
-                e(ii)=std::complex<double>(cos(temp2),sin(temp2))/rm1;
+                e(ii)=std::complex<double>(cos(temp2),sin(temp2));//rm1;
 //                e(ii)=exp(kjj*(r01-rm1))/rm1;
             }
-            rs=1.0/r01;
+            rs=1.0;//r01;
             for (int nn=nmin; nn<nmax; ++nn) {
                 temp1=0.0;
                 for (int ii=0; ii<nc; ++ii) {

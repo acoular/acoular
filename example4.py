@@ -142,4 +142,3 @@ for b in all_bf:
     colorbar()
     title(b.__class__.__name__+'\n '+b.steer, size=10)
 show()
-show()
