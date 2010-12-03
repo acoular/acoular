@@ -1009,14 +1009,14 @@ class BeamformerCleansc( BeamformerBase ):
                     rm = self.rm[xi_max]
                     r0 = self.r0[xi_max]
                     if self.steer == 'true level':
-                        wmax = 1.0/(rm*r0*(1/(rm*rm)).sum(0))
+                        rs = rm*r0*(1/(rm*rm)).sum(0)
                     elif self.steer == 'true location':
-                        wmax = 1.0/(rm*sqrt((1/(rm*rm)).sum(0)*numchannels))
+                        rs = rm*sqrt((1/(rm*rm)).sum(0)*numchannels)
                     elif self.steer == 'classic':
-                        wmax = 1.0/numchannels
+                        rs = 1.0*numchannels
                     elif self.steer == 'inverse':
-                        wmax = rm/(r0*numchannels)
-                    wmax *= numchannels*sqrt(adiv)*exp(-kj[0]*(r0-rm))
+                        rs = numchannels*r0/rm
+                    wmax = numchannels*sqrt(adiv)*exp(-kj[0]*(r0-rm))/rs
                     hh = wmax.copy()
                     D1 = dot(csm[0]-diag(diag(csm[0])), wmax)/hmax
                     ww = wmax.conj()*wmax
