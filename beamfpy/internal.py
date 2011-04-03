@@ -1,13 +1,13 @@
 """
 internal.py
 
-Part of the beamfpy library: several classes for the implemetation of 
+Part of the beamfpy library: several classes for the implementation of 
 acoustic beamforming
 
-(c) Ennes Sarradj 2007-2010, all rights reserved
+(c) Ennes Sarradj 2007-2011, all rights reserved
 ennes.sarradj@gmx.de
 """
-import hashlib
+from hashlib import md5
 
 def digest( obj, name='digest'):
     str_ = []
@@ -19,4 +19,4 @@ def digest( obj, name='digest'):
             str_.append(str(vobj))
         except:
             pass
-    return '_' + hashlib.md5(''.join(str_)).hexdigest()
+    return '_' + md5(''.join(str_)).hexdigest()

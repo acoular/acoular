@@ -3,7 +3,7 @@
 The beamfpy library: several classes for the implemetation of 
 acoustic beamforming
 
-(c) Ennes Sarradj 2007-2010, all rights reserved
+(c) Ennes Sarradj 2007-2011, all rights reserved
 ennes.sarradj@gmx.de
 
 A minimal usage example would be:
@@ -37,17 +37,21 @@ output if necessary.
 """
 
 __author__ = "Ennes Sarradj, ennes.sarradj@gmx.de"
-__date__ = "6 July 2010"
-__version__ = "3.0beta"
+__date__ = "2 April 2011"
+__version__ = "3.01beta"
 
 from fileimport import time_data_import, csv_import, td_import, \
 bk_mat_import, datx_import
 try:
     from nidaqimport import nidaq_import
-except ImportError:
+except:
     pass
 
 from h5cache import td_dir, cache_dir
+
+#make sure that no OMP multithreading is use if OMP_NUM_THREADS is not defined
+import os
+os.environ.setdefault('OMP_NUM_THREADS','1')
 
 from timedomain import Calib, SamplesGenerator, TimeSamples, \
 MaskedTimeSamples, TimeInOut, Mixer, TimeAverage, TimeReverse, \

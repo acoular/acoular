@@ -22,13 +22,18 @@ def faverage(mod):
     std::complex<double> temp;
     int nf=Ncsm[0]; 
     int nc=Ncsm[1];
-    for (int f=0; f<nf; ++f) {
-        for (int i=0; i<nc; ++i) {
+    int f,i,j;
+#pragma omp parallel private(f,i,j,temp) shared(csm,nc,nf,ft)
+    {
+#pragma omp for schedule(auto) nowait 
+    for (f=0; f<nf; ++f) {
+        for (i=0; i<nc; ++i) {
             temp=conj(ft(f,i));
-            for (int j=0; j<nc; ++j) {
+            for (j=0; j<nc; ++j) {
                  csm(f,i,j)+=temp * ft(f,j);
             }
         }
+    }
     }
     """
     #type declarations
@@ -168,7 +173,7 @@ def r_beamfuncs_os(mod):
     for (int i=0; i<numfreq; ++i) {
         kjj=kj(i).imag();
         int p,ii,nn;
-#pragma omp parallel private(p,rs,r01,ii,rm1,temp3,temp2,temp1,temp4,e1) shared(numpoints,nc,numfreq,i,kjj,h,r0,rm,kj,eva,eve,nmin,nmax)
+#pragma omp parallel private(p,rs,r01,ii,nn,rm1,temp3,temp2,temp1,temp4,e1) shared(numpoints,nc,numfreq,i,kjj,h,r0,rm,kj,eva,eve,nmin,nmax)
         {
 #pragma omp for schedule(auto) nowait 
         for (p=0; p<numpoints; ++p) {
@@ -376,8 +381,6 @@ def gseidel(mod):
 
 def build_beamformer():
     mod = ext_tools.ext_module('beamformer')
-    # if openmp library functions are required
-    #mod._build_information[0]._headers.insert(1,'<omp.h>')
     faverage(mod)
     r_beamfuncs(mod)
     r_beamfuncs_os(mod)

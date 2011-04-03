@@ -190,6 +190,7 @@ class MovingPointSource( PointSource ):
         offset = int(1.1*maxrm/c)
         signal = self.signal.signal()
         upsample = 16
+        # TODO: fix numerical problems with filter design
         (b, a) = cheby1(8, 0.05, 0.8/upsample)
         out = zeros(((self.numsamples+offset)*upsample, self.numchannels))
         d_index2 = arange(self.numchannels, dtype=int)

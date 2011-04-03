@@ -1003,8 +1003,7 @@ class BeamformerCleansc( BeamformerBase ):
                     xi_max = h.argmax() #index of maximum
                     powers[j] = hmax = h[0, xi_max] #maximum
                     result[xi_max] += self.damp * hmax
-                    if  j > 2 and hmax > powers[j-self.stopn]:
-                        #print j
+                    if  j > self.stopn and hmax > powers[j-self.stopn]:
                         break
                     rm = self.rm[xi_max]
                     r0 = self.r0[xi_max]
@@ -1029,6 +1028,7 @@ class BeamformerCleansc( BeamformerBase ):
                         array((hmax, ))[newaxis, :], hh[newaxis, :], 0, 1)
                     h -= self.damp*h1*adiv
                     csm -= self.damp*csm1
+#                print '%i iter of %i' % (j,J)
                 ac[i] = result
                 fr[i] = True
 

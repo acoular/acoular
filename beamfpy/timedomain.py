@@ -930,6 +930,8 @@ class Trajectory( HasPrivateTraits ):
         if not delta_t:
             delta_t = t_start
             t_start, t_end = self.interval
+        if not t_end:
+            t_end = self.interval[1]
         for t in arange(t_start, t_end, delta_t):
             yield self.location(t, der)
         
@@ -1002,9 +1004,15 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
         d_index2 = arange(self.mpos.num_mics, dtype=int) # second index (static)
         offset = aoff # start offset for working array
         ooffset = 0 # offset for output array      
-        # generators for trajectory
-        g = self.trajectory.traj(1/self.source.sample_freq)
-        g1 = self.trajectory.traj(1/self.source.sample_freq, der=1)
+        # generators for trajectory, starting at minimum time of flight between
+        # trajectory start and array mics
+        start_t = self.trajectory.interval[0]
+        start_t = self.env.r( self.c, 
+                        array(self.trajectory.location(start_t))[:,newaxis], 
+                        self.mpos.mpos).min()/self.c
+        g = self.trajectory.traj( start_t, delta_t=1/self.source.sample_freq)
+        g1 = self.trajectory.traj( start_t, delta_t=1/self.source.sample_freq, 
+                                  der=1)
         rflag = (self.rvec == 0).all() #flag translation vs. rotation
         for block in self.source.result(num):
             ns = block.shape[0] # numbers of samples and channels

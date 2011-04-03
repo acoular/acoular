@@ -794,7 +794,7 @@ def gseidel(mod):
             x0=(y(j)-x0);
             x(j)=x0>0.0 ? x0 : 0;
         }
-    } 
+    }
     """
     n=1 #eigenwert nr
     om=1.0 # relaxation parameter
@@ -824,7 +824,7 @@ def build_beamformer():
         compiler = 'mingw32'
     print compiler
     mod.compile(extra_compile_args=['-O3','-ffast-math','-march=native', \
-        '-Wno-write-strings'],#'-mfpmath=sse'],#'-msse','-m3dnow'],#
+        '-Wno-write-strings','-fopenmp'],#'-mfpmath=sse'],#'-msse','-m3dnow'],#
                 verbose=2,
                 compiler=compiler)
 
