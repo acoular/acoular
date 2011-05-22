@@ -26,7 +26,7 @@ from os import path
 
 try:
 	nidaq = ctypes.windll.nicaiu # load the DLL
-except AttributeError:
+except:
 	raise ImportError
 # type definitions
 int32 = ctypes.c_long
