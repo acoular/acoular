@@ -14,7 +14,7 @@ ennes.sarradj@gmx.de
 from numpy import array, newaxis, empty, empty_like, pi, sin, sqrt, arange, \
 clip, sort, r_, s_, zeros, int16, histogram, unique1d, where, cross, dot
 from scipy.interpolate import splprep, splev
-from enthought.traits.api import HasPrivateTraits, Float, Int, Long, \
+from enthought.traits.api import HasPrivateTraits, Float, Int, CLong, \
 File, CArray, Property, Instance, Trait, Bool, Delegate, Any, \
 cached_property, on_trait_change, property_depends_on, List, Dict, Tuple
 from enthought.traits.ui.api import View, Item
@@ -108,10 +108,10 @@ class SamplesGenerator( HasPrivateTraits ):
         desc="sampling frequency")
     
     # number of channels 
-    numchannels = Long
+    numchannels = CLong
                
     # number of samples 
-    numsamples = Long
+    numsamples = CLong
     
     # internal identifier
     digest = ''
@@ -139,11 +139,11 @@ class TimeSamples( SamplesGenerator ):
         desc="Calibration data")
     
     # number of channels, is set automatically
-    numchannels = Long(0L, 
+    numchannels = CLong(0L, 
         desc="number of input channels")
 
     # number of time data samples, is set automatically
-    numsamples = Long(0L, 
+    numsamples = CLong(0L, 
         desc="number of samples")
 
     # the time data as (numsamples, numchannels) array of floats
@@ -227,11 +227,11 @@ class MaskedTimeSamples( TimeSamples ):
     """
     
     # start of valid samples
-    start = Long(0L, 
+    start = CLong(0L, 
         desc="start of valid samples")
     
     # stop of valid samples
-    stop = Trait(None, None, Long, 
+    stop = Trait(None, None, CLong, 
         desc="stop of valid samples")
     
     # invalid channels  
@@ -243,11 +243,11 @@ class MaskedTimeSamples( TimeSamples ):
         desc="channel mask")
         
     # number of channels, is set automatically
-    numchannels_total = Long(0L, 
+    numchannels_total = CLong(0L, 
         desc="total number of input channels")
 
     # number of time data samples, is set automatically
-    numsamples_total = Long(0L, 
+    numsamples_total = CLong(0L, 
         desc="total number of samples per channel")
 
     # number of channels, is set automatically
@@ -597,6 +597,7 @@ class FiltFiltOctave( TimeInOut ):
             raise ValueError("band frequency too high:%f,%f" % (self.band, fs))
         om1 = fr/alpha 
         om2 = fr*alpha
+#        print om1, om2
         return butter(order, [om1, om2], 'bandpass') 
         
     def result(self, num):
