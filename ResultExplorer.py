@@ -10,6 +10,9 @@ __author__ = "Ennes Sarradj, ennes.sarradj@gmx.de"
 __date__ = "29 January 2009"
 __version__ = "2.0alpha"
 
+from os import environ
+environ['ETS_TOOLKIT'] = 'wx'
+
 from beamfpy import *
 from enthought.chaco.api import ArrayDataSource, ArrayPlotData,\
  BasePlotContainer, ColorBar, DataRange1D, HPlotContainer, ImageData, ImagePlot,\
