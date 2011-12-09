@@ -13,28 +13,31 @@ __version__ = "2.0alpha"
 from beamfpy import *
 from enthought.chaco.api import ArrayDataSource, ArrayPlotData,\
  BasePlotContainer, ColorBar, DataRange1D, HPlotContainer, ImageData, ImagePlot,\
- LinearMapper, Plot, VPlotContainer, jet 
+ LinearMapper, Plot, VPlotContainer, jet, LogMapper
 from enthought.chaco.tools.api import ImageInspectorOverlay, ImageInspectorTool,\
- PanTool, RangeSelection, RangeSelectionOverlay, RectZoomTool, SaveTool
+ PanTool, RangeSelection, RangeSelectionOverlay, SaveTool, ZoomTool as RectZoomTool
+#from enthought.chaco.tools.rect_zoom import RectZoomTool
 from enthought.chaco.tools.cursor_tool import BaseCursorTool, CursorTool 
 from enthought.enable.component_editor import ComponentEditor
-from enthought.pyface.action.api import Action, Group, MenuBarManager,\
- MenuManager, ToolBarManager
 from enthought.pyface.api import FileDialog, GUI, ImageResource 
 from enthought.traits.api import Any, Bool, Button, CArray, DelegatesTo, Event,\
  File, Float, HasPrivateTraits, HasTraits, Instance, Int, List, on_trait_change,\
  Property, property_depends_on, Str, Trait, Tuple
 from enthought.traits.ui.api import EnumEditor, Group as TGroup, HFlow, HGroup,\
  HSplit, HSplit, InstanceEditor, Item, StatusItem, Tabbed, VGroup, View, VSplit
-from enthought.traits.ui.menu import Action, CancelButton, Menu, OKButton,\
- Separator
+from enthought.traits.ui.menu import Action, Menu, MenuBar,\
+ Separator, ActionGroup as Group
+MenuManager = Menu
+MenuBarManager = MenuBar
+
 from numpy import arange, around, array, linspace, log10, ones, ravel, unique,\
- zeros 
+ zeros, isnan, sometrue, log
+from cPickle import dump, load 
 from os import path
 from threading import Thread
 from time import sleep, time 
 
-
+HFlow = HGroup
 # defaults
 calib_default=''
 geom_default=path.join( path.split(beamfpy.__file__)[0],'xml','array_84_10_9.xml')
@@ -101,11 +104,37 @@ class RectZoomSelect(RectZoomTool):
         event.handled = True
         return
 
+# bugfix for chaco 4.0 LogMapper        
+class MyLogMapper(LogMapper):        
+
+    def map_screen(self, data_array):
+        """ map_screen(data_array) -> screen_array
+
+        Overrides AbstractMapper. Maps values from data space to screen space.
+        """      
+        #First convert to a [0,1] space, then to the screen space
+        if not self._cache_valid:
+            self._compute_scale()
+        if self._inter_scale == 0.0:
+            intermediate = data_array*0.0
+        else:
+            try:
+                LOG_MINIMUM = 0.0
+                mask = (data_array <= LOG_MINIMUM) | isnan(data_array)
+                if sometrue(mask):
+                    data_array = array(data_array, copy=True, ndmin=1)
+                    data_array[mask] = self.fill_value
+                intermediate = (log(data_array) - self._inter_offset)/self._inter_scale
+            except ValueError:
+                intermediate = zeros(len(data_array))
+
+        return intermediate * self._screen_scale + self._screen_offset
+
 class FreqSelector(HasTraits):
     
     parent = Any
     
-    synth_type = Trait('Oktave',{'Single frequency':0,'Oktave':1,'Third octave':3},
+    synth_type = Trait('Octave',{'Single frequency':0,'Octave':1,'Third octave':3},
         desc="type of frequency band for synthesis")
     
     synth_freq_enum = List
@@ -152,64 +181,64 @@ class ResultExplorer(HasTraits):
     Beamformer = Instance(BeamformerBase)
     
     # traits for the plots
-    plot_data = Instance(ArrayPlotData)
+    plot_data = Instance(ArrayPlotData, transient=True)
     
     # the map
-    map_plot = Instance(Plot)
-    imgp = Instance(ImagePlot)
+    map_plot = Instance(Plot, transient=True)
+    imgp = Instance(ImagePlot, transient=True)
     
     # map interpolation
-    interpolation = DelegatesTo('imgp')
+    interpolation = DelegatesTo('imgp', transient=True)
     
     # the colorbar for the map
-    colorbar = Instance(ColorBar)
+    colorbar = Instance(ColorBar, transient=True)
     
     # the spectrum
-    spec_plot = Instance(Plot)
+    spec_plot = Instance(Plot, transient=True)
     
     # the main container for the plots
-    plot_container = Instance(BasePlotContainer)
+    plot_container = Instance(BasePlotContainer, transient=True)
     
     # zoom and integration box tool for map plot
-    zoom = Instance(RectZoomSelect)  
+    zoom = Instance(RectZoomSelect, transient=True)  
     
     # selection of freqs
-    synth = Instance(FreqSelector)
+    synth = Instance(FreqSelector, transient=True)
     
     # cursor tool for spectrum plot
-    cursor = Instance(BaseCursorTool)
+    cursor = Instance(BaseCursorTool, transient=True)
     
     # dynamic range of the map
-    drange = Instance(DataRange1D)
+    drange = Instance(DataRange1D, transient=True)
 
     # dynamic range of the spectrum plot
-    yrange = Instance(DataRange1D)
+    yrange = Instance(DataRange1D, transient=True)
 
     # set if plots are invalid
-    invalid = Bool(False)
+    invalid = Bool(False, transient=True)
     
     # remember the last valid result
-    last_valid_digest = Str
+    last_valid_digest = Str(transient=True)
 
     # starts calculation thread
-    start_calc = Button
+    start_calc = Button(transient=True)
 
     # signals end of calculation
-    calc_ready = Event
+    calc_ready = Event(transient=True)
     
     # calculation thread
-    CThread = Instance(Thread)
+    CThread = Instance(Thread, transient=True)
     
     # is calculation active ?
-    running = Bool(False)
+    running = Bool(False, transient=True)
     rmesg = Property(depends_on = 'running')
     
     # automatic recalculation ?
-    automatic = Bool(False)
+    automatic = Bool(False, transient=True)
     
     # picture
     pict = File(filter=['*.png','*.jpg'],
-        desc="name of picture file")
+        desc="name of picture file", transient=True)
         
     pic_x_min = Float(-1.0,
         desc="minimum  x-value picture plane")
@@ -252,11 +281,11 @@ class ResultExplorer(HasTraits):
             menubar = 
                 MenuBarManager(
                     MenuManager(
-                        #~ MenuManager(
-                            #~ Action(name='Open', on_perform=self.load),
-                            #~ Action(name='Save as', on_perform=self.save_as),
-                            #~ name = '&Project'
-                        #~ ),
+                        MenuManager(
+                            Action(name='Open', action='load'),
+                            Action(name='Save as', action='save_as'),
+                            name = '&Project'
+                        ),
                         MenuManager(
                             Action(name='VI logger csv', action='import_time_data'),
                             Action(name='Pulse mat', action='import_bk_mat_data'),
@@ -303,7 +332,7 @@ class ResultExplorer(HasTraits):
     def __init__(self, **kwtraits):
         super(ResultExplorer,self).__init__(**kwtraits)
         # containers
-        bgcolor = (212/255.,208/255.,200/255.) # Windows standard background
+        bgcolor = "sys_window"#(212/255.,208/255.,200/255.) # Windows standard background
         self.plot_container = container = VPlotContainer(use_backbuffer = True,
             padding=0, fill_padding = False, valign="center", bgcolor=bgcolor)
         subcontainer = HPlotContainer(use_backbuffer = True, padding=0, 
@@ -319,14 +348,15 @@ class ResultExplorer(HasTraits):
         self.map_plot.img_plot("image", name="image")        
         imgp = self.map_plot.img_plot("map_data", name="map", colormap=jet)[0]
         self.imgp = imgp
-        self.map_plot.plot(("xpoly","ypoly"), name="sector", type = "polygon")
+        t1 = self.map_plot.plot(("xpoly","ypoly"), name="sector", type = "polygon")
+        t1[0].face_color = (0,0,0,0) # set face color to transparent
         # map plot tools and overlays
         imgtool = ImageInspectorTool(imgp)
         imgp.tools.append(imgtool)
         overlay = ImageInspectorOverlay(component=imgp, image_inspector=imgtool,
                                             bgcolor="white", border_visible=True)
         self.map_plot.overlays.append(overlay)
-        self.zoom = RectZoomSelect(self.map_plot, drag_button='right')
+        self.zoom = RectZoomSelect(self.map_plot, drag_button='right', always_on=True, tool_mode='box')
         self.map_plot.overlays.append(self.zoom)
         self.map_plot.tools.append(PanTool(self.map_plot))
         # colorbar   
@@ -346,9 +376,12 @@ class ResultExplorer(HasTraits):
         self.spec_plot = Plot(pd, padding=25)
         px = self.spec_plot.plot(("freqs","spectrum"), name="spectrum", index_scale="log")[0]
         self.yrange = self.spec_plot.value_range
+        px.index_mapper = MyLogMapper(range=self.spec_plot.index_range)
         # spectrum plot tools
-        self.cursor = CursorTool(px, drag_button="left", color='blue', show_value_line=False)
+        self.cursor = CursorTool(px)#, drag_button="left", color='blue', show_value_line=False)
         px.overlays.append(self.cursor)
+        self.cursor.current_position = 0.3,0.5
+        px.index_mapper.map_screen(0.5)
 #        self.map_plot.tools.append(SaveTool(self.map_plot, filename='pic.png'))
         
         # layout                     
@@ -492,21 +525,22 @@ class ResultExplorer(HasTraits):
             imgd = imgd._data
         pd.set_data("image",imgd)
 
-#    def save_as(self):
-#        dlg = FileDialog( action='save as', wildcard='*.rep')
-#        dlg.open()
-#        if dlg.filename!='':
-#            fi = file(dlg.filename,'w')
-#            dump(self.panel,fi)
-#            fi.close()
-#
-#    def load(self):
-#        dlg = FileDialog( action='open', wildcard='*.rep')
-#        dlg.open()
-#        if dlg.filename!='':
-#            fi = file(dlg.filename,'rb')
-#            self.panel = load(dlg.filename)
-#            fi.close()
+    def save_as(self):
+        dlg = FileDialog( action='save as', wildcard='*.rep')
+        dlg.open()
+        if dlg.filename!='':
+            fi = file(dlg.filename,'w')
+            dump(self,fi)
+            fi.close()
+
+    def load(self):
+        dlg = FileDialog( action='open', wildcard='*.rep')
+        dlg.open()
+        if dlg.filename!='':
+            fi = file(dlg.filename,'rb')
+            s = load(fi)
+            self.copy_traits(s)
+            fi.close()
                 
     def run_script(self):
         dlg = FileDialog( action='open', wildcard='*.py')
