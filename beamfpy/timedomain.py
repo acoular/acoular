@@ -875,8 +875,8 @@ class BeamformerTimeSq( BeamformerTime ):
 
 class Trajectory( HasPrivateTraits ):
     """
-    Base class for any time domain signal processing block, 
-    gets samples from 'source' and generates output via the generator 'result'
+    describes the trajectory from sampled points
+    does spline interpolation of positions between samples
     """
     # dictionary; keys: time, values: sampled (x, y, z) positions along the 
     # trajectory
@@ -923,7 +923,7 @@ class Trajectory( HasPrivateTraits ):
     
     def traj(self, t_start, t_end=None, delta_t=None, der=0):
         """
-        python generator, yields gives locations along the trajectory
+        python generator, yields locations along the trajectory
         x.traj(0.1)  every 0.1s within self.interval
         x.traj(2.5, 4.5, 0.1)  every 0.1s between 2.5s and 4.5s
         x.traj(0.1, der=1)  1st derivative every 0.1s within self.interval

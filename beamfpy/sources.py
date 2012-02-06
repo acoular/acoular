@@ -12,11 +12,11 @@ ennes.sarradj@gmx.de
 """
 
 # imports from other packages
-from numpy import array, newaxis, pi, fft, exp, arange, sin, zeros
+from numpy import array, pi, arange, sin, sqrt, ones, empty
 from numpy.random import normal, seed
 from enthought.traits.api import HasPrivateTraits, Float, Int, Long, \
 Property, Trait, Delegate, cached_property, Tuple
-from scipy.signal import cheby1, lfilter
+from scipy.signal import resample
 
 # beamfpy imports
 from timedomain import SamplesGenerator, Trajectory
@@ -46,6 +46,12 @@ class SignalGenerator( HasPrivateTraits ):
     def signal(self):
         """delivers the signal as an array of length numsamples"""
         pass
+    
+    def usignal(self, factor):
+        """
+        delivers the upsampled signal as an array of length factor*numsamples
+        """
+        return resample(self.signal(), factor*self.numsamples)
 
 class WNoiseGenerator( SignalGenerator ):
     """
@@ -97,8 +103,6 @@ class SineGenerator( SignalGenerator ):
         """delivers the signal as an array of length numsamples"""
         t = arange(self.numsamples, dtype=float)/self.sample_freq
         return self.rms*sin(2*pi*self.freq*t+self.phase)
-        
-    
 
 class PointSource( SamplesGenerator ):
     """
@@ -120,12 +124,24 @@ class PointSource( SamplesGenerator ):
     mpos = Trait(MicGeom, 
         desc="microphone geometry")
         
-    # Environment object that provides speed of sound and grid-mic distances
+    # Environment object that provides grid-mic distances
     env = Trait(Environment(), Environment)
 
     # the speed of sound, defaults to 343 m/s
     c = Float(343., 
         desc="speed of sound")
+        
+    # the start time of the signal, in seconds
+    start_t = Float(0.0,
+        desc="signal start time")
+    
+    # the start time of the data aquisition at microphones, in seconds
+    start = Float(0.0,
+        desc="sample start time")
+
+    # upsampling factor, internal use
+    up = Int(16, 
+        desc="upsampling factor")        
     
     # number of samples 
     numsamples = Delegate('signal')
@@ -136,29 +152,41 @@ class PointSource( SamplesGenerator ):
     # internal identifier
     digest = Property( 
         depends_on = ['mpos.digest', 'signal.digest', 'loc', 'c', \
-         'env.digest', '__class__'], 
+         'env.digest', 'start_t', 'start', '__class__'], 
         )
                
     @cached_property
     def _get_digest( self ):
         return digest(self)
-        
+           
     def result(self, num=128):
         """ 
         python generator: yields source output at microphones in blocks of 
         shape (num, numchannels), the last block may be shorter than num
-        """
-        signal = fft.fft(self.signal.signal())
-        pos = array(self.loc, dtype=float).reshape(3, 1)
-        rm = self.env.r(self.c, pos, self.mpos.mpos)
-        delays = exp(-2j*pi*(rm/self.c)*\
-            fft.fftfreq(int(self.numsamples),1.0/self.sample_freq)[:,newaxis])
-        out = fft.ifft(signal[:, newaxis]*delays, axis=0).real/rm
-        i = 0
-        while i < self.numsamples:
-            yield out[i:i+num]
-            i += num
+        if signal samples are needed for te < t_start, then samples are taken
         
+        """       
+        signal = self.signal.usignal(self.up)
+        out = empty((num, self.numchannels))
+        # distances
+        rm = self.env.r(self.c, array(self.loc).reshape((3, 1)), self.mpos.mpos)
+        # emission time relative to start_t (in samples) for first sample
+        ind = (-rm/self.c-self.start_t+self.start)*self.sample_freq   
+        i = 0
+        n = self.numsamples        
+        while n:
+            n -= 1
+            try:
+                out[i] = signal[array(0.5+ind*self.up, dtype=long)]/rm
+                ind += 1.
+                i += 1
+                if i == num:
+                    yield out
+                    i = 0
+            except IndexError:
+                break
+        yield out[:i]            
+
 class MovingPointSource( PointSource ):
     """
     point source class for simulations that moves along a given trajectory
@@ -171,40 +199,51 @@ class MovingPointSource( PointSource ):
 
     # internal identifier
     digest = Property( 
-        depends_on = ['mpos.digest', 'signal.digest', 'c', \
-         'env.digest', 'trajectory.digest', '__class__'], 
+        depends_on = ['mpos.digest', 'signal.digest', 'loc', 'c', \
+         'env.digest', 'start_t', 'start', 'trajectory.digest', '__class__'], 
         )
                
     @cached_property
     def _get_digest( self ):
         return digest(self)
-        
+
     def result(self, num=128):
         """ 
         python generator: yields source output at microphones in blocks of 
         shape (num, numchannels), the last block may be shorter than num
-        """
-        c = self.c/self.signal.sample_freq
-        maxrm = self.env.r( self.c, array(self.trajectory.points.values()).T,
-                              self.mpos.mpos).max()
-        offset = int(1.1*maxrm/c)
-        signal = self.signal.signal()
-        upsample = 16
-        # TODO: fix numerical problems with filter design
-        (b, a) = cheby1(8, 0.05, 0.8/upsample)
-        out = zeros(((self.numsamples+offset)*upsample, self.numchannels))
-        d_index2 = arange(self.numchannels, dtype=int)
-        g = self.trajectory.traj(1/self.signal.sample_freq)
-        for i in xrange(self.numsamples):
-            tpos = array(g.next())[:, newaxis]
-            rm = self.env.r( self.c, tpos, self.mpos.mpos)
-            d_index = array(upsample*rm/c, dtype=int)+i*upsample # integer index
-            out[d_index, d_index2] += signal[i, newaxis]/rm
+        """       
+        signal = self.signal.usignal(self.up)
+        out = empty((num, self.numchannels))
+        m = self.mpos
+        t = self.start*ones(m.num_mics)
         i = 0
-        while out[i].sum() == 0:
-            i += 1
-        out = lfilter(b, a, out[i:], axis=0)[::upsample][:self.numsamples]
-        i = 0
-        while i < self.numsamples:
-            yield out[i:i+num]
-            i += num
+        epslim = 0.1/self.up/self.sample_freq
+        c0 = self.c
+        tr = self.trajectory
+        n = self.numsamples
+        while n:
+            n -= 1
+            eps = ones(m.num_mics)
+            te = t.copy()
+            j = 0
+            while abs(eps).max()>epslim and j<100:
+                loc = array(tr.location(te))
+                rm = loc-m.mpos
+                rm = sqrt((rm*rm).sum(0))
+                loc /= sqrt((loc*loc).sum(0))
+                der = array(tr.location(te, der=1))
+                Mr = (der*loc).sum(0)/c0
+                eps = (te + rm/c0 - t)/(1+Mr)
+                te -= eps
+                j += 1
+            t += 1./self.sample_freq
+            ind = (te-self.start_t+self.start)*self.sample_freq
+            try:
+                out[i] = signal[array(0.5+ind*self.up, dtype=long)]/rm
+                i += 1
+                if i == num:
+                    yield out
+                    i = 0
+            except IndexError:
+                break
+        yield out[:i]
