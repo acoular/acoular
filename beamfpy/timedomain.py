@@ -938,7 +938,7 @@ class Trajectory( HasPrivateTraits ):
         
 class BeamformerTimeSqTraj( BeamformerTimeSq ):
     """
-    Provides a time domain beamformer with time-dependend
+    Provides a time domain beamformer with time-dependent
     power signal output and possible autopower removal
     for a grid moving along a trajectory
     """
@@ -984,68 +984,78 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
         rotated grid), yields samples in blocks of shape (num, numchannels), 
         the last block may be shorter than num; numchannels is usually very 
         large (number of grid points)
+        
+        the output starts for signals that were emitted from the grid at t=0
         """
         if self.weights_:
             w = self.weights_(self)[newaxis]
         else:
             w = 1.0
         c = self.c/self.source.sample_freq
+        # temp array for the grid co-ordinates
         gpos = self.grid.pos()
-        # determine the maximum delay
-        maxrg = sqrt((gpos*gpos).sum(0)).max() # max grid radius
-        maxrm = self.env.r( self.c, array(self.trajectory.points.values()).T, 
-                      self.mpos.mpos).max() # max trajectory-mic distance
-        dmax = int((maxrm+maxrg)/c) + 10 # +10 for roundoff errors
-        dmin = 0 # minimum: no delay
-        aoff = dmax-dmin # index span
-        zi = empty((aoff+num, self.source.numchannels), \
+        # max delay span = sum of
+        # max diagonal lengths of circumscribing cuboids for grid and micarray
+        dmax = sqrt(((gpos.max(1)-gpos.min(1))**2).sum())
+        dmax += sqrt(((self.mpos.mpos.max(1)-self.mpos.mpos.min(1))**2).sum())
+        dmax = int(dmax/c)+1 # max index span
+        zi = empty((dmax+num, self.source.numchannels), \
             dtype=float) #working copy of data
         o = empty((num, self.grid.size), dtype=float) # output array
         temp = empty((self.grid.size, self.source.numchannels), dtype=float)
         d_index2 = arange(self.mpos.num_mics, dtype=int) # second index (static)
-        offset = aoff # start offset for working array
+        offset = dmax+num # start offset for working array
         ooffset = 0 # offset for output array      
-        # generators for trajectory, starting at minimum time of flight between
-        # trajectory start and array mics
-        start_t = self.trajectory.interval[0]
-        start_t = self.env.r( self.c, 
-                        array(self.trajectory.location(start_t))[:,newaxis], 
-                        self.mpos.mpos).min()/self.c
+        # generators for trajectory, starting at time zero
+        start_t = 0.0
         g = self.trajectory.traj( start_t, delta_t=1/self.source.sample_freq)
         g1 = self.trajectory.traj( start_t, delta_t=1/self.source.sample_freq, 
                                   der=1)
         rflag = (self.rvec == 0).all() #flag translation vs. rotation
-        for block in self.source.result(num):
-            ns = block.shape[0] # numbers of samples and channels
-            maxoffset = ns-dmin # ns - aoff +aoff -dmin
-            zi[aoff:aoff+ns] = block * w# copy data to working array
-            # loop over data samples
-            while offset < maxoffset:
-                # yield output array if full
-                if ooffset == num:
-                    yield o
-                    ooffset = 0
-                if rflag:
-                    # grid is only translated, not rotated
-                    tpos = gpos + array(g.next())[:, newaxis]
-                else:
-                    # grid is both translated and rotated
-                    loc = array(g.next()) #translation
-                    dx = array(g1.next()) #direction vector (new x-axis)
-                    dy = cross(self.rvec, dx) # new y-axis
-                    dz = cross(dx, dy) # new z-axis
-                    RM = array((dx, dy, dz)).T # rotation matrix
-                    RM /= sqrt((RM*RM).sum(0)) # column normalized
-                    tpos = dot(RM, gpos)+loc[:, newaxis] # rotation+translation
-                rm = self.env.r( self.c, tpos, self.mpos.mpos)
-                r0 = self.env.r( self.c, tpos)
-                delays = rm/c
-                d_index = array(delays, dtype=int) # integer index
-                d_interp1 = delays % 1 # 1st coeff for lin interpolation
-                d_interp2 = 1-d_interp1 # 2nd coeff for lin interpolation
-                amp = (w/(rm*rm)).sum(1) * r0
-                amp = 1.0/(amp[:, newaxis]*rm) # multiplication factor
+        data = self.source.result(num)
+        while True:
+            # yield output array if full
+            if ooffset == num:
+                yield o
+                ooffset = 0
+            if rflag:
+                # grid is only translated, not rotated
+                tpos = gpos + array(g.next())[:, newaxis]
+            else:
+                # grid is both translated and rotated
+                loc = array(g.next()) #translation
+                dx = array(g1.next()) #direction vector (new x-axis)
+                dy = cross(self.rvec, dx) # new y-axis
+                dz = cross(dx, dy) # new z-axis
+                RM = array((dx, dy, dz)).T # rotation matrix
+                RM /= sqrt((RM*RM).sum(0)) # column normalized
+                tpos = dot(RM, gpos)+loc[:, newaxis] # rotation+translation
+            rm = self.env.r( self.c, tpos, self.mpos.mpos)
+            r0 = self.env.r( self.c, tpos)
+            delays = rm/c
+            d_index = array(delays, dtype=int) # integer index
+            d_interp1 = delays % 1 # 1st coeff for lin interpolation
+            d_interp2 = 1-d_interp1 # 2nd coeff for lin interpolation
+            amp = (w/(rm*rm)).sum(1) * r0
+            amp = 1.0/(amp[:, newaxis]*rm) # multiplication factor
+            # now, we have to make sure that the needed data is available                 
+            while offset+d_index.max()+2>dmax+num:
+                # copy remaining samples in front of next block
+                zi[0:dmax] = zi[-dmax:]
+                # the offset is adjusted by one block length
+                offset -= num
+                # test if data generator is exhausted
+                try:
+                    # get next data
+                    block = data.next()
+                except StopIteration:
+                    break
+                # samples in the block, equals to num except for the last block
+                ns = block.shape[0]                
+                zi[dmax:dmax+ns] = block * w# copy data to working array
+            else:
                 # the next line needs to be implemented faster
+                # it eats half of the time
                 temp[:, :] = (zi[offset+d_index, d_index2]*d_interp1 \
                             + zi[offset+d_index+1, d_index2]*d_interp2)*amp
                 if self.r_diag:
@@ -1057,13 +1067,9 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
                     o[ooffset] = temp.sum(-1)**2
                 offset += 1
                 ooffset += 1
-            # copy remaining samples in front of next block
-            zi[0:aoff] = zi[-aoff:]
-            offset -= num
-        # remaining data chunk 
+        # remaining data chunk
         yield o[:ooffset]
-                
-        
+                       
 class TimeCache( TimeInOut ):
     """
     caches time signal in cache file

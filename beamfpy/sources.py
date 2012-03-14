@@ -214,6 +214,7 @@ class MovingPointSource( PointSource ):
         """       
         signal = self.signal.usignal(self.up)
         out = empty((num, self.numchannels))
+        # shortcuts and intial values
         m = self.mpos
         t = self.start*ones(m.num_mics)
         i = 0
@@ -224,19 +225,21 @@ class MovingPointSource( PointSource ):
         while n:
             n -= 1
             eps = ones(m.num_mics)
-            te = t.copy()
+            te = t.copy() # init emission time = receiving time
             j = 0
+            # Newton-Rhapson iteration
             while abs(eps).max()>epslim and j<100:
                 loc = array(tr.location(te))
-                rm = loc-m.mpos
-                rm = sqrt((rm*rm).sum(0))
-                loc /= sqrt((loc*loc).sum(0))
+                rm = loc-m.mpos# distance vectors to microphones
+                rm = sqrt((rm*rm).sum(0))# absolute distance
+                loc /= sqrt((loc*loc).sum(0))# distance unit vector
                 der = array(tr.location(te, der=1))
-                Mr = (der*loc).sum(0)/c0
-                eps = (te + rm/c0 - t)/(1+Mr)
+                Mr = (der*loc).sum(0)/c0# radial Mach number
+                eps = (te + rm/c0 - t)/(1+Mr)# discrepancy in time 
                 te -= eps
-                j += 1
+                j += 1 #iteration count
             t += 1./self.sample_freq
+            # emission time relative to start time
             ind = (te-self.start_t+self.start)*self.sample_freq
             try:
                 out[i] = signal[array(0.5+ind*self.up, dtype=long)]/rm
@@ -244,6 +247,6 @@ class MovingPointSource( PointSource ):
                 if i == num:
                     yield out
                     i = 0
-            except IndexError:
+            except IndexError: #if no ore samples available from the source 
                 break
         yield out[:i]
