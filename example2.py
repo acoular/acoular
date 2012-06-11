@@ -78,9 +78,10 @@ s2 = SineGenerator(sample_freq=sfreq, numsamples=nsamples, freq=freq, \
 #===============================================================================
 
 p0 = MovingPointSource(signal=s1, mpos=m, trajectory=tr1)
-t = p0
-#p1 = PointSource(signal=n1, mpos=m,  loc=(0,R,Z))
+#t = p0
+p1 = PointSource(signal=n1, mpos=m,  loc=(0,R,Z))
 #t = Mixer(source = p0, sources = [p1,]) # mix both signals
+t = p1
 
 # uncomment to save the signal to a wave file
 #ww = WriteWAV(source = t)
