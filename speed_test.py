@@ -10,7 +10,7 @@ microphone geometry in array_56.xml (part of beamfpy)
 ennes.sarradj@gmx.de
 """
 from os import environ
-environ['OMP_NUM_THREADS']='4'
+environ['OMP_NUM_THREADS']='2'
 
 # imports from beamfpy
 import beamfpy
