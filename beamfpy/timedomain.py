@@ -19,6 +19,7 @@ File, CArray, Property, Instance, Trait, Bool, Delegate, Any, \
 cached_property, on_trait_change, property_depends_on, List, Dict, Tuple
 from enthought.traits.ui.api import View, Item
 from enthought.traits.ui.menu import OKCancelButtons
+from datetime import datetime
 from os import path
 import tables
 import wave
@@ -26,7 +27,7 @@ from scipy.signal import butter, lfilter, filtfilt
 
 # beamfpy imports
 from internal import digest
-from h5cache import H5cache
+from h5cache import H5cache, td_dir
 from grids import RectGrid, MicGeom, Environment
 
 class Calib( HasPrivateTraits ):
@@ -1013,7 +1014,8 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
                                   der=1)
         rflag = (self.rvec == 0).all() #flag translation vs. rotation
         data = self.source.result(num)
-        while True:
+        flag = True
+        while flag:
             # yield output array if full
             if ooffset == num:
                 yield o
@@ -1049,6 +1051,7 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
                     # get next data
                     block = data.next()
                 except StopIteration:
+                    flag = False
                     break
                 # samples in the block, equals to num except for the last block
                 ns = block.shape[0]                
@@ -1152,11 +1155,11 @@ class WriteWAV( TimeInOut ):
 
     traits_view = View(
         [Item('source', style='custom'), 
-            ['name~{Cache file name}', 
+            ['basename~{File name}', 
             '|[Properties]'], 
             '|'
         ], 
-        title='Linear average', 
+        title='Write wav file', 
         buttons = OKCancelButtons
                     )
 
@@ -1202,6 +1205,45 @@ class WriteWAV( TimeInOut ):
         for data in self.source.result(1024):
             wf.writeframesraw(array(data[:, ind]*scale, dtype=int16).tostring())
         wf.close()
+
+class WriteH5( TimeInOut ):
+    """
+    saves time signal as h5 file
+    """
+    # basename for cache
+    name = File(filter=['*.h5'], 
+        desc="name of data file")    
+      
+    # internal identifier
+    digest = Property( depends_on = ['source.digest', '__class__'])
+
+    traits_view = View(
+        [Item('source', style='custom'), 
+            ['name{File name}', 
+            '|[Properties]'], 
+            '|'
+        ], 
+        title='write .h5', 
+        buttons = OKCancelButtons
+                    )
+
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+
+
+    def save(self):
+        """ saves source output h5 file """
+        if self.name == '':
+            name = datetime.now().isoformat('_').replace(':','-').replace('.','_')
+            self.name = path.join(td_dir,name+'.h5')
+        f5h = tables.openFile(self.name, mode = 'w')
+        ac = f5h.createEArray(f5h.root, 'time_data', \
+            tables.atom.Float32Atom(), (0, self.numchannels))
+        ac.setAttr('sample_freq', self.sample_freq)
+        for data in self.source.result(4096):
+            ac.append(data)
+        f5h.close()
         
 class IntegratorSectorTime( TimeInOut ):
     """

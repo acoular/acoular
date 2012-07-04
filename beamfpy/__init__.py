@@ -56,7 +56,8 @@ os.environ.setdefault('OMP_NUM_THREADS','1')
 from timedomain import Calib, SamplesGenerator, TimeSamples, \
 MaskedTimeSamples, TimeInOut, Mixer, TimeAverage, TimeReverse, \
 TimePower, FiltFiltOctave, FiltOctave, Trajectory, IntegratorSectorTime, \
-BeamformerTime, BeamformerTimeSq, BeamformerTimeSqTraj, TimeCache, WriteWAV 
+BeamformerTime, BeamformerTimeSq, BeamformerTimeSqTraj, TimeCache, WriteWAV, \
+WriteH5 
 from grids import RectGrid, RectGrid3D, MicGeom, \
 Environment, UniformFlowEnvironment
 from beamfpy import  PowerSpectra, EigSpectra, \
