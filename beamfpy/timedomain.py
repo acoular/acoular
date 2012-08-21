@@ -892,7 +892,7 @@ class Trajectory( HasPrivateTraits ):
     
     # internal identifier
     digest = Property( 
-        depends_on = ['points'], 
+        depends_on = ['points[]'], 
         )
 
     traits_view = View(
@@ -906,11 +906,11 @@ class Trajectory( HasPrivateTraits ):
     def _get_digest( self ):
         return digest(self)
         
-    @property_depends_on('points')
+    @property_depends_on('points[]')
     def _get_interval( self ):
         return sort(self.points.keys())[r_[0, -1]]
 
-    @property_depends_on('points')
+    @property_depends_on('points[]')
     def _get_tck( self ):
         t = sort(self.points.keys())
         xp = array([self.points[i] for i in t]).T

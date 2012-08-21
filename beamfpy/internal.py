@@ -15,7 +15,7 @@ def digest( obj, name='digest'):
         vobj = obj
         try:
             for i in do_.split('.'):               
-                vobj = vobj.get(i).values()[0]
+                vobj = vobj.get(i.rstrip('[]')).values()[0]
             str_.append(str(vobj))
         except:
             pass
