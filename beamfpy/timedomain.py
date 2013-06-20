@@ -12,7 +12,7 @@ ennes.sarradj@gmx.de
 
 # imports from other packages
 from numpy import array, newaxis, empty, empty_like, pi, sin, sqrt, arange, \
-clip, sort, r_, s_, zeros, int16, histogram, unique1d, where, cross, dot
+clip, sort, r_, s_, zeros, int16, histogram, unique, where, cross, dot
 from scipy.interpolate import splprep, splev
 from enthought.traits.api import HasPrivateTraits, Float, Int, CLong, \
 File, CArray, Property, Instance, Trait, Bool, Delegate, Any, \
@@ -648,7 +648,7 @@ def const_power_weight( bf ):
     r = bf.env.r( bf.c, zeros((3, 1)), bf.mpos.mpos) # distances to center
     # round the relative distances to one decimal place
     r = (r/r.max()).round(decimals=1)
-    ru, ind = unique1d(r, return_inverse=True)
+    ru, ind = unique(r, return_inverse=True)
     ru = (ru[1:]+ru[:-1])/2
     count, bins = histogram(r, r_[0, ru, 1.5*r.max()-0.5*ru[-1]])
     bins *= bins
