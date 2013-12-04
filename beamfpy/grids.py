@@ -11,17 +11,54 @@ ennes.sarradj@gmx.de
 """
 
 # imports from other packages
-from numpy import mgrid, s_, array, isscalar, float32, float64, newaxis, sqrt
-from enthought.traits.api import HasPrivateTraits, Float, Property, File, \
+from numpy import mgrid, s_, array, isscalar, float32, float64, newaxis, \
+sqrt, arange
+from traits.api import HasPrivateTraits, Float, Property, File, \
 CArray, List, property_depends_on, cached_property, on_trait_change
-from enthought.traits.ui.api import View
-from enthought.traits.ui.menu import OKCancelButtons
+from traitsui.api import View
+from traitsui.menu import OKCancelButtons
 from os import path
 
 from internal import digest
 
-#TODO: construct a base class for this
-class RectGrid( HasPrivateTraits ):
+class Grid( HasPrivateTraits ):
+    """
+    base class for grid geometries
+    """
+
+    # overall number of grid points (auto-set)
+    size = Property( 
+        desc="overall number of grid points")
+
+    # shape of grid
+    shape = Property(
+        desc="grid shape as tuple")
+        
+    # internal identifier
+    digest = ''
+    
+    def _get_size ( self ):
+        return 1
+
+    def _get_shape ( self ):
+        return (1, 1)
+    
+    def pos ( self ):
+        """
+        returns an (3, size) array with the grid point x, y, z-coordinates
+        """
+        return array([[0.],[0.],[0.]])
+        
+    def extend (self) :
+        """
+        returns the x, y extension of the grid, 
+        useful for the imshow function from pylab
+        """
+        pos = self.pos()
+        return (min(pos[0,:]), max(pos[0,:]), min(pos[1,:]), max(pos[1,:]))
+        
+
+class RectGrid( Grid ):
     """
     constructs a quadratic 2D grid for the beamforming results
     that is on a plane perpendicular to the z-axis
@@ -46,21 +83,13 @@ class RectGrid( HasPrivateTraits ):
     increment = Float(0.1, 
         desc="step size")
 
-    # overall number of grid points (auto-set)
-    size = Property( 
-        desc="overall number of grid points")
-        
-    # shape of grid
-    shape = Property(
-        desc="grid shape as tuple")
-    
-    # number of grid points alog x-axis (auto-set)
+    # number of grid points along x-axis (auto-set)
     nxsteps = Property( 
-        desc="number of grid points alog x-axis")
+        desc="number of grid points along x-axis")
 
-    # number of grid points alog y-axis (auto-set)
+    # number of grid points along y-axis (auto-set)
     nysteps = Property( 
-        desc="number of grid points alog y-axis")
+        desc="number of grid points along y-axis")
 
     # internal identifier
     digest = Property( 
@@ -121,18 +150,37 @@ class RectGrid( HasPrivateTraits ):
             raise ValueError, "x-value out of range"
         if y  <  self.y_min or y > self.y_max:
             raise ValueError, "y-value out of range"
-        xi = round((x-self.x_min)/self.increment)
-        yi = round((y-self.y_min)/self.increment)
+        xi = int((x-self.x_min)/self.increment+0.5)
+        yi = int((y-self.y_min)/self.increment+0.5)
         return xi, yi
 
-    def indices ( self, x1, y1, x2, y2 ):
+    def indices ( self, x1, y1, x2, y2=None ):
         """
-        returns the slices to index a recangular subdomain, 
+        returns the slices to index a rectangular subdomain, or,
+        alternatively, the indices of all grid points with distance 
+        x2 or less to point (x1, y1)
         useful for inspecting subdomains in a result already calculated
         """
-        xi1, yi1 = self.index(min(x1, x2), min(y1, y2))
-        xi2, yi2 = self.index(max(x1, x2), max(y1, y2))
-        return s_[xi1:xi2+1], s_[yi1:yi2+1]
+        if y2 is None: # only 3 values given -> use x,y,radius method
+            xpos = self.pos()
+
+            xis = []
+            yis = []
+            
+            dr2 = (xpos[0,:]-x1)**2 + (xpos[1,:]-y1)**2
+            inds = dr2 <= x2**2 # array with true/false entries
+            for np in arange(self.size)[inds]: # np -- points in x2-circle
+                xi, yi = self.index(xpos[0,np], xpos[1,np])
+                xis += [xi]
+                yis += [yi]
+            if not (xis and yis): # if no points in circle, take nearest one
+                return self.index(x1, y1)
+            else:
+                return array(xis), array(yis)
+        else: # rectangular subdomain - old functionality
+            xi1, yi1 = self.index(min(x1, x2), min(y1, y2))
+            xi2, yi2 = self.index(max(x1, x2), max(y1, y2))
+            return s_[xi1:xi2+1], s_[yi1:yi2+1]
 
     def extend (self) :
         """

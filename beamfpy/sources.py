@@ -14,7 +14,7 @@ ennes.sarradj@gmx.de
 # imports from other packages
 from numpy import array, pi, arange, sin, sqrt, ones, empty
 from numpy.random import normal, seed
-from enthought.traits.api import HasPrivateTraits, Float, Int, Long, \
+from traits.api import HasPrivateTraits, Float, Int, Long, \
 Property, Trait, Delegate, cached_property, Tuple
 from scipy.signal import resample
 

@@ -62,7 +62,7 @@ from grids import RectGrid, RectGrid3D, MicGeom, \
 Environment, UniformFlowEnvironment
 from beamfpy import  PowerSpectra, EigSpectra, \
 BeamformerBase, BeamformerCapon, BeamformerEig, BeamformerMusic,\
-BeamformerDamas, BeamformerOrth,BeamformerCleansc, \
-L_p, synthetic
+BeamformerDamas, BeamformerOrth,BeamformerCleansc, BeamformerCMF,\
+BeamformerClean, L_p, synthetic
 from sources import PointSource, MovingPointSource, \
 SineGenerator, WNoiseGenerator, SignalGenerator

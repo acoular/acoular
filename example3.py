@@ -20,7 +20,7 @@ RectGrid3D, BeamformerBase, BeamformerEig, BeamformerOrth, BeamformerCleansc
 # other imports
 from os import path
 from numpy import mgrid, arange
-from enthought.mayavi import mlab
+from mayavi import mlab
 
 #===============================================================================
 # first, we define the data source, calibration and microphone geometry

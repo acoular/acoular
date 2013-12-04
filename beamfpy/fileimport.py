@@ -11,10 +11,10 @@ ennes.sarradj@gmx.de
 
 from h5cache import td_dir
 from numpy import fromstring, float32, newaxis, empty, sort, zeros
-from enthought.traits.api import HasPrivateTraits, Float, Int, \
+from traits.api import HasPrivateTraits, Float, Int, \
 File, CArray, Property, Any, Str
-from enthought.traits.ui.api import View
-from enthought.traits.ui.menu import OKCancelButtons
+from traitsui.api import View
+from traitsui.menu import OKCancelButtons
 from os import path
 import cPickle
 import tables

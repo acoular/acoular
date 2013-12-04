@@ -281,6 +281,44 @@ def r_beamfuncs_os(mod):
     mod.add_function(func)
 
 
+
+
+
+def transfer(mod):
+    # **** matrix of vectors with transfer Functions **** 
+    # mit vorberechneten Abstaenden
+    # ohne diag removal
+    code="""
+    int numpoints = Nrtm[0];
+    int nc = Nrtm[1];    
+    int numfreq = Nkj[0];
+    float expon, kj_freq, r0, factor, ri;
+    
+    for (int i_freq=0; i_freq<numfreq; ++i_freq) {
+        kj_freq = (kj(i_freq)).imag();
+        
+        for (int t=0; t<numpoints; ++t) {
+            r0 = rt0(t);
+            
+            for (int i=0; i<nc; ++i) {
+                ri = rtm(t,i);
+                factor = r0/ri;
+                expon = kj_freq * ( r0 - ri );                 
+                h(i_freq,t,i) = factor*(std::complex<float>(cosf(expon),sinf(expon)));
+                
+            }
+        }
+    }
+    """
+    h=zeros((2,2,2),'D') #ausgabe, spaeter t+i vertauschen t->spalten, i->zeilen
+    rtm=zeros((2,2),'d') # Abstaende Mics Gridpts
+    rt0=zeros((2),'d') # Abstaende Gridpts Arraycenter
+    kj=zeros((2),'D') # wellenzahl * j    
+    func = ext_tools.ext_function('transfer',code,['h','rt0','rtm','kj'],
+                                  type_converters=converters.blitz)
+    mod.add_function(func)
+
+
 def r_beam_psf(mod):
     # ****r_beam_psf****
     # mit vorberechneten Abstaenden
@@ -291,7 +329,7 @@ def r_beam_psf(mod):
     int nc=Nrm[1];   
     int numfreq=Nkj[0];
     float temp2;
-    float kjjj,r00,rmm,r0m,rs;
+    float r00,rmm,r0m,rs;
     for (int i=0; i<numfreq; ++i) {
         kjj=kj(i);//.imag();
         for (int j=0; j<numpoints; ++j) {
@@ -325,11 +363,184 @@ def r_beam_psf(mod):
     func = ext_tools.ext_function('r_beam_psf',code,['e','f','h','r0','rm','kj'],type_converters=converters.blitz)
     mod.add_function(func)
 
+
+def r_beam_psf1(mod):
+    # ****r_beam_psf1**** (siehe Sarradj2012, Variante I 'classic')
+    # mit vorberechneten Abstaenden
+    # ohne diag removal
+    code="""
+    std::complex<float> term2;
+    int numpoints_grid = Nrtm[0];
+    int numpoints = Nrsm[0];
+    int nc = Nrtm[1];    
+    float expon, kj_freq;
+    float r0, rsi;
+
+    kj_freq = kj.imag();
+
+    for (int t=0; t<numpoints_grid; ++t) {
+        for (int s=0; s<numpoints; ++s) {
+            term2 = 0;
+            for (int i=0; i<nc; ++i) {
+                rsi = rsm(s,i);
+                expon = kj_freq * ( rtm(t,i) - rsi );
+                term2 += (std::complex<float>(cosf(expon),sinf(expon))) / rsi;
+            }
+            r0 = rs0(s);
+            h(t,s) = r0*r0 / (nc*nc) * (term2*conj(term2)).real();
+        }
+    }
+ 
+    """
+    h=zeros((2,2),'d') #ausgabe
+    rtm=zeros((2,2),'d') # Abstaende Mics Gridpts
+    rsm=zeros((2,2),'d') # Abstaende Mics Deconv.pts
+    rt0=zeros((2),'d') # Abstaende Deconv.pts Arraycenter (not really needed here)
+    rs0=zeros((2),'d') # Abstaende Deconv.pts Arraycenter
+    dummy=zeros((2),'D') # to declare complex128, alt.: kj=1.2+0.3j 
+    kj=dummy[0] # wellenzahl * j    
+    func = ext_tools.ext_function('r_beam_psf1',code,['h','rt0','rs0','rtm','rsm','kj'],type_converters=converters.blitz)
+    mod.add_function(func)
+
+
+def r_beam_psf2(mod):
+    # ****r_beam_psf2**** (siehe Sarradj2012, Variante II 'inverse')
+    # mit vorberechneten Abstaenden
+    # ohne diag removal
+    code="""
+    std::complex<float> term2;
+    int numpoints_grid = Nrtm[0];
+    int numpoints = Nrsm[0];
+    int nc = Nrtm[1];    
+    float expon, kj_freq;
+    float r0, rsi, rti;
+
+    kj_freq = kj.imag();
+
+    for (int t=0; t<numpoints_grid; ++t) {
+        for (int s=0; s<numpoints; ++s) {
+            term2 = 0;
+    
+            for (int i=0; i<nc; ++i) {
+                rsi = rsm(s,i);
+                rti = rtm(t,i);
+               
+                expon = kj_freq * (rti-rsi);
+                term2 += rti/rsi * (std::complex<float>(cosf(expon),sinf(expon)));
+            }
+            r0 = rs0(s)/rt0(t);
+            h(t,s) = r0*r0 /(nc*nc) * (term2*conj(term2)).real();
+        }
+    }
+
+    """
+    h=zeros((2,2),'d') #ausgabe
+    rtm=zeros((2,2),'d') # Abstaende Mics Gridpts
+    rsm=zeros((2,2),'d') # Abstaende Mics Deconv.pts
+    rt0=zeros((2),'d') # Abstaende Deconv.pts Arraycenter
+    rs0=zeros((2),'d') # Abstaende Gridpts Arraycenter
+    dummy=zeros((2),'D') # to declare complex128, alt. z.B.: kj=1.2+0.3j 
+    kj=dummy[0] # wellenzahl * j   
+    
+    func = ext_tools.ext_function('r_beam_psf2',code,['h','rt0','rs0','rtm','rsm','kj'],type_converters=converters.blitz)
+    mod.add_function(func)
+
+
+
+def r_beam_psf3(mod):
+    # ****r_beam_psf3**** (siehe Sarradj2012, Variante III 'true level')
+    # mit vorberechneten Abstaenden
+    # ohne diag removal
+    code="""
+    std::complex<float> term2;
+    int numpoints_grid = Nrtm[0];
+    int numpoints = Nrsm[0];
+    int nc = Nrtm[1];    
+    float term1, expon, kj_freq;
+    float r0, rsi, rti;
+
+    kj_freq = kj.imag();
+
+    for (int t=0; t<numpoints_grid; ++t) {
+        for (int s=0; s<numpoints; ++s) {
+            term1 = 0;
+            term2 = 0;
+    
+            for (int i=0; i<nc; ++i) {
+                rsi = rsm(s,i);
+                rti = rtm(t,i);
+                
+                term1 += 1/(rti*rti);
+               
+                expon = kj_freq * (rti-rsi);
+                term2 += (std::complex<float>(cosf(expon),sinf(expon))) / (rsi*rti);
+            }
+            r0 = rs0(s)/rt0(t);
+            h(t,s) = r0*r0 / (term1*term1) * (term2*conj(term2)).real();
+        }
+    }
+
+    """
+    h=zeros((2,2),'d') #ausgabe
+    rtm=zeros((2,2),'d') # Abstaende Mics Gridpts
+    rsm=zeros((2,2),'d') # Abstaende Mics Deconv.pts
+    rt0=zeros((2),'d') # Abstaende Deconv.pts Arraycenter
+    rs0=zeros((2),'d') # Abstaende Gridpts Arraycenter
+    dummy=zeros((2),'D') # to declare complex128, alt.: kj=1.2+0.3j 
+    kj=dummy[0] # wellenzahl * j   
+    func = ext_tools.ext_function('r_beam_psf3',code,['h','rt0','rs0','rtm','rsm','kj'],type_converters=converters.blitz)
+    mod.add_function(func)
+
+def r_beam_psf4(mod):
+    # ****r_beam_psf4**** (siehe Sarradj2012, Variante IV 'true location')
+    # mit vorberechneten Abstaenden
+    # ohne diag removal
+    code="""
+    std::complex<float> term2;
+    int numpoints_grid = Nrtm[0];
+    int numpoints = Nrsm[0];
+    int nc = Nrtm[1];    
+    float term1, expon, kj_freq;
+    float r0, rsi, rti;
+    
+    kj_freq = kj.imag();
+
+    for (int t=0; t<numpoints_grid; ++t) {
+        for (int s=0; s<numpoints; ++s) {
+            term1 = 0;
+            term2 = 0;
+    
+            for (int i=0; i<nc; ++i) {
+                rsi = rsm(s,i);
+                rti = rtm(t,i);
+                
+                term1 += 1/(rti*rti);
+               
+                expon = kj_freq * (rti-rsi);
+                term2 += (std::complex<float>(cosf(expon),sinf(expon))) / (rsi*rti);
+            }
+            r0 = rs0(s);
+            h(t,s) = r0*r0 / (nc*term1*term1) * (term2*conj(term2)).real();
+        }
+    }
+    """
+    h=zeros((2,2),'d') #ausgabe
+    rtm=zeros((2,2),'d') # Abstaende Mics Gridpts
+    rsm=zeros((2,2),'d') # Abstaende Mics Deconv.pts
+    rs0=zeros((2),'d') # Abstaende Gridpts Arraycenter
+    rt0=zeros((2),'d') # Abstaende Deconv.pts Arraycenter -- not needed here
+    dummy=zeros((2),'D') # to declare complex128, alt.: kj=1.2+0.3j 
+    kj=dummy[0] # wellenzahl * j 
+    func = ext_tools.ext_function('r_beam_psf4',code,['h','rt0','rs0','rtm','rsm','kj'],type_converters=converters.blitz)
+    mod.add_function(func)
+
+
+
 def gseidel(mod):
     # ****gseidel****
     code="""
     int numpoints=Ny[0];
-    double x0,x1;
+    double x0;
     for (int i=0; i<n; ++i) {
         for (int j=0; j<numpoints; ++j) {
             x0=0;
@@ -356,7 +567,7 @@ def gseidel(mod):
     # with relaxation parameter = 1
     code="""
     int numpoints=Ny[0];
-    float x0,x1;
+    float x0;
     for (int i=0; i<n; ++i) {
         for (int j=0; j<numpoints; ++j) {
             x0=0;
@@ -385,6 +596,11 @@ def build_beamformer():
     r_beamfuncs(mod)
     r_beamfuncs_os(mod)
     r_beam_psf(mod)
+    r_beam_psf1(mod)
+    r_beam_psf2(mod)
+    r_beam_psf3(mod)
+    r_beam_psf4(mod)
+    transfer(mod)
     gseidel(mod)
     if sys.platform[:5] == 'linux':
         compiler = 'unix'

@@ -14,11 +14,11 @@ ennes.sarradj@gmx.de
 from numpy import array, newaxis, empty, empty_like, pi, sin, sqrt, arange, \
 clip, sort, r_, s_, zeros, int16, histogram, unique, where, cross, dot
 from scipy.interpolate import splprep, splev
-from enthought.traits.api import HasPrivateTraits, Float, Int, CLong, \
+from traits.api import HasPrivateTraits, Float, Int, CLong, \
 File, CArray, Property, Instance, Trait, Bool, Delegate, Any, \
 cached_property, on_trait_change, property_depends_on, List, Dict, Tuple
-from enthought.traits.ui.api import View, Item
-from enthought.traits.ui.menu import OKCancelButtons
+from traitsui.api import View, Item
+from traitsui.menu import OKCancelButtons
 from datetime import datetime
 from os import path
 import tables

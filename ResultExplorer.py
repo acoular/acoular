@@ -10,30 +10,28 @@ __author__ = "Ennes Sarradj, ennes.sarradj@gmx.de"
 __date__ = "29 January 2009"
 __version__ = "2.0alpha"
 
-from os import environ
-environ['ETS_TOOLKIT'] = 'wx'
 
 from beamfpy import *
-from enthought.chaco.api import ArrayDataSource, ArrayPlotData,\
+from chaco.api import ArrayDataSource, ArrayPlotData,\
  BasePlotContainer, ColorBar, DataRange1D, HPlotContainer, ImageData, ImagePlot,\
  LinearMapper, Plot, VPlotContainer, jet, LogMapper
-from enthought.chaco.tools.api import ImageInspectorOverlay, ImageInspectorTool,\
+from chaco.tools.api import ImageInspectorOverlay, ImageInspectorTool,\
  PanTool, RangeSelection, RangeSelectionOverlay, SaveTool, ZoomTool as RectZoomTool
-#from enthought.chaco.tools.rect_zoom import RectZoomTool
-from enthought.chaco.tools.cursor_tool import BaseCursorTool, CursorTool 
-from enthought.enable.component_editor import ComponentEditor
-from enthought.pyface.api import FileDialog, GUI, ImageResource 
-from enthought.traits.api import Any, Bool, Button, CArray, DelegatesTo, Event,\
- File, Float, HasPrivateTraits, HasTraits, Instance, Int, List, on_trait_change,\
- Property, property_depends_on, Str, Trait, Tuple
-from enthought.traits.ui.api import EnumEditor, Group as TGroup, HFlow, HGroup,\
- HSplit, HSplit, InstanceEditor, Item, StatusItem, Tabbed, VGroup, View, VSplit
-from enthought.traits.ui.menu import Action, Menu, MenuBar,\
+#from chaco.tools.rect_zoom import RectZoomTool
+from chaco.tools.cursor_tool import BaseCursorTool, CursorTool 
+from enable.component_editor import ComponentEditor
+from pyface.api import FileDialog
+from traits.api import Any, Bool, Button, DelegatesTo, Event,\
+ File, Float, HasTraits, Instance, List, on_trait_change,\
+ Property, property_depends_on, Str, Trait
+from traitsui.api import EnumEditor, Group as TGroup, HGroup,\
+ HSplit, InstanceEditor, Item, StatusItem, Tabbed, VGroup, View
+from traitsui.menu import Action, Menu, MenuBar,\
  Separator, ActionGroup as Group
 MenuManager = Menu
 MenuBarManager = MenuBar
 
-from numpy import arange, around, array, linspace, log10, ones, ravel, unique,\
+from numpy import arange, around, array, linspace, log10, ones, unique,\
  zeros, isnan, sometrue, log
 from cPickle import dump, load 
 from os import path

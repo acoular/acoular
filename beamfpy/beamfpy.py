@@ -10,26 +10,32 @@ acoustic beamforming
 ennes.sarradj@gmx.de
 """
 
-from numpy import array, ones, hanning, hamming, bartlett, blackman, \
+from numpy import array, ones, hanning, hamming, bartlett, blackman, invert, \
 dot, newaxis, zeros, empty, fft, float32, float64, complex64, linalg, where, \
-searchsorted, pi, multiply, sign, diag, arange, sqrt, exp, log10, int
-from enthought.traits.api import HasPrivateTraits, Float, Int, \
+searchsorted, pi, multiply, sign, diag, arange, sqrt, exp, log10, int,\
+reshape, hstack, vstack, eye, tril, size, clip
+from sklearn.linear_model import LassoLars, LassoCV, LassoLarsCV, LassoLarsIC,\
+ OrthogonalMatchingPursuit, SGDRegressor, LinearRegression, ElasticNet, \
+ OrthogonalMatchingPursuitCV, Lasso
+from sklearn.cross_validation import LeaveOneOut
+from scipy.optimize import nnls
+import tables
+from traits.api import HasPrivateTraits, Float, Int, \
 CArray, Property, Instance, Trait, Bool, Range, Delegate, Enum, \
 cached_property, on_trait_change, property_depends_on
-from enthought.traits.ui.api import View, Item
-from enthought.traits.ui.menu import OKCancelButtons
-from beamformer import faverage, gseidel, r_beam_psf, \
+from traitsui.api import View, Item
+from traitsui.menu import OKCancelButtons
+from beamformer import faverage, gseidel, transfer,\
+r_beam_psf, r_beam_psf1, r_beam_psf2, r_beam_psf3, r_beam_psf4, \
 r_beamfull, r_beamfull_3d, r_beamfull_classic, r_beamfull_inverse, \
 r_beamdiag, r_beamdiag_3d, r_beamdiag_classic, r_beamdiag_inverse, \
 r_beamfull_os, r_beamfull_os_3d, r_beamfull_os_classic, r_beamfull_os_inverse, \
 r_beamdiag_os, r_beamdiag_os_3d, r_beamdiag_os_classic, r_beamdiag_os_inverse
-import tables
 
 from h5cache import H5cache
 from internal import digest
-from grids import RectGrid, MicGeom, Environment
+from grids import Grid, MicGeom, Environment
 from timedomain import SamplesGenerator, Calib
-
 
 class PowerSpectra( HasPrivateTraits ):
     """
@@ -304,7 +310,7 @@ class BeamformerBase( HasPrivateTraits ):
         desc="freq data object")
 
     # RectGrid object that provides the grid locations
-    grid = Trait(RectGrid, 
+    grid = Trait(Grid, 
         desc="beamforming grid")
 
     # MicGeom object that provides the microphone locations
@@ -497,7 +503,8 @@ class BeamformerBase( HasPrivateTraits ):
         """
         integrates result map over the given sector
         where sector is a tuple with arguments for grid.indices
-        e.g. (xmin, ymin, xmin, ymax)
+        e.g. array([xmin, ymin, xmax, ymax]) or array([x, y, radius])
+        resp. array([rmin, phimin, rmax, phimax]), array([r, phi, radius]).
         returns spectrum
         """
 #        ind = self.grid.indices(*sector)
@@ -688,9 +695,13 @@ class PointSpreadFunction (HasPrivateTraits):
     Array point spread function
     """
     # RectGrid object that provides the grid locations
-    grid = Trait(RectGrid, 
+    grid = Trait(Grid, 
         desc="beamforming grid")
 
+    # indices of grid points to calculate the PSF for
+    grid_indices = CArray( dtype=int, value=array([]), 
+                     desc="indices of grid points for psf") #value=array([]), value=self.grid.pos(),
+    
     # MicGeom object that provides the microphone locations
     mpos = Trait(MicGeom, 
         desc="microphone geometry")
@@ -702,6 +713,15 @@ class PointSpreadFunction (HasPrivateTraits):
     c = Float(343., 
         desc="speed of sound")
 
+    # type of steering vectors
+    steer = Trait('true level', 'true location', 'classic', 'inverse', 
+                  'old_version',
+                  desc="type of steering vectors used")
+
+    # how to calculate and store the psf
+    calcmode = Trait('single', 'block', 'full', 'readonly',
+                     desc="mode of calculation / storage")
+              
     # frequency 
     freq = Float(1.0, 
         desc="frequency")
@@ -712,8 +732,8 @@ class PointSpreadFunction (HasPrivateTraits):
     
     # sound travel distances from array microphones to grid points
     rm = Property(
-        desc="array center to grid distances")
-    
+        desc="array to grid distances")
+        
     # the actual point spread function
     psf = Property(
         desc="point spread function")
@@ -723,7 +743,7 @@ class PointSpreadFunction (HasPrivateTraits):
     
     # internal identifier
     digest = Property( depends_on = ['mpos.digest', 'grid.digest', 'c', \
-        'env.digest'], cached = True)
+             'env.digest', 'steer'], cached = True)
 
     @cached_property
     def _get_digest( self ):
@@ -736,28 +756,122 @@ class PointSpreadFunction (HasPrivateTraits):
     @property_depends_on('digest')
     def _get_rm ( self ):
         return self.env.r( self.c, self.grid.pos(), self.mpos.mpos)
+
+    def get_beam_psf( self ):
+        """
+        returns the proper low-level beamforming routine
+        """
+        steer = {'true level': '3', \
+                'true location': '4', \
+                'classic': '1', \
+                'inverse': '2'}[self.steer]
+        return eval('r_beam_psf'+steer)
+    
     
     @property_depends_on('digest, freq')
     def _get_psf ( self ):
         """
         point spread function is either calculated or loaded from cache
         """
-        #try:           
+        gs = self.grid.size
+        if not self.grid_indices.size:
+            self.grid_indices = arange(gs)
         name = 'psf' + self.digest
         H5cache.get_cache( self, name)
         fr = ('Hz_%.2f' % self.freq).replace('.', '_')
+        
+        # get the cached data, or, if non-existing, create new structure
         if not fr in self.h5f.root:
-            kj = array((2j*pi*self.freq/self.c, ))
-            gs = self.grid.size
-            #bpos = self.grid.pos()
-            hh = ones((1, gs, gs), 'd')
-            e = zeros((self.mpos.num_mics), 'D')
-            e1 = e.copy()
-            r_beam_psf(e, e1, hh, self.r0, self.rm, kj)
-            ac = self.h5f.createArray('/', fr, hh[0]/diag(hh[0]))
+            if self.calcmode == 'readonly':
+                raise ValueError('Cannot calculate missing PSF (freq %s) in \'readonly\' mode.' % fr)
+            
+            group = self.h5f.createGroup(self.h5f.root, fr) 
+            
+            shape = (gs, gs)
+            atom = tables.Float64Atom()
+            ac = self.h5f.createCArray(group, 'result', atom, shape)
+            
+            shape = (gs,)
+            atom = tables.BoolAtom()
+            gp = self.h5f.createCArray(group, 'gridpts', atom, shape)
+            
         else:
-            ac = self.h5f.getNode('/', fr)
-        return ac
+            ac = self.h5f.getNode('/'+fr, 'result')
+            gp = self.h5f.getNode('/'+fr, 'gridpts')
+        
+        # are there grid points for which the PSF hasn't been calculated yet?
+        if not gp[:][self.grid_indices].all():
+
+            if self.calcmode == 'readonly':
+                raise ValueError('Cannot calculate missing PSF (points) in \'readonly\' mode.')
+
+            elif self.calcmode != 'full':
+                # calc_ind has the form [True, True, False, True], except
+                # when it has only 1 entry (value True/1 would be ambiguous)
+                if self.grid_indices.size == 1:
+                    calc_ind = [0]
+                else:
+                    calc_ind = invert(gp[:][self.grid_indices])
+                
+                # get indices which have the value True = not yet calculated
+                g_ind_calc = self.grid_indices[calc_ind]
+            
+            
+            r0 = self.r0
+            rm = self.rm
+            kj = 2j*pi*self.freq/self.c
+            
+
+            r_beam_psf = self.get_beam_psf()
+            #{ 
+            #    'true level'   : r_beam_psf3(hh, r0, r0[ind], rm, rm[ind], kj),
+            #    'true location': r_beam_psf4(hh, r0[ind], rm, rm[ind], kj),
+            #    'classic'      : r_beam_psf1(hh, r0[ind], rm, rm[ind], kj),
+            #    'inverse'      : r_beam_psf2(hh, r0, r0[ind], rm, rm[ind], kj)
+            #    }
+
+            
+            if self.calcmode == 'single':
+            
+                hh = ones((gs, 1), 'd')
+
+              
+                for ind in g_ind_calc:
+                    # hh = hh / hh[ind] #psf4 & 3
+                    # psf: ['h','rt0','rs0','rtm','rsm','kj']
+                    """    
+                    else:
+                        e = zeros((self.mpos.num_mics), 'D')
+                        e1 = e.copy()
+                        r_beam_psf(e, e1, hh, self.r0, self.rm, kj)
+                        h_out = hh[0] / diag(hh[0])
+                    """
+                    r_beam_psf(hh, r0, r0[[ind]], rm, rm[[ind]], kj)
+                    
+                    ac[:,ind] = hh[:,0] / hh[ind,0]
+                    gp[ind] = True
+                
+            elif self.calcmode == 'full':
+                hh = ones((gs, gs), 'd')
+                r_beam_psf(hh, r0, r0, rm, rm, kj)
+                
+                gp[:] = True
+                ac[:] = hh / diag(hh)
+
+            else: # 'block'
+                hh = ones((gs, g_ind_calc.size), 'd')
+                r_beam_psf(hh, r0, r0[g_ind_calc], rm, rm[g_ind_calc], kj)
+                hh /= diag(hh[g_ind_calc,:])[newaxis,:]
+                
+                indh = 0
+                for ind in g_ind_calc:
+                    gp[ind] = True
+                    ac[:,ind] = hh[:,indh]
+                    indh += 1
+
+                
+            self.h5f.flush()
+        return ac[:][:,self.grid_indices]
 
 class BeamformerDamas (BeamformerBase):
     """
@@ -781,11 +895,18 @@ class BeamformerDamas (BeamformerBase):
 
     # flag, if true (default), the main diagonal is removed before beamforming
     r_diag =  Delegate('beamformer')
+    
+    # type of steering vectors
+    steer =  Delegate('beamformer')
 
     # number of iterations
     n_iter = Int(100, 
         desc="number of iterations")
 
+    # how to calculate and store the psf
+    calcmode = Trait('full', 'single', 'block', 'readonly',
+                     desc="mode of psf calculation / storage")
+    
     # internal identifier
     digest = Property( 
         depends_on = ['beamformer.digest', 'n_iter'], 
@@ -800,6 +921,8 @@ class BeamformerDamas (BeamformerBase):
         [
             [Item('beamformer{}', style='custom')], 
             [Item('n_iter{Number of iterations}')], 
+            [Item('steer{Type of steering vector}')], 
+            [Item('calcmode{How to calculate PSF}')], 
             '|'
         ], 
         title='Beamformer denconvolution options', 
@@ -821,7 +944,8 @@ class BeamformerDamas (BeamformerBase):
         """
         freqs = self.freq_data.fftfreq()
         p = PointSpreadFunction(mpos=self.mpos, grid=self.grid, 
-                                            c=self.c, env=self.env)
+                                c=self.c, env=self.env, steer=self.steer,
+                                calcmode=self.calcmode)
         for i in self.freq_data.indices:        
             if not fr[i]:
                 p.freq = freqs[i]
@@ -854,6 +978,9 @@ class BeamformerOrth (BeamformerBase):
 
     # flag, if true (default), the main diagonal is removed before beamforming
     r_diag =  Delegate('beamformer')
+
+    # type of steering vectors
+    steer =  Delegate('beamformer')
 
     # environment
     env =  Delegate('beamformer')
@@ -1032,15 +1159,244 @@ class BeamformerCleansc( BeamformerBase ):
                 ac[i] = result
                 fr[i] = True
 
+class BeamformerClean (BeamformerBase):
+    """
+    CLEAN Deconvolution
+    """
+
+    # BeamformerBase object that provides data for deconvolution
+    beamformer = Trait(BeamformerBase)
+
+    # PowerSpectra object that provides the cross spectral matrix
+    freq_data = Delegate('beamformer')
+
+    # RectGrid object that provides the grid locations
+    grid = Delegate('beamformer')
+
+    # MicGeom object that provides the microphone locations
+    mpos = Delegate('beamformer')
+
+    # the speed of sound, defaults to 343 m/s
+    c =  Delegate('beamformer')
+
+    # type of steering vectors
+    steer =  Delegate('beamformer')
+
+    # flag, if true (default), the main diagonal is removed before beamforming
+    #r_diag =  Delegate('beamformer')
+    
+    # iteration damping factor
+    # defaults to 0.6
+    damp = Range(0.01, 1.0, 0.6, 
+        desc="damping factor")
+        
+    # max number of iterations
+    n_iter = Int(100, 
+        desc="maximum number of iterations")
+
+    # how to calculate and store the psf
+    calcmode = Trait('block', 'full', 'single', 'readonly',
+                     desc="mode of psf calculation / storage")
+                     
+    # internal identifier
+    digest = Property( 
+        depends_on = ['beamformer.digest', 'n_iter', 'damp'], 
+        )
+
+    # internal identifier
+    ext_digest = Property( 
+        depends_on = ['digest', 'beamformer.ext_digest'], 
+        )
+    
+    traits_view = View(
+        [
+            [Item('beamformer{}', style='custom')], 
+            [Item('')], 
+            '|'
+        ], 
+        title='Beamformer denconvolution options', 
+        buttons = OKCancelButtons
+        )
+    
+    @cached_property
+    def _get_digest( self ):
+        return digest( self )
+      
+    @cached_property
+    def _get_ext_digest( self ):
+        return digest( self, 'ext_digest' )
+    
+    def calc(self, ac, fr):
+        """
+        calculation of CLEAN result 
+        for all missing frequencies
+        """
+        freqs = self.freq_data.fftfreq()
+        gs = self.grid.size
+        
+        if self.calcmode == 'full':
+            print 'Warning: calcmode = \'full\', slow CLEAN performance. Better use \'block\' or \'single\'.'
+        p = PointSpreadFunction(mpos=self.mpos, grid=self.grid, 
+                                c=self.c, env=self.env, steer=self.steer,
+                                calcmode=self.calcmode)
+        
+        for i in self.freq_data.indices:        
+            if not fr[i]:
+                
+                p.freq = freqs[i]
+                dirty = array(self.beamformer.result[i], dtype=float64)
+                clean = zeros(gs, 'd')
+                
+                i_iter = 0
+                flag = True
+                while flag:
+                    # TODO: negative werte!!!
+                    dirty_sum = abs(dirty).sum(0)
+                    next_max = dirty.argmax(0)
+                    p.grid_indices = array([next_max])
+                    psf = p.psf.reshape(gs,)
+                    new_amp = self.damp * dirty[next_max] #/ psf[next_max]
+                    clean[next_max] += new_amp
+                    dirty -= psf * new_amp
+                    i_iter += 1
+                    flag = (dirty_sum > abs(dirty).sum(0) \
+                            and i_iter < self.n_iter \
+                            and max(dirty) > 0)
+                #print freqs[i],'Hz, Iterations:',i_iter
+                
+                ac[i] = clean            
+                fr[i] = True
+
+class BeamformerCMF ( BeamformerBase ):
+    """
+    Covariance Matrix Fitting (Yardibi2008)
+    (not really a beamformer, but an inverse method)
+    """
+    # type of fit method
+    method = Trait('LassoLars', 'LassoLarsBIC', \
+        'OMPCV', 'NNLS', desc="fit method used")
+        
+    # weight factor
+    # defaults to 0.0
+    alpha = Range(0.0, 1.0, 0.0, 
+        desc="Lasso weight factor")
+    
+    # maximum number of iterations
+    # tradeoff between speed and precision
+    # defaults to 500
+    max_iter = Int(500, 
+        desc="maximum number of iterations")
+
+    # internal identifier
+    digest = Property( 
+        depends_on = ['mpos.digest', 'grid.digest', 'freq_data.digest', 'c', \
+            'alpha', 'method', 'max_iter', 'env.digest', 'steer', 'r_diag'], 
+        )
+
+    traits_view = View(
+        [
+            [Item('mpos{}', style='custom')], 
+            [Item('grid', style='custom'), '-<>'], 
+            [Item('method', label='fit method')], 
+            [Item('max_iter', label='max iterations')], 
+            [Item('alpha', label='Lasso weight factor')], 
+            [Item('c', label='speed of sound')], 
+            [Item('env{}', style='custom')], 
+            '|'
+        ], 
+        title='Beamformer options', 
+        buttons = OKCancelButtons
+        )
+
+    @cached_property
+    def _get_digest( self ):
+        return digest( self )
+   
+
+    def calc(self, ac, fr):
+        """
+        calculation of delay-and-sum beamforming result 
+        for all missing frequencies
+        """
+        def realify(M):
+            return vstack([M.real,M.imag])
+
+            
+        # prepare calculation
+        kj = 2j*pi*self.freq_data.fftfreq()/self.c
+        nc = self.freq_data.time_data.numchannels
+        r0 = self.r0
+        rm = self.rm
+        numpoints = rm.shape[0]
+
+        hh = zeros((1, numpoints, nc), dtype='D')
+
+            
+        for i in self.freq_data.indices:
+            if not fr[i]:
+                # csm transposed b/c indices switched in faverage!
+                csm = array(self.freq_data.csm[i], dtype='complex128',copy=1).T
+
+                kji = kj[i, newaxis]
+                transfer(hh, r0, rm, kji)
+                h = hh[0].T
+                
+                # reduced Kronecker product (only where solution matrix != 0)
+                Bc = ( h[:,:,newaxis] * \
+                       h.conjugate().T[newaxis,:,:] )\
+                         .transpose(2,0,1)
+                Ac = Bc.reshape(nc*nc,numpoints)
+                
+                # get indices for upper triangular matrices (use tril b/c transposed)
+                ind = reshape(tril(ones((nc,nc))), (nc*nc,)) > 0
+                
+                ind_im0 = (reshape(eye(nc),(nc*nc,)) == 0)[ind]
+                if self.r_diag:
+                    # omit main diagonal for noise reduction
+                    ind_reim = hstack([ind_im0, ind_im0])
+                else:
+                    # take all real parts -- also main diagonal
+                    ind_reim = hstack([ones(size(ind_im0),)>0,ind_im0])
+                    ind_reim[0]=True # TODO: warum hier extra definiert??
+#                    if sigma2:
+#                        # identity matrix, needed when noise term sigma is used
+#                        I  = eye(nc).reshape(nc*nc,1)                
+#                        A = realify( hstack([Ac, I])[ind,:] )[ind_reim,:]
+#                        # ... ac[i] = model.coef_[:-1]
+#                    else:
+
+                A = realify( Ac [ind,:] )[ind_reim,:]
+                # use csm.T for column stacking reshape!
+                R = realify( reshape(csm.T, (nc*nc,1))[ind,:] )[ind_reim,:]
+#                print A.shape, R.shape
+                # choose method
+                if self.method == 'LassoLars':
+                    model = LassoLars(alpha=self.alpha,max_iter=self.max_iter)
+                elif self.method == 'LassoLarsBIC':
+                    model = LassoLarsIC(criterion='bic',max_iter=self.max_iter)
+                elif self.method == 'OMPCV':
+                    model = OrthogonalMatchingPursuitCV()
+#                model = ElasticNet(alpha=self.alpha, l1_ratio=0.7)
+                # nnls is not in sklearn
+                if self.method == 'NNLS':
+                    ac[i] , x = nnls(A,R.flat)
+                else:
+                    model.fit(A,R[:,0])
+                    ac[i] = model.coef_[:]
+                fr[i] = True
+
+
 def L_p ( x ):
     """
     calculates the sound pressure level from the sound pressure squared:
 
     L_p = 10 lg x/4e-10
 
-    if x<0, return -1000. dB
+    if x<0, return -350. dB
     """
-    return where(x>0, 10*log10(x/4e-10), -1000.)
+    # new version to prevent division by zero warning for float32 arguments
+    return 10*log10(clip(x/4e-10,1e-35,None))
+#    return where(x>0, 10*log10(x/4e-10), -1000.)
 
 def synthetic (data, freqs, f, num=3):
     """
@@ -1062,4 +1418,15 @@ def synthetic (data, freqs, f, num=3):
                     searchsorted(freqs, i*2.**(+0.5/num))].sum(0) for i in f]
     return array(res)
 
-
+def integrate(data, grid, sector):
+        """
+        integrates result map over the given sector
+        where sector is a tuple with arguments for grid.indices
+        e.g. array([xmin, ymin, xmax, ymax]) or array([x, y, radius])
+        resp. array([rmin, phimin, rmax, phimax]), array([r, phi, radius]).
+        returns spectrum
+        """
+        ind = grid.indices(*sector)
+        gshape = grid.shape
+        h = data.reshape(gshape)[ind].sum()
+        return h

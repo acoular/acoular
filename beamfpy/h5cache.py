@@ -11,7 +11,7 @@ ennes.sarradj@gmx.de
 """
 
 # imports from other packages
-from enthought.traits.api import HasPrivateTraits, Bool, Str
+from traits.api import HasPrivateTraits, Bool, Str
 from os import path, mkdir, environ
 import tables
 from weakref import WeakValueDictionary

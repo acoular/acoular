@@ -8,7 +8,7 @@ acoustic beamforming
 ennes.sarradj@gmx.de
 """
 
-from enthought.traits.api import HasPrivateTraits, CArray
+from traits.api import HasPrivateTraits, CArray
 from numpy import float32
 
 class spectrum( HasPrivateTraits ):

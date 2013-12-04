@@ -1,7 +1,9 @@
 """
-Example 1 for beamfpy library
+Example 6 for beamfpy library
 
-demonstrates different features of beamfpy,
+demonstrates different steering vectors in beamfpy,
+and CSM diagonal removal 
+with same setup as in example 1
 
 uses measured data in file 2008-05-16_11-36-00_468000.h5
 calibration in file calib_06_05_2008.xml
@@ -16,12 +18,9 @@ ennes.sarradj@gmx.de
 import beamfpy
 from beamfpy import td_dir, L_p, Calib, MicGeom, EigSpectra, \
 RectGrid, BeamformerBase, BeamformerEig, BeamformerOrth, BeamformerCleansc, \
-MaskedTimeSamples, FiltFiltOctave, BeamformerTimeSq, TimeAverage, \
-TimeCache, BeamformerTime, TimePower, BeamformerCMF, \
-BeamformerCapon, BeamformerMusic, BeamformerDamas, BeamformerClean
+MaskedTimeSamples, BeamformerDamas
 
 # other imports
-from numpy import zeros
 from os import path
 from pylab import figure, subplot, imshow, show, colorbar, title
 
@@ -77,80 +76,39 @@ f = EigSpectra(time_data=t1,
 
 
 #===============================================================================
-# different beamformers in frequency domain
+# beamformers in frequency domain
 #===============================================================================
 bb = BeamformerBase(freq_data=f, grid=g, mpos=m, r_diag=True, c=346.04)
-bc = BeamformerCapon(freq_data=f, grid=g, mpos=m, c=346.04, cached=False)
-be = BeamformerEig(freq_data=f, grid=g, mpos=m, r_diag=True, c=346.04, n=54)
-bm = BeamformerMusic(freq_data=f, grid=g, mpos=m, c=346.04, n=2)
 bd = BeamformerDamas(beamformer=bb, n_iter=100)
+be = BeamformerEig(freq_data=f, grid=g, mpos=m, r_diag=True, c=346.04, n=54)
 bo = BeamformerOrth(beamformer=be, eva_list=range(38,54))
 bs = BeamformerCleansc(freq_data=f, grid=g, mpos=m, r_diag=True, c=346.04)
-bcmf = BeamformerCMF(freq_data=f, grid=g, mpos=m, c=346.04, method='LassoLarsBIC')
-bl = BeamformerClean(beamformer=bb, n_iter=100)
 
 #===============================================================================
 # plot result maps for different beamformers in frequency domain
 #===============================================================================
-figure(1)
-i1 = 1 #no of subplot
-for b in (bc, be, bm, bl, bo, bs, bb, bd, bcmf):
-    subplot(3,4,i1)
-    i1 += 1
-    map = b.synthetic(cfreq,1)
-    mx = L_p(map.max())
-    imshow(L_p(map.T), vmax=mx, vmin=mx-15, 
-           interpolation='nearest', extent=g.extend())
-    colorbar()
-    title(b.__class__.__name__)
+fi = 1 #no of figure
+for r_diag in (True,False):
+    figure(fi)
+    fi +=1 
+    bb.r_diag = r_diag
+    be.r_diag = r_diag
+    bs.r_diag = r_diag
+    i1 = 1 #no of subplot
+    for steer in ('true level', 'true location', 'classic', 'inverse'):     
+        bb.steer = steer
+        be.steer = steer
+        bs.steer = steer
+        for b in (bb, bd, bo, bs):
+            subplot(4,4,i1)
+            i1 += 1
+            map = b.synthetic(cfreq,1)
+            mx = L_p(map.max())
+            imshow(L_p(map.T), vmax=mx, vmin=mx-15, 
+                   interpolation='nearest', extent=g.extend())
+            print b.steer
+            colorbar()
+            title(b.__class__.__name__)
 
-#===============================================================================
-# delay and sum beamformer in time domain
-# processing chain: beamforming, filtering, power, average
-#===============================================================================
-bt = BeamformerTime(source=t1, grid=g, mpos=m, c=346.04)
-ft = FiltFiltOctave(source=bt, band=cfreq)
-pt = TimePower(source=ft)
-avgt = TimeAverage(source=pt, naverage = 1024)
-cacht = TimeCache( source = avgt) # cache to prevent recalculation
 
-#===============================================================================
-# delay and sum beamformer in time domain with autocorrelation removal
-# processing chain: zero-phase filtering, beamforming+power, average
-#===============================================================================
-fi = FiltFiltOctave(source=t1, band=cfreq)
-bts = BeamformerTimeSq(source = fi,grid=g, mpos=m, r_diag=True,c=346.04)
-avgts = TimeAverage(source=bts, naverage = 1024)
-cachts = TimeCache( source = avgts) # cache to prevent recalculation
-
-#===============================================================================
-# plot result maps for different beamformers in time domain
-#===============================================================================
-i2 = 2 # no of figure
-for b in (cacht, cachts):
-    # first, plot time-dependent result (block-wise)
-    figure(i2)
-    i2 += 1
-    res = zeros(g.size) # init accumulator for average
-    i3 = 1 # no of subplot
-    for r in b.result(1):  #one single block
-        subplot(4,4,i3)
-        i3 += 1
-        res += r[0] # average accum.
-        map = r[0].reshape(g.shape)
-        mx = L_p(map.max())
-        imshow(L_p(map.T), vmax=mx, vmin=mx-15, 
-               interpolation='nearest', extent=g.extend())
-        title('%i' % ((i3-1)*1024))
-    res /= i3-1 # average
-    # second, plot overall result (average over all blocks)
-    figure(1)
-    subplot(3,4,i1)
-    i1 += 1
-    map = r[0].reshape(g.shape)
-    mx = L_p(map.max())
-    imshow(L_p(map.T), vmax=mx, vmin=mx-15, 
-           interpolation='nearest', extent=g.extend())
-    colorbar()
-    title(('BeamformerTime','BeamformerTimeSq')[i2-3])
 show()

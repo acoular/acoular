@@ -17,10 +17,10 @@ import ctypes
 import numpy
 import time
 import tables
-from enthought.traits.api import HasTraits, HasPrivateTraits, Float, Int, File, CArray, Property, Instance, Trait, Bool, Any, List, Str, Long
-from enthought.traits.ui.api import EnumEditor
-from enthought.traits.ui.api import View, Item, Group
-from enthought.traits.ui.menu import OKCancelButtons
+from traits.api import HasTraits, HasPrivateTraits, Float, Int, File, CArray, Property, Instance, Trait, Bool, Any, List, Str, Long
+from traitsui.api import EnumEditor
+from traitsui.api import View, Item, Group
+from traitsui.menu import OKCancelButtons
 from datetime import datetime
 from os import path
 
