@@ -1419,14 +1419,14 @@ def synthetic (data, freqs, f, num=3):
     return array(res)
 
 def integrate(data, grid, sector):
-        """
-        integrates result map over the given sector
-        where sector is a tuple with arguments for grid.indices
-        e.g. array([xmin, ymin, xmax, ymax]) or array([x, y, radius])
-        resp. array([rmin, phimin, rmax, phimax]), array([r, phi, radius]).
-        returns spectrum
-        """
-        ind = grid.indices(*sector)
-        gshape = grid.shape
-        h = data.reshape(gshape)[ind].sum()
-        return h
+    """
+    integrates result map over the given sector
+    where sector is a tuple with arguments for grid.indices
+    e.g. array([xmin, ymin, xmax, ymax]) or array([x, y, radius])
+    resp. array([rmin, phimin, rmax, phimax]), array([r, phi, radius]).
+    returns spectrum
+    """
+    ind = grid.indices(*sector)
+    gshape = grid.shape
+    h = data.reshape(gshape)[ind].sum()
+    return h
