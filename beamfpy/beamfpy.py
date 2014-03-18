@@ -521,6 +521,65 @@ class BeamformerBase( HasPrivateTraits ):
         for i in range(r.shape[0]):
             h[i] = r[i].reshape(gshape)[ind].sum()
         return h
+
+class BeamformerFunctional( BeamformerBase ):
+    """
+    functional beamforming after Dougherty 2014
+    """
+
+    # functional exponent
+    gamma = Float(1, 
+        desc="functional exponent")
+
+    # internal identifier
+    digest = Property( 
+        depends_on = ['mpos.digest', 'grid.digest', 'freq_data.digest', 'c', \
+            'r_diag', 'env.digest', 'gamma', 'steer'], 
+        )
+
+    traits_view = View(
+        [
+            [Item('mpos{}', style='custom')], 
+            [Item('grid', style='custom'), '-<>'], 
+            [Item('gamma', label='exponent', style='text')], 
+            [Item('c', label='speed of sound')], 
+            [Item('env{}', style='custom')], 
+            '|'
+        ], 
+        title='Beamformer options', 
+        buttons = OKCancelButtons
+        )
+
+    @cached_property
+    def _get_digest( self ):
+        return digest( self )
+
+    def calc(self, ac, fr):
+        """
+        calculation of functional beamforming result 
+        for all missing frequencies
+        """
+        # prepare calculation
+        kj = 2j*pi*self.freq_data.fftfreq()/self.c
+        numchannels = self.freq_data.time_data.numchannels
+        e = zeros((numchannels), 'D')
+        h = empty((1, self.grid.size), 'd')
+        # function
+        beamfunc = self.get_beamfunc('_os')
+        if self.r_diag:
+            adiv = sqrt(1.0/(numchannels*numchannels-numchannels))
+            scalefunc = lambda h : adiv*(multiply(adiv*h, (sign(h)+1-1e-35)/2))**self.gamma
+        else:
+            adiv = 1.0/(numchannels)
+            scalefunc = lambda h : adiv*(adiv*h)**self.gamma
+        for i in self.freq_data.indices:        
+            if not fr[i]:
+                eva = array(self.freq_data.eva[i][newaxis], dtype='float64')**(1.0/self.gamma)
+                eve = array(self.freq_data.eve[i][newaxis], dtype='complex128')
+                kji = kj[i, newaxis]
+                beamfunc(e, h, self.r0, self.rm, kji, eva, eve, 0, numchannels)
+                ac[i] = scalefunc(h)
+                fr[i] = True
             
 class BeamformerCapon( BeamformerBase ):
     """
@@ -1419,14 +1478,15 @@ def synthetic (data, freqs, f, num=3):
     return array(res)
 
 def integrate(data, grid, sector):
-    """
-    integrates result map over the given sector
-    where sector is a tuple with arguments for grid.indices
-    e.g. array([xmin, ymin, xmax, ymax]) or array([x, y, radius])
-    resp. array([rmin, phimin, rmax, phimax]), array([r, phi, radius]).
-    returns spectrum
-    """
-    ind = grid.indices(*sector)
-    gshape = grid.shape
-    h = data.reshape(gshape)[ind].sum()
-    return h
+        """
+        integrates result map over the given sector
+        where sector is a tuple with arguments for grid.indices
+        e.g. array([xmin, ymin, xmax, ymax]) or array([x, y, radius])
+        resp. array([rmin, phimin, rmax, phimax]), array([r, phi, radius]).
+        returns spectrum
+        """
+        ind = grid.indices(*sector)
+        gshape = grid.shape
+        h = data.reshape(gshape)[ind].sum()
+        return h
+        
