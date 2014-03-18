@@ -12,9 +12,14 @@ ennes.sarradj@gmx.de
 
 # imports from other packages
 from numpy import mgrid, s_, array, isscalar, float32, float64, newaxis, \
-sqrt, arange
-from traits.api import HasPrivateTraits, Float, Property, File, \
-CArray, List, property_depends_on, cached_property, on_trait_change
+sqrt, arange, pi, exp, sin, cos, arccos, zeros_like, empty, dot, hstack, \
+vstack, identity
+from numpy.linalg.linalg import norm
+from scipy.integrate import ode
+from scipy.interpolate import LinearNDInterpolator
+from scipy.spatial import ConvexHull
+from traits.api import HasPrivateTraits, Float, Property, File, Int, \
+CArray, List, property_depends_on, cached_property, on_trait_change, Trait
 from traitsui.api import View
 from traitsui.menu import OKCancelButtons
 from os import path
@@ -37,9 +42,14 @@ class Grid( HasPrivateTraits ):
     # internal identifier
     digest = ''
     
+    # 'digest' is a placeholder for other properties in derived classes,
+    # necessary to trigger the depends on mechanism
+    @property_depends_on('digest')
     def _get_size ( self ):
         return 1
 
+    # 'digest' is a placeholder for other properties in derived classes
+    @property_depends_on('digest')
     def _get_shape ( self ):
         return (1, 1)
     
@@ -431,3 +441,209 @@ class UniformFlowEnvironment( Environment):
         if rm.shape[1] == 1:
             rm = rm[:, 0]
         return rm
+
+class FlowField( HasPrivateTraits ):
+    """
+    abstract base class for spatial flow field
+    """
+    digest = Property
+
+    traits_view = View(
+        )
+        
+    def _get_digest( self ):
+        return ''
+    
+    def v( self, xx):
+        """ 
+        returns v and Jacobian at location xx
+        """
+        v = array( (0., 0., 0.) )
+        dv = array( ((0.,0.,0.),(0.,0.,0.),(0.,0.,0.)) )      
+        return -v,-dv                         
+        
+class OpenJet( FlowField ):
+    """
+    analytical approximation of the flow field of an open jet,
+    see Albertson et al., 1950
+    """
+    # exit velocity
+    v0 = Float(0.0, 
+        desc="exit velocity")
+        
+    # nozzle center
+    origin = CArray( dtype=float64, shape=(3, ), value=array((0., 0., 0.)), 
+        desc="center of nozzle")
+
+    # nozzle diameter
+    D = Float(0.2, 
+        desc="nozzle diameter")
+
+    # internal identifier
+    digest = Property( 
+        depends_on=['v0', 'origin','D'], 
+        )
+
+    traits_view = View(
+            [
+                ['v0{exit velocity}', 'origin{jet origin}', 
+                'D{nozzle diameter}'], 
+                '|[open jet]'
+            ]
+        )
+
+    @cached_property
+    def _get_digest( self ):
+        return digest( self )
+    
+    # velocity and Jacobian, y and z components are neglected
+    def v( self, xx):
+        x,y,z = xx-self.origin
+        r = sqrt(y*y+z*z)
+        x1 = 0.081*x
+        h1 = r+x1-0.5*self.D
+        U = self.v0*exp(-h1*h1/(2*x1*x1))
+        if h1<0.0:
+            Udr = 0.0
+            U = self.v0
+        else:
+            Udr = -h1*U/(x1*x1)
+        if r>0.0:
+            Udy = y*Udr/r
+            Udz = z*Udr/r
+        else:
+            Udy = Udz = 0.0
+        Udx = (h1*h1/(x*x1*x1)-h1/(x*x1))*U
+        if h1<0.0:
+            Udx = 0
+        v = array( (U, 0., 0.) ) 
+        dv = array( ((Udx,0.,0.),(Udy,0.,0.),(Udz,0.,0.)) )      
+        return v,dv                         
+       
+def spiral_sphere(N,Om=2*pi,b=array((0,0,1))):
+    """
+    returns an array of unit vectors (N,3) giving equally distributed
+    directions on a part of sphere given by the center direction b and
+    the solid angle Om
+    """
+    # first produce 'equally' distributed directions in spherical coords
+    o=4*pi/Om
+    h = -1+ 2*arange(N)/(N*o-1.)
+    theta = arccos(h)
+    phi = zeros_like(theta)
+    for i,hk in enumerate(h[1:]):
+        phi[i+1] = phi[i]+3.6/sqrt(N*o*(1-hk*hk)) % (2*pi)
+    # translate to cartesian coords
+    xyz = vstack((sin(theta) * cos(phi),sin(theta) * sin(phi),cos(theta)))
+    # mirror everything on a plane so that b points into the center
+    a = xyz[:,0]
+    b = b/norm(b)
+    ab = (a-b)[:,newaxis]
+    if norm(ab)<1e-10:
+        return xyz
+    # this is the Householder matrix for mirroring
+    H = identity(3)-dot(ab,ab.T)/dot(ab.T,a)
+    # actual mirroring
+    return dot(H,xyz)    
+
+
+class GeneralFlowEnvironment( Environment):
+    """
+    general flow enviroment
+    """
+    # the Mach number
+    ff = Trait(FlowField, 
+        desc="flow field")
+        
+    # exit velocity
+    N = Int(100, 
+        desc="number of rays per pi")
+
+    # exit velocity
+    Om = Float(pi, 
+        desc="maximum spherical angle")
+        
+    # internal identifier
+    digest = Property( 
+        depends_on=['ff.digest','N','Om'], 
+        )
+
+    traits_view = View(
+            [
+                ['ff','N{max. number of rays}','Om{max. solid angle }'], 
+                '|[General Flow]'
+            ]
+        )
+
+    @cached_property
+    def _get_digest( self ):
+        return digest( self )
+    
+    def r( self, c, gpos, mpos=0.0):
+        """ 
+        calculates virtual distances between grid points and mics or origin 
+        """
+        if isscalar(mpos):
+            mpos = array((0, 0, 0), dtype = float32)[:, newaxis]
+
+        # the DE system
+        def f1(t, y, v):
+            x = y[0:3]                            
+            s = y[3:6]
+            vv, dv = v(x)
+            sa = sqrt(s[0]*s[0]+s[1]*s[1]+s[2]*s[2])
+            x = empty(6)
+            x[0:3] = c*s/sa - vv # time reversal
+            x[3:6] = dot(s, -dv) # time reversal
+            return x
+        
+        # integration along a single ray 
+        def fr(x0,n0, rmax, dt, v, xyz, t):
+            s0 = n0 / (c+dot(v(x0)[0],n0))
+            y0 = hstack((x0,s0))
+            oo = ode(f1)
+            oo.set_f_params(v)
+            oo.set_integrator('vode',rtol=1e-2)
+            oo.set_initial_value(y0,0)
+            while oo.successful():
+                xyz.append(oo.y[0:3])
+                t.append(oo.t)
+                if norm(oo.y[0:3]-x0)>rmax:
+                    break
+                oo.integrate(oo.t+dt)    
+
+        print gpos.shape                
+        gs2 = gpos.shape[-1]
+        gt = empty((gs2,mpos.shape[-1]))
+        vv = self.ff.v
+        NN = int(sqrt(self.N))
+        for micnum,x0 in enumerate(mpos.T):
+            xe = gpos.mean(1) # center of grid
+            r = x0[:,newaxis]-gpos
+            rmax = sqrt((r*r).sum(0).max()) # maximum distance
+            nv = spiral_sphere(self.N,pi,b=xe-x0)
+            rstep = rmax/sqrt(self.N)
+            rmax += rstep
+            tstep = rstep/c
+            xyz = []
+            t = []
+            lastind = 0
+            for i,n0 in enumerate(nv.T):
+                fr(x0,n0,rmax,tstep,vv,xyz,t)
+                if i and i%NN==0:
+                    if not lastind:
+                        dd = ConvexHull(vstack((gpos.T,xyz)),incremental=True)
+                    else:
+                        dd.add_points(xyz[lastind:],restart=True)
+                    lastind = len(xyz)
+                    # ConvexHull includes grid ?
+                    if dd.simplices.min()>=gs2:
+                        break
+            xyz = array(xyz)
+            t = array(t)    
+            li = LinearNDInterpolator(xyz,t)
+            gt[:,micnum] = li(gpos.T)
+        if gt.shape[1] == 1:
+            gt = gt[:, 0]
+    #        print gt[:,micnum].max(),gt[:,micnum].min(),gt[:,micnum].mean()   
+        return c*gt #return distance along ray
