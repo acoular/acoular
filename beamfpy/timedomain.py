@@ -45,7 +45,7 @@ class Calib( HasPrivateTraits ):
         desc="basename of xml file")
     
     # number of microphones in the calibration data 
-    num_mics = Int( 0, 
+    num_mics = CLong( 0, 
         desc="number of microphones in the geometry")
 
     # array of calibration factors

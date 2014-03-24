@@ -602,24 +602,23 @@ def build_beamformer():
     r_beam_psf4(mod)
     transfer(mod)
     gseidel(mod)
-    if sys.platform[:5] == 'linux':
-        compiler = 'unix'
-    else:    
-        compiler = 'mingw32'
-    print compiler
-    
+
     extra_compile_args = ['-O3','-ffast-math','-march=native', \
         '-Wno-write-strings','-fopenmp']
     extra_link_args = ['-lgomp']
-    
-    #uncomment for non-openmp version
-    #extra_compile_args.pop()
-    #extra_link_args.pop()
-    
-    mod.compile(extra_compile_args=extra_compile_args,
+
+    if sys.platform[:5] == 'linux':
+        compiler = 'unix'
+        mod.compile(extra_compile_args=extra_compile_args,
                 extra_link_args=extra_link_args,
-                verbose=4,
-                compiler=compiler)
+                verbose=4, compiler=compiler)
+    else:    
+    #uncomment for non-openmp version
+        extra_compile_args.pop()
+        extra_link_args.pop()
+        mod.compile(extra_compile_args=extra_compile_args,
+                extra_link_args=extra_link_args,
+                verbose=4)
 
 if __name__ == "__main__":
     #~ try:

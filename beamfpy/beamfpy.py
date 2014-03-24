@@ -734,7 +734,7 @@ class BeamformerMusic( BeamformerEig ):
         """
         # prepare calculation
         kj = 2j*pi*self.freq_data.fftfreq()/self.c
-        n = self.mpos.num_mics-self.na
+        n = int(self.mpos.num_mics-self.na)
         numchannels = self.freq_data.time_data.numchannels
         e = zeros((numchannels), 'D')
         h = empty((1, self.grid.size), 'd')
