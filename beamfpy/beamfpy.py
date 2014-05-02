@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
 #pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
+#------------------------------------------------------------------------------
+# Copyright (c) 2007-2014, Beamfpy Development Team.
+#------------------------------------------------------------------------------
 """
-beamfpy.py: classes for calculations in the frequency domain
-
-Part of the beamfpy library: several classes for the implemetation of 
-acoustic beamforming
-
-(c) Ennes Sarradj 2007-2010, all rights reserved
-ennes.sarradj@gmx.de
+Classes that implement beamforming in the frequency domain
 """
 
 from numpy import array, ones, hanning, hamming, bartlett, blackman, invert, \
