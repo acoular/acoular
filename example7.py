@@ -16,8 +16,7 @@ ennes.sarradj@gmx.de
 # imports from beamfpy
 import beamfpy
 from beamfpy import td_dir, L_p, Calib, MicGeom, EigSpectra, \
-RectGrid, BeamformerBase, BeamformerEig, BeamformerOrth, BeamformerCleansc, \
-TimeSamples, BeamformerDamas, BeamformerCMF
+RectGrid, TimeSamples, BeamformerCMF
 
 # other imports
 from os import path
