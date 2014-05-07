@@ -31,7 +31,8 @@ r_beamdiag_os, r_beamdiag_os_3d, r_beamdiag_os_classic, r_beamdiag_os_inverse
 
 from h5cache import H5cache
 from internal import digest
-from grids import Grid, MicGeom, Environment
+from grids import Grid, MicGeom
+from .environments import Environment
 from timedomain import SamplesGenerator, Calib
 
 class PowerSpectra( HasPrivateTraits ):

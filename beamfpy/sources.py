@@ -21,7 +21,8 @@ from scipy.signal import resample
 # beamfpy imports
 from timedomain import SamplesGenerator, Trajectory
 from internal import digest
-from grids import MicGeom, Environment
+from grids import MicGeom
+from .environments import Environment
 
 class SignalGenerator( HasPrivateTraits ):
     """
@@ -29,11 +30,11 @@ class SignalGenerator( HasPrivateTraits ):
     generates output via the function 'signal'
     """
 
-    # rms amplitude of source signal in 1 m  distance
+    #: rms amplitude of source signal in 1 m  distance
     rms = Float(1.0, 
         desc="rms amplitude")
     
-    # sample_freq of signal
+    #: sample_freq of signal
     sample_freq = Float(1.0, 
         desc="sampling frequency")
                    

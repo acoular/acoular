@@ -34,8 +34,8 @@ class FunctionDoc(BaseDoc):
 
     def __init__(self, lines, headers=None):
 
-        if headers is None:
-            headers = {'Returns': 'as_item_list', 'Arguments': 'arguments',
+        #if headers is None:
+        headers = {'Returns': 'as_item_list', 'Arguments': 'arguments',
                        'Parameters': 'arguments', 'Raises': 'as_item_list',
                        'Yields': 'as_item_list', 'Notes': 'notes'}
 
@@ -67,11 +67,17 @@ class FunctionDoc(BaseDoc):
             This parameter is ignored in thi method.
 
         """
-        items = self.extract_items(item_class=ArgumentItem)
-        lines = []
+        items = self.extract_items(item_class=ListItem)
+        lines = [':{0}:'.format(header.lower())]
+        prefix = None if len(items) == 1 else '-'
         for item in items:
-            lines += item.to_rst()
+            lines += add_indent(item.to_rst(prefix))
         return lines
+#        items = self.extract_items(item_class=ArgumentItem)
+#        lines = []
+#        for item in items:
+#            lines += item.to_rst()
+#        return lines
 
     def _refactor_notes(self, header):
         """ Refactor the notes section to sphinx friendly format.

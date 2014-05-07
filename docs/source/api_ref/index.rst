@@ -12,11 +12,39 @@ beamfpy Package
 Modules in beamfpy
 ------------------
 The following modules are part of beamfpy:
- 
-.. autosummary::
 
-    beamfpy.beamfpy
-    beamfpy.timedomain
+.. currentmodule:: beamfpy 
+
+.. autosummary::
+    :toctree: generated/
+
+    environments
+    beamfpy
+    timedomain
+    grids
+    sources
+    nidaqimport
+    fileimport
+    h5cache
+    internal
+
+.. TODO:
+    environments
+    microphone
+    tools
+    trajectories ??
+
+    timedomain:
+    calib
+    signals
+    sources
+    filters
+    spectra
+    beamformers
+
+    frequencydomain:
+    beamformers
+
 
 :mod:`beamfpy` Module
 ---------------------

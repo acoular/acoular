@@ -28,10 +28,12 @@ sys.path.insert(0,os.path.abspath('../..')) # in order to document the source in
 extensions = [
     'sphinx.ext.autodoc', 
     'traits.util.trait_documenter',
-    'refactordoc',
-    'sphinx.ext.pngmath',
+#    'refactordoc',
+    'sphinx.ext.mathjax',
     'sphinx.ext.inheritance_diagram',
-    'sphinx.ext.autosummary'
+    'sphinx.ext.autosummary',
+    'numpydoc',
+#    'numpydoc.traitsdoc'
     ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -101,7 +103,7 @@ html_theme = 'default'
 ## 'sidebarwidth' : '20em'
 ## }
 html_theme_options = {
-    'stickysidebar': True,
+#    'stickysidebar': True,
 #    'navbar_sidebarrel': False,
 #    'bootswatch_theme': 'cosmo',
 #    'bootstrap_version': '3',
@@ -173,6 +175,7 @@ inheritance_graph_attrs = dict(rankdir="LR", size='"16.0, 8.0"',
 
 autosummary_generate = True
 
+numpydoc_show_class_members = False
 
 # Options for LaTeX output
 # ------------------------
@@ -205,3 +208,18 @@ latex_documents = [
 
 # If false, no module index is generated.
 #latex_use_modindex = True
+
+# skips all traits references in autoclass
+def traits_skip_member(app, what, name, obj, skip, options):
+    if not skip and what=='class':
+        try:
+            if not obj.__module__.startswith(project):
+                return True
+        except:
+            pass
+#            if obj.__class__.__name__ == 'method_descriptor':
+#                return True
+    return skip
+
+def setup(app):
+    app.connect('autodoc-skip-member', traits_skip_member)

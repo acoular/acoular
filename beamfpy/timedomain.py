@@ -28,7 +28,8 @@ from scipy.signal import butter, lfilter, filtfilt
 # beamfpy imports
 from internal import digest
 from h5cache import H5cache, td_dir
-from grids import RectGrid, MicGeom, Environment
+from grids import RectGrid, MicGeom
+from .environments import Environment
 
 class Calib( HasPrivateTraits ):
     """
