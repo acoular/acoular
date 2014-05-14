@@ -334,9 +334,7 @@ class RectGrid3D( RectGrid):
         
         Parameters
         ----------
-        x : float
-        y : float
-        z : float
+        x, y, z : float
             The co-ordinates for which the indices is queried.
 
         Returns
@@ -367,12 +365,7 @@ class RectGrid3D( RectGrid):
         
         Parameters
         ----------
-        x1 : float
-        y1 : float
-        z1 : float
-        x2 : float
-        y2 : float
-        z2 : float
+        x1, y1, z1, x2, y2, z2 : float
             A box-shaped sector is assumed that is given by two corners
             (x1,y1,z1) and (x2,y2,z2). 
 
