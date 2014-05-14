@@ -1,0 +1,5 @@
+{{ name }}
+{{ underline }}
+
+.. automodule:: {{fullname}}
+
