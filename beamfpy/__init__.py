@@ -66,8 +66,10 @@ MaskedTimeSamples, TimeInOut, Mixer, TimeAverage, TimeReverse, \
 TimePower, FiltFiltOctave, FiltOctave, Trajectory, IntegratorSectorTime, \
 BeamformerTime, BeamformerTimeSq, BeamformerTimeSqTraj, TimeCache, WriteWAV, \
 WriteH5 
-from .grids import RectGrid, RectGrid3D, MicGeom
-from .environments import Environment, UniformFlowEnvironment
+from .grids import RectGrid, RectGrid3D
+from .environments import Environment, UniformFlowEnvironment, \
+FlowField, OpenJet, GeneralFlowEnvironment
+from .microphones import MicGeom
 from beamfpy import  PowerSpectra, EigSpectra, \
 BeamformerBase, BeamformerCapon, BeamformerEig, BeamformerMusic,\
 BeamformerDamas, BeamformerOrth,BeamformerCleansc, BeamformerCMF,\

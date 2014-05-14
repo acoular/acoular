@@ -20,8 +20,8 @@ from scipy.signal import resample
 
 # beamfpy imports
 from timedomain import SamplesGenerator, Trajectory
-from internal import digest
-from grids import MicGeom
+from .internal import digest
+from .microphones import MicGeom
 from .environments import Environment
 
 class SignalGenerator( HasPrivateTraits ):
