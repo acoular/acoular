@@ -177,6 +177,8 @@ autosummary_generate = True
 
 numpydoc_show_class_members = False
 
+autodoc_member_order = 'bysource'
+
 # Options for LaTeX output
 # ------------------------
 

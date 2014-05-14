@@ -51,10 +51,10 @@ class Environment( HasPrivateTraits ):
         ----------
         c  : float
             The speed of sound to use for the calculation.
-        gpos : array of floats of dimension (3,N)
+        gpos : array of floats of shape (3,N)
             The locations of points in the beamforming map grid in 3D cartesian
             co-ordinates.
-        mpos : array of floats of dimension (3,M), optional
+        mpos : array of floats of shape (3,M), optional
             The locations of microphones in 3D cartesian co-ordinates. If not
             given, then only one microphone at the origin (0,0,0) is
             considered.
@@ -115,10 +115,10 @@ class UniformFlowEnvironment( Environment):
         ----------
         c : float
             The speed of sound to use for the calculation.
-        gpos : array of floats of dimension (3,N)
+        gpos : array of floats of shape (3,N)
             The locations of points in the beamforming map grid in 3D cartesian
             co-ordinates.
-        mpos : array of floats of dimension (3,M), optional
+        mpos : array of floats of shape (3,M), optional
             The locations of microphones in 3D cartesian co-ordinates. If not
             given, then only one microphone at the origin (0,0,0) is
             considered.
@@ -159,7 +159,7 @@ class FlowField( HasPrivateTraits ):
 
         Parameters
         ----------
-        xx : array of floats of dimension (3,)
+        xx : array of floats of shape (3,)
             Location in the fluid for which to provide the data.
 
         Returns
@@ -219,7 +219,7 @@ class OpenJet( FlowField ):
 
         Parameters
         ----------
-        xx : array of floats of dimension (3,)
+        xx : array of floats of shape (3,)
             Location in the fluid for which to provide the data.
 
         Returns
@@ -325,10 +325,10 @@ class GeneralFlowEnvironment(Environment):
         ----------
         c : float
             The speed of sound to use for the calculation.
-        gpos : array of floats of dimension (3,N)
+        gpos : array of floats of shape (3,N)
             The locations of points in the beamforming map grid in 3D cartesian
             co-ordinates.
-        mpos : array of floats of dimension (3,M), optional
+        mpos : array of floats of shape (3,M), optional
             The locations of microphones in 3D cartesian co-ordinates. If not
             given, then only one microphone at the origin (0,0,0) is
             considered.

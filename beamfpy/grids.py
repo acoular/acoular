@@ -1,46 +1,59 @@
 # -*- coding: utf-8 -*-
 #pylint: disable-msg=E0611, C0103, R0901, R0902, R0903, R0904, W0232
-"""
-grids.py: classes providing support for grids and microphone geometries
+# -*- coding: utf-8 -*-
+#pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
+#------------------------------------------------------------------------------
+# Copyright (c) 2007-2014, Beamfpy Development Team.
+#------------------------------------------------------------------------------
+"""Implements support for two- and threedimensional grids
 
-Part of the beamfpy library: several classes for the implemetation of
-acoustic beamforming
+.. autosummary::
+    :toctree: generated/
 
-(c) Ennes Sarradj 2007-2010, all rights reserved
-ennes.sarradj@gmx.de
+    Grid
+    RectGrid
+    RectGrid3D
+    MicGeom
+
 """
 
 # imports from other packages
-from numpy import mgrid, s_, array, isscalar, float32, float64, newaxis, \
-sqrt, arange, pi, exp, sin, cos, arccos, zeros_like, empty, dot, hstack, \
-vstack, identity
-from numpy.linalg.linalg import norm
-from scipy.integrate import ode
-from scipy.interpolate import LinearNDInterpolator
-from scipy.spatial import ConvexHull
-from traits.api import HasPrivateTraits, Float, Property, File, Int, \
-CArray, List, property_depends_on, cached_property, on_trait_change, Trait
+from numpy import mgrid, s_, array, arange
+from traits.api import HasPrivateTraits, Float, Property, File, \
+CArray, List, property_depends_on, cached_property, on_trait_change
 from traitsui.api import View
 from traitsui.menu import OKCancelButtons
 from os import path
 
-from internal import digest
+from .internal import digest
 
 class Grid( HasPrivateTraits ):
-    """
-    base class for grid geometries
+    """Virtual base class for grid geometries.
+    
+    Defines the common interface for all grid classes and
+    provides facilities to query grid properties and related data. This class
+    may be used as a base for specialized grid implementaions. It should not
+    be used directly as it contains no real functionality.
     """
 
-    # overall number of grid points (auto-set)
+    #: overall number of grid points, readonly, is set automatically when
+    #: other grid defining properties are set
     size = Property(
         desc="overall number of grid points")
 
-    # shape of grid
+    #: shape of grid, readonly, gives the shape as tuple, useful for cartesian
+    #: grids
     shape = Property(
         desc="grid shape as tuple")
 
     # internal identifier
-    digest = ''
+    digest = Property
+
+    # no view necessary
+    traits_view = View()
+
+    def _get_digest( self ):
+        return ''
 
     # 'digest' is a placeholder for other properties in derived classes,
     # necessary to trigger the depends on mechanism
@@ -54,50 +67,62 @@ class Grid( HasPrivateTraits ):
         return (1, 1)
 
     def pos ( self ):
-        """
-        returns an (3, size) array with the grid point x, y, z-coordinates
+        """Calculates grid co-ordinates.
+        
+        Returns
+        -------
+        array of floats of shape (3, size)
+            The grid point x, y, z-coordinates in one array.
         """
         return array([[0.],[0.],[0.]])
 
-    def extend (self) :
-        """
-        returns the x, y extension of the grid,
-        useful for the imshow function from pylab
-        """
-        pos = self.pos()
-        return (min(pos[0,:]), max(pos[0,:]), min(pos[1,:]), max(pos[1,:]))
+# This is not needed in the base class (?)
+#    def extend (self) :
+#        """
+#        returns the x, y extension of the grid,
+#        useful for the imshow function from pylab
+#        """
+#        pos = self.pos()
+#        return (min(pos[0,:]), max(pos[0,:]), min(pos[1,:]), max(pos[1,:]))
 
 
 class RectGrid( Grid ):
+    """Provides a cartesian 2D grid for the beamforming results.
+    
+    The grid has square or nearly square cells and is on a plane perpendicular
+    to the z-axis. It is defined by lower and upper x- and  y-limits and the 
+    z co-ordinate.
     """
-    constructs a quadratic 2D grid for the beamforming results
-    that is on a plane perpendicular to the z-axis
-    """
-
+    
+    #: The lower x-limit that defines the grid, defaults to -1.
     x_min = Float(-1.0,
         desc="minimum  x-value")
 
+    #: The upper x-limit that defines the grid, defaults to 1.
     x_max = Float(1.0,
         desc="maximum  x-value")
 
+    #: The lower y-limit that defines the grid, defaults to -1.
     y_min = Float(-1.0,
         desc="minimum  y-value")
 
+    #: The upper y-limit that defines the grid, defaults to 1.
     y_max = Float(1.0,
         desc="maximum  y-value")
 
+    #: The z co-ordinate that defines the grid, defaults to 1.
     z = Float(1.0,
         desc="position on z-axis")
 
-    # increment in x- and y- direction
+    #: The cell side length for the grid, defaults to 0.1.
     increment = Float(0.1,
         desc="step size")
 
-    # number of grid points along x-axis (auto-set)
+    #: Number of grid points along x-axis, readonly.
     nxsteps = Property(
         desc="number of grid points along x-axis")
 
-    # number of grid points along y-axis (auto-set)
+    #: Number of grid points along y-axis, readonly.
     nysteps = Property(
         desc="number of grid points along y-axis")
 
@@ -141,8 +166,12 @@ class RectGrid( Grid ):
         return digest( self )
 
     def pos ( self ):
-        """
-        returns an (3, size) array with the grid point x, y, z-coordinates
+        """Calculates grid co-ordinates.
+        
+        Returns
+        -------
+        array of floats of shape (3, size)
+            The grid point x, y, z-coordinates in one array.
         """
         i = self.increment
         xi = 1j*round((self.x_max-self.x_min+i)/i)
@@ -153,8 +182,21 @@ class RectGrid( Grid ):
         return bpos
 
     def index ( self, x, y ):
-        """
-        returns the indices for a certain x, y co-ordinate
+        """Queries the indices for a grid point near a certain co-ordinate.
+
+        This can be used to query results or co-ordinates at/near a certain
+        co-ordinate.
+        
+        Parameters
+        ----------
+        x,y : float
+            The co-ordinates for which the indices is queried.
+
+        Returns
+        -------
+        2-tuple of integers
+            The indices that give the grid point nearest to the given x, y
+            co-ordinates from an array with the same shape as the grid.            
         """
         if x < self.x_min or x > self.x_max:
             raise ValueError, "x-value out of range"
@@ -165,20 +207,33 @@ class RectGrid( Grid ):
         return xi, yi
 
     def indices ( self, x1, y1, x2, y2=None ):
-        """
-        returns the slices to index a rectangular subdomain, or,
-        alternatively, the indices of all grid points with distance
-        x2 or less to point (x1, y1)
-        useful for inspecting subdomains in a result already calculated
-        """
-        if y2 is None: # only 3 values given -> use x,y,radius method
-            xpos = self.pos()
+        """Queries the indices for a subdomain in the grid.
+        
+        Allows either rectagular or circular subdomains. This can be used to
+        mask or to query results from a certain sector or subdomain.
+        
+        Parameters
+        ----------
+        x1, x2, y1, y2 : float
+            If all four paramters are given, then a rectangular sector is
+            assumed that is given by two corners (x1,y1) and (x2,y2). If
+            only three parameters are given, then a circular sector is assumed
+            that is given by its center (x1,y1) and the radius x2.
 
+        Returns
+        -------
+        2-tuple of arrays of integers or of numpy slice objects
+            The indices that can be used to mask/select the grid subdomain from 
+            an array with the same shape as the grid.            
+        """
+        # only 3 values given -> use x,y,radius method
+        if y2 is None: 
+            xpos = self.pos()
             xis = []
             yis = []
-
             dr2 = (xpos[0,:]-x1)**2 + (xpos[1,:]-y1)**2
-            inds = dr2 <= x2**2 # array with true/false entries
+            # array with true/false entries
+            inds = dr2 <= x2**2 
             for np in arange(self.size)[inds]: # np -- points in x2-circle
                 xi, yi = self.index(xpos[0,np], xpos[1,np])
                 xis += [xi]
@@ -193,24 +248,31 @@ class RectGrid( Grid ):
             return s_[xi1:xi2+1], s_[yi1:yi2+1]
 
     def extend (self) :
-        """
-        returns the x, y extension of the grid,
-        useful for the imshow function from pylab
+        """The extension of the grid in pylab imshow compatible form.
+
+        Returns
+        -------
+        4-tuple of floats
+            The extent of the grid as a tuple of x_min, x_max, y_min, y_max)
         """
         return (self.x_min, self.x_max, self.y_min, self.y_max)
 
 class RectGrid3D( RectGrid):
-    """
-    constructs a quadratic 3D grid for the beamforming results
+    """Provides a cartesian 3D grid for the beamforming results.
+    
+    The grid has cubic or nearly cubic cells. It is defined by lower and upper 
+    x-, y- and  z-limits.
     """
 
+    #: The lower z-limit that defines the grid, defaults to -1.
     z_min = Float(-1.0,
         desc="minimum  z-value")
 
+    #: The upper z-limit that defines the grid, defaults to 1.
     z_max = Float(1.0,
         desc="maximum  z-value")
 
-    # number of grid points alog x-axis (auto-set)
+    #: Number of grid points along x-axis, readonly.
     nzsteps = Property(
         desc="number of grid points alog x-axis")
 
@@ -249,8 +311,12 @@ class RectGrid3D( RectGrid):
         return digest( self )
 
     def pos ( self ):
-        """
-        returns an (3, size) array with the grid point x, y, z-coordinates
+        """Calculates grid co-ordinates.
+        
+        Returns
+        -------
+        array of floats of shape (3, size)
+            The grid point x, y, z-coordinates in one array.
         """
         i = self.increment
         xi = 1j*round((self.x_max-self.x_min+i)/i)
@@ -263,8 +329,23 @@ class RectGrid3D( RectGrid):
         return bpos
 
     def index ( self, x, y, z ):
-        """
-        returns the indices for a certain x, y, z co-ordinate
+        """Queries the indices for a grid point near a certain co-ordinate.
+
+        This can be used to query results or co-ordinates at/near a certain
+        co-ordinate.
+        
+        Parameters
+        ----------
+        x : float
+        y : float
+        z : float
+            The co-ordinates for which the indices is queried.
+
+        Returns
+        -------
+        3-tuple of integers
+            The indices that give the grid point nearest to the given x, y, z
+            co-ordinates from an array with the same shape as the grid.            
         """
         if x < self.x_min or x > self.x_max:
             raise ValueError, "x-value out of range %f (%f, %f)" % \
@@ -281,42 +362,65 @@ class RectGrid3D( RectGrid):
         return xi, yi, zi
 
     def indices ( self, x1, y1, z1, x2, y2, z2 ):
-        """
-        returns the slices to index a rectangular subdomain,
-        useful for inspecting subdomains in a result already calculated
+        """Queries the indices for a subdomain in the grid.
+        
+        Allows box-shaped subdomains. This can be used to
+        mask or to query results from a certain sector or subdomain.
+        
+        Parameters
+        ----------
+        x1 : float
+        y1 : float
+        z1 : float
+        x2 : float
+        y2 : float
+        z2 : float
+            A box-shaped sector is assumed that is given by two corners
+            (x1,y1,z1) and (x2,y2,z2). 
+
+        Returns
+        -------
+        3-tuple of numpy slice objects
+            The indices that can be used to mask/select the grid subdomain from 
+            an array with the same shape as the grid.            
         """
         xi1, yi1, zi1 = self.index(min(x1, x2), min(y1, y2), min(z1, z2))
         xi2, yi2, zi2 = self.index(max(x1, x2), max(y1, y2), max(z1, z2))
         return s_[xi1:xi2+1], s_[yi1:yi2+1], s_[zi1:zi2+1]
 
 class MicGeom( HasPrivateTraits ):
-    """
-    container for the geometric arrangement of microphones
-    reads data from xml-source with element tag names 'pos'
-    and attributes Name, x, y and z
+    """Provides the geometric arrangement of microphones in the mic. array.
+    
+    The geometric arrangement of microphones is read in from an 
+    xml-source with element tag names 'pos' and attributes Name, x, y and z. 
+    Can also be used with programmatically generated arrangements.
     """
 
-    # name of the .xml-file
+    #: Name of the .xml-file from wich to read the data.
     from_file = File(filter=['*.xml'],
         desc="name of the xml file to import")
 
-    # basename of the .xml-file
+    #: Basename of the .xml-file, without the extension, readonly.
     basename = Property( depends_on = 'from_file',
         desc="basename of xml file")
 
-    # invalid channels
+    #: List that gives the indices of channels that should not be considered.
+    #: Defaults to a blank list.
     invalid_channels = List(
         desc="list of invalid channels")
 
-    # number of mics
+    #: Number of microphones in the array, readonly.
     num_mics = Property( depends_on = ['mpos', ],
         desc="number of microphones in the geometry")
 
-    # positions as (3, num_mics) array
+    #: Positions as (3, num_mics) array of floats, may include also invalid
+    #: microphones (if any). Set either automatically on change of the
+    #: from_file argument or explicitely by assigning an array of floats.
     mpos_tot = CArray(
         desc="x, y, z position of all microphones")
 
-    # positions as (3, num_mics) array
+    #: Positions as (3, num_mics) array of floats, without invalid
+    #: microphones, readonly.
     mpos = Property( depends_on = ['mpos_tot', 'invalid_channels'],
         desc="x, y, z position of microphones")
 

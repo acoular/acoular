@@ -61,14 +61,6 @@ The following modules are part of beamfpy:
     :undoc-members:
     :show-inheritance:
 
-:mod:`grids` Module
--------------------
-
-.. automodule:: beamfpy.grids
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 :mod:`h5cache` Module
 ---------------------
 
