@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
+#pylint: disable-msg=E0611, E1103, C0103, R0901, R0902, R0903, R0904, W0232
 #------------------------------------------------------------------------------
 # Copyright (c) 2007-2014, Beamfpy Development Team.
 #------------------------------------------------------------------------------
@@ -51,18 +51,18 @@ class Environment( HasPrivateTraits ):
         ----------
         c  : float
             The speed of sound to use for the calculation.
-        gpos : array of floats of shape (3,N)
+        gpos : array of floats of shape (3, N)
             The locations of points in the beamforming map grid in 3D cartesian
             co-ordinates.
-        mpos : array of floats of shape (3,M), optional
+        mpos : array of floats of shape (3, M), optional
             The locations of microphones in 3D cartesian co-ordinates. If not
-            given, then only one microphone at the origin (0,0,0) is
+            given, then only one microphone at the origin (0, 0, 0) is
             considered.
 
         Returns
         -------
         r : array of floats
-            The distances in a twodimensional (N,M) array of floats. If M==1,
+            The distances in a twodimensional (N, M) array of floats. If M==1, 
             then only a onedimensional array is returned.
         """
         if isscalar(mpos):
@@ -82,22 +82,22 @@ class UniformFlowEnvironment( Environment):
     field.
     """
     #: The Mach number, defaults to 0.
-    ma = Float(0.0,
+    ma = Float(0.0, 
         desc="flow mach number")
 
     #: The unit vector that gives the direction of the flow, defaults to
     #: flow in x-direction..
-    fdv = CArray( dtype=float64, shape=(3, ), value=array((1.0, 0, 0)),
+    fdv = CArray( dtype=float64, shape=(3, ), value=array((1.0, 0, 0)), 
         desc="flow direction")
 
     # internal identifier
     digest = Property(
-        depends_on=['ma', 'fdv'],
+        depends_on=['ma', 'fdv'], 
         )
 
     traits_view = View(
             [
-                ['ma{flow Mach number}', 'fdv{flow vector}'],
+                ['ma{flow Mach number}', 'fdv{flow vector}'], 
                 '|[Uniform Flow]'
             ]
         )
@@ -115,18 +115,18 @@ class UniformFlowEnvironment( Environment):
         ----------
         c : float
             The speed of sound to use for the calculation.
-        gpos : array of floats of shape (3,N)
+        gpos : array of floats of shape (3, N)
             The locations of points in the beamforming map grid in 3D cartesian
             co-ordinates.
-        mpos : array of floats of shape (3,M), optional
+        mpos : array of floats of shape (3, M), optional
             The locations of microphones in 3D cartesian co-ordinates. If not
-            given, then only one microphone at the origin (0,0,0) is
+            given, then only one microphone at the origin (0, 0, 0) is
             considered.
 
         Returns
         -------
         array of floats
-            The distances in a twodimensional (N,M) array of floats. If M==1,
+            The distances in a twodimensional (N, M) array of floats. If M==1, 
             then only a onedimensional array is returned.
         """
         if isscalar(mpos):
@@ -159,7 +159,7 @@ class FlowField( HasPrivateTraits ):
 
         Parameters
         ----------
-        xx : array of floats of shape (3,)
+        xx : array of floats of shape (3, )
             Location in the fluid for which to provide the data.
 
         Returns
@@ -170,11 +170,11 @@ class FlowField( HasPrivateTraits ):
             given location.
         """
         v = array((0., 0., 0.))
-        dv = array(((0.,0.,0.), (0.,0.,0.), (0.,0.,0.)))
-        return -v,-dv
+        dv = array(((0., 0., 0.), (0., 0., 0.), (0., 0., 0.)))
+        return -v, -dv
 
 class OpenJet( FlowField ):
-    """Provides an analytical approximation of the flow field of an open jet,
+    """Provides an analytical approximation of the flow field of an open jet, 
     see Albertson et al., 1950.
 
     Notes
@@ -184,26 +184,26 @@ class OpenJet( FlowField ):
     components in the other direction are zero.
     """
     #: Exit velocity at jet origin, i.e. the nozzle. Defaults to 0.
-    v0 = Float(0.0,
+    v0 = Float(0.0, 
         desc="exit velocity")
 
     #: Location of the nozzle center, defaults to the co-ordinate origin.
-    origin = CArray( dtype=float64, shape=(3, ), value=array((0., 0., 0.)),
+    origin = CArray( dtype=float64, shape=(3, ), value=array((0., 0., 0.)), 
         desc="center of nozzle")
 
     #: Diameter of the nozzle, defaults to 0.2 .
-    D = Float(0.2,
+    D = Float(0.2, 
         desc="nozzle diameter")
 
     # internal identifier
     digest = Property(
-        depends_on=['v0', 'origin','D'],
+        depends_on=['v0', 'origin', 'D'], 
         )
 
     traits_view = View(
             [
-                ['v0{exit velocity}', 'origin{jet origin}',
-                'D{nozzle diameter}'],
+                ['v0{exit velocity}', 'origin{jet origin}', 
+                'D{nozzle diameter}'], 
                 '|[open jet]'
             ]
         )
@@ -219,7 +219,7 @@ class OpenJet( FlowField ):
 
         Parameters
         ----------
-        xx : array of floats of shape (3,)
+        xx : array of floats of shape (3, )
             Location in the fluid for which to provide the data.
 
         Returns
@@ -229,52 +229,52 @@ class OpenJet( FlowField ):
             second is the Jacobian of the velocity vector field, both at the
             given location.
         """
-        x,y,z = xx-self.origin
+        x, y, z = xx-self.origin
         r = sqrt(y*y+z*z)
         x1 = 0.081*x
         h1 = r+x1-0.5*self.D
         U = self.v0*exp(-h1*h1/(2*x1*x1))
-        if h1<0.0:
+        if h1 < 0.0:
             Udr = 0.0
             U = self.v0
         else:
             Udr = -h1*U/(x1*x1)
-        if r>0.0:
+        if r > 0.0:
             Udy = y*Udr/r
             Udz = z*Udr/r
         else:
             Udy = Udz = 0.0
         Udx = (h1*h1/(x*x1*x1)-h1/(x*x1))*U
-        if h1<0.0:
+        if h1 < 0.0:
             Udx = 0
         v = array( (U, 0., 0.) )
-        dv = array( ((Udx,0.,0.),(Udy,0.,0.),(Udz,0.,0.)) )
-        return v,dv
+        dv = array( ((Udx, 0., 0.), (Udy, 0., 0.), (Udz, 0., 0.)) )
+        return v, dv
 
-def spiral_sphere(N,Om=2*pi,b=array((0,0,1))):
+def spiral_sphere(N, Om=2*pi, b=array((0, 0, 1))):
     """Internal helper function for the raycasting that returns an array of
-    unit vectors (N,3) giving equally distributed directions on a part of
+    unit vectors (N, 3) giving equally distributed directions on a part of
     sphere given by the center direction b and the solid angle Om
     """
     # first produce 'equally' distributed directions in spherical coords
-    o=4*pi/Om
+    o = 4*pi/Om
     h = -1+ 2*arange(N)/(N*o-1.)
     theta = arccos(h)
     phi = zeros_like(theta)
-    for i,hk in enumerate(h[1:]):
+    for i, hk in enumerate(h[1:]):
         phi[i+1] = phi[i]+3.6/sqrt(N*o*(1-hk*hk)) % (2*pi)
     # translate to cartesian coords
-    xyz = vstack((sin(theta) * cos(phi),sin(theta) * sin(phi),cos(theta)))
+    xyz = vstack((sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta)))
     # mirror everything on a plane so that b points into the center
-    a = xyz[:,0]
+    a = xyz[:, 0]
     b = b/norm(b)
-    ab = (a-b)[:,newaxis]
+    ab = (a-b)[:, newaxis]
     if norm(ab)<1e-10:
         return xyz
     # this is the Householder matrix for mirroring
-    H = identity(3)-dot(ab,ab.T)/dot(ab.T,a)
+    H = identity(3)-dot(ab, ab.T)/dot(ab.T, a)
     # actual mirroring
-    return dot(H,xyz)
+    return dot(H, xyz)
 
 class GeneralFlowEnvironment(Environment):
     """An acoustic environment with a generic flow field.
@@ -288,25 +288,25 @@ class GeneralFlowEnvironment(Environment):
     spanned between these rays.
     """
     #: The flow field, must be of type :py:class:FlowField
-    ff = Trait(FlowField,
+    ff = Trait(FlowField, 
         desc="flow field")
 
     #: Number of rays used per solid angle :math:`\pi`, defaults to 100.
-    N = Int(100,
+    N = Int(100, 
         desc="number of rays per pi")
 
     #: The maximum solid angle used in the algorithm, defaults to :math:`\pi`.
-    Om = Float(pi,
+    Om = Float(pi, 
         desc="maximum solid angle")
 
     # internal identifier
     digest = Property(
-        depends_on=['ff.digest','N','Om'],
+        depends_on=['ff.digest', 'N', 'Om'], 
         )
 
     traits_view = View(
             [
-                ['ff','N{max. number of rays}','Om{max. solid angle }'],
+                ['ff', 'N{max. number of rays}', 'Om{max. solid angle }'], 
                 '|[General Flow]'
             ]
         )
@@ -325,18 +325,18 @@ class GeneralFlowEnvironment(Environment):
         ----------
         c : float
             The speed of sound to use for the calculation.
-        gpos : array of floats of shape (3,N)
+        gpos : array of floats of shape (3, N)
             The locations of points in the beamforming map grid in 3D cartesian
             co-ordinates.
-        mpos : array of floats of shape (3,M), optional
+        mpos : array of floats of shape (3, M), optional
             The locations of microphones in 3D cartesian co-ordinates. If not
-            given, then only one microphone at the origin (0,0,0) is
+            given, then only one microphone at the origin (0, 0, 0) is
             considered.
 
         Returns
         -------
         array of floats
-            The distances in a twodimensional (N,M) array of floats. If M==1,
+            The distances in a twodimensional (N, M) array of floats. If M==1, 
             then only a onedimensional array is returned.
         """
         if isscalar(mpos):
@@ -354,13 +354,13 @@ class GeneralFlowEnvironment(Environment):
             return x
 
         # integration along a single ray
-        def fr(x0,n0, rmax, dt, v, xyz, t):
-            s0 = n0 / (c+dot(v(x0)[0],n0))
-            y0 = hstack((x0,s0))
+        def fr(x0, n0, rmax, dt, v, xyz, t):
+            s0 = n0 / (c+dot(v(x0)[0], n0))
+            y0 = hstack((x0, s0))
             oo = ode(f1)
             oo.set_f_params(v)
-            oo.set_integrator('vode',rtol=1e-2)
-            oo.set_initial_value(y0,0)
+            oo.set_integrator('vode', rtol=1e-2)
+            oo.set_initial_value(y0, 0)
             while oo.successful():
                 xyz.append(oo.y[0:3])
                 t.append(oo.t)
@@ -368,39 +368,37 @@ class GeneralFlowEnvironment(Environment):
                     break
                 oo.integrate(oo.t+dt)
 
-        print gpos.shape
         gs2 = gpos.shape[-1]
-        gt = empty((gs2,mpos.shape[-1]))
+        gt = empty((gs2, mpos.shape[-1]))
         vv = self.ff.v
         NN = int(sqrt(self.N))
-        for micnum,x0 in enumerate(mpos.T):
+        for micnum, x0 in enumerate(mpos.T):
             xe = gpos.mean(1) # center of grid
-            r = x0[:,newaxis]-gpos
+            r = x0[:, newaxis]-gpos
             rmax = sqrt((r*r).sum(0).max()) # maximum distance
-            nv = spiral_sphere(self.N,pi,b=xe-x0)
+            nv = spiral_sphere(self.N, pi, b=xe-x0)
             rstep = rmax/sqrt(self.N)
             rmax += rstep
             tstep = rstep/c
             xyz = []
             t = []
             lastind = 0
-            for i,n0 in enumerate(nv.T):
-                fr(x0,n0,rmax,tstep,vv,xyz,t)
-                if i and i%NN==0:
+            for i, n0 in enumerate(nv.T):
+                fr(x0, n0, rmax, tstep, vv, xyz, t)
+                if i and i % NN == 0:
                     if not lastind:
-                        dd = ConvexHull(vstack((gpos.T,xyz)),incremental=True)
+                        dd = ConvexHull(vstack((gpos.T, xyz)), incremental=True)
                     else:
-                        dd.add_points(xyz[lastind:],restart=True)
+                        dd.add_points(xyz[lastind:], restart=True)
                     lastind = len(xyz)
                     # ConvexHull includes grid ?
                     if dd.simplices.min()>=gs2:
                         break
             xyz = array(xyz)
             t = array(t)
-            li = LinearNDInterpolator(xyz,t)
-            gt[:,micnum] = li(gpos.T)
+            li = LinearNDInterpolator(xyz, t)
+            gt[:, micnum] = li(gpos.T)
         if gt.shape[1] == 1:
             gt = gt[:, 0]
-    #        print gt[:,micnum].max(),gt[:,micnum].min(),gt[:,micnum].mean()
         return c*gt #return distance along ray
 

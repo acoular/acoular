@@ -70,9 +70,9 @@ from .grids import RectGrid, RectGrid3D
 from .environments import Environment, UniformFlowEnvironment, \
 FlowField, OpenJet, GeneralFlowEnvironment
 from .microphones import MicGeom
-from beamfpy import  PowerSpectra, EigSpectra, \
-BeamformerBase, BeamformerCapon, BeamformerEig, BeamformerMusic,\
-BeamformerDamas, BeamformerOrth,BeamformerCleansc, BeamformerCMF,\
-BeamformerClean, L_p, synthetic
+from .spectra import PowerSpectra, EigSpectra, synthetic
+from beamfpy import BeamformerBase, BeamformerCapon, BeamformerEig, \
+BeamformerMusic, BeamformerDamas, BeamformerOrth,BeamformerCleansc, \
+BeamformerCMF, BeamformerClean, L_p
 from sources import PointSource, MovingPointSource, \
 SineGenerator, WNoiseGenerator, SignalGenerator

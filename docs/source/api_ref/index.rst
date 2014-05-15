@@ -22,6 +22,8 @@ The following modules are part of beamfpy:
     beamfpy
     timedomain
     grids
+    microphones
+    spectra
     sources
     nidaqimport
     fileimport

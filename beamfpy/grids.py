@@ -72,7 +72,7 @@ class Grid( HasPrivateTraits ):
         array of floats of shape (3, size)
             The grid point x, y, z-coordinates in one array.
         """
-        return array([[0.],[0.],[0.]])
+        return array([[0.], [0.], [0.]])
 
 # This is not needed in the base class (?)
 #    def extend (self) :
@@ -229,11 +229,11 @@ class RectGrid( Grid ):
             xpos = self.pos()
             xis = []
             yis = []
-            dr2 = (xpos[0,:]-x1)**2 + (xpos[1,:]-y1)**2
+            dr2 = (xpos[0, :]-x1)**2 + (xpos[1, :]-y1)**2
             # array with true/false entries
             inds = dr2 <= x2**2 
             for np in arange(self.size)[inds]: # np -- points in x2-circle
-                xi, yi = self.index(xpos[0,np], xpos[1,np])
+                xi, yi = self.index(xpos[0, np], xpos[1, np])
                 xis += [xi]
                 yis += [yi]
             if not (xis and yis): # if no points in circle, take nearest one
