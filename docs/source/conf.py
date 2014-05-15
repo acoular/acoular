@@ -170,8 +170,8 @@ html_copy_source = False
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'Beamfpydoc'
 
-inheritance_graph_attrs = dict(rankdir="LR", size='"16.0, 8.0"',
-                               fontsize=14, ratio='compress')
+inheritance_graph_attrs = dict(rankdir="LR", size='"16.0, 16.0"',
+                               fontsize=14, ratio='auto')
 
 autosummary_generate = True
 

@@ -1,6 +1,9 @@
 beamfpy Package
 ===============
 
+.. inheritance-diagram:: beamfpy.environments beamfpy.grids beamfpy.microphones beamfpy.spectra beamfpy.timedomain beamfpy.beamfpy beamfpy.sources
+    :parts: 1
+
 :mod:`beamfpy` Package
 ----------------------
 
@@ -19,11 +22,11 @@ The following modules are part of beamfpy:
     :toctree: generated/
 
     environments
-    beamfpy
-    timedomain
     grids
     microphones
     spectra
+    beamfpy
+    timedomain
     sources
     nidaqimport
     fileimport
@@ -31,8 +34,6 @@ The following modules are part of beamfpy:
     internal
 
 .. TODO:
-    environments
-    microphone
     tools
     trajectories ??
 
@@ -46,64 +47,5 @@ The following modules are part of beamfpy:
 
     frequencydomain:
     beamformers
-
-
-:mod:`beamfpy` Module
----------------------
-.. automodule:: beamfpy.beamfpy
-    :members:
-    :undoc-members: digest
-    :show-inheritance:
-
-:mod:`cachemanager` Module
---------------------------
-
-.. automodule:: beamfpy.cachemanager
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`h5cache` Module
----------------------
-
-.. automodule:: beamfpy.h5cache
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`internal` Module
-----------------------
-
-.. automodule:: beamfpy.internal
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-
-:mod:`sources` Module
----------------------
-
-.. automodule:: beamfpy.sources
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`spectrum` Module
-----------------------
-
-.. automodule:: beamfpy.spectrum
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`timedomain` Module
-------------------------
-
-.. automodule:: beamfpy.timedomain
-    :members:
-    :undoc-members:
-    :show-inheritance:
-    :member-order: bysource
 
 

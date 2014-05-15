@@ -13,7 +13,6 @@
     Grid
     RectGrid
     RectGrid3D
-    MicGeom
 
 """
 
