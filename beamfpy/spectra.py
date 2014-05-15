@@ -31,36 +31,49 @@ from .timedomain import SamplesGenerator, Calib
 
 
 class PowerSpectra( HasPrivateTraits ):
-    """
-    efficient calculation of full cross spectral matrix
-    container for data and properties of this matrix
+    """Provides the cross spectral matrix of multichannel time data.
+    
+    This class includes the efficient calculation of the full cross spectral
+    matrix using the Welch method with windows and overlap. It also contains 
+    data and additional properties of this matrix. 
+    
+    The result is computed only when needed, that is when the *csm* attribute
+    is actually read. Any change in the input data or parameters leads to a
+    new calculation, again triggered when csm is read. The result may be 
+    cached on disk in HDF5 files and need not to be recomputed during
+    subsequent program runs with identical input data and parameters. The
+    input data is taken to be identical if the source has identical parameters
+    and the same file name in case of that the data is read from a file.
     """
 
-    # the SamplesGenerator object that provides the data
+    #: The SamplesGenerator object that provides the data.
     time_data = Trait(SamplesGenerator, 
         desc="time data object")
 
-    # the Calib object that provides the calibration data, 
-    # defaults to no calibration, i.e. the raw time data is used
+    #: The Calib object that provides the calibration data, 
+    #: defaults to no calibration, i.e. the raw time data is used.
+    #:
+    #: **deprecated**:      use calib property of TimeSamples objects
     calib = Instance(Calib)
 
-    # FFT block size, one of: 128, 256, 512, 1024, 2048 ... 16384
-    # defaults to 1024
+    #: FFT block size, one of: 128, 256, 512, 1024, 2048 ... 16384,
+    #: defaults to 1024
     block_size = Trait(1024, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 
         desc="number of samples per FFT block")
 
-    # index of lowest frequency line
-    # defaults to 0
+    #: Index of lowest frequency line to compute, integer, defaults to 0,
+    #: is used only by objects that fetch the csm, PowerSpectra computes every
+    #: frequency line
     ind_low = Range(1, 
         desc="index of lowest frequency line")
 
-    # index of highest frequency line
-    # defaults to -1 (last possible line for default block_size)
+    #: Index of highest frequency line to compute, integer, 
+    #: defaults to -1 (last possible line for default block_size).
     ind_high = Int(-1, 
         desc="index of highest frequency line")
 
-    # window function for FFT, one of:
-    # 'Rectangular' (default), 'Hanning', 'Hamming', 'Bartlett', 'Blackman'
+    #: Window function for FFT, one of:
+    #: 'Rectangular' (default), 'Hanning', 'Hamming', 'Bartlett', 'Blackman'
     window = Trait('Rectangular', 
         {'Rectangular':ones, 
         'Hanning':hanning, 
@@ -69,32 +82,36 @@ class PowerSpectra( HasPrivateTraits ):
         'Blackman':blackman}, 
         desc="type of window for FFT")
 
-    # overlap factor for averaging: 'None'(default), '50%', '75%', '87.5%'
+    #: Overlap factor for averaging: 'None'(default), '50%', '75%', '87.5%'
     overlap = Trait('None', {'None':1, '50%':2, '75%':4, '87.5%':8}, 
         desc="overlap of FFT blocks")
         
-    # flag, if true (default), the result is cached in h5 files
+    #: Flag, if true (default), the result is cached in h5 files and need not
+    #: to be recomputed during subsequent program runs
     cached = Bool(True, 
         desc="cached flag")   
 
-    # number of FFT blocks to average (auto-set from block_size and overlap)
+    #: Number of FFT blocks to average, readonly
+    #: (set from block_size and overlap).
     num_blocks = Property(
         desc="overall number of FFT blocks")
 
-    # frequency range
+    #: 2-element array with the lowest and highest frequency, readonly.
     freq_range = Property(
         desc = "frequency range" )
         
-    # frequency range
+    #: Array with a sequence of indices for all frequencies 
+    #: between *ind_low* and *ind_high* within the result, readonly.
     indices = Property(
         desc = "index range" )
         
-    # basename for cache file
+    #: Name of the cache file without extension, readonly.
     basename = Property( depends_on = 'time_data.digest', 
         desc="basename for cache file")
 
-    # the cross spectral matrix as
-    # (number of frequencies, numchannels, numchannels) array of complex
+    #: The cross spectral matrix, 
+    #: (number of frequencies, numchannels, numchannels) array of complex
+    #: readonly.
     csm = Property( 
         desc="cross spectral matrix")
 
@@ -224,38 +241,54 @@ class PowerSpectra( HasPrivateTraits ):
             return self.h5f.getNode('/', name)
 
     def fftfreq ( self ):
-        """
-        returns an array of the frequencies for the spectra in the 
-        cross spectral matrix from 0 to fs/2
+        """Return the Discrete Fourier Transform sample frequencies.
+        
+        Returns
+        -------
+        f : ndarray
+            Array of length *block_size/2+1* containing the sample frequencies.
         """
         return abs(fft.fftfreq(self.block_size, 1./self.time_data.sample_freq)\
                     [:self.block_size/2+1])
 
 
 class EigSpectra( PowerSpectra ):
-    """
-    efficient calculation of full cross spectral matrix
-    container for data and properties of this matrix
-    and its eigenvalues and eigenvectors
+    """Provides the eigendecomposition of cross spectral matrix.
+    
+    This class includes the efficient calculation of the full cross spectral
+    matrix using the Welch method with windows and overlap and in addition its. 
+    eigenvalues and eigenvectors. 
+    
+    The result is computed only when needed, that is when the *csm*, *eva* or
+    *eve* attribute
+    is actually read. Any change in the input data or parameters leads to a
+    new calculation, again triggered when csm is read. The result may be 
+    cached on disk in HDF5 files and need not to be recomputed during
+    subsequent program runs with identical input data and parameters. The
+    input data is taken to be identical if the source has identical parameters
+    and the same file name in case of that the data is read from a file.
     """
 
-    # eigenvalues of the cross spectral matrix
+    #: Eigenvalues of the cross spectral matrix as an
+    #: (number of frequencies) array of floats, readonly.
     eva = Property( 
         desc="eigenvalues of cross spectral matrix")
 
-    # eigenvectors of the cross spectral matrix
+    #: Eigenvectors of the cross spectral matrix as an
+    #: (number of frequencies, numchannels, numchannels) array of floats,
+    #: readonly.
     eve = Property( 
         desc="eigenvectors of cross spectral matrix")
 
     @property_depends_on('digest')
     def _get_eva ( self ):
-        return self.calc_ev()[0]
+        return self._calc_ev()[0]
 
     @property_depends_on('digest')
     def _get_eve ( self ):
-        return self.calc_ev()[1]
+        return self._calc_ev()[1]
 
-    def calc_ev ( self ):
+    def _calc_ev ( self ):
         """
         eigenvalues / eigenvectors calculation
         """
@@ -281,12 +314,30 @@ class EigSpectra( PowerSpectra ):
                     self.h5f.getNode('/', name_eve))
             
     def synthetic_ev( self, freq, num=0):
-        """
-        returns synthesized frequency band values of the eigenvalues
-        num = 0: single frequency line
-        num = 1: octave band
-        num = 3: third octave band
-        etc.
+        """Return synthesized frequency band values of the eigenvalues.
+        
+        Parameters
+        ----------
+        freq : float 
+            Band center frequency for which to return the results.
+        num : integer
+            Controls the width of the frequency bands considered, defaults to
+            3 (third-octave band).
+            
+            ===  =====================
+            num  frequency band width
+            ===  =====================
+            0    single frequency line
+            1    octave band
+            3    third octave band
+            n    1/n-octave band
+            ===  =====================
+
+        Returns
+        -------
+        float 
+            Synthesized frequency band value of the eigenvalues (the sum of
+            all values that are contained in the band).
         """
         f = self.fftfreq()
         if num == 0:
@@ -302,17 +353,34 @@ class EigSpectra( PowerSpectra ):
 
 
 def synthetic (data, freqs, f, num=3):
-    """
-    returns synthesized frequency band values of data
-    num = 0: single frequency line
-    num = 1: octave bands
-    num = 3: third octave bands
-    etc.
+    """Return synthesized frequency band values of spectral data.
+    
+    Parameters
+    ----------
+    data : array of floats
+        The spectral data in an array with one value per frequency line.
+    freq : array of floats
+        The frequencies of the *data*.
+    f : array of floats
+        Band center frequencies for which to return the results.
+    num : integer
+        Controls the width of the frequency bands considered, , defaults to
+        3 (third-octave band).
+        
+        ===  =====================
+        num  frequency band width
+        ===  =====================
+        0    single frequency line
+        1    octave band
+        3    third octave band
+        n    1/n-octave band
+        ===  =====================
 
-    freqs: the frequencies that correspond to the input data
-
-    f: band center frequencies
-
+    Returns
+    -------
+    array of floats
+        Synthesized frequency band values of the eigenvalues (the sum of
+        all values that are contained in the band).
     """
     if num == 0:
         res = [ data[searchsorted(freqs, i)] for i in f]        
