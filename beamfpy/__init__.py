@@ -1,10 +1,11 @@
 # coding=UTF-8
+#------------------------------------------------------------------------------
+# Copyright (c) 2007-2014, Beamfpy Development Team.
+#------------------------------------------------------------------------------
+
 """
 The beamfpy library: several classes for the implemetation of 
 acoustic beamforming
-
-(c) Ennes Sarradj 2007-2011, all rights reserved
-ennes.sarradj@gmx.de
 
 A minimal usage example would be:
 
@@ -61,10 +62,10 @@ from h5cache import td_dir, cache_dir
 import os
 os.environ.setdefault('OMP_NUM_THREADS','1')
 
-from timedomain import TimeInOut, Mixer, TimeAverage, TimeReverse, \
-TimePower, FiltFiltOctave, FiltOctave, IntegratorSectorTime, \
-BeamformerTime, BeamformerTimeSq, BeamformerTimeSqTraj, TimeCache, WriteWAV, \
-WriteH5 
+from .tbeamform import IntegratorSectorTime, \
+BeamformerTime, BeamformerTimeSq, BeamformerTimeSqTraj
+from .tprocess import TimeInOut, Mixer, TimeAverage, TimeReverse, \
+TimePower, FiltFiltOctave, FiltOctave, TimeCache, WriteWAV, WriteH5 
 from .calib import Calib
 from .trajectory import Trajectory
 from .grids import RectGrid, RectGrid3D

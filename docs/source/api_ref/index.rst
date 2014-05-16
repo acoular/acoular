@@ -1,17 +1,6 @@
 Reference Manual
 ================
 
-.. inheritance-diagram:: beamfpy.environments beamfpy.grids beamfpy.microphones beamfpy.spectra beamfpy.timedomain beamfpy.beamfpy beamfpy.sources
-    :parts: 1
-
-:mod:`beamfpy` Package
-----------------------
-
-.. automodule:: beamfpy.__init__
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 Modules in beamfpy
 ------------------
 The following modules are part of beamfpy:
@@ -35,21 +24,27 @@ these modules still need some more documentation:
     sources
     calib
     trajectory
-    beamfpy
-    timedomain
-    nidaqimport
+    fbeamform
+    tbeamform
+    tprocess
     fileimport
     h5cache
     internal
 
-.. TODO:
-    tools
+Classes in beamfpy and their inheritance
+----------------------------------------
 
-    timedomain:
-    filters
-    beamformers
+.. inheritance-diagram:: beamfpy.environments beamfpy.grids beamfpy.microphones
+                         beamfpy.spectra beamfpy.signals beamfpy.sources
+                         beamfpy.calib beamfpy.trajectory beamfpy.fbeamform
+                         beamfpy.tbeamform beamfpy.tprocess
+    :parts: 1
 
-    frequencydomain:
-    beamformers
+:mod:`beamfpy` Package
+----------------------
 
+.. automodule:: beamfpy.__init__
+    :members:
+    :undoc-members:
+    :show-inheritance:
 

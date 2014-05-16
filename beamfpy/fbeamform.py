@@ -3,7 +3,7 @@
 #------------------------------------------------------------------------------
 # Copyright (c) 2007-2014, Beamfpy Development Team.
 #------------------------------------------------------------------------------
-"""Implements beamformers in the frequency domain
+"""Implements beamformers in the frequency domain.
 
 .. autosummary::
     :toctree: generated/
