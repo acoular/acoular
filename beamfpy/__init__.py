@@ -74,5 +74,5 @@ from .spectra import PowerSpectra, EigSpectra, synthetic
 from beamfpy import BeamformerBase, BeamformerCapon, BeamformerEig, \
 BeamformerMusic, BeamformerDamas, BeamformerOrth,BeamformerCleansc, \
 BeamformerCMF, BeamformerClean, L_p
-from sources import PointSource, MovingPointSource, \
-SineGenerator, WNoiseGenerator, SignalGenerator
+from sources import PointSource, MovingPointSource
+from .signals import SineGenerator, WNoiseGenerator, SignalGenerator

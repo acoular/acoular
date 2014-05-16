@@ -1,5 +1,5 @@
-beamfpy Package
-===============
+Reference Manual
+================
 
 .. inheritance-diagram:: beamfpy.environments beamfpy.grids beamfpy.microphones beamfpy.spectra beamfpy.timedomain beamfpy.beamfpy beamfpy.sources
     :parts: 1
@@ -25,6 +25,11 @@ The following modules are part of beamfpy:
     grids
     microphones
     spectra
+    signals
+
+these modules still need some more documentation
+.. autosummary::
+    :toctree: generated/
     beamfpy
     timedomain
     sources

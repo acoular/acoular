@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-#pylint: disable-msg=E0611, C0103, R0901, R0902, R0903, R0904, W0232
-# -*- coding: utf-8 -*-
 #pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
 #------------------------------------------------------------------------------
 # Copyright (c) 2007-2014, Beamfpy Development Team.

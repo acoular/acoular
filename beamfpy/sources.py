@@ -12,98 +12,17 @@ ennes.sarradj@gmx.de
 """
 
 # imports from other packages
-from numpy import array, pi, arange, sin, sqrt, ones, empty
-from numpy.random import normal, seed
-from traits.api import HasPrivateTraits, Float, Int, Long, \
+from numpy import array, sqrt, ones, empty
+from traits.api import Float, Int, \
 Property, Trait, Delegate, cached_property, Tuple
-from scipy.signal import resample
 
 # beamfpy imports
 from timedomain import SamplesGenerator, Trajectory
 from .internal import digest
 from .microphones import MicGeom
 from .environments import Environment
+from .signals import SignalGenerator
 
-class SignalGenerator( HasPrivateTraits ):
-    """
-    Base class for a simple one-channel signal generator,
-    generates output via the function 'signal'
-    """
-
-    #: rms amplitude of source signal in 1 m  distance
-    rms = Float(1.0, 
-        desc="rms amplitude")
-    
-    #: sample_freq of signal
-    sample_freq = Float(1.0, 
-        desc="sampling frequency")
-                   
-    # number of samples 
-    numsamples = Long
-    
-    # internal identifier
-    digest = ''
-               
-    def signal(self):
-        """delivers the signal as an array of length numsamples"""
-        pass
-    
-    def usignal(self, factor):
-        """
-        delivers the upsampled signal as an array of length factor*numsamples
-        """
-        return resample(self.signal(), factor*self.numsamples)
-
-class WNoiseGenerator( SignalGenerator ):
-    """
-    Simple one-channel white noise signal generator
-    """
-    # seed for random number generator, defaults to 0
-    seed = Int(0, 
-        desc="random seed value")
-
-    # internal identifier
-    digest = Property( 
-        depends_on = ['rms', 'numsamples', \
-        'sample_freq', 'seed', '__class__'], 
-        )
-               
-    @cached_property
-    def _get_digest( self ):
-        return digest(self)
-
-    def signal(self):
-        """delivers the signal as an array of length numsamples"""
-        seed(self.seed)
-        return self.rms*normal(scale=1.0, size=self.numsamples)
-    
-class SineGenerator( SignalGenerator ):
-    """
-    Simple one-channel sine signal generator
-    """
-
-    # Sine wave frequency
-    freq = Float(1000.0, 
-        desc="Frequency")
-
-    # Sine wave phase
-    phase = Float(0.0, 
-        desc="Phase")
-        
-    # internal identifier
-    digest = Property( 
-        depends_on = ['rms', 'numsamples', \
-        'sample_freq', 'freq', 'phase', '__class__'], 
-        )
-               
-    @cached_property
-    def _get_digest( self ):
-        return digest(self)
-
-    def signal(self):
-        """delivers the signal as an array of length numsamples"""
-        t = arange(self.numsamples, dtype=float)/self.sample_freq
-        return self.rms*sin(2*pi*self.freq*t+self.phase)
 
 class PointSource( SamplesGenerator ):
     """
