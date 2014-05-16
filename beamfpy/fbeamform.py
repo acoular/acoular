@@ -3,10 +3,27 @@
 #------------------------------------------------------------------------------
 # Copyright (c) 2007-2014, Beamfpy Development Team.
 #------------------------------------------------------------------------------
-"""
-Classes that implement beamforming in the frequency domain
+"""Implements beamformers in the frequency domain
+
+.. autosummary::
+    :toctree: generated/
+
+    BeamformerBase
+    BeamformerFunctional
+    BeamformerCapon
+    BeamformerEig
+    BeamformerMusic
+    BeamformerClean
+    BeamformerDamas
+    BeamformerOrth
+    BeamformerCleansc
+    BeamformerCMF
+
+    PointSpreadFunction
+
 """
 
+# imports from other packages
 from numpy import array, ones, hanning, hamming, bartlett, blackman, invert, \
 dot, newaxis, zeros, empty, fft, float32, float64, complex64, linalg, where, \
 searchsorted, pi, multiply, sign, diag, arange, sqrt, exp, log10, int,\
@@ -22,6 +39,7 @@ CArray, Property, Instance, Trait, Bool, Range, Delegate, Enum, \
 cached_property, on_trait_change, property_depends_on
 from traitsui.api import View, Item
 from traitsui.menu import OKCancelButtons
+
 from beamformer import faverage, gseidel, transfer,\
 r_beam_psf, r_beam_psf1, r_beam_psf2, r_beam_psf3, r_beam_psf4, \
 r_beamfull, r_beamfull_3d, r_beamfull_classic, r_beamfull_inverse, \
@@ -30,7 +48,7 @@ r_beamfull_os, r_beamfull_os_3d, r_beamfull_os_classic, r_beamfull_os_inverse, \
 r_beamdiag_os, r_beamdiag_os_3d, r_beamdiag_os_classic, r_beamdiag_os_inverse
 
 from h5cache import H5cache
-from internal import digest
+from .internal import digest
 from .grids import Grid
 from .microphones import MicGeom
 from .environments import Environment

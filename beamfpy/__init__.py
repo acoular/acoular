@@ -72,7 +72,7 @@ from .environments import Environment, UniformFlowEnvironment, \
 FlowField, OpenJet, GeneralFlowEnvironment
 from .microphones import MicGeom
 from .spectra import PowerSpectra, EigSpectra, synthetic
-from beamfpy import BeamformerBase, BeamformerCapon, BeamformerEig, \
+from .fbeamform import BeamformerBase, BeamformerCapon, BeamformerEig, \
 BeamformerMusic, BeamformerDamas, BeamformerOrth,BeamformerCleansc, \
 BeamformerCMF, BeamformerClean, L_p
 from .sources import PointSource, MovingPointSource, SamplesGenerator, \

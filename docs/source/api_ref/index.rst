@@ -27,12 +27,16 @@ The following modules are part of beamfpy:
     spectra
     signals
 
-these modules still need some more documentation
+these modules still need some more documentation:
+
 .. autosummary::
     :toctree: generated/
+
+    sources
+    calib
+    trajectory
     beamfpy
     timedomain
-    sources
     nidaqimport
     fileimport
     h5cache
@@ -40,14 +44,9 @@ these modules still need some more documentation
 
 .. TODO:
     tools
-    trajectories ??
 
     timedomain:
-    calib
-    signals
-    sources
     filters
-    spectra
     beamformers
 
     frequencydomain:

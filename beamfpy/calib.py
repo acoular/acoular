@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 #pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
-"""
-beamfpy.py: classes for calculations in the time domain
+#------------------------------------------------------------------------------
+# Copyright (c) 2007-2014, Beamfpy Development Team.
+#------------------------------------------------------------------------------
+"""Implements calibration of multichannel time signals.
 
-Part of the beamfpy library: several classes for the implemetation of 
-acoustic beamforming
- 
-(c) Ennes Sarradj 2007-2010, all rights reserved
-ennes.sarradj@gmx.de
+.. autosummary::
+    :toctree: generated/
+
+    Calib
 """
 
 # imports from other packages
@@ -27,19 +28,19 @@ class Calib( HasPrivateTraits ):
     an .xml-file
     """
 
-    # name of the .xml file
+    #: name of the .xml file
     from_file = File(filter=['*.xml'], 
         desc="name of the xml file to import")
 
-    # basename of the .xml-file
+    #: basename of the .xml-file
     basename = Property( depends_on = 'from_file', 
         desc="basename of xml file")
     
-    # number of microphones in the calibration data 
+    #: number of microphones in the calibration data 
     num_mics = CLong( 0, 
         desc="number of microphones in the geometry")
 
-    # array of calibration factors
+    #: array of calibration factors
     data = CArray(
         desc="calibration data")
 

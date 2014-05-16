@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 #pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
-"""
-beamfpy.py: classes for calculations in the time domain
+#------------------------------------------------------------------------------
+# Copyright (c) 2007-2014, Beamfpy Development Team.
+#------------------------------------------------------------------------------
+"""Implements the definition of trajectories.
 
-Part of the beamfpy library: several classes for the implemetation of 
-acoustic beamforming
- 
-(c) Ennes Sarradj 2007-2010, all rights reserved
-ennes.sarradj@gmx.de
+.. autosummary::
+    :toctree: generated/
+
+    Trajectory
 """
 
 # imports from other packages
@@ -27,15 +28,15 @@ class Trajectory( HasPrivateTraits ):
     describes the trajectory from sampled points
     does spline interpolation of positions between samples
     """
-    # dictionary; keys: time, values: sampled (x, y, z) positions along the 
-    # trajectory
+    #: dictionary; keys: time, values: sampled (x, y, z) positions along the 
+    #: trajectory
     points = Dict(key_trait = Float, value_trait = Tuple(Float, Float, Float), 
         desc = "sampled positions along the trajectory")
     
-    # t_min, t_max tuple
+    #: t_min, t_max tuple
     interval = Property()
     
-    # spline data, internal use
+    #: spline data, internal use
     tck = Property()
     
     # internal identifier
