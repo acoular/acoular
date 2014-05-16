@@ -61,11 +61,12 @@ from h5cache import td_dir, cache_dir
 import os
 os.environ.setdefault('OMP_NUM_THREADS','1')
 
-from timedomain import Calib, SamplesGenerator, TimeSamples, \
-MaskedTimeSamples, TimeInOut, Mixer, TimeAverage, TimeReverse, \
-TimePower, FiltFiltOctave, FiltOctave, Trajectory, IntegratorSectorTime, \
+from timedomain import TimeInOut, Mixer, TimeAverage, TimeReverse, \
+TimePower, FiltFiltOctave, FiltOctave, IntegratorSectorTime, \
 BeamformerTime, BeamformerTimeSq, BeamformerTimeSqTraj, TimeCache, WriteWAV, \
 WriteH5 
+from .calib import Calib
+from .trajectory import Trajectory
 from .grids import RectGrid, RectGrid3D
 from .environments import Environment, UniformFlowEnvironment, \
 FlowField, OpenJet, GeneralFlowEnvironment
@@ -74,5 +75,6 @@ from .spectra import PowerSpectra, EigSpectra, synthetic
 from beamfpy import BeamformerBase, BeamformerCapon, BeamformerEig, \
 BeamformerMusic, BeamformerDamas, BeamformerOrth,BeamformerCleansc, \
 BeamformerCMF, BeamformerClean, L_p
-from sources import PointSource, MovingPointSource
+from .sources import PointSource, MovingPointSource, SamplesGenerator, \
+TimeSamples, MaskedTimeSamples
 from .signals import SineGenerator, WNoiseGenerator, SignalGenerator

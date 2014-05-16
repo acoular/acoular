@@ -34,8 +34,7 @@ from internal import digest
 from .grids import Grid
 from .microphones import MicGeom
 from .environments import Environment
-from .spectra import PowerSpectra, EigSpectra, synthetic
-from timedomain import SamplesGenerator, Calib
+from .spectra import PowerSpectra, EigSpectra
 
 
 class BeamformerBase( HasPrivateTraits ):

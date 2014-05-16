@@ -27,7 +27,8 @@ from .beamformer import faverage
 
 from .h5cache import H5cache
 from .internal import digest
-from .timedomain import SamplesGenerator, Calib
+from .sources import SamplesGenerator
+from .calib import Calib
 
 
 class PowerSpectra( HasPrivateTraits ):
