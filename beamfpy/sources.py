@@ -35,58 +35,79 @@ from .signals import SignalGenerator
 
 class SamplesGenerator( HasPrivateTraits ):
     """
-    Base class for any generating signal processing block, 
-    generates output via the generator 'result'
+    Base class for any generating signal processing block
+    
+    It provides a common interface for all SamplesGenerator classes, which
+    generate an output via the generator :py:meth:`result`.
+    This class has no real functionality on its own and should not be 
+    used directly.
     """
 
-    #: sample_freq of signal
+    #: Sampling frequency of the signal, defaults to 1.0
     sample_freq = Float(1.0, 
         desc="sampling frequency")
     
-    #: number of channels 
+    #: Number of channels 
     numchannels = CLong
                
-    #: number of samples 
+    #: Number of samples 
     numsamples = CLong
     
     # internal identifier
     digest = ''
                
     def result(self, num):
-        """ python generator: yields output in blocks of num samples """
+        """Python generator that yields the output block-wise
+        
+        
+        Parameters
+        ----------
+        num : integer
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block) 
+        
+        Returns
+        -------
+        No output since SamplesGenerator only represents a base class to derive
+        other classes from
+        """
         pass
 
 class TimeSamples( SamplesGenerator ):
     """
-    Container for time data, loads time data
-    and provides information about this data
+    Container for time data in *.h5 format
+    
+    This class loads measured data from h5 files and
+    and provides information about this data.
+    It also serves as an interface where the data can be accessed
+    (e.g. for use in a block chain) via the :py:meth:`result` generator.
     """
 
-    #: full name of the .h5 file with data
+    #: Full name of the .h5 file with data
     name = File(filter=['*.h5'], 
         desc="name of data file")
 
-    #: basename of the .h5 file with data
+    #: Basename of the .h5 file with data, is set automatically
     basename = Property( depends_on = 'name', #filter=['*.h5'], 
         desc="basename of data file")
     
-    #: calibration data
+    #: Calibration data, instance of :py:class:`~beamfpy.calib.Calib` class, optional 
     calib = Trait( Calib, 
         desc="Calibration data")
     
-    #: number of channels, is set automatically
+    #: Number of channels, is set automatically / read from file
     numchannels = CLong(0L, 
         desc="number of input channels")
 
-    #: number of time data samples, is set automatically
+    #: Number of time data samples, is set automatically / read from file
     numsamples = CLong(0L, 
         desc="number of samples")
 
-    #: the time data as (numsamples, numchannels) array of floats
+    #: The time data as array of floats with dimension (numsamples, numchannels)
     data = Any( transient = True, 
         desc="the actual time data array")
 
-    #: hdf5 file object
+    #: HDF5 file object
     h5f = Instance(tables.File, transient = True)
     
     # internal identifier
@@ -114,8 +135,8 @@ class TimeSamples( SamplesGenerator ):
     
     @on_trait_change('basename')
     def load_data( self ):
-        """ open the .h5 file and setting attributes
-        """
+        #""" open the .h5 file and set attributes
+        #"""
         if not path.isfile(self.name):
             # no file there
             self.numsamples = 0
@@ -133,9 +154,19 @@ class TimeSamples( SamplesGenerator ):
         (self.numsamples, self.numchannels) = self.data.shape
 
     def result(self, num=128):
-        """ 
-        python generator: yields samples in blocks of shape (num, numchannels), 
-        the last block may be shorter than num
+        """Python generator that yields the output block-wise
+        
+        
+        Parameters
+        ----------
+        num : integer, defaults to 128
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block) 
+        
+        Returns
+        -------
+        Samples in blocks of shape (num, numchannels). 
+        The last block may be shorter than num.
         """
         if self.numsamples == 0:
             raise IOError("no samples available")
@@ -156,41 +187,45 @@ class TimeSamples( SamplesGenerator ):
 
 class MaskedTimeSamples( TimeSamples ):
     """
-    Container for time data, loads time data
-    and provides information about this data, 
-    stores information about valid samples and
-    valid channels
+    Container for time data in *.h5 format
+    
+    This class loads measured data from h5 files and
+    and provides information about this data.
+    It supports storing information about (in)valid samples and (in)valid channels
+    It also serves as an interface where the data can be accessed
+    (e.g. for use in a block chain) via the :py:meth:`result` generator.
+    
     """
     
-    #: start of valid samples
+    #: Index of the first sample to be considered valid
     start = CLong(0L, 
         desc="start of valid samples")
     
-    #: stop of valid samples
+    #: Index of the last valid sample to be considered valid
     stop = Trait(None, None, CLong, 
         desc="stop of valid samples")
     
-    #: invalid channels  
+    #: Channels that are to be treated as invalid
     invalid_channels = List(
         desc="list of invalid channels")
     
-    #: channel mask to serve as an index for all valid channels
+    #: Channel mask to serve as an index for all valid channels, is set automatically
     channels = Property(depends_on = ['invalid_channels', 'numchannels_total'], 
         desc="channel mask")
         
-    #: number of channels, is set automatically
+    #: Number of channels (including invalid channels), is set automatically
     numchannels_total = CLong(0L, 
         desc="total number of input channels")
 
-    #: number of time data samples, is set automatically
+    #: Number of time data samples (including invalid samples), is set automatically
     numsamples_total = CLong(0L, 
         desc="total number of samples per channel")
 
-    #: number of channels, is set automatically
+    #: Number of valid channels, is set automatically
     numchannels = Property(depends_on = ['invalid_channels', \
         'numchannels_total'], desc="number of valid input channels")
 
-    #: number of time data samples, is set automatically
+    #: Number of valid time data samples, is set automatically
     numsamples = Property(depends_on = ['start', 'stop', 'numsamples_total'], 
         desc="number of valid samples per channel")
 
@@ -243,8 +278,8 @@ class MaskedTimeSamples( TimeSamples ):
 
     @on_trait_change('basename')
     def load_data( self ):
-        """ open the .h5 file and setting attributes
-        """
+        #""" open the .h5 file and set attributes
+        #"""
         if not path.isfile(self.name):
             # no file there
             self.numsamples_total = 0
@@ -262,9 +297,18 @@ class MaskedTimeSamples( TimeSamples ):
         (self.numsamples_total, self.numchannels_total) = self.data.shape
 
     def result(self, num=128):
-        """ 
-        python generator: yields samples in blocks of shape (num, numchannels), 
-        the last block may be shorter than num
+        """Python generator that yields the output block-wise
+        
+        Parameters
+        ----------
+        num : integer, defaults to 128
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block) 
+        
+        Returns
+        -------
+        Samples in blocks of shape (num, numchannels). 
+        The last block may be shorter than num.
         """
         sli = slice(self.start, self.stop).indices(self.numsamples_total)
         i = sli[0]
@@ -287,47 +331,55 @@ class MaskedTimeSamples( TimeSamples ):
 
 class PointSource( SamplesGenerator ):
     """
-    fixed point source class for simulations
-    generates output via the generator 'result'
+    Class to define a fixed point source with an arbitrary signal 
+    (e.g. for use in simulations)
+    
+    The output is being generated via the :py:meth:`result` generator
     """
     
-    #: signal generator
+    #:  Emitted signal, instance of the :py:class:`~beamfpy.signals.SignalGenerator` class
     signal = Trait(SignalGenerator)
     
-    #: location of source 
+    #: Location of source in (x, y, z) coordinates (left-oriented system)
     loc = Tuple((0.0, 0.0, 1.0),
         desc="source location")
                
-    #: number of channels in output
+    #: Number of channels in output, is automatically set / 
+    #: depends on used microphone geometry
     numchannels = Delegate('mpos', 'num_mics')
 
-    #: MicGeom object that provides the microphone locations
+    #: Microphone locations as provided by a 
+    #: :py:class:`~beamfpy.microphones.MicGeom`-derived object
     mpos = Trait(MicGeom, 
         desc="microphone geometry")
         
-    #: Environment object that provides grid-mic distances
+    #: :py:class:`~beamfpy.environments.Environment` object 
+    #: that provides distances from grid points to microphone positions
     env = Trait(Environment(), Environment)
 
-    #: the speed of sound, defaults to 343 m/s
+    #: Speed of sound, defaults to 343 m/s
     c = Float(343., 
         desc="speed of sound")
         
-    #: the start time of the signal, in seconds
+    #: Start time of the signal in seconds, defaults to 0 s
     start_t = Float(0.0,
         desc="signal start time")
     
-    #: the start time of the data aquisition at microphones, in seconds
+    #: Start time of the data aquisition at microphones in seconds, 
+    #: defaults to 0 s
     start = Float(0.0,
         desc="sample start time")
 
-    #: upsampling factor, internal use
+    #: Upsampling factor, internal use, defaults to 16
     up = Int(16, 
         desc="upsampling factor")        
     
-    #: number of samples 
+    #: Number of samples, is set automatically / 
+    #: depends on :py:attr:`~beamfpy.sources.PointSource.signal`
     numsamples = Delegate('signal')
     
-    #: sample_freq of signal
+    #: Sampling frequency of the signal, is set automatically / 
+    #: depends on :py:attr:`~beamfpy.sources.PointSource.signal`
     sample_freq = Delegate('signal') 
 
     # internal identifier
@@ -341,12 +393,24 @@ class PointSource( SamplesGenerator ):
         return digest(self)
            
     def result(self, num=128):
-        """ 
-        python generator: yields source output at microphones in blocks of 
-        shape (num, numchannels), the last block may be shorter than num
-        if signal samples are needed for te < t_start, then samples are taken
+        """Python generator that yields the output at microphones block-wise
         
-        """       
+        
+        Parameters
+        ----------
+        num : integer, defaults to 128
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block) 
+        
+        Returns
+        -------
+        Samples in blocks of shape (num, numchannels). 
+        The last block may be shorter than num.
+        """
+        #If signal samples are needed for te < t_start, then samples are taken
+        #from the end of the calculated signal.
+        
+   
         signal = self.signal.usignal(self.up)
         out = empty((num, self.numchannels))
         # distances
@@ -370,11 +434,16 @@ class PointSource( SamplesGenerator ):
 
 class MovingPointSource( PointSource ):
     """
-    point source class for simulations that moves along a given trajectory
-    generates output via the generator 'result'
+    Class to define a point source with an arbitrary 
+    signal moving along a given trajectory
+    (e.g. for use in simulations)
+    
+    The output is being generated via the :py:meth:`result` generator
     """
 
-    #: trajectory, start time is assumed to be the same as for the samples
+    #: Trajectory of the source, 
+    #: instance of the :py:class:`~beamfpy.trajectory.Trajectory` class.
+    #: The start time is assumed to be the same as for the samples
     trajectory = Trait(Trajectory, 
         desc="trajectory of the source")
 
@@ -389,10 +458,23 @@ class MovingPointSource( PointSource ):
         return digest(self)
 
     def result(self, num=128):
-        """ 
-        python generator: yields source output at microphones in blocks of 
-        shape (num, numchannels), the last block may be shorter than num
-        """       
+        """Python generator that yields the output at microphones block-wise
+        
+        
+        Parameters
+        ----------
+        num : integer, defaults to 128
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block) 
+        
+        Returns
+        -------
+        Samples in blocks of shape (num, numchannels). 
+        The last block may be shorter than num.
+        """   
+        #If signal samples are needed for te < t_start, then samples are taken
+        #from the end of the calculated signal.
+        
         signal = self.signal.usignal(self.up)
         out = empty((num, self.numchannels))
         # shortcuts and intial values

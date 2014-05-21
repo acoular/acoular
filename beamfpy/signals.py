@@ -80,9 +80,9 @@ class WNoiseGenerator( SignalGenerator ):
     """White noise signal generator.
     """
 
-    #: seed for random number generator, defaults to 0
-    #: should be set differently for different instances to guarantee
-    #: statistically independent outputs
+    #: Seed for random number generator, defaults to 0.
+    #: This parameter should be set differently for different instances
+    #: to guarantee statistically independent (non-correlated) outputs
     seed = Int(0, 
         desc="random seed value")
 
@@ -101,7 +101,7 @@ class WNoiseGenerator( SignalGenerator ):
 
         Returns
         -------
-        array of floats
+        Array of floats
             The resulting signal as an array of length *numsamples*.
         """
         seed(self.seed)
