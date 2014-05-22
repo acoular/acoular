@@ -25,18 +25,23 @@ from .internal import digest
 
 class Trajectory( HasPrivateTraits ):
     """
-    describes the trajectory from sampled points
-    does spline interpolation of positions between samples
+    Describes a trajectory from sampled points
+    
+    Based on a discrete number of points in space and time, a 
+    continuous trajectory is calculated using spline interpolation 
+    of positions between samples.
     """
-    #: dictionary; keys: time, values: sampled (x, y, z) positions along the 
-    #: trajectory
+    #: Dictionary that assigns discrete time instants (keys) to 
+    #: sampled (x, y, z) positions along the trajectory (values)
     points = Dict(key_trait = Float, value_trait = Tuple(Float, Float, Float), 
         desc = "sampled positions along the trajectory")
     
-    #: t_min, t_max tuple
+    #: Tuple of the start and end time, is set autoamtically 
+    #: (deducted from :py:attr:`~beamfpy.trajectory.Trajectory.points`)
     interval = Property()
+    #t_min, t_max tuple
     
-    #: spline data, internal use
+    #: Spline data, internal use
     tck = Property()
     
     # internal identifier
@@ -68,15 +73,54 @@ class Trajectory( HasPrivateTraits ):
         return tcku[0]
     
     def location(self, t, der=0):
-        """ returns (x, y, z) for t, x, y and z have the same shape as t """
+        """ 
+        Returns the positions for one or more instants in time
+        
+        Parameters
+        ----------
+        t : array of floats
+            Instances in time to calculate the positions at.
+        der : integer
+            The order of derivative of the spline to compute, defaults to 0.
+        
+        Returns
+        -------
+        (x, y, z) : tuple with arrays of floats
+            Positions at the given times; x, y and z have the same shape as t .
+        """
         return splev(t, self.tck, der)
     
     def traj(self, t_start, t_end=None, delta_t=None, der=0):
         """
-        python generator, yields locations along the trajectory
-        x.traj(0.1)  every 0.1s within self.interval
-        x.traj(2.5, 4.5, 0.1)  every 0.1s between 2.5s and 4.5s
-        x.traj(0.1, der=1)  1st derivative every 0.1s within self.interval
+        Python generator that yields locations along the trajectory
+        
+        Parameters
+        ----------
+        t_start : float
+            Starting time of the trajectory, defaults to the earliest  
+            time in :py:attr:`~beamfpy.trajectory.Trajectory.points`
+        t_end : float
+            Ending time of the trajectory, defaults to the latest  
+            time in :py:attr:`~beamfpy.trajectory.Trajectory.points`    
+        delta_t : float
+            Time interval between yielded trajectory points, defaults to earliest  
+            time in :py:attr:`~beamfpy.trajectory.Trajectory.points`
+        
+        Returns
+        -------
+        (x, y, z) : tuples of floats
+            Positions at the desired times are yielded
+            
+        Examples
+        --------
+        x.traj(0.1)  
+            Yields the position every 0.1 s within the 
+            given :py:attr:`~beamfpy.trajectory.Trajectory.interval`.
+        x.traj(2.5, 4.5, 0.1)  
+            Yields the position every 0.1 s between 2.5 s and 4.5 s.
+        x.traj(0.1, der=1)  
+            Yields the 1st derivative of the spline (= velocity vector) every 0.1s 
+            within the given :py:attr:`~beamfpy.trajectory.Trajectory.interval`.
         """
         if not delta_t:
             delta_t = t_start

@@ -24,23 +24,27 @@ from .internal import digest
 
 class Calib( HasPrivateTraits ):
     """
-    container for calibration data that is loaded from
-    an .xml-file
+    Container for calibration data in *.xml format
+    
+    This class serves as interface to load calibration data for the used
+    microphone array.
     """
 
-    #: name of the .xml file
+    #: Name of the .xml file to be imported
     from_file = File(filter=['*.xml'], 
         desc="name of the xml file to import")
 
-    #: basename of the .xml-file
+    #: Basename of the .xml-file, is set automatically
     basename = Property( depends_on = 'from_file', 
         desc="basename of xml file")
     
-    #: number of microphones in the calibration data 
+    #: Number of microphones in the calibration data , 
+    #: is set automatically / read from file
     num_mics = CLong( 0, 
         desc="number of microphones in the geometry")
 
-    #: array of calibration factors
+    #: Array of calibration factors, 
+    #: is set automatically / read from file
     data = CArray(
         desc="calibration data")
 

@@ -689,7 +689,7 @@ class PointSpreadFunction (HasPrivateTraits):
 
 class BeamformerDamas (BeamformerBase):
     """
-    DAMAS Deconvolution
+    DAMAS Deconvolution, see :ref:`Brooks and Humphreys 2006<BroHum2006>`
     """
 
     # BeamformerBase object that provides data for deconvolution

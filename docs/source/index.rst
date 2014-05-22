@@ -48,12 +48,11 @@ Contents:
         templates, best practices, and more.
 
 
-    * - :doc:`arch_ref/index`
+    * - :doc:`literature/index`
 
-        Hackers welcome! This section offers a collection of topics covering
-        the low level details of Enaml's architecture and implementation.
-        Look here if you want to understand how Enaml works internally, or
-        if you are interested in extending Enaml for your own custom needs.
+        In here some of the publications used for this program package are 
+        listed. Further reading to fully understand how the algorithms work
+        is recommended.
 
       - :doc:`examples/index`
 

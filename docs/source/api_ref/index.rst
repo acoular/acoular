@@ -15,14 +15,15 @@ The following modules are part of beamfpy:
     microphones
     spectra
     signals
+    sources
+    calib
+
 
 these modules still need some more documentation:
 
 .. autosummary::
     :toctree: generated/
 
-    sources
-    calib
     trajectory
     fbeamform
     tbeamform
