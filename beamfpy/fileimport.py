@@ -1,12 +1,20 @@
-#pylint: disable-msg = E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
+# -*- coding: utf-8 -*-
+#pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
+#------------------------------------------------------------------------------
+# Copyright (c) 2007-2014, Beamfpy Development Team.
+#------------------------------------------------------------------------------
 """
-fileimport.py: classes for importing data in several file formats
+Contains classes for importing time data in several file formats.
 
-Part of the beamfpy library: several classes for the implemetation of 
-acoustic beamforming
+.. autosummary::
+    :toctree: generated/
 
-(c) Ennes Sarradj 2007-2010, all rights reserved
-ennes.sarradj@gmx.de
+    time_data_import
+    td_import
+    bk_mat_import
+    datx_d_file
+    datx_channel
+    datx_import
 """
 
 from h5cache import td_dir
@@ -23,13 +31,13 @@ import struct
 
 class time_data_import( HasPrivateTraits ):
     """
-    base class for import of time data
+    Base class for import of time data.
     """
 
     def get_data (self, td):
         """
-        imports the data into time_data object td
-        (this is a dummy function)
+        Imports the data into an arbitrary time_data object td.
+        This is a dummy function and should not be used directly.
         """
         td.data = None
         td.numsamples = 0
@@ -38,18 +46,18 @@ class time_data_import( HasPrivateTraits ):
 
 class csv_import( time_data_import ):
     """
-    import of CSV data as saved by NI VI Logger
+    Class that supports the import of CSV data as saved by NI VI Logger.
     """
 
-    # name of the comma delimited file to import
+    #: Name of the comma delimited file to import.
     from_file = File(filter = ['*.txt'], 
         desc = "name of the comma delimited file to import")
 
-    # header length, defaults to 6
+    #: Header length, defaults to 6.
     header_length =  Int(6, 
         desc = "length of the header to ignore during import")
 
-    # number of leading columns, defaults to 1
+    #: Number of leading columns (will be ignored during import), defaults to 1.
     dummy_columns = Int(1, 
         desc = "number of leading columns to ignore during import")
 
@@ -64,8 +72,9 @@ class csv_import( time_data_import ):
 
     def get_data (self, td):
         """
-        main work is done here: imports the data from CSV file into
-        TimeSamples object td and saves also a '*.h5' file so this import
+        Imports the data from CSV file into a
+        :class:`~beamfpy.sources.TimeSamples` object td.
+        Also, a '*.h5' file will be written, so this import
         need not be performed every time the data is needed
         """
         if not path.isfile(self.from_file):

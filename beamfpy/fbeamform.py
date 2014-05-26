@@ -689,35 +689,46 @@ class PointSpreadFunction (HasPrivateTraits):
 
 class BeamformerDamas (BeamformerBase):
     """
-    DAMAS Deconvolution, see :ref:`Brooks and Humphreys 2006<BroHum2006>`
+    DAMAS deconvolution, see :ref:`Brooks and Humphreys, 2006<BrooksHumphreys2006>`.
     """
 
-    # BeamformerBase object that provides data for deconvolution
+    #: :class:`BeamformerBase` object that provides data for deconvolution.
     beamformer = Trait(BeamformerBase)
 
-    # PowerSpectra object that provides the cross spectral matrix
+    #: :class:`~spectra.PowerSpectra` object that provides the cross spectral matrix, 
+    #: is set automatically.
     freq_data = Delegate('beamformer')
 
-    # RectGrid object that provides the grid locations
+    #: :class:`~grids.Grid`-derived object that provides the grid locations, 
+    #: is set automatically.
     grid = Delegate('beamformer')
 
-    # MicGeom object that provides the microphone locations
+    #: :class:`~microphones.MicGeom` object that provides the microphone locations, 
+    #: is set automatically.
     mpos = Delegate('beamformer')
 
-    # the speed of sound, defaults to 343 m/s
+    #: Speed of sound, is set automatically.
     c =  Delegate('beamformer')
 
-    # flag, if true (default), the main diagonal is removed before beamforming
+    #: Flag, if true (default), the main diagonal is removed before beamforming, 
+    #: is set automatically.
     r_diag =  Delegate('beamformer')
     
-    # type of steering vectors
+    #: Type of steering vectors, 
+    #: is set automatically.
     steer =  Delegate('beamformer')
 
-    # number of iterations
+    #: Number of iterations, defaults to 100.
     n_iter = Int(100, 
         desc="number of iterations")
 
-    # how to calculate and store the psf
+    #: Flag that defines how to calculate and store the point spread function
+    #: defaults to 'full'.
+    #:
+    #: * 'full': Calculate the full PSF (for all grid points) in one go
+    #: * 'single': Calculate the PSF for the grid points where it hasn't yet been calculated for, one by one
+    #: * 'block': Calculate the PSF for the grid points where it hasn't yet been calculated for, in one go
+
     calcmode = Trait('full', 'single', 'block', 'readonly',
                      desc="mode of psf calculation / storage")
     
@@ -753,8 +764,8 @@ class BeamformerDamas (BeamformerBase):
     
     def calc(self, ac, fr):
         """
-        calculation of DAMAS result 
-        for all missing frequencies
+        Calculates the DAMAS result 
+        for all missing frequencies.
         """
         freqs = self.freq_data.fftfreq()
         p = PointSpreadFunction(mpos=self.mpos, grid=self.grid, 

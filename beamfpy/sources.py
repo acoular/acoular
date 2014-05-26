@@ -38,7 +38,7 @@ class SamplesGenerator( HasPrivateTraits ):
     Base class for any generating signal processing block
     
     It provides a common interface for all SamplesGenerator classes, which
-    generate an output via the generator :py:meth:`result`.
+    generate an output via the generator :meth:`result`.
     This class has no real functionality on its own and should not be 
     used directly.
     """
@@ -80,7 +80,7 @@ class TimeSamples( SamplesGenerator ):
     This class loads measured data from h5 files and
     and provides information about this data.
     It also serves as an interface where the data can be accessed
-    (e.g. for use in a block chain) via the :py:meth:`result` generator.
+    (e.g. for use in a block chain) via the :meth:`result` generator.
     """
 
     #: Full name of the .h5 file with data
@@ -91,7 +91,7 @@ class TimeSamples( SamplesGenerator ):
     basename = Property( depends_on = 'name', #filter=['*.h5'], 
         desc="basename of data file")
     
-    #: Calibration data, instance of :py:class:`~beamfpy.calib.Calib` class, optional 
+    #: Calibration data, instance of :class:`~beamfpy.calib.Calib` class, optional 
     calib = Trait( Calib, 
         desc="Calibration data")
     
@@ -193,7 +193,7 @@ class MaskedTimeSamples( TimeSamples ):
     and provides information about this data.
     It supports storing information about (in)valid samples and (in)valid channels
     It also serves as an interface where the data can be accessed
-    (e.g. for use in a block chain) via the :py:meth:`result` generator.
+    (e.g. for use in a block chain) via the :meth:`result` generator.
     
     """
     
@@ -331,13 +331,13 @@ class MaskedTimeSamples( TimeSamples ):
 
 class PointSource( SamplesGenerator ):
     """
-    Class to define a fixed point source with an arbitrary signal 
-    (e.g. for use in simulations)
+    Class to define a fixed point source with an arbitrary signal.
+    This can be used in simulations.
     
-    The output is being generated via the :py:meth:`result` generator
+    The output is being generated via the :meth:`result` generator.
     """
     
-    #:  Emitted signal, instance of the :py:class:`~beamfpy.signals.SignalGenerator` class
+    #:  Emitted signal, instance of the :class:`~beamfpy.signals.SignalGenerator` class
     signal = Trait(SignalGenerator)
     
     #: Location of source in (x, y, z) coordinates (left-oriented system)
@@ -349,11 +349,11 @@ class PointSource( SamplesGenerator ):
     numchannels = Delegate('mpos', 'num_mics')
 
     #: Microphone locations as provided by a 
-    #: :py:class:`~beamfpy.microphones.MicGeom`-derived object
+    #: :class:`~beamfpy.microphones.MicGeom`-derived object
     mpos = Trait(MicGeom, 
         desc="microphone geometry")
         
-    #: :py:class:`~beamfpy.environments.Environment` object 
+    #: :class:`~beamfpy.environments.Environment` object 
     #: that provides distances from grid points to microphone positions
     env = Trait(Environment(), Environment)
 
@@ -375,11 +375,11 @@ class PointSource( SamplesGenerator ):
         desc="upsampling factor")        
     
     #: Number of samples, is set automatically / 
-    #: depends on :py:attr:`~beamfpy.sources.PointSource.signal`
+    #: depends on :attr:`signal`
     numsamples = Delegate('signal')
     
     #: Sampling frequency of the signal, is set automatically / 
-    #: depends on :py:attr:`~beamfpy.sources.PointSource.signal`
+    #: depends on :attr:`signal`
     sample_freq = Delegate('signal') 
 
     # internal identifier
@@ -435,14 +435,14 @@ class PointSource( SamplesGenerator ):
 class MovingPointSource( PointSource ):
     """
     Class to define a point source with an arbitrary 
-    signal moving along a given trajectory
-    (e.g. for use in simulations)
+    signal moving along a given trajectory.
+    This can be used in simulations.
     
-    The output is being generated via the :py:meth:`result` generator
+    The output is being generated via the :meth:`result` generator.
     """
 
     #: Trajectory of the source, 
-    #: instance of the :py:class:`~beamfpy.trajectory.Trajectory` class.
+    #: instance of the :class:`~beamfpy.trajectory.Trajectory` class.
     #: The start time is assumed to be the same as for the samples
     trajectory = Trait(Trajectory, 
         desc="trajectory of the source")
@@ -458,14 +458,14 @@ class MovingPointSource( PointSource ):
         return digest(self)
 
     def result(self, num=128):
-        """Python generator that yields the output at microphones block-wise
+        """Python generator that yields the output at microphones block-wise.
         
         
         Parameters
         ----------
         num : integer, defaults to 128
             This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block) 
+            (i.e. the number of samples per block).
         
         Returns
         -------

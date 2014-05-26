@@ -47,20 +47,21 @@ from .trajectory import Trajectory
 class TimeInOut( SamplesGenerator ):
     """
     Base class for any time domain signal processing block, 
-    gets samples from 'source' and generates output via the generator 'result'
+    gets samples from :attr:`source` and generates output via the 
+    generator :meth:`result`
     """
 
-    # data source, object that has a property sample_freq and 
-    # a python generator result(N) that will generate data blocks of N samples
+    #: Data source; object that has a property sample_freq and 
+    #: a python generator result(N) that will generate data blocks of N samples
     source = Trait(SamplesGenerator)
 
-    # sample_freq of output signal
+    #: Sampling frequency of output signal
     sample_freq = Delegate('source')
     
-    # number of channels in output
+    #: Number of channels in output
     numchannels = Delegate('source')
                
-    # number of channels in output
+    #: Number of samples in output
     numsamples = Delegate('source')
             
     # internal identifier

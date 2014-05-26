@@ -30,21 +30,21 @@ class Calib( HasPrivateTraits ):
     microphone array.
     """
 
-    #: Name of the .xml file to be imported
+    #: Name of the .xml file to be imported.
     from_file = File(filter=['*.xml'], 
         desc="name of the xml file to import")
 
-    #: Basename of the .xml-file, is set automatically
+    #: Basename of the .xml-file. Readonly / is set automatically.
     basename = Property( depends_on = 'from_file', 
         desc="basename of xml file")
     
     #: Number of microphones in the calibration data , 
-    #: is set automatically / read from file
+    #: is set automatically / read from file.
     num_mics = CLong( 0, 
         desc="number of microphones in the geometry")
 
     #: Array of calibration factors, 
-    #: is set automatically / read from file
+    #: is set automatically / read from file.
     data = CArray(
         desc="calibration data")
 

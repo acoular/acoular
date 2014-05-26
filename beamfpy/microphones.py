@@ -35,7 +35,7 @@ class MicGeom( HasPrivateTraits ):
     from_file = File(filter=['*.xml'],
         desc="name of the xml file to import")
 
-    #: Basename of the .xml-file, without the extension, readonly.
+    #: Basename of the .xml-file, without the extension, is set automatically / readonly.
     basename = Property( depends_on = 'from_file',
         desc="basename of xml file")
 
@@ -48,9 +48,9 @@ class MicGeom( HasPrivateTraits ):
     num_mics = Property( depends_on = ['mpos', ],
         desc="number of microphones in the geometry")
 
-    #: Positions as (3, num_mics) array of floats, may include also invalid
+    #: Positions as (3, :attr:`num_mics`) array of floats, may include also invalid
     #: microphones (if any). Set either automatically on change of the
-    #: from_file argument or explicitely by assigning an array of floats.
+    #: :attr:`from_file` argument or explicitely by assigning an array of floats.
     mpos_tot = CArray(
         desc="x, y, z position of all microphones")
 
@@ -95,8 +95,8 @@ class MicGeom( HasPrivateTraits ):
 
     @on_trait_change('basename')
     def import_mpos( self ):
-        """import the microphone positions from .xml file,
-        called when basename changes
+        """Import the microphone positions from .xml file.
+        Called when :attr:`basename` changes.
         """
         if not path.isfile(self.from_file):
             # no file there

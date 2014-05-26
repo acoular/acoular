@@ -31,12 +31,12 @@ class Grid( HasPrivateTraits ):
     be used directly as it contains no real functionality.
     """
 
-    #: overall number of grid points, readonly, is set automatically when
+    #: Overall number of grid points. Readonly, is set automatically when
     #: other grid defining properties are set
     size = Property(
         desc="overall number of grid points")
 
-    #: shape of grid, readonly, gives the shape as tuple, useful for cartesian
+    #: Shape of grid. Readonly, gives the shape as tuple, useful for cartesian
     #: grids
     shape = Property(
         desc="grid shape as tuple")
@@ -66,7 +66,7 @@ class Grid( HasPrivateTraits ):
         
         Returns
         -------
-        array of floats of shape (3, size)
+        array of floats of shape (3, :attr:`size`)
             The grid point x, y, z-coordinates in one array.
         """
         return array([[0.], [0.], [0.]])
@@ -165,7 +165,7 @@ class RectGrid( Grid ):
         
         Returns
         -------
-        array of floats of shape (3, size)
+        array of floats of shape (3, :attr:`~Grid.size`)
             The grid point x, y, z-coordinates in one array.
         """
         i = self.increment
@@ -243,7 +243,7 @@ class RectGrid( Grid ):
             return s_[xi1:xi2+1], s_[yi1:yi2+1]
 
     def extend (self) :
-        """The extension of the grid in pylab imshow compatible form.
+        """The extension of the grid in pylab.imshow compatible form.
 
         Returns
         -------
@@ -310,7 +310,7 @@ class RectGrid3D( RectGrid):
         
         Returns
         -------
-        array of floats of shape (3, size)
+        array of floats of shape (3, :attr:`~Grid.size`)
             The grid point x, y, z-coordinates in one array.
         """
         i = self.increment

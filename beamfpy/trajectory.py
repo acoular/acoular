@@ -37,7 +37,7 @@ class Trajectory( HasPrivateTraits ):
         desc = "sampled positions along the trajectory")
     
     #: Tuple of the start and end time, is set autoamtically 
-    #: (deducted from :py:attr:`~beamfpy.trajectory.Trajectory.points`)
+    #: (deducted from :attr:`points`)
     interval = Property()
     #t_min, t_max tuple
     
@@ -98,13 +98,13 @@ class Trajectory( HasPrivateTraits ):
         ----------
         t_start : float
             Starting time of the trajectory, defaults to the earliest  
-            time in :py:attr:`~beamfpy.trajectory.Trajectory.points`
+            time in :attr:`points`
         t_end : float
             Ending time of the trajectory, defaults to the latest  
-            time in :py:attr:`~beamfpy.trajectory.Trajectory.points`    
+            time in :attr:`points`    
         delta_t : float
             Time interval between yielded trajectory points, defaults to earliest  
-            time in :py:attr:`~beamfpy.trajectory.Trajectory.points`
+            time in :attr:`points`
         
         Returns
         -------
@@ -115,12 +115,12 @@ class Trajectory( HasPrivateTraits ):
         --------
         x.traj(0.1)  
             Yields the position every 0.1 s within the 
-            given :py:attr:`~beamfpy.trajectory.Trajectory.interval`.
+            given :attr:`interval`.
         x.traj(2.5, 4.5, 0.1)  
             Yields the position every 0.1 s between 2.5 s and 4.5 s.
         x.traj(0.1, der=1)  
             Yields the 1st derivative of the spline (= velocity vector) every 0.1s 
-            within the given :py:attr:`~beamfpy.trajectory.Trajectory.interval`.
+            within the given :attr:`interval`.
         """
         if not delta_t:
             delta_t = t_start

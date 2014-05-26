@@ -86,7 +86,7 @@ class UniformFlowEnvironment( Environment):
         desc="flow mach number")
 
     #: The unit vector that gives the direction of the flow, defaults to
-    #: flow in x-direction..
+    #: flow in x-direction.
     fdv = CArray( dtype=float64, shape=(3, ), value=array((1.0, 0, 0)), 
         desc="flow direction")
 
@@ -174,8 +174,9 @@ class FlowField( HasPrivateTraits ):
         return -v, -dv
 
 class OpenJet( FlowField ):
-    """Provides an analytical approximation of the flow field of an open jet, 
-    see Albertson et al., 1950.
+    """
+    Provides an analytical approximation of the flow field of an open jet, 
+    see :ref:`Albertsib et al., 1950<Albertson1950>`.
 
     Notes
     -----
@@ -287,7 +288,7 @@ class GeneralFlowEnvironment(Environment):
     backwards in time. The result is interpolated within a tetrahedal grid
     spanned between these rays.
     """
-    #: The flow field, must be of type :py:class:FlowField
+    #: The flow field, must be of type :class:FlowField
     ff = Trait(FlowField, 
         desc="flow field")
 
