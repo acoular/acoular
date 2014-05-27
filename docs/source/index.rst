@@ -69,9 +69,8 @@ Contents:
 
       - :doc:`api_ref/index`
 
-        "Use the source, Luke." When all else fails, consult the API docs to
-        find the answer you need. The API docs also include convenient links
-        to the most definitive Enaml documentation: the source.
+        All modules, classes and methods featured in beamfpy are described in detail
+        here. They can easily be browsed through an inheritance tree and cross links.
 
 Indices and tables
 ==================

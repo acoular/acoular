@@ -57,22 +57,23 @@ from .spectra import PowerSpectra, EigSpectra
 
 class BeamformerBase( HasPrivateTraits ):
     """
-    beamforming using the basic delay-and-sum algorithm
+    Beamforming using the basic delay-and-sum algorithm in the frequency domain.
     """
 
-    # PowerSpectra object that provides the cross spectral matrix
+    # :class:`~beamfpy.spectra.PowerSpectra` object that provides the cross spectral matrix.
     freq_data = Trait(PowerSpectra, 
         desc="freq data object")
 
-    # RectGrid object that provides the grid locations
+    #: :class:`~beamfpy.grids.Grid`-derived object that provides the grid locations.
     grid = Trait(Grid, 
         desc="beamforming grid")
 
-    # MicGeom object that provides the microphone locations
+    #: :class:`~beamfpy.microphones.MicGeom` object that provides the microphone locations.
     mpos = Trait(MicGeom, 
         desc="microphone geometry")
         
-    # Environment object that provides speed of sound and grid-mic distances
+    #: :class:`~beamfpy.environments.Environment` or derived object, 
+    #: which provides information about the sound propagation in the medium.
     env = Trait(Environment(), Environment)
 
     # the speed of sound, defaults to 343 m/s
@@ -532,7 +533,13 @@ class PointSpreadFunction (HasPrivateTraits):
                   'old_version',
                   desc="type of steering vectors used")
 
-    # how to calculate and store the psf
+    #: Flag that defines how to calculate and store the point spread function
+    #: defaults to 'single'.
+    #:
+    #: * 'full': Calculate the full PSF (for all grid points) in one go (should be used if the PSF at all grid points is needed, as with :class:`DAMAS<BeamformerDamas>`)
+    #: * 'single': Calculate the PSF for the grid points defined by :attr:`grid_indices`, one by one (useful if not all PSFs are needed, as with :class:`CLEAN<BeamformerClean>`)
+    #: * 'block': Calculate the PSF for the grid points defined by :attr:`grid_indices`, in one go (useful if not all PSFs are needed, as with :class:`CLEAN<BeamformerClean>`)
+    #: * 'readonly': Do not attempt to calculate the PSF since it should already be cached (useful if multiple processes have to access the cache file)
     calcmode = Trait('single', 'block', 'full', 'readonly',
                      desc="mode of calculation / storage")
               
@@ -695,24 +702,29 @@ class BeamformerDamas (BeamformerBase):
     #: :class:`BeamformerBase` object that provides data for deconvolution.
     beamformer = Trait(BeamformerBase)
 
-    #: :class:`~spectra.PowerSpectra` object that provides the cross spectral matrix, 
+    #: :class:`~beamfpy.spectra.PowerSpectra` object that provides the cross spectral matrix; 
     #: is set automatically.
     freq_data = Delegate('beamformer')
 
-    #: :class:`~grids.Grid`-derived object that provides the grid locations, 
+    #: :class:`~beamfpy.grids.Grid`-derived object that provides the grid locations; 
     #: is set automatically.
     grid = Delegate('beamformer')
 
-    #: :class:`~microphones.MicGeom` object that provides the microphone locations, 
+    #: :class:`~beamfpy.microphones.MicGeom` object that provides the microphone locations; 
     #: is set automatically.
     mpos = Delegate('beamformer')
 
     #: Speed of sound, is set automatically.
     c =  Delegate('beamformer')
 
-    #: Flag, if true (default), the main diagonal is removed before beamforming, 
+    #: Boolean flag, if 'True' (default), the main diagonal is removed before beamforming; 
     #: is set automatically.
     r_diag =  Delegate('beamformer')
+    
+    #: :class:`~beamfpy.environments.Environment` or derived object,
+    #: which provides information about the sound propagation in the medium;
+    #: is set automatically.
+    env =  Delegate('beamformer')    
     
     #: Type of steering vectors, 
     #: is set automatically.
@@ -722,13 +734,8 @@ class BeamformerDamas (BeamformerBase):
     n_iter = Int(100, 
         desc="number of iterations")
 
-    #: Flag that defines how to calculate and store the point spread function
-    #: defaults to 'full'.
-    #:
-    #: * 'full': Calculate the full PSF (for all grid points) in one go
-    #: * 'single': Calculate the PSF for the grid points where it hasn't yet been calculated for, one by one
-    #: * 'block': Calculate the PSF for the grid points where it hasn't yet been calculated for, in one go
-
+    #: Flag that defines how to calculate and store the point spread function, 
+    #: defaults to 'full'. See :attr:`PointSpreadFunction.calcmode` for details.
     calcmode = Trait('full', 'single', 'block', 'readonly',
                      desc="mode of psf calculation / storage")
     
@@ -764,8 +771,29 @@ class BeamformerDamas (BeamformerBase):
     
     def calc(self, ac, fr):
         """
-        Calculates the DAMAS result 
-        for all missing frequencies.
+        Calculates the DAMAS result for the frequencies defined by :attr:`freq_data`
+        
+        This is an internal helper function that is automatically called when 
+        accessing the beamformer's :attr:`~BeamformerBase.result` or calling
+        its :meth:`~BeamformerBase.synthetic` method.        
+        A Gauss-Seidel algorithm implemented in C is used for computing the result.
+        
+        Parameters
+        ----------
+        ac : array of floats
+            This array of dimension ([number of frequencies]x[number of gridpoints])
+            is used as call-by-reference parameter and contains the calculated
+            value after calling this method. 
+        fr : array of booleans
+            The entries of this [number of frequencies]-sized array are either 
+            'True' (if the result for this frequency has already been calculated)
+            or 'False' (for the frequencies where the result has yet to be calculated).
+            After the calculation at a certain frequency the value will be set
+            to 'True'
+        
+        Returns
+        -------
+        This method only returns values through the *ac* and *fr* parameters
         """
         freqs = self.freq_data.fftfreq()
         p = PointSpreadFunction(mpos=self.mpos, grid=self.grid, 
@@ -783,28 +811,32 @@ class BeamformerDamas (BeamformerBase):
 
 class BeamformerOrth (BeamformerBase):
     """
-    Estimation using orthogonal beamforming
+    Orthogonal beamforming, see :ref:`Sarradj, 2010<Sarradj2010>`.
     """
 
-    # BeamformerEig object that provides data for deconvolution
+    #: :class:`BeamformerEig` object that provides data for deconvolution.
     beamformer = Trait(BeamformerEig)
 
-    # EigSpectra object that provides the cross spectral matrix and Eigenvalues
+    #: :class:`~beamfpy.spectra.EigSpectra` object that provides the cross spectral matrix 
+    #: and eigenvalues, is set automatically.    
     freq_data = Delegate('beamformer')
 
-    # RectGrid object that provides the grid locations
+    #: :class:`~beamfpy.grids.Grid`-derived object that provides the grid locations, 
+    #: is set automatically.
     grid = Delegate('beamformer')
 
-    # MicGeom object that provides the microphone locations
+    #: :class:`~beamfpy.microphones.MicGeom` object that provides the microphone locations, 
+    #: is set automatically.
     mpos = Delegate('beamformer')
 
-    # the speed of sound, defaults to 343 m/s
+    #: Speed of sound, is set automatically.
     c =  Delegate('beamformer')
 
-    # flag, if true (default), the main diagonal is removed before beamforming
+    #: Flag, if 'True' (default), the main diagonal is removed before beamforming, 
+    #: is set automatically.
     r_diag =  Delegate('beamformer')
 
-    # type of steering vectors
+    #: Type of steering vectors, is set automatically.
     steer =  Delegate('beamformer')
 
     # environment
@@ -875,7 +907,7 @@ class BeamformerOrth (BeamformerBase):
     
 class BeamformerCleansc( BeamformerBase ):
     """
-    beamforming using CLEAN-SC (Sijtsma)
+    CLEAN-SC deconvolution, see :ref:`Sijtsma, 2007<Sijtsma2007>`.
     """
 
     # no of CLEAN-SC iterations
@@ -986,7 +1018,7 @@ class BeamformerCleansc( BeamformerBase ):
 
 class BeamformerClean (BeamformerBase):
     """
-    CLEAN Deconvolution
+    CLEAN deconvolution, see :ref:`Högbom, 1974<Hoegbom1974>`.
     """
 
     # BeamformerBase object that provides data for deconvolution
@@ -1094,9 +1126,10 @@ class BeamformerClean (BeamformerBase):
 
 class BeamformerCMF ( BeamformerBase ):
     """
-    Covariance Matrix Fitting (Yardibi2008)
-    (not really a beamformer, but an inverse method)
+    Covariance Matrix Fitting, see :ref:`Yardibi et al., 2008<Yardibi2008>`.
+    This is not really a beamformer, but an inverse method.
     """
+
     # type of fit method
     method = Trait('LassoLars', 'LassoLarsBIC', \
         'OMPCV', 'NNLS', desc="fit method used")

@@ -53,7 +53,7 @@ copyright = '2007-2014, Ennes Sarradj'
 # other places throughout the built documents.
 #d = {}
 #execfile(os.path.join('..','..', 'beamfpy', '__init__.py'), d)
-version = release = '3.0'#d['__version__']
+version = release = '2014.05.27'#'3.0'#d['__version__']
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
