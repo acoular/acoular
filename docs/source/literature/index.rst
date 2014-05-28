@@ -9,6 +9,9 @@ Albertson, M. L. , Dai, Y. B., Jensen, R. A., and Hunter Rouse (1950). Diffusion
 .. _BrooksHumphreys2006:
 Brooks, T. F., & Humphreys, W. M. (2006). A deconvolution approach for the mapping of acoustic sources (DAMAS) determined from phased microphone arrays. Journal of Sound and Vibration, 294(4-5), 856-879. 
 
+.. _Dougherty2014:
+Dougherty, R. P. (2014). Functional Beamforming. In: Proceedings of the Berlin Beamforming Conference 2014.
+
 .. _Hoegbom1974:
 Högbom, J. A. (1974). Aperture synthesis with a non-regular distribution of interferometer baselines. Astronomy and Astrophysics Supplement, 15(3), 417-426.
 

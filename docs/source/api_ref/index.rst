@@ -18,7 +18,6 @@ The following modules are part of beamfpy:
     sources
     calib
 
-
 these modules still need some more documentation:
 
 .. autosummary::
@@ -34,6 +33,8 @@ these modules still need some more documentation:
 
 Classes in beamfpy and their inheritance
 ----------------------------------------
+**ACHTUNG! JE NACH GROESSE DES BROWSERFENSTERS IST HIER DIE POSITION DER CROSS-LINKS NICHT KORREKT!**
+
 
 .. inheritance-diagram:: beamfpy.environments beamfpy.grids beamfpy.microphones
                          beamfpy.spectra beamfpy.signals beamfpy.sources

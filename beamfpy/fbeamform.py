@@ -60,7 +60,7 @@ class BeamformerBase( HasPrivateTraits ):
     Beamforming using the basic delay-and-sum algorithm in the frequency domain.
     """
 
-    # :class:`~beamfpy.spectra.PowerSpectra` object that provides the cross spectral matrix.
+    #: :class:`~beamfpy.spectra.PowerSpectra` object that provides the cross spectral matrix.
     freq_data = Trait(PowerSpectra, 
         desc="freq data object")
 
@@ -230,11 +230,29 @@ class BeamformerBase( HasPrivateTraits ):
     
     def synthetic( self, freq, num=0):
         """
-        returns synthesized frequency band values of beamforming result
-        num = 0: single frequency line
-        num = 1: octave band
-        num = 3: third octave band
-        etc.
+        Evaluate the beamforming result for an arbitrary frequency band.
+        
+        Parameters
+        ----------
+        freq: float
+            Band center frequency. 
+        num: positive integer
+            Band width marker:
+            
+            * num = 0: single frequency line
+            * num = 1: octave band
+            * num = 3: third octave band
+            * etc.
+              
+        Returns
+        -------
+        array of floats
+            The synthesized frequency band values of the beamforming result at 
+            each grid point .
+            Note that the frequency resolution and therefore the bandwidth 
+            represented by a single frequency line depends on 
+            the :attr:`sampling frequency<beamfpy.sources.SamplesGenerator.sample_freq>` and 
+            used :attr:`FFT block size<beamfpy.spectra.PowerSpectra.block_size>`.
         """
         res = self.result # trigger calculation
         f = self.freq_data.fftfreq()
@@ -257,12 +275,25 @@ class BeamformerBase( HasPrivateTraits ):
 
     def integrate(self, sector):
         """
-        integrates result map over the given sector
-        where sector is a tuple with arguments for grid.indices
-        e.g. array([xmin, ymin, xmax, ymax]) or array([x, y, radius])
-        resp. array([rmin, phimin, rmax, phimax]), array([r, phi, radius]).
-        returns spectrum
+        Integrates result map over a given sector.
+        
+        Parameters
+        ----------
+        sector: array of floats
+              Tuple with arguments for the 'indices' method 
+              of a :class:`~beamfpy.grids.Grid`-derived class 
+              (e.g. :meth:`RectGrid.indices<beamfpy.grids.RectGrid.indices>` 
+              or :meth:`RectGrid3D.indices<beamfpy.grids.RectGrid3D.indices>`).
+              Possible sectors would be *array([xmin, ymin, xmax, ymax])* 
+              or *array([x, y, radius])*.
+              
+        Returns
+        -------
+        array of floats
+            The spectrum (all calculated frequency bands) for the integrated sector.
         """
+        #resp. array([rmin, phimin, rmax, phimax]), array([r, phi, radius]).
+        
 #        ind = self.grid.indices(*sector)
 #        gshape = self.grid.shape
 #        r = self.result
@@ -280,10 +311,10 @@ class BeamformerBase( HasPrivateTraits ):
 
 class BeamformerFunctional( BeamformerBase ):
     """
-    functional beamforming after Dougherty 2014
+    Functional beamforming after :ref:`Dougherty, 2014<Dougherty2014>`.
     """
 
-    # functional exponent
+    #: Functional exponent, defaults to 1: Classical Beamforming
     gamma = Float(1, 
         desc="functional exponent")
 
@@ -1018,7 +1049,7 @@ class BeamformerCleansc( BeamformerBase ):
 
 class BeamformerClean (BeamformerBase):
     """
-    CLEAN deconvolution, see :ref:`Högbom, 1974<Hoegbom1974>`.
+    CLEAN deconvolution, see :ref:`Hoegbom, 1974<Hoegbom1974>`.
     """
 
     # BeamformerBase object that provides data for deconvolution
