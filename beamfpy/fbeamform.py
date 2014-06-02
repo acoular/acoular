@@ -230,7 +230,7 @@ class BeamformerBase( HasPrivateTraits ):
     
     def synthetic( self, freq, num=0):
         """
-        Evaluate the beamforming result for an arbitrary frequency band.
+        Evaluates the beamforming result for an arbitrary frequency band.
         
         Parameters
         ----------
@@ -314,7 +314,7 @@ class BeamformerFunctional( BeamformerBase ):
     Functional beamforming after :ref:`Dougherty, 2014<Dougherty2014>`.
     """
 
-    #: Functional exponent, defaults to 1: Classical Beamforming
+    #: Functional exponent, defaults to 1 (= Classic Beamforming)
     gamma = Float(1, 
         desc="functional exponent")
 
@@ -370,7 +370,7 @@ class BeamformerFunctional( BeamformerBase ):
             
 class BeamformerCapon( BeamformerBase ):
     """
-    beamforming using the minimum variance or Capon algorithm
+    Beamforming using the minimum variance or Capon algorithm, see :ref:`Capon, 1969<Capon1969>`.
     """
     # flag for main diagonal removal is set to False
     r_diag = Enum(False, 
@@ -390,7 +390,7 @@ class BeamformerCapon( BeamformerBase ):
 
     def calc(self, ac, fr):
         """
-        calculation of Capon (Mininimum Variance) beamforming result 
+        Calculation of Capon (Mininimum Variance) beamforming result 
         for all missing frequencies
         """
         # prepare calculation
@@ -411,21 +411,23 @@ class BeamformerCapon( BeamformerBase ):
 
 class BeamformerEig( BeamformerBase ):
     """
-    beamforming using eigenvalue and eigenvector techniques
+    Beamforming using eigenvalue and eigenvector techniques.
     """
 
-    # EigSpectra object that provides the cross spectral matrix and eigenvalues
+    #: :class:`~beamfpy.spectra.EigSpectra` object that provides the 
+    #: cross spectral matrix and eigenvalues
     freq_data = Trait(EigSpectra, 
         desc="freq data object")
 
-    # no of component to calculate 0 (smallest) ... numchannels-1
-    # defaults to -1, i.e. numchannels-1
+    #: Number of component to calculate: 
+    #: 0 (smallest) ... :attr:`~beamfpy.sources.SamplesGenerator.numchannels`-1;
+    #: defaults to -1, i.e. numchannels-1
     n = Int(-1, 
-        desc="no of eigenvalue")
+        desc="No. of eigenvalue")
 
     # actual component to calculate
     na = Property(
-        desc="no of eigenvalue")
+        desc="No. of eigenvalue")
 
     # internal identifier
     digest = Property( 
@@ -728,6 +730,7 @@ class PointSpreadFunction (HasPrivateTraits):
 class BeamformerDamas (BeamformerBase):
     """
     DAMAS deconvolution, see :ref:`Brooks and Humphreys, 2006<BrooksHumphreys2006>`.
+    Needs a-priori delay-and-sum beamforming (:class:`BeamformerBase`).
     """
 
     #: :class:`BeamformerBase` object that provides data for deconvolution.
@@ -843,6 +846,7 @@ class BeamformerDamas (BeamformerBase):
 class BeamformerOrth (BeamformerBase):
     """
     Orthogonal beamforming, see :ref:`Sarradj, 2010<Sarradj2010>`.
+    Needs a-priori beamforming with eigenvalue decomposition (:class:`BeamformerEig`).
     """
 
     #: :class:`BeamformerEig` object that provides data for deconvolution.
@@ -919,8 +923,29 @@ class BeamformerOrth (BeamformerBase):
 
     def calc(self, ac, fr):
         """
-        calculation of orthogonal beamforming result 
-        for all missing frequencies
+        Calculates the Orthogonal Beamforming result for the frequencies 
+        defined by :attr:`freq_data`.
+        
+        This is an internal helper function that is automatically called when 
+        accessing the beamformer's :attr:`~BeamformerBase.result` or calling
+        its :meth:`~BeamformerBase.synthetic` method.        
+        
+        Parameters
+        ----------
+        ac : array of floats
+            This array of dimension ([number of frequencies]x[number of gridpoints])
+            is used as call-by-reference parameter and contains the calculated
+            value after calling this method. 
+        fr : array of booleans
+            The entries of this [number of frequencies]-sized array are either 
+            'True' (if the result for this frequency has already been calculated)
+            or 'False' (for the frequencies where the result has yet to be calculated).
+            After the calculation at a certain frequency the value will be set
+            to 'True'
+        
+        Returns
+        -------
+        This method only returns values through the *ac* and *fr* parameters
         """
         # prepare calculation
         ii = []
@@ -939,6 +964,7 @@ class BeamformerOrth (BeamformerBase):
 class BeamformerCleansc( BeamformerBase ):
     """
     CLEAN-SC deconvolution, see :ref:`Sijtsma, 2007<Sijtsma2007>`.
+    Needs a-priori delay-and-sum beamforming (:class:`BeamformerBase`).
     """
 
     # no of CLEAN-SC iterations
@@ -982,9 +1008,30 @@ class BeamformerCleansc( BeamformerBase ):
 
     def calc(self, ac, fr):
         """
-        calculation of orthogonal beamforming result 
-        for all missing frequencies
+        Calculates the CLEAN-SC result for the frequencies defined by :attr:`freq_data`
+        
+        This is an internal helper function that is automatically called when 
+        accessing the beamformer's :attr:`~BeamformerBase.result` or calling
+        its :meth:`~BeamformerBase.synthetic` method.        
+        
+        Parameters
+        ----------
+        ac : array of floats
+            This array of dimension ([number of frequencies]x[number of gridpoints])
+            is used as call-by-reference parameter and contains the calculated
+            value after calling this method. 
+        fr : array of booleans
+            The entries of this [number of frequencies]-sized array are either 
+            'True' (if the result for this frequency has already been calculated)
+            or 'False' (for the frequencies where the result has yet to be calculated).
+            After the calculation at a certain frequency the value will be set
+            to 'True'
+        
+        Returns
+        -------
+        This method only returns values through the *ac* and *fr* parameters
         """
+
         # prepare calculation
         numchannels = self.freq_data.time_data.numchannels
         f = self.freq_data.fftfreq()
@@ -1050,6 +1097,7 @@ class BeamformerCleansc( BeamformerBase ):
 class BeamformerClean (BeamformerBase):
     """
     CLEAN deconvolution, see :ref:`Hoegbom, 1974<Hoegbom1974>`.
+    Needs a-priori delay-and-sum beamforming (:class:`BeamformerBase`).
     """
 
     # BeamformerBase object that provides data for deconvolution
@@ -1116,8 +1164,28 @@ class BeamformerClean (BeamformerBase):
     
     def calc(self, ac, fr):
         """
-        calculation of CLEAN result 
-        for all missing frequencies
+        Calculates the CLEAN result for the frequencies defined by :attr:`freq_data`
+        
+        This is an internal helper function that is automatically called when 
+        accessing the beamformer's :attr:`~BeamformerBase.result` or calling
+        its :meth:`~BeamformerBase.synthetic` method.        
+        
+        Parameters
+        ----------
+        ac : array of floats
+            This array of dimension ([number of frequencies]x[number of gridpoints])
+            is used as call-by-reference parameter and contains the calculated
+            value after calling this method. 
+        fr : array of booleans
+            The entries of this [number of frequencies]-sized array are either 
+            'True' (if the result for this frequency has already been calculated)
+            or 'False' (for the frequencies where the result has yet to be calculated).
+            After the calculation at a certain frequency the value will be set
+            to 'True'
+        
+        Returns
+        -------
+        This method only returns values through the *ac* and *fr* parameters
         """
         freqs = self.freq_data.fftfreq()
         gs = self.grid.size
@@ -1161,18 +1229,23 @@ class BeamformerCMF ( BeamformerBase ):
     This is not really a beamformer, but an inverse method.
     """
 
-    # type of fit method
-    method = Trait('LassoLars', 'LassoLarsBIC', \
+    #: Type of fit method to be used ('LassoLars', 'LassoLarsBIC', 
+    #: 'OMPCV' or 'NNLS', defaults to 'LassoLars').
+    #: These methods are implemented in 
+    #: the `scikit-learn <http://scikit-learn.org/stable/user_guide.html>`_ 
+    #: module.
+    method = Trait('LassoLars', 'LassoLarsBIC',  \
         'OMPCV', 'NNLS', desc="fit method used")
         
-    # weight factor
-    # defaults to 0.0
+    #: Weight factor for LassoLars mathod,
+    #: defaults to 0.0.
     alpha = Range(0.0, 1.0, 0.0, 
         desc="Lasso weight factor")
+    # (use values in the order of 10^⁻9 for good results)
     
-    # maximum number of iterations
-    # tradeoff between speed and precision
-    # defaults to 500
+    #: Maximum number of iterations,
+    #: tradeoff between speed and precision;
+    #: defaults to 500
     max_iter = Int(500, 
         desc="maximum number of iterations")
 
@@ -1204,9 +1277,31 @@ class BeamformerCMF ( BeamformerBase ):
 
     def calc(self, ac, fr):
         """
-        calculation of delay-and-sum beamforming result 
-        for all missing frequencies
+        Calculates the CMF result for the frequencies defined by :attr:`freq_data`
+        
+        This is an internal helper function that is automatically called when 
+        accessing the beamformer's :attr:`~BeamformerBase.result` or calling
+        its :meth:`~BeamformerBase.synthetic` method.        
+        
+        Parameters
+        ----------
+        ac : array of floats
+            This array of dimension ([number of frequencies]x[number of gridpoints])
+            is used as call-by-reference parameter and contains the calculated
+            value after calling this method. 
+        fr : array of booleans
+            The entries of this [number of frequencies]-sized array are either 
+            'True' (if the result for this frequency has already been calculated)
+            or 'False' (for the frequencies where the result has yet to be calculated).
+            After the calculation at a certain frequency the value will be set
+            to 'True'
+        
+        Returns
+        -------
+        This method only returns values through the *ac* and *fr* parameters
         """
+        
+        # function to repack complex matrices to deal with them in real number space
         def realify(M):
             return vstack([M.real,M.imag])
 
@@ -1277,7 +1372,7 @@ class BeamformerCMF ( BeamformerBase ):
 
 def L_p ( x ):
     """
-    calculates the sound pressure level from the sound pressure squared:
+    Calculates the sound pressure level from the sound pressure squared:
 
     L_p = 10 lg x/4e-10
 
@@ -1288,15 +1383,97 @@ def L_p ( x ):
 #    return where(x>0, 10*log10(x/4e-10), -1000.)
 
 def integrate(data, grid, sector):
-        """
-        integrates result map over the given sector
-        where sector is a tuple with arguments for grid.indices
-        e.g. array([xmin, ymin, xmax, ymax]) or array([x, y, radius])
-        resp. array([rmin, phimin, rmax, phimax]), array([r, phi, radius]).
-        returns spectrum
-        """
-        ind = grid.indices(*sector)
-        gshape = grid.shape
-        h = data.reshape(gshape)[ind].sum()
-        return h
+    """
+    Integrates a sound pressure map over a given sector.
+    
+    This function can be applied on beamforming results to
+    quantitatively analyze the sound pressure in a given sector.
+    If used with :meth:`Beamformer.result`, the output is identical to
+    the result of the intrinsic :meth:`Beamformer.integrate` method.
+    It can, however, also be used with the :meth:`Beamformer.synthetic`
+    output.
+    
+    Parameters
+    ----------
+    data: array of floats
+        Contains the calculated sound pressures in Pa.        
+        The number of entries must be identical to the number of
+        grid points.
+    grid: :class:`~beamfpy.grids.Grid`-derived object 
+        Object that provides the grid locations.        
+    sector: array of floats
+        Tuple with arguments for the 'indices' method 
+        of a :class:`~beamfpy.grids.Grid`-derived class 
+        (e.g. :meth:`RectGrid.indices<beamfpy.grids.RectGrid.indices>` 
+        or :meth:`RectGrid3D.indices<beamfpy.grids.RectGrid3D.indices>`).
+        Possible sectors would be *array([xmin, ymin, xmax, ymax])* 
+        or *array([x, y, radius])*.
+          
+    Returns
+    -------
+    array of floats
+        The spectrum (all calculated frequency bands) for the integrated sector.
+    """
+    ind = grid.indices(*sector)
+    gshape = grid.shape
+    h = data.reshape(gshape)[ind].sum()
+    return h
+
+def synthetic (data, f, freqs, num=3):
+    """
+    Evaluates a sound pressure map for an arbitrary frequency band.
+    
+    This function can calculate a freuency band from a full 
+    beamforming result.
+    If used with :meth:`Beamformer.result` and only one frequency band, 
+    the output is identical to
+    the result of the intrinsic :meth:`Beamformer.synthetic` method.
+    It can, however, also be used with the :meth:`Beamformer.integrate`
+    output and more frequency bands.
+    
+    Parameters
+    ----------
+    data: array of floats
+        Contains the calculated sound pressures in Pa.        
+        The number of entries must be identical to the number of
+        grid points.
+    f: 
+        the frequencies that correspond to the input data (as yielded by
+        the :meth:`PowerSpectra.fftfreq<beamfpy.spectra.Powerspectra.fftfreq`
+        method).
+    freqs: list of floats
+        Band center frequencies. Make sure this is a list even if only one
+        frequency is used.
+    num: positive integer
+        Band width marker:
         
+        * num = 0: single frequency line
+        * num = 1: octave band
+        * num = 3: third octave band
+        * etc.
+          
+    Returns
+    -------
+    array of floats
+        The synthesized frequency band values of the beamforming result at 
+        each grid point .
+        Note that the frequency resolution and therefore the bandwidth 
+        represented by a single frequency line depends on 
+        the :attr:`sampling frequency<beamfpy.sources.SamplesGenerator.sample_freq>` 
+        and used :attr:`FFT block size<beamfpy.spectra.PowerSpectra.block_size>`.
+    """
+
+    if num == 0:
+        res = [ data[searchsorted(f, i)] for i in freqs]        
+    else:
+        res = []
+        for freq in freqs:
+            f1 = searchsorted(f, freq*2.**(-0.5/num))
+            f2 = searchsorted(f, freq*2.**(0.5/num))
+            if f1 == f2:
+                h = data[f1]
+            else:
+                h = sum(data[f1:f2], 0)
+            res += [h]   
+
+    return array(res)
