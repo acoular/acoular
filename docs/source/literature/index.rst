@@ -18,8 +18,14 @@ Dougherty, R. P. (2014). Functional Beamforming. In: Proceedings of the Berlin B
 .. _Hoegbom1974:
 Högbom, J. A. (1974). Aperture synthesis with a non-regular distribution of interferometer baselines. Astronomy and Astrophysics Supplement, 15(3), 417-426.
 
+.. _Sarradj2005:
+Sarradj, E., Schulze, C., Zeibig, A. (2005): Identification of noise source mechanisms using orthogonal beamforming. Proceedings of International Congress on Noise and Vibration Emerging Methods (NOVEM 2005).
+
 .. _Sarradj2010:
 Sarradj, E. (2010). A fast signal subspace approach for the determination of absolute levels from phased microphone array measurements. Journal of Sound and Vibration, 329(9), 1553-1569.
+
+.. _Sarradj2012:
+Sarradj, E. (2012). Three-Dimensional Acoustic Source Mapping with Different Beamforming Steering Vector Formulations. Advances in Acoustics and Vibration, 2012, 1-12.
 
 .. _Sijtsma2007:
 Sijtsma, P. (2007). CLEAN based on spatial source coherence. International Journal of Aeroacoustics, 6(4), 357-374.

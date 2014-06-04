@@ -322,7 +322,7 @@ class EigSpectra( PowerSpectra ):
         freq : float 
             Band center frequency for which to return the results.
         num : integer
-            Controls the width of the frequency bands considered, defaults to
+            Controls the width of the frequency bands considered; defaults to
             3 (third-octave band).
             
             ===  =====================
@@ -330,7 +330,7 @@ class EigSpectra( PowerSpectra ):
             ===  =====================
             0    single frequency line
             1    octave band
-            3    third octave band
+            3    third-octave band
             n    1/n-octave band
             ===  =====================
 
@@ -354,18 +354,30 @@ class EigSpectra( PowerSpectra ):
 
 
 def synthetic (data, freqs, f, num=3):
-    """Return synthesized frequency band values of spectral data.
+    """
+    Returns synthesized frequency band values of spectral data.
+    
+    If used with :meth:`Beamformer.result` and only one frequency band, 
+    the output is identical to
+    the result of the intrinsic :meth:`Beamformer.synthetic` method.
+    It can, however, also be used with the :meth:`Beamformer.integrate`
+    output and more frequency bands.
     
     Parameters
     ----------
     data : array of floats
-        The spectral data in an array with one value per frequency line.
+        The spectral data (sound pressures in Pa) in an array with one value 
+        per frequency line.
+        The number of entries must be identical to the number of
+        grid points.
     freq : array of floats
-        The frequencies of the *data*.
-    f : array of floats
+        The frequencies that correspon to the input *data* (as yielded by
+        the :meth:`PowerSpectra.fftfreq<beamfpy.spectra.Powerspectra.fftfreq`
+        method).
+    f : list of floats
         Band center frequencies for which to return the results.
     num : integer
-        Controls the width of the frequency bands considered, , defaults to
+        Controls the width of the frequency bands considered; defaults to
         3 (third-octave band).
         
         ===  =====================
@@ -373,15 +385,19 @@ def synthetic (data, freqs, f, num=3):
         ===  =====================
         0    single frequency line
         1    octave band
-        3    third octave band
+        3    third-octave band
         n    1/n-octave band
         ===  =====================
 
     Returns
     -------
     array of floats
-        Synthesized frequency band values of the eigenvalues (the sum of
-        all values that are contained in the band).
+        Synthesized frequency band values of the beamforming result at 
+        each grid point (the sum of all values that are contained in the band).
+        Note that the frequency resolution and therefore the bandwidth 
+        represented by a single frequency line depends on 
+        the :attr:`sampling frequency<beamfpy.sources.SamplesGenerator.sample_freq>` 
+        and used :attr:`FFT block size<beamfpy.spectra.PowerSpectra.block_size>`.
     """
     if num == 0:
         res = [ data[searchsorted(freqs, i)] for i in f]        
