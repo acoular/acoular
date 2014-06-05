@@ -27,6 +27,9 @@ Sarradj, E. (2010). A fast signal subspace approach for the determination of abs
 .. _Sarradj2012:
 Sarradj, E. (2012). Three-Dimensional Acoustic Source Mapping with Different Beamforming Steering Vector Formulations. Advances in Acoustics and Vibration, 2012, 1-12.
 
+.. _Schmidt1986:
+R. Schmidt (1986). Multiple emitter location and signal parameter estimation. IEEE Trans Antennas Propag. 34(3), 276-280.
+
 .. _Sijtsma2007:
 Sijtsma, P. (2007). CLEAN based on spatial source coherence. International Journal of Aeroacoustics, 6(4), 357-374.
 

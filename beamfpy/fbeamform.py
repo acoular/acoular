@@ -84,27 +84,30 @@ class BeamformerBase( HasPrivateTraits ):
     r_diag = Bool(True, 
         desc="removal of diagonal")
     
-    # Type of steering vectors, see also :ref:`Sarradj, 2012<Sarradj2012>`.
+    #: Type of steering vectors, see also :ref:`Sarradj, 2012<Sarradj2012>`.
     steer = Trait('true level', 'true location', 'classic', 'inverse', 
                   desc="type of steering vectors used")
                   
-    # flag, if true (default), the result is cached in h5 files
+    #: Boolean flag, if 'True' (default), the result is cached in h5 files.
     cached = Bool(True, 
         desc="cached flag")
                   
     # hdf5 cache file
     h5f = Instance(tables.File, transient = True )
     
-    # the result, sound pressure squared in all grid locations
-    # as (number of frequencies, nxsteps, nysteps) array of float
+    #: The beamforming result as squared sound pressure values 
+    #: at all grid point locations (readonly).
+    #: Returns a (number of frequencies, nxsteps, nysteps) array of float
     result = Property(
         desc="beamforming result")
         
-    # sound travel distances from microphone array center to grid points
+    #: Sound travel distances from microphone array center to grid 
+    #: points (readonly).
     r0 = Property(
         desc="array center to grid distances")
 
-    # sound travel distances from array microphones to grid points
+    #: Sound travel distances from array microphones to grid 
+    #: points (readonly).
     rm = Property(
         desc="array center to grid distances")
     
@@ -151,7 +154,8 @@ class BeamformerBase( HasPrivateTraits ):
     @property_depends_on('ext_digest')
     def _get_result ( self ):
         """
-        beamforming result is either loaded or calculated
+        This is the :attr:`result` getter routine.
+        The beamforming result is either loaded or calculated.
         """
         _digest = ''
         while self.digest != _digest:
@@ -191,7 +195,8 @@ class BeamformerBase( HasPrivateTraits ):
         
     def get_beamfunc( self, os='' ):
         """
-        returns the proper low-level beamforming routine
+        Returns the proper low-level beamforming routine (implemented in C).
+        This function is only called internally by the :meth:`calc` routine.
         """
         r_diag = {True: 'diag', False: 'full'}[self.r_diag]
         steer = {'true level': '', \
@@ -202,8 +207,29 @@ class BeamformerBase( HasPrivateTraits ):
 
     def calc(self, ac, fr):
         """
-        calculation of delay-and-sum beamforming result 
-        for all missing frequencies
+        Calculates the delay-and-sum beamforming result for the frequencies 
+        defined by :attr:`freq_data`
+        
+        This is an internal helper function that is automatically called when 
+        accessing the beamformer's :attr:`result` or calling
+        its :meth:`synthetic` method.        
+        
+        Parameters
+        ----------
+        ac : array of floats
+            This array of dimension ([number of frequencies]x[number of gridpoints])
+            is used as call-by-reference parameter and contains the calculated
+            value after calling this method. 
+        fr : array of booleans
+            The entries of this [number of frequencies]-sized array are either 
+            'True' (if the result for this frequency has already been calculated)
+            or 'False' (for the frequencies where the result has yet to be calculated).
+            After the calculation at a certain frequency the value will be set
+            to 'True'
+        
+        Returns
+        -------
+        This method only returns values through the *ac* and *fr* parameters
         """
         # prepare calculation
         kj = 2j*pi*self.freq_data.fftfreq()/self.c
@@ -261,6 +287,8 @@ class BeamformerBase( HasPrivateTraits ):
         """
         res = self.result # trigger calculation
         freq = self.freq_data.fftfreq()
+        ind = searchsorted(freq, f)
+        print '...',ind,freq[ind],freq[ind-1],freq.shape
         if len(freq) == 0:
             return None#array([[1, ], ], 'd')
         try:
@@ -315,7 +343,7 @@ class BeamformerFunctional( BeamformerBase ):
     Functional beamforming after :ref:`Dougherty, 2014<Dougherty2014>`.
     """
 
-    #: Functional exponent, defaults to 1 (= Classic Beamforming)
+    #: Functional exponent, defaults to 1 (= Classic Beamforming).
     gamma = Float(1, 
         desc="functional exponent")
 
@@ -394,7 +422,8 @@ class BeamformerCapon( BeamformerBase ):
     Beamforming using the Capon (Mininimum Variance) algorithm, 
     see :ref:`Capon, 1969<Capon1969>`.
     """
-    # flag for main diagonal removal is set to False
+    # Boolean flag, if 'True', the main diagonal is removed before beamforming;
+    # for Capon beamforming r_diag is set to 'False'.
     r_diag = Enum(False, 
         desc="removal of diagonal")
 
@@ -468,7 +497,7 @@ class BeamformerEig( BeamformerBase ):
     n = Int(-1, 
         desc="No. of eigenvalue")
 
-    # actual component to calculate
+    # Actual component to calculate, internal, readonly.
     na = Property(
         desc="No. of eigenvalue")
 
@@ -554,10 +583,11 @@ class BeamformerEig( BeamformerBase ):
 
 class BeamformerMusic( BeamformerEig ):
     """
-    beamforming using MUSIC algoritm
+    Beamforming using the MUSIC algorithm, see ref:`Schmidt, 1986<Schmidt1986>`.
     """
 
-    # flag for main diagonal removal is set to False
+    # Boolean flag, if 'True', the main diagonal is removed before beamforming;
+    # for MUSIC beamforming r_diag is set to 'False'.
     r_diag = Enum(False, 
         desc="removal of diagonal")
 
@@ -623,28 +653,36 @@ class BeamformerMusic( BeamformerEig ):
 
 class PointSpreadFunction (HasPrivateTraits):
     """
-    Array point spread function
+    The point spread function
+    
+    This class provides tools to calculate the PSF depending on the used 
+    microphone geometry, focus grid, flow environment, etc.
+    The PSF is needed by several deconvolution algorithms to correct
+    the aberrations when using simple delay-and-sum beamforming.
     """
-    # RectGrid object that provides the grid locations
+    #: :class:`~beamfpy.grids.Grid`-derived object that provides 
+    #: the grid locations.
     grid = Trait(Grid, 
         desc="beamforming grid")
 
-    # indices of grid points to calculate the PSF for
+    #: Indices of grid points to calculate the PSF for.
     grid_indices = CArray( dtype=int, value=array([]), 
                      desc="indices of grid points for psf") #value=array([]), value=self.grid.pos(),
     
-    # MicGeom object that provides the microphone locations
+    #: :class:`~beamfpy.microphones.MicGeom` object that provides 
+    #: the microphone locations.
     mpos = Trait(MicGeom, 
         desc="microphone geometry")
 
-    # Environment object that provides speed of sound and grid-mic distances
+    #: :class:`~beamfpy.environments.Environment` or derived object, 
+    #: which provides information about the sound propagation in the medium.
     env = Trait(Environment(), Environment)
 
-    # the speed of sound, defaults to 343 m/s
+    #: The speed of sound, defaults to 343 m/s
     c = Float(343., 
         desc="speed of sound")
 
-    # Type of steering vectors, see also :ref:`Sarradj, 2012<Sarradj2012>`.
+    #: Type of steering vectors, see also :ref:`Sarradj, 2012<Sarradj2012>`.
     steer = Trait('true level', 'true location', 'classic', 'inverse', 
                   'old_version',
                   desc="type of steering vectors used")
@@ -659,19 +697,21 @@ class PointSpreadFunction (HasPrivateTraits):
     calcmode = Trait('single', 'block', 'full', 'readonly',
                      desc="mode of calculation / storage")
               
-    # frequency 
+    #: Frequency to evaluate the PSF for; defaults to 1.0. 
     freq = Float(1.0, 
         desc="frequency")
         
-    # sound travel distances from microphone array center to grid points
+    #: Sound travel distances from microphone array center to grid 
+    #: points (readonly).
     r0 = Property(
         desc="array center to grid distances")
     
-    # sound travel distances from array microphones to grid points
+    #: Sound travel distances from array microphones to grid 
+    #: points (readonly).
     rm = Property(
         desc="array to grid distances")
         
-    # the actual point spread function
+    #: The actual point spread function.
     psf = Property(
         desc="point spread function")
 
@@ -696,7 +736,8 @@ class PointSpreadFunction (HasPrivateTraits):
 
     def get_beam_psf( self ):
         """
-        returns the proper low-level beamforming routine
+        Returns the proper low-level beamforming routine (implemented in C).
+        This function is only called internally by the :meth:`calc` routine.
         """
         steer = {'true level': '3', \
                 'true location': '4', \
@@ -708,7 +749,8 @@ class PointSpreadFunction (HasPrivateTraits):
     @property_depends_on('digest, freq')
     def _get_psf ( self ):
         """
-        point spread function is either calculated or loaded from cache
+        This is the :attr:`psf` getter routine.
+        The point spread function is either loaded or calculated.
         """
         gs = self.grid.size
         if not self.grid_indices.size:

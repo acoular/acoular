@@ -17,14 +17,14 @@ The following modules are part of beamfpy:
     signals
     sources
     calib
+    fbeamform
+    trajectory
 
 these modules still need some more documentation:
 
 .. autosummary::
     :toctree: generated/
 
-    trajectory
-    fbeamform
     tbeamform
     tprocess
     fileimport
