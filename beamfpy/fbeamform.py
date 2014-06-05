@@ -261,7 +261,7 @@ class BeamformerBase( HasPrivateTraits ):
         """
         res = self.result # trigger calculation
         freq = self.freq_data.fftfreq()
-        if len(f) == 0:
+        if len(freq) == 0:
             return None#array([[1, ], ], 'd')
         try:
             if num == 0:
