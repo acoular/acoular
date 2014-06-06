@@ -166,7 +166,7 @@ class TimeSamples( SamplesGenerator ):
         Returns
         -------
         Samples in blocks of shape (num, numchannels). 
-        The last block may be shorter than num.
+            The last block may be shorter than num.
         """
         if self.numsamples == 0:
             raise IOError("no samples available")
@@ -308,7 +308,7 @@ class MaskedTimeSamples( TimeSamples ):
         Returns
         -------
         Samples in blocks of shape (num, numchannels). 
-        The last block may be shorter than num.
+            The last block may be shorter than num.
         """
         sli = slice(self.start, self.stop).indices(self.numsamples_total)
         i = sli[0]
@@ -405,7 +405,7 @@ class PointSource( SamplesGenerator ):
         Returns
         -------
         Samples in blocks of shape (num, numchannels). 
-        The last block may be shorter than num.
+            The last block may be shorter than num.
         """
         #If signal samples are needed for te < t_start, then samples are taken
         #from the end of the calculated signal.
@@ -470,7 +470,7 @@ class MovingPointSource( PointSource ):
         Returns
         -------
         Samples in blocks of shape (num, numchannels). 
-        The last block may be shorter than num.
+            The last block may be shorter than num.
         """   
         #If signal samples are needed for te < t_start, then samples are taken
         #from the end of the calculated signal.

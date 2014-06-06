@@ -51,8 +51,7 @@ class TimeInOut( SamplesGenerator ):
     generator :meth:`result`
     """
 
-    #: Data source; object that has a property sample_freq and 
-    #: a python generator result(N) that will generate data blocks of N samples
+    #: Data source; :class:`~beamfpy.sources.SamplesGenerator` object.
     source = Trait(SamplesGenerator)
 
     #: Sampling frequency of output signal
@@ -77,9 +76,9 @@ class TimeInOut( SamplesGenerator ):
 
     def result(self, num):
         """ 
-        python generator: dummy function, just echoes the output of source,
+        Python generator: dummy function, just echoes the output of source,
         yields samples in blocks of shape (num, numchannels), the last block
-        may be shorter than num
+        may be shorter than num.
         """
         for temp in self.source.result(num):
             # effectively no processing
@@ -87,23 +86,23 @@ class TimeInOut( SamplesGenerator ):
 
 class Mixer( TimeInOut ):
     """
-    mixes the signals from several sources
+    Mixes the signals from several sources.
     """
 
-    # data source, object that has a property sample_freq and 
-    # a python generator result(N) that will generate data blocks of N samples
+    #: Data source; :class:`~beamfpy.sources.SamplesGenerator` object.
     source = Trait(SamplesGenerator)
 
-    # list of additional data source objects
+    #: List of additional :class:`~beamfpy.sources.SamplesGenerator` objects
+    #: to be mixed.
     sources = List( Instance(SamplesGenerator, ()) ) 
 
-    # sample_freq of output signal
+    #: Sampling frequency of the signal as given by :attr:`source`.
     sample_freq = Delegate('source')
     
-    # number of channels in output
+    #: Number of channels in output as given by :attr:`source`.
     numchannels = Delegate('source')
                
-    # number of channels in output
+    #: Number of samples in output as given by :attr:`source`.
     numsamples = Delegate('source')
 
     # internal identifier
@@ -138,10 +137,21 @@ class Mixer( TimeInOut ):
                     raise ValueError("Channel count of %s does not fit" % s)
 
     def result(self, num):
-        """ 
-        python generator: adds the output from the source and those in the list 
-        sources, yields samples in blocks of shape (num, numchannels), 
-        the last block may be shorter than num
+        """
+        Python generator that yields the output block-wise.
+        The output from the source and those in the list 
+        sources are being added.
+        
+        Parameters
+        ----------
+        num : integer
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block) 
+        
+        Returns
+        -------
+        Samples in blocks of shape (num, numchannels). 
+            The last block may be shorter than num.
         """
         gens = [i.result(num) for i in self.sources]
         for temp in self.source.result(num):
@@ -158,30 +168,40 @@ class Mixer( TimeInOut ):
 
 class TimePower( TimeInOut ):
     """
-    calculates time-depended power of the signal
+    Calculates time-depended power of the signal
     """
 
     def result(self, num):
-        """ 
-        python generator: echoes the squared output of source, yields samples 
-        in blocks of shape (num, numchannels), the last block may be shorter 
-        than num
+        """
+        Python generator that yields the output block-wise.
+        
+        Parameters
+        ----------
+        num : integer
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block) 
+        
+        Returns
+        -------
+        Squared output of source. 
+            Yields samples in blocks of shape (num, numchannels). 
+            The last block may be shorter than num.
         """
         for temp in self.source.result(num):
             yield temp*temp
     
 class TimeAverage( TimeInOut ) :
     """
-    calculates time-depended average of the signal
+    Calculates time-depended average of the signal
     """
-    # number of samples to average over
+    #: Number of samples to average over, defaults to 64.
     naverage = Int(64, 
         desc = "number of samples to average over")
         
-    # sample_freq of output signal
+    #: Sampling frequency of the output signal, is set automatically.
     sample_freq = Property( depends_on = 'source.sample_freq, naverage')
     
-    # number of samples in output signal
+    #: Number of samples of the output signal, is set automatically.
     numsamples = Property( depends_on = 'source.numsamples, naverage')
     
     # internal identifier
@@ -213,10 +233,21 @@ class TimeAverage( TimeInOut ) :
             return self.source.numsamples / self.naverage
 
     def result(self, num):
-        """ 
-        python generator: delivers the blockwise average of the output of 
-        source, yields samples in blocks of shape (num, numchannels), the last 
-        block may be shorter than num
+        """
+        Python generator that yields the output block-wise.
+
+        
+        Parameters
+        ----------
+        num : integer
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block) 
+        
+        Returns
+        -------
+        Average of the output of source. 
+            Yields samples in blocks of shape (num, numchannels). 
+            The last block may be shorter than num.
         """
         nav = self.naverage
         for temp in self.source.result(num*nav):
@@ -227,13 +258,24 @@ class TimeAverage( TimeInOut ) :
                 
 class TimeReverse( TimeInOut ):
     """
-    reverses time 
+    Calculates the time-reversed signal of a source. 
     """
     def result(self, num):
-        """ 
-        python generator: delivers the time-reversed output of source, yields 
-        samples in blocks of shape (num, numchannels), the last block may be 
-        shorter than num
+        """
+        Python generator that yields the output block-wise.
+
+        
+        Parameters
+        ----------
+        num : integer
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block) 
+        
+        Returns
+        -------
+        Time-reversed output of source. 
+            Yields samples in blocks of shape (num, numchannels). 
+            The last block may be shorter than num.
         """
         l = []
         l.extend(self.source.result(num))

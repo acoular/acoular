@@ -18,6 +18,7 @@ The following modules are part of beamfpy:
     sources
     calib
     fbeamform
+    tbeamform
     trajectory
 
 these modules still need some more documentation:
@@ -25,7 +26,6 @@ these modules still need some more documentation:
 .. autosummary::
     :toctree: generated/
 
-    tbeamform
     tprocess
     fileimport
     h5cache

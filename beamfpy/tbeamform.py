@@ -33,10 +33,23 @@ from .tprocess import TimeInOut
 
 def const_power_weight( bf ):
     """
-    provides microphone weighting for BeamformerTime
+    Internal helper function for :class:`BeamformerTime`
+    
+    Provides microphone weighting 
     to make the power per unit area of the
-    microphone array geometry constant 
+    microphone array geometry constant.
+    
+    Parameters
+    ----------
+    bf: :class:`BeamformerTime` object
+        
+          
+    Returns
+    -------
+    array of floats
+        The weight factors.
     """
+
     r = bf.env.r( bf.c, zeros((3, 1)), bf.mpos.mpos) # distances to center
     # round the relative distances to one decimal place
     r = (r/r.max()).round(decimals=1)
@@ -56,36 +69,40 @@ possible_weights = {'none':None,
 class BeamformerTime( TimeInOut ):
     """
     Provides a basic time domain beamformer with time signal output
-    for a spatially fixed grid
+    for a spatially fixed grid.
     """
 
-    # RectGrid object that provides the grid locations
+    #: :class:`~beamfpy.grids.Grid`-derived object that provides the grid locations.
     grid = Trait(RectGrid, 
         desc="beamforming grid")
 
-    # number of channels in output
+    #: Number of channels in output (=number of grid points).
     numchannels = Delegate('grid', 'size')
 
-    # MicGeom object that provides the microphone locations
-    mpos = Trait(MicGeom, 
+    #: :class:`~beamfpy.microphones.MicGeom` object that provides the microphone locations.
+    mpos= Trait(MicGeom, 
         desc="microphone geometry")
         
-    # Environment object that provides speed of sound and grid-mic distances
+    #: :class:`~beamfpy.environments.Environment` or derived object, 
+    #: which provides information about the sound propagation in the medium.
     env = Trait(Environment(), Environment)
 
-    # spatial weighting function (from timedomain.possible_weights)
+    #: Spatial weighting function.
     weights = Trait('none', possible_weights, 
         desc="spatial weighting function")
-
-    # the speed of sound, defaults to 343 m/s
+    # (from timedomain.possible_weights)
+        
+    #: The speed of sound, defaults to 343 m/s
     c = Float(343., 
         desc="speed of sound")
     
-    # sound travel distances from microphone array center to grid points
+    #: Sound travel distances from microphone array center to grid 
+    #: points (readonly).
     r0 = Property(
         desc="array center to grid distances")
 
-    # sound travel distances from array microphones to grid points
+    #: Sound travel distances from array microphones to grid 
+    #: points (readonly).
     rm = Property(
         desc="array center to grid distances")
 
@@ -121,10 +138,20 @@ class BeamformerTime( TimeInOut ):
         return self.env.r( self.c, self.grid.pos(), self.mpos.mpos)
 
     def result( self, num=2048 ):
-        """ 
-        python generator: delivers the beamformer result, yields samples in 
-        blocks of shape (num, numchannels), the last block may be shorter 
-        than num; numchannels is usually very large (number of grid points)
+        """
+        Python generator that yields the beamformer output block-wise.
+        
+        Parameters
+        ----------
+        num : integer, defaults to 2048
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block) 
+        
+        Returns
+        -------
+        Samples in blocks of shape (num, :attr:`numchannels`). 
+            :attr:`numchannels` is usually very large.
+            The last block may be shorter than num.
         """
         if self.weights_:
             w = self.weights_(self)[newaxis]
@@ -175,10 +202,10 @@ class BeamformerTimeSq( BeamformerTime ):
     """
     Provides a time domain beamformer with time-dependend
     power signal output and possible autopower removal
-    for a spatially fixed grid
+    for a spatially fixed grid.
     """
     
-    # flag, if true (default), the auto power is removed 
+    #: Boolean flag, if 'True' (default), the main diagonal is removed before beamforming.
     r_diag = Bool(True, 
         desc="removal of diagonal")
 
@@ -208,12 +235,25 @@ class BeamformerTimeSq( BeamformerTime ):
         
     # generator, delivers the beamformer result
     def result( self, num=2048 ):
-        """ 
-        python generator: delivers the _squared_ beamformer result with optional
-        removal of autocorrelation, yields samples in blocks of shape 
-        (num, numchannels), the last block may be shorter than num; 
-        numchannels is usually very large (number of grid points)
         """
+        Python generator that yields the *squared* beamformer 
+        output with optional removal of autocorrelation block-wise.
+        
+        Parameters
+        ----------
+        num : integer, defaults to 2048
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block) 
+        
+        Returns
+        -------
+        Samples in blocks of shape \
+        (num, :attr:`~BeamformerTime.numchannels`). 
+            :attr:`~BeamformerTime.numchannels` is usually very 
+            large (number of grid points).
+            The last block may be shorter than num.
+        """
+
         if self.weights_:
             w = self.weights_(self)[newaxis]
         else:
@@ -272,14 +312,15 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
     """
     Provides a time domain beamformer with time-dependent
     power signal output and possible autopower removal
-    for a grid moving along a trajectory
+    for a grid moving along a trajectory.
     """
     
-    # trajectory, start time is assumed to be the same as for the samples
+    #: :class:`~beamfpy.trajectory.Trajectory` or derived object.
+    #: Start time is assumed to be the same as for the samples.
     trajectory = Trait(Trajectory, 
         desc="trajectory of the grid center")
 
-    # reference vector, perpendicular to the y-axis of moving grid
+    #: Reference vector, perpendicular to the y-axis of moving grid.
     rvec = CArray( dtype=float, shape=(3, ), value=array((0, 0, 0)), 
         desc="reference vector")
     
@@ -310,15 +351,29 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
         return digest(self)
         
     def result( self, num=2048 ):
-        """ 
-        python generator: delivers the _squared_ beamformer result with optional
-        removal of autocorrelation for a moving (translated and optionally 
-        rotated grid), yields samples in blocks of shape (num, numchannels), 
-        the last block may be shorter than num; numchannels is usually very 
-        large (number of grid points)
-        
-        the output starts for signals that were emitted from the grid at t=0
         """
+        Python generator that yields the *squared* beamformer 
+        output block-wise. 
+        
+        Optional removal of autocorrelation.
+        The "moving" grid can be translated and optionally rotated.
+        
+        Parameters
+        ----------
+        num : integer, defaults to 2048
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block) 
+        
+        Returns
+        -------
+        Samples in blocks of shape  \
+        (num, :attr:`~BeamformerTime.numchannels`). 
+            :attr:`~BeamformerTime.numchannels` is usually very \
+            large (number of grid points).
+            The last block may be shorter than num. \
+            The output starts for signals that were emitted from the grid at t=0.
+        """
+
         if self.weights_:
             w = self.weights_(self)[newaxis]
         else:
@@ -407,20 +462,20 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
 
 class IntegratorSectorTime( TimeInOut ):
     """
-    Provides an Integrator
+    Provides an Integrator in the time domain.
     """
 
-    # RectGrid object that provides the grid locations
+    #: :class:`~beamfpy.grids.Grid`-derived object that provides the grid locations.
     grid = Trait(RectGrid, 
         desc="beamforming grid")
         
-    # List of sectors in grid
+    #: List of sectors in grid
     sectors = List()
 
-    # Clipping, in Dezibel relative to maximum (negative values)
-    clip = Float(-1000.0)
+    #: Clipping, in Dezibel relative to maximum (negative values)
+    clip = Float(-350.0)
 
-    # number of channels in output
+    #: Number of channels in output (= number of sectors).
     numchannels = Property( depends_on = ['sectors', ])
 
     # internal identifier
@@ -448,10 +503,21 @@ class IntegratorSectorTime( TimeInOut ):
         return len(self.sectors)
 
     def result( self, num=1 ):
-        """ 
-        python generator: delivers the source output integrateds over the given 
-        sectors, yields samples in blocks of shape (num, numchannels), the last 
-        block may be shorter than num; numchannels is the number of sectors
+        """
+        Python generator that yields the source output integrated over the given 
+        sectors, block-wise.
+        
+        Parameters
+        ----------
+        num : integer, defaults to 1
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block) 
+        
+        Returns
+        -------
+        Samples in blocks of shape (num, :attr:`numchannels`). 
+        :attr:`numchannels` is the number of sectors.
+        The last block may be shorter than num.
         """
         inds = [self.grid.indices(*sector) for sector in self.sectors]
         gshape = self.grid.shape

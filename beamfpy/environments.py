@@ -253,7 +253,8 @@ class OpenJet( FlowField ):
         return v, dv
 
 def spiral_sphere(N, Om=2*pi, b=array((0, 0, 1))):
-    """Internal helper function for the raycasting that returns an array of
+    """
+    Internal helper function for the raycasting that returns an array of
     unit vectors (N, 3) giving equally distributed directions on a part of
     sphere given by the center direction b and the solid angle Om
     """
@@ -278,7 +279,8 @@ def spiral_sphere(N, Om=2*pi, b=array((0, 0, 1))):
     return dot(H, xyz)
 
 class GeneralFlowEnvironment(Environment):
-    """An acoustic environment with a generic flow field.
+    """
+    An acoustic environment with a generic flow field.
 
     This class provides the facilities to calculate the travel time (distances)
     between grid point locations and microphone locations in a generic flow

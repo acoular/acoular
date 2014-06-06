@@ -20,6 +20,8 @@
     BeamformerCMF
 
     PointSpreadFunction
+    L_p
+    integrate
 
 """
 
@@ -1498,10 +1500,18 @@ class BeamformerCMF ( BeamformerBase ):
 def L_p ( x ):
     """
     Calculates the sound pressure level from the sound pressure squared:
-
     L_p = 10 lg x/4e-10
-
-    if x<0, return -350. dB
+    
+    Parameters
+    ----------
+    x: array of floats
+        The squared sound pressure values
+        
+    Returns
+    -------
+    array of floats
+        The corresponding sound pressure levels in dB. 
+        If x<0, -350. dB is returned.
     """
     # new version to prevent division by zero warning for float32 arguments
     return 10*log10(clip(x/4e-10,1e-35,None))
