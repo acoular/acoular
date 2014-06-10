@@ -68,7 +68,7 @@ from .tprocess import TimeInOut, Mixer, TimeAverage, TimeReverse, \
 TimePower, FiltFiltOctave, FiltOctave, TimeCache, WriteWAV, WriteH5 
 from .calib import Calib
 from .trajectory import Trajectory
-from .grids import RectGrid, RectGrid3D
+from .grids import Grid, RectGrid, RectGrid3D
 from .environments import Environment, UniformFlowEnvironment, \
 FlowField, OpenJet, GeneralFlowEnvironment
 from .microphones import MicGeom
