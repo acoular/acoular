@@ -20,13 +20,13 @@ The following modules are part of beamfpy:
     fbeamform
     tbeamform
     trajectory
+    tprocess
 
 these modules still need some more documentation:
 
 .. autosummary::
     :toctree: generated/
 
-    tprocess
     fileimport
     h5cache
     internal

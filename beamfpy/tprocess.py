@@ -273,8 +273,8 @@ class TimeReverse( TimeInOut ):
         
         Returns
         -------
-        Time-reversed output of source. 
-            Yields samples in blocks of shape (num, numchannels). 
+        Yields samples in blocks of shape (num, numchannels). 
+            Time-reversed output of source. 
             The last block may be shorter than num.
         """
         l = []
@@ -291,14 +291,16 @@ class TimeReverse( TimeInOut ):
         
 class FiltFiltOctave( TimeInOut ):
     """
-    octave or fractional octave filter with zero phase delay
-    requires large amounts of memory !   
+    Octave or third-octave filter with zero phase delay.
+    
+    This filter can be applied on time signals.
+    It requires large amounts of memory!   
     """
-    # band center frequency
+    #: Band center frequency; defaults to 1000.
     band = Float(1000.0, 
         desc = "band center frequency")
         
-    # octave fraction
+    #: Octave fraction: 'Octave' or 'Third octave'; defaults to 'Octave'.
     fraction = Trait('Octave', {'Octave':1, 'Third octave':3}, 
         desc = "fraction of octave")
         
@@ -323,7 +325,19 @@ class FiltFiltOctave( TimeInOut ):
         return digest(self)
         
     def ba(self, order):
-        """ internal filter design routine, return filter coeffs """
+        """ 
+        Internal Butterworth filter design routine.
+        
+        Parameters
+        ----------
+        order : integer
+            The order of the filter.
+        
+        Returns
+        -------
+            b, a : ndarray, ndarray
+                Filter coefficients
+        """
         # filter design
         fs = self.sample_freq
         # adjust filter edge frequencies
@@ -340,10 +354,21 @@ class FiltFiltOctave( TimeInOut ):
         return butter(order, [om1, om2], 'bandpass') 
         
     def result(self, num):
-        """ 
-        python generator: delivers the zero-phase bandpass filtered output of 
-        source, yields samples in blocks of shape (num, numchannels), the last 
-        block may be shorter than num
+        """
+        Python generator that yields the output block-wise.
+
+        
+        Parameters
+        ----------
+        num : integer
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block) 
+        
+        Returns
+        -------
+        Samples in blocks of shape (num, numchannels). 
+            Delivers the zero-phase bandpass filtered output of source.
+            The last block may be shorter than num.
         """
         b, a = self.ba(3) # filter order = 3
         data = empty((self.source.numsamples, self.source.numchannels))
@@ -362,14 +387,25 @@ class FiltFiltOctave( TimeInOut ):
 
 class FiltOctave( FiltFiltOctave ):
     """
-    octave or fractional octave filter (not zero-phase)
+    Octave or third-octave filter (not zero-phase).
     """
 
     def result(self, num):
         """ 
-        python generator: delivers the bandpass filtered output of source,
-        yields samples in blocks of shape (num, numchannels), the last 
-        block may be shorter than num
+        Python generator that yields the output block-wise.
+
+        
+        Parameters
+        ----------
+        num : integer
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block) 
+        
+        Returns
+        -------
+        Samples in blocks of shape (num, numchannels). 
+            Delivers the bandpass filtered output of source.
+            The last block may be shorter than num.
         """
         b, a = self.ba(3) # filter order = 3
         zi = zeros((max(len(a), len(b))-1, self.source.numchannels))
@@ -380,7 +416,7 @@ class FiltOctave( FiltFiltOctave ):
                        
 class TimeCache( TimeInOut ):
     """
-    caches time signal in cache file
+    Caches time signal in cache file.
     """
     # basename for cache
     basename = Property( depends_on = 'digest')
@@ -423,10 +459,21 @@ class TimeCache( TimeInOut ):
     # result generator: delivers input, possibly from cache
     def result(self, num):
         """ 
-        python generator: just echos the source output, but reads it from cache
-        when available and prevents unnecassary recalculation, yields samples 
-        in blocks of shape (num, numchannels), the last block may be shorter 
-        than num
+        Python generator that yields the output from cache block-wise.
+
+        
+        Parameters
+        ----------
+        num : integer
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block) 
+        
+        Returns
+        -------
+        Samples in blocks of shape (num, numchannels). 
+            The last block may be shorter than num.
+            Echos the source output, but reads it from cache
+            when available and prevents unnecassary recalculation.
         """
         name = 'tc_' + self.digest
         H5cache.get_cache( self, self.basename )
@@ -447,12 +494,13 @@ class TimeCache( TimeInOut ):
 
 class WriteWAV( TimeInOut ):
     """
-    saves time signal from one or two channels as mono or stereo wav file
+    Saves time signal from one or two channels as 
+    mono or stereo *.wav file
     """
     # basename for cache
     basename = Property( depends_on = 'digest')
        
-    # channel(s) to save
+    #: Channel(s) to save. List can only contain one or two channels.
     channels = List(desc="channel to save")
        
     # internal identifier
@@ -488,10 +536,12 @@ class WriteWAV( TimeInOut ):
         return basename
 
     def save(self):
-        """ saves source output to one- or two-channel .wav file """
+        """ 
+        Saves source output to one- or two-channel *.wav file. 
+        """
         nc = len(self.channels)
         if not (0 < nc < 3):
-            raise ValueError("one or two channels allowed, %i channels given" %\
+            raise ValueError("One or two channels allowed, %i channels given" %\
             nc)
         name = self.basename
         for nr in self.channels:
@@ -513,9 +563,10 @@ class WriteWAV( TimeInOut ):
 
 class WriteH5( TimeInOut ):
     """
-    saves time signal as h5 file
+    Saves time signal as *.h5 file
     """
-    # basename for cache
+    #: Name of the file to be saved. If none is given, the name will be
+    #: automatically generated from a time stamp.
     name = File(filter=['*.h5'], 
         desc="name of data file")    
       
