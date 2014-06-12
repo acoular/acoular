@@ -201,7 +201,7 @@ class MaskedTimeSamples( TimeSamples ):
     start = CLong(0L, 
         desc="start of valid samples")
     
-    #: Index of the last valid sample to be considered valid
+    #: Index of the last sample to be considered valid
     stop = Trait(None, None, CLong, 
         desc="stop of valid samples")
     
