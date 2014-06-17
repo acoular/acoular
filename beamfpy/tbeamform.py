@@ -9,6 +9,7 @@
     :toctree: generated/
 
     BeamformerTime
+    BeamformerTimeTraj
     BeamformerTimeSq
     BeamformerTimeSqTraj
     IntegratorSectorTime
@@ -305,6 +306,155 @@ class BeamformerTimeSq( BeamformerTime ):
             zi[0:aoff] = zi[-aoff:]
             offset -= num
         # remaining data chunk 
+        yield o[:ooffset]
+
+
+
+
+class BeamformerTimeTraj( BeamformerTime ):
+    """
+    Provides a basic time domain beamformer with time signal output
+    for a grid moving along a trajectory
+    """
+
+
+    #: :class:`~beamfpy.trajectory.Trajectory` or derived object.
+    #: Start time is assumed to be the same as for the samples.
+    trajectory = Trait(Trajectory, 
+        desc="trajectory of the grid center")
+
+    #: Reference vector, perpendicular to the y-axis of moving grid.
+    rvec = CArray( dtype=float, shape=(3, ), value=array((0, 0, 0)), 
+        desc="reference vector")
+    
+    # internal identifier
+    digest = Property( 
+        depends_on = ['mpos.digest', 'grid.digest', 'source.digest', \
+            'c', 'weights', 'rvec', 'env.digest', 'trajectory.digest', \
+            '__class__'], 
+        )
+
+    traits_view = View(
+        [
+            [Item('mpos{}', style='custom')], 
+            [Item('grid', style='custom'), '-<>'], 
+            [Item('trajectory{}', style='custom')], 
+            [Item('c', label='speed of sound')], 
+            [Item('env{}', style='custom')], 
+            [Item('weights{}', style='custom')], 
+            '|'
+        ], 
+        title='Beamformer options', 
+        buttons = OKCancelButtons
+        )
+
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+        
+    def result( self, num=2048 ):
+        """
+        Python generator that yields the beamformer 
+        output block-wise. 
+        
+        Optional removal of autocorrelation.
+        The "moving" grid can be translated and optionally rotated.
+        
+        Parameters
+        ----------
+        num : integer, defaults to 2048
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block) 
+        
+        Returns
+        -------
+        Samples in blocks of shape  \
+        (num, :attr:`~BeamformerTime.numchannels`). 
+            :attr:`~BeamformerTime.numchannels` is usually very \
+            large (number of grid points).
+            The last block may be shorter than num. \
+            The output starts for signals that were emitted from the grid at t=0.
+        """
+
+        if self.weights_:
+            w = self.weights_(self)[newaxis]
+        else:
+            w = 1.0
+        c = self.c/self.source.sample_freq
+        # temp array for the grid co-ordinates
+        gpos = self.grid.pos()
+        # max delay span = sum of
+        # max diagonal lengths of circumscribing cuboids for grid and micarray
+        dmax = sqrt(((gpos.max(1)-gpos.min(1))**2).sum())
+        dmax += sqrt(((self.mpos.mpos.max(1)-self.mpos.mpos.min(1))**2).sum())
+        dmax = int(dmax/c)+1 # max index span
+        zi = empty((dmax+num, self.source.numchannels), \
+            dtype=float) #working copy of data
+        o = empty((num, self.grid.size), dtype=float) # output array
+        temp = empty((self.grid.size, self.source.numchannels), dtype=float)
+        d_index2 = arange(self.mpos.num_mics, dtype=int) # second index (static)
+        offset = dmax+num # start offset for working array
+        ooffset = 0 # offset for output array      
+        # generators for trajectory, starting at time zero
+        start_t = 0.0
+        g = self.trajectory.traj( start_t, delta_t=1/self.source.sample_freq)
+        g1 = self.trajectory.traj( start_t, delta_t=1/self.source.sample_freq, 
+                                  der=1)
+                                  
+        rflag = (self.rvec == 0).all() #flag translation vs. rotation
+        data = self.source.result(num)
+        flag = True
+        while flag:
+            # yield output array if full
+            if ooffset == num:
+                yield o
+                ooffset = 0
+            if rflag:
+                # grid is only translated, not rotated
+                tpos = gpos + array(g.next())[:, newaxis]
+            else:
+                # grid is both translated and rotated
+                loc = array(g.next()) #translation array([0., 0.4, 1.])
+                dx = array(g1.next()) #direction vector (new x-axis)
+                dy = cross(self.rvec, dx) # new y-axis
+                dz = cross(dx, dy) # new z-axis
+                RM = array((dx, dy, dz)).T # rotation matrix
+                RM /= sqrt((RM*RM).sum(0)) # column normalized
+                tpos = dot(RM, gpos)+loc[:, newaxis] # rotation+translation
+            rm = self.env.r( self.c, tpos, self.mpos.mpos)
+            r0 = self.env.r( self.c, tpos)
+            delays = rm/c
+            d_index = array(delays, dtype=int) # integer index
+            d_interp1 = delays % 1 # 1st coeff for lin interpolation
+            d_interp2 = 1-d_interp1 # 2nd coeff for lin interpolation
+            amp = (w/(rm*rm)).sum(1) * r0
+            amp = 1.0/(amp[:, newaxis]*rm) # multiplication factor
+            # now, we have to make sure that the needed data is available                 
+            while offset+d_index.max()+2>dmax+num:
+                # copy remaining samples in front of next block
+                zi[0:dmax] = zi[-dmax:]
+                # the offset is adjusted by one block length
+                offset -= num
+                # test if data generator is exhausted
+                try:
+                    # get next data
+                    block = data.next()
+                except StopIteration:
+                    print loc
+                    flag = False
+                    break
+                # samples in the block, equals to num except for the last block
+                ns = block.shape[0]                
+                zi[dmax:dmax+ns] = block * w# copy data to working array
+            else:
+                # the next line needs to be implemented faster
+                # it eats half of the time
+                temp[:, :] = (zi[offset+d_index, d_index2]*d_interp1 \
+                            + zi[offset+d_index+1, d_index2]*d_interp2)*amp
+                o[ooffset] = temp.sum(-1)
+                offset += 1
+                ooffset += 1
+        # remaining data chunk
         yield o[:ooffset]
 
         

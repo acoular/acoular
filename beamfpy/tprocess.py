@@ -51,7 +51,7 @@ class TimeInOut( SamplesGenerator ):
     generator :meth:`result`
     """
 
-    #: Data source; :class:`~beamfpy.sources.SamplesGenerator` object.
+    #: Data source; :class:`~beamfpy.sources.SamplesGenerator` or derived object.
     source = Trait(SamplesGenerator)
 
     #: Sampling frequency of output signal

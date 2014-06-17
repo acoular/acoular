@@ -25,7 +25,7 @@ from .internal import digest
 
 class Trajectory( HasPrivateTraits ):
     """
-    Describes a trajectory from sampled points
+    Describes a trajectory from sampled points.
     
     Based on a discrete number of points in space and time, a 
     continuous trajectory is calculated using spline interpolation 

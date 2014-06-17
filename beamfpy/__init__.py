@@ -63,7 +63,7 @@ import os
 os.environ.setdefault('OMP_NUM_THREADS','1')
 
 from .tbeamform import IntegratorSectorTime, \
-BeamformerTime, BeamformerTimeSq, BeamformerTimeSqTraj
+BeamformerTime, BeamformerTimeSq, BeamformerTimeTraj, BeamformerTimeSqTraj
 from .tprocess import TimeInOut, Mixer, TimeAverage, TimeReverse, \
 TimePower, FiltFiltOctave, FiltOctave, TimeCache, WriteWAV, WriteH5 
 from .calib import Calib
