@@ -24,7 +24,8 @@ from .internal import digest
 
 
 class MicGeom( HasPrivateTraits ):
-    """Provides the geometric arrangement of microphones in the mic. array.
+    """
+    Provides the geometric arrangement of microphones in the mic. array.
     
     The geometric arrangement of microphones is read in from an 
     xml-source with element tag names 'pos' and attributes Name, x, y and z. 
@@ -95,7 +96,8 @@ class MicGeom( HasPrivateTraits ):
 
     @on_trait_change('basename')
     def import_mpos( self ):
-        """Import the microphone positions from .xml file.
+        """
+        Import the microphone positions from .xml file.
         Called when :attr:`basename` changes.
         """
         if not path.isfile(self.from_file):

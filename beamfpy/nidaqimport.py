@@ -78,38 +78,39 @@ DAQmxSetSampClkRate = ECFactory(nidaq.DAQmxSetSampClkRate)
 
 class nidaq_import( time_data_import ):
     """
-    import of data from measurement using NI-DAQmx
+    This class provides an interface to import of measurement data 
+    using NI-DAQmx.
     """
 
-    # name of the NI task to use
+    #: Name of the NI task to use
     taskname = Str(
         desc="name of the NI task to use for the measurement")
 
-    # sample rate
+    # Sampling frequency, defaults to 48000.
     sample_freq = Float(48000.0,
         desc="sampling frequency")
 
-    # number of time data samples
+    # Number of time data samples, defaults to 48000.
     numsamples = Long(48000,
         desc="number of samples")
 
-    # number of channels, is set automatically
+    # Number of channels; is set automatically.
     numchannels =  Long(0,
         desc="number of channels in the task")
 
-    # number of devices, is set automatically
+    # Number of devices; is set automatically.
     numdevices = Long(0,
         desc="number of devices in the task")
 
-    # name of channels, is set automatically
+    # Name of channels; is set automatically.
     namechannels =  List(
         desc="names of channels in the task")
 
-    # number of devices, is set automatically
+    # Name of devices; is set automatically.
     namedevices = List(
         desc="names of devices in the task")
 
-    # name of available and valid tasks
+    # Name of available and valid tasks.
     tasknames = List
 
     traits_view = View(

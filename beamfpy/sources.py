@@ -57,9 +57,9 @@ class SamplesGenerator( HasPrivateTraits ):
     digest = ''
                
     def result(self, num):
-        """Python generator that yields the output block-wise
-        
-        
+        """
+        Python generator that yields the output block-wise.
+                
         Parameters
         ----------
         num : integer
@@ -154,9 +154,9 @@ class TimeSamples( SamplesGenerator ):
         (self.numsamples, self.numchannels) = self.data.shape
 
     def result(self, num=128):
-        """Python generator that yields the output block-wise
-        
-        
+        """
+        Python generator that yields the output block-wise.
+                
         Parameters
         ----------
         num : integer, defaults to 128
@@ -297,7 +297,8 @@ class MaskedTimeSamples( TimeSamples ):
         (self.numsamples_total, self.numchannels_total) = self.data.shape
 
     def result(self, num=128):
-        """Python generator that yields the output block-wise
+        """
+        Python generator that yields the output block-wise.
         
         Parameters
         ----------
@@ -393,9 +394,9 @@ class PointSource( SamplesGenerator ):
         return digest(self)
            
     def result(self, num=128):
-        """Python generator that yields the output at microphones block-wise
-        
-        
+        """
+        Python generator that yields the output at microphones block-wise.
+                
         Parameters
         ----------
         num : integer, defaults to 128
@@ -458,9 +459,9 @@ class MovingPointSource( PointSource ):
         return digest(self)
 
     def result(self, num=128):
-        """Python generator that yields the output at microphones block-wise.
-        
-        
+        """
+        Python generator that yields the output at microphones block-wise.
+                
         Parameters
         ----------
         num : integer, defaults to 128

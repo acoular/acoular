@@ -34,7 +34,7 @@ if not path.exists(td_dir):
 
 class H5cache_class(HasPrivateTraits):
     """
-    cache class that handles opening and closing tables.File objects
+    Cache class that handles opening and closing tables.File objects
     """
     # cache directory
     cache_dir = Str

@@ -29,7 +29,8 @@ from traitsui.api import View
 from .internal import digest
 
 class Environment( HasPrivateTraits ):
-    """A simple acoustic environment without flow.
+    """
+    A simple acoustic environment without flow.
 
     This class provides the facilities to calculate the travel time (distances)
     between grid point locations and microphone locations.
@@ -44,7 +45,8 @@ class Environment( HasPrivateTraits ):
         return ''
 
     def r( self, c, gpos, mpos=0.0):
-        """Calculates distances between grid point locations and microphone
+        """
+        Calculates distances between grid point locations and microphone
         locations or the origin.
 
         Parameters
@@ -75,7 +77,8 @@ class Environment( HasPrivateTraits ):
         return rm
 
 class UniformFlowEnvironment( Environment):
-    """An acoustic environment with uniform flow.
+    """
+    An acoustic environment with uniform flow.
 
     This class provides the facilities to calculate the travel time (distances)
     between grid point locations and microphone locations in a uniform flow
@@ -107,7 +110,8 @@ class UniformFlowEnvironment( Environment):
         return digest( self )
 
     def r( self, c, gpos, mpos=0.0):
-        """Calculates the virtual distances between grid point locations and
+        """
+        Calculates the virtual distances between grid point locations and
         microphone locations or the origin. These virtual distances correspond
         to travel times of the sound.
 
@@ -143,7 +147,8 @@ class UniformFlowEnvironment( Environment):
         return rm
 
 class FlowField( HasPrivateTraits ):
-    """An abstract base class for a spatial flow field.
+    """
+    An abstract base class for a spatial flow field.
     """
     digest = Property
 
@@ -154,7 +159,8 @@ class FlowField( HasPrivateTraits ):
         return ''
 
     def v( self, xx):
-        """Provides the flow field as a function of the location. This is
+        """
+        Provides the flow field as a function of the location. This is
         implemented here for the possibly most simple case: a quiescent fluid.
 
         Parameters
@@ -214,7 +220,8 @@ class OpenJet( FlowField ):
         return digest( self )
 
     def v( self, xx):
-        """Provides the flow field as a function of the location. This is
+        """
+        Provides the flow field as a function of the location. This is
         implemented here only for a jet in x-direction and the y- and
         z-components are set to zero.
 
@@ -319,7 +326,8 @@ class GeneralFlowEnvironment(Environment):
         return digest( self )
 
     def r( self, c, gpos, mpos=0.0):
-        """Calculates the virtual distances between grid point locations and
+        """
+        Calculates the virtual distances between grid point locations and
         microphone locations or the origin. These virtual distances correspond
         to travel times of the sound along a ray that is traced through the
         medium.

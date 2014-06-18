@@ -23,7 +23,8 @@ from traitsui.api import View
 from .internal import digest
 
 class Grid( HasPrivateTraits ):
-    """Virtual base class for grid geometries.
+    """
+    Virtual base class for grid geometries.
     
     Defines the common interface for all grid classes and
     provides facilities to query grid properties and related data. This class
@@ -62,7 +63,8 @@ class Grid( HasPrivateTraits ):
         return (1, 1)
 
     def pos ( self ):
-        """Calculates grid co-ordinates.
+        """
+        Calculates grid co-ordinates.
         
         Returns
         -------
@@ -82,7 +84,8 @@ class Grid( HasPrivateTraits ):
 
 
 class RectGrid( Grid ):
-    """Provides a cartesian 2D grid for the beamforming results.
+    """
+    Provides a cartesian 2D grid for the beamforming results.
     
     The grid has square or nearly square cells and is on a plane perpendicular
     to the z-axis. It is defined by lower and upper x- and  y-limits and the 
@@ -161,7 +164,8 @@ class RectGrid( Grid ):
         return digest( self )
 
     def pos ( self ):
-        """Calculates grid co-ordinates.
+        """
+        Calculates grid co-ordinates.
         
         Returns
         -------
@@ -177,7 +181,8 @@ class RectGrid( Grid ):
         return bpos
 
     def index ( self, x, y ):
-        """Queries the indices for a grid point near a certain co-ordinate.
+        """
+        Queries the indices for a grid point near a certain co-ordinate.
 
         This can be used to query results or co-ordinates at/near a certain
         co-ordinate.
@@ -202,7 +207,8 @@ class RectGrid( Grid ):
         return xi, yi
 
     def indices ( self, x1, y1, x2, y2=None ):
-        """Queries the indices for a subdomain in the grid.
+        """
+        Queries the indices for a subdomain in the grid.
         
         Allows either rectagular or circular subdomains. This can be used to
         mask or to query results from a certain sector or subdomain.
@@ -243,7 +249,8 @@ class RectGrid( Grid ):
             return s_[xi1:xi2+1], s_[yi1:yi2+1]
 
     def extend (self) :
-        """The extension of the grid in pylab.imshow compatible form.
+        """
+        The extension of the grid in pylab.imshow compatible form.
 
         Returns
         -------
@@ -253,7 +260,8 @@ class RectGrid( Grid ):
         return (self.x_min, self.x_max, self.y_min, self.y_max)
 
 class RectGrid3D( RectGrid):
-    """Provides a cartesian 3D grid for the beamforming results.
+    """
+    Provides a cartesian 3D grid for the beamforming results.
     
     The grid has cubic or nearly cubic cells. It is defined by lower and upper 
     x-, y- and  z-limits.
@@ -306,7 +314,8 @@ class RectGrid3D( RectGrid):
         return digest( self )
 
     def pos ( self ):
-        """Calculates grid co-ordinates.
+        """
+        Calculates grid co-ordinates.
         
         Returns
         -------
@@ -324,7 +333,8 @@ class RectGrid3D( RectGrid):
         return bpos
 
     def index ( self, x, y, z ):
-        """Queries the indices for a grid point near a certain co-ordinate.
+        """
+        Queries the indices for a grid point near a certain co-ordinate.
 
         This can be used to query results or co-ordinates at/near a certain
         co-ordinate.
@@ -355,7 +365,8 @@ class RectGrid3D( RectGrid):
         return xi, yi, zi
 
     def indices ( self, x1, y1, z1, x2, y2, z2 ):
-        """Queries the indices for a subdomain in the grid.
+        """
+        Queries the indices for a subdomain in the grid.
         
         Allows box-shaped subdomains. This can be used to
         mask or to query results from a certain sector or subdomain.

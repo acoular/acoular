@@ -24,7 +24,7 @@ Contents:
 
     Getting Started <get_started/index>
     Developer Guides <dev_guides/index>
-    Architecture Reference <arch_ref/index>
+    Literature <literature/index>
     FAQs <faqs/index>
     Examples <examples/index>
     API Reference <api_ref/index>

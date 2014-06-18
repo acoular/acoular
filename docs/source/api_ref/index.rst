@@ -36,11 +36,11 @@ Classes in beamfpy and their inheritance
 **ACHTUNG! JE NACH GROESSE DES BROWSERFENSTERS IST HIER DIE POSITION DER CROSS-LINKS NICHT KORREKT!**
 
 
-.. inheritance-diagram:: beamfpy.environments beamfpy.grids beamfpy.microphones
-                         beamfpy.spectra beamfpy.signals beamfpy.sources
-                         beamfpy.calib beamfpy.trajectory beamfpy.fbeamform
-                         beamfpy.tbeamform beamfpy.tprocess
-    :parts: 1
+#.. inheritance-diagram:: beamfpy.environments beamfpy.grids beamfpy.microphones
+#                         beamfpy.spectra beamfpy.signals beamfpy.sources
+#                         beamfpy.calib beamfpy.trajectory beamfpy.fbeamform
+#                         beamfpy.tbeamform beamfpy.tprocess
+#    :parts: 1
 
 :mod:`beamfpy` Package
 ----------------------

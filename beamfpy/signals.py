@@ -26,7 +26,8 @@ from scipy.signal import resample
 from .internal import digest
 
 class SignalGenerator( HasPrivateTraits ):
-    """Virtual base class for a simple one-channel signal generator.
+    """
+    Virtual base class for a simple one-channel signal generator.
     
     Defines the common interface for all SignalGenerator classes. This class
     may be used as a base for specialized SignalGenerator implementations. It
@@ -54,12 +55,14 @@ class SignalGenerator( HasPrivateTraits ):
         return ''
 
     def signal(self):
-        """Deliver the signal.
+        """
+        Deliver the signal.
         """
         pass
     
     def usignal(self, factor):
-        """Delivers the signal resampled with multiple of the sampling freq.
+        """
+        Delivers the signal resampled with multiple of the sampling freq.
         
         Uses fourier transform method for resampling (from scipy.signal).
         
@@ -97,7 +100,8 @@ class WNoiseGenerator( SignalGenerator ):
         return digest(self)
 
     def signal(self):
-        """Deliver the signal.
+        """
+        Deliver the signal.
 
         Returns
         -------
@@ -108,7 +112,8 @@ class WNoiseGenerator( SignalGenerator ):
         return self.rms*normal(scale=1.0, size=self.numsamples)
     
 class SineGenerator( SignalGenerator ):
-    """Sine signal generator with adjustable frequency and phase.
+    """
+    Sine signal generator with adjustable frequency and phase.
     """
 
     #: Sine wave frequency, float, defaults to 1000.0
@@ -130,7 +135,8 @@ class SineGenerator( SignalGenerator ):
         return digest(self)
 
     def signal(self):
-        """Deliver the signal.
+        """
+        Deliver the signal.
 
         Returns
         -------
