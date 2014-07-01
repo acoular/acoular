@@ -104,10 +104,10 @@ class csv_import( time_data_import ):
             if td.h5f !=  None:
                 td.h5f.close()
         # TODO problems with already open h5 files from other instances
-        f5h = tables.open_file(name, mode = 'w')
-        ac = f5h.create_earray(f5h.root, 'time_data', \
+        f5h = tables.openFile(name, mode = 'w')
+        ac = f5h.createEArray(f5h.root, 'time_data', \
             tables.atom.Float32Atom(), (0, numchannels))
-        ac.set_attr('sample_freq', sample_freq)
+        ac.setAttr('sample_freq', sample_freq)
         ac.append(data[newaxis, :])
         for line in f:
             ac.append(fromstring(line, dtype=float32, sep=', ')[newaxis, d:])
@@ -156,10 +156,10 @@ class td_import( time_data_import ):
             if td.h5f !=  None:
                 td.h5f.close()
         # TODO problems with already open h5 files from other instances
-        f5h = tables.open_file(name, mode = 'w')
-        ac = f5h.create_earray(f5h.root, 'time_data', \
+        f5h = tables.openFile(name, mode = 'w')
+        ac = f5h.createEArray(f5h.root, 'time_data', \
             tables.atom.Float32Atom(), (0, numchannels))
-        ac.set_attr('sample_freq', sample_freq)
+        ac.setAttr('sample_freq', sample_freq)
         ac.append(data)
         f5h.close()
         td.name = name
@@ -213,10 +213,10 @@ class bk_mat_import( time_data_import ):
             if td.h5f !=  None:
                 td.h5f.close()
         # TODO problems with already open h5 files from other instances
-        f5h = tables.open_file(name, mode = 'w')
-        ac = f5h.create_earray(f5h.root, 'time_data', \
+        f5h = tables.openFile(name, mode = 'w')
+        ac = f5h.createEArray(f5h.root, 'time_data', \
             tables.atom.Float32Atom(), (0, numchannels))
-        ac.set_attr('sample_freq', sample_freq)
+        ac.setAttr('sample_freq', sample_freq)
         ac.append(data)
         f5h.close()
         td.name = name
@@ -380,10 +380,10 @@ class datx_import(time_data_import):
             if td.h5f !=  None:
                 td.h5f.close()
         # TODO problems with already open h5 files from other instances
-        f5h = tables.open_file(name, mode = 'w')
-        ac = f5h.create_earray(f5h.root, 'time_data', \
+        f5h = tables.openFile(name, mode = 'w')
+        ac = f5h.createEArray(f5h.root, 'time_data', \
             tables.atom.Float32Atom(), (0, numchannels))
-        ac.set_attr('sample_freq', sample_rate)
+        ac.setAttr('sample_freq', sample_rate)
         block_data = \
             zeros((128*d_files[channels[0].d_file].num_samples_per_block, \
                 numchannels), 'Float32')

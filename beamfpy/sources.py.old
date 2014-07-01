@@ -148,9 +148,9 @@ class TimeSamples( SamplesGenerator ):
                 self.h5f.close()
             except IOError:
                 pass
-        self.h5f = tables.open_file(self.name)
+        self.h5f = tables.openFile(self.name)
         self.data = self.h5f.root.time_data
-        self.sample_freq = self.data.get_attr('sample_freq')
+        self.sample_freq = self.data.getAttr('sample_freq')
         (self.numsamples, self.numchannels) = self.data.shape
 
     def result(self, num=128):
@@ -291,9 +291,9 @@ class MaskedTimeSamples( TimeSamples ):
                 self.h5f.close()
             except IOError:
                 pass
-        self.h5f = tables.open_file(self.name)
+        self.h5f = tables.openFile(self.name)
         self.data = self.h5f.root.time_data
-        self.sample_freq = self.data.get_attr('sample_freq')
+        self.sample_freq = self.data.getAttr('sample_freq')
         (self.numsamples_total, self.numchannels_total) = self.data.shape
 
     def result(self, num=128):

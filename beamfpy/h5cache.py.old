@@ -62,7 +62,7 @@ class H5cache_class(HasPrivateTraits):
                     obj.h5f.close()
         # open each file only once
         if not self.open_files.has_key(cname):
-            obj.h5f = tables.open_file(path.join(self.cache_dir, cname), mode)
+            obj.h5f = tables.openFile(path.join(self.cache_dir, cname), mode)
             self.open_files[cname] = obj.h5f
         else:
             obj.h5f = self.open_files[cname]

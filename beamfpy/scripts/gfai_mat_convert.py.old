@@ -14,16 +14,16 @@ data = numpy.float32(h['Data'])
 (numsamples,numchannels)=data.shape
 
 
-f5h=tables.open_file(name+'.h5',mode='w')
-#group=f5h.create_group(f5h.root,'time_data')
-ac=f5h.create_earray(f5h.root,'time_data',tables.atom.Float32Atom(),(0,numchannels))
-ac.set_attr('sample_freq',sample_freq)
+f5h=tables.openFile(name+'.h5',mode='w')
+#group=f5h.createGroup(f5h.root,'time_data')
+ac=f5h.createEArray(f5h.root,'time_data',tables.atom.Float32Atom(),(0,numchannels))
+ac.setAttr('sample_freq',sample_freq)
 ac.append(data)
 f5h.close()
 
-f5h=tables.open_file(name+'.h5')
+f5h=tables.openFile(name+'.h5')
 ac=f5h.root.time_data
-print ac.get_attr('sample_freq'),ac.shape
+print ac.getAttr('sample_freq'),ac.shape
     
 from pylab import *
 plot(ac[:1000,0])
