@@ -46,8 +46,8 @@ output if necessary.
 """
 
 __author__ = "Ennes Sarradj, ennes.sarradj@gmx.de"
-__date__ = "2 May 2014"
-__version__ = "3.02"
+__date__ = "20 June 2014"
+__version__ = "14.06.20"
 
 from fileimport import time_data_import, csv_import, td_import, \
 bk_mat_import, datx_import
