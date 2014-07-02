@@ -49,7 +49,7 @@ t1.invalid_channels = invalid
 # object (preferred) or for frequency domain processing at the PowerSpectra 
 # object (for backwards compatibility)
 #===============================================================================
-t1.calib = Calib(from_file=calibfile)
+#t1.calib = Calib(from_file=calibfile)
 
 #===============================================================================
 # the microphone geometry must have the same number of valid channels as the
