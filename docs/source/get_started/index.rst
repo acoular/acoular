@@ -15,6 +15,8 @@ The simulation generates the sound pressure at 64 microphones that are
 arranged in the 'array64' geometry which is part of the library. 
 
 .. figure:: array64.png
+   :align: center
+   :scale: 50%
 
 The sound field of three sources is simulated that are assumed to have incoherent signals. The source locations (relative to array center) and levels are given in the following table:
 
@@ -52,7 +54,7 @@ The data for the calculation is to be taken from the ts object that was created 
 >>> ps.block_size = 128
 >>> ps.window='Hanning'
 
-If one (or more) parameters are changed, after the cross spectral matrix was calculated, then it we be recalculated the next time it is needed.
+If one (or more) parameters are changed, after the cross spectral matrix was calculated, then it will be recalculated the next time it is needed.
 
 The beamforming will be done here in order to produce a mapping of the sound sources. Because such a map can be produced only when having a number of possible source positions available, these positions must be provided by creating a Grid object. More specifically, we want to create a RectGrid object that provides possible source positions in a regular, twodimensional grid with rectangular shape:
 
@@ -60,22 +62,32 @@ The beamforming will be done here in order to produce a mapping of the sound sou
 
 The traits here give the dimensions of the grid and distance (increment) between individual source positions.
 
+The positions of the microphones are needed for beamforming, so we create a MicGeom object that reads the positions from a .xml file. Here we use array64.xml, that is part of the library:
 
->>> mg = beamfpy.MicGeom( from_file=micgeofile )
+>>> mg = beamfpy.MicGeom( from_file='array64.xml' )
+
+Finally we can create the object that encapsulates the delay-and-sum algorithm. The basic beamforming algorithm is provided by objects of the type :class:`~beamfpy.fbeamform.BeamformerBase` 
+
 >>> bb = beamfpy.BeamformerBase( freq_data=ps, grid=rg, mpos=mg )
 
+The cross spectral matrix, grid and microphone arrangement created before are used here as input data. Still, no computation was done, because no result was needed yet. Using 
 
+>>> pm = bb.synthetic( 8000, 3 )
+>>> Lm = beamfpy.L_p( pm )
 
-In order tis done 
+the beamforming result mapped onto the grid is queried for a frequency of 8000 Hz and over a third-octave wide frequency band (thus the '3' in the second argument). As a consequence, processing starts: the data is read from the file, the cross spectral matrix is computed and the beamforming is performed. The result (sound pressure squared) is given as an array with same shape as the grid. Using the helper function L_p, this is converted to decibels.
 
+In order to plot the result, we make use of the convenient matplotlib library with its pylab interface:
 
->>> test
+>>> import pylab
+>>> pylab.imshow( Lm.T, origin='lower', vmin=Lm.max()-10, extent=rg.extend(), interpolation='bicubic')
+>>> pylab.colorbar()
+>>> pylab.show()
 
-test
+which shows the following map, scaled to a range between the maximum value and 10 dB below, and with the axes scales derived from the RectGrid data object. 
 
->>> test
->>> test
+.. figure:: map_three_sources.png
+   :align: center
+   :scale: 50%
 
-test
-
-
+It appears that the three sources correspond to the local maxima in the map and that the relative height of two lesser maxima is -3 dB and -6 dB as would be expected from the values given in the table above.
