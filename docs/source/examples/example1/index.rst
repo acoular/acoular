@@ -1,4 +1,4 @@
 Example 1
 =========
 
-.. literalinclude:: ../../../../example1.py
+.. literalinclude:: ../../../../examples/example1.py
