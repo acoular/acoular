@@ -189,8 +189,8 @@ class RectGrid( Grid ):
         
         Parameters
         ----------
-        x,y : float
-            The co-ordinates for which the indices is queried.
+        x, y : float
+            The co-ordinates for which the indices are queried.
 
         Returns
         -------
@@ -210,16 +210,16 @@ class RectGrid( Grid ):
         """
         Queries the indices for a subdomain in the grid.
         
-        Allows either rectagular or circular subdomains. This can be used to
+        Allows either rectangular or circular subdomains. This can be used to
         mask or to query results from a certain sector or subdomain.
         
         Parameters
         ----------
         x1, x2, y1, y2 : float
             If all four paramters are given, then a rectangular sector is
-            assumed that is given by two corners (x1,y1) and (x2,y2). If
+            assumed that is given by two corners (x1, y1) and (x2, y2). If
             only three parameters are given, then a circular sector is assumed
-            that is given by its center (x1,y1) and the radius x2.
+            that is given by its center (x1, y1) and the radius x2.
 
         Returns
         -------

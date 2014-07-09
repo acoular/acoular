@@ -1534,8 +1534,9 @@ def integrate(data, grid, sector):
         Contains the calculated sound pressures in Pa.        
         The number of entries must be identical to the number of
         grid points.
-    grid: :class:`~beamfpy.grids.Grid`-derived object 
-        Object that provides the grid locations.        
+    grid: Grid object 
+        Object of a :class:`~beamfpy.grids.Grid`-derived class 
+        that provides the grid locations.        
     sector: array of floats
         Tuple with arguments for the 'indices' method 
         of a :class:`~beamfpy.grids.Grid`-derived class 
