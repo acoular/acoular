@@ -99,7 +99,7 @@ class BeamformerBase( HasPrivateTraits ):
     
     #: The beamforming result as squared sound pressure values 
     #: at all grid point locations (readonly).
-    #: Returns a (number of frequencies, nxsteps, nysteps) array of float
+    #: Returns a (number of frequencies, number of gridpoints) array of float
     result = Property(
         desc="beamforming result")
         
