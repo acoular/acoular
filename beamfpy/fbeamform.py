@@ -478,7 +478,7 @@ class BeamformerCapon( BeamformerBase ):
             if not fr[i]:
                 csm = array(linalg.inv(array(self.freq_data.csm[i], \
                         dtype='complex128')), order='C')[newaxis]
-                print csm.flags
+                #print csm.flags
                 kji = kj[i, newaxis]
                 beamfunc(csm, e, h, self.r0, self.rm, kji)
                 ac[i] = 1.0/h
