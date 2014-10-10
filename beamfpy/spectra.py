@@ -233,7 +233,9 @@ class PowerSpectra( HasPrivateTraits ):
             csm = csm*(2.0/self.block_size/weight/self.num_blocks)
             if self.cached:
                 atom = tables.ComplexAtom(8)
-                ac = self.h5f.create_carray(self.h5f.root, name, atom, csm_shape)
+                filters = tables.Filters(complevel=5, complib='blosc')
+                ac = self.h5f.create_carray(self.h5f.root, name, atom,
+                                            csm_shape, filters=filters)
                 ac[:] = csm
                 return ac
             else:
@@ -304,11 +306,11 @@ class EigSpectra( PowerSpectra ):
                 (eva[i], eve[i])=linalg.eigh(self.csm[i])
             atom_eva = tables.Float32Atom()
             atom_eve = tables.ComplexAtom(8)
-            #filters = tables.Filters(complevel=5, complib='zlib')
+            filters = tables.Filters(complevel=5, complib='blosc')
             ac_eva = self.h5f.create_carray(self.h5f.root, name_eva, atom_eva, \
-                eva.shape)#, filters=filters)
+                eva.shape, filters=filters)
             ac_eve = self.h5f.create_carray(self.h5f.root, name_eve, atom_eve, \
-                eve.shape)#, filters=filters)
+                eve.shape, filters=filters)
             ac_eva[:] = eva
             ac_eve[:] = eve
         return (self.h5f.get_node('/', name_eva), \

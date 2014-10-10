@@ -177,11 +177,13 @@ class BeamformerBase( HasPrivateTraits ):
                     group = self.h5f.create_group(self.h5f.root, name)
                     shape = (numfreq, self.grid.size)
                     atom = tables.Float32Atom()
-                    #filters = tables.Filters(complevel=5, complib='zlib')
-                    ac = self.h5f.create_carray(group, 'result', atom, shape)
+                    filters = tables.Filters(complevel=5, complib='blosc')
+                    ac = self.h5f.create_carray(group, 'result', atom, shape, 
+                                                filters=filters)
                     shape = (numfreq, )
                     atom = tables.BoolAtom()
-                    fr = self.h5f.create_carray(group, 'freqs', atom, shape)
+                    fr = self.h5f.create_carray(group, 'freqs', atom, shape,
+                                                filters=filters)
                 else:
                     ac = self.h5f.get_node('/'+name, 'result')
                     fr = self.h5f.get_node('/'+name, 'freqs')
@@ -770,11 +772,14 @@ class PointSpreadFunction (HasPrivateTraits):
             
             shape = (gs, gs)
             atom = tables.Float64Atom()
-            ac = self.h5f.create_carray(group, 'result', atom, shape)
+            filters = tables.Filters(complevel=5, complib='blosc')
+            ac = self.h5f.create_carray(group, 'result', atom, shape,
+                                        filters=filters)
             
             shape = (gs,)
             atom = tables.BoolAtom()
-            gp = self.h5f.create_carray(group, 'gridpts', atom, shape)
+            gp = self.h5f.create_carray(group, 'gridpts', atom, shape,
+                                        filters=filters)
             
         else:
             ac = self.h5f.get_node('/'+fr, 'result')
