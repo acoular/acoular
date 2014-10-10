@@ -15,6 +15,7 @@ from traits.api import HasPrivateTraits, Bool, Str
 from os import path, mkdir, environ
 import tables
 from weakref import WeakValueDictionary
+import gc
 
 # path to cache directory, possibly in temp
 try:
@@ -52,10 +53,12 @@ class H5cache_class(HasPrivateTraits):
         cname = name + '_cache.h5'
         if isinstance(obj.h5f, tables.File):
             oname = path.basename(obj.h5f.filename)
+            print oname, cname
             if oname == cname:
                 self.busy = False
                 return
             else:
+                print oname, self.open_count[oname]
                 self.open_count[oname] = self.open_count[oname] - 1
                 # close if no references to file left
                 if not self.open_count[oname]:
@@ -68,6 +71,22 @@ class H5cache_class(HasPrivateTraits):
             obj.h5f = self.open_files[cname]
             obj.h5f.flush()
         self.open_count[cname] = self.open_count.get(cname, 0) + 1
+        # garbage collection, identify unreferenced open files
+        for a in self.open_files.itervalues():
+            close_flag = True
+            # inspect all refererres to the file object
+            for b in gc.get_referrers(a):
+                # does the file object have a referrer that has a 'h5f' 
+                # attribute?
+                if isinstance(b,dict) and b.has_key('h5f'):
+                    # file is still referred, must not be closed
+                    close_flag = False
+                    break
+            # no reference except from its own internal objects
+            if close_flag:
+                # reset reference count
+                self.open_count[path.basename(a.filename)] = 0
+                a.close()
         print self.open_count.items()
         self.busy = False
         
