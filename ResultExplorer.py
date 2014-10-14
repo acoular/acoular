@@ -10,7 +10,7 @@ __author__ = "Ennes Sarradj, ennes.sarradj@gmx.de"
 __date__ = "29 January 2009"
 __version__ = "2.0alpha"
 
-
+import beamfpy
 from beamfpy import *
 from chaco.api import ArrayDataSource, ArrayPlotData,\
  BasePlotContainer, ColorBar, DataRange1D, HPlotContainer, ImageData, ImagePlot,\
