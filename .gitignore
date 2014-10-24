@@ -11,4 +11,4 @@ dist/
 docs/build/
 **/cache/
 **/td/
-**/generated/
+docs/source/api_ref/generated/
