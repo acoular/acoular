@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Chaco documentation build configuration file, created by
-# sphinx-quickstart on Mon Jul 21 21:01:40 2008.
+# beamfpy documentation build configuration file
 #
 # This file is execfile()d with the current directory set to its containing dir.
 #
@@ -27,8 +26,9 @@ sys.path.insert(0,os.path.abspath('../..')) # in order to document the source in
 #extensions = ['sphinx.ext.autodoc', 'traitsdoc','sphinx.ext.pngmath','sphinx.ext.inheritance_diagram']
 extensions = [
     'sphinx.ext.autodoc', 
-    'traits.util.trait_documenter',
+    'trait_documenter',
 #    'refactordoc',
+#    'traits.util.trait_documenter',
     'sphinx.ext.mathjax',
     'sphinx.ext.inheritance_diagram',
     'sphinx.ext.autosummary',

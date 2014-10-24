@@ -11,3 +11,4 @@ dist/
 docs/build/
 **/cache/
 **/td/
+**/generated/
