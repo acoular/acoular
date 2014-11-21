@@ -75,7 +75,7 @@ from .microphones import MicGeom
 from .spectra import PowerSpectra, EigSpectra, synthetic
 from .fbeamform import BeamformerBase, BeamformerCapon, BeamformerEig, \
 BeamformerMusic, BeamformerDamas, BeamformerOrth,BeamformerCleansc, \
-BeamformerCMF, BeamformerClean, L_p, integrate
+BeamformerCMF, BeamformerClean, BeamformerFunctional, L_p, integrate
 from .sources import PointSource, MovingPointSource, SamplesGenerator, \
 TimeSamples, MaskedTimeSamples
 from .signals import SineGenerator, WNoiseGenerator, SignalGenerator
