@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-import beamfpy
-from beamfpy import environments
-from beamfpy import grids
-from beamfpy import microphones
-from beamfpy import spectra
-from beamfpy import signals
-from beamfpy import sources
-from beamfpy import calib
-from beamfpy import trajectory
-from beamfpy import fbeamform
+import acoular
+from acoular import environments
+from acoular import grids
+from acoular import microphones
+from acoular import spectra
+from acoular import signals
+from acoular import sources
+from acoular import calib
+from acoular import trajectory
+from acoular import fbeamform
 
