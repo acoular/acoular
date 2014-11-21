@@ -306,10 +306,13 @@ class ResultExplorer(HasTraits):
                             Action(name='&Delay+Sum', style='radio', action='set_Base', checked=True),
                             Action(name='&Eigenvalue', style='radio', action='set_Eig'),
                             Action(name='&Capon', style='radio', action='set_Capon'),
-                            Action(name='&Music', style='radio', action='set_Music'),
+                            Action(name='M&usic', style='radio', action='set_Music'),
                             Action(name='D&amas', style='radio', action='set_Damas'),
+                            Action(name='Clea&n', style='radio', action='set_Clean'),
                             Action(name='C&lean-SC', style='radio', action='set_Cleansc'),
                             Action(name='&Orthogonal', style='radio', action='set_Ortho'),
+                            Action(name='&Functional', style='radio', action='set_Functional'),
+                            Action(name='C&MF', style='radio', action='set_CMF'),
                         ),
                         Separator(),
                         Action(name='Auto &recalc', style='toggle', checked_when='automatic', action='toggle_auto'),
@@ -621,6 +624,22 @@ class ResultExplorer(HasTraits):
         self.Beamformer = BeamformerOrth(beamformer=BeamformerEig(freq_data=b.freq_data,grid=b.grid,mpos=b.mpos,c=b.c,env=b.env))
         self.Beamformer.n = 10
         self.invalid = True
+
+    def set_Functional (self):
+        b = self.Beamformer
+        self.Beamformer = BeamformerFunctional(freq_data=b.freq_data,grid=b.grid,mpos=b.mpos,c=b.c,env=b.env)
+        self.invalid = True
+
+    def set_Clean (self):
+        b = self.Beamformer
+        self.Beamformer = BeamformerClean(freq_data=b.freq_data,grid=b.grid,mpos=b.mpos,c=b.c,env=b.env)
+        self.invalid = True
+
+    def set_CMF (self):
+        b = self.Beamformer
+        self.Beamformer = BeamformerCMF(freq_data=b.freq_data,grid=b.grid,mpos=b.mpos,c=b.c,env=b.env)
+        self.invalid = True
+
     
     def toggle_auto(self):
         self.automatic = not self.automatic
