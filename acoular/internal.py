@@ -1,7 +1,7 @@
 """
 internal.py
 
-Part of the beamfpy library: several classes for the implementation of 
+Part of the acoular library: several classes for the implementation of 
 acoustic beamforming
 
 (c) Ennes Sarradj 2007-2011, all rights reserved

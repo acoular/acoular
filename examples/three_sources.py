@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2014, Beamfpy Development Team.
+# Copyright (c) 2007-2014, Acoular Development Team.
 #------------------------------------------------------------------------------
 """Generates an test data set for three sources.
  
@@ -21,7 +21,7 @@ Source Location        Level
 """
 
 from os import path
-from beamfpy import __file__ as bpath, td_dir, MicGeom, WNoiseGenerator, PointSource, Mixer, WriteH5
+from acoular import __file__ as bpath, td_dir, MicGeom, WNoiseGenerator, PointSource, Mixer, WriteH5
 
 sfreq = 51200
 duration = 1

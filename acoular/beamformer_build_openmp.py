@@ -1,7 +1,7 @@
 """
 beamformer_build_new.py: auxillary to compile fast extensions
 
-Part of the beamfpy library: several classes for the implemetation of 
+Part of the acoular library: several classes for the implemetation of 
 acoustic beamforming
 
 (c) Ennes Sarradj 2007-2010, all rights reserved

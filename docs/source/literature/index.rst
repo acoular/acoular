@@ -1,7 +1,7 @@
 Literature
 ==========
 
-The following references give some theoretical background about the methods being used in the Beamfpy program package.
+The following references give some theoretical background about the methods being used in the Acoular program package.
 
 .. _Albertson1950: 
 Albertson, M. L. , Dai, Y. B., Jensen, R. A., and Hunter Rouse (1950). Diffusion of Submerged Jets. Transactions of the American Society of Civil Engineers, 115(1), 639-664.

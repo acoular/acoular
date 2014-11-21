@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2014, Beamfpy Development Team.
+# Copyright (c) 2007-2014, Acoular Development Team.
 #------------------------------------------------------------------------------
 """Implements beamformers in the time domain.
 
@@ -23,7 +23,7 @@ cached_property, List
 from traitsui.api import View, Item
 from traitsui.menu import OKCancelButtons
 
-# beamfpy imports
+# acoular imports
 from .internal import digest
 from .grids import RectGrid
 from .microphones import MicGeom
@@ -73,18 +73,18 @@ class BeamformerTime( TimeInOut ):
     for a spatially fixed grid.
     """
 
-    #: :class:`~beamfpy.grids.Grid`-derived object that provides the grid locations.
+    #: :class:`~acoular.grids.Grid`-derived object that provides the grid locations.
     grid = Trait(RectGrid, 
         desc="beamforming grid")
 
     #: Number of channels in output (=number of grid points).
     numchannels = Delegate('grid', 'size')
 
-    #: :class:`~beamfpy.microphones.MicGeom` object that provides the microphone locations.
+    #: :class:`~acoular.microphones.MicGeom` object that provides the microphone locations.
     mpos= Trait(MicGeom, 
         desc="microphone geometry")
         
-    #: :class:`~beamfpy.environments.Environment` or derived object, 
+    #: :class:`~acoular.environments.Environment` or derived object, 
     #: which provides information about the sound propagation in the medium.
     env = Trait(Environment(), Environment)
 
@@ -318,7 +318,7 @@ class BeamformerTimeTraj( BeamformerTime ):
     """
 
 
-    #: :class:`~beamfpy.trajectory.Trajectory` or derived object.
+    #: :class:`~acoular.trajectory.Trajectory` or derived object.
     #: Start time is assumed to be the same as for the samples.
     trajectory = Trait(Trajectory, 
         desc="trajectory of the grid center")
@@ -465,7 +465,7 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
     for a grid moving along a trajectory.
     """
     
-    #: :class:`~beamfpy.trajectory.Trajectory` or derived object.
+    #: :class:`~acoular.trajectory.Trajectory` or derived object.
     #: Start time is assumed to be the same as for the samples.
     trajectory = Trait(Trajectory, 
         desc="trajectory of the grid center")
@@ -615,7 +615,7 @@ class IntegratorSectorTime( TimeInOut ):
     Provides an Integrator in the time domain.
     """
 
-    #: :class:`~beamfpy.grids.Grid`-derived object that provides the grid locations.
+    #: :class:`~acoular.grids.Grid`-derived object that provides the grid locations.
     grid = Trait(RectGrid, 
         desc="beamforming grid")
         

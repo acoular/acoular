@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2014, Beamfpy Development Team.
+# Copyright (c) 2007-2014, Acoular Development Team.
 #------------------------------------------------------------------------------
 """Measured multichannel data managment and simulation of acoustic sources.
 
@@ -25,7 +25,7 @@ from traitsui.menu import OKCancelButtons
 import tables
 from os import path
 
-# beamfpy imports
+# acoular imports
 from .calib import Calib
 from .trajectory import Trajectory
 from .internal import digest
@@ -91,7 +91,7 @@ class TimeSamples( SamplesGenerator ):
     basename = Property( depends_on = 'name', #filter=['*.h5'], 
         desc="basename of data file")
     
-    #: Calibration data, instance of :class:`~beamfpy.calib.Calib` class, optional 
+    #: Calibration data, instance of :class:`~acoular.calib.Calib` class, optional 
     calib = Trait( Calib, 
         desc="Calibration data")
     
@@ -338,7 +338,7 @@ class PointSource( SamplesGenerator ):
     The output is being generated via the :meth:`result` generator.
     """
     
-    #:  Emitted signal, instance of the :class:`~beamfpy.signals.SignalGenerator` class
+    #:  Emitted signal, instance of the :class:`~acoular.signals.SignalGenerator` class
     signal = Trait(SignalGenerator)
     
     #: Location of source in (x, y, z) coordinates (left-oriented system)
@@ -350,11 +350,11 @@ class PointSource( SamplesGenerator ):
     numchannels = Delegate('mpos', 'num_mics')
 
     #: Microphone locations as provided by a 
-    #: :class:`~beamfpy.microphones.MicGeom`-derived object
+    #: :class:`~acoular.microphones.MicGeom`-derived object
     mpos = Trait(MicGeom, 
         desc="microphone geometry")
         
-    #: :class:`~beamfpy.environments.Environment` object 
+    #: :class:`~acoular.environments.Environment` object 
     #: that provides distances from grid points to microphone positions
     env = Trait(Environment(), Environment)
 
@@ -443,7 +443,7 @@ class MovingPointSource( PointSource ):
     """
 
     #: Trajectory of the source, 
-    #: instance of the :class:`~beamfpy.trajectory.Trajectory` class.
+    #: instance of the :class:`~acoular.trajectory.Trajectory` class.
     #: The start time is assumed to be the same as for the samples
     trajectory = Trait(Trajectory, 
         desc="trajectory of the source")

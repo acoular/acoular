@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2014, Beamfpy Development Team.
+# Copyright (c) 2007-2014, Acoular Development Team.
 #------------------------------------------------------------------------------
 """Implements beamformers in the frequency domain.
 
@@ -62,19 +62,19 @@ class BeamformerBase( HasPrivateTraits ):
     Beamforming using the basic delay-and-sum algorithm in the frequency domain.
     """
 
-    #: :class:`~beamfpy.spectra.PowerSpectra` object that provides the cross spectral matrix.
+    #: :class:`~acoular.spectra.PowerSpectra` object that provides the cross spectral matrix.
     freq_data = Trait(PowerSpectra, 
         desc="freq data object")
 
-    #: :class:`~beamfpy.grids.Grid`-derived object that provides the grid locations.
+    #: :class:`~acoular.grids.Grid`-derived object that provides the grid locations.
     grid = Trait(Grid, 
         desc="beamforming grid")
 
-    #: :class:`~beamfpy.microphones.MicGeom` object that provides the microphone locations.
+    #: :class:`~acoular.microphones.MicGeom` object that provides the microphone locations.
     mpos = Trait(MicGeom, 
         desc="microphone geometry")
         
-    #: :class:`~beamfpy.environments.Environment` or derived object, 
+    #: :class:`~acoular.environments.Environment` or derived object, 
     #: which provides information about the sound propagation in the medium.
     env = Trait(Environment(), Environment)
 
@@ -286,8 +286,8 @@ class BeamformerBase( HasPrivateTraits ):
             each grid point .
             Note that the frequency resolution and therefore the bandwidth 
             represented by a single frequency line depends on 
-            the :attr:`sampling frequency<beamfpy.sources.SamplesGenerator.sample_freq>` and 
-            used :attr:`FFT block size<beamfpy.spectra.PowerSpectra.block_size>`.
+            the :attr:`sampling frequency<acoular.sources.SamplesGenerator.sample_freq>` and 
+            used :attr:`FFT block size<acoular.spectra.PowerSpectra.block_size>`.
         """
         res = self.result # trigger calculation
         freq = self.freq_data.fftfreq()
@@ -314,9 +314,9 @@ class BeamformerBase( HasPrivateTraits ):
         ----------
         sector: array of floats
               Tuple with arguments for the 'indices' method 
-              of a :class:`~beamfpy.grids.Grid`-derived class 
-              (e.g. :meth:`RectGrid.indices<beamfpy.grids.RectGrid.indices>` 
-              or :meth:`RectGrid3D.indices<beamfpy.grids.RectGrid3D.indices>`).
+              of a :class:`~acoular.grids.Grid`-derived class 
+              (e.g. :meth:`RectGrid.indices<acoular.grids.RectGrid.indices>` 
+              or :meth:`RectGrid3D.indices<acoular.grids.RectGrid3D.indices>`).
               Possible sectors would be *array([xmin, ymin, xmax, ymax])* 
               or *array([x, y, radius])*.
               
@@ -490,13 +490,13 @@ class BeamformerEig( BeamformerBase ):
     see :ref:`Sarradj et al., 2005<Sarradj2005>`.
     """
 
-    #: :class:`~beamfpy.spectra.EigSpectra` object that provides the 
+    #: :class:`~acoular.spectra.EigSpectra` object that provides the 
     #: cross spectral matrix and eigenvalues
     freq_data = Trait(EigSpectra, 
         desc="freq data object")
 
     #: Number of component to calculate: 
-    #: 0 (smallest) ... :attr:`~beamfpy.sources.SamplesGenerator.numchannels`-1;
+    #: 0 (smallest) ... :attr:`~acoular.sources.SamplesGenerator.numchannels`-1;
     #: defaults to -1, i.e. numchannels-1
     n = Int(-1, 
         desc="No. of eigenvalue")
@@ -664,7 +664,7 @@ class PointSpreadFunction (HasPrivateTraits):
     The PSF is needed by several deconvolution algorithms to correct
     the aberrations when using simple delay-and-sum beamforming.
     """
-    #: :class:`~beamfpy.grids.Grid`-derived object that provides 
+    #: :class:`~acoular.grids.Grid`-derived object that provides 
     #: the grid locations.
     grid = Trait(Grid, 
         desc="beamforming grid")
@@ -673,12 +673,12 @@ class PointSpreadFunction (HasPrivateTraits):
     grid_indices = CArray( dtype=int, value=array([]), 
                      desc="indices of grid points for psf") #value=array([]), value=self.grid.pos(),
     
-    #: :class:`~beamfpy.microphones.MicGeom` object that provides 
+    #: :class:`~acoular.microphones.MicGeom` object that provides 
     #: the microphone locations.
     mpos = Trait(MicGeom, 
         desc="microphone geometry")
 
-    #: :class:`~beamfpy.environments.Environment` or derived object, 
+    #: :class:`~acoular.environments.Environment` or derived object, 
     #: which provides information about the sound propagation in the medium.
     env = Trait(Environment(), Environment)
 
@@ -868,15 +868,15 @@ class BeamformerDamas (BeamformerBase):
     #: :class:`BeamformerBase` object that provides data for deconvolution.
     beamformer = Trait(BeamformerBase)
 
-    #: :class:`~beamfpy.spectra.PowerSpectra` object that provides the cross spectral matrix; 
+    #: :class:`~acoular.spectra.PowerSpectra` object that provides the cross spectral matrix; 
     #: is set automatically.
     freq_data = Delegate('beamformer')
 
-    #: :class:`~beamfpy.grids.Grid`-derived object that provides the grid locations; 
+    #: :class:`~acoular.grids.Grid`-derived object that provides the grid locations; 
     #: is set automatically.
     grid = Delegate('beamformer')
 
-    #: :class:`~beamfpy.microphones.MicGeom` object that provides the microphone locations; 
+    #: :class:`~acoular.microphones.MicGeom` object that provides the microphone locations; 
     #: is set automatically.
     mpos = Delegate('beamformer')
 
@@ -887,7 +887,7 @@ class BeamformerDamas (BeamformerBase):
     #: is set automatically.
     r_diag =  Delegate('beamformer')
     
-    #: :class:`~beamfpy.environments.Environment` or derived object,
+    #: :class:`~acoular.environments.Environment` or derived object,
     #: which provides information about the sound propagation in the medium;
     #: is set automatically.
     env =  Delegate('beamformer')    
@@ -984,15 +984,15 @@ class BeamformerOrth (BeamformerBase):
     #: :class:`BeamformerEig` object that provides data for deconvolution.
     beamformer = Trait(BeamformerEig)
 
-    #: :class:`~beamfpy.spectra.EigSpectra` object that provides the cross spectral matrix 
+    #: :class:`~acoular.spectra.EigSpectra` object that provides the cross spectral matrix 
     #: and eigenvalues, is set automatically.    
     freq_data = Delegate('beamformer')
 
-    #: :class:`~beamfpy.grids.Grid`-derived object that provides the grid locations, 
+    #: :class:`~acoular.grids.Grid`-derived object that provides the grid locations, 
     #: is set automatically.
     grid = Delegate('beamformer')
 
-    #: :class:`~beamfpy.microphones.MicGeom` object that provides the microphone locations, 
+    #: :class:`~acoular.microphones.MicGeom` object that provides the microphone locations, 
     #: is set automatically.
     mpos = Delegate('beamformer')
 
@@ -1540,13 +1540,13 @@ def integrate(data, grid, sector):
         The number of entries must be identical to the number of
         grid points.
     grid: Grid object 
-        Object of a :class:`~beamfpy.grids.Grid`-derived class 
+        Object of a :class:`~acoular.grids.Grid`-derived class 
         that provides the grid locations.        
     sector: array of floats
         Tuple with arguments for the 'indices' method 
-        of a :class:`~beamfpy.grids.Grid`-derived class 
-        (e.g. :meth:`RectGrid.indices<beamfpy.grids.RectGrid.indices>` 
-        or :meth:`RectGrid3D.indices<beamfpy.grids.RectGrid3D.indices>`).
+        of a :class:`~acoular.grids.Grid`-derived class 
+        (e.g. :meth:`RectGrid.indices<acoular.grids.RectGrid.indices>` 
+        or :meth:`RectGrid3D.indices<acoular.grids.RectGrid3D.indices>`).
         Possible sectors would be *array([xmin, ymin, xmax, ymax])* 
         or *array([x, y, radius])*.
           

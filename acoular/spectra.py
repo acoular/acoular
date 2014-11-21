@@ -2,7 +2,7 @@
 #pylint: disable-msg=E0611, E1101, E1103, C0103, R0901, R0902, R0903, R0904
 #pylint: disable-msg=W0232
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2014, Beamfpy Development Team.
+# Copyright (c) 2007-2014, Acoular Development Team.
 #------------------------------------------------------------------------------
 """Estimation of power spectra and related tools
 
@@ -374,7 +374,7 @@ def synthetic (data, freqs, f, num=3):
         grid points.
     freq : array of floats
         The frequencies that correspon to the input *data* (as yielded by
-        the :meth:`PowerSpectra.fftfreq<beamfpy.spectra.Powerspectra.fftfreq`
+        the :meth:`PowerSpectra.fftfreq<acoular.spectra.Powerspectra.fftfreq`
         method).
     f : list of floats
         Band center frequencies for which to return the results.
@@ -398,8 +398,8 @@ def synthetic (data, freqs, f, num=3):
         each grid point (the sum of all values that are contained in the band).
         Note that the frequency resolution and therefore the bandwidth 
         represented by a single frequency line depends on 
-        the :attr:`sampling frequency<beamfpy.sources.SamplesGenerator.sample_freq>` 
-        and used :attr:`FFT block size<beamfpy.spectra.PowerSpectra.block_size>`.
+        the :attr:`sampling frequency<acoular.sources.SamplesGenerator.sample_freq>` 
+        and used :attr:`FFT block size<acoular.spectra.PowerSpectra.block_size>`.
     """
     if num == 0:
         res = [ data[searchsorted(freqs, i)] for i in f]        

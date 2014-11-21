@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2014, Beamfpy Development Team.
+# Copyright (c) 2007-2014, Acoular Development Team.
 #------------------------------------------------------------------------------
 """
 Contains classes for importing time data in several file formats.
@@ -73,7 +73,7 @@ class csv_import( time_data_import ):
     def get_data (self, td):
         """
         Imports the data from CSV file into a
-        :class:`~beamfpy.sources.TimeSamples` object td.
+        :class:`~acoular.sources.TimeSamples` object td.
         Also, a '*.h5' file will be written, so this import
         need not be performed every time the data is needed
         """

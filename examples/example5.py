@@ -1,5 +1,5 @@
 """
-Example 5 for beamfpy library
+Example 5 for acoular library
 
 demonstrates different beamformers in frequency domain,
 - persistence (loading of configured beamformers), see example 4 for 
@@ -7,15 +7,15 @@ demonstrates different beamformers in frequency domain,
 
 uses measured data in file 2008-05-16_11-36-00_468000.h5
 calibration in file calib_06_05_2008.xml
-microphone geometry in array_56.xml (part of beamfpy)
+microphone geometry in array_56.xml (part of acoular)
 
 
 (c) Ennes Sarradj 2007-2010, all rights reserved
 ennes.sarradj@gmx.de
 """
 
-# imports from beamfpy
-from beamfpy import L_p
+# imports from acoular
+from acoular import L_p
 # other imports
 from pylab import figure, subplot, imshow, show, colorbar, title
 from cPickle import load

@@ -1,5 +1,5 @@
 """
-Example 4 for beamfpy library
+Example 4 for acoular library
 
 demonstrates different beamformers in frequency domain,
 - setting of steering vector type,
@@ -9,16 +9,16 @@ demonstrates different beamformers in frequency domain,
 
 uses measured data in file 2008-05-16_11-36-00_468000.h5
 calibration in file calib_06_05_2008.xml
-microphone geometry in array_56.xml (part of beamfpy)
+microphone geometry in array_56.xml (part of acoular)
 
 
 (c) Ennes Sarradj 2007-2010, all rights reserved
 ennes.sarradj@gmx.de
 """
 
-# imports from beamfpy
-import beamfpy
-from beamfpy import td_dir, L_p, Calib, MicGeom, EigSpectra, \
+# imports from acoular
+import acoular
+from acoular import td_dir, L_p, Calib, MicGeom, EigSpectra, \
 RectGrid3D, BeamformerBase, BeamformerEig, BeamformerOrth, BeamformerCleansc, \
 MaskedTimeSamples, FiltFiltOctave, BeamformerTimeSq, TimeAverage, \
 TimeCache, BeamformerTime, TimePower, \
@@ -32,7 +32,7 @@ from cPickle import dump
 # files
 datafile = path.join(td_dir,'2008-05-16_11-36-00_468000.h5')
 calibfile = path.join(td_dir,'calib_06_05_2008.xml')
-micgeofile = path.join( path.split(beamfpy.__file__)[0],'xml','array_56.xml')
+micgeofile = path.join( path.split(acoular.__file__)[0],'xml','array_56.xml')
 
 #octave band of interest
 cfreq = 4000

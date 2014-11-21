@@ -1,10 +1,10 @@
 # coding=UTF-8
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2014, Beamfpy Development Team.
+# Copyright (c) 2007-2014, Acoular Development Team.
 #------------------------------------------------------------------------------
 
 """
-The beamfpy library: several classes for the implemetation of 
+The acoular library: several classes for the implemetation of 
 acoustic beamforming
 
 A minimal usage example would be:

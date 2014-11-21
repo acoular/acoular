@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2014, Beamfpy Development Team.
+# Copyright (c) 2007-2014, Acoular Development Team.
 #------------------------------------------------------------------------------
 """Implements processing in the time domain.
 
@@ -34,7 +34,7 @@ import tables
 import wave
 from scipy.signal import butter, lfilter, filtfilt
 
-# beamfpy imports
+# acoular imports
 from .internal import digest
 from h5cache import H5cache, td_dir
 from .grids import RectGrid
@@ -51,7 +51,7 @@ class TimeInOut( SamplesGenerator ):
     generator :meth:`result`
     """
 
-    #: Data source; :class:`~beamfpy.sources.SamplesGenerator` or derived object.
+    #: Data source; :class:`~acoular.sources.SamplesGenerator` or derived object.
     source = Trait(SamplesGenerator)
 
     #: Sampling frequency of output signal
@@ -89,10 +89,10 @@ class Mixer( TimeInOut ):
     Mixes the signals from several sources.
     """
 
-    #: Data source; :class:`~beamfpy.sources.SamplesGenerator` object.
+    #: Data source; :class:`~acoular.sources.SamplesGenerator` object.
     source = Trait(SamplesGenerator)
 
-    #: List of additional :class:`~beamfpy.sources.SamplesGenerator` objects
+    #: List of additional :class:`~acoular.sources.SamplesGenerator` objects
     #: to be mixed.
     sources = List( Instance(SamplesGenerator, ()) ) 
 

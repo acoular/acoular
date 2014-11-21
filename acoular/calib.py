@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2014, Beamfpy Development Team.
+# Copyright (c) 2007-2014, Acoular Development Team.
 #------------------------------------------------------------------------------
 """Implements calibration of multichannel time signals.
 
@@ -19,7 +19,7 @@ from traitsui.api import View
 from traitsui.menu import OKCancelButtons
 from os import path
 
-# beamfpy imports
+# acoular imports
 from .internal import digest
 
 class Calib( HasPrivateTraits ):

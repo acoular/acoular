@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2014, Beamfpy Development Team.
+# Copyright (c) 2007-2014, Acoular Development Team.
 #------------------------------------------------------------------------------
 """Implements the definition of trajectories.
 
@@ -19,7 +19,7 @@ Property, cached_property, property_depends_on, Dict, Tuple
 from traitsui.api import View, Item
 from traitsui.menu import OKCancelButtons
 
-# beamfpy imports
+# acoular imports
 from .internal import digest
 
 

@@ -1,7 +1,7 @@
-beamfpy
+acoular
 =======
 
 .. toctree::
    :maxdepth: 4
 
-   beamfpy
+   acoular

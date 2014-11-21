@@ -1,7 +1,7 @@
 """
-Example 2 for beamfpy library
+Example 2 for acoular library
 
-demonstrates use of beamfpy for a point source moving on a circle trajectory
+demonstrates use of acoular for a point source moving on a circle trajectory
 
 uses synthesized data
 
@@ -9,15 +9,15 @@ uses synthesized data
 ennes.sarradj@gmx.de
 """
 
-import beamfpy
-print beamfpy.__file__
+import acoular
+print acoular.__file__
 
 from os import path
 import sys
 from numpy import empty, clip, sqrt, arange, log10, sort, array, pi, zeros, \
 hypot, cos, sin, linspace, hstack, cross, dot, newaxis
 from numpy.linalg import norm
-from beamfpy import td_dir, L_p, TimeSamples, Calib, MicGeom, PowerSpectra, \
+from acoular import td_dir, L_p, TimeSamples, Calib, MicGeom, PowerSpectra, \
 RectGrid, BeamformerBase, BeamformerEig, BeamformerOrth, BeamformerCleansc, \
 MaskedTimeSamples, FiltFiltOctave, Trajectory, BeamformerTimeSq, TimeAverage, \
 BeamformerTimeSqTraj, \

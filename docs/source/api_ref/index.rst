@@ -1,11 +1,11 @@
 Reference Manual
 ================
 
-Modules in beamfpy
+Modules in acoular
 ------------------
-The following modules are part of beamfpy:
+The following modules are part of acoular:
 
-.. currentmodule:: beamfpy 
+.. currentmodule:: acoular 
 
 .. autosummary::
     :toctree: generated/
@@ -31,21 +31,21 @@ these modules still need some more documentation:
     h5cache
     internal
 
-Classes in beamfpy and their inheritance
+Classes in acoular and their inheritance
 ----------------------------------------
 **Depending on the resolution of your browser window the cross links may not be positioned correctly!**
 
 
-.. inheritance-diagram:: beamfpy.environments beamfpy.grids beamfpy.microphones
-                         beamfpy.spectra beamfpy.signals beamfpy.sources
-                         beamfpy.calib beamfpy.trajectory beamfpy.fbeamform
-                         beamfpy.tbeamform beamfpy.tprocess
+.. inheritance-diagram:: acoular.environments acoular.grids acoular.microphones
+                         acoular.spectra acoular.signals acoular.sources
+                         acoular.calib acoular.trajectory acoular.fbeamform
+                         acoular.tbeamform acoular.tprocess
     :parts: 1
 
-:mod:`beamfpy` Package
+:mod:`acoular` Package
 ----------------------
 
-.. automodule:: beamfpy.__init__
+.. automodule:: acoular.__init__
     :members:
     :undoc-members:
     :show-inheritance:

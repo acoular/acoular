@@ -1,9 +1,9 @@
-.. beamfpy documentation master file
+.. acoular documentation master file
 
-Welcome to beamfpy's documentation!
+Welcome to acoular's documentation!
 ===================================
 
-Beamfpy is a framework for acoustic beamforming that is written in the Python programming language. It is aimed at applications in acoustic testing. Multichannel data recorded by a microphone array can be processed and analyzed in order generate mappings of sound source distributions. The maps (acoustic photographs) can then be used to  locate sources of interest and to characterize them using their spectra. 
+Acoular is a framework for acoustic beamforming that is written in the Python programming language. It is aimed at applications in acoustic testing. Multichannel data recorded by a microphone array can be processed and analyzed in order generate mappings of sound source distributions. The maps (acoustic photographs) can then be used to  locate sources of interest and to characterize them using their spectra. 
 
 A few highlights of the framework:
 
@@ -35,7 +35,7 @@ Contents:
 
     * - :doc:`get_started/index`
 
-        The first stop for all those new to beamfpy.
+        The first stop for all those new to acoular.
 
       - :doc:`dev_guides/index`
 
@@ -58,7 +58,7 @@ Contents:
 
       - :doc:`api_ref/index`
 
-        All modules, classes and methods featured in beamfpy are described in detail
+        All modules, classes and methods featured in acoular are described in detail
         here. They can easily be browsed through an inheritance tree and cross links.
 
 Indices and tables

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# beamfpy documentation build configuration file
+# acoular documentation build configuration file
 #
 # This file is execfile()d with the current directory set to its containing dir.
 #
@@ -46,13 +46,13 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General substitutions.
-project = 'beamfpy'
+project = 'acoular'
 copyright = '2007-2014, Ennes Sarradj'
 
 # The default replacements for |version| and |release|, also used in various
 # other places throughout the built documents.
 #d = {}
-#execfile(os.path.join('..','..', 'beamfpy', '__init__.py'), d)
+#execfile(os.path.join('..','..', 'acoular', '__init__.py'), d)
 version = release = '14.06.20'#'3.0'#d['__version__']
 
 # There are two options for replacing |today|: either, you set today to some
@@ -168,7 +168,7 @@ html_copy_source = False
 #html_file_suffix = ''
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'Beamfpydoc'
+htmlhelp_basename = 'Acoulardoc'
 
 inheritance_graph_attrs = dict(rankdir="LR", size='"16.0, 16.0"',
                                fontsize=14, ratio='auto')
@@ -191,7 +191,7 @@ autodoc_member_order = 'bysource'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, document class [howto/manual]).
 latex_documents = [
-  ('index', 'beamfpy.tex', 'Beamfpy Documentation', 'Ennes Sarradj', 'manual'),
+  ('index', 'acoular.tex', 'Acoular Documentation', 'Ennes Sarradj', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
