@@ -632,7 +632,7 @@ class ResultExplorer(HasTraits):
 
     def set_Clean (self):
         b = self.Beamformer
-        self.Beamformer = BeamformerClean(freq_data=b.freq_data,grid=b.grid,mpos=b.mpos,c=b.c,env=b.env)
+        self.Beamformer = BeamformerClean(beamformer=BeamformerBase(freq_data=b.freq_data,grid=b.grid,mpos=b.mpos,c=b.c,env=b.env))
         self.invalid = True
 
     def set_CMF (self):
