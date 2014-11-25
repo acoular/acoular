@@ -602,8 +602,16 @@ def build_beamformer():
     r_beam_psf4(mod)
     transfer(mod)
     gseidel(mod)
-
-    extra_compile_args = ['-O3','-ffast-math','-march=native', \
+    
+    # --- compiler arguments ---
+    # -O3 : maximum optimization
+    # -ffast-math : fast floating point ops, violates IEEE standards
+    # -msse3 : enable usage of SSE3 instruction set
+    # -Wno-write-strings : suppress warnings concerning strings conversions
+    # -fopenmp : flag to enable code parallelization, linux only
+    # -lgomp : library needed for code parallelization, linux only
+    
+    extra_compile_args = ['-O3','-ffast-math','-msse3', \
         '-Wno-write-strings','-fopenmp']
     extra_link_args = ['-lgomp']
 
