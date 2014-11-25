@@ -100,7 +100,7 @@ class UniformFlowEnvironment( Environment):
 
     traits_view = View(
             [
-                ['ma{flow Mach number}', 'fdv{flow vector}'], 
+                ['ma{Flow Mach number}', 'fdv{Flow vector}'], 
                 '|[Uniform Flow]'
             ]
         )
@@ -209,9 +209,9 @@ class OpenJet( FlowField ):
 
     traits_view = View(
             [
-                ['v0{exit velocity}', 'origin{jet origin}', 
-                'D{nozzle diameter}'], 
-                '|[open jet]'
+                ['v0{Exit velocity}', 'origin{Jet origin}', 
+                'D{Nozzle diameter}'], 
+                '|[Open jet]'
             ]
         )
 
@@ -316,7 +316,7 @@ class GeneralFlowEnvironment(Environment):
 
     traits_view = View(
             [
-                ['ff', 'N{max. number of rays}', 'Om{max. solid angle }'], 
+                ['ff{Flow field}', 'N{Max. number of rays}', 'Om{Max. solid angle }'], 
                 '|[General Flow]'
             ]
         )
