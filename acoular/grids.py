@@ -132,7 +132,7 @@ class RectGrid( Grid ):
     traits_view = View(
             [
                 ['x_min', 'y_min', '|'],
-                ['x_max', 'y_max', 'z', 'increment', 'size~{grid size}', '|'],
+                ['x_max', 'y_max', 'z', 'increment', 'size~{Grid size}', '|'],
                 '-[Map extension]'
             ]
         )
@@ -289,7 +289,7 @@ class RectGrid3D( RectGrid):
             [
                 ['x_min', 'y_min', 'z_min', '|'],
                 ['x_max', 'y_max', 'z_max', 'increment', \
-                'size~{grid size}', '|'],
+                'size~{Grid size}', '|'],
                 '-[Map extension]'
             ]
         )
