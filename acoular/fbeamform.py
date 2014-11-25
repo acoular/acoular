@@ -128,8 +128,8 @@ class BeamformerBase( HasPrivateTraits ):
         [
             [Item('mpos{}', style='custom')], 
             [Item('grid', style='custom'), '-<>'], 
-            [Item('r_diag', label='diagonal removed')], 
-            [Item('c', label='speed of sound')], 
+            [Item('r_diag', label='Diagonal removed')], 
+            [Item('c', label='Speed of sound')], 
             [Item('env{}', style='custom')], 
             '|'
         ], 
@@ -361,8 +361,8 @@ class BeamformerFunctional( BeamformerBase ):
         [
             [Item('mpos{}', style='custom')], 
             [Item('grid', style='custom'), '-<>'], 
-            [Item('gamma', label='exponent', style='text')], 
-            [Item('c', label='speed of sound')], 
+            [Item('gamma', label='Exponent', style='text')], 
+            [Item('c', label='Speed of sound')], 
             [Item('env{}', style='custom')], 
             '|'
         ], 
@@ -435,7 +435,7 @@ class BeamformerCapon( BeamformerBase ):
         [
             [Item('mpos{}', style='custom')], 
             [Item('grid', style='custom'), '-<>'], 
-            [Item('c', label='speed of sound')], 
+            [Item('c', label='Speed of sound')], 
             [Item('env{}', style='custom')], 
             '|'
         ], 
@@ -515,9 +515,9 @@ class BeamformerEig( BeamformerBase ):
         [
             [Item('mpos{}', style='custom')], 
             [Item('grid', style='custom'), '-<>'], 
-            [Item('n', label='component no', style='text')], 
-            [Item('r_diag', label='diagonal removed')], 
-            [Item('c', label='speed of sound')], 
+            [Item('n', label='Component No.', style='text')], 
+            [Item('r_diag', label='Diagonal removed')], 
+            [Item('c', label='Speed of sound')], 
             [Item('env{}', style='custom')], 
             '|'
         ], 
@@ -604,8 +604,8 @@ class BeamformerMusic( BeamformerEig ):
         [
             [Item('mpos{}', style='custom')], 
             [Item('grid', style='custom'), '-<>'], 
-            [Item('n', label='no of sources', style='text')], 
-            [Item('c', label='speed of sound')], 
+            [Item('n', label='No. of sources', style='text')], 
+            [Item('c', label='Speed of sound')], 
             [Item('env{}', style='custom')], 
             '|'
         ], 
@@ -1030,9 +1030,9 @@ class BeamformerOrth (BeamformerBase):
         [
             [Item('mpos{}', style='custom')], 
             [Item('grid', style='custom'), '-<>'], 
-            [Item('n', label='number of components', style='text')], 
-            [Item('r_diag', label='diagonal removed')], 
-            [Item('c', label='speed of sound')], 
+            [Item('n', label='Number of components', style='text')], 
+            [Item('r_diag', label='Diagonal removed')], 
+            [Item('c', label='Speed of sound')], 
             [Item('env{}', style='custom')], 
             '|'
         ], 
@@ -1124,9 +1124,9 @@ class BeamformerCleansc( BeamformerBase ):
         [
             [Item('mpos{}', style='custom')], 
             [Item('grid', style='custom'), '-<>'], 
-            [Item('n', label='no of iterations', style='text')], 
-            [Item('r_diag', label='diagonal removed')], 
-            [Item('c', label='speed of sound')], 
+            [Item('n', label='No. of iterations', style='text')], 
+            [Item('r_diag', label='Diagonal removed')], 
+            [Item('c', label='Speed of sound')], 
             [Item('env{}', style='custom')], 
             '|'
         ], 
@@ -1279,12 +1279,15 @@ class BeamformerClean (BeamformerBase):
     traits_view = View(
         [
             [Item('beamformer{}', style='custom')], 
-            [Item('')], 
+            [Item('n_iter{Number of iterations}')], 
+            [Item('steer{Type of steering vector}')], 
+            [Item('calcmode{How to calculate PSF}')], 
             '|'
         ], 
         title='Beamformer denconvolution options', 
         buttons = OKCancelButtons
         )
+
     
     @cached_property
     def _get_digest( self ):
@@ -1391,10 +1394,10 @@ class BeamformerCMF ( BeamformerBase ):
         [
             [Item('mpos{}', style='custom')], 
             [Item('grid', style='custom'), '-<>'], 
-            [Item('method', label='fit method')], 
-            [Item('max_iter', label='max iterations')], 
+            [Item('method', label='Fit method')], 
+            [Item('max_iter', label='No. of iterations')], 
             [Item('alpha', label='Lasso weight factor')], 
-            [Item('c', label='speed of sound')], 
+            [Item('c', label='Speed of sound')], 
             [Item('env{}', style='custom')], 
             '|'
         ], 
