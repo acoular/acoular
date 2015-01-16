@@ -164,7 +164,7 @@ class BeamformerBase( HasPrivateTraits ):
             _digest = self.digest
             name = self.__class__.__name__ + self.digest
             #print 1, name
-            numchannels = self.freq_data.time_data.numchannels
+            numchannels = self.freq_data.numchannels
             #print "nch", numchannels
             if  numchannels != self.mpos.num_mics or numchannels == 0:
                 #return None
@@ -237,7 +237,7 @@ class BeamformerBase( HasPrivateTraits ):
         """
         # prepare calculation
         kj = 2j*pi*self.freq_data.fftfreq()/self.c
-        numchannels = self.freq_data.time_data.numchannels
+        numchannels = self.freq_data.numchannels
         e = zeros((numchannels), 'D')
         r0 = self.r0
         rm = self.rm
@@ -401,7 +401,7 @@ class BeamformerFunctional( BeamformerBase ):
         """   
         # prepare calculation
         kj = 2j*pi*self.freq_data.fftfreq()/self.c
-        numchannels = int(self.freq_data.time_data.numchannels)
+        numchannels = int(self.freq_data.numchannels)
         e = zeros((numchannels), 'D')
         h = empty((1, self.grid.size), 'd')
         # function
@@ -470,7 +470,7 @@ class BeamformerCapon( BeamformerBase ):
         """        
         # prepare calculation
         kj = 2j*pi*self.freq_data.fftfreq()/self.c
-        numchannels = self.freq_data.time_data.numchannels
+        numchannels = self.freq_data.numchannels
         e = zeros((numchannels), 'D')
         h = zeros((1, self.grid.size), 'd')
         beamfunc = self.get_beamfunc()
@@ -565,7 +565,7 @@ class BeamformerEig( BeamformerBase ):
         # prepare calculation
         kj = 2j*pi*self.freq_data.fftfreq()/self.c
         na = int(self.na)
-        numchannels = self.freq_data.time_data.numchannels
+        numchannels = self.freq_data.numchannels
         e = zeros((numchannels), 'D')
         h = empty((1, self.grid.size), 'd')
         # function
@@ -641,7 +641,7 @@ class BeamformerMusic( BeamformerEig ):
         # prepare calculation
         kj = 2j*pi*self.freq_data.fftfreq()/self.c
         n = int(self.mpos.num_mics-self.na)
-        numchannels = self.freq_data.time_data.numchannels
+        numchannels = self.freq_data.numchannels
         e = zeros((numchannels), 'D')
         h = empty((1, self.grid.size), 'd')
         beamfunc = self.get_beamfunc('_os')
@@ -1084,7 +1084,7 @@ class BeamformerOrth (BeamformerBase):
         for i in self.freq_data.indices:        
             if not fr[i]:
                 ii.append(i)
-        numchannels = self.freq_data.time_data.numchannels
+        numchannels = self.freq_data.numchannels
         e = self.beamformer
         for n in self.eva_list:
             e.n = n
@@ -1165,7 +1165,7 @@ class BeamformerCleansc( BeamformerBase ):
         """
 
         # prepare calculation
-        numchannels = self.freq_data.time_data.numchannels
+        numchannels = self.freq_data.numchannels
         f = self.freq_data.fftfreq()
         kjall = 2j*pi*f/self.c
         e = zeros((numchannels), 'D')
@@ -1440,7 +1440,7 @@ class BeamformerCMF ( BeamformerBase ):
             
         # prepare calculation
         kj = 2j*pi*self.freq_data.fftfreq()/self.c
-        nc = self.freq_data.time_data.numchannels
+        nc = self.freq_data.numchannels
         r0 = self.r0
         rm = self.rm
         numpoints = rm.shape[0]
