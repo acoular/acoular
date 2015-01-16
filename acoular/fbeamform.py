@@ -291,10 +291,8 @@ class BeamformerBase( HasPrivateTraits ):
         """
         res = self.result # trigger calculation
         freq = self.freq_data.fftfreq()
-        ind = searchsorted(freq, f)
-        print '...',ind,freq[ind],freq[ind-1],freq.shape
         if len(freq) == 0:
-            return None#array([[1, ], ], 'd')
+            return None
         try:
             if num == 0:
                 # single frequency line
