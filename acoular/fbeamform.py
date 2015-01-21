@@ -170,7 +170,7 @@ class BeamformerBase( HasPrivateTraits ):
                 #return None
                 raise ValueError("%i channels do not fit %i mics" % \
                     (numchannels, self.mpos.num_mics))
-            numfreq = self.freq_data.block_size/2 + 1
+            numfreq = self.freq_data.fftfreq().shape[0]# block_size/2 + 1
             if self.cached:
                 H5cache.get_cache( self, self.freq_data.basename)
                 if not name in self.h5f.root:
