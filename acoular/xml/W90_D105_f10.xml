@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<BKArray name="W90_D105_f4,5">
+<MicArray name="W90_D105_f4,5">
    <pos Name="Point 1" x="-0.14507" y="-0.1112" z="0"/>
    <pos Name="Point 2" x="-0.1125" y="-0.20451" z="0"/>
    <pos Name="Point 3" x="-0.067958" y="-0.33208" z="0"/>
@@ -90,4 +90,4 @@
    <pos Name="Point 88" x="0.13581" y="-0.3978" z="0"/>
    <pos Name="Point 89" x="0.16751" y="-0.4315" z="0"/>
    <pos Name="Point 90" x="0.21424" y="-0.48119" z="0"/>
-</BKArray>
+</MicArray>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<BKArray name="acousticam_vierfachkreis_mirr">
+<MicArray name="acousticam_vierfachkreis_mirr">
  <pos Name="Point 1" x="-0.145527" y="0.633500" z="0"/>
  <pos Name="Point 2" x="-0.029598" y="0.463341" z="0"/>
  <pos Name="Point 3" x="-0.138631" y="0.241627" z="0"/>
@@ -32,4 +32,4 @@
  <pos Name="Point 30" x="0.306703" y="0.348561" z="0"/>
  <pos Name="Point 31" x="0.072829" y="0.268883" z="0"/>
  <pos Name="Point 32" x="0.042067" y="0.082782" z="0"/>
-</BKArray>
+</MicArray>
