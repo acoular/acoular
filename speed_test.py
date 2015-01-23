@@ -1,13 +1,15 @@
+# coding=UTF-8
+#------------------------------------------------------------------------------
+# Copyright (c) 2007-2014, Acoular Development Team.
+#------------------------------------------------------------------------------
+
 """
-speed test
+provisional speed test with open mp 
 
 uses measured data in file 2008-05-16_11-36-00_468000.h5
 calibration in file calib_06_05_2008.xml
 microphone geometry in array_56.xml (part of acoular)
 
-
-(c) Ennes Sarradj 2007-2010, all rights reserved
-ennes.sarradj@gmx.de
 """
 from os import environ
 environ['OMP_NUM_THREADS']='2'
