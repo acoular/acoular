@@ -1,8 +1,11 @@
-# file types to ignore
+# files and file types to ignore
 *.pyc
 #*.pyd
 #*.so
 *~
+
+beamformer.cpp
+examples/*.h5
 
 # ignore the build directories
 *.egg-info/
