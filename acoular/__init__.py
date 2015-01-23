@@ -77,5 +77,5 @@ from .fbeamform import BeamformerBase, BeamformerCapon, BeamformerEig, \
 BeamformerMusic, BeamformerDamas, BeamformerOrth,BeamformerCleansc, \
 BeamformerCMF, BeamformerClean, BeamformerFunctional, L_p, integrate
 from .sources import PointSource, MovingPointSource, SamplesGenerator, \
-TimeSamples, MaskedTimeSamples
+TimeSamples, MaskedTimeSamples, SourceMixer
 from .signals import SineGenerator, WNoiseGenerator, SignalGenerator

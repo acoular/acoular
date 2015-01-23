@@ -433,6 +433,7 @@ class PointSource( SamplesGenerator ):
                 break
         yield out[:i]            
 
+
 class MovingPointSource( PointSource ):
     """
     Class to define a point source with an arbitrary 
@@ -514,3 +515,87 @@ class MovingPointSource( PointSource ):
             except IndexError: #if no ore samples available from the source 
                 break
         yield out[:i]
+
+
+class SourceMixer( SamplesGenerator ):
+    """
+    Mixes the signals from several sources. 
+    """
+
+    #: List of :class:`~beamfpy.sources.SamplesGenerator` objects
+    #: to be mixed.
+    sources = List( Instance(SamplesGenerator, ()) ) 
+
+    #: Sampling frequency of the signal
+    sample_freq = Trait( SamplesGenerator().sample_freq )
+    
+    #: Number of channels 
+    numchannels = Trait( SamplesGenerator().numchannels )
+               
+    #: Number of samples 
+    numsamples = Trait( SamplesGenerator().numsamples )
+    
+    # internal identifier
+    ldigest = Property( depends_on = ['sources.digest', ])
+
+    # internal identifier
+    digest = Property( depends_on = ['ldigest', '__class__'])
+
+    traits_view = View(
+        Item('sources', style='custom')
+                    )
+
+    @cached_property
+    def _get_ldigest( self ):
+        res = ''
+        for s in self.sources:
+            res += s.digest
+        return res
+
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+
+    @on_trait_change('sources')
+    def validate_sources( self ):
+        """ validates if sources fit together """
+        if self.sources:
+            self.sample_freq = self.sources[0].sample_freq
+            self.numchannels = self.sources[0].numchannels
+            self.numsamples = self.sources[0].numsamples
+            for s in self.sources[1:]:
+                if self.sample_freq != s.sample_freq:
+                    raise ValueError("Sample frequency of %s does not fit" % s)
+                if self.numchannels != s.numchannels:
+                    raise ValueError("Channel count of %s does not fit" % s)
+                if self.numsamples != s.numsamples:
+                    raise ValueError("Number of samples of %s does not fit" % s)
+
+
+    def result(self, num):
+        """
+        Python generator that yields the output block-wise.
+        The outputs from the sources in the list are being added.
+        
+        Parameters
+        ----------
+        num : integer
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block) 
+        
+        Returns
+        -------
+        Samples in blocks of shape (num, numchannels). 
+            The last block may be shorter than num.
+        """
+        gens = [i.result(num) for i in self.sources[1:]]
+        for temp in self.sources[0].result(num):
+            sh = temp.shape[0]
+            for g in gens:
+                temp1 = g.next()
+                if temp.shape[0] > temp1.shape[0]:
+                    temp = temp[:temp1.shape[0]]
+                temp += temp1[:temp.shape[0]]
+            yield temp
+            if sh > temp.shape[0]:
+                break
