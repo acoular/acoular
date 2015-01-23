@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<BKArray name="array_56_bomb">
+<MicArray name="array_56_bomb">
 <pos Name="Point 1" x="0.145500000" y="-0.622278973" z="0.118706063"/>
 <pos Name="Point 2" x="0.066800000" y="-0.232605621" z="0.044371895"/>
 <pos Name="Point 3" x="0.376900000" y="-0.520219328" z="0.099237144"/>
@@ -56,4 +56,4 @@
 <pos Name="Point 54" x="-0.306700000" y="-0.342425336" z="0.065321126"/>
 <pos Name="Point 55" x="-0.072800000" y="-0.264137042" z="0.050386835"/>
 <pos Name="Point 56" x="-0.042100000" y="-0.081333384" z="0.015515173"/>
-</BKArray>
+</MicArray>

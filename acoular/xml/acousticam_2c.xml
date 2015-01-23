@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<BKArray name="acousticam_2c">
+<MicArray name="acousticam_2c">
     <pos Name="Point 1" x="-0.145527" y="0.633500" z="0"/>
     <pos Name="Point 2" x="-0.066774" y="0.236764" z="0"/>
     <pos Name="Point 3" x="-0.376879" y="0.529587" z="0"/>
@@ -32,4 +32,4 @@
     <pos Name="Point 30" x="0.120201" y="0.214634" z="0"/>
     <pos Name="Point 31" x="0.107980" y="0.640968" z="0"/>
     <pos Name="Point 32" x="0.028914" y="0.244295" z="0"/>
-</BKArray>
+</MicArray>
