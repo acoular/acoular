@@ -19,7 +19,7 @@ dot, newaxis, zeros, empty, fft, float32, complex64, linalg, \
 searchsorted
 import tables
 from traits.api import HasPrivateTraits, Int, Property, Instance, Trait, \
-Range, Bool, cached_property, property_depends_on
+Range, Bool, cached_property, property_depends_on, Delegate
 from traitsui.api import View
 from traitsui.menu import OKCancelButtons
 
@@ -51,6 +51,9 @@ class PowerSpectra( HasPrivateTraits ):
     time_data = Trait(SamplesGenerator, 
         desc="time data object")
 
+    #: Number of samples 
+    numchannels = Delegate('time_data')
+
     #: The Calib object that provides the calibration data, 
     #: defaults to no calibration, i.e. the raw time data is used.
     #:
@@ -62,7 +65,7 @@ class PowerSpectra( HasPrivateTraits ):
     block_size = Trait(1024, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 
         desc="number of samples per FFT block")
 
-    #: Index of lowest frequency line to compute, integer, defaults to 0,
+    #: Index of lowest frequency line to compute, integer, defaults to 1,
     #: is used only by objects that fetch the csm, PowerSpectra computes every
     #: frequency line
     ind_low = Range(1, 

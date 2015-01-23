@@ -3,6 +3,7 @@
 #*.pyd
 #*.so
 *~
+*.h5
 
 beamformer.cpp
 examples/*.h5
