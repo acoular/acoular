@@ -33,6 +33,7 @@ from os import path
 import tables
 import wave
 from scipy.signal import butter, lfilter, filtfilt
+from warnings import warn
 
 # acoular imports
 from .internal import digest
@@ -531,18 +532,21 @@ class WriteWAV( TimeInOut ):
                     break
                 else:
                     obj = obj.source # traverse down until original data source
+            else:
+                basename = 'void'
         except AttributeError:
             basename = 'void' # if no file source is found
         return basename
 
     def save(self):
         """ 
-        Saves source output to one- or two-channel *.wav file. 
+        Saves source output to one- or multiple-channel *.wav file. 
         """
         nc = len(self.channels)
-        if not (0 < nc < 3):
-            raise ValueError("One or two channels allowed, %i channels given" %\
-            nc)
+        if nc == 0:
+            raise ValueError("No channels given for output")
+        if nc > 2:
+            warn("More than two channels given for output, exported file will have %i channels" % nc)
         name = self.basename
         for nr in self.channels:
             name += '_%i' % nr
