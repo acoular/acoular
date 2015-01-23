@@ -45,7 +45,7 @@ where all objects that depend upon the specific trait will update their
 output if necessary.
 """
 
-__author__ = "Ennes Sarradj, ennes.sarradj@gmx.de"
+__author__ = "Acoular developers"
 __date__ = "20 June 2014"
 __version__ = "14.06.20"
 

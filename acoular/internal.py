@@ -1,12 +1,8 @@
-"""
-internal.py
+# coding=UTF-8
+#------------------------------------------------------------------------------
+# Copyright (c) 2007-2014, Acoular Development Team.
+#------------------------------------------------------------------------------
 
-Part of the acoular library: several classes for the implementation of 
-acoustic beamforming
-
-(c) Ennes Sarradj 2007-2011, all rights reserved
-ennes.sarradj@gmx.de
-"""
 from hashlib import md5
 
 def digest( obj, name='digest'):

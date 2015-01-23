@@ -1,14 +1,11 @@
 # coding=UTF-8
+#------------------------------------------------------------------------------
+# Copyright (c) 2007-2014, Acoular Development Team.
+#------------------------------------------------------------------------------
+
 """
 nidaqimport.py: interface to nidaq mx
-
-Part of the acoular library: several classes for the implemetation of 
-acoustic beamforming
-
-(c) Ennes Sarradj 2007-2010, all rights reserved
-ennes.sarradj@gmx.de
 """
-
 
 from timedomain import TimeSamples
 from h5cache import td_dir

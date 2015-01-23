@@ -1,14 +1,8 @@
 # -*- coding: utf-8 -*-
 #pylint: disable-msg=E0611,C0111,C0103,R0901,R0902,R0903,R0904,W0232
-"""
-h5cache.py
-
-Part of the acoular library: several classes for the implemetation of 
-acoustic beamforming
-
-(c) Ennes Sarradj 2007-2010, all rights reserved
-ennes.sarradj@gmx.de
-"""
+#------------------------------------------------------------------------------
+# Copyright (c) 2007-2014, Acoular Development Team.
+#------------------------------------------------------------------------------
 
 # imports from other packages
 from traits.api import HasPrivateTraits, Bool, Str
