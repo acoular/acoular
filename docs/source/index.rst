@@ -31,35 +31,26 @@ Contents:
 
 
 .. list-table::
-    :class: borderless
+    :widths: 20 80
 
-    * - :doc:`get_started/index`
+    * - :doc:`get_started/index` 
 
-        The first stop for all those new to acoular.
+      - The first stop for all those new to acoular.
 
-      - :doc:`dev_guides/index`
+    * - :doc:`examples/index` 
 
-        Some info for developers.
+      - Example scripts.
 
+    * - :doc:`api_ref/index` 
 
-    * - :doc:`literature/index`
-
-        In here some of the publications used for this program package are 
-        listed. Further reading to fully understand how the algorithms work
-        is recommended.
-
-      - :doc:`examples/index`
-
-        Example scripts.
-
-    * - :doc:`faqs/index`
-
-        Frequently asked questions
-
-      - :doc:`api_ref/index`
-
-        All modules, classes and methods featured in acoular are described in detail
+      - All modules, classes and methods featured in acoular are described in detail
         here. They can easily be browsed through an inheritance tree and cross links.
+
+    * - :doc:`literature/index` 
+
+      - In here some of the publications used for this program package are 
+        listed. Further reading to fully understand how the algorithms work is recommended.
+
 
 Indices and tables
 ==================

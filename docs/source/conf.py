@@ -46,8 +46,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General substitutions.
-project = 'acoular'
-copyright = '2007-2014, Ennes Sarradj'
+project = 'Acoular'
+copyright = '2007-2015, Acoular developers'
 
 # The default replacements for |version| and |release|, also used in various
 # other places throughout the built documents.
@@ -93,7 +93,7 @@ pygments_style = 'sphinx'
 # must exist either in Sphinx' static/ path, or in one of the custom paths
 # given in html_static_path.
 #html_style = 'default.css'
-html_theme = 'default'
+html_theme = 'haiku'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further. For a list of options available for each theme, see the
@@ -120,7 +120,7 @@ html_theme_options = {
 
 # The name of an image file (within the static path) to place at the top of
 # the sidebar.
-#html_logo = '_static/e-logo-rev.png'
+html_logo = '_static/Acoular_logo.png'
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -191,7 +191,7 @@ autodoc_member_order = 'bysource'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, document class [howto/manual]).
 latex_documents = [
-  ('index', 'acoular.tex', 'Acoular Documentation', 'Ennes Sarradj', 'manual'),
+  ('index', 'acoular.tex', 'Acoular Documentation', 'Acoular developers', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
