@@ -1007,11 +1007,15 @@ class BeamformerOrth (BeamformerBase):
     # environment
     env =  Delegate('beamformer')
     
-    # list of components to consider
+    #: List of components to consider, use this to directly set the eigenvalues
+    #: used in the beamformer. Alternatively, set :attr:`n`.
     eva_list = CArray(
         desc="components")
         
-    # helper: number of components to consider
+    #: Number of components to consider, defaults to 1. If set, 
+    #: :attr:`eva_list` will contain
+    #: the indices of the n largest eigenvalues. Setting :attr:`eva_list` 
+    #: afterwards will override this value.
     n = Int(1)
 
     # internal identifier

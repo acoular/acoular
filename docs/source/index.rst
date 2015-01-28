@@ -35,11 +35,11 @@ Contents:
 
     * - :doc:`get_started/index` 
 
-      - The first stop for all those new to acoular.
+      - The basics for using Acoular explained with a simple example.
 
     * - :doc:`examples/index` 
 
-      - Example scripts.
+      - Example scripts covering different use cases.
 
     * - :doc:`api_ref/index` 
 
