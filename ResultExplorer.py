@@ -1,14 +1,16 @@
 #! /usr/bin/python
 # coding=UTF-8
 """
-GUI for viewing and analysing beamforming results
+GUI for viewing and analysing beamforming results using the Acoular library
 
-ResultExplorer.py (c) Ennes Sarradj 2007-2009, all rights reserved
+ResultExplorer.py (c) Acoular developers
+
+published under the new BSD license
 """
 
-__author__ = "Ennes Sarradj, ennes.sarradj@gmx.de"
-__date__ = "29 January 2009"
-__version__ = "2.0alpha"
+__author__ = "Acoular developers"
+__date__ = "January 2015"
+__version__ = "3.0alpha"
 
 import acoular
 from acoular import *

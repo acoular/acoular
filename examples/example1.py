@@ -7,9 +7,8 @@ uses measured data in file 2008-05-16_11-36-00_468000.h5
 calibration in file calib_06_05_2008.xml
 microphone geometry in array_56.xml (part of acoular)
 
-
-(c) Ennes Sarradj 2007-2010, all rights reserved
-ennes.sarradj@gmx.de
+Copyright (c) 2006–2015 The Acoular developers.
+All rights reserved.
 """
 
 # imports from acoular

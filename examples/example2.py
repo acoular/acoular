@@ -5,8 +5,8 @@ demonstrates use of acoular for a point source moving on a circle trajectory
 
 uses synthesized data
 
-(c) Ennes Sarradj 2007-2010, all rights reserved
-ennes.sarradj@gmx.de
+Copyright (c) 2006–2015 The Acoular developers.
+All rights reserved.
 """
 
 import acoular
