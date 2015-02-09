@@ -348,13 +348,9 @@ class RectGrid3D( RectGrid):
         array of floats of shape (3, :attr:`~Grid.size`)
             The grid point x, y, z-coordinates in one array.
         """
-        i = self.increment3D
-        xi = 1j*round((self.x_max-self.x_min+i[0])/i[0])
-        yi = 1j*round((self.y_max-self.y_min+i[1])/i[1])
-        zi = 1j*round((self.z_max-self.z_min+i[2])/i[2])
-        bpos = mgrid[self.x_min:self.x_max:xi, \
-            self.y_min:self.y_max:yi, \
-            self.z_min:self.z_max:zi]
+        bpos = mgrid[self.x_min:self.x_max:self.nxsteps*1j, \
+                     self.y_min:self.y_max:self.nysteps*1j, \
+                     self.z_min:self.z_max:self.nzsteps*1j]
         bpos.resize((3, self.size))
         return bpos
 
