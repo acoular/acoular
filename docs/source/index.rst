@@ -1,7 +1,7 @@
 .. acoular documentation master file
 
-Acoular -- Acoustic data analysis and source detection software
-===============================================================
+Acoular -- Acoustic testing and source mapping software
+=======================================================
 
 Acoular is a framework for acoustic beamforming that is written in the Python programming language. It is aimed at applications in acoustic testing. Multichannel data recorded by a microphone array can be processed and analyzed in order generate mappings of sound source distributions. The maps (acoustic photographs) can then be used to  locate sources of interest and to characterize them using their spectra. 
 
