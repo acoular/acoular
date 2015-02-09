@@ -53,7 +53,8 @@ copyright = '2007-2015, Acoular developers'
 # other places throughout the built documents.
 #d = {}
 #execfile(os.path.join('..','..', 'acoular', '__init__.py'), d)
-version = release = '14.06.20'#'3.0'#d['__version__']
+#import acoular #acoular.__version__
+version = release =  '15.02.09'#'3.0'#d['__version__']
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
@@ -93,7 +94,8 @@ pygments_style = 'sphinx'
 # must exist either in Sphinx' static/ path, or in one of the custom paths
 # given in html_static_path.
 #html_style = 'default.css'
-html_theme = 'haiku'
+html_theme = 'haikuac'
+html_theme_path = ['_themes/']
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further. For a list of options available for each theme, see the
@@ -125,7 +127,7 @@ html_logo = '_static/Acoular_logo.png'
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
-html_favicon = 'acoular_logo.ico'
+html_favicon = '_static/acoular_logo.ico'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -169,9 +171,9 @@ html_copy_source = False
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'Acoulardoc'
-
-inheritance_graph_attrs = dict(rankdir="LR", size='"16.0, 16.0"',
-                               fontsize=14, ratio='auto')
+#16.0, 16.0"',
+inheritance_graph_attrs = dict(rankdir="LR", size='"10.0,10.0"',
+                               fontsize=18, ratio='compress')
 
 autosummary_generate = True
 
