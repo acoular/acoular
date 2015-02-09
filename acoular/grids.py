@@ -279,7 +279,7 @@ class RectGrid3D( RectGrid):
 
     #: Respective increments in x,y, and z-direction (in m), defaults 
     #: to :attr:`~RectGrid.increment` for all three (whichever of the two
-    # increment parameters is set last replaces the other). 
+    #: increment parameters is set last replaces the other). 
     increment3D = CArray( dtype=float, shape=(3, ),
                          desc="3D step sizes")
     def _increment3D_default(self): 
