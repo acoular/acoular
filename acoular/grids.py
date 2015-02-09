@@ -16,8 +16,8 @@
 
 # imports from other packages
 from numpy import mgrid, s_, array, arange
-from traits.api import HasPrivateTraits, Float, Property, \
-property_depends_on, cached_property
+from traits.api import HasPrivateTraits, Float, Property, CArray, \
+property_depends_on, cached_property, on_trait_change
 from traitsui.api import View
 
 from .internal import digest
@@ -279,12 +279,24 @@ class RectGrid3D( RectGrid):
     nzsteps = Property(
         desc="number of grid points alog x-axis")
 
+    #: Respective increments in x,y, and z-direction (in m), defaults 
+    #: to :attr:`~RectGrid.increment` for all three, but overrides it, if set.
+    increment3D = CArray( dtype=float, shape=(3, ),
+                         desc="3D step sizes")
+    def _increment3D_default(self): 
+        return array([self.increment,self.increment,self.increment])
+    
+    @on_trait_change('increment')
+    def reset_increment3D(self): 
+        self.increment3D = array([self.increment,self.increment,self.increment])
+     
     # internal identifier
     digest = Property(
         depends_on = ['x_min', 'x_max', 'y_min', 'y_max', 'z_min', 'z_max', \
-        'increment']
+        'increment3D']
         )
 
+    # increment3D omitted in view for easier handling, can be added later
     traits_view = View(
             [
                 ['x_min', 'y_min', 'z_min', '|'],
@@ -301,10 +313,24 @@ class RectGrid3D( RectGrid):
     @property_depends_on('nxsteps, nysteps, nzsteps')
     def _get_shape ( self ):
         return (self.nxsteps, self.nysteps, self.nzsteps)
+    
+    @property_depends_on('x_min, x_max, increment3D')
+    def _get_nxsteps ( self ):
+        i = abs(self.increment3D[0])
+        if i != 0:
+            return int(round((abs(self.x_max-self.x_min)+i)/i))
+        return 1
 
-    @property_depends_on('z_min, z_max, increment')
+    @property_depends_on('y_min, y_max, increment3D')
+    def _get_nysteps ( self ):
+        i = abs(self.increment3D[1])
+        if i != 0:
+            return int(round((abs(self.y_max-self.y_min)+i)/i))
+        return 1
+        
+    @property_depends_on('z_min, z_max, increment3D')
     def _get_nzsteps ( self ):
-        i = abs(self.increment)
+        i = abs(self.increment3D[2])
         if i != 0:
             return int(round((abs(self.z_max-self.z_min)+i)/i))
         return 1
@@ -322,10 +348,10 @@ class RectGrid3D( RectGrid):
         array of floats of shape (3, :attr:`~Grid.size`)
             The grid point x, y, z-coordinates in one array.
         """
-        i = self.increment
-        xi = 1j*round((self.x_max-self.x_min+i)/i)
-        yi = 1j*round((self.y_max-self.y_min+i)/i)
-        zi = 1j*round((self.z_max-self.z_min+i)/i)
+        i = self.increment3D
+        xi = 1j*round((self.x_max-self.x_min+i[0])/i[0])
+        yi = 1j*round((self.y_max-self.y_min+i[1])/i[1])
+        zi = 1j*round((self.z_max-self.z_min+i[2])/i[2])
         bpos = mgrid[self.x_min:self.x_max:xi, \
             self.y_min:self.y_max:yi, \
             self.z_min:self.z_max:zi]
@@ -359,9 +385,9 @@ class RectGrid3D( RectGrid):
         if z < self.z_min or z > self.z_max:
             raise ValueError, "z-value out of range %f (%f, %f)" % \
                 (z,self.z_min,self.z_max)
-        xi = round((x-self.x_min)/self.increment)
-        yi = round((y-self.y_min)/self.increment)
-        zi = round((z-self.z_min)/self.increment)
+        xi = round((x-self.x_min)/self.increment3D[0])
+        yi = round((y-self.y_min)/self.increment3D[1])
+        zi = round((z-self.z_min)/self.increment3D[2])
         return xi, yi, zi
 
     def indices ( self, x1, y1, z1, x2, y2, z2 ):
