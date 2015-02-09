@@ -172,11 +172,9 @@ class RectGrid( Grid ):
         array of floats of shape (3, :attr:`~Grid.size`)
             The grid point x, y, z-coordinates in one array.
         """
-        i = self.increment
-        xi = 1j*round((self.x_max-self.x_min+i)/i)
-        yi = 1j*round((self.y_max-self.y_min+i)/i)
-        bpos = mgrid[self.x_min:self.x_max:xi, self.y_min:self.y_max:yi, \
-            self.z:self.z+0.1]
+        bpos = mgrid[self.x_min:self.x_max:self.nxsteps*1j, \
+                     self.y_min:self.y_max:self.nysteps*1j, \
+                     self.z:self.z+0.1]
         bpos.resize((3, self.size))
         return bpos
 
@@ -280,7 +278,8 @@ class RectGrid3D( RectGrid):
         desc="number of grid points alog x-axis")
 
     #: Respective increments in x,y, and z-direction (in m), defaults 
-    #: to :attr:`~RectGrid.increment` for all three, but overrides it, if set.
+    #: to :attr:`~RectGrid.increment` for all three (whichever of the two
+    # increment parameters is set last replaces the other). 
     increment3D = CArray( dtype=float, shape=(3, ),
                          desc="3D step sizes")
     def _increment3D_default(self): 
