@@ -46,8 +46,8 @@ output if necessary.
 """
 
 __author__ = "Acoular developers"
-__date__ = "09 February 2015"
-__version__ = "15.02.09"
+__date__ = "10 February 2015"
+__version__ = "15.02.10"
 
 from fileimport import time_data_import, csv_import, td_import, \
 bk_mat_import, datx_import

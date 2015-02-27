@@ -7,9 +7,13 @@ from setuptools import setup, Extension
 from os.path import join, abspath, dirname
 import sys
 
-import acoular
-bf_version = str(acoular.__version__)
-bf_author = str(acoular.__author__)
+#import acoular
+#bf_version = str(acoular.__version__)
+#bf_author = str(acoular.__author__)
+#preliminary hack to avoid package import during setup
+bf_version = '15.02.10'
+bf_author = 'Acoular developers'
+
 
 # preparation for compiling the beamformer extension
 import scipy.weave
@@ -67,7 +71,14 @@ setup(name="acoular",
       install_requires = [
       'numpy>=1.8',
       'scipy>=0.13',
-      'sklearn>=0.15',
+      'scikit-learn>=0.15',
+      'tables>=3.1',
+      'traits>=4.4',
+      'chaco>=4.4'],
+      setup_requires = [
+      'numpy>=1.8',
+      'scipy>=0.13',
+      'scikit-learn>=0.15',
       'tables>=3.1',
       'traits>=4.4',
       'chaco>=4.4'],
