@@ -1,6 +1,6 @@
 # coding=UTF-8
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2014, Acoular Development Team.
+# Copyright (c) 2007-2015, Acoular Development Team.
 #------------------------------------------------------------------------------
 
 """
@@ -46,8 +46,8 @@ output if necessary.
 """
 
 __author__ = "Acoular developers"
-__date__ = "20 June 2014"
-__version__ = "14.06.20"
+__date__ = "09 February 2015"
+__version__ = "15.02.09"
 
 from fileimport import time_data_import, csv_import, td_import, \
 bk_mat_import, datx_import

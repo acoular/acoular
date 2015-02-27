@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Example 6 for acoular library
 

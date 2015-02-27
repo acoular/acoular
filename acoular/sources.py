@@ -429,9 +429,10 @@ class PointSource( SamplesGenerator ):
                 if i == num:
                     yield out
                     i = 0
-            except IndexError:
+            except IndexError: #if no more samples available from the source
                 break
-        yield out[:i]            
+        if i > 0: # if there are still samples to yield
+            yield out[:i]         
 
 
 class MovingPointSource( PointSource ):
@@ -512,9 +513,10 @@ class MovingPointSource( PointSource ):
                 if i == num:
                     yield out
                     i = 0
-            except IndexError: #if no ore samples available from the source 
+            except IndexError: #if no more samples available from the source 
                 break
-        yield out[:i]
+        if i > 0: # if there are still samples to yield
+            yield out[:i]
 
 
 class SourceMixer( SamplesGenerator ):
