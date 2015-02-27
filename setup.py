@@ -11,7 +11,7 @@ import sys
 #bf_version = str(acoular.__version__)
 #bf_author = str(acoular.__author__)
 #preliminary hack to avoid package import during setup
-bf_version = '15.02.10'
+bf_version = '15.02.10.post1'
 bf_author = 'Acoular developers'
 
 
@@ -72,16 +72,16 @@ setup(name="acoular",
       'numpy>=1.8',
       'scipy>=0.13',
       'scikit-learn>=0.15',
-      'tables>=3.1',
+      'pytables>=3.1',
       'traits>=4.4',
       'chaco>=4.4'],
-      setup_requires = [
-      'numpy>=1.8',
-      'scipy>=0.13',
-      'scikit-learn>=0.15',
-      'tables>=3.1',
-      'traits>=4.4',
-      'chaco>=4.4'],
+#      setup_requires = [
+#      'numpy>=1.8',
+#      'scipy>=0.13',
+#      'scikit-learn>=0.15',
+#      'tables>=3.1',
+#      'traits>=4.4',
+#      'chaco>=4.4'],
       ext_modules = [module1],
       scripts=['ResultExplorer.py','CalibHelper.py'],
       include_package_data = True,
