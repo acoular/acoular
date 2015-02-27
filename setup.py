@@ -1,9 +1,9 @@
 # coding=UTF-8
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2014, Acoular Development Team.
+# Copyright (c) 2007-2015, Acoular Development Team.
 #------------------------------------------------------------------------------
 
-from distutils.core import setup, Extension
+from setuptools import setup, Extension
 from os.path import join, abspath, dirname
 import sys
 
@@ -34,7 +34,7 @@ module1 = Extension('acoular.beamformer',
                     include_dirs = [weavepath, join(weavepath,'scxx'), 
                                     join(weavepath,'blitz'),
                                     join(numpypath,'core','include')],
-                    compiler = compiler,
+#                    compiler = compiler,
                     extra_compile_args = extra_compile_args,
                     extra_link_args = extra_link_args,
                     sources = ['acoular/beamformer.cpp'])
