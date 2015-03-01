@@ -5,14 +5,16 @@
 
 from setuptools import setup, Extension
 from os.path import join, abspath, dirname
+from os import remove
+from shutil import copy
 import sys
 
-#import acoular
-#bf_version = str(acoular.__version__)
-#bf_author = str(acoular.__author__)
-#preliminary hack to avoid package import during setup
-bf_version = '15.02.10.post1'
-bf_author = 'Acoular developers'
+#import acoular.version as av
+#bf_version = str(av.__version__)
+#bf_author = str(av.__author__)
+
+bf_version = "15.02.10"
+bf_author = "Acoular developers"
 
 
 # preparation for compiling the beamformer extension
@@ -32,17 +34,25 @@ else:
     extra_compile_args.pop()
     extra_link_args.pop()
 
+# provide weave_imp.cpp
+copy(join(weavepath,'scxx','weave_imp.cpp'),'weave_imp.cpp')
+
+# build C++ extension from weave-generated beamformer.cpp file
 module1 = Extension('acoular.beamformer',
                     define_macros = [('MAJOR_VERSION', '15'),
                                      ('MINOR_VERSION', '1.31')],
                     include_dirs = [weavepath, join(weavepath,'scxx'), 
                                     join(weavepath,'blitz'),
                                     join(numpypath,'core','include')],
+                    language = "c++",
 #                    compiler = compiler,
                     extra_compile_args = extra_compile_args,
                     extra_link_args = extra_link_args,
-                    sources = ['acoular/beamformer.cpp'])
-                    
+                    sources = [
+                        join('acoular','beamformer.cpp'),
+                        'weave_imp.cpp'
+                    ])
+
 # Get the long description from the relevant file
 here = abspath(dirname(__file__))
 with open(join(here, 'README.rst')) as f:
@@ -87,4 +97,6 @@ setup(name="acoular",
       include_package_data = True,
       package_data={'acoular': ['xml/*.xml']}
 )
-#package_data={'acoular': ['doc/*.*','*.pyd','*.so','xml/*.xml']}
+
+# cleanup
+remove('weave_imp.cpp')
