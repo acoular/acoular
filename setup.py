@@ -13,7 +13,7 @@ import sys
 #bf_version = str(av.__version__)
 #bf_author = str(av.__author__)
 
-bf_version = "15.02.10"
+bf_version = "15.02.28"
 bf_author = "Acoular developers"
 
 
