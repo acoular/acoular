@@ -5,8 +5,6 @@
 *~
 *.h5
 MANIFEST
-beamformer.cpp
-examples/*.h5
 
 # ignore the build directories
 *.egg-info/
