@@ -21,7 +21,11 @@
         «&#160;&#160;<a href="{{ prev.link|e }}">{{ prev.title }}</a>
         &#160;&#160;::&#160;&#160;
         {%- endif %}
-        <a class="uplink" href="{{ pathto(master_doc) }}">{{ _('Contents') }}</a>
+        {%- if parents|length>0 %}
+        <a class="uplink" href="{{ parents[-1].link|e }}">{{ parents[-1].title }}</a>
+        {%- else %}       
+        <a class="uplink" href="{{ pathto(master_doc) }}">{{ _('Main Page') }}</a>
+        {%- endif %}
         {%- if next %}
         &#160;&#160;::&#160;&#160;
         <a href="{{ next.link|e }}">{{ next.title }}</a>&#160;&#160;»
