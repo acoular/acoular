@@ -16,7 +16,7 @@ import sys, os
 # is relative to the documentation root, use os.path.abspath to make it
 # absolute, like shown here.
 sys.path.append(os.path.abspath('sphinxext'))
-sys.path.insert(0,os.path.abspath('../..')) # in order to document the source in trunk
+sys.path.insert(0,os.path.abspath('../')) # in order to document the source in trunk
 
 # General configuration
 # ---------------------
@@ -62,12 +62,9 @@ version = release =  '15.2.28'#'3.0'#d['__version__']
 # Else, today_fmt is used as the format for a strftime call.
 today_fmt = '%B %d, %Y'
 
-# List of documents that shouldn't be included in the build.
-#unused_docs = []
-
-# List of directories, relative to source directories, that shouldn't be searched
+# List of patterns, relative to source directories, that shouldn't be searched
 # for source files.
-#exclude_dirs = []
+#exclude_patterns = ['_templates/*']
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 #default_role = None
@@ -225,5 +222,5 @@ def traits_skip_member(app, what, name, obj, skip, options):
 #                return True
     return skip
 
-def setup(app):
-    app.connect('autodoc-skip-member', traits_skip_member)
+#def setup(app):
+#    app.connect('autodoc-skip-member', traits_skip_member)
