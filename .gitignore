@@ -4,9 +4,7 @@
 #*.so
 *~
 *.h5
-
-beamformer.cpp
-examples/*.h5
+MANIFEST
 
 # ignore the build directories
 *.egg-info/

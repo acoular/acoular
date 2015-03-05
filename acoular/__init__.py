@@ -45,9 +45,7 @@ where all objects that depend upon the specific trait will update their
 output if necessary.
 """
 
-__author__ = "Acoular developers"
-__date__ = "09 February 2015"
-__version__ = "15.02.09"
+from .version import __author__, __date__, __version__
 
 from fileimport import time_data_import, csv_import, td_import, \
 bk_mat_import, datx_import
