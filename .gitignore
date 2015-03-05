@@ -1,7 +1,7 @@
 # files and file types to ignore
 *.pyc
-#*.pyd
-#*.so
+*.pyd
+*.so
 *~
 *.h5
 MANIFEST
