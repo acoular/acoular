@@ -2,44 +2,40 @@ Examples
 ========
 
 .. toctree::
+    :glob:
+    :hidden:
     
-    Example1 <example1/index>
-    Developer Guides <dev_guides/index>
-    Literature <literature/index>
-    FAQs <faqs/index>
-    Examples <examples/index>
-    API Reference <api_ref/index>
+    example*
 
-
-**In die Erläuterungen der einzelnen Beispiele noch Abbildungen hinzufügen.**
+TODO
 
 .. list-table::
     :class: borderless
 
-    * - :doc:`example1/index`
+    * - :doc:`example1`
 
         First example. Short description...
         
-    * - :doc:`example2/index`
+    * - :doc:`example2`
      
         Second example.
 
-    * - :doc:`example3/index`
+    * - :doc:`example3`
 
         Third example.
         
-    * - :doc:`example4/index`
+    * - :doc:`example4`
      
         Fourth example.
 
-    * - :doc:`example5/index`
+    * - :doc:`example5`
      
         Fifth example.
 
-    * - :doc:`example6/index`
+    * - :doc:`example6`
 
         Sixth example.
         
-    * - :doc:`example7/index`
+    * - :doc:`example7`
      
         Seventh example.

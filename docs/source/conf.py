@@ -34,6 +34,7 @@ extensions = [
     'sphinx.ext.autosummary',
     'numpydoc',
 #    'numpydoc.traitsdoc'
+#    'gen_rst',
     ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -64,7 +65,7 @@ today_fmt = '%B %d, %Y'
 
 # List of patterns, relative to source directories, that shouldn't be searched
 # for source files.
-#exclude_patterns = ['_templates/*']
+exclude_patterns = ['_templates/*']
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 #default_role = None
