@@ -22,8 +22,6 @@ Source Location        Level
 
 from os import path
 import acoular
-#from acoular import __file__ as bpath, MicGeom, TimeSamples, PowerSpectra, \
-#RectGrid, BeamformerBase, L_p
 from pylab import figure, plot, axis, imshow, colorbar, show
 
 micgeofile = path.join(path.split(acoular.__file__)[0],'xml','array_64.xml')

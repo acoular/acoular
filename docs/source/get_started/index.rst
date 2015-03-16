@@ -7,11 +7,11 @@ The acoular library is based on the Python programming language. While a basic k
 
 This "Getting started" tutorial assumes that the acoular library is installed together with its dependencies.
 
-One possible way to use the library is for doing classic delay-and-sum beamforming. This can either be done directly in the time domain or in the frequency domain. To get started with acoular, we will present a very basic example of beamforming in the frequency domain. In order to perform such an analysis we do need some data to work on. In a practical application, this data is acquired during multichannel measurements using a microphone array. The library provides some functionality to do so and stores the measured sound pressure time histories for all channels of the microphone array in a hierarchical data file (HDF5) format. However, a working measurement set-up is required. Thus, we will use simulated data here. Because the data file to be used is quite large (>10MB), we will generate it by running a python script (three_sources.py) that is contained in the 'examples' folder.
+One possible way to use the library is for doing classic delay-and-sum beamforming. This can either be done directly in the time domain or in the frequency domain. To get started with acoular, we will present a very basic example of beamforming in the frequency domain. In order to perform such an analysis we do need some data to work on. In a practical application, this data is acquired during multichannel measurements using a microphone array. The library provides some functionality to do so and stores the measured sound pressure time histories for all channels of the microphone array in a hierarchical data file (HDF5) format. However, a working measurement set-up is required. Thus, we will use simulated data here. Because the data file to be used is quite large (>10MB), we will generate it by running a python script (three_sources.py) that is contained in the 'examples' folder. You may :download:`download <../../../examples/three_sources.py>` this script into your working directory and run it:
 
 >>> python three_sources.py
  
-As a result, the 'examples' folder will contain a file 'three_sources.h5' that is 13MB large and contains the time history data for 64 microphone channels, which are sampled at 51200 Hz for a duration of 1 seconds, i.e. 51200 samples per channel. The simulation is also done using the acoular library using its simulation capabilities (see the reference).
+As a result, the working directory will contain a file 'three_sources.h5' that is 13MB large and contains the time history data for 64 microphone channels, which are sampled at 51200 Hz for a duration of 1 seconds, i.e. 51200 samples per channel. The simulation is also done using the acoular library using its simulation capabilities (see the :doc:`reference <../api_ref/index>`).
 
 The simulation generates the sound pressure at 64 microphones that are
 arranged in the 'array64' geometry, which is part of the library. 
@@ -93,3 +93,7 @@ which shows the following map, scaled to a range between the maximum value and 1
    :scale: 50%
 
 It appears that the three sources correspond to the local maxima in the map and that the relative height of two lesser maxima is -3 dB and -6 dB as would be expected from the values given in the table above.
+
+To play around with this simple example, download :download:`basic_beamformer_example.py <../../../examples/basic_beamformer_example.py>` change something and run it as a Python script.
+
+.. literalinclude:: ../../../examples/basic_beamformer_example.py
