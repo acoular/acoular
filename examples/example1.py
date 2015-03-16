@@ -4,8 +4,8 @@ Example 1 for acoular library
 
 demonstrates different features of acoular,
 
-uses measured data in file 2008-05-16_11-36-00_468000.h5
-calibration in file calib_06_05_2008.xml
+uses measured data in file example_data.h5
+calibration in file example_calib.xml
 microphone geometry in array_56.xml (part of acoular)
 
 Copyright (c) 2006-2015 The Acoular developers.
@@ -14,11 +14,12 @@ All rights reserved.
 
 # imports from acoular
 import acoular
-from acoular import td_dir, L_p, Calib, MicGeom, EigSpectra, \
+from acoular import L_p, Calib, MicGeom, EigSpectra, \
 RectGrid, BeamformerBase, BeamformerEig, BeamformerOrth, BeamformerCleansc, \
 MaskedTimeSamples, FiltFiltOctave, BeamformerTimeSq, TimeAverage, \
 TimeCache, BeamformerTime, TimePower, BeamformerCMF, \
-BeamformerCapon, BeamformerMusic, BeamformerDamas, BeamformerClean
+BeamformerCapon, BeamformerMusic, BeamformerDamas, BeamformerClean, \
+BeamformerFunctional
 
 # other imports
 from numpy import zeros
@@ -26,8 +27,8 @@ from os import path
 from pylab import figure, subplot, imshow, show, colorbar, title
 
 # files
-datafile = path.join(td_dir,'2008-05-16_11-36-00_468000.h5')
-calibfile = path.join(td_dir,'calib_06_05_2008.xml')
+datafile = 'example_data.h5'
+calibfile = 'example_calib.xml'
 micgeofile = path.join( path.split(acoular.__file__)[0],'xml','array_56.xml')
 
 #octave band of interest
@@ -82,19 +83,22 @@ f = EigSpectra(time_data=t1,
 bb = BeamformerBase(freq_data=f, grid=g, mpos=m, r_diag=True, c=346.04)
 bc = BeamformerCapon(freq_data=f, grid=g, mpos=m, c=346.04, cached=False)
 be = BeamformerEig(freq_data=f, grid=g, mpos=m, r_diag=True, c=346.04, n=54)
-bm = BeamformerMusic(freq_data=f, grid=g, mpos=m, c=346.04, n=2)
+bm = BeamformerMusic(freq_data=f, grid=g, mpos=m, c=346.04, n=6)
 bd = BeamformerDamas(beamformer=bb, n_iter=100)
 bo = BeamformerOrth(beamformer=be, eva_list=range(38,54))
 bs = BeamformerCleansc(freq_data=f, grid=g, mpos=m, r_diag=True, c=346.04)
-bcmf = BeamformerCMF(freq_data=f, grid=g, mpos=m, c=346.04, method='LassoLarsBIC')
+bcmf = BeamformerCMF(freq_data=f, grid=g, mpos=m, c=346.04, \
+    method='LassoLarsBIC')
 bl = BeamformerClean(beamformer=bb, n_iter=100)
+bf = BeamformerFunctional(freq_data=f, grid=g, mpos=m, r_diag=True, c=346.04, \
+    gamma=4)
 
 #===============================================================================
 # plot result maps for different beamformers in frequency domain
 #===============================================================================
 figure(1)
 i1 = 1 #no of subplot
-for b in (bc, be, bm, bl, bo, bs, bb, bd, bcmf):
+for b in (bb, bc, be, bm, bl, bo, bs, bd, bcmf, bf):
     subplot(3,4,i1)
     i1 += 1
     map = b.synthetic(cfreq,1)

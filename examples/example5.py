@@ -6,8 +6,8 @@ demonstrates different beamformers in frequency domain,
 - persistence (loading of configured beamformers), see example 4 for 
   the first part (saving)
 
-uses measured data in file 2008-05-16_11-36-00_468000.h5
-calibration in file calib_06_05_2008.xml
+uses measured data in file example_data.h5
+calibration in file example_calib.xml
 microphone geometry in array_56.xml (part of acoular)
 
 
