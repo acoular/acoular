@@ -495,8 +495,8 @@ class TimeCache( TimeInOut ):
 
 class WriteWAV( TimeInOut ):
     """
-    Saves time signal from one or two channels as 
-    mono or stereo *.wav file
+    Saves time signal from one or more channels as mono/stereo/multi-channel
+    *.wav file
     """
     # basename for cache
     basename = Property( depends_on = 'digest')
