@@ -1,5 +1,18 @@
 Example 4
 =========
-download :download:`example4.py <../../../examples/example4.py>`
+Demonstrates different beamformers in frequency domain,
+
+* setting of steering vector type,
+* disabling of result caching,
+* persistence (saving of configured beamformers)
+
+Download: :download:`example4.py <../../../examples/example4.py>`
+
+The script produces the figure:
+
+.. figure:: example4.png
+    :align: center
+    :width: 100%
+    :figwidth: 80%
 
 .. literalinclude:: ../../../examples/example4.py

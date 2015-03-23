@@ -37,7 +37,7 @@ A few highlights of the framework:
     * efficient: intelligent caching, parallel computing with OpenMP
     * easily extendible and well documented
 
-Problems, suggestions and success using Acoular may be reported to info@acoular.org
+Problems, suggestions and success using Acoular may be reported to **info (at) acoular.org**.
 
 Contents:
 

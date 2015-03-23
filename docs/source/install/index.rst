@@ -32,7 +32,7 @@ You may download the `source tarball <https://pypi.python.org/pypi/acoular>`_. U
 >>> python setup.py install
 
 to compile and install the software. This requires a properly set up system with all installed dependecies and a compiler.  
-Another option to get the source is to clone or fork from `Github <https://github.com/acoular>`_.
+Another option to get the source is to clone or fork from `Github <https://github.com/acoular/acoular>`_.
 
     
 

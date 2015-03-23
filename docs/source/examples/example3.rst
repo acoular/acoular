@@ -1,5 +1,16 @@
 Example 3
 =========
-download :download:`example3.py <../../../examples/example3.py>`
+This example demonstrates a 3D beamforming setup.
+
+Download: :download:`example3.py <../../../examples/example3.py>`
+
+The script produces the figure:
+
+.. figure:: example3.png
+    :align: center
+    :width: 100%
+    :figwidth: 50%
+
+    Result for the trailing edge noise in 3D using beamforming (Such results will be useful only if a fast deconvolution method is applied.)
 
 .. literalinclude:: ../../../examples/example3.py

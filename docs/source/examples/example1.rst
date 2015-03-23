@@ -2,9 +2,11 @@ Example 1
 =========
 This example demonstrates different features of acoular using measured data from a wind tunnel experiment on trailing edge noise. 
 
-It needs the measured timeseries data in :download:`example_data.h5 <../../../examples/example_data.h5>` and calibration in :download:`example_calib.xml <../../../examples/example_calib.xml>`. Both files should reside in the same directory as the :download:`example1.py <../../../examples/example1.py>` script.
+It needs the measured timeseries data in :download:`example_data.h5 <../../../examples/example_data.h5>` and calibration in :download:`example_calib.xml <../../../examples/example_calib.xml>`. Both files should reside in the same directory as the :download:`example1.py <../../../examples/example1.py>` script. 
 
-Three figures are the output of the script and shall look like these:
+Note that for a sucessful practical application a much longer timeseries and much finer grid is required.
+
+The script produces three figures:
 
 .. list-table::
     :widths: 50 25 25
@@ -14,21 +16,21 @@ Three figures are the output of the script and shall look like these:
 	    :width: 100%
 	    :figwidth: 80%
 
-            results for different frequency domain beamformers and averaged time domain beamformers          
+            Results for different frequency domain beamformers and averaged time domain beamformers          
   
       - .. figure:: example1_2.png
             :align: center
 	    :width: 100%
 	    :figwidth: 80%
 
-            time domain beamformer output at different times
+            Time domain beamformer output at different times
 
       - .. figure:: example1_3.png
             :align: center
 	    :width: 100%
 	    :figwidth: 80%
 
-            time domain beamformer output with auto-power removal at different times
+            Time domain beamformer output with auto-power removal at different times
 
 
 The script example1.py:
