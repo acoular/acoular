@@ -7,35 +7,19 @@ Examples
     
     example*
 
-TODO
-
 .. list-table::
     :class: borderless
 
-    * - :doc:`example1`
-
-        First example. Short description...
+    * - :doc:`example1` demonstrates different features of acoular using measured data from a wind tunnel experiment on trailing edge noise
         
-    * - :doc:`example2`
-     
-        Second example.
+    * - :doc:`example2` demonstrates a simple approach to beamforming on a rotating source
 
-    * - :doc:`example3`
-
-        Third example.
+    * - :doc:`example3` demonstrates a 3D beamforming setup
         
-    * - :doc:`example4`
-     
-        Fourth example.
+    * - :doc:`example4` demonstrates different beamformers in frequency domain and persistence of objects (saving)
 
-    * - :doc:`example5`
-     
-        Fifth example.
+    * - :doc:`example5` demonstrates different beamformers in frequency domain and persistence of objects (loading)
 
-    * - :doc:`example6`
-
-        Sixth example.
+    * - :doc:`example6` demonstrates different steering vectors in Acoular and CSM diagonal removal
         
-    * - :doc:`example7`
-     
-        Seventh example.
+    * - :doc:`example7` demonstrates CMF method with different optimization schemes

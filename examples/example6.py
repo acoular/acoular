@@ -6,8 +6,8 @@ demonstrates different steering vectors in acoular,
 and CSM diagonal removal 
 with same setup as in example 1
 
-uses measured data in file 2008-05-16_11-36-00_468000.h5
-calibration in file calib_06_05_2008.xml
+uses measured data in file example_data.h5
+calibration in file example_calib.xml
 microphone geometry in array_56.xml (part of acoular)
 
 
@@ -17,7 +17,7 @@ All rights reserved.
 
 # imports from acoular
 import acoular
-from acoular import td_dir, L_p, Calib, MicGeom, EigSpectra, \
+from acoular import L_p, Calib, MicGeom, EigSpectra, \
 RectGrid, BeamformerBase, BeamformerEig, BeamformerOrth, BeamformerCleansc, \
 MaskedTimeSamples, BeamformerDamas
 
@@ -26,8 +26,8 @@ from os import path
 from pylab import figure, subplot, imshow, show, colorbar, title
 
 # files
-datafile = path.join(td_dir,'2008-05-16_11-36-00_468000.h5')
-calibfile = path.join(td_dir,'calib_06_05_2008.xml')
+datafile = 'example_data.h5'
+calibfile = 'example_calib.xml'
 micgeofile = path.join( path.split(acoular.__file__)[0],'xml','array_56.xml')
 
 #octave band of interest
@@ -109,7 +109,7 @@ for r_diag in (True,False):
                    interpolation='nearest', extent=g.extend())
             print b.steer
             colorbar()
-            title(b.__class__.__name__)
+            title(b.__class__.__name__,fontsize='small')
 
 
 show()

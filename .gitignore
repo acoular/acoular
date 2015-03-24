@@ -3,7 +3,7 @@
 *.pyd
 *.so
 *~
-*.h5
+examples/three_sources.h5
 MANIFEST
 
 # ignore the build directories

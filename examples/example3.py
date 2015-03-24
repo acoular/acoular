@@ -4,8 +4,8 @@ Example 3 for acoular library
 
 demonstrates a 3D beamforming setup,
 
-uses measured data in file 2008-05-16_11-36-00_468000.h5
-calibration in file calib_06_05_2008.xml
+uses measured data in file example_data.h5
+calibration in file example_calib.xml
 microphone geometry in array_56.xml (part of acoular)
 
 
@@ -15,7 +15,7 @@ All rights reserved.
 
 # imports from acoular
 import acoular
-from acoular import td_dir, L_p, TimeSamples, Calib, MicGeom, EigSpectra,\
+from acoular import L_p, TimeSamples, Calib, MicGeom, EigSpectra,\
 RectGrid3D, BeamformerBase, BeamformerEig, BeamformerOrth, BeamformerCleansc
 
 # other imports
@@ -27,8 +27,8 @@ from mayavi import mlab
 # first, we define the data source, calibration and microphone geometry
 #===============================================================================
 
-t = TimeSamples(name=path.join(td_dir,'2008-05-16_11-36-00_468000.h5'))
-cal = Calib(from_file=path.join(td_dir,'calib_06_05_2008.xml'))
+t = TimeSamples(name='example_data.h5')
+cal = Calib(from_file='example_calib.xml')
 m = MicGeom(from_file=path.join(\
     path.split(acoular.__file__)[0], 'xml', 'array_56.xml'))
 

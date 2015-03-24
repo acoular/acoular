@@ -4,16 +4,22 @@
     :align: right
     :width: 100%
     :figwidth: 30%
+    
+    *three different point sources*
 
-.. figure:: get_started/map_three_sources.png
+.. figure:: _static/airfoil_leading_edge_noise.png
     :align: right
     :width: 100%
     :figwidth: 30%
 
-.. figure:: get_started/map_three_sources.png
+    *airfoil leading edge noise*
+
+.. figure:: _static/pantograph_noise_3d.png
     :align: right
     :width: 100%
     :figwidth: 30%
+
+    *pantograph noise*
 
 Acoular -- Acoustic testing and source mapping software
 =======================================================
@@ -31,13 +37,14 @@ A few highlights of the framework:
     * efficient: intelligent caching, parallel computing with OpenMP
     * easily extendible and well documented
 
+Problems, suggestions and success using Acoular may be reported to **info (at) acoular.org**.
 
 Contents:
 
 .. toctree::
     :hidden:
     
-    Installation <install/index>
+    How to Get <install/index>
     Getting Started <get_started/index>
     Literature <literature/index>
     Examples <examples/index>
@@ -49,7 +56,7 @@ Contents:
     
     * - :doc:`install/index` 
 
-      - Download sources and description of the different installation options to get 
+      - Description of the different download and installation options to get 
         Acoular running on your system.
 
     * - :doc:`get_started/index` 
