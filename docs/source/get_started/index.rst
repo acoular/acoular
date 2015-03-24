@@ -64,9 +64,9 @@ The beamforming will be done here in order to produce a mapping of the acoustic 
 
 The traits assigned in brackets determine the dimensions of the grid and distance (increment) between individual source positions.
 
-The positions of the microphones are needed for beamforming, so we create a :class:`~acoular.microphones.MicGeom` object, that reads the positions from a .xml file. Here we use array64.xml, which is part of the library:
+The positions of the microphones are needed for beamforming, so we create a :class:`~acoular.microphones.MicGeom` object, that reads the positions from a .xml file. Here we use array_64.xml, which is part of the library. You will need to :download:`download <../../../acoular/xml/array_64.xml>` the file to your working directory.
 
->>> mg = acoular.MicGeom( from_file='array64.xml' )
+>>> mg = acoular.MicGeom( from_file='array_64.xml' )
 
 Finally, we can create the object that encapsulates the delay-and-sum algorithm. The basic beamforming algorithm is provided by objects of the type :class:`~acoular.fbeamform.BeamformerBase` 
 
