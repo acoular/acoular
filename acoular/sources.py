@@ -12,14 +12,16 @@
     TimeSamples
     MaskedTimeSamples
     PointSource
+    PointSourceDipole
     MovingPointSource
+    UncorrelatedNoiseSource
 """
 
 # imports from other packages
-from numpy import array, sqrt, ones, empty, newaxis
+from numpy import array, sqrt, ones, empty, newaxis, uint32, arange
 from traits.api import Float, Int, Property, Trait, Delegate, \
 cached_property, Tuple, HasPrivateTraits, CLong, File, Instance, Any, \
-on_trait_change, List
+on_trait_change, List, CArray
 from traitsui.api import View, Item
 from traitsui.menu import OKCancelButtons
 import tables
@@ -31,7 +33,7 @@ from .trajectory import Trajectory
 from .internal import digest
 from .microphones import MicGeom
 from .environments import Environment
-from .signals import SignalGenerator
+from .signals import SignalGenerator, WNoiseGenerator, PNoiseGenerator
 
 class SamplesGenerator( HasPrivateTraits ):
     """
@@ -517,6 +519,189 @@ class MovingPointSource( PointSource ):
                 break
         if i > 0: # if there are still samples to yield
             yield out[:i]
+
+class PointSourceDipole ( PointSource ):
+    """
+    Class to define a fixed point source with an arbitrary signal and
+    dipole characteristics via superposition of two nearby inversely
+    phased monopoles.
+    This can be used in simulations.
+    
+    The output is being generated via the :meth:`result` generator.
+    """
+    
+    #: Vector to define the orientation of the dipole lobes. Its magnitude will
+    #: be interpreted as the distance of the two phase-inversed superposed
+    #: monopoles.
+    direction = Tuple((0.0, 0.0, 0.01),
+        desc="dipole orientation and distance of the inversely phased monopoles")
+
+    # internal identifier
+    digest = Property( 
+        depends_on = ['mpos.digest', 'signal.digest', 'loc', 'c', \
+         'env.digest', 'start_t', 'start', '__class__', 'direction'], 
+        )
+               
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+        
+        
+    def result(self, num=128):
+        """
+        Python generator that yields the output at microphones block-wise.
+                
+        Parameters
+        ----------
+        num : integer, defaults to 128
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block) 
+        
+        Returns
+        -------
+        Samples in blocks of shape (num, numchannels). 
+            The last block may be shorter than num.
+        """
+        #If signal samples are needed for te < t_start, then samples are taken
+        #from the end of the calculated signal.
+        
+        mpos = self.mpos.mpos
+        loc = array(self.loc).reshape((3, 1))
+        c = self.c
+        dir2 = array(self.direction).reshape((3, 1)) / 2.
+        
+        signal = self.signal.usignal(self.up)
+        out = empty((num, self.numchannels))
+        # distances
+        rm1 = self.env.r(c, loc + dir2, mpos)
+        rm2 = self.env.r(c, loc - dir2, mpos)
+        
+        # emission time relative to start_t (in samples) for first sample
+        ind1 = (-rm1 / c - self.start_t + self.start) * self.sample_freq   
+        ind2 = (-rm2 / c - self.start_t + self.start) * self.sample_freq
+        
+        i = 0
+        n = self.numsamples        
+        while n:
+            n -= 1
+            try:
+                out[i] = signal[array(0.5 + ind1 * self.up, dtype=long)] / rm1 - \
+                         signal[array(0.5 + ind2 * self.up, dtype=long)] / rm2
+                ind1 += 1.
+                ind2 += 1.
+                
+                i += 1
+                if i == num:
+                    yield out
+                    i = 0
+            except IndexError:
+                break
+            
+        yield out[:i]
+
+
+class UncorrelatedNoiseSource( SamplesGenerator ):
+    """
+    Class to simulate white or pink noise as uncorrelated signal at each
+    channel.
+    
+    The output is being generated via the :meth:`result` generator.
+    """
+    
+    #: Type of noise to generate at the channels. 
+    #: The `~acoular.signals.SignalGenerator`-derived class has to 
+    # feature the parameter "seed" (i.e. white or pink noise).
+    signal = Trait(SignalGenerator,
+                   desc = "type of noise")
+
+    #: Array with seeds for random number generator.
+    #: When left empty, arange(:attr:`numchannels`) will be used
+    seed = CArray(dtype = uint32,
+                  desc = "random seed values")
+    
+    #: Number of channels in output, is automatically set / 
+    #: depends on used microphone geometry
+    numchannels = Delegate('mpos', 'num_mics')
+
+    #: Microphone locations as provided by a 
+    #: :class:`~acoular.microphones.MicGeom`-derived object
+    mpos = Trait(MicGeom, 
+        desc="microphone geometry")
+        
+
+    #: Speed of sound, defaults to 343 m/s
+    c = Float(343., 
+        desc="speed of sound")
+        
+    #: Start time of the signal in seconds, defaults to 0 s
+    start_t = Float(0.0,
+        desc="signal start time")
+    
+    #: Start time of the data aquisition at microphones in seconds, 
+    #: defaults to 0 s
+    start = Float(0.0,
+        desc="sample start time")
+
+    
+    #: Number of samples, is set automatically / 
+    #: depends on :attr:`signal`
+    numsamples = Delegate('signal')
+    
+    #: Sampling frequency of the signal, is set automatically / 
+    #: depends on :attr:`signal`
+    sample_freq = Delegate('signal') 
+    
+    # internal identifier
+    digest = Property( 
+        depends_on = ['mpos.digest', 'signal.rms', 'signal.numsamples', \
+        'signal.sample_freq', 'signal.__class__' , 'seed', 'loc', 'c', \
+         'start_t', 'start', '__class__'], 
+        )
+
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+    
+    def result ( self, num=128 ):
+        """
+        Python generator that yields the output at microphones block-wise.
+                
+        Parameters
+        ----------
+        num : integer, defaults to 128
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block) 
+        
+        Returns
+        -------
+        Samples in blocks of shape (num, numchannels). 
+            The last block may be shorter than num.
+        """
+
+        Noise = self.signal.__class__
+        # create or get the array of random seeds
+        if not self.seed:            
+            seed = arange(self.numchannels)
+        elif self.seed.shape == (self.numchannels,):
+            seed = self.seed
+        else:
+            raise ValueError(\
+               "Seed array expected to be of shape (%i,), but has shape %s." \
+                % (self.numchannels, str(self.seed.shape)) )
+        
+        # create array with [numchannels] noise signal tracks
+        signal = array([Noise(seed = s, 
+                              numsamples = self.numsamples,
+                              sample_freq = self.sample_freq).signal() \
+                        for s in seed]).T
+
+        n = num        
+        while n <= self.numsamples:
+            yield signal[n-num:n,:]
+            n += num
+        else:
+            yield signal[n-num:,:]
+
 
 
 class SourceMixer( SamplesGenerator ):
