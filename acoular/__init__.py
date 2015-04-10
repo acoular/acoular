@@ -77,5 +77,7 @@ BeamformerMusic, BeamformerDamas, BeamformerOrth,BeamformerCleansc, \
 BeamformerCMF, BeamformerClean, BeamformerFunctional, L_p, integrate, \
 PointSpreadFunction
 from .sources import PointSource, MovingPointSource, SamplesGenerator, \
-TimeSamples, MaskedTimeSamples, SourceMixer
-from .signals import SineGenerator, WNoiseGenerator, SignalGenerator
+TimeSamples, MaskedTimeSamples, PointSourceDipole, UncorrelatedNoiseSource, \
+SourceMixer
+from .signals import SineGenerator, WNoiseGenerator, SignalGenerator,\
+PNoiseGenerator
