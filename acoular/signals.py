@@ -10,13 +10,14 @@
 
     SignalGenerator
     WNoiseGenerator
+    PNoiseGenerator
     SineGenerator
 
 """
 
 # imports from other packages
-from numpy import pi, arange, sin
-from numpy.random import normal, seed
+from numpy import pi, arange, sin, sqrt, repeat, log
+from numpy.random import RandomState
 from traits.api import HasPrivateTraits, Float, Int, Long, \
 Property, cached_property
 from traitsui.api import View
@@ -80,7 +81,8 @@ class SignalGenerator( HasPrivateTraits ):
         return resample(self.signal(), factor*self.numsamples)
 
 class WNoiseGenerator( SignalGenerator ):
-    """White noise signal generator.
+    """
+    White noise signal generator. 
     """
 
     #: Seed for random number generator, defaults to 0.
@@ -108,9 +110,64 @@ class WNoiseGenerator( SignalGenerator ):
         Array of floats
             The resulting signal as an array of length :attr:`~SignalGenerator.numsamples`.
         """
-        seed(self.seed)
-        return self.rms*normal(scale=1.0, size=self.numsamples)
+        rnd_gen = RandomState(self.seed)
+        return self.rms*rnd_gen.standard_normal(self.numsamples)
     
+
+class PNoiseGenerator( SignalGenerator ):
+    """
+    Pink noise signal generator.
+    
+    Simulation of pink noise is based on the Voss-McCartney algorithm.
+    Ref.:
+     * S.J. Orfanidis: Signal Processing (2010), pp. 729-733
+     * online discussion: http://www.firstpr.com.au/dsp/pink-noise/
+    The idea is to iteratively add larger-wavelength noise to get 1/f 
+    characteristic.
+    """
+    
+    #: Seed for random number generator, defaults to 0.
+    #: This parameter should be set differently for different instances
+    #: to guarantee statistically independent (non-correlated) outputs
+    seed = Int(0, 
+        desc="random seed value")
+    
+    #: "Octave depth" -- higher values for 1/f spectrum at low frequencies, 
+    #: but longer calculation    
+    depth = Int(16,
+        desc="octave depth")
+
+    # internal identifier
+    digest = Property( 
+        depends_on = ['rms', 'numsamples', \
+        'sample_freq', 'seed', 'depth', '__class__'], 
+        )
+               
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+
+    def signal(self):
+        nums = self.numsamples
+        depth = self.depth
+        # maximum depth depending on number of samples
+        max_depth = int( log(nums) / log(2) )
+        
+        if depth > max_depth:
+            depth = max_depth
+            print 'Pink noise filter depth set to maximum possible value of %d.' % max_depth
+        
+        rnd_gen = RandomState(self.seed)
+        s = rnd_gen.standard_normal(nums)
+        for _ in range(depth):
+            ind = 2**_-1
+            lind = nums-ind
+            dind = 2**(_+1)
+            s[ind:] += repeat( rnd_gen.standard_normal(nums / dind+1 ), dind)[:lind]
+        # divide by sqrt(depth+1.5) to get same overall level as white noise
+        return self.rms/sqrt(depth+1.5) * s
+
+
 class SineGenerator( SignalGenerator ):
     """
     Sine signal generator with adjustable frequency and phase.
