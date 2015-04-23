@@ -13,7 +13,7 @@ import sys
 #bf_version = str(av.__version__)
 #bf_author = str(av.__author__)
 
-bf_version = "15.2.28"
+bf_version = "15.4.23"
 bf_author = "Acoular developers"
 
 
@@ -34,13 +34,18 @@ else:
     extra_compile_args.pop()
     extra_link_args.pop()
 
+# we need to link libgcc and libstdc++ statically for Windows
+if sys.platform[:3] == 'win':
+    extra_link_args.append('-static-libgcc')    
+    extra_link_args.append('-static-libstdc++')
+
 # provide weave_imp.cpp
 copy(join(weavepath,'scxx','weave_imp.cpp'),'weave_imp.cpp')
 
 # build C++ extension from weave-generated beamformer.cpp file
 module1 = Extension('acoular.beamformer',
                     define_macros = [('MAJOR_VERSION', '15'),
-                                     ('MINOR_VERSION', '1.31')],
+                                     ('MINOR_VERSION', '4.23')],
                     include_dirs = [weavepath, join(weavepath,'scxx'), 
                                     join(weavepath,'blitz'),
                                     join(numpypath,'core','include')],
