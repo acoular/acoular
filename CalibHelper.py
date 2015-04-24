@@ -1,3 +1,4 @@
+#! /usr/bin/env python
 from acoular import *
 from matplotlib import use
 use('wx')

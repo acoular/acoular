@@ -1,4 +1,4 @@
-#! /usr/bin/python
+#! /usr/bin/env python
 # coding=UTF-8
 """
 GUI for viewing and analysing beamforming results using the Acoular library

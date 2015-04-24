@@ -98,7 +98,8 @@ setup(name="acoular",
 #      'traits>=4.4',
 #      'chaco>=4.4'],
       ext_modules = [module1],
-      scripts=['ResultExplorer.py','CalibHelper.py'],
+      scripts=['ResultExplorer.py','CalibHelper.py',
+               join('examples','acoular_demo.py')],
       include_package_data = True,
       package_data={'acoular': ['xml/*.xml']}
 )
