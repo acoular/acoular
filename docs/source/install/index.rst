@@ -14,11 +14,12 @@ Option 1: Anaconda (Windows and Linux)
 
 This option assumes that you have the `Anaconda <http://continuum.io/downloads>`_ Python-distribution installed on your computer. If this is not the case you may `download <http://continuum.io/downloads>`_ and install it (higly recommended). 
 
-Once Anaconda Python is up and running you should use the command line ("Anaconda command line" on Windows, Terminal on Linux) to install acoular by typing
+Once Anaconda Python is up and running, start a console, i.e. either "cmd" or the "Anaconda command prompt" on Windows, Terminal on Linux.
+In the command line, type
 
 >>> conda install -c https://conda.binstar.org/acoular acoular
 
-This will install Acoular in your Anaconda Python enviroment and make the Acoular library available from Python. In addition this will install all dependencies (those other packages mentioned above), if they are not already present on your system.
+This will install Acoular in your Anaconda Python enviroment and make the Acoular library available from Python. In addition, this will install all dependencies (those other packages mentioned above) if they are not already present on your system.
 Depending on your type of Anaconda installation (single user or system-wide), you may be asked for admin privileges in order to start the installation process.
 
 Option 2: Windows with other Python distributions
@@ -31,7 +32,7 @@ You may download the `source tarball <https://pypi.python.org/pypi/acoular>`_. U
 
 >>> python setup.py install
 
-to compile and install the software. This requires a properly set up system with all installed dependecies and a compiler.  
+to compile and install the software. This requires a properly set up system with all installed dependencies and a compiler.  
 Another option to get the source is to clone or fork from `Github <https://github.com/acoular/acoular>`_.
 
     
