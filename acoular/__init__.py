@@ -70,10 +70,11 @@ from .grids import Grid, RectGrid, RectGrid3D
 from .environments import Environment, UniformFlowEnvironment, \
 FlowField, OpenJet, GeneralFlowEnvironment
 from .microphones import MicGeom
-from .spectra import PowerSpectra, EigSpectra, synthetic
+from .spectra import PowerSpectra, EigSpectra
 from .fbeamform import BeamformerBase, BeamformerCapon, BeamformerEig, \
 BeamformerMusic, BeamformerDamas, BeamformerOrth,BeamformerCleansc, \
-BeamformerCMF, BeamformerClean, BeamformerFunctional, L_p, integrate
+BeamformerCMF, BeamformerClean, BeamformerFunctional, \
+L_p, integrate, synthetic
 from .sources import PointSource, MovingPointSource, SamplesGenerator, \
 TimeSamples, MaskedTimeSamples, SourceMixer
 from .signals import SineGenerator, WNoiseGenerator, SignalGenerator
