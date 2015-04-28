@@ -1595,7 +1595,7 @@ def synthetic (data, freqs, f, num=3):
         The number of entries must be identical to the number of
         grid points.
     freq : array of floats
-        The frequencies that correspon to the input *data* (as yielded by
+        The frequencies that correspond to the input *data* (as yielded by
         the :meth:`PowerSpectra.fftfreq<acoular.spectra.Powerspectra.fftfreq`
         method).
     f : float or list of floats 
