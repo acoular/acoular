@@ -73,7 +73,7 @@ from .microphones import MicGeom
 from .spectra import PowerSpectra, EigSpectra
 from .fbeamform import BeamformerBase, BeamformerCapon, BeamformerEig, \
 BeamformerMusic, BeamformerDamas, BeamformerOrth,BeamformerCleansc, \
-BeamformerCMF, BeamformerClean, BeamformerFunctional, \
+BeamformerCMF, BeamformerClean, BeamformerFunctional, PointSpreadFunction, \
 L_p, integrate, synthetic
 from .sources import PointSource, MovingPointSource, SamplesGenerator, \
 TimeSamples, MaskedTimeSamples, SourceMixer
