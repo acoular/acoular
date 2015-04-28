@@ -1542,8 +1542,11 @@ def integrate(data, grid, sector):
     ----------
     data: array of floats
         Contains the calculated sound pressures in Pa.        
-        The number of entries must be identical to the number of
-        grid points.
+        If data has the same number of entries than the number of grid points
+        only one value is returned.
+        In case of a 2-D array with the second dimension identical 
+        to the number of grid points an array containing as many entries as
+        the first dimension is returned.
     grid: Grid object 
         Object of a :class:`~acoular.grids.Grid`-derived class 
         that provides the grid locations.        
@@ -1560,8 +1563,15 @@ def integrate(data, grid, sector):
     array of floats
         The spectrum (all calculated frequency bands) for the integrated sector.
     """
+    
     ind = grid.indices(*sector)
     gshape = grid.shape
-    h = data.reshape(gshape)[ind].sum()
+    gsize = grid.size
+    if size(data) == gsize: # one value per grid point
+        h = data.reshape(gshape)[ind].sum()
+    elif data.ndim == 2 and data.shape[1] == gsize:
+        h = zeros(data.shape[0])
+        for i in range(data.shape[0]):
+            h[i] = data[i].reshape(gshape)[ind].sum()
     return h
 
