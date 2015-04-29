@@ -1102,19 +1102,19 @@ class BeamformerCleansc( BeamformerBase ):
     Classic delay-and-sum beamforming is already included.
     """
 
-    # no of CLEAN-SC iterations
-    # defaults to 0, i.e. automatic (max 2*numchannels)
+    #: no of CLEAN-SC iterations
+    #: defaults to 0, i.e. automatic (max 2*numchannels)
     n = Int(0, 
         desc="no of iterations")
 
-    # iteration damping factor
-    # defaults to 0.6
+    #: iteration damping factor
+    #: defaults to 0.6
     damp = Range(0.01, 1.0, 0.6, 
         desc="damping factor")
 
-    # iteration stop criterion for automatic detection
-    # iteration stops if power[i]>power[i-stopn]
-    # defaults to 3
+    #: iteration stop criterion for automatic detection
+    #: iteration stops if power[i]>power[i-stopn]
+    #: defaults to 3
     stopn = Int(3, 
         desc="stop criterion index")
 
@@ -1375,7 +1375,7 @@ class BeamformerCMF ( BeamformerBase ):
     method = Trait('LassoLars', 'LassoLarsBIC',  \
         'OMPCV', 'NNLS', desc="fit method used")
         
-    #: Weight factor for LassoLars mathod,
+    #: Weight factor for LassoLars method,
     #: defaults to 0.0.
     alpha = Range(0.0, 1.0, 0.0, 
         desc="Lasso weight factor")
