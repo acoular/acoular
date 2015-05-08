@@ -6,26 +6,26 @@ Depending on your operating system and python distribution, there are different 
 Requirements
 ------------
 
-Acoular runs under 64bit Windows and Linux (it should also run under OS X, but this untested).
+Acoular runs under 64bit Windows and Linux (it should also run under OS X, but this is untested).
 In order to install Acoular you need a Python 2.7 environment running on your machine. 
-Furthermore, Acoular requires the following Python Packages to be installed: 
+Furthermore, Acoular requires the following Python Packages: 
     * `NumPy <http://www.numpy.org/>`_, 
     * `SciPy <http://www.scipy.org/scipylib/index.html>`_, 
     * `Traits <http://code.enthought.com/projects/traits/>`_, 
     * `scikit-learn <http://scikit-learn.org/stable/>`_ (aka sklearn),
     * `pytables <http://www.pytables.org/>`_ (aka tables),
     * `Chaco <http://code.enthought.com/projects/chaco/>`_. 
-If you do not chose option 1 below for installation, you may have to take care that these are installed on your machine before you can install Acoular.
+If you do not chose option 1 below for installation, you may have to take care that these are all installed on your machine before you can install Acoular.
 
 In order to run the demo and examples you will also need the `matplotlib <http://matplotlib.org>`_ package and for one example the `Mayavi <http://docs.enthought.com/mayavi/mayavi/>`_ package.
 
 
 Option 1 (recommended): Anaconda (Windows and Linux)
---------------------------------------
+----------------------------------------------------
 
-This option assumes that you have the `Anaconda <http://continuum.io/downloads>`_ Python-distribution installed on your computer. If this is not the case you may `download <http://continuum.io/downloads>`_ and install it (higly recommended). You may install Anaconda alongside any other Python installation on your system, which is an advantage especially with 
+This option assumes that you have the `Anaconda <http://continuum.io/downloads>`_ Python-distribution installed on your computer. If this is not the case you may `download <http://continuum.io/downloads>`_ and install it (higly recommended). **You may install Anaconda alongside any other Python installation on your system**, without the need to interfere the other Python installation.
 
-Once Anaconda Python is up and running, start a console, i.e. either "cmd" or the "Anaconda command prompt" on Windows, Terminal on Linux.
+Once Anaconda Python is properly installed and works, start a console, i.e. either "cmd" or the "Anaconda command prompt" on Windows, Terminal on Linux.
 In the command line, type
 
 >>> conda install -c https://conda.binstar.org/acoular acoular
