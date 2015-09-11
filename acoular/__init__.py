@@ -62,8 +62,9 @@ os.environ.setdefault('OMP_NUM_THREADS','1')
 
 from .tbeamform import IntegratorSectorTime, \
 BeamformerTime, BeamformerTimeSq, BeamformerTimeTraj, BeamformerTimeSqTraj
-from .tprocess import TimeInOut, Mixer, TimeAverage, TimeReverse, \
-TimePower, FiltFiltOctave, FiltOctave, TimeCache, WriteWAV, WriteH5 
+from .tprocess import TimeInOut, MaskedTimeInOut, Mixer, TimeAverage, \
+TimeReverse, TimePower, FiltFiltOctave, FiltOctave, TimeCache, WriteWAV, \
+WriteH5 
 from .calib import Calib
 from .trajectory import Trajectory
 from .grids import Grid, RectGrid, RectGrid3D

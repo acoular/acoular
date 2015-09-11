@@ -9,6 +9,7 @@
     :toctree: generated/
 
     TimeInOut
+    MaskedTimeInOut
     Mixer
     TimePower
     TimeAverage
@@ -23,7 +24,7 @@
 # imports from other packages
 from numpy import array, newaxis, empty, empty_like, pi, sin, sqrt, arange, \
 clip, r_, zeros, int16, histogram, unique, cross, dot
-from traits.api import Float, Int, \
+from traits.api import Float, Int, CLong, \
 File, CArray, Property, Instance, Trait, Bool, Delegate, \
 cached_property, on_trait_change, List
 from traitsui.api import View, Item
@@ -55,13 +56,13 @@ class TimeInOut( SamplesGenerator ):
     #: Data source; :class:`~acoular.sources.SamplesGenerator` or derived object.
     source = Trait(SamplesGenerator)
 
-    #: Sampling frequency of output signal
+    #: Sampling frequency of output signal, as given by :attr:`source`
     sample_freq = Delegate('source')
     
-    #: Number of channels in output
+    #: Number of channels in output, as given by :attr:`source`
     numchannels = Delegate('source')
                
-    #: Number of samples in output
+    #: Number of samples in output, as given by :attr:`source`
     numsamples = Delegate('source')
             
     # internal identifier
@@ -78,12 +79,130 @@ class TimeInOut( SamplesGenerator ):
     def result(self, num):
         """ 
         Python generator: dummy function, just echoes the output of source,
-        yields samples in blocks of shape (num, numchannels), the last block
+        yields samples in blocks of shape (num, :attr:`numchannels`), the last block
         may be shorter than num.
         """
         for temp in self.source.result(num):
             # effectively no processing
             yield temp
+
+
+class MaskedTimeInOut ( TimeInOut ):
+    """
+    Signal processing block for channel and sample selection.
+    
+    This class serves as intermediary to define (in)valid 
+    channels and samples for any 
+    :class:`~acoular.sources.SamplesGenerator` (or derived) object.
+    It gets samples from :attr:`~acoular.tprocess.TimInOut.source` 
+    and generates output via the generator :meth:`result`.
+    """
+        
+    #: Index of the first sample to be considered valid
+    start = CLong(0L, 
+        desc="start of valid samples")
+    
+    #: Index of the last sample to be considered valid
+    stop = Trait(None, None, CLong, 
+        desc="stop of valid samples")
+    
+    #: Channels that are to be treated as invalid
+    invalid_channels = List(
+        desc="list of invalid channels")
+    
+    #: Channel mask to serve as an index for all valid channels, is set automatically
+    channels = Property(depends_on = ['invalid_channels', 'source.numchannels'], 
+        desc="channel mask")
+    
+    #: Number of channels in input, as given by :attr:`~acoular.tprocess.TimInOut.source`
+    numchannels_total = Delegate('source', 'numchannels')
+               
+    #: Number of samples in input, as given by :attr:`~acoular.tprocess.TimInOut.source`
+    numsamples_total = Delegate('source', 'numsamples')
+
+    #: Number of valid channels, is set automatically
+    numchannels = Property(depends_on = ['invalid_channels', \
+        'source.numchannels'], desc="number of valid input channels")
+
+    #: Number of valid time samples, is set automatically
+    numsamples = Property(depends_on = ['start', 'stop', 'source.numsamples'], 
+        desc="number of valid samples per channel")
+
+    # internal identifier
+    digest = Property( depends_on = ['source.digest', 'start', 'stop', \
+        'invalid_channels'])
+
+
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+    
+    
+    @cached_property
+    def _get_channels( self ):
+        if len(self.invalid_channels)==0:
+            return slice(0, None, None)
+        allr = range(self.numchannels_total)
+        for channel in self.invalid_channels:
+            if channel in allr:
+                allr.remove(channel)
+        return array(allr)
+    
+    @cached_property
+    def _get_numchannels( self ):
+        if len(self.invalid_channels)==0:
+            return self.numchannels_total
+        return len(self.channels)
+    
+    @cached_property
+    def _get_numsamples( self ):
+        sli = slice(self.start, self.stop).indices(self.numsamples_total)
+        return sli[1]-sli[0]
+
+    def result(self, num):
+        """ 
+        Python generator that yields the output block-wise.
+        
+        Parameters
+        ----------
+        num : integer
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block) 
+        
+        Returns
+        -------
+        Samples in blocks of shape (num, :attr:`numchannels`). 
+            The last block may be shorter than num.
+        """
+        sli = slice(self.start, self.stop).indices(self.numsamples_total)
+        start = sli[0]
+        stop = sli[1]
+        if start >= stop:
+            raise IOError("no samples available")
+        
+        if start != 0 or stop != self.numsamples_total:
+
+            stopoff = -stop % num
+            offset = -start % num
+            if offset == 0: offset = num      
+            buf = empty((num + offset , self.numchannels), dtype=float) # buffer array
+            i = 0
+            for block in self.source.result(num):
+                i += num
+                if i > start and i <= stop+stopoff:
+                    ns = block.shape[0] # numbers of samples
+                    buf[offset:offset+ns] = block[:, self.channels]
+                    if i > start + num:
+                        yield buf[:num]
+                    buf[:offset] = buf[num:num+offset]
+            if offset-stopoff != 0:
+                yield buf[:(offset-stopoff)]
+        
+        else: # if no start/stop given, don't do the resorting thing
+            for block in self.source.result(num):
+                yield block[:, self.channels]
+                
+
 
 class Mixer( TimeInOut ):
     """
