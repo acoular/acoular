@@ -128,15 +128,24 @@ class MaskedTimeInOut ( TimeInOut ):
     numsamples = Property(depends_on = ['start', 'stop', 'source.numsamples'], 
         desc="number of valid samples per channel")
 
+    #: Name of the cache file without extension, readonly.
+    basename = Property( depends_on = 'source.digest', 
+        desc="basename for cache file")
+
     # internal identifier
     digest = Property( depends_on = ['source.digest', 'start', 'stop', \
         'invalid_channels'])
 
-
     @cached_property
     def _get_digest( self ):
         return digest(self)
-    
+
+    @cached_property
+    def _get_basename( self ):
+        if 'basename' in self.source.all_trait_names():
+            return self.source.basename
+        else: 
+            return self.source.__class__.__name__ + self.source.digest
     
     @cached_property
     def _get_channels( self ):
