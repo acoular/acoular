@@ -1596,7 +1596,7 @@ def synthetic (data, freqs, f, num=3):
         grid points.
     freq : array of floats
         The frequencies that correspond to the input *data* (as yielded by
-        the :meth:`PowerSpectra.fftfreq<acoular.spectra.Powerspectra.fftfreq`
+        the :meth:`PowerSpectra.fftfreq<acoular.spectra.Powerspectra.fftfreq>`
         method).
     f : float or list of floats 
         Band center frequency or frequencies for which to return the results.
