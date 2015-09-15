@@ -94,7 +94,7 @@ class MaskedTimeInOut ( TimeInOut ):
     This class serves as intermediary to define (in)valid 
     channels and samples for any 
     :class:`~acoular.sources.SamplesGenerator` (or derived) object.
-    It gets samples from :attr:`~acoular.tprocess.TimInOut.source` 
+    It gets samples from :attr:`~acoular.tprocess.TimeInOut.source` 
     and generates output via the generator :meth:`result`.
     """
         
@@ -114,10 +114,10 @@ class MaskedTimeInOut ( TimeInOut ):
     channels = Property(depends_on = ['invalid_channels', 'source.numchannels'], 
         desc="channel mask")
     
-    #: Number of channels in input, as given by :attr:`~acoular.tprocess.TimInOut.source`
+    #: Number of channels in input, as given by :attr:`~acoular.tprocess.TimeInOut.source`
     numchannels_total = Delegate('source', 'numchannels')
                
-    #: Number of samples in input, as given by :attr:`~acoular.tprocess.TimInOut.source`
+    #: Number of samples in input, as given by :attr:`~acoular.tprocess.TimeInOut.source`
     numsamples_total = Delegate('source', 'numsamples')
 
     #: Number of valid channels, is set automatically
