@@ -301,9 +301,9 @@ class GeneralFlowEnvironment(Environment):
     ff = Trait(FlowField, 
         desc="flow field")
 
-    #: Number of rays used per solid angle :math:`\pi`, defaults to 100.
+    #: Number of rays used per solid angle :math:`\Om`, defaults to 100.
     N = Int(100, 
-        desc="number of rays per pi")
+        desc="number of rays per Om")
 
     #: The maximum solid angle used in the algorithm, defaults to :math:`\pi`.
     Om = Float(pi, 
@@ -387,7 +387,7 @@ class GeneralFlowEnvironment(Environment):
             xe = gpos.mean(1) # center of grid
             r = x0[:, newaxis]-gpos
             rmax = sqrt((r*r).sum(0).max()) # maximum distance
-            nv = spiral_sphere(self.N, pi, b=xe-x0)
+            nv = spiral_sphere(self.N, self.Om, b=xe-x0)
             rstep = rmax/sqrt(self.N)
             rmax += rstep
             tstep = rstep/c
@@ -402,7 +402,7 @@ class GeneralFlowEnvironment(Environment):
                     else:
                         dd.add_points(xyz[lastind:], restart=True)
                     lastind = len(xyz)
-                    # ConvexHull includes grid ?
+                    # ConvexHull includes grid if no grid points on hull
                     if dd.simplices.min()>=gs2:
                         break
             xyz = array(xyz)
