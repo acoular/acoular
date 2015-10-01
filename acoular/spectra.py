@@ -16,7 +16,7 @@
 
 from numpy import array, ones, hanning, hamming, bartlett, blackman, \
 dot, newaxis, zeros, empty, fft, float32, complex64, linalg, \
-searchsorted
+searchsorted, isscalar
 import tables
 from traits.api import HasPrivateTraits, Int, Property, Instance, Trait, \
 Range, Bool, cached_property, property_depends_on, Delegate
@@ -379,8 +379,8 @@ def synthetic (data, freqs, f, num=3):
         The frequencies that correspon to the input *data* (as yielded by
         the :meth:`PowerSpectra.fftfreq<acoular.spectra.Powerspectra.fftfreq`
         method).
-    f : list of floats
-        Band center frequencies for which to return the results.
+    f : float or list of floats
+        Band center frequency/frequencies for which to return the results.
     num : integer
         Controls the width of the frequency bands considered; defaults to
         3 (third-octave band).
@@ -404,6 +404,8 @@ def synthetic (data, freqs, f, num=3):
         the :attr:`sampling frequency<acoular.sources.SamplesGenerator.sample_freq>` 
         and used :attr:`FFT block size<acoular.spectra.PowerSpectra.block_size>`.
     """
+    if isscalar(f):
+        f = (f,)
     if num == 0:
         res = [ data[searchsorted(freqs, i)] for i in f]        
     else:
