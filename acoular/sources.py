@@ -615,7 +615,8 @@ class UncorrelatedNoiseSource( SamplesGenerator ):
                    desc = "type of noise")
 
     #: Array with seeds for random number generator.
-    #: When left empty, arange(:attr:`numchannels`) will be used
+    #: When left empty, arange(:attr:`numchannels`)+:attr:`signal`.seed  
+    #: will be used
     seed = CArray(dtype = uint32,
                   desc = "random seed values")
     
@@ -681,7 +682,7 @@ class UncorrelatedNoiseSource( SamplesGenerator ):
         Noise = self.signal.__class__
         # create or get the array of random seeds
         if not self.seed:            
-            seed = arange(self.numchannels)
+            seed = arange(self.numchannels) + self.signal.seed
         elif self.seed.shape == (self.numchannels,):
             seed = self.seed
         else:
@@ -692,7 +693,8 @@ class UncorrelatedNoiseSource( SamplesGenerator ):
         # create array with [numchannels] noise signal tracks
         signal = array([Noise(seed = s, 
                               numsamples = self.numsamples,
-                              sample_freq = self.sample_freq).signal() \
+                              sample_freq = self.sample_freq,
+                              rms = self.signal.rms).signal() \
                         for s in seed]).T
 
         n = num        
