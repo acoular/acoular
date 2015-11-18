@@ -1,2 +1,3 @@
 # pip-style requirements file to make project build on readthedocs
+scipy >=0.13
 traits >=4.4
