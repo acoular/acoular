@@ -179,10 +179,86 @@ class FlowField( HasPrivateTraits ):
         dv = array(((0., 0., 0.), (0., 0., 0.), (0., 0., 0.)))
         return -v, -dv
 
+class SlotJet( FlowField ):
+    """
+    Provides an analytical approximation of the flow field of a slot jet, 
+    see :ref:`Albertson et al., 1950<Albertson1950>`.
+    """
+    #: Exit velocity at jet origin, i.e. the nozzle. Defaults to 0.
+    v0 = Float(0.0, 
+        desc="exit velocity")
+
+    #: Location of a point at the slot center line, 
+    #: defaults to the co-ordinate origin.
+    origin = CArray( dtype=float64, shape=(3, ), value=array((0., 0., 0.)), 
+        desc="center of nozzle")
+
+    #: Unit flow direction of the slot jet, defaults to (1,0,0).
+    flow = CArray( dtype=float64, shape=(3, ), value=array((1., 0., 0.)), 
+        desc="flow direction")
+
+    #: Unit normal vector on slot center plane, defaults to (0,1,1)
+    plane = CArray( dtype=float64, shape=(3, ), value=array((0., 1., 0.)), 
+        desc="slot center line direction")
+        
+    #: Width of the slot, defaults to 0.2 .
+    B = Float(0.2, 
+        desc="nozzle diameter")
+
+    # internal identifier
+    digest = Property(
+        depends_on=['v0', 'origin', 'flow', 'plane', 'B'], 
+        )
+
+    traits_view = View(
+            [
+                ['v0{Exit velocity}', 'origin{Jet origin}',
+                 'flow', 'plane',
+                'B{Slot width}'], 
+                '|[Slot jet]'
+            ]
+        )
+
+    @cached_property
+    def _get_digest( self ):
+        return digest( self )
+
+    def v( self, xx):
+        """
+        Provides the flow field as a function of the location. This is
+        implemented here only for a jet in x-direction and the y- and
+        z-components are set to zero.
+
+        Parameters
+        ----------
+        xx : array of floats of shape (3, )
+            Location in the fluid for which to provide the data.
+
+        Returns
+        -------
+        tuple with two elements
+            The first element in the tuple is the velocity vector and the
+            second is the Jacobian of the velocity vector field, both at the
+            given location.
+        """
+        # TODO: better to make sure that self.flow and self.plane are indeed unit vectors before
+        # normalize
+        flow = self.flow/norm(self.flow)
+        plane = self.plane/norm(self.plane)      
+        # distance from slot exit plane
+        xx1 = xx-self.origin
+        x = dot(flow,xx1)
+        y = dot(plane,xx1)
+        x1 = 0.109*x
+        h1 = y+sqrt(pi)*0.5*x1-0.5*self.B
+        U = self.v0*exp(-h1*h1/(2*x1*x1))
+        
+        return 0
+
 class OpenJet( FlowField ):
     """
     Provides an analytical approximation of the flow field of an open jet, 
-    see :ref:`Albertsib et al., 1950<Albertson1950>`.
+    see :ref:`Albertson et al., 1950<Albertson1950>`.
 
     Notes
     -----
