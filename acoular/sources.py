@@ -18,7 +18,7 @@
 """
 
 # imports from other packages
-from numpy import array, sqrt, ones, empty, newaxis, uint32, arange
+from numpy import array, sqrt, ones, empty, newaxis, uint32, arange, dot
 from traits.api import Float, Int, Property, Trait, Delegate, \
 cached_property, Tuple, HasPrivateTraits, CLong, File, Instance, Any, \
 on_trait_change, List, CArray
@@ -530,12 +530,13 @@ class PointSourceDipole ( PointSource ):
     The output is being generated via the :meth:`result` generator.
     """
     
-    #: Vector to define the orientation of the dipole lobes. Its magnitude will
-    #: be interpreted as the distance of the two phase-inversed superposed
-    #: monopoles.
+    #: Vector to define the orientation of the dipole lobes. Its magnitude
+    #: governs the distance between the monopoles
+    #: (dist = [lowest wavelength in spectrum] x [magnitude]).
+    #: Note: Use vectors of lengths <= 0.01 for good results.
     direction = Tuple((0.0, 0.0, 0.01),
         desc="dipole orientation and distance of the inversely phased monopoles")
-
+    
     # internal identifier
     digest = Property( 
         depends_on = ['mpos.digest', 'signal.digest', 'loc', 'c', \
@@ -566,13 +567,28 @@ class PointSourceDipole ( PointSource ):
         #from the end of the calculated signal.
         
         mpos = self.mpos.mpos
-        loc = array(self.loc).reshape((3, 1))
+        
+        # position of the dipole as (3,1) vector
+        loc = array(self.loc, dtype = float).reshape((3, 1)) 
+        # direction vector from tuple
+        direc = array(self.direction, dtype = float) 
+        direc_mag =  sqrt(dot(direc,direc))
+        
+        # normed direction vector
+        direc_n = direc / direc_mag
+        
         c = self.c
-        dir2 = array(self.direction).reshape((3, 1)) / 2.
+        
+        # distance between monopoles as function of c, sample freq, upsampling factor 
+        dist = c / self.sample_freq * direc_mag
+        
+        # vector from dipole center to one of the monopoles
+        dir2 = (direc_n * dist / 2.0).reshape((3, 1))
         
         signal = self.signal.usignal(self.up)
         out = empty((num, self.numchannels))
-        # distances
+        
+        # distances from monopoles to microphones
         rm1 = self.env.r(c, loc + dir2, mpos)
         rm2 = self.env.r(c, loc - dir2, mpos)
         
@@ -585,8 +601,10 @@ class PointSourceDipole ( PointSource ):
         while n:
             n -= 1
             try:
-                out[i] = signal[array(0.5 + ind1 * self.up, dtype=long)] / rm1 - \
-                         signal[array(0.5 + ind2 * self.up, dtype=long)] / rm2
+                # subtract the second signal b/c of phase inversion
+                out[i] = 1./2./dist * \
+                         (signal[array(0.5 + ind1 * self.up, dtype=long)] / rm1 - \
+                          signal[array(0.5 + ind2 * self.up, dtype=long)] / rm2)
                 ind1 += 1.
                 ind2 += 1.
                 
