@@ -532,9 +532,10 @@ class PointSourceDipole ( PointSource ):
     
     #: Vector to define the orientation of the dipole lobes. Its magnitude
     #: governs the distance between the monopoles
-    #: (dist = [lowest wavelength in spectrum] x [magnitude]).
-    #: Note: Use vectors of lengths <= 0.01 for good results.
-    direction = Tuple((0.0, 0.0, 0.01),
+    #: (dist = [lowest wavelength in spectrum] x [magnitude] x 1e-5).
+    #: Note: Use vectors with order of magnitude around 1.0 or less 
+    #: for good results.
+    direction = Tuple((0.0, 0.0, 1.0),
         desc="dipole orientation and distance of the inversely phased monopoles")
     
     # internal identifier
@@ -571,7 +572,7 @@ class PointSourceDipole ( PointSource ):
         # position of the dipole as (3,1) vector
         loc = array(self.loc, dtype = float).reshape((3, 1)) 
         # direction vector from tuple
-        direc = array(self.direction, dtype = float) 
+        direc = array(self.direction, dtype = float) * 1e-5
         direc_mag =  sqrt(dot(direc,direc))
         
         # normed direction vector
@@ -579,7 +580,7 @@ class PointSourceDipole ( PointSource ):
         
         c = self.c
         
-        # distance between monopoles as function of c, sample freq, upsampling factor 
+        # distance between monopoles as function of c, sample freq, direction vector
         dist = c / self.sample_freq * direc_mag
         
         # vector from dipole center to one of the monopoles
@@ -587,6 +588,9 @@ class PointSourceDipole ( PointSource ):
         
         signal = self.signal.usignal(self.up)
         out = empty((num, self.numchannels))
+        
+        # distance from dipole center to microphones
+        rm = self.env.r(c, loc, mpos)
         
         # distances from monopoles to microphones
         rm1 = self.env.r(c, loc + dir2, mpos)
@@ -602,7 +606,7 @@ class PointSourceDipole ( PointSource ):
             n -= 1
             try:
                 # subtract the second signal b/c of phase inversion
-                out[i] = 1./2./dist * \
+                out[i] = rm / dist * \
                          (signal[array(0.5 + ind1 * self.up, dtype=long)] / rm1 - \
                           signal[array(0.5 + ind2 * self.up, dtype=long)] / rm2)
                 ind1 += 1.
