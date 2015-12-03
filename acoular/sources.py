@@ -388,7 +388,7 @@ class PointSource( SamplesGenerator ):
     # internal identifier
     digest = Property( 
         depends_on = ['mpos.digest', 'signal.digest', 'loc', 'c', \
-         'env.digest', 'start_t', 'start', '__class__'], 
+         'env.digest', 'start_t', 'start', 'up', '__class__'], 
         )
                
     @cached_property
@@ -540,7 +540,7 @@ class PointSourceDipole ( PointSource ):
     # internal identifier
     digest = Property( 
         depends_on = ['mpos.digest', 'signal.digest', 'loc', 'c', \
-         'env.digest', 'start_t', 'start', '__class__', 'direction'], 
+         'env.digest', 'start_t', 'start', 'up', 'direction', '__class__'], 
         )
                
     @cached_property
