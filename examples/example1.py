@@ -151,7 +151,7 @@ for b in (cacht, cachts):
     figure(1)
     subplot(3,4,i1)
     i1 += 1
-    map = r[0].reshape(g.shape)
+    map = res.reshape(g.shape)
     mx = L_p(map.max())
     imshow(L_p(map.T), vmax=mx, vmin=mx-15, 
            interpolation='nearest', extent=g.extend())
