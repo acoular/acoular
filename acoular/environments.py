@@ -446,7 +446,9 @@ class GeneralFlowEnvironment(Environment):
             y0 = hstack((x0, s0))
             oo = ode(f1)
             oo.set_f_params(v)
-            oo.set_integrator('vode', rtol=1e-2)
+            oo.set_integrator('vode', 
+                              rtol=1e-4, # accuracy !
+                              max_step=1e-4*rmax) # for thin shear layer
             oo.set_initial_value(y0, 0)
             while oo.successful():
                 xyz.append(oo.y[0:3])
