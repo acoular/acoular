@@ -17,7 +17,7 @@
 """
 from numpy import array, isscalar, float32, float64, newaxis, \
 sqrt, arange, pi, exp, sin, cos, arccos, zeros_like, empty, dot, hstack, \
-vstack, identity
+vstack, identity, cross, sign
 from numpy.linalg.linalg import norm
 from scipy.integrate import ode
 from scipy.interpolate import LinearNDInterpolator
@@ -197,7 +197,7 @@ class SlotJet( FlowField ):
     flow = CArray( dtype=float64, shape=(3, ), value=array((1., 0., 0.)), 
         desc="flow direction")
 
-    #: Unit normal vector on slot center plane, defaults to (0,1,1)
+    #: Unit vector parallel to slot center plane, defaults to (0,1,0)
     plane = CArray( dtype=float64, shape=(3, ), value=array((0., 1., 0.)), 
         desc="slot center line direction")
         
@@ -244,16 +244,32 @@ class SlotJet( FlowField ):
         # TODO: better to make sure that self.flow and self.plane are indeed unit vectors before
         # normalize
         flow = self.flow/norm(self.flow)
-        plane = self.plane/norm(self.plane)      
+        plane = self.plane/norm(self.plane)
+        # additional axes of global co-ordinate system
+        yy = -cross(flow,plane)
+        zz = cross(flow,yy)
         # distance from slot exit plane
         xx1 = xx-self.origin
+        # local co-ordinate system 
         x = dot(flow,xx1)
-        y = dot(plane,xx1)
+        y = dot(yy,xx1)
         x1 = 0.109*x
-        h1 = y+sqrt(pi)*0.5*x1-0.5*self.B
-        U = self.v0*exp(-h1*h1/(2*x1*x1))
-        
-        return 0
+        h1 = abs(y)+sqrt(pi)*0.5*x1-0.5*self.B
+        if h1 < 0.0:
+            # core jet
+            Ux = self.v0
+            Udx = 0
+            Udy = 0
+        else:
+            # shear layer
+            Ux = self.v0*exp(-h1*h1/(2*x1*x1))
+            Udx = (h1*h1/(x*x1*x1)-h1/(x*x1))*Ux
+            Udy = -sign(y)*h1*Ux/(x1*x1)
+        dU = array(((Udx,0,0),(Udy,0,0),(0,0,0)))
+        # rotation matrix
+        rotation = array((flow,yy,zz))
+        # TODO: check if rotation is correct
+        return dot(array((Ux,0,0)),rotation), dot(dU,rotation)
 
 class OpenJet( FlowField ):
     """
