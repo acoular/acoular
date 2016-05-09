@@ -265,7 +265,8 @@ class SlotJet( FlowField ):
             Ux = self.v0*exp(-h1*h1/(2*x1*x1))
             Udx = (h1*h1/(x*x1*x1)-sqrt(pi)*0.5*h1/(x*x1))*Ux
             Udy = -sign(y)*h1*Ux/(x1*x1)
-        dU = array(((Udx,0,0),(Udy,0,0),(0,0,0)))
+        # Jacobi matrix
+        dU = array(((Udx,0,0),(Udy,0,0),(0,0,0))).T
         # rotation matrix
         R = array((flow,yy,zz)).T
         return dot(R,array((Ux,0,0))), dot(dot(R,dU),R.T)
@@ -346,8 +347,10 @@ class OpenJet( FlowField ):
         Udx = (h1*h1/(x*x1*x1)-h1/(x*x1))*U
         if h1 < 0.0:
             Udx = 0
+        # flow field
         v = array( (U, 0., 0.) )
-        dv = array( ((Udx, 0., 0.), (Udy, 0., 0.), (Udz, 0., 0.)) )
+        # Jacobi matrix
+        dv = array( ((Udx, 0., 0.), (Udy, 0., 0.), (Udz, 0., 0.)) ).T
         return v, dv
 
 def spiral_sphere(N, Om=2*pi, b=array((0, 0, 1))):
@@ -452,7 +455,7 @@ class GeneralFlowEnvironment(Environment):
             sa = sqrt(s[0]*s[0]+s[1]*s[1]+s[2]*s[2])
             x = empty(6)
             x[0:3] = c*s/sa - vv # time reversal
-            x[3:6] = dot(s, -dv) # time reversal
+            x[3:6] = dot(s, -dv.T) # time reversal
             return x
 
         # integration along a single ray
