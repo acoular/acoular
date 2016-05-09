@@ -263,13 +263,12 @@ class SlotJet( FlowField ):
         else:
             # shear layer
             Ux = self.v0*exp(-h1*h1/(2*x1*x1))
-            Udx = (h1*h1/(x*x1*x1)-h1/(x*x1))*Ux
+            Udx = (h1*h1/(x*x1*x1)-sqrt(pi)*0.5*h1/(x*x1))*Ux
             Udy = -sign(y)*h1*Ux/(x1*x1)
         dU = array(((Udx,0,0),(Udy,0,0),(0,0,0)))
         # rotation matrix
-        rotation = array((flow,yy,zz))
-        # TODO: check if rotation is correct
-        return dot(array((Ux,0,0)),rotation), dot(dU,rotation)
+        R = array((flow,yy,zz)).T
+        return dot(R,array((Ux,0,0))), dot(dot(R,dU),R.T)
 
 class OpenJet( FlowField ):
     """
