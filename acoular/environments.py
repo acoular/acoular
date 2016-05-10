@@ -13,6 +13,7 @@
     GeneralFlowEnvironment
     FlowField
     OpenJet
+    SlotJet
 
 """
 from numpy import array, isscalar, float32, float64, newaxis, \
@@ -226,8 +227,8 @@ class SlotJet( FlowField ):
     def v( self, xx):
         """
         Provides the flow field as a function of the location. This is
-        implemented here only for a jet in x-direction and the y- and
-        z-components are set to zero.
+        implemented here only the component in the direction of :attr:`flow`
+        entrainment components are set to zero.
 
         Parameters
         ----------
@@ -395,8 +396,8 @@ class GeneralFlowEnvironment(Environment):
     ff = Trait(FlowField, 
         desc="flow field")
 
-    #: Number of rays used per solid angle :math:`\Om`, defaults to 100.
-    N = Int(100, 
+    #: Number of rays used per solid angle :math:`\Omega`, defaults to 200.
+    N = Int(200, 
         desc="number of rays per Om")
 
     #: The maximum solid angle used in the algorithm, defaults to :math:`\pi`.
