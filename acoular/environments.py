@@ -227,7 +227,7 @@ class SlotJet( FlowField ):
     def v( self, xx):
         """
         Provides the flow field as a function of the location. This is
-        implemented here only the component in the direction of :attr:`flow`
+        implemented here only for the component in the direction of :attr:`flow`;
         entrainment components are set to zero.
 
         Parameters
