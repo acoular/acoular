@@ -1,6 +1,6 @@
 # coding=UTF-8
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2015, Acoular Development Team.
+# Copyright (c) 2007-2016, Acoular Development Team.
 #------------------------------------------------------------------------------
 
 from setuptools import setup, Extension
@@ -13,7 +13,7 @@ import sys
 #bf_version = str(av.__version__)
 #bf_author = str(av.__author__)
 
-bf_version = "15.4.23"
+bf_version = "16.5"
 bf_author = "Acoular developers"
 
 
