@@ -43,6 +43,7 @@ requirements:
     - pytables >=3.1
     - traits >=4.4
     - chaco >=4.4
+    - kiwisolver
 
 test:
   # Python imports
