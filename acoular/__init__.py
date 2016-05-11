@@ -56,7 +56,7 @@ except:
 
 from h5cache import td_dir, cache_dir
 
-#make sure that no OMP multithreading is use if OMP_NUM_THREADS is not defined
+#make sure that no OMP multithreading is used if OMP_NUM_THREADS is not defined
 import os
 os.environ.setdefault('OMP_NUM_THREADS','1')
 
@@ -69,7 +69,7 @@ from .calib import Calib
 from .trajectory import Trajectory
 from .grids import Grid, RectGrid, RectGrid3D
 from .environments import Environment, UniformFlowEnvironment, \
-FlowField, OpenJet, GeneralFlowEnvironment
+FlowField, OpenJet, SlotJet, GeneralFlowEnvironment
 from .microphones import MicGeom
 from .spectra import PowerSpectra, EigSpectra, synthetic
 from .fbeamform import BeamformerBase, BeamformerCapon, BeamformerEig, \

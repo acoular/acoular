@@ -13,11 +13,12 @@
     GeneralFlowEnvironment
     FlowField
     OpenJet
+    SlotJet
 
 """
 from numpy import array, isscalar, float32, float64, newaxis, \
 sqrt, arange, pi, exp, sin, cos, arccos, zeros_like, empty, dot, hstack, \
-vstack, identity
+vstack, identity, cross, sign
 from numpy.linalg.linalg import norm
 from scipy.integrate import ode
 from scipy.interpolate import LinearNDInterpolator
@@ -179,10 +180,102 @@ class FlowField( HasPrivateTraits ):
         dv = array(((0., 0., 0.), (0., 0., 0.), (0., 0., 0.)))
         return -v, -dv
 
+class SlotJet( FlowField ):
+    """
+    Provides an analytical approximation of the flow field of a slot jet, 
+    see :ref:`Albertson et al., 1950<Albertson1950>`.
+    """
+    #: Exit velocity at jet origin, i.e. the nozzle. Defaults to 0.
+    v0 = Float(0.0, 
+        desc="exit velocity")
+
+    #: Location of a point at the slot center line, 
+    #: defaults to the co-ordinate origin.
+    origin = CArray( dtype=float64, shape=(3, ), value=array((0., 0., 0.)), 
+        desc="center of nozzle")
+
+    #: Unit flow direction of the slot jet, defaults to (1,0,0).
+    flow = CArray( dtype=float64, shape=(3, ), value=array((1., 0., 0.)), 
+        desc="flow direction")
+
+    #: Unit vector parallel to slot center plane, defaults to (0,1,0)
+    plane = CArray( dtype=float64, shape=(3, ), value=array((0., 1., 0.)), 
+        desc="slot center line direction")
+        
+    #: Width of the slot, defaults to 0.2 .
+    B = Float(0.2, 
+        desc="nozzle diameter")
+
+    # internal identifier
+    digest = Property(
+        depends_on=['v0', 'origin', 'flow', 'plane', 'B'], 
+        )
+
+    traits_view = View(
+            [
+                ['v0{Exit velocity}', 'origin{Jet origin}',
+                 'flow', 'plane',
+                'B{Slot width}'], 
+                '|[Slot jet]'
+            ]
+        )
+
+    @cached_property
+    def _get_digest( self ):
+        return digest( self )
+
+    def v( self, xx):
+        """
+        Provides the flow field as a function of the location. This is
+        implemented here only for the component in the direction of :attr:`flow`;
+        entrainment components are set to zero.
+
+        Parameters
+        ----------
+        xx : array of floats of shape (3, )
+            Location in the fluid for which to provide the data.
+
+        Returns
+        -------
+        tuple with two elements
+            The first element in the tuple is the velocity vector and the
+            second is the Jacobian of the velocity vector field, both at the
+            given location.
+        """
+        # TODO: better to make sure that self.flow and self.plane are indeed unit vectors before
+        # normalize
+        flow = self.flow/norm(self.flow)
+        plane = self.plane/norm(self.plane)
+        # additional axes of global co-ordinate system
+        yy = -cross(flow,plane)
+        zz = cross(flow,yy)
+        # distance from slot exit plane
+        xx1 = xx-self.origin
+        # local co-ordinate system 
+        x = dot(flow,xx1)
+        y = dot(yy,xx1)
+        x1 = 0.109*x
+        h1 = abs(y)+sqrt(pi)*0.5*x1-0.5*self.B
+        if h1 < 0.0:
+            # core jet
+            Ux = self.v0
+            Udx = 0
+            Udy = 0
+        else:
+            # shear layer
+            Ux = self.v0*exp(-h1*h1/(2*x1*x1))
+            Udx = (h1*h1/(x*x1*x1)-sqrt(pi)*0.5*h1/(x*x1))*Ux
+            Udy = -sign(y)*h1*Ux/(x1*x1)
+        # Jacobi matrix
+        dU = array(((Udx,0,0),(Udy,0,0),(0,0,0))).T
+        # rotation matrix
+        R = array((flow,yy,zz)).T
+        return dot(R,array((Ux,0,0))), dot(dot(R,dU),R.T)
+
 class OpenJet( FlowField ):
     """
     Provides an analytical approximation of the flow field of an open jet, 
-    see :ref:`Albertsib et al., 1950<Albertson1950>`.
+    see :ref:`Albertson et al., 1950<Albertson1950>`.
 
     Notes
     -----
@@ -255,8 +348,10 @@ class OpenJet( FlowField ):
         Udx = (h1*h1/(x*x1*x1)-h1/(x*x1))*U
         if h1 < 0.0:
             Udx = 0
+        # flow field
         v = array( (U, 0., 0.) )
-        dv = array( ((Udx, 0., 0.), (Udy, 0., 0.), (Udz, 0., 0.)) )
+        # Jacobi matrix
+        dv = array( ((Udx, 0., 0.), (Udy, 0., 0.), (Udz, 0., 0.)) ).T
         return v, dv
 
 def spiral_sphere(N, Om=2*pi, b=array((0, 0, 1))):
@@ -301,8 +396,8 @@ class GeneralFlowEnvironment(Environment):
     ff = Trait(FlowField, 
         desc="flow field")
 
-    #: Number of rays used per solid angle :math:`\Om`, defaults to 100.
-    N = Int(100, 
+    #: Number of rays used per solid angle :math:`\Omega`, defaults to 200.
+    N = Int(200, 
         desc="number of rays per Om")
 
     #: The maximum solid angle used in the algorithm, defaults to :math:`\pi`.
@@ -361,7 +456,7 @@ class GeneralFlowEnvironment(Environment):
             sa = sqrt(s[0]*s[0]+s[1]*s[1]+s[2]*s[2])
             x = empty(6)
             x[0:3] = c*s/sa - vv # time reversal
-            x[3:6] = dot(s, -dv) # time reversal
+            x[3:6] = dot(s, -dv.T) # time reversal
             return x
 
         # integration along a single ray
@@ -370,7 +465,9 @@ class GeneralFlowEnvironment(Environment):
             y0 = hstack((x0, s0))
             oo = ode(f1)
             oo.set_f_params(v)
-            oo.set_integrator('vode', rtol=1e-2)
+            oo.set_integrator('vode', 
+                              rtol=1e-4, # accuracy !
+                              max_step=1e-4*rmax) # for thin shear layer
             oo.set_initial_value(y0, 0)
             while oo.successful():
                 xyz.append(oo.y[0:3])
