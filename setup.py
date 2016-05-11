@@ -44,8 +44,8 @@ copy(join(weavepath,'scxx','weave_imp.cpp'),'weave_imp.cpp')
 
 # build C++ extension from weave-generated beamformer.cpp file
 module1 = Extension('acoular.beamformer',
-                    define_macros = [('MAJOR_VERSION', '15'),
-                                     ('MINOR_VERSION', '4.23')],
+                    define_macros = [('MAJOR_VERSION', '16'),
+                                     ('MINOR_VERSION', '5')],
                     include_dirs = [weavepath, join(weavepath,'scxx'), 
                                     join(weavepath,'blitz'),
                                     join(numpypath,'core','include')],
