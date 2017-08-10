@@ -121,7 +121,7 @@ class BeamformerTime( TimeInOut ):
             [Item('grid', style='custom'), '-<>'], 
             [Item('c', label='speed of sound')], 
             [Item('env{}', style='custom')], 
-            [Item('weights{}', style='custom')], 
+            [Item('weights{}', style='simple')], 
             '|'
         ], 
         title='Beamformer options', 
@@ -225,7 +225,7 @@ class BeamformerTimeSq( BeamformerTime ):
             [Item('r_diag', label='diagonal removed')], 
             [Item('c', label='speed of sound')], 
             [Item('env{}', style='custom')], 
-            [Item('weights{}', style='custom')], 
+            [Item('weights', style='simple')], 
             '|'
         ], 
         title='Beamformer options', 
@@ -343,7 +343,7 @@ class BeamformerTimeTraj( BeamformerTime ):
             [Item('trajectory{}', style='custom')], 
             [Item('c', label='speed of sound')], 
             [Item('env{}', style='custom')], 
-            [Item('weights{}', style='custom')], 
+            [Item('weights{}', style='simple')], 
             '|'
         ], 
         title='Beamformer options', 
@@ -491,7 +491,7 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
             [Item('r_diag', label='diagonal removed')], 
             [Item('c', label='speed of sound')], 
             [Item('env{}', style='custom')], 
-            [Item('weights{}', style='custom')], 
+            [Item('weights{}', style='simple')], 
             '|'
         ], 
         title='Beamformer options', 

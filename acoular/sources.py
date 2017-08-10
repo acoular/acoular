@@ -423,7 +423,7 @@ class PointSource( SamplesGenerator ):
         while n:
             n -= 1
             try:
-                out[i] = signal[array(0.5+ind*self.up, dtype=long)]/rm
+                out[i] = signal[array(0.5+ind*self.up, dtype=int64)]/rm
                 ind += 1.
                 i += 1
                 if i == num:
@@ -508,7 +508,7 @@ class MovingPointSource( PointSource ):
             # emission time relative to start time
             ind = (te-self.start_t+self.start)*self.sample_freq
             try:
-                out[i] = signal[array(0.5+ind*self.up, dtype=long)]/rm
+                out[i] = signal[array(0.5+ind*self.up, dtype=int64)]/rm
                 i += 1
                 if i == num:
                     yield out
@@ -605,8 +605,8 @@ class PointSourceDipole ( PointSource ):
             try:
                 # subtract the second signal b/c of phase inversion
                 out[i] = rm / dist * \
-                         (signal[array(0.5 + ind1 * self.up, dtype=long)] / rm1 - \
-                          signal[array(0.5 + ind2 * self.up, dtype=long)] / rm2)
+                         (signal[array(0.5 + ind1 * self.up, dtype=int64)] / rm1 - \
+                          signal[array(0.5 + ind2 * self.up, dtype=int64)] / rm2)
                 ind1 += 1.
                 ind2 += 1.
                 
