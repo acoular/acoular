@@ -44,6 +44,11 @@ cached_property, on_trait_change, property_depends_on
 from traitsui.api import View, Item
 from traitsui.menu import OKCancelButtons
 
+try:
+    from sklearn.model_selection import LeaveOneOut
+except ImportError:
+    from sklearn.cross_validation import LeaveOneOut
+
 from beamformer import faverage, gseidel, transfer,\
 r_beam_psf, r_beam_psf1, r_beam_psf2, r_beam_psf3, r_beam_psf4, \
 r_beamfull, r_beamfull_3d, r_beamfull_classic, r_beamfull_inverse, \
@@ -51,7 +56,7 @@ r_beamdiag, r_beamdiag_3d, r_beamdiag_classic, r_beamdiag_inverse, \
 r_beamfull_os, r_beamfull_os_3d, r_beamfull_os_classic, r_beamfull_os_inverse, \
 r_beamdiag_os, r_beamdiag_os_3d, r_beamdiag_os_classic, r_beamdiag_os_inverse
 
-from h5cache import H5cache
+from .h5cache import H5cache
 from .internal import digest
 from .grids import Grid
 from .microphones import MicGeom

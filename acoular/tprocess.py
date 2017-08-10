@@ -22,6 +22,7 @@
 """
 
 # imports from other packages
+from six import next
 from numpy import array, newaxis, empty, empty_like, pi, sin, sqrt, arange, \
 clip, r_, zeros, int16, histogram, unique, cross, dot
 from traits.api import Float, Int, CLong, \
@@ -38,7 +39,7 @@ from warnings import warn
 
 # acoular imports
 from .internal import digest
-from h5cache import H5cache, td_dir
+from .h5cache import H5cache, td_dir
 from .grids import RectGrid
 from .microphones import MicGeom
 from .environments import Environment

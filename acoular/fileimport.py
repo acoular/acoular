@@ -17,16 +17,17 @@ Contains classes for importing time data in several file formats.
     datx_import
 """
 
-from h5cache import td_dir
+from .h5cache import td_dir
 from numpy import fromstring, float32, newaxis, empty, sort, zeros
 from traits.api import HasPrivateTraits, Float, Int, \
 File, CArray, Property, Any, Str
 from traitsui.api import View
 from traitsui.menu import OKCancelButtons
 from os import path
-import cPickle
+from six import next
+import pickle
 import tables
-import ConfigParser
+import configparser
 import struct
 
 class time_data_import( HasPrivateTraits ):

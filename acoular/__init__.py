@@ -47,14 +47,14 @@ output if necessary.
 
 from .version import __author__, __date__, __version__
 
-from fileimport import time_data_import, csv_import, td_import, \
+from .fileimport import time_data_import, csv_import, td_import, \
 bk_mat_import, datx_import
 try:
-    from nidaqimport import nidaq_import
+    from .nidaqimport import nidaq_import
 except:
     pass
 
-from h5cache import td_dir, cache_dir
+from .h5cache import td_dir, cache_dir
 
 #make sure that no OMP multithreading is used if OMP_NUM_THREADS is not defined
 import os
