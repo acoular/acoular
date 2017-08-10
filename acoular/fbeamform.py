@@ -35,7 +35,6 @@ reshape, hstack, vstack, eye, tril, size, clip
 from sklearn.linear_model import LassoLars, LassoCV, LassoLarsCV, LassoLarsIC,\
  OrthogonalMatchingPursuit, SGDRegressor, LinearRegression, ElasticNet, \
  OrthogonalMatchingPursuitCV, Lasso
-from sklearn.cross_validation import LeaveOneOut
 from scipy.optimize import nnls
 import tables
 from traits.api import HasPrivateTraits, Float, Int, \

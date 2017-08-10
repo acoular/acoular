@@ -283,11 +283,11 @@ class Mixer( TimeInOut ):
         Samples in blocks of shape (num, numchannels). 
             The last block may be shorter than num.
         """
-        gens = [i.result(num) for i in self.sources]
+        gens = (i.result(num) for i in self.sources)
         for temp in self.source.result(num):
             sh = temp.shape[0]
             for g in gens:
-                temp1 = g.next()
+                temp1 = next(g)
                 if temp.shape[0] > temp1.shape[0]:
                     temp = temp[:temp1.shape[0]]
                 temp += temp1[:temp.shape[0]]

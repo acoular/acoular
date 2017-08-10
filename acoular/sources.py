@@ -262,10 +262,7 @@ class MaskedTimeSamples( TimeSamples ):
     def _get_channels( self ):
         if len(self.invalid_channels)==0:
             return slice(0, None, None)
-        allr = range(self.numchannels_total)
-        for channel in self.invalid_channels:
-            if channel in allr:
-                allr.remove(channel)
+        allr=[i for i in range(self.numchannels_total) if i not in self.invalid_channels]
         return array(allr)
     
     @cached_property
@@ -804,7 +801,7 @@ class SourceMixer( SamplesGenerator ):
         for temp in self.sources[0].result(num):
             sh = temp.shape[0]
             for g in gens:
-                temp1 = g.next()
+                temp1 = next(g)
                 if temp.shape[0] > temp1.shape[0]:
                     temp = temp[:temp1.shape[0]]
                 temp += temp1[:temp.shape[0]]

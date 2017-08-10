@@ -67,13 +67,18 @@ class H5cache_class(HasPrivateTraits):
             obj.h5f.flush()
         self.open_count[cname] = self.open_count.get(cname, 0) + 1
         # garbage collection, identify unreferenced open files
-        for a in self.open_files.itervalues():
+        try:
+            values = self.open_files.itervalues()
+        except AttributeError:
+            values = iter(self.open_files.values())
+            
+        for a in values:
             close_flag = True
             # inspect all refererres to the file object
-            for b in gc.get_referrers(a):
+            for ref in gc.get_referrers(a):
                 # does the file object have a referrer that has a 'h5f' 
                 # attribute?
-                if isinstance(b,dict) and b.has_key('h5f'):
+                if isinstance(ref,dict) and 'h5f' in ref:
                     # file is still referred, must not be closed
                     close_flag = False
                     break

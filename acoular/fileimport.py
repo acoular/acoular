@@ -94,7 +94,7 @@ class csv_import( time_data_import ):
                 sample_freq = int(1./float(h[1].split(' ')[1]))
             if c == 0:
                 break
-        line = f.next()
+        line = next(f)
         data = fromstring(line, dtype = float32, sep = ', ')[d:]
         numchannels = len(data)
         name = td.name
@@ -144,7 +144,7 @@ class td_import( time_data_import ):
             time_data_import.getdata(self, td)
             return
         f = file(self.from_file, 'rb')
-        h = cPickle.load(f)
+        h = pickle.load(f)
         f.close()
         sample_freq = h['sample_freq']
         data = h['data']
@@ -356,7 +356,7 @@ class datx_import(time_data_import):
             return
         #browse datx information
         f0 = open(self.from_file)
-        config = ConfigParser.ConfigParser()
+        config = configparser.ConfigParser()
         config.readfp(f0)
         sample_rate = float(config.get('keywords', 'sample_rate'))
         # reading sample-rate from index-file

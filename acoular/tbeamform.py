@@ -413,11 +413,11 @@ class BeamformerTimeTraj( BeamformerTime ):
                 ooffset = 0
             if rflag:
                 # grid is only translated, not rotated
-                tpos = gpos + array(g.next())[:, newaxis]
+                tpos = gpos + array(next(g))[:, newaxis]
             else:
                 # grid is both translated and rotated
-                loc = array(g.next()) #translation array([0., 0.4, 1.])
-                dx = array(g1.next()) #direction vector (new x-axis)
+                loc = array(next(g)) #translation array([0., 0.4, 1.])
+                dx = array(next(g1)) #direction vector (new x-axis)
                 dy = cross(self.rvec, dx) # new y-axis
                 dz = cross(dx, dy) # new z-axis
                 RM = array((dx, dy, dz)).T # rotation matrix
@@ -560,11 +560,11 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
                 ooffset = 0
             if rflag:
                 # grid is only translated, not rotated
-                tpos = gpos + array(g.next())[:, newaxis]
+                tpos = gpos + array(next(g))[:, newaxis]
             else:
                 # grid is both translated and rotated
-                loc = array(g.next()) #translation
-                dx = array(g1.next()) #direction vector (new x-axis)
+                loc = array(next(g)) #translation
+                dx = array(next(g1)) #direction vector (new x-axis)
                 dy = cross(self.rvec, dx) # new y-axis
                 dz = cross(dx, dy) # new z-axis
                 RM = array((dx, dy, dz)).T # rotation matrix
@@ -587,7 +587,7 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
                 # test if data generator is exhausted
                 try:
                     # get next data
-                    block = data.next()
+                    block = next(data)
                 except StopIteration:
                     flag = False
                     break
