@@ -26,6 +26,8 @@
 """
 
 # imports from other packages
+from __future__ import print_function, division
+import sys
 from numpy import array, ones, hanning, hamming, bartlett, blackman, invert, \
 dot, newaxis, zeros, empty, fft, float32, float64, complex64, linalg, where, \
 searchsorted, pi, multiply, sign, diag, arange, sqrt, exp, log10, int,\
@@ -1328,7 +1330,7 @@ class BeamformerClean (BeamformerBase):
         gs = self.grid.size
         
         if self.calcmode == 'full':
-            print 'Warning: calcmode = \'full\', slow CLEAN performance. Better use \'block\' or \'single\'.'
+            print('Warning: calcmode = \'full\', slow CLEAN performance. Better use \'block\' or \'single\'.')
         p = PointSpreadFunction(mpos=self.mpos, grid=self.grid, 
                                 c=self.c, env=self.env, steer=self.steer,
                                 calcmode=self.calcmode)

@@ -6,8 +6,8 @@
 """
 nidaqimport.py: interface to nidaq mx
 """
-
-from timedomain import TimeSamples
+from __future__ import print_function
+from sources import TimeSamples
 from h5cache import td_dir
 from fileimport import time_data_import
 import ctypes
@@ -183,7 +183,7 @@ class nidaq_import( time_data_import ):
         DAQmxGetSampClkRate(taskHandle,ctypes.byref(fnum))
         self.sample_freq = fnum.value
         DAQmxClearTask(taskHandle)
-        print self.sample_freq
+        print(self.sample_freq)
 
 
     def get_data (self,td):
@@ -216,7 +216,7 @@ class nidaq_import( time_data_import ):
         DAQmxSetSampQuantSampPerChan(taskHandle,uInt64(100000))
         DAQmxGetSampQuantSampPerChan(taskHandle,ctypes.byref(lnum))
         max_num_samples = lnum.value
-        print "Puffergroesse: %i" % max_num_samples
+        print("Puffergroesse: %i" % max_num_samples)
         data = numpy.empty((max_num_samples,self.numchannels),dtype=numpy.float64)
         DAQmxStartTask(taskHandle)
         count = 0L

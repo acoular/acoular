@@ -16,8 +16,10 @@
 """
 
 # imports from other packages
+from __future__ import print_function, division
+from six import next
 from numpy import array, newaxis, empty, sqrt, arange, clip, r_, zeros, \
-histogram, unique, cross, dot
+histogram, unique, cross, dot, where, s_
 from traits.api import Float, CArray, Property, Trait, Bool, Delegate, \
 cached_property, List
 from traitsui.api import View, Item
@@ -438,9 +440,9 @@ class BeamformerTimeTraj( BeamformerTime ):
                 # test if data generator is exhausted
                 try:
                     # get next data
-                    block = data.next()
+                    block = next(data)
                 except StopIteration:
-                    print loc
+                    print(loc)
                     flag = False
                     break
                 # samples in the block, equals to num except for the last block

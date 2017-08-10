@@ -16,6 +16,8 @@
 """
 
 # imports from other packages
+from __future__ import print_function, division
+import sys
 from numpy import pi, arange, sin, sqrt, repeat, log
 from numpy.random import RandomState
 from traits.api import HasPrivateTraits, Float, Int, Long, \
@@ -155,7 +157,7 @@ class PNoiseGenerator( SignalGenerator ):
         
         if depth > max_depth:
             depth = max_depth
-            print 'Pink noise filter depth set to maximum possible value of %d.' % max_depth
+            print("Pink noise filter depth set to maximum possible value of %d." % max_depth)
         
         rnd_gen = RandomState(self.seed)
         s = rnd_gen.standard_normal(nums)

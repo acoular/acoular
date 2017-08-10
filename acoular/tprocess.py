@@ -99,7 +99,7 @@ class MaskedTimeInOut ( TimeInOut ):
     """
         
     #: Index of the first sample to be considered valid
-    start = CLong(0L, 
+    start = CLong(0, 
         desc="start of valid samples")
     
     #: Index of the last sample to be considered valid
@@ -381,7 +381,7 @@ class TimeAverage( TimeInOut ) :
         nav = self.naverage
         for temp in self.source.result(num*nav):
             ns, nc = temp.shape
-            nso = ns/nav
+            nso = int(ns/nav)
             if nso > 0:
                 yield temp[:nso*nav].reshape((nso, -1, nc)).mean(axis=1)
                 

@@ -5,6 +5,7 @@
 #------------------------------------------------------------------------------
 
 # imports from other packages
+from __future__ import print_function
 from traits.api import HasPrivateTraits, Bool, Str
 from os import path, mkdir, environ
 import tables
@@ -47,18 +48,18 @@ class H5cache_class(HasPrivateTraits):
         cname = name + '_cache.h5'
         if isinstance(obj.h5f, tables.File):
             oname = path.basename(obj.h5f.filename)
-            print oname, cname
+            print((oname, cname))
             if oname == cname:
                 self.busy = False
                 return
             else:
-                print oname, self.open_count[oname]
+                print((oname, self.open_count[oname]))
                 self.open_count[oname] = self.open_count[oname] - 1
                 # close if no references to file left
                 if not self.open_count[oname]:
                     obj.h5f.close()
         # open each file only once
-        if not self.open_files.has_key(cname):
+        if not cname in self.open_files:
             obj.h5f = tables.open_file(path.join(self.cache_dir, cname), mode)
             self.open_files[cname] = obj.h5f
         else:
@@ -81,7 +82,7 @@ class H5cache_class(HasPrivateTraits):
                 # reset reference count
                 self.open_count[path.basename(a.filename)] = 0
                 a.close()
-        print self.open_count.items()
+        print(list(self.open_count.items()))
         self.busy = False
         
         

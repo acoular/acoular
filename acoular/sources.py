@@ -98,11 +98,11 @@ class TimeSamples( SamplesGenerator ):
         desc="Calibration data")
     
     #: Number of channels, is set automatically / read from file
-    numchannels = CLong(0L, 
+    numchannels = CLong(0, 
         desc="number of input channels")
 
     #: Number of time data samples, is set automatically / read from file
-    numsamples = CLong(0L, 
+    numsamples = CLong(0, 
         desc="number of samples")
 
     #: The time data as array of floats with dimension (numsamples, numchannels)
@@ -200,7 +200,7 @@ class MaskedTimeSamples( TimeSamples ):
     """
     
     #: Index of the first sample to be considered valid
-    start = CLong(0L, 
+    start = CLong(0, 
         desc="start of valid samples")
     
     #: Index of the last sample to be considered valid
@@ -216,11 +216,11 @@ class MaskedTimeSamples( TimeSamples ):
         desc="channel mask")
         
     #: Number of channels (including invalid channels), is set automatically
-    numchannels_total = CLong(0L, 
+    numchannels_total = CLong(0, 
         desc="total number of input channels")
 
     #: Number of time data samples (including invalid samples), is set automatically
-    numsamples_total = CLong(0L, 
+    numsamples_total = CLong(0, 
         desc="total number of samples per channel")
 
     #: Number of valid channels, is set automatically
