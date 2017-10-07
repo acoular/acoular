@@ -560,27 +560,20 @@ class BeamformerEig( BeamformerBase ):
         -------
         This method only returns values through the *ac* and *fr* parameters
         """
-        # prepare calculation
         kj = 2j*pi*self.freq_data.fftfreq()/self.c
-        na = int(self.na)
-        numchannels = self.freq_data.numchannels
-        e = zeros((numchannels), 'D')
-        h = empty((1, self.grid.size), 'd')
-        # function
-        beamfunc = self.get_beamfunc('_os')
-        if self.r_diag:
-            adiv = 1.0/(numchannels*numchannels-numchannels)
-            scalefunc = lambda h : adiv*multiply(h, (sign(h)+1-1e-35)/2)
-        else:
-            adiv = 1.0/(numchannels*numchannels)
-            scalefunc = lambda h : adiv*h
+        na = int(self.na)  # eigenvalue taken into account
+        normFactor = self.signalLossNormalize()
+        steerVecFormulation = self.steerVecTranslation()
         for i in self.freq_data.indices:        
             if not fr[i]:
                 eva = array(self.freq_data.eva[i][newaxis], dtype='float64')
                 eve = array(self.freq_data.eve[i][newaxis], dtype='complex128')
                 kji = kj[i, newaxis]
-                beamfunc(e, h, self.r0, self.rm, kji, eva, eve, na, na+1)
-                ac[i] = scalefunc(h)
+                beamformerOutput = beamformerFreq(True, steerVecFormulation, self.r_diag, normFactor, (self.r0, self.rm, kji, eva[:, na:na+1], eve[:, :, na:na+1]))
+                if self.r_diag:  # set (unphysical) negative output values to 0
+                    indNegSign = sign(beamformerOutput) < 0
+                    beamformerOutput[indNegSign] = 0
+                ac[i] = beamformerOutput
                 fr[i] = True
 
 class BeamformerMusic( BeamformerEig ):
