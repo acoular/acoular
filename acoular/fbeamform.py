@@ -470,20 +470,16 @@ class BeamformerCapon( BeamformerBase ):
         -------
         This method only returns values through the *ac* and *fr* parameters
         """        
-        # prepare calculation
         kj = 2j*pi*self.freq_data.fftfreq()/self.c
-        numchannels = self.freq_data.numchannels
-        e = zeros((numchannels), 'D')
-        h = zeros((1, self.grid.size), 'd')
-        beamfunc = self.get_beamfunc()
+        nMics = self.freq_data.numchannels
+        normFactor = self.signalLossNormalize() * nMics**2
+        steerVecFormulation = self.steerVecTranslation()
         for i in self.freq_data.indices:
             if not fr[i]:
-                csm = array(linalg.inv(array(self.freq_data.csm[i], \
-                        dtype='complex128')), order='C')[newaxis]
-                #print csm.flags
+                csm = array(linalg.inv(array(self.freq_data.csm[i], dtype='complex128')), order='C')[newaxis]
                 kji = kj[i, newaxis]
-                beamfunc(csm, e, h, self.r0, self.rm, kji)
-                ac[i] = 1.0/h
+                beamformerOutput = beamformerFreq(False, steerVecFormulation, self.r_diag, normFactor, (self.r0, self.rm, kji, csm))
+                ac[i] = 1.0 / beamformerOutput
                 fr[i] = True
 
 class BeamformerEig( BeamformerBase ):
