@@ -401,26 +401,23 @@ class BeamformerFunctional( BeamformerBase ):
         -------
         This method only returns values through the *ac* and *fr* parameters
         """   
-        # prepare calculation
         kj = 2j*pi*self.freq_data.fftfreq()/self.c
-        numchannels = int(self.freq_data.numchannels)
-        e = zeros((numchannels), 'D')
-        h = empty((1, self.grid.size), 'd')
-        # function
-        beamfunc = self.get_beamfunc('_os')
+        steerVecFormulation = self.steerVecTranslation()
+        nMics = float(self.freq_data.numchannels)
         if self.r_diag:
-            adiv = sqrt(1.0/(numchannels*numchannels-numchannels))
-            scalefunc = lambda h : adiv*(multiply(adiv*h, (sign(h)+1-1e-35)/2))**self.gamma
-        else:
-            adiv = 1.0/(numchannels)
-            scalefunc = lambda h : adiv*(adiv*h)**self.gamma
+            normFactor = sqrt(1.0 / (nMics * nMics - nMics))
+        elif not self.r_diag:
+            normFactor = 1.0 / nMics
         for i in self.freq_data.indices:        
             if not fr[i]:
-                eva = array(self.freq_data.eva[i][newaxis], dtype='float64')**(1.0/self.gamma)
+                eva = array(self.freq_data.eva[i][newaxis], dtype='float64') ** (1.0 / self.gamma)
                 eve = array(self.freq_data.eve[i][newaxis], dtype='complex128')
                 kji = kj[i, newaxis]
-                beamfunc(e, h, self.r0, self.rm, kji, eva, eve, 0, numchannels)
-                ac[i] = scalefunc(h)
+                beamformerOutput = beamformerFreq(True, steerVecFormulation, self.r_diag, normFactor * nMics**2, (self.r0, self.rm, kji, eva, eve))  # takes all EigVal into account
+                if self.r_diag:  # set (unphysical) negative output values to 0
+                    indNegSign = sign(beamformerOutput) < 0
+                    beamformerOutput[indNegSign] = 0.0
+                ac[i] = (beamformerOutput ** self.gamma) * normFactor
                 fr[i] = True
             
 class BeamformerCapon( BeamformerBase ):
