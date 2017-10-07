@@ -629,21 +629,18 @@ class BeamformerMusic( BeamformerEig ):
         -------
         This method only returns values through the *ac* and *fr* parameters
         """
-        # prepare calculation
         kj = 2j*pi*self.freq_data.fftfreq()/self.c
+        nMics = self.freq_data.numchannels
         n = int(self.mpos.num_mics-self.na)
-        numchannels = self.freq_data.numchannels
-        e = zeros((numchannels), 'D')
-        h = empty((1, self.grid.size), 'd')
-        beamfunc = self.get_beamfunc('_os')
-        # function
+        normFactor = self.signalLossNormalize() * nMics**2
+        steerVecFormulation = self.steerVecTranslation()
         for i in self.freq_data.indices:        
             if not fr[i]:
                 eva = array(self.freq_data.eva[i][newaxis], dtype='float64')
                 eve = array(self.freq_data.eve[i][newaxis], dtype='complex128')
                 kji = kj[i, newaxis]
-                beamfunc(e, h, self.r0, self.rm, kji, eva, eve, 0, n)
-                ac[i] = 4e-10*h.min()/h
+                beamformerOutput = beamformerFreq(True, steerVecFormulation, self.r_diag, normFactor, (self.r0, self.rm, kji, eva[:, :n], eve[:, :, :n]))  # [:n] takes all values element of [0, n[
+                ac[i] = 4e-10*beamformerOutput.min() / beamformerOutput
                 fr[i] = True
 
 class PointSpreadFunction (HasPrivateTraits):
