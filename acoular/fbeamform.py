@@ -48,8 +48,8 @@ try:
 except ImportError:
     from sklearn.cross_validation import LeaveOneOut
 
-from fastFuncs import beamformerFreq
-from beamformer import transfer, gseidel, r_beam_psf1, r_beam_psf2, r_beam_psf3, r_beam_psf4
+from fastFuncs import beamformerFreq, transfer
+from beamformer import gseidel, r_beam_psf1, r_beam_psf2, r_beam_psf3, r_beam_psf4
 
 from .h5cache import H5cache
 from .internal import digest
@@ -1438,10 +1438,10 @@ class BeamformerCMF ( BeamformerBase ):
         for i in self.freq_data.indices:
             if not fr[i]:
                 # csm transposed b/c indices switched in faverage!
-                csm = array(self.freq_data.csm[i], dtype='complex128',copy=1).T
+                csm = array(self.freq_data.csm[i], dtype='complex128',copy=1)
 
                 kji = kj[i, newaxis]
-                transfer(hh, r0, rm, kji)
+                hh = transfer(r0, rm, kji)
                 h = hh[0].T
                 
                 # reduced Kronecker product (only where solution matrix != 0)

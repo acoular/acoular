@@ -662,3 +662,35 @@ def _freqBeamformer_EigValProb_SpecificSteerVec_CsmRemovedDiag(eigVal, eigVec, s
         scalarProdReducedCSM += (scalarProdFullCSMAbsSquared - scalarProdDiagCSMperEigVal) * eigVal[cntEigVal]
     result[0] = scalarProdReducedCSM * signalLossNormalization[0]
 
+
+#%% Transfer - Function
+def transfer(distGridToArrayCenter, distGridToAllMics, wavenumber):
+    """ Calculates the transfer functions between the various mics and gridpoints.
+    
+    Input
+    -----
+        ``distGridToArrayCenter`` ... float64[nGridpoints]
+
+        ``distGridToAllMics`` ... float64[nGridpoints, nMics]
+
+        ``wavenumber`` ... complex128[nFreqs] (the wavenumber should be stored in the imag-part)
+    
+    Returns
+    -------
+        The Transferfunctions in format complex128[nFreqs, nGridPoints, nMics].
+    """
+    nFreqs, nGridPoints, nMics = wavenumber.shape[0], distGridToAllMics.shape[0], distGridToAllMics.shape[1]
+    # transfer routine: parallelized over Gridpoints
+    transferOutput = np.zeros((nFreqs, nGridPoints, nMics), np.complex128)
+    for cntFreqs in xrange(nFreqs):
+        result = np.zeros((nGridPoints, nMics), np.complex128)
+        _transferCoreFunc(distGridToArrayCenter, distGridToAllMics, wavenumber[cntFreqs].imag, result)
+        transferOutput[cntFreqs, :, :] = result
+    return transferOutput
+
+@nb.guvectorize([(nb.float64[:], nb.float64[:], nb.float64[:], nb.complex128[:])], '(),(m),()->(m)', nopython=True, target=parallelOption, cache=cachedOption)
+def _transferCoreFunc(distGridToArrayCenter, distGridToAllMics, waveNumber, result):
+    nMics = distGridToAllMics.shape[0]
+    for cntMics in xrange(nMics):
+        expArg = np.float32(waveNumber[0] * (distGridToAllMics[cntMics] - distGridToArrayCenter[0]))  # FLOAT32 ODER FLOAT64?
+        result[cntMics] = (np.cos(expArg) - 1j * np.sin(expArg)) * distGridToArrayCenter[0] / distGridToAllMics[cntMics]
