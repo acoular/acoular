@@ -48,12 +48,8 @@ try:
 except ImportError:
     from sklearn.cross_validation import LeaveOneOut
 
-from beamformer import faverage, gseidel, transfer,\
-r_beam_psf, r_beam_psf1, r_beam_psf2, r_beam_psf3, r_beam_psf4, \
-r_beamfull, r_beamfull_3d, r_beamfull_classic, r_beamfull_inverse, \
-r_beamdiag, r_beamdiag_3d, r_beamdiag_classic, r_beamdiag_inverse, \
-r_beamfull_os, r_beamfull_os_3d, r_beamfull_os_classic, r_beamfull_os_inverse, \
-r_beamdiag_os, r_beamdiag_os_3d, r_beamdiag_os_classic, r_beamdiag_os_inverse
+from fastFuncs import beamformerFreq
+from beamformer import transfer, gseidel, r_beam_psf1, r_beam_psf2, r_beam_psf3, r_beam_psf4
 
 from .h5cache import H5cache
 from .internal import digest
@@ -90,11 +86,14 @@ class BeamformerBase( HasPrivateTraits ):
 
     #: Boolean flag, if 'True' (default), the main diagonal is removed before beamforming.
     r_diag = Bool(True, 
-        desc="removal of diagonal")
+                  desc="removal of diagonal")
     
     #: Type of steering vectors, see also :ref:`Sarradj, 2012<Sarradj2012>`.
     steer = Trait('true level', 'true location', 'classic', 'inverse', 
-                  desc="type of steering vectors used")
+                  desc="Type of steering vectors used. Corresponds to the formulations"
+                  "in :ref:`Sarradj, 2012<Sarradj2012>`. classic -> Formulation I;"
+                  "inverse -> Formulation II; true level-> Formulation III;"
+                  "true location -> Formulation IV")
                   
     #: Boolean flag, if 'True' (default), the result is cached in h5 files.
     cached = Bool(True, 
@@ -203,17 +202,25 @@ class BeamformerBase( HasPrivateTraits ):
             #print 2, name
         return ac
         
-    def get_beamfunc( self, os='' ):
+    def steerVecTranslation(self):
+        """ Translates the value of the property 'steer' into the numerical values
+        corresponding to :ref:`Sarradj, 2012<Sarradj2012>`.
         """
-        Returns the proper low-level beamforming routine (implemented in C).
-        This function is only called internally by the :meth:`calc` routine.
+        steerNumeric = {'true level': 3,
+                        'true location': 4,
+                        'classic': 1,
+                        'inverse': 2,
+                        'specific': 'specific'}[self.steer]
+        return steerNumeric
+    
+    def signalLossNormalize(self):
+        """ If the Diagonal of the CSM is removed one has to handle the loss 
+        of signal energy --> Done via a normalization factor.
         """
-        r_diag = {True: 'diag', False: 'full'}[self.r_diag]
-        steer = {'true level': '', \
-                'true location': '_3d', \
-                'classic': '_classic', \
-                'inverse': '_inverse'}[self.steer]
-        return eval('r_beam'+r_diag+os+steer)
+        nMics = float(self.freq_data.numchannels)
+        normFactor = {False: 1.0,
+                      True: nMics / (nMics - 1)}[self.r_diag]
+        return normFactor
 
     def calc(self, ac, fr):
         """
@@ -241,27 +248,18 @@ class BeamformerBase( HasPrivateTraits ):
         -------
         This method only returns values through the *ac* and *fr* parameters
         """
-        # prepare calculation
         kj = 2j*pi*self.freq_data.fftfreq()/self.c
-        numchannels = self.freq_data.numchannels
-        e = zeros((numchannels), 'D')
-        r0 = self.r0
-        rm = self.rm
-        h = zeros((1, self.grid.size), 'd')
-        # function
-        beamfunc = self.get_beamfunc()
-        if self.r_diag:
-            adiv = 1.0/(numchannels*numchannels-numchannels)
-            scalefunc = lambda h : adiv*multiply(h, (sign(h)+1-1e-35)/2)
-        else:
-            adiv = 1.0/(numchannels*numchannels)
-            scalefunc = lambda h : adiv*h
+        steerVecFormulation = self.steerVecTranslation()
+        normFactor = self.signalLossNormalize()
         for i in self.freq_data.indices:
             if not fr[i]:
                 csm = array(self.freq_data.csm[i][newaxis], dtype='complex128')
                 kji = kj[i, newaxis]
-                beamfunc(csm, e, h, r0, rm, kji)
-                ac[i] = scalefunc(h)
+                beamformerOutput = beamformerFreq(False, steerVecFormulation, self.r_diag, normFactor, (self.r0, self.rm, kji, csm))
+                if self.r_diag:  # set (unphysical) negative output values to 0
+                    indNegSign = sign(beamformerOutput) < 0
+                    beamformerOutput[indNegSign] = 0.0
+                ac[i] = beamformerOutput
                 fr[i] = True
     
     def synthetic( self, f, num=0):
@@ -403,26 +401,23 @@ class BeamformerFunctional( BeamformerBase ):
         -------
         This method only returns values through the *ac* and *fr* parameters
         """   
-        # prepare calculation
         kj = 2j*pi*self.freq_data.fftfreq()/self.c
-        numchannels = int(self.freq_data.numchannels)
-        e = zeros((numchannels), 'D')
-        h = empty((1, self.grid.size), 'd')
-        # function
-        beamfunc = self.get_beamfunc('_os')
+        steerVecFormulation = self.steerVecTranslation()
+        nMics = float(self.freq_data.numchannels)
         if self.r_diag:
-            adiv = sqrt(1.0/(numchannels*numchannels-numchannels))
-            scalefunc = lambda h : adiv*(multiply(adiv*h, (sign(h)+1-1e-35)/2))**self.gamma
-        else:
-            adiv = 1.0/(numchannels)
-            scalefunc = lambda h : adiv*(adiv*h)**self.gamma
+            normFactor = sqrt(1.0 / (nMics * nMics - nMics))
+        elif not self.r_diag:
+            normFactor = 1.0 / nMics
         for i in self.freq_data.indices:        
             if not fr[i]:
-                eva = array(self.freq_data.eva[i][newaxis], dtype='float64')**(1.0/self.gamma)
+                eva = array(self.freq_data.eva[i][newaxis], dtype='float64') ** (1.0 / self.gamma)
                 eve = array(self.freq_data.eve[i][newaxis], dtype='complex128')
                 kji = kj[i, newaxis]
-                beamfunc(e, h, self.r0, self.rm, kji, eva, eve, 0, numchannels)
-                ac[i] = scalefunc(h)
+                beamformerOutput = beamformerFreq(True, steerVecFormulation, self.r_diag, normFactor * nMics**2, (self.r0, self.rm, kji, eva, eve))  # takes all EigVal into account
+                if self.r_diag:  # set (unphysical) negative output values to 0
+                    indNegSign = sign(beamformerOutput) < 0
+                    beamformerOutput[indNegSign] = 0.0
+                ac[i] = (beamformerOutput ** self.gamma) * normFactor
                 fr[i] = True
             
 class BeamformerCapon( BeamformerBase ):
@@ -472,20 +467,16 @@ class BeamformerCapon( BeamformerBase ):
         -------
         This method only returns values through the *ac* and *fr* parameters
         """        
-        # prepare calculation
         kj = 2j*pi*self.freq_data.fftfreq()/self.c
-        numchannels = self.freq_data.numchannels
-        e = zeros((numchannels), 'D')
-        h = zeros((1, self.grid.size), 'd')
-        beamfunc = self.get_beamfunc()
+        nMics = self.freq_data.numchannels
+        normFactor = self.signalLossNormalize() * nMics**2
+        steerVecFormulation = self.steerVecTranslation()
         for i in self.freq_data.indices:
             if not fr[i]:
-                csm = array(linalg.inv(array(self.freq_data.csm[i], \
-                        dtype='complex128')), order='C')[newaxis]
-                #print csm.flags
+                csm = array(linalg.inv(array(self.freq_data.csm[i], dtype='complex128')), order='C')[newaxis]
                 kji = kj[i, newaxis]
-                beamfunc(csm, e, h, self.r0, self.rm, kji)
-                ac[i] = 1.0/h
+                beamformerOutput = beamformerFreq(False, steerVecFormulation, self.r_diag, normFactor, (self.r0, self.rm, kji, csm))
+                ac[i] = 1.0 / beamformerOutput
                 fr[i] = True
 
 class BeamformerEig( BeamformerBase ):
@@ -566,27 +557,20 @@ class BeamformerEig( BeamformerBase ):
         -------
         This method only returns values through the *ac* and *fr* parameters
         """
-        # prepare calculation
         kj = 2j*pi*self.freq_data.fftfreq()/self.c
-        na = int(self.na)
-        numchannels = self.freq_data.numchannels
-        e = zeros((numchannels), 'D')
-        h = empty((1, self.grid.size), 'd')
-        # function
-        beamfunc = self.get_beamfunc('_os')
-        if self.r_diag:
-            adiv = 1.0/(numchannels*numchannels-numchannels)
-            scalefunc = lambda h : adiv*multiply(h, (sign(h)+1-1e-35)/2)
-        else:
-            adiv = 1.0/(numchannels*numchannels)
-            scalefunc = lambda h : adiv*h
+        na = int(self.na)  # eigenvalue taken into account
+        normFactor = self.signalLossNormalize()
+        steerVecFormulation = self.steerVecTranslation()
         for i in self.freq_data.indices:        
             if not fr[i]:
                 eva = array(self.freq_data.eva[i][newaxis], dtype='float64')
                 eve = array(self.freq_data.eve[i][newaxis], dtype='complex128')
                 kji = kj[i, newaxis]
-                beamfunc(e, h, self.r0, self.rm, kji, eva, eve, na, na+1)
-                ac[i] = scalefunc(h)
+                beamformerOutput = beamformerFreq(True, steerVecFormulation, self.r_diag, normFactor, (self.r0, self.rm, kji, eva[:, na:na+1], eve[:, :, na:na+1]))
+                if self.r_diag:  # set (unphysical) negative output values to 0
+                    indNegSign = sign(beamformerOutput) < 0
+                    beamformerOutput[indNegSign] = 0
+                ac[i] = beamformerOutput
                 fr[i] = True
 
 class BeamformerMusic( BeamformerEig ):
@@ -642,21 +626,18 @@ class BeamformerMusic( BeamformerEig ):
         -------
         This method only returns values through the *ac* and *fr* parameters
         """
-        # prepare calculation
         kj = 2j*pi*self.freq_data.fftfreq()/self.c
+        nMics = self.freq_data.numchannels
         n = int(self.mpos.num_mics-self.na)
-        numchannels = self.freq_data.numchannels
-        e = zeros((numchannels), 'D')
-        h = empty((1, self.grid.size), 'd')
-        beamfunc = self.get_beamfunc('_os')
-        # function
+        normFactor = self.signalLossNormalize() * nMics**2
+        steerVecFormulation = self.steerVecTranslation()
         for i in self.freq_data.indices:        
             if not fr[i]:
                 eva = array(self.freq_data.eva[i][newaxis], dtype='float64')
                 eve = array(self.freq_data.eve[i][newaxis], dtype='complex128')
                 kji = kj[i, newaxis]
-                beamfunc(e, h, self.r0, self.rm, kji, eva, eve, 0, n)
-                ac[i] = 4e-10*h.min()/h
+                beamformerOutput = beamformerFreq(True, steerVecFormulation, self.r_diag, normFactor, (self.r0, self.rm, kji, eva[:, :n], eve[:, :, :n]))  # [:n] takes all values element of [0, n[
+                ac[i] = 4e-10*beamformerOutput.min() / beamformerOutput
                 fr[i] = True
 
 class PointSpreadFunction (HasPrivateTraits):
