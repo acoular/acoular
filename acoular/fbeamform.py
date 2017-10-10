@@ -1154,13 +1154,12 @@ class BeamformerCleansc( BeamformerBase ):
         """
 
         # prepare calculation
+        normFactor = self.signalLossNormalize()
+        steerVecFormulation = self.steerVecTranslation()
         numchannels = self.freq_data.numchannels
         f = self.freq_data.fftfreq()
         kjall = 2j*pi*f/self.c
-        e = zeros((numchannels), 'D')
         result = zeros((self.grid.size), 'f')
-        fullbeamfunc = self.get_beamfunc()
-        orthbeamfunc = self.get_beamfunc('_os')
         if self.r_diag:
             adiv = 1.0/(numchannels*numchannels-numchannels)
         else:
@@ -1170,16 +1169,13 @@ class BeamformerCleansc( BeamformerBase ):
         else:
             J = self.n
         powers = zeros(J, 'd')
-        h = zeros((1, self.grid.size), 'd')
-        h1 = h.copy()
         # loop over frequencies
         for i in self.freq_data.indices:        
             if not fr[i]:
                 kj = kjall[i, newaxis]
-                csm = array(self.freq_data.csm[i][newaxis], \
-                    dtype='complex128', copy=1)
-                fullbeamfunc(csm, e, h, self.r0, self.rm, kj)
-                h = h*adiv
+                csm = array(self.freq_data.csm[i][newaxis], dtype='complex128', copy=1)
+                h = beamformerFreq(False, steerVecFormulation, self.r_diag, normFactor, (self.r0, self.rm, kj, csm))
+
                 # CLEANSC Iteration
                 result *= 0.0
                 for j in range(J):
@@ -1200,17 +1196,16 @@ class BeamformerCleansc( BeamformerBase ):
                         rs = numchannels*r0/rm
                     wmax = numchannels*sqrt(adiv)*exp(-kj[0]*(r0-rm))/rs
                     hh = wmax.copy()
-                    D1 = dot(csm[0]-diag(diag(csm[0])), wmax)/hmax
+                    D1 = dot(csm[0].T - diag(diag(csm[0])), wmax)/hmax
                     ww = wmax.conj()*wmax
                     for m in range(20):
                         H = hh.conj()*hh
                         hh = (D1+H*wmax)/sqrt(1+dot(ww, H))
                     hh = hh[:, newaxis]
                     csm1 = hmax*(hh*hh.conj().T)[newaxis, :, :]
-                    orthbeamfunc(e, h1, self.r0, self.rm, kj, \
-                        array((hmax, ))[newaxis, :], hh[newaxis, :], 0, 1)
-                    h -= self.damp*h1*adiv
-                    csm -= self.damp*csm1
+                    h1 = beamformerFreq(True, steerVecFormulation, self.r_diag, normFactor, (self.r0, self.rm, kj, array((hmax, ))[newaxis, :], hh[newaxis, :].conjugate()))
+                    h -= self.damp * h1
+                    csm -= self.damp * csm1.transpose(0,2,1)
 #                print '%i iter of %i' % (j,J)
                 ac[i] = result
                 fr[i] = True
