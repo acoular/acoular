@@ -15,4 +15,6 @@ td/
 docs/build/
 **/cache/
 **/td/
+__pycache__
+*.pyd
 docs/source/api_ref/generated/

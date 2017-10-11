@@ -662,3 +662,228 @@ def _freqBeamformer_EigValProb_SpecificSteerVec_CsmRemovedDiag(eigVal, eigVec, s
         scalarProdReducedCSM += (scalarProdFullCSMAbsSquared - scalarProdDiagCSMperEigVal) * eigVal[cntEigVal]
     result[0] = scalarProdReducedCSM * signalLossNormalization[0]
 
+#%% Point - Spread - Function
+def calcPointSpreadFunction(steerVecType, inputTuple):
+    """ Calculates the Point-Spread-Functions. Use either a predefined
+    steering vector formulation (see Sarradj 2012) or pass it your own
+    steering vector.
+
+    Input
+    -----
+        ``steerVecType`` (one of the following options: 1, 2, 3, 4, 'specific') ...
+        either build the steering vector via the predefined formulations
+        I - IV (see Sarradj 2012) or pass it directly (not implemented yet).
+
+        ``inputTuple`` ... dependent of the inputs above. If
+
+                    ``steerVecType`` != 'specific' --> ``inputTuple`` =(``distGridToArrayCenter``, ``distGridToAllMics``, ``wavenumber``, ``indSource``)
+
+                    ``steerVecType`` = 'specific' --> NOT IMPLEMENTED YET!!!!!!    #``inputTuple`` =(``steeringVector``, ``transfer``, ``indSource``)
+
+                    In both cases:
+
+                        ``distGridToArrayCenter`` ... float64[nGridpoints]
+
+                        ``distGridToAllMics`` ... float64[nGridpoints, nMics]
+
+                        ``wavenumber`` ... complex128[nFreqs] (the wavenumber should be stored in the imag-part)
+
+                        ``indSource`` ... a LIST of int (e.g. indSource=[5] is fine; indSource=5 doesn't work):
+                        specifies which gridpoints should be assumed to be sources -> a seperate psf will be calculated for each source
+
+    Returns
+    -------
+        Autopower spectrum PSF map [nFreqs, nGridPoints, nSources]
+    
+    Some Notes on the optimization of all subroutines
+    -------------------------------------------------
+        Reducing beamforming equation:
+            Let the steering vector be h, than, using Linear Albegra, the PSF of a SourcePoint S would be
+            
+            .. math:: B = h^H \\cdot (a_S \\cdot a_S^H) \\cdot h,
+            with ^H meaning the complex conjugated transpose and a_s the transfer function from source to gridpoint.
+            The (...)-part equals the CSM that the source would produce via the chosen steering vec formulation. 
+            Using (for example) tensor calculus, one can reduce the equation to:
+            
+            .. math:: B = \\left| h^H \\cdot a_S \\right| ^ 2.
+        Steering vector:
+            Theoretically the steering vector always includes the term "exp(distMicsGrid - distArrayCenterGrid)", but as the steering vector gets multplied with its complex conjugation in 
+            all beamformer routines, the constant "distArrayCenterGrid" cancels out --> In order to save operations, it is not implemented.
+        Squares:
+            Seemingly "a * a" is slightly faster than "a**2" in numba
+        Square of abs():
+            Even though "a.real**2 + a.imag**^2" would have fewer operations, modern processors seem to be optimized for "a * a.conj" and are slightly faster the latter way.
+            Both Versions are much faster than "abs(a)**2".
+    """
+    # get the steering vector formulation
+    psfDict = {1 : _psf_Formulation1AkaClassic,
+               2 : _psf_Formulation2AkaInverse,
+               3 : _psf_Formulation3AkaTrueLevel,
+               4 : _psf_Formulation4AkaTrueLocation}#,
+#               'specific' : _psf_SpecificSteerVec}
+    coreFunc = psfDict[steerVecType]
+
+    # prepare input
+    if steerVecType == 'specific':  # PSF with specific steering vector
+        raise ValueError('specific Steering vectors are not implemented yet.')
+#        steerVec, transFunc, indSource = inputTuple[0], inputTuple[1], inputTuple[2]
+#        nFreqs, nGridPoints = steerVec.shape[0], steerVec.shape[1]
+    else:  # predefined steering vectors (Formulation I - IV)
+        distGridToArrayCenter, distGridToAllMics, wavenumber, indSource = inputTuple[0], inputTuple[1], inputTuple[2], inputTuple[3]
+        nFreqs, nGridPoints = wavenumber.shape[0], distGridToAllMics.shape[0]
+    nSources = len(indSource)
+
+    # psf routine: parallelized over Gridpoints
+    psfOutput = np.zeros((nFreqs, nGridPoints, nSources), np.float64)
+    for cntFreqs in xrange(nFreqs):
+        result = np.zeros((nGridPoints, nSources), np.float64)
+        if steerVecType == 'specific':
+            raise ValueError('specific Steering vectors are not implemented yet.')
+#            coreFunc(steerVec[cntFreqs, :, :], transFunc[cntFreqs, indSource, :], result)
+        else:  # predefined steering vector (Formulation I - IV)
+            coreFunc(distGridToArrayCenter, distGridToAllMics, distGridToArrayCenter[indSource], distGridToAllMics[indSource, :], wavenumber[cntFreqs].imag, result)
+        psfOutput[cntFreqs, :, :] = result
+    return psfOutput
+
+
+@nb.guvectorize([(nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float64[:])], '(),(m),(s),(s,m),()->(s)', nopython=True, target=parallelOption, cache=cachedOption)
+def _psf_Formulation1AkaClassic(distGridToArrayCenter, distGridToAllMics, distSourcesToArrayCenter, distSourcesToAllMics, waveNumber, result):
+    nMics = distGridToAllMics.shape[0]
+    for cntSources in range(len(distSourcesToArrayCenter)):
+        # see bottom of information header of 'calcPointSpreadFunction' for infos on the PSF calculation and speed improvements.
+        scalarProd = 0.0 + 0.0j
+        for cntMics in xrange(nMics):
+            expArg = np.float32(waveNumber[0] * (distGridToAllMics[cntMics] - distSourcesToAllMics[cntSources, cntMics]))
+            scalarProd += (np.cos(expArg) - 1j * np.sin(expArg)) / distSourcesToAllMics[cntSources, cntMics]
+        normalizeFactor = distSourcesToArrayCenter[cntSources] / nMics
+        scalarProdAbsSquared = (scalarProd * scalarProd.conjugate()).real
+        result[cntSources] = scalarProdAbsSquared * (normalizeFactor * normalizeFactor)
+
+
+@nb.guvectorize([(nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float64[:])], '(),(m),(s),(s,m),()->(s)', nopython=True, target=parallelOption, cache=cachedOption)
+def _psf_Formulation2AkaInverse(distGridToArrayCenter, distGridToAllMics, distSourcesToArrayCenter, distSourcesToAllMics, waveNumber, result):
+    nMics = distGridToAllMics.shape[0]
+    for cntSources in range(len(distSourcesToArrayCenter)):
+        # see bottom of information header of 'calcPointSpreadFunction' for infos on the PSF calculation and speed improvements.
+        scalarProd = 0.0 + 0.0j
+        for cntMics in xrange(nMics):
+            expArg = np.float32(waveNumber[0] * (distGridToAllMics[cntMics] - distSourcesToAllMics[cntSources, cntMics]))
+            scalarProd += (np.cos(expArg) - 1j * np.sin(expArg)) / distSourcesToAllMics[cntSources, cntMics] * distGridToAllMics[cntMics]
+        normalizeFactor = distSourcesToArrayCenter[cntSources] / distGridToArrayCenter[0] / nMics
+        scalarProdAbsSquared = (scalarProd * scalarProd.conjugate()).real  
+        result[cntSources] = scalarProdAbsSquared * (normalizeFactor * normalizeFactor)  
+
+
+@nb.guvectorize([(nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float64[:])], '(),(m),(s),(s,m),()->(s)', nopython=True, target=parallelOption, cache=cachedOption)
+def _psf_Formulation3AkaTrueLevel(distGridToArrayCenter, distGridToAllMics, distSourcesToArrayCenter, distSourcesToAllMics, waveNumber, result):
+    nMics = distGridToAllMics.shape[0]
+    for cntSources in range(len(distSourcesToArrayCenter)):
+        # see bottom of information header of 'calcPointSpreadFunction' for infos on the PSF calculation and speed improvements.
+        scalarProd = 0.0 + 0.0j
+        helpNormalizeGrid = 0.0
+        for cntMics in xrange(nMics):
+            expArg = np.float32(waveNumber[0] * (distGridToAllMics[cntMics] - distSourcesToAllMics[cntSources, cntMics]))
+            scalarProd += (np.cos(expArg) - 1j * np.sin(expArg)) / distSourcesToAllMics[cntSources, cntMics] / distGridToAllMics[cntMics]
+            helpNormalizeGrid += 1.0 / (distGridToAllMics[cntMics] * distGridToAllMics[cntMics])
+        normalizeFactor = distSourcesToArrayCenter[cntSources] / distGridToArrayCenter[0] / helpNormalizeGrid
+        scalarProdAbsSquared = (scalarProd * scalarProd.conjugate()).real
+        result[cntSources] = scalarProdAbsSquared * (normalizeFactor * normalizeFactor)
+
+
+@nb.guvectorize([(nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float64[:])], '(),(m),(s),(s,m),()->(s)', nopython=True, target=parallelOption, cache=cachedOption)
+def _psf_Formulation4AkaTrueLocation(distGridToArrayCenter, distGridToAllMics, distSourcesToArrayCenter, distSourcesToAllMics, waveNumber, result):
+    nMics = distGridToAllMics.shape[0]
+    for cntSources in range(len(distSourcesToArrayCenter)):
+        # see bottom of information header of 'calcPointSpreadFunction' for infos on the PSF calculation and speed improvements.
+        scalarProd = 0.0 + 0.0j
+        helpNormalizeGrid = 0.0
+        for cntMics in xrange(nMics):
+            expArg = np.float32(waveNumber[0] * (distGridToAllMics[cntMics] - distSourcesToAllMics[cntSources, cntMics]))
+            scalarProd += (np.cos(expArg) - 1j * np.sin(expArg)) / distSourcesToAllMics[cntSources, cntMics] / distGridToAllMics[cntMics]
+            helpNormalizeGrid += 1.0 / (distGridToAllMics[cntMics] * distGridToAllMics[cntMics])
+        normalizeFactor = distSourcesToArrayCenter[cntSources]
+        scalarProdAbsSquared = (scalarProd * scalarProd.conjugate()).real
+        result[cntSources] = scalarProdAbsSquared * (normalizeFactor * normalizeFactor) / nMics / helpNormalizeGrid / helpNormalizeGrid  # ERROR: one helpNormalizeGrid too much! needs to be corrected after py3 migration
+
+# NEEDS TO BE OVERLOOKED!!
+#@nb.guvectorize([(nb.complex128[:], nb.complex128[:,:], nb.float64[:])], '(m),(s,m)->(s)', nopython=True, target=parallelOption, cache=cachedOption)
+#def _psf_SpecificSteerVec(steerVec, steerVecSources, result):
+#    nMics = len(steerVec)
+#    for cntSources in range(steerVecSources.shape[0]):
+#        # see bottom of information header of 'calcPointSpreadFunction' for infos on the PSF calculation and speed improvements.
+#        scalarProd = 0.0 + 0.0j
+#        for cntMics in xrange(nMics):
+#            scalarProd += steerVec[cntMics].conjugate() * steerVecSources[cntSources, cntMics]
+#        scalarProdAbsSquared = (scalarProd * scalarProd.conjugate()).real  
+#        result[cntSources] = scalarProdAbsSquared
+
+
+#%% Damas - Gauss Seidel
+# Formerly known as 'gseidel'
+@nb.guvectorize([(nb.float32[:,:], nb.float32[:], nb.int64[:], nb.float64[:], nb.float32[:]), 
+                 (nb.float64[:,:], nb.float64[:], nb.int64[:], nb.float64[:], nb.float64[:])], '(g,g),(g),(),()->(g)', nopython=True, target=parallelOption, cache=cachedOption)
+def damasSolverGaussSeidel(A, dirtyMap, nIterations, relax, damasSolution):
+    """ Solves the DAMAS inverse problem via modified gauss seidel.
+    
+    Input
+    -----
+        ``A`` ... float32[nFreqs, nGridpoints, nGridpoints] (or float64[...]) --> the PSF build matrix
+        
+        ``dirtyMap`` ... float32[nFreqs, nGridpoints] (or float64[...]) --> the conventional beamformer map
+        
+        ``nIterations`` ... int64[scalar] --> number of Iterations the damas solver has to go through
+        
+        ``relax`` ... int64[scalar] --> relaxation parameter (is originally 1.0 in DAMAS)
+        
+        ``damasSolution`` ... float32[nFreqs, nGridpoints] (or float64[...]) --> starting solution
+    
+    Returns
+    -------
+        ``None`` as ``damasSolution`` is overwritten with end result of the damas iterative solver.
+    """
+    nGridPoints = len(dirtyMap)
+    for cntIter in xrange(nIterations[0]):
+        for cntGrid in xrange(nGridPoints):
+            solHelp = np.float32(0)
+            for cntGridHelp in xrange(cntGrid):  # lower sum
+                solHelp += A[cntGrid, cntGridHelp] * damasSolution[cntGridHelp]
+            for cntGridHelp in xrange(cntGrid + 1, nGridPoints):  # upper sum
+                solHelp += A[cntGrid, cntGridHelp] * damasSolution[cntGridHelp]
+            solHelp = (1 - relax[0]) * damasSolution[cntGrid] + relax[0] * (dirtyMap[cntGrid] - solHelp)
+            if solHelp > 0.0:
+                damasSolution[cntGrid] = solHelp
+            else:
+                damasSolution[cntGrid] = 0.0
+
+
+#%% Transfer - Function
+def transfer(distGridToArrayCenter, distGridToAllMics, wavenumber):
+    """ Calculates the transfer functions between the various mics and gridpoints.
+    
+    Input
+    -----
+        ``distGridToArrayCenter`` ... float64[nGridpoints]
+
+        ``distGridToAllMics`` ... float64[nGridpoints, nMics]
+
+        ``wavenumber`` ... complex128[nFreqs] (the wavenumber should be stored in the imag-part)
+    
+    Returns
+    -------
+        The Transferfunctions in format complex128[nFreqs, nGridPoints, nMics].
+    """
+    nFreqs, nGridPoints, nMics = wavenumber.shape[0], distGridToAllMics.shape[0], distGridToAllMics.shape[1]
+    # transfer routine: parallelized over Gridpoints
+    transferOutput = np.zeros((nFreqs, nGridPoints, nMics), np.complex128)
+    for cntFreqs in xrange(nFreqs):
+        result = np.zeros((nGridPoints, nMics), np.complex128)
+        _transferCoreFunc(distGridToArrayCenter, distGridToAllMics, wavenumber[cntFreqs].imag, result)
+        transferOutput[cntFreqs, :, :] = result
+    return transferOutput
+
+@nb.guvectorize([(nb.float64[:], nb.float64[:], nb.float64[:], nb.complex128[:])], '(),(m),()->(m)', nopython=True, target=parallelOption, cache=cachedOption)
+def _transferCoreFunc(distGridToArrayCenter, distGridToAllMics, waveNumber, result):
+    nMics = distGridToAllMics.shape[0]
+    for cntMics in xrange(nMics):
+        expArg = np.float32(waveNumber[0] * (distGridToAllMics[cntMics] - distGridToArrayCenter[0]))  # FLOAT32 ODER FLOAT64?
+        result[cntMics] = (np.cos(expArg) - 1j * np.sin(expArg)) * distGridToArrayCenter[0] / distGridToAllMics[cntMics]

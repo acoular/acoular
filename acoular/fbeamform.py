@@ -48,8 +48,7 @@ try:
 except ImportError:
     from sklearn.cross_validation import LeaveOneOut
 
-from fastFuncs import beamformerFreq
-from beamformer import transfer, gseidel, r_beam_psf1, r_beam_psf2, r_beam_psf3, r_beam_psf4
+from fastFuncs import beamformerFreq, transfer, calcPointSpreadFunction, damasSolverGaussSeidel
 
 from .h5cache import H5cache
 from .internal import digest
@@ -58,6 +57,17 @@ from .microphones import MicGeom
 from .environments import Environment
 from .spectra import PowerSpectra, EigSpectra
 
+
+def steerVecTranslation(steer):
+    """ Translates the value of the property 'steer' into the numerical values
+    corresponding to :ref:`Sarradj, 2012<Sarradj2012>`.
+    """
+    steerNumeric = {'true level': 3,
+                    'true location': 4,
+                    'classic': 1,
+                    'inverse': 2,
+                    'specific': 'specific'}[steer]
+    return steerNumeric
 
 class BeamformerBase( HasPrivateTraits ):
     """
@@ -202,17 +212,6 @@ class BeamformerBase( HasPrivateTraits ):
             #print 2, name
         return ac
         
-    def steerVecTranslation(self):
-        """ Translates the value of the property 'steer' into the numerical values
-        corresponding to :ref:`Sarradj, 2012<Sarradj2012>`.
-        """
-        steerNumeric = {'true level': 3,
-                        'true location': 4,
-                        'classic': 1,
-                        'inverse': 2,
-                        'specific': 'specific'}[self.steer]
-        return steerNumeric
-    
     def signalLossNormalize(self):
         """ If the Diagonal of the CSM is removed one has to handle the loss 
         of signal energy --> Done via a normalization factor.
@@ -249,7 +248,7 @@ class BeamformerBase( HasPrivateTraits ):
         This method only returns values through the *ac* and *fr* parameters
         """
         kj = 2j*pi*self.freq_data.fftfreq()/self.c
-        steerVecFormulation = self.steerVecTranslation()
+        steerVecFormulation = steerVecTranslation(self.steer)
         normFactor = self.signalLossNormalize()
         for i in self.freq_data.indices:
             if not fr[i]:
@@ -402,7 +401,7 @@ class BeamformerFunctional( BeamformerBase ):
         This method only returns values through the *ac* and *fr* parameters
         """   
         kj = 2j*pi*self.freq_data.fftfreq()/self.c
-        steerVecFormulation = self.steerVecTranslation()
+        steerVecFormulation = steerVecTranslation(self.steer)
         nMics = float(self.freq_data.numchannels)
         if self.r_diag:
             normFactor = sqrt(1.0 / (nMics * nMics - nMics))
@@ -470,7 +469,7 @@ class BeamformerCapon( BeamformerBase ):
         kj = 2j*pi*self.freq_data.fftfreq()/self.c
         nMics = self.freq_data.numchannels
         normFactor = self.signalLossNormalize() * nMics**2
-        steerVecFormulation = self.steerVecTranslation()
+        steerVecFormulation = steerVecTranslation(self.steer)
         for i in self.freq_data.indices:
             if not fr[i]:
                 csm = array(linalg.inv(array(self.freq_data.csm[i], dtype='complex128')), order='C')[newaxis]
@@ -560,7 +559,7 @@ class BeamformerEig( BeamformerBase ):
         kj = 2j*pi*self.freq_data.fftfreq()/self.c
         na = int(self.na)  # eigenvalue taken into account
         normFactor = self.signalLossNormalize()
-        steerVecFormulation = self.steerVecTranslation()
+        steerVecFormulation = steerVecTranslation(self.steer)
         for i in self.freq_data.indices:        
             if not fr[i]:
                 eva = array(self.freq_data.eva[i][newaxis], dtype='float64')
@@ -630,7 +629,7 @@ class BeamformerMusic( BeamformerEig ):
         nMics = self.freq_data.numchannels
         n = int(self.mpos.num_mics-self.na)
         normFactor = self.signalLossNormalize() * nMics**2
-        steerVecFormulation = self.steerVecTranslation()
+        steerVecFormulation = steerVecTranslation(self.steer)
         for i in self.freq_data.indices:        
             if not fr[i]:
                 eva = array(self.freq_data.eva[i][newaxis], dtype='float64')
@@ -673,7 +672,6 @@ class PointSpreadFunction (HasPrivateTraits):
 
     #: Type of steering vectors, see also :ref:`Sarradj, 2012<Sarradj2012>`.
     steer = Trait('true level', 'true location', 'classic', 'inverse', 
-                  'old_version',
                   desc="type of steering vectors used")
 
     #: Flag that defines how to calculate and store the point spread function
@@ -723,18 +721,6 @@ class PointSpreadFunction (HasPrivateTraits):
     def _get_rm ( self ):
         return self.env.r( self.c, self.grid.pos(), self.mpos.mpos)
 
-    def get_beam_psf( self ):
-        """
-        Returns the proper low-level beamforming routine (implemented in C).
-        This function is only called internally by the :meth:`calc` routine.
-        """
-        steer = {'true level': '3', \
-                'true location': '4', \
-                'classic': '1', \
-                'inverse': '2'}[self.steer]
-        return eval('r_beam_psf'+steer)
-    
-    
     @property_depends_on('digest, freq')
     def _get_psf ( self ):
         """
@@ -786,61 +772,27 @@ class PointSpreadFunction (HasPrivateTraits):
                 
                 # get indices which have the value True = not yet calculated
                 g_ind_calc = self.grid_indices[calc_ind]
-            
-            
             r0 = self.r0
             rm = self.rm
-            kj = 2j*pi*self.freq/self.c
-            
-
-            r_beam_psf = self.get_beam_psf()
-            #{ 
-            #    'true level'   : r_beam_psf3(hh, r0, r0[ind], rm, rm[ind], kj),
-            #    'true location': r_beam_psf4(hh, r0[ind], rm, rm[ind], kj),
-            #    'classic'      : r_beam_psf1(hh, r0[ind], rm, rm[ind], kj),
-            #    'inverse'      : r_beam_psf2(hh, r0, r0[ind], rm, rm[ind], kj)
-            #    }
-
-            
+            kj = array(2j*pi*self.freq/self.c)[newaxis]
+            steerVecFormulation = steerVecTranslation(self.steer)
             if self.calcmode == 'single':
-            
-                hh = ones((gs, 1), 'd')
-
-              
                 for ind in g_ind_calc:
-                    # hh = hh / hh[ind] #psf4 & 3
-                    # psf: ['h','rt0','rs0','rtm','rsm','kj']
-                    """    
-                    else:
-                        e = zeros((self.mpos.num_mics), 'D')
-                        e1 = e.copy()
-                        r_beam_psf(e, e1, hh, self.r0, self.rm, kj)
-                        h_out = hh[0] / diag(hh[0])
-                    """
-                    r_beam_psf(hh, r0, r0[[ind]], rm, rm[[ind]], kj)
-                    
+                    hh = calcPointSpreadFunction(steerVecFormulation, (r0, rm, kj, [ind]))[0,:,:]
                     ac[:,ind] = hh[:,0] / hh[ind,0]
                     gp[ind] = True
-                
             elif self.calcmode == 'full':
-                hh = ones((gs, gs), 'd')
-                r_beam_psf(hh, r0, r0, rm, rm, kj)
-                
+                hh = calcPointSpreadFunction(steerVecFormulation, (r0, rm, kj, arange(r0.shape[0])))[0,:,:]
                 gp[:] = True
                 ac[:] = hh / diag(hh)
-
             else: # 'block'
-                hh = ones((gs, g_ind_calc.size), 'd')
-                r_beam_psf(hh, r0, r0[g_ind_calc], rm, rm[g_ind_calc], kj)
+                hh = calcPointSpreadFunction(steerVecFormulation, (r0, rm, kj, g_ind_calc))[0,:,:]
                 hh /= diag(hh[g_ind_calc,:])[newaxis,:]
-                
                 indh = 0
                 for ind in g_ind_calc:
                     gp[ind] = True
                     ac[:,ind] = hh[:,indh]
                     indh += 1
-
-                
             self.h5f.flush()
         return ac[:][:,self.grid_indices]
 
@@ -884,6 +836,10 @@ class BeamformerDamas (BeamformerBase):
     #: Number of iterations, defaults to 100.
     n_iter = Int(100, 
         desc="number of iterations")
+    
+    #: Damping factor in modified gauss-seidel
+    dampingFactor = Float(1.0,
+                          desc="damping factor in modified gauss-seidel-DAMAS-approach")
 
     #: Flag that defines how to calculate and store the point spread function, 
     #: defaults to 'full'. See :attr:`PointSpreadFunction.calcmode` for details.
@@ -956,7 +912,7 @@ class BeamformerDamas (BeamformerBase):
                 y = array(self.beamformer.result[i], dtype=float64)
                 x = y.copy()
                 psf = p.psf[:]
-                gseidel(psf, y, x, self.n_iter, 1.0)
+                damasSolverGaussSeidel(psf, y, self.n_iter, self.dampingFactor, x)
                 ac[i] = x
                 fr[i] = True
 
@@ -1154,13 +1110,12 @@ class BeamformerCleansc( BeamformerBase ):
         """
 
         # prepare calculation
+        normFactor = self.signalLossNormalize()
+        steerVecFormulation = steerVecTranslation(self.steer)
         numchannels = self.freq_data.numchannels
         f = self.freq_data.fftfreq()
         kjall = 2j*pi*f/self.c
-        e = zeros((numchannels), 'D')
         result = zeros((self.grid.size), 'f')
-        fullbeamfunc = self.get_beamfunc()
-        orthbeamfunc = self.get_beamfunc('_os')
         if self.r_diag:
             adiv = 1.0/(numchannels*numchannels-numchannels)
         else:
@@ -1170,16 +1125,13 @@ class BeamformerCleansc( BeamformerBase ):
         else:
             J = self.n
         powers = zeros(J, 'd')
-        h = zeros((1, self.grid.size), 'd')
-        h1 = h.copy()
         # loop over frequencies
         for i in self.freq_data.indices:        
             if not fr[i]:
                 kj = kjall[i, newaxis]
-                csm = array(self.freq_data.csm[i][newaxis], \
-                    dtype='complex128', copy=1)
-                fullbeamfunc(csm, e, h, self.r0, self.rm, kj)
-                h = h*adiv
+                csm = array(self.freq_data.csm[i][newaxis], dtype='complex128', copy=1)
+                h = beamformerFreq(False, steerVecFormulation, self.r_diag, normFactor, (self.r0, self.rm, kj, csm))
+
                 # CLEANSC Iteration
                 result *= 0.0
                 for j in range(J):
@@ -1200,17 +1152,16 @@ class BeamformerCleansc( BeamformerBase ):
                         rs = numchannels*r0/rm
                     wmax = numchannels*sqrt(adiv)*exp(-kj[0]*(r0-rm))/rs
                     hh = wmax.copy()
-                    D1 = dot(csm[0]-diag(diag(csm[0])), wmax)/hmax
+                    D1 = dot(csm[0].T - diag(diag(csm[0])), wmax)/hmax
                     ww = wmax.conj()*wmax
                     for m in range(20):
                         H = hh.conj()*hh
                         hh = (D1+H*wmax)/sqrt(1+dot(ww, H))
                     hh = hh[:, newaxis]
                     csm1 = hmax*(hh*hh.conj().T)[newaxis, :, :]
-                    orthbeamfunc(e, h1, self.r0, self.rm, kj, \
-                        array((hmax, ))[newaxis, :], hh[newaxis, :], 0, 1)
-                    h -= self.damp*h1*adiv
-                    csm -= self.damp*csm1
+                    h1 = beamformerFreq(True, steerVecFormulation, self.r_diag, normFactor, (self.r0, self.rm, kj, array((hmax, ))[newaxis, :], hh[newaxis, :].conjugate()))
+                    h -= self.damp * h1
+                    csm -= self.damp * csm1.transpose(0,2,1)
 #                print '%i iter of %i' % (j,J)
                 ac[i] = result
                 fr[i] = True
@@ -1443,10 +1394,10 @@ class BeamformerCMF ( BeamformerBase ):
         for i in self.freq_data.indices:
             if not fr[i]:
                 # csm transposed b/c indices switched in faverage!
-                csm = array(self.freq_data.csm[i], dtype='complex128',copy=1).T
+                csm = array(self.freq_data.csm[i], dtype='complex128',copy=1)
 
                 kji = kj[i, newaxis]
-                transfer(hh, r0, rm, kji)
+                hh = transfer(r0, rm, kji)
                 h = hh[0].T
                 
                 # reduced Kronecker product (only where solution matrix != 0)
