@@ -818,6 +818,44 @@ def _psf_Formulation4AkaTrueLocation(distGridToArrayCenter, distGridToAllMics, d
 #        result[cntSources] = scalarProdAbsSquared
 
 
+#%% Damas - Gauss Seidel
+# Formerly known as 'gseidel'
+@nb.guvectorize([(nb.float32[:,:], nb.float32[:], nb.int64[:], nb.float64[:], nb.float32[:]), 
+                 (nb.float64[:,:], nb.float64[:], nb.int64[:], nb.float64[:], nb.float64[:])], '(g,g),(g),(),()->(g)', nopython=True, target=parallelOption, cache=cachedOption)
+def damasSolverGaussSeidel(A, dirtyMap, nIterations, relax, damasSolution):
+    """ Solves the DAMAS inverse problem via modified gauss seidel.
+    
+    Input
+    -----
+        ``A`` ... float32[nFreqs, nGridpoints, nGridpoints] (or float64[...]) --> the PSF build matrix
+        
+        ``dirtyMap`` ... float32[nFreqs, nGridpoints] (or float64[...]) --> the conventional beamformer map
+        
+        ``nIterations`` ... int64[scalar] --> number of Iterations the damas solver has to go through
+        
+        ``relax`` ... int64[scalar] --> relaxation parameter (is originally 1.0 in DAMAS)
+        
+        ``damasSolution`` ... float32[nFreqs, nGridpoints] (or float64[...]) --> starting solution
+    
+    Returns
+    -------
+        ``None`` as ``damasSolution`` is overwritten with end result of the damas iterative solver.
+    """
+    nGridPoints = len(dirtyMap)
+    for cntIter in xrange(nIterations[0]):
+        for cntGrid in xrange(nGridPoints):
+            solHelp = np.float32(0)
+            for cntGridHelp in xrange(cntGrid):  # lower sum
+                solHelp += A[cntGrid, cntGridHelp] * damasSolution[cntGridHelp]
+            for cntGridHelp in xrange(cntGrid + 1, nGridPoints):  # upper sum
+                solHelp += A[cntGrid, cntGridHelp] * damasSolution[cntGridHelp]
+            solHelp = (1 - relax[0]) * damasSolution[cntGrid] + relax[0] * (dirtyMap[cntGrid] - solHelp)
+            if solHelp > 0.0:
+                damasSolution[cntGrid] = solHelp
+            else:
+                damasSolution[cntGrid] = 0.0
+
+
 #%% Transfer - Function
 def transfer(distGridToArrayCenter, distGridToAllMics, wavenumber):
     """ Calculates the transfer functions between the various mics and gridpoints.

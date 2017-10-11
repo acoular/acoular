@@ -48,8 +48,7 @@ try:
 except ImportError:
     from sklearn.cross_validation import LeaveOneOut
 
-from fastFuncs import beamformerFreq, transfer, calcPointSpreadFunction
-from beamformer import gseidel
+from fastFuncs import beamformerFreq, transfer, calcPointSpreadFunction, damasSolverGaussSeidel
 
 from .h5cache import H5cache
 from .internal import digest
@@ -837,6 +836,10 @@ class BeamformerDamas (BeamformerBase):
     #: Number of iterations, defaults to 100.
     n_iter = Int(100, 
         desc="number of iterations")
+    
+    #: Damping factor in modified gauss-seidel
+    dampingFactor = Float(1.0,
+                          desc="damping factor in modified gauss-seidel-DAMAS-approach")
 
     #: Flag that defines how to calculate and store the point spread function, 
     #: defaults to 'full'. See :attr:`PointSpreadFunction.calcmode` for details.
@@ -909,7 +912,7 @@ class BeamformerDamas (BeamformerBase):
                 y = array(self.beamformer.result[i], dtype=float64)
                 x = y.copy()
                 psf = p.psf[:]
-                gseidel(psf, y, x, self.n_iter, 1.0)
+                damasSolverGaussSeidel(psf, y, self.n_iter, self.dampingFactor, x)
                 ac[i] = x
                 fr[i] = True
 
