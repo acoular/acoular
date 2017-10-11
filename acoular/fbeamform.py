@@ -48,8 +48,8 @@ try:
 except ImportError:
     from sklearn.cross_validation import LeaveOneOut
 
-from fastFuncs import beamformerFreq, transfer
-from beamformer import gseidel, r_beam_psf1, r_beam_psf2, r_beam_psf3, r_beam_psf4
+from fastFuncs import beamformerFreq, transfer, calcPointSpreadFunction
+from beamformer import gseidel
 
 from .h5cache import H5cache
 from .internal import digest
@@ -673,7 +673,6 @@ class PointSpreadFunction (HasPrivateTraits):
 
     #: Type of steering vectors, see also :ref:`Sarradj, 2012<Sarradj2012>`.
     steer = Trait('true level', 'true location', 'classic', 'inverse', 
-                  'old_version',
                   desc="type of steering vectors used")
 
     #: Flag that defines how to calculate and store the point spread function
@@ -723,18 +722,6 @@ class PointSpreadFunction (HasPrivateTraits):
     def _get_rm ( self ):
         return self.env.r( self.c, self.grid.pos(), self.mpos.mpos)
 
-    def get_beam_psf( self ):
-        """
-        Returns the proper low-level beamforming routine (implemented in C).
-        This function is only called internally by the :meth:`calc` routine.
-        """
-        steer = {'true level': '3', \
-                'true location': '4', \
-                'classic': '1', \
-                'inverse': '2'}[self.steer]
-        return eval('r_beam_psf'+steer)
-    
-    
     @property_depends_on('digest, freq')
     def _get_psf ( self ):
         """
@@ -786,61 +773,27 @@ class PointSpreadFunction (HasPrivateTraits):
                 
                 # get indices which have the value True = not yet calculated
                 g_ind_calc = self.grid_indices[calc_ind]
-            
-            
             r0 = self.r0
             rm = self.rm
-            kj = 2j*pi*self.freq/self.c
-            
-
-            r_beam_psf = self.get_beam_psf()
-            #{ 
-            #    'true level'   : r_beam_psf3(hh, r0, r0[ind], rm, rm[ind], kj),
-            #    'true location': r_beam_psf4(hh, r0[ind], rm, rm[ind], kj),
-            #    'classic'      : r_beam_psf1(hh, r0[ind], rm, rm[ind], kj),
-            #    'inverse'      : r_beam_psf2(hh, r0, r0[ind], rm, rm[ind], kj)
-            #    }
-
-            
+            kj = array(2j*pi*self.freq/self.c)[newaxis]
+            steerVecFormulation = steerVecTranslation(self.steer)
             if self.calcmode == 'single':
-            
-                hh = ones((gs, 1), 'd')
-
-              
                 for ind in g_ind_calc:
-                    # hh = hh / hh[ind] #psf4 & 3
-                    # psf: ['h','rt0','rs0','rtm','rsm','kj']
-                    """    
-                    else:
-                        e = zeros((self.mpos.num_mics), 'D')
-                        e1 = e.copy()
-                        r_beam_psf(e, e1, hh, self.r0, self.rm, kj)
-                        h_out = hh[0] / diag(hh[0])
-                    """
-                    r_beam_psf(hh, r0, r0[[ind]], rm, rm[[ind]], kj)
-                    
+                    hh = calcPointSpreadFunction(steerVecFormulation, (r0, rm, kj, [ind]))[0,:,:]
                     ac[:,ind] = hh[:,0] / hh[ind,0]
                     gp[ind] = True
-                
             elif self.calcmode == 'full':
-                hh = ones((gs, gs), 'd')
-                r_beam_psf(hh, r0, r0, rm, rm, kj)
-                
+                hh = calcPointSpreadFunction(steerVecFormulation, (r0, rm, kj, arange(r0.shape[0])))[0,:,:]
                 gp[:] = True
                 ac[:] = hh / diag(hh)
-
             else: # 'block'
-                hh = ones((gs, g_ind_calc.size), 'd')
-                r_beam_psf(hh, r0, r0[g_ind_calc], rm, rm[g_ind_calc], kj)
+                hh = calcPointSpreadFunction(steerVecFormulation, (r0, rm, kj, g_ind_calc))[0,:,:]
                 hh /= diag(hh[g_ind_calc,:])[newaxis,:]
-                
                 indh = 0
                 for ind in g_ind_calc:
                     gp[ind] = True
                     ac[:,ind] = hh[:,indh]
                     indh += 1
-
-                
             self.h5f.flush()
         return ac[:][:,self.grid_indices]
 
