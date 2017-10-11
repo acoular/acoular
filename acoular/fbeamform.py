@@ -59,6 +59,17 @@ from .environments import Environment
 from .spectra import PowerSpectra, EigSpectra
 
 
+def steerVecTranslation(steer):
+    """ Translates the value of the property 'steer' into the numerical values
+    corresponding to :ref:`Sarradj, 2012<Sarradj2012>`.
+    """
+    steerNumeric = {'true level': 3,
+                    'true location': 4,
+                    'classic': 1,
+                    'inverse': 2,
+                    'specific': 'specific'}[steer]
+    return steerNumeric
+
 class BeamformerBase( HasPrivateTraits ):
     """
     Beamforming using the basic delay-and-sum algorithm in the frequency domain.
@@ -202,17 +213,6 @@ class BeamformerBase( HasPrivateTraits ):
             #print 2, name
         return ac
         
-    def steerVecTranslation(self):
-        """ Translates the value of the property 'steer' into the numerical values
-        corresponding to :ref:`Sarradj, 2012<Sarradj2012>`.
-        """
-        steerNumeric = {'true level': 3,
-                        'true location': 4,
-                        'classic': 1,
-                        'inverse': 2,
-                        'specific': 'specific'}[self.steer]
-        return steerNumeric
-    
     def signalLossNormalize(self):
         """ If the Diagonal of the CSM is removed one has to handle the loss 
         of signal energy --> Done via a normalization factor.
@@ -249,7 +249,7 @@ class BeamformerBase( HasPrivateTraits ):
         This method only returns values through the *ac* and *fr* parameters
         """
         kj = 2j*pi*self.freq_data.fftfreq()/self.c
-        steerVecFormulation = self.steerVecTranslation()
+        steerVecFormulation = steerVecTranslation(self.steer)
         normFactor = self.signalLossNormalize()
         for i in self.freq_data.indices:
             if not fr[i]:
@@ -402,7 +402,7 @@ class BeamformerFunctional( BeamformerBase ):
         This method only returns values through the *ac* and *fr* parameters
         """   
         kj = 2j*pi*self.freq_data.fftfreq()/self.c
-        steerVecFormulation = self.steerVecTranslation()
+        steerVecFormulation = steerVecTranslation(self.steer)
         nMics = float(self.freq_data.numchannels)
         if self.r_diag:
             normFactor = sqrt(1.0 / (nMics * nMics - nMics))
@@ -470,7 +470,7 @@ class BeamformerCapon( BeamformerBase ):
         kj = 2j*pi*self.freq_data.fftfreq()/self.c
         nMics = self.freq_data.numchannels
         normFactor = self.signalLossNormalize() * nMics**2
-        steerVecFormulation = self.steerVecTranslation()
+        steerVecFormulation = steerVecTranslation(self.steer)
         for i in self.freq_data.indices:
             if not fr[i]:
                 csm = array(linalg.inv(array(self.freq_data.csm[i], dtype='complex128')), order='C')[newaxis]
@@ -560,7 +560,7 @@ class BeamformerEig( BeamformerBase ):
         kj = 2j*pi*self.freq_data.fftfreq()/self.c
         na = int(self.na)  # eigenvalue taken into account
         normFactor = self.signalLossNormalize()
-        steerVecFormulation = self.steerVecTranslation()
+        steerVecFormulation = steerVecTranslation(self.steer)
         for i in self.freq_data.indices:        
             if not fr[i]:
                 eva = array(self.freq_data.eva[i][newaxis], dtype='float64')
@@ -630,7 +630,7 @@ class BeamformerMusic( BeamformerEig ):
         nMics = self.freq_data.numchannels
         n = int(self.mpos.num_mics-self.na)
         normFactor = self.signalLossNormalize() * nMics**2
-        steerVecFormulation = self.steerVecTranslation()
+        steerVecFormulation = steerVecTranslation(self.steer)
         for i in self.freq_data.indices:        
             if not fr[i]:
                 eva = array(self.freq_data.eva[i][newaxis], dtype='float64')
@@ -1155,7 +1155,7 @@ class BeamformerCleansc( BeamformerBase ):
 
         # prepare calculation
         normFactor = self.signalLossNormalize()
-        steerVecFormulation = self.steerVecTranslation()
+        steerVecFormulation = steerVecTranslation(self.steer)
         numchannels = self.freq_data.numchannels
         f = self.freq_data.fftfreq()
         kjall = 2j*pi*f/self.c
