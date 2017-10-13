@@ -8,7 +8,9 @@ MANIFEST
 
 # ignore the build directories
 *.egg-info/
+.eggs/
 build/
+__pycache__/
 dist/
 cache/
 td/

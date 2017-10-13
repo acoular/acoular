@@ -7,9 +7,9 @@
 nidaqimport.py: interface to nidaq mx
 """
 from __future__ import print_function
-from sources import TimeSamples
-from h5cache import td_dir
-from fileimport import time_data_import
+from .sources import TimeSamples
+from .h5cache import td_dir
+from .fileimport import time_data_import
 import ctypes
 import numpy
 import time
@@ -47,9 +47,12 @@ def ECFactory(func):
         err = func(*args)
         if err < 0:
             buf_size = 256
-            buf = ctypes.create_string_buffer('\000' * buf_size)
+#            buf = ctypes.create_string_buffer('\000' * buf_size)
+            buf = ctypes.create_string_buffer(b'\000' * buf_size)
             nidaq.DAQmxGetErrorString(err,ctypes.byref(buf),buf_size)
-            buf1 = ctypes.create_string_buffer('\000' * buf_size)
+#            buf1 = ctypes.create_string_buffer('\000' * buf_size)
+            buf1 = ctypes.create_string_buffer(b'\000' * buf_size)
+
 ##            nidaq.DAQmxGetExtendedErrorInfo(ctypes.byref(buf1),buf_size)
 ##            print buf1.value
             raise RuntimeError('nidaq call failed with error %d: %s'%(err,repr(buf.value)))
@@ -127,9 +130,12 @@ class nidaq_import( time_data_import ):
         time_data_import.__init__(self, **traits )
         taskHandle = TaskHandle(0)
         buf_size = 1024
-        buf = ctypes.create_string_buffer('\000' * buf_size)
+#        buf = ctypes.create_string_buffer('\000' * buf_size)
+        buf = ctypes.create_string_buffer(b'\000' * buf_size)
         DAQmxGetSysTasks(ctypes.byref(buf),buf_size)
-        tasknamelist = buf.value.split(', ')
+#        tasknamelist = buf.value.split(', ')
+        tasknamelist = buf.value.split(b', ')
+
         self.tasknames=[]
         for taskname in tasknamelist:
             # is task valid ?? try to load
@@ -143,12 +149,14 @@ class nidaq_import( time_data_import ):
     def _taskname_changed ( self ):
         taskHandle = TaskHandle(0)
         buf_size = 1024*4
-        buf = ctypes.create_string_buffer('\000' * buf_size)
+#        buf = ctypes.create_string_buffer('\000' * buf_size)
+        buf = ctypes.create_string_buffer(b'\000' * buf_size)
+
         num = uInt32()
         fnum = float64()
         lnum = uInt64()
         try:
-            DAQmxLoadTask(self.taskname,ctypes.byref(taskHandle))
+            DAQmxLoadTask(str.encode(self.taskname),ctypes.byref(taskHandle))
         except RuntimeError:
             return
         DAQmxGetTaskNumChans(taskHandle,ctypes.byref(num))
@@ -173,7 +181,7 @@ class nidaq_import( time_data_import ):
         taskHandle = TaskHandle(0)
         fnum = float64()
         try:
-            DAQmxLoadTask(self.taskname,ctypes.byref(taskHandle))
+            DAQmxLoadTask(str.encode(self.taskname),ctypes.byref(taskHandle))
         except RuntimeError:
             return
         try:
@@ -197,7 +205,7 @@ class nidaq_import( time_data_import ):
         fnum = float64()
         lnum = uInt64()
         try:
-            DAQmxLoadTask(self.taskname,ctypes.byref(taskHandle))
+            DAQmxLoadTask(str.encode(self.taskname),ctypes.byref(taskHandle))
             if self.numchannels<1:
                 raise RuntimeError
             DAQmxSetSampClkRate(taskHandle,float64(self.sample_freq))
@@ -219,7 +227,7 @@ class nidaq_import( time_data_import ):
         print("Puffergroesse: %i" % max_num_samples)
         data = numpy.empty((max_num_samples,self.numchannels),dtype=numpy.float64)
         DAQmxStartTask(taskHandle)
-        count = 0L
+        count = 0
         numsamples = self.numsamples
         while count<numsamples:
             #~ DAQmxReadAnalogF64(taskHandle,-1,float64(10.0),
@@ -247,7 +255,7 @@ class nidaq_import( time_data_import ):
         fnum = float64()
         lnum = uInt64()
         try:
-            DAQmxLoadTask(self.taskname,ctypes.byref(taskHandle))
+            DAQmxLoadTask(str.encode(self.taskname),ctypes.byref(taskHandle))
             if self.numchannels<1:
                 raise RuntimeError
         except RuntimeError:
@@ -260,7 +268,7 @@ class nidaq_import( time_data_import ):
         max_num_samples = lnum.value
         data = numpy.empty((max_num_samples,self.numchannels),dtype=numpy.float64)
         DAQmxStartTask(taskHandle)
-        count = 0L
+        count = 0
         numsamples = self.numsamples
         while count<numsamples:
             DAQmxReadAnalogF64(taskHandle,-1,float64(10.0),
