@@ -23,7 +23,7 @@ BeamformerCleansc, BeamformerCapon, BeamformerMusic, BeamformerCMF, PointSpreadF
 # other imports
 from os import path
 #from mayavi import mlab
-
+from numpy import amax
 from cPickle import dump, load
 
 
