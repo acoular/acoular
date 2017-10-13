@@ -5,5 +5,5 @@
 
 # separate file to find out about version without importing the acoular lib
 __author__ = "Acoular developers"
-__date__ = "11 May 2016"
-__version__ = "16.5"
+__date__ = "10 Oktober 2017"
+__version__ = "17.10"
