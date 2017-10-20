@@ -68,8 +68,8 @@ m.mpos_tot = array([(r*sin(2*pi*i+pi/4), r*cos(2*pi*i+pi/4), 0) \
 #===============================================================================
 # define the different source signals
 #===============================================================================
-#if sys.version_info > (3,):
-#     long = int
+if sys.version_info > (3,):
+     long = int
 nsamples = long(sfreq*tmax)
 n1 = WNoiseGenerator(sample_freq=sfreq, numsamples=nsamples)
 s1 = SineGenerator(sample_freq=sfreq, numsamples=nsamples, freq=freq)

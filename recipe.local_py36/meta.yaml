@@ -33,13 +33,11 @@ requirements:
     - pytables >=3.1
     - traits >=4.4
     - numba >=0.21
-#    - chaco >=4.4
     - libpython [win]
 
   run:
     - python >=3.6
     - pyqt >=5.6
-    - matplotlib >=2.1
     - numpy >=1.13
     - numba >=0.35
     - scipy >=0.19
@@ -47,13 +45,11 @@ requirements:
     - pytables >=3.4
     - traits >=4.6
     - traitsui >=5.1.0
-#    - configparser #just for python version 2.7
-#    - chaco >=2.7
 
 test:
   # Python imports
-#  imports:
-#    - acoular
+  imports:
+    - acoular
 
   # commands:
     # You can put test commands to be run here.  Use this to test that the

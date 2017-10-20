@@ -14,6 +14,7 @@ microphone geometry in array_56.xml (part of acoular)
 Copyright (c) 2006-2015 The Acoular developers.
 All rights reserved.
 """
+from __future__ import print_function
 
 # imports from acoular
 import acoular
@@ -82,7 +83,7 @@ f = EigSpectra(time_data=t1,
 bb = BeamformerBase(freq_data=f, grid=g, mpos=m, r_diag=True, c=346.04)
 bd = BeamformerDamas(beamformer=bb, n_iter=100)
 be = BeamformerEig(freq_data=f, grid=g, mpos=m, r_diag=True, c=346.04, n=54)
-bo = BeamformerOrth(beamformer=be, eva_list=range(38,54))
+bo = BeamformerOrth(beamformer=be, eva_list=list(range(38,54)))
 bs = BeamformerCleansc(freq_data=f, grid=g, mpos=m, r_diag=True, c=346.04)
 
 #===============================================================================
@@ -107,7 +108,7 @@ for r_diag in (True,False):
             mx = L_p(map.max())
             imshow(L_p(map.T), vmax=mx, vmin=mx-15, 
                    interpolation='nearest', extent=g.extend())
-            print b.steer
+            print(b.steer)
             colorbar()
             title(b.__class__.__name__,fontsize='small')
 

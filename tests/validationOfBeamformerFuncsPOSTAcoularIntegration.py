@@ -24,8 +24,8 @@ BeamformerCleansc, BeamformerCapon, BeamformerMusic, BeamformerCMF, PointSpreadF
 from os import path
 #from mayavi import mlab
 from numpy import amax
-from cPickle import dump, load
-
+#from cPickle import dump, load
+from pickle import dump, load
 
 # see example3
 t = TimeSamples(name='example_data.h5')
@@ -126,14 +126,14 @@ Lbcsc2Full = L_p(bcsc2Full.synthetic(4000,1))
 Lbcsc3Full = L_p(bcsc3Full.synthetic(4000,1))
 Lbcsc4Full = L_p(bcsc4Full.synthetic(4000,1))
 
-bort1Rem = BeamformerOrth(beamformer=be1Rem, eva_list=range(4,8))
-bort2Rem = BeamformerOrth(beamformer=be2Rem, eva_list=range(4,8))
-bort3Rem = BeamformerOrth(beamformer=be3Rem, eva_list=range(4,8))
-bort4Rem = BeamformerOrth(beamformer=be4Rem, eva_list=range(4,8))
-bort1Full = BeamformerOrth(beamformer=be1Full, eva_list=range(4,8))
-bort2Full = BeamformerOrth(beamformer=be2Full, eva_list=range(4,8))
-bort3Full = BeamformerOrth(beamformer=be3Full, eva_list=range(4,8))
-bort4Full = BeamformerOrth(beamformer=be4Full, eva_list=range(4,8))
+bort1Rem = BeamformerOrth(beamformer=be1Rem, eva_list=list(range(4,8)))
+bort2Rem = BeamformerOrth(beamformer=be2Rem, eva_list=list(range(4,8)))
+bort3Rem = BeamformerOrth(beamformer=be3Rem, eva_list=list(range(4,8)))
+bort4Rem = BeamformerOrth(beamformer=be4Rem, eva_list=list(range(4,8)))
+bort1Full = BeamformerOrth(beamformer=be1Full, eva_list=list(range(4,8)))
+bort2Full = BeamformerOrth(beamformer=be2Full, eva_list=list(range(4,8)))
+bort3Full = BeamformerOrth(beamformer=be3Full, eva_list=list(range(4,8)))
+bort4Full = BeamformerOrth(beamformer=be4Full, eva_list=list(range(4,8)))
 Lbort1Rem = L_p(bort1Rem.synthetic(4000,1))
 Lbort2Rem = L_p(bort2Rem.synthetic(4000,1))
 Lbort3Rem = L_p(bort3Rem.synthetic(4000,1))

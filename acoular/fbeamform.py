@@ -48,7 +48,7 @@ try:
 except ImportError:
     from sklearn.cross_validation import LeaveOneOut
 
-from fastFuncs import beamformerFreq, transfer, calcPointSpreadFunction, damasSolverGaussSeidel
+from .fastFuncs import beamformerFreq, transfer, calcPointSpreadFunction, damasSolverGaussSeidel
 
 from .h5cache import H5cache
 from .internal import digest

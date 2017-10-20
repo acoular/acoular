@@ -28,18 +28,17 @@ requirements:
   build:
     - python
     - numpy >=1.10.2
+    - numba >=0.21
     - scipy >=0.13
     - scikit-learn >=0.15
     - pytables >=3.1
     - traits >=4.4
     - numba >=0.21
-#    - chaco >=4.4
     - libpython [win]
 
   run:
-    - python >=2.7,<3.6
+    - python >=2.7
     - pyqt >=4.10,<5.6.0
-    - matplotlib >=1.1.1,<1.5.3
     - numpy >=1.10.2
     - numba >=0.21
     - scipy >=0.13
@@ -48,12 +47,12 @@ requirements:
     - traits >=4.4
     - traitsui >=4.4
     - configparser #just for python version 2.7
-    - chaco >=4.4
+#    - chaco >=4.4 #just for python version 2.7
 
 test:
   # Python imports
-#  imports:
-#    - acoular
+  imports:
+    - acoular
 
   # commands:
     # You can put test commands to be run here.  Use this to test that the

@@ -27,7 +27,7 @@ BeamformerCapon, BeamformerMusic, BeamformerDamas
 # other imports
 from os import path
 from pylab import figure, subplot, imshow, show, colorbar, title
-from cPickle import dump
+from pickle import dump
 
 # files
 datafile = 'example_data.h5'
@@ -115,14 +115,14 @@ bs3 = BeamformerCleansc(freq_data=f, grid=g, mpos=m, r_diag=True, c=346.04, \
 #===============================================================================
 be = BeamformerEig(freq_data=f, grid=g, mpos=m, r_diag=True, c=346.04, n=-1, \
     cached=False) 
-bo = BeamformerOrth(beamformer=be, eva_list=range(38,54))
+bo = BeamformerOrth(beamformer=be, eva_list=list(range(38,54)))
 
 #===============================================================================
 # save all beamformers in an external file
 # important: import dump from cPickle !!!
 #===============================================================================
 all_bf = (bb0, bb1, bb2, bb3, bs0, bs1, bs2, bs3, bo)
-fi = open('all_bf.sav','w')
+fi = open('all_bf.sav','wb')
 dump(all_bf,fi,-1) # uses newest pickle protocol -1 (default = 0)
 fi.close()
 
