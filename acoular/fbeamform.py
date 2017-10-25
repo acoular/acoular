@@ -362,7 +362,7 @@ class BeamformerFunctional( BeamformerBase ):
         [
             [Item('mpos{}', style='custom')], 
             [Item('grid', style='custom'), '-<>'], 
-            [Item('gamma', label='Exponent', style='text')], 
+            [Item('gamma', label='Exponent', style='simple')], 
             [Item('c', label='Speed of sound')], 
             [Item('env{}', style='custom')], 
             '|'
@@ -509,7 +509,7 @@ class BeamformerEig( BeamformerBase ):
         [
             [Item('mpos{}', style='custom')], 
             [Item('grid', style='custom'), '-<>'], 
-            [Item('n', label='Component No.', style='text')], 
+            [Item('n', label='Component No.', style='simple')], 
             [Item('r_diag', label='Diagonal removed')], 
             [Item('c', label='Speed of sound')], 
             [Item('env{}', style='custom')], 
@@ -591,7 +591,7 @@ class BeamformerMusic( BeamformerEig ):
         [
             [Item('mpos{}', style='custom')], 
             [Item('grid', style='custom'), '-<>'], 
-            [Item('n', label='No. of sources', style='text')], 
+            [Item('n', label='No. of sources', style='simple')], 
             [Item('c', label='Speed of sound')], 
             [Item('env{}', style='custom')], 
             '|'
@@ -975,7 +975,7 @@ class BeamformerOrth (BeamformerBase):
         [
             [Item('mpos{}', style='custom')], 
             [Item('grid', style='custom'), '-<>'], 
-            [Item('n', label='Number of components', style='text')], 
+            [Item('n', label='Number of components', style='simple')], 
             [Item('r_diag', label='Diagonal removed')], 
             [Item('c', label='Speed of sound')], 
             [Item('env{}', style='custom')], 
@@ -1069,7 +1069,7 @@ class BeamformerCleansc( BeamformerBase ):
         [
             [Item('mpos{}', style='custom')], 
             [Item('grid', style='custom'), '-<>'], 
-            [Item('n', label='No. of iterations', style='text')], 
+            [Item('n', label='No. of iterations', style='simple')], 
             [Item('r_diag', label='Diagonal removed')], 
             [Item('c', label='Speed of sound')], 
             [Item('env{}', style='custom')], 
