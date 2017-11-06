@@ -380,9 +380,9 @@ class RectGrid3D( RectGrid):
         if z < self.z_min or z > self.z_max:
             raise ValueError("z-value out of range %f (%f, %f)" % \
                 (z,self.z_min,self.z_max))
-        xi = round((x-self.x_min)/self.increment3D[0])
-        yi = round((y-self.y_min)/self.increment3D[1])
-        zi = round((z-self.z_min)/self.increment3D[2])
+        xi = int(round((x-self.x_min)/self.increment3D[0]))
+        yi = int(round((y-self.y_min)/self.increment3D[1]))
+        zi = int(round((z-self.z_min)/self.increment3D[2]))
         return xi, yi, zi
 
     def indices ( self, x1, y1, z1, x2, y2, z2 ):
