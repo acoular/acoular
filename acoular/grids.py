@@ -197,9 +197,9 @@ class RectGrid( Grid ):
             co-ordinates from an array with the same shape as the grid.            
         """
         if x < self.x_min or x > self.x_max:
-            raise ValueError, "x-value out of range"
-        if y  <  self.y_min or y > self.y_max:
-            raise ValueError, "y-value out of range"
+           # raise ValueError, "x-value out of range"
+            if y  <  self.y_min or y > self.y_max:
+                raise ValueError("y-value out of range")
         xi = int((x-self.x_min)/self.increment+0.5)
         yi = int((y-self.y_min)/self.increment+0.5)
         return xi, yi
@@ -372,17 +372,17 @@ class RectGrid3D( RectGrid):
             co-ordinates from an array with the same shape as the grid.            
         """
         if x < self.x_min or x > self.x_max:
-            raise ValueError, "x-value out of range %f (%f, %f)" % \
-                (x,self.x_min,self.x_max)
+            raise ValueError("x-value out of range %f (%f, %f)" % \
+                (x,self.x_min,self.x_max))
         if y < self.y_min or y > self.y_max:
-            raise ValueError, "y-value out of range %f (%f, %f)" % \
-                (y,self.y_min,self.y_max)
+            raise ValueError("y-value out of range %f (%f, %f)" % \
+                (y,self.y_min,self.y_max))
         if z < self.z_min or z > self.z_max:
-            raise ValueError, "z-value out of range %f (%f, %f)" % \
-                (z,self.z_min,self.z_max)
-        xi = round((x-self.x_min)/self.increment3D[0])
-        yi = round((y-self.y_min)/self.increment3D[1])
-        zi = round((z-self.z_min)/self.increment3D[2])
+            raise ValueError("z-value out of range %f (%f, %f)" % \
+                (z,self.z_min,self.z_max))
+        xi = int(round((x-self.x_min)/self.increment3D[0]))
+        yi = int(round((y-self.y_min)/self.increment3D[1]))
+        zi = int(round((z-self.z_min)/self.increment3D[2]))
         return xi, yi, zi
 
     def indices ( self, x1, y1, z1, x2, y2, z2 ):

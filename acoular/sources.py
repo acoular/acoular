@@ -18,7 +18,8 @@
 """
 
 # imports from other packages
-from numpy import array, sqrt, ones, empty, newaxis, uint32, arange, dot
+from six import next
+from numpy import array, sqrt, ones, empty, newaxis, uint32, arange, dot, int64
 from traits.api import Float, Int, Property, Trait, Delegate, \
 cached_property, Tuple, HasPrivateTraits, CLong, File, Instance, Any, \
 on_trait_change, List, CArray
@@ -98,11 +99,11 @@ class TimeSamples( SamplesGenerator ):
         desc="Calibration data")
     
     #: Number of channels, is set automatically / read from file
-    numchannels = CLong(0L, 
+    numchannels = CLong(0, 
         desc="number of input channels")
 
     #: Number of time data samples, is set automatically / read from file
-    numsamples = CLong(0L, 
+    numsamples = CLong(0, 
         desc="number of samples")
 
     #: The time data as array of floats with dimension (numsamples, numchannels)
@@ -200,7 +201,7 @@ class MaskedTimeSamples( TimeSamples ):
     """
     
     #: Index of the first sample to be considered valid
-    start = CLong(0L, 
+    start = CLong(0, 
         desc="start of valid samples")
     
     #: Index of the last sample to be considered valid
@@ -216,11 +217,11 @@ class MaskedTimeSamples( TimeSamples ):
         desc="channel mask")
         
     #: Number of channels (including invalid channels), is set automatically
-    numchannels_total = CLong(0L, 
+    numchannels_total = CLong(0, 
         desc="total number of input channels")
 
     #: Number of time data samples (including invalid samples), is set automatically
-    numsamples_total = CLong(0L, 
+    numsamples_total = CLong(0, 
         desc="total number of samples per channel")
 
     #: Number of valid channels, is set automatically
@@ -261,10 +262,7 @@ class MaskedTimeSamples( TimeSamples ):
     def _get_channels( self ):
         if len(self.invalid_channels)==0:
             return slice(0, None, None)
-        allr = range(self.numchannels_total)
-        for channel in self.invalid_channels:
-            if channel in allr:
-                allr.remove(channel)
+        allr=[i for i in range(self.numchannels_total) if i not in self.invalid_channels]
         return array(allr)
     
     @cached_property
@@ -425,7 +423,7 @@ class PointSource( SamplesGenerator ):
         while n:
             n -= 1
             try:
-                out[i] = signal[array(0.5+ind*self.up, dtype=long)]/rm
+                out[i] = signal[array(0.5+ind*self.up, dtype=int64)]/rm
                 ind += 1.
                 i += 1
                 if i == num:
@@ -510,7 +508,7 @@ class MovingPointSource( PointSource ):
             # emission time relative to start time
             ind = (te-self.start_t+self.start)*self.sample_freq
             try:
-                out[i] = signal[array(0.5+ind*self.up, dtype=long)]/rm
+                out[i] = signal[array(0.5+ind*self.up, dtype=int64)]/rm
                 i += 1
                 if i == num:
                     yield out
@@ -607,8 +605,8 @@ class PointSourceDipole ( PointSource ):
             try:
                 # subtract the second signal b/c of phase inversion
                 out[i] = rm / dist * \
-                         (signal[array(0.5 + ind1 * self.up, dtype=long)] / rm1 - \
-                          signal[array(0.5 + ind2 * self.up, dtype=long)] / rm2)
+                         (signal[array(0.5 + ind1 * self.up, dtype=int64)] / rm1 - \
+                          signal[array(0.5 + ind2 * self.up, dtype=int64)] / rm2)
                 ind1 += 1.
                 ind2 += 1.
                 
@@ -803,7 +801,7 @@ class SourceMixer( SamplesGenerator ):
         for temp in self.sources[0].result(num):
             sh = temp.shape[0]
             for g in gens:
-                temp1 = g.next()
+                temp1 = next(g)
                 if temp.shape[0] > temp1.shape[0]:
                     temp = temp[:temp1.shape[0]]
                 temp += temp1[:temp.shape[0]]

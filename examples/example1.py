@@ -85,7 +85,7 @@ bc = BeamformerCapon(freq_data=f, grid=g, mpos=m, c=346.04, cached=False)
 be = BeamformerEig(freq_data=f, grid=g, mpos=m, r_diag=True, c=346.04, n=54)
 bm = BeamformerMusic(freq_data=f, grid=g, mpos=m, c=346.04, n=6)
 bd = BeamformerDamas(beamformer=bb, n_iter=100)
-bo = BeamformerOrth(beamformer=be, eva_list=range(38,54))
+bo = BeamformerOrth(beamformer=be, eva_list=list(range(38,54)))
 bs = BeamformerCleansc(freq_data=f, grid=g, mpos=m, r_diag=True, c=346.04)
 bcmf = BeamformerCMF(freq_data=f, grid=g, mpos=m, c=346.04, \
     method='LassoLarsBIC')

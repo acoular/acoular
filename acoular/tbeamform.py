@@ -16,8 +16,10 @@
 """
 
 # imports from other packages
+from __future__ import print_function, division
+from six import next
 from numpy import array, newaxis, empty, sqrt, arange, clip, r_, zeros, \
-histogram, unique, cross, dot
+histogram, unique, cross, dot, where, s_
 from traits.api import Float, CArray, Property, Trait, Bool, Delegate, \
 cached_property, List
 from traitsui.api import View, Item
@@ -119,7 +121,7 @@ class BeamformerTime( TimeInOut ):
             [Item('grid', style='custom'), '-<>'], 
             [Item('c', label='speed of sound')], 
             [Item('env{}', style='custom')], 
-            [Item('weights{}', style='custom')], 
+            [Item('weights{}', style='simple')], 
             '|'
         ], 
         title='Beamformer options', 
@@ -223,7 +225,7 @@ class BeamformerTimeSq( BeamformerTime ):
             [Item('r_diag', label='diagonal removed')], 
             [Item('c', label='speed of sound')], 
             [Item('env{}', style='custom')], 
-            [Item('weights{}', style='custom')], 
+            [Item('weights', style='simple')], 
             '|'
         ], 
         title='Beamformer options', 
@@ -341,7 +343,7 @@ class BeamformerTimeTraj( BeamformerTime ):
             [Item('trajectory{}', style='custom')], 
             [Item('c', label='speed of sound')], 
             [Item('env{}', style='custom')], 
-            [Item('weights{}', style='custom')], 
+            [Item('weights{}', style='simple')], 
             '|'
         ], 
         title='Beamformer options', 
@@ -411,11 +413,11 @@ class BeamformerTimeTraj( BeamformerTime ):
                 ooffset = 0
             if rflag:
                 # grid is only translated, not rotated
-                tpos = gpos + array(g.next())[:, newaxis]
+                tpos = gpos + array(next(g))[:, newaxis]
             else:
                 # grid is both translated and rotated
-                loc = array(g.next()) #translation array([0., 0.4, 1.])
-                dx = array(g1.next()) #direction vector (new x-axis)
+                loc = array(next(g)) #translation array([0., 0.4, 1.])
+                dx = array(next(g1)) #direction vector (new x-axis)
                 dy = cross(self.rvec, dx) # new y-axis
                 dz = cross(dx, dy) # new z-axis
                 RM = array((dx, dy, dz)).T # rotation matrix
@@ -438,9 +440,9 @@ class BeamformerTimeTraj( BeamformerTime ):
                 # test if data generator is exhausted
                 try:
                     # get next data
-                    block = data.next()
+                    block = next(data)
                 except StopIteration:
-                    print loc
+                    print(loc)
                     flag = False
                     break
                 # samples in the block, equals to num except for the last block
@@ -489,7 +491,7 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
             [Item('r_diag', label='diagonal removed')], 
             [Item('c', label='speed of sound')], 
             [Item('env{}', style='custom')], 
-            [Item('weights{}', style='custom')], 
+            [Item('weights{}', style='simple')], 
             '|'
         ], 
         title='Beamformer options', 
@@ -558,11 +560,11 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
                 ooffset = 0
             if rflag:
                 # grid is only translated, not rotated
-                tpos = gpos + array(g.next())[:, newaxis]
+                tpos = gpos + array(next(g))[:, newaxis]
             else:
                 # grid is both translated and rotated
-                loc = array(g.next()) #translation
-                dx = array(g1.next()) #direction vector (new x-axis)
+                loc = array(next(g)) #translation
+                dx = array(next(g1)) #direction vector (new x-axis)
                 dy = cross(self.rvec, dx) # new y-axis
                 dz = cross(dx, dy) # new z-axis
                 RM = array((dx, dy, dz)).T # rotation matrix
@@ -585,7 +587,7 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
                 # test if data generator is exhausted
                 try:
                     # get next data
-                    block = data.next()
+                    block = next(data)
                 except StopIteration:
                     flag = False
                     break

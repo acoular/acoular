@@ -13,6 +13,7 @@ microphone geometry in array_56.xml (part of acoular)
 Copyright (c) 2006-2015 The Acoular developers.
 All rights reserved.
 """
+from __future__ import print_function
 
 # imports from acoular
 import acoular
@@ -86,7 +87,7 @@ for method in ('LassoLars', 'LassoLarsBIC', \
     i1 += 1
     ti = time()
     map = b.synthetic(cfreq,1)
-    print time()-ti
+    print(time()-ti)
     mx = L_p(map.max())
     imshow(L_p(map.T), vmax=mx, vmin=mx-15, 
            interpolation='nearest', extent=g.extend())

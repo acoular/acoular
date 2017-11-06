@@ -11,8 +11,8 @@ def digest( obj, name='digest'):
         vobj = obj
         try:
             for i in do_.split('.'):               
-                vobj = vobj.get(i.rstrip('[]')).values()[0]
-            str_.append(str(vobj))
+                vobj = list(vobj.get(i.rstrip('[]')).values())[0]
+            str_.append(str(vobj).encode("UTF-8"))
         except:
             pass
-    return '_' + md5(''.join(str_)).hexdigest()
+    return '_' + md5(''.encode("UTF-8").join(str_)).hexdigest()

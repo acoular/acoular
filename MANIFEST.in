@@ -1,4 +1,3 @@
 include README.rst
 include examples/*.py
 include acoular/xml/*.*
-exclude weave_imp.cpp

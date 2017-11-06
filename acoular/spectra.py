@@ -13,17 +13,18 @@
     EigSpectra
     synthetic
 """
+from six.moves import xrange  # solves the xrange/range issue for python2/3: in py3 'xrange' is now treated as 'range' and in py2 nothing changes
 
 from numpy import array, ones, hanning, hamming, bartlett, blackman, \
 dot, newaxis, zeros, empty, fft, float32, complex64, linalg, \
-searchsorted, isscalar
+searchsorted, isscalar, fill_diagonal, arange
 import tables
 from traits.api import HasPrivateTraits, Int, Property, Instance, Trait, \
 Range, Bool, cached_property, property_depends_on, Delegate
 from traitsui.api import View
 from traitsui.menu import OKCancelButtons
 
-from .beamformer import faverage
+from .fastFuncs import calcCSM
 
 from .h5cache import H5cache
 from .internal import digest
@@ -161,7 +162,7 @@ class PowerSpectra( HasPrivateTraits ):
     @property_depends_on( 'block_size, ind_low, ind_high' )
     def _get_indices ( self ):
         try:
-            return range(self.block_size/2+1)[ self.ind_low: self.ind_high ]
+            return arange(self.block_size/2+1,dtype=int)[ self.ind_low: self.ind_high ]
         except IndexError:
             return range(0)
 
@@ -207,9 +208,9 @@ class PowerSpectra( HasPrivateTraits ):
             wind = self.window_( self.block_size )
             weight = dot( wind, wind )
             wind = wind[newaxis, :].swapaxes( 0, 1 )
-            numfreq = self.block_size/2 + 1
+            numfreq = int(self.block_size/2 + 1)
             csm_shape = (numfreq, t.numchannels, t.numchannels)
-            csm = zeros(csm_shape, 'D')
+            csmUpper = zeros(csm_shape, 'D')
             #print "num blocks", self.num_blocks
             # for backward compatibility
             if self.calib and self.calib.num_mics > 0:
@@ -227,13 +228,20 @@ class PowerSpectra( HasPrivateTraits ):
                 ns = data.shape[0]
                 temp[bs:bs+ns] = data
                 while pos+bs <= bs+ns:
-                    ft = fft.rfft(temp[pos:(pos+bs)]*wind, None, 0)
-                    faverage(csm, ft)
+                    ft = fft.rfft(temp[int(pos):int(pos+bs)]*wind, None, 0)
+                    calcCSM(csmUpper, ft)  # only upper triangular part of matrix is calculated (for speed reasons)
                     pos += posinc
                 temp[0:bs] = temp[bs:]
                 pos -= bs
+            
+            # create the full csm matrix via transposingand complex conj.
+            csmLower = csmUpper.conj().transpose(0,2,1)
+            [fill_diagonal(csmLower[cntFreq, :, :], 0) for cntFreq in xrange(csmLower.shape[0])]
+            csm = csmLower + csmUpper
+
             # onesided spectrum: multiplication by 2.0=sqrt(2)^2
             csm = csm*(2.0/self.block_size/weight/self.num_blocks)
+            
             if self.cached:
                 atom = tables.ComplexAtom(8)
                 filters = tables.Filters(complevel=5, complib='blosc')
@@ -255,7 +263,7 @@ class PowerSpectra( HasPrivateTraits ):
             Array of length *block_size/2+1* containing the sample frequencies.
         """
         return abs(fft.fftfreq(self.block_size, 1./self.time_data.sample_freq)\
-                    [:self.block_size/2+1])
+                    [:int(self.block_size/2+1)])
 
 
 class EigSpectra( PowerSpectra ):
