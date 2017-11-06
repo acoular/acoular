@@ -22,6 +22,7 @@
 """
 
 # imports from other packages
+from six import next
 from numpy import array, newaxis, empty, empty_like, pi, sin, sqrt, arange, \
 clip, r_, zeros, int16, histogram, unique, cross, dot
 from traits.api import Float, Int, CLong, \
@@ -38,7 +39,7 @@ from warnings import warn
 
 # acoular imports
 from .internal import digest
-from h5cache import H5cache, td_dir
+from .h5cache import H5cache, td_dir
 from .grids import RectGrid
 from .microphones import MicGeom
 from .environments import Environment
@@ -99,7 +100,7 @@ class MaskedTimeInOut ( TimeInOut ):
     """
         
     #: Index of the first sample to be considered valid
-    start = CLong(0L, 
+    start = CLong(0, 
         desc="start of valid samples")
     
     #: Index of the last sample to be considered valid
@@ -286,7 +287,7 @@ class Mixer( TimeInOut ):
         for temp in self.source.result(num):
             sh = temp.shape[0]
             for g in gens:
-                temp1 = g.next()
+                temp1 = next(g)
                 if temp.shape[0] > temp1.shape[0]:
                     temp = temp[:temp1.shape[0]]
                 temp += temp1[:temp.shape[0]]
@@ -381,7 +382,7 @@ class TimeAverage( TimeInOut ) :
         nav = self.naverage
         for temp in self.source.result(num*nav):
             ns, nc = temp.shape
-            nso = ns/nav
+            nso = int(ns/nav)
             if nso > 0:
                 yield temp[:nso*nav].reshape((nso, -1, nc)).mean(axis=1)
                 

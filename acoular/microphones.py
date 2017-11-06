@@ -84,10 +84,7 @@ class MicGeom( HasPrivateTraits ):
     def _get_mpos( self ):
         if len(self.invalid_channels)==0:
             return self.mpos_tot
-        allr = range(self.mpos_tot.shape[-1])
-        for channel in self.invalid_channels:
-            if channel in allr:
-                allr.remove(channel)
+        allr=[i for i in range(self.mpos_tot.shape[-1]) if i not in self.invalid_channels]
         return self.mpos_tot[:, array(allr)]
 
     @cached_property
@@ -111,7 +108,7 @@ class MicGeom( HasPrivateTraits ):
         xyz = []
         for el in doc.getElementsByTagName('pos'):
             names.append(el.getAttribute('Name'))
-            xyz.append(map(lambda a : float(el.getAttribute(a)), 'xyz'))
+            xyz.append(list(map(lambda a : float(el.getAttribute(a)), 'xyz')))
         self.mpos_tot = array(xyz, 'd').swapaxes(0, 1)
 #        self.num_mics = self.mpos.shape[1]
 

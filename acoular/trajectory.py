@@ -62,11 +62,11 @@ class Trajectory( HasPrivateTraits ):
         
     @property_depends_on('points[]')
     def _get_interval( self ):
-        return sort(self.points.keys())[r_[0, -1]]
+        return sort(list(self.points.keys()))[r_[0, -1]]
 
     @property_depends_on('points[]')
     def _get_tck( self ):
-        t = sort(self.points.keys())
+        t = sort(list(self.points.keys()))
         xp = array([self.points[i] for i in t]).T
         k = min(3, len(self.points)-1)
         tcku = splprep(xp, u=t, s=0, k=k)

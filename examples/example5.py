@@ -19,7 +19,7 @@ All rights reserved.
 from acoular import L_p
 # other imports
 from pylab import figure, subplot, imshow, show, colorbar, title
-from cPickle import load
+from pickle import load
 
 #octave band of interest
 cfreq = 4000
@@ -28,7 +28,7 @@ cfreq = 4000
 # load all beamformers in an external file
 # important: import load from cPickle !!!
 #===============================================================================
-fi = open('all_bf.sav','r')
+fi = open('all_bf.sav','rb')
 all_bf = load(fi)
 fi.close()
 
