@@ -1063,7 +1063,7 @@ class BeamformerCleansc( BeamformerBase ):
     # internal identifier
     digest = Property( 
         depends_on = ['mpos.digest', 'grid.digest', 'freq_data.digest', 'c', \
-        'env.digest', 'n', 'damp', 'stopn', 'steer'], )
+        'r_diag', 'env.digest', 'steer', 'n', 'damp', 'stopn'], )
 
     traits_view = View(
         [
