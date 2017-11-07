@@ -66,7 +66,7 @@ def steerVecTranslation(steer):
                     'true location': 4,
                     'classic': 1,
                     'inverse': 2,
-                    'specific': 'specific'}[steer]
+                    'custom': 'custom'}[steer]
     return steerNumeric
 
 class BeamformerBase( HasPrivateTraits ):
