@@ -838,7 +838,7 @@ class BeamformerDamas (BeamformerBase):
         desc="number of iterations")
     
     #: Damping factor in modified gauss-seidel
-    dampingFactor = Float(1.0,
+    damp = Float(1.0,
                           desc="damping factor in modified gauss-seidel-DAMAS-approach")
 
     #: Flag that defines how to calculate and store the point spread function, 
@@ -848,7 +848,7 @@ class BeamformerDamas (BeamformerBase):
     
     # internal identifier
     digest = Property( 
-        depends_on = ['beamformer.digest', 'n_iter'], 
+        depends_on = ['beamformer.digest', 'n_iter', 'damp'], 
         )
 
     # internal identifier
@@ -912,7 +912,7 @@ class BeamformerDamas (BeamformerBase):
                 y = array(self.beamformer.result[i], dtype=float64)
                 x = y.copy()
                 psf = p.psf[:]
-                damasSolverGaussSeidel(psf, y, self.n_iter, self.dampingFactor, x)
+                damasSolverGaussSeidel(psf, y, self.n_iter, self.damp, x)
                 ac[i] = x
                 fr[i] = True
 
