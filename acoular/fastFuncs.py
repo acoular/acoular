@@ -58,7 +58,7 @@ def beamformerFreq(boolIsEigValProb, steerVecType, boolRemovedDiagOfCSM, normFac
         ``boolIsEigValProb`` (bool) ... should the beamformer use spectral
         decomposition of the csm matrix?
 
-        ``steerVecType`` (one of the following options: 1, 2, 3, 4, 'specific') ...
+        ``steerVecType`` (one of the following options: 1, 2, 3, 4, 'custom') ...
         either build the steering vector via the predefined formulations
         I - IV (see Sarradj 2012) or pass it directly.
 
@@ -69,13 +69,13 @@ def beamformerFreq(boolIsEigValProb, steerVecType, boolRemovedDiagOfCSM, normFac
 
         ``inputTuple`` ... dependent of the inputs above. If
 
-                    ``boolIsEigValProb`` = False & ``steerVecType`` != 'specific' --> ``inputTuple`` =( ``distGridToArrayCenter``, ``distGridToAllMics``, ``wavenumber``, ``csm``)
+                    ``boolIsEigValProb`` = False & ``steerVecType`` != 'custom' --> ``inputTuple`` =( ``distGridToArrayCenter``, ``distGridToAllMics``, ``wavenumber``, ``csm``)
 
-                    ``boolIsEigValProb`` = False & ``steerVecType`` = 'specific'  --> ``inputTuple`` =( ``steeringVector``, ``csm``)
+                    ``boolIsEigValProb`` = False & ``steerVecType`` = 'custom'  --> ``inputTuple`` =( ``steeringVector``, ``csm``)
 
-                    ``boolIsEigValProb`` = True  & ``steerVecType`` != 'specific' --> ``inputTuple`` =( ``distGridToArrayCenter``, ``distGridToAllMics``, ``wavenumber``, ``eigValues``, ``eigVectors``)
+                    ``boolIsEigValProb`` = True  & ``steerVecType`` != 'custom' --> ``inputTuple`` =( ``distGridToArrayCenter``, ``distGridToAllMics``, ``wavenumber``, ``eigValues``, ``eigVectors``)
 
-                    ``boolIsEigValProb`` = True  & ``steerVecType`` = 'specific'  --> ``inputTuple`` =( ``steeringVector``, ``eigValues``, ``eigVectors``)
+                    ``boolIsEigValProb`` = True  & ``steerVecType`` = 'custom'  --> ``inputTuple`` =( ``steeringVector``, ``eigValues``, ``eigVectors``)
 
 
                     In all 4 cases:
@@ -137,8 +137,8 @@ def beamformerFreq(boolIsEigValProb, steerVecType, boolRemovedDiagOfCSM, normFac
                       (False, 3, True) : _freqBeamformer_Formulation3AkaTrueLevel_CsmRemovedDiag,
                       (False, 4, False) : _freqBeamformer_Formulation4AkaTrueLocation_FullCSM,
                       (False, 4, True) : _freqBeamformer_Formulation4AkaTrueLocation_CsmRemovedDiag,
-                      (False, 'specific', False) : _freqBeamformer_SpecificSteerVec_FullCSM,
-                      (False, 'specific', True) : _freqBeamformer_SpecificSteerVec_CsmRemovedDiag,
+                      (False, 'custom', False) : _freqBeamformer_SpecificSteerVec_FullCSM,
+                      (False, 'custom', True) : _freqBeamformer_SpecificSteerVec_CsmRemovedDiag,
                       (True, 1, False) : _freqBeamformer_EigValProb_Formulation1AkaClassic_FullCSM,
                       (True, 1, True) : _freqBeamformer_EigValProb_Formulation1AkaClassic_CsmRemovedDiag,
                       (True, 2, False) : _freqBeamformer_EigValProb_Formulation2AkaInverse_FullCSM,
@@ -147,12 +147,12 @@ def beamformerFreq(boolIsEigValProb, steerVecType, boolRemovedDiagOfCSM, normFac
                       (True, 3, True) : _freqBeamformer_EigValProb_Formulation3AkaTrueLevel_CsmRemovedDiag,
                       (True, 4, False) : _freqBeamformer_EigValProb_Formulation4AkaTrueLocation_FullCSM,
                       (True, 4, True) : _freqBeamformer_EigValProb_Formulation4AkaTrueLocation_CsmRemovedDiag,
-                      (True, 'specific', False) : _freqBeamformer_EigValProb_SpecificSteerVec_FullCSM,
-                      (True, 'specific', True) : _freqBeamformer_EigValProb_SpecificSteerVec_CsmRemovedDiag,}
+                      (True, 'custom', False) : _freqBeamformer_EigValProb_SpecificSteerVec_FullCSM,
+                      (True, 'custom', True) : _freqBeamformer_EigValProb_SpecificSteerVec_CsmRemovedDiag,}
     coreFunc = beamformerDict[(boolIsEigValProb, steerVecType, boolRemovedDiagOfCSM)]
 
     # prepare Input
-    if steerVecType == 'specific':  # beamformer with specific steering vector
+    if steerVecType == 'custom':  # beamformer with custom steering vector
         steerVec = inputTuple[0]
         nFreqs, nGridPoints = steerVec.shape[0], steerVec.shape[1]
         if boolIsEigValProb:
@@ -171,7 +171,7 @@ def beamformerFreq(boolIsEigValProb, steerVecType, boolRemovedDiagOfCSM, normFac
     beamformOutput = np.zeros((nFreqs, nGridPoints), np.float64)
     for cntFreqs in xrange(nFreqs):
         result = np.zeros(nGridPoints, np.float64)
-        if steerVecType == 'specific':  # beamformer with specific steering vector
+        if steerVecType == 'custom':  # beamformer with custom steering vector
             if boolIsEigValProb:
                 coreFunc(eigVal[cntFreqs, :], eigVec[cntFreqs, :, :], steerVec[cntFreqs, :, :], normFactor, result)
             else:
@@ -671,15 +671,15 @@ def calcPointSpreadFunction(steerVecType, inputTuple):
 
     Input
     -----
-        ``steerVecType`` (one of the following options: 1, 2, 3, 4, 'specific') ...
+        ``steerVecType`` (one of the following options: 1, 2, 3, 4, 'custom') ...
         either build the steering vector via the predefined formulations
         I - IV (see Sarradj 2012) or pass it directly (not implemented yet).
 
         ``inputTuple`` ... dependent of the inputs above. If
 
-                    ``steerVecType`` != 'specific' --> ``inputTuple`` =(``distGridToArrayCenter``, ``distGridToAllMics``, ``wavenumber``, ``indSource``)
+                    ``steerVecType`` != 'custom' --> ``inputTuple`` =(``distGridToArrayCenter``, ``distGridToAllMics``, ``wavenumber``, ``indSource``)
 
-                    ``steerVecType`` = 'specific' --> NOT IMPLEMENTED YET!!!!!!    #``inputTuple`` =(``steeringVector``, ``transfer``, ``indSource``)
+                    ``steerVecType`` = 'custom' --> NOT IMPLEMENTED YET!!!!!!    #``inputTuple`` =(``steeringVector``, ``transfer``, ``indSource``)
 
                     In both cases:
 
@@ -721,12 +721,12 @@ def calcPointSpreadFunction(steerVecType, inputTuple):
                2 : _psf_Formulation2AkaInverse,
                3 : _psf_Formulation3AkaTrueLevel,
                4 : _psf_Formulation4AkaTrueLocation}#,
-#               'specific' : _psf_SpecificSteerVec}
+#               'custom' : _psf_SpecificSteerVec}
     coreFunc = psfDict[steerVecType]
 
     # prepare input
-    if steerVecType == 'specific':  # PSF with specific steering vector
-        raise ValueError('specific Steering vectors are not implemented yet.')
+    if steerVecType == 'custom':  # PSF with custom steering vector
+        raise ValueError('custom Steering vectors are not implemented yet.')
 #        steerVec, transFunc, indSource = inputTuple[0], inputTuple[1], inputTuple[2]
 #        nFreqs, nGridPoints = steerVec.shape[0], steerVec.shape[1]
     else:  # predefined steering vectors (Formulation I - IV)
@@ -738,8 +738,8 @@ def calcPointSpreadFunction(steerVecType, inputTuple):
     psfOutput = np.zeros((nFreqs, nGridPoints, nSources), np.float64)
     for cntFreqs in xrange(nFreqs):
         result = np.zeros((nGridPoints, nSources), np.float64)
-        if steerVecType == 'specific':
-            raise ValueError('specific Steering vectors are not implemented yet.')
+        if steerVecType == 'custom':
+            raise ValueError('custom Steering vectors are not implemented yet.')
 #            coreFunc(steerVec[cntFreqs, :, :], transFunc[cntFreqs, indSource, :], result)
         else:  # predefined steering vector (Formulation I - IV)
             coreFunc(distGridToArrayCenter, distGridToAllMics, distGridToArrayCenter[indSource], distGridToAllMics[indSource, :], wavenumber[cntFreqs].imag, result)
