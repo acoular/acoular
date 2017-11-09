@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2014, Acoular Development Team.
+# Copyright (c) 2007-2017, Acoular Development Team.
 #------------------------------------------------------------------------------
 """Implements calibration of multichannel time signals.
 
@@ -38,7 +38,7 @@ class Calib( HasPrivateTraits ):
     basename = Property( depends_on = 'from_file', 
         desc="basename of xml file")
     
-    #: Number of microphones in the calibration data , 
+    #: Number of microphones in the calibration data, 
     #: is set automatically / read from file.
     num_mics = CLong( 0, 
         desc="number of microphones in the geometry")
@@ -48,7 +48,7 @@ class Calib( HasPrivateTraits ):
     data = CArray(
         desc="calibration data")
 
-    # internal identifier
+    # Internal identifier
     digest = Property( depends_on = ['basename', ] )
 
     traits_view = View(
@@ -73,7 +73,9 @@ class Calib( HasPrivateTraits ):
     
     @on_trait_change('basename')
     def import_data( self ):
-        "loads the calibration data from .xml file"
+        """ 
+        Loads the calibration data from .xml file 
+        """
         if not path.isfile(self.from_file):
             # empty calibration
             if self.basename=='':
