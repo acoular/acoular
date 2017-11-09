@@ -18,18 +18,20 @@ def calcCSM(csm, SpecAllMics):
     """ Adds a given spectrum to the Cross-Spectral-Matrix (CSM).
     Here only the upper triangular matrix of the CSM is calculated. After
     averaging over the various ensembles, the whole CSM is created via complex 
-    conjugation transposing. This happens outside (in acoular.spectra). This method
-    was called 'faverage' in earlier versions of acoular.
+    conjugation transposing. This happens outside 
+    (in :class:`PowerSpectra<acoular.spectra.PowerSpectra>`). 
+    This method was called 'faverage' in acoular versions <= 16.5.
     
-    Input
-    -----
-        ``csm`` ... complex128[nFreqs, nMics, nMics] --> the current CSM.
-        
-        ``SpecAllMics`` ...complex128[nFreqs, nMics] --> spectrum of the added ensemble at all Mics.
+    Parameters
+    ----------
+    csm : complex128[nFreqs, nMics, nMics] 
+        The cross spectral matrix which gets updated with the spectrum of the ensemble.
+    SpecAllMics : complex128[nFreqs, nMics] 
+        Spectrum of the added ensemble at all Mics.
     
     Returns
     -------
-        ``None`` ... as the input ``csm`` gets overwritten.
+    None : as the input csm gets overwritten.
     """
 #==============================================================================
 #     It showed, that parallelizing brings no benefit when calling calcCSM once per 
@@ -53,80 +55,81 @@ def beamformerFreq(boolIsEigValProb, steerVecType, boolRemovedDiagOfCSM, normFac
     steering vector formulation (see Sarradj 2012) or pass it your own
     steering vector.
 
-    Input
-    -----
-        ``boolIsEigValProb`` (bool) ... should the beamformer use spectral
-        decomposition of the csm matrix?
-
-        ``steerVecType`` (one of the following options: 1, 2, 3, 4, 'custom') ...
-        either build the steering vector via the predefined formulations
-        I - IV (see Sarradj 2012) or pass it directly.
-
-        ``boolRemovedDiagOfCSM`` (bool) ... should the diagonal of the csm be removed?
-        
-        ``normFactor`` (float) ... in here both the signalenergy loss factor (due to removal of the csm diagonal) as well as
+    Parameters
+    ----------
+    boolIsEigValProb : bool 
+        Should the beamformer use spectral decomposition of the csm matrix?
+    steerVecType : (one of the following options: 1, 2, 3, 4, 'custom')
+        Either build the steering vector via the predefined formulations
+        I - IV (see :ref:`Sarradj, 2012<Sarradj2012>`) or pass it directly.
+    boolRemovedDiagOfCSM : bool
+        Should the diagonal of the csm be removed?
+    normFactor : float
+        In here both the signalenergy loss factor (due to removal of the csm diagonal) as well as
         beamforming algorithm (functional, capon, ...) dependent normalization factors are handled.
+    inputTuple : dependent of the inputs above. There are 4 combinations:
+        boolIsEigValProb = False & steerVecType != 'custom' : 
+            inputTuple = (distGridToArrayCenter, distGridToAllMics, waveNumber, csm)
+        boolIsEigValProb = False & steerVecType = 'custom' : 
+            inputTuple = (steeringVector, csm)
+        boolIsEigValProb = True  & steerVecType != 'custom' :
+            inputTuple = (distGridToArrayCenter, distGridToAllMics, waveNumber, eigValues, eigVectors)
+        boolIsEigValProb = True  & steerVecType = 'custom' :
+            inputTuple = (steeringVector, eigValues, eigVectors)
 
-        ``inputTuple`` ... dependent of the inputs above. If
-
-                    ``boolIsEigValProb`` = False & ``steerVecType`` != 'custom' --> ``inputTuple`` =( ``distGridToArrayCenter``, ``distGridToAllMics``, ``wavenumber``, ``csm``)
-
-                    ``boolIsEigValProb`` = False & ``steerVecType`` = 'custom'  --> ``inputTuple`` =( ``steeringVector``, ``csm``)
-
-                    ``boolIsEigValProb`` = True  & ``steerVecType`` != 'custom' --> ``inputTuple`` =( ``distGridToArrayCenter``, ``distGridToAllMics``, ``wavenumber``, ``eigValues``, ``eigVectors``)
-
-                    ``boolIsEigValProb`` = True  & ``steerVecType`` = 'custom'  --> ``inputTuple`` =( ``steeringVector``, ``eigValues``, ``eigVectors``)
-
-
-                    In all 4 cases:
-
-                        ``distGridToArrayCenter`` ... float64[nGridpoints]
-
-                        ``distGridToAllMics`` ... float64[nGridpoints, nMics]
-
-                        ``wavenumber`` ... complex128[nFreqs] (the wavenumber should be stored in the imag-part)
-
-                        ``csm`` ... complex128[nFreqs, nMics, nMics]
-
-                        ``steeringVector`` ... complex128[nFreqs, nGridPoints, nMics]
-
-                        ``eigValues`` ... float64[nFreqs, nEV] (nEV ... number of eigenvalues which should be taken into account. The chosen eigenvalues have to be passed to 'beamformerFreq'.)
-
-                        ``eigVectors`` ... complex128[nFreqs, nMics, nEV] (eigenvectors corresponding to ``eigVectors``)
-
+        Data types : In all 4 above cases the data types of inputTuple are
+            distGridToArrayCenter : float64[nGridpoints]
+                Distance of all gridpoints to the center of sensor array
+            distGridToAllMics : float64[nGridpoints, nMics]
+                Distance of all gridpoints to all sensors of array
+            waveNumber : complex128[nFreqs]
+                The wave number should be stored in the imag-part
+            csm : complex128[nFreqs, nMics, nMics]
+                The cross spectral matrix
+            steeringVector : complex128[nFreqs, nGridPoints, nMics]
+                The steering vector of each gridpoint and frequency
+            eigValues : float64[nFreqs, nEV]
+                nEV is the number of eigenvalues which should be taken into account. 
+                All passed eigenvalues will be evaluated.
+            eigVectors : complex128[nFreqs, nMics, nEV]
+                Eigen vectors corresponding to eigValues. All passed eigenvector slices will be evaluated.
+    
     Returns
     -------
-        Autopower spectrum beamforming map [nFreqs, nGridPoints]
+    Autopower spectrum beamforming map : [nFreqs, nGridPoints]
     
     Some Notes on the optimization of all subroutines
     -------------------------------------------------
-        Reducing beamforming equation:
-            Let the csm be C and the steering vector be h, than, using Linear Albegra, the conventional beamformer can be written as 
-            
-            .. math:: B = h^H \\cdot C \\cdot h,
-            with ^H meaning the complex conjugated transpose.
-            When using that C is a hermitian matrix one can reduce the equation to
-            
-            .. math:: B = h^H \\cdot C_D \\cdot h + 2 \\cdot Real(h^H \\cdot C_U \\cdot h),
-            where C_D and C_U are the diagonal part and upper part of C respectively.
-        Steering vector:
-            Theoretically the steering vector always includes the term "exp(distMicsGrid - distArrayCenterGrid)", but as the steering vector gets multplied with its complex conjugation in 
-            all beamformer routines, the constant "distArrayCenterGrid" cancels out --> In order to save operations, it is not implemented.
-        Spectral decomposition of the CSM:
-            In Linear Algebra the spectral decomposition of the CSM matrix would be:
-            
-            .. math:: CSM = \\sum_{i=1}^{nEigenvalues} \\lambda_i (v_i \\cdot v_i^H) ,
-            where lambda_i is the i-th eigenvalue and 
-            v_i is the eigenvector[nEigVal,1] belonging to lambda_i and ^H denotes the complex conjug transpose. Using this, one must not build the whole CSM 
-            (which would be time consuming), but can drag the steering vector into the sum of the spectral decomp. This saves a lot of operations.
-        Squares:
-            Seemingly "a * a" is slightly faster than "a**2" in numba
-        Square of abs():
-            Even though "a.real**2 + a.imag**2" would have fewer operations, modern processors seem to be optimized for "a * a.conj" and are slightly faster the latter way.
-            Both Versions are much faster than "abs(a)**2".
-        Using Cascading Sums:
-            When using the Spectral-Decomposition-Beamformer one could use numpys cascading sums for the scalar product "eigenVec.conj * steeringVector". BUT (at the moment) this only brings benefits 
-            in comp-time for a very small range of nMics (approx 250) --> Therefor it is not implemented here.
+    Reducing beamforming equation:
+        Let the csm be C and the steering vector be h, than, using Linear Albegra, the conventional beamformer can be written as 
+        
+        .. math:: B = h^H \\cdot C \\cdot h,
+        with ^H meaning the complex conjugated transpose.
+        When using that C is a hermitian matrix one can reduce the equation to
+        
+        .. math:: B = h^H \\cdot C_D \\cdot h + 2 \\cdot Real(h^H \\cdot C_U \\cdot h),
+        where C_D and C_U are the diagonal part and upper part of C respectively.
+    Steering vector:
+        Theoretically the steering vector always includes the term "exp(distMicsGrid - distArrayCenterGrid)", 
+        but as the steering vector gets multplied with its complex conjugation in all beamformer routines, 
+        the constant "distArrayCenterGrid" cancels out --> In order to save operations, it is not implemented.
+    Spectral decomposition of the CSM:
+        In Linear Algebra the spectral decomposition of the CSM matrix would be:
+        
+        .. math:: CSM = \\sum_{i=1}^{nEigenvalues} \\lambda_i (v_i \\cdot v_i^H) ,
+        where lambda_i is the i-th eigenvalue and 
+        v_i is the eigenvector[nEigVal,1] belonging to lambda_i and ^H denotes the complex conjug transpose. 
+        Using this, one must not build the whole CSM (which would be time consuming), but can drag the 
+        steering vector into the sum of the spectral decomp. This saves a lot of operations.
+    Squares:
+        Seemingly "a * a" is slightly faster than "a**2" in numba
+    Square of abs():
+        Even though "a.real**2 + a.imag**2" would have fewer operations, modern processors seem to be optimized 
+        for "a * a.conj" and are slightly faster the latter way. Both Versions are much faster than "abs(a)**2".
+    Using Cascading Sums:
+        When using the Spectral-Decomposition-Beamformer one could use numpys cascading sums for the scalar product 
+        "eigenVec.conj * steeringVector". BUT (at the moment) this only brings benefits in comp-time for a very 
+        small range of nMics (approx 250) --> Therefor it is not implemented here.
     """
     # get the beamformer type (key-tuple = (isEigValProblem, formulationOfSteeringVector, RemovalOfCSMDiag))
     beamformerDict = {(False, 1, False) : _freqBeamformer_Formulation1AkaClassic_FullCSM,
@@ -160,8 +163,8 @@ def beamformerFreq(boolIsEigValProb, steerVecType, boolRemovedDiagOfCSM, normFac
         else:
             csm = inputTuple[1]
     else:  # predefined beamformers (Formulation I - IV)
-        distGridToArrayCenter, distGridToAllMics, wavenumber = inputTuple[0], inputTuple[1], inputTuple[2]
-        nFreqs, nGridPoints = wavenumber.shape[0], distGridToAllMics.shape[0]
+        distGridToArrayCenter, distGridToAllMics, waveNumber = inputTuple[0], inputTuple[1], inputTuple[2]
+        nFreqs, nGridPoints = waveNumber.shape[0], distGridToAllMics.shape[0]
         if boolIsEigValProb:
             eigVal, eigVec = inputTuple[3], inputTuple[4]
         else:
@@ -178,9 +181,9 @@ def beamformerFreq(boolIsEigValProb, steerVecType, boolRemovedDiagOfCSM, normFac
                 coreFunc(csm[cntFreqs, :, :], steerVec[cntFreqs, :, :], normFactor, result)
         else:  # predefined beamformers (Formulation I - IV)
             if boolIsEigValProb:
-                coreFunc(eigVal[cntFreqs, :], eigVec[cntFreqs, :, :], distGridToArrayCenter, distGridToAllMics, wavenumber[cntFreqs].imag, normFactor, result)
+                coreFunc(eigVal[cntFreqs, :], eigVec[cntFreqs, :, :], distGridToArrayCenter, distGridToAllMics, waveNumber[cntFreqs].imag, normFactor, result)
             else:
-                coreFunc(csm[cntFreqs, :, :], distGridToArrayCenter, distGridToAllMics, wavenumber[cntFreqs].imag, normFactor, result)
+                coreFunc(csm[cntFreqs, :, :], distGridToArrayCenter, distGridToAllMics, waveNumber[cntFreqs].imag, normFactor, result)
         beamformOutput[cntFreqs, :] = result
     return beamformOutput
 
@@ -665,56 +668,54 @@ def _freqBeamformer_EigValProb_SpecificSteerVec_CsmRemovedDiag(eigVal, eigVec, s
 
 #%% Point - Spread - Function
 def calcPointSpreadFunction(steerVecType, inputTuple):
-    """ Calculates the Point-Spread-Functions. Use either a predefined
-    steering vector formulation (see Sarradj 2012) or pass it your own
-    steering vector.
+    """ Calculates the Point-Spread-Functions. Use either a predefined steering vector 
+    formulation (see :ref:`Sarradj, 2012<Sarradj2012>`) or pass it your own steering vector.
 
-    Input
-    -----
-        ``steerVecType`` (one of the following options: 1, 2, 3, 4, 'custom') ...
-        either build the steering vector via the predefined formulations
-        I - IV (see Sarradj 2012) or pass it directly (not implemented yet).
-
-        ``inputTuple`` ... dependent of the inputs above. If
-
-                    ``steerVecType`` != 'custom' --> ``inputTuple`` =(``distGridToArrayCenter``, ``distGridToAllMics``, ``wavenumber``, ``indSource``)
-
-                    ``steerVecType`` = 'custom' --> NOT IMPLEMENTED YET!!!!!!    #``inputTuple`` =(``steeringVector``, ``transfer``, ``indSource``)
-
-                    In both cases:
-
-                        ``distGridToArrayCenter`` ... float64[nGridpoints]
-
-                        ``distGridToAllMics`` ... float64[nGridpoints, nMics]
-
-                        ``wavenumber`` ... complex128[nFreqs] (the wavenumber should be stored in the imag-part)
-
-                        ``indSource`` ... a LIST of int (e.g. indSource=[5] is fine; indSource=5 doesn't work):
-                        specifies which gridpoints should be assumed to be sources -> a seperate psf will be calculated for each source
+    Parameters
+    ----------
+    steerVecType : (one of the following options: 1, 2, 3, 4, 'custom')
+        Either build the steering vector via the predefined formulations
+        I - IV (see :ref:`Sarradj, 2012<Sarradj2012>`) or pass it directly. (not implemented yet).
+    inputTuple: dependent of the inputs above. If
+        steerVecType != 'custom' :
+            inputTuple =(distGridToArrayCenter, distGridToAllMics, waveNumber, indSource)
+        steerVecType = 'custom' :
+            NOT IMPLEMENTED YET!!!!!!    #inputTuple =(steeringVector, transfer, indSource)
+    
+        Data types : In both cases the data types of inputTuple are
+            distGridToArrayCenter : float64[nGridpoints]
+                Distance of all gridpoints to the center of sensor array
+            distGridToAllMics : float64[nGridpoints, nMics]
+                Distance of all gridpoints to all sensors of array
+            waveNumber : complex128[nFreqs]
+                The wave number should be stored in the imag-part
+            indSource : a LIST of int (e.g. indSource=[5] is fine; indSource=5 doesn't work):
+                specifies which gridpoints should be assumed to be sources 
+                --> a seperate psf will be calculated for each source
 
     Returns
     -------
-        Autopower spectrum PSF map [nFreqs, nGridPoints, nSources]
+    Autopower spectrum PSF map : [nFreqs, nGridPoints, nSources]
     
     Some Notes on the optimization of all subroutines
     -------------------------------------------------
-        Reducing beamforming equation:
-            Let the steering vector be h, than, using Linear Albegra, the PSF of a SourcePoint S would be
-            
-            .. math:: B = h^H \\cdot (a_S \\cdot a_S^H) \\cdot h,
-            with ^H meaning the complex conjugated transpose and a_s the transfer function from source to gridpoint.
-            The (...)-part equals the CSM that the source would produce via the chosen steering vec formulation. 
-            Using (for example) tensor calculus, one can reduce the equation to:
-            
-            .. math:: B = \\left| h^H \\cdot a_S \\right| ^ 2.
-        Steering vector:
-            Theoretically the steering vector always includes the term "exp(distMicsGrid - distArrayCenterGrid)", but as the steering vector gets multplied with its complex conjugation in 
-            all beamformer routines, the constant "distArrayCenterGrid" cancels out --> In order to save operations, it is not implemented.
-        Squares:
-            Seemingly "a * a" is slightly faster than "a**2" in numba
-        Square of abs():
-            Even though "a.real**2 + a.imag**^2" would have fewer operations, modern processors seem to be optimized for "a * a.conj" and are slightly faster the latter way.
-            Both Versions are much faster than "abs(a)**2".
+    Reducing beamforming equation:
+        Let the steering vector be h, than, using Linear Albegra, the PSF of a SourcePoint S would be
+        
+        .. math:: B = h^H \\cdot (a_S \\cdot a_S^H) \\cdot h,
+        with ^H meaning the complex conjugated transpose and a_s the transfer function from source to gridpoint.
+        The (...)-part equals the CSM that the source would produce via the chosen steering vec formulation. 
+        Using (for example) tensor calculus, one can reduce the equation to:
+        
+        .. math:: B = \\left| h^H \\cdot a_S \\right| ^ 2.
+    Steering vector:
+        Theoretically the steering vector always includes the term "exp(distMicsGrid - distArrayCenterGrid)", but as the steering vector gets multplied with its complex conjugation in 
+        all beamformer routines, the constant "distArrayCenterGrid" cancels out --> In order to save operations, it is not implemented.
+    Squares:
+        Seemingly "a * a" is slightly faster than "a**2" in numba
+    Square of abs():
+        Even though "a.real**2 + a.imag**^2" would have fewer operations, modern processors seem to be optimized for "a * a.conj" and are slightly faster the latter way.
+        Both Versions are much faster than "abs(a)**2".
     """
     # get the steering vector formulation
     psfDict = {1 : _psf_Formulation1AkaClassic,
@@ -730,8 +731,8 @@ def calcPointSpreadFunction(steerVecType, inputTuple):
 #        steerVec, transFunc, indSource = inputTuple[0], inputTuple[1], inputTuple[2]
 #        nFreqs, nGridPoints = steerVec.shape[0], steerVec.shape[1]
     else:  # predefined steering vectors (Formulation I - IV)
-        distGridToArrayCenter, distGridToAllMics, wavenumber, indSource = inputTuple[0], inputTuple[1], inputTuple[2], inputTuple[3]
-        nFreqs, nGridPoints = wavenumber.shape[0], distGridToAllMics.shape[0]
+        distGridToArrayCenter, distGridToAllMics, waveNumber, indSource = inputTuple[0], inputTuple[1], inputTuple[2], inputTuple[3]
+        nFreqs, nGridPoints = waveNumber.shape[0], distGridToAllMics.shape[0]
     nSources = len(indSource)
 
     # psf routine: parallelized over Gridpoints
@@ -742,7 +743,7 @@ def calcPointSpreadFunction(steerVecType, inputTuple):
             raise ValueError('custom Steering vectors are not implemented yet.')
 #            coreFunc(steerVec[cntFreqs, :, :], transFunc[cntFreqs, indSource, :], result)
         else:  # predefined steering vector (Formulation I - IV)
-            coreFunc(distGridToArrayCenter, distGridToAllMics, distGridToArrayCenter[indSource], distGridToAllMics[indSource, :], wavenumber[cntFreqs].imag, result)
+            coreFunc(distGridToArrayCenter, distGridToAllMics, distGridToArrayCenter[indSource], distGridToAllMics[indSource, :], waveNumber[cntFreqs].imag, result)
         psfOutput[cntFreqs, :, :] = result
     return psfOutput
 
@@ -825,22 +826,24 @@ def _psf_Formulation4AkaTrueLocation(distGridToArrayCenter, distGridToAllMics, d
                  (nb.float64[:,:], nb.float64[:], nb.int64[:], nb.float64[:], nb.float64[:])], '(g,g),(g),(),()->(g)', nopython=True, target=parallelOption, cache=cachedOption)
 def damasSolverGaussSeidel(A, dirtyMap, nIterations, relax, damasSolution):
     """ Solves the DAMAS inverse problem via modified gauss seidel.
+    This is the original formulation from :ref:`Brooks and Humphreys, 2006<BrooksHumphreys2006>`.
     
-    Input
-    -----
-        ``A`` ... float32[nFreqs, nGridpoints, nGridpoints] (or float64[...]) --> the PSF build matrix
-        
-        ``dirtyMap`` ... float32[nFreqs, nGridpoints] (or float64[...]) --> the conventional beamformer map
-        
-        ``nIterations`` ... int64[scalar] --> number of Iterations the damas solver has to go through
-        
-        ``relax`` ... int64[scalar] --> relaxation parameter (is originally 1.0 in DAMAS)
-        
-        ``damasSolution`` ... float32[nFreqs, nGridpoints] (or float64[...]) --> starting solution
+    Parameters
+    ----------
+    A : float32[nFreqs, nGridpoints, nGridpoints] (or float64[...])
+        The PSF build matrix (see :ref:`Brooks and Humphreys, 2006<BrooksHumphreys2006>`)
+    dirtyMap : float32[nFreqs, nGridpoints] (or float64[...])
+        The conventional beamformer map
+    nIterations : int64[scalar] 
+        number of Iterations the damas solver has to go through
+    relax : int64[scalar] 
+        relaxation parameter (=1.0 in :ref:`Brooks and Humphreys, 2006<BrooksHumphreys2006>`)
+    damasSolution : float32[nFreqs, nGridpoints] (or float64[...]) 
+        starting solution
     
     Returns
     -------
-        ``None`` as ``damasSolution`` is overwritten with end result of the damas iterative solver.
+    None : as damasSolution is overwritten with end result of the damas iterative solver.
     """
     nGridPoints = len(dirtyMap)
     for cntIter in xrange(nIterations[0]):
@@ -858,27 +861,28 @@ def damasSolverGaussSeidel(A, dirtyMap, nIterations, relax, damasSolution):
 
 
 #%% Transfer - Function
-def transfer(distGridToArrayCenter, distGridToAllMics, wavenumber):
+def transfer(distGridToArrayCenter, distGridToAllMics, waveNumber):
     """ Calculates the transfer functions between the various mics and gridpoints.
     
-    Input
-    -----
-        ``distGridToArrayCenter`` ... float64[nGridpoints]
+    Parameters
+    ----------
+    distGridToArrayCenter : float64[nGridpoints]
+        Distance of all gridpoints to the center of sensor array
+    distGridToAllMics : float64[nGridpoints, nMics]
+        Distance of all gridpoints to all sensors of array
+    waveNumber : complex128[nFreqs]
+        The wave number should be stored in the imag-part
 
-        ``distGridToAllMics`` ... float64[nGridpoints, nMics]
-
-        ``wavenumber`` ... complex128[nFreqs] (the wavenumber should be stored in the imag-part)
-    
     Returns
     -------
-        The Transferfunctions in format complex128[nFreqs, nGridPoints, nMics].
+    The Transferfunctions in format complex128[nFreqs, nGridPoints, nMics].
     """
-    nFreqs, nGridPoints, nMics = wavenumber.shape[0], distGridToAllMics.shape[0], distGridToAllMics.shape[1]
+    nFreqs, nGridPoints, nMics = waveNumber.shape[0], distGridToAllMics.shape[0], distGridToAllMics.shape[1]
     # transfer routine: parallelized over Gridpoints
     transferOutput = np.zeros((nFreqs, nGridPoints, nMics), np.complex128)
     for cntFreqs in xrange(nFreqs):
         result = np.zeros((nGridPoints, nMics), np.complex128)
-        _transferCoreFunc(distGridToArrayCenter, distGridToAllMics, wavenumber[cntFreqs].imag, result)
+        _transferCoreFunc(distGridToArrayCenter, distGridToAllMics, waveNumber[cntFreqs].imag, result)
         transferOutput[cntFreqs, :, :] = result
     return transferOutput
 
