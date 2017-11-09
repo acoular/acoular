@@ -1,6 +1,6 @@
 # coding=UTF-8
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2015, Acoular Development Team.
+# Copyright (c) 2007-2017, Acoular Development Team.
 #------------------------------------------------------------------------------
 
 """
@@ -22,7 +22,7 @@ A minimal usage example would be:
 
 The classes in the module possess a number of automatic data update
 capabilities. That is, only the traits must be set to get the results.
-The calculation need not be triggered explictely.
+The calculation need not be triggered explicitely.
 
 The classes are also GUI-aware, they know how to display a graphical user
 interface. So by calling
