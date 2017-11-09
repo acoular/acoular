@@ -392,7 +392,7 @@ class GeneralFlowEnvironment(Environment):
     backwards in time. The result is interpolated within a tetrahedal grid
     spanned between these rays.
     """
-    #: The flow field, must be of type :class:FlowField.
+    #: The flow field, must be of type :class:`~acoular.environments.FlowField`.
     ff = Trait(FlowField, 
         desc="flow field")
 

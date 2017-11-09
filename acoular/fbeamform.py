@@ -59,7 +59,9 @@ from .spectra import PowerSpectra, EigSpectra
 
 
 def steerVecTranslation(steer):
-    """ Translates the value of the property 'steer' into the numerical values
+    """ 
+    Internal helper function.
+    Translates the value of the property 'steer' into the numerical values
     corresponding to :ref:`Sarradj, 2012<Sarradj2012>`.
     """
     steerNumeric = {'true level': 3,
