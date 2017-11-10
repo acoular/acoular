@@ -32,7 +32,7 @@ class Grid( HasPrivateTraits ):
     be used directly as it contains no real functionality.
     """
 
-    #: Overall number of grid points. Readonly, is set automatically when
+    #: Overall number of grid points. Readonly; is set automatically when
     #: other grid defining properties are set
     size = Property(
         desc="overall number of grid points")
@@ -73,14 +73,6 @@ class Grid( HasPrivateTraits ):
         """
         return array([[0.], [0.], [0.]])
 
-# This is not needed in the base class (?)
-#    def extend (self) :
-#        """
-#        returns the x, y extension of the grid,
-#        useful for the imshow function from pylab
-#        """
-#        pos = self.pos()
-#        return (min(pos[0,:]), max(pos[0,:]), min(pos[1,:]), max(pos[1,:]))
 
 
 class RectGrid( Grid ):
@@ -214,7 +206,7 @@ class RectGrid( Grid ):
         Parameters
         ----------
         x1, x2, y1, y2 : float
-            If all four paramters are given, then a rectangular sector is
+            If all four parameters are given, then a rectangular sector is
             assumed that is given by two corners (x1, y1) and (x2, y2). If
             only three parameters are given, then a circular sector is assumed
             that is given by its center (x1, y1) and the radius x2.
@@ -275,7 +267,7 @@ class RectGrid3D( RectGrid):
 
     #: Number of grid points along x-axis, readonly.
     nzsteps = Property(
-        desc="number of grid points alog x-axis")
+        desc="number of grid points along x-axis")
 
     #: Respective increments in x,y, and z-direction (in m), defaults 
     #: to :attr:`~RectGrid.increment` for all three (whichever of the two
