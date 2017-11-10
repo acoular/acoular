@@ -37,7 +37,7 @@ class SignalGenerator( HasPrivateTraits ):
     should not be used directly as it contains no real functionality.
     """
 
-    #: RMS amplitude of source signal (for point source: in 1 m  distance).
+    #: RMS amplitude of source signal (for point source: in 1 m distance).
     rms = Float(1.0, 
         desc="rms amplitude")
     
@@ -65,7 +65,7 @@ class SignalGenerator( HasPrivateTraits ):
     
     def usignal(self, factor):
         """
-        Delivers the signal resampled with multiple of the sampling freq.
+        Delivers the signal resampled with a multiple of the sampling freq.
         
         Uses fourier transform method for resampling (from scipy.signal).
         
@@ -89,7 +89,7 @@ class WNoiseGenerator( SignalGenerator ):
 
     #: Seed for random number generator, defaults to 0.
     #: This parameter should be set differently for different instances
-    #: to guarantee statistically independent (non-correlated) outputs
+    #: to guarantee statistically independent (non-correlated) outputs.
     seed = Int(0, 
         desc="random seed value")
 
@@ -130,12 +130,12 @@ class PNoiseGenerator( SignalGenerator ):
     
     #: Seed for random number generator, defaults to 0.
     #: This parameter should be set differently for different instances
-    #: to guarantee statistically independent (non-correlated) outputs
+    #: to guarantee statistically independent (non-correlated) outputs.
     seed = Int(0, 
         desc="random seed value")
     
     #: "Octave depth" -- higher values for 1/f spectrum at low frequencies, 
-    #: but longer calculation    
+    #: but longer calculation, defaults to 16.
     depth = Int(16,
         desc="octave depth")
 
@@ -175,11 +175,11 @@ class SineGenerator( SignalGenerator ):
     Sine signal generator with adjustable frequency and phase.
     """
 
-    #: Sine wave frequency, float, defaults to 1000.0
+    #: Sine wave frequency, float, defaults to 1000.0.
     freq = Float(1000.0, 
         desc="Frequency")
 
-    #: Sine wave phase (in radians), float, defaults to 0.0
+    #: Sine wave phase (in radians), float, defaults to 0.0.
     phase = Float(0.0, 
         desc="Phase")
         

@@ -25,10 +25,10 @@ from .internal import digest
 
 class MicGeom( HasPrivateTraits ):
     """
-    Provides the geometric arrangement of microphones in the mic. array.
+    Provides the geometric arrangement of microphones in the array.
     
     The geometric arrangement of microphones is read in from an 
-    xml-source with element tag names 'pos' and attributes Name, x, y and z. 
+    xml-source with element tag names `pos` and attributes Name, `x`, `y` and `z`. 
     Can also be used with programmatically generated arrangements.
     """
 
@@ -110,5 +110,4 @@ class MicGeom( HasPrivateTraits ):
             names.append(el.getAttribute('Name'))
             xyz.append(list(map(lambda a : float(el.getAttribute(a)), 'xyz')))
         self.mpos_tot = array(xyz, 'd').swapaxes(0, 1)
-#        self.num_mics = self.mpos.shape[1]
 
