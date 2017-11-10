@@ -523,7 +523,7 @@ class BeamformerEig( BeamformerBase ):
     def _get_digest( self ):
         return digest( self )
     
-    @property_depends_on('mpos','n')
+    @property_depends_on('mpos, n')
     def _get_na( self ):
         na = self.n
         nm = self.mpos.num_mics
