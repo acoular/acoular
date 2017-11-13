@@ -32,16 +32,16 @@ class Trajectory( HasPrivateTraits ):
     of positions between samples.
     """
     #: Dictionary that assigns discrete time instants (keys) to 
-    #: sampled (x, y, z) positions along the trajectory (values)
+    #: sampled (x, y, z) positions along the trajectory (values).
     points = Dict(key_trait = Float, value_trait = Tuple(Float, Float, Float), 
         desc = "sampled positions along the trajectory")
     
-    #: Tuple of the start and end time, is set autoamtically 
-    #: (deducted from :attr:`points`)
+    #: Tuple of the start and end time, is set automatically 
+    #: (depending on :attr:`points`).
     interval = Property()
     #t_min, t_max tuple
     
-    #: Spline data, internal use
+    #: Spline data, internal use.
     tck = Property()
     
     # internal identifier
@@ -74,7 +74,7 @@ class Trajectory( HasPrivateTraits ):
     
     def location(self, t, der=0):
         """ 
-        Returns the positions for one or more instants in time
+        Returns the positions for one or more instants in time.
         
         Parameters
         ----------
@@ -86,30 +86,30 @@ class Trajectory( HasPrivateTraits ):
         Returns
         -------
         (x, y, z) : tuple with arrays of floats
-            Positions at the given times; x, y and z have the same shape as t .
+            Positions at the given times; `x`, `y` and `z` have the same shape as `t`.
         """
         return splev(t, self.tck, der)
     
     def traj(self, t_start, t_end=None, delta_t=None, der=0):
         """
-        Python generator that yields locations along the trajectory
+        Python generator that yields locations along the trajectory.
         
         Parameters
         ----------
         t_start : float
             Starting time of the trajectory, defaults to the earliest  
-            time in :attr:`points`
+            time in :attr:`points`.
         t_end : float
             Ending time of the trajectory, defaults to the latest  
-            time in :attr:`points`    
+            time in :attr:`points`.
         delta_t : float
             Time interval between yielded trajectory points, defaults to earliest  
-            time in :attr:`points`
+            time in :attr:`points`.
         
         Returns
         -------
         (x, y, z) : tuples of floats
-            Positions at the desired times are yielded
+            Positions at the desired times are yielded.
             
         Examples
         --------
@@ -119,7 +119,7 @@ class Trajectory( HasPrivateTraits ):
         x.traj(2.5, 4.5, 0.1)  
             Yields the position every 0.1 s between 2.5 s and 4.5 s.
         x.traj(0.1, der=1)  
-            Yields the 1st derivative of the spline (= velocity vector) every 0.1s 
+            Yields the 1st derivative of the spline (= velocity vector) every 0.1 s 
             within the given :attr:`interval`.
         """
         if not delta_t:
