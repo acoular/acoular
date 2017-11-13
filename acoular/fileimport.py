@@ -72,8 +72,8 @@ class csv_import( time_data_import ):
     def get_data (self, td):
         """
         Imports the data from CSV file into a
-        :class:`~acoular.sources.TimeSamples` object 'td'.
-        Also, a '*.h5' file will be written, so this import
+        :class:`~acoular.sources.TimeSamples` object `td`.
+        Also, a `*.h5` file will be written, so this import
         need not be performed every time the data is needed
         """
         if not path.isfile(self.from_file):
@@ -116,7 +116,7 @@ class csv_import( time_data_import ):
 
 class td_import( time_data_import ):
     """
-    Import of *.td data as saved by earlier versions
+    Import of `*.td` data as saved by earlier versions
     """
 
     #: Name of the comma delimited file to import.
@@ -133,8 +133,8 @@ class td_import( time_data_import ):
 
     def get_data (self, td):
         """
-        Main work is done here: imports the data from '*.td' file into
-        TimeSamples object 'td' and saves also a '*.h5' file so this import
+        Main work is done here: imports the data from `*.td` file into
+        TimeSamples object `td` and saves also a `*.h5` file so this import
         need not be performed only once.
         """
         if not path.isfile(self.from_file):
@@ -185,7 +185,7 @@ class bk_mat_import( time_data_import ):
     def get_data (self, td):
         """
         Main work is done here: imports the data from pulse .mat file into
-        time_data object 'td' and saves also a '*.h5' file so this import
+        time_data object 'td' and saves also a `*.h5` file so this import
         need not be performed every time the data is needed.
         """
         if not path.isfile(self.from_file):
@@ -345,7 +345,7 @@ class datx_import(time_data_import):
     def get_data (self, td):
         """
         Main work is done here: imports the data from datx files into
-        time_data object td and saves also a '*.h5' file so this import
+        time_data object td and saves also a `*.h5` file so this import
         need not be performed every time the data is needed
         """
         if not path.isfile(self.from_file):

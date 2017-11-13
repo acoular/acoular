@@ -116,7 +116,7 @@ class BeamformerBase( HasPrivateTraits ):
     
     #: The beamforming result as squared sound pressure values 
     #: at all grid point locations (readonly).
-    #: Returns a (number of frequencies, number of gridpoints) array of float
+    #: Returns a (number of frequencies, number of gridpoints) array of floats.
     result = Property(
         desc="beamforming result")
         
@@ -576,7 +576,7 @@ class BeamformerEig( BeamformerBase ):
 
 class BeamformerMusic( BeamformerEig ):
     """
-    Beamforming using the MUSIC algorithm, see ref:`Schmidt, 1986<Schmidt1986>`.
+    Beamforming using the MUSIC algorithm, see :ref:`Schmidt, 1986<Schmidt1986>`.
     """
 
     # Boolean flag, if 'True', the main diagonal is removed before beamforming;
@@ -643,7 +643,7 @@ class BeamformerMusic( BeamformerEig ):
 
 class PointSpreadFunction (HasPrivateTraits):
     """
-    The point spread function
+    The point spread function.
     
     This class provides tools to calculate the PSF depending on the used 
     microphone geometry, focus grid, flow environment, etc.
@@ -1449,8 +1449,8 @@ class BeamformerCMF ( BeamformerBase ):
 
 def L_p ( x ):
     """
-    Calculates the sound pressure level from the sound pressure squared:
-    L_p = 10 lg x/4e-10
+    Calculates the sound pressure level from the squared sound pressure.
+    :math:`L_p = 10 \lg ( x/4*10^{-10})`
     
     Parameters
     ----------

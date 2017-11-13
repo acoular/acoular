@@ -315,8 +315,8 @@ class OpenJet( FlowField ):
     def v( self, xx):
         """
         Provides the flow field as a function of the location. This is
-        implemented here only for a jet in x-direction and the y- and
-        z-components are set to zero.
+        implemented here only for a jet in `x`-direction and the `y`- and
+        `z`-components are set to zero.
 
         Parameters
         ----------

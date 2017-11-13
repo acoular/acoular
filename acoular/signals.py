@@ -122,8 +122,8 @@ class PNoiseGenerator( SignalGenerator ):
     
     Simulation of pink noise is based on the Voss-McCartney algorithm.
     Ref.:
-     * S.J. Orfanidis: Signal Processing (2010), pp. 729-733
-     * online discussion: http://www.firstpr.com.au/dsp/pink-noise/
+      * S.J. Orfanidis: Signal Processing (2010), pp. 729-733
+      * online discussion: http://www.firstpr.com.au/dsp/pink-noise/
     The idea is to iteratively add larger-wavelength noise to get 1/f 
     characteristic.
     """
@@ -200,7 +200,7 @@ class SineGenerator( SignalGenerator ):
         Returns
         -------
         array of floats
-            The resulting signal as an array of length *numsamples*.
+            The resulting signal as an array of length :attr:`~SignalGenerator.numsamples`.
         """
         t = arange(self.numsamples, dtype=float)/self.sample_freq
         return self.rms*sin(2*pi*self.freq*t+self.phase)

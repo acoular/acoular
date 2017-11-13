@@ -343,11 +343,11 @@ class PointSource( SamplesGenerator ):
     #:  Emitted signal, instance of the :class:`~acoular.signals.SignalGenerator` class.
     signal = Trait(SignalGenerator)
     
-    #: Location of source in (x, y, z) coordinates (left-oriented system).
+    #: Location of source in (`x`, `y`, `z`) coordinates (left-oriented system).
     loc = Tuple((0.0, 0.0, 1.0),
         desc="source location")
                
-    #: Number of channels in output, is set automatically, / 
+    #: Number of channels in output, is set automatically / 
     #: depends on used microphone geometry.
     numchannels = Delegate('mpos', 'num_mics')
 
@@ -381,7 +381,7 @@ class PointSource( SamplesGenerator ):
     #: depends on :attr:`signal`.
     numsamples = Delegate('signal')
     
-    #: Sampling frequency of the signal, is set automatically, / 
+    #: Sampling frequency of the signal, is set automatically / 
     #: depends on :attr:`signal`.
     sample_freq = Delegate('signal') 
 
@@ -637,12 +637,12 @@ class UncorrelatedNoiseSource( SamplesGenerator ):
                    desc = "type of noise")
 
     #: Array with seeds for random number generator.
-    #: When left empty, arange(:attr:`numchannels`)+:attr:`signal`.seed  
+    #: When left empty, arange(:attr:`numchannels`) + :attr:`signal`.seed  
     #: will be used.
     seed = CArray(dtype = uint32,
                   desc = "random seed values")
     
-    #: Number of channels in output, is set automatically; / 
+    #: Number of channels in output; is set automatically / 
     #: depends on used microphone geometry.
     numchannels = Delegate('mpos', 'num_mics')
 
@@ -666,11 +666,11 @@ class UncorrelatedNoiseSource( SamplesGenerator ):
         desc="sample start time")
 
     
-    #: Number of samples, is set automatically; / 
+    #: Number of samples is set automatically / 
     #: depends on :attr:`signal`.
     numsamples = Delegate('signal')
     
-    #: Sampling frequency of the signal, is set automatically; / 
+    #: Sampling frequency of the signal; is set automatically / 
     #: depends on :attr:`signal`.
     sample_freq = Delegate('signal') 
     
@@ -733,7 +733,7 @@ class SourceMixer( SamplesGenerator ):
     Mixes the signals from several sources. 
     """
 
-    #: List of :class:`~beamfpy.sources.SamplesGenerator` objects
+    #: List of :class:`~acoular.sources.SamplesGenerator` objects
     #: to be mixed.
     sources = List( Instance(SamplesGenerator, ()) ) 
 

@@ -36,7 +36,7 @@ class MicGeom( HasPrivateTraits ):
     from_file = File(filter=['*.xml'],
         desc="name of the xml file to import")
 
-    #: Basename of the .xml-file, without the extension, is set automatically / readonly.
+    #: Basename of the .xml-file, without the extension; is set automatically / readonly.
     basename = Property( depends_on = 'from_file',
         desc="basename of xml file")
 
@@ -45,7 +45,7 @@ class MicGeom( HasPrivateTraits ):
     invalid_channels = List(
         desc="list of invalid channels")
 
-    #: Number of microphones in the array, readonly.
+    #: Number of microphones in the array; readonly.
     num_mics = Property( depends_on = ['mpos', ],
         desc="number of microphones in the geometry")
 
@@ -55,8 +55,8 @@ class MicGeom( HasPrivateTraits ):
     mpos_tot = CArray(
         desc="x, y, z position of all microphones")
 
-    #: Positions as (3, num_mics) array of floats, without invalid
-    #: microphones, readonly.
+    #: Positions as (3, :attr:`num_mics`) array of floats, without invalid
+    #: microphones; readonly.
     mpos = Property( depends_on = ['mpos_tot', 'invalid_channels'],
         desc="x, y, z position of microphones")
 

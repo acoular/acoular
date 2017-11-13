@@ -3,7 +3,8 @@
 #------------------------------------------------------------------------------
 # Copyright (c) 2007-2017, Acoular Development Team.
 #------------------------------------------------------------------------------
-"""Implements calibration of multichannel time signals.
+"""
+Implements calibration of multichannel time signals.
 
 .. autosummary::
     :toctree: generated/
@@ -24,7 +25,7 @@ from .internal import digest
 
 class Calib( HasPrivateTraits ):
     """
-    Container for calibration data in *.xml format
+    Container for calibration data in `*.xml` format
     
     This class serves as interface to load calibration data for the used
     microphone array.
@@ -74,7 +75,7 @@ class Calib( HasPrivateTraits ):
     @on_trait_change('basename')
     def import_data( self ):
         """ 
-        Loads the calibration data from .xml file 
+        Loads the calibration data from `*.xml` file .
         """
         if not path.isfile(self.from_file):
             # empty calibration

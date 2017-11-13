@@ -48,18 +48,18 @@ class PowerSpectra( HasPrivateTraits ):
     and the same file name in case of that the data is read from a file.
     """
 
-    #: The :class:`~beamfpy.sources.SamplesGenerator` object that provides the data.
+    #: The :class:`~acoular.sources.SamplesGenerator` object that provides the data.
     time_data = Trait(SamplesGenerator, 
         desc="time data object")
 
     #: Number of samples 
     numchannels = Delegate('time_data')
 
-    #: The Calib object that provides the calibration data, 
+    #: The :class:`~acoular.calib.Calib` object that provides the calibration data, 
     #: defaults to no calibration, i.e. the raw time data is used.
     #:
-    #: **deprecated**:      use calib property of 
-    #: :class:`~beamfpy.sources.TimeSamples` objects
+    #: **deprecated**:      use :attr:`~acoular.sources.TimeSamples.calib` property of 
+    #: :class:`~acoular.sources.TimeSamples` objects
     calib = Instance(Calib)
 
     #: FFT block size, one of: 128, 256, 512, 1024, 2048 ... 16384,
@@ -79,7 +79,11 @@ class PowerSpectra( HasPrivateTraits ):
         desc="index of highest frequency line")
 
     #: Window function for FFT, one of:
-    #: 'Rectangular' (default), 'Hanning', 'Hamming', 'Bartlett', 'Blackman'.
+    #:   * 'Rectangular' (default)
+    #:   * 'Hanning'
+    #:   * 'Hamming'
+    #:   * 'Bartlett'
+    #:   * 'Blackman'
     window = Trait('Rectangular', 
         {'Rectangular':ones, 
         'Hanning':hanning, 
@@ -275,7 +279,7 @@ class EigSpectra( PowerSpectra ):
     matrix using the Welch method with windows and overlap and in addition its. 
     eigenvalues and eigenvectors. 
     
-    The result is computed only when needed, that is when the :attr:`csm`, 
+    The result is computed only when needed, that is when the :attr:`~PowerSpectra.csm`, 
     :attr:`eva` or :attr:`eve` attribute is actually read. 
     Any change in the input data or parameters leads to a
     new calculation, again triggered when csm is read. The result may be 
@@ -372,10 +376,11 @@ def synthetic (data, freqs, f, num=3):
     """
     Returns synthesized frequency band values of spectral data.
     
-    If used with :meth:`Beamformer.result` and only one frequency band, 
-    the output is identical to
-    the result of the intrinsic :meth:`Beamformer.synthetic` method.
-    It can, however, also be used with the :meth:`Beamformer.integrate`
+    If used with :meth:`Beamformer.result()<acoular.fbeamform.BeamformerBase.result>` 
+    and only one frequency band, the output is identical to the result of the intrinsic 
+    :meth:`Beamformer.synthetic<acoular.fbeamform.BeamformerBase.synthetic>` method.
+    It can, however, also be used with the 
+    :meth:`Beamformer.integrate<acoular.fbeamform.BeamformerBase.integrate>`
     output and more frequency bands.
     
     Parameters
@@ -387,7 +392,7 @@ def synthetic (data, freqs, f, num=3):
         grid points.
     freq : array of floats
         The frequencies that correspon to the input *data* (as yielded by
-        the :meth:`PowerSpectra.fftfreq<acoular.spectra.Powerspectra.fftfreq`
+        the :meth:`PowerSpectra.fftfreq<acoular.spectra.PowerSpectra.fftfreq>`
         method).
     f : float or list of floats
         Band center frequency/frequencies for which to return the results.
