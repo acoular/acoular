@@ -148,7 +148,7 @@ class BeamformerTime( TimeInOut ):
         ----------
         num : integer, defaults to 2048
             This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block) 
+            (i.e. the number of samples per block).
         
         Returns
         -------
@@ -246,7 +246,7 @@ class BeamformerTimeSq( BeamformerTime ):
         ----------
         num : integer, defaults to 2048
             This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block) 
+            (i.e. the number of samples per block) .
         
         Returns
         -------
@@ -316,7 +316,7 @@ class BeamformerTimeSq( BeamformerTime ):
 class BeamformerTimeTraj( BeamformerTime ):
     """
     Provides a basic time domain beamformer with time signal output
-    for a grid moving along a trajectory
+    for a grid moving along a trajectory.
     """
 
 
@@ -366,7 +366,7 @@ class BeamformerTimeTraj( BeamformerTime ):
         ----------
         num : integer, defaults to 2048
             This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block) 
+            (i.e. the number of samples per block).
         
         Returns
         -------
@@ -514,7 +514,7 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
         ----------
         num : integer, defaults to 2048
             This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block) 
+            (i.e. the number of samples per block).
         
         Returns
         -------
@@ -663,7 +663,7 @@ class IntegratorSectorTime( TimeInOut ):
         ----------
         num : integer, defaults to 1
             This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block) 
+            (i.e. the number of samples per block).
         
         Returns
         -------
