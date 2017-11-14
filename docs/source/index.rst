@@ -1,13 +1,13 @@
 .. acoular documentation master file
 
-.. figure:: get_started/map_three_sources.png
+.. figure:: get_started/three_source_py3_colormap.png
     :align: right
     :width: 100%
     :figwidth: 30%
     
     *three different point sources*
 
-.. figure:: _static/airfoil_leading_edge_noise.png
+.. figure:: _static/Airfoil_selfnoise_3d.png
     :align: right
     :width: 100%
     :figwidth: 30%
@@ -34,7 +34,7 @@ A few highlights of the framework:
     * 3D mapping possible
     * application for stationary and for moving targets
     * supports both scripting and graphical user interface
-    * efficient: intelligent caching, parallel computing with OpenMP
+    * efficient: intelligent caching, parallel computing with Numba
     * easily extendible and well documented
 
 Problems, suggestions and success using Acoular may be reported via the `acoular-users  <https://groups.google.com/forum/#!forum/acoular-users>`_ discussion forum or to *info (at) acoular.org*.
@@ -46,6 +46,7 @@ Contents:
     
     How to Get <install/index>
     Getting Started <get_started/index>
+    What's new <news/index>
     Literature <literature/index>
     Examples <examples/index>
     API Reference <api_ref/index>
@@ -62,6 +63,10 @@ Contents:
     * - :doc:`get_started/index` 
 
       - The basics for using Acoular explained with a simple example.
+
+    * - :doc:`news/index` 
+
+      - Release notes for the current version of Acoular.
 
     * - :doc:`examples/index` 
 
