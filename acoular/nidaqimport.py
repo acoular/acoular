@@ -1,6 +1,6 @@
 # coding=UTF-8
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2014, Acoular Development Team.
+# Copyright (c) 2007-2017, Acoular Development Team.
 #------------------------------------------------------------------------------
 
 """
@@ -86,31 +86,31 @@ class nidaq_import( time_data_import ):
     taskname = Str(
         desc="name of the NI task to use for the measurement")
 
-    # Sampling frequency, defaults to 48000.
+    #: Sampling frequency, defaults to 48000.
     sample_freq = Float(48000.0,
         desc="sampling frequency")
 
-    # Number of time data samples, defaults to 48000.
+    #: Number of time data samples, defaults to 48000.
     numsamples = Long(48000,
         desc="number of samples")
 
-    # Number of channels; is set automatically.
+    #: Number of channels; is set automatically.
     numchannels =  Long(0,
         desc="number of channels in the task")
 
-    # Number of devices; is set automatically.
+    #: Number of devices; is set automatically.
     numdevices = Long(0,
         desc="number of devices in the task")
 
-    # Name of channels; is set automatically.
+    #: Name of channels; is set automatically.
     namechannels =  List(
         desc="names of channels in the task")
 
-    # Name of devices; is set automatically.
+    #: Name of devices; is set automatically.
     namedevices = List(
         desc="names of devices in the task")
 
-    # Name of available and valid tasks.
+    #: Name of available and valid tasks.
     tasknames = List
 
     traits_view = View(
@@ -194,11 +194,11 @@ class nidaq_import( time_data_import ):
         print(self.sample_freq)
 
 
-    def get_data (self,td):
+    def get_data (self, td):
         """
-        main work is done here: imports the data from CSV file into
-        TimeSamples object td and saves also a '*.h5' file so this import
-        need not be performed every time the data is needed
+        Main work is done here: loads data from buffer into
+        :class:`~acoular.sources.TimeSamples` object `td` and saves also a 
+        '*.h5' file.
         """
         taskHandle = TaskHandle(0)
         read = uInt32()
@@ -248,7 +248,7 @@ class nidaq_import( time_data_import ):
         
     def get_single (self):
         """
-        gets one block of data
+        Gets one block of data
         """
         taskHandle = TaskHandle(0)
         read = uInt32()

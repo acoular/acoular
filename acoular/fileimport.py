@@ -1,19 +1,20 @@
 # -*- coding: utf-8 -*-
 #pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2014, Acoular Development Team.
+# Copyright (c) 2007-2017, Acoular Development Team.
 #------------------------------------------------------------------------------
 """
 Contains classes for importing time data in several file formats.
+Standard HDF (`*.h5`) import can be done using 
+:class:`~acoular.sources.TimeSamples` objects.
 
 .. autosummary::
     :toctree: generated/
 
     time_data_import
+    csv_import
     td_import
     bk_mat_import
-    datx_d_file
-    datx_channel
     datx_import
 """
 
@@ -74,8 +75,8 @@ class csv_import( time_data_import ):
     def get_data (self, td):
         """
         Imports the data from CSV file into a
-        :class:`~acoular.sources.TimeSamples` object td.
-        Also, a '*.h5' file will be written, so this import
+        :class:`~acoular.sources.TimeSamples` object `td`.
+        Also, a `*.h5` file will be written, so this import
         need not be performed every time the data is needed
         """
         if not path.isfile(self.from_file):
@@ -85,7 +86,7 @@ class csv_import( time_data_import ):
         #import data
         c = self.header_length
         d = self.dummy_columns
-        f = file(self.from_file)
+        f = open(self.from_file)
         #read header
         for line in f:
             c -= 1
@@ -118,10 +119,10 @@ class csv_import( time_data_import ):
 
 class td_import( time_data_import ):
     """
-    import of *.td data as saved by earlier versions
+    Import of `*.td` data as saved by earlier versions
     """
 
-    # name of the comma delimited file to import
+    #: Name of the comma delimited file to import.
     from_file = File(filter = ['*.td'], 
         desc = "name of the *.td file to import")
 
@@ -135,15 +136,15 @@ class td_import( time_data_import ):
 
     def get_data (self, td):
         """
-        main work is done here: imports the data from *.td file into
-        TimeSamples object td and saves also a '*.h5' file so this import
-        need not be performed only once
+        Main work is done here: imports the data from `*.td` file into
+        TimeSamples object `td` and saves also a `*.h5` file so this import
+        need not be performed only once.
         """
         if not path.isfile(self.from_file):
             # no file there
             time_data_import.getdata(self, td)
             return
-        f = file(self.from_file, 'rb')
+        f = open(self.from_file, 'rb')
         h = pickle.load(f)
         f.close()
         sample_freq = h['sample_freq']
@@ -169,10 +170,10 @@ class td_import( time_data_import ):
 
 class bk_mat_import( time_data_import ):
     """
-    import of BK pulse matlab data
+    Import of BK pulse matlab data.
     """
 
-    # name of the mat file to import
+    #: Name of the mat file to import
     from_file = File(filter = ['*.mat'], 
         desc = "name of the BK pulse mat file to import")
 
@@ -186,9 +187,9 @@ class bk_mat_import( time_data_import ):
 
     def get_data (self, td):
         """
-        main work is done here: imports the data from pulse .mat file into
-        time_data object td and saves also a '*.h5' file so this import
-        need not be performed every time the data is needed
+        Main work is done here: imports the data from pulse .mat file into
+        time_data object 'td' and saves also a `*.h5` file so this import
+        need not be performed every time the data is needed.
         """
         if not path.isfile(self.from_file):
             # no file there
@@ -225,26 +226,26 @@ class bk_mat_import( time_data_import ):
 
 class datx_d_file(HasPrivateTraits):
     """
-    helper class for import of .datx data, represents
-    datx data file
+    Helper class for import of `*.datx` data, represents
+    datx data file.
     """
-    # file name
+    # File name
     name = File(filter = ['*.datx'], 
         desc = "name of datx data file")
 
-    # file object
+    # File object
     f = Any()
 
-    # properties
+    # Properties
     data_offset = Int()
     channel_count = Int()
     num_samples_per_block = Int()
     bytes_per_sample = Int()
     block_size = Property()
 
-    # number of blocks to read in one pull
+    # Number of blocks to read in one pull
     blocks = Int()
-    # the actual block data
+    # The actual block data
     data = CArray()
 
     def _get_block_size( self ):
@@ -264,7 +265,7 @@ class datx_d_file(HasPrivateTraits):
 
     def __init__(self, name, blocks = 128):
         self.name = name
-        self.f = file(self.name, 'rb')
+        self.f = open(self.name, 'rb')
         s = self.f.read(32)
         # header
         s0 = struct.unpack('IIIIIIHHf', s)        
@@ -280,8 +281,8 @@ class datx_d_file(HasPrivateTraits):
 
 class datx_channel(HasPrivateTraits):
     """
-    helper class for import of .datx data, represents
-    one channel
+    Helper class for import of .datx data, represents
+    one channel.
     """
 
     label = Str()
@@ -329,10 +330,10 @@ class datx_channel(HasPrivateTraits):
 
 class datx_import(time_data_import):
     """
-    import of .datx data
+    Import of .datx data
     """
 
-    # name of the mat file to import
+    #: Name of the datx index file to import.
     from_file = File(filter = ['*.datx_index'], 
         desc = "name of the datx index file to import")
 
@@ -346,8 +347,8 @@ class datx_import(time_data_import):
 
     def get_data (self, td):
         """
-        main work is done here: imports the data from datx files into
-        time_data object td and saves also a '*.h5' file so this import
+        Main work is done here: imports the data from datx files into
+        time_data object td and saves also a `*.h5` file so this import
         need not be performed every time the data is needed
         """
         if not path.isfile(self.from_file):

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2014, Acoular Development Team.
+# Copyright (c) 2007-2017, Acoular Development Team.
 #------------------------------------------------------------------------------
 """Implements processing in the time domain.
 
@@ -57,13 +57,13 @@ class TimeInOut( SamplesGenerator ):
     #: Data source; :class:`~acoular.sources.SamplesGenerator` or derived object.
     source = Trait(SamplesGenerator)
 
-    #: Sampling frequency of output signal, as given by :attr:`source`
+    #: Sampling frequency of output signal, as given by :attr:`source`.
     sample_freq = Delegate('source')
     
-    #: Number of channels in output, as given by :attr:`source`
+    #: Number of channels in output, as given by :attr:`source`.
     numchannels = Delegate('source')
                
-    #: Number of samples in output, as given by :attr:`source`
+    #: Number of samples in output, as given by :attr:`source`.
     numsamples = Delegate('source')
             
     # internal identifier
@@ -99,33 +99,33 @@ class MaskedTimeInOut ( TimeInOut ):
     and generates output via the generator :meth:`result`.
     """
         
-    #: Index of the first sample to be considered valid
+    #: Index of the first sample to be considered valid.
     start = CLong(0, 
         desc="start of valid samples")
     
-    #: Index of the last sample to be considered valid
+    #: Index of the last sample to be considered valid.
     stop = Trait(None, None, CLong, 
         desc="stop of valid samples")
     
-    #: Channels that are to be treated as invalid
+    #: Channels that are to be treated as invalid.
     invalid_channels = List(
         desc="list of invalid channels")
     
-    #: Channel mask to serve as an index for all valid channels, is set automatically
+    #: Channel mask to serve as an index for all valid channels, is set automatically.
     channels = Property(depends_on = ['invalid_channels', 'source.numchannels'], 
         desc="channel mask")
     
-    #: Number of channels in input, as given by :attr:`~acoular.tprocess.TimeInOut.source`
+    #: Number of channels in input, as given by :attr:`~acoular.tprocess.TimeInOut.source`.
     numchannels_total = Delegate('source', 'numchannels')
                
-    #: Number of samples in input, as given by :attr:`~acoular.tprocess.TimeInOut.source`
+    #: Number of samples in input, as given by :attr:`~acoular.tprocess.TimeInOut.source`.
     numsamples_total = Delegate('source', 'numsamples')
 
-    #: Number of valid channels, is set automatically
+    #: Number of valid channels, is set automatically.
     numchannels = Property(depends_on = ['invalid_channels', \
         'source.numchannels'], desc="number of valid input channels")
 
-    #: Number of valid time samples, is set automatically
+    #: Number of valid time samples, is set automatically.
     numsamples = Property(depends_on = ['start', 'stop', 'source.numsamples'], 
         desc="number of valid samples per channel")
 
@@ -177,7 +177,7 @@ class MaskedTimeInOut ( TimeInOut ):
         ----------
         num : integer
             This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block) 
+            (i.e. the number of samples per block).
         
         Returns
         -------
@@ -276,7 +276,7 @@ class Mixer( TimeInOut ):
         ----------
         num : integer
             This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block) 
+            (i.e. the number of samples per block).
         
         Returns
         -------
@@ -298,7 +298,7 @@ class Mixer( TimeInOut ):
 
 class TimePower( TimeInOut ):
     """
-    Calculates time-depended power of the signal
+    Calculates time-depended power of the signal.
     """
 
     def result(self, num):
@@ -309,7 +309,7 @@ class TimePower( TimeInOut ):
         ----------
         num : integer
             This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block) 
+            (i.e. the number of samples per block).
         
         Returns
         -------
@@ -371,7 +371,7 @@ class TimeAverage( TimeInOut ) :
         ----------
         num : integer
             This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block) 
+            (i.e. the number of samples per block).
         
         Returns
         -------
@@ -399,7 +399,7 @@ class TimeReverse( TimeInOut ):
         ----------
         num : integer
             This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block) 
+            (i.e. the number of samples per block).
         
         Returns
         -------
@@ -466,7 +466,7 @@ class FiltFiltOctave( TimeInOut ):
         Returns
         -------
             b, a : ndarray, ndarray
-                Filter coefficients
+                Filter coefficients.
         """
         # filter design
         fs = self.sample_freq
@@ -492,7 +492,7 @@ class FiltFiltOctave( TimeInOut ):
         ----------
         num : integer
             This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block) 
+            (i.e. the number of samples per block).
         
         Returns
         -------
@@ -529,7 +529,7 @@ class FiltOctave( FiltFiltOctave ):
         ----------
         num : integer
             This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block) 
+            (i.e. the number of samples per block).
         
         Returns
         -------
@@ -596,7 +596,7 @@ class TimeCache( TimeInOut ):
         ----------
         num : integer
             This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block) 
+            (i.e. the number of samples per block).
         
         Returns
         -------
@@ -625,9 +625,10 @@ class TimeCache( TimeInOut ):
 class WriteWAV( TimeInOut ):
     """
     Saves time signal from one or more channels as mono/stereo/multi-channel
-    *.wav file
+    `*.wav` file.
     """
-    # basename for cache
+    
+    #: Basename for cache, readonly.
     basename = Property( depends_on = 'digest')
        
     #: Channel(s) to save. List can only contain one or two channels.
@@ -652,10 +653,9 @@ class WriteWAV( TimeInOut ):
 
     @cached_property
     def _get_basename ( self ):
-        obj = self.source # start width source
+        obj = self.source # start with source
         try:
             while obj:
-    #            print obj
                 if 'basename' in obj.all_trait_names(): # at original source?
                     basename = obj.basename # get the name
                     break
@@ -669,11 +669,11 @@ class WriteWAV( TimeInOut ):
 
     def save(self):
         """ 
-        Saves source output to one- or multiple-channel *.wav file. 
+        Saves source output to one- or multiple-channel `*.wav` file. 
         """
         nc = len(self.channels)
         if nc == 0:
-            raise ValueError("No channels given for output")
+            raise ValueError("No channels given for output.")
         if nc > 2:
             warn("More than two channels given for output, exported file will have %i channels" % nc)
         name = self.basename
@@ -696,7 +696,7 @@ class WriteWAV( TimeInOut ):
 
 class WriteH5( TimeInOut ):
     """
-    Saves time signal as *.h5 file
+    Saves time signal as `*.h5` file
     """
     #: Name of the file to be saved. If none is given, the name will be
     #: automatically generated from a time stamp.
@@ -722,7 +722,9 @@ class WriteH5( TimeInOut ):
 
 
     def save(self):
-        """ saves source output h5 file """
+        """ 
+        Saves source output to `*.h5` file 
+        """
         if self.name == '':
             name = datetime.now().isoformat('_').replace(':','-').replace('.','_')
             self.name = path.join(td_dir,name+'.h5')

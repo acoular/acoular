@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #pylint: disable-msg=E0611, E1103, C0103, R0901, R0902, R0903, R0904, W0232
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2014, Acoular Development Team.
+# Copyright (c) 2007-2017, Acoular Development Team.
 #------------------------------------------------------------------------------
 """Implements acoustic environments with and without flow.
 
@@ -66,7 +66,7 @@ class Environment( HasPrivateTraits ):
         -------
         r : array of floats
             The distances in a twodimensional (N, M) array of floats. If M==1, 
-            then only a onedimensional array is returned.
+            then only a one-dimensional array is returned.
         """
         if isscalar(mpos):
             mpos = array((0, 0, 0), dtype = float32)[:, newaxis]
@@ -132,7 +132,7 @@ class UniformFlowEnvironment( Environment):
         -------
         array of floats
             The distances in a twodimensional (N, M) array of floats. If M==1, 
-            then only a onedimensional array is returned.
+            then only a one-dimensional array is returned.
         """
         if isscalar(mpos):
             mpos = array((0, 0, 0), dtype = float32)[:, newaxis]
@@ -198,7 +198,7 @@ class SlotJet( FlowField ):
     flow = CArray( dtype=float64, shape=(3, ), value=array((1., 0., 0.)), 
         desc="flow direction")
 
-    #: Unit vector parallel to slot center plane, defaults to (0,1,0)
+    #: Unit vector parallel to slot center plane, defaults to (0,1,0).
     plane = CArray( dtype=float64, shape=(3, ), value=array((0., 1., 0.)), 
         desc="slot center line direction")
         
@@ -315,8 +315,8 @@ class OpenJet( FlowField ):
     def v( self, xx):
         """
         Provides the flow field as a function of the location. This is
-        implemented here only for a jet in x-direction and the y- and
-        z-components are set to zero.
+        implemented here only for a jet in `x`-direction and the `y`- and
+        `z`-components are set to zero.
 
         Parameters
         ----------
@@ -358,7 +358,7 @@ def spiral_sphere(N, Om=2*pi, b=array((0, 0, 1))):
     """
     Internal helper function for the raycasting that returns an array of
     unit vectors (N, 3) giving equally distributed directions on a part of
-    sphere given by the center direction b and the solid angle Om
+    sphere given by the center direction b and the solid angle Om.
     """
     # first produce 'equally' distributed directions in spherical coords
     o = 4*pi/Om
@@ -392,7 +392,7 @@ class GeneralFlowEnvironment(Environment):
     backwards in time. The result is interpolated within a tetrahedal grid
     spanned between these rays.
     """
-    #: The flow field, must be of type :class:FlowField
+    #: The flow field, must be of type :class:`~acoular.environments.FlowField`.
     ff = Trait(FlowField, 
         desc="flow field")
 
@@ -443,7 +443,7 @@ class GeneralFlowEnvironment(Environment):
         -------
         array of floats
             The distances in a twodimensional (N, M) array of floats. If M==1, 
-            then only a onedimensional array is returned.
+            then only a one-dimensional array is returned.
         """
         if isscalar(mpos):
             mpos = array((0, 0, 0), dtype = float32)[:, newaxis]

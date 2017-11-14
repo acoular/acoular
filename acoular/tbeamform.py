@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2014, Acoular Development Team.
+# Copyright (c) 2007-2017, Acoular Development Team.
 #------------------------------------------------------------------------------
 """Implements beamformers in the time domain.
 
@@ -148,7 +148,7 @@ class BeamformerTime( TimeInOut ):
         ----------
         num : integer, defaults to 2048
             This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block) 
+            (i.e. the number of samples per block).
         
         Returns
         -------
@@ -246,7 +246,7 @@ class BeamformerTimeSq( BeamformerTime ):
         ----------
         num : integer, defaults to 2048
             This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block) 
+            (i.e. the number of samples per block) .
         
         Returns
         -------
@@ -316,7 +316,7 @@ class BeamformerTimeSq( BeamformerTime ):
 class BeamformerTimeTraj( BeamformerTime ):
     """
     Provides a basic time domain beamformer with time signal output
-    for a grid moving along a trajectory
+    for a grid moving along a trajectory.
     """
 
 
@@ -366,7 +366,7 @@ class BeamformerTimeTraj( BeamformerTime ):
         ----------
         num : integer, defaults to 2048
             This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block) 
+            (i.e. the number of samples per block).
         
         Returns
         -------
@@ -375,7 +375,8 @@ class BeamformerTimeTraj( BeamformerTime ):
             :attr:`~BeamformerTime.numchannels` is usually very \
             large (number of grid points).
             The last block may be shorter than num. \
-            The output starts for signals that were emitted from the grid at t=0.
+            The output starts for signals that were emitted 
+            from the grid at `t=0`.
         """
 
         if self.weights_:
@@ -514,7 +515,7 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
         ----------
         num : integer, defaults to 2048
             This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block) 
+            (i.e. the number of samples per block).
         
         Returns
         -------
@@ -523,7 +524,8 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
             :attr:`~BeamformerTime.numchannels` is usually very \
             large (number of grid points).
             The last block may be shorter than num. \
-            The output starts for signals that were emitted from the grid at t=0.
+            The output starts for signals that were emitted 
+            from the grid at `t=0`.
         """
 
         if self.weights_:
@@ -663,7 +665,7 @@ class IntegratorSectorTime( TimeInOut ):
         ----------
         num : integer, defaults to 1
             This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block) 
+            (i.e. the number of samples per block).
         
         Returns
         -------
