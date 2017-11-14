@@ -619,7 +619,7 @@ class IntegratorSectorTime( TimeInOut ):
     Provides an Integrator in the time domain.
     """
 
-    #: :class:`~acoular.grids.Grid`-derived object that provides the grid locations.
+    #: :class:`~acoular.grids.RectGrid` object that provides the grid locations.
     grid = Trait(RectGrid, 
         desc="beamforming grid")
         

@@ -12,11 +12,10 @@ from .h5cache import td_dir
 from .fileimport import time_data_import
 import ctypes
 import numpy
-import time
 import tables
-from traits.api import HasTraits, HasPrivateTraits, Float, Int, File, CArray, Property, Instance, Trait, Bool, Any, List, Str, Long
+from traits.api import Float, List, Str, Long
 from traitsui.api import EnumEditor
-from traitsui.api import View, Item, Group
+from traitsui.api import View, Item
 from traitsui.menu import OKCancelButtons
 from datetime import datetime
 from os import path

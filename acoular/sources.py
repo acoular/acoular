@@ -35,7 +35,7 @@ from .trajectory import Trajectory
 from .internal import digest
 from .microphones import MicGeom
 from .environments import Environment
-from .signals import SignalGenerator, WNoiseGenerator, PNoiseGenerator
+from .signals import SignalGenerator
 
 class SamplesGenerator( HasPrivateTraits ):
     """
