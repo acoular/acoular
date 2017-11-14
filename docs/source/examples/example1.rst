@@ -11,21 +11,21 @@ The script produces three figures:
 .. list-table::
     :widths: 50 25 25
     
-    * - .. figure:: example1_1.png
+    * - .. figure:: example1_1_py3colors.png
             :align: center
 	    :width: 100%
 	    :figwidth: 80%
 
             Results for different frequency domain beamformers and averaged time domain beamformers          
   
-      - .. figure:: example1_2.png
+      - .. figure:: example1_2_py3colors.png
             :align: center
 	    :width: 100%
 	    :figwidth: 80%
 
             Time domain beamformer output at different times
 
-      - .. figure:: example1_3.png
+      - .. figure:: example1_3_py3colors.png
             :align: center
 	    :width: 100%
 	    :figwidth: 80%

@@ -5,9 +5,11 @@ The acoular library is based on the Python programming language. While a basic k
 
 Prerequisites
 -------------
-This "Getting started" tutorial assumes that the Acoular library is :doc:`installed<../install/index>` together with its dependencies and the demo finished successfully. If you did not run the demo yet, you should do so by typing 
+This "Getting started" tutorial assumes that the Acoular library is :doc:`installed<../install/index>` together with its dependencies and the demo finished successfully. If you did not run the demo yet, you should do so by typing into your comand line
 
->>> acoular_demo.py
+.. code-block:: python
+
+    $ acoular_demo.py
 
 which should, after some seconds, produce two pictures (a 64 microphone arrangement and a beamforming map with three sources). You may close the pictures in order to continue. 
 
@@ -19,7 +21,7 @@ Beamforming example step-by-step
 One possible way to use the library is for doing classic delay-and-sum beamforming. This can either be done directly in the time domain or in the frequency domain. To get started with acoular, we will present a very basic example of beamforming in the frequency domain. In order to perform such an analysis we do need some data to work on. In a practical application, this data is acquired during multichannel measurements using a microphone array. The library provides some functionality to do so and stores the measured sound pressure time histories for all channels of the microphone array in a hierarchical data file (HDF5) format. 
 However, a working measurement set-up is required. Thus, we will use simulated data here. The 'three_sources.h5' file, generated using Acoular's simulation capabilities (see the :doc:`reference <../api_ref/index>`), contains the time history data for 64 microphone channels, which are sampled at 51200 Hz for a duration of 1 second, i.e. 51200 samples per channel. 
 
-In what follows, it is assumed that an interactive python session is started, preferably an IPython session:
+In what follows, it is assumed that an interactive python session is started, preferably an IPython or jupyter session:
 
 >>> ipython
 
@@ -100,7 +102,7 @@ In order to plot the microphone arrangement, we make use of the convenient matpl
 
     In [1]: plt.plot(mg.mpos[0],mg.mpos[1],'o')
 
-.. figure:: array64.png
+.. figure:: array64_py3colormap.png
    :align: center
    :scale: 50%
 
@@ -133,7 +135,7 @@ Now let us plot the result:
 
 which shows the following map, scaled to a range between the maximum value and 10 dB below it, and with the axes scales derived from the :class:`~acoular.grids.RectGrid` data object. 
 
-.. figure:: map_three_sources.png
+.. figure:: three_source_py3_colormap.png
    :align: center
    :scale: 50%
 

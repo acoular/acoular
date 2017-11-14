@@ -6,9 +6,9 @@ It needs the measured timeseries data in :download:`example_data.h5 <../../../ex
 
 The script produces the figure:
 
-.. figure:: example7.png
+.. figure:: example7_py3colormap.png
     :align: center
     :width: 100%
-    :figwidth: 50%
+    :figwidth: 70%
 
 .. literalinclude:: ../../../examples/example7.py

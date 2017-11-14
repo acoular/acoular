@@ -33,7 +33,6 @@ requirements:
     - scikit-learn >=0.15
     - pytables >=3.1
     - traits >=4.4
-    - numba >=0.21
     - libpython [win]
 
   run:
