@@ -103,7 +103,7 @@ for b in (bb, bc, be, bm, bl, bo, bs, bd, bcmf, bf):
     i1 += 1
     map = b.synthetic(cfreq,1)
     mx = L_p(map.max())
-    imshow(L_p(map.T), vmax=mx, vmin=mx-15, 
+    imshow(L_p(map.T), origin='lower', vmin=mx-15, 
            interpolation='nearest', extent=g.extend())
     colorbar()
     title(b.__class__.__name__)
