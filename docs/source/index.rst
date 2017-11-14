@@ -66,7 +66,7 @@ Contents:
 
     * - :doc:`news/index` 
 
-      - Release notes for the current Version of Acoular.
+      - Release notes for the current version of Acoular.
 
     * - :doc:`examples/index` 
 

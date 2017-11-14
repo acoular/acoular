@@ -6,7 +6,7 @@
 #------------------------------------------------------------------------------
 """Demo for acuolar
 
-Generates an test data set for three sources, analyzes them and generates a
+Generates a test data set for three sources, analyzes them and generates a
 map of the three sources
  
 The simulation generates the sound pressure at 64 microphones that are

@@ -3,7 +3,7 @@
 #------------------------------------------------------------------------------
 # Copyright (c) 2007-2017, Acoular Development Team.
 #------------------------------------------------------------------------------
-"""Generates an test data set for three sources.
+"""Generates a test data set for three sources.
  
 The simulation generates the sound pressure at 64 microphones that are
 arrangend in the 'array64' geometry which is part of the package. The sound

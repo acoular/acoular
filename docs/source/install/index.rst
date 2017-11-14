@@ -35,7 +35,7 @@ and for the example 3:
 Option 1 (recommended): Anaconda (Windows and Linux)
 ----------------------------------------------------
 
-This option assumes that you have the `Anaconda <https://www.anaconda.com/download/>`_ Python-distribution installed on your computer. If this is not the case you may `download <https://www.anaconda.com/download/>`_ and install it (higly recommended). **You may install Anaconda alongside any other Python installation on your system**, without the need to interfere the other Python installation.
+This option assumes that you have the `Anaconda <https://www.anaconda.com/download/>`_ Python-distribution installed on your computer. If this is not the case you may `download <https://www.anaconda.com/download/>`_ and install it (higly recommended). **You may install Anaconda alongside any other Python installation on your system**, without the need to interfere with the other Python installation.
 
 Once Anaconda Python is properly installed and works, start a console, i.e. either "cmd" or the "Anaconda command prompt" on Windows, Terminal on Linux.
 In the command line, type
