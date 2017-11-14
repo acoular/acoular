@@ -1,6 +1,6 @@
 Example 3
 =========
-This example demonstrates a 3D beamforming setup.
+This example demonstrates a 3D beamforming setup. The visualization uses the Mayavi package. Please note, that Mayavi ist not yet available for Python 3.   
 
 Download: :download:`example3.py <../../../examples/example3.py>`
 
