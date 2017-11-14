@@ -1,5 +1,8 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
+#------------------------------------------------------------------------------
+# Copyright (c) 2007-2017, Acoular Development Team.
+#------------------------------------------------------------------------------
 """
 This file contains all the functionalities which are very expansive, regarding
 computational costs. All functionalities are optimized via NUMBA.

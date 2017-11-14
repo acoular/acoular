@@ -2,7 +2,7 @@
 #pylint: disable-msg=E0611, E1101, E1103, C0103, R0901, R0902, R0903, R0904
 #pylint: disable-msg=W0232
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2014, Acoular Development Team.
+# Copyright (c) 2007-2017, Acoular Development Team.
 #------------------------------------------------------------------------------
 """Estimation of power spectra and related tools
 
@@ -39,7 +39,7 @@ class PowerSpectra( HasPrivateTraits ):
     matrix using the Welch method with windows and overlap. It also contains 
     data and additional properties of this matrix. 
     
-    The result is computed only when needed, that is when the *csm* attribute
+    The result is computed only when needed, that is when the :attr:`csm` attribute
     is actually read. Any change in the input data or parameters leads to a
     new calculation, again triggered when csm is read. The result may be 
     cached on disk in HDF5 files and need not to be recomputed during
@@ -48,27 +48,28 @@ class PowerSpectra( HasPrivateTraits ):
     and the same file name in case of that the data is read from a file.
     """
 
-    #: The SamplesGenerator object that provides the data.
+    #: The :class:`~acoular.sources.SamplesGenerator` object that provides the data.
     time_data = Trait(SamplesGenerator, 
         desc="time data object")
 
     #: Number of samples 
     numchannels = Delegate('time_data')
 
-    #: The Calib object that provides the calibration data, 
+    #: The :class:`~acoular.calib.Calib` object that provides the calibration data, 
     #: defaults to no calibration, i.e. the raw time data is used.
     #:
-    #: **deprecated**:      use calib property of TimeSamples objects
+    #: **deprecated**:      use :attr:`~acoular.sources.TimeSamples.calib` property of 
+    #: :class:`~acoular.sources.TimeSamples` objects
     calib = Instance(Calib)
 
     #: FFT block size, one of: 128, 256, 512, 1024, 2048 ... 16384,
-    #: defaults to 1024
+    #: defaults to 1024.
     block_size = Trait(1024, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 
         desc="number of samples per FFT block")
 
     #: Index of lowest frequency line to compute, integer, defaults to 1,
     #: is used only by objects that fetch the csm, PowerSpectra computes every
-    #: frequency line
+    #: frequency line.
     ind_low = Range(1, 
         desc="index of lowest frequency line")
 
@@ -78,7 +79,11 @@ class PowerSpectra( HasPrivateTraits ):
         desc="index of highest frequency line")
 
     #: Window function for FFT, one of:
-    #: 'Rectangular' (default), 'Hanning', 'Hamming', 'Bartlett', 'Blackman'
+    #:   * 'Rectangular' (default)
+    #:   * 'Hanning'
+    #:   * 'Hamming'
+    #:   * 'Bartlett'
+    #:   * 'Blackman'
     window = Trait('Rectangular', 
         {'Rectangular':ones, 
         'Hanning':hanning, 
@@ -87,12 +92,12 @@ class PowerSpectra( HasPrivateTraits ):
         'Blackman':blackman}, 
         desc="type of window for FFT")
 
-    #: Overlap factor for averaging: 'None'(default), '50%', '75%', '87.5%'
+    #: Overlap factor for averaging: 'None'(default), '50%', '75%', '87.5%'.
     overlap = Trait('None', {'None':1, '50%':2, '75%':4, '87.5%':8}, 
         desc="overlap of FFT blocks")
         
     #: Flag, if true (default), the result is cached in h5 files and need not
-    #: to be recomputed during subsequent program runs
+    #: to be recomputed during subsequent program runs.
     cached = Bool(True, 
         desc="cached flag")   
 
@@ -106,7 +111,7 @@ class PowerSpectra( HasPrivateTraits ):
         desc = "frequency range" )
         
     #: Array with a sequence of indices for all frequencies 
-    #: between *ind_low* and *ind_high* within the result, readonly.
+    #: between :attr:`ind_low` and :attr:`ind_high` within the result, readonly.
     indices = Property(
         desc = "index range" )
         
@@ -115,7 +120,7 @@ class PowerSpectra( HasPrivateTraits ):
         desc="basename for cache file")
 
     #: The cross spectral matrix, 
-    #: (number of frequencies, numchannels, numchannels) array of complex
+    #: (number of frequencies, numchannels, numchannels) array of complex;
     #: readonly.
     csm = Property( 
         desc="cross spectral matrix")
@@ -179,20 +184,20 @@ class PowerSpectra( HasPrivateTraits ):
 
     @property_depends_on('digest')
     def _get_csm ( self ):
-        """main work is done here:
-        cross spectral matrix is either loaded from cache file or
-        calculated and then additionally stored into cache
+        """
+        Main work is done here:
+        Cross spectral matrix is either loaded from cache file or
+        calculated and then additionally stored into cache.
         """
         # test for dual calibration
         obj = self.time_data # start with time_data obj
         while obj:
-            #print obj
             if 'calib' in obj.all_trait_names(): # at original source?
                 if obj.calib and self.calib:
                     if obj.calib.digest == self.calib.digest:
                         self.calib = None # ignore it silently
                     else:
-                        raise ValueError("nonidentical dual calibration for "\
+                        raise ValueError("Non-identical dual calibration for "\
                                     "both TimeSamples and PowerSpectra object")
                 obj = None
             else:
@@ -218,7 +223,7 @@ class PowerSpectra( HasPrivateTraits ):
                     wind = wind * self.calib.data[newaxis, :]
                 else:
                     raise ValueError(
-                            "calibration data not compatible: %i, %i" % \
+                            "Calibration data not compatible: %i, %i" % \
                             (self.calib.num_mics, t.numchannels))
             bs = self.block_size
             temp = empty((2*bs, t.numchannels))
@@ -255,7 +260,8 @@ class PowerSpectra( HasPrivateTraits ):
             return self.h5f.get_node('/', name)
 
     def fftfreq ( self ):
-        """Return the Discrete Fourier Transform sample frequencies.
+        """
+        Return the Discrete Fourier Transform sample frequencies.
         
         Returns
         -------
@@ -273,9 +279,9 @@ class EigSpectra( PowerSpectra ):
     matrix using the Welch method with windows and overlap and in addition its. 
     eigenvalues and eigenvectors. 
     
-    The result is computed only when needed, that is when the *csm*, *eva* or
-    *eve* attribute
-    is actually read. Any change in the input data or parameters leads to a
+    The result is computed only when needed, that is when the :attr:`~PowerSpectra.csm`, 
+    :attr:`eva` or :attr:`eve` attribute is actually read. 
+    Any change in the input data or parameters leads to a
     new calculation, again triggered when csm is read. The result may be 
     cached on disk in HDF5 files and need not to be recomputed during
     subsequent program runs with identical input data and parameters. The
@@ -370,10 +376,11 @@ def synthetic (data, freqs, f, num=3):
     """
     Returns synthesized frequency band values of spectral data.
     
-    If used with :meth:`Beamformer.result` and only one frequency band, 
-    the output is identical to
-    the result of the intrinsic :meth:`Beamformer.synthetic` method.
-    It can, however, also be used with the :meth:`Beamformer.integrate`
+    If used with :meth:`Beamformer.result()<acoular.fbeamform.BeamformerBase.result>` 
+    and only one frequency band, the output is identical to the result of the intrinsic 
+    :meth:`Beamformer.synthetic<acoular.fbeamform.BeamformerBase.synthetic>` method.
+    It can, however, also be used with the 
+    :meth:`Beamformer.integrate<acoular.fbeamform.BeamformerBase.integrate>`
     output and more frequency bands.
     
     Parameters
@@ -385,7 +392,7 @@ def synthetic (data, freqs, f, num=3):
         grid points.
     freq : array of floats
         The frequencies that correspon to the input *data* (as yielded by
-        the :meth:`PowerSpectra.fftfreq<acoular.spectra.Powerspectra.fftfreq`
+        the :meth:`PowerSpectra.fftfreq<acoular.spectra.PowerSpectra.fftfreq>`
         method).
     f : float or list of floats
         Band center frequency/frequencies for which to return the results.

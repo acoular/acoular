@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2014, Acoular Development Team.
+# Copyright (c) 2007-2017, Acoular Development Team.
 #------------------------------------------------------------------------------
 """Measured multichannel data managment and simulation of acoustic sources.
 
@@ -15,6 +15,7 @@
     PointSourceDipole
     MovingPointSource
     UncorrelatedNoiseSource
+    SourceMixer
 """
 
 # imports from other packages
@@ -71,14 +72,14 @@ class SamplesGenerator( HasPrivateTraits ):
         
         Returns
         -------
-        No output since SamplesGenerator only represents a base class to derive
-        other classes from
+        No output since `SamplesGenerator` only represents a base class to derive
+        other classes from.
         """
         pass
 
 class TimeSamples( SamplesGenerator ):
     """
-    Container for time data in *.h5 format
+    Container for time data in `*.h5` format.
     
     This class loads measured data from h5 files and
     and provides information about this data.
@@ -86,27 +87,27 @@ class TimeSamples( SamplesGenerator ):
     (e.g. for use in a block chain) via the :meth:`result` generator.
     """
 
-    #: Full name of the .h5 file with data
+    #: Full name of the .h5 file with data.
     name = File(filter=['*.h5'], 
         desc="name of data file")
 
-    #: Basename of the .h5 file with data, is set automatically
+    #: Basename of the .h5 file with data, is set automatically.
     basename = Property( depends_on = 'name', #filter=['*.h5'], 
         desc="basename of data file")
     
-    #: Calibration data, instance of :class:`~acoular.calib.Calib` class, optional 
+    #: Calibration data, instance of :class:`~acoular.calib.Calib` class, optional .
     calib = Trait( Calib, 
         desc="Calibration data")
     
-    #: Number of channels, is set automatically / read from file
+    #: Number of channels, is set automatically / read from file.
     numchannels = CLong(0, 
         desc="number of input channels")
 
-    #: Number of time data samples, is set automatically / read from file
+    #: Number of time data samples, is set automatically / read from file.
     numsamples = CLong(0, 
         desc="number of samples")
 
-    #: The time data as array of floats with dimension (numsamples, numchannels)
+    #: The time data as array of floats with dimension (numsamples, numchannels).
     data = Any( transient = True, 
         desc="the actual time data array")
 
@@ -138,8 +139,9 @@ class TimeSamples( SamplesGenerator ):
     
     @on_trait_change('basename')
     def load_data( self ):
-        #""" open the .h5 file and set attributes
-        #"""
+        """ 
+        Open the .h5 file and set attributes.
+        """
         if not path.isfile(self.name):
             # no file there
             self.numsamples = 0
@@ -164,7 +166,7 @@ class TimeSamples( SamplesGenerator ):
         ----------
         num : integer, defaults to 128
             This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block) 
+            (i.e. the number of samples per block) .
         
         Returns
         -------
@@ -190,9 +192,9 @@ class TimeSamples( SamplesGenerator ):
 
 class MaskedTimeSamples( TimeSamples ):
     """
-    Container for time data in *.h5 format
+    Container for time data in `*.h5` format.
     
-    This class loads measured data from h5 files and
+    This class loads measured data from h5 files 
     and provides information about this data.
     It supports storing information about (in)valid samples and (in)valid channels
     It also serves as an interface where the data can be accessed
@@ -200,35 +202,35 @@ class MaskedTimeSamples( TimeSamples ):
     
     """
     
-    #: Index of the first sample to be considered valid
+    #: Index of the first sample to be considered valid.
     start = CLong(0, 
         desc="start of valid samples")
     
-    #: Index of the last sample to be considered valid
+    #: Index of the last sample to be considered valid.
     stop = Trait(None, None, CLong, 
         desc="stop of valid samples")
     
-    #: Channels that are to be treated as invalid
+    #: Channels that are to be treated as invalid.
     invalid_channels = List(
         desc="list of invalid channels")
     
-    #: Channel mask to serve as an index for all valid channels, is set automatically
+    #: Channel mask to serve as an index for all valid channels, is set automatically.
     channels = Property(depends_on = ['invalid_channels', 'numchannels_total'], 
         desc="channel mask")
         
-    #: Number of channels (including invalid channels), is set automatically
+    #: Number of channels (including invalid channels), is set automatically.
     numchannels_total = CLong(0, 
         desc="total number of input channels")
 
-    #: Number of time data samples (including invalid samples), is set automatically
+    #: Number of time data samples (including invalid samples), is set automatically.
     numsamples_total = CLong(0, 
         desc="total number of samples per channel")
 
-    #: Number of valid channels, is set automatically
+    #: Number of valid channels, is set automatically.
     numchannels = Property(depends_on = ['invalid_channels', \
         'numchannels_total'], desc="number of valid input channels")
 
-    #: Number of valid time data samples, is set automatically
+    #: Number of valid time data samples, is set automatically.
     numsamples = Property(depends_on = ['start', 'stop', 'numsamples_total'], 
         desc="number of valid samples per channel")
 
@@ -304,7 +306,7 @@ class MaskedTimeSamples( TimeSamples ):
         ----------
         num : integer, defaults to 128
             This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block) 
+            (i.e. the number of samples per block).
         
         Returns
         -------
@@ -338,49 +340,49 @@ class PointSource( SamplesGenerator ):
     The output is being generated via the :meth:`result` generator.
     """
     
-    #:  Emitted signal, instance of the :class:`~acoular.signals.SignalGenerator` class
+    #:  Emitted signal, instance of the :class:`~acoular.signals.SignalGenerator` class.
     signal = Trait(SignalGenerator)
     
-    #: Location of source in (x, y, z) coordinates (left-oriented system)
+    #: Location of source in (`x`, `y`, `z`) coordinates (left-oriented system).
     loc = Tuple((0.0, 0.0, 1.0),
         desc="source location")
                
-    #: Number of channels in output, is automatically set / 
-    #: depends on used microphone geometry
+    #: Number of channels in output, is set automatically / 
+    #: depends on used microphone geometry.
     numchannels = Delegate('mpos', 'num_mics')
 
     #: Microphone locations as provided by a 
-    #: :class:`~acoular.microphones.MicGeom`-derived object
+    #: :class:`~acoular.microphones.MicGeom`-derived object.
     mpos = Trait(MicGeom, 
         desc="microphone geometry")
         
     #: :class:`~acoular.environments.Environment` object 
-    #: that provides distances from grid points to microphone positions
+    #: that provides distances from grid points to microphone positions.
     env = Trait(Environment(), Environment)
 
     #: Speed of sound, defaults to 343 m/s
     c = Float(343., 
         desc="speed of sound")
         
-    #: Start time of the signal in seconds, defaults to 0 s
+    #: Start time of the signal in seconds, defaults to 0 s.
     start_t = Float(0.0,
         desc="signal start time")
     
     #: Start time of the data aquisition at microphones in seconds, 
-    #: defaults to 0 s
+    #: defaults to 0 s.
     start = Float(0.0,
         desc="sample start time")
 
-    #: Upsampling factor, internal use, defaults to 16
+    #: Upsampling factor, internal use, defaults to 16.
     up = Int(16, 
         desc="upsampling factor")        
     
     #: Number of samples, is set automatically / 
-    #: depends on :attr:`signal`
+    #: depends on :attr:`signal`.
     numsamples = Delegate('signal')
     
     #: Sampling frequency of the signal, is set automatically / 
-    #: depends on :attr:`signal`
+    #: depends on :attr:`signal`.
     sample_freq = Delegate('signal') 
 
     # internal identifier
@@ -401,7 +403,7 @@ class PointSource( SamplesGenerator ):
         ----------
         num : integer, defaults to 128
             This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block) 
+            (i.e. the number of samples per block) .
         
         Returns
         -------
@@ -446,7 +448,7 @@ class MovingPointSource( PointSource ):
 
     #: Trajectory of the source, 
     #: instance of the :class:`~acoular.trajectory.Trajectory` class.
-    #: The start time is assumed to be the same as for the samples
+    #: The start time is assumed to be the same as for the samples.
     trajectory = Trait(Trajectory, 
         desc="trajectory of the source")
 
@@ -555,7 +557,7 @@ class PointSourceDipole ( PointSource ):
         ----------
         num : integer, defaults to 128
             This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block) 
+            (i.e. the number of samples per block) .
         
         Returns
         -------
@@ -635,41 +637,41 @@ class UncorrelatedNoiseSource( SamplesGenerator ):
                    desc = "type of noise")
 
     #: Array with seeds for random number generator.
-    #: When left empty, arange(:attr:`numchannels`)+:attr:`signal`.seed  
-    #: will be used
+    #: When left empty, arange(:attr:`numchannels`) + :attr:`signal`.seed  
+    #: will be used.
     seed = CArray(dtype = uint32,
                   desc = "random seed values")
     
-    #: Number of channels in output, is automatically set / 
-    #: depends on used microphone geometry
+    #: Number of channels in output; is set automatically / 
+    #: depends on used microphone geometry.
     numchannels = Delegate('mpos', 'num_mics')
 
     #: Microphone locations as provided by a 
-    #: :class:`~acoular.microphones.MicGeom`-derived object
+    #: :class:`~acoular.microphones.MicGeom`-derived object.
     mpos = Trait(MicGeom, 
         desc="microphone geometry")
         
 
-    #: Speed of sound, defaults to 343 m/s
+    #: Speed of sound, defaults to 343 m/s.
     c = Float(343., 
         desc="speed of sound")
         
-    #: Start time of the signal in seconds, defaults to 0 s
+    #: Start time of the signal in seconds, defaults to 0 s.
     start_t = Float(0.0,
         desc="signal start time")
     
     #: Start time of the data aquisition at microphones in seconds, 
-    #: defaults to 0 s
+    #: defaults to 0 s.
     start = Float(0.0,
         desc="sample start time")
 
     
-    #: Number of samples, is set automatically / 
-    #: depends on :attr:`signal`
+    #: Number of samples is set automatically / 
+    #: depends on :attr:`signal`.
     numsamples = Delegate('signal')
     
-    #: Sampling frequency of the signal, is set automatically / 
-    #: depends on :attr:`signal`
+    #: Sampling frequency of the signal; is set automatically / 
+    #: depends on :attr:`signal`.
     sample_freq = Delegate('signal') 
     
     # internal identifier
@@ -691,7 +693,7 @@ class UncorrelatedNoiseSource( SamplesGenerator ):
         ----------
         num : integer, defaults to 128
             This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block) 
+            (i.e. the number of samples per block) .
         
         Returns
         -------
@@ -731,17 +733,17 @@ class SourceMixer( SamplesGenerator ):
     Mixes the signals from several sources. 
     """
 
-    #: List of :class:`~beamfpy.sources.SamplesGenerator` objects
+    #: List of :class:`~acoular.sources.SamplesGenerator` objects
     #: to be mixed.
     sources = List( Instance(SamplesGenerator, ()) ) 
 
-    #: Sampling frequency of the signal
+    #: Sampling frequency of the signal.
     sample_freq = Trait( SamplesGenerator().sample_freq )
     
-    #: Number of channels 
+    #: Number of channels.
     numchannels = Trait( SamplesGenerator().numchannels )
                
-    #: Number of samples 
+    #: Number of samples.
     numsamples = Trait( SamplesGenerator().numsamples )
     
     # internal identifier
@@ -767,7 +769,7 @@ class SourceMixer( SamplesGenerator ):
 
     @on_trait_change('sources')
     def validate_sources( self ):
-        """ validates if sources fit together """
+        """ Validates if sources fit together. """
         if self.sources:
             self.sample_freq = self.sources[0].sample_freq
             self.numchannels = self.sources[0].numchannels
@@ -790,7 +792,7 @@ class SourceMixer( SamplesGenerator ):
         ----------
         num : integer
             This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block) 
+            (i.e. the number of samples per block).
         
         Returns
         -------

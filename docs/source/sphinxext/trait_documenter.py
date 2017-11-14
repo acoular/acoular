@@ -6,12 +6,20 @@
     :copyright: Copyright 2012 by Enthought, Inc
 
 """
+
+import os 
+# workaround for problems with pyqt5 support, may be removed in the future
+try:
+    import pyface.qt
+except:
+    os.environ['QT_API'] = 'pyqt' 
+
 import traceback
 import sys
 import inspect
 import tokenize
 import token
-import StringIO
+import io
 
 from sphinx.ext.autodoc import ClassLevelDocumenter
 
@@ -24,12 +32,6 @@ def _is_class_trait(name, cls):
     """
     return isinstance(cls, MetaHasTraits) and name in cls.__class_traits__
 
-class myut(tokenize.Untokenizer):
-    def add_whitespace(self,start):
-        row, col = start
-        col_offset = col - self.prev_col
-        if col_offset:
-            self.tokens.append(" " * col_offset)
 
 class TraitDocumenter(ClassLevelDocumenter):
     """ Specialized Documenter subclass for trait attributes.
@@ -47,7 +49,7 @@ class TraitDocumenter(ClassLevelDocumenter):
 
     """
 
-    ### ClassLevelDocumenter interface #####################################
+    # ClassLevelDocumenter interface #####################################
 
     objtype = 'traitattribute'
     directivetype = 'attribute'
@@ -94,13 +96,13 @@ class TraitDocumenter(ClassLevelDocumenter):
         # this used to only catch SyntaxError, ImportError and
         # AttributeError, but importing modules with side effects can raise
         # all kinds of errors.
-        except Exception, err:
+        except Exception as err:
             if self.env.app and not self.env.app.quiet:
                 self.env.app.info(traceback.format_exc().rstrip())
             msg = ('autodoc can\'t import/find {0} {r1}, it reported error: '
                    '"{2}", please check your spelling and sys.path')
             self.directive.warn(msg.format(self.objtype, str(self.fullname),
-                                                                        err))
+                                err))
             self.env.note_reread()
             return False
 
@@ -111,10 +113,10 @@ class TraitDocumenter(ClassLevelDocumenter):
         """
         ClassLevelDocumenter.add_directive_header(self, sig)
         definition = self._get_trait_definition()
-        self.add_line(u'   :annotation: = {0}'.format(definition),
+        self.add_line('   :annotation: = {0}'.format(definition),
                       '<autodoc>')
 
-    ### Private Interface #####################################################
+    # Private Interface #####################################################
 
     def _get_trait_definition(self):
         """ Retrieve the Trait attribute definition
@@ -122,14 +124,14 @@ class TraitDocumenter(ClassLevelDocumenter):
 
         # Get the class source and tokenize it.
         source = inspect.getsource(self.parent)
-        string_io = StringIO.StringIO(source)
+        string_io = io.StringIO(source)
         tokens = tokenize.generate_tokens(string_io.readline)
 
         # find the trait definition start
         trait_found = False
         name_found = False
         while not trait_found:
-            item = tokens.next()
+            item = next(tokens)
             if name_found and item[:2] == (token.OP, '='):
                 trait_found = True
                 continue
@@ -137,16 +139,42 @@ class TraitDocumenter(ClassLevelDocumenter):
                 name_found = True
 
         # Retrieve the trait definition.
-        definition_tokens = []
-        for type, name, start, stop, line in tokens:
-            if type == token.NEWLINE:
-                break
-            item = (type, name, (0, start[1]), (0, stop[1]), line)
-            definition_tokens.append(item)
+        definition_tokens = _get_definition_tokens(tokens)
+        return tokenize.untokenize(definition_tokens).strip()
 
-        ut = myut()
-              
-        return ut.untokenize(definition_tokens).strip()
+
+def _get_definition_tokens(tokens):
+    """ Given the tokens, extracts the definition tokens.
+
+    Parameters
+    ----------
+    tokens : iterator
+        An iterator producing tokens.
+
+    Returns
+    -------
+    A list of tokens for the definition.
+    """
+    # Retrieve the trait definition.
+    definition_tokens = []
+    first_line = None
+
+    for type, name, start, stop, line_text in tokens:
+        if first_line is None:
+            first_line = start[0]
+
+        if type == token.NEWLINE:
+            break
+
+        item = (type,
+                name,
+                (start[0] - first_line + 1, start[1]),
+                (stop[0] - first_line + 1, stop[1]),
+                line_text)
+
+        definition_tokens.append(item)
+
+    return definition_tokens
 
 
 def setup(app):

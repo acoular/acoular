@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #pylint: disable-msg=E0611,C0111,C0103,R0901,R0902,R0903,R0904,W0232
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2014, Acoular Development Team.
+# Copyright (c) 2007-2017, Acoular Development Team.
 #------------------------------------------------------------------------------
 
 # imports from other packages
@@ -30,7 +30,7 @@ if not path.exists(td_dir):
 
 class H5cache_class(HasPrivateTraits):
     """
-    Cache class that handles opening and closing tables.File objects
+    Cache class that handles opening and closing 'tables.File' objects
     """
     # cache directory
     cache_dir = Str
