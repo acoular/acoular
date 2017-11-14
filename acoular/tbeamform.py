@@ -27,7 +27,7 @@ from traitsui.menu import OKCancelButtons
 
 # acoular imports
 from .internal import digest
-from .grids import RectGrid
+from .grids import RectGrid, Grid
 from .microphones import MicGeom
 from .environments import Environment
 from .trajectory import Trajectory
@@ -76,7 +76,7 @@ class BeamformerTime( TimeInOut ):
     """
 
     #: :class:`~acoular.grids.Grid`-derived object that provides the grid locations.
-    grid = Trait(RectGrid, 
+    grid = Trait(Grid, 
         desc="beamforming grid")
 
     #: Number of channels in output (=number of grid points).
