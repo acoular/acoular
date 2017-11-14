@@ -42,7 +42,7 @@ In the command line, type
 
 .. code-block:: python
 
-    $ conda install -c https://conda.binstar.org/acoular acoular
+    $ conda install -c acoular acoular
 
 This will install Acoular in your Anaconda Python enviroment and make the Acoular library available from Python. In addition, this will install all dependencies (those other packages mentioned above) if they are not already present on your system.
 Depending on your type of Anaconda installation (single user or system-wide), you may be asked for admin privileges in order to start the installation process.

@@ -1,23 +1,13 @@
 # -*- coding: utf-8 -*-
 #pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2014, Acoular Development Team.
+# Copyright (c) 2007-2017, Acoular Development Team.
 #------------------------------------------------------------------------------
-"""Generates an test data set for three sources.
- 
-The simulation generates the sound pressure at 64 microphones that are
-arrangend in the 'array64' geometry which is part of the package. The sound
-pressure signals are sampled at 51200 Hz for a duration of 1 second.
+"""
 
-Source location (relative to array center) and levels:
+Loads the three sources test data set, analyzes them and generates a
+map of the three sources. 
 
-====== =============== ======
-Source Location        Level 
-====== =============== ======
-1      (-0.1,-0.1,0.3) 1 Pa
-2      (0.15,0,0.3)    0.7 Pa 
-3      (0,0.1,0.3)     0.5 Pa
-====== =============== ======
 """
 
 from os import path

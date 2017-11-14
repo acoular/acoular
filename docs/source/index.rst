@@ -46,6 +46,7 @@ Contents:
     
     How to Get <install/index>
     Getting Started <get_started/index>
+    What's new <news/index>
     Literature <literature/index>
     Examples <examples/index>
     API Reference <api_ref/index>
@@ -62,6 +63,10 @@ Contents:
     * - :doc:`get_started/index` 
 
       - The basics for using Acoular explained with a simple example.
+
+    * - :doc:`news/index` 
+
+      - Release notes for the current Version of Acoular.
 
     * - :doc:`examples/index` 
 
