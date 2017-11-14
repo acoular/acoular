@@ -10,5 +10,8 @@ People
 
 * Ennes Sarradj
 * Gert Herold
+* Adam Kujawski
+* Tom Gensch
+* Simon Jekosch
 
 
