@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 #pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2015, Acoular Development Team.
+# Copyright (c) 2007-2017, Acoular Development Team.
 #------------------------------------------------------------------------------
 """Demo for acuolar
 
-Generates an test data set for three sources, analyzes them and generates a
+Generates a test data set for three sources, analyzes them and generates a
 map of the three sources
  
 The simulation generates the sound pressure at 64 microphones that are

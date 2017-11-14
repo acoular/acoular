@@ -6,7 +6,7 @@ demonstrates use of acoular for a point source moving on a circle trajectory
 
 uses synthesized data
 
-Copyright (c) 2006-2015 The Acoular developers.
+Copyright (c) 2006-2017 The Acoular developers.
 All rights reserved.
 """
 from __future__ import print_function

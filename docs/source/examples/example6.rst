@@ -9,14 +9,14 @@ The script produces two figures:
 .. list-table::
     :widths: 50 50
     
-    * - .. figure:: example6_1.png
+    * - .. figure:: example6_2_py3colors.png
             :align: center
 	    :width: 100%
 	    :figwidth: 80%
 
             Results for different frequency domain beamformers with diagonal removal
   
-      - .. figure:: example6_2.png
+      - .. figure:: example6_3_py3colors.png
             :align: center
 	    :width: 100%
 	    :figwidth: 80%
