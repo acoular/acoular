@@ -27,14 +27,11 @@
 
 # imports from other packages
 from __future__ import print_function, division
-import sys
-from numpy import array, ones, hanning, hamming, bartlett, blackman, invert, \
-dot, newaxis, zeros, empty, fft, float32, float64, complex64, linalg, where, \
-searchsorted, pi, multiply, sign, diag, arange, sqrt, exp, log10, int,\
+from numpy import array, ones, invert, \
+dot, newaxis, zeros, float32, float64, linalg,  \
+searchsorted, pi, sign, diag, arange, sqrt, exp, log10, int,\
 reshape, hstack, vstack, eye, tril, size, clip
-from sklearn.linear_model import LassoLars, LassoCV, LassoLarsCV, LassoLarsIC,\
- OrthogonalMatchingPursuit, SGDRegressor, LinearRegression, ElasticNet, \
- OrthogonalMatchingPursuitCV, Lasso
+from sklearn.linear_model import LassoLars, LassoLarsIC, OrthogonalMatchingPursuitCV
 from scipy.optimize import nnls
 import tables
 from traits.api import HasPrivateTraits, Float, Int, \
@@ -42,11 +39,6 @@ CArray, Property, Instance, Trait, Bool, Range, Delegate, Enum, \
 cached_property, on_trait_change, property_depends_on
 from traitsui.api import View, Item
 from traitsui.menu import OKCancelButtons
-
-try:
-    from sklearn.model_selection import LeaveOneOut
-except ImportError:
-    from sklearn.cross_validation import LeaveOneOut
 
 from .fastFuncs import beamformerFreq, transfer, calcPointSpreadFunction, damasSolverGaussSeidel
 
