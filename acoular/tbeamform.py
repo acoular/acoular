@@ -375,7 +375,8 @@ class BeamformerTimeTraj( BeamformerTime ):
             :attr:`~BeamformerTime.numchannels` is usually very \
             large (number of grid points).
             The last block may be shorter than num. \
-            The output starts for signals that were emitted from the grid at t=0.
+            The output starts for signals that were emitted 
+            from the grid at `t=0`.
         """
 
         if self.weights_:
@@ -523,7 +524,8 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
             :attr:`~BeamformerTime.numchannels` is usually very \
             large (number of grid points).
             The last block may be shorter than num. \
-            The output starts for signals that were emitted from the grid at t=0.
+            The output starts for signals that were emitted 
+            from the grid at `t=0`.
         """
 
         if self.weights_:

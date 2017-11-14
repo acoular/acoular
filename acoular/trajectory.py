@@ -32,7 +32,7 @@ class Trajectory( HasPrivateTraits ):
     of positions between samples.
     """
     #: Dictionary that assigns discrete time instants (keys) to 
-    #: sampled (x, y, z) positions along the trajectory (values).
+    #: sampled `(x, y, z)` positions along the trajectory (values).
     points = Dict(key_trait = Float, value_trait = Tuple(Float, Float, Float), 
         desc = "sampled positions along the trajectory")
     

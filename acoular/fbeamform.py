@@ -1450,7 +1450,8 @@ class BeamformerCMF ( BeamformerBase ):
 def L_p ( x ):
     """
     Calculates the sound pressure level from the squared sound pressure.
-    :math:`L_p = 10 \lg ( x/4*10^{-10})`
+    
+    :math:`L_p = 10 \lg ( x / 4\cdot 10^{-10})`
     
     Parameters
     ----------
@@ -1461,7 +1462,7 @@ def L_p ( x ):
     -------
     array of floats
         The corresponding sound pressure levels in dB. 
-        If x<0, -350. dB is returned.
+        If `x<0`, -350.0 dB is returned.
     """
     # new version to prevent division by zero warning for float32 arguments
     return 10*log10(clip(x/4e-10,1e-35,None))
@@ -1473,9 +1474,11 @@ def integrate(data, grid, sector):
     
     This function can be applied on beamforming results to
     quantitatively analyze the sound pressure in a given sector.
-    If used with :meth:`Beamformer.result`, the output is identical to
-    the result of the intrinsic :meth:`Beamformer.integrate` method.
-    It can, however, also be used with the :meth:`Beamformer.synthetic`
+    If used with :meth:`Beamformer.result()<acoular.fbeamform.BeamformerBase.result>`, 
+    the output is identical to the result of the intrinsic 
+    :meth:`Beamformer.integrate<acoular.fbeamform.BeamformerBase.integrate>` method.
+    It can, however, also be used with the 
+    :meth:`Beamformer.synthetic<acoular.fbeamform.BeamformerBase.synthetic>`
     output.
     
     Parameters
@@ -1491,12 +1494,12 @@ def integrate(data, grid, sector):
         Object of a :class:`~acoular.grids.Grid`-derived class 
         that provides the grid locations.        
     sector: array of floats
-        Tuple with arguments for the 'indices' method 
+        Tuple with arguments for the `indices` method 
         of a :class:`~acoular.grids.Grid`-derived class 
         (e.g. :meth:`RectGrid.indices<acoular.grids.RectGrid.indices>` 
         or :meth:`RectGrid3D.indices<acoular.grids.RectGrid3D.indices>`).
-        Possible sectors would be *array([xmin, ymin, xmax, ymax])* 
-        or *array([x, y, radius])*.
+        Possible sectors would be `array([xmin, ymin, xmax, ymax])`
+        or `array([x, y, radius])`.
           
     Returns
     -------

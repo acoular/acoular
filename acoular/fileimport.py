@@ -5,11 +5,14 @@
 #------------------------------------------------------------------------------
 """
 Contains classes for importing time data in several file formats.
+Standard HDF (`*.h5`) import can be done using 
+:class:`~acoular.sources.TimeSamples` objects.
 
 .. autosummary::
     :toctree: generated/
 
     time_data_import
+    csv_import
     td_import
     bk_mat_import
     datx_import
@@ -223,7 +226,7 @@ class bk_mat_import( time_data_import ):
 
 class datx_d_file(HasPrivateTraits):
     """
-    Helper class for import of .datx data, represents
+    Helper class for import of `*.datx` data, represents
     datx data file.
     """
     # File name
