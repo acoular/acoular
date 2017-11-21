@@ -18,6 +18,7 @@
     BeamformerOrth
     BeamformerCleansc
     BeamformerCMF
+    BeamformerGIB
 
     PointSpreadFunction
     L_p
@@ -27,13 +28,24 @@
 
 # imports from other packages
 from __future__ import print_function, division
-from numpy import array, ones, invert, \
-dot, newaxis, zeros, float32, float64, linalg,  \
-searchsorted, pi, sign, diag, arange, sqrt, exp, log10, int,\
-reshape, hstack, vstack, eye, tril, size, clip
-from sklearn.linear_model import LassoLars, LassoLarsIC, OrthogonalMatchingPursuitCV
+
+
+from numpy import array, ones, hanning, hamming, bartlett, blackman, invert, \
+dot, newaxis, zeros, empty, fft, float32, float64, complex64, linalg, where, \
+searchsorted, pi, multiply, sign, diag, arange, sqrt, exp, log10, int,\
+reshape, hstack, vstack, eye, tril, size, clip, tile, flipud, fliplr, round, delete, \
+absolute, argsort, sort, sum, hsplit
+
+from sklearn.linear_model import LassoLars, LassoCV, LassoLarsCV, LassoLarsIC,\
+ OrthogonalMatchingPursuit, SGDRegressor, LinearRegression, ElasticNet, \
+ OrthogonalMatchingPursuitCV, Lasso
+
+#from sklearn.cross_validation import LeaveOneOut
 from scipy.optimize import nnls
+from scipy.linalg import inv, eigh, eigvals
+
 import tables
+
 from traits.api import HasPrivateTraits, Float, Int, \
 CArray, Property, Instance, Trait, Bool, Range, Delegate, Enum, \
 cached_property, on_trait_change, property_depends_on
@@ -1438,6 +1450,213 @@ class BeamformerCMF ( BeamformerBase ):
                     ac[i] = model.coef_[:]
                 fr[i] = True
 
+class BeamformerGIB( BeamformerEig ):  #BeamformerEig #BeamformerBase
+    """
+    Beamforming GIB methods with different normalizations,
+    """
+    
+    #: :class:`~acoular.spectra.EigSpectra` object that provides the 
+    #: cross spectral matrix and eigenvalues
+    freq_data = Trait(EigSpectra, 
+        desc="freq data object")
+
+    #: Number of component to calculate: 
+    #: 0 (smallest) ... :attr:`~acoular.sources.SamplesGenerator.numchannels`-1;
+    #: defaults to -1, i.e. numchannels-1
+    n = Int(-1, 
+        desc="No. of eigenvalue")
+    
+
+    #: Maximum number of iterations,
+    #: tradeoff between speed and precision;
+    #: defaults to 10
+    max_iter = Int(10, 
+        desc="maximum number of iterations")
+
+    #: Type of fit method to be used ('Suzuki', 'LassoLars', 'LassoLarsBIC', 
+    #: 'OMPCV' or 'NNLS', defaults to 'Suzuki').
+    #: These methods are implemented in 
+    #: the `scikit-learn <http://scikit-learn.org/stable/user_guide.html>`_ 
+    #: module.
+    method = Trait('Suzuki', 'InverseILRS', 'LassoLars', 'LassoLarsBIC',  \
+        'OMPCV', 'NNLS', desc="fit method used")
+
+    #: Weight factor for LassoLars method,
+    #: defaults to 0.0.
+    alpha = Range(0.0, 1.0, 0.0, 
+        desc="Lasso weight factor")
+    # (use values in the order of 10^⁻9 for good results)  
+    #norm to consider
+    pnorm= Float(1,desc="Norm for normalization")
+
+    # Beta - fraction of source maintained after each iteration
+    beta =  Float(0.9,desc="fraction of source maintained")
+    
+    eps_perc =  Float(0.05,desc="regularization parameter")
+        # internal identifier++++++++++++++++++++++++++++++++++++++++++++++++++
+    digest = Property( 
+        depends_on = ['mpos.digest', 'grid.digest', 'freq_data.digest', 'c', \
+            'alpha', 'method', 'max_iter', 'env.digest', 'steer', 'r_diag',\
+            'pnorm', 'beta','n'], 
+        )
+
+    traits_view = View(
+        [
+            [Item('mpos{}', style='custom')], 
+            [Item('grid', style='custom'), '-<>'], 
+            [Item('method', label='Fit method')], 
+            [Item('max_iter', label='No. of iterations')], 
+            [Item('alpha', label='Lasso weight factor')], 
+            [Item('c', label='Speed of sound')], 
+            [Item('env{}', style='custom')], 
+            '|'
+        ], 
+        title='Beamformer options', 
+        buttons = OKCancelButtons
+        )
+    
+    @cached_property
+    def _get_digest( self ):
+        return digest( self )
+    
+    @property_depends_on('n')
+    def _get_na( self ):
+        na = self.n
+        nm = self.mpos.num_mics
+        if na < 0:
+            na = max(nm + na, 0)
+        return min(nm - 1, na)
+
+
+    def calc(self, ac, fr):
+        
+        """
+        Calculates the result for the frequencies defined by :attr:`freq_data`
+        
+        This is an internal helper function that is automatically called when 
+        accessing the beamformer's :attr:`~BeamformerBase.result` or calling
+        its :meth:`~BeamformerBase.synthetic` method.        
+        
+        Parameters
+        ----------
+        ac : array of floats
+            This array of dimension ([number of frequencies]x[number of gridpoints])
+            is used as call-by-reference parameter and contains the calculated
+            value after calling this method. 
+        fr : array of booleans
+            The entries of this [number of frequencies]-sized array are either 
+            'True' (if the result for this frequency has already been calculated)
+            or 'False' (for the frequencies where the result has yet to be calculated).
+            After the calculation at a certain frequency the value will be set
+            to 'True'
+        
+        Returns
+        -------
+        This method only returns values through the *ac* and *fr* parameters
+
+        """        
+        # prepare calculation
+        kj = 2j*pi*self.freq_data.fftfreq()/self.c #wavebnumber
+        n = int(self.n)                            #number of eigenvalues
+        numchannels = self.freq_data.numchannels   #number of channels
+        r0 = self.r0                                #
+        rm = self.rm
+        numpoints = rm.shape[0]
+        hh = zeros((1, numpoints, numchannels), dtype='D')
+        #Generate a cross spectral matrix, and perform the eigenvalue decomposition
+        #beamfunc = self.get_beamfunc('_os')
+        for i in self.freq_data.indices:
+            if not fr[i]:
+                kji = kj[i, newaxis]                
+                #for monopole and source strenght Q needs to define density
+                #calculate a transfer matrix A 
+                hh = transfer(r0, rm, kji)         
+                A=hh[0].T                 
+                #eigenvalues and vectors       
+                eva,eve=eigh(array(self.freq_data.csm[i], dtype='complex128',copy=1))# .T
+                print(eva, eve)
+                eva = flipud(sort(eva))
+                print(eva)
+                #set small values zo 0, lowers numerical errors
+                eve = fliplr(eve[:, eva.argsort()[::-1]]) 
+                #eve = flipud(eve[:, eva.argsort()[::-1]]) 
+                eva[eva < max(eva)/1e12] = 0
+                print(eva,eve)
+                #init sources    
+                qi=zeros([n,numpoints], dtype='complex128')
+                #Select the number of coherent modes to be processed referring to the eigenvalue distribution.
+                for s in arange(n):        
+                    #3)Generate the corresponding eigenmodes
+                    emode=array(sqrt(eva[s])*eve[:,s], dtype='complex128')
+                    # choose method for computation
+                    if self.method == 'Suzuki':
+                        leftpoints=numpoints
+                        locpoints=arange(numpoints)         
+                        weights=diag(ones(numpoints))             
+                        epsilon=arange(self.max_iter)
+                        #Increase the resolution                  
+                        for it in arange(self.max_iter): 
+                            if numchannels<=leftpoints:
+                                AWA= dot(dot(A[:,locpoints],weights),A[:,locpoints].conj().T)
+                                epsilon[it] = max(absolute(eigvals(AWA)))*self.eps_perc
+                                qi[s,locpoints]=dot(dot(dot(weights,A[:,locpoints].conj().T),inv(AWA+eye(numchannels)*epsilon[it])),emode)
+                            elif numchannels>leftpoints:
+                                AA=dot(A[:,locpoints].conj().T,A[:,locpoints])
+                                epsilon[it] = max(absolute(eigvals(AA)))*self.eps_perc
+                                qi[s,locpoints]=dot(dot(inv(AA+inv(weights)*epsilon[it]),A[:,locpoints].conj().T),emode)                                                       
+                            if self.beta < 1 and it > 1:   
+                                #Reorder from the greatest to smallest magnitude to define a reduced-point source distribution , and reform a reduced transfer matrix 
+                                leftpoints=int(round(numpoints*self.beta**(it+1)))                                                                                          
+                                idx = argsort(abs(qi[s,locpoints]))[::-1]   
+                                #print(it, leftpoints, locpoints, idx )
+                                locpoints= delete(locpoints,[idx[leftpoints::]])             
+                                qix=zeros([n,leftpoints], dtype='complex128')                      
+                                qix[s,:]=qi[s,locpoints]
+                                #calc weights for next iteration 
+                                weights=diag(absolute(qix[s,:])**(2-self.pnorm))    
+                            else:                          
+                                weights=diag((absolute(qi[s,:])**(2-self.pnorm)))    
+                         
+                    elif self.method == 'InverseILRS':                        
+                        weights=eye(numpoints)
+                        locpoints=arange(numpoints)
+                        for it in arange(self.max_iter): 
+                            if numchannels<=numpoints: 
+                                wtwi=inv(dot(weights.T,weights))  
+                                aH=A.conj().T                       
+                                qi[s,:]=dot(dot(wtwi,aH),dot(inv(dot(A,dot(wtwi,aH))),emode))                            
+                                weights=diag(absolute(qi[s,:])**((2-self.pnorm)/2))
+                                weights=weights/sum(absolute(weights))                                 
+                            elif numchannels>numpoints:
+                                wtw=dot(weights.T,weights)
+                                qi[s,:]= dot(dot(inv(dot(dot(A.conj.T,wtw),A)),dot( A.conj().T,wtw)) ,emode)
+                                weights=diag(absolute(qi[s,:])**((2-self.pnorm)/2))
+                                weights=weights/sum(absolute(weights))                  
+                    else:
+                        locpoints=arange(numpoints)                      
+                        AB = vstack([hstack([A.real,-A.imag]),hstack([A.imag,A.real])])
+                        R  = hstack([emode.real.T,emode.imag.T])
+                        if self.method == 'LassoLars':
+                            model = LassoLars(alpha=self.alpha,max_iter=self.max_iter)
+                        elif self.method == 'LassoLarsBIC':
+                            model = LassoLarsIC(criterion='bic',max_iter=self.max_iter)
+                        elif self.method == 'OMPCV':
+                            model = OrthogonalMatchingPursuitCV()
+                        
+                        if self.method == 'NNLS':
+                            x , zz = nnls(AB,R)
+                            qi_real,qi_imag = hsplit(x, 2) 
+                        else:
+                            model.fit(AB,R)
+                            qi_real,qi_imag = hsplit(model.coef_[:], 2) 
+                            
+                        qi[s,locpoints] = qi_real+qi_imag*1j
+                        
+                #Generate source maps of all selected eigenmodes, and superpose source intensity for each source type.
+                ac[i] = zeros([1,numpoints])
+                ac[i,locpoints] = sum(absolute(qi[:,locpoints]),axis=0)
+                #print self.freq_data.fftfreq()[i]# print fftfreq
+                fr[i] = True    
 
 def L_p ( x ):
     """

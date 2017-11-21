@@ -81,7 +81,7 @@ from .spectra import PowerSpectra, EigSpectra, synthetic
 from .fbeamform import BeamformerBase, BeamformerCapon, BeamformerEig, \
 BeamformerMusic, BeamformerDamas, BeamformerOrth,BeamformerCleansc, \
 BeamformerCMF, BeamformerClean, BeamformerFunctional, L_p, integrate, \
-PointSpreadFunction
+PointSpreadFunction, BeamformerGIB
 from .sources import PointSource, MovingPointSource, SamplesGenerator, \
 TimeSamples, MaskedTimeSamples, PointSourceDipole, UncorrelatedNoiseSource, \
 SourceMixer
