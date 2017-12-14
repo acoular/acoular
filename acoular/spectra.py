@@ -13,11 +13,12 @@
     EigSpectra
     synthetic
 """
+import warnings
 from six.moves import xrange  # solves the xrange/range issue for python2/3: in py3 'xrange' is now treated as 'range' and in py2 nothing changes
 
 from numpy import array, ones, hanning, hamming, bartlett, blackman, \
 dot, newaxis, zeros, empty, fft, float32, complex64, linalg, \
-searchsorted, isscalar, fill_diagonal, arange
+searchsorted, isscalar, fill_diagonal, arange, zeros_like
 import tables
 from traits.api import HasPrivateTraits, Int, Property, Instance, Trait, \
 Range, Bool, cached_property, property_depends_on, Delegate
@@ -422,9 +423,39 @@ def synthetic (data, freqs, f, num=3):
     if isscalar(f):
         f = (f,)
     if num == 0:
-        res = [ data[searchsorted(freqs, i)] for i in f]        
+        # single frequency lines
+        res = list()
+        for i in f:
+            ind = searchsorted(freqs, i)
+            if ind >= len(freqs):
+                warnings.warn('Queried frequency (%g Hz) not in resolved '
+                              'frequency range. Returning zeros.' % i, 
+                              Warning, stacklevel = 2)
+                h = zeros_like(data[0])
+            else:
+                if freqs[ind] != i:
+                    warnings.warn('Queried frequency (%g Hz) not in set of '
+                                  'discrete FFT sample frequencies. '
+                                  'Using frequency %g Hz instead.' % (i,freqs[ind]), 
+                                  Warning, stacklevel = 2)
+                h = data[ind]
+            res += [h]      
     else:
-        res = [ data[searchsorted(freqs, i*2.**(-0.5/num)):\
-                    searchsorted(freqs, i*2.**(+0.5/num))].sum(0) for i in f]
+        # fractional octave bands
+        res = list()
+        for i in f:
+            f1 = i*2.**(-0.5/num)
+            f2 = i*2.**(+0.5/num)
+            ind1 = searchsorted(freqs, f1)
+            ind2 = searchsorted(freqs, f2)
+            if ind1 == ind2:
+                warnings.warn('Queried frequency band (%g to %g Hz) does not '
+                              'include any discrete FFT sample frequencies. '
+                              'Returning zeros.' % (f1,f2), 
+                              Warning, stacklevel = 2)
+                h = zeros_like(data[0])
+            else:
+                h = sum(data[ind1:ind2], 0)
+            res += [h]
     return array(res)
         
