@@ -27,10 +27,11 @@
 
 # imports from other packages
 from __future__ import print_function, division
+import warnings
 from numpy import array, ones, invert, \
 dot, newaxis, zeros, float32, float64, linalg,  \
 searchsorted, pi, sign, diag, arange, sqrt, exp, log10, int,\
-reshape, hstack, vstack, eye, tril, size, clip
+reshape, hstack, vstack, eye, tril, size, clip, zeros_like
 from sklearn.linear_model import LassoLars, LassoLarsIC, OrthogonalMatchingPursuitCV
 from scipy.optimize import nnls
 import tables
@@ -290,16 +291,38 @@ class BeamformerBase( HasPrivateTraits ):
         freq = self.freq_data.fftfreq()
         if len(freq) == 0:
             return None
-        try:
-            if num == 0:
-                # single frequency line
-                h = res[searchsorted(freq, f)]
+
+        if num == 0:
+            # single frequency line
+            ind = searchsorted(freq, f)
+            if ind >= len(freq):
+                warnings.warn('Queried frequency (%g Hz) not in resolved '
+                              'frequency range. Returning zeros.' % f, 
+                              Warning, stacklevel = 2)
+                h = zeros_like(res[0])
             else:
-                h = sum(res[searchsorted(freq, f*2.**(-0.5/num)) : \
-                            searchsorted(freq, f*2.**(+0.5/num))], 0)
-            return h.reshape(self.grid.shape)
-        except IndexError:
-            return None
+                if freq[ind] != f:
+                    warnings.warn('Queried frequency (%g Hz) not in set of '
+                                  'discrete FFT sample frequencies. '
+                                  'Using frequency %g Hz instead.' % (f,freq[ind]), 
+                                  Warning, stacklevel = 2)
+                h = res[ind]
+        else:
+            # fractional octave band
+            f1 = f*2.**(-0.5/num)
+            f2 = f*2.**(+0.5/num)
+            ind1 = searchsorted(freq, f1)
+            ind2 = searchsorted(freq, f2)
+            if ind1 == ind2:
+                warnings.warn('Queried frequency band (%g to %g Hz) does not '
+                              'include any discrete FFT sample frequencies. '
+                              'Returning zeros.' % (f1,f2), 
+                              Warning, stacklevel = 2)
+                h = zeros_like(res[0])
+            else:
+                h = sum(res[ind1:ind2], 0)
+        return h.reshape(self.grid.shape)
+
 
     def integrate(self, sector):
         """
