@@ -1318,10 +1318,19 @@ class BeamformerCMF ( BeamformerBase ):
     max_iter = Int(500, 
         desc="maximum number of iterations")
 
+    
+    #: Unit multiplier for evaluating, e.g., nPa instead of Pa. 
+    #: Values are converted back before returning. 
+    #: Temporary conversion may be necessary to not reach machine epsilon
+    #: within fitting method algorithms. Defaults to 1e9.
+    unit_mult = Float(1e9,
+                      desc = "unit multiplier")
+
     # internal identifier
     digest = Property( 
-        depends_on = ['mpos.digest', 'grid.digest', 'freq_data.digest', 'c', \
-            'alpha', 'method', 'max_iter', 'env.digest', 'steer', 'r_diag'], 
+        depends_on = ['mpos.digest', 'grid.digest', 'freq_data.digest', \
+                      'c', 'alpha', 'method', 'max_iter', 'unit_mult', \
+                      'env.digest', 'steer', 'r_diag'], 
         )
 
     traits_view = View(
@@ -1381,7 +1390,7 @@ class BeamformerCMF ( BeamformerBase ):
         r0 = self.r0
         rm = self.rm
         numpoints = rm.shape[0]
-
+        unit = self.unit_mult
         hh = zeros((1, numpoints, nc), dtype='D')
 
             
@@ -1420,22 +1429,25 @@ class BeamformerCMF ( BeamformerBase ):
 
                 A = realify( Ac [ind,:] )[ind_reim,:]
                 # use csm.T for column stacking reshape!
-                R = realify( reshape(csm.T, (nc*nc,1))[ind,:] )[ind_reim,:]
+                R = realify( reshape(csm.T, (nc*nc,1))[ind,:] )[ind_reim,:] * unit
 #                print A.shape, R.shape
                 # choose method
                 if self.method == 'LassoLars':
-                    model = LassoLars(alpha=self.alpha,max_iter=self.max_iter)
+                    model = LassoLars(alpha = self.alpha * unit,
+                                      max_iter = self.max_iter)
                 elif self.method == 'LassoLarsBIC':
-                    model = LassoLarsIC(criterion='bic',max_iter=self.max_iter)
+                    model = LassoLarsIC(criterion = 'bic',
+                                        max_iter = self.max_iter)
                 elif self.method == 'OMPCV':
                     model = OrthogonalMatchingPursuitCV()
 #                model = ElasticNet(alpha=self.alpha, l1_ratio=0.7)
                 # nnls is not in sklearn
                 if self.method == 'NNLS':
                     ac[i] , x = nnls(A,R.flat)
+                    ac[i] /= unit
                 else:
                     model.fit(A,R[:,0])
-                    ac[i] = model.coef_[:]
+                    ac[i] = model.coef_[:] / unit
                 fr[i] = True
 
 
