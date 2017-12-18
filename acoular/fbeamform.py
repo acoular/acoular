@@ -27,7 +27,7 @@
 
 # imports from other packages
 from __future__ import print_function, division
-import warnings
+from warnings import warn
 from numpy import array, ones, invert, \
 dot, newaxis, zeros, float32, float64, linalg,  \
 searchsorted, pi, sign, diag, arange, sqrt, exp, log10, int,\
@@ -296,16 +296,16 @@ class BeamformerBase( HasPrivateTraits ):
             # single frequency line
             ind = searchsorted(freq, f)
             if ind >= len(freq):
-                warnings.warn('Queried frequency (%g Hz) not in resolved '
+                warn('Queried frequency (%g Hz) not in resolved '
                               'frequency range. Returning zeros.' % f, 
                               Warning, stacklevel = 2)
                 h = zeros_like(res[0])
             else:
                 if freq[ind] != f:
-                    warnings.warn('Queried frequency (%g Hz) not in set of '
-                                  'discrete FFT sample frequencies. '
-                                  'Using frequency %g Hz instead.' % (f,freq[ind]), 
-                                  Warning, stacklevel = 2)
+                    warn('Queried frequency (%g Hz) not in set of '
+                         'discrete FFT sample frequencies. '
+                         'Using frequency %g Hz instead.' % (f,freq[ind]), 
+                         Warning, stacklevel = 2)
                 h = res[ind]
         else:
             # fractional octave band
@@ -314,10 +314,10 @@ class BeamformerBase( HasPrivateTraits ):
             ind1 = searchsorted(freq, f1)
             ind2 = searchsorted(freq, f2)
             if ind1 == ind2:
-                warnings.warn('Queried frequency band (%g to %g Hz) does not '
-                              'include any discrete FFT sample frequencies. '
-                              'Returning zeros.' % (f1,f2), 
-                              Warning, stacklevel = 2)
+                warn('Queried frequency band (%g to %g Hz) does not '
+                     'include any discrete FFT sample frequencies. '
+                     'Returning zeros.' % (f1,f2), 
+                     Warning, stacklevel = 2)
                 h = zeros_like(res[0])
             else:
                 h = sum(res[ind1:ind2], 0)
