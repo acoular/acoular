@@ -47,7 +47,7 @@ from .internal import digest
 from .grids import Grid
 from .microphones import MicGeom
 from .environments import Environment
-from .spectra import PowerSpectra, EigSpectra
+from .spectra import PowerSpectra
 
 
 def steerVecTranslation(steer):
@@ -478,9 +478,9 @@ class BeamformerEig( BeamformerBase ):
     see :ref:`Sarradj et al., 2005<Sarradj2005>`.
     """
 
-    #: :class:`~acoular.spectra.EigSpectra` object that provides the 
+    #: :class:`~acoular.spectra.PowerSpectra` object that provides the 
     #: cross spectral matrix and eigenvalues
-    freq_data = Trait(EigSpectra, 
+    freq_data = Trait(PowerSpectra, 
         desc="freq data object")
 
     #: Number of component to calculate: 
@@ -919,7 +919,7 @@ class BeamformerOrth (BeamformerBase):
     #: :class:`BeamformerEig` object that provides data for deconvolution.
     beamformer = Trait(BeamformerEig)
 
-    #: :class:`~acoular.spectra.EigSpectra` object that provides the cross spectral matrix 
+    #: :class:`~acoular.spectra.PowerSpectra` object that provides the cross spectral matrix 
     #: and eigenvalues, is set automatically.    
     freq_data = Delegate('beamformer')
 
