@@ -291,7 +291,9 @@ class BeamformerBase( HasPrivateTraits ):
         freq = self.freq_data.fftfreq()
         if len(freq) == 0:
             return None
-
+        
+        indices = self.freq_data.indices
+        
         if num == 0:
             # single frequency line
             ind = searchsorted(freq, f)
@@ -306,6 +308,11 @@ class BeamformerBase( HasPrivateTraits ):
                          'discrete FFT sample frequencies. '
                          'Using frequency %g Hz instead.' % (f,freq[ind]), 
                          Warning, stacklevel = 2)
+                if not (ind in indices):
+                    warn('Beamforming result may not have been calculated '
+                         'for queried frequency. Check '
+                         'freq_data.ind_low and freq_data.ind_high!',
+                          Warning, stacklevel = 2)
                 h = res[ind]
         else:
             # fractional octave band
@@ -321,6 +328,11 @@ class BeamformerBase( HasPrivateTraits ):
                 h = zeros_like(res[0])
             else:
                 h = sum(res[ind1:ind2], 0)
+                if not ((ind1 in indices) and (ind2 in indices)):
+                    warn('Beamforming result may not have been calculated '
+                         'for all queried frequencies. Check '
+                         'freq_data.ind_low and freq_data.ind_high!',
+                          Warning, stacklevel = 2)
         return h.reshape(self.grid.shape)
 
 
