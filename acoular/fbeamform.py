@@ -1464,14 +1464,23 @@ class BeamformerGIB( BeamformerEig ):  #BeamformerEig #BeamformerBase
     #: 0 (smallest) ... :attr:`~acoular.sources.SamplesGenerator.numchannels`-1;
     #: defaults to -1, i.e. numchannels-1
     n = Int(-1, 
-        desc="No. of eigenvalue")
+            desc="No. of eigenvalue")
     
+    
+    #: Unit multiplier for evaluating, e.g., nPa instead of Pa. 
+    #: Values are converted back before returning. 
+    #: Temporary conversion may be necessary to not reach machine epsilon
+    #: within fitting method algorithms. Defaults to 1e9.
+    unit_mult = Float(1e9,
+                      desc = "unit multiplier")
+
+
 
     #: Maximum number of iterations,
     #: tradeoff between speed and precision;
     #: defaults to 10
     max_iter = Int(10, 
-        desc="maximum number of iterations")
+                   desc="maximum number of iterations")
 
     #: Type of fit method to be used ('Suzuki', 'LassoLars', 'LassoLarsBIC', 
     #: 'OMPCV' or 'NNLS', defaults to 'Suzuki').
@@ -1496,7 +1505,7 @@ class BeamformerGIB( BeamformerEig ):  #BeamformerEig #BeamformerBase
         # internal identifier++++++++++++++++++++++++++++++++++++++++++++++++++
     digest = Property( 
         depends_on = ['mpos.digest', 'grid.digest', 'freq_data.digest', 'c', \
-            'alpha', 'method', 'max_iter', 'env.digest', 'steer', 'r_diag',\
+            'alpha', 'method', 'max_iter', 'env.digest',  'unit_mult', 'r_diag',\
             'pnorm', 'beta','n'], 
         )
 
@@ -1574,19 +1583,14 @@ class BeamformerGIB( BeamformerEig ):  #BeamformerEig #BeamformerBase
                 A=hh[0].T                 
                 #eigenvalues and vectors       
                 eva,eve=eigh(array(self.freq_data.csm[i], dtype='complex128',copy=1))# .T
-                print(eva, eve)
-                eva = flipud(sort(eva))
-                print(eva)
-                #set small values zo 0, lowers numerical errors
+                eva = flipud(sort(eva))         
                 eve = fliplr(eve[:, eva.argsort()[::-1]]) 
-                #eve = flipud(eve[:, eva.argsort()[::-1]]) 
-                eva[eva < max(eva)/1e12] = 0
-                print(eva,eve)
+                eva[eva < max(eva)/1e12] = 0 #set small values zo 0, lowers numerical errors in simulated data
                 #init sources    
                 qi=zeros([n,numpoints], dtype='complex128')
                 #Select the number of coherent modes to be processed referring to the eigenvalue distribution.
                 for s in arange(n):        
-                    #3)Generate the corresponding eigenmodes
+                    #Generate the corresponding eigenmodes
                     emode=array(sqrt(eva[s])*eve[:,s], dtype='complex128')
                     # choose method for computation
                     if self.method == 'Suzuki':
@@ -1633,26 +1637,26 @@ class BeamformerGIB( BeamformerEig ):  #BeamformerEig #BeamformerBase
                                 weights=diag(absolute(qi[s,:])**((2-self.pnorm)/2))
                                 weights=weights/sum(absolute(weights))                  
                     else:
-                        locpoints=arange(numpoints)                      
+                        locpoints=arange(numpoints) 
+                        unit = self.unit_mult
                         AB = vstack([hstack([A.real,-A.imag]),hstack([A.imag,A.real])])
-                        R  = hstack([emode.real.T,emode.imag.T])
+                        R  = hstack([emode.real.T,emode.imag.T]) * unit
+
                         if self.method == 'LassoLars':
-                            model = LassoLars(alpha=self.alpha,max_iter=self.max_iter)
+                            model = LassoLars(alpha=self.alpha * unit,max_iter=self.max_iter)
                         elif self.method == 'LassoLarsBIC':
                             model = LassoLarsIC(criterion='bic',max_iter=self.max_iter)
                         elif self.method == 'OMPCV':
                             model = OrthogonalMatchingPursuitCV()
-                            
-                            
                         elif self.method == 'LassoLarsCV':
                             model = LassoLarsCV()    
                         
                         if self.method == 'NNLS':
                             x , zz = nnls(AB,R)
-                            qi_real,qi_imag = hsplit(x, 2) 
+                            qi_real,qi_imag = hsplit(x/unit, 2) 
                         else:
                             model.fit(AB,R)
-                            qi_real,qi_imag = hsplit(model.coef_[:], 2) 
+                            qi_real,qi_imag = hsplit(model.coef_[:]/unit, 2) 
                             
                         qi[s,locpoints] = qi_real+qi_imag*1j
                         
