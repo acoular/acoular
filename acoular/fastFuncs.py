@@ -430,7 +430,7 @@ def _freqBeamformer_EigValProb_Formulation1AkaClassic_FullCSM(eigVal, eigVec, di
 
     # building steering vector: in order to save some operation -> some normalization steps are applied after mat-vec-multipl.
     for cntMics in xrange(nMics):
-        expArg = np.float32(waveNumber[0] * (distGridToAllMics[cntMics]))
+        expArg = np.float32(waveNumber[0] * distGridToAllMics[cntMics])
         steerVec[cntMics] = (np.cos(expArg) - 1j * np.sin(expArg))
 
     # performing matrix-vector-multplication via spectral decomp. (see bottom of information header of 'beamformerFreq')
@@ -454,7 +454,7 @@ def _freqBeamformer_EigValProb_Formulation1AkaClassic_CsmRemovedDiag(eigVal, eig
 
     # building steering vector: in order to save some operation -> some normalization steps are applied after mat-vec-multipl.
     for cntMics in xrange(nMics):
-        expArg = np.float32(waveNumber[0] * (distGridToAllMics[cntMics] - distGridToArrayCenter[0]))
+        expArg = np.float32(waveNumber[0] * distGridToAllMics[cntMics])
         steerVec[cntMics] = (np.cos(expArg) - 1j * np.sin(expArg))
 
     # performing matrix-vector-multplication via spectral decomp. (see bottom of information header of 'beamformerFreq')
@@ -481,7 +481,7 @@ def _freqBeamformer_EigValProb_Formulation2AkaInverse_FullCSM(eigVal, eigVec, di
 
     # building steering vector: in order to save some operation -> some normalization steps are applied after mat-vec-multipl.
     for cntMics in xrange(nMics):
-        expArg = np.float32(waveNumber[0] * (distGridToAllMics[cntMics] - distGridToArrayCenter[0]))
+        expArg = np.float32(waveNumber[0] * distGridToAllMics[cntMics])
         steerVec[cntMics] = (np.cos(expArg) - 1j * np.sin(expArg)) * distGridToAllMics[cntMics]  # r_{t,i}-normalization is handled here
 
     # performing matrix-vector-multplication via spectral decomp. (see bottom of information header of 'beamformerFreq')
@@ -505,7 +505,7 @@ def _freqBeamformer_EigValProb_Formulation2AkaInverse_CsmRemovedDiag(eigVal, eig
 
     # building steering vector: in order to save some operation -> some normalization steps are applied after mat-vec-multipl.
     for cntMics in xrange(nMics):
-        expArg = np.float32(waveNumber[0] * (distGridToAllMics[cntMics] - distGridToArrayCenter[0]))
+        expArg = np.float32(waveNumber[0] * distGridToAllMics[cntMics])
         steerVec[cntMics] = (np.cos(expArg) - 1j * np.sin(expArg)) * distGridToAllMics[cntMics]  # r_{t,i}-normalization is handled here
 
     # performing matrix-vector-multplication via spectral decomp. (see bottom of information header of 'beamformerFreq')
@@ -534,7 +534,7 @@ def _freqBeamformer_EigValProb_Formulation3AkaTrueLevel_FullCSM(eigVal, eigVec, 
     helpNormalize = 0.0
     for cntMics in xrange(nMics):
         helpNormalize += 1.0 / (distGridToAllMics[cntMics] * distGridToAllMics[cntMics])  
-        expArg = np.float32(waveNumber[0] * (distGridToAllMics[cntMics] - distGridToArrayCenter[0]))
+        expArg = np.float32(waveNumber[0] * distGridToAllMics[cntMics])
         steerVec[cntMics] = (np.cos(expArg) - 1j * np.sin(expArg)) / distGridToAllMics[cntMics]  # r_{t,i}-normalization is handled here
 
     # performing matrix-vector-multplication via spectral decomp. (see bottom of information header of 'beamformerFreq')
@@ -560,7 +560,7 @@ def _freqBeamformer_EigValProb_Formulation3AkaTrueLevel_CsmRemovedDiag(eigVal, e
     helpNormalize = 0.0
     for cntMics in xrange(nMics):
         helpNormalize += 1.0 / (distGridToAllMics[cntMics] * distGridToAllMics[cntMics])  
-        expArg = np.float32(waveNumber[0] * (distGridToAllMics[cntMics] - distGridToArrayCenter[0]))
+        expArg = np.float32(waveNumber[0] * distGridToAllMics[cntMics])
         steerVec[cntMics] = (np.cos(expArg) - 1j * np.sin(expArg)) / distGridToAllMics[cntMics]  # r_{t,i}-normalization is handled here
 
     # performing matrix-vector-multplication via spectral decomp. (see bottom of information header of 'beamformerFreq')
@@ -589,7 +589,7 @@ def _freqBeamformer_EigValProb_Formulation4AkaTrueLocation_FullCSM(eigVal, eigVe
     helpNormalize = 0.0
     for cntMics in xrange(nMics):
         helpNormalize += 1.0 / (distGridToAllMics[cntMics] * distGridToAllMics[cntMics])  
-        expArg = np.float32(waveNumber[0] * (distGridToAllMics[cntMics] - distGridToArrayCenter[0]))
+        expArg = np.float32(waveNumber[0] * distGridToAllMics[cntMics])
         steerVec[cntMics] = (np.cos(expArg) - 1j * np.sin(expArg)) / distGridToAllMics[cntMics]  # r_{t,i}-normalization is handled here
 
     # performing matrix-vector-multplication via spectral decomp. (see bottom of information header of 'beamformerFreq')
@@ -615,7 +615,7 @@ def _freqBeamformer_EigValProb_Formulation4AkaTrueLocation_CsmRemovedDiag(eigVal
     helpNormalize = 0.0
     for cntMics in xrange(nMics):
         helpNormalize += 1.0 / (distGridToAllMics[cntMics] * distGridToAllMics[cntMics])  
-        expArg = np.float32(waveNumber[0] * (distGridToAllMics[cntMics] - distGridToArrayCenter[0]))
+        expArg = np.float32(waveNumber[0] * distGridToAllMics[cntMics])
         steerVec[cntMics] = (np.cos(expArg) - 1j * np.sin(expArg)) / distGridToAllMics[cntMics]  # r_{t,i}-normalization is handled here
 
     # performing matrix-vector-multplication via spectral decomp. (see bottom of information header of 'beamformerFreq')
