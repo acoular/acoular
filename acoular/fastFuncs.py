@@ -808,7 +808,7 @@ def _psf_Formulation4AkaTrueLocation(distGridToArrayCenter, distGridToAllMics, d
             helpNormalizeGrid += 1.0 / (distGridToAllMics[cntMics] * distGridToAllMics[cntMics])
         normalizeFactor = distSourcesToArrayCenter[cntSources]
         scalarProdAbsSquared = (scalarProd * scalarProd.conjugate()).real
-        result[cntSources] = scalarProdAbsSquared * (normalizeFactor * normalizeFactor) / nMics / helpNormalizeGrid / helpNormalizeGrid  # ERROR: one helpNormalizeGrid too much! needs to be corrected after py3 migration
+        result[cntSources] = scalarProdAbsSquared * (normalizeFactor * normalizeFactor) / nMics / helpNormalizeGrid
 
 # NEEDS TO BE OVERLOOKED!!
 #@nb.guvectorize([(nb.complex128[:], nb.complex128[:,:], nb.float64[:])], '(m),(s,m)->(s)', nopython=True, target=parallelOption, cache=cachedOption)
