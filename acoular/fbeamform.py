@@ -807,20 +807,17 @@ class PointSpreadFunction (HasPrivateTraits):
             steerVecFormulation = steerVecTranslation(self.steer)
             if self.calcmode == 'single':
                 for ind in g_ind_calc:
-                    hh = calcPointSpreadFunction(steerVecFormulation, (r0, rm, kj, [ind]))[0,:,:]
-                    ac[:,ind] = hh[:,0] / hh[ind,0]
+                    ac[:,ind] = calcPointSpreadFunction(steerVecFormulation, (r0, rm, kj, [ind]))[0,:,0]
                     gp[ind] = True
             elif self.calcmode == 'full':
-                hh = calcPointSpreadFunction(steerVecFormulation, (r0, rm, kj, arange(r0.shape[0])))[0,:,:]
                 gp[:] = True
-                ac[:] = hh / diag(hh)
+                ac[:] = calcPointSpreadFunction(steerVecFormulation, (r0, rm, kj, arange(r0.shape[0])))[0,:,:]
             else: # 'block'
-                hh = calcPointSpreadFunction(steerVecFormulation, (r0, rm, kj, g_ind_calc))[0,:,:]
-                hh /= diag(hh[g_ind_calc,:])[newaxis,:]
+                hh = calcPointSpreadFunction(steerVecFormulation, (r0, rm, kj, g_ind_calc))
                 indh = 0
                 for ind in g_ind_calc:
                     gp[ind] = True
-                    ac[:,ind] = hh[:,indh]
+                    ac[:,ind] = hh[0,:,indh]
                     indh += 1
             self.h5f.flush()
         return ac[:][:,self.grid_indices]
