@@ -34,7 +34,7 @@ from numpy import array, ones, hanning, hamming, bartlett, blackman, invert, \
 dot, newaxis, zeros, empty, fft, float32, float64, complex64, linalg, where, \
 searchsorted, pi, multiply, sign, diag, arange, sqrt, exp, log10, int,\
 reshape, hstack, vstack, eye, tril, size, clip, tile, flipud, fliplr, round, delete, \
-absolute, argsort, sort, sum, hsplit
+absolute, argsort, sort, sum, hsplit, fill_diagonal
 
 from sklearn.linear_model import LassoLars, LassoCV, LassoLarsCV, LassoLarsIC,\
  OrthogonalMatchingPursuit, SGDRegressor, LinearRegression, ElasticNet, \
@@ -1459,6 +1459,10 @@ class BeamformerGIB( BeamformerEig ):  #BeamformerEig #BeamformerBase
     #: cross spectral matrix and eigenvalues
     freq_data = Trait(EigSpectra, 
         desc="freq data object")
+    
+     #: Boolean flag, if 'True' (default), the main diagonal is removed before beamforming.
+    r_diag = Bool(True, 
+                  desc="removal of diagonal")
 
     #: Number of component to calculate: 
     #: 0 (smallest) ... :attr:`~acoular.sources.SamplesGenerator.numchannels`-1;
@@ -1581,8 +1585,14 @@ class BeamformerGIB( BeamformerEig ):  #BeamformerEig #BeamformerBase
                 #calculate a transfer matrix A 
                 hh = transfer(r0, rm, kji)         
                 A=hh[0].T                 
-                #eigenvalues and vectors       
-                eva,eve=eigh(array(self.freq_data.csm[i], dtype='complex128',copy=1))# .T
+                #eigenvalues and vectors  
+                
+                csm = array(self.freq_data.csm[i], dtype='complex128',copy=1)
+                if self.r_diag:
+                    # omit main diagonal for noise reduction
+                   fill_diagonal(csm, 0)
+                
+                eva,eve=eigh(csm)# .T
                 eva = flipud(sort(eva))         
                 eve = fliplr(eve[:, eva.argsort()[::-1]]) 
                 eva[eva < max(eva)/1e12] = 0 #set small values zo 0, lowers numerical errors in simulated data
