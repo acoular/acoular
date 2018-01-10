@@ -93,11 +93,11 @@ class BeamformerBase( HasPrivateTraits ):
     r_diag = Bool(True, 
                   desc="removal of diagonal")
     
-    #: If r_diag==True: if r_diagSignalLossNormalize==0.0 then the standard  
-    #: normalization = nMics/(nMics-1) is used. If r_diagSignalLossNormalize !=0.0  
+    #: If r_diag==True: if r_diag_sig_loss_norm==0.0 then the standard  
+    #: normalization = nMics/(nMics-1) is used. If r_diag_sig_loss_norm !=0.0  
     #: then the user input is used instead.  
     #: If r_diag==False then the normalization is 1.0 either way. 
-    r_diagSignalLossNormalize = Float(0.0, 
+    r_diag_sig_loss_norm = Float(0.0, 
                                       desc="If diagonal of the csm is removed, some signal energy is lost." 
                                       "This is handled via this Normalization factor." 
                                       "Internally the default is: nMics / (nMics**2 - nMics).") 
@@ -135,7 +135,7 @@ class BeamformerBase( HasPrivateTraits ):
     # internal identifier
     digest = Property( 
         depends_on = ['mpos.digest', 'grid.digest', 'freq_data.digest', 'c', \
-            'r_diag', 'env.digest', 'r_diagSignalLossNormalize', 'steer'], 
+            'r_diag', 'env.digest', 'r_diag_sig_loss_norm', 'steer'], 
         )
 
     # internal identifier
@@ -216,18 +216,18 @@ class BeamformerBase( HasPrivateTraits ):
             #print 2, name
         return ac
         
-    def signalLossNormalize(self):
+    def sig_loss_norm(self):
         """ 
         If the Diagonal of the CSM is removed one has to handle the loss 
         of signal energy --> Done via a normalization factor.
         """
         if not self.r_diag:  # Full CSM --> no normalization needed 
             normFactor = 1.0 
-        elif self.r_diagSignalLossNormalize == 0.0:  # Removed diag: standard normaliz.-factor 
+        elif self.r_diag_sig_loss_norm == 0.0:  # Removed diag: standard normaliz.-factor 
             nMics = float(self.freq_data.numchannels) 
             normFactor = nMics / (nMics - 1) 
-        elif self.r_diagSignalLossNormalize != 0.0:  # Removed diag: user defined normaliz.-factor 
-            normFactor = self.r_diagSignalLossNormalize 
+        elif self.r_diag_sig_loss_norm != 0.0:  # Removed diag: user defined normaliz.-factor 
+            normFactor = self.r_diag_sig_loss_norm 
         return normFactor
 
     def calc(self, ac, fr):
@@ -258,7 +258,7 @@ class BeamformerBase( HasPrivateTraits ):
         """
         kj = 2j*pi*self.freq_data.fftfreq()/self.c
         steerVecFormulation = steerVecTranslation(self.steer)
-        normFactor = self.signalLossNormalize()
+        normFactor = self.sig_loss_norm()
         for i in self.freq_data.indices:
             if not fr[i]:
                 csm = array(self.freq_data.csm[i][newaxis], dtype='complex128')
@@ -511,7 +511,7 @@ class BeamformerCapon( BeamformerBase ):
         """        
         kj = 2j*pi*self.freq_data.fftfreq()/self.c
         nMics = self.freq_data.numchannels
-        normFactor = self.signalLossNormalize() * nMics**2
+        normFactor = self.sig_loss_norm() * nMics**2
         steerVecFormulation = steerVecTranslation(self.steer)
         for i in self.freq_data.indices:
             if not fr[i]:
@@ -601,7 +601,7 @@ class BeamformerEig( BeamformerBase ):
         """
         kj = 2j*pi*self.freq_data.fftfreq()/self.c
         na = int(self.na)  # eigenvalue taken into account
-        normFactor = self.signalLossNormalize()
+        normFactor = self.sig_loss_norm()
         steerVecFormulation = steerVecTranslation(self.steer)
         for i in self.freq_data.indices:        
             if not fr[i]:
@@ -671,7 +671,7 @@ class BeamformerMusic( BeamformerEig ):
         kj = 2j*pi*self.freq_data.fftfreq()/self.c
         nMics = self.freq_data.numchannels
         n = int(self.mpos.num_mics-self.na)
-        normFactor = self.signalLossNormalize() * nMics**2
+        normFactor = self.sig_loss_norm() * nMics**2
         steerVecFormulation = steerVecTranslation(self.steer)
         for i in self.freq_data.indices:        
             if not fr[i]:
@@ -1153,7 +1153,7 @@ class BeamformerCleansc( BeamformerBase ):
         """
 
         # prepare calculation
-        normFactor = self.signalLossNormalize()
+        normFactor = self.sig_loss_norm()
         steerVecFormulation = steerVecTranslation(self.steer)
         numchannels = self.freq_data.numchannels
         f = self.freq_data.fftfreq()
