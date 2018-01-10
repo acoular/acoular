@@ -15,6 +15,7 @@
     BeamformerMusic
     BeamformerClean
     BeamformerDamas
+    BeamformerDamasPlus
     BeamformerOrth
     BeamformerCleansc
     BeamformerCMF
@@ -33,7 +34,7 @@ dot, newaxis, zeros, float32, float64, linalg,  \
 searchsorted, pi, sign, diag, arange, sqrt, exp, log10, int,\
 reshape, hstack, vstack, eye, tril, size, clip, zeros_like
 from sklearn.linear_model import LassoLars, LassoLarsIC, OrthogonalMatchingPursuitCV
-from scipy.optimize import nnls
+from scipy.optimize import nnls, linprog
 import tables
 from traits.api import HasPrivateTraits, Float, Int, \
 CArray, Property, Instance, Trait, Bool, Range, Delegate, Enum, \
@@ -940,6 +941,135 @@ class BeamformerDamas (BeamformerBase):
                 psf = p.psf[:]
                 damasSolverGaussSeidel(psf, y, self.n_iter, self.damp, x)
                 ac[i] = x
+                fr[i] = True
+
+class BeamformerDamasPlus (BeamformerDamas):
+    """
+    DAMAS deconvolution, see :ref:`Brooks and Humphreys, 2006<BrooksHumphreys2006>`,
+    for solving the system of equations, instead of the original Gauss-Seidel 
+    iterations, this class employs the NNLS or linear programming solvers from 
+    scipy.optimize or one  of several optimization algorithms from the scikit-learn module.
+    Needs a-priori delay-and-sum beamforming (:class:`BeamformerBase`).
+    """
+    
+    #: Type of fit method to be used ('LassoLars', 
+    #: 'OMPCV', 'LP', or 'NNLS', defaults to 'NNLS').
+    #: These methods are implemented in 
+    #: the `scikit-learn <http://scikit-learn.org/stable/user_guide.html>`_ 
+    #: module or within scipy.optimize respectively.
+    method = Trait('NNLS','LP','LassoLars', 'OMPCV',  
+                   desc="method used for solving deconvolution problem")
+    
+    #: Weight factor for LassoLars method,
+    #: defaults to 0.0.
+    # (Values in the order of 10^⁻9 should produce good results.)
+    alpha = Range(0.0, 1.0, 0.0,
+                  desc="Lasso weight factor")
+    
+    #: Maximum number of iterations,
+    #: tradeoff between speed and precision;
+    #: defaults to 500
+    max_iter = Int(500,
+                   desc="maximum number of iterations")
+    
+    #: Unit multiplier for evaluating, e.g., nPa instead of Pa. 
+    #: Values are converted back before returning. 
+    #: Temporary conversion may be necessary to not reach machine epsilon
+    #: within fitting method algorithms. Defaults to 1e9.
+    unit_mult = Float(1e9,
+                      desc = "unit multiplier")
+    
+    # internal identifier
+    digest = Property( 
+        depends_on = ['beamformer.digest','alpha', 'method', 
+                      'max_iter', 'unit_mult'], 
+        )
+
+    # internal identifier
+    ext_digest = Property( 
+        depends_on = ['digest', 'beamformer.ext_digest'], 
+        )
+    
+    traits_view = View(
+        [
+            [Item('beamformer{}', style='custom')], 
+            [Item('method{Solver}')],
+            [Item('max_iter{Max. number of iterations}')], 
+            [Item('alpha', label='Lasso weight factor')], 
+            [Item('calcmode{How to calculate PSF}')], 
+            '|'
+        ], 
+        title='Beamformer denconvolution options', 
+        buttons = OKCancelButtons
+        )
+
+    @cached_property
+    def _get_digest( self ):
+        return digest( self )
+      
+    @cached_property
+    def _get_ext_digest( self ):
+        return digest( self, 'ext_digest' )
+    
+    def calc(self, ac, fr):
+        """
+        Calculates the DAMAS result for the frequencies defined by :attr:`freq_data`
+        
+        This is an internal helper function that is automatically called when 
+        accessing the beamformer's :attr:`~BeamformerBase.result` or calling
+        its :meth:`~BeamformerBase.synthetic` method.        
+        
+        Parameters
+        ----------
+        ac : array of floats
+            This array of dimension ([number of frequencies]x[number of gridpoints])
+            is used as call-by-reference parameter and contains the calculated
+            value after calling this method. 
+        fr : array of booleans
+            The entries of this [number of frequencies]-sized array are either 
+            'True' (if the result for this frequency has already been calculated)
+            or 'False' (for the frequencies where the result has yet to be calculated).
+            After the calculation at a certain frequency the value will be set
+            to 'True'
+        
+        Returns
+        -------
+        This method only returns values through the *ac* and *fr* parameters
+        """
+        unit = self.unit_mult
+        freqs = self.freq_data.fftfreq()
+        p = PointSpreadFunction(mpos=self.mpos, grid=self.grid, 
+                                c=self.c, env=self.env, steer=self.steer,
+                                calcmode=self.calcmode)
+        for i in self.freq_data.indices:        
+            if not fr[i]:
+                p.freq = freqs[i]
+                y = array(self.beamformer.result[i], dtype=float64) * unit
+
+                psf = p.psf[:]
+
+                if self.method == 'NNLS':
+                    resopt = nnls(psf,y)[0]
+                elif self.method == 'LP': # linear programming (Dougherty)
+                    if self.r_diag:
+                        warn('Linear programming solver may fail when CSM main '
+                              'diagonal is removed for delay-and-sum beamforming.', 
+                              Warning, stacklevel = 5)
+                    cT = -1*psf.sum(1) # turn the minimization into a maximization
+                    resopt = linprog(c=cT, A_ub=psf, b_ub=y).x # defaults to simplex method and non-negative x
+                elif self.method == 'LassoLars':
+                    model = LassoLars(alpha = self.alpha * unit, 
+                                      max_iter = self.max_iter)
+                else: # self.method == 'OMPCV':
+                    model = OrthogonalMatchingPursuitCV()
+                
+                
+                if self.method in ('NNLS','LP'):
+                    ac[i] = resopt / unit
+                else: # sklearn models
+                    model.fit(psf,y)
+                    ac[i] = model.coef_[:] / unit
+                
                 fr[i] = True
 
 class BeamformerOrth (BeamformerBase):
