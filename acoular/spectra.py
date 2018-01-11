@@ -18,7 +18,7 @@ from six.moves import xrange  # solves the xrange/range issue for python2/3: in 
 
 from numpy import array, ones, hanning, hamming, bartlett, blackman, \
 dot, newaxis, zeros, empty, fft, float32, complex64, linalg, \
-searchsorted, isscalar, fill_diagonal, arange, zeros_like
+searchsorted, isscalar, fill_diagonal, arange, zeros_like, sum
 import tables
 from traits.api import HasPrivateTraits, Int, Property, Instance, Trait, \
 Range, Bool, cached_property, property_depends_on, Delegate
