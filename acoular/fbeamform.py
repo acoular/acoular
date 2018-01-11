@@ -93,14 +93,14 @@ class BeamformerBase( HasPrivateTraits ):
     r_diag = Bool(True, 
                   desc="removal of diagonal")
     
-    #: If r_diag==True: if r_diag_sig_loss_norm==0.0 then the standard  
-    #: normalization = nMics/(nMics-1) is used. If r_diag_sig_loss_norm !=0.0  
-    #: then the user input is used instead.  
-    #: If r_diag==False then the normalization is 1.0 either way. 
-    r_diag_sig_loss_norm = Float(0.0, 
-                                      desc="If diagonal of the csm is removed, some signal energy is lost." 
-                                      "This is handled via this Normalization factor." 
-                                      "Internally the default is: nMics / (nMics**2 - nMics).") 
+    #: If r_diag==True: if r_diag_norm==0.0, the standard  
+    #: normalization = num_mics/(num_mics-1) is used. If r_diag_norm !=0.0,  
+    #: the user input is used instead.  
+    #: If r_diag==False, the normalization is 1.0 either way. 
+    r_diag_norm = Float(0.0, 
+                        desc="If diagonal of the csm is removed, some signal energy is lost." 
+                        "This is handled via this normalization factor." 
+                        "Internally, the default is: num_mics / (num_mics - 1).") 
     
     #: Type of steering vectors, see also :ref:`Sarradj, 2012<Sarradj2012>`.
     steer = Trait('true level', 'true location', 'classic', 'inverse', 
@@ -135,7 +135,7 @@ class BeamformerBase( HasPrivateTraits ):
     # internal identifier
     digest = Property( 
         depends_on = ['mpos.digest', 'grid.digest', 'freq_data.digest', 'c', \
-            'r_diag', 'env.digest', 'r_diag_sig_loss_norm', 'steer'], 
+            'r_diag', 'env.digest', 'r_diag_norm', 'steer'], 
         )
 
     # internal identifier
@@ -218,16 +218,16 @@ class BeamformerBase( HasPrivateTraits ):
         
     def sig_loss_norm(self):
         """ 
-        If the Diagonal of the CSM is removed one has to handle the loss 
+        If the diagonal of the CSM is removed one has to handle the loss 
         of signal energy --> Done via a normalization factor.
         """
         if not self.r_diag:  # Full CSM --> no normalization needed 
             normFactor = 1.0 
-        elif self.r_diag_sig_loss_norm == 0.0:  # Removed diag: standard normaliz.-factor 
+        elif self.r_diag_norm == 0.0:  # Removed diag: standard normalization factor 
             nMics = float(self.freq_data.numchannels) 
             normFactor = nMics / (nMics - 1) 
-        elif self.r_diag_sig_loss_norm != 0.0:  # Removed diag: user defined normaliz.-factor 
-            normFactor = self.r_diag_sig_loss_norm 
+        elif self.r_diag_norm != 0.0:  # Removed diag: user defined normalization factor 
+            normFactor = self.r_diag_norm 
         return normFactor
 
     def calc(self, ac, fr):
