@@ -18,7 +18,7 @@
 """
 from numpy import array, isscalar, float32, float64, newaxis, \
 sqrt, arange, pi, exp, sin, cos, arccos, zeros_like, empty, dot, hstack, \
-vstack, identity, cross, sign
+vstack, identity, cross, sign, sum
 from numpy.linalg.linalg import norm
 from scipy.integrate import ode
 from scipy.interpolate import LinearNDInterpolator

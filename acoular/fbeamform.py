@@ -31,7 +31,7 @@ from warnings import warn
 from numpy import array, ones, invert, \
 dot, newaxis, zeros, float32, float64, linalg,  \
 searchsorted, pi, sign, diag, arange, sqrt, exp, log10, int,\
-reshape, hstack, vstack, eye, tril, size, clip, zeros_like
+reshape, hstack, vstack, eye, tril, size, clip, zeros_like, sum
 from sklearn.linear_model import LassoLars, LassoLarsIC, OrthogonalMatchingPursuitCV
 from scipy.optimize import nnls
 import tables
