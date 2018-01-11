@@ -94,15 +94,19 @@ class BeamformerBase( HasPrivateTraits ):
                   desc="removal of diagonal")
     
     #: If r_diag==True: if r_diag_norm==0.0, the standard  
-    #: normalization = num_mics/(num_mics-1) is used. If r_diag_norm !=0.0,  
-    #: the user input is used instead.  
+    #: normalization = num_mics/(num_mics-1) is used. 
+    #: If r_diag_norm !=0.0, the user input is used instead.  
     #: If r_diag==False, the normalization is 1.0 either way. 
     r_diag_norm = Float(0.0, 
                         desc="If diagonal of the csm is removed, some signal energy is lost." 
                         "This is handled via this normalization factor." 
                         "Internally, the default is: num_mics / (num_mics - 1).") 
     
-    #: Type of steering vectors, see also :ref:`Sarradj, 2012<Sarradj2012>`.
+    #: Type of steering vectors, see also :ref:`Sarradj, 2012<Sarradj2012>`:
+    #: classic -> Formulation I; 
+    #: inverse -> Formulation II; 
+    #: true level-> Formulation III (default);
+    #: true location -> Formulation IV.
     steer = Trait('true level', 'true location', 'classic', 'inverse', 
                   desc="Type of steering vectors used. Corresponds to the formulations"
                   "in :ref:`Sarradj, 2012<Sarradj2012>`. classic -> Formulation I;"
@@ -182,11 +186,8 @@ class BeamformerBase( HasPrivateTraits ):
         while self.digest != _digest:
             _digest = self.digest
             name = self.__class__.__name__ + self.digest
-            #print 1, name
             numchannels = self.freq_data.numchannels
-            #print "nch", numchannels
             if  numchannels != self.mpos.num_mics or numchannels == 0:
-                #return None
                 raise ValueError("%i channels do not fit %i mics" % \
                     (numchannels, self.mpos.num_mics))
             numfreq = self.freq_data.fftfreq().shape[0]# block_size/2 + 1
@@ -213,7 +214,6 @@ class BeamformerBase( HasPrivateTraits ):
                 ac = zeros((numfreq, self.grid.size), dtype=float32)
                 fr = zeros(numfreq, dtype=int)
                 self.calc(ac,fr)
-            #print 2, name
         return ac
         
     def sig_loss_norm(self):
@@ -1202,7 +1202,6 @@ class BeamformerCleansc( BeamformerBase ):
                     h1 = beamformerFreq(True, steerVecFormulation, self.r_diag, normFactor, (self.r0, self.rm, kj, array((hmax, ))[newaxis, :], hh[newaxis, :].conjugate()))
                     h -= self.damp * h1
                     csm -= self.damp * csm1.transpose(0,2,1)
-#                print '%i iter of %i' % (j,J)
                 ac[i] = result
                 fr[i] = True
 
@@ -1333,7 +1332,6 @@ class BeamformerClean (BeamformerBase):
                     flag = (dirty_sum > abs(dirty).sum(0) \
                             and i_iter < self.n_iter \
                             and max(dirty) > 0)
-                #print freqs[i],'Hz, Iterations:',i_iter
                 
                 ac[i] = clean            
                 fr[i] = True
@@ -1354,9 +1352,9 @@ class BeamformerCMF ( BeamformerBase ):
         
     #: Weight factor for LassoLars method,
     #: defaults to 0.0.
+    #: (Use values in the order of 10^⁻9 for good results.)
     alpha = Range(0.0, 1.0, 0.0, 
         desc="Lasso weight factor")
-    # (use values in the order of 10^⁻9 for good results)
     
     #: Maximum number of iterations,
     #: tradeoff between speed and precision;
@@ -1476,7 +1474,6 @@ class BeamformerCMF ( BeamformerBase ):
                 A = realify( Ac [ind,:] )[ind_reim,:]
                 # use csm.T for column stacking reshape!
                 R = realify( reshape(csm.T, (nc*nc,1))[ind,:] )[ind_reim,:] * unit
-#                print A.shape, R.shape
                 # choose method
                 if self.method == 'LassoLars':
                     model = LassoLars(alpha = self.alpha * unit,
@@ -1486,7 +1483,7 @@ class BeamformerCMF ( BeamformerBase ):
                                         max_iter = self.max_iter)
                 elif self.method == 'OMPCV':
                     model = OrthogonalMatchingPursuitCV()
-#                model = ElasticNet(alpha=self.alpha, l1_ratio=0.7)
+
                 # nnls is not in sklearn
                 if self.method == 'NNLS':
                     ac[i] , x = nnls(A,R.flat)
