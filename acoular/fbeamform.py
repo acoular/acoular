@@ -1454,31 +1454,23 @@ class BeamformerGIB( BeamformerEig ):  #BeamformerEig #BeamformerBase
     """
     Beamforming GIB methods with different normalizations,
     """
-    
     #: :class:`~acoular.spectra.EigSpectra` object that provides the 
     #: cross spectral matrix and eigenvalues
     freq_data = Trait(EigSpectra, 
         desc="freq data object")
-    
-     #: Boolean flag, if 'True' (default), the main diagonal is removed before beamforming.
-    r_diag = Bool(True, 
-                  desc="removal of diagonal")
 
     #: Number of component to calculate: 
     #: 0 (smallest) ... :attr:`~acoular.sources.SamplesGenerator.numchannels`-1;
     #: defaults to -1, i.e. numchannels-1
     n = Int(-1, 
             desc="No. of eigenvalue")
-    
-    
+      
     #: Unit multiplier for evaluating, e.g., nPa instead of Pa. 
     #: Values are converted back before returning. 
     #: Temporary conversion may be necessary to not reach machine epsilon
     #: within fitting method algorithms. Defaults to 1e9.
     unit_mult = Float(1e9,
                       desc = "unit multiplier")
-
-
 
     #: Maximum number of iterations,
     #: tradeoff between speed and precision;
@@ -1498,18 +1490,21 @@ class BeamformerGIB( BeamformerEig ):  #BeamformerEig #BeamformerBase
     #: defaults to 0.0.
     alpha = Range(0.0, 1.0, 0.0, 
         desc="Lasso weight factor")
-    # (use values in the order of 10^⁻9 for good results)  
+    # (use values in the order of 10^⁻9 for good results) 
+    
     #norm to consider
     pnorm= Float(1,desc="Norm for normalization")
 
-    # Beta - fraction of source maintained after each iteration
+    # Beta - Fraction of source maintained after each iteration
     beta =  Float(0.9,desc="fraction of source maintained")
     
+    # eps - regularization parameter
     eps_perc =  Float(0.05,desc="regularization parameter")
-        # internal identifier++++++++++++++++++++++++++++++++++++++++++++++++++
+        
+    # internal identifier++++++++++++++++++++++++++++++++++++++++++++++++++
     digest = Property( 
         depends_on = ['mpos.digest', 'grid.digest', 'freq_data.digest', 'c', \
-            'alpha', 'method', 'max_iter', 'env.digest',  'unit_mult', 'r_diag',\
+            'alpha', 'method', 'max_iter', 'env.digest',  'unit_mult', 'eps_perc',\
             'pnorm', 'beta','n'], 
         )
 
@@ -1539,7 +1534,6 @@ class BeamformerGIB( BeamformerEig ):  #BeamformerEig #BeamformerBase
         if na < 0:
             na = max(nm + na, 0)
         return min(nm - 1, na)
-
 
     def calc(self, ac, fr):
         
@@ -1572,12 +1566,11 @@ class BeamformerGIB( BeamformerEig ):  #BeamformerEig #BeamformerBase
         kj = 2j*pi*self.freq_data.fftfreq()/self.c #wavebnumber
         n = int(self.n)                            #number of eigenvalues
         numchannels = self.freq_data.numchannels   #number of channels
-        r0 = self.r0                                #
+        r0 = self.r0                                
         rm = self.rm
         numpoints = rm.shape[0]
         hh = zeros((1, numpoints, numchannels), dtype='D')
         #Generate a cross spectral matrix, and perform the eigenvalue decomposition
-        #beamfunc = self.get_beamfunc('_os')
         for i in self.freq_data.indices:
             if not fr[i]:
                 kji = kj[i, newaxis]                
@@ -1585,14 +1578,9 @@ class BeamformerGIB( BeamformerEig ):  #BeamformerEig #BeamformerBase
                 #calculate a transfer matrix A 
                 hh = transfer(r0, rm, kji)         
                 A=hh[0].T                 
-                #eigenvalues and vectors  
-                
+                #eigenvalues and vectors               
                 csm = array(self.freq_data.csm[i], dtype='complex128',copy=1)
-                if self.r_diag:
-                    # omit main diagonal for noise reduction
-                   fill_diagonal(csm, 0)
-                
-                eva,eve=eigh(csm)# .T
+                eva,eve=eigh(csm)
                 eva = flipud(sort(eva))         
                 eve = fliplr(eve[:, eva.argsort()[::-1]]) 
                 eva[eva < max(eva)/1e12] = 0 #set small values zo 0, lowers numerical errors in simulated data
@@ -1607,8 +1595,7 @@ class BeamformerGIB( BeamformerEig ):  #BeamformerEig #BeamformerBase
                         leftpoints=numpoints
                         locpoints=arange(numpoints)         
                         weights=diag(ones(numpoints))             
-                        epsilon=arange(self.max_iter)
-                        #Increase the resolution                  
+                        epsilon=arange(self.max_iter)              
                         for it in arange(self.max_iter): 
                             if numchannels<=leftpoints:
                                 AWA= dot(dot(A[:,locpoints],weights),A[:,locpoints].conj().T)
@@ -1631,7 +1618,7 @@ class BeamformerGIB( BeamformerEig ):  #BeamformerEig #BeamformerBase
                             else:                          
                                 weights=diag((absolute(qi[s,:])**(2-self.pnorm)))    
                          
-                    elif self.method == 'InverseILRS':                        
+                    elif self.method == 'InverseILRS':                         
                         weights=eye(numpoints)
                         locpoints=arange(numpoints)
                         for it in arange(self.max_iter): 
@@ -1651,7 +1638,6 @@ class BeamformerGIB( BeamformerEig ):  #BeamformerEig #BeamformerBase
                         unit = self.unit_mult
                         AB = vstack([hstack([A.real,-A.imag]),hstack([A.imag,A.real])])
                         R  = hstack([emode.real.T,emode.imag.T]) * unit
-
                         if self.method == 'LassoLars':
                             model = LassoLars(alpha=self.alpha * unit,max_iter=self.max_iter)
                         elif self.method == 'LassoLarsBIC':
@@ -1659,21 +1645,17 @@ class BeamformerGIB( BeamformerEig ):  #BeamformerEig #BeamformerBase
                         elif self.method == 'OMPCV':
                             model = OrthogonalMatchingPursuitCV()
                         elif self.method == 'LassoLarsCV':
-                            model = LassoLarsCV()    
-                        
+                            model = LassoLarsCV()                        
                         if self.method == 'NNLS':
                             x , zz = nnls(AB,R)
                             qi_real,qi_imag = hsplit(x/unit, 2) 
                         else:
                             model.fit(AB,R)
-                            qi_real,qi_imag = hsplit(model.coef_[:]/unit, 2) 
-                            
+                            qi_real,qi_imag = hsplit(model.coef_[:]/unit, 2)                       
                         qi[s,locpoints] = qi_real+qi_imag*1j
-                        
                 #Generate source maps of all selected eigenmodes, and superpose source intensity for each source type.
                 ac[i] = zeros([1,numpoints])
                 ac[i,locpoints] = sum(absolute(qi[:,locpoints]),axis=0)
-                #print self.freq_data.fftfreq()[i]# print fftfreq
                 fr[i] = True    
 
 def L_p ( x ):
