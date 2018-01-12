@@ -29,7 +29,6 @@
 # imports from other packages
 from __future__ import print_function, division
 
-
 from numpy import array, ones, hanning, hamming, bartlett, blackman, invert, \
 dot, newaxis, zeros, empty, fft, float32, float64, complex64, linalg, where, \
 searchsorted, pi, multiply, sign, diag, arange, sqrt, exp, log10, int,\
@@ -37,30 +36,25 @@ reshape, hstack, vstack, eye, tril, size, clip, tile, flipud, fliplr, round, del
 absolute, argsort, sort, sum, hsplit, fill_diagonal
 
 from sklearn.linear_model import LassoLars, LassoCV, LassoLarsCV, LassoLarsIC,\
- OrthogonalMatchingPursuit, SGDRegressor, LinearRegression, ElasticNet, \
- OrthogonalMatchingPursuitCV, Lasso
+OrthogonalMatchingPursuit, ElasticNet, OrthogonalMatchingPursuitCV, Lasso
 
-#from sklearn.cross_validation import LeaveOneOut
 from scipy.optimize import nnls
 from scipy.linalg import inv, eigh, eigvals
-
 import tables
 
 from traits.api import HasPrivateTraits, Float, Int, \
 CArray, Property, Instance, Trait, Bool, Range, Delegate, Enum, \
 cached_property, on_trait_change, property_depends_on
+
 from traitsui.api import View, Item
 from traitsui.menu import OKCancelButtons
-
 from .fastFuncs import beamformerFreq, transfer, calcPointSpreadFunction, damasSolverGaussSeidel
-
 from .h5cache import H5cache
 from .internal import digest
 from .grids import Grid
 from .microphones import MicGeom
 from .environments import Environment
 from .spectra import PowerSpectra, EigSpectra
-
 
 def steerVecTranslation(steer):
     """ 
