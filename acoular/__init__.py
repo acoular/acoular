@@ -77,11 +77,13 @@ from .grids import Grid, RectGrid, RectGrid3D
 from .environments import Environment, UniformFlowEnvironment, \
 FlowField, OpenJet, SlotJet, GeneralFlowEnvironment
 from .microphones import MicGeom
-from .spectra import PowerSpectra, EigSpectra, synthetic
+from .spectra import PowerSpectra, PowerSpectra as EigSpectra, synthetic
+
 from .fbeamform import BeamformerBase, BeamformerCapon, BeamformerEig, \
-BeamformerMusic, BeamformerDamas, BeamformerOrth,BeamformerCleansc, \
+BeamformerMusic, BeamformerDamas,BeamformerDamasPlus, BeamformerOrth,BeamformerCleansc, \
 BeamformerCMF, BeamformerClean, BeamformerFunctional, L_p, integrate, \
 PointSpreadFunction, BeamformerGIB
+
 from .sources import PointSource, MovingPointSource, SamplesGenerator, \
 TimeSamples, MaskedTimeSamples, PointSourceDipole, UncorrelatedNoiseSource, \
 SourceMixer
