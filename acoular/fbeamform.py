@@ -397,11 +397,15 @@ class BeamformerFunctional( BeamformerBase ):
     gamma = Float(1, 
         desc="functional exponent")
 
-    # internal identifier
+    #: internal identifier
     digest = Property( 
         depends_on = ['mpos.digest', 'grid.digest', 'freq_data.digest', 'c', \
             'r_diag', 'env.digest', 'gamma', 'steer'], 
         )
+    
+    #: Functional Beamforming is only well defined for full CSM
+    r_diag = Enum(False, 
+                  desc="False, as Functional Beamformer is only well defined for the full CSM")
 
     traits_view = View(
         [
@@ -452,6 +456,7 @@ class BeamformerFunctional( BeamformerBase ):
             if not fr[i]:
                 kji = kj[i, newaxis]
                 if self.r_diag:
+                    # This case is not used at the moment (see Trait r_diag)
 #==============================================================================
 #                     One cannot use spectral decomposition when diagonal of csm is removed,
 #                     as the resulting modified eigenvectors are not orthogonal to each other anymore.

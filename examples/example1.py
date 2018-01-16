@@ -90,7 +90,7 @@ bs = BeamformerCleansc(freq_data=f, grid=g, mpos=m, r_diag=True, c=346.04)
 bcmf = BeamformerCMF(freq_data=f, grid=g, mpos=m, c=346.04, \
     method='LassoLarsBIC')
 bl = BeamformerClean(beamformer=bb, n_iter=100)
-bf = BeamformerFunctional(freq_data=f, grid=g, mpos=m, r_diag=True, c=346.04, \
+bf = BeamformerFunctional(freq_data=f, grid=g, mpos=m, r_diag=False, c=346.04, \
     gamma=4)
 
 #===============================================================================
