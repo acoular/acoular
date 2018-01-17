@@ -265,7 +265,7 @@ class BeamformerBase( HasPrivateTraits ):
             if not fr[i]:
                 csm = array(self.freq_data.csm[i][newaxis], dtype='complex128')
                 kji = kj[i, newaxis]
-                beamformerOutput, dummy = beamformerFreq(False, steerVecFormulation, self.r_diag, normFactor, (self.r0, self.rm, kji, csm))
+                beamformerOutput = beamformerFreq(False, steerVecFormulation, self.r_diag, normFactor, (self.r0, self.rm, kji, csm))[0]
                 if self.r_diag:  # set (unphysical) negative output values to 0
                     indNegSign = sign(beamformerOutput) < 0
                     beamformerOutput[indNegSign] = 0.0
@@ -536,7 +536,7 @@ class BeamformerCapon( BeamformerBase ):
             if not fr[i]:
                 csm = array(linalg.inv(array(self.freq_data.csm[i], dtype='complex128')), order='C')[newaxis]
                 kji = kj[i, newaxis]
-                beamformerOutput, dummy = beamformerFreq(False, steerVecFormulation, self.r_diag, normFactor, (self.r0, self.rm, kji, csm))
+                beamformerOutput = beamformerFreq(False, steerVecFormulation, self.r_diag, normFactor, (self.r0, self.rm, kji, csm))[0]
                 ac[i] = 1.0 / beamformerOutput
                 fr[i] = True
 
@@ -627,7 +627,7 @@ class BeamformerEig( BeamformerBase ):
                 eva = array(self.freq_data.eva[i][newaxis], dtype='float64')
                 eve = array(self.freq_data.eve[i][newaxis], dtype='complex128')
                 kji = kj[i, newaxis]
-                beamformerOutput, dummy = beamformerFreq(True, steerVecFormulation, self.r_diag, normFactor, (self.r0, self.rm, kji, eva[:, na:na+1], eve[:, :, na:na+1]))
+                beamformerOutput = beamformerFreq(True, steerVecFormulation, self.r_diag, normFactor, (self.r0, self.rm, kji, eva[:, na:na+1], eve[:, :, na:na+1]))[0]
                 if self.r_diag:  # set (unphysical) negative output values to 0
                     indNegSign = sign(beamformerOutput) < 0
                     beamformerOutput[indNegSign] = 0
@@ -697,7 +697,7 @@ class BeamformerMusic( BeamformerEig ):
                 eva = array(self.freq_data.eva[i][newaxis], dtype='float64')
                 eve = array(self.freq_data.eve[i][newaxis], dtype='complex128')
                 kji = kj[i, newaxis]
-                beamformerOutput, dummy = beamformerFreq(True, steerVecFormulation, self.r_diag, normFactor, (self.r0, self.rm, kji, eva[:, :n], eve[:, :, :n]))  # [:n] takes all values element of [0, n[
+                beamformerOutput = beamformerFreq(True, steerVecFormulation, self.r_diag, normFactor, (self.r0, self.rm, kji, eva[:, :n], eve[:, :, :n]))[0]  # [:n] takes all values element of [0, n[
                 ac[i] = 4e-10*beamformerOutput.min() / beamformerOutput
                 fr[i] = True
 
@@ -1318,7 +1318,7 @@ class BeamformerCleansc( BeamformerBase ):
             if not fr[i]:
                 kj = kjall[i, newaxis]
                 csm = array(self.freq_data.csm[i][newaxis], dtype='complex128', copy=1)
-                h, dummy = beamformerFreq(False, steerVecFormulation, self.r_diag, normFactor, (self.r0, self.rm, kj, csm))
+                h = beamformerFreq(False, steerVecFormulation, self.r_diag, normFactor, (self.r0, self.rm, kj, csm))[0]
 
                 # CLEANSC Iteration
                 result *= 0.0
@@ -1347,7 +1347,7 @@ class BeamformerCleansc( BeamformerBase ):
                         hh = (D1+H*wmax)/sqrt(1+dot(ww, H))
                     hh = hh[:, newaxis]
                     csm1 = hmax*(hh*hh.conj().T)[newaxis, :, :]
-                    h1, dummy = beamformerFreq(True, steerVecFormulation, self.r_diag, normFactor, (self.r0, self.rm, kj, array((hmax, ))[newaxis, :], hh[newaxis, :].conjugate()))
+                    h1 = beamformerFreq(True, steerVecFormulation, self.r_diag, normFactor, (self.r0, self.rm, kj, array((hmax, ))[newaxis, :], hh[newaxis, :].conjugate()))[0]
                     h -= self.damp * h1
                     csm -= self.damp * csm1.transpose(0,2,1)
                 ac[i] = result
