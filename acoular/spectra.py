@@ -17,7 +17,7 @@ from warnings import warn
 from six.moves import xrange  # solves the xrange/range issue for python2/3: in py3 'xrange' is now treated as 'range' and in py2 nothing changes
 
 from numpy import array, ones, hanning, hamming, bartlett, blackman, \
-dot, newaxis, zeros, empty, fft, float32, complex64, linalg, \
+dot, newaxis, zeros, empty, fft, linalg, \
 searchsorted, isscalar, fill_diagonal, arange, zeros_like, sum
 import tables
 from traits.api import HasPrivateTraits, Int, Property, Instance, Trait, \
@@ -32,6 +32,16 @@ from .internal import digest
 from .sources import SamplesGenerator
 from .calib import Calib
 
+
+def _precision(idString):
+    """
+    Internal method, needed for allocation of memory.
+    """
+    # Create dictionary: third value is needed as Argument for tables.ComplexAtoms.
+    # Quite ugly creation of dictionary needed because several keys have same value.
+    precDict = dict.fromkeys(['float32', 'complex64'], ('float32', 'complex64', 8, tables.Float32Atom))
+    precDict.update(dict.fromkeys(['float64', 'complex128'], ('float64', 'complex128', 16, tables.Float64Atom)))
+    return precDict[idString]
 
 class PowerSpectra( HasPrivateTraits ):
     """Provides the cross spectral matrix of multichannel time data
@@ -127,7 +137,11 @@ class PowerSpectra( HasPrivateTraits ):
     #: readonly.
     csm = Property( 
         desc="cross spectral matrix")
-
+    
+    #: The floating-number-precision of entries of csm, eigenvalues and 
+    #: eigenvectors, corresponding to numpy dtypes. Default is 64 bit.
+    precision = Trait('complex128', 'complex64', 
+                      desc="precision csm, eva, eve")
 
     #: Eigenvalues of the cross spectral matrix as an
     #: (number of frequencies) array of floats, readonly.
@@ -145,7 +159,7 @@ class PowerSpectra( HasPrivateTraits ):
     # internal identifier
     digest = Property( 
         depends_on = ['time_data.digest', 'calib.digest', 'block_size', 
-            'window', 'overlap'], 
+            'window', 'overlap', 'precision'], 
         )
 
     # hdf5 cache file
@@ -232,7 +246,7 @@ class PowerSpectra( HasPrivateTraits ):
             wind = wind[newaxis, :].swapaxes( 0, 1 )
             numfreq = int(self.block_size/2 + 1)
             csm_shape = (numfreq, t.numchannels, t.numchannels)
-            csmUpper = zeros(csm_shape, 'D')
+            csmUpper = zeros(csm_shape, dtype=self.precision)
             #print "num blocks", self.num_blocks
             # for backward compatibility
             if self.calib and self.calib.num_mics > 0:
@@ -250,7 +264,7 @@ class PowerSpectra( HasPrivateTraits ):
                 ns = data.shape[0]
                 temp[bs:bs+ns] = data
                 while pos+bs <= bs+ns:
-                    ft = fft.rfft(temp[int(pos):int(pos+bs)]*wind, None, 0)
+                    ft = array(fft.rfft(temp[int(pos):int(pos+bs)]*wind, None, 0), dtype=self.precision)
                     calcCSM(csmUpper, ft)  # only upper triangular part of matrix is calculated (for speed reasons)
                     pos += posinc
                 temp[0:bs] = temp[bs:]
@@ -265,7 +279,8 @@ class PowerSpectra( HasPrivateTraits ):
             csm = csm*(2.0/self.block_size/weight/self.num_blocks)
             
             if self.cached:
-                atom = tables.ComplexAtom(8)
+                precisionTuple = _precision(self.precision)
+                atom = tables.ComplexAtom(precisionTuple[2])
                 filters = tables.Filters(complevel=5, complib='blosc')
                 ac = self.h5f.create_carray(self.h5f.root, name, atom,
                                             csm_shape, filters=filters)
@@ -295,12 +310,13 @@ class PowerSpectra( HasPrivateTraits ):
         csm = self.csm #trigger calculation
         if (not name_eva in self.h5f.root) or (not name_eve in self.h5f.root):
             csm_shape = self.csm.shape
-            eva = empty(csm_shape[0:2], float32)
-            eve = empty(csm_shape, complex64)
+            precisionTuple = _precision(self.precision)
+            eva = empty(csm_shape[0:2], dtype=precisionTuple[0])
+            eve = empty(csm_shape, dtype=precisionTuple[1])
             for i in range(csm_shape[0]):
                 (eva[i], eve[i])=linalg.eigh(self.csm[i])
-            atom_eva = tables.Float32Atom()
-            atom_eve = tables.ComplexAtom(8)
+            atom_eva = precisionTuple[3]()
+            atom_eve = tables.ComplexAtom(precisionTuple[2])
             filters = tables.Filters(complevel=5, complib='blosc')
             ac_eva = self.h5f.create_carray(self.h5f.root, name_eva, atom_eva, \
                 eva.shape, filters=filters)

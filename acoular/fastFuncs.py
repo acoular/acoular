@@ -16,7 +16,8 @@ parallelOption = 'parallel'  # if numba.guvectorize is used: 'CPU' for single th
 
 
 # Formerly known as 'faverage'
-@nb.njit(nb.complex128[:,:,:](nb.complex128[:,:,:], nb.complex128[:,:]), cache=cachedOption)
+@nb.njit([nb.complex128[:,:,:](nb.complex128[:,:,:], nb.complex128[:,:]), 
+          nb.complex64[:,:,:](nb.complex64[:,:,:], nb.complex64[:,:])], cache=cachedOption)
 def calcCSM(csm, SpecAllMics):
     """ Adds a given spectrum to the Cross-Spectral-Matrix (CSM).
     Here only the upper triangular matrix of the CSM is calculated. After
@@ -670,7 +671,7 @@ def _freqBeamformer_EigValProb_SpecificSteerVec_CsmRemovedDiag(eigVal, eigVec, s
     result[0] = scalarProdReducedCSM * signalLossNormalization[0]
 
 #%% Point - Spread - Function
-def calcPointSpreadFunction(steerVecType, inputTuple):
+def calcPointSpreadFunction(steerVecType, inputTuple, dtype):
     """ Calculates the Point-Spread-Functions. Use either a predefined steering vector 
     formulation (see :ref:`Sarradj, 2012<Sarradj2012>`) or pass it your own steering vector.
 
@@ -679,7 +680,7 @@ def calcPointSpreadFunction(steerVecType, inputTuple):
     steerVecType : (one of the following options: 1, 2, 3, 4, 'custom')
         Either build the steering vector via the predefined formulations
         I - IV (see :ref:`Sarradj, 2012<Sarradj2012>`) or pass it directly. (not implemented yet).
-    inputTuple: dependent of the inputs above. If
+    inputTuple : dependent of the inputs above. If
         steerVecType != 'custom' :
             inputTuple =(distGridToArrayCenter, distGridToAllMics, waveNumber, indSource)
         steerVecType = 'custom' :
@@ -695,6 +696,8 @@ def calcPointSpreadFunction(steerVecType, inputTuple):
             indSource : a LIST of int (e.g. indSource=[5] is fine; indSource=5 doesn't work):
                 specifies which gridpoints should be assumed to be sources 
                 --> a seperate psf will be calculated for each source
+    dtype : either 'float64' or 'float32'
+        Determines the precision of the result. For big maps this could be worth downgrading.
 
     Returns
     -------
@@ -737,11 +740,11 @@ def calcPointSpreadFunction(steerVecType, inputTuple):
         distGridToArrayCenter, distGridToAllMics, waveNumber, indSource = inputTuple[0], inputTuple[1], inputTuple[2], inputTuple[3]
         nFreqs, nGridPoints = waveNumber.shape[0], distGridToAllMics.shape[0]
     nSources = len(indSource)
-
+    
     # psf routine: parallelized over Gridpoints
-    psfOutput = np.zeros((nFreqs, nGridPoints, nSources), np.float64)
+    psfOutput = np.zeros((nFreqs, nGridPoints, nSources), dtype=dtype)
     for cntFreqs in xrange(nFreqs):
-        result = np.zeros((nGridPoints, nSources), np.float64)
+        result = np.zeros((nGridPoints, nSources), dtype=dtype)
         if steerVecType == 'custom':
             raise ValueError('custom Steering vectors are not implemented yet.')
 #            coreFunc(steerVec[cntFreqs, :, :], transFunc[cntFreqs, indSource, :], result)
@@ -751,7 +754,9 @@ def calcPointSpreadFunction(steerVecType, inputTuple):
     return psfOutput
 
 
-@nb.guvectorize([(nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float64[:])], '(),(m),(s),(s,m),()->(s)', nopython=True, target=parallelOption, cache=cachedOption)
+@nb.guvectorize([(nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float64[:]),
+                 (nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float32[:])],
+                 '(),(m),(s),(s,m),()->(s)', nopython=True, target=parallelOption, cache=cachedOption)
 def _psf_Formulation1AkaClassic(distGridToArrayCenter, distGridToAllMics, distSourcesToArrayCenter, distSourcesToAllMics, waveNumber, result):
     nMics = distGridToAllMics.shape[0]
     for cntSources in range(len(distSourcesToArrayCenter)):
@@ -765,7 +770,9 @@ def _psf_Formulation1AkaClassic(distGridToArrayCenter, distGridToAllMics, distSo
         result[cntSources] = scalarProdAbsSquared * (normalizeFactor * normalizeFactor)
 
 
-@nb.guvectorize([(nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float64[:])], '(),(m),(s),(s,m),()->(s)', nopython=True, target=parallelOption, cache=cachedOption)
+@nb.guvectorize([(nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float64[:]),
+                 (nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float32[:])],
+                 '(),(m),(s),(s,m),()->(s)', nopython=True, target=parallelOption, cache=cachedOption)
 def _psf_Formulation2AkaInverse(distGridToArrayCenter, distGridToAllMics, distSourcesToArrayCenter, distSourcesToAllMics, waveNumber, result):
     nMics = distGridToAllMics.shape[0]
     for cntSources in range(len(distSourcesToArrayCenter)):
@@ -779,7 +786,9 @@ def _psf_Formulation2AkaInverse(distGridToArrayCenter, distGridToAllMics, distSo
         result[cntSources] = scalarProdAbsSquared * (normalizeFactor * normalizeFactor)  
 
 
-@nb.guvectorize([(nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float64[:])], '(),(m),(s),(s,m),()->(s)', nopython=True, target=parallelOption, cache=cachedOption)
+@nb.guvectorize([(nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float64[:]),
+                 (nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float32[:])],
+                 '(),(m),(s),(s,m),()->(s)', nopython=True, target=parallelOption, cache=cachedOption)
 def _psf_Formulation3AkaTrueLevel(distGridToArrayCenter, distGridToAllMics, distSourcesToArrayCenter, distSourcesToAllMics, waveNumber, result):
     nMics = distGridToAllMics.shape[0]
     for cntSources in range(len(distSourcesToArrayCenter)):
@@ -795,7 +804,9 @@ def _psf_Formulation3AkaTrueLevel(distGridToArrayCenter, distGridToAllMics, dist
         result[cntSources] = scalarProdAbsSquared * (normalizeFactor * normalizeFactor)
 
 
-@nb.guvectorize([(nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float64[:])], '(),(m),(s),(s,m),()->(s)', nopython=True, target=parallelOption, cache=cachedOption)
+@nb.guvectorize([(nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float64[:]),
+                 (nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float32[:])],
+                 '(),(m),(s),(s,m),()->(s)', nopython=True, target=parallelOption, cache=cachedOption)
 def _psf_Formulation4AkaTrueLocation(distGridToArrayCenter, distGridToAllMics, distSourcesToArrayCenter, distSourcesToAllMics, waveNumber, result):
     nMics = distGridToAllMics.shape[0]
     for cntSources in range(len(distSourcesToArrayCenter)):
@@ -811,7 +822,9 @@ def _psf_Formulation4AkaTrueLocation(distGridToArrayCenter, distGridToAllMics, d
         result[cntSources] = scalarProdAbsSquared * (normalizeFactor * normalizeFactor) / nMics / helpNormalizeGrid
 
 # NEEDS TO BE OVERLOOKED!!
-#@nb.guvectorize([(nb.complex128[:], nb.complex128[:,:], nb.float64[:])], '(m),(s,m)->(s)', nopython=True, target=parallelOption, cache=cachedOption)
+#@nb.guvectorize([(nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float64[:]),
+#                 (nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float32[:])],
+#                 '(),(m),(s),(s,m),()->(s)', nopython=True, target=parallelOption, cache=cachedOption)
 #def _psf_SpecificSteerVec(steerVec, steerVecSources, result):
 #    nMics = len(steerVec)
 #    for cntSources in range(steerVecSources.shape[0]):
@@ -826,22 +839,25 @@ def _psf_Formulation4AkaTrueLocation(distGridToArrayCenter, distGridToAllMics, d
 #%% Damas - Gauss Seidel
 # Formerly known as 'gseidel'
 @nb.guvectorize([(nb.float32[:,:], nb.float32[:], nb.int64[:], nb.float64[:], nb.float32[:]), 
-                 (nb.float64[:,:], nb.float64[:], nb.int64[:], nb.float64[:], nb.float64[:])], '(g,g),(g),(),()->(g)', nopython=True, target=parallelOption, cache=cachedOption)
+                 (nb.float64[:,:], nb.float64[:], nb.int64[:], nb.float64[:], nb.float64[:]),
+                 (nb.float32[:,:], nb.float64[:], nb.int64[:], nb.float64[:], nb.float64[:]),
+                 (nb.float64[:,:], nb.float32[:], nb.int64[:], nb.float64[:], nb.float32[:])], 
+                 '(g,g),(g),(),()->(g)', nopython=True, target=parallelOption, cache=cachedOption)
 def damasSolverGaussSeidel(A, dirtyMap, nIterations, relax, damasSolution):
     """ Solves the DAMAS inverse problem via modified gauss seidel.
     This is the original formulation from :ref:`Brooks and Humphreys, 2006<BrooksHumphreys2006>`.
     
     Parameters
     ----------
-    A : float32[nFreqs, nGridpoints, nGridpoints] (or float64[...])
+    A : float32/float64[nFreqs, nGridpoints, nGridpoints] (or float64[...])
         The PSF build matrix (see :ref:`Brooks and Humphreys, 2006<BrooksHumphreys2006>`)
-    dirtyMap : float32[nFreqs, nGridpoints] (or float64[...])
+    dirtyMap : float32/float64[nFreqs, nGridpoints] (or float64[...])
         The conventional beamformer map
     nIterations : int64[scalar] 
         number of Iterations the damas solver has to go through
     relax : int64[scalar] 
         relaxation parameter (=1.0 in :ref:`Brooks and Humphreys, 2006<BrooksHumphreys2006>`)
-    damasSolution : float32[nFreqs, nGridpoints] (or float64[...]) 
+    damasSolution : float32/float64[nFreqs, nGridpoints] (or float64[...]) 
         starting solution
     
     Returns
