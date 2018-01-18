@@ -1,6 +1,6 @@
 package:
   name: acoular
-  version: "17.11"
+  version: "18.01"
 
 source:
   path: ../../acoular
