@@ -36,7 +36,7 @@ searchsorted, pi, multiply, sign, diag, arange, sqrt, exp, log10, int,\
 reshape, hstack, vstack, eye, tril, size, clip, tile, flipud, fliplr, round, delete, \
 absolute, argsort, sort, sum, hsplit, fill_diagonal, zeros_like
 
-from sklearn.linear_model import LassoLars, LassoCV, LassoLarsCV, LassoLarsIC,\
+from sklearn.linear_model import LassoLars, LassoLarsCV, LassoLarsIC,\
 OrthogonalMatchingPursuit, ElasticNet, OrthogonalMatchingPursuitCV, Lasso
 
 from scipy.optimize import nnls, linprog
@@ -1648,7 +1648,7 @@ class BeamformerGIB(BeamformerEig):  #BeamformerEig #BeamformerBase
     max_iter = Int(10, 
                    desc="maximum number of iterations")
 
-    #: Type of fit method to be used ('Suzuki', 'LassoLars', 'LassoLarsBIC', 
+    #: Type of fit method to be used ('Suzuki', 'LassoLars', 'LassoLarsCV', 'LassoLarsBIC', 
     #: 'OMPCV' or 'NNLS', defaults to 'Suzuki').
     #: These methods are implemented in 
     #: the `scikit-learn <http://scikit-learn.org/stable/user_guide.html>`_ 
@@ -1662,9 +1662,9 @@ class BeamformerGIB(BeamformerEig):  #BeamformerEig #BeamformerBase
         desc="Lasso weight factor")
     # (use values in the order of 10^⁻9 for good results) 
     
-    #: Norm to consider for the regularitation in InverseIRLS and Suzuki methods 
+    #: Norm to consider for the regularization in InverseIRLS and Suzuki methods 
     #: defaults to L-1 Norm
-    pnorm= Float(1,desc="Norm for regularitation")
+    pnorm= Float(1,desc="Norm for regularization")
 
     #: Beta - Fraction of sources maintained after each iteration
     #: defaults to 0.9 
