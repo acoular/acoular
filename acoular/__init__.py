@@ -78,10 +78,12 @@ from .environments import Environment, UniformFlowEnvironment, \
 FlowField, OpenJet, SlotJet, GeneralFlowEnvironment
 from .microphones import MicGeom
 from .spectra import PowerSpectra, PowerSpectra as EigSpectra, synthetic
+
 from .fbeamform import BeamformerBase, BeamformerCapon, BeamformerEig, \
-BeamformerMusic, BeamformerDamas, BeamformerDamasPlus, BeamformerOrth, \
-BeamformerCleansc, BeamformerCMF, BeamformerClean, BeamformerFunctional, \
-L_p, integrate, PointSpreadFunction
+BeamformerMusic, BeamformerDamas, BeamformerDamasPlus, BeamformerOrth,BeamformerCleansc, \
+BeamformerCMF, BeamformerClean, BeamformerFunctional, BeamformerGIB, L_p, integrate, \
+PointSpreadFunction
+
 from .sources import PointSource, MovingPointSource, SamplesGenerator, \
 TimeSamples, MaskedTimeSamples, PointSourceDipole, UncorrelatedNoiseSource, \
 SourceMixer
