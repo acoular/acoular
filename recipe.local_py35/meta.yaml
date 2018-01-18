@@ -32,14 +32,14 @@ requirements:
     - scikit-learn >=0.15
     - pytables >=3.1
     - traits >=4.4
-    - numba >=0.21
+    - numba >=0.30
     - libpython [win]
 
   run:
     - python >=3.5,<3.6
     - pyqt >=4.10
     - numpy >=1.10.2
-    - numba >=0.21
+    - numba >=0.30
     - scipy >=0.13
     - scikit-learn >=0.15
     - pytables >=3.1

@@ -15,6 +15,7 @@
     BeamformerMusic
     BeamformerClean
     BeamformerDamas
+    BeamformerDamasPlus
     BeamformerOrth
     BeamformerCleansc
     BeamformerCMF
@@ -33,13 +34,15 @@ from numpy import array, ones, hanning, hamming, bartlett, blackman, invert, \
 dot, newaxis, zeros, empty, fft, float32, float64, complex64, linalg, where, \
 searchsorted, pi, multiply, sign, diag, arange, sqrt, exp, log10, int,\
 reshape, hstack, vstack, eye, tril, size, clip, tile, flipud, fliplr, round, delete, \
-absolute, argsort, sort, sum, hsplit, fill_diagonal
+absolute, argsort, sort, sum, hsplit, fill_diagonal, zeros_like
 
 from sklearn.linear_model import LassoLars, LassoCV, LassoLarsCV, LassoLarsIC,\
 OrthogonalMatchingPursuit, ElasticNet, OrthogonalMatchingPursuitCV, Lasso
 
-from scipy.optimize import nnls
+from scipy.optimize import nnls, linprog
 from scipy.linalg import inv, eigh, eigvals
+from warnings import warn
+
 import tables
 
 from traits.api import HasPrivateTraits, Float, Int, \
@@ -54,7 +57,7 @@ from .internal import digest
 from .grids import Grid
 from .microphones import MicGeom
 from .environments import Environment
-from .spectra import PowerSpectra, EigSpectra
+from .spectra import PowerSpectra
 
 def steerVecTranslation(steer):
     """ 
@@ -98,7 +101,20 @@ class BeamformerBase( HasPrivateTraits ):
     r_diag = Bool(True, 
                   desc="removal of diagonal")
     
-    #: Type of steering vectors, see also :ref:`Sarradj, 2012<Sarradj2012>`.
+    #: If r_diag==True: if r_diag_norm==0.0, the standard  
+    #: normalization = num_mics/(num_mics-1) is used. 
+    #: If r_diag_norm !=0.0, the user input is used instead.  
+    #: If r_diag==False, the normalization is 1.0 either way. 
+    r_diag_norm = Float(0.0, 
+                        desc="If diagonal of the csm is removed, some signal energy is lost." 
+                        "This is handled via this normalization factor." 
+                        "Internally, the default is: num_mics / (num_mics - 1).") 
+    
+    #: Type of steering vectors, see also :ref:`Sarradj, 2012<Sarradj2012>`:
+    #: classic -> Formulation I; 
+    #: inverse -> Formulation II; 
+    #: true level-> Formulation III (default);
+    #: true location -> Formulation IV.
     steer = Trait('true level', 'true location', 'classic', 'inverse', 
                   desc="Type of steering vectors used. Corresponds to the formulations"
                   "in :ref:`Sarradj, 2012<Sarradj2012>`. classic -> Formulation I;"
@@ -131,7 +147,7 @@ class BeamformerBase( HasPrivateTraits ):
     # internal identifier
     digest = Property( 
         depends_on = ['mpos.digest', 'grid.digest', 'freq_data.digest', 'c', \
-            'r_diag', 'env.digest', 'steer'], 
+            'r_diag', 'env.digest', 'r_diag_norm', 'steer'], 
         )
 
     # internal identifier
@@ -178,11 +194,8 @@ class BeamformerBase( HasPrivateTraits ):
         while self.digest != _digest:
             _digest = self.digest
             name = self.__class__.__name__ + self.digest
-            #print 1, name
             numchannels = self.freq_data.numchannels
-            #print "nch", numchannels
             if  numchannels != self.mpos.num_mics or numchannels == 0:
-                #return None
                 raise ValueError("%i channels do not fit %i mics" % \
                     (numchannels, self.mpos.num_mics))
             numfreq = self.freq_data.fftfreq().shape[0]# block_size/2 + 1
@@ -209,16 +222,20 @@ class BeamformerBase( HasPrivateTraits ):
                 ac = zeros((numfreq, self.grid.size), dtype=float32)
                 fr = zeros(numfreq, dtype=int)
                 self.calc(ac,fr)
-            #print 2, name
         return ac
         
-    def signalLossNormalize(self):
-        """ If the Diagonal of the CSM is removed one has to handle the loss 
+    def sig_loss_norm(self):
+        """ 
+        If the diagonal of the CSM is removed one has to handle the loss 
         of signal energy --> Done via a normalization factor.
         """
-        nMics = float(self.freq_data.numchannels)
-        normFactor = {False: 1.0,
-                      True: nMics / (nMics - 1)}[self.r_diag]
+        if not self.r_diag:  # Full CSM --> no normalization needed 
+            normFactor = 1.0 
+        elif self.r_diag_norm == 0.0:  # Removed diag: standard normalization factor 
+            nMics = float(self.freq_data.numchannels) 
+            normFactor = nMics / (nMics - 1) 
+        elif self.r_diag_norm != 0.0:  # Removed diag: user defined normalization factor 
+            normFactor = self.r_diag_norm 
         return normFactor
 
     def calc(self, ac, fr):
@@ -249,7 +266,7 @@ class BeamformerBase( HasPrivateTraits ):
         """
         kj = 2j*pi*self.freq_data.fftfreq()/self.c
         steerVecFormulation = steerVecTranslation(self.steer)
-        normFactor = self.signalLossNormalize()
+        normFactor = self.sig_loss_norm()
         for i in self.freq_data.indices:
             if not fr[i]:
                 csm = array(self.freq_data.csm[i][newaxis], dtype='complex128')
@@ -296,16 +313,50 @@ class BeamformerBase( HasPrivateTraits ):
         freq = self.freq_data.fftfreq()
         if len(freq) == 0:
             return None
-        try:
-            if num == 0:
-                # single frequency line
-                h = res[searchsorted(freq, f)]
+        
+        indices = self.freq_data.indices
+        
+        if num == 0:
+            # single frequency line
+            ind = searchsorted(freq, f)
+            if ind >= len(freq):
+                warn('Queried frequency (%g Hz) not in resolved '
+                              'frequency range. Returning zeros.' % f, 
+                              Warning, stacklevel = 2)
+                h = zeros_like(res[0])
             else:
-                h = sum(res[searchsorted(freq, f*2.**(-0.5/num)) : \
-                            searchsorted(freq, f*2.**(+0.5/num))], 0)
-            return h.reshape(self.grid.shape)
-        except IndexError:
-            return None
+                if freq[ind] != f:
+                    warn('Queried frequency (%g Hz) not in set of '
+                         'discrete FFT sample frequencies. '
+                         'Using frequency %g Hz instead.' % (f,freq[ind]), 
+                         Warning, stacklevel = 2)
+                if not (ind in indices):
+                    warn('Beamforming result may not have been calculated '
+                         'for queried frequency. Check '
+                         'freq_data.ind_low and freq_data.ind_high!',
+                          Warning, stacklevel = 2)
+                h = res[ind]
+        else:
+            # fractional octave band
+            f1 = f*2.**(-0.5/num)
+            f2 = f*2.**(+0.5/num)
+            ind1 = searchsorted(freq, f1)
+            ind2 = searchsorted(freq, f2)
+            if ind1 == ind2:
+                warn('Queried frequency band (%g to %g Hz) does not '
+                     'include any discrete FFT sample frequencies. '
+                     'Returning zeros.' % (f1,f2), 
+                     Warning, stacklevel = 2)
+                h = zeros_like(res[0])
+            else:
+                h = sum(res[ind1:ind2], 0)
+                if not ((ind1 in indices) and (ind2 in indices)):
+                    warn('Beamforming result may not have been calculated '
+                         'for all queried frequencies. Check '
+                         'freq_data.ind_low and freq_data.ind_high!',
+                          Warning, stacklevel = 2)
+        return h.reshape(self.grid.shape)
+
 
     def integrate(self, sector):
         """
@@ -468,7 +519,7 @@ class BeamformerCapon( BeamformerBase ):
         """        
         kj = 2j*pi*self.freq_data.fftfreq()/self.c
         nMics = self.freq_data.numchannels
-        normFactor = self.signalLossNormalize() * nMics**2
+        normFactor = self.sig_loss_norm() * nMics**2
         steerVecFormulation = steerVecTranslation(self.steer)
         for i in self.freq_data.indices:
             if not fr[i]:
@@ -484,9 +535,9 @@ class BeamformerEig( BeamformerBase ):
     see :ref:`Sarradj et al., 2005<Sarradj2005>`.
     """
 
-    #: :class:`~acoular.spectra.EigSpectra` object that provides the 
+    #: :class:`~acoular.spectra.PowerSpectra` object that provides the 
     #: cross spectral matrix and eigenvalues
-    freq_data = Trait(EigSpectra, 
+    freq_data = Trait(PowerSpectra, 
         desc="freq data object")
 
     #: Number of component to calculate: 
@@ -558,7 +609,7 @@ class BeamformerEig( BeamformerBase ):
         """
         kj = 2j*pi*self.freq_data.fftfreq()/self.c
         na = int(self.na)  # eigenvalue taken into account
-        normFactor = self.signalLossNormalize()
+        normFactor = self.sig_loss_norm()
         steerVecFormulation = steerVecTranslation(self.steer)
         for i in self.freq_data.indices:        
             if not fr[i]:
@@ -628,7 +679,7 @@ class BeamformerMusic( BeamformerEig ):
         kj = 2j*pi*self.freq_data.fftfreq()/self.c
         nMics = self.freq_data.numchannels
         n = int(self.mpos.num_mics-self.na)
-        normFactor = self.signalLossNormalize() * nMics**2
+        normFactor = self.sig_loss_norm() * nMics**2
         steerVecFormulation = steerVecTranslation(self.steer)
         for i in self.freq_data.indices:        
             if not fr[i]:
@@ -778,20 +829,17 @@ class PointSpreadFunction (HasPrivateTraits):
             steerVecFormulation = steerVecTranslation(self.steer)
             if self.calcmode == 'single':
                 for ind in g_ind_calc:
-                    hh = calcPointSpreadFunction(steerVecFormulation, (r0, rm, kj, [ind]))[0,:,:]
-                    ac[:,ind] = hh[:,0] / hh[ind,0]
+                    ac[:,ind] = calcPointSpreadFunction(steerVecFormulation, (r0, rm, kj, [ind]))[0,:,0]
                     gp[ind] = True
             elif self.calcmode == 'full':
-                hh = calcPointSpreadFunction(steerVecFormulation, (r0, rm, kj, arange(r0.shape[0])))[0,:,:]
                 gp[:] = True
-                ac[:] = hh / diag(hh)
+                ac[:] = calcPointSpreadFunction(steerVecFormulation, (r0, rm, kj, arange(r0.shape[0])))[0,:,:]
             else: # 'block'
-                hh = calcPointSpreadFunction(steerVecFormulation, (r0, rm, kj, g_ind_calc))[0,:,:]
-                hh /= diag(hh[g_ind_calc,:])[newaxis,:]
+                hh = calcPointSpreadFunction(steerVecFormulation, (r0, rm, kj, g_ind_calc))
                 indh = 0
                 for ind in g_ind_calc:
                     gp[ind] = True
-                    ac[:,ind] = hh[:,indh]
+                    ac[:,ind] = hh[0,:,indh]
                     indh += 1
             self.h5f.flush()
         return ac[:][:,self.grid_indices]
@@ -916,6 +964,135 @@ class BeamformerDamas (BeamformerBase):
                 ac[i] = x
                 fr[i] = True
 
+class BeamformerDamasPlus (BeamformerDamas):
+    """
+    DAMAS deconvolution, see :ref:`Brooks and Humphreys, 2006<BrooksHumphreys2006>`,
+    for solving the system of equations, instead of the original Gauss-Seidel 
+    iterations, this class employs the NNLS or linear programming solvers from 
+    scipy.optimize or one  of several optimization algorithms from the scikit-learn module.
+    Needs a-priori delay-and-sum beamforming (:class:`BeamformerBase`).
+    """
+    
+    #: Type of fit method to be used ('LassoLars', 
+    #: 'OMPCV', 'LP', or 'NNLS', defaults to 'NNLS').
+    #: These methods are implemented in 
+    #: the `scikit-learn <http://scikit-learn.org/stable/user_guide.html>`_ 
+    #: module or within scipy.optimize respectively.
+    method = Trait('NNLS','LP','LassoLars', 'OMPCV',  
+                   desc="method used for solving deconvolution problem")
+    
+    #: Weight factor for LassoLars method,
+    #: defaults to 0.0.
+    # (Values in the order of 10^⁻9 should produce good results.)
+    alpha = Range(0.0, 1.0, 0.0,
+                  desc="Lasso weight factor")
+    
+    #: Maximum number of iterations,
+    #: tradeoff between speed and precision;
+    #: defaults to 500
+    max_iter = Int(500,
+                   desc="maximum number of iterations")
+    
+    #: Unit multiplier for evaluating, e.g., nPa instead of Pa. 
+    #: Values are converted back before returning. 
+    #: Temporary conversion may be necessary to not reach machine epsilon
+    #: within fitting method algorithms. Defaults to 1e9.
+    unit_mult = Float(1e9,
+                      desc = "unit multiplier")
+    
+    # internal identifier
+    digest = Property( 
+        depends_on = ['beamformer.digest','alpha', 'method', 
+                      'max_iter', 'unit_mult'], 
+        )
+
+    # internal identifier
+    ext_digest = Property( 
+        depends_on = ['digest', 'beamformer.ext_digest'], 
+        )
+    
+    traits_view = View(
+        [
+            [Item('beamformer{}', style='custom')], 
+            [Item('method{Solver}')],
+            [Item('max_iter{Max. number of iterations}')], 
+            [Item('alpha', label='Lasso weight factor')], 
+            [Item('calcmode{How to calculate PSF}')], 
+            '|'
+        ], 
+        title='Beamformer denconvolution options', 
+        buttons = OKCancelButtons
+        )
+
+    @cached_property
+    def _get_digest( self ):
+        return digest( self )
+      
+    @cached_property
+    def _get_ext_digest( self ):
+        return digest( self, 'ext_digest' )
+    
+    def calc(self, ac, fr):
+        """
+        Calculates the DAMAS result for the frequencies defined by :attr:`freq_data`
+        
+        This is an internal helper function that is automatically called when 
+        accessing the beamformer's :attr:`~BeamformerBase.result` or calling
+        its :meth:`~BeamformerBase.synthetic` method.        
+        
+        Parameters
+        ----------
+        ac : array of floats
+            This array of dimension ([number of frequencies]x[number of gridpoints])
+            is used as call-by-reference parameter and contains the calculated
+            value after calling this method. 
+        fr : array of booleans
+            The entries of this [number of frequencies]-sized array are either 
+            'True' (if the result for this frequency has already been calculated)
+            or 'False' (for the frequencies where the result has yet to be calculated).
+            After the calculation at a certain frequency the value will be set
+            to 'True'
+        
+        Returns
+        -------
+        This method only returns values through the *ac* and *fr* parameters
+        """
+        unit = self.unit_mult
+        freqs = self.freq_data.fftfreq()
+        p = PointSpreadFunction(mpos=self.mpos, grid=self.grid, 
+                                c=self.c, env=self.env, steer=self.steer,
+                                calcmode=self.calcmode)
+        for i in self.freq_data.indices:        
+            if not fr[i]:
+                p.freq = freqs[i]
+                y = array(self.beamformer.result[i], dtype=float64) * unit
+
+                psf = p.psf[:]
+
+                if self.method == 'NNLS':
+                    resopt = nnls(psf,y)[0]
+                elif self.method == 'LP': # linear programming (Dougherty)
+                    if self.r_diag:
+                        warn('Linear programming solver may fail when CSM main '
+                              'diagonal is removed for delay-and-sum beamforming.', 
+                              Warning, stacklevel = 5)
+                    cT = -1*psf.sum(1) # turn the minimization into a maximization
+                    resopt = linprog(c=cT, A_ub=psf, b_ub=y).x # defaults to simplex method and non-negative x
+                elif self.method == 'LassoLars':
+                    model = LassoLars(alpha = self.alpha * unit, 
+                                      max_iter = self.max_iter)
+                else: # self.method == 'OMPCV':
+                    model = OrthogonalMatchingPursuitCV()
+                
+                
+                if self.method in ('NNLS','LP'):
+                    ac[i] = resopt / unit
+                else: # sklearn models
+                    model.fit(psf,y)
+                    ac[i] = model.coef_[:] / unit
+                
+                fr[i] = True
+
 class BeamformerOrth (BeamformerBase):
     """
     Orthogonal beamforming, see :ref:`Sarradj, 2010<Sarradj2010>`.
@@ -925,7 +1102,7 @@ class BeamformerOrth (BeamformerBase):
     #: :class:`BeamformerEig` object that provides data for deconvolution.
     beamformer = Trait(BeamformerEig)
 
-    #: :class:`~acoular.spectra.EigSpectra` object that provides the cross spectral matrix 
+    #: :class:`~acoular.spectra.PowerSpectra` object that provides the cross spectral matrix 
     #: and eigenvalues, is set automatically.    
     freq_data = Delegate('beamformer')
 
@@ -1110,7 +1287,7 @@ class BeamformerCleansc( BeamformerBase ):
         """
 
         # prepare calculation
-        normFactor = self.signalLossNormalize()
+        normFactor = self.sig_loss_norm()
         steerVecFormulation = steerVecTranslation(self.steer)
         numchannels = self.freq_data.numchannels
         f = self.freq_data.fftfreq()
@@ -1162,7 +1339,6 @@ class BeamformerCleansc( BeamformerBase ):
                     h1 = beamformerFreq(True, steerVecFormulation, self.r_diag, normFactor, (self.r0, self.rm, kj, array((hmax, ))[newaxis, :], hh[newaxis, :].conjugate()))
                     h -= self.damp * h1
                     csm -= self.damp * csm1.transpose(0,2,1)
-#                print '%i iter of %i' % (j,J)
                 ac[i] = result
                 fr[i] = True
 
@@ -1293,7 +1469,6 @@ class BeamformerClean (BeamformerBase):
                     flag = (dirty_sum > abs(dirty).sum(0) \
                             and i_iter < self.n_iter \
                             and max(dirty) > 0)
-                #print freqs[i],'Hz, Iterations:',i_iter
                 
                 ac[i] = clean            
                 fr[i] = True
@@ -1314,9 +1489,9 @@ class BeamformerCMF ( BeamformerBase ):
         
     #: Weight factor for LassoLars method,
     #: defaults to 0.0.
+    #: (Use values in the order of 10^⁻9 for good results.)
     alpha = Range(0.0, 1.0, 0.0, 
         desc="Lasso weight factor")
-    # (use values in the order of 10^⁻9 for good results)
     
     #: Maximum number of iterations,
     #: tradeoff between speed and precision;
@@ -1324,10 +1499,19 @@ class BeamformerCMF ( BeamformerBase ):
     max_iter = Int(500, 
         desc="maximum number of iterations")
 
+    
+    #: Unit multiplier for evaluating, e.g., nPa instead of Pa. 
+    #: Values are converted back before returning. 
+    #: Temporary conversion may be necessary to not reach machine epsilon
+    #: within fitting method algorithms. Defaults to 1e9.
+    unit_mult = Float(1e9,
+                      desc = "unit multiplier")
+
     # internal identifier
     digest = Property( 
-        depends_on = ['mpos.digest', 'grid.digest', 'freq_data.digest', 'c', \
-            'alpha', 'method', 'max_iter', 'env.digest', 'steer', 'r_diag'], 
+        depends_on = ['mpos.digest', 'grid.digest', 'freq_data.digest', \
+                      'c', 'alpha', 'method', 'max_iter', 'unit_mult', \
+                      'env.digest', 'steer', 'r_diag'], 
         )
 
     traits_view = View(
@@ -1387,7 +1571,7 @@ class BeamformerCMF ( BeamformerBase ):
         r0 = self.r0
         rm = self.rm
         numpoints = rm.shape[0]
-
+        unit = self.unit_mult
         hh = zeros((1, numpoints, nc), dtype='D')
 
             
@@ -1426,22 +1610,24 @@ class BeamformerCMF ( BeamformerBase ):
 
                 A = realify( Ac [ind,:] )[ind_reim,:]
                 # use csm.T for column stacking reshape!
-                R = realify( reshape(csm.T, (nc*nc,1))[ind,:] )[ind_reim,:]
-#                print A.shape, R.shape
+                R = realify( reshape(csm.T, (nc*nc,1))[ind,:] )[ind_reim,:] * unit
                 # choose method
                 if self.method == 'LassoLars':
-                    model = LassoLars(alpha=self.alpha,max_iter=self.max_iter)
+                    model = LassoLars(alpha = self.alpha * unit,
+                                      max_iter = self.max_iter)
                 elif self.method == 'LassoLarsBIC':
-                    model = LassoLarsIC(criterion='bic',max_iter=self.max_iter)
+                    model = LassoLarsIC(criterion = 'bic',
+                                        max_iter = self.max_iter)
                 elif self.method == 'OMPCV':
                     model = OrthogonalMatchingPursuitCV()
-#                model = ElasticNet(alpha=self.alpha, l1_ratio=0.7)
+
                 # nnls is not in sklearn
                 if self.method == 'NNLS':
                     ac[i] , x = nnls(A,R.flat)
+                    ac[i] /= unit
                 else:
                     model.fit(A,R[:,0])
-                    ac[i] = model.coef_[:]
+                    ac[i] = model.coef_[:] / unit
                 fr[i] = True
 
 class BeamformerGIB( BeamformerEig ):  #BeamformerEig #BeamformerBase

@@ -19,7 +19,7 @@
 from __future__ import print_function, division
 from six import next
 from numpy import array, newaxis, empty, sqrt, arange, clip, r_, zeros, \
-histogram, unique, cross, dot, where, s_
+histogram, unique, cross, dot, where, s_ , sum
 from traits.api import Float, CArray, Property, Trait, Bool, Delegate, \
 cached_property, List
 from traitsui.api import View, Item

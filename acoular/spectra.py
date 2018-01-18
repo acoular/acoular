@@ -13,11 +13,12 @@
     EigSpectra
     synthetic
 """
+from warnings import warn
 from six.moves import xrange  # solves the xrange/range issue for python2/3: in py3 'xrange' is now treated as 'range' and in py2 nothing changes
 
 from numpy import array, ones, hanning, hamming, bartlett, blackman, \
 dot, newaxis, zeros, empty, fft, float32, complex64, linalg, \
-searchsorted, isscalar, fill_diagonal, arange
+searchsorted, isscalar, fill_diagonal, arange, zeros_like, sum
 import tables
 from traits.api import HasPrivateTraits, Int, Property, Instance, Trait, \
 Range, Bool, cached_property, property_depends_on, Delegate
@@ -33,15 +34,17 @@ from .calib import Calib
 
 
 class PowerSpectra( HasPrivateTraits ):
-    """Provides the cross spectral matrix of multichannel time data.
+    """Provides the cross spectral matrix of multichannel time data
+     and its eigen-decomposition.
     
     This class includes the efficient calculation of the full cross spectral
     matrix using the Welch method with windows and overlap. It also contains 
-    data and additional properties of this matrix. 
+    the CSM's eigenvalues and eigenvectors and additional properties. 
     
-    The result is computed only when needed, that is when the :attr:`csm` attribute
-    is actually read. Any change in the input data or parameters leads to a
-    new calculation, again triggered when csm is read. The result may be 
+    The result is computed only when needed, that is when the :attr:`csm`,
+    :attr:`eva`, or :attr:`eve` attributes are acturally read.
+    Any change in the input data or parameters leads to a new calculation, 
+    again triggered when an attribute is read. The result may be 
     cached on disk in HDF5 files and need not to be recomputed during
     subsequent program runs with identical input data and parameters. The
     input data is taken to be identical if the source has identical parameters
@@ -124,6 +127,20 @@ class PowerSpectra( HasPrivateTraits ):
     #: readonly.
     csm = Property( 
         desc="cross spectral matrix")
+
+
+    #: Eigenvalues of the cross spectral matrix as an
+    #: (number of frequencies) array of floats, readonly.
+    eva = Property( 
+        desc="eigenvalues of cross spectral matrix")
+
+    #: Eigenvectors of the cross spectral matrix as an
+    #: (number of frequencies, numchannels, numchannels) array of floats,
+    #: readonly.
+    eve = Property( 
+        desc="eigenvectors of cross spectral matrix")
+
+
 
     # internal identifier
     digest = Property( 
@@ -259,46 +276,7 @@ class PowerSpectra( HasPrivateTraits ):
         else:
             return self.h5f.get_node('/', name)
 
-    def fftfreq ( self ):
-        """
-        Return the Discrete Fourier Transform sample frequencies.
-        
-        Returns
-        -------
-        f : ndarray
-            Array of length *block_size/2+1* containing the sample frequencies.
-        """
-        return abs(fft.fftfreq(self.block_size, 1./self.time_data.sample_freq)\
-                    [:int(self.block_size/2+1)])
 
-
-class EigSpectra( PowerSpectra ):
-    """Provides the eigendecomposition of cross spectral matrix.
-    
-    This class includes the efficient calculation of the full cross spectral
-    matrix using the Welch method with windows and overlap and in addition its. 
-    eigenvalues and eigenvectors. 
-    
-    The result is computed only when needed, that is when the :attr:`~PowerSpectra.csm`, 
-    :attr:`eva` or :attr:`eve` attribute is actually read. 
-    Any change in the input data or parameters leads to a
-    new calculation, again triggered when csm is read. The result may be 
-    cached on disk in HDF5 files and need not to be recomputed during
-    subsequent program runs with identical input data and parameters. The
-    input data is taken to be identical if the source has identical parameters
-    and the same file name in case of that the data is read from a file.
-    """
-
-    #: Eigenvalues of the cross spectral matrix as an
-    #: (number of frequencies) array of floats, readonly.
-    eva = Property( 
-        desc="eigenvalues of cross spectral matrix")
-
-    #: Eigenvectors of the cross spectral matrix as an
-    #: (number of frequencies, numchannels, numchannels) array of floats,
-    #: readonly.
-    eve = Property( 
-        desc="eigenvectors of cross spectral matrix")
 
     @property_depends_on('digest')
     def _get_eva ( self ):
@@ -372,6 +350,20 @@ class EigSpectra( PowerSpectra ):
                 return sum(self.eva[f1:f2], 0)
 
 
+    def fftfreq ( self ):
+        """
+        Return the Discrete Fourier Transform sample frequencies.
+        
+        Returns
+        -------
+        f : ndarray
+            Array of length *block_size/2+1* containing the sample frequencies.
+        """
+        return abs(fft.fftfreq(self.block_size, 1./self.time_data.sample_freq)\
+                    [:int(self.block_size/2+1)])
+
+
+
 def synthetic (data, freqs, f, num=3):
     """
     Returns synthesized frequency band values of spectral data.
@@ -422,9 +414,39 @@ def synthetic (data, freqs, f, num=3):
     if isscalar(f):
         f = (f,)
     if num == 0:
-        res = [ data[searchsorted(freqs, i)] for i in f]        
+        # single frequency lines
+        res = list()
+        for i in f:
+            ind = searchsorted(freqs, i)
+            if ind >= len(freqs):
+                warn('Queried frequency (%g Hz) not in resolved '
+                     'frequency range. Returning zeros.' % i, 
+                     Warning, stacklevel = 2)
+                h = zeros_like(data[0])
+            else:
+                if freqs[ind] != i:
+                    warn('Queried frequency (%g Hz) not in set of '
+                         'discrete FFT sample frequencies. '
+                         'Using frequency %g Hz instead.' % (i,freqs[ind]), 
+                         Warning, stacklevel = 2)
+                h = data[ind]
+            res += [h]      
     else:
-        res = [ data[searchsorted(freqs, i*2.**(-0.5/num)):\
-                    searchsorted(freqs, i*2.**(+0.5/num))].sum(0) for i in f]
+        # fractional octave bands
+        res = list()
+        for i in f:
+            f1 = i*2.**(-0.5/num)
+            f2 = i*2.**(+0.5/num)
+            ind1 = searchsorted(freqs, f1)
+            ind2 = searchsorted(freqs, f2)
+            if ind1 == ind2:
+                warn('Queried frequency band (%g to %g Hz) does not '
+                     'include any discrete FFT sample frequencies. '
+                     'Returning zeros.' % (f1,f2), 
+                     Warning, stacklevel = 2)
+                h = zeros_like(data[0])
+            else:
+                h = sum(data[ind1:ind2], 0)
+            res += [h]
     return array(res)
         
