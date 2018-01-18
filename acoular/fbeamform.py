@@ -1477,7 +1477,7 @@ class BeamformerGIB( BeamformerEig ):  #BeamformerEig #BeamformerBase
     #: These methods are implemented in 
     #: the `scikit-learn <http://scikit-learn.org/stable/user_guide.html>`_ 
     #: module.
-    method = Trait('Suzuki', 'InverseILRS', 'LassoLars', 'LassoLarsBIC','LassoLarsCV',  \
+    method = Trait('Suzuki', 'InverseIRLS', 'LassoLars', 'LassoLarsBIC','LassoLarsCV',  \
         'OMPCV', 'NNLS', desc="fit method used")
 
     #: Weight factor for LassoLars method,
@@ -1612,7 +1612,7 @@ class BeamformerGIB( BeamformerEig ):  #BeamformerEig #BeamformerBase
                             else:                          
                                 weights=diag((absolute(qi[s,:])**(2-self.pnorm)))    
                          
-                    elif self.method == 'InverseILRS':                         
+                    elif self.method == 'InverseIRLS':                         
                         weights=eye(numpoints)
                         locpoints=arange(numpoints)
                         for it in arange(self.max_iter): 
