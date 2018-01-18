@@ -1630,21 +1630,11 @@ class BeamformerCMF ( BeamformerBase ):
                     ac[i] = model.coef_[:] / unit
                 fr[i] = True
 
-class BeamformerGIB( BeamformerEig ):  #BeamformerEig #BeamformerBase
+class BeamformerGIB(BeamformerEig):  #BeamformerEig #BeamformerBase
     """
     Beamforming GIB methods with different normalizations,
     """
-    #: :class:`~acoular.spectra.EigSpectra` object that provides the 
-    #: cross spectral matrix and eigenvalues
-    freq_data = Trait(EigSpectra, 
-        desc="freq data object")
-
-    #: Number of component to calculate: 
-    #: 0 (smallest) ... :attr:`~acoular.sources.SamplesGenerator.numchannels`-1;
-    #: defaults to -1, i.e. numchannels-1
-    n = Int(-1, 
-            desc="No. of eigenvalue")
-      
+    
     #: Unit multiplier for evaluating, e.g., nPa instead of Pa. 
     #: Values are converted back before returning. 
     #: Temporary conversion may be necessary to not reach machine epsilon
@@ -1672,13 +1662,16 @@ class BeamformerGIB( BeamformerEig ):  #BeamformerEig #BeamformerBase
         desc="Lasso weight factor")
     # (use values in the order of 10^⁻9 for good results) 
     
-    #norm to consider
-    pnorm= Float(1,desc="Norm for normalization")
+    #: Norm to consider for the regularitation in InverseIRLS and Suzuki methods 
+    #: defaults to L-1 Norm
+    pnorm= Float(1,desc="Norm for regularitation")
 
-    # Beta - Fraction of source maintained after each iteration
-    beta =  Float(0.9,desc="fraction of source maintained")
+    #: Beta - Fraction of sources maintained after each iteration
+    #: defaults to 0.9 
+    beta =  Float(0.9,desc="fraction of sources maintained")
     
-    # eps - regularization parameter
+    #: eps - Regularization parameter for Suzuki algorithm
+    #: defaults to 0.05. 
     eps_perc =  Float(0.05,desc="regularization parameter")
         
     # internal identifier++++++++++++++++++++++++++++++++++++++++++++++++++
