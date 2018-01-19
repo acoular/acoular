@@ -264,7 +264,7 @@ class PowerSpectra( HasPrivateTraits ):
                 ns = data.shape[0]
                 temp[bs:bs+ns] = data
                 while pos+bs <= bs+ns:
-                    ft = array(fft.rfft(temp[int(pos):int(pos+bs)]*wind, None, 0), dtype=self.precision)
+                    ft = fft.rfft(temp[int(pos):int(pos+bs)]*wind, None, 0).astype(self.precision)
                     calcCSM(csmUpper, ft)  # only upper triangular part of matrix is calculated (for speed reasons)
                     pos += posinc
                 temp[0:bs] = temp[bs:]
