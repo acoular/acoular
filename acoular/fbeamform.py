@@ -397,7 +397,7 @@ class BeamformerFunctional( BeamformerBase ):
     gamma = Float(1, 
         desc="functional exponent")
 
-    #: internal identifier
+    # internal identifier
     digest = Property( 
         depends_on = ['mpos.digest', 'grid.digest', 'freq_data.digest', 'c', \
             'r_diag', 'env.digest', 'gamma', 'steer'], 
