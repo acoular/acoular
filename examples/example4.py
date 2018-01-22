@@ -75,7 +75,7 @@ g = RectGrid3D(x_min=-0.6, x_max=+0.0, y_min=0.0, y_max=0.0, \
 # eigenvalues and eigenvectors, if only the matrix is needed then class 
 # PowerSpectra can be used instead
 #===============================================================================
-f = EigSpectra(time_data=t1, 
+f = PowerSpectra(time_data=t1, 
                window='Hanning', overlap='50%', block_size=128, #FFT-parameters
                ind_low=8, ind_high=16) #to save computational effort, only
                # frequencies with index 1-30 are used
