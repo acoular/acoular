@@ -11,20 +11,20 @@ calibration in file example_calib.xml
 microphone geometry in array_56.xml (part of acoular)
 
 
-Copyright (c) 2006-2017 The Acoular developers.
+Copyright (c) 2006-2018 The Acoular developers.
 All rights reserved.
 """
 from __future__ import print_function
 
 # imports from acoular
 import acoular
-from acoular import L_p, Calib, MicGeom, EigSpectra, \
+from acoular import L_p, Calib, MicGeom, PowerSpectra, \
 RectGrid, BeamformerBase, BeamformerEig, BeamformerOrth, BeamformerCleansc, \
 MaskedTimeSamples, BeamformerDamas
 
 # other imports
 from os import path
-from pylab import figure, subplot, imshow, show, colorbar, title
+from pylab import figure, subplot, imshow, show, colorbar, title, tight_layout
 
 # files
 datafile = 'example_data.h5'
@@ -71,7 +71,7 @@ g = RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=0.68,
 # eigenvalues and eigenvectors, if only the matrix is needed then class 
 # PowerSpectra can be used instead
 #===============================================================================
-f = EigSpectra(time_data=t1, 
+f = PowerSpectra(time_data=t1, 
                window='Hanning', overlap='50%', block_size=128, #FFT-parameters
                ind_low=7, ind_high=15) #to save computational effort, only
                # frequencies with index 1-30 are used
@@ -91,7 +91,7 @@ bs = BeamformerCleansc(freq_data=f, grid=g, mpos=m, r_diag=True, c=346.04)
 #===============================================================================
 fi = 1 #no of figure
 for r_diag in (True,False):
-    figure(fi)
+    figure(fi,(10,6))
     fi +=1 
     bb.r_diag = r_diag
     be.r_diag = r_diag
@@ -112,5 +112,7 @@ for r_diag in (True,False):
             colorbar()
             title(b.__class__.__name__,fontsize='small')
 
+    tight_layout()
 
-show()
+# only display result on screen if this script is run directly
+if __name__ == '__main__': show()
