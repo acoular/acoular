@@ -9,7 +9,7 @@ What's new
     * Floating point precision of CSM, PSF and beamformer customizable (default: float64) -- affects cache file size
     * PowerSpectra class now includes EigSpectra functionality (EigSpectra still callable for backwards compatibility)
     * Inverse methods: unit of sound pressure for internal calculation customizable (default: nPa) for better numeric stability with sklearn solvers. Still returns all values in Pa.
-    * Bugfix: BeamformerFunctional works now with steering vector formulation II (inverse) and III (true level) which produced wrong results in the past. 
+    * Bugfix: BeamformerFunctional works now with steering vector formulation II (inverse) and III (true level) which produced incorrect results in the past. 
     * Bugfix: BeamformerFunctional is only calculable when the diagonal of the CSM is included
     * Bugfix: Corrected calculation of PSF for steering vector formulation IV
     * Bugfix: Behaviour of normalizing PSF at assumed source location (psf=1) is removed
