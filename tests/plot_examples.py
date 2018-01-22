@@ -33,4 +33,6 @@ for ex in glob("example*.py"):
             savefig(figname, bbox_inches='tight')
         close('all')
     except:
-        print('Error importing %s !' % ex)
+        print('---------------------------------------------')
+        print('        Error importing %s !' % ex)
+        print('---------------------------------------------')
