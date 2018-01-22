@@ -73,7 +73,7 @@ g = RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=0.68,
 #===============================================================================
 f = PowerSpectra(time_data=t1, 
                window='Hanning', overlap='50%', block_size=128, #FFT-parameters
-               ind_low=7, ind_high=15) #to save computational effort, only
+               ind_low=8, ind_high=16) #to save computational effort, only
                # frequencies with index 1-30 are used
 
 
