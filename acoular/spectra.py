@@ -10,7 +10,6 @@
     :toctree: generated/
 
     PowerSpectra
-    EigSpectra
     synthetic
 """
 from warnings import warn
