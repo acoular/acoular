@@ -147,10 +147,7 @@ class MaskedTimeInOut ( TimeInOut ):
     def _get_channels( self ):
         if len(self.invalid_channels)==0:
             return slice(0, None, None)
-        allr = range(self.numchannels_total)
-        for channel in self.invalid_channels:
-            if channel in allr:
-                allr.remove(channel)
+        allr=[i for i in range(self.numchannels_total) if not (i in self.invalid_channels)]
         return array(allr)
     
     @cached_property
