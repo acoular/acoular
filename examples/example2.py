@@ -27,7 +27,7 @@ TimeCache, FiltOctave, BeamformerTime, TimePower, IntegratorSectorTime, \
 PointSource, MovingPointSource, SineGenerator, WNoiseGenerator, Mixer, WriteWAV
 
 from pylab import subplot, imshow, show, colorbar, plot, transpose, figure, \
-psd, axis, xlim, ylim, title, suptitle, tight_layout
+psd, axis, xlim, ylim, title, tight_layout, text
 
 #===============================================================================
 # some important definitions
@@ -112,7 +112,7 @@ cacht = TimeCache(source=avgt) # cache to prevent recalculation
 map2 = zeros(g.shape) # accumulator for average
 # plot single frames
 figure(1,(8,7))
-i = 0
+i = 1
 for res in cacht.result(1):
     res0 = res[0].reshape(g.shape)
     map2 += res0 # average
@@ -124,7 +124,9 @@ for res in cacht.result(1):
     colorbar()
 map2 /= i
 
-suptitle('fixed focus')
+subplot(4,4,1)
+text(0.4,0.25,'fixed\nfocus', fontsize=15, ha='center')
+axis('off')
 tight_layout()
 
 
@@ -144,7 +146,7 @@ cachts = TimeCache(source=avgts) # cache to prevent recalculation
 map3 = zeros(g1.shape) # accumulator for average
 # plot single frames
 figure(2,(8,7))
-i = 0
+i = 1
 for res in cachts.result(1):
     res0 = res[0].reshape(g1.shape)
     map3 += res0 # average
@@ -156,7 +158,9 @@ for res in cachts.result(1):
     colorbar()
 map3 /= i
 
-suptitle('moving focus')
+subplot(4,4,1)
+text(0.4,0.25,'moving\nfocus', fontsize=15, ha='center')
+axis('off')
 tight_layout()
 
 #===============================================================================

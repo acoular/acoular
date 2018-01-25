@@ -106,7 +106,7 @@ for r_diag in (True,False):
             i1 += 1
             map = b.synthetic(cfreq,1)
             mx = L_p(map.max())
-            imshow(L_p(map.T), vmax=mx, vmin=mx-15, 
+            imshow(L_p(map.T), vmax=mx, vmin=mx-15,  origin='lower',
                    interpolation='nearest', extent=g.extend())
             print(b.steer)
             colorbar()
