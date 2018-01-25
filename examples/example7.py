@@ -89,7 +89,7 @@ for method in ('LassoLars', 'LassoLarsBIC', \
     map = b.synthetic(cfreq,1)
     print(time()-ti)
     mx = L_p(map.max())
-    imshow(L_p(map.T), vmax=mx, vmin=mx-15, 
+    imshow(L_p(map.T), vmax=mx, vmin=mx-15,  origin='lower',
            interpolation='nearest', extent=g.extend())
     colorbar()
     title(b.method)

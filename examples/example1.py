@@ -143,7 +143,7 @@ for b in (cacht, cachts):
         res += r[0] # average accum.
         map = r[0].reshape(g.shape)
         mx = L_p(map.max())
-        imshow(L_p(map.T), vmax=mx, vmin=mx-15, 
+        imshow(L_p(map.T), vmax=mx, vmin=mx-15, origin='lower',
                interpolation='nearest', extent=g.extend())
         title('%i' % ((i3-1)*1024))
     res /= i3-1 # average
@@ -154,7 +154,7 @@ for b in (cacht, cachts):
     i1 += 1
     map = res.reshape(g.shape)
     mx = L_p(map.max())
-    imshow(L_p(map.T), vmax=mx, vmin=mx-15, 
+    imshow(L_p(map.T), vmax=mx, vmin=mx-15, origin='lower',
            interpolation='nearest', extent=g.extend())
     colorbar()
     title(('BeamformerTime','BeamformerTimeSq')[i2-3])
