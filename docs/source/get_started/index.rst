@@ -1,31 +1,37 @@
 Getting Started
 ===============
 
-The acoular library is based on the Python programming language. While a basic knowledge of Python is definitely helpful, the following first steps do not require this. A number of good Python tutorials can be found on the web. 
+The Acoular library is based on the Python programming language. While a basic knowledge of Python is definitely helpful, the following first steps do not require this. A number of good Python tutorials can be found on the web. 
 
 Prerequisites
 -------------
-This "Getting started" tutorial assumes that the Acoular library is :doc:`installed<../install/index>` together with its dependencies and the demo finished successfully. If you did not run the demo yet, you should do so by typing into your comand line
+This "Getting started" tutorial assumes that the Acoular library is :doc:`installed<../install/index>` together with its dependencies and matplotlib, and that the demo finished successfully. If you did not run the demo yet, you should do so by typing into your command line
 
 .. code-block:: python
 
     $ acoular_demo.py
 
-which should, after some seconds, produce two pictures (a 64 microphone arrangement and a beamforming map with three sources). You may close the pictures in order to continue. 
+under Linux or Mac, and
 
-Apart from showing that everything works well the demo also produced some data to work on. You should now have a **file 'three_sources.h5' (13MB)** in your working directory.
+.. code-block:: python
+
+    > acoular_demo.exe
+
+under Windows respectively. This should, after some seconds, produce two pictures (a 64 microphone arrangement and a beamforming map with three sources). You may close the pictures in order to continue. 
+
+Apart from showing that everything works well, the demo also produced some data to work on. You should now have a **file 'three_sources.h5' (13MB)** in your working directory.
 
 Beamforming example step-by-step 
 --------------------------------
 
-One possible way to use the library is for doing classic delay-and-sum beamforming. This can either be done directly in the time domain or in the frequency domain. To get started with acoular, we will present a very basic example of beamforming in the frequency domain. In order to perform such an analysis we do need some data to work on. In a practical application, this data is acquired during multichannel measurements using a microphone array. The library provides some functionality to do so and stores the measured sound pressure time histories for all channels of the microphone array in a hierarchical data file (HDF5) format. 
+One possible way to use the library is for doing classic delay-and-sum beamforming. This can either be done directly in the time domain or in the frequency domain. To get started with Acoular, we will present a very basic example of beamforming in the frequency domain. In order to perform such an analysis we do need some data to work on. In a practical application, this data is acquired during multichannel measurements using a microphone array. The library provides some functionality to do so and stores the measured sound pressure time histories for all channels of the microphone array in a hierarchical data file (HDF5) format. 
 However, a working measurement set-up is required. Thus, we will use simulated data here. The 'three_sources.h5' file, generated using Acoular's simulation capabilities (see the :doc:`reference <../api_ref/index>`), contains the time history data for 64 microphone channels, which are sampled at 51200 Hz for a duration of 1 second, i.e. 51200 samples per channel. 
 
 In what follows, it is assumed that an interactive python session is started, preferably an IPython or jupyter session:
 
 >>> ipython
 
-Then, the first step to perform an analysis is to import the acoular library:
+Then, the first step to perform an analysis is to import the Acoular library:
 
 .. ipython::
 
