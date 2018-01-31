@@ -1,4 +1,4 @@
-.. acoular documentation master file
+.. Acoular documentation master file
 
 .. figure:: get_started/three_source_py3_colormap.png
     :align: right
