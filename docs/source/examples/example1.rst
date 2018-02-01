@@ -1,6 +1,6 @@
 Example 1
 =========
-This example demonstrates different features of acoular using measured data from a wind tunnel experiment on trailing edge noise. 
+This example demonstrates different features of Acoular using measured data from a wind tunnel experiment on trailing edge noise. 
 
 It needs the measured timeseries data in :download:`example_data.h5 <../../../examples/example_data.h5>` and calibration in :download:`example_calib.xml <../../../examples/example_calib.xml>`. Both files should reside in the same directory as the :download:`example1.py <../../../examples/example1.py>` script. 
 

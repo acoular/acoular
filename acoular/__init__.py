@@ -4,7 +4,7 @@
 #------------------------------------------------------------------------------
 
 """
-The acoular library: several classes for the implemetation of 
+The Acoular library: several classes for the implemetation of 
 acoustic beamforming
 
 A minimal usage example would be:

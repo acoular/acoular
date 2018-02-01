@@ -10,7 +10,7 @@ Examples
 .. list-table::
     :class: borderless
 
-    * - :doc:`example1` demonstrates different features of acoular using measured data from a wind tunnel experiment on trailing edge noise
+    * - :doc:`example1` demonstrates different features of Acoular using measured data from a wind tunnel experiment on trailing edge noise
         
     * - :doc:`example2` demonstrates a simple approach to beamforming on a rotating source
 
