@@ -33,7 +33,7 @@ from __future__ import print_function, division
 from numpy import array, ones, hanning, hamming, bartlett, blackman, invert, \
 dot, newaxis, zeros, empty, fft, float32, float64, complex64, linalg, where, \
 searchsorted, pi, multiply, sign, diag, arange, sqrt, exp, log10, int,\
-reshape, hstack, vstack, eye, tril, size, clip, tile, flipud, fliplr, round, delete, \
+reshape, hstack, vstack, eye, tril, size, clip, tile, round, delete, \
 absolute, argsort, sort, sum, hsplit, fill_diagonal, zeros_like
 
 from sklearn.linear_model import LassoLars, LassoLarsCV, LassoLarsIC,\
@@ -1711,12 +1711,18 @@ class BeamformerGIB(BeamformerEig):  #BeamformerEig #BeamformerBase
     #: eps - Regularization parameter for Suzuki algorithm
     #: defaults to 0.05. 
     eps_perc =  Float(0.05,desc="regularization parameter")
-        
+
+    # This feature is not fully supported may be changed in the next release 
+    # First eigenvalue to consider. Defaults to 0.
+    m = Int(0,
+                      desc = "First eigenvalue to consider")
+    
+    
     # internal identifier++++++++++++++++++++++++++++++++++++++++++++++++++
     digest = Property( 
         depends_on = ['mpos.digest', 'grid.digest', 'freq_data.digest', 'c', \
             'alpha', 'method', 'max_iter', 'env.digest',  'unit_mult', 'eps_perc',\
-            'pnorm', 'beta','n'], 
+            'pnorm', 'beta','n', 'm'], 
         )
 
     traits_view = View(
@@ -1775,7 +1781,8 @@ class BeamformerGIB(BeamformerEig):  #BeamformerEig #BeamformerBase
         """        
         # prepare calculation
         kj = 2j*pi*self.freq_data.fftfreq()/self.c #wavebnumber
-        n = int(self.n)                            #number of eigenvalues
+        n = int(self.n)  
+        m = int(self.m)                             #number of eigenvalues
         numchannels = self.freq_data.numchannels   #number of channels
         r0 = self.r0                                
         rm = self.rm
@@ -1792,13 +1799,14 @@ class BeamformerGIB(BeamformerEig):  #BeamformerEig #BeamformerBase
                 #eigenvalues and vectors               
                 csm = array(self.freq_data.csm[i], dtype='complex128',copy=1)
                 eva,eve=eigh(csm)
-                eva = flipud(sort(eva))         
-                eve = fliplr(eve[:, eva.argsort()[::-1]]) 
+                eva = eva[::-1]
+                eve = eve[:, ::-1] 
                 eva[eva < max(eva)/1e12] = 0 #set small values zo 0, lowers numerical errors in simulated data
                 #init sources    
-                qi=zeros([n,numpoints], dtype='complex128')
+                qi=zeros([n+m,numpoints], dtype='complex128')
                 #Select the number of coherent modes to be processed referring to the eigenvalue distribution.
-                for s in arange(n):        
+                #for s in arange(n):  
+                for s in list(range(m,n+m)): 
                     #Generate the corresponding eigenmodes
                     emode=array(sqrt(eva[s])*eve[:,s], dtype='complex128')
                     # choose method for computation
@@ -1822,7 +1830,7 @@ class BeamformerGIB(BeamformerEig):  #BeamformerEig #BeamformerBase
                                 idx = argsort(abs(qi[s,locpoints]))[::-1]   
                                 #print(it, leftpoints, locpoints, idx )
                                 locpoints= delete(locpoints,[idx[leftpoints::]])             
-                                qix=zeros([n,leftpoints], dtype='complex128')                      
+                                qix=zeros([n+m,leftpoints], dtype='complex128')                      
                                 qix[s,:]=qi[s,locpoints]
                                 #calc weights for next iteration 
                                 weights=diag(absolute(qix[s,:])**(2-self.pnorm))    
@@ -1862,11 +1870,12 @@ class BeamformerGIB(BeamformerEig):  #BeamformerEig #BeamformerBase
                             qi_real,qi_imag = hsplit(x/unit, 2) 
                         else:
                             model.fit(AB,R)
-                            qi_real,qi_imag = hsplit(model.coef_[:]/unit, 2)                       
+                            qi_real,qi_imag = hsplit(model.coef_[:]/unit, 2)
+                        #print(s,qi.size)    
                         qi[s,locpoints] = qi_real+qi_imag*1j
                 #Generate source maps of all selected eigenmodes, and superpose source intensity for each source type.
                 ac[i] = zeros([1,numpoints])
-                ac[i,locpoints] = sum(absolute(qi[:,locpoints]),axis=0)
+                ac[i,locpoints] = sum(absolute(qi[:,locpoints])**2,axis=0)
                 fr[i] = True    
 
 def L_p ( x ):
