@@ -8,13 +8,13 @@ uses measured data in file example_data.h5
 calibration in file example_calib.xml
 microphone geometry in array_56.xml (part of acoular)
 
-Copyright (c) 2006-2017 The Acoular developers.
+Copyright (c) 2006-2018 The Acoular developers.
 All rights reserved.
 """
 
 # imports from acoular
 import acoular
-from acoular import L_p, Calib, MicGeom, EigSpectra, \
+from acoular import L_p, Calib, MicGeom, PowerSpectra, \
 RectGrid, BeamformerBase, BeamformerEig, BeamformerOrth, BeamformerCleansc, \
 MaskedTimeSamples, FiltFiltOctave, BeamformerTimeSq, TimeAverage, \
 TimeCache, BeamformerTime, TimePower, BeamformerCMF, \
@@ -24,7 +24,7 @@ BeamformerFunctional
 # other imports
 from numpy import zeros
 from os import path
-from pylab import figure, subplot, imshow, show, colorbar, title
+from pylab import figure, subplot, imshow, show, colorbar, title, tight_layout
 
 # files
 datafile = 'example_data.h5'
@@ -71,10 +71,10 @@ g = RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=0.68,
 # eigenvalues and eigenvectors, if only the matrix is needed then class 
 # PowerSpectra can be used instead
 #===============================================================================
-f = EigSpectra(time_data=t1, 
+f = PowerSpectra(time_data=t1, 
                window='Hanning', overlap='50%', block_size=128, #FFT-parameters
-               ind_low=7, ind_high=15) #to save computational effort, only
-               # frequencies with index 1-30 are used
+               ind_low=8, ind_high=16) #to save computational effort, only
+               # frequencies with indices 8..15 are used
 
 
 #===============================================================================
@@ -90,13 +90,13 @@ bs = BeamformerCleansc(freq_data=f, grid=g, mpos=m, r_diag=True, c=346.04)
 bcmf = BeamformerCMF(freq_data=f, grid=g, mpos=m, c=346.04, \
     method='LassoLarsBIC')
 bl = BeamformerClean(beamformer=bb, n_iter=100)
-bf = BeamformerFunctional(freq_data=f, grid=g, mpos=m, r_diag=True, c=346.04, \
+bf = BeamformerFunctional(freq_data=f, grid=g, mpos=m, r_diag=False, c=346.04, \
     gamma=4)
 
 #===============================================================================
 # plot result maps for different beamformers in frequency domain
 #===============================================================================
-figure(1)
+figure(1,(10,6))
 i1 = 1 #no of subplot
 for b in (bb, bc, be, bm, bl, bo, bs, bd, bcmf, bf):
     subplot(3,4,i1)
@@ -133,7 +133,7 @@ cachts = TimeCache( source = avgts) # cache to prevent recalculation
 i2 = 2 # no of figure
 for b in (cacht, cachts):
     # first, plot time-dependent result (block-wise)
-    figure(i2)
+    figure(i2,(7,7))
     i2 += 1
     res = zeros(g.size) # init accumulator for average
     i3 = 1 # no of subplot
@@ -143,18 +143,21 @@ for b in (cacht, cachts):
         res += r[0] # average accum.
         map = r[0].reshape(g.shape)
         mx = L_p(map.max())
-        imshow(L_p(map.T), vmax=mx, vmin=mx-15, 
+        imshow(L_p(map.T), vmax=mx, vmin=mx-15, origin='lower',
                interpolation='nearest', extent=g.extend())
         title('%i' % ((i3-1)*1024))
     res /= i3-1 # average
+    tight_layout()
     # second, plot overall result (average over all blocks)
     figure(1)
     subplot(3,4,i1)
     i1 += 1
     map = res.reshape(g.shape)
     mx = L_p(map.max())
-    imshow(L_p(map.T), vmax=mx, vmin=mx-15, 
+    imshow(L_p(map.T), vmax=mx, vmin=mx-15, origin='lower',
            interpolation='nearest', extent=g.extend())
     colorbar()
     title(('BeamformerTime','BeamformerTimeSq')[i2-3])
-show()
+tight_layout()
+# only display result on screen if this script is run directly
+if __name__ == '__main__': show()

@@ -13,20 +13,20 @@ calibration in file example_calib.xml
 microphone geometry in array_56.xml (part of acoular)
 
 
-Copyright (c) 2006-2017 The Acoular developers.
+Copyright (c) 2006-2018 The Acoular developers.
 All rights reserved.
 """
 
 # imports from acoular
 import acoular
-from acoular import L_p, Calib, MicGeom, EigSpectra, \
+from acoular import L_p, Calib, MicGeom, PowerSpectra, \
 RectGrid3D, BeamformerBase, BeamformerEig, BeamformerOrth, BeamformerCleansc, \
 MaskedTimeSamples, FiltFiltOctave, BeamformerTimeSq, TimeAverage, \
 TimeCache, BeamformerTime, TimePower, \
 BeamformerCapon, BeamformerMusic, BeamformerDamas
 # other imports
 from os import path
-from pylab import figure, subplot, imshow, show, colorbar, title
+from pylab import figure, subplot, imshow, show, colorbar, title, tight_layout
 from pickle import dump
 
 # files
@@ -75,9 +75,9 @@ g = RectGrid3D(x_min=-0.6, x_max=+0.0, y_min=0.0, y_max=0.0, \
 # eigenvalues and eigenvectors, if only the matrix is needed then class 
 # PowerSpectra can be used instead
 #===============================================================================
-f = EigSpectra(time_data=t1, 
+f = PowerSpectra(time_data=t1, 
                window='Hanning', overlap='50%', block_size=128, #FFT-parameters
-               ind_low=1, ind_high=15) #to save computational effort, only
+               ind_low=8, ind_high=16) #to save computational effort, only
                # frequencies with index 1-30 are used
 
 
@@ -129,7 +129,7 @@ fi.close()
 #===============================================================================
 # plot result maps for different beamformers in frequency domain
 #===============================================================================
-figure(1)
+figure(1,(10,6))
 i1 = 1 #no of subplot
 for b in all_bf:
     subplot(3,4,i1)
@@ -141,4 +141,7 @@ for b in all_bf:
            origin='lower')
     colorbar()
     title(b.__class__.__name__+'\n '+b.steer, size=10)
-show()
+
+tight_layout()
+# only display result on screen if this script is run directly
+if __name__ == '__main__': show()

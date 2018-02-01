@@ -10,19 +10,19 @@ calibration in file example_calib.xml
 microphone geometry in array_56.xml (part of acoular)
 
 
-Copyright (c) 2006-2017 The Acoular developers.
+Copyright (c) 2006-2018 The Acoular developers.
 All rights reserved.
 """
 from __future__ import print_function
 
 # imports from acoular
 import acoular
-from acoular import L_p, Calib, MicGeom, EigSpectra, \
+from acoular import L_p, Calib, MicGeom, PowerSpectra, \
 RectGrid, TimeSamples, BeamformerCMF
 
 # other imports
 from os import path
-from pylab import figure, subplot, imshow, show, colorbar, title
+from pylab import figure, subplot, imshow, show, colorbar, title, tight_layout
 
 # files
 datafile = 'example_data.h5'
@@ -64,7 +64,7 @@ g = RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=0.68,
 # eigenvalues and eigenvectors, if only the matrix is needed then class 
 # PowerSpectra can be used instead
 #===============================================================================
-f = EigSpectra(time_data=t1, 
+f = PowerSpectra(time_data=t1, 
                window='Hanning', overlap='50%', block_size=256, #FFT-parameters
                ind_low=15, ind_high=31) #to save computational effort, only
                # frequencies with index 15-31 are used
@@ -77,7 +77,7 @@ b = BeamformerCMF(freq_data=f, grid=g, mpos=m, c=346.04, alpha=1e-8)
 #===============================================================================
 # plot result maps for different beamformers in frequency domain
 #===============================================================================
-figure(1) #no of figure
+figure(1,(7,7)) #no of figure
 i1 = 1 #no of subplot
 from time import time
 for method in ('LassoLars', 'LassoLarsBIC', \
@@ -89,10 +89,12 @@ for method in ('LassoLars', 'LassoLarsBIC', \
     map = b.synthetic(cfreq,1)
     print(time()-ti)
     mx = L_p(map.max())
-    imshow(L_p(map.T), vmax=mx, vmin=mx-15, 
+    imshow(L_p(map.T), vmax=mx, vmin=mx-15,  origin='lower',
            interpolation='nearest', extent=g.extend())
     colorbar()
     title(b.method)
 
+tight_layout()
+# only display result on screen if this script is run directly
+if __name__ == '__main__': show()
 
-show()

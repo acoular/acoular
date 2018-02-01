@@ -40,7 +40,7 @@ from sklearn.linear_model import LassoLars, LassoLarsCV, LassoLarsIC,\
 OrthogonalMatchingPursuit, ElasticNet, OrthogonalMatchingPursuitCV, Lasso
 
 from scipy.optimize import nnls, linprog
-from scipy.linalg import inv, eigh, eigvals
+from scipy.linalg import inv, eigh, eigvals, fractional_matrix_power
 from warnings import warn
 
 import tables
@@ -51,13 +51,15 @@ cached_property, on_trait_change, property_depends_on
 
 from traitsui.api import View, Item
 from traitsui.menu import OKCancelButtons
+
 from .fastFuncs import beamformerFreq, transfer, calcPointSpreadFunction, damasSolverGaussSeidel
+
 from .h5cache import H5cache
 from .internal import digest
 from .grids import Grid
 from .microphones import MicGeom
 from .environments import Environment
-from .spectra import PowerSpectra
+from .spectra import PowerSpectra, _precision
 
 def steerVecTranslation(steer):
     """ 
@@ -133,6 +135,10 @@ class BeamformerBase( HasPrivateTraits ):
     #: Returns a (number of frequencies, number of gridpoints) array of floats.
     result = Property(
         desc="beamforming result")
+    
+    #: Floating point precision of property result. Corresponding to numpy dtypes. Default = 64 Bit.
+    precision = Trait('float64', 'float32',
+            desc="precision (32/64 Bit) of result, corresponding to numpy dtypes")
         
     #: Sound travel distances from microphone array center to grid 
     #: points (readonly).
@@ -147,7 +153,7 @@ class BeamformerBase( HasPrivateTraits ):
     # internal identifier
     digest = Property( 
         depends_on = ['mpos.digest', 'grid.digest', 'freq_data.digest', 'c', \
-            'r_diag', 'env.digest', 'r_diag_norm', 'steer'], 
+            'r_diag', 'env.digest', 'r_diag_norm', 'steer', 'precision'], 
         )
 
     # internal identifier
@@ -199,19 +205,18 @@ class BeamformerBase( HasPrivateTraits ):
                 raise ValueError("%i channels do not fit %i mics" % \
                     (numchannels, self.mpos.num_mics))
             numfreq = self.freq_data.fftfreq().shape[0]# block_size/2 + 1
+            precisionTuple = _precision(self.precision)
             if self.cached:
                 H5cache.get_cache( self, self.freq_data.basename)
                 if not name in self.h5f.root:
                     group = self.h5f.create_group(self.h5f.root, name)
                     shape = (numfreq, self.grid.size)
-                    atom = tables.Float32Atom()
+                    atom = precisionTuple[3]()
                     filters = tables.Filters(complevel=5, complib='blosc')
-                    ac = self.h5f.create_carray(group, 'result', atom, shape, 
-                                                filters=filters)
+                    ac = self.h5f.create_carray(group, 'result', atom, shape, filters=filters)
                     shape = (numfreq, )
                     atom = tables.BoolAtom()
-                    fr = self.h5f.create_carray(group, 'freqs', atom, shape,
-                                                filters=filters)
+                    fr = self.h5f.create_carray(group, 'freqs', atom, shape, filters=filters)
                 else:
                     ac = self.h5f.get_node('/'+name, 'result')
                     fr = self.h5f.get_node('/'+name, 'freqs')
@@ -219,8 +224,8 @@ class BeamformerBase( HasPrivateTraits ):
                     self.calc(ac, fr)                  
                     self.h5f.flush()
             else:
-                ac = zeros((numfreq, self.grid.size), dtype=float32)
-                fr = zeros(numfreq, dtype=int)
+                ac = zeros((numfreq, self.grid.size), dtype=self.precision)
+                fr = zeros(numfreq, dtype='int64')
                 self.calc(ac,fr)
         return ac
         
@@ -271,7 +276,7 @@ class BeamformerBase( HasPrivateTraits ):
             if not fr[i]:
                 csm = array(self.freq_data.csm[i][newaxis], dtype='complex128')
                 kji = kj[i, newaxis]
-                beamformerOutput = beamformerFreq(False, steerVecFormulation, self.r_diag, normFactor, (self.r0, self.rm, kji, csm))
+                beamformerOutput = beamformerFreq(False, steerVecFormulation, self.r_diag, normFactor, (self.r0, self.rm, kji, csm))[0]
                 if self.r_diag:  # set (unphysical) negative output values to 0
                     indNegSign = sign(beamformerOutput) < 0
                     beamformerOutput[indNegSign] = 0.0
@@ -408,6 +413,10 @@ class BeamformerFunctional( BeamformerBase ):
         depends_on = ['mpos.digest', 'grid.digest', 'freq_data.digest', 'c', \
             'r_diag', 'env.digest', 'gamma', 'steer'], 
         )
+    
+    #: Functional Beamforming is only well defined for full CSM
+    r_diag = Enum(False, 
+                  desc="False, as Functional Beamformer is only well defined for the full CSM")
 
     traits_view = View(
         [
@@ -453,21 +462,34 @@ class BeamformerFunctional( BeamformerBase ):
         """   
         kj = 2j*pi*self.freq_data.fftfreq()/self.c
         steerVecFormulation = steerVecTranslation(self.steer)
-        nMics = float(self.freq_data.numchannels)
-        if self.r_diag:
-            normFactor = sqrt(1.0 / (nMics * nMics - nMics))
-        elif not self.r_diag:
-            normFactor = 1.0 / nMics
+        normFactor = self.sig_loss_norm()
         for i in self.freq_data.indices:        
             if not fr[i]:
-                eva = array(self.freq_data.eva[i][newaxis], dtype='float64') ** (1.0 / self.gamma)
-                eve = array(self.freq_data.eve[i][newaxis], dtype='complex128')
                 kji = kj[i, newaxis]
-                beamformerOutput = beamformerFreq(True, steerVecFormulation, self.r_diag, normFactor * nMics**2, (self.r0, self.rm, kji, eva, eve))  # takes all EigVal into account
-                if self.r_diag:  # set (unphysical) negative output values to 0
+                if self.r_diag:
+                    # This case is not used at the moment (see Trait r_diag)
+#==============================================================================
+#                     One cannot use spectral decomposition when diagonal of csm is removed,
+#                     as the resulting modified eigenvectors are not orthogonal to each other anymore.
+#                     Therefor potentiating cannot be applied only to the eigenvalues.
+#                     --> To avoid this the root of the csm (removed diag) is calculated directly.
+#                     WATCH OUT: This doesn't really produce good results.
+#==============================================================================
+                    csm = self.freq_data.csm[i]
+                    fill_diagonal(csm, 0)
+                    csmRoot = fractional_matrix_power(csm, 1.0 / self.gamma)
+                    beamformerOutput, steerNorm = beamformerFreq(False, steerVecFormulation, False, 1.0, (self.r0, self.rm, kji, csmRoot[newaxis]))
+                    beamformerOutput /= steerNorm  # take normalized steering vec
+                    
+                    # set (unphysical) negative output values to 0
                     indNegSign = sign(beamformerOutput) < 0
                     beamformerOutput[indNegSign] = 0.0
-                ac[i] = (beamformerOutput ** self.gamma) * normFactor
+                else:
+                    eva = array(self.freq_data.eva[i][newaxis], dtype='float64') ** (1.0 / self.gamma)
+                    eve = array(self.freq_data.eve[i][newaxis], dtype='complex128')
+                    beamformerOutput, steerNorm = beamformerFreq(True, steerVecFormulation, self.r_diag, 1.0, (self.r0, self.rm, kji, eva, eve))  # takes all EigVal into account
+                    beamformerOutput /= steerNorm  # take normalized steering vec
+                ac[i] = (beamformerOutput ** self.gamma) * steerNorm * normFactor  # the normalization must be done outside the beamformer
                 fr[i] = True
             
 class BeamformerCapon( BeamformerBase ):
@@ -525,7 +547,7 @@ class BeamformerCapon( BeamformerBase ):
             if not fr[i]:
                 csm = array(linalg.inv(array(self.freq_data.csm[i], dtype='complex128')), order='C')[newaxis]
                 kji = kj[i, newaxis]
-                beamformerOutput = beamformerFreq(False, steerVecFormulation, self.r_diag, normFactor, (self.r0, self.rm, kji, csm))
+                beamformerOutput = beamformerFreq(False, steerVecFormulation, self.r_diag, normFactor, (self.r0, self.rm, kji, csm))[0]
                 ac[i] = 1.0 / beamformerOutput
                 fr[i] = True
 
@@ -616,7 +638,7 @@ class BeamformerEig( BeamformerBase ):
                 eva = array(self.freq_data.eva[i][newaxis], dtype='float64')
                 eve = array(self.freq_data.eve[i][newaxis], dtype='complex128')
                 kji = kj[i, newaxis]
-                beamformerOutput = beamformerFreq(True, steerVecFormulation, self.r_diag, normFactor, (self.r0, self.rm, kji, eva[:, na:na+1], eve[:, :, na:na+1]))
+                beamformerOutput = beamformerFreq(True, steerVecFormulation, self.r_diag, normFactor, (self.r0, self.rm, kji, eva[:, na:na+1], eve[:, :, na:na+1]))[0]
                 if self.r_diag:  # set (unphysical) negative output values to 0
                     indNegSign = sign(beamformerOutput) < 0
                     beamformerOutput[indNegSign] = 0
@@ -686,7 +708,7 @@ class BeamformerMusic( BeamformerEig ):
                 eva = array(self.freq_data.eva[i][newaxis], dtype='float64')
                 eve = array(self.freq_data.eve[i][newaxis], dtype='complex128')
                 kji = kj[i, newaxis]
-                beamformerOutput = beamformerFreq(True, steerVecFormulation, self.r_diag, normFactor, (self.r0, self.rm, kji, eva[:, :n], eve[:, :, :n]))  # [:n] takes all values element of [0, n[
+                beamformerOutput = beamformerFreq(True, steerVecFormulation, self.r_diag, normFactor, (self.r0, self.rm, kji, eva[:, :n], eve[:, :, :n]))[0]  # [:n] takes all values element of [0, n[
                 ac[i] = 4e-10*beamformerOutput.min() / beamformerOutput
                 fr[i] = True
 
@@ -752,13 +774,17 @@ class PointSpreadFunction (HasPrivateTraits):
     #: The actual point spread function.
     psf = Property(
         desc="point spread function")
+    
+    #: Floating point precision of property psf. Corresponding to numpy dtypes. Default = 64 Bit.
+    precision = Trait('float64', 'float32',
+            desc="precision (32/64 Bit) of result, corresponding to numpy dtypes")
 
     # hdf5 cache file
     h5f = Instance(tables.File, transient = True)
     
     # internal identifier
     digest = Property( depends_on = ['mpos.digest', 'grid.digest', 'c', \
-             'env.digest', 'steer'], cached = True)
+             'env.digest', 'steer', 'precision'], cached = True)
 
     @cached_property
     def _get_digest( self ):
@@ -784,6 +810,7 @@ class PointSpreadFunction (HasPrivateTraits):
         name = 'psf' + self.digest
         H5cache.get_cache( self, name)
         fr = ('Hz_%.2f' % self.freq).replace('.', '_')
+        precisionTuple = _precision(self.precision)
         
         # get the cached data, or, if non-existing, create new structure
         if not fr in self.h5f.root:
@@ -791,13 +818,11 @@ class PointSpreadFunction (HasPrivateTraits):
                 raise ValueError('Cannot calculate missing PSF (freq %s) in \'readonly\' mode.' % fr)
             
             group = self.h5f.create_group(self.h5f.root, fr) 
-            
             shape = (gs, gs)
-            atom = tables.Float64Atom()
+            atom = precisionTuple[3]()
             filters = tables.Filters(complevel=5, complib='blosc')
             ac = self.h5f.create_carray(group, 'result', atom, shape,
                                         filters=filters)
-            
             shape = (gs,)
             atom = tables.BoolAtom()
             gp = self.h5f.create_carray(group, 'gridpts', atom, shape,
@@ -829,13 +854,13 @@ class PointSpreadFunction (HasPrivateTraits):
             steerVecFormulation = steerVecTranslation(self.steer)
             if self.calcmode == 'single':
                 for ind in g_ind_calc:
-                    ac[:,ind] = calcPointSpreadFunction(steerVecFormulation, (r0, rm, kj, [ind]))[0,:,0]
+                    ac[:,ind] = calcPointSpreadFunction(steerVecFormulation, (r0, rm, kj, [ind]), self.precision)[0,:,0]
                     gp[ind] = True
             elif self.calcmode == 'full':
                 gp[:] = True
-                ac[:] = calcPointSpreadFunction(steerVecFormulation, (r0, rm, kj, arange(r0.shape[0])))[0,:,:]
+                ac[:] = calcPointSpreadFunction(steerVecFormulation, (r0, rm, kj, arange(r0.shape[0])), self.precision)[0,:,:]
             else: # 'block'
-                hh = calcPointSpreadFunction(steerVecFormulation, (r0, rm, kj, g_ind_calc))
+                hh = calcPointSpreadFunction(steerVecFormulation, (r0, rm, kj, g_ind_calc), self.precision)
                 indh = 0
                 for ind in g_ind_calc:
                     gp[ind] = True
@@ -880,6 +905,13 @@ class BeamformerDamas (BeamformerBase):
     #: Type of steering vectors, 
     #: is set automatically.
     steer =  Delegate('beamformer')
+    
+    #: Floating point precision of result, is set automatically.
+    precision = Delegate('beamformer')
+    
+    #: The floating-number-precision of the PSFs. Default is 64 bit.
+    psf_precision = Trait('float64', 'float32', 
+                          desc="precision of PSF")
 
     #: Number of iterations, defaults to 100.
     n_iter = Int(100, 
@@ -896,7 +928,7 @@ class BeamformerDamas (BeamformerBase):
     
     # internal identifier
     digest = Property( 
-        depends_on = ['beamformer.digest', 'n_iter', 'damp'], 
+        depends_on = ['beamformer.digest', 'n_iter', 'damp', 'psf_precision'], 
         )
 
     # internal identifier
@@ -953,11 +985,11 @@ class BeamformerDamas (BeamformerBase):
         freqs = self.freq_data.fftfreq()
         p = PointSpreadFunction(mpos=self.mpos, grid=self.grid, 
                                 c=self.c, env=self.env, steer=self.steer,
-                                calcmode=self.calcmode)
+                                calcmode=self.calcmode, precision=self.psf_precision)
         for i in self.freq_data.indices:        
             if not fr[i]:
                 p.freq = freqs[i]
-                y = array(self.beamformer.result[i], dtype=float64)
+                y = array(self.beamformer.result[i])
                 x = y.copy()
                 psf = p.psf[:]
                 damasSolverGaussSeidel(psf, y, self.n_iter, self.damp, x)
@@ -1061,11 +1093,11 @@ class BeamformerDamasPlus (BeamformerDamas):
         freqs = self.freq_data.fftfreq()
         p = PointSpreadFunction(mpos=self.mpos, grid=self.grid, 
                                 c=self.c, env=self.env, steer=self.steer,
-                                calcmode=self.calcmode)
+                                calcmode=self.calcmode, precision=self.psf_precision)
         for i in self.freq_data.indices:        
             if not fr[i]:
                 p.freq = freqs[i]
-                y = array(self.beamformer.result[i], dtype=float64) * unit
+                y = self.beamformer.result[i] * unit
 
                 psf = p.psf[:]
 
@@ -1307,7 +1339,7 @@ class BeamformerCleansc( BeamformerBase ):
             if not fr[i]:
                 kj = kjall[i, newaxis]
                 csm = array(self.freq_data.csm[i][newaxis], dtype='complex128', copy=1)
-                h = beamformerFreq(False, steerVecFormulation, self.r_diag, normFactor, (self.r0, self.rm, kj, csm))
+                h = beamformerFreq(False, steerVecFormulation, self.r_diag, normFactor, (self.r0, self.rm, kj, csm))[0]
 
                 # CLEANSC Iteration
                 result *= 0.0
@@ -1336,7 +1368,7 @@ class BeamformerCleansc( BeamformerBase ):
                         hh = (D1+H*wmax)/sqrt(1+dot(ww, H))
                     hh = hh[:, newaxis]
                     csm1 = hmax*(hh*hh.conj().T)[newaxis, :, :]
-                    h1 = beamformerFreq(True, steerVecFormulation, self.r_diag, normFactor, (self.r0, self.rm, kj, array((hmax, ))[newaxis, :], hh[newaxis, :].conjugate()))
+                    h1 = beamformerFreq(True, steerVecFormulation, self.r_diag, normFactor, (self.r0, self.rm, kj, array((hmax, ))[newaxis, :], hh[newaxis, :].conjugate()))[0]
                     h -= self.damp * h1
                     csm -= self.damp * csm1.transpose(0,2,1)
                 ac[i] = result
@@ -1369,6 +1401,13 @@ class BeamformerClean (BeamformerBase):
     # flag, if true (default), the main diagonal is removed before beamforming
     #r_diag =  Delegate('beamformer')
     
+    #: Floating point precision of result, is set automatically.
+    precision = Delegate('beamformer')
+    
+    #: The floating-number-precision of the PSFs. Default is 64 bit.
+    psf_precision = Trait('float64', 'float32', 
+                     desc="precision of PSF.")
+    
     # iteration damping factor
     # defaults to 0.6
     damp = Range(0.01, 1.0, 0.6, 
@@ -1384,7 +1423,7 @@ class BeamformerClean (BeamformerBase):
                      
     # internal identifier
     digest = Property( 
-        depends_on = ['beamformer.digest', 'n_iter', 'damp'], 
+        depends_on = ['beamformer.digest', 'n_iter', 'damp', 'psf_precision'], 
         )
 
     # internal identifier
@@ -1445,14 +1484,13 @@ class BeamformerClean (BeamformerBase):
             print('Warning: calcmode = \'full\', slow CLEAN performance. Better use \'block\' or \'single\'.')
         p = PointSpreadFunction(mpos=self.mpos, grid=self.grid, 
                                 c=self.c, env=self.env, steer=self.steer,
-                                calcmode=self.calcmode)
-        
+                                calcmode=self.calcmode, precision=self.psf_precision)
         for i in self.freq_data.indices:        
             if not fr[i]:
                 
                 p.freq = freqs[i]
-                dirty = array(self.beamformer.result[i], dtype=float64)
-                clean = zeros(gs, 'd')
+                dirty = self.beamformer.result[i]
+                clean = zeros(gs, dtype=dirty.dtype)
                 
                 i_iter = 0
                 flag = True

@@ -6,7 +6,7 @@ demonstrates use of acoular for a point source moving on a circle trajectory
 
 uses synthesized data
 
-Copyright (c) 2006-2017 The Acoular developers.
+Copyright (c) 2006-2018 The Acoular developers.
 All rights reserved.
 """
 from __future__ import print_function
@@ -27,7 +27,7 @@ TimeCache, FiltOctave, BeamformerTime, TimePower, IntegratorSectorTime, \
 PointSource, MovingPointSource, SineGenerator, WNoiseGenerator, Mixer, WriteWAV
 
 from pylab import subplot, imshow, show, colorbar, plot, transpose, figure, \
-psd, axis, xlim, ylim, title, suptitle
+psd, axis, xlim, ylim, title, tight_layout, text
 
 #===============================================================================
 # some important definitions
@@ -111,8 +111,8 @@ avgt = TimeAverage(source=bt, naverage=int(sfreq*tmax/16)) # 16 single images
 cacht = TimeCache(source=avgt) # cache to prevent recalculation
 map2 = zeros(g.shape) # accumulator for average
 # plot single frames
-figure(1)
-i = 0
+figure(1,(8,7))
+i = 1
 for res in cacht.result(1):
     res0 = res[0].reshape(g.shape)
     map2 += res0 # average
@@ -123,7 +123,12 @@ for res in cacht.result(1):
         extent=g.extend(), origin='lower')
     colorbar()
 map2 /= i
-suptitle('fixed focus')
+
+subplot(4,4,1)
+text(0.4,0.25,'fixed\nfocus', fontsize=15, ha='center')
+axis('off')
+tight_layout()
+
 
 #===============================================================================
 # moving focus time domain beamforming
@@ -140,8 +145,8 @@ avgts = TimeAverage(source=bts, naverage=int(sfreq*tmax/16)) # 16 single images
 cachts = TimeCache(source=avgts) # cache to prevent recalculation
 map3 = zeros(g1.shape) # accumulator for average
 # plot single frames
-figure(2)
-i = 0
+figure(2,(8,7))
+i = 1
 for res in cachts.result(1):
     res0 = res[0].reshape(g1.shape)
     map3 += res0 # average
@@ -152,13 +157,17 @@ for res in cachts.result(1):
         extent=g1.extend(), origin='lower')
     colorbar()
 map3 /= i
-suptitle('moving focus')
+
+subplot(4,4,1)
+text(0.4,0.25,'moving\nfocus', fontsize=15, ha='center')
+axis('off')
+tight_layout()
 
 #===============================================================================
 # compare all three results
 #===============================================================================
 
-figure(3)
+figure(3,(10,3))
 subplot(1,3,1)
 mx = L_p(map1.max())
 imshow(L_p(transpose(map1)), vmax=mx, vmin=mx-10, interpolation='nearest',\
@@ -178,7 +187,10 @@ imshow(L_p(transpose(map3)), vmax=mx, vmin=mx-10, interpolation='nearest',\
 colorbar()
 title('time domain\n moving focus')
 
+tight_layout()
 
-show()
+# only display result on screen if this script is run directly
+if __name__ == '__main__': show()
+
 
 

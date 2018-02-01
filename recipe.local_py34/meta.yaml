@@ -1,6 +1,6 @@
 package:
   name: acoular
-  version: "17.11"
+  version: "18.01"
 
 source:
   path: ../../acoular
@@ -38,7 +38,7 @@ requirements:
 
   run:
     - python >=3.4,<3.5
-    - pyqt >=4.10,<5.6.0
+    - pyqt >=4.10
     - numpy >=1.10.2
     - numba >=0.30
     - scipy >=0.13

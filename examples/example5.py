@@ -11,14 +11,14 @@ calibration in file example_calib.xml
 microphone geometry in array_56.xml (part of acoular)
 
 
-Copyright (c) 2006-2017 The Acoular developers.
+Copyright (c) 2006-2018 The Acoular developers.
 All rights reserved.
 """
 
 # imports from acoular
 from acoular import L_p
 # other imports
-from pylab import figure, subplot, imshow, show, colorbar, title
+from pylab import figure, subplot, imshow, show, colorbar, title, tight_layout
 from pickle import load
 
 #octave band of interest
@@ -35,7 +35,7 @@ fi.close()
 #===============================================================================
 # plot result maps for different beamformers in frequency domain
 #===============================================================================
-figure(1)
+figure(1,(10,6))
 i1 = 1 #no of subplot
 for b in all_bf:
     subplot(3,4,i1)
@@ -48,5 +48,8 @@ for b in all_bf:
            origin='lower')
     colorbar()
     title(b.__class__.__name__+'\n '+b.steer, size=10)
-show()
+
+tight_layout()
+# only display result on screen if this script is run directly
+if __name__ == '__main__': show()
 

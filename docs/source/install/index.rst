@@ -53,6 +53,13 @@ If the installation has finished, you may try out Acoular by typing
 
     $ acoular_demo.py
 
+under Linux or Mac, and
+
+.. code-block:: python
+
+    > acoular_demo.exe
+
+under Windows respectively.
 After some seconds, this should produce two pictures (a 64 microphone arrangement and a beamforming map with three sources).
 
 Option 2: Windows with other Python distributions
@@ -63,7 +70,7 @@ If the installation has finished, you may try out Acoular by typing
 
 .. code-block:: python
 
-    $ acoular_demo.py
+    $ acoular_demo.exe
 
 After some seconds, this should produce two pictures (a 64 microphone arrangement and a beamforming map with three sources).
 
@@ -83,6 +90,13 @@ If the installation has finished, you may try out Acoular by typing
 
     $ acoular_demo.py
 
+under Linux or Mac, and
+
+.. code-block:: python
+
+    > acoular_demo.exe
+
+under Windows respectively.
 After some seconds, this should produce two pictures (a 64 microphone arrangement and a beamforming map with three sources).
 
 
