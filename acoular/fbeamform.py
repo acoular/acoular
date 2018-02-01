@@ -1712,7 +1712,8 @@ class BeamformerGIB(BeamformerEig):  #BeamformerEig #BeamformerBase
     #: defaults to 0.05. 
     eps_perc =  Float(0.05,desc="regularization parameter")
 
-    #: First eigenvalue to consider. Defaults to 0.
+    # This feature is not fully supported may be changed in the next release 
+    # First eigenvalue to consider. Defaults to 0.
     m = Int(0,
                       desc = "First eigenvalue to consider")
     
