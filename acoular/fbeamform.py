@@ -589,8 +589,12 @@ class BeamformerBase( HasPrivateTraits ):
                 h = res[ind]
         else:
             # fractional octave band
-            f1 = f*2.**(-0.5/num)
-            f2 = f*2.**(+0.5/num)
+            if isinstance(num,list):
+                f1=num[0]
+                f2=num[-1]
+            else:
+                f1 = f*2.**(-0.5/num)
+                f2 = f*2.**(+0.5/num)
             ind1 = searchsorted(freq, f1)
             ind2 = searchsorted(freq, f2)
             if ind1 == ind2:
