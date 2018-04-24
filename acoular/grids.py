@@ -19,6 +19,7 @@ from numpy import mgrid, s_, array, arange, isscalar, absolute
 from traits.api import HasPrivateTraits, Float, Property, CArray, Any, \
 property_depends_on, cached_property, on_trait_change
 from traits.trait_errors import TraitError
+from matplotlib.path import Path
 
 from .internal import digest
 
