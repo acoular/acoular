@@ -575,7 +575,7 @@ class BeamformerEig( BeamformerBase ):
     # internal identifier
     digest = Property( 
         depends_on = ['mpos.digest', 'grid.digest', 'freq_data.digest', 'c', \
-            'r_diag', 'env.digest', 'na', 'steer'], 
+            'r_diag', 'env.digest', 'n', 'steer'], 
         )
 
     traits_view = View(
