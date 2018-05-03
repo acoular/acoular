@@ -109,6 +109,9 @@ class SteeringVector( HasPrivateTraits ):
     transfer = Property(depends_on=['f', 'c', 'env.digest', 'grid.digest', 'mpos.digest'], 
                         desc = 'transfer matrix')
     
+    #: Steering vector of dimension [nFreq, nGrid, nMics], corresponding to transfer; read-only
+    steer_vector = Property(depends_on='digest', desc = 'steering vector')
+    
     # internal identifier
     digest = Property( 
         depends_on = ['f', 'c', 'steer_type', 'env.digest', 'grid.digest', 'mpos.digest'])
@@ -134,6 +137,13 @@ class SteeringVector( HasPrivateTraits ):
         trans = calcTransfer(self.r0, self.rm, array(self.k))
         return trans
     
+    @cached_property
+    def _get_steer_vector(self):
+        steer = zeros_like(self.transfer, 'complex128')
+        for indFreq in range(steer.shape[0]):
+            steer[indFreq, :, :] = self.calc_steer_vector(self.transfer[indFreq, :, :])
+        return steer
+    
     def _transfer_specific_gridpoint(self, ind):
         """
         Calculates the transfer function of ONE grid point. Is used in clean-sc
@@ -151,7 +161,7 @@ class SteeringVector( HasPrivateTraits ):
         trans = calcTransfer(self.r0[ind], self.rm[ind, :][newaxis], array(self.k))[:, 0, :]
         return trans
     
-    def steer_vector(self, a):
+    def calc_steer_vector(self, a):
         """
         Calculates the steering vector from a given transfer function a.
         See also :ref:`Sarradj, 2012<Sarradj2012>`.
@@ -1478,7 +1488,7 @@ class BeamformerCleansc( BeamformerBase ):
                     if  j > self.stopn and hmax > powers[j-self.stopn]:
                         break
                     trans = self.steer_obj._transfer_specific_gridpoint(xi_max)[cntFreq, :][newaxis]
-                    wmax = self.steer_obj.steer_vector(trans)[0] * sqrt(normFac)
+                    wmax = self.steer_obj.calc_steer_vector(trans)[0] * sqrt(normFac)
                     wmax = wmax.conj()  # as old code worked with conjugated csm..should be updated
                     hh = wmax.copy()
                     D1 = dot(csm[0].T - diag(diag(csm[0])), wmax)/hmax
