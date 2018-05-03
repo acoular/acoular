@@ -798,7 +798,6 @@ class PointSpreadFunction (HasPrivateTraits):
     def _get_rm ( self ):
         return self.env.r( self.c, self.grid.pos(), self.mpos.mpos)
 
-    @property_depends_on('digest, freq')
     def _get_psf ( self ):
         """
         This is the :attr:`psf` getter routine.
