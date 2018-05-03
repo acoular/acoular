@@ -93,7 +93,7 @@ bcmf = BeamformerCMF(freq_data=f, grid=g, mpos=m, c=346.04, \
 bl = BeamformerClean(beamformer=bb, n_iter=100)
 bf = BeamformerFunctional(freq_data=f, grid=g, mpos=m, r_diag=False, c=346.04, \
     gamma=4)
-bgib = BeamformerGIB(freq_data=f, grid=g, mpos=m, r_diag=True, c=346.04, n=15)
+bgib = BeamformerGIB(freq_data=f, grid=g, mpos=m, c=346.04,method= 'LassoLars', n=10)
 
 #===============================================================================
 # plot result maps for different beamformers in frequency domain
