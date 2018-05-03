@@ -19,7 +19,7 @@ RectGrid, BeamformerBase, BeamformerEig, BeamformerOrth, BeamformerCleansc, \
 MaskedTimeSamples, FiltFiltOctave, BeamformerTimeSq, TimeAverage, \
 TimeCache, BeamformerTime, TimePower, BeamformerCMF, \
 BeamformerCapon, BeamformerMusic, BeamformerDamas, BeamformerClean, \
-BeamformerFunctional
+BeamformerFunctional, BeamformerDamasPlus, BeamformerGIB
 
 # other imports
 from numpy import zeros
@@ -85,6 +85,7 @@ bc = BeamformerCapon(freq_data=f, grid=g, mpos=m, c=346.04, cached=False)
 be = BeamformerEig(freq_data=f, grid=g, mpos=m, r_diag=True, c=346.04, n=54)
 bm = BeamformerMusic(freq_data=f, grid=g, mpos=m, c=346.04, n=6)
 bd = BeamformerDamas(beamformer=bb, n_iter=100)
+bdp = BeamformerDamasPlus(beamformer=bb, n_iter=100)
 bo = BeamformerOrth(beamformer=be, eva_list=list(range(38,54)))
 bs = BeamformerCleansc(freq_data=f, grid=g, mpos=m, r_diag=True, c=346.04)
 bcmf = BeamformerCMF(freq_data=f, grid=g, mpos=m, c=346.04, \
@@ -92,14 +93,15 @@ bcmf = BeamformerCMF(freq_data=f, grid=g, mpos=m, c=346.04, \
 bl = BeamformerClean(beamformer=bb, n_iter=100)
 bf = BeamformerFunctional(freq_data=f, grid=g, mpos=m, r_diag=False, c=346.04, \
     gamma=4)
+bgib = BeamformerGIB(freq_data=f, grid=g, mpos=m, c=346.04,method= 'LassoLars', n=10)
 
 #===============================================================================
 # plot result maps for different beamformers in frequency domain
 #===============================================================================
 figure(1,(10,6))
 i1 = 1 #no of subplot
-for b in (bb, bc, be, bm, bl, bo, bs, bd, bcmf, bf):
-    subplot(3,4,i1)
+for b in (bb, bc, be, bm, bl, bo, bs, bd, bcmf, bf, bdp, bgib):
+    subplot(4,4,i1)
     i1 += 1
     map = b.synthetic(cfreq,1)
     mx = L_p(map.max())
@@ -150,7 +152,7 @@ for b in (cacht, cachts):
     tight_layout()
     # second, plot overall result (average over all blocks)
     figure(1)
-    subplot(3,4,i1)
+    subplot(4,4,i1)
     i1 += 1
     map = res.reshape(g.shape)
     mx = L_p(map.max())

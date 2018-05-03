@@ -2051,4 +2051,3 @@ def integrate(data, grid, sector):
         for i in range(data.shape[0]):
             h[i] = data[i].reshape(gshape)[ind].sum()
     return h
-
