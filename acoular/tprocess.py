@@ -10,6 +10,8 @@
 
     TimeInOut
     MaskedTimeInOut
+    SpatialInterpolator
+    SpatialInterpolatorConstantRotation
     Mixer
     TimePower
     TimeAverage
@@ -23,10 +25,16 @@
 
 # imports from other packages
 from six import next
-from numpy import array, empty, empty_like, pi, sin, sqrt, zeros, int16
+from numpy import array, empty, empty_like, pi, sin, sqrt, zeros, newaxis, unique, \
+int16, cross, isclose, zeros_like, dot, nan, concatenate, isnan, nansum, float64, \
+identity, argsort, interp, arange, append, linspace
+from numpy.linalg import norm
+from numpy.matlib import repmat
+from scipy.spatial import Delaunay
+from scipy.interpolate import LinearNDInterpolator
 from traits.api import Float, Int, CLong, \
 File, Property, Instance, Trait, Delegate, \
-cached_property, on_trait_change, List
+cached_property, on_trait_change, List, ListInt, CArray
 from traitsui.api import View, Item
 from traitsui.menu import OKCancelButtons
 from datetime import datetime
@@ -39,7 +47,9 @@ from warnings import warn
 # acoular imports
 from .internal import digest
 from .h5cache import H5cache, td_dir
-from .sources import SamplesGenerator
+from .sources import SamplesGenerator, MaskedTimeSamples
+from .environments import cartToCyl
+from .microphones import MicGeom
 
 
 class TimeInOut( SamplesGenerator ):
@@ -203,9 +213,376 @@ class MaskedTimeInOut ( TimeInOut ):
         else: # if no start/stop given, don't do the resorting thing
             for block in self.source.result(num):
                 yield block[:, self.channels]
+
+
+class SpatialInterpolator(SamplesGenerator):
+    """
+    Base class for spatial linear Interpolation of microphone data.
+    Gets samples from :attr:`source` and generates output via the 
+    generator :meth:`result`
+    """
+    #: :class:`~acoular.microphones.MicGeom` object that provides the real microphone locations.
+    mpos_real = Instance(MicGeom, 
+        desc="microphone geometry")
+    
+    #: :class:`~acoular.microphones.MicGeom` object that provides the virtual microphone locations.
+    mpos_virtual = Instance(MicGeom, 
+        desc="microphone geometry")
+    
+    #: Data source; :class:`~acoular.sources.SamplesGenerator` or derived object.
+    source = Instance(SamplesGenerator)
+    
+    #: Identifier of sub-arrays. E.g. if the array consists of two subarrays, then
+    #: ind_subarray=[0,0,0,0, ... ,1,1,1,1] would identify which entries of m.mpos
+    #: belong to the sub-arrays 0 and 1. The entries can be any Integers.
+    #: Default is [], which assumes that there are no sub-arrays included.
+    ind_subarray = ListInt()
+    
+    #: rtol for numpys isclose when comparing if all mics are on an plain or line 
+    #: via cross/dot-products
+    eps = Float(1e-4)
+    
+    #: Stores the output of :meth:`_reduced_interp_dim_core_func`; Read-Only
+    reduced_interp_dim = Property(depends_on=['mpos_real.digest', 'mpos_virtual.digest', 'ind_subarray', 'eps'])
+    
+    #: Sampling frequency of output signal, as given by :attr:`source`.
+    sample_freq = Delegate('source', 'sample_freq')
+    
+    #: Number of channels in output.
+    numchannels = Property()
+    
+    #: Number of samples in output, as given by :attr:`source`.
+    numsamples = Delegate('source', 'numsamples')
+    
+    # internal identifier
+    digest = Property(depends_on=['mpos_real.digest', 'mpos_virtual.digest', 'source.digest', 'ind_subarray', 'eps'])
+    
+    def _get_numchannels(self):
+        return self.mpos_virtual.num_mics
+    
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+    
+    @cached_property
+    def _get_reduced_interp_dim(self):
+        return self._reduced_interp_dim_core_func(self.mpos_real.mpos, self.mpos_virtual.mpos)
+    
+    def _reduced_interp_dim_core_func(self, mic, micVirt, basisVectors=[]):
+        """ 
+        Core functionality for getting the reduced interpolation dimensions.
+        
+        Parameters
+        ----------
+        mic : float[3, nPhysicalMics]
+            The mic positions of the physical (really existing) mics
+        micVirt : float[3, nVirtualMics]
+            The mic positions of the virtual mics
+        basisVectors : list of float[3]
+            If passed, the entries of basisVectors contain the basis vectors of
+            the new coordinate system. In this case, the code assumes rotational periodicity.
+        
+        Returns
+        -------
+        indCorOut : int64[nVirtualMics]
+            Array of indices, to which predefined subarrays (see SpatialInterpolator.ind_subarray) each virtual mic belongs. 
+        mesh : List[nSubarrays]
+            For each subarray (see unique entries of SpatialInterpolator.ind_subarray) a list is passed.
+            The items of these lists are dependent of the reduced interpolation dimension of each subarray.
+            If the subarray is 1D the list items are:
+                1. item : float64[nMicsInSpecificSubarray]
+                    Ordered positions of the real mics (of the subarray) on the new 1d axis, to be used as inputs for numpys interp.
+                2. item : int64[nMicsInSpecificSubarray]
+                    Indices identifying how the measured pressures must be evaluated, s.t. the entries of the previous item (see last line)
+                    correspond to their initial pressure values
+            If the subarray is 2D or 3d the list items are:
+                1. item : Delaunay mesh object
+                    Delauney mesh (see scipy.spatial.Delaunay) for the specific subarray
+                2. item : int64[nMicsInSpecificSubarray]
+                    same as 1d case, BUT with the difference, that here the rotational periodicy is handled, when constructing the mesh.
+                    Therefor the mesh could have more vertices than the actual subarray mics.
+        virtNewCoord : float64[3, nVirtualMics]
+            Projection of each virtual mic onto its new reduced coordinates.
+            If indeed a dimension reduction could be performed, the reduced dimensions are NaN. E.g. if a virtual mic
+            lies on a 1d subarray the items 1 and 2 of virtNewCoord[:, virtual mic] are Nan whereas item 0 contains the projection.
+            For rotational cases, the columns of virtNewCoord correspond to [phi, rho, z]
+        """
+
+        # check whether sub arrays are specified or not
+        if self.ind_subarray == []:  # no sub arrays
+            sub = zeros((mic.shape[1]), dtype='int64')
+            subUnique = [0]
+            nSubArrays = 1
+            self.ind_subarray = sub.tolist()
+            warn('No sub arrays were defined (see SpatialInterpolator.ind_subarray). This may lead to much worse performance.')
+        else:
+            sub = array(self.ind_subarray)
+            subUnique = unique(sub)
+            if not len(sub) == mic.shape[1]:
+                raise Exception('mpos_real.mpos and ind_subarray must correspond in dimension!')
+            nSubArrays = len(subUnique)
+        
+        # init
+        normalizeVec = lambda vec : vec / norm(vec)
+        nVirtMics = micVirt.shape[1]
+        indCorrespSub = zeros((nSubArrays, nVirtMics))
+        indCorrespSub.fill(nan)
+        virtNewCoord = zeros((3, nVirtMics))
+        virtNewCoord.fill(nan)
+        mesh = []
+        
+        # check for each sub array whether dimension reduction can be done
+        for cntSub in range(nSubArrays):
+            indSub = sub == subUnique[cntSub]
+            subArrayMics = mic[:, indSub]
+            
+            # check whether all current subArray mics are on a line (cross prod == 0)
+            micRef = subArrayMics[:, 0]
+            distMic = (subArrayMics[:, 1:].T - micRef.T).T  # distance between all real mics (except the first) and the first real mic
+            if basisVectors == []:
+                basisVec1 = normalizeVec(distMic[:, 0])  # first basis vector in sub array coordinates
+            else:
+                basisVec1 = basisVectors[0]
                 
+            crossMicsOnBasisVec = cross(distMic, basisVec1, axisa=0, axisc=0)
+            micsOnLine = isclose(crossMicsOnBasisVec, zeros_like(crossMicsOnBasisVec), rtol=self.eps)
+            if micsOnLine.all():  # 1d sub array (line)
+                # check which virtual mics are in line with basisVec1
+                distVirtToRef = (micVirt.T - micRef.T).T
+                crossVirtOnBasis = cross(distVirtToRef, basisVec1, axisa=0, axisc=0)
+                virtOnLine = isclose(crossVirtOnBasis, zeros_like(crossVirtOnBasis), rtol=self.eps)
+                virtInSub = virtOnLine.all(axis=0)
+                indCorrespSub[cntSub, virtInSub] = subUnique[cntSub]
+                
+                # get projections onto new coordinate, for real mics and virtual mics
+                projectionOnNewAxis = dot(basisVec1, subArrayMics)
+                indReorderHelp = argsort(projectionOnNewAxis)
+                virtNewCoord[0, virtInSub] = dot(basisVec1, micVirt[:, virtInSub])
+                mesh.append([projectionOnNewAxis[indReorderHelp], indReorderHelp])
+            else:  # try 2d case
+                if basisVectors == []:
+                    # find a real mic which spans a plain with basisVec1 and obtain its normal vector
+                    helpForPlain = micsOnLine.all(axis=0) == False
+                    indPlain = helpForPlain.nonzero()[0][0]
+                    normalOfPlain = crossMicsOnBasisVec[:, indPlain]
+                    basisVec2 = normalizeVec(cross(basisVec1, normalOfPlain))  # get second basis Vector in sub array coordinates
+                else:
+                    basisVec2 = basisVectors[1]
+                    normalOfPlain = cross(basisVec1, basisVec2)
+                
+                # check whether all subarray mics are on that plain
+                scalarProdMicsOnNormal = dot(normalOfPlain, subArrayMics)
+                micsOnPlain = isclose(scalarProdMicsOnNormal, zeros_like(scalarProdMicsOnNormal), rtol=self.eps)
+                if micsOnPlain.all():  # 2d sub array (plain)
+                    # get all virtual mics on that plain
+                    scalarProdVirtOnNormal = dot(normalOfPlain, micVirt)
+                    virtInSub = isclose(scalarProdVirtOnNormal, zeros_like(scalarProdVirtOnNormal), rtol=self.eps)
+                    indCorrespSub[cntSub, virtInSub] = subUnique[cntSub]
+                    
+                    # get mic projections on new coord system
+                    projectionOnNewAxis1 = dot(basisVec1, subArrayMics)[:,newaxis]
+                    projectionOnNewAxis2 = dot(basisVec2, subArrayMics)[:,newaxis]
+                    newCoordinates = concatenate((projectionOnNewAxis1, projectionOnNewAxis2), axis=1)
+                    
+                    # get virtual mic projections on new coord system
+                    projectionOnNewAxisVirt1 = dot(basisVec1, micVirt[:, virtInSub])[newaxis]
+                    projectionOnNewAxisVirt2 = dot(basisVec2, micVirt[:, virtInSub])[newaxis]
+                    virtNewCoord[:2, virtInSub] = concatenate((projectionOnNewAxisVirt1, projectionOnNewAxisVirt2), axis=0)
+                    
+                    tri = Delaunay(newCoordinates, incremental=True)
+                else:  # 3d case
+                    newCoordinates = subArrayMics.T
+                    tri = Delaunay(newCoordinates, incremental=True)
+                    virtInSub = tri.find_simplex(micVirt.T) != -1
+                    indCorrespSub[cntSub, virtInSub] = subUnique[cntSub]
+                    virtNewCoord[:, virtInSub] = micVirt[:, virtInSub]
+                    
+                if not (tri.points == newCoordinates).all():
+                    # even though nothing is said about that in the docu, tri.points seems to have the same order as the
+                    # mics given as input in tri = Delaunay(mics). This behaviour is assumed in the code, therefor any contradiction
+                    # to that behaviour must be raised.
+                    raise Exception('Unexpected behaviour in Delaunay-Triangulation. Please contact the developer!')
+                        
+                if not basisVectors == []:
+                    # extend mesh with closest boundary points of repeating mesh 
+                    # (both left and right of original array)
+                    pointsOriginal = arange(tri.points.shape[0])
+                    hull = tri.convex_hull
+                    hullPoints = unique(hull)
+                    
+                    addRight = tri.points[hullPoints]
+                    addRight[:, 0] += 2 * pi
+                    addLeft= tri.points[hullPoints]
+                    addLeft[:, 0] -= 2 * pi
+                    indOrigPoints = concatenate((pointsOriginal, pointsOriginal[hullPoints], pointsOriginal[hullPoints]))
+        
+                    # add all hull vertices to original mesh and check which of those 
+                    # are actual neighbors of the original array. Cancel out all others.
+                    tri.add_points(concatenate([addLeft, addRight]))
+                    indices, indptr = tri.vertex_neighbor_vertices
+                    hullNeighbor = empty((0), dtype='int32')
+                    for currHull in hullPoints:
+                        neighborOfHull = indptr[indices[currHull]:indices[currHull + 1]]
+                        hullNeighbor = append(hullNeighbor, neighborOfHull)
+                    hullNeighborUnique = unique(hullNeighbor)
+                    pointsNew = unique(append(pointsOriginal, hullNeighborUnique))
+                    tri = Delaunay(tri.points[pointsNew])  # re-meshing
+                    mesh.append([tri, indOrigPoints[pointsNew]])
+                else:
+                    mesh.append([tri, arange(tri.points.shape[0])])
 
+        # check whether sub arrays make sense
+        correspSubarrays = ~isnan(indCorrespSub)
+        correspSubarraysHelp = correspSubarrays.sum(axis=0)
+        multplSubs = correspSubarraysHelp > 1
+        if multplSubs.any():
+            multplSubsNonZero = multplSubs.nonzero()[0]
+            indMultp = [subUnique[correspSubarrays[:, multplSubs[cnt]]].tolist() for cnt in range(len(multplSubsNonZero))]
+            raise Exception('mpos_virtual (entries %s) correspond to multiple sub arrays with indices %s (one list of indices for each virual mic).' % (multplSubsNonZero, indMultp))
+        elif (correspSubarraysHelp == 0).any():
+            raise Exception('mpos_virtual (entries %s) do not correspond to (sub-) array. Extrapolation is not allowed!' % (correspSubarraysHelp == 0).nonzero()[0])
+        else:  # everything is fine
+            indCorOut = nansum(indCorrespSub, axis=0, dtype='int')
+        return indCorOut, mesh, virtNewCoord
 
+                     
+    def _result_core_func(self, p, phiDelay=[], period=None):
+        """
+        Performs the actual Interpolation.
+        
+        Parameters
+        ----------
+        p : float[nSamples, nMicsReal]
+            The pressure field of the yielded sample at real mics.
+        phiDelay : empty list (default) or float[nSamples] 
+            If passed (rotational case), this list contains the angular delay 
+            of each sample in rad.
+        period : None (default) or float
+            If periodicity can be assumed (rotational case) and the array is 1D 
+            (see :attr:`reduced_interp_dim`) this parameter contains the periodicity length (2pi)
+        
+        Returns
+        -------
+        pInterp : float[nSamples, nMicsVirtual]
+            The interpolated time data at the virtual mics
+        """
+        nTime = p.shape[0]
+        indSubArray, meshList, virtProj = self.reduced_interp_dim
+        subArrays = unique(indSubArray)
+        pInterp = zeros((nTime, len(indSubArray)))
+        for cntSub in range(len(subArrays)):
+            subMicsReal = self.ind_subarray == subArrays[cntSub]
+            subMicsVirt = indSubArray == subArrays[cntSub]
+            pHelp = p[:, subMicsReal][:, meshList[cntSub][1]]
+            
+            # get interpolation dim
+            interpDimHelp = unique((~isnan(virtProj[:, subMicsVirt])).sum(axis=0))
+            if len(interpDimHelp) == 1:
+                interpDim = interpDimHelp[0]
+            else:
+                raise Exception('Interpolation dim is not the same for all mics in (sub-) array! Something went wrong in reduced_interp_dim')
+            wantedCoord = virtProj[:interpDim, subMicsVirt]
+            
+            if not phiDelay == []:
+                xInterpHelp = repmat(wantedCoord[0, :], nTime, 1) + repmat(phiDelay, wantedCoord.shape[1], 1).T
+                xInterp = ((xInterpHelp + pi) % (2 * pi)) - pi  # shifting phi cootrdinate into feasible area [-pi, pi]
+            else:
+                xInterp = repmat(wantedCoord[0, :], nTime, 1)
+            
+            # interpolating
+            for cntTime in range(nTime):
+                if interpDim == 1:  # 1D
+                    x = meshList[cntSub][0]
+                    pInterp[cntTime, subMicsVirt] = interp(xInterp[cntTime, :], x, pHelp[cntTime, :], period=period, left=nan, right=nan)
+                else:  # 2D and 3D
+                    mesh = meshList[cntSub][0]
+                    newPoint = concatenate((xInterp[cntTime, :][:, newaxis], wantedCoord[1:, :].T), axis=1)
+                    f = LinearNDInterpolator(mesh, pHelp[cntTime, :])
+                    pInterp[cntTime, subMicsVirt] = f(newPoint)
+        return pInterp
+        
+    def result(self, num=128):
+        """ 
+        Python generator that yields the output block-wise.
+        
+        Parameters
+        ----------
+        num : integer
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block).
+        
+        Returns
+        -------
+        Samples in blocks of shape (num, :attr:`numchannels`). 
+            The last block may be shorter than num.
+        """
+        for timeData in self.source.result(num):
+            interpVal = self._result_core_func(timeData)
+            yield interpVal
+
+    
+class SpatialInterpolatorConstantRotation(SpatialInterpolator):
+    """
+    Spatial linear Interpolation for constantly rotating sources.
+    Gets samples from :attr:`source` and generates output via the 
+    generator :meth:`result`
+    """
+    #: Rotational speed in rps. Positive, if rotation is around positive z-axis sense,
+    #: which means from x to y axis.
+    rotational_speed = Float(0.0)
+    
+    #: The rotation must be around the z-axis, which means from x to y axis.
+    #: If the coordinates are not build like that, than this 3x3 orthogonal 
+    #: transformation matrix Q can be used to modify the coordinates.
+    #: It is assumed that with the modified coordinates the rotation is around the z-axis. 
+    #: The transformation is done via [x,y,z]_mod = Q * [x,y,z]. (default is Identity).
+    Q = CArray(dtype=float64, shape=(3, 3), value=identity(3))
+    
+    #: Stores the output of :meth:`_reduced_interp_dim_core_func`; Read-Only
+    reduced_interp_dim = Property(depends_on=['mpos_real.digest', 'ind_subarray', 'eps', 'mpos_virtual.digest', 'Q'])
+    
+    # internal identifier
+    digest = Property( depends_on = ['source.digest', 'rotational_speed', 'Q', 'mpos_real.digest', 'ind_subarray', 'eps', 'mpos_virtual.digest'])
+    
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+    
+    @cached_property
+    def _get_reduced_interp_dim(self):
+        if not isclose(dot(self.Q.T, self.Q), identity(3)).all():
+            raise Exception('Transformation matrix SpatialInterpolatorRotation.Q must be orthogonal!')
+        mic = cartToCyl(self.mpos_real.mpos, self.Q)
+        micVirt = cartToCyl(self.mpos_virtual.mpos, self.Q)
+        basisVecs = [array([1,0,0]), array([0,1,0])]
+        return self._reduced_interp_dim_core_func(mic, micVirt, basisVecs)
+    
+    def result(self, num=1):
+        """ 
+        Python generator that yields the output block-wise.
+        
+        Parameters
+        ----------
+        num : integer
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block).
+        
+        Returns
+        -------
+        Samples in blocks of shape (num, :attr:`numchannels`). 
+            The last block may be shorter than num.
+        """
+        omega = 2 * pi * self.rotational_speed
+        period = 2 * pi
+        phiOffset = 0.0
+        for timeData in self.source.result(num):
+            nTime = timeData.shape[0]
+            phiDelay = phiOffset + linspace(0, nTime / self.sample_freq * omega, nTime, endpoint=False)
+            interpVal = self._result_core_func(timeData, phiDelay, period)
+            phiOffset = phiDelay[-1] + omega / self.sample_freq
+            yield interpVal
+   
+    
 class Mixer( TimeInOut ):
     """
     Mixes the signals from several sources.
