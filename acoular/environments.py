@@ -18,7 +18,7 @@
 """
 from numpy import array, isscalar, float32, float64, newaxis, \
 sqrt, arange, pi, exp, sin, cos, arccos, zeros_like, empty, dot, hstack, \
-vstack, identity, cross, sign, sum
+vstack, identity, cross, sign, arctan2, matmul, sum
 from numpy.linalg.linalg import norm
 from scipy.integrate import ode
 from scipy.interpolate import LinearNDInterpolator
@@ -28,6 +28,31 @@ CArray, cached_property, Trait
 from traitsui.api import View
 
 from .internal import digest
+
+def cartToCyl(x, Q=identity(3)):
+    """
+    Returns the cylindrical coordinate representation of a input position 
+    which was before transformed into a modified cartesian coordinate, which
+    has flow into positive z direction.
+    
+    Parameters
+    ----------
+    x : float[3, nPoints]
+        cartesian coordinates of n points
+    Q : float[3,3]
+        Orthogonal transformation matrix. If provided, the pos vectors are
+        transformed via posiMod = Q * x, before transforming those modified
+        coordinates into cylindrical ones. Default is identity matrix.
+        
+    Returns
+    -------
+    cylCoord : [3, nPoints]
+        cylindrical representation of those n points with (phi, r, z)
+    """
+    if not (Q == identity(3)).all():
+        x = matmul(Q, x)  # modified position vector
+    cylCoord = array([arctan2(x[1], x[0]), sqrt(x[0]**2 + x[1]**2), x[2]])
+    return cylCoord
 
 class Environment( HasPrivateTraits ):
     """
