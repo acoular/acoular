@@ -215,7 +215,7 @@ class MaskedTimeInOut ( TimeInOut ):
                 yield block[:, self.channels]
 
 
-class SpatialInterpolator(SamplesGenerator):
+class SpatialInterpolator(TimeInOut):
     """
     Base class for spatial linear Interpolation of microphone data.
     Gets samples from :attr:`source` and generates output via the 
