@@ -10,6 +10,7 @@
 
     TimeInOut
     MaskedTimeInOut
+    Trigger
     SpatialInterpolator
     SpatialInterpolatorConstantRotation
     Mixer
@@ -27,7 +28,8 @@
 from six import next
 from numpy import array, empty, empty_like, pi, sin, sqrt, zeros, newaxis, unique, \
 int16, cross, isclose, zeros_like, dot, nan, concatenate, isnan, nansum, float64, \
-identity, argsort, interp, arange, append, linspace
+identity, argsort, interp, arange, append, linspace, flatnonzero, argmin, argmax, \
+delete, mean, inf
 from numpy.linalg import norm
 from numpy.matlib import repmat
 from scipy.spatial import Delaunay
@@ -213,6 +215,161 @@ class MaskedTimeInOut ( TimeInOut ):
         else: # if no start/stop given, don't do the resorting thing
             for block in self.source.result(num):
                 yield block[:, self.channels]
+                
+
+class Trigger(TimeInOut):
+    """
+    Class for identifying trigger signals.
+    Gets samples from :attr:`source` and stores the trigger samples in :meth:`trigger_data`.
+    """
+    #: Data source; :class:`~acoular.sources.SamplesGenerator` or derived object.
+    source = Instance(SamplesGenerator)
+    
+    #: Threshold of trigger. Has different meanings for different 
+    #: :attr:`~acoular.tprocess.Trigger.trigger_type`. The sign is relevant.
+    #: Default is None, in which case a first estimate is used: The threshold
+    #: is assumed to be 75% of the max/min difference between all extremums and the 
+    #: mean value of the trigger signal. E.g: the mean value is 0 and there are positive
+    #: extremums at 400 and negative extremums at -800. Then the estimated threshold would be 
+    #: 0.75 * -800 = -600.
+    threshold = Float(None)
+    
+    #: Maximum allowable variation of length of each 1/Rev duration. Default is
+    #: 2%. A warning is thrown, if any 1/Rev length surpasses this value:
+    #: abs(durationEachRev - meanDuration) > 0.02 * meanDuration
+    max_variation_of_duration = Float(0.02)
+    
+    #: Defines the length of hunks via lenHunk = hunk_length * maxOncePerRevDuration.
+    #: If there are multiple peaks within lenHunk, then the algorithm will 
+    #: cancel all but one out (see :attr:`~acoular.tprocess.Trigger.multiple_peaks_in_hunk`).
+    #: Default is to 0.1.
+    hunk_length = Float(0.1)
+    
+    #: Type of trigger.
+    #: - 'Dirac': a single puls is assumed (sign of 
+    #:      :attr:`~acoular.tprocess.Trigger.trigger_type` is important)
+    #: - 'Rect' : repeating rectangular functions. Only every second 
+    #:      edge is assumed to be a trigger. The sign of 
+    #:      :attr:`~acoular.tprocess.Trigger.trigger_type` gives information
+    #:      on which edge should be used (+ for rising edge, - for falling edge)
+    #: Default is to 'Dirac'.
+    trigger_type = Trait('Dirac', 'Rect')
+    
+    #: Identifier which peak to consider, if there are multiple peaks in one hunk
+    #: (see :attr:`~acoular.tprocess.Trigger.hunk_length`). Default is to 'max'.
+    multiple_peaks_in_hunk = Trait('max', 'first')
+    
+    #: Tuple consisting of 3 entries: 
+    #: 1.: -Vector with the sample indices of the 1/Rev trigger samples
+    #: 2.: -maximum of number of samples between adjacent trigger samples
+    #: 3.: -minimum of number of samples between adjacent trigger samples
+    trigger_data = Property(depends_on=['source.digest', 'threshold', 'max_variation_of_duration', \
+                                        'hunk_length', 'trigger_type', 'multiple_peaks_in_hunk'])
+    
+    # internal identifier
+    digest = Property(depends_on=['source.digest', 'threshold', 'max_variation_of_duration', \
+                                        'hunk_length', 'trigger_type', 'multiple_peaks_in_hunk'])
+    
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+    
+    @cached_property
+    def _get_trigger_data(self):
+        self._check_trigger_existence()
+        triggerFunc = {'Dirac' : self._trigger_dirac,
+                       'Rect' : self._trigger_rect}[self.trigger_type]
+        nSamples = 2000  # number samples for result-method of source
+        threshold = self._threshold(nSamples)
+        
+        # get all samples which surpasse the threshold
+        peakLoc = array([], dtype='int')  # all indices which surpasse the threshold
+        triggerData = array([])
+        x0 = []
+        dSamples = 0
+        for triggerSignal in self.source.result(nSamples):
+            localTrigger = flatnonzero(triggerFunc(x0, triggerSignal, threshold))
+            if not len(localTrigger) == 0:
+                peakLoc = append(peakLoc, localTrigger + dSamples)
+                triggerData = append(triggerData, triggerSignal[localTrigger])
+            dSamples += nSamples
+            x0 = triggerSignal[-1]
+        if len(peakLoc) == 0:
+            raise Exception('Signal never triggers. Maybe check *threshold* sign and value!')
+
+        peakDist = peakLoc[1:] - peakLoc[:-1]
+        maxPeakDist = max(peakDist)  # approximate distance between the revolutions
+        
+        # if there are hunks which contain multiple peaks -> check for each hunk, 
+        # which peak is the correct one -> delete the other one.
+        # if there are no multiple peaks in any hunk left -> leave the while 
+        # loop and continue with program
+        multiplePeaksWithinHunk = flatnonzero(peakDist < self.hunk_length * maxPeakDist)
+        while len(multiplePeaksWithinHunk) > 0:
+            peakLocHelp = multiplePeaksWithinHunk[0]
+            indHelp = [peakLocHelp, peakLocHelp + 1]
+            if self.multiple_peaks_in_hunk == 'max':
+                values = triggerData[indHelp]
+                deleteInd = indHelp[argmin(abs(values))]
+            elif self.multiple_peaks_in_hunk == 'first':
+                deleteInd = indHelp[1]
+            peakLoc = delete(peakLoc, deleteInd)
+            triggerData = delete(triggerData, deleteInd)
+            peakDist = peakLoc[1:] - peakLoc[:-1]
+            multiplePeaksWithinHunk = flatnonzero(peakDist < self.hunk_length * maxPeakDist)
+        
+        # check whether distances between peaks are evenly distributed
+        meanDist = mean(peakDist)
+        diffDist = abs(peakDist - meanDist)
+        faultyInd = flatnonzero(diffDist > self.max_variation_of_duration * meanDist)
+        if faultyInd.size != 0:
+            warn('In Trigger-Identification: The distances between the peaks varies to much (check samples %s).' % str(peakLoc[faultyInd] + self.source.start))
+        return peakLoc, max(peakDist), min(peakDist)
+    
+    def _trigger_dirac(self, x0, x, threshold):
+        # x0 not needed here, but needed in _trigger_rect
+        return self._trigger_value_comp(x, threshold)
+    
+    def _trigger_rect(self, x0, x, threshold):
+        # x0 stores the last value of the the last generator cycle
+        xNew = append(x0, x)
+#        indPeakHunk = abs(xNew[1:] - xNew[:-1]) > abs(threshold)  # with this line: every edge would be located
+        indPeakHunk = self._trigger_value_comp(xNew[1:] - xNew[:-1], threshold)
+        return indPeakHunk
+    
+    def _trigger_value_comp(self, triggerData, threshold):
+        if threshold > 0.0:
+            indPeaks= triggerData > threshold
+        else:
+            indPeaks = triggerData < threshold
+        return indPeaks
+    
+    def _threshold(self, nSamples):
+        if self.threshold == None:  # take a guessed threshold
+            warn('No threshold was passed. A default threshold of 75% of maximum absolute value of whole trigger signal is assumed.')
+            # get max and min values of whole trigger signal
+            maxVal = -inf
+            minVal = inf
+            meanVal = 0
+            for triggerData in self.source.result(nSamples):
+                maxVal = max(maxVal, triggerData.max())
+                minVal = min(minVal, triggerData.min())
+                meanVal += triggerData.mean()
+            
+            # get 75% of maximum absolute value of trigger signal
+            maxTriggerHelp = [minVal, maxVal] - meanVal
+            argInd = argmax(abs(maxTriggerHelp))
+            thresh = maxTriggerHelp[argInd] * 0.75  # 0.75 for 75% of max trigger signal
+        else:  # take user defined  threshold
+            thresh = self.threshold
+        return thresh
+    
+    def _check_trigger_existence(self):
+        for triggerData in self.source.result(1):
+            nChannels = triggerData.shape[1]
+            if not nChannels == 1:
+                raise Exception('Trigger signal must consist of ONE channel, instead %s channels are given!' % nChannels)
+        return 0
 
 
 class SpatialInterpolator(TimeInOut):
