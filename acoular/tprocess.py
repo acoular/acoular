@@ -221,12 +221,23 @@ class Trigger(TimeInOut):
     """
     Class for identifying trigger signals.
     Gets samples from :attr:`source` and stores the trigger samples in :meth:`trigger_data`.
+    
+    The algorithm searches for peaks which are above/below a signed threshold.
+    A estimate for approximative length of one revolution is found via the greatest
+    number of samples between the adjacent peaks.
+    The algorithm then defines hunks as percentages of the estimated length of one revolution.
+    If there are multiple peaks within one hunk, the algorithm just takes one of them 
+    into account (e.g. the first peak, the peak with extremum value, ...).
+    In the end, the algorithm checks if the found peak locations result in rpm that don't
+    vary too much.
     """
     #: Data source; :class:`~acoular.sources.SamplesGenerator` or derived object.
     source = Instance(SamplesGenerator)
     
     #: Threshold of trigger. Has different meanings for different 
     #: :attr:`~acoular.tprocess.Trigger.trigger_type`. The sign is relevant.
+    #: If a sample of the signal is above/below the positive/negative threshold, 
+    #: it is assumed to be a peak.
     #: Default is None, in which case a first estimate is used: The threshold
     #: is assumed to be 75% of the max/min difference between all extremums and the 
     #: mean value of the trigger signal. E.g: the mean value is 0 and there are positive
@@ -234,8 +245,8 @@ class Trigger(TimeInOut):
     #: 0.75 * -800 = -600.
     threshold = Float(None)
     
-    #: Maximum allowable variation of length of each 1/Rev duration. Default is
-    #: 2%. A warning is thrown, if any 1/Rev length surpasses this value:
+    #: Maximum allowable variation of length of each revolution duration. Default is
+    #: 2%. A warning is thrown, if any revolution length surpasses this value:
     #: abs(durationEachRev - meanDuration) > 0.02 * meanDuration
     max_variation_of_duration = Float(0.02)
     
@@ -247,17 +258,21 @@ class Trigger(TimeInOut):
     
     #: Type of trigger.
     #: - 'Dirac': a single puls is assumed (sign of 
-    #:      :attr:`~acoular.tprocess.Trigger.trigger_type` is important)
+    #:      :attr:`~acoular.tprocess.Trigger.trigger_type` is important).
+    #:      Sample will trigger if its value is above/below the pos/neg threshold.
     #: - 'Rect' : repeating rectangular functions. Only every second 
     #:      edge is assumed to be a trigger. The sign of 
     #:      :attr:`~acoular.tprocess.Trigger.trigger_type` gives information
-    #:      on which edge should be used (+ for rising edge, - for falling edge)
+    #:      on which edge should be used (+ for rising edge, - for falling edge).
+    #:      Sample will trigger if the difference between its value and its predecessors value
+    #:      is above/below the pos/neg threshold.
     #: Default is to 'Dirac'.
     trigger_type = Trait('Dirac', 'Rect')
     
     #: Identifier which peak to consider, if there are multiple peaks in one hunk
-    #: (see :attr:`~acoular.tprocess.Trigger.hunk_length`). Default is to 'max'.
-    multiple_peaks_in_hunk = Trait('max', 'first')
+    #: (see :attr:`~acoular.tprocess.Trigger.hunk_length`). Default is to 'extremum', 
+    #: in which case the extremal peak (maximum if threshold > 0, minimum if threshold < 0) is considered.
+    multiple_peaks_in_hunk = Trait('extremum', 'first')
     
     #: Tuple consisting of 3 entries: 
     #: 1.: -Vector with the sample indices of the 1/Rev trigger samples
@@ -279,7 +294,7 @@ class Trigger(TimeInOut):
         self._check_trigger_existence()
         triggerFunc = {'Dirac' : self._trigger_dirac,
                        'Rect' : self._trigger_rect}[self.trigger_type]
-        nSamples = 2000  # number samples for result-method of source
+        nSamples = 2048  # number samples for result-method of source
         threshold = self._threshold(nSamples)
         
         # get all samples which surpasse the threshold
@@ -294,8 +309,8 @@ class Trigger(TimeInOut):
                 triggerData = append(triggerData, triggerSignal[localTrigger])
             dSamples += nSamples
             x0 = triggerSignal[-1]
-        if len(peakLoc) == 0:
-            raise Exception('Signal never triggers. Maybe check *threshold* sign and value!')
+        if len(peakLoc) <= 1:
+            raise Exception('Not enough trigger info. Check *threshold* sign and value!')
 
         peakDist = peakLoc[1:] - peakLoc[:-1]
         maxPeakDist = max(peakDist)  # approximate distance between the revolutions
@@ -308,7 +323,7 @@ class Trigger(TimeInOut):
         while len(multiplePeaksWithinHunk) > 0:
             peakLocHelp = multiplePeaksWithinHunk[0]
             indHelp = [peakLocHelp, peakLocHelp + 1]
-            if self.multiple_peaks_in_hunk == 'max':
+            if self.multiple_peaks_in_hunk == 'extremum':
                 values = triggerData[indHelp]
                 deleteInd = indHelp[argmin(abs(values))]
             elif self.multiple_peaks_in_hunk == 'first':
@@ -323,7 +338,7 @@ class Trigger(TimeInOut):
         diffDist = abs(peakDist - meanDist)
         faultyInd = flatnonzero(diffDist > self.max_variation_of_duration * meanDist)
         if faultyInd.size != 0:
-            warn('In Trigger-Identification: The distances between the peaks varies to much (check samples %s).' % str(peakLoc[faultyInd] + self.source.start))
+            warn('In Trigger-Identification: The distances between the peaks (and therefor the lengths of the revolutions) vary too much (check samples %s).' % str(peakLoc[faultyInd] + self.source.start), Warning, stacklevel = 2)
         return peakLoc, max(peakDist), min(peakDist)
     
     def _trigger_dirac(self, x0, x, threshold):
@@ -346,20 +361,23 @@ class Trigger(TimeInOut):
     
     def _threshold(self, nSamples):
         if self.threshold == None:  # take a guessed threshold
-            warn('No threshold was passed. A default threshold of 75% of maximum absolute value of whole trigger signal is assumed.')
             # get max and min values of whole trigger signal
             maxVal = -inf
             minVal = inf
             meanVal = 0
+            cntMean = 0
             for triggerData in self.source.result(nSamples):
                 maxVal = max(maxVal, triggerData.max())
                 minVal = min(minVal, triggerData.min())
                 meanVal += triggerData.mean()
+                cntMean += 1
+            meanVal /= cntMean
             
             # get 75% of maximum absolute value of trigger signal
             maxTriggerHelp = [minVal, maxVal] - meanVal
             argInd = argmax(abs(maxTriggerHelp))
             thresh = maxTriggerHelp[argInd] * 0.75  # 0.75 for 75% of max trigger signal
+            warn('No threshold was passed. An estimated threshold of %s is assumed.' % thresh, Warning, stacklevel = 2)
         else:  # take user defined  threshold
             thresh = self.threshold
         return thresh
