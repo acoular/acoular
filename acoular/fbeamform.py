@@ -8,6 +8,9 @@
 .. autosummary::
     :toctree: generated/
 
+    SteeringVector
+    SteeringVectorInduct
+    
     BeamformerBase
     BeamformerFunctional
     BeamformerCapon
@@ -35,13 +38,14 @@ dot, newaxis, zeros, empty, fft, float32, float64, complex64, linalg, where, \
 searchsorted, pi, multiply, sign, diag, arange, sqrt, exp, log10, int,\
 reshape, hstack, vstack, eye, tril, size, clip, tile, round, delete, \
 absolute, argsort, sort, sum, hsplit, fill_diagonal, zeros_like, isclose, \
-vdot, flatnonzero
+vdot, flatnonzero, unique, int32, in1d, mean, inf
 
 from sklearn.linear_model import LassoLars, LassoLarsCV, LassoLarsIC,\
 OrthogonalMatchingPursuit, ElasticNet, OrthogonalMatchingPursuitCV, Lasso
 
 from scipy.optimize import nnls, linprog
 from scipy.linalg import inv, eigh, eigvals, fractional_matrix_power
+from scipy.special import jn
 from warnings import warn
 
 import tables
@@ -53,13 +57,13 @@ from traitsui.api import View, Item
 from traitsui.menu import OKCancelButtons
 
 from .fastFuncs import beamformerFreq, calcTransfer, calcPointSpreadFunction, \
-damasSolverGaussSeidel
+damasSolverGaussSeidel, greenFunc
 
 from .h5cache import H5cache
 from .internal import digest
 from .grids import Grid
 from .microphones import MicGeom
-from .environments import Environment
+from .environments import Environment, InductUniformFlow, cartToCyl
 from .spectra import PowerSpectra, _precision
 
 
@@ -229,7 +233,210 @@ class SteeringVector( HasPrivateTraits ):
         result = calcPointSpreadFunction(self.steer_type, self.r0, self.rm, self.k[freqInd][newaxis], sourceInd, precision)
         return result
 
+
+class SteeringVectorInduct( SteeringVector ):
+    """
+    Class for implementing a steering vector for sound 
+    propagation in a circular duct (without hub).
+    Assumed is a uniform flow into positive z-direction of an 
+    cartesian coordinate system.
+    """
+    #: :class:`~acoular.environments.InductUniformFlow`, which provides 
+    #: information about the sound propagation in the medium.
+    env = Instance(InductUniformFlow)
     
+    #: Maximum attenuation level (dB) per radius of duct. All modes with 
+    #: attenuation levels above this value are not taken into account.
+    
+    # Funzt nich mit 0
+    max_attenuation = Float(0.0, 
+                            desc="Maximum level of attenuation of modes."
+                            "Modes with values above this Float are not taken into account.")
+
+    #: List of azimuthal mode orders which are observed (one Int per entry of Trait f).
+    #: E.g. if considered_azi_modes=[-5,10] then for the first entry of f only 
+    #: the (m,n) modes with m=-5 are taken into account for the transfer vectors,
+    #: respectively m=10 for the second entry of f. The default is on empty List
+    #: in which case for all entries of k all (m,n) modes of Trait modal_properties
+    #: are taken into account for the transfer vectors.
+    considered_azi_modes = ListInt()
+    
+    #: When calculating the transfer function: Should the propagation from gridpoint to mics be
+    #: normalized with the propagation from gridpoint to specific point (e.g. array center)? 
+    #: Default is True (see transfer_norm_ref_point).
+    transfer_normalized = Bool(True)
+    
+    #: Only relevant if transfer_normalized is True. Specifies the normalization point
+    #: for the transfer function (see transfer_normalized). Default is [inf, inf, inf]
+    #: which normalizes with the propagation to the array center.
+    transfer_norm_ref_point = CArray(dtype=float64, shape=(3, ), value=(inf, inf, inf))
+    
+    #: grid positions in cylindrical coordinates; read only
+    grid_cyl = Property(depends_on=['grid.digest', 'env.digest'])
+    
+    #: grid positions in cylindrical coordinates; read only
+    mpos_cyl = Property(depends_on=['mpos.digest', 'env.digest'])
+    
+    #: List with table of modal properties of each (m,n)-mode (in rows). Column entries are:
+    #: [azim. order, rad. order, sigma, alpha.real, alpha.imag, k+, k-, norm-Factor].
+    #: The List contains nFreq tables. Read-only
+    modal_properties = Property(depends_on=['f', 'c', 'max_attenuation', 'env.digest'])
+    
+    #: Transfer matrix (vector of transfer-vectors) of dimension [nFreq, nGrid, nMics]; read only
+    transfer = Property(depends_on=['f', 'c', 'max_attenuation', 'env.digest', 'considered_azi_modes', \
+                                    'grid.digest', 'mpos.digest', 'transfer_normalized', 'transfer_norm_ref_point'], 
+                        desc = 'transfer matrix')
+    
+    # internal identifier
+    digest = Property(depends_on = ['f', 'c', 'steer_type', 'env.digest', 'grid.digest', 'mpos.digest', 'considered_azi_modes', \
+                                    'max_attenuation', 'transfer_normalized', 'transfer_norm_ref_point'])
+ 
+    @cached_property
+    def _get_digest( self ):
+        return digest( self )
+    
+    @cached_property
+    def _get_grid_cyl(self):
+        return cartToCyl(self.grid.pos(), self.env.Q)
+    
+    @cached_property
+    def _get_mpos_cyl(self):
+        return cartToCyl(self.mpos.mpos, self.env.Q)
+    
+    @cached_property
+    def _get_modal_properties(self):
+        k = self.k
+        maxAtten = self.max_attenuation
+        c = self.c
+        result = self.env.modal_properties(k, maxAtten, c)
+        return result
+    
+    @cached_property
+    def _get_transfer(self):
+        nFreq, nMics, nGrid = len(self.k), self.mpos_cyl.shape[1], self.grid_cyl.shape[1]
+        trans = zeros((nFreq, nGrid, nMics), dtype='complex128')
+
+        for cntFreq in range(nFreq):
+            modeProps = self.modal_properties[cntFreq]
+            uniqueAziModes = unique(int32(modeProps[:, 0]))
+    
+            # Check which modegroups with same aziMode should be taken into account
+            if self.considered_azi_modes == []:  # default case
+                usedAziModes = uniqueAziModes  # create one transfer matrix for all (m,n) modes
+            else:
+                considerHelp= in1d(self.considered_azi_modes[cntFreq], uniqueAziModes)
+                if not considerHelp.all():
+                    raise Exception('Specified azi-mode of considered_azi_modes[%s] must be '
+                                    'within possible azimuthal mode range of [%s, %s], but %s was given.' 
+                                    % (cntFreq, uniqueAziModes[0], uniqueAziModes[-1], self.considered_azi_modes[cntFreq]))
+                usedAziModes = self.considered_azi_modes[cntFreq]  # create one transfer matrix for all (m,n) modes with fixed m
+            
+            # locate all active (m,n)-modes
+            usedModes = in1d(int32(modeProps[:, 0]), usedAziModes)
+            usedModesInd = flatnonzero(usedModes)
+            nActiveModes = usedModesInd.shape[0]
+            
+            # calc all needed bessel functions
+            besselMic = zeros((nActiveModes, nMics), dtype='float64')
+            besselGrid = zeros((nGrid, nActiveModes), dtype='float64')
+            for cntUsed in range(nActiveModes):
+                besselMic[cntUsed, :] = jn(modeProps[usedModesInd[cntUsed], 0], modeProps[usedModesInd[cntUsed], 2] * self.mpos_cyl[1, :] / self.env.R)
+                besselGrid[:, cntUsed] = jn(modeProps[usedModesInd[cntUsed], 0], modeProps[usedModesInd[cntUsed], 2] * self.grid_cyl[1, :] / self.env.R)
+
+            # calc greens function from all grids to all mics
+            greenFunc(modeProps[usedModes, 0], modeProps[usedModes, 3], modeProps[usedModes, 4], 
+                      modeProps[usedModes, 5], modeProps[usedModes, 6], modeProps[usedModes, 7], 
+                      self.mpos_cyl[0, :], self.mpos_cyl[2, :], 
+                      self.grid_cyl[0, :], self.grid_cyl[2, :], 
+                      besselMic, besselGrid, trans[cntFreq, :, :])
+            
+            if self.transfer_normalized:
+                if (self.transfer_norm_ref_point == array([inf, inf, inf])).all():  # take center of array
+                    pointOfRef = mean(self.mpos.mpos, axis=-1)
+                else:  # take user defined point
+                    pointOfRef = self.transfer_norm_ref_point
+                pointOfRefCyl = cartToCyl(pointOfRef)
+                if pointOfRefCyl[1] < 1e-5:  # all modes except (0,0) have no influence here
+                    usedModesRef = (modeProps[:, 0:2] == [0,0]).sum(axis=1) == 2
+                else:
+                    usedModesRef = ones((modeProps.shape[0]), dtype='bool')
+                transHelpArrayCenter = zeros((nGrid, 1), dtype='complex128')
+                greenFunc(modeProps[usedModesRef, 0], modeProps[usedModesRef, 3], modeProps[usedModesRef, 4],
+                          modeProps[usedModesRef, 5], modeProps[usedModesRef, 6], modeProps[usedModesRef, 7], 
+                          [pointOfRefCyl[0]], [pointOfRef[2]], 
+                          self.grid_cyl[0, :], self.grid_cyl[2, :], 
+                          array([1])[newaxis], ones((nGrid, 1)), transHelpArrayCenter)
+                trans[cntFreq, :, :] /= transHelpArrayCenter
+        return trans
+    
+    def _transfer_specific_gridpoint(self, ind):
+        """
+        Calculates the transfer function of ONE grid point. Is used in clean-sc
+        when not the whole transfer matrix is needed.
+        
+        Parameters
+        ----------
+        ind : int
+            Identifier for wich gridpoint the transfer funtion is calculated
+        
+        Returns
+        -------
+        trans : complex128[nFreqs, nMics]
+        """
+        # basically needed in clean-sc (freefield steering vectors), when not all transfer functions must be calculated.
+        # In here this is only implemented for class compatibility with SteeringVector (basically senseless as the full transfer
+        # vectors are calculated for any beamformer anyway).
+        trans = self.transfer[:, ind, :]
+        return trans
+    
+    def _beamformerCall(self, indFreq, rDiag, normFac, tupleCSM):
+        """
+        Manages the calling of the core beamformer functionality.
+        
+        Parameters
+        ----------
+        indFreq : int
+            The index for which item of this classes property k the beamformer should be performed.
+        rDiag : bool
+            Should the diagonal of the csm should be considered in beamformer
+            (rDiag==False) or not (rDiag==True).
+        normFac : float
+            Normalization factor for the beamforming result (e.g. removal of diag is compensated with this.)
+        tupleCSM : either (csm,) or (eigValues, eigVectors)
+            See information header of beamformerFreq in fastFuncs.py for information on those inputs.
+
+        Returns
+        -------
+        The results of beamformerFreq, see fastFuncs.py 
+        """
+        steer = self.steer_vector[indFreq, :, :][newaxis]
+        result = beamformerFreq('custom', rDiag, normFac, (steer,), tupleCSM)
+        return result
+    
+    def _psfCall(self, freqInd, sourceInd, precision):
+        """
+        Manages the calling of the core psf functionality.
+        
+        Parameters
+        ----------
+        freqInd : int
+            Index for which entry of Trait f the psf should be calculated.
+        sourceInd : list of int
+            Indices of gridpoints which are assumed to be sources.
+            Normalization factor for the beamforming result (e.g. removal of diag is compensated with this.)
+        precision : string ('float32' or 'float64')
+            Precision of psf.
+
+        Returns
+        -------
+        The psf [1, nGridPoints, len(sourceInd)]
+        """
+        # Perform steer^H * transfer (see information header in fastFuncs.calcPointSpreadFunction)
+        prelim = dot(self.steer_vector[freqInd, :, :].conj(), self.transfer[freqInd, sourceInd, :].T)
+        psf = (prelim * prelim.conj()).real.astype(precision)
+        return psf[newaxis]
+
+
 class BeamformerBase( HasPrivateTraits ):
     """
     Beamforming using the basic delay-and-sum algorithm in the frequency domain.
