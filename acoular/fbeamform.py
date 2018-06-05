@@ -988,9 +988,8 @@ class PointSpreadFunction (HasPrivateTraits):
         if freqInSteerObjFreq.any():
             freqInd = flatnonzero(freqInSteerObjFreq)[0]
         else:
-            warn('PointSpreadFunction.freq was appended to PointSpreadFunction.steer_obj.f, '\
-                 'as it was not an element of the original list! '\
-                 'You should check possible implications on beamformer results, etc.', Warning, stacklevel = 2)
+            warn('PointSpreadFunction.freq (%s Hz) was appended to PointSpreadFunction.steer_obj.f, '\
+                 'as it was not an element of the original list!' % self.freq, Warning, stacklevel = 2)
             self.steer_obj.f.append(self.freq)
             freqInd = int(-1)
         
