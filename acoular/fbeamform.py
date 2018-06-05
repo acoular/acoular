@@ -986,7 +986,7 @@ class PointSpreadFunction (HasPrivateTraits):
         # check wether self.freq is part of SteeringVector.f
         freqInSteerObjFreq = isclose(array(self.steer_obj.f), self.freq)
         if freqInSteerObjFreq.any():
-            freqInd = flatnonzero(freqInSteerObjFreq)
+            freqInd = flatnonzero(freqInSteerObjFreq)[0]
         else:
             warn('PointSpreadFunction.freq was appended to PointSpreadFunction.steer_obj.f, '\
                  'as it was not an element of the original list! '\
