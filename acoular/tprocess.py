@@ -11,7 +11,7 @@
     TimeInOut
     MaskedTimeInOut
     Trigger
-    EngineOrderAnalysis
+    EngineOrderAnalyzer
     SpatialInterpolator
     SpatialInterpolatorConstantRotation
     Mixer
@@ -391,7 +391,7 @@ class Trigger(TimeInOut):
         return 0
 
 
-class EngineOrderAnalysis(TimeInOut):
+class EngineOrderAnalyzer(TimeInOut):
     """
     Signal processing block for Engine-Order-Analysis or Order-Tracking of 
     rotating sound sources.

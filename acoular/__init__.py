@@ -71,7 +71,7 @@ BeamformerTime, BeamformerTimeSq, BeamformerTimeTraj, BeamformerTimeSqTraj
 from .tprocess import TimeInOut, MaskedTimeInOut, Mixer, TimeAverage, \
 TimeReverse, TimePower, FiltFiltOctave, FiltOctave, TimeCache, WriteWAV, \
 WriteH5, SpatialInterpolator, SpatialInterpolatorConstantRotation, Trigger, \
-EngineOrderAnalysis
+EngineOrderAnalyzer
 from .calib import Calib
 from .trajectory import Trajectory
 from .grids import Grid, RectGrid, RectGrid3D

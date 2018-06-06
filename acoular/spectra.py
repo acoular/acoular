@@ -30,7 +30,7 @@ from .h5cache import H5cache
 from .internal import digest
 from .sources import SamplesGenerator
 from .calib import Calib
-from .tprocess import EngineOrderAnalysis
+from .tprocess import EngineOrderAnalyzer
 
 
 def _precision(idString):
@@ -81,7 +81,7 @@ class PowerSpectra( HasPrivateTraits ):
     #: valid. In this context block_size=1 means the resulting frequency 
     #: resolution is 1 EO, block_size=2 means the resolution is 1/2 EO, 
     #: block_size=4 means the resolution is 1/4 EO, etc.
-    #: See :class:`~acoular.tprocess.EngineOrderAnalysis` for more information.
+    #: See :class:`~acoular.tprocess.EngineOrderAnalyzer` for more information.
     block_size = Trait(1024, 1, 2, 4, 8, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 
         desc="number of samples per FFT block")
 
@@ -149,7 +149,7 @@ class PowerSpectra( HasPrivateTraits ):
     #: (complex) outer product of the averaged mic spectrums. So the csm is calculated
     #: just once in the end and not for all blocks (which would be the standard case).
     #: This option (True) only makes sense if :attr:`time_data` is a 
-    #: :class:`~acoular.tprocess.EngineOrderAnalysis`.
+    #: :class:`~acoular.tprocess.EngineOrderAnalyzer`.
     eo_analysis = Bool(False, desc="create CSM via linear averaging of spectrum")
     
     #: The floating-number-precision of entries of csm, eigenvalues and 
@@ -410,11 +410,11 @@ class PowerSpectra( HasPrivateTraits ):
             Array of length *block_size/2+1* containing the sample frequencies.
         """
         bs = self.time_data._block_size(self.block_size)
-        if isinstance(self.time_data, EngineOrderAnalysis):
+        if isinstance(self.time_data, EngineOrderAnalyzer):
             f = abs(fft.fftfreq(bs, 1. / self.time_data.samples_per_rev)[:int(bs / 2 + 1)])
         else:
             raise Exception ('For this feature PowerSpectra.time_data must be an instance of '
-                             'EngineOrderAnalysis but is %s instead!' % self.time_data.__class__.__name__)
+                             'EngineOrderAnalyzer but is %s instead!' % self.time_data.__class__.__name__)
         return f
 
 
