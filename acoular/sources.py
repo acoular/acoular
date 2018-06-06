@@ -76,6 +76,13 @@ class SamplesGenerator( HasPrivateTraits ):
         other classes from.
         """
         pass
+    
+    def _block_size(self, bs): 
+        """
+        Iternally used function, not for users.
+        """
+        # needed in PowerSpectra
+        return bs
 
 class TimeSamples( SamplesGenerator ):
     """

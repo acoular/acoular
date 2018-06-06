@@ -30,6 +30,7 @@ from .h5cache import H5cache
 from .internal import digest
 from .sources import SamplesGenerator
 from .calib import Calib
+from .tprocess import EngineOrderAnalysis
 
 
 def _precision(idString):
@@ -76,7 +77,12 @@ class PowerSpectra( HasPrivateTraits ):
 
     #: FFT block size, one of: 128, 256, 512, 1024, 2048 ... 16384,
     #: defaults to 1024.
-    block_size = Trait(1024, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 
+    #: For Engine Order Analysis purposes, the blocksizes 1, 2, 4, 8 are also
+    #: valid. In this context block_size=1 means the resulting frequency 
+    #: resolution is 1 EO, block_size=2 means the resolution is 1/2 EO, 
+    #: block_size=4 means the resolution is 1/4 EO, etc.
+    #: See :class:`~acoular.tprocess.EngineOrderAnalysis` for more information.
+    block_size = Trait(1024, 1, 2, 4, 8, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 
         desc="number of samples per FFT block")
 
     #: Index of lowest frequency line to compute, integer, defaults to 1,
@@ -137,6 +143,15 @@ class PowerSpectra( HasPrivateTraits ):
     csm = Property( 
         desc="cross spectral matrix")
     
+    #: False (default) if the csm is build via classic cross spectrum approach.
+    #: If True: Firstly the FFT-spectrum are averaged over all blocks for each 
+    #: microphone individually. In a second step the csm is then build via the
+    #: (complex) outer product of the averaged mic spectrums. So the csm is calculated
+    #: just once in the end and not for all blocks (which would be the standard case).
+    #: This option (True) only makes sense if :attr:`time_data` is a 
+    #: :class:`~acoular.tprocess.EngineOrderAnalysis`.
+    eo_analysis = Bool(False, desc="create CSM via linear averaging of spectrum")
+    
     #: The floating-number-precision of entries of csm, eigenvalues and 
     #: eigenvectors, corresponding to numpy dtypes. Default is 64 bit.
     precision = Trait('complex128', 'complex64', 
@@ -158,7 +173,7 @@ class PowerSpectra( HasPrivateTraits ):
     # internal identifier
     digest = Property( 
         depends_on = ['time_data.digest', 'calib.digest', 'block_size', 
-            'window', 'overlap', 'precision'], 
+            'window', 'overlap', 'precision', 'eo_analysis'], 
         )
 
     # hdf5 cache file
@@ -182,10 +197,10 @@ class PowerSpectra( HasPrivateTraits ):
         buttons = OKCancelButtons
         )
     
-    @property_depends_on('time_data.numsamples, block_size, overlap')
+    @property_depends_on('time_data.digest, block_size, overlap')
     def _get_num_blocks ( self ):
-        return self.overlap_*self.time_data.numsamples/self.block_size-\
-        self.overlap_+1
+        bs = self.time_data._block_size(self.block_size)
+        return self.overlap_ * self.time_data.numsamples / bs - self.overlap_ + 1
 
     @property_depends_on('time_data.sample_freq, block_size, ind_low, ind_high')
     def _get_freq_range ( self ):
@@ -194,10 +209,11 @@ class PowerSpectra( HasPrivateTraits ):
         except IndexError:
             return array([0., 0])
 
-    @property_depends_on( 'block_size, ind_low, ind_high' )
+    @property_depends_on( 'time_data.digest, block_size, ind_low, ind_high' )
     def _get_indices ( self ):
         try:
-            return arange(self.block_size/2+1,dtype=int)[ self.ind_low: self.ind_high ]
+            bs = self.time_data._block_size(self.block_size)
+            return arange(bs/2+1,dtype=int)[ self.ind_low: self.ind_high ]
         except IndexError:
             return range(0)
 
@@ -240,12 +256,14 @@ class PowerSpectra( HasPrivateTraits ):
         #print self.basename
         if not self.cached  or not name in self.h5f.root:
             t = self.time_data
-            wind = self.window_( self.block_size )
+            bs = t._block_size(self.block_size)
+            wind = self.window_(bs)
             weight = dot( wind, wind )
             wind = wind[newaxis, :].swapaxes( 0, 1 )
-            numfreq = int(self.block_size/2 + 1)
+            numfreq = int(bs / 2 + 1)
             csm_shape = (numfreq, t.numchannels, t.numchannels)
             csmUpper = zeros(csm_shape, dtype=self.precision)
+            spectrumEO = zeros(csmUpper.shape[:2], dtype=self.precision)
             #print "num blocks", self.num_blocks
             # for backward compatibility
             if self.calib and self.calib.num_mics > 0:
@@ -255,27 +273,32 @@ class PowerSpectra( HasPrivateTraits ):
                     raise ValueError(
                             "Calibration data not compatible: %i, %i" % \
                             (self.calib.num_mics, t.numchannels))
-            bs = self.block_size
             temp = empty((2*bs, t.numchannels))
             pos = bs
             posinc = bs/self.overlap_
-            for data in t.result(bs):
+            for data in t.result(self.block_size):
                 ns = data.shape[0]
                 temp[bs:bs+ns] = data
                 while pos+bs <= bs+ns:
                     ft = fft.rfft(temp[int(pos):int(pos+bs)]*wind, None, 0).astype(self.precision)
-                    calcCSM(csmUpper, ft)  # only upper triangular part of matrix is calculated (for speed reasons)
+                    if self.eo_analysis:
+                        spectrumEO += ft
+                    else:
+                        calcCSM(csmUpper, ft)  # only upper triangular part of matrix is calculated (for speed reasons)
                     pos += posinc
                 temp[0:bs] = temp[bs:]
                 pos -= bs
             
+            if self.eo_analysis:
+                calcCSM(csmUpper, spectrumEO)
+
             # create the full csm matrix via transposingand complex conj.
             csmLower = csmUpper.conj().transpose(0,2,1)
             [fill_diagonal(csmLower[cntFreq, :, :], 0) for cntFreq in xrange(csmLower.shape[0])]
             csm = csmLower + csmUpper
 
             # onesided spectrum: multiplication by 2.0=sqrt(2)^2
-            csm = csm*(2.0/self.block_size/weight/self.num_blocks)
+            csm = csm*(2.0/bs/weight/self.num_blocks)
             
             if self.cached:
                 precisionTuple = _precision(self.precision)
@@ -364,7 +387,6 @@ class PowerSpectra( HasPrivateTraits ):
             else:
                 return sum(self.eva[f1:f2], 0)
 
-
     def fftfreq ( self ):
         """
         Return the Discrete Fourier Transform sample frequencies.
@@ -374,9 +396,26 @@ class PowerSpectra( HasPrivateTraits ):
         f : ndarray
             Array of length *block_size/2+1* containing the sample frequencies.
         """
-        return abs(fft.fftfreq(self.block_size, 1./self.time_data.sample_freq)\
-                    [:int(self.block_size/2+1)])
-
+        bs = self.time_data._block_size(self.block_size)
+        f = abs(fft.fftfreq(bs, 1. / self.time_data.sample_freq)[:int(bs / 2 + 1)])
+        return f
+    
+    def eofreq(self):
+        """
+        Return the Discrete Fourier Transform sample frequencies in Engine Order.
+        
+        Returns
+        -------
+        f : ndarray
+            Array of length *block_size/2+1* containing the sample frequencies.
+        """
+        bs = self.time_data._block_size(self.block_size)
+        if isinstance(self.time_data, EngineOrderAnalysis):
+            f = abs(fft.fftfreq(bs, 1. / self.time_data.samples_per_rev)[:int(bs / 2 + 1)])
+        else:
+            raise Exception ('For this feature PowerSpectra.time_data must be an instance of '
+                             'EngineOrderAnalysis but is %s instead!' % self.time_data.__class__.__name__)
+        return f
 
 
 def synthetic (data, freqs, f, num=3):
