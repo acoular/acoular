@@ -89,5 +89,5 @@ TimeSamples, MaskedTimeSamples, PointSourceDipole, UncorrelatedNoiseSource, \
 SourceMixer
 from .signals import SineGenerator, WNoiseGenerator, SignalGenerator,\
 PNoiseGenerator
-from .fastFuncs import greenFunc
+from .fastFuncs import greens_func_Induct
 

@@ -57,7 +57,7 @@ from traitsui.api import View, Item
 from traitsui.menu import OKCancelButtons
 
 from .fastFuncs import beamformerFreq, calcTransfer, calcPointSpreadFunction, \
-damasSolverGaussSeidel, greenFunc
+damasSolverGaussSeidel, greens_func_Induct
 
 from .h5cache import H5cache
 from .internal import digest
@@ -238,8 +238,6 @@ class SteeringVectorInduct( SteeringVector ):
     """
     Class for implementing a steering vector for sound 
     propagation in a circular duct (without hub).
-    Assumed is a uniform flow into positive z-direction of an 
-    cartesian coordinate system.
     """
     #: :class:`~acoular.environments.InductUniformFlow`, which provides 
     #: information about the sound propagation in the medium.
@@ -344,7 +342,7 @@ class SteeringVectorInduct( SteeringVector ):
                 besselGrid[:, cntUsed] = jn(modeProps[usedModesInd[cntUsed], 0], modeProps[usedModesInd[cntUsed], 2] * self.grid_cyl[1, :] / self.env.R)
 
             # calc greens function from all grids to all mics
-            greenFunc(modeProps[usedModes, 0], modeProps[usedModes, 3], modeProps[usedModes, 4], 
+            greens_func_Induct(modeProps[usedModes, 0], modeProps[usedModes, 3], modeProps[usedModes, 4], 
                       modeProps[usedModes, 5], modeProps[usedModes, 6], modeProps[usedModes, 7], 
                       self.mpos_cyl[0, :], self.mpos_cyl[2, :], 
                       self.grid_cyl[0, :], self.grid_cyl[2, :], 
@@ -361,7 +359,7 @@ class SteeringVectorInduct( SteeringVector ):
                 else:
                     usedModesRef = ones((modeProps.shape[0]), dtype='bool')
                 transHelpArrayCenter = zeros((nGrid, 1), dtype='complex128')
-                greenFunc(modeProps[usedModesRef, 0], modeProps[usedModesRef, 3], modeProps[usedModesRef, 4],
+                greens_func_Induct(modeProps[usedModesRef, 0], modeProps[usedModesRef, 3], modeProps[usedModesRef, 4],
                           modeProps[usedModesRef, 5], modeProps[usedModesRef, 6], modeProps[usedModesRef, 7], 
                           [pointOfRefCyl[0]], [pointOfRef[2]], 
                           self.grid_cyl[0, :], self.grid_cyl[2, :], 
