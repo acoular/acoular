@@ -179,7 +179,6 @@ class InductUniformFlow( HasPrivateTraits ):
     An acoustic Induct environment for uniform flow. 
     
     The flow direction is assumed to be in positve z-direction.
-    If that is not the case, :attr:`Q` can be used.
     """
     #: The Mach number, defaults to 0.
     ma = Float(0.0,
@@ -189,18 +188,6 @@ class InductUniformFlow( HasPrivateTraits ):
     R = Float(0.0, 
         desc="Radius of duct")
 
-    #: 3x3 orthogonal transformation matrix Q to modified cartesian coordinates (default is Identity).
-    #: It is assumed that with the modified coordinates the uniform flow streams 
-    #: only into positive z_mod-direction. The transformation is done via
-    #: [x,y,z]_mod = Q * [x,y,z].
-    #: The modified cart-coordinates are then used for transformation to 
-    #: cylindrical coordinates, needed for Induct routines. That transformation 
-    #: is then done from (x_mod, y_mod, z_mod) to (r, phi, z_mod). Those 
-    #: transformation rules are : x_mod = cos(phi)*r, y_mod=sin(phi)*r, z_mod=z_mod.
-    Q = CArray(dtype=float64, shape=(3, 3), value=identity(3), 
-        desc="Orthogonal transformation matrix to modified cart-coord (with flow in z-dir)"
-        " before transforming into cylindrical coordinates.")
-    
     #: Swirl of flow around the z-direction in rpm. 
     #: CAUTION: Keep in mind that within this code a rigid-body movement is 
     #: used to approximate the swirl. However this rigid-body approximation is 
@@ -214,7 +201,7 @@ class InductUniformFlow( HasPrivateTraits ):
     omega = Property(depends_on=['swirl'])
     
     # internal identifier
-    digest = Property( depends_on = ['ma', 'R', 'Q', 'swirl'])
+    digest = Property( depends_on = ['ma', 'R', 'swirl'])
     
     @cached_property
     def _get_digest( self ):
