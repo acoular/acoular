@@ -947,7 +947,7 @@ def _transferCoreFunc(distGridToArrayCenter, distGridToAllMics, waveNumber, resu
                  (nb.float32[:], nb.float32[:], nb.float32[:], nb.float32[:], nb.float32[:], nb.float32[:], nb.float32[:],  
                   nb.float32[:], nb.float32[:], nb.float32[:], nb.float32[:,:], nb.float32[:], nb.complex64[:])],  
                 '(n),(n),(n),(n),(n),(n),(m),(m),(),(),(n,m),(n)->(m)', nopython=True, target=parallelOption, cache=cachedOption) 
-def greenFunc(m, alphaAbs, axWaveNumWithFlow, axWaveNumAgainstFlow, axWaveNumImag, normFac, micPhi, micZ, gridPhi, gridZ, besselMic, besselGrid, result): 
+def greens_func_Induct(m, alphaAbs, axWaveNumWithFlow, axWaveNumAgainstFlow, axWaveNumImag, normFac, micPhi, micZ, gridPhi, gridZ, besselMic, besselGrid, result): 
         """  
         Calculates the green function from the passed gridpoint to all mics. 
  
@@ -995,6 +995,11 @@ def greenFunc(m, alphaAbs, axWaveNumWithFlow, axWaveNumAgainstFlow, axWaveNumIma
         None 
             As the green functions are stored in passed result vector. 
         """ 
+        # This method essentially implements (20) of Bennet, Reilly, Liu, Tapken: "MODELLING MULTI-MODAL SOUND TRANSMISSION
+        # FROM POINT SOURCES IN DUCTS WITH FLOW USING A WAVE-BASED METHOD". 
+        # But with the difference: the abs of alpha_mn is used instead of alpha_mn when normalizing, 
+        # because otherwise cut-off modes at source location would be off phase with source.
+        
         nMics = micPhi.shape[0] 
         nModes = besselMic.shape[0] 
         

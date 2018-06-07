@@ -174,11 +174,13 @@ class UniformFlowEnvironment( Environment):
             rm = rm[:, 0]
         return rm
     
-class InductUniformFlow( Environment ):
+class InductUniformFlow( HasPrivateTraits ):
     """
     An acoustic Induct environment for uniform flow. 
-    """
     
+    The flow direction is assumed to be in positve z-direction.
+    If that is not the case, :attr:`Q` can be used.
+    """
     #: The Mach number, defaults to 0.
     ma = Float(0.0,
         desc="flow mach number")
@@ -206,7 +208,7 @@ class InductUniformFlow( Environment ):
     #: this code assumes no hub at all. Any calculations with swirl must
     #: therefor be treated cautiously.
     swirl = Float(0.0, 
-        desc="in RPM; negative values for clockwise rotation when looking into flow.")
+        desc="in RPM; negative values for clockwise rotation when looking against flow-direction.")
     
     # angular velocity of swirl; read only
     omega = Property(depends_on=['swirl'])
@@ -249,7 +251,7 @@ class InductUniformFlow( Environment ):
         kInput : float[nFreqs]
             Free field Wave number of observed frequency.
         maxAttenuation : float
-            Maximum attenuation level (dB) per radius of duct. All modes with 
+            Maximum attenuation level (dB) per axial length of one radius of duct. All modes with 
             attenuation levels above this value are not taken into account.
         c : float
             speed of sound
@@ -284,6 +286,9 @@ class InductUniformFlow( Environment ):
         -------
         Real and imaginary part of axial wave number is stored seperatly, because if stored
         as complex number, the whole matrix would be complex (=more memory use)
+        
+        See Phd-thesis of Ulf Tapken (TU Berlin) for information on the theory and the meanings
+        of m, n, sigma, etc.
         """
         
 #==============================================================================
@@ -291,11 +296,11 @@ class InductUniformFlow( Environment ):
 #         - Because scipy.jnp_zeros is the most time consuming part: Calculate the
 #           needed mode range first. Then one kann call jnp_zeros just once per azi-mode.
 #         - One could manage the first couple of cut-off modes also via taken all modes 
-#           within cut-on factor of e.g. 1.2. BUT: For small frequencies this means
-#           one almost takes no cut-off modes at all, whereas for greater frequencies
+#           within cut-on factor of e.g. 1.2. BUT: For lower frequencies this means
+#           one almost takes no cut-off modes at all, whereas for higher frequencies
 #           the number of massively attenuated modes in the output table is very high.
 #           This is time consuming and brings no advantage.
-#           -> Therefor we work with an explicit attenuation limit maxAttenuation
+#           -> Therefore we work with an explicit attenuation limit maxAttenuation
 #==============================================================================
         
         # get maximum matrix of eigen values of bessel dgl
