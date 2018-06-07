@@ -270,10 +270,10 @@ class SteeringVectorInduct( SteeringVector ):
     transfer_norm_ref_point = CArray(dtype=float64, shape=(3, ), value=(inf, inf, inf))
     
     #: grid positions in cylindrical coordinates; read only
-    grid_cyl = Property(depends_on=['grid.digest', 'env.digest'])
+    grid_cyl = Property(depends_on='grid.digest')
     
     #: grid positions in cylindrical coordinates; read only
-    mpos_cyl = Property(depends_on=['mpos.digest', 'env.digest'])
+    mpos_cyl = Property(depends_on='mpos.digest')
     
     #: List with table of modal properties of each (m,n)-mode (in rows). Column entries are:
     #: [azim. order, rad. order, sigma, alpha.real, alpha.imag, k+, k-, norm-Factor].
@@ -295,11 +295,11 @@ class SteeringVectorInduct( SteeringVector ):
     
     @cached_property
     def _get_grid_cyl(self):
-        return cartToCyl(self.grid.pos(), self.env.Q)
+        return cartToCyl(self.grid.pos())
     
     @cached_property
     def _get_mpos_cyl(self):
-        return cartToCyl(self.mpos.mpos, self.env.Q)
+        return cartToCyl(self.mpos.mpos)
     
     @cached_property
     def _get_modal_properties(self):
