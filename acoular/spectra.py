@@ -10,6 +10,7 @@
     :toctree: generated/
 
     PowerSpectra
+    PowerSpectraEngineOrderAnalyzed
     synthetic
 """
 from warnings import warn
@@ -77,12 +78,7 @@ class PowerSpectra( HasPrivateTraits ):
 
     #: FFT block size, one of: 128, 256, 512, 1024, 2048 ... 16384,
     #: defaults to 1024.
-    #: For Engine Order Analysis purposes, the blocksizes 1, 2, 4, 8 are also
-    #: valid. In this context block_size=1 means the resulting frequency 
-    #: resolution is 1 EO, block_size=2 means the resolution is 1/2 EO, 
-    #: block_size=4 means the resolution is 1/4 EO, etc.
-    #: See :class:`~acoular.tprocess.EngineOrderAnalyzer` for more information.
-    block_size = Trait(1024, 1, 2, 4, 8, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 
+    block_size = Trait(1024, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 
         desc="number of samples per FFT block")
 
     #: Index of lowest frequency line to compute, integer, defaults to 1,
@@ -143,15 +139,6 @@ class PowerSpectra( HasPrivateTraits ):
     csm = Property( 
         desc="cross spectral matrix")
     
-    #: False (default) if the csm is build via classic cross spectrum approach.
-    #: If True: Firstly the FFT-spectrum are averaged over all blocks for each 
-    #: microphone individually. In a second step the csm is then build via the
-    #: (complex) outer product of the averaged mic spectrums. So the csm is calculated
-    #: just once in the end and not for all blocks (which would be the standard case).
-    #: This option (True) only makes sense if :attr:`time_data` is a 
-    #: :class:`~acoular.tprocess.EngineOrderAnalyzer`.
-    eo_analysis = Bool(False, desc="create CSM via linear averaging of spectrum")
-    
     #: The floating-number-precision of entries of csm, eigenvalues and 
     #: eigenvectors, corresponding to numpy dtypes. Default is 64 bit.
     precision = Trait('complex128', 'complex64', 
@@ -173,7 +160,7 @@ class PowerSpectra( HasPrivateTraits ):
     # internal identifier
     digest = Property( 
         depends_on = ['time_data.digest', 'calib.digest', 'block_size', 
-            'window', 'overlap', 'precision', 'eo_analysis'], 
+            'window', 'overlap', 'precision'], 
         )
 
     # hdf5 cache file
@@ -197,10 +184,10 @@ class PowerSpectra( HasPrivateTraits ):
         buttons = OKCancelButtons
         )
     
-    @property_depends_on('time_data.digest, block_size, overlap')
+    @property_depends_on('time_data.numsamples, block_size, overlap')
     def _get_num_blocks ( self ):
-        bs = self.time_data._block_size(self.block_size)
-        return self.overlap_ * self.time_data.numsamples / bs - self.overlap_ + 1
+        return self.overlap_*self.time_data.numsamples/self.block_size-\
+        self.overlap_+1
 
     @property_depends_on('time_data.sample_freq, block_size, ind_low, ind_high')
     def _get_freq_range ( self ):
@@ -209,11 +196,10 @@ class PowerSpectra( HasPrivateTraits ):
         except IndexError:
             return array([0., 0])
 
-    @property_depends_on( 'time_data.digest, block_size, ind_low, ind_high' )
+    @property_depends_on( 'block_size, ind_low, ind_high' )
     def _get_indices ( self ):
         try:
-            bs = self.time_data._block_size(self.block_size)
-            return arange(bs/2+1,dtype=int)[ self.ind_low: self.ind_high ]
+            return arange(self.block_size/2+1,dtype=int)[ self.ind_low: self.ind_high ]
         except IndexError:
             return range(0)
 
@@ -256,11 +242,331 @@ class PowerSpectra( HasPrivateTraits ):
         #print self.basename
         if not self.cached  or not name in self.h5f.root:
             t = self.time_data
-            bs = t._block_size(self.block_size)
-            wind = self.window_(bs)
+            wind = self.window_( self.block_size )
             weight = dot( wind, wind )
             wind = wind[newaxis, :].swapaxes( 0, 1 )
-            numfreq = int(bs / 2 + 1)
+            numfreq = int(self.block_size/2 + 1)
+            csm_shape = (numfreq, t.numchannels, t.numchannels)
+            csmUpper = zeros(csm_shape, dtype=self.precision)
+            #print "num blocks", self.num_blocks
+            # for backward compatibility
+            if self.calib and self.calib.num_mics > 0:
+                if self.calib.num_mics == t.numchannels:
+                    wind = wind * self.calib.data[newaxis, :]
+                else:
+                    raise ValueError(
+                            "Calibration data not compatible: %i, %i" % \
+                            (self.calib.num_mics, t.numchannels))
+            bs = self.block_size
+            temp = empty((2*bs, t.numchannels))
+            pos = bs
+            posinc = bs/self.overlap_
+            for data in t.result(bs):
+                ns = data.shape[0]
+                temp[bs:bs+ns] = data
+                while pos+bs <= bs+ns:
+                    ft = fft.rfft(temp[int(pos):int(pos+bs)]*wind, None, 0).astype(self.precision)
+                    calcCSM(csmUpper, ft)  # only upper triangular part of matrix is calculated (for speed reasons)
+                    pos += posinc
+                temp[0:bs] = temp[bs:]
+                pos -= bs
+            
+            # create the full csm matrix via transposingand complex conj.
+            csmLower = csmUpper.conj().transpose(0,2,1)
+            [fill_diagonal(csmLower[cntFreq, :, :], 0) for cntFreq in xrange(csmLower.shape[0])]
+            csm = csmLower + csmUpper
+
+            # onesided spectrum: multiplication by 2.0=sqrt(2)^2
+            csm = csm*(2.0/self.block_size/weight/self.num_blocks)
+            
+            if self.cached:
+                precisionTuple = _precision(self.precision)
+                atom = tables.ComplexAtom(precisionTuple[2])
+                filters = tables.Filters(complevel=5, complib='blosc')
+                ac = self.h5f.create_carray(self.h5f.root, name, atom,
+                                            csm_shape, filters=filters)
+                ac[:] = csm
+                return ac
+            else:
+                return csm
+        else:
+            return self.h5f.get_node('/', name)
+
+
+
+    @property_depends_on('digest')
+    def _get_eva ( self ):
+        return self._calc_ev()[0]
+
+    @property_depends_on('digest')
+    def _get_eve ( self ):
+        return self._calc_ev()[1]
+
+    def _calc_ev ( self ):
+        """
+        eigenvalues / eigenvectors calculation
+        """
+        name_eva = 'eva_' + self.digest
+        name_eve = 'eve_' + self.digest
+        csm = self.csm #trigger calculation
+        if (not name_eva in self.h5f.root) or (not name_eve in self.h5f.root):
+            csm_shape = self.csm.shape
+            precisionTuple = _precision(self.precision)
+            eva = empty(csm_shape[0:2], dtype=precisionTuple[0])
+            eve = empty(csm_shape, dtype=precisionTuple[1])
+            for i in range(csm_shape[0]):
+                (eva[i], eve[i])=linalg.eigh(self.csm[i])
+            atom_eva = precisionTuple[3]()
+            atom_eve = tables.ComplexAtom(precisionTuple[2])
+            filters = tables.Filters(complevel=5, complib='blosc')
+            ac_eva = self.h5f.create_carray(self.h5f.root, name_eva, atom_eva, \
+                eva.shape, filters=filters)
+            ac_eve = self.h5f.create_carray(self.h5f.root, name_eve, atom_eve, \
+                eve.shape, filters=filters)
+            ac_eva[:] = eva
+            ac_eve[:] = eve
+        return (self.h5f.get_node('/', name_eva), \
+                    self.h5f.get_node('/', name_eve))
+            
+    def synthetic_ev( self, freq, num=0):
+        """Return synthesized frequency band values of the eigenvalues.
+        
+        Parameters
+        ----------
+        freq : float 
+            Band center frequency for which to return the results.
+        num : integer
+            Controls the width of the frequency bands considered; defaults to
+            3 (third-octave band).
+            
+            ===  =====================
+            num  frequency band width
+            ===  =====================
+            0    single frequency line
+            1    octave band
+            3    third-octave band
+            n    1/n-octave band
+            ===  =====================
+
+        Returns
+        -------
+        float 
+            Synthesized frequency band value of the eigenvalues (the sum of
+            all values that are contained in the band).
+        """
+        f = self.fftfreq()
+        if num == 0:
+            # single frequency line
+            return self.eva[searchsorted(f, freq)]
+        else:
+            f1 = searchsorted(f, freq*2.**(-0.5/num))
+            f2 = searchsorted(f, freq*2.**(0.5/num))
+            if f1 == f2:
+                return self.eva[f1]
+            else:
+                return sum(self.eva[f1:f2], 0)
+
+
+    def fftfreq ( self ):
+        """
+        Return the Discrete Fourier Transform sample frequencies.
+        
+        Returns
+        -------
+        f : ndarray
+            Array of length *block_size/2+1* containing the sample frequencies.
+        """
+        return abs(fft.fftfreq(self.block_size, 1./self.time_data.sample_freq)\
+                    [:int(self.block_size/2+1)])
+
+
+class PowerSpectraEngineOrderAnalyzed( HasPrivateTraits ):
+    """An copy of the PowerSpectra for Engine Ordered analysed signals.
+    """
+    #: The :class:`~acoular.sources.SamplesGenerator` object that provides the data.
+    time_data = Trait(SamplesGenerator, 
+        desc="time data object")
+
+    #: Number of samples 
+    numchannels = Delegate('time_data')
+
+    #: The :class:`~acoular.calib.Calib` object that provides the calibration data, 
+    #: defaults to no calibration, i.e. the raw time data is used.
+    #:
+    #: **deprecated**:      use :attr:`~acoular.sources.TimeSamples.calib` property of 
+    #: :class:`~acoular.sources.TimeSamples` objects
+    calib = Instance(Calib)
+
+    #: FFT block size, one of: 128, 256, 512, 1024, 2048 ... 16384,
+    #: defaults to 1024.
+    block_size = Trait(1024, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536,
+        desc="number of samples per FFT block")
+
+    #: Index of lowest frequency line to compute, integer, defaults to 1,
+    #: is used only by objects that fetch the csm, PowerSpectra computes every
+    #: frequency line.
+    ind_low = Range(1, 
+        desc="index of lowest frequency line")
+
+    #: Index of highest frequency line to compute, integer, 
+    #: defaults to -1 (last possible line for default block_size).
+    ind_high = Int(-1, 
+        desc="index of highest frequency line")
+
+    #: Window function for FFT, one of:
+    #:   * 'Rectangular' (default)
+    #:   * 'Hanning'
+    #:   * 'Hamming'
+    #:   * 'Bartlett'
+    #:   * 'Blackman'
+    window = Trait('Rectangular', 
+        {'Rectangular':ones, 
+        'Hanning':hanning, 
+        'Hamming':hamming, 
+        'Bartlett':bartlett, 
+        'Blackman':blackman}, 
+        desc="type of window for FFT")
+
+    #: Overlap factor for averaging: 'None'(default), '50%', '75%', '87.5%'.
+    overlap = Trait('None', {'None':1, '50%':2, '75%':4, '87.5%':8}, 
+        desc="overlap of FFT blocks")
+        
+    #: Flag, if true (default), the result is cached in h5 files and need not
+    #: to be recomputed during subsequent program runs.
+    cached = Bool(True, 
+        desc="cached flag")   
+
+    #: Number of FFT blocks to average, readonly
+    #: (set from block_size and overlap).
+    num_blocks = Property(
+        desc="overall number of FFT blocks")
+
+    #: 2-element array with the lowest and highest frequency, readonly.
+    freq_range = Property(
+        desc = "frequency range" )
+        
+    #: Array with a sequence of indices for all frequencies 
+    #: between :attr:`ind_low` and :attr:`ind_high` within the result, readonly.
+    indices = Property(
+        desc = "index range" )
+        
+    #: Name of the cache file without extension, readonly.
+    basename = Property( depends_on = 'time_data.digest', 
+        desc="basename for cache file")
+
+    #: The cross spectral matrix, 
+    #: (number of frequencies, numchannels, numchannels) array of complex;
+    #: readonly.
+    csm = Property( 
+        desc="cross spectral matrix")
+    
+    #: The floating-number-precision of entries of csm, eigenvalues and 
+    #: eigenvectors, corresponding to numpy dtypes. Default is 64 bit.
+    precision = Trait('complex128', 'complex64', 
+                      desc="precision csm, eva, eve")
+
+    #: Eigenvalues of the cross spectral matrix as an
+    #: (number of frequencies) array of floats, readonly.
+    eva = Property( 
+        desc="eigenvalues of cross spectral matrix")
+
+    #: Eigenvectors of the cross spectral matrix as an
+    #: (number of frequencies, numchannels, numchannels) array of floats,
+    #: readonly.
+    eve = Property( 
+        desc="eigenvectors of cross spectral matrix")
+
+
+
+    # internal identifier
+    digest = Property( 
+        depends_on = ['time_data.digest', 'calib.digest', 'block_size', 
+            'window', 'overlap', 'precision'], 
+        )
+
+    # hdf5 cache file
+    h5f = Instance(tables.File, transient = True )
+    
+    traits_view = View(
+        ['time_data@{}', 
+         'calib@{}', 
+            ['block_size', 
+                'window', 
+                'overlap', 
+                    ['ind_low{Low Index}', 
+                    'ind_high{High Index}', 
+                    '-[Frequency range indices]'], 
+                    ['num_blocks~{Number of blocks}', 
+                    'freq_range~{Frequency range}', 
+                    '-'], 
+                '[FFT-parameters]'
+            ], 
+        ], 
+        buttons = OKCancelButtons
+        )
+    
+    @property_depends_on('time_data.numsamples, block_size, overlap')
+    def _get_num_blocks ( self ):
+        return self.overlap_*self.time_data.numsamples/self.block_size-\
+        self.overlap_+1
+
+    @property_depends_on('time_data.sample_freq, block_size, ind_low, ind_high')
+    def _get_freq_range ( self ):
+        try:
+            return self.fftfreq()[[ self.ind_low, self.ind_high ]]
+        except IndexError:
+            return array([0., 0])
+
+    @property_depends_on( 'block_size, ind_low, ind_high' )
+    def _get_indices ( self ):
+        try:
+            return arange(self.block_size/2+1,dtype=int)[ self.ind_low: self.ind_high ]
+        except IndexError:
+            return range(0)
+
+    @cached_property
+    def _get_digest( self ):
+        return digest( self )
+
+    @cached_property
+    def _get_basename( self ):
+        if 'basename' in self.time_data.all_trait_names():
+            return self.time_data.basename
+        else: 
+            return self.time_data.__class__.__name__ + self.time_data.digest
+
+    @property_depends_on('digest')
+    def _get_csm ( self ):
+        """
+        Main work is done here:
+        Cross spectral matrix is either loaded from cache file or
+        calculated and then additionally stored into cache.
+        """
+        # test for dual calibration
+        obj = self.time_data # start with time_data obj
+        while obj:
+            if 'calib' in obj.all_trait_names(): # at original source?
+                if obj.calib and self.calib:
+                    if obj.calib.digest == self.calib.digest:
+                        self.calib = None # ignore it silently
+                    else:
+                        raise ValueError("Non-identical dual calibration for "\
+                                    "both TimeSamples and PowerSpectra object")
+                obj = None
+            else:
+                try:
+                    obj = obj.source # traverse down until original data source
+                except AttributeError:
+                    obj = None
+        name = 'csm_' + self.digest
+        H5cache.get_cache( self, self.basename )
+        #print self.basename
+        if not self.cached  or not name in self.h5f.root:
+            t = self.time_data
+            wind = self.window_( self.block_size )
+            weight = dot( wind, wind )
+            wind = wind[newaxis, :].swapaxes( 0, 1 )
+            numfreq = int(self.block_size/2 + 1)
             csm_shape = (numfreq, t.numchannels, t.numchannels)
             csmUpper = zeros(csm_shape, dtype=self.precision)
             spectrumEO = zeros(csmUpper.shape[:2], dtype=self.precision)
@@ -273,24 +579,20 @@ class PowerSpectra( HasPrivateTraits ):
                     raise ValueError(
                             "Calibration data not compatible: %i, %i" % \
                             (self.calib.num_mics, t.numchannels))
+            bs = self.block_size
             temp = empty((2*bs, t.numchannels))
             pos = bs
             posinc = bs/self.overlap_
-            for data in t.result(self.block_size):
+            for data in t.result(bs):
                 ns = data.shape[0]
                 temp[bs:bs+ns] = data
                 while pos+bs <= bs+ns:
                     ft = fft.rfft(temp[int(pos):int(pos+bs)]*wind, None, 0).astype(self.precision)
-                    if self.eo_analysis:
-                        spectrumEO += ft
-                    else:
-                        calcCSM(csmUpper, ft)  # only upper triangular part of matrix is calculated (for speed reasons)
+                    spectrumEO += ft
                     pos += posinc
                 temp[0:bs] = temp[bs:]
                 pos -= bs
-            
-            if self.eo_analysis:
-                calcCSM(csmUpper, spectrumEO)
+            calcCSM(csmUpper, spectrumEO)
 
             # create the full csm matrix via transposingand complex conj.
             csmLower = csmUpper.conj().transpose(0,2,1)
@@ -298,7 +600,7 @@ class PowerSpectra( HasPrivateTraits ):
             csm = csmLower + csmUpper
 
             # onesided spectrum: multiplication by 2.0=sqrt(2)^2
-            csm = csm*(2.0/bs/weight/self.num_blocks)
+            csm = csm*(2.0/self.block_size/weight/self.num_blocks)
             
             if self.cached:
                 precisionTuple = _precision(self.precision)
@@ -389,19 +691,6 @@ class PowerSpectra( HasPrivateTraits ):
 
     def fftfreq ( self ):
         """
-        Return the Discrete Fourier Transform sample frequencies.
-        
-        Returns
-        -------
-        f : ndarray
-            Array of length *block_size/2+1* containing the sample frequencies.
-        """
-        bs = self.time_data._block_size(self.block_size)
-        f = abs(fft.fftfreq(bs, 1. / self.time_data.sample_freq)[:int(bs / 2 + 1)])
-        return f
-    
-    def eofreq(self):
-        """
         Return the Discrete Fourier Transform sample frequencies in Engine Order.
         
         Returns
@@ -409,12 +698,13 @@ class PowerSpectra( HasPrivateTraits ):
         f : ndarray
             Array of length *block_size/2+1* containing the sample frequencies.
         """
-        bs = self.time_data._block_size(self.block_size)
-        if isinstance(self.time_data, EngineOrderAnalyzer):
-            f = abs(fft.fftfreq(bs, 1. / self.time_data.samples_per_rev)[:int(bs / 2 + 1)])
-        else:
+        EOInstance = _recursiv_source_class_check(self.time_data, EngineOrderAnalyzer)
+        if EOInstance == []:
             raise Exception ('For this feature PowerSpectra.time_data must be an instance of '
                              'EngineOrderAnalyzer but is %s instead!' % self.time_data.__class__.__name__)
+        else:
+            bs = self.block_size
+            f = abs(fft.fftfreq(bs, 1. / EOInstance.samples_per_rev)[:int(bs / 2 + 1)])
         return f
 
 
@@ -503,4 +793,15 @@ def synthetic (data, freqs, f, num=3):
                 h = sum(data[ind1:ind2], 0)
             res += [h]
     return array(res)
-        
+
+def _recursiv_source_class_check(source, classType):
+    # This method checks whether any source property (and their source properties, 
+    # and their...) is an instance of classType. If so, the respective instance
+    # is returned. If not: an empty list ([]) is returned.
+    try:
+        while not isinstance(source, classType):
+            source = source.source
+        returnClass = source
+    except:
+        returnClass = []
+    return returnClass

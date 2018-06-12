@@ -459,42 +459,34 @@ class EngineOrderAnalyzer(TimeInOut):
         durationPerRev = samplesPerRev / fsMeasured  # in seconds
         return 60. / durationPerRev
     
-    def _block_size(self, bs):
-        """
-        Iternally used function, not for users.
-        """
-        # needed in PowerSpectra
-        nSamples = self.samples_per_rev * bs
-        return int(nSamples)
-    
-    def result(self, num=1):
+    def result(self, num):
         """ 
         Python generator that yields the output block-wise.
         
         Parameters
         ----------
         num : integer
-            This parameter defines the size of the blocks to be yielded. In the 
-            EO context one block means one revolution. So num=2 yields all
-            the samples of 2 revolutions.
+            This parameter defines the size of the blocks to be yielded. This 
+            parameter must be passed and should be a multiple of the number
+            of samples per revolution of the trigger signal.
         
         Returns
         -------
-        Samples in blocks of shape (:attr:`samples_per_rev` * num, :attr:`numchannels`). 
+        Samples in blocks of shape (num, :attr:`numchannels`). 
             This generator only yields full revolutions, which means that all
             samples following the last trigger peak are cropped.
         """
         nMics = self.numchannels
         oncePerRevInd, maxLen, minLen = self.trigger.trigger_data
         nRev = len(oncePerRevInd) - 1
-        nResample = self.samples_per_rev
-        tNew = linspace(0, 1, nResample, endpoint=False)
+        nAdjacentRevs = int(num / self.samples_per_rev)
+        tNew = linspace(0, 1, self.samples_per_rev, endpoint=False)
         indStart = cntRev = cntAdjacentRevs = 0
         samplesIDPerRev = arange(oncePerRevInd[0], oncePerRevInd[1])
         valuesPerRev = zeros((len(samplesIDPerRev), nMics))
         valuesPerRev.fill(nan)
         resampled = zeros((len(tNew), nMics))
-        resamplesStack = zeros((len(tNew) * num, nMics))
+        resamplesStack = zeros((num, nMics))
 
         for timeDataRaw in self.source.result(minLen):
             # check which entries of timeDataRaw can be used for current Revolution
@@ -512,12 +504,12 @@ class EngineOrderAnalyzer(TimeInOut):
                 
                 # actual resampling
                 resampled = asarray([interp(tNew, tOld, valuesPerRev[:, cntMic]) for cntMic in range(nMics)]).T
-                stackStart = int((cntAdjacentRevs - 1) * nResample)
-                stackEnd = int(stackStart + nResample)
+                stackStart = int((cntAdjacentRevs - 1) * self.samples_per_rev)
+                stackEnd = int(stackStart + self.samples_per_rev)
                 resamplesStack[stackStart : stackEnd, :] = resampled
                 
-                # if num resamples are calculated -> yield them
-                if cntAdjacentRevs == num:
+                # if nAdjacentRevs resamples are calculated -> yield them
+                if cntAdjacentRevs == nAdjacentRevs:
                     yield resamplesStack
                     cntAdjacentRevs = 0
             
@@ -586,13 +578,6 @@ class SpatialInterpolator(TimeInOut):
     @cached_property
     def _get_reduced_interp_dim(self):
         return self._reduced_interp_dim_core_func(self.mpos_real.mpos, self.mpos_virtual.mpos)
-    
-    def _block_size(self, bs):
-        """
-        Iternally used function, not for users.
-        """
-        # needed in PowerSpectra
-        return self.source._block_size(bs)
     
     def _reduced_interp_dim_core_func(self, mic, micVirt, basisVectors=[]):
         """ 
