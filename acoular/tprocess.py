@@ -384,10 +384,9 @@ class Trigger(TimeInOut):
         return thresh
     
     def _check_trigger_existence(self):
-        for triggerData in self.source.result(1):
-            nChannels = triggerData.shape[1]
-            if not nChannels == 1:
-                raise Exception('Trigger signal must consist of ONE channel, instead %s channels are given!' % nChannels)
+        nChannels = self.source.numchannels
+        if not nChannels == 1:
+            raise Exception('Trigger signal must consist of ONE channel, instead %s channels are given!' % nChannels)
         return 0
 
 
