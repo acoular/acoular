@@ -11,6 +11,7 @@
     TimeInOut
     MaskedTimeInOut
     Trigger
+    EngineOrderAnalyzer
     SpatialInterpolator
     SpatialInterpolatorConstantRotation
     Mixer
@@ -29,7 +30,7 @@ from six import next
 from numpy import array, empty, empty_like, pi, sin, sqrt, zeros, newaxis, unique, \
 int16, cross, isclose, zeros_like, dot, nan, concatenate, isnan, nansum, float64, \
 identity, argsort, interp, arange, append, linspace, flatnonzero, argmin, argmax, \
-delete, mean, inf
+delete, mean, inf, ceil, log2, logical_and, asarray
 from numpy.linalg import norm
 from numpy.matlib import repmat
 from scipy.spatial import Delaunay
@@ -49,7 +50,7 @@ from warnings import warn
 # acoular imports
 from .internal import digest
 from .h5cache import H5cache, td_dir
-from .sources import SamplesGenerator, MaskedTimeSamples
+from .sources import SamplesGenerator
 from .environments import cartToCyl
 from .microphones import MicGeom
 
@@ -387,6 +388,141 @@ class Trigger(TimeInOut):
         if not nChannels == 1:
             raise Exception('Trigger signal must consist of ONE channel, instead %s channels are given!' % nChannels)
         return 0
+
+
+class EngineOrderAnalyzer(TimeInOut):
+    """
+    Signal processing block for Engine-Order-Analysis or Order-Tracking of 
+    rotating sound sources.
+    
+    If a signal with 1/Rev triggers is provided, this class upsamples its 
+    :attr:`~acoular.tprocess.TimeInOut.source` samples, s.t. each revolution 
+    consists of the same number of samples N.
+    Here N is the next power of 2 which contains all original samples of the 
+    slowest revolution.
+    
+    Because of the common samples per revolution, possible fluctuations of the
+    rotational speed still result in the same phase of frequency bins, when 
+    performing a subsequent FFT. Averaging those FFTs would mean that 
+    non-rotor-coherent sources decay, whereas rotor-coherent sources don't.
+    
+    The output is delivered via the generator :meth:`result`.
+    """
+    #: Upsampled sample frequency. Is calculated via 
+    #: round(mean(:attr:`rpm`) / 60 * :attr:`samples_per_rev`).
+    sample_freq = Property(depends_on = ['source.sample_freq', 'trigger.digest'])
+    
+    #: Number of samples 
+    numsamples = Property(depends_on = ['source.sample_freq', 'trigger.digest'])
+    
+    #: Trigger source; :class:`~acoular.tprocess.Trigger` object.
+    trigger = Instance(Trigger)
+    
+    #: Integer containing the samples per revolution for the upsampled signal.
+    #: Is the next power of 2 which contains all original samples of the 
+    #: slowest revolution.
+    samples_per_rev = Property(depends_on = 'trigger.digest')
+    
+    #: Rotational speed in rpm for each revolution. A vector of floats of 
+    #: length n-1, where n are the trigger-peaks delivered by :attr:`trigger`.
+    rpm = Property(depends_on = ['source.sample_freq', 'trigger.digest'])
+    
+    # internal identifier
+    digest = Property(depends_on = ['source.digest', 'trigger.digest'])
+    
+    @cached_property
+    def _get_sample_freq(self):
+        rps = mean(self.rpm) / 60
+        fs = int(round(rps * self.samples_per_rev))
+        return fs
+    
+    @cached_property
+    def _get_numsamples(self):
+        return self.samples_per_rev * len(self.rpm)
+    
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+    
+    @cached_property
+    def _get_samples_per_rev(self):
+        maxLen = self.trigger.trigger_data[1]
+        nResample = int(2 ** ceil(log2(maxLen)))  # round to next power of 2
+        return nResample
+    
+    @cached_property
+    def _get_rpm(self):
+        fsMeasured = self.source.sample_freq
+        peakLoc = self.trigger.trigger_data[0]
+        samplesPerRev = peakLoc[1:] - peakLoc[:-1]
+        durationPerRev = samplesPerRev / fsMeasured  # in seconds
+        return 60. / durationPerRev
+    
+    def result(self, num):
+        """ 
+        Python generator that yields the output block-wise.
+        
+        Parameters
+        ----------
+        num : integer
+            This parameter defines the size of the blocks to be yielded. This 
+            parameter must be passed and should be a multiple of the number
+            of samples per revolution of the trigger signal.
+        
+        Returns
+        -------
+        Samples in blocks of shape (num, :attr:`numchannels`). 
+            This generator only yields full revolutions, which means that all
+            samples following the last trigger peak are cropped.
+        """
+        nMics = self.numchannels
+        oncePerRevInd, maxLen, minLen = self.trigger.trigger_data
+        nRev = len(oncePerRevInd) - 1
+        nAdjacentRevs = int(num / self.samples_per_rev)
+        tNew = linspace(0, 1, self.samples_per_rev, endpoint=False)
+        indStart = cntRev = cntAdjacentRevs = 0
+        samplesIDPerRev = arange(oncePerRevInd[0], oncePerRevInd[1])
+        valuesPerRev = zeros((len(samplesIDPerRev), nMics))
+        valuesPerRev.fill(nan)
+        resampled = zeros((len(tNew), nMics))
+        resamplesStack = zeros((num, nMics))
+
+        for timeDataRaw in self.source.result(minLen):
+            # check which entries of timeDataRaw can be used for current Revolution
+            indEnd = indStart + timeDataRaw.shape[0]
+            correctSamplesPerRev = logical_and(samplesIDPerRev >= indStart, samplesIDPerRev < indEnd)
+            samplesIDRawInput = arange(indStart, indEnd)
+            correctSamplesRawInput = logical_and(samplesIDRawInput >= oncePerRevInd[cntRev], samplesIDRawInput < oncePerRevInd[cntRev + 1])
+            valuesPerRev[correctSamplesPerRev, :] = timeDataRaw[correctSamplesRawInput]
+            
+            # check whether current Revolution is filled completely
+            if not isnan(valuesPerRev).any():
+                cntAdjacentRevs += 1
+                cntRev += 1
+                tOld = linspace(0, 1, len(samplesIDPerRev), endpoint=False)
+                
+                # actual resampling
+                resampled = asarray([interp(tNew, tOld, valuesPerRev[:, cntMic]) for cntMic in range(nMics)]).T
+                stackStart = int((cntAdjacentRevs - 1) * self.samples_per_rev)
+                stackEnd = int(stackStart + self.samples_per_rev)
+                resamplesStack[stackStart : stackEnd, :] = resampled
+                
+                # if nAdjacentRevs resamples are calculated -> yield them
+                if cntAdjacentRevs == nAdjacentRevs:
+                    yield resamplesStack
+                    cntAdjacentRevs = 0
+            
+                if cntRev < nRev:
+                    # fill all entries of next Revolution with the left over stuff of current timeDataRaw
+                    samplesIDPerRev = arange(oncePerRevInd[cntRev], oncePerRevInd[cntRev + 1])
+                    correctSamplesPerRev = logical_and(samplesIDPerRev >= indStart, samplesIDPerRev < indEnd)
+                    valuesPerRev = zeros((len(samplesIDPerRev), nMics))
+                    valuesPerRev.fill(nan)
+                    valuesPerRev[correctSamplesPerRev, :] = timeDataRaw[~correctSamplesRawInput]
+                else:
+                    # stop if the last revolution with beginning and end trigger peak is done
+                    break
+            indStart = indEnd
 
 
 class SpatialInterpolator(TimeInOut):
