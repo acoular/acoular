@@ -74,7 +74,7 @@ WriteH5
 from .calib import Calib
 from .trajectory import Trajectory
 from .grids import Grid, RectGrid, RectGrid3D
-from .environments import cartToCyl, Environment, UniformFlowEnvironment, InductUniformFlow, \
+from .environments import Environment, UniformFlowEnvironment, \
 FlowField, OpenJet, SlotJet, GeneralFlowEnvironment
 from .microphones import MicGeom
 from .spectra import PowerSpectra, PowerSpectra as EigSpectra, synthetic
@@ -82,12 +82,10 @@ from .spectra import PowerSpectra, PowerSpectra as EigSpectra, synthetic
 from .fbeamform import BeamformerBase, BeamformerCapon, BeamformerEig, \
 BeamformerMusic, BeamformerDamas, BeamformerDamasPlus, BeamformerOrth,BeamformerCleansc, \
 BeamformerCMF, BeamformerClean, BeamformerFunctional, BeamformerGIB, L_p, integrate, \
-PointSpreadFunction, SteeringVector, SteeringVectorInduct
+PointSpreadFunction, SteeringVector
 
 from .sources import PointSource, MovingPointSource, SamplesGenerator, \
 TimeSamples, MaskedTimeSamples, PointSourceDipole, UncorrelatedNoiseSource, \
 SourceMixer
 from .signals import SineGenerator, WNoiseGenerator, SignalGenerator,\
 PNoiseGenerator
-from .fastFuncs import greens_func_Induct
-
