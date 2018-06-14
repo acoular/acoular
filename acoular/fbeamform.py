@@ -303,10 +303,9 @@ class SteeringVectorInduct( SteeringVector ):
     
     @cached_property
     def _get_modal_properties(self):
-        k = self.k
-        maxAtten = self.max_attenuation
-        c = self.c
-        result = self.env.modal_properties(k, maxAtten, c)
+        if len(self.k) == 0:
+            raise Exception('Property f of SteeringVectorInduct must be set with Floats, but is [] instead!')
+        result = self.env.modal_properties(self.k, self.max_attenuation, self.c)
         return result
     
     @cached_property

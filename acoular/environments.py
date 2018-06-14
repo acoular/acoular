@@ -334,7 +334,6 @@ class InductUniformFlow( HasPrivateTraits ):
                            
         output = []
         for cntFreqs in range(len(kInput)):
-            print('Modeprops: Freq %s of %s' %(cntFreqs, len(kInput)))
             k = kInput[cntFreqs]
             # start the actual loop, to calculate modal properties
             # (0,0) mode
@@ -342,7 +341,11 @@ class InductUniformFlow( HasPrivateTraits ):
             alphaHelp, axWaveNumHelp = self._calcModalCoreProps(0, k, 0, self.omega, c)[:-1]
             axWaveNum = axWaveNumHelp[newaxis]
             normFac = array([0.5])
-            alpha = array(alphaHelp, dtype='complex128')
+# =============================================================================
+#             # Using the much cleaner array(alphaHelp) produces errors. Therefore those 2 lines.
+            alpha = zeros((1), dtype='complex128')  
+            alpha[0] = alphaHelp
+# =============================================================================
             
             # calc all other modes
             for azimuthalIncrement in [-1, 0, 1]:  # order of azimuthal modes: negativ, 0, positive
@@ -361,7 +364,7 @@ class InductUniformFlow( HasPrivateTraits ):
                     while continueRadial:
                         sigmaHelp = sigmaPrelim[radiMode, abs(aziMode)]
                         alphaHelp, axWaveNumHelp, deltaLHelp = self._calcModalCoreProps(aziMode, k, sigmaHelp, self.omega, c)
-                        if abs(deltaLHelp) * self.R < maxAttenuation:
+                        if abs(deltaLHelp) * self.R <= maxAttenuation:
                             sigma = append(sigma, sigmaHelp)
                             m = append(m, aziMode)
                             n = append(n, radiMode + aziOffset)
