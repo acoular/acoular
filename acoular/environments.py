@@ -10,51 +10,24 @@
 
     Environment
     UniformFlowEnvironment
-    InductUniformFlow
     GeneralFlowEnvironment
     FlowField
     OpenJet
     SlotJet
 
 """
-from numpy import array, isscalar, float32, float64, newaxis, zeros, \
+from numpy import array, isscalar, float32, float64, newaxis, \
 sqrt, arange, pi, exp, sin, cos, arccos, zeros_like, empty, dot, hstack, \
-vstack, identity, cross, sign, arctan2, matmul, sum, lexsort, stack, nonzero, append, outer, asarray
+vstack, identity, cross, sign, sum
 from numpy.linalg.linalg import norm
 from scipy.integrate import ode
 from scipy.interpolate import LinearNDInterpolator
 from scipy.spatial import ConvexHull
-from scipy.special import jn, jnp_zeros
 from traits.api import HasPrivateTraits, Float, Property, Int, \
 CArray, cached_property, Trait
 from traitsui.api import View
 
 from .internal import digest
-
-def cartToCyl(x, Q=identity(3)): 
-    """ 
-    Returns the cylindrical coordinate representation of a input position  
-    which was before transformed into a modified cartesian coordinate, which 
-    has flow into positive z direction. 
-     
-    Parameters 
-    ---------- 
-    x : float[3, nPoints] 
-        cartesian coordinates of n points 
-    Q : float[3,3] 
-        Orthogonal transformation matrix. If provided, the pos vectors are 
-        transformed via posiMod = Q * x, before transforming those modified 
-        coordinates into cylindrical ones. Default is identity matrix. 
-         
-    Returns 
-    ------- 
-    cylCoord : [3, nPoints] 
-        cylindrical representation of those n points with (phi, r, z) 
-    """ 
-    if not (Q == identity(3)).all(): 
-        x = matmul(Q, x)  # modified position vector 
-    cylCoord = array([arctan2(x[1], x[0]), sqrt(x[0]**2 + x[1]**2), x[2]]) 
-    return cylCoord 
 
 class Environment( HasPrivateTraits ):
     """
@@ -173,237 +146,6 @@ class UniformFlowEnvironment( Environment):
         if rm.shape[1] == 1:
             rm = rm[:, 0]
         return rm
-    
-class InductUniformFlow( HasPrivateTraits ):
-    """
-    An acoustic Induct environment for uniform flow. 
-    
-    The flow direction is assumed to be in positve z-direction.
-    """
-    #: The Mach number, defaults to 0.
-    ma = Float(0.0,
-        desc="flow mach number")
-    
-    #: Radius of cylindrical duct
-    R = Float(0.0, 
-        desc="Radius of duct")
-
-    #: Swirl of flow around the z-direction in rpm. 
-    #: CAUTION: Keep in mind that within this code a rigid-body movement is 
-    #: used to approximate the swirl. However this rigid-body approximation is 
-    #: particularly good, if the hub-radius-ratio is high. In contradiction to that,
-    #: this code assumes no hub at all. Any calculations with swirl must
-    #: therefor be treated cautiously.
-    swirl = Float(0.0, 
-        desc="in RPM; negative values for clockwise rotation when looking against flow-direction.")
-    
-    # angular velocity of swirl; read only
-    omega = Property(depends_on=['swirl'])
-    
-    # internal identifier
-    digest = Property( depends_on = ['ma', 'R', 'swirl'])
-    
-    @cached_property
-    def _get_digest( self ):
-        return digest( self )
-    
-    @cached_property
-    def _get_omega(self):
-        return 2 * pi * self.swirl / 60
-    
-    def azi_velocity(self, f, m):
-        """
-        Calculates the phase velocity (rounds per second) in azimuthal direction of nModes azimuthal modes m for all frequencies nFreqs f.
-        
-        Parameters
-        ----------
-        f : float[nFreqs]
-            Frequencies in Hz.
-        m : int[nModes]
-            Azimuthal mode orders
-        
-        Returns
-        -------
-        aziVel : float[nFreqs, nModes]
-            A matrix containing all the azimuthal phase velocities (rounds per second) for the modal-frequencies-combinations.
-        """
-        mArray = asarray(m)
-        aziVel = outer(f, 1 / mArray)
-        return aziVel
-    
-    def modal_properties(self, kInput, maxAttenuation, c):
-        """ 
-        Parameters
-        ----------
-        kInput : float[nFreqs]
-            Free field Wave number of observed frequency.
-        maxAttenuation : float
-            Maximum attenuation level (dB) per axial length of one radius of duct. All modes with 
-            attenuation levels above this value are not taken into account.
-        c : float
-            speed of sound
-        
-        Returns
-        -------
-        modal_properties : list[nFreqs] of matrices. Each entry of the list contains a matrix of:
-            float32[nActiveModes, 7] : 
-                Matrix which contains all modal parameters in its rows for all azimuthal/
-                radial mode combination (m,n) which are not too much attenuated. 
-                The rows are sorted with increasing azimuthal order, where all radial orders
-                of each azimuthal order are listed adjacently, e.g. 
-                [..., (-47,1), (-47,2), (-47,3), ..., (18,1), (18,2), ...]
-                The columns are as follows:
-                    m : 
-                        Azimuthal mode number
-                    n : 
-                        Radial mode number
-                    sigma : 
-                        Eigenvalue of (m,n) system
-                    alphaAbs : 
-                        Absolut value of alpha. If alpha is imaginary -> axial wavenumber has imaginary part
-                    k+Real : 
-                        Axial wavenmuber with flow of (m,n) system, real part.
-                    k-Real : 
-                        Axial wavenmuber against flow of (m,n) system, real part.
-                    k+-Imag: 
-                        Imaginary part of axial wavenmuber of (m,n) system. Same value for against/with flow-
-                    normalizationFacor :
-                        Factor that normalizes the orthogonal eigenfunction (mode) system to be orthonormal
-        Remarks
-        -------
-        Real and imaginary part of axial wave number is stored seperatly, because if stored
-        as complex number, the whole matrix would be complex (=more memory use)
-        
-        See Phd-thesis of Ulf Tapken (TU Berlin) for information on the theory and the meanings
-        of m, n, sigma, etc.
-        """
-        
-#==============================================================================
-#         Some Explanation: 
-#         - Because scipy.jnp_zeros is the most time consuming part: Calculate the
-#           needed mode range first. Then one kann call jnp_zeros just once per azi-mode.
-#         - One could manage the first couple of cut-off modes also via taken all modes 
-#           within cut-on factor of e.g. 1.2. BUT: For lower frequencies this means
-#           one almost takes no cut-off modes at all, whereas for higher frequencies
-#           the number of massively attenuated modes in the output table is very high.
-#           This is time consuming and brings no advantage.
-#           -> Therefore we work with an explicit attenuation limit maxAttenuation
-#==============================================================================
-        
-        # get maximum matrix of eigen values of bessel dgl
-        kMax = max(kInput)
-        dopplerFactor = sqrt(1 - self.ma ** 2)
-        kRMaxHelp = kMax * self.R / dopplerFactor
-        
-        # get the maximum radial modes (located at azimuthal=0)
-        cntAziMode = 0
-        sigmaHelp = jnp_zeros(cntAziMode, 500)
-        cntSigma = 1
-        indCutOn = sigmaHelp <= kRMaxHelp
-        while all(indCutOn):  
-            cntSigma += 1
-            sigmaHelp = jnp_zeros(0, 500 * cntSigma)
-            indCutOn = sigmaHelp <= kRMaxHelp
-        indCutOffMode = nonzero(~indCutOn)[0][0]
-        
-        boolCutOn = True
-        while boolCutOn:
-            deltaLHelp = self._calcModalCoreProps(cntAziMode, kMax, sigmaHelp[indCutOffMode], 0, c)[2]
-            boolCutOn = abs(deltaLHelp) * self.R < maxAttenuation
-            indCutOffMode += 1
-        sigmaPrelim = sigmaHelp[:indCutOffMode + 1][:, newaxis]
-        
-        nRadialModes = len(sigmaPrelim)
-        omegaROverC = self.omega * self.R / c
-        boolCutOn = True
-        while boolCutOn:
-            cntAziMode += 1
-            sigmaPrelim = append(sigmaPrelim, jnp_zeros(cntAziMode, nRadialModes)[:, newaxis], axis=1)
-            if (kMax * self.R + abs(cntAziMode * omegaROverC)) / dopplerFactor < sigmaPrelim[0, -1]:
-                boolCutOn = False
-                omega = -abs(self.omega)
-                
-                boolCutOn2 = True
-                while boolCutOn2:
-                    cntAziMode += 1
-                    if cntAziMode == 231:
-                        raise Exception('scipy is buggy and cannot calculate zero of bessel with m=231')  # at least for scipy=1.0.1
-                    sigmaPrelim = append(sigmaPrelim, jnp_zeros(cntAziMode, nRadialModes)[:, newaxis], axis=1)
-                    deltaLHelp = self._calcModalCoreProps(cntAziMode, kMax, sigmaPrelim[0, -1], omega, c)[2]
-                    boolCutOn2 = abs(deltaLHelp) * self.R < maxAttenuation
-                           
-        output = []
-        for cntFreqs in range(len(kInput)):
-            print('Modeprops: Freq %s of %s' %(cntFreqs, len(kInput)))
-            k = kInput[cntFreqs]
-            # start the actual loop, to calculate modal properties
-            # (0,0) mode
-            m = n = sigma = zeros(1)
-            alphaHelp, axWaveNumHelp = self._calcModalCoreProps(0, k, 0, self.omega, c)[:-1]
-            axWaveNum = axWaveNumHelp[newaxis]
-            normFac = array([0.5])
-            alpha = array(alphaHelp, dtype='complex128')
-            
-            # calc all other modes
-            for azimuthalIncrement in [-1, 0, 1]:  # order of azimuthal modes: negativ, 0, positive
-                continueAzimuthal = True
-                aziMode = azimuthalIncrement
-                
-                # To keep (m,n)-definition correct. See underneath...
-                if aziMode == 0:
-                    aziOffset = 1
-                else:
-                    aziOffset = 0
-                
-                while continueAzimuthal:
-                    continueRadial = True
-                    radiMode = 0
-                    while continueRadial:
-                        sigmaHelp = sigmaPrelim[radiMode, abs(aziMode)]
-                        alphaHelp, axWaveNumHelp, deltaLHelp = self._calcModalCoreProps(aziMode, k, sigmaHelp, self.omega, c)
-                        if abs(deltaLHelp) * self.R < maxAttenuation:
-                            sigma = append(sigma, sigmaHelp)
-                            m = append(m, aziMode)
-                            n = append(n, radiMode + aziOffset)
-                            alpha = append(alpha, alphaHelp)
-                            axWaveNum = append(axWaveNum, axWaveNumHelp[newaxis], axis=0)
-                            normFac = append(normFac, self._normalizationFactor(aziMode, sigmaHelp))
-                            radiMode += 1
-                        else:
-                            continueRadial = False
-                            if azimuthalIncrement == 0:
-                                continueAzimuthal = False
-                            else:
-                                continueAzimuthal = not radiMode == 0  # stop if even first radial mode is to weak
-                    aziMode += azimuthalIncrement
-    
-            # sorting entries
-            indSort = lexsort((n, m))  # sorting order: azimuthal, radial order
-            modeTable = stack((m[indSort], n[indSort], sigma[indSort], abs(alpha[indSort]), \
-                               axWaveNum[indSort, 0].real, axWaveNum[indSort, 1].real, \
-                               -abs(axWaveNum[indSort, 0].imag), normFac[indSort]), axis=1)
-            output.append(modeTable,)
-        return output
-    
-    def _calcModalCoreProps(self, aziMode, k, sigma, omega, c):
-        kMod = k - aziMode * omega / c
-        
-        # calculate alpha
-        helpTerm = sigma / kMod / self.R
-        rootTerm = 1 - (1 - self.ma * self.ma) * helpTerm * helpTerm
-        alpha = sqrt(abs(rootTerm))
-        if rootTerm < 0.0:
-            alpha *= 1j
-        
-        # calc axial wave number and attenuation level per distance
-        kMN = kMod / (1 - self.ma * self.ma) * (alpha * array([1,-1]) - self.ma)  # returns positiv and negativ axial wavenumber
-        deltaLHelp = 8.6858896380650368 * kMN[0].imag  # 8.6858.. is 20 * log10(exp)
-        return alpha, kMN, deltaLHelp
-        
-    def _normalizationFactor(self, m, sigma):
-        besselHelp = jn(m, sigma)
-        normFac = (besselHelp * besselHelp - jn(m - 1, sigma) * jn(m + 1, sigma)) / 2
-        return normFac
 
 class FlowField( HasPrivateTraits ):
     """
