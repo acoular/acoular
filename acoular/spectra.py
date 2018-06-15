@@ -446,6 +446,8 @@ class PowerSpectraEngineOrderAnalyzed( PowerSpectra ):
                     pos += posinc
                 temp[0:bs] = temp[bs:]
                 pos -= bs
+            
+            spectrumEO /= self.num_blocks
             calcCSM(csmUpper, spectrumEO)
 
             # create the full csm matrix via transposingand complex conj.
@@ -454,7 +456,7 @@ class PowerSpectraEngineOrderAnalyzed( PowerSpectra ):
             csm = csmLower + csmUpper
 
             # onesided spectrum: multiplication by 2.0=sqrt(2)^2
-            csm = csm*(2.0/self.block_size/weight/self.num_blocks)
+            csm = csm*(2.0/self.block_size/weight)
             
             if self.cached:
                 precisionTuple = _precision(self.precision)
