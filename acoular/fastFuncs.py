@@ -1013,7 +1013,7 @@ def greens_func_Induct(m, alphaAbs, axWaveNumWithFlow, axWaveNumAgainstFlow, axW
                 else:  # mic is DOWNstream of grid  
                     k = axWaveNumWithFlow[cntMode] 
                 expArg = np.float32(k * dZ + m[cntMode] * dPhi) 
-                dPhase = np.cos(expArg) + 1j * np.sin(expArg)  # - or + for imag part??
+                dPhase = np.cos(expArg) - 1j * np.sin(expArg)
                 besselProdNormalized = besselMic[cntMode, cntMic] * besselSourceNormalized                                              
                 modalTrans = dPhase * besselProdNormalized 
                 
