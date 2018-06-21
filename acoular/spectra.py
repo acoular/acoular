@@ -76,7 +76,7 @@ class PowerSpectra( HasPrivateTraits ):
     #: :class:`~acoular.sources.TimeSamples` objects
     calib = Instance(Calib)
 
-    #: FFT block size, one of: 128, 256, 512, 1024, 2048 ... 16384,
+    #: FFT block size, one of: 128, 256, 512, 1024, 2048 ... 65536,
     #: defaults to 1024.
     block_size = Trait(1024, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536,
         desc="number of samples per FFT block")
@@ -446,6 +446,8 @@ class PowerSpectraEngineOrderAnalyzed( PowerSpectra ):
                     pos += posinc
                 temp[0:bs] = temp[bs:]
                 pos -= bs
+            
+            spectrumEO /= self.num_blocks
             calcCSM(csmUpper, spectrumEO)
 
             # create the full csm matrix via transposingand complex conj.
@@ -454,7 +456,7 @@ class PowerSpectraEngineOrderAnalyzed( PowerSpectra ):
             csm = csmLower + csmUpper
 
             # onesided spectrum: multiplication by 2.0=sqrt(2)^2
-            csm = csm*(2.0/self.block_size/weight/self.num_blocks)
+            csm = csm*(2.0/self.block_size/weight)
             
             if self.cached:
                 precisionTuple = _precision(self.precision)
