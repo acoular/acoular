@@ -159,7 +159,7 @@ class PowerSpectra( HasPrivateTraits ):
 
     # internal identifier
     digest = Property( 
-        depends_on = ['time_data.digest', 'calib.digest', 'block_size', 
+        depends_on = ['__class__', 'time_data.digest', 'calib.digest', 'block_size', 
             'window', 'overlap', 'precision'], 
         )
 
