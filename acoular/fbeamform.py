@@ -245,8 +245,6 @@ class SteeringVectorInduct( SteeringVector ):
     
     #: Maximum attenuation level (dB) per radius of duct. All modes with 
     #: attenuation levels above this value are not taken into account.
-    
-    # Funzt nich mit 0
     max_attenuation = Float(0.0, 
                             desc="Maximum level of attenuation of modes."
                             "Modes with values above this Float are not taken into account.")
@@ -255,17 +253,17 @@ class SteeringVectorInduct( SteeringVector ):
     #: E.g. if considered_azi_modes=[-5,10] then for the first entry of f only 
     #: the (m,n) modes with m=-5 are taken into account for the transfer vectors,
     #: respectively m=10 for the second entry of f. The default is on empty List
-    #: in which case for all entries of k all (m,n) modes of Trait modal_properties
+    #: in which case for all entries of k all (m,n) modes of :attr:`modal_properties`
     #: are taken into account for the transfer vectors.
     considered_azi_modes = ListInt()
     
     #: When calculating the transfer function: Should the propagation from gridpoint to mics be
     #: normalized with the propagation from gridpoint to specific point (e.g. array center)? 
-    #: Default is True (see transfer_norm_ref_point).
+    #: Default is True (see :attr:`transfer_norm_ref_point`).
     transfer_normalized = Bool(True)
     
-    #: Only relevant if transfer_normalized is True. Specifies the normalization point
-    #: for the transfer function (see transfer_normalized). Default is [inf, inf, inf]
+    #: Only relevant if :attr:`transfer_normalized` is True. Specifies the normalization point
+    #: for the transfer function (see :attr:`transfer_normalized`). Default is [inf, inf, inf]
     #: which normalizes with the propagation to the array center.
     transfer_norm_ref_point = CArray(dtype=float64, shape=(3, ), value=(inf, inf, inf))
     
@@ -277,7 +275,8 @@ class SteeringVectorInduct( SteeringVector ):
     
     #: List with table of modal properties of each (m,n)-mode (in rows). Column entries are:
     #: [azim. order, rad. order, sigma, alpha.real, alpha.imag, k+, k-, norm-Factor].
-    #: The List contains nFreq tables. Read-only
+    #: The List contains nFreq tables. See Phd-thesis of Ulf Tapken (TU Berlin) for 
+    #: information on sigma, alpha, k+- and the normalization factor (=F_mn in the thesis); Read-only
     modal_properties = Property(depends_on=['f', 'c', 'max_attenuation', 'env.digest'])
     
     #: Transfer matrix (vector of transfer-vectors) of dimension [nFreq, nGrid, nMics]; read only

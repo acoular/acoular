@@ -997,8 +997,13 @@ def greens_func_Induct(m, alphaAbs, axWaveNumWithFlow, axWaveNumAgainstFlow, axW
         """ 
         # This method essentially implements (20) of Bennet, Reilly, Liu, Tapken: "MODELLING MULTI-MODAL SOUND TRANSMISSION
         # FROM POINT SOURCES IN DUCTS WITH FLOW USING A WAVE-BASED METHOD". 
-        # But with the difference: the abs of alpha_mn is used instead of alpha_mn when normalizing, 
-        # because otherwise cut-off modes at source location would be off phase with source.
+        # But with the differences: 
+        #   -the abs of alpha_mn is used instead of alpha_mn when normalizing, because otherwise cut-off 
+        #        modes at source location would be off phase with source.
+        #   -the normalizatuion factors provided by 'InductUniformFlow.modal_properties' are the ones which are proposed
+        #        by Ulf Tapkens PHD-Thesis (TU Berlin) ("F_mn") whereas Bennet et al. proposed different factors ("N_mn").
+        #        F_mn and N_mn only differ by a constant factor 2*pi*R^2. So when calculating the transfer function, this 
+        #        constant factor cancels out. This is different if 'SteeringVectorInduct.transfer_normalized' == False.
         
         nMics = micPhi.shape[0] 
         nModes = besselMic.shape[0] 
