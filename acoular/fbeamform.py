@@ -437,25 +437,25 @@ class BeamformerBase( HasPrivateTraits ):
     """
     Beamforming using the basic delay-and-sum algorithm in the frequency domain.
     """
-    # Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.c` for information.
+    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.c` for information.
     c = Property(desc="speed of sound")
     
-    # Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.steer_type` for information.
+    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.steer_type` for information.
     steer = Property(desc="type of steering vectors used")
     
-    # Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.env` for information.
+    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.env` for information.
     env = Property()
     
-    # Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.grid` for information.
+    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.grid` for information.
     grid = Property(desc="beamforming grid")
     
-    # Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.mpos` for information.
+    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.mpos` for information.
     mpos = Property(desc="microphone geometry")
     
-    # Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.r0` for information.
+    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.r0` for information.
     r0 = Property(desc="array center to grid distances")
     
-    # Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.rm` for information.
+    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.rm` for information.
     rm = Property(desc="all array mics to grid distances")
     
     #: instance of :class:`~acoular.fbeamform.SteeringVector` or its derived classes,
@@ -1078,29 +1078,29 @@ class PointSpreadFunction (HasPrivateTraits):
     The PSF is needed by several deconvolution algorithms to correct
     the aberrations when using simple delay-and-sum beamforming.
     """
-    # Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.grid` for information.
+    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.grid` for information.
     grid = Property(desc="beamforming grid")
     
     #: Indices of grid points to calculate the PSF for.
     grid_indices = CArray( dtype=int, value=array([]), 
                      desc="indices of grid points for psf") #value=array([]), value=self.grid.pos(),
     
-    # Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.mpos` for information.
+    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.mpos` for information.
     mpos = Property(desc="microphone geometry")
     
-    # Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.env` for information.
+    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.env` for information.
     env = Property()
     
-    # Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.c` for information.
+    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.c` for information.
     c = Property(desc="speed of sound")
     
-    # Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.steer_type` for information.
+    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.steer_type` for information.
     steer = Property(desc="type of steering vectors used")
     
-    # Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.r0` for information.
+    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.r0` for information.
     r0 = Property(desc="array center to grid distances")
     
-    # Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.rm` for information.
+    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.rm` for information.
     rm = Property(desc="all array mics to grid distances")
     
     #: instance of :class:`~acoular.fbeamform.SteeringVector` or its derived classes,
