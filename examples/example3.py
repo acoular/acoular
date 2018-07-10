@@ -16,7 +16,8 @@ All rights reserved.
 # imports from acoular
 import acoular
 from acoular import L_p, TimeSamples, Calib, MicGeom, EigSpectra,\
-RectGrid3D, BeamformerBase, BeamformerEig, BeamformerOrth, BeamformerCleansc
+RectGrid3D, BeamformerBase, BeamformerEig, BeamformerOrth, BeamformerCleansc, \
+SteeringVector
 
 # other imports
 from os import path
@@ -48,7 +49,8 @@ g = RectGrid3D(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, \
 
 f = EigSpectra(time_data=t, window='Hanning', overlap='50%', block_size=128, \
     ind_low=5, ind_high=15)
-b = BeamformerBase(freq_data=f, grid=g, mpos=m, r_diag=True, c=346.04)
+st = SteeringVector(grid=g, mpos=m, c=346.04)
+b = BeamformerBase(freq_data=f, steer_obj=st, r_diag=True)
 
 #===============================================================================
 # reads the data, finds the maximum value (to properly scale the views)
