@@ -24,7 +24,8 @@ RectGrid, BeamformerBase, BeamformerEig, BeamformerOrth, BeamformerCleansc, \
 MaskedTimeSamples, FiltFiltOctave, Trajectory, BeamformerTimeSq, TimeAverage, \
 BeamformerTimeSqTraj, \
 TimeCache, FiltOctave, BeamformerTime, TimePower, IntegratorSectorTime, \
-PointSource, MovingPointSource, SineGenerator, WNoiseGenerator, Mixer, WriteWAV
+PointSource, MovingPointSource, SineGenerator, WNoiseGenerator, Mixer, WriteWAV, \
+SteeringVector
 
 from pylab import subplot, imshow, show, colorbar, plot, transpose, figure, \
 psd, axis, xlim, ylim, title, tight_layout, text
@@ -98,15 +99,15 @@ t = Mixer(source = p0, sources = [p1,]) # mix both signals
 f = PowerSpectra(time_data=t, window='Hanning', overlap='50%', block_size=128, \
     ind_low=1,ind_high=30) # CSM calculation 
 g = RectGrid(x_min=-3.0, x_max=+3.0, y_min=-3.0, y_max=+3.0, z=Z, increment=0.3)
-b = BeamformerBase(freq_data=f, grid=g, mpos=m, r_diag=True, c=c0)
+st = SteeringVector(grid=g, mpos=m, c=c0)
+b = BeamformerBase(freq_data=f, steer_obj=st, r_diag=True)
 map1 = b.synthetic(freq,3)
 
 #===============================================================================
 # fixed focus time domain beamforming
 #===============================================================================
-
 fi = FiltFiltOctave(source=t, band=freq, fraction='Third octave')
-bt = BeamformerTimeSq(source=fi, grid=g, mpos=m, r_diag=True, c=c0)
+bt = BeamformerTimeSq(source=fi, steer_obj=st, r_diag=True)
 avgt = TimeAverage(source=bt, naverage=int(sfreq*tmax/16)) # 16 single images
 cacht = TimeCache(source=avgt) # cache to prevent recalculation
 map2 = zeros(g.shape) # accumulator for average
@@ -138,8 +139,9 @@ tight_layout()
 # thus, with the circular movement assumed, the center of rotation is at (0,2.5)
 g1 = RectGrid(x_min=-3.0, x_max=+3.0, y_min=-1.0, y_max=+5.0, z=0, \
     increment=0.3)# grid point of origin is at trajectory (thus z=0)
+st1 = SteeringVector(grid=g1, mpos=m, c=c0)
 # beamforming with trajectory (rvec axis perpendicular to trajectory)
-bts = BeamformerTimeSqTraj(source=fi, grid=g1, mpos=m, trajectory=tr, \
+bts = BeamformerTimeSqTraj(source=fi, steer_obj=st1, trajectory=tr, \
     rvec = array((0,0,1.0)))
 avgts = TimeAverage(source=bts, naverage=int(sfreq*tmax/16)) # 16 single images
 cachts = TimeCache(source=avgts) # cache to prevent recalculation

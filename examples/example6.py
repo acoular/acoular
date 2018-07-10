@@ -20,7 +20,7 @@ from __future__ import print_function
 import acoular
 from acoular import L_p, Calib, MicGeom, PowerSpectra, \
 RectGrid, BeamformerBase, BeamformerEig, BeamformerOrth, BeamformerCleansc, \
-MaskedTimeSamples, BeamformerDamas
+MaskedTimeSamples, BeamformerDamas, SteeringVector
 
 # other imports
 from os import path
@@ -76,15 +76,20 @@ f = PowerSpectra(time_data=t1,
                ind_low=8, ind_high=16) #to save computational effort, only
                # frequencies with index 1-30 are used
 
+# =============================================================================
+# a steering vector instance. SteeringVector provides the standard freefield 
+# sound propagation model in the steering vectors.
+# =============================================================================
+st = SteeringVector(grid=g, mpos=m, c=346.04)
 
 #===============================================================================
 # beamformers in frequency domain
 #===============================================================================
-bb = BeamformerBase(freq_data=f, grid=g, mpos=m, r_diag=True, c=346.04)
+bb = BeamformerBase(freq_data=f, steer_obj=st, r_diag=True)
 bd = BeamformerDamas(beamformer=bb, n_iter=100)
-be = BeamformerEig(freq_data=f, grid=g, mpos=m, r_diag=True, c=346.04, n=54)
+be = BeamformerEig(freq_data=f, steer_obj=st, r_diag=True, n=54)
 bo = BeamformerOrth(beamformer=be, eva_list=list(range(38,54)))
-bs = BeamformerCleansc(freq_data=f, grid=g, mpos=m, r_diag=True, c=346.04)
+bs = BeamformerCleansc(freq_data=f, steer_obj=st, r_diag=True)
 
 #===============================================================================
 # plot result maps for different beamformers in frequency domain
@@ -98,9 +103,7 @@ for r_diag in (True,False):
     bs.r_diag = r_diag
     i1 = 1 #no of subplot
     for steer in ('true level', 'true location', 'classic', 'inverse'):     
-        bb.steer = steer
-        be.steer = steer
-        bs.steer = steer
+        st.steer_type = steer
         for b in (bb, bd, bo, bs):
             subplot(4,4,i1)
             i1 += 1
@@ -108,7 +111,7 @@ for r_diag in (True,False):
             mx = L_p(map.max())
             imshow(L_p(map.T), vmax=mx, vmin=mx-15,  origin='lower',
                    interpolation='nearest', extent=g.extend())
-            print(b.steer)
+            print(b.steer_obj.steer_type)
             colorbar()
             title(b.__class__.__name__,fontsize='small')
 
