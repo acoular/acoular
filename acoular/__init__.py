@@ -75,7 +75,7 @@ EngineOrderAnalyzer
 from .calib import Calib
 from .trajectory import Trajectory
 from .grids import Grid, RectGrid, RectGrid3D
-from .environments import cartToCyl, Environment, UniformFlowEnvironment, \
+from .environments import cartToCyl, Environment, UniformFlowEnvironment, InductUniformFlow, \
 FlowField, OpenJet, SlotJet, GeneralFlowEnvironment
 from .microphones import MicGeom
 from .spectra import PowerSpectra, PowerSpectra as EigSpectra, PowerSpectraEngineOrderAnalyzed, synthetic
@@ -83,10 +83,12 @@ from .spectra import PowerSpectra, PowerSpectra as EigSpectra, PowerSpectraEngin
 from .fbeamform import BeamformerBase, BeamformerCapon, BeamformerEig, \
 BeamformerMusic, BeamformerDamas, BeamformerDamasPlus, BeamformerOrth,BeamformerCleansc, \
 BeamformerCMF, BeamformerClean, BeamformerFunctional, BeamformerGIB, L_p, integrate, \
-PointSpreadFunction, SteeringVector
+PointSpreadFunction, SteeringVector, SteeringVectorInduct
 
 from .sources import PointSource, MovingPointSource, SamplesGenerator, \
 TimeSamples, MaskedTimeSamples, PointSourceDipole, UncorrelatedNoiseSource, \
 SourceMixer
 from .signals import SineGenerator, WNoiseGenerator, SignalGenerator,\
 PNoiseGenerator
+from .fastFuncs import greens_func_Induct
+
