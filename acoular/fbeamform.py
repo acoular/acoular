@@ -902,7 +902,7 @@ class PointSpreadFunction (HasPrivateTraits):
     
     #: instance of :class:`~acoular.fbeamform.SteeringVector` or its derived classes,
     #: that contains information about the steering vector.
-    steer_obj = Trait(SteeringVector)
+    steer_obj = Instance(SteeringVector(), SteeringVector)  # creates standard steering vector in constructor
 
     #: Flag that defines how to calculate and store the point spread function
     #: defaults to 'single'.
