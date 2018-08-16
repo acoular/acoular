@@ -210,7 +210,7 @@ class nidaq_import( time_data_import ):
             DAQmxSetSampClkRate(taskHandle,float64(self.sample_freq))
         except RuntimeError:
             # no valid task
-            time_data_import.getdata(self,td)
+            time_data_import.get_data(self,td)
             return
         #import data
         name = td.name
