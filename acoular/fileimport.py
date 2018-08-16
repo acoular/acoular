@@ -81,7 +81,7 @@ class csv_import( time_data_import ):
         """
         if not path.isfile(self.from_file):
             # no file there
-            time_data_import.getdata(self, td)
+            time_data_import.get_data(self, td)
             return
         #import data
         c = self.header_length
@@ -142,7 +142,7 @@ class td_import( time_data_import ):
         """
         if not path.isfile(self.from_file):
             # no file there
-            time_data_import.getdata(self, td)
+            time_data_import.get_data(self, td)
             return
         f = open(self.from_file, 'rb')
         h = pickle.load(f)
@@ -193,7 +193,7 @@ class bk_mat_import( time_data_import ):
         """
         if not path.isfile(self.from_file):
             # no file there
-            time_data_import.getdata(self, td)
+            time_data_import.get_data(self, td)
             return
         #import data
         from scipy.io import loadmat
@@ -353,7 +353,7 @@ class datx_import(time_data_import):
         """
         if not path.isfile(self.from_file):
             # no file there
-            time_data_import.getdata(self, td)
+            time_data_import.get_data(self, td)
             return
         #browse datx information
         f0 = open(self.from_file)
