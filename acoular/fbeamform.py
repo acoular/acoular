@@ -114,7 +114,7 @@ class SteeringVector( HasPrivateTraits ):
     
     # internal identifier
     digest = Property( 
-        depends_on = ['f', 'c', 'steer_type', 'env.digest', 'grid.digest', 'mpos.digest'])
+        depends_on = ['c', 'steer_type', 'env.digest', 'grid.digest', 'mpos.digest'])
     
     @cached_property
     def _get_k(self):
