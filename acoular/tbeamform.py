@@ -27,11 +27,10 @@ from traitsui.menu import OKCancelButtons
 
 # acoular imports
 from .internal import digest
-from .grids import RectGrid, Grid
-from .microphones import MicGeom
-from .environments import Environment
+from .grids import RectGrid
 from .trajectory import Trajectory
 from .tprocess import TimeInOut
+from .fbeamform import SteeringVector
 
 
 def const_power_weight( bf ):
@@ -74,72 +73,101 @@ class BeamformerTime( TimeInOut ):
     Provides a basic time domain beamformer with time signal output
     for a spatially fixed grid.
     """
+    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.c` for information.
+    c = Property(desc="speed of sound")
+    
+    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.env` for information.
+    env = Property()
 
-    #: :class:`~acoular.grids.Grid`-derived object that provides the grid locations.
-    grid = Trait(Grid, 
-        desc="beamforming grid")
+    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.grid` for information.
+    grid = Property(desc="beamforming grid")
+    
+    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.mpos` for information.
+    mpos = Property(desc="microphone geometry")
+    
+    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.r0` for information.
+    r0 = Property(desc="array center to grid distances")
+    
+    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.rm` for information.
+    rm = Property(desc="all array mics to grid distances")
 
     #: Number of channels in output (=number of grid points).
     numchannels = Delegate('grid', 'size')
-
-    #: :class:`~acoular.microphones.MicGeom` object that provides the microphone locations.
-    mpos= Trait(MicGeom, 
-        desc="microphone geometry")
-        
-    #: :class:`~acoular.environments.Environment` or derived object, 
-    #: which provides information about the sound propagation in the medium.
-    env = Trait(Environment(), Environment)
 
     #: Spatial weighting function.
     weights = Trait('none', possible_weights, 
         desc="spatial weighting function")
     # (from timedomain.possible_weights)
-        
-    #: The speed of sound, defaults to 343 m/s
-    c = Float(343., 
-        desc="speed of sound")
     
-    #: Sound travel distances from microphone array center to grid 
-    #: points (readonly).
-    r0 = Property(
-        desc="array center to grid distances")
-
-    #: Sound travel distances from array microphones to grid 
-    #: points (readonly).
-    rm = Property(
-        desc="array center to grid distances")
-
+    #: instance of :class:`~acoular.fbeamform.SteeringVector`
+    #: that contains information about the steering vector.
+    #: Derived classes of SteeringVector are not allowed at the moment.
+    steer_obj = Property()
+    
+    # internally used
+    _steer_obj_internal = Trait(SteeringVector(), SteeringVector)  # creates standard steering vector in constructor of BeamformerTime
+        
     # internal identifier
     digest = Property( 
-        depends_on = ['mpos.digest', 'grid.digest', 'source.digest', 'c', \
-        'env.digest', 'weights', '__class__'], 
+        depends_on = ['steer_obj.digest', 'source.digest', 'weights', '__class__'], 
         )
 
-    traits_view = View(
-        [
-            [Item('mpos{}', style='custom')], 
-            [Item('grid', style='custom'), '-<>'], 
-            [Item('c', label='speed of sound')], 
-            [Item('env{}', style='custom')], 
-            [Item('weights{}', style='simple')], 
-            '|'
-        ], 
-        title='Beamformer options', 
-        buttons = OKCancelButtons
-        )
+#    traits_view = View(
+#        [
+#            [Item('mpos{}', style='custom')], 
+#            [Item('grid', style='custom'), '-<>'], 
+#            [Item('c', label='speed of sound')], 
+#            [Item('env{}', style='custom')], 
+#            [Item('weights{}', style='simple')], 
+#            '|'
+#        ], 
+#        title='Beamformer options', 
+#        buttons = OKCancelButtons
+#        )
 
     @cached_property
     def _get_digest( self ):
         return digest(self)
+    
+    def _get_steer_obj(self):
+        return self._steer_obj_internal
+    
+    def _set_steer_obj(self, steer_obj):
+        if steer_obj.__class__.__name__ == 'SteeringVector':
+            self._steer_obj_internal = steer_obj
+        else:
+            raise Exception('Only instances of SteeringVector are allowed for BeamformerTime.steer_obj at the moment (NO derived classes)!')
+    
+    def _get_c(self):
+        return self.steer_obj.c
+    
+    def _get_env(self):
+        return self.steer_obj.env
+    
+    def _get_grid(self):
+        return self.steer_obj.grid
+    
+    def _get_mpos(self):
+        return self.steer_obj.mpos
+    
+    def _get_r0(self):
+        return self.steer_obj.r0
+    
+    def _get_rm(self):
+        return self.steer_obj.rm
+    
+    def _set_c(self, c):
+        self.steer_obj.c = c
+    
+    def _set_env(self, env):
+        self.steer_obj.env = env
+    
+    def _set_grid(self, grid):
+        self.steer_obj.grid = grid
+    
+    def _set_mpos(self, mpos):
+        self.steer_obj.mpos = mpos
         
-    #@cached_property
-    def _get_r0 ( self ):
-        return self.env.r( self.c, self.grid.pos())
-
-    #@cached_property
-    def _get_rm ( self ):
-        return self.env.r( self.c, self.grid.pos(), self.mpos.mpos)
-
     def result( self, num=2048 ):
         """
         Python generator that yields the beamformer output block-wise.

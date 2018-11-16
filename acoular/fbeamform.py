@@ -114,7 +114,7 @@ class SteeringVector( HasPrivateTraits ):
     
     # internal identifier
     digest = Property( 
-        depends_on = ['f', 'c', 'steer_type', 'env.digest', 'grid.digest', 'mpos.digest'])
+        depends_on = ['c', 'steer_type', 'env.digest', 'grid.digest', 'mpos.digest'])
     
     @cached_property
     def _get_k(self):
@@ -234,25 +234,25 @@ class BeamformerBase( HasPrivateTraits ):
     """
     Beamforming using the basic delay-and-sum algorithm in the frequency domain.
     """
-    # Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.c` for information.
+    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.c` for information.
     c = Property(desc="speed of sound")
     
-    # Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.steer_type` for information.
+    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.steer_type` for information.
     steer = Property(desc="type of steering vectors used")
     
-    # Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.env` for information.
+    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.env` for information.
     env = Property()
     
-    # Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.grid` for information.
+    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.grid` for information.
     grid = Property(desc="beamforming grid")
     
-    # Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.mpos` for information.
+    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.mpos` for information.
     mpos = Property(desc="microphone geometry")
     
-    # Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.r0` for information.
+    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.r0` for information.
     r0 = Property(desc="array center to grid distances")
     
-    # Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.rm` for information.
+    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.rm` for information.
     rm = Property(desc="all array mics to grid distances")
     
     #: instance of :class:`~acoular.fbeamform.SteeringVector` or its derived classes,
@@ -875,34 +875,34 @@ class PointSpreadFunction (HasPrivateTraits):
     The PSF is needed by several deconvolution algorithms to correct
     the aberrations when using simple delay-and-sum beamforming.
     """
-    # Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.grid` for information.
+    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.grid` for information.
     grid = Property(desc="beamforming grid")
     
     #: Indices of grid points to calculate the PSF for.
     grid_indices = CArray( dtype=int, value=array([]), 
                      desc="indices of grid points for psf") #value=array([]), value=self.grid.pos(),
     
-    # Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.mpos` for information.
+    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.mpos` for information.
     mpos = Property(desc="microphone geometry")
     
-    # Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.env` for information.
+    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.env` for information.
     env = Property()
     
-    # Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.c` for information.
+    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.c` for information.
     c = Property(desc="speed of sound")
     
-    # Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.steer_type` for information.
+    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.steer_type` for information.
     steer = Property(desc="type of steering vectors used")
     
-    # Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.r0` for information.
+    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.r0` for information.
     r0 = Property(desc="array center to grid distances")
     
-    # Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.rm` for information.
+    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.rm` for information.
     rm = Property(desc="all array mics to grid distances")
     
     #: instance of :class:`~acoular.fbeamform.SteeringVector` or its derived classes,
     #: that contains information about the steering vector.
-    steer_obj = Trait(SteeringVector)
+    steer_obj = Instance(SteeringVector(), SteeringVector)  # creates standard steering vector in constructor
 
     #: Flag that defines how to calculate and store the point spread function
     #: defaults to 'single'.
@@ -986,11 +986,10 @@ class PointSpreadFunction (HasPrivateTraits):
         # check wether self.freq is part of SteeringVector.f
         freqInSteerObjFreq = isclose(array(self.steer_obj.f), self.freq)
         if freqInSteerObjFreq.any():
-            freqInd = flatnonzero(freqInSteerObjFreq)
+            freqInd = flatnonzero(freqInSteerObjFreq)[0]
         else:
-            warn('PointSpreadFunction.freq was appended to PointSpreadFunction.steer_obj.f, '\
-                 'as it was not an element of the original list! '\
-                 'You should check possible implications on beamformer results, etc.', Warning, stacklevel = 2)
+            warn('PointSpreadFunction.freq (%s Hz) was appended to PointSpreadFunction.steer_obj.f, '\
+                 'as it was not an element of the original list!' % self.freq, Warning, stacklevel = 2)
             self.steer_obj.f.append(self.freq)
             freqInd = int(-1)
         

@@ -867,11 +867,12 @@ def _psf_Formulation4AkaTrueLocation(distGridToArrayCenter, distGridToAllMics, d
 
 #%% Damas - Gauss Seidel
 # Formerly known as 'gseidel'
-@nb.guvectorize([(nb.float32[:,:], nb.float32[:], nb.int64[:], nb.float64[:], nb.float32[:]), 
+@nb.guvectorize([#(nb.float32[:,:], nb.float32[:], nb.int64[:], nb.float64[:], nb.float32[:]), 
                  (nb.float64[:,:], nb.float64[:], nb.int64[:], nb.float64[:], nb.float64[:]),
-                 (nb.float32[:,:], nb.float64[:], nb.int64[:], nb.float64[:], nb.float64[:]),
-                 (nb.float64[:,:], nb.float32[:], nb.int64[:], nb.float64[:], nb.float32[:])], 
-                 '(g,g),(g),(),()->(g)', nopython=True, target=parallelOption, cache=cachedOption)
+                 #(nb.float32[:,:], nb.float64[:], nb.int64[:], nb.float64[:], nb.float64[:]),
+                 #(nb.float64[:,:], nb.float32[:], nb.int64[:], nb.float64[:], nb.float32[:])
+                 ], 
+                 '(g,g),(g),(),()->(g)', nopython=True, target=parallelOption, cache=cachedOption,fastmath=True)
 def damasSolverGaussSeidel(A, dirtyMap, nIterations, relax, damasSolution):
     """ Solves the DAMAS inverse problem via modified gauss seidel.
     This is the original formulation from :ref:`Brooks and Humphreys, 2006<BrooksHumphreys2006>`.
@@ -893,14 +894,26 @@ def damasSolverGaussSeidel(A, dirtyMap, nIterations, relax, damasSolution):
     -------
     None : as damasSolution is overwritten with end result of the damas iterative solver.
     """
+#    nGridPoints = len(dirtyMap)
+#    for cntIter in xrange(nIterations[0]):
+#        for cntGrid in xrange(nGridPoints):
+#            solHelp = np.float32(0)
+#            for cntGridHelp in xrange(cntGrid):  # lower sum
+#                solHelp += A[cntGrid, cntGridHelp] * damasSolution[cntGridHelp]
+#            for cntGridHelp in xrange(cntGrid + 1, nGridPoints):  # upper sum
+#                solHelp += A[cntGrid, cntGridHelp] * damasSolution[cntGridHelp]
+#            solHelp = (1 - relax[0]) * damasSolution[cntGrid] + relax[0] * (dirtyMap[cntGrid] - solHelp)
+#            if solHelp > 0.0:
+#                damasSolution[cntGrid] = solHelp
+#            else:
+#                damasSolution[cntGrid] = 0.0
     nGridPoints = len(dirtyMap)
     for cntIter in xrange(nIterations[0]):
         for cntGrid in xrange(nGridPoints):
-            solHelp = np.float32(0)
-            for cntGridHelp in xrange(cntGrid):  # lower sum
+            solHelp = 0.0
+            for cntGridHelp in xrange(nGridPoints):  # full sum
                 solHelp += A[cntGrid, cntGridHelp] * damasSolution[cntGridHelp]
-            for cntGridHelp in xrange(cntGrid + 1, nGridPoints):  # upper sum
-                solHelp += A[cntGrid, cntGridHelp] * damasSolution[cntGridHelp]
+            solHelp -= A[cntGrid, cntGrid] * damasSolution[cntGrid]
             solHelp = (1 - relax[0]) * damasSolution[cntGrid] + relax[0] * (dirtyMap[cntGrid] - solHelp)
             if solHelp > 0.0:
                 damasSolution[cntGrid] = solHelp

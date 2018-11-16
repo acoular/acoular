@@ -40,14 +40,14 @@ i1 = 1 #no of subplot
 for b in all_bf:
     subplot(3,4,i1)
     i1 += 1
-    g = b.grid
+    g = b.steer_obj.grid
     map = b.synthetic(cfreq,1)[:,0,:]
     mx = L_p(map.max())
     imshow(L_p(map.T), vmax=mx, vmin=mx-15, 
            interpolation='nearest', extent=(g.x_min,g.x_max,g.z_min,g.z_max),
            origin='lower')
     colorbar()
-    title(b.__class__.__name__+'\n '+b.steer, size=10)
+    title(b.__class__.__name__+'\n '+b.steer_obj.steer_type, size=10)
 
 tight_layout()
 # only display result on screen if this script is run directly
