@@ -74,14 +74,6 @@ class SteeringVector( HasPrivateTraits ):
     # always recalculates everything (especially transferfunctions and psf),
     # even though f got overwritten with its original List (which happens often with the current implementation)
     
-    #: The speed of sound, defaults to 343 m/s
-    c = Float(343., 
-        desc="speed of sound")
-    
-    #: List of free field wave numbers, corresponding to :attr:`SteeringVector.f`
-    #: and :attr:`SteeringVector.c`; read only
-    k = Property(depends_on=['f', 'c'])
-
     #: Type of steering vectors, see also :ref:`Sarradj, 2012<Sarradj2012>`.
     steer_type = Trait('true level', 'true location', 'classic', 'inverse',
                   desc="type of steering vectors used")
@@ -107,7 +99,7 @@ class SteeringVector( HasPrivateTraits ):
     rm = Property(desc="all array mics to grid distances")
     
     #: Transfer matrix (vector of transfer-vectors) of dimension [nFreq, nGrid, nMics]; read only
-    transfer = Property(depends_on=['f', 'c', 'env.digest', 'grid.digest', 'mpos.digest'], 
+    transfer = Property(depends_on=['f', 'env.digest', 'grid.digest', 'mpos.digest'], 
                         desc = 'transfer matrix')
     
     #: Steering vector of dimension [nFreq, nGrid, nMics], corresponding to transfer; read-only
@@ -115,27 +107,31 @@ class SteeringVector( HasPrivateTraits ):
     
     # internal identifier
     digest = Property( 
-        depends_on = ['c', 'steer_type', 'env.digest', 'grid.digest', 'mpos.digest'])
+        depends_on = ['steer_type', 'env.digest', 'grid.digest', 'mpos.digest'])
     
-    @cached_property
-    def _get_k(self):
-        return 2 * pi * array(self.f) / self.c
-    
-    @property_depends_on('c, grid.digest, env.digest')
+    # internal identifier, use for inverse methods, excluding steering vector type
+    inv_digest = Property( 
+        depends_on = ['env.digest', 'grid.digest', 'mpos.digest'])
+        
+    @property_depends_on('grid.digest, env.digest')
     def _get_r0 ( self ):
-        return self.env.r( self.c, self.grid.pos())
+        return self.env._r(self.grid.pos())
 
-    @property_depends_on('c, grid.digest, mpos.digest, env.digest')
+    @property_depends_on('grid.digest, mpos.digest, env.digest')
     def _get_rm ( self ):
-        return self.env.r( self.c, self.grid.pos(), self.mpos.mpos)
+        return self.env._r(self.grid.pos(), self.mpos.mpos)
  
     @cached_property
     def _get_digest( self ):
         return digest( self )
     
     @cached_property
+    def _get_inv_digest( self ):
+        return digest( self )
+    
+    @cached_property
     def _get_transfer(self):
-        trans = calcTransfer(self.r0, self.rm, array(self.k))
+        trans = calcTransfer(self.r0, self.rm, array(2*pi*self.f/self.env.c))
         return trans
     
     @cached_property
@@ -159,7 +155,7 @@ class SteeringVector( HasPrivateTraits ):
         -------
         trans : complex128[nFreqs, nMics]
         """
-        trans = calcTransfer(self.r0[ind], self.rm[ind, :][newaxis], array(self.k))[:, 0, :]
+        trans = calcTransfer(self.r0[ind], self.rm[ind, :][newaxis], array(2*pi*self.f/self.env.c))[:, 0, :]
         return trans
     
     def calc_steer_vector(self, a):
@@ -205,7 +201,7 @@ class SteeringVector( HasPrivateTraits ):
         -------
         The results of beamformerFreq, see fastFuncs.py 
         """
-        tupleSteer = (self.r0, self.rm, self.k[indFreq][newaxis])
+        tupleSteer = (self.r0, self.rm, 2*pi*self.f[indFreq][newaxis]/self.env.c)
         result = beamformerFreq(self.steer_type, rDiag, normFac, tupleSteer, tupleCSM)
         return result
     
@@ -227,7 +223,7 @@ class SteeringVector( HasPrivateTraits ):
         -------
         The psf [1, nGridPoints, len(sourceInd)]
         """
-        result = calcPointSpreadFunction(self.steer_type, self.r0, self.rm, self.k[freqInd][newaxis], sourceInd, precision)
+        result = calcPointSpreadFunction(self.steer_type, self.r0, self.rm, 2*pi*self.f[freqInd][newaxis]/self.env.c, sourceInd, precision)
         return result
 
     
@@ -364,7 +360,7 @@ class BeamformerBase( HasPrivateTraits ):
     
     # internal identifier
     digest = Property( 
-        depends_on = ['freq_data.digest', 'r_diag', 'r_diag_norm', 'precision', 'steer_obj.digest'])
+        depends_on = ['freq_data.digest', 'r_diag', 'r_diag_norm', 'precision', '_steer_obj.digest'])
 
     # internal identifier
     ext_digest = Property( 
@@ -608,7 +604,7 @@ class BeamformerFunctional( BeamformerBase ):
         desc="functional exponent")
 
     # internal identifier
-    digest = Property(depends_on = ['freq_data.digest', 'steer_obj.digest', 'r_diag', 'gamma'])
+    digest = Property(depends_on = ['freq_data.digest', '_steer_obj.digest', 'r_diag', 'gamma'])
     
     #: Functional Beamforming is only well defined for full CSM
     r_diag = Enum(False, 
@@ -619,7 +615,6 @@ class BeamformerFunctional( BeamformerBase ):
 #            [Item('mpos{}', style='custom')], 
 #            [Item('grid', style='custom'), '-<>'], 
             [Item('gamma', label='Exponent', style='simple')], 
-            [Item('c', label='Speed of sound')], 
 #            [Item('env{}', style='custom')], 
             '|'
         ], 
@@ -702,7 +697,6 @@ class BeamformerCapon( BeamformerBase ):
         [
 #            [Item('mpos{}', style='custom')], 
 #            [Item('grid', style='custom'), '-<>'], 
-            [Item('c', label='Speed of sound')], 
 #            [Item('env{}', style='custom')], 
             '|'
         ], 
@@ -763,7 +757,7 @@ class BeamformerEig( BeamformerBase ):
 
     # internal identifier
     digest = Property( 
-        depends_on = ['freq_data.digest', 'steer_obj.digest', 'r_diag', 'n'])
+        depends_on = ['freq_data.digest', '_steer_obj.digest', 'r_diag', 'n'])
 
     traits_view = View(
         [
@@ -771,7 +765,6 @@ class BeamformerEig( BeamformerBase ):
 #            [Item('grid', style='custom'), '-<>'], 
             [Item('n', label='Component No.', style='simple')], 
             [Item('r_diag', label='Diagonal removed')], 
-            [Item('c', label='Speed of sound')], 
 #            [Item('env{}', style='custom')], 
             '|'
         ], 
@@ -783,7 +776,7 @@ class BeamformerEig( BeamformerBase ):
     def _get_digest( self ):
         return digest( self )
     
-    @property_depends_on('steer_obj.mpos, n')
+    @property_depends_on('_steer_obj.mpos, n')
     def _get_na( self ):
         na = self.n
         nm = self._steer_obj.mpos.num_mics
@@ -851,7 +844,6 @@ class BeamformerMusic( BeamformerEig ):
 #            [Item('mpos{}', style='custom')], 
 #            [Item('grid', style='custom'), '-<>'], 
             [Item('n', label='No. of sources', style='simple')], 
-            [Item('c', label='Speed of sound')], 
 #            [Item('env{}', style='custom')], 
             '|'
         ], 
@@ -897,6 +889,7 @@ class BeamformerMusic( BeamformerEig ):
                 ac[i[cntFreq]] = 4e-10*beamformerOutput.min() / beamformerOutput
                 fr[i[cntFreq]] = True
 
+# TODO: PSF has to be changed to new steer functionality
 class PointSpreadFunction (HasPrivateTraits):
     """
     The point spread function.
@@ -1360,7 +1353,6 @@ class BeamformerOrth (BeamformerBase):
 #            [Item('grid', style='custom'), '-<>'], 
             [Item('n', label='Number of components', style='simple')], 
             [Item('r_diag', label='Diagonal removed')], 
-            [Item('c', label='Speed of sound')], 
 #            [Item('env{}', style='custom')], 
             '|'
         ], 
@@ -1445,7 +1437,7 @@ class BeamformerCleansc( BeamformerBase ):
 
     # internal identifier
     digest = Property( 
-        depends_on = ['freq_data.digest', 'steer_obj.digest', 'r_diag', 'n', 'damp', 'stopn'])
+        depends_on = ['freq_data.digest', '_steer_obj.digest', 'r_diag', 'n', 'damp', 'stopn'])
 
     traits_view = View(
         [
@@ -1453,7 +1445,6 @@ class BeamformerCleansc( BeamformerBase ):
 #            [Item('grid', style='custom'), '-<>'], 
             [Item('n', label='No. of iterations', style='simple')], 
             [Item('r_diag', label='Diagonal removed')], 
-            [Item('c', label='Speed of sound')], 
 #            [Item('env{}', style='custom')], 
             '|'
         ], 
@@ -1697,7 +1688,7 @@ class BeamformerCMF ( BeamformerBase ):
 
     # internal identifier
     digest = Property( 
-        depends_on = ['freq_data.digest', 'c', 'alpha', 'method', 'max_iter', 'unit_mult', 'r_diag', 'steer_obj.digest'], 
+        depends_on = ['freq_data.digest', 'alpha', 'method', 'max_iter', 'unit_mult', 'r_diag', '_steer_obj.inv_digest'], 
         )
 
     traits_view = View(
@@ -1864,7 +1855,7 @@ class BeamformerGIB(BeamformerEig):  #BeamformerEig #BeamformerBase
     
     # internal identifier++++++++++++++++++++++++++++++++++++++++++++++++++
     digest = Property( 
-        depends_on = ['steer_obj.digest', 'freq_data.digest', \
+        depends_on = ['_steer_obj.inv_digest', 'freq_data.digest', \
             'alpha', 'method', 'max_iter', 'unit_mult', 'eps_perc',\
             'pnorm', 'beta','n', 'm'], 
         )
