@@ -159,18 +159,23 @@ def beamformerFreq(steerVecType, boolRemovedDiagOfCSM, normFactor, inputTupleSte
                       (True, 'custom', True) : _freqBeamformer_EigValProb_SpecificSteerVec_CsmRemovedDiag}
     coreFunc = beamformerDict[(boolIsEigValProb, steerVecType, boolRemovedDiagOfCSM)]
 
+   
     # prepare Input
     if steerVecType == 'custom':  # beamformer with custom steering vector
         steerVec = inputTupleSteer[0]
-        nFreqs, nGridPoints = steerVec.shape[0], steerVec.shape[1]
+        #nFreqs, nGridPoints = steerVec.shape[0], steerVec.shape[1]
+        nGridPoints = steerVec.shape[1]
     else:  # predefined beamformers (Formulation I - IV)
         distGridToArrayCenter, distGridToAllMics, waveNumber = inputTupleSteer[0], inputTupleSteer[1], inputTupleSteer[2]
-        nFreqs, nGridPoints = waveNumber.shape[0], distGridToAllMics.shape[0]
+        if not isinstance(waveNumber, np.ndarray): waveNumber = np.array([waveNumber])
+        #nFreqs, nGridPoints = waveNumber.shape[0], distGridToAllMics.shape[0]
+        nGridPoints = distGridToAllMics.shape[0]
     if boolIsEigValProb:
         eigVal, eigVec = inputTupleCsm[0], inputTupleCsm[1]
     else:
         csm = inputTupleCsm[0]
     
+    nFreqs=1 # TODO: Quick and dirty workaround has to be cleant up
     # beamformer routine: parallelized over Gridpoints
     beamformOutput = np.zeros((nFreqs, nGridPoints), np.float64)
     steerNormalizeOutput = np.zeros_like(beamformOutput)
@@ -184,9 +189,9 @@ def beamformerFreq(steerVecType, boolRemovedDiagOfCSM, normFactor, inputTupleSte
                 coreFunc(csm[cntFreqs, :, :], steerVec[cntFreqs, :, :], normFactor, result, normalHelp)
         else:  # predefined beamformers (Formulation I - IV)
             if boolIsEigValProb:
-                coreFunc(eigVal[cntFreqs, :], eigVec[cntFreqs, :, :], distGridToArrayCenter, distGridToAllMics, waveNumber[cntFreqs], normFactor, result, normalHelp)
+                coreFunc(eigVal[cntFreqs, :], eigVec[cntFreqs, :, :], distGridToArrayCenter, distGridToAllMics, waveNumber, normFactor, result, normalHelp)
             else:
-                coreFunc(csm[cntFreqs, :, :], distGridToArrayCenter, distGridToAllMics, waveNumber[cntFreqs], normFactor, result, normalHelp)
+                coreFunc(csm[cntFreqs, :, :], distGridToArrayCenter, distGridToAllMics, waveNumber, normFactor, result, normalHelp)
         beamformOutput[cntFreqs, :] = result
         steerNormalizeOutput[cntFreqs, :] = normalHelp 
     return beamformOutput, steerNormalizeOutput 
@@ -931,21 +936,18 @@ def calcTransfer(distGridToArrayCenter, distGridToAllMics, waveNumber):
         Distance of all gridpoints to the center of sensor array
     distGridToAllMics : float64[nGridpoints, nMics]
         Distance of all gridpoints to all sensors of array
-    waveNumber : complex128[nFreqs]
+    waveNumber : complex128
         The wave number should be stored in the imag-part
 
     Returns
     -------
-    The Transferfunctions in format complex128[nFreqs, nGridPoints, nMics].
+    The Transferfunctions in format complex128[nGridPoints, nMics].
     """
-    nFreqs, nGridPoints, nMics = waveNumber.shape[0], distGridToAllMics.shape[0], distGridToAllMics.shape[1]
+    nGridPoints, nMics = distGridToAllMics.shape[0], distGridToAllMics.shape[1]
+    result = np.zeros((nGridPoints, nMics), np.complex128)
     # transfer routine: parallelized over Gridpoints
-    transferOutput = np.zeros((nFreqs, nGridPoints, nMics), np.complex128)
-    for cntFreqs in xrange(nFreqs):
-        result = np.zeros((nGridPoints, nMics), np.complex128)
-        _transferCoreFunc(distGridToArrayCenter, distGridToAllMics, waveNumber[cntFreqs], result)
-        transferOutput[cntFreqs, :, :] = result
-    return transferOutput
+    _transferCoreFunc(distGridToArrayCenter, distGridToAllMics, np.array([waveNumber]), result)
+    return result
 
 @nb.guvectorize([(nb.float64[:], nb.float64[:], nb.float64[:], nb.complex128[:])], '(),(m),()->(m)', nopython=True, target=parallelOption, cache=cachedOption)
 def _transferCoreFunc(distGridToArrayCenter, distGridToAllMics, waveNumber, result):
