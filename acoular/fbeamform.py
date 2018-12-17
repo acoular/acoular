@@ -1006,7 +1006,6 @@ class PointSpreadFunction (HasPrivateTraits):
         return digest( self )
     
 
-    # TODO: put this in the PSF class and make it independent of monopole model
     def _psfCall(self, ind):
         """
         Manages the calling of the core psf functionality.
@@ -1021,7 +1020,7 @@ class PointSpreadFunction (HasPrivateTraits):
         -------
         The psf [1, nGridPoints, len(ind)]
         """
-        if type(self.steer) == 'SteeringVector': # for simple steering vector, use faster method
+        if type(self.steer) == SteeringVector: # for simple steering vector, use faster method
             result = calcPointSpreadFunction(self.steer.steer_type, 
                                              self.steer.r0, 
                                              self.steer.rm, 
