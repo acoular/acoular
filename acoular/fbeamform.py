@@ -83,7 +83,7 @@ class SteeringVector( HasPrivateTraits ):
         desc="beamforming grid")
     
     #: :class:`~acoular.microphones.MicGeom` object that provides the microphone locations.
-    mpos = Trait(MicGeom, 
+    mics = Trait(MicGeom, 
         desc="microphone geometry")
     
     #: Flag, if "True" (not default), the transfer function is 
@@ -94,29 +94,30 @@ class SteeringVector( HasPrivateTraits ):
                   desc="cache flag for transfer function")    
     
     
-    #: Sound travel distances from microphone array center to grid 
-    #: points (readonly).
+    # TODO: add reference pos trait ('array center', dist_to_gridpoint, fixed position)
+    # Sound travel distances from microphone array center to grid 
+    # points (readonly). Feature may change.
     r0 = Property(desc="array center to grid distances")
 
-    #: Sound travel distances from array microphones to grid 
-    #: points (readonly).
+    # Sound travel distances from array microphones to grid 
+    # points (readonly). Feature may change.
     rm = Property(desc="all array mics to grid distances")
     
     # internal identifier
     digest = Property( 
-        depends_on = ['steer_type', 'env.digest', 'grid.digest', 'mpos.digest'])
+        depends_on = ['steer_type', 'env.digest', 'grid.digest', 'mics.digest'])
     
     # internal identifier, use for inverse methods, excluding steering vector type
     inv_digest = Property( 
-        depends_on = ['env.digest', 'grid.digest', 'mpos.digest'])
+        depends_on = ['env.digest', 'grid.digest', 'mics.digest'])
         
     @property_depends_on('grid.digest, env.digest')
     def _get_r0 ( self ):
         return self.env._r(self.grid.pos())
 
-    @property_depends_on('grid.digest, mpos.digest, env.digest')
+    @property_depends_on('grid.digest, mics.digest, env.digest')
     def _get_rm ( self ):
-        return self.env._r(self.grid.pos(), self.mpos.mpos)
+        return self.env._r(self.grid.pos(), self.mics.mpos)
  
     @cached_property
     def _get_digest( self ):
@@ -300,11 +301,11 @@ class BeamformerBase( HasPrivateTraits ):
     # Now governed by :attr:`steer` trait
     r0 = Property()
     def _get_r0(self):
-        return self._steer_obj._r0
+        return self._steer_obj.r0
     
     rm = Property()
     def _get_rm(self):
-        return self._steer_obj._rm
+        return self._steer_obj.rm
     
     # --- End of backwards compatibility traits --------------------------------------
 
@@ -383,8 +384,8 @@ class BeamformerBase( HasPrivateTraits ):
             _digest = self.digest
             name = self.__class__.__name__ + self.digest
             numchannels = self.freq_data.numchannels
-            if  numchannels != self.steer.mpos.num_mics or numchannels == 0:
-                raise ValueError("%i channels do not fit %i mics" % (numchannels, self.steer.mpos.num_mics))
+            if  numchannels != self.steer.mics.num_mics or numchannels == 0:
+                raise ValueError("%i channels do not fit %i mics" % (numchannels, self.steer.mics.num_mics))
             numfreq = self.freq_data.fftfreq().shape[0]# block_size/2 + 1steer_obj
             precisionTuple = _precision(self.precision)
             if self.cached:
@@ -596,7 +597,7 @@ class BeamformerFunctional( BeamformerBase ):
 
     traits_view = View(
         [
-#            [Item('mpos{}', style='custom')], 
+#            [Item('mics{}', style='custom')], 
 #            [Item('grid', style='custom'), '-<>'], 
             [Item('gamma', label='Exponent', style='simple')], 
 #            [Item('env{}', style='custom')], 
@@ -678,7 +679,7 @@ class BeamformerCapon( BeamformerBase ):
 
     traits_view = View(
         [
-#            [Item('mpos{}', style='custom')], 
+#            [Item('mics{}', style='custom')], 
 #            [Item('grid', style='custom'), '-<>'], 
 #            [Item('env{}', style='custom')], 
             '|'
@@ -743,7 +744,7 @@ class BeamformerEig( BeamformerBase ):
 
     traits_view = View(
         [
-#            [Item('mpos{}', style='custom')], 
+#            [Item('mics{}', style='custom')], 
 #            [Item('grid', style='custom'), '-<>'], 
             [Item('n', label='Component No.', style='simple')], 
             [Item('r_diag', label='Diagonal removed')], 
@@ -758,10 +759,10 @@ class BeamformerEig( BeamformerBase ):
     def _get_digest( self ):
         return digest( self )
     
-    @property_depends_on('steer.mpos, n')
+    @property_depends_on('steer.mics, n')
     def _get_na( self ):
         na = self.n
-        nm = self.steer.mpos.num_mics
+        nm = self.steer.mics.num_mics
         if na < 0:
             na = max(nm + na, 0)
         return min(nm - 1, na)
@@ -822,7 +823,7 @@ class BeamformerMusic( BeamformerEig ):
 
     traits_view = View(
         [
-#            [Item('mpos{}', style='custom')], 
+#            [Item('mics{}', style='custom')], 
 #            [Item('grid', style='custom'), '-<>'], 
             [Item('n', label='No. of sources', style='simple')], 
 #            [Item('env{}', style='custom')], 
@@ -859,7 +860,7 @@ class BeamformerMusic( BeamformerEig ):
         """
         f = self.freq_data.fftfreq()
         nMics = self.freq_data.numchannels
-        n = int(self.steer.mpos.num_mics-self.na)
+        n = int(self.steer.mics.num_mics-self.na)
         normFactor = self.sig_loss_norm() * nMics**2
         for i in self.freq_data.indices:
             if not fr[i]:
@@ -962,11 +963,11 @@ class PointSpreadFunction (HasPrivateTraits):
     # Now governed by :attr:`steer` trait
     r0 = Property()
     def _get_r0(self):
-        return self._steer_obj._r0
+        return self._steer_obj.r0
     
     rm = Property()
     def _get_rm(self):
-        return self._steer_obj._rm
+        return self._steer_obj.rm
     
     # --- End of backwards compatibility traits --------------------------------------
     
@@ -1915,7 +1916,7 @@ class BeamformerGIB(BeamformerEig):  #BeamformerEig #BeamformerBase
     @property_depends_on('n')
     def _get_na( self ):
         na = self.n
-        nm = self.steer.mpos.num_mics
+        nm = self.steer.mics.num_mics
         if na < 0:
             na = max(nm + na, 0)
         return min(nm - 1, na)

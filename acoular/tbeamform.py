@@ -21,9 +21,10 @@ from six import next
 from numpy import array, newaxis, empty, sqrt, arange, clip, r_, zeros, \
 histogram, unique, cross, dot, where, s_ , sum
 from traits.api import Float, CArray, Property, Trait, Bool, Delegate, \
-cached_property, List
+cached_property, List, Instance
 from traitsui.api import View, Item
 from traitsui.menu import OKCancelButtons
+from traits.trait_errors import TraitError
 
 # acoular imports
 from .internal import digest
@@ -73,23 +74,98 @@ class BeamformerTime( TimeInOut ):
     Provides a basic time domain beamformer with time signal output
     for a spatially fixed grid.
     """
-    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.c` for information.
-    c = Property(desc="speed of sound")
-    
-    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.env` for information.
-    env = Property()
 
-    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.grid` for information.
-    grid = Property(desc="beamforming grid")
+
+    # Instance of :class:`~acoular.fbeamform.SteeringVector` or its derived classes
+    # that contains information about the steering vector. This is a private trait.
+    # Do not set this directly, use `steer` trait instead.
+    _steer_obj = Instance(SteeringVector(), SteeringVector)   
     
-    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.mpos` for information.
-    mpos = Property(desc="microphone geometry")
+    #: :class:`~acoular.fbeamform.SteeringVector` or derived object. 
+    #: Defaults to :class:`~acoular.fbeamform.SteeringVector` object.
+    steer = Property(desc="steering vector object")  
     
-    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.r0` for information.
-    r0 = Property(desc="array center to grid distances")
+    def _get_steer(self):
+        return self._steer_obj
     
-    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.rm` for information.
-    rm = Property(desc="all array mics to grid distances")
+    def _set_steer(self, steer):
+        if type(steer) == SteeringVector:
+            # This condition may be replaced at a later time by: isinstance(steer, SteeringVector): -- (derived classes allowed)
+            self._steer_obj = steer
+        elif steer in ('true level', 'true location', 'classic', 'inverse'):
+            # Type of steering vectors, see also :ref:`Sarradj, 2012<Sarradj2012>`.
+            print("Warning! Deprecated use of 'steer' trait. Better use object of class 'SteeringVector'")
+            self._steer_obj = SteeringVector(steer_type = steer)
+        else:
+            raise(TraitError(args=self,
+                             name='steer', 
+                             info='SteeringVector',
+                             value=steer))
+
+    # --- List of backwards compatibility traits and their setters/getters -----------
+    
+    # :class:`~acoular.environments.Environment` or derived object. 
+    # Deprecated! Only kept for backwards compatibility. 
+    # Now governed by :attr:`steer` trait.
+    env = Property()
+    
+    def _get_env(self):
+        return self._steer_obj.env    
+    
+    def _set_env(self, env):
+        print("Warning! Deprecated use of 'env' trait.")
+        self._steer_obj.env = env
+    
+    # The speed of sound.
+    # Deprecated! Only kept for backwards compatibility. 
+    # Now governed by :attr:`steer` trait.
+    c = Property()
+    
+    def _get_c(self):
+        return self._steer_obj.env.c
+    
+    def _set_c(self, c):
+        print("Warning! Deprecated use of 'c' trait.")
+        self._steer_obj.env.c = c
+   
+    # :class:`~acoular.grids.Grid`-derived object that provides the grid locations.
+    # Deprecated! Only kept for backwards compatibility. 
+    # Now governed by :attr:`steer` trait.
+    grid = Property()
+
+    def _get_grid(self):
+        return self._steer_obj.grid
+    
+    def _set_grid(self, grid):
+        print("Warning! Deprecated use of 'grid' trait.")
+        self._steer_obj.grid = grid
+    
+    # :class:`~acoular.microphones.MicGeom` object that provides the microphone locations.
+    # Deprecated! Only kept for backwards compatibility. 
+    # Now governed by :attr:`steer` trait
+    mpos = Property()
+    
+    def _get_mpos(self):
+        return self._steer_obj.mics
+    
+    def _set_mpos(self, mpos):
+        print("Warning! Deprecated use of 'mpos' trait.")
+        self._steer_obj.mics = mpos
+    
+    
+    # Sound travel distances from microphone array center to grid points (r0)
+    # and all array mics to grid points (rm). Readonly.
+    # Deprecated! Only kept for backwards compatibility. 
+    # Now governed by :attr:`steer` trait
+    r0 = Property()
+    def _get_r0(self):
+        return self._steer_obj.r0
+    
+    rm = Property()
+    def _get_rm(self):
+        return self._steer_obj.rm
+    
+    # --- End of backwards compatibility traits --------------------------------------
 
     #: Number of channels in output (=number of grid points).
     numchannels = Delegate('grid', 'size')
@@ -99,17 +175,9 @@ class BeamformerTime( TimeInOut ):
         desc="spatial weighting function")
     # (from timedomain.possible_weights)
     
-    #: instance of :class:`~acoular.fbeamform.SteeringVector`
-    #: that contains information about the steering vector.
-    #: Derived classes of SteeringVector are not allowed at the moment.
-    steer_obj = Property()
-    
-    # internally used
-    _steer_obj_internal = Trait(SteeringVector(), SteeringVector)  # creates standard steering vector in constructor of BeamformerTime
-        
     # internal identifier
     digest = Property( 
-        depends_on = ['steer_obj.digest', 'source.digest', 'weights', '__class__'], 
+        depends_on = ['steer.digest', 'source.digest', 'weights', '__class__'], 
         )
 
 #    traits_view = View(
@@ -129,45 +197,7 @@ class BeamformerTime( TimeInOut ):
     def _get_digest( self ):
         return digest(self)
     
-    def _get_steer_obj(self):
-        return self._steer_obj_internal
-    
-    def _set_steer_obj(self, steer_obj):
-        if steer_obj.__class__.__name__ == 'SteeringVector':
-            self._steer_obj_internal = steer_obj
-        else:
-            raise Exception('Only instances of SteeringVector are allowed for BeamformerTime.steer_obj at the moment (NO derived classes)!')
-    
-    def _get_c(self):
-        return self.steer_obj.c
-    
-    def _get_env(self):
-        return self.steer_obj.env
-    
-    def _get_grid(self):
-        return self.steer_obj.grid
-    
-    def _get_mpos(self):
-        return self.steer_obj.mpos
-    
-    def _get_r0(self):
-        return self.steer_obj.r0
-    
-    def _get_rm(self):
-        return self.steer_obj.rm
-    
-    def _set_c(self, c):
-        self.steer_obj.c = c
-    
-    def _set_env(self, env):
-        self.steer_obj.env = env
-    
-    def _set_grid(self, grid):
-        self.steer_obj.grid = grid
-    
-    def _set_mpos(self, mpos):
-        self.steer_obj.mpos = mpos
-        
+         
     def result( self, num=2048 ):
         """
         Python generator that yields the beamformer output block-wise.
