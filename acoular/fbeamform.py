@@ -1962,7 +1962,7 @@ class BeamformerGIB(BeamformerEig):  #BeamformerEig #BeamformerBase
                 #for monopole and source strenght Q needs to define density
                 #calculate a transfer matrix A 
                 hh = self.steer.transfer(f[i])
-                A=hh[i].T                 
+                A=hh.T                 
                 #eigenvalues and vectors               
                 csm = array(self.freq_data.csm[i], dtype='complex128',copy=1)
                 eva,eve=eigh(csm)
