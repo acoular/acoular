@@ -177,7 +177,7 @@ class BeamformerTime( TimeInOut ):
     
     # internal identifier
     digest = Property( 
-        depends_on = ['steer.digest', 'source.digest', 'weights', '__class__'], 
+        depends_on = ['_steer_obj.digest', 'source.digest', 'weights', '__class__'], 
         )
 
     traits_view = View(
@@ -270,7 +270,7 @@ class BeamformerTimeSq( BeamformerTime ):
 
     # internal identifier
     digest = Property( 
-        depends_on = ['steer.digest', 'source.digest', 'r_diag', \
+        depends_on = ['_steer_obj.digest', 'source.digest', 'r_diag', \
                       'weights', '__class__'], 
         )
 
@@ -386,7 +386,7 @@ class BeamformerTimeTraj( BeamformerTime ):
     
     # internal identifier
     digest = Property( 
-        depends_on = ['steer.digest', 'source.digest', 'weights',  \
+        depends_on = ['_steer_obj.digest', 'source.digest', 'weights',  \
                       'rvec', 'trajectory.digest', '__class__'], 
         )
 
@@ -532,7 +532,7 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
     
     # internal identifier
     digest = Property( 
-        depends_on = ['steer.digest', 'source.digest', 'r_diag', 'weights', \
+        depends_on = ['_steer_obj.digest', 'source.digest', 'r_diag', 'weights', \
                       'rvec', 'trajectory.digest', '__class__'], 
         )
 
