@@ -53,7 +53,7 @@ def const_power_weight( bf ):
         The weight factors.
     """
 
-    r = bf.env.r( bf.c, zeros((3, 1)), bf.mpos.mpos) # distances to center
+    r = bf.steer.env._r(zeros((3, 1)), bf.steer.mics.mpos) # distances to center
     # round the relative distances to one decimal place
     r = (r/r.max()).round(decimals=1)
     ru, ind = unique(r, return_inverse=True)
