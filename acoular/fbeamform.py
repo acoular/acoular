@@ -346,7 +346,7 @@ class BeamformerBase( HasPrivateTraits ):
     
     # internal identifier
     digest = Property( 
-        depends_on = ['freq_data.digest', 'r_diag', 'r_diag_norm', 'precision', 'steer.digest'])
+        depends_on = ['freq_data.digest', 'r_diag', 'r_diag_norm', 'precision', '_steer_obj.digest'])
 
     # internal identifier
     ext_digest = Property( 
@@ -589,7 +589,7 @@ class BeamformerFunctional( BeamformerBase ):
         desc="functional exponent")
 
     # internal identifier
-    digest = Property(depends_on = ['freq_data.digest', 'steer.digest', 'r_diag', 'gamma'])
+    digest = Property(depends_on = ['freq_data.digest', '_steer_obj.digest', 'r_diag', 'gamma'])
     
     #: Functional Beamforming is only well defined for full CSM
     r_diag = Enum(False, 
@@ -740,7 +740,7 @@ class BeamformerEig( BeamformerBase ):
 
     # internal identifier
     digest = Property( 
-        depends_on = ['freq_data.digest', 'steer.digest', 'r_diag', 'n'])
+        depends_on = ['freq_data.digest', '_steer_obj.digest', 'r_diag', 'n'])
 
     traits_view = View(
         [
@@ -1000,7 +1000,7 @@ class PointSpreadFunction (HasPrivateTraits):
     h5f = Instance(tables.File, transient = True)
     
     # internal identifier
-    digest = Property( depends_on = ['steer.digest', 'precision'], cached = True)
+    digest = Property( depends_on = ['_steer_obj.digest', 'precision'], cached = True)
 
     @cached_property
     def _get_digest( self ):
@@ -1476,7 +1476,7 @@ class BeamformerCleansc( BeamformerBase ):
 
     # internal identifier
     digest = Property( 
-        depends_on = ['freq_data.digest', 'steer.digest', 'r_diag', 'n', 'damp', 'stopn'])
+        depends_on = ['freq_data.digest', '_steer_obj.digest', 'r_diag', 'n', 'damp', 'stopn'])
 
     traits_view = View(
         [
