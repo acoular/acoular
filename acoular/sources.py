@@ -349,7 +349,7 @@ class PointSource( SamplesGenerator ):
                
     #: Number of channels in output, is set automatically / 
     #: depends on used microphone geometry.
-    numchannels = Delegate('mpos', 'num_mics')
+    numchannels = Delegate('mics', 'num_mics')
 
 
     #: :class:`~acoular.microphones.MicGeom` object that provides the microphone locations.
@@ -410,7 +410,7 @@ class PointSource( SamplesGenerator ):
 
     # internal identifier
     digest = Property( 
-        depends_on = ['mpos.digest', 'signal.digest', 'loc', \
+        depends_on = ['mics.digest', 'signal.digest', 'loc', \
          'env.digest', 'start_t', 'start', 'up', '__class__'], 
         )
                
@@ -440,7 +440,7 @@ class PointSource( SamplesGenerator ):
         signal = self.signal.usignal(self.up)
         out = empty((num, self.numchannels))
         # distances
-        rm = self.env._r(array(self.loc).reshape((3, 1)), self.mpos.mpos)
+        rm = self.env._r(array(self.loc).reshape((3, 1)), self.mics.mpos)
         # emission time relative to start_t (in samples) for first sample
         ind = (-rm/self.env.c-self.start_t+self.start)*self.sample_freq   
         i = 0
@@ -477,7 +477,7 @@ class MovingPointSource( PointSource ):
 
     # internal identifier
     digest = Property( 
-        depends_on = ['mpos.digest', 'signal.digest', 'loc', \
+        depends_on = ['mics.digest', 'signal.digest', 'loc', \
          'env.digest', 'start_t', 'start', 'trajectory.digest', '__class__'], 
         )
                
@@ -506,7 +506,7 @@ class MovingPointSource( PointSource ):
         signal = self.signal.usignal(self.up)
         out = empty((num, self.numchannels))
         # shortcuts and intial values
-        m = self.mpos
+        m = self.mics
         t = self.start*ones(m.num_mics)
         i = 0
         epslim = 0.1/self.up/self.sample_freq
@@ -563,7 +563,7 @@ class PointSourceDipole ( PointSource ):
     
     # internal identifier
     digest = Property( 
-        depends_on = ['mpos.digest', 'signal.digest', 'loc', \
+        depends_on = ['mics.digest', 'signal.digest', 'loc', \
          'env.digest', 'start_t', 'start', 'up', 'direction', '__class__'], 
         )
                
@@ -590,7 +590,7 @@ class PointSourceDipole ( PointSource ):
         #If signal samples are needed for te < t_start, then samples are taken
         #from the end of the calculated signal.
         
-        mpos = self.mpos.mpos
+        mpos = self.mics.mpos
         
         # position of the dipole as (3,1) vector
         loc = array(self.loc, dtype = float).reshape((3, 1)) 
@@ -667,12 +667,26 @@ class UncorrelatedNoiseSource( SamplesGenerator ):
     
     #: Number of channels in output; is set automatically / 
     #: depends on used microphone geometry.
-    numchannels = Delegate('mpos', 'num_mics')
+    numchannels = Delegate('mics', 'num_mics')
 
-    #: Microphone locations as provided by a 
-    #: :class:`~acoular.microphones.MicGeom`-derived object.
-    mpos = Trait(MicGeom, 
+    #: :class:`~acoular.microphones.MicGeom` object that provides the microphone locations.
+    mics = Trait(MicGeom, 
         desc="microphone geometry")
+
+    # --- List of backwards compatibility traits and their setters/getters -----------
+
+    # Microphone locations.
+    # Deprecated! Use :attr:`mics` trait instead.
+    mpos = Property()
+    
+    def _get_mpos(self):
+        return self.mics
+    
+    def _set_mpos(self, mpos):
+        print("Warning! Deprecated use of 'mpos' trait.")
+        self.mics = mpos
+
+    # --- End of backwards compatibility traits --------------------------------------
         
     #: Start time of the signal in seconds, defaults to 0 s.
     start_t = Float(0.0,
@@ -694,7 +708,7 @@ class UncorrelatedNoiseSource( SamplesGenerator ):
     
     # internal identifier
     digest = Property( 
-        depends_on = ['mpos.digest', 'signal.rms', 'signal.numsamples', \
+        depends_on = ['mics.digest', 'signal.rms', 'signal.numsamples', \
         'signal.sample_freq', 'signal.__class__' , 'seed', 'loc', \
          'start_t', 'start', '__class__'], 
         )
