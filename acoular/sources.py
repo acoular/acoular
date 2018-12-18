@@ -351,15 +351,28 @@ class PointSource( SamplesGenerator ):
     #: depends on used microphone geometry.
     numchannels = Delegate('mpos', 'num_mics')
 
-    #: Microphone locations as provided by a 
-    #: :class:`~acoular.microphones.MicGeom`-derived object.
-    mpos = Trait(MicGeom, 
+
+    #: :class:`~acoular.microphones.MicGeom` object that provides the microphone locations.
+    mics = Trait(MicGeom, 
         desc="microphone geometry")
-        
+    
     #: :class:`~acoular.environments.Environment` or derived object, 
     #: which provides information about the sound propagation in the medium.
     env = Trait(Environment(), Environment)
 
+    # --- List of backwards compatibility traits and their setters/getters -----------
+
+    # Microphone locations.
+    # Deprecated! Use :attr:`mics` trait instead.
+    mpos = Property()
+    
+    def _get_mpos(self):
+        return self.mics
+    
+    def _set_mpos(self, mpos):
+        print("Warning! Deprecated use of 'mpos' trait.")
+        self.mics = mpos
+        
     # The speed of sound.
     # Deprecated! Only kept for backwards compatibility. 
     # Now governed by :attr:`env` trait.
@@ -371,6 +384,8 @@ class PointSource( SamplesGenerator ):
     def _set_c(self, c):
         print("Warning! Deprecated use of 'c' trait.")
         self.env.c = c
+
+    # --- End of backwards compatibility traits --------------------------------------
         
     #: Start time of the signal in seconds, defaults to 0 s.
     start_t = Float(0.0,
