@@ -18,7 +18,7 @@ from __future__ import print_function
 
 # imports from acoular
 import acoular
-from acoular import L_p, Calib, MicGeom, PowerSpectra, \
+from acoular import L_p, Calib, MicGeom, PowerSpectra, Environment,\
 RectGrid, BeamformerBase, BeamformerEig, BeamformerOrth, BeamformerCleansc, \
 MaskedTimeSamples, BeamformerDamas, SteeringVector
 
@@ -76,20 +76,26 @@ f = PowerSpectra(time_data=t1,
                ind_low=8, ind_high=16) #to save computational effort, only
                # frequencies with index 1-30 are used
 
+#===============================================================================
+# the environment, i.e. medium characteristics
+# (in this case, the speed of sound is set)
+#===============================================================================
+env = Environment(c = 346.04)
+
 # =============================================================================
 # a steering vector instance. SteeringVector provides the standard freefield 
 # sound propagation model in the steering vectors.
 # =============================================================================
-st = SteeringVector(grid=g, mpos=m, c=346.04)
+st = SteeringVector(grid=g, mics=m, env=env)
 
 #===============================================================================
 # beamformers in frequency domain
 #===============================================================================
-bb = BeamformerBase(freq_data=f, steer_obj=st, r_diag=True)
+bb = BeamformerBase(freq_data=f, steer=st, r_diag=True)
 bd = BeamformerDamas(beamformer=bb, n_iter=100)
-be = BeamformerEig(freq_data=f, steer_obj=st, r_diag=True, n=54)
+be = BeamformerEig(freq_data=f, steer=st, r_diag=True, n=54)
 bo = BeamformerOrth(beamformer=be, eva_list=list(range(38,54)))
-bs = BeamformerCleansc(freq_data=f, steer_obj=st, r_diag=True)
+bs = BeamformerCleansc(freq_data=f, steer=st, r_diag=True)
 
 #===============================================================================
 # plot result maps for different beamformers in frequency domain
@@ -111,7 +117,7 @@ for r_diag in (True,False):
             mx = L_p(map.max())
             imshow(L_p(map.T), vmax=mx, vmin=mx-15,  origin='lower',
                    interpolation='nearest', extent=g.extend())
-            print(b.steer_obj.steer_type)
+            print(b.steer.steer_type)
             colorbar()
             title(b.__class__.__name__,fontsize='small')
 
