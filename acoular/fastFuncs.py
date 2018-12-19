@@ -56,7 +56,7 @@ def calcCSM(csm, SpecAllMics):
     
 def beamformerFreq(steerVecType, boolRemovedDiagOfCSM, normFactor, inputTupleSteer, inputTupleCsm):
     """ Conventional beamformer in frequency domain. Use either a predefined
-    steering vector formulation (see Sarradj 2012) or pass it your own
+    steering vector formulation (see Sarradj 2012) or pass your own
     steering vector.
 
     Parameters
@@ -76,30 +76,30 @@ def beamformerFreq(steerVecType, boolRemovedDiagOfCSM, normFactor, inputTupleSte
                     Distance of all gridpoints to the center of sensor array
                 distGridToAllMics : float64[nGridpoints, nMics]
                     Distance of all gridpoints to all sensors of array
-                waveNumber : float64[nFreqs]
+                waveNumber : float64
                     The wave number
         steerVecType == 'custom' :
-            inputTupleSteer = (steeringVector,)    , with
-                steeringVector : complex128[nFreqs, nGridPoints, nMics]
-                    The steering vector of each gridpoint and frequency
+            inputTupleSteer = steeringVector    , with
+                steeringVector : complex128[nGridPoints, nMics]
+                    The steering vector of each gridpoint for the same frequency as the CSM
     inputTupleCsm : contains the data of measurement as a tuple. There are 2 cases:
         perform standard CSM-beamformer:
-            inputTupleCsm = (csm,)    , with
-                csm : complex128[nFreqs, nMics, nMics]
-                    The cross spectral matrix
+            inputTupleCsm = csm
+                csm : complex128[ nMics, nMics]
+                    The cross spectral matrix for one frequency
         perform beamformer on eigenvalue decomposition of csm:
             inputTupleCsm = (eigValues, eigVectors)    , with
-                eigValues : float64[nFreqs, nEV]
+                eigValues : float64[nEV]
                     nEV is the number of eigenvalues which should be taken into account. 
                     All passed eigenvalues will be evaluated.
-                eigVectors : complex128[nFreqs, nMics, nEV]
+                eigVectors : complex128[nMics, nEV]
                     Eigen vectors corresponding to eigValues. All passed eigenvector slices will be evaluated.
-    
+
     Returns
     -------
-    *Autopower spectrum beamforming map [nFreqs, nGridPoints] 
+    *Autopower spectrum beamforming map [nGridPoints] 
          
-    *steer normalization factor [nFreqs, nGridPoints]... contains the values the autopower needs to be multiplied with, in order to 
+    *steer normalization factor [nGridPoints]... contains the values the autopower needs to be multiplied with, in order to 
     fullfill 'steer^H * steer = 1' as needed for functional beamforming. 
     
     Some Notes on the optimization of all subroutines
@@ -135,7 +135,7 @@ def beamformerFreq(steerVecType, boolRemovedDiagOfCSM, normFactor, inputTupleSte
         "eigenVec.conj * steeringVector". BUT (at the moment) this only brings benefits in comp-time for a very 
         small range of nMics (approx 250) --> Therefor it is not implemented here.
     """
-    boolIsEigValProb = len(inputTupleCsm) > 1
+    boolIsEigValProb = isinstance(inputTupleCsm, tuple)# len(inputTupleCsm) > 1
     # get the beamformer type (key-tuple = (isEigValProblem, formulationOfSteeringVector, RemovalOfCSMDiag))
     beamformerDict = {(False, 'classic', False) : _freqBeamformer_Formulation1AkaClassic_FullCSM,
                       (False, 'classic', True) : _freqBeamformer_Formulation1AkaClassic_CsmRemovedDiag,
@@ -162,38 +162,36 @@ def beamformerFreq(steerVecType, boolRemovedDiagOfCSM, normFactor, inputTupleSte
    
     # prepare Input
     if steerVecType == 'custom':  # beamformer with custom steering vector
-        steerVec = inputTupleSteer[0]
+        steerVec = inputTupleSteer
         #nFreqs, nGridPoints = steerVec.shape[0], steerVec.shape[1]
         nGridPoints = steerVec.shape[1]
     else:  # predefined beamformers (Formulation I - IV)
-        distGridToArrayCenter, distGridToAllMics, waveNumber = inputTupleSteer[0], inputTupleSteer[1], inputTupleSteer[2]
+        distGridToArrayCenter, distGridToAllMics, waveNumber = inputTupleSteer#[0], inputTupleSteer[1], inputTupleSteer[2]
         if not isinstance(waveNumber, np.ndarray): waveNumber = np.array([waveNumber])
         #nFreqs, nGridPoints = waveNumber.shape[0], distGridToAllMics.shape[0]
         nGridPoints = distGridToAllMics.shape[0]
     if boolIsEigValProb:
-        eigVal, eigVec = inputTupleCsm[0], inputTupleCsm[1]
+        eigVal, eigVec = inputTupleCsm#[0], inputTupleCsm[1]
     else:
-        csm = inputTupleCsm[0]
+        csm = inputTupleCsm
     
-    nFreqs=1 # TODO: Quick and dirty workaround has to be cleant up
     # beamformer routine: parallelized over Gridpoints
-    beamformOutput = np.zeros((nFreqs, nGridPoints), np.float64)
+    beamformOutput = np.zeros(nGridPoints, np.float64)
     steerNormalizeOutput = np.zeros_like(beamformOutput)
-    for cntFreqs in xrange(nFreqs):
-        result = np.zeros(nGridPoints, np.float64)
-        normalHelp = np.zeros_like(result)
-        if steerVecType == 'custom':  # beamformer with custom steering vector
-            if boolIsEigValProb:
-                coreFunc(eigVal[cntFreqs, :], eigVec[cntFreqs, :, :], steerVec[cntFreqs, :, :], normFactor, result, normalHelp)
-            else:
-                coreFunc(csm[cntFreqs, :, :], steerVec[cntFreqs, :, :], normFactor, result, normalHelp)
-        else:  # predefined beamformers (Formulation I - IV)
-            if boolIsEigValProb:
-                coreFunc(eigVal[cntFreqs, :], eigVec[cntFreqs, :, :], distGridToArrayCenter, distGridToAllMics, waveNumber, normFactor, result, normalHelp)
-            else:
-                coreFunc(csm[cntFreqs, :, :], distGridToArrayCenter, distGridToAllMics, waveNumber, normFactor, result, normalHelp)
-        beamformOutput[cntFreqs, :] = result
-        steerNormalizeOutput[cntFreqs, :] = normalHelp 
+    result = np.zeros(nGridPoints, np.float64)
+    normalHelp = np.zeros_like(result)
+    if steerVecType == 'custom':  # beamformer with custom steering vector
+        if boolIsEigValProb:
+            coreFunc(eigVal, eigVec, steerVec, normFactor, result, normalHelp)
+        else:
+            coreFunc(csm, steerVec, normFactor, result, normalHelp)
+    else:  # predefined beamformers (Formulation I - IV)
+        if boolIsEigValProb:
+            coreFunc(eigVal, eigVec, distGridToArrayCenter, distGridToAllMics, waveNumber, normFactor, result, normalHelp)
+        else:
+            coreFunc(csm, distGridToArrayCenter, distGridToAllMics, waveNumber, normFactor, result, normalHelp)
+    beamformOutput = result
+    steerNormalizeOutput = normalHelp 
     return beamformOutput, steerNormalizeOutput 
 
 

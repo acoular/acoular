@@ -185,30 +185,7 @@ class SteeringVector( HasPrivateTraits ):
     
    
     
-    # TODO: put this in the calc function of the beamformer!
-    def _beamformerCall(self, f, rDiag, normFac, tupleCSM):
-        """
-        Manages the calling of the core beamformer functionality.
-        
-        Parameters
-        ----------
-        indFreq : int
-            The index for which item of this classes property k the beamformer should be performed.
-        rDiag : bool
-            Should the diagonal of the csm should be considered in beamformer
-            (rDiag==False) or not (rDiag==True).
-        normFac : float
-            Normalization factor for the beamforming result (e.g. removal of diag is compensated with this.)
-        tupleCSM : either (csm,) or (eigValues, eigVectors)
-            See information header of beamformerFreq in fastFuncs.py for information on those inputs.
 
-        Returns
-        -------
-        The results of beamformerFreq, see fastFuncs.py 
-        """
-        tupleSteer = (self.r0, self.rm, 2*pi*f/self.env.c)
-        result = beamformerFreq(self.steer_type, rDiag, normFac, tupleSteer, tupleCSM)
-        return result
     
 
 
@@ -425,6 +402,27 @@ class BeamformerBase( HasPrivateTraits ):
             normFactor = self.r_diag_norm 
         return normFactor
 
+
+    def _beamformer_params(self):
+        """
+        Manages the parameters for calling of the core beamformer functionality.
+        This is a workaround to allow faster calculation and may change in the
+        future.
+        
+        Returns
+        -------
+            - String containing the steering vector type
+            - Function for frequency-dependent steering vector calculation
+                
+        """
+        if type(self.steer) == SteeringVector: # for simple steering vector, use faster method
+            param_type = self.steer.steer_type
+            def param_steer_func(f): return (self.steer.r0, self.steer.rm, 2*pi*f/self.steer.env.c )
+        else:
+            param_type = 'custom'
+            param_steer_func = self.steer.steer_vector
+        return param_type, param_steer_func
+
     def calc(self, ac, fr):
         """
         Calculates the delay-and-sum beamforming result for the frequencies 
@@ -451,12 +449,16 @@ class BeamformerBase( HasPrivateTraits ):
         -------
         This method only returns values through the *ac* and *fr* parameters
         """
-        freqs = self.freq_data.fftfreq()#[inds]
-        normFactor = self.sig_loss_norm()
+        f = self.freq_data.fftfreq()#[inds]
+        param_steer_type, steer_vector = self._beamformer_params()
         for i in self.freq_data.indices:
             if not fr[i]:
-                csm = array(self.freq_data.csm[i][newaxis], dtype='complex128')
-                beamformerOutput = self.steer._beamformerCall(freqs[i], self.r_diag, normFactor, (csm,))[0]
+                csm = array(self.freq_data.csm[i], dtype='complex128')
+                beamformerOutput = beamformerFreq(param_steer_type, 
+                                                  self.r_diag, 
+                                                  self.sig_loss_norm(), 
+                                                  steer_vector(f[i]), 
+                                                  csm)[0]
                 if self.r_diag:  # set (unphysical) negative output values to 0
                     indNegSign = sign(beamformerOutput) < 0
                     beamformerOutput[indNegSign] = 0.0
@@ -638,6 +640,7 @@ class BeamformerFunctional( BeamformerBase ):
         """
         f = self.freq_data.fftfreq()
         normFactor = self.sig_loss_norm()
+        param_steer_type, steer_vector = self._beamformer_params()
         for i in self.freq_data.indices:
             if not fr[i]:
                 if self.r_diag:
@@ -653,16 +656,24 @@ class BeamformerFunctional( BeamformerBase ):
                     csm = self.freq_data.csm[i]
                     fill_diagonal(csm, 0)
                     csmRoot = fractional_matrix_power(csm, 1.0 / self.gamma)
-                    beamformerOutput, steerNorm = self.steer._beamformerCall(f[i], self.r_diag, 1.0, (csmRoot[newaxis],))
+                    beamformerOutput, steerNorm = beamformerFreq(param_steer_type, 
+                                                                 self.r_diag, 
+                                                                 1.0, 
+                                                                 steer_vector(f[i]), 
+                                                                 csmRoot)
                     beamformerOutput /= steerNorm  # take normalized steering vec
                     
                     # set (unphysical) negative output values to 0
                     indNegSign = sign(beamformerOutput) < 0
                     beamformerOutput[indNegSign] = 0.0
                 else:
-                    eva = array(self.freq_data.eva[i][newaxis], dtype='float64') ** (1.0 / self.gamma)
-                    eve = array(self.freq_data.eve[i][newaxis], dtype='complex128')
-                    beamformerOutput, steerNorm = self.steer._beamformerCall(f[i], self.r_diag, 1.0, (eva, eve))  # takes all EigVal into account
+                    eva = array(self.freq_data.eva[i], dtype='float64') ** (1.0 / self.gamma)
+                    eve = array(self.freq_data.eve[i], dtype='complex128')
+                    beamformerOutput, steerNorm = beamformerFreq(param_steer_type, 
+                                                                 self.r_diag, 
+                                                                 1.0, 
+                                                                 steer_vector(f[i]), 
+                                                                 (eva, eve))
                     beamformerOutput /= steerNorm  # take normalized steering vec
                 ac[i] = (beamformerOutput ** self.gamma) * steerNorm * normFactor  # the normalization must be done outside the beamformer
                 fr[i] = True
@@ -716,10 +727,15 @@ class BeamformerCapon( BeamformerBase ):
         f = self.freq_data.fftfreq()
         nMics = self.freq_data.numchannels
         normFactor = self.sig_loss_norm() * nMics**2
+        param_steer_type, steer_vector = self._beamformer_params()
         for i in self.freq_data.indices:
             if not fr[i]:
-                csm = array(linalg.inv(array(self.freq_data.csm[i], dtype='complex128')), order='C')[newaxis]
-                beamformerOutput = self.steer._beamformerCall(f[i], self.r_diag, normFactor, (csm,))[0]
+                csm = array(linalg.inv(array(self.freq_data.csm[i], dtype='complex128')), order='C')
+                beamformerOutput = beamformerFreq(param_steer_type, 
+                                                  self.r_diag, 
+                                                  normFactor, 
+                                                  steer_vector(f[i]), 
+                                                  csm)[0]
                 ac[i] = 1.0 / beamformerOutput
                 fr[i] = True
 
@@ -795,11 +811,16 @@ class BeamformerEig( BeamformerBase ):
         f = self.freq_data.fftfreq()
         na = int(self.na)  # eigenvalue taken into account
         normFactor = self.sig_loss_norm()
+        param_steer_type, steer_vector = self._beamformer_params()
         for i in self.freq_data.indices:
             if not fr[i]:
-                eva = array(self.freq_data.eva[i][newaxis], dtype='float64')
-                eve = array(self.freq_data.eve[i][newaxis], dtype='complex128')
-                beamformerOutput = self.steer._beamformerCall(f[i], self.r_diag, normFactor, (eva[:, na:na+1], eve[:, :, na:na+1]))[0]
+                eva = array(self.freq_data.eva[i], dtype='float64')
+                eve = array(self.freq_data.eve[i], dtype='complex128')
+                beamformerOutput = beamformerFreq(param_steer_type, 
+                                                  self.r_diag, 
+                                                  normFactor, 
+                                                  steer_vector(f[i]), 
+                                                  (eva[na:na+1], eve[:, na:na+1]))[0]
                 if self.r_diag:  # set (unphysical) negative output values to 0
                     indNegSign = sign(beamformerOutput) < 0
                     beamformerOutput[indNegSign] = 0
@@ -862,11 +883,16 @@ class BeamformerMusic( BeamformerEig ):
         nMics = self.freq_data.numchannels
         n = int(self.steer.mics.num_mics-self.na)
         normFactor = self.sig_loss_norm() * nMics**2
+        param_steer_type, steer_vector = self._beamformer_params()
         for i in self.freq_data.indices:
             if not fr[i]:
-                eva = array(self.freq_data.eva[i][newaxis], dtype='float64')
-                eve = array(self.freq_data.eve[i][newaxis], dtype='complex128')
-                beamformerOutput = self.steer._beamformerCall(f[i], self.r_diag, normFactor, (eva[:, :n], eve[:, :, :n]))[0]
+                eva = array(self.freq_data.eva[i], dtype='float64')
+                eve = array(self.freq_data.eve[i], dtype='complex128')
+                beamformerOutput = beamformerFreq(param_steer_type, 
+                                                  self.r_diag, 
+                                                  normFactor, 
+                                                  steer_vector(f[i]), 
+                                                  (eva[:n], eve[:, :n]))[0]
                 ac[i] = 4e-10*beamformerOutput.min() / beamformerOutput
                 fr[i] = True
 
@@ -1533,32 +1559,43 @@ class BeamformerCleansc( BeamformerBase ):
             J = self.n
         powers = zeros(J, 'd')
         
+        param_steer_type, steer_vector = self._beamformer_params()
         for i in self.freq_data.indices:
             if not fr[i]:
-                csm = array(self.freq_data.csm[i][newaxis], dtype='complex128', copy=1)
-                h = self.steer._beamformerCall(f[i], self.r_diag, normFactor, (csm,))[0]
-
+                csm = array(self.freq_data.csm[i], dtype='complex128', copy=1)
+                #h = self.steer._beamformerCall(f[i], self.r_diag, normFactor, (csm,))[0]
+                h = beamformerFreq(param_steer_type, 
+                                   self.r_diag, 
+                                   normFactor, 
+                                   steer_vector(f[i]), 
+                                   csm)[0]
                 # CLEANSC Iteration
                 result *= 0.0
                 for j in range(J):
                     xi_max = h.argmax() #index of maximum
-                    powers[j] = hmax = h[0, xi_max] #maximum
+                    powers[j] = hmax = h[xi_max] #maximum
                     result[xi_max] += self.damp * hmax
                     if  j > self.stopn and hmax > powers[j-self.stopn]:
                         break
                     wmax = self.steer.steer_vector(f[i],xi_max) * sqrt(normFac)
                     wmax = wmax[0].conj()  # as old code worked with conjugated csm..should be updated
                     hh = wmax.copy()
-                    D1 = dot(csm[0].T - diag(diag(csm[0])), wmax)/hmax
+                    D1 = dot(csm.T - diag(diag(csm)), wmax)/hmax
                     ww = wmax.conj()*wmax
                     for m in range(20):
                         H = hh.conj()*hh
                         hh = (D1+H*wmax)/sqrt(1+dot(ww, H))
                     hh = hh[:, newaxis]
-                    csm1 = hmax*(hh*hh.conj().T)[newaxis, :, :]
-                    h1 = self.steer._beamformerCall(f[i], self.r_diag, normFactor, (array((hmax, ))[newaxis, :], hh[newaxis, :].conjugate()))[0]
+                    csm1 = hmax*(hh*hh.conj().T)
+                    
+                    #h1 = self.steer._beamformerCall(f[i], self.r_diag, normFactor, (array((hmax, ))[newaxis, :], hh[newaxis, :].conjugate()))[0]
+                    h1 = beamformerFreq(param_steer_type, 
+                                        self.r_diag, 
+                                        normFactor, 
+                                        steer_vector(f[i]), 
+                                        (array((hmax, )), hh.conj()))[0]
                     h -= self.damp * h1
-                    csm -= self.damp * csm1.transpose(0,2,1)
+                    csm -= self.damp * csm1.T#transpose(0,2,1)
                 ac[i] = result
                 fr[i] = True
 
