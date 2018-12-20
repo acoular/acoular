@@ -15,7 +15,7 @@
 """
 
 # imports from other packages
-from numpy import mgrid, s_, array, arange, isscalar
+from numpy import mgrid, s_, array, arange, isscalar, absolute
 from traits.api import HasPrivateTraits, Float, Property, CArray, Any, \
 property_depends_on, cached_property, on_trait_change
 from traitsui.api import View
@@ -293,7 +293,13 @@ class RectGrid3D( RectGrid):
     
     def _set_increment(self, increment):
         if isscalar(increment):
-            self._increment = float(increment)
+            try:
+                self._increment = absolute(float(increment))
+            except:
+                raise TraitError(args=self,
+                                 name='increment', 
+                                 info='Float or CArray(3,)',
+                                 value=increment) 
         elif len(increment) == 3:
             self._increment = array(increment,dtype=float)
         else:
