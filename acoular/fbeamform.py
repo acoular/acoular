@@ -30,12 +30,12 @@
 # imports from other packages
 from __future__ import print_function, division
 
-from numpy import array, ones, hanning, hamming, bartlett, blackman, invert, \
-dot, newaxis, zeros, empty, fft, float32, float64, complex64, linalg, where, \
-searchsorted, pi, multiply, sign, diag, arange, sqrt, exp, log10, int,\
+from numpy import array, ones, full, hanning, hamming, bartlett, blackman, \
+invert, dot, newaxis, zeros, empty, fft, float32, float64, complex64, linalg, \
+where, searchsorted, pi, multiply, sign, diag, arange, sqrt, exp, log10, int,\
 reshape, hstack, vstack, eye, tril, size, clip, tile, round, delete, \
 absolute, argsort, sort, sum, hsplit, fill_diagonal, zeros_like, isclose, \
-vdot, flatnonzero, einsum, ndarray
+vdot, flatnonzero, einsum, ndarray, isscalar
 
 from sklearn.linear_model import LassoLars, LassoLarsCV, LassoLarsIC,\
 OrthogonalMatchingPursuit, ElasticNet, OrthogonalMatchingPursuitCV, Lasso
@@ -46,7 +46,7 @@ from warnings import warn
 
 import tables
 from traits.api import HasPrivateTraits, Float, Int, ListInt, ListFloat, \
-CArray, Property, Instance, Trait, Bool, Range, Delegate, Enum, \
+CArray, Property, Instance, Trait, Bool, Range, Delegate, Enum, Any, \
 cached_property, on_trait_change, property_depends_on
 from traits.trait_errors import TraitError
 
@@ -94,26 +94,56 @@ class SteeringVector( HasPrivateTraits ):
                   desc="cache flag for transfer function")    
     
     
-    # TODO: add reference pos trait ('array center', dist_to_gridpoint, fixed position)
     # Sound travel distances from microphone array center to grid 
-    # points (readonly). Feature may change.
+    # points or reference position (readonly). Feature may change.
     r0 = Property(desc="array center to grid distances")
 
     # Sound travel distances from array microphones to grid 
     # points (readonly). Feature may change.
     rm = Property(desc="all array mics to grid distances")
     
+    _ref = Any(array([0.,0.,0.]),
+               desc="reference position or distance")
+    
+    #: Reference position or distance at which to evaluate the sound pressure 
+    #: of a grid point. Defaults to [0.,0.,0.].
+    ref = Property(desc="reference position or distance")
+    
+    def _set_ref (self, ref):
+        if isscalar(ref):
+            try:
+                self._ref = absolute(float(ref))
+            except:
+                raise TraitError(args=self,
+                                 name='ref', 
+                                 info='Float or CArray(3,)',
+                                 value=ref) 
+        elif len(ref) == 3:
+            self._ref = array(ref, dtype=float)
+        else:
+            raise TraitError(args=self,
+                             name='ref', 
+                             info='Float or CArray(3,)',
+                             value=ref)
+      
+    def _get_ref (self):
+        return self._ref
+    
+    
     # internal identifier
     digest = Property( 
-        depends_on = ['steer_type', 'env.digest', 'grid.digest', 'mics.digest'])
+        depends_on = ['steer_type', 'env.digest', 'grid.digest', 'mics.digest', '_ref'])
     
     # internal identifier, use for inverse methods, excluding steering vector type
     inv_digest = Property( 
-        depends_on = ['env.digest', 'grid.digest', 'mics.digest'])
+        depends_on = ['env.digest', 'grid.digest', 'mics.digest', '_ref'])
         
-    @property_depends_on('grid.digest, env.digest')
+    @property_depends_on('grid.digest, env.digest, _ref')
     def _get_r0 ( self ):
-        return self.env._r(self.grid.pos())
+        if isscalar(self.ref) and self.ref > 0:
+            return full((self.grid.size,), self.ref)
+        else:
+            return self.env._r(self.grid.pos())
 
     @property_depends_on('grid.digest, mics.digest, env.digest')
     def _get_rm ( self ):
@@ -183,12 +213,6 @@ class SteeringVector( HasPrivateTraits ):
                 }[self.steer_type]
         return func(self.transfer(f, ind))
     
-   
-    
-
-    
-
-
     
 class BeamformerBase( HasPrivateTraits ):
     """
@@ -896,7 +920,6 @@ class BeamformerMusic( BeamformerEig ):
                 ac[i] = 4e-10*beamformerOutput.min() / beamformerOutput
                 fr[i] = True
 
-# TODO: PSF has to be changed to new steer functionality
 class PointSpreadFunction (HasPrivateTraits):
     """
     The point spread function.
