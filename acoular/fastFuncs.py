@@ -164,7 +164,7 @@ def beamformerFreq(steerVecType, boolRemovedDiagOfCSM, normFactor, inputTupleSte
     if steerVecType == 'custom':  # beamformer with custom steering vector
         steerVec = inputTupleSteer
         #nFreqs, nGridPoints = steerVec.shape[0], steerVec.shape[1]
-        nGridPoints = steerVec.shape[1]
+        nGridPoints = steerVec.shape[0]
     else:  # predefined beamformers (Formulation I - IV)
         distGridToArrayCenter, distGridToAllMics, waveNumber = inputTupleSteer#[0], inputTupleSteer[1], inputTupleSteer[2]
         if not isinstance(waveNumber, np.ndarray): waveNumber = np.array([waveNumber])
