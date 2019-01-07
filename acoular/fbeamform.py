@@ -86,12 +86,13 @@ class SteeringVector( HasPrivateTraits ):
     mics = Trait(MicGeom, 
         desc="microphone geometry")
     
-    #: Flag, if "True" (not default), the transfer function is 
-    #: cached in h5 files and does not have to be recomputed during subsequent 
-    #: program runs. 
-    #: Be aware that setting this to "True" may result in high memory usage.
-    cached = Bool(False, 
-                  desc="cache flag for transfer function")    
+    # TODO: add caching capability for transfer function
+    # Flag, if "True" (not default), the transfer function is 
+    # cached in h5 files and does not have to be recomputed during subsequent 
+    # program runs. 
+    # Be aware that setting this to "True" may result in high memory usage.
+    #cached = Bool(False, 
+    #              desc="cache flag for transfer function")    
     
     
     # Sound travel distances from microphone array center to grid 
@@ -175,9 +176,9 @@ class SteeringVector( HasPrivateTraits ):
         array of complex128
             array of shape (ngridpts, nmics) containing the transfer matrix for the given frequency
         """
-        if self.cached:
-            print('Warning! Caching of transfer function is not yet supported!')
-            self.cached = False
+        #if self.cached:
+        #    warn('Caching of transfer function is not yet supported!', Warning)
+        #    self.cached = False
         
         if ind is None:
             trans = calcTransfer(self.r0, self.rm, array(2*pi*f/self.env.c))
@@ -237,7 +238,9 @@ class BeamformerBase( HasPrivateTraits ):
             self._steer_obj = steer
         elif steer in ('true level', 'true location', 'classic', 'inverse'):
             # Type of steering vectors, see also :ref:`Sarradj, 2012<Sarradj2012>`.
-            print("Warning! Deprecated use of 'steer' trait. Better use object of class 'SteeringVector'")
+            warn("Deprecated use of 'steer' trait. "
+                 "Please use object of class 'SteeringVector' in the future.", 
+                 Warning, stacklevel = 2)
             self._steer_obj = SteeringVector(steer_type = steer)
         else:
             raise(TraitError(args=self,
@@ -256,7 +259,7 @@ class BeamformerBase( HasPrivateTraits ):
         return self._steer_obj.env    
     
     def _set_env(self, env):
-        print("Warning! Deprecated use of 'env' trait.")
+        warn("Deprecated use of 'env' trait. ", Warning, stacklevel = 2)
         self._steer_obj.env = env
     
     # The speed of sound.
@@ -268,7 +271,7 @@ class BeamformerBase( HasPrivateTraits ):
         return self._steer_obj.env.c
     
     def _set_c(self, c):
-        print("Warning! Deprecated use of 'c' trait.")
+        warn("Deprecated use of 'c' trait. ", Warning, stacklevel = 2)
         self._steer_obj.env.c = c
    
     # :class:`~acoular.grids.Grid`-derived object that provides the grid locations.
@@ -280,7 +283,7 @@ class BeamformerBase( HasPrivateTraits ):
         return self._steer_obj.grid
     
     def _set_grid(self, grid):
-        print("Warning! Deprecated use of 'grid' trait.")
+        warn("Deprecated use of 'grid' trait. ", Warning, stacklevel = 2)
         self._steer_obj.grid = grid
     
     # :class:`~acoular.microphones.MicGeom` object that provides the microphone locations.
@@ -292,7 +295,7 @@ class BeamformerBase( HasPrivateTraits ):
         return self._steer_obj.mics
     
     def _set_mpos(self, mpos):
-        print("Warning! Deprecated use of 'mpos' trait.")
+        warn("Deprecated use of 'mpos' trait. ", Warning, stacklevel = 2)
         self._steer_obj.mics = mpos
     
     
@@ -947,7 +950,9 @@ class PointSpreadFunction (HasPrivateTraits):
             self._steer_obj = steer
         elif steer in ('true level', 'true location', 'classic', 'inverse'):
             # Type of steering vectors, see also :ref:`Sarradj, 2012<Sarradj2012>`.
-            print("Warning! Deprecated use of 'steer' trait. Better use object of class 'SteeringVector'")
+            warn("Deprecated use of 'steer' trait. "
+                 "Please use object of class 'SteeringVector' in the future.", 
+                 Warning, stacklevel = 2)
             self._steer_obj = SteeringVector(steer_type = steer)
         else:
             raise(TraitError(args=self,
@@ -966,7 +971,7 @@ class PointSpreadFunction (HasPrivateTraits):
         return self._steer_obj.env    
     
     def _set_env(self, env):
-        print("Warning! Deprecated use of 'env' trait.")
+        warn("Deprecated use of 'env' trait. ", Warning, stacklevel = 2)
         self._steer_obj.env = env
     
     # The speed of sound.
@@ -978,7 +983,7 @@ class PointSpreadFunction (HasPrivateTraits):
         return self._steer_obj.env.c
     
     def _set_c(self, c):
-        print("Warning! Deprecated use of 'c' trait.")
+        warn("Deprecated use of 'c' trait. ", Warning, stacklevel = 2)
         self._steer_obj.env.c = c
    
     # :class:`~acoular.grids.Grid`-derived object that provides the grid locations.
@@ -990,7 +995,7 @@ class PointSpreadFunction (HasPrivateTraits):
         return self._steer_obj.grid
     
     def _set_grid(self, grid):
-        print("Warning! Deprecated use of 'grid' trait.")
+        warn("Deprecated use of 'grid' trait. ", Warning, stacklevel = 2)
         self._steer_obj.grid = grid
     
     # :class:`~acoular.microphones.MicGeom` object that provides the microphone locations.
@@ -1002,7 +1007,7 @@ class PointSpreadFunction (HasPrivateTraits):
         return self._steer_obj.mics
     
     def _set_mpos(self, mpos):
-        print("Warning! Deprecated use of 'mpos' trait.")
+        warn("Deprecated use of 'mpos' trait. ", Warning, stacklevel = 2)
         self._steer_obj.mics = mpos
     
     
@@ -1721,7 +1726,8 @@ class BeamformerClean (BeamformerBase):
         gs = self.steer.grid.size
         
         if self.calcmode == 'full':
-            print('Warning: calcmode = \'full\', slow CLEAN performance. Better use \'block\' or \'single\'.')
+            warn("calcmode = 'full', possibly slow CLEAN performance. "
+                 "Better use 'block' or 'single'.", Warning, stacklevel = 2)
         p = PointSpreadFunction(steer=self.steer, calcmode=self.calcmode, precision=self.psf_precision)
         for i in self.freq_data.indices:
             if not fr[i]:

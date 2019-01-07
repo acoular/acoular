@@ -25,6 +25,7 @@ cached_property, List, Instance
 from traitsui.api import View, Item
 from traitsui.menu import OKCancelButtons
 from traits.trait_errors import TraitError
+from warnings import warn
 
 # acoular imports
 from .internal import digest
@@ -94,7 +95,9 @@ class BeamformerTime( TimeInOut ):
             self._steer_obj = steer
         elif steer in ('true level', 'true location', 'classic', 'inverse'):
             # Type of steering vectors, see also :ref:`Sarradj, 2012<Sarradj2012>`.
-            print("Warning! Deprecated use of 'steer' trait. Better use object of class 'SteeringVector'")
+            warn("Deprecated use of 'steer' trait. "
+                 "Please use object of class 'SteeringVector' in the future.", 
+                 Warning, stacklevel = 2)
             self._steer_obj = SteeringVector(steer_type = steer)
         else:
             raise(TraitError(args=self,
@@ -113,7 +116,7 @@ class BeamformerTime( TimeInOut ):
         return self._steer_obj.env    
     
     def _set_env(self, env):
-        print("Warning! Deprecated use of 'env' trait.")
+        warn("Deprecated use of 'env' trait. ", Warning, stacklevel = 2)
         self._steer_obj.env = env
     
     # The speed of sound.
@@ -125,7 +128,7 @@ class BeamformerTime( TimeInOut ):
         return self._steer_obj.env.c
     
     def _set_c(self, c):
-        print("Warning! Deprecated use of 'c' trait.")
+        warn("Deprecated use of 'c' trait. ", Warning, stacklevel = 2)
         self._steer_obj.env.c = c
    
     # :class:`~acoular.grids.Grid`-derived object that provides the grid locations.
@@ -137,7 +140,7 @@ class BeamformerTime( TimeInOut ):
         return self._steer_obj.grid
     
     def _set_grid(self, grid):
-        print("Warning! Deprecated use of 'grid' trait.")
+        warn("Deprecated use of 'grid' trait. ", Warning, stacklevel = 2)
         self._steer_obj.grid = grid
     
     # :class:`~acoular.microphones.MicGeom` object that provides the microphone locations.
@@ -149,7 +152,7 @@ class BeamformerTime( TimeInOut ):
         return self._steer_obj.mics
     
     def _set_mpos(self, mpos):
-        print("Warning! Deprecated use of 'mpos' trait.")
+        warn("Deprecated use of 'mpos' trait. ", Warning, stacklevel = 2)
         self._steer_obj.mics = mpos
     
     

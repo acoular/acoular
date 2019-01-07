@@ -28,6 +28,7 @@ from traitsui.api import View, Item
 from traitsui.menu import OKCancelButtons
 import tables
 from os import path
+from warnings import warn
 
 # acoular imports
 from .calib import Calib
@@ -370,7 +371,7 @@ class PointSource( SamplesGenerator ):
         return self.mics
     
     def _set_mpos(self, mpos):
-        print("Warning! Deprecated use of 'mpos' trait.")
+        warn("Deprecated use of 'mpos' trait. ", Warning, stacklevel = 2)
         self.mics = mpos
         
     # The speed of sound.
@@ -382,7 +383,7 @@ class PointSource( SamplesGenerator ):
         return self.env.c
     
     def _set_c(self, c):
-        print("Warning! Deprecated use of 'c' trait.")
+        warn("Deprecated use of 'c' trait. ", Warning, stacklevel = 2)
         self.env.c = c
 
     # --- End of backwards compatibility traits --------------------------------------
@@ -683,7 +684,7 @@ class UncorrelatedNoiseSource( SamplesGenerator ):
         return self.mics
     
     def _set_mpos(self, mpos):
-        print("Warning! Deprecated use of 'mpos' trait.")
+        warn("Deprecated use of 'mpos' trait. ", Warning, stacklevel = 2)
         self.mics = mpos
 
     # --- End of backwards compatibility traits --------------------------------------
