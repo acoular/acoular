@@ -79,7 +79,7 @@ bgib = BeamformerGIB(freq_data=f, steer_obj=st, method= 'LassoLars', n=10, cache
 
 
 
-class acoular_test(unittest.TestCase):  
+class acoular_ex1_test(unittest.TestCase):  
     
         #test if microfon positions are correct
     def test_mic_positions(self):
@@ -87,7 +87,7 @@ class acoular_test(unittest.TestCase):
     
     #test if grid points are correct
     def test_grid_positions(self):
-        self.assertEqual(g.pos().sum()/grid_pos_num.sum(),1,3) 
+        self.assertAlmostEqual(g.pos().sum()/grid_pos_num.sum(),1,3) 
     
     #test steering vector calculation
     def test_steering(self):
@@ -95,17 +95,17 @@ class acoular_test(unittest.TestCase):
         
     #test if csm values are correct
     def test_csm_calculation(self):
-        self.assertEqual(f.csm[:].sum()/csm_num.sum(),1,3)    
+        self.assertAlmostEqual(f.csm[:].sum()/csm_num.sum(),1,3)    
         
     #test eve/eva    
     def test_eigenvalue_calculation(self):
-        self.assertEqual(f.eva[:].sum()/eve_num.sum(),1,3)      
-        self.assertEqual(f.eve[:].sum()/eva_num.sum(),1,3) 
+        self.assertAlmostEqual(f.eva[:].sum()/eve_num.sum(),1,3)      
+        self.assertAlmostEqual(f.eve[:].sum()/eva_num.sum(),1,3) 
      
     #test beamformer results  
     def test_beamformer_calculation(self):
         for beam,bfname in zip((bb, bc, be, bm, bl, bo, bs, bd, bcmf, bf, bdp, bgib),('bb', 'bc', 'be', 'bm', 'bl', 'bo', 'bs', 'bd', 'bcmf', 'bf', 'bdp', 'bgib')):   
-            self.assertEqual(beam.synthetic(cfreq,1).sum()/d[bfname+'num'].sum(),1,3)     
+            self.assertAlmostEqual(beam.synthetic(cfreq,1).sum()/d[bfname+'num'].sum(),1,3)     
                             
 if "__main__" == __name__:
     unittest.main(exit=False)
