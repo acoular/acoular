@@ -33,9 +33,9 @@ csm_num = h5file_num.get('csm_values').value
 eve_num = h5file_num.get('eva_values').value
 eva_num = h5file_num.get('eve_values').value
 
-d={}
+bfdata={}
 for b in ('bb', 'bc', 'be', 'bm', 'bl', 'bo', 'bs', 'bd', 'bcmf', 'bf', 'bdp', 'bgib'):
-    d[b+'num'] = h5file_num.get(str(b)+'_values').value
+    bfdata[b+'num'] = h5file_num.get(str(b)+'_values').value
 
 
 #load exampledata
@@ -105,7 +105,7 @@ class acoular_ex1_test(unittest.TestCase):
     #test beamformer results  
     def test_beamformer_calculation(self):
         for beam,bfname in zip((bb, bc, be, bm, bl, bo, bs, bd, bcmf, bf, bdp, bgib),('bb', 'bc', 'be', 'bm', 'bl', 'bo', 'bs', 'bd', 'bcmf', 'bf', 'bdp', 'bgib')):   
-            self.assertAlmostEqual(beam.synthetic(cfreq,1).sum()/d[bfname+'num'].sum(),1,3)     
+            self.assertAlmostEqual(beam.synthetic(cfreq,1).sum()/bfdata[bfname+'num'].sum(),1,3)     
                             
 if "__main__" == __name__:
     unittest.main(exit=False)
