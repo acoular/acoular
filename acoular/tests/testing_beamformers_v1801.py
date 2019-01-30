@@ -19,18 +19,19 @@ TimeCache, BeamformerTime, TimePower, BeamformerCMF, \
 BeamformerCapon, BeamformerMusic, BeamformerDamas, BeamformerClean, \
 BeamformerFunctional, BeamformerDamasPlus, BeamformerGIB, SteeringVector
 
-from numpy import zeros, empty
 from os import path
-
 import h5py
 
+
+#load exampledata
 datafile = '../../examples/example_data.h5'
 calibfile = '../../examples/example_calib.xml'
 micgeofile = path.join( path.split(acoular.__file__)[0],'xml','array_56.xml')
 
+#frequencies to test
 cfreqs = 1000,8000
 
-#load numerical values from Examples
+#load numerical values from datafile
 h5file_num = h5py.File('Beamforer_numerical_values.h5', 'r')
 
 res_num = h5file_num.get('timebf_values').value
@@ -39,23 +40,18 @@ resq_num = h5file_num.get('timebfsq_values').value
 bfdata={}
 for b in ('bb', 'bc', 'be', 'bm', 'bl', 'bo', 'bs', 'bd', 'bcmf', 'bf', 'bdp', 'bgib'):
     for cfreq_num in cfreqs:
-        bfdata[b+'num''_'+str(cfreq_num)] = h5file_num.get(b+'_'+str(cfreq_num)+'_values').value
+        bfdata[b+'_num_'+str(cfreq_num)] = h5file_num.get(b+'_'+str(cfreq_num)+'_values').value
 
 
-#calc all values from example 1
-
+#calc all values from example with low resolution
 t1 = MaskedTimeSamples(name= datafile)
 t1.start = 0 # first sample, default
 t1.stop = 16000 # last valid sample = 15999
-
 t1.calib = Calib(from_file=calibfile)
 m = MicGeom(from_file=micgeofile)
-
 g = RectGrid(x_min=-0.2, x_max=-0.0, y_min=-0.3, y_max=0.2, z=0.68,
              increment=0.1 )
-
 st = SteeringVector(grid=g, mpos=m, c=346.04 )
-
 f = PowerSpectra(time_data=t1, 
                window='Hanning', overlap='50%', block_size=128, #FFT-parameters
                cached = False )  #cached = False
@@ -73,6 +69,8 @@ bcmf = BeamformerCMF(freq_data=f, steer_obj=st, method='LassoLarsBIC', cached = 
 bl = BeamformerClean(beamformer=bb, n_iter=10, cached = False)
 bf = BeamformerFunctional(freq_data=f, steer_obj=st, r_diag=False, gamma=3, cached = False)
 bgib = BeamformerGIB(freq_data=f, steer_obj=st, method= 'LassoLars', n=2, cached = False)
+bbase = BeamformerBase(freq_data=f, steer_obj=st, r_diag=True, cached = False)
+beig = BeamformerEig(freq_data=f, steer_obj=st, r_diag=True, n=54, cached = False)
 
 #timebeamformer test
 bt = BeamformerTime(source=t1, steer_obj=st)
@@ -93,9 +91,9 @@ class acoular_beamformer_test(unittest.TestCase):
     def test_beamformer_freq_results(self):
         #test all fbeamformers for 1000 and 8000 hertz
         for cfreq in cfreqs:     
-            for beam,bfname in zip((bb, bc, be, bm, bl, bo, bs, bd, bcmf, bf, bdp, bgib),('bb', 'bc', 'be', 'bm', 'bl', 'bo', 'bs', 'bd', 'bcmf', 'bf', 'bdp', 'bgib')):   
+            for beam,bfname in zip((bbase, bc, beig, bm, bl, bo, bs, bd, bcmf, bf, bdp, bgib),('bb', 'bc', 'be', 'bm', 'bl', 'bo', 'bs', 'bd', 'bcmf', 'bf', 'bdp', 'bgib')):   
                 for i in range(len(beam.synthetic(cfreq,1).flatten())):
-                    self.assertAlmostEqual(beam.synthetic(cfreq,1).flatten()[i],bfdata[bfname+'num''_'+str(cfreq)].flatten()[i],1)##,1,3)   
+                    self.assertAlmostEqual(beam.synthetic(cfreq,1).flatten()[i],bfdata[bfname+'_num_'+str(cfreq)][i],8)##,1,3)#.flatten()   
     
     def test_beamformer_time_results(self):
         #test beamformertime
