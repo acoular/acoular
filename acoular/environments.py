@@ -37,23 +37,27 @@ class Environment( HasPrivateTraits ):
     between grid point locations and microphone locations.
     """
     # internal identifier
-    digest = Property
+    digest = Property(
+        depends_on=['c'], 
+        )
 
     # no view necessary
     traits_view = View()
 
-    def _get_digest( self ):
-        return ''
+    #: The speed of sound, defaults to 343 m/s
+    c = Float(343., 
+        desc="speed of sound")
 
-    def r( self, c, gpos, mpos=0.0):
+    def _get_digest( self ):
+        return digest( self )
+
+    def _r( self, gpos, mpos=0.0):
         """
         Calculates distances between grid point locations and microphone
-        locations or the origin.
+        locations or the origin. Functionality may change in the future.
 
         Parameters
         ----------
-        c  : float
-            The speed of sound to use for the calculation.
         gpos : array of floats of shape (3, N)
             The locations of points in the beamforming map grid in 3D cartesian
             co-ordinates.
@@ -96,7 +100,7 @@ class UniformFlowEnvironment( Environment):
 
     # internal identifier
     digest = Property(
-        depends_on=['ma', 'fdv'], 
+        depends_on=['c', 'ma', 'fdv'], 
         )
 
     traits_view = View(
@@ -110,16 +114,14 @@ class UniformFlowEnvironment( Environment):
     def _get_digest( self ):
         return digest( self )
 
-    def r( self, c, gpos, mpos=0.0):
+    def _r( self, gpos, mpos=0.0):
         """
         Calculates the virtual distances between grid point locations and
         microphone locations or the origin. These virtual distances correspond
-        to travel times of the sound.
+        to travel times of the sound. Functionality may change in the future.
 
         Parameters
         ----------
-        c : float
-            The speed of sound to use for the calculation.
         gpos : array of floats of shape (3, N)
             The locations of points in the beamforming map grid in 3D cartesian
             co-ordinates.
@@ -406,7 +408,7 @@ class GeneralFlowEnvironment(Environment):
 
     # internal identifier
     digest = Property(
-        depends_on=['ff.digest', 'N', 'Om'], 
+        depends_on=['c', 'ff.digest', 'N', 'Om'], 
         )
 
     traits_view = View(
@@ -420,17 +422,15 @@ class GeneralFlowEnvironment(Environment):
     def _get_digest( self ):
         return digest( self )
 
-    def r( self, c, gpos, mpos=0.0):
+    def _r( self, gpos, mpos=0.0):
         """
         Calculates the virtual distances between grid point locations and
         microphone locations or the origin. These virtual distances correspond
         to travel times of the sound along a ray that is traced through the
-        medium.
+        medium. Functionality may change in the future.
 
         Parameters
         ----------
-        c : float
-            The speed of sound to use for the calculation.
         gpos : array of floats of shape (3, N)
             The locations of points in the beamforming map grid in 3D cartesian
             co-ordinates.
@@ -445,6 +445,8 @@ class GeneralFlowEnvironment(Environment):
             The distances in a twodimensional (N, M) array of floats. If M==1, 
             then only a one-dimensional array is returned.
         """
+        c = self.c
+        
         if isscalar(mpos):
             mpos = array((0, 0, 0), dtype = float32)[:, newaxis]
 

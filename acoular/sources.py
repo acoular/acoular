@@ -28,6 +28,7 @@ from traitsui.api import View, Item
 from traitsui.menu import OKCancelButtons
 import tables
 from os import path
+from warnings import warn
 
 # acoular imports
 from .calib import Calib
@@ -349,20 +350,43 @@ class PointSource( SamplesGenerator ):
                
     #: Number of channels in output, is set automatically / 
     #: depends on used microphone geometry.
-    numchannels = Delegate('mpos', 'num_mics')
+    numchannels = Delegate('mics', 'num_mics')
 
-    #: Microphone locations as provided by a 
-    #: :class:`~acoular.microphones.MicGeom`-derived object.
-    mpos = Trait(MicGeom, 
+
+    #: :class:`~acoular.microphones.MicGeom` object that provides the microphone locations.
+    mics = Trait(MicGeom, 
         desc="microphone geometry")
-        
-    #: :class:`~acoular.environments.Environment` object 
-    #: that provides distances from grid points to microphone positions.
+    
+    #: :class:`~acoular.environments.Environment` or derived object, 
+    #: which provides information about the sound propagation in the medium.
     env = Trait(Environment(), Environment)
 
-    #: Speed of sound, defaults to 343 m/s
-    c = Float(343., 
-        desc="speed of sound")
+    # --- List of backwards compatibility traits and their setters/getters -----------
+
+    # Microphone locations.
+    # Deprecated! Use :attr:`mics` trait instead.
+    mpos = Property()
+    
+    def _get_mpos(self):
+        return self.mics
+    
+    def _set_mpos(self, mpos):
+        warn("Deprecated use of 'mpos' trait. ", Warning, stacklevel = 2)
+        self.mics = mpos
+        
+    # The speed of sound.
+    # Deprecated! Only kept for backwards compatibility. 
+    # Now governed by :attr:`env` trait.
+    c = Property()
+    
+    def _get_c(self):
+        return self.env.c
+    
+    def _set_c(self, c):
+        warn("Deprecated use of 'c' trait. ", Warning, stacklevel = 2)
+        self.env.c = c
+
+    # --- End of backwards compatibility traits --------------------------------------
         
     #: Start time of the signal in seconds, defaults to 0 s.
     start_t = Float(0.0,
@@ -387,7 +411,7 @@ class PointSource( SamplesGenerator ):
 
     # internal identifier
     digest = Property( 
-        depends_on = ['mpos.digest', 'signal.digest', 'loc', 'c', \
+        depends_on = ['mics.digest', 'signal.digest', 'loc', \
          'env.digest', 'start_t', 'start', 'up', '__class__'], 
         )
                
@@ -417,9 +441,9 @@ class PointSource( SamplesGenerator ):
         signal = self.signal.usignal(self.up)
         out = empty((num, self.numchannels))
         # distances
-        rm = self.env.r(self.c, array(self.loc).reshape((3, 1)), self.mpos.mpos)
+        rm = self.env._r(array(self.loc).reshape((3, 1)), self.mics.mpos)
         # emission time relative to start_t (in samples) for first sample
-        ind = (-rm/self.c-self.start_t+self.start)*self.sample_freq   
+        ind = (-rm/self.env.c-self.start_t+self.start)*self.sample_freq   
         i = 0
         n = self.numsamples        
         while n:
@@ -454,7 +478,7 @@ class MovingPointSource( PointSource ):
 
     # internal identifier
     digest = Property( 
-        depends_on = ['mpos.digest', 'signal.digest', 'loc', 'c', \
+        depends_on = ['mics.digest', 'signal.digest', 'loc', \
          'env.digest', 'start_t', 'start', 'trajectory.digest', '__class__'], 
         )
                
@@ -483,11 +507,11 @@ class MovingPointSource( PointSource ):
         signal = self.signal.usignal(self.up)
         out = empty((num, self.numchannels))
         # shortcuts and intial values
-        m = self.mpos
+        m = self.mics
         t = self.start*ones(m.num_mics)
         i = 0
         epslim = 0.1/self.up/self.sample_freq
-        c0 = self.c
+        c0 = self.env.c
         tr = self.trajectory
         n = self.numsamples
         while n:
@@ -540,7 +564,7 @@ class PointSourceDipole ( PointSource ):
     
     # internal identifier
     digest = Property( 
-        depends_on = ['mpos.digest', 'signal.digest', 'loc', 'c', \
+        depends_on = ['mics.digest', 'signal.digest', 'loc', \
          'env.digest', 'start_t', 'start', 'up', 'direction', '__class__'], 
         )
                
@@ -567,7 +591,7 @@ class PointSourceDipole ( PointSource ):
         #If signal samples are needed for te < t_start, then samples are taken
         #from the end of the calculated signal.
         
-        mpos = self.mpos.mpos
+        mpos = self.mics.mpos
         
         # position of the dipole as (3,1) vector
         loc = array(self.loc, dtype = float).reshape((3, 1)) 
@@ -578,7 +602,7 @@ class PointSourceDipole ( PointSource ):
         # normed direction vector
         direc_n = direc / direc_mag
         
-        c = self.c
+        c = self.env.c
         
         # distance between monopoles as function of c, sample freq, direction vector
         dist = c / self.sample_freq * direc_mag
@@ -590,11 +614,11 @@ class PointSourceDipole ( PointSource ):
         out = empty((num, self.numchannels))
         
         # distance from dipole center to microphones
-        rm = self.env.r(c, loc, mpos)
+        rm = self.env._r(loc, mpos)
         
         # distances from monopoles to microphones
-        rm1 = self.env.r(c, loc + dir2, mpos)
-        rm2 = self.env.r(c, loc - dir2, mpos)
+        rm1 = self.env._r(loc + dir2, mpos)
+        rm2 = self.env._r(loc - dir2, mpos)
         
         # emission time relative to start_t (in samples) for first sample
         ind1 = (-rm1 / c - self.start_t + self.start) * self.sample_freq   
@@ -644,17 +668,26 @@ class UncorrelatedNoiseSource( SamplesGenerator ):
     
     #: Number of channels in output; is set automatically / 
     #: depends on used microphone geometry.
-    numchannels = Delegate('mpos', 'num_mics')
+    numchannels = Delegate('mics', 'num_mics')
 
-    #: Microphone locations as provided by a 
-    #: :class:`~acoular.microphones.MicGeom`-derived object.
-    mpos = Trait(MicGeom, 
+    #: :class:`~acoular.microphones.MicGeom` object that provides the microphone locations.
+    mics = Trait(MicGeom, 
         desc="microphone geometry")
-        
 
-    #: Speed of sound, defaults to 343 m/s.
-    c = Float(343., 
-        desc="speed of sound")
+    # --- List of backwards compatibility traits and their setters/getters -----------
+
+    # Microphone locations.
+    # Deprecated! Use :attr:`mics` trait instead.
+    mpos = Property()
+    
+    def _get_mpos(self):
+        return self.mics
+    
+    def _set_mpos(self, mpos):
+        warn("Deprecated use of 'mpos' trait. ", Warning, stacklevel = 2)
+        self.mics = mpos
+
+    # --- End of backwards compatibility traits --------------------------------------
         
     #: Start time of the signal in seconds, defaults to 0 s.
     start_t = Float(0.0,
@@ -676,8 +709,8 @@ class UncorrelatedNoiseSource( SamplesGenerator ):
     
     # internal identifier
     digest = Property( 
-        depends_on = ['mpos.digest', 'signal.rms', 'signal.numsamples', \
-        'signal.sample_freq', 'signal.__class__' , 'seed', 'loc', 'c', \
+        depends_on = ['mics.digest', 'signal.rms', 'signal.numsamples', \
+        'signal.sample_freq', 'signal.__class__' , 'seed', 'loc', \
          'start_t', 'start', '__class__'], 
         )
 

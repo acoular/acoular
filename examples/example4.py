@@ -19,7 +19,7 @@ All rights reserved.
 
 # imports from acoular
 import acoular
-from acoular import L_p, Calib, MicGeom, PowerSpectra, \
+from acoular import L_p, Calib, MicGeom, PowerSpectra, Environment, \
 RectGrid3D, BeamformerBase, BeamformerEig, BeamformerOrth, BeamformerCleansc, \
 MaskedTimeSamples, FiltFiltOctave, BeamformerTimeSq, TimeAverage, \
 TimeCache, BeamformerTime, TimePower, \
@@ -70,17 +70,24 @@ m.invalid_channels = invalid
 g = RectGrid3D(x_min=-0.6, x_max=+0.0, y_min=0.0, y_max=0.0, \
     z_min=0.3, z_max=0.9, increment=0.05)
 
+
+#===============================================================================
+# the environment, i.e. medium characteristics
+# (in this case, the speed of sound is set)
+#===============================================================================
+env = Environment(c = 346.04)
+
 # =============================================================================
 # a steering vector instance for different steering vector types. SteeringVector 
 # provides the standard freefield sound propagation model in the steering vectors.
 # =============================================================================
-st0 = SteeringVector(grid=g, mpos=m, c=346.04, \
+st0 = SteeringVector(grid=g, mics=m, env=env, \
     steer_type='true level')  # this is the default
-st1 = SteeringVector(grid=g, mpos=m, c=346.04, \
+st1 = SteeringVector(grid=g, mics=m, env=env, \
     steer_type='true location')  # gives better results for 3D location at low freqs.
-st2 = SteeringVector(grid=g, mpos=m, c=346.04, \
+st2 = SteeringVector(grid=g, mics=m, env=env, \
     steer_type='classic')  # classical formulation (e.g. Johnson/Dudgeon)
-st3 = SteeringVector(grid=g, mpos=m, c=346.04, \
+st3 = SteeringVector(grid=g, mics=m, env=env, \
     steer_type='inverse')  # 'inverse' formulation (e.g. Brooks 2001)
 
 
@@ -90,9 +97,9 @@ st3 = SteeringVector(grid=g, mpos=m, c=346.04, \
 # PowerSpectra can be used instead
 #===============================================================================
 f = PowerSpectra(time_data=t1, 
-               window='Hanning', overlap='50%', block_size=128, #FFT-parameters
-               ind_low=8, ind_high=16) #to save computational effort, only
-               # frequencies with index 1-30 are used
+                 window='Hanning', overlap='50%', block_size=128, #FFT-parameters
+                 ind_low=8, ind_high=16) #to save computational effort, only
+                   # frequencies with index 1-30 are used
 
 
 #===============================================================================
@@ -101,25 +108,25 @@ f = PowerSpectra(time_data=t1,
 # first, some simple delay and sum beamformers, 
 # but with different steering vector types
 #===============================================================================
-bb0 = BeamformerBase(freq_data=f, steer_obj=st0, r_diag=True)
-bb1 = BeamformerBase(freq_data=f, steer_obj=st1, r_diag=True)
-bb2 = BeamformerBase(freq_data=f, steer_obj=st2, r_diag=True)
-bb3 = BeamformerBase(freq_data=f, steer_obj=st3, r_diag=True)
+bb0 = BeamformerBase(freq_data=f, steer=st0, r_diag=True)
+bb1 = BeamformerBase(freq_data=f, steer=st1, r_diag=True)
+bb2 = BeamformerBase(freq_data=f, steer=st2, r_diag=True)
+bb3 = BeamformerBase(freq_data=f, steer=st3, r_diag=True)
 
 #===============================================================================
 # second, the same with CleanSC
 #===============================================================================
-bs0 = BeamformerCleansc(freq_data=f, steer_obj=st0, r_diag=True)
-bs1 = BeamformerCleansc(freq_data=f, steer_obj=st1, r_diag=True)
-bs2 = BeamformerCleansc(freq_data=f, steer_obj=st2, r_diag=True)
-bs3 = BeamformerCleansc(freq_data=f, steer_obj=st3, r_diag=True)
+bs0 = BeamformerCleansc(freq_data=f, steer=st0, r_diag=True)
+bs1 = BeamformerCleansc(freq_data=f, steer=st1, r_diag=True)
+bs2 = BeamformerCleansc(freq_data=f, steer=st2, r_diag=True)
+bs3 = BeamformerCleansc(freq_data=f, steer=st3, r_diag=True)
 
 
 #===============================================================================
 # third, caching is disabled here for BeamformerEig to save cache storage
 # (the results are not needed anyway, exept one time for BeamformerOrth)
 #===============================================================================
-be = BeamformerEig(freq_data=f, steer_obj=st0, r_diag=True, n=-1, 
+be = BeamformerEig(freq_data=f, steer=st0, r_diag=True, n=-1, 
     cached=False) 
 bo = BeamformerOrth(beamformer=be, eva_list=list(range(38,54)))
 
@@ -146,7 +153,7 @@ for b in all_bf:
            interpolation='nearest', extent=(g.x_min,g.x_max,g.z_min,g.z_max),
            origin='lower')
     colorbar()
-    title(b.__class__.__name__+'\n '+b.steer_obj.steer_type, size=10)
+    title(b.__class__.__name__+'\n '+b.steer.steer_type, size=10)
 
 tight_layout()
 # only display result on screen if this script is run directly

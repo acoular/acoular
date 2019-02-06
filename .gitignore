@@ -4,6 +4,7 @@
 *.so
 *~
 examples/three_sources.h5
+examples/all_bf.sav
 MANIFEST
 
 # ignore the build directories
