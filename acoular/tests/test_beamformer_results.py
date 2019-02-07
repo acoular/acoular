@@ -17,7 +17,7 @@ RectGrid, BeamformerBase, BeamformerEig, BeamformerOrth, BeamformerCleansc, \
 MaskedTimeSamples, FiltFiltOctave, BeamformerTimeSq, TimeAverage, \
 TimeCache, BeamformerTime, TimePower, BeamformerCMF, \
 BeamformerCapon, BeamformerMusic, BeamformerDamas, BeamformerClean, \
-BeamformerFunctional, BeamformerDamasPlus, BeamformerGIB, SteeringVector
+BeamformerFunctional, BeamformerDamasPlus, BeamformerGIB, SteeringVector,Environment
 
 from os import path
 import h5py
@@ -51,36 +51,41 @@ t1.calib = Calib(from_file=calibfile)
 m = MicGeom(from_file=micgeofile)
 g = RectGrid(x_min=-0.2, x_max=-0.0, y_min=-0.3, y_max=0.2, z=0.68,
              increment=0.1 )
-st = SteeringVector(grid=g, mpos=m, c=346.04 )
+
+env=Environment(c=346.04)
+
+st = SteeringVector(grid=g, mics=m, env=env)
+
+
 f = PowerSpectra(time_data=t1, 
                window='Hanning', overlap='50%', block_size=128, #FFT-parameters
                cached = False )  #cached = False
 
 #frequency beamformer test
-bb = BeamformerBase(freq_data=f, steer_obj=st, r_diag=True, cached = False)
-bc = BeamformerCapon(freq_data=f, steer_obj=st, cached=False)
-be = BeamformerEig(freq_data=f, steer_obj=st, r_diag=True, n=54, cached = False)
-bm = BeamformerMusic(freq_data=f, steer_obj=st, n=6, cached = False)
+bb = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached = False)
+bc = BeamformerCapon(freq_data=f, steer=st, cached=False)
+be = BeamformerEig(freq_data=f, steer=st, r_diag=True, n=54, cached = False)
+bm = BeamformerMusic(freq_data=f, steer=st, n=6, cached = False)
 bd = BeamformerDamas(beamformer=bb, n_iter=10, cached = False)
 bdp = BeamformerDamasPlus(beamformer=bb, n_iter=100, cached = False)
 bo = BeamformerOrth(beamformer=be, eva_list=list(range(38,54)), cached = False)
-bs = BeamformerCleansc(freq_data=f, steer_obj=st, r_diag=True, cached = False)
-bcmf = BeamformerCMF(freq_data=f, steer_obj=st, method='LassoLarsBIC', cached = False)
+bs = BeamformerCleansc(freq_data=f, steer=st, r_diag=True, cached = False)
+bcmf = BeamformerCMF(freq_data=f, steer=st, method='LassoLarsBIC', cached = False)
 bl = BeamformerClean(beamformer=bb, n_iter=10, cached = False)
-bf = BeamformerFunctional(freq_data=f, steer_obj=st, r_diag=False, gamma=3, cached = False)
-bgib = BeamformerGIB(freq_data=f, steer_obj=st, method= 'LassoLars', n=2, cached = False)
-bbase = BeamformerBase(freq_data=f, steer_obj=st, r_diag=True, cached = False)
-beig = BeamformerEig(freq_data=f, steer_obj=st, r_diag=True, n=54, cached = False)
+bf = BeamformerFunctional(freq_data=f, steer=st, r_diag=False, gamma=3, cached = False)
+bgib = BeamformerGIB(freq_data=f, steer=st, method= 'LassoLars', n=2, cached = False)
+bbase = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached = False)
+beig = BeamformerEig(freq_data=f, steer=st, r_diag=True, n=54, cached = False)
 
 #timebeamformer test
-bt = BeamformerTime(source=t1, steer_obj=st)
+bt = BeamformerTime(source=t1, steer=st)
 ft = FiltFiltOctave(source=bt, band=1000)
 pt = TimePower(source=ft)
 avgt = TimeAverage(source=pt, naverage = 1024)
 res= next(avgt.result(1))
 #squared
 fi = FiltFiltOctave(source=t1, band=4000)
-bts = BeamformerTimeSq(source=fi, steer_obj=st, r_diag=True)
+bts = BeamformerTimeSq(source=fi, steer=st, r_diag=True)
 avgts = TimeAverage(source=bts, naverage = 1024)
 resq= next(avgts.result(1))
 

@@ -5,13 +5,13 @@ Created on Thu Jan 24 09:58:04 2019
 
 @author: newuser
 """
-#standart testing suite from python
+#standard testing suite from python
 import unittest
 
 #acoular imports
 import acoular
 
-from acoular import L_p, Calib, MicGeom, PowerSpectra, \
+from acoular import L_p, Calib, MicGeom, PowerSpectra, Environment, \
 RectGrid, BeamformerBase, BeamformerEig, BeamformerOrth, BeamformerCleansc, \
 MaskedTimeSamples, FiltFiltOctave, BeamformerTimeSq, TimeAverage, \
 TimeCache, BeamformerTime, TimePower, BeamformerCMF, \
@@ -33,9 +33,9 @@ csm_num = h5file_num.get('csm_values').value
 eve_num = h5file_num.get('eva_values').value
 eva_num = h5file_num.get('eve_values').value
 
-bfdata={}
+d={}
 for b in ('bb', 'bc', 'be', 'bm', 'bl', 'bo', 'bs', 'bd', 'bcmf', 'bf', 'bdp', 'bgib'):
-    bfdata[b+'num'] = h5file_num.get(str(b)+'_values').value
+    d[b+'num'] = h5file_num.get(str(b)+'_values').value
 
 
 #load exampledata
@@ -57,29 +57,31 @@ m.invalid_channels = invalid
 g = RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=0.68,
              increment=0.05 )
 
-st = SteeringVector(grid=g, mpos=m, c=346.04 )
+env=Environment(c=346.04)
+
+st = SteeringVector(grid=g, mics=m, env=env)
 
 f = PowerSpectra(time_data=t1, 
                window='Hanning', overlap='50%', block_size=128, #FFT-parameters
                cached = False )  #cached = False
 
-bb = BeamformerBase(freq_data=f, steer_obj=st, r_diag=True, cached = False)
-bc = BeamformerCapon(freq_data=f, steer_obj=st, cached=False)
-be = BeamformerEig(freq_data=f, steer_obj=st, r_diag=True, n=54, cached = False)
-bm = BeamformerMusic(freq_data=f, steer_obj=st, n=6, cached = False)
+
+bb = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached = False)
+bc = BeamformerCapon(freq_data=f, steer=st, cached=False)
+be = BeamformerEig(freq_data=f, steer=st, r_diag=True, n=54, cached = False)
+bm = BeamformerMusic(freq_data=f, steer=st, n=6, cached = False)
 bd = BeamformerDamas(beamformer=bb, n_iter=100, cached = False)
 bdp = BeamformerDamasPlus(beamformer=bb, n_iter=100, cached = False)
 bo = BeamformerOrth(beamformer=be, eva_list=list(range(38,54)), cached = False)
-bs = BeamformerCleansc(freq_data=f, steer_obj=st, r_diag=True, cached = False)
-bcmf = BeamformerCMF(freq_data=f, steer_obj=st, method='LassoLarsBIC', cached = False)
+bs = BeamformerCleansc(freq_data=f, steer=st, r_diag=True, cached = False)
+bcmf = BeamformerCMF(freq_data=f, steer=st, method='LassoLarsBIC', cached = False)
 bl = BeamformerClean(beamformer=bb, n_iter=100, cached = False)
-bf = BeamformerFunctional(freq_data=f, steer_obj=st, r_diag=False, gamma=4, cached = False)
-bgib = BeamformerGIB(freq_data=f, steer_obj=st, method= 'LassoLars', n=10, cached = False)
+bf = BeamformerFunctional(freq_data=f, steer=st, r_diag=False, gamma=4, cached = False)
+bgib = BeamformerGIB(freq_data=f, steer=st, method= 'LassoLars', n=10, cached = False)
 
 
-
-
-class acoular_ex1_test(unittest.TestCase):  
+    
+class acoular_test(unittest.TestCase):  
     
     #test if microfon positions are correct
     def test_mic_positions(self):
@@ -87,11 +89,16 @@ class acoular_ex1_test(unittest.TestCase):
     
     #test if grid points are correct
     def test_grid_positions(self):
-        self.assertAlmostEqual(g.pos().sum()/grid_pos_num.sum(),1,3) 
-    
+        self.assertAlmostEqual(g.gpos.sum()/grid_pos_num.sum(),1,3) 
+        
     #test steering vector calculation
     def test_steering(self):
-        self.assertAlmostEqual(st.transfer.sum()/transfer_num.sum(),1,3) 
+        ind=0
+        checktrans=0
+        for freq in f.fftfreq()[1:-1]:
+            checktrans=checktrans+st.transfer(freq)
+            ind+=1
+        self.assertAlmostEqual(checktrans.sum()/transfer_num.sum(),1,3)             
         
     #test if csm values are correct
     def test_csm_calculation(self):
@@ -102,12 +109,16 @@ class acoular_ex1_test(unittest.TestCase):
         self.assertAlmostEqual(f.eva[:].sum()/eve_num.sum(),1,3)      
         self.assertAlmostEqual(f.eve[:].sum()/eva_num.sum(),1,3) 
      
-    #test beamformer computations  
+    #test beamformer results  
     def test_beamformer_calculation(self):
         for beam,bfname in zip((bb, bc, be, bm, bl, bo, bs, bd, bcmf, bf, bdp, bgib),('bb', 'bc', 'be', 'bm', 'bl', 'bo', 'bs', 'bd', 'bcmf', 'bf', 'bdp', 'bgib')):   
-            self.assertAlmostEqual(beam.synthetic(cfreq,1).sum()/bfdata[bfname+'num'].sum(),1,3)     
-                            
+            self.assertAlmostEqual(beam.synthetic(cfreq,1).sum()/d[bfname+'num'].sum(),1,3)      
+
+                
+            
 if "__main__" == __name__:
     unittest.main(exit=False)
-        
+
+
+                            
         
