@@ -51,7 +51,6 @@ The ts object now provides access to the HDF5 file and information stored in it.
 
     In [1]: ts.sample_freq
 
-
 It is important to note that the data in the file is **not read into the memory** for it could be very large (i.e. several GB). Instead, the data is read in small chunks the moment it is needed. Because this is done automatically, the user does not have to take care of that.
 
 The beamforming shall be done in the frequency domain. In this case the cross spectral matrix is the basis. This matrix consists of the cross power spectra of all possible combinations of channels. Here, this gives 64²=4096 cross power spectra. These spectra are computed using Welch's method, i.e. blocks of samples are taken from the signals and fourier-transformed using FFT, used to calculate the power spectra, and then the results are averaged over a number of blocks. The blocks have a certain length and may be overlapping. In addition, a windowing function may be applied to each block prior to the FFT. To provide the facilities to calculate the cross spectral matrix we create an instance of :class:`~acoular.spectra.PowerSpectra` and define the size of the blocks to be 128 samples and a von-Hann ('Hanning') window to be used:  
@@ -112,13 +111,19 @@ In order to plot the microphone arrangement, we make use of the convenient matpl
    :align: center
    :scale: 50%
 
+The sound propagation model (including the source model and transfer path) is contained in a :class:`~acoular.fbeamform.SteeringVector` object, which is given the focus grid and microphone arrangement to calculate the steering vector, which also contains a weighting of the transfer functions from grid points to microphone positions:
+
+.. ipython:: 
+
+    In [1]: st = acoular.SteeringVector( grid=rg, mics=mg )
+
 Finally, we can create the object that encapsulates the delay-and-sum algorithm. The basic beamforming algorithm is provided by objects of the type :class:`~acoular.fbeamform.BeamformerBase` 
 
 .. ipython:: 
 
-    In [1]: bb = acoular.BeamformerBase( freq_data=ps, grid=rg, mpos=mg )
+    In [1]: bb = acoular.BeamformerBase( freq_data=ps, steer=st )
 
-The cross spectral matrix, grid and microphone arrangement created before are used here as input data. Still, **up to now, no computation has been done** because no result was needed yet. Using 
+The cross spectral matrix and the steering vector, which were created before, are used here as input data. Still, **up to now, no computation has been done** because no result was needed yet. Using 
 
 .. ipython:: 
 
