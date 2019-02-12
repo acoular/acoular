@@ -27,7 +27,7 @@ sys.path.insert(0,os.path.abspath('../..')) # in order to document the source in
 extensions = [
     'sphinx.ext.autodoc', 
     'trait_documenter',
-    'matplotlib.sphinxext.only_directives',
+#    'matplotlib.sphinxext.only_directives',
     'matplotlib.sphinxext.plot_directive',
     'IPython.sphinxext.ipython_directive',
     'IPython.sphinxext.ipython_console_highlighting',
