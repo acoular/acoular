@@ -7,8 +7,10 @@ What's new
     * Adds support for Python 3.7
     * Introduces new :class:`~acoular.fbeamform.SteeringVector` class (see :doc:`../get_started/index` and :doc:`../examples/index`  for usage). With this, some of the Beamformer and PointSource traits are deprecated and should no longer be used. While the current version is intended to be fully compatible with older scripts, deprecation warnings will be raised if necessary.
     * Introduces optional use of reference distance for SPL evaluation (current default: reference position at (x,y,z)=(0,0,0) )
+    * Introduces some basic Unit tests to evaluate the beamformer results 
     * Bugfix: CLEAN algorithm now uses correct PSFs
     * some minor bugfixes
+
 
 
 18.01

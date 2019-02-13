@@ -131,7 +131,7 @@ The cross spectral matrix and the steering vector, which were created before, ar
 
     In [1]: Lm = acoular.L_p( pm )
 
-the beamforming result mapped onto the grid is queried for a frequency of 8000 Hz and over a third-octave wide frequency band (thus the '3' in the second argument). As a consequence, processing starts: the data is read from the file, the cross spectral matrix is computed and the beamforming is performed. The result (sound pressure squared) is given as an array with same shape as the grid. Using the helper function :class:`~acoular.fbeamform.L_p`, this is converted to decibels.
+the beamforming result mapped onto the grid is queried for a frequency of 8000 Hz and over a third-octave wide frequency band (thus the '3' in the second argument). As a consequence, processing starts: the data is read from the file, the cross spectral matrix is computed and the beamforming is performed. The result (sound pressure squared) is given as an array with the same shape as the grid. Using the helper function :class:`~acoular.fbeamform.L_p`, this is converted to decibels.
 
 Now let us plot the result:
 
