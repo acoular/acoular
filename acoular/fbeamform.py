@@ -7,6 +7,8 @@
 
 .. autosummary::
     :toctree: generated/
+    
+    SteeringVector
 
     BeamformerBase
     BeamformerFunctional
@@ -66,17 +68,8 @@ from .spectra import PowerSpectra, _precision
 
 class SteeringVector( HasPrivateTraits ):
     """ 
-    Basic class for implementing steering vectors without flow in free field
-    environment.
+    Basic class for implementing steering vectors with monopole source transfer models
     """
-    
-    #: Type of steering vectors, see also :ref:`Sarradj, 2012<Sarradj2012>`.
-    steer_type = Trait('true level', 'true location', 'classic', 'inverse',
-                  desc="type of steering vectors used")
-    
-    #: :class:`~acoular.environments.Environment` or derived object, 
-    #: which provides information about the sound propagation in the medium.
-    env = Instance(Environment(), Environment)
     
     #: :class:`~acoular.grids.Grid`-derived object that provides the grid locations.
     grid = Trait(Grid, 
@@ -85,6 +78,15 @@ class SteeringVector( HasPrivateTraits ):
     #: :class:`~acoular.microphones.MicGeom` object that provides the microphone locations.
     mics = Trait(MicGeom, 
         desc="microphone geometry")
+        
+    #: Type of steering vectors, see also :ref:`Sarradj, 2012<Sarradj2012>`. Defaults to 'true level'.
+    steer_type = Trait('true level', 'true location', 'classic', 'inverse',
+                  desc="type of steering vectors used")
+    
+    #: :class:`~acoular.environments.Environment` or derived object, 
+    #: which provides information about the sound propagation in the medium.
+    #: Defaults to standard :class:`~acoular.environments.Environment` object.
+    env = Instance(Environment(), Environment)
     
     # TODO: add caching capability for transfer function
     # Flag, if "True" (not default), the transfer function is 
@@ -103,11 +105,15 @@ class SteeringVector( HasPrivateTraits ):
     # points (readonly). Feature may change.
     rm = Property(desc="all array mics to grid distances")
     
+    # mirror trait for ref
     _ref = Any(array([0.,0.,0.]),
                desc="reference position or distance")
     
     #: Reference position or distance at which to evaluate the sound pressure 
-    #: of a grid point. Defaults to [0.,0.,0.].
+    #: of a grid point. 
+    #: If set to a scalar, this is used as reference distance to the grid points.
+    #: If set to a vector, this is interpreted as x,y,z coordinates of the reference position.
+    #: Defaults to [0.,0.,0.].
     ref = Property(desc="reference position or distance")
     
     def _set_ref (self, ref):

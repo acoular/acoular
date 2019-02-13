@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2017, Acoular Development Team.
+# Copyright (c) 2007-2019, Acoular Development Team.
 #------------------------------------------------------------------------------
 """
 
@@ -22,7 +22,8 @@ ts = acoular.TimeSamples( name='three_sources.h5' )
 ps = acoular.PowerSpectra( time_data=ts, block_size=128, window='Hanning' )
 rg = acoular.RectGrid( x_min=-0.2, x_max=0.2, y_min=-0.2, y_max=0.2, z=0.3, \
 increment=0.01 )
-bb = acoular.BeamformerBase( freq_data=ps, grid=rg, mpos=mg )
+st = acoular.SteeringVector( grid = rg, mics=mg )
+bb = acoular.BeamformerBase( freq_data=ps, steer=st )
 pm = bb.synthetic( 8000, 3 )
 Lm = acoular.L_p( pm )
 imshow( Lm.T, origin='lower', vmin=Lm.max()-10, extent=rg.extend(), \

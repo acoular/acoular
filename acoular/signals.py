@@ -121,8 +121,10 @@ class PNoiseGenerator( SignalGenerator ):
     
     Simulation of pink noise is based on the Voss-McCartney algorithm.
     Ref.:
+        
       * S.J. Orfanidis: Signal Processing (2010), pp. 729-733
       * online discussion: http://www.firstpr.com.au/dsp/pink-noise/
+      
     The idea is to iteratively add larger-wavelength noise to get 1/f 
     characteristic.
     """
