@@ -2,91 +2,131 @@
 """
 Example 3 for acoular library
 
-demonstrates a 3D beamforming setup,
+Demonstrates a 3D beamforming setup.
 
-uses measured data in file example_data.h5
-calibration in file example_calib.xml
-microphone geometry in array_56.xml (part of acoular)
+Simulates data on 64 channel array,
+subsequent beamforming with CLEAN-SC on 3D grid.
 
-
-Copyright (c) 2006-2017 The Acoular developers.
+Copyright (c) 2019 The Acoular developers.
 All rights reserved.
 """
+from os import path
 
 # imports from acoular
-import acoular
-from acoular import L_p, TimeSamples, Calib, MicGeom, PowerSpectra,\
-RectGrid3D, BeamformerBase, BeamformerEig, BeamformerOrth, BeamformerCleansc, \
-SteeringVector, Environment
+
+from acoular import __file__ as bpath, L_p, MicGeom, PowerSpectra,\
+RectGrid3D, BeamformerBase, BeamformerCleansc, \
+SteeringVector, WNoiseGenerator, PointSource, SourceMixer
 
 # other imports
-from os import path
-from numpy import mgrid, arange
-from mayavi import mlab
+from numpy import mgrid, arange, array, arccos, pi, cos, sin, sum
+import mpl_toolkits.mplot3d
+from pylab import figure, show, scatter, subplot, imshow, title, colorbar,\
+xlabel, ylabel
 
 #===============================================================================
-# first, we define the data source, calibration and microphone geometry
+# First, we define the microphone geometry.
 #===============================================================================
 
-t = TimeSamples(name='example_data.h5')
-cal = Calib(from_file='example_calib.xml')
-m = MicGeom(from_file=path.join(\
-    path.split(acoular.__file__)[0], 'xml', 'array_56.xml'))
+micgeofile = path.join(path.split(bpath)[0],'xml','array_64.xml')
+# generate test data, in real life this would come from an array measurement
+m = MicGeom( from_file=micgeofile )
+
+#===============================================================================
+# Now, the sources (signals and types/positions) are defined.
+#===============================================================================
+sfreq = 51200 
+duration = 1
+nsamples = duration*sfreq
+
+n1 = WNoiseGenerator( sample_freq=sfreq, numsamples=nsamples, seed=1 )
+n2 = WNoiseGenerator( sample_freq=sfreq, numsamples=nsamples, seed=2, rms=0.5 )
+n3 = WNoiseGenerator( sample_freq=sfreq, numsamples=nsamples, seed=3, rms=0.25 )
+p1 = PointSource( signal=n1, mics=m,  loc=(-0.1,-0.1,0.3) )
+p2 = PointSource( signal=n2, mics=m,  loc=(0.15,0,0.17) )
+p3 = PointSource( signal=n3, mics=m,  loc=(0,0.1,0.25) )
+pa = SourceMixer( sources=[p1,p2,p3])
+
 
 #===============================================================================
 # the 3D grid (very coarse to enable fast computation for this example)
 #===============================================================================
 
-g = RectGrid3D(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, \
-    z_min=0.48, z_max=0.88, increment=0.05)
+g = RectGrid3D(x_min=-0.2, x_max=0.2, 
+               y_min=-0.2, y_max=0.2, 
+               z_min=0.1, z_max=0.36, 
+               increment=0.02)
 
 #===============================================================================
-# this provides the cross spectral matrix and defines the beamformer
-# usually, another type of beamformer (e.g. CLEAN-SC) would be more appropriate
-# to be really fast, we restrict ourselves to only 10 frequencies
+# The following provides the cross spectral matrix and defines the CLEAN-SC beamformer.
+# To be really fast, we restrict ourselves to only 10 frequencies
 # in the range 2000 - 6000 Hz (5*400 - 15*400)
 #===============================================================================
 
-f = PowerSpectra(time_data=t, window='Hanning', overlap='50%', block_size=128, \
-    ind_low=5, ind_high=15)
-env = Environment(c=346.04)
-st = SteeringVector(grid=g, mics=m, env=env)
-b = BeamformerBase(freq_data=f, steer=st, r_diag=True)
+f = PowerSpectra(time_data=pa, 
+                 window='Hanning', 
+                 overlap='50%', 
+                 block_size=128, 
+                 ind_low=5, ind_high=16)
+st = SteeringVector(grid=g, mics=m, steer_type='true level') 
+b = BeamformerCleansc(freq_data=f, steer=st)
 
 #===============================================================================
-# reads the data, finds the maximum value (to properly scale the views)
+# Calculate the result for 4 kHz octave band
 #===============================================================================
 
 map = b.synthetic(4000,1)
-L1 = L_p(map)
-mx = L1.max()
 
 #===============================================================================
-# print out the result integrated over an 3d-sector of the 3d map
+# Display views of setup and result.
+# For each view, the values along the repsective axis are summed.
+# Note that, while Acoular uses a left-oriented coordinate system, 
+# for display purposes, the z-axis is inverted, plotting the data in
+# a right-oriented coordinate system.
 #===============================================================================
 
-print(L_p(b.integrate((-0.3,-0.1,0.58,-0.1,0.1,0.78)))[f.ind_low:f.ind_high])
+fig=figure(1,(8,8))
 
-#===============================================================================
-# displays the 3d view
-#===============================================================================
+# plot the results
 
-X,Y,Z = mgrid[g.x_min:g.x_max:1j*g.nxsteps,\
-            g.y_min:g.y_max:1j*g.nysteps,\
-            g.z_min:g.z_max:1j*g.nzsteps]
-data = mlab.pipeline.scalar_field(X,Y,Z,L1)
-mlab.pipeline.iso_surface(data,contours=arange(mx-10,mx,1).tolist(),vmin=mx-10,vmax=mx)
+subplot(221)
+map_z = sum(map,2)
+mx = L_p(map_z.max())
+imshow(L_p(map_z.T), vmax=mx, vmin=mx-20, origin='lower', interpolation='nearest', 
+       extent=(g.x_min, g.x_max, g.y_min, g.y_max))
+xlabel('x')
+ylabel('y')
+title('Top view (xy)' )
 
-# uncomment one of the following lines to see a different visualization of 
-# the data
-#mlab.contour3d(X,Y,Z,L1,vmin=mx-5,vmax=mx,transparent=True)
-#mlab.points3d(X,Y,Z,L1,vmin=mx-5,vmax=mx,transparent=True)
+subplot(223)
+map_y = sum(map,1)
+imshow(L_p(map_y.T), vmax=mx, vmin=mx-20, origin='upper', interpolation='nearest', 
+       extent=(g.x_min, g.x_max, -g.z_max, -g.z_min))
+xlabel('x')
+ylabel('z')
+title('Side view (xz)' )
 
-#===============================================================================
-# adds some axes and enters the GUI main loop
-#===============================================================================
+subplot(222)
+map_x = sum(map,0)
+imshow(L_p(map_x), vmax=mx, vmin=mx-20, origin='lower', interpolation='nearest', 
+       extent=(-g.z_min, -g.z_max,g.y_min, g.y_max))
+xlabel('z')
+ylabel('y')
+title('Side view (zy)' )
+colorbar()
 
-mlab.axes()
-mlab.show()
+
+# plot the setup
+
+ax0 = fig.add_subplot((224), aspect='equal', projection='3d')
+ax0.scatter(m.mpos[0],m.mpos[1],-m.mpos[2])
+source_locs=array([p1.loc,p2.loc,p3.loc]).T
+ax0.scatter(source_locs[0],source_locs[1],-source_locs[2])
+ax0.set_xlabel('x')
+ax0.set_ylabel('y')
+ax0.set_zlabel('z')
+ax0.set_title('Setup (mic and source positions)')
+
+show()
 
 
