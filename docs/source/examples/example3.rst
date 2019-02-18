@@ -1,6 +1,6 @@
 Example 3
 =========
-This example demonstrates a 3D beamforming setup. The visualization uses the Mayavi package. Please note that Mayavi ist not yet available for Python 3.   
+This example demonstrates a 3D beamforming setup with simulated point sources. 
 
 Download: :download:`example3.py <../../../examples/example3.py>`
 
@@ -11,6 +11,6 @@ The script produces the figure:
     :width: 100%
     :figwidth: 50%
 
-    Result for the trailing edge noise in 3D using beamforming (Such results will be useful only if a fast deconvolution method is applied.)
+    Views (summed sound maps) along x,y, and z axis for a setup with 3 different point sources. Evaluation done with the CLEAN-SC algorithm.
 
 .. literalinclude:: ../../../examples/example3.py
