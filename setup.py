@@ -69,8 +69,7 @@ setup(name="acoular",
 #      'traitsui>=4.4.0',
 #      'chaco>=4.4'
 	],
-      scripts=['ResultExplorer.py','CalibHelper.py',
-               join('examples','acoular_demo.py')],
+      scripts=[join('examples','acoular_demo.py')],
       include_package_data = True,
       package_data={'acoular': ['xml/*.xml']}
 )
