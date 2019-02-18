@@ -2,19 +2,18 @@
 """
 Former example 3 for acoular library
 
-demonstrates a 3D beamforming setup,
+Demonstrates a 3D beamforming setup,
 
-uses measured data in file example_data.h5
+Uses measured data in file example_data.h5
 calibration in file example_calib.xml
 microphone geometry in array_56.xml (part of acoular)
 
 
-Copyright (c) 2006-2017 The Acoular developers.
+Copyright (c) 2019 The Acoular developers.
 All rights reserved.
 """
 
 # imports from acoular
-import acoular
 from acoular import L_p, TimeSamples, Calib, MicGeom, PowerSpectra,\
 RectGrid3D, BeamformerBase, BeamformerEig, BeamformerOrth, BeamformerCleansc, \
 SteeringVector, Environment
