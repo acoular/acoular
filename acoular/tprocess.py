@@ -30,12 +30,12 @@ from six import next
 from numpy import array, empty, empty_like, pi, sin, sqrt, zeros, newaxis, unique, \
 int16, cross, isclose, zeros_like, dot, nan, concatenate, isnan, nansum, float64, \
 identity, argsort, interp, arange, append, linspace, flatnonzero, argmin, argmax, \
-delete, mean, inf, ceil, log2, logical_and, asarray
+delete, mean, inf, ceil, log2, logical_and, asarray, stack
 from numpy.linalg import norm
 from numpy.matlib import repmat
 from scipy.spatial import Delaunay
-from scipy.interpolate import LinearNDInterpolator
-from traits.api import Float, Int, CLong, \
+from scipy.interpolate import LinearNDInterpolator,splrep,splev
+from traits.api import Float, Int, CLong, Bool, \
 File, Property, Instance, Trait, Delegate, \
 cached_property, on_trait_change, List, ListInt, CArray
 from traitsui.api import View, Item
@@ -388,7 +388,121 @@ class Trigger(TimeInOut):
         if not nChannels == 1:
             raise Exception('Trigger signal must consist of ONE channel, instead %s channels are given!' % nChannels)
         return 0
+#
+class AngleTracker(MaskedTimeInOut):
+    '''
+    Calculates rotation angle from a trigger signal using spline interpolation
+    in the time domain. Moved from AngleTrajectory
+    '''
 
+    #Data source; :class:`~acoular.SamplesGenerator or derived object.
+    source = Instance(SamplesGenerator)    
+    
+    #trigger
+    trigger = Instance(Trigger) 
+    
+    #internal identifier
+    digest = Property(depends_on=['source.digest'])
+    
+    # trigger signals per revolution
+    TriggerPerRevo = Int(1,
+                   desc =" trigger signals per revolution")
+        
+    # Flag to set counter-clockwise (1) or clockwise (-1) rotation,
+    # defaults to -1.
+    rotDirection = Int(-1,
+                   desc ="mathematical direction of rotation")
+    
+    #rotation angle for trigger position
+    StartAngle = Float(0,
+                   desc ="rotation angle for trigger position")
+    
+    # revolutions per minute
+    rpm = CArray()(0,
+                   desc ="revolutions per minute")
+          
+    #rotation angle
+    angle = Float(0,
+                   desc ="rotation angle")
+    
+    # internal flag to determine whether AngleTracker has been processed
+    calcflag = Bool(False) 
+    
+    
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+    
+    #helperfunction for index detection
+    def find_nearest_idx(peakarray, value):
+        peakarray = asarray(peakarray)
+        return (abs(peakarray - value)).argmin()
+    
+    def _trigger_to_rpm_and_degree(self):
+        """ 
+        Returns angles in deg for one or more instants in time.
+        
+        Parameters
+        ----------
+        t : array of floats
+            Instances in time to calculate the positions at.
+        
+        Returns
+        -------
+        rpm and angle: arrays of floats
+            Angles in degree at the given times; array has the same shape as t .
+            rpm in 1/min. Only returns ver _get_functions
+        """
+        
+        # spline data, internal use
+        Spline = Property(depends_on = 'digest') 
+
+        #init
+        ind=0
+        #trigger data
+        peakloc,maxdist,mindist= self.trigger._get_trigger_data()
+        TriggerPerRevo= self.TriggerPerRevo
+        rotDirection = self.rotDirection
+        nSamples =  self.source.numsamples
+        StartAngle = self.StartAngle
+        samplerate =  self.source.sample_rate()
+        rpm = zeros(nSamples)
+        angle = zeros(nSamples)
+        #number of spline points
+        InterpPoints=10
+        
+        #loop over alle timesamples
+        while ind < nSamples :     
+            #when starting spline forward
+            if ind<peakloc[InterpPoints]:
+                peakdist=peakloc[self.find_nearest_idx(peakloc, ind)+1] - peakloc[self.find_nearest_idx(peakloc, ind)]
+                splineData = stack((range(InterpPoints), peakloc[ind//peakdist:ind//peakdist+InterpPoints]), axis=0)
+            #spline backwards    
+            else:
+                peakdist=peakloc[self.find_nearest_idx(peakloc, ind)] - peakloc[self.find_nearest_idx(peakloc, ind)-1]
+                splineData = stack((range(InterpPoints), peakloc[ind//peakdist-InterpPoints:ind//peakdist]), axis=0)
+            #calc angles and rpm    
+            Spline = splrep(splineData[:,:][1], splineData[:,:][0], k=3)    
+            rpm[ind]=splev(ind, Spline, der=1, ext=0)*60*samplerate
+            angle[ind] = splev(ind, Spline, der=0, ext=0)*360*rotDirection/TriggerPerRevo + StartAngle % 360
+            #next sample
+            ind+=1
+        #calculation complete    
+        self.calcflag = True
+    
+    #calc rpm from trigger data
+    @cached_property
+    def _get_rpm( self ):
+        if not self.calcflag:
+            self._to_rpm_degree()
+        return self.rpm
+
+    #calc of angle from trigger data
+    @cached_property
+    def _get_angle(self):
+        if not self.calcflag:
+            self._to_rpm_degree()
+        return self.angle
 
 class EngineOrderAnalyzer(TimeInOut):
     """
