@@ -1,3 +1,5 @@
 include README.rst
 include examples/*.py
 include acoular/xml/*.*
+include LICENSE
+include AUTHORS.rst
