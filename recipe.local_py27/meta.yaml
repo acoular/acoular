@@ -1,6 +1,6 @@
 package:
   name: acoular
-  version: "17.11"
+  version: "19.02"
 
 source:
   path: ../../acoular
@@ -28,7 +28,7 @@ requirements:
   build:
     - python
     - numpy >=1.10.2
-    - numba >=0.21
+    - numba >=0.30
     - scipy >=0.13
     - scikit-learn >=0.15
     - pytables >=3.1
@@ -37,16 +37,16 @@ requirements:
 
   run:
     - python >=2.7
-    - pyqt >=4.10,<5.6.0
+    - pyqt >=4.10,<=5.6.0
     - numpy >=1.10.2
-    - numba >=0.21
+    - numba >=0.30
     - scipy >=0.13
     - scikit-learn >=0.15
     - pytables >=3.1
     - traits >=4.4
     - traitsui >=4.4
     - configparser #just for python version 2.7
-#    - chaco >=4.4 #just for python version 2.7
+
 
 test:
   # Python imports

@@ -10,12 +10,11 @@ Examples
 .. list-table::
     :class: borderless
 
-    * - :doc:`example1` demonstrates different features of acoular using measured data from a wind tunnel experiment on trailing edge noise
+    * - :doc:`example1` demonstrates different features of Acoular using measured data from a wind tunnel experiment on trailing edge noise
         
     * - :doc:`example2` demonstrates a simple approach to beamforming on a rotating source
 
-    * - :doc:`example3` demonstrates a 3D beamforming setup. Please note that Mayavi ist not yet available for Python 3.
-
+    * - :doc:`example3` demonstrates a 3D beamforming setup. 
         
     * - :doc:`example4` demonstrates different beamformers in frequency domain and persistence of objects (saving)
 

@@ -10,7 +10,7 @@ Download: :download:`example4.py <../../../examples/example4.py>`
 
 The script produces the figure:
 
-.. figure:: example4_1_py3colors.png
+.. figure:: example4_1.png
     :align: center
     :width: 100%
     :figwidth: 80%

@@ -9,21 +9,21 @@ The script produces three figures:
 .. list-table::
     :widths: 25 25 50
     
-    * - .. figure:: example2_1_py3colors.png
+    * - .. figure:: example2_1.png
             :align: center
 	    :width: 100%
 	    :figwidth: 80%
 
             Results for a time domain beamformer with fixed focus
   
-      - .. figure:: example2_2_py3colors.png
+      - .. figure:: example2_2.png
             :align: center
 	    :width: 100%
 	    :figwidth: 80%
 
             Results for a time domain beamformer with focus moving along a circle trajectory
 
-      - .. figure:: example2_3_py3colors.png
+      - .. figure:: example2_3.png
             :align: center
 	    :width: 100%
 	    :figwidth: 80%

@@ -9,7 +9,7 @@ against NUMPY code (which is much clearer to varify with the bare eye).
 
 This script needs the 'fastFuncs.py' with all the NUMBA optimized code and the 
 'beamformer.so' with all the WEAVE code in its directory.
-
+--> Only runs under python=2
 
 Created on Tue Aug 22 12:41:50 2017
 
@@ -41,9 +41,9 @@ def beamformerRef(csm, steer):
     return beamformOutput.real
 
 
-nFreqs = 65
+nFreqs = 1
 nMics = 56
-nGridPoints = 1521
+nGridPoints = 100#1521
 
 csm = np.random.rand(nFreqs, nMics, nMics) + 1j*np.random.rand(nFreqs, nMics, nMics)  # cross spectral matrix
 for cntFreqs in range(nFreqs):
@@ -66,6 +66,10 @@ steerFormulation1 = np.zeros((nFreqs, nGridPoints, nMics), np.complex128)
 steerFormulation2 = np.zeros((nFreqs, nGridPoints, nMics), np.complex128)
 steerFormulation3 = np.zeros((nFreqs, nGridPoints, nMics), np.complex128)
 steerFormulation4 = np.zeros((nFreqs, nGridPoints, nMics), np.complex128)
+steerFormulation1normalized = np.zeros((nFreqs, nGridPoints, nMics), np.complex128)
+steerFormulation2normalized = np.zeros((nFreqs, nGridPoints, nMics), np.complex128)
+steerFormulation3normalized = np.zeros((nFreqs, nGridPoints, nMics), np.complex128)
+steerFormulation4normalized = np.zeros((nFreqs, nGridPoints, nMics), np.complex128)
 transfer = np.zeros((nFreqs, nGridPoints, nMics), np.complex128)
 csmPsf = np.zeros((nFreqs, nMics, nMics), np.complex128)
 
@@ -74,10 +78,16 @@ indSourceCalcWithNumpy = 0
 
 for cntFreqs in xrange(nFreqs):
     for cntGrid in xrange(nGridPoints):
-        steerFormulation1[cntFreqs, cntGrid, :] = np.exp(-1j * kj[cntFreqs].imag * (rm[cntGrid, :] - r0[cntGrid]))  / nMics
+        steerFormulation1[cntFreqs, cntGrid, :] = np.exp(-1j * kj[cntFreqs].imag * (rm[cntGrid, :] - r0[cntGrid])) / nMics
         steerFormulation2[cntFreqs, cntGrid, :] = np.exp(-1j * kj[cntFreqs].imag * (rm[cntGrid, :] - r0[cntGrid])) * rm[cntGrid, :] / r0[cntGrid] / nMics
         steerFormulation3[cntFreqs, cntGrid, :] = np.exp(-1j * kj[cntFreqs].imag * (rm[cntGrid, :] - r0[cntGrid])) / rm[cntGrid, :] / r0[cntGrid] / np.sum(1.0 / rm[cntGrid, :]**2)
         steerFormulation4[cntFreqs, cntGrid, :] = np.exp(-1j * kj[cntFreqs].imag * (rm[cntGrid, :] - r0[cntGrid])) / rm[cntGrid, :] / np.sqrt(nMics * np.sum(1.0 / rm[cntGrid, :]**2))
+        
+        steerFormulation1normalized[cntFreqs, cntGrid, :] = steerFormulation1[cntFreqs, cntGrid, :] / np.sqrt(np.vdot(steerFormulation1[cntFreqs, cntGrid, :], steerFormulation1[cntFreqs, cntGrid, :]))
+        steerFormulation2normalized[cntFreqs, cntGrid, :] = steerFormulation2[cntFreqs, cntGrid, :] / np.sqrt(np.vdot(steerFormulation2[cntFreqs, cntGrid, :], steerFormulation2[cntFreqs, cntGrid, :]))
+        steerFormulation3normalized[cntFreqs, cntGrid, :] = steerFormulation3[cntFreqs, cntGrid, :] / np.sqrt(np.vdot(steerFormulation3[cntFreqs, cntGrid, :], steerFormulation3[cntFreqs, cntGrid, :]))
+        steerFormulation4normalized[cntFreqs, cntGrid, :] = steerFormulation4[cntFreqs, cntGrid, :] / np.sqrt(np.vdot(steerFormulation4[cntFreqs, cntGrid, :], steerFormulation4[cntFreqs, cntGrid, :]))
+        
         transfer[cntFreqs, cntGrid, :] = np.exp(-1j * kj[cntFreqs].imag * (rm[cntGrid, :] - r0[cntGrid])) * r0[cntGrid] / rm[cntGrid, :]
     csmPsf[cntFreqs, :] = np.outer(transfer[cntFreqs, indSource[indSourceCalcWithNumpy], :], transfer[cntFreqs, indSource[indSourceCalcWithNumpy], :].conj())
 
@@ -150,113 +160,224 @@ indHigh = nMics  # when all eigenvalues are taken into account --> eigVal beamfo
 normFull = 1.0
 normDiag = np.float64(nMics) / np.float64(nMics - 1)
 
-comp1Voll = beamNew.beamformerFreq(False, 1, False, normFull, (r0, rm, kj, csm))
+
+comp1Voll, dummy = beamNew.beamformerFreq(False, 1, False, normFull, (r0, rm, kj, csm))
 comp1VollRefNumpy = beamformerRef(csm, steerFormulation1)
 relDiff = (comp1Voll - comp1VollRefNumpy) / (comp1Voll + comp1VollRefNumpy) * 2
 error1VollAgainstNumpy = np.amax(np.amax(abs(relDiff), 0), 0)
 
-comp1Diag = beamNew.beamformerFreq(False, 1, True, normDiag, (r0, rm, kj, csm))
+comp1Diag, dummy = beamNew.beamformerFreq(False, 1, True, normDiag, (r0, rm, kj, csm))
 comp1DiagRefNumpy = beamformerRef(csmRemovedDiag, steerFormulation1) * normDiag
 relDiff = (comp1Diag - comp1DiagRefNumpy) / (comp1Diag + comp1DiagRefNumpy) * 2
 error1DiagAgainstNumpy = np.amax(np.amax(abs(relDiff), 0), 0)
 
-comp1VollEig = beamNew.beamformerFreq(True, 1, False, normFull, (r0, rm, kj, eigVal[:, indLow : indHigh], eigVec[:, :, indLow : indHigh]))
+comp1VollEig, dummy = beamNew.beamformerFreq(True, 1, False, normFull, (r0, rm, kj, eigVal[:, indLow : indHigh], eigVec[:, :, indLow : indHigh]))
 comp1VollEigRefNumpy = beamformerRef(csm, steerFormulation1)
 relDiff = (comp1VollEig - comp1VollEigRefNumpy) / (comp1VollEig + comp1VollEigRefNumpy) * 2
 error1VollEigAgainstNumpy = np.amax(np.amax(abs(relDiff), 0), 0)
 
-comp1DiagEig = beamNew.beamformerFreq(True, 1, True, normDiag, (r0, rm, kj, eigVal[:, indLow : indHigh], eigVec[:, :, indLow : indHigh]))
+comp1DiagEig, dummy = beamNew.beamformerFreq(True, 1, True, normDiag, (r0, rm, kj, eigVal[:, indLow : indHigh], eigVec[:, :, indLow : indHigh]))
 comp1DiagEigRefNumpy = beamformerRef(csmRemovedDiag, steerFormulation1) * normDiag
 relDiff = (comp1DiagEig - comp1DiagEigRefNumpy) / (comp1DiagEig + comp1DiagEigRefNumpy) * 2
 error1DiagEigAgainstNumpy = np.amax(np.amax(abs(relDiff), 0), 0)
 
 
 
-comp2Voll = beamNew.beamformerFreq(False, 2, False, normFull, (r0, rm, kj, csm))
+comp2Voll, dummy = beamNew.beamformerFreq(False, 2, False, normFull, (r0, rm, kj, csm))
 comp2VollRefNumpy = beamformerRef(csm, steerFormulation2)
 relDiff = (comp2Voll - comp2VollRefNumpy) / (comp2Voll + comp2VollRefNumpy) * 2
 error2VollAgainstNumpy = np.amax(np.amax(abs(relDiff), 0), 0)
 
-comp2Diag = beamNew.beamformerFreq(False, 2, True, normDiag, (r0, rm, kj, csm))
+comp2Diag, dummy = beamNew.beamformerFreq(False, 2, True, normDiag, (r0, rm, kj, csm))
 comp2DiagRefNumpy = beamformerRef(csmRemovedDiag, steerFormulation2) * normDiag
 relDiff = (comp2Diag - comp2DiagRefNumpy) / (comp2Diag + comp2DiagRefNumpy) * 2
 error2DiagAgainstNumpy = np.amax(np.amax(abs(relDiff), 0), 0)
 
-comp2VollEig = beamNew.beamformerFreq(True, 2, False, normFull, (r0, rm, kj, eigVal[:, indLow : indHigh], eigVec[:, :, indLow : indHigh]))
+comp2VollEig, dummy = beamNew.beamformerFreq(True, 2, False, normFull, (r0, rm, kj, eigVal[:, indLow : indHigh], eigVec[:, :, indLow : indHigh]))
 comp2VollEigRefNumpy = beamformerRef(csm, steerFormulation2)
 relDiff = (comp2VollEig - comp2VollEigRefNumpy) / (comp2VollEig + comp2VollEigRefNumpy) * 2
 error2VollEigAgainstNumpy = np.amax(np.amax(abs(relDiff), 0), 0)
 
-comp2DiagEig = beamNew.beamformerFreq(True, 2, True, normDiag, (r0, rm, kj, eigVal[:, indLow : indHigh], eigVec[:, :, indLow : indHigh]))
+comp2DiagEig, dummy = beamNew.beamformerFreq(True, 2, True, normDiag, (r0, rm, kj, eigVal[:, indLow : indHigh], eigVec[:, :, indLow : indHigh]))
 comp2DiagEigRefNumpy = beamformerRef(csmRemovedDiag, steerFormulation2) * normDiag
 relDiff = (comp2DiagEig - comp2DiagEigRefNumpy) / (comp2DiagEig + comp2DiagEigRefNumpy) * 2
 error2DiagEigAgainstNumpy = np.amax(np.amax(abs(relDiff), 0), 0)
 
 
 
-comp3Voll = beamNew.beamformerFreq(False, 3, False, normFull, (r0, rm, kj, csm))
+comp3Voll, dummy = beamNew.beamformerFreq(False, 3, False, normFull, (r0, rm, kj, csm))
 comp3VollRefNumpy = beamformerRef(csm, steerFormulation3)
 relDiff = (comp3Voll - comp3VollRefNumpy) / (comp3Voll + comp3VollRefNumpy) * 2
 error3VollAgainstNumpy = np.amax(np.amax(abs(relDiff), 0), 0)
 
-comp3Diag = beamNew.beamformerFreq(False, 3, True, normDiag, (r0, rm, kj, csm))
+comp3Diag, dummy = beamNew.beamformerFreq(False, 3, True, normDiag, (r0, rm, kj, csm))
 comp3DiagRefNumpy = beamformerRef(csmRemovedDiag, steerFormulation3) * normDiag
 relDiff = (comp3Diag - comp3DiagRefNumpy) / (comp3Diag + comp3DiagRefNumpy) * 2
 error3DiagAgainstNumpy = np.amax(np.amax(abs(relDiff), 0), 0)
 
-comp3VollEig = beamNew.beamformerFreq(True, 3, False, normFull, (r0, rm, kj, eigVal[:, indLow : indHigh], eigVec[:, :, indLow : indHigh]))
+comp3VollEig, dummy = beamNew.beamformerFreq(True, 3, False, normFull, (r0, rm, kj, eigVal[:, indLow : indHigh], eigVec[:, :, indLow : indHigh]))
 comp3VollEigRefNumpy = beamformerRef(csm, steerFormulation3)
 relDiff = (comp3VollEig - comp3VollEigRefNumpy) / (comp3VollEig + comp3VollEigRefNumpy) * 2
 error3VollEigAgainstNumpy = np.amax(np.amax(abs(relDiff), 0), 0)
 
-comp3DiagEig = beamNew.beamformerFreq(True, 3, True, normDiag, (r0, rm, kj, eigVal[:, indLow : indHigh], eigVec[:, :, indLow : indHigh]))
+comp3DiagEig, dummy = beamNew.beamformerFreq(True, 3, True, normDiag, (r0, rm, kj, eigVal[:, indLow : indHigh], eigVec[:, :, indLow : indHigh]))
 comp3DiagEigRefNumpy = beamformerRef(csmRemovedDiag, steerFormulation3) * normDiag
 relDiff = (comp3DiagEig - comp3DiagEigRefNumpy) / (comp3DiagEig + comp3DiagEigRefNumpy) * 2
 error3DiagEigAgainstNumpy = np.amax(np.amax(abs(relDiff), 0), 0)
 
 
 
-comp4Voll = beamNew.beamformerFreq(False, 4, False, normFull, (r0, rm, kj, csm))
+comp4Voll, dummy = beamNew.beamformerFreq(False, 4, False, normFull, (r0, rm, kj, csm))
 comp4VollRefNumpy = beamformerRef(csm, steerFormulation4)
 relDiff = (comp4Voll - comp4VollRefNumpy) / (comp4Voll + comp4VollRefNumpy) * 2
 error4VollAgainstNumpy = np.amax(np.amax(abs(relDiff), 0), 0)
 
-comp4Diag = beamNew.beamformerFreq(False, 4, True, normDiag, (r0, rm, kj, csm))
+comp4Diag, dummy = beamNew.beamformerFreq(False, 4, True, normDiag, (r0, rm, kj, csm))
 comp4DiagRefNumpy = beamformerRef(csmRemovedDiag, steerFormulation4) * normDiag
 relDiff = (comp4Diag - comp4DiagRefNumpy) / (comp4Diag + comp4DiagRefNumpy) * 2
 error4DiagAgainstNumpy = np.amax(np.amax(abs(relDiff), 0), 0)
 
-comp4VollEig = beamNew.beamformerFreq(True, 4, False, normFull, (r0, rm, kj, eigVal[:, indLow : indHigh], eigVec[:, :, indLow : indHigh]))
+comp4VollEig, dummy = beamNew.beamformerFreq(True, 4, False, normFull, (r0, rm, kj, eigVal[:, indLow : indHigh], eigVec[:, :, indLow : indHigh]))
 comp4VollEigRefNumpy = beamformerRef(csm, steerFormulation4)
 relDiff = (comp4VollEig - comp4VollEigRefNumpy) / (comp4VollEig + comp4VollEigRefNumpy) * 2
 error4VollEigAgainstNumpy = np.amax(np.amax(abs(relDiff), 0), 0)
 
-comp4DiagEig = beamNew.beamformerFreq(True, 4, True, normDiag, (r0, rm, kj, eigVal[:, indLow : indHigh], eigVec[:, :, indLow : indHigh]))
+comp4DiagEig, dummy = beamNew.beamformerFreq(True, 4, True, normDiag, (r0, rm, kj, eigVal[:, indLow : indHigh], eigVec[:, :, indLow : indHigh]))
 comp4DiagEigRefNumpy = beamformerRef(csmRemovedDiag, steerFormulation4) * normDiag
 relDiff = (comp4DiagEig - comp4DiagEigRefNumpy) / (comp4DiagEig + comp4DiagEigRefNumpy) * 2
 error4DiagEigAgainstNumpy = np.amax(np.amax(abs(relDiff), 0), 0)
 
 
 
-compSpecificVoll = beamNew.beamformerFreq(False, 'specific', False, normFull, (steerFormulation4, csm))
+compSpecificVoll, dummy = beamNew.beamformerFreq(False, 'custom', False, normFull, (steerFormulation4, csm))
 compSpecificVollRefNumpy = beamformerRef(csm, steerFormulation4)
 relDiff = (compSpecificVoll - compSpecificVollRefNumpy) / (compSpecificVoll + compSpecificVollRefNumpy) * 2
 errorSpecificVollAgainstNumpy = np.amax(np.amax(abs(relDiff), 0), 0)
 
-compSpecificDiag = beamNew.beamformerFreq(False, 'specific', True, normDiag, (steerFormulation4, csm))
+compSpecificDiag, dummy = beamNew.beamformerFreq(False, 'custom', True, normDiag, (steerFormulation4, csm))
 compSpecificDiagRefNumpy = beamformerRef(csmRemovedDiag, steerFormulation4) * normDiag
 relDiff = (compSpecificDiag - compSpecificDiagRefNumpy) / (compSpecificDiag + compSpecificDiagRefNumpy) * 2
 errorSpecificDiagAgainstNumpy = np.amax(np.amax(abs(relDiff), 0), 0)
 
-compSpecificVollEig = beamNew.beamformerFreq(True, 'specific', False, normFull, (steerFormulation4, eigVal[:, indLow : indHigh], eigVec[:, :, indLow : indHigh]))
+compSpecificVollEig, dummy = beamNew.beamformerFreq(True, 'custom', False, normFull, (steerFormulation4, eigVal[:, indLow : indHigh], eigVec[:, :, indLow : indHigh]))
 compSpecificVollEigRefNumpy = beamformerRef(csm, steerFormulation4)
 relDiff = (compSpecificVollEig - compSpecificVollEigRefNumpy) / (compSpecificVollEig + compSpecificVollEigRefNumpy) * 2
 errorSpecificVollEigAgainstNumpy = np.amax(np.amax(abs(relDiff), 0), 0)
 
-compSpecificDiagEig = beamNew.beamformerFreq(True, 'specific', True, normDiag, (steerFormulation4, eigVal[:, indLow : indHigh], eigVec[:, :, indLow : indHigh]))
+compSpecificDiagEig, dummy = beamNew.beamformerFreq(True, 'custom', True, normDiag, (steerFormulation4, eigVal[:, indLow : indHigh], eigVec[:, :, indLow : indHigh]))
 compSpecificDiagEigRefNumpy = beamformerRef(csmRemovedDiag, steerFormulation4) * normDiag
 relDiff = (compSpecificDiagEig - compSpecificDiagEigRefNumpy) / (compSpecificDiagEig + compSpecificDiagEigRefNumpy) * 2
 errorSpecificDiagEigAgainstNumpy = np.amax(np.amax(abs(relDiff), 0), 0)
+
+
+
+
+
+
+## now check the normalization of steering vector functionality
+
+comp1VollNormalizedSteer, steerNorm = beamNew.beamformerFreq(False, 1, False, normFull, (r0, rm, kj, csm))
+comp1VollNormalizedSteer /= steerNorm
+comp1VollNormalizedSteerRefNumpy = beamformerRef(csm, steerFormulation1normalized)
+relDiff = (comp1VollNormalizedSteer - comp1VollNormalizedSteerRefNumpy) / (comp1VollNormalizedSteer + comp1VollNormalizedSteerRefNumpy) * 2
+error1VollNormalizedSteerAgainstNumpy = np.amax(np.amax(abs(relDiff), 0), 0)
+
+comp1DiagNormalizedSteer, steerNorm = beamNew.beamformerFreq(False, 1, True, normDiag, (r0, rm, kj, csm))
+comp1DiagNormalizedSteer /= steerNorm
+comp1DiagNormalizedSteerRefNumpy = beamformerRef(csmRemovedDiag, steerFormulation1normalized) * normDiag
+relDiff = (comp1DiagNormalizedSteer - comp1DiagNormalizedSteerRefNumpy) / (comp1DiagNormalizedSteer + comp1DiagNormalizedSteerRefNumpy) * 2
+error1DiagNormalizedSteerAgainstNumpy = np.amax(np.amax(abs(relDiff), 0), 0)
+
+comp1VollEigNormalizedSteer, steerNorm = beamNew.beamformerFreq(True, 1, False, normFull, (r0, rm, kj, eigVal[:, indLow : indHigh], eigVec[:, :, indLow : indHigh]))
+comp1VollEigNormalizedSteer /= steerNorm
+comp1VollEigNormalizedSteerRefNumpy = beamformerRef(csm, steerFormulation1normalized)
+relDiff = (comp1VollEigNormalizedSteer - comp1VollEigNormalizedSteerRefNumpy) / (comp1VollEigNormalizedSteer + comp1VollEigNormalizedSteerRefNumpy) * 2
+error1VollEigNormalizedSteerAgainstNumpy = np.amax(np.amax(abs(relDiff), 0), 0)
+
+comp1DiagEigNormalizedSteer, steerNorm = beamNew.beamformerFreq(True, 1, True, normDiag, (r0, rm, kj, eigVal[:, indLow : indHigh], eigVec[:, :, indLow : indHigh]))
+comp1DiagEigNormalizedSteer /= steerNorm
+comp1DiagEigNormalizedSteerRefNumpy = beamformerRef(csmRemovedDiag, steerFormulation1normalized) * normDiag
+relDiff = (comp1DiagEigNormalizedSteer - comp1DiagEigNormalizedSteerRefNumpy) / (comp1DiagEigNormalizedSteer + comp1DiagEigNormalizedSteerRefNumpy) * 2
+error1DiagEigNormalizedSteerAgainstNumpy = np.amax(np.amax(abs(relDiff), 0), 0)
+
+
+
+comp2VollNormalizedSteer, steerNorm = beamNew.beamformerFreq(False, 2, False, normFull, (r0, rm, kj, csm))
+comp2VollNormalizedSteer /= steerNorm
+comp2VollNormalizedSteerRefNumpy = beamformerRef(csm, steerFormulation2normalized)
+relDiff = (comp2VollNormalizedSteer - comp2VollNormalizedSteerRefNumpy) / (comp2VollNormalizedSteer + comp2VollNormalizedSteerRefNumpy) * 2
+error2VollNormalizedSteerAgainstNumpy = np.amax(np.amax(abs(relDiff), 0), 0)
+
+comp2DiagNormalizedSteer, steerNorm = beamNew.beamformerFreq(False, 2, True, normDiag, (r0, rm, kj, csm))
+comp2DiagNormalizedSteer /= steerNorm
+comp2DiagNormalizedSteerRefNumpy = beamformerRef(csmRemovedDiag, steerFormulation2normalized) * normDiag
+relDiff = (comp2DiagNormalizedSteer - comp2DiagNormalizedSteerRefNumpy) / (comp2DiagNormalizedSteer + comp2DiagNormalizedSteerRefNumpy) * 2
+error2DiagNormalizedSteerAgainstNumpy = np.amax(np.amax(abs(relDiff), 0), 0)
+
+comp2VollEigNormalizedSteer, steerNorm = beamNew.beamformerFreq(True, 2, False, normFull, (r0, rm, kj, eigVal[:, indLow : indHigh], eigVec[:, :, indLow : indHigh]))
+comp2VollEigNormalizedSteer /= steerNorm
+comp2VollEigNormalizedSteerRefNumpy = beamformerRef(csm, steerFormulation2normalized)
+relDiff = (comp2VollEigNormalizedSteer - comp2VollEigNormalizedSteerRefNumpy) / (comp2VollEigNormalizedSteer + comp2VollEigNormalizedSteerRefNumpy) * 2
+error2VollEigNormalizedSteerAgainstNumpy = np.amax(np.amax(abs(relDiff), 0), 0)
+
+comp2DiagEigNormalizedSteer, steerNorm = beamNew.beamformerFreq(True, 2, True, normDiag, (r0, rm, kj, eigVal[:, indLow : indHigh], eigVec[:, :, indLow : indHigh]))
+comp2DiagEigNormalizedSteer /= steerNorm
+comp2DiagEigNormalizedSteerRefNumpy = beamformerRef(csmRemovedDiag, steerFormulation2normalized) * normDiag
+relDiff = (comp2DiagEigNormalizedSteer - comp2DiagEigNormalizedSteerRefNumpy) / (comp2DiagEigNormalizedSteer + comp2DiagEigNormalizedSteerRefNumpy) * 2
+error2DiagEigNormalizedSteerAgainstNumpy = np.amax(np.amax(abs(relDiff), 0), 0)
+
+
+
+comp3VollNormalizedSteer, steerNorm = beamNew.beamformerFreq(False, 3, False, normFull, (r0, rm, kj, csm))
+comp3VollNormalizedSteer /= steerNorm
+comp3VollNormalizedSteerRefNumpy = beamformerRef(csm, steerFormulation3normalized)
+relDiff = (comp3VollNormalizedSteer - comp3VollNormalizedSteerRefNumpy) / (comp3VollNormalizedSteer + comp3VollNormalizedSteerRefNumpy) * 2
+error3VollNormalizedSteerAgainstNumpy = np.amax(np.amax(abs(relDiff), 0), 0)
+
+comp3DiagNormalizedSteer, steerNorm = beamNew.beamformerFreq(False, 3, True, normDiag, (r0, rm, kj, csm))
+comp3DiagNormalizedSteer /= steerNorm
+comp3DiagNormalizedSteerRefNumpy = beamformerRef(csmRemovedDiag, steerFormulation3normalized) * normDiag
+relDiff = (comp3DiagNormalizedSteer - comp3DiagNormalizedSteerRefNumpy) / (comp3DiagNormalizedSteer + comp3DiagNormalizedSteerRefNumpy) * 2
+error3DiagNormalizedSteerAgainstNumpy = np.amax(np.amax(abs(relDiff), 0), 0)
+
+comp3VollEigNormalizedSteer, steerNorm = beamNew.beamformerFreq(True, 3, False, normFull, (r0, rm, kj, eigVal[:, indLow : indHigh], eigVec[:, :, indLow : indHigh]))
+comp3VollEigNormalizedSteer /= steerNorm
+comp3VollEigNormalizedSteerRefNumpy = beamformerRef(csm, steerFormulation3normalized)
+relDiff = (comp3VollEigNormalizedSteer - comp3VollEigNormalizedSteerRefNumpy) / (comp3VollEigNormalizedSteer + comp3VollEigNormalizedSteerRefNumpy) * 2
+error3VollEigNormalizedSteerAgainstNumpy = np.amax(np.amax(abs(relDiff), 0), 0)
+
+comp3DiagEigNormalizedSteer, steerNorm = beamNew.beamformerFreq(True, 3, True, normDiag, (r0, rm, kj, eigVal[:, indLow : indHigh], eigVec[:, :, indLow : indHigh]))
+comp3DiagEigNormalizedSteer /= steerNorm
+comp3DiagEigNormalizedSteerRefNumpy = beamformerRef(csmRemovedDiag, steerFormulation3normalized) * normDiag
+relDiff = (comp3DiagEigNormalizedSteer - comp3DiagEigNormalizedSteerRefNumpy) / (comp3DiagEigNormalizedSteer + comp3DiagEigNormalizedSteerRefNumpy) * 2
+error3DiagEigNormalizedSteerAgainstNumpy = np.amax(np.amax(abs(relDiff), 0), 0)
+
+
+
+comp4VollNormalizedSteer, steerNorm = beamNew.beamformerFreq(False, 4, False, normFull, (r0, rm, kj, csm))
+comp4VollNormalizedSteer /= steerNorm
+comp4VollNormalizedSteerRefNumpy = beamformerRef(csm, steerFormulation4normalized)
+relDiff = (comp4VollNormalizedSteer - comp4VollNormalizedSteerRefNumpy) / (comp4VollNormalizedSteer + comp4VollNormalizedSteerRefNumpy) * 2
+error4VollNormalizedSteerAgainstNumpy = np.amax(np.amax(abs(relDiff), 0), 0)
+
+comp4DiagNormalizedSteer, steerNorm = beamNew.beamformerFreq(False, 4, True, normDiag, (r0, rm, kj, csm))
+comp4DiagNormalizedSteer /= steerNorm
+comp4DiagNormalizedSteerRefNumpy = beamformerRef(csmRemovedDiag, steerFormulation4normalized) * normDiag
+relDiff = (comp4DiagNormalizedSteer - comp4DiagNormalizedSteerRefNumpy) / (comp4DiagNormalizedSteer + comp4DiagNormalizedSteerRefNumpy) * 2
+error4DiagNormalizedSteerAgainstNumpy = np.amax(np.amax(abs(relDiff), 0), 0)
+
+comp4VollEigNormalizedSteer, steerNorm = beamNew.beamformerFreq(True, 4, False, normFull, (r0, rm, kj, eigVal[:, indLow : indHigh], eigVec[:, :, indLow : indHigh]))
+comp4VollEigNormalizedSteer /= steerNorm
+comp4VollEigNormalizedSteerRefNumpy = beamformerRef(csm, steerFormulation4normalized)
+relDiff = (comp4VollEigNormalizedSteer - comp4VollEigNormalizedSteerRefNumpy) / (comp4VollEigNormalizedSteer + comp4VollEigNormalizedSteerRefNumpy) * 2
+error4VollEigNormalizedSteerAgainstNumpy = np.amax(np.amax(abs(relDiff), 0), 0)
+
+comp4DiagEigNormalizedSteer, steerNorm = beamNew.beamformerFreq(True, 4, True, normDiag, (r0, rm, kj, eigVal[:, indLow : indHigh], eigVec[:, :, indLow : indHigh]))
+comp4DiagEigNormalizedSteer /= steerNorm
+comp4DiagEigNormalizedSteerRefNumpy = beamformerRef(csmRemovedDiag, steerFormulation4normalized) * normDiag
+relDiff = (comp4DiagEigNormalizedSteer - comp4DiagEigNormalizedSteerRefNumpy) / (comp4DiagEigNormalizedSteer + comp4DiagEigNormalizedSteerRefNumpy) * 2
+error4DiagEigNormalizedSteerAgainstNumpy = np.amax(np.amax(abs(relDiff), 0), 0)
+
 
 ### --> loojks good
 
@@ -276,25 +397,25 @@ normDiagWeave = np.float64(nMics * (nMics - 1))
 # # see below why the csm can't be transposed as the input of weave 
 # # (but must be transposed as input of numpy and new beamformer)
 #==============================================================================
-comp1Voll = beamNew.beamformerFreq(False, 1, False, normFull, (r0, rm, kj, csm.transpose(0,2,1)))
+comp1Voll, steerNorm = beamNew.beamformerFreq(False, 1, False, normFull, (r0, rm, kj, csm.transpose(0,2,1)))
 beamformer.r_beamfull_classic(csm, e, h, r0, rm, kj)
 comp1VollRefWeave = h / normFullWeave
 relDiff = (comp1Voll - comp1VollRefWeave) / (comp1Voll + comp1VollRefWeave) * 2
 error1VollAgainstWeave = np.amax(np.amax(abs(relDiff), 0), 0)
 
-comp1Diag = beamNew.beamformerFreq(False, 1, True, normDiag, (r0, rm, kj, csm.transpose(0,2,1)))
+comp1Diag, steerNorm = beamNew.beamformerFreq(False, 1, True, normDiag, (r0, rm, kj, csm.transpose(0,2,1)))
 beamformer.r_beamdiag_classic(csm, e, h, r0, rm, kj)
 comp1DiagRefWeave = h / normDiagWeave
 relDiff = (comp1Diag - comp1DiagRefWeave) / (comp1Diag + comp1DiagRefWeave) * 2
 error1DiagAgainstWeave = np.amax(np.amax(abs(relDiff), 0), 0)
 
-comp1VollEig = beamNew.beamformerFreq(True, 1, False, normFull, (r0, rm, kj, eigValTrans[:, indLow : indHigh], eigVecTrans[:, :, indLow : indHigh]))
+comp1VollEig, steerNorm = beamNew.beamformerFreq(True, 1, False, normFull, (r0, rm, kj, eigValTrans[:, indLow : indHigh], eigVecTrans[:, :, indLow : indHigh]))
 beamformer.r_beamfull_os_classic(e, h, r0, rm, kj, eigVal, eigVec, indLow, indHigh)
 comp1VollEigRefWeave = h / normFullWeave
 relDiff = (comp1VollEig - comp1VollEigRefWeave) / (comp1VollEig + comp1VollEigRefWeave) * 2
 error1VollEigAgainstWeave = np.amax(np.amax(abs(relDiff), 0), 0)
 
-comp1DiagEig = beamNew.beamformerFreq(True, 1, True, normDiag, (r0, rm, kj, eigValTrans[:, indLow : indHigh], eigVecTrans[:, :, indLow : indHigh]))
+comp1DiagEig, steerNorm = beamNew.beamformerFreq(True, 1, True, normDiag, (r0, rm, kj, eigValTrans[:, indLow : indHigh], eigVecTrans[:, :, indLow : indHigh]))
 beamformer.r_beamdiag_os_classic(e, h, r0, rm, kj, eigVal, eigVec, indLow, indHigh)
 comp1DiagEigRefWeave = h / normDiagWeave
 relDiff = (comp1DiagEig - comp1DiagEigRefWeave) / (comp1DiagEig + comp1DiagEigRefWeave) * 2
@@ -302,25 +423,25 @@ error1DiagEigAgainstWeave = np.amax(np.amax(abs(relDiff), 0), 0)
 
 
 
-comp2Voll = beamNew.beamformerFreq(False, 2, False, normFull, (r0, rm, kj, csm.transpose(0,2,1)))
+comp2Voll, steerNorm = beamNew.beamformerFreq(False, 2, False, normFull, (r0, rm, kj, csm.transpose(0,2,1)))
 beamformer.r_beamfull_inverse(csm, e, h, r0, rm, kj)
 comp2VollRefWeave = h / normFullWeave
 relDiff = (comp2Voll - comp2VollRefWeave) / (comp2Voll + comp2VollRefWeave) * 2
 error2VollAgainstWeave = np.amax(np.amax(abs(relDiff), 0), 0)
 
-comp2Diag = beamNew.beamformerFreq(False, 2, True, normDiag, (r0, rm, kj, csm.transpose(0,2,1)))
+comp2Diag, steerNorm = beamNew.beamformerFreq(False, 2, True, normDiag, (r0, rm, kj, csm.transpose(0,2,1)))
 beamformer.r_beamdiag_inverse(csm, e, h, r0, rm, kj)
 comp2DiagRefWeave = h / normDiagWeave
 relDiff = (comp2Diag - comp2DiagRefWeave) / (comp2Diag + comp2DiagRefWeave) * 2
 error2DiagAgainstWeave = np.amax(np.amax(abs(relDiff), 0), 0)
 
-comp2VollEig = beamNew.beamformerFreq(True, 2, False, normFull, (r0, rm, kj, eigValTrans[:, indLow : indHigh], eigVecTrans[:, :, indLow : indHigh]))
+comp2VollEig, steerNorm = beamNew.beamformerFreq(True, 2, False, normFull, (r0, rm, kj, eigValTrans[:, indLow : indHigh], eigVecTrans[:, :, indLow : indHigh]))
 beamformer.r_beamfull_os_inverse(e, h, r0, rm, kj, eigVal, eigVec, indLow, indHigh)
 comp2VollEigRefWeave = h / normFullWeave
 relDiff = (comp2VollEig - comp2VollEigRefWeave) / (comp2VollEig + comp2VollEigRefWeave) * 2
 error2VollEigAgainstWeave = np.amax(np.amax(abs(relDiff), 0), 0)
 
-comp2DiagEig = beamNew.beamformerFreq(True, 2, True, normDiag, (r0, rm, kj, eigValTrans[:, indLow : indHigh], eigVecTrans[:, :, indLow : indHigh]))
+comp2DiagEig, steerNorm = beamNew.beamformerFreq(True, 2, True, normDiag, (r0, rm, kj, eigValTrans[:, indLow : indHigh], eigVecTrans[:, :, indLow : indHigh]))
 beamformer.r_beamdiag_os_inverse(e, h, r0, rm, kj, eigVal, eigVec, indLow, indHigh)
 comp2DiagEigRefWeave = h / normDiagWeave
 relDiff = (comp2DiagEig - comp2DiagEigRefWeave) / (comp2DiagEig + comp2DiagEigRefWeave) * 2
@@ -328,25 +449,25 @@ error2DiagEigAgainstWeave = np.amax(np.amax(abs(relDiff), 0), 0)
 
 
 
-comp3Voll = beamNew.beamformerFreq(False, 3, False, normFull, (r0, rm, kj, csm.transpose(0,2,1)))
+comp3Voll, steerNorm = beamNew.beamformerFreq(False, 3, False, normFull, (r0, rm, kj, csm.transpose(0,2,1)))
 beamformer.r_beamfull(csm, e, h, r0, rm, kj)
 comp3VollRefWeave = h / normFullWeave
 relDiff = (comp3Voll - comp3VollRefWeave) / (comp3Voll + comp3VollRefWeave) * 2
 error3VollAgainstWeave = np.amax(np.amax(abs(relDiff), 0), 0)
 
-comp3Diag = beamNew.beamformerFreq(False, 3, True, normDiag, (r0, rm, kj, csm.transpose(0,2,1)))
+comp3Diag, steerNorm = beamNew.beamformerFreq(False, 3, True, normDiag, (r0, rm, kj, csm.transpose(0,2,1)))
 beamformer.r_beamdiag(csm, e, h, r0, rm, kj)
 comp3DiagRefWeave = h / normDiagWeave
 relDiff = (comp3Diag - comp3DiagRefWeave) / (comp3Diag + comp3DiagRefWeave) * 2
 error3DiagAgainstWeave = np.amax(np.amax(abs(relDiff), 0), 0)
 
-comp3VollEig = beamNew.beamformerFreq(True, 3, False, normFull, (r0, rm, kj, eigValTrans[:, indLow : indHigh], eigVecTrans[:, :, indLow : indHigh]))
+comp3VollEig, steerNorm = beamNew.beamformerFreq(True, 3, False, normFull, (r0, rm, kj, eigValTrans[:, indLow : indHigh], eigVecTrans[:, :, indLow : indHigh]))
 beamformer.r_beamfull_os(e, h, r0, rm, kj, eigVal, eigVec, indLow, indHigh)
 comp3VollEigRefWeave = h / normFullWeave
 relDiff = (comp3VollEig - comp3VollEigRefWeave) / (comp3VollEig + comp3VollEigRefWeave) * 2
 error3VollEigAgainstWeave = np.amax(np.amax(abs(relDiff), 0), 0)
 
-comp3DiagEig = beamNew.beamformerFreq(True, 3, True, normDiag, (r0, rm, kj, eigValTrans[:, indLow : indHigh], eigVecTrans[:, :, indLow : indHigh]))
+comp3DiagEig, steerNorm = beamNew.beamformerFreq(True, 3, True, normDiag, (r0, rm, kj, eigValTrans[:, indLow : indHigh], eigVecTrans[:, :, indLow : indHigh]))
 beamformer.r_beamdiag_os(e, h, r0, rm, kj, eigVal, eigVec, indLow, indHigh)
 comp3DiagEigRefWeave = h / normDiagWeave
 relDiff = (comp3DiagEig - comp3DiagEigRefWeave) / (comp3DiagEig + comp3DiagEigRefWeave) * 2
@@ -354,25 +475,25 @@ error3DiagEigAgainstWeave = np.amax(np.amax(abs(relDiff), 0), 0)
 
 
 
-comp4Voll = beamNew.beamformerFreq(False, 4, False, normFull, (r0, rm, kj, csm.transpose(0,2,1)))
+comp4Voll, steerNorm = beamNew.beamformerFreq(False, 4, False, normFull, (r0, rm, kj, csm.transpose(0,2,1)))
 beamformer.r_beamfull_3d(csm, e, h, r0, rm, kj)
 comp4VollRefWeave = h / normFullWeave
 relDiff = (comp4Voll - comp4VollRefWeave) / (comp4Voll + comp4VollRefWeave) * 2
 error4VollAgainstWeave = np.amax(np.amax(abs(relDiff), 0), 0)
 
-comp4Diag = beamNew.beamformerFreq(False, 4, True, normDiag, (r0, rm, kj, csm.transpose(0,2,1)))
+comp4Diag, steerNorm = beamNew.beamformerFreq(False, 4, True, normDiag, (r0, rm, kj, csm.transpose(0,2,1)))
 beamformer.r_beamdiag_3d(csm, e, h, r0, rm, kj)
 comp4DiagRefWeave = h / normDiagWeave
 relDiff = (comp4Diag - comp4DiagRefWeave) / (comp4Diag + comp4DiagRefWeave) * 2
 error4DiagAgainstWeave = np.amax(np.amax(abs(relDiff), 0), 0)
 
-comp4VollEig = beamNew.beamformerFreq(True, 4, False, normFull, (r0, rm, kj, eigValTrans[:, indLow : indHigh], eigVecTrans[:, :, indLow : indHigh]))
+comp4VollEig, steerNorm = beamNew.beamformerFreq(True, 4, False, normFull, (r0, rm, kj, eigValTrans[:, indLow : indHigh], eigVecTrans[:, :, indLow : indHigh]))
 beamformer.r_beamfull_os_3d(e, h, r0, rm, kj, eigVal, eigVec, indLow, indHigh)
 comp4VollEigRefWeave = h / normFullWeave
 relDiff = (comp4VollEig - comp4VollEigRefWeave) / (comp4VollEig + comp4VollEigRefWeave) * 2
 error4VollEigAgainstWeave = np.amax(np.amax(abs(relDiff), 0), 0)
 
-comp4DiagEig = beamNew.beamformerFreq(True, 4, True, normDiag, (r0, rm, kj, eigValTrans[:, indLow : indHigh], eigVecTrans[:, :, indLow : indHigh]))
+comp4DiagEig, steerNorm = beamNew.beamformerFreq(True, 4, True, normDiag, (r0, rm, kj, eigValTrans[:, indLow : indHigh], eigVecTrans[:, :, indLow : indHigh]))
 beamformer.r_beamdiag_os_3d(e, h, r0, rm, kj, eigVal, eigVec, indLow, indHigh)
 comp4DiagEigRefWeave = h / normDiagWeave
 relDiff = (comp4DiagEig - comp4DiagEigRefWeave) / (comp4DiagEig + comp4DiagEigRefWeave) * 2
@@ -382,7 +503,7 @@ error4DiagEigAgainstWeave = np.amax(np.amax(abs(relDiff), 0), 0)
 
 #%% Use only float32 for all calculations in beamformer
 erg64 = beamformerRef(csm, steerFormulation1)
-erg32 = beamformerRef(np.complex64(csm), np.float32(steerFormulation1))
+erg32 = beamformerRef(np.complex64(csm), np.complex64(steerFormulation1))
 relDiff = np.amax(np.amax((erg64 - erg32) / (erg64 + erg32), 0), 0)
 
 ### --> there will be massive errors, if one uses only float32 datatypes!
@@ -396,7 +517,7 @@ relDiff = np.amax(np.amax((erg64 - erg32) / (erg64 + erg32), 0), 0)
 normalizationFull = np.float64(nMics ** 2)
 
 numpyResult = vectorized(csm.transpose(0,2,1), e, h, r0, rm, kj, normalizationFull)  
-neu = beamNew.beamformerFreq(False, 1, False, normFull, (r0, rm, kj, csm.transpose(0,2,1)))
+neu, steerNorm = beamNew.beamformerFreq(False, 1, False, normFull, (r0, rm, kj, csm.transpose(0,2,1)))
 beamformer.r_beamfull_classic(csm, e, h, r0, rm, kj)
 weave = h / normalizationFull
 

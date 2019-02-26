@@ -16,7 +16,8 @@ parallelOption = 'parallel'  # if numba.guvectorize is used: 'CPU' for single th
 
 
 # Formerly known as 'faverage'
-@nb.njit(nb.complex128[:,:,:](nb.complex128[:,:,:], nb.complex128[:,:]), cache=cachedOption)
+@nb.njit([nb.complex128[:,:,:](nb.complex128[:,:,:], nb.complex128[:,:]), 
+          nb.complex64[:,:,:](nb.complex64[:,:,:], nb.complex64[:,:])], cache=cachedOption)
 def calcCSM(csm, SpecAllMics):
     """ Adds a given spectrum to the Cross-Spectral-Matrix (CSM).
     Here only the upper triangular matrix of the CSM is calculated. After
@@ -53,53 +54,53 @@ def calcCSM(csm, SpecAllMics):
     return csm
 
     
-def beamformerFreq(boolIsEigValProb, steerVecType, boolRemovedDiagOfCSM, normFactor, inputTuple):
+def beamformerFreq(steerVecType, boolRemovedDiagOfCSM, normFactor, inputTupleSteer, inputTupleCsm):
     """ Conventional beamformer in frequency domain. Use either a predefined
-    steering vector formulation (see Sarradj 2012) or pass it your own
+    steering vector formulation (see Sarradj 2012) or pass your own
     steering vector.
 
     Parameters
     ----------
-    boolIsEigValProb : bool 
-        Should the beamformer use spectral decomposition of the csm matrix?
-    steerVecType : (one of the following options: 1, 2, 3, 4, 'custom')
+    steerVecType : (one of the following strings: 'classic' (I), 'inverse' (II), 'true level' (III), 'true location' (IV), 'custom')
         Either build the steering vector via the predefined formulations
         I - IV (see :ref:`Sarradj, 2012<Sarradj2012>`) or pass it directly.
     boolRemovedDiagOfCSM : bool
         Should the diagonal of the csm be removed?
     normFactor : float
         In here both the signalenergy loss factor (due to removal of the csm diagonal) as well as
-        beamforming algorithm (functional, capon, ...) dependent normalization factors are handled.
-    inputTuple : dependent of the inputs above. There are 4 combinations:
-        boolIsEigValProb = False & steerVecType != 'custom' : 
-            inputTuple = (distGridToArrayCenter, distGridToAllMics, waveNumber, csm)
-        boolIsEigValProb = False & steerVecType = 'custom' : 
-            inputTuple = (steeringVector, csm)
-        boolIsEigValProb = True  & steerVecType != 'custom' :
-            inputTuple = (distGridToArrayCenter, distGridToAllMics, waveNumber, eigValues, eigVectors)
-        boolIsEigValProb = True  & steerVecType = 'custom' :
-            inputTuple = (steeringVector, eigValues, eigVectors)
+        beamforming algorithm (music, capon, ...) dependent normalization factors are handled.
+    inputTupleSteer : contains the information needed to create the steering vector. Is dependent of steerVecType. There are 2 cases:
+        steerVecType != 'custom' :
+            inputTupleSteer = (distGridToArrayCenter, distGridToAllMics, waveNumber)    , with
+                distGridToArrayCenter : float64[nGridpoints]
+                    Distance of all gridpoints to the center of sensor array
+                distGridToAllMics : float64[nGridpoints, nMics]
+                    Distance of all gridpoints to all sensors of array
+                waveNumber : float64
+                    The wave number
+        steerVecType == 'custom' :
+            inputTupleSteer = steeringVector    , with
+                steeringVector : complex128[nGridPoints, nMics]
+                    The steering vector of each gridpoint for the same frequency as the CSM
+    inputTupleCsm : contains the data of measurement as a tuple. There are 2 cases:
+        perform standard CSM-beamformer:
+            inputTupleCsm = csm
+                csm : complex128[ nMics, nMics]
+                    The cross spectral matrix for one frequency
+        perform beamformer on eigenvalue decomposition of csm:
+            inputTupleCsm = (eigValues, eigVectors)    , with
+                eigValues : float64[nEV]
+                    nEV is the number of eigenvalues which should be taken into account. 
+                    All passed eigenvalues will be evaluated.
+                eigVectors : complex128[nMics, nEV]
+                    Eigen vectors corresponding to eigValues. All passed eigenvector slices will be evaluated.
 
-        Data types : In all 4 above cases the data types of inputTuple are
-            distGridToArrayCenter : float64[nGridpoints]
-                Distance of all gridpoints to the center of sensor array
-            distGridToAllMics : float64[nGridpoints, nMics]
-                Distance of all gridpoints to all sensors of array
-            waveNumber : complex128[nFreqs]
-                The wave number should be stored in the imag-part
-            csm : complex128[nFreqs, nMics, nMics]
-                The cross spectral matrix
-            steeringVector : complex128[nFreqs, nGridPoints, nMics]
-                The steering vector of each gridpoint and frequency
-            eigValues : float64[nFreqs, nEV]
-                nEV is the number of eigenvalues which should be taken into account. 
-                All passed eigenvalues will be evaluated.
-            eigVectors : complex128[nFreqs, nMics, nEV]
-                Eigen vectors corresponding to eigValues. All passed eigenvector slices will be evaluated.
-    
     Returns
     -------
-    Autopower spectrum beamforming map : [nFreqs, nGridPoints]
+    *Autopower spectrum beamforming map [nGridPoints] 
+         
+    *steer normalization factor [nGridPoints]... contains the values the autopower needs to be multiplied with, in order to 
+    fullfill 'steer^H * steer = 1' as needed for functional beamforming. 
     
     Some Notes on the optimization of all subroutines
     -------------------------------------------------
@@ -134,67 +135,70 @@ def beamformerFreq(boolIsEigValProb, steerVecType, boolRemovedDiagOfCSM, normFac
         "eigenVec.conj * steeringVector". BUT (at the moment) this only brings benefits in comp-time for a very 
         small range of nMics (approx 250) --> Therefor it is not implemented here.
     """
+    boolIsEigValProb = isinstance(inputTupleCsm, tuple)# len(inputTupleCsm) > 1
     # get the beamformer type (key-tuple = (isEigValProblem, formulationOfSteeringVector, RemovalOfCSMDiag))
-    beamformerDict = {(False, 1, False) : _freqBeamformer_Formulation1AkaClassic_FullCSM,
-                      (False, 1, True) : _freqBeamformer_Formulation1AkaClassic_CsmRemovedDiag,
-                      (False, 2, False) : _freqBeamformer_Formulation2AkaInverse_FullCSM,
-                      (False, 2, True) : _freqBeamformer_Formulation2AkaInverse_CsmRemovedDiag,
-                      (False, 3, False) : _freqBeamformer_Formulation3AkaTrueLevel_FullCSM,
-                      (False, 3, True) : _freqBeamformer_Formulation3AkaTrueLevel_CsmRemovedDiag,
-                      (False, 4, False) : _freqBeamformer_Formulation4AkaTrueLocation_FullCSM,
-                      (False, 4, True) : _freqBeamformer_Formulation4AkaTrueLocation_CsmRemovedDiag,
+    beamformerDict = {(False, 'classic', False) : _freqBeamformer_Formulation1AkaClassic_FullCSM,
+                      (False, 'classic', True) : _freqBeamformer_Formulation1AkaClassic_CsmRemovedDiag,
+                      (False, 'inverse', False) : _freqBeamformer_Formulation2AkaInverse_FullCSM,
+                      (False, 'inverse', True) : _freqBeamformer_Formulation2AkaInverse_CsmRemovedDiag,
+                      (False, 'true level', False) : _freqBeamformer_Formulation3AkaTrueLevel_FullCSM,
+                      (False, 'true level', True) : _freqBeamformer_Formulation3AkaTrueLevel_CsmRemovedDiag,
+                      (False, 'true location', False) : _freqBeamformer_Formulation4AkaTrueLocation_FullCSM,
+                      (False, 'true location', True) : _freqBeamformer_Formulation4AkaTrueLocation_CsmRemovedDiag,
                       (False, 'custom', False) : _freqBeamformer_SpecificSteerVec_FullCSM,
                       (False, 'custom', True) : _freqBeamformer_SpecificSteerVec_CsmRemovedDiag,
-                      (True, 1, False) : _freqBeamformer_EigValProb_Formulation1AkaClassic_FullCSM,
-                      (True, 1, True) : _freqBeamformer_EigValProb_Formulation1AkaClassic_CsmRemovedDiag,
-                      (True, 2, False) : _freqBeamformer_EigValProb_Formulation2AkaInverse_FullCSM,
-                      (True, 2, True) : _freqBeamformer_EigValProb_Formulation2AkaInverse_CsmRemovedDiag,
-                      (True, 3, False) : _freqBeamformer_EigValProb_Formulation3AkaTrueLevel_FullCSM,
-                      (True, 3, True) : _freqBeamformer_EigValProb_Formulation3AkaTrueLevel_CsmRemovedDiag,
-                      (True, 4, False) : _freqBeamformer_EigValProb_Formulation4AkaTrueLocation_FullCSM,
-                      (True, 4, True) : _freqBeamformer_EigValProb_Formulation4AkaTrueLocation_CsmRemovedDiag,
+                      (True, 'classic', False) : _freqBeamformer_EigValProb_Formulation1AkaClassic_FullCSM,
+                      (True, 'classic', True) : _freqBeamformer_EigValProb_Formulation1AkaClassic_CsmRemovedDiag,
+                      (True, 'inverse', False) : _freqBeamformer_EigValProb_Formulation2AkaInverse_FullCSM,
+                      (True, 'inverse', True) : _freqBeamformer_EigValProb_Formulation2AkaInverse_CsmRemovedDiag,
+                      (True, 'true level', False) : _freqBeamformer_EigValProb_Formulation3AkaTrueLevel_FullCSM,
+                      (True, 'true level', True) : _freqBeamformer_EigValProb_Formulation3AkaTrueLevel_CsmRemovedDiag,
+                      (True, 'true location', False) : _freqBeamformer_EigValProb_Formulation4AkaTrueLocation_FullCSM,
+                      (True, 'true location', True) : _freqBeamformer_EigValProb_Formulation4AkaTrueLocation_CsmRemovedDiag,
                       (True, 'custom', False) : _freqBeamformer_EigValProb_SpecificSteerVec_FullCSM,
-                      (True, 'custom', True) : _freqBeamformer_EigValProb_SpecificSteerVec_CsmRemovedDiag,}
+                      (True, 'custom', True) : _freqBeamformer_EigValProb_SpecificSteerVec_CsmRemovedDiag}
     coreFunc = beamformerDict[(boolIsEigValProb, steerVecType, boolRemovedDiagOfCSM)]
 
+   
     # prepare Input
     if steerVecType == 'custom':  # beamformer with custom steering vector
-        steerVec = inputTuple[0]
-        nFreqs, nGridPoints = steerVec.shape[0], steerVec.shape[1]
-        if boolIsEigValProb:
-            eigVal, eigVec = inputTuple[1], inputTuple[2]
-        else:
-            csm = inputTuple[1]
+        steerVec = inputTupleSteer
+        #nFreqs, nGridPoints = steerVec.shape[0], steerVec.shape[1]
+        nGridPoints = steerVec.shape[0]
     else:  # predefined beamformers (Formulation I - IV)
-        distGridToArrayCenter, distGridToAllMics, waveNumber = inputTuple[0], inputTuple[1], inputTuple[2]
-        nFreqs, nGridPoints = waveNumber.shape[0], distGridToAllMics.shape[0]
-        if boolIsEigValProb:
-            eigVal, eigVec = inputTuple[3], inputTuple[4]
-        else:
-            csm = inputTuple[3]
+        distGridToArrayCenter, distGridToAllMics, waveNumber = inputTupleSteer#[0], inputTupleSteer[1], inputTupleSteer[2]
+        if not isinstance(waveNumber, np.ndarray): waveNumber = np.array([waveNumber])
+        #nFreqs, nGridPoints = waveNumber.shape[0], distGridToAllMics.shape[0]
+        nGridPoints = distGridToAllMics.shape[0]
+    if boolIsEigValProb:
+        eigVal, eigVec = inputTupleCsm#[0], inputTupleCsm[1]
+    else:
+        csm = inputTupleCsm
     
     # beamformer routine: parallelized over Gridpoints
-    beamformOutput = np.zeros((nFreqs, nGridPoints), np.float64)
-    for cntFreqs in xrange(nFreqs):
-        result = np.zeros(nGridPoints, np.float64)
-        if steerVecType == 'custom':  # beamformer with custom steering vector
-            if boolIsEigValProb:
-                coreFunc(eigVal[cntFreqs, :], eigVec[cntFreqs, :, :], steerVec[cntFreqs, :, :], normFactor, result)
-            else:
-                coreFunc(csm[cntFreqs, :, :], steerVec[cntFreqs, :, :], normFactor, result)
-        else:  # predefined beamformers (Formulation I - IV)
-            if boolIsEigValProb:
-                coreFunc(eigVal[cntFreqs, :], eigVec[cntFreqs, :, :], distGridToArrayCenter, distGridToAllMics, waveNumber[cntFreqs].imag, normFactor, result)
-            else:
-                coreFunc(csm[cntFreqs, :, :], distGridToArrayCenter, distGridToAllMics, waveNumber[cntFreqs].imag, normFactor, result)
-        beamformOutput[cntFreqs, :] = result
-    return beamformOutput
+    beamformOutput = np.zeros(nGridPoints, np.float64)
+    steerNormalizeOutput = np.zeros_like(beamformOutput)
+    result = np.zeros(nGridPoints, np.float64)
+    normalHelp = np.zeros_like(result)
+    if steerVecType == 'custom':  # beamformer with custom steering vector
+        if boolIsEigValProb:
+            coreFunc(eigVal, eigVec, steerVec, normFactor, result, normalHelp)
+        else:
+            coreFunc(csm, steerVec, normFactor, result, normalHelp)
+    else:  # predefined beamformers (Formulation I - IV)
+        if boolIsEigValProb:
+            coreFunc(eigVal, eigVec, distGridToArrayCenter, distGridToAllMics, waveNumber, normFactor, result, normalHelp)
+        else:
+            coreFunc(csm, distGridToArrayCenter, distGridToAllMics, waveNumber, normFactor, result, normalHelp)
+    beamformOutput = result
+    steerNormalizeOutput = normalHelp 
+    return beamformOutput, steerNormalizeOutput 
 
 
 #%% beamformers - steer * CSM * steer
-@nb.guvectorize([(nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
-              '(m,m),(),(m),(),()->()', nopython=True, target=parallelOption, cache=cachedOption)
-def _freqBeamformer_Formulation1AkaClassic_FullCSM(csm, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result):
+@nb.guvectorize([(nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
+                 '(m,m),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+def _freqBeamformer_Formulation1AkaClassic_FullCSM(csm, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = csm.shape[0]
     steerVec = np.zeros((nMics), np.complex128)
@@ -213,12 +217,13 @@ def _freqBeamformer_Formulation1AkaClassic_FullCSM(csm, distGridToArrayCenter, d
         scalarProd += 2 * (leftVecMatrixProd * steerVec[cntMics]).real  # use that csm is Hermitian (lower triangular of csm can be reduced to factor '2')
         scalarProd += (csm[cntMics, cntMics] * steerVec[cntMics].conjugate() * steerVec[cntMics]).real  # include diagonal of csm
     normalizeFactor = nMics  # specific normalization of steering vector formulation
+    normalizeSteer[0] = 1.0 / nMics 
     result[0] = scalarProd / (normalizeFactor * normalizeFactor) * signalLossNormalization[0]
 
 
-@nb.guvectorize([(nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
-              '(m,m),(),(m),(),()->()', nopython=True, target=parallelOption, cache=cachedOption)
-def _freqBeamformer_Formulation1AkaClassic_CsmRemovedDiag(csm, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result):
+@nb.guvectorize([(nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
+                 '(m,m),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+def _freqBeamformer_Formulation1AkaClassic_CsmRemovedDiag(csm, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = csm.shape[0]
     steerVec = np.zeros((nMics), np.complex128)
@@ -236,18 +241,21 @@ def _freqBeamformer_Formulation1AkaClassic_CsmRemovedDiag(csm, distGridToArrayCe
             leftVecMatrixProd += csm[cntMics2, cntMics] * steerVec[cntMics2].conjugate()
         scalarProd += 2 * (leftVecMatrixProd * steerVec[cntMics]).real  # use that csm is Hermitian (lower triangular of csm can be reduced to factor '2')
     normalizeFactor = nMics  # specific normalization of steering vector formulation
+    normalizeSteer[0] = 1.0 / nMics
     result[0] = scalarProd / (normalizeFactor * normalizeFactor) * signalLossNormalization[0]
 
 
-@nb.guvectorize([(nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
-              '(m,m),(),(m),(),()->()', nopython=True, target=parallelOption, cache=cachedOption)
-def _freqBeamformer_Formulation2AkaInverse_FullCSM(csm, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result):
+@nb.guvectorize([(nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
+                 '(m,m),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+def _freqBeamformer_Formulation2AkaInverse_FullCSM(csm, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = csm.shape[0]
     steerVec = np.zeros((nMics), np.complex128)
 
     # building steering vector: in order to save some operation -> some normalization steps are applied after mat-vec-multipl.
+    helpNormalize = 0.0
     for cntMics in xrange(nMics):
+        helpNormalize += distGridToAllMics[cntMics] * distGridToAllMics[cntMics]
         expArg = np.float32(waveNumber[0] * distGridToAllMics[cntMics])
         steerVec[cntMics] = (np.cos(expArg) - 1j * np.sin(expArg)) * distGridToAllMics[cntMics]  # r_{t,i}-normalization is handled here
 
@@ -260,18 +268,22 @@ def _freqBeamformer_Formulation2AkaInverse_FullCSM(csm, distGridToArrayCenter, d
         scalarProd += 2 * (leftVecMatrixProd * steerVec[cntMics]).real  # use that csm is Hermitian (lower triangular of csm can be reduced to factor '2')
         scalarProd += (csm[cntMics, cntMics] * steerVec[cntMics].conjugate() * steerVec[cntMics]).real  # include diagonal of csm
     normalizeFactor = nMics * distGridToArrayCenter[0]  # specific normalization of steering vector formulation
-    result[0] = scalarProd / (normalizeFactor * normalizeFactor) * signalLossNormalization[0]
+    normalizeFactorSquared = normalizeFactor * normalizeFactor
+    normalizeSteer[0] = helpNormalize / normalizeFactorSquared
+    result[0] = scalarProd / normalizeFactorSquared * signalLossNormalization[0]
 
 
-@nb.guvectorize([(nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
-              '(m,m),(),(m),(),()->()', nopython=True, target=parallelOption, cache=cachedOption)
-def _freqBeamformer_Formulation2AkaInverse_CsmRemovedDiag(csm, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result):
+@nb.guvectorize([(nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
+                 '(m,m),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+def _freqBeamformer_Formulation2AkaInverse_CsmRemovedDiag(csm, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = csm.shape[0]
     steerVec = np.zeros((nMics), np.complex128)
 
     # building steering vector: in order to save some operation -> some normalization steps are applied after mat-vec-multipl.
+    helpNormalize = 0.0
     for cntMics in xrange(nMics):
+        helpNormalize += distGridToAllMics[cntMics] * distGridToAllMics[cntMics]
         expArg = np.float32(waveNumber[0] * distGridToAllMics[cntMics])
         steerVec[cntMics] = (np.cos(expArg) - 1j * np.sin(expArg)) * distGridToAllMics[cntMics]  # r_{t,i}-normalization is handled here
 
@@ -283,12 +295,14 @@ def _freqBeamformer_Formulation2AkaInverse_CsmRemovedDiag(csm, distGridToArrayCe
             leftVecMatrixProd += csm[cntMics2, cntMics] * steerVec[cntMics2].conjugate()
         scalarProd += 2 * (leftVecMatrixProd * steerVec[cntMics]).real  # use that csm is Hermitian (lower triangular of csm can be reduced to factor '2')
     normalizeFactor = nMics * distGridToArrayCenter[0]  # specific normalization of steering vector formulation
-    result[0] = scalarProd / (normalizeFactor * normalizeFactor) * signalLossNormalization[0]
+    normalizeFactorSquared = normalizeFactor * normalizeFactor
+    normalizeSteer[0] = helpNormalize / normalizeFactorSquared
+    result[0] = scalarProd / normalizeFactorSquared * signalLossNormalization[0]
 
 
-@nb.guvectorize([(nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
-              '(m,m),(),(m),(),()->()', nopython=True, target=parallelOption, cache=cachedOption)
-def _freqBeamformer_Formulation3AkaTrueLevel_FullCSM(csm, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result):
+@nb.guvectorize([(nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
+                 '(m,m),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+def _freqBeamformer_Formulation3AkaTrueLevel_FullCSM(csm, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = csm.shape[0]
     steerVec = np.zeros((nMics), np.complex128)
@@ -309,12 +323,13 @@ def _freqBeamformer_Formulation3AkaTrueLevel_FullCSM(csm, distGridToArrayCenter,
         scalarProd += 2 * (leftVecMatrixProd * steerVec[cntMics]).real  # use that csm is Hermitian (lower triangular of csm can be reduced to factor '2')
         scalarProd += (csm[cntMics, cntMics] * steerVec[cntMics].conjugate() * steerVec[cntMics]).real  # include diagonal of csm
     normalizeFactor = distGridToArrayCenter[0] * helpNormalize  # specific normalization of steering vector formulation
+    normalizeSteer[0] = 1.0 / (distGridToArrayCenter[0] * distGridToArrayCenter[0]) / helpNormalize
     result[0] = scalarProd / (normalizeFactor * normalizeFactor) * signalLossNormalization[0]
 
 
-@nb.guvectorize([(nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
-              '(m,m),(),(m),(),()->()', nopython=True, target=parallelOption, cache=cachedOption)
-def _freqBeamformer_Formulation3AkaTrueLevel_CsmRemovedDiag(csm, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result):
+@nb.guvectorize([(nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
+                 '(m,m),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+def _freqBeamformer_Formulation3AkaTrueLevel_CsmRemovedDiag(csm, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = csm.shape[0]
     steerVec = np.zeros((nMics), np.complex128)
@@ -334,12 +349,13 @@ def _freqBeamformer_Formulation3AkaTrueLevel_CsmRemovedDiag(csm, distGridToArray
             leftVecMatrixProd += csm[cntMics2, cntMics] * steerVec[cntMics2].conjugate()
         scalarProd += 2 * (leftVecMatrixProd * steerVec[cntMics]).real  # use that csm is Hermitian (lower triangular of csm can be reduced to factor '2')
     normalizeFactor = distGridToArrayCenter[0] * helpNormalize  # specific normalization of steering vector formulation
+    normalizeSteer[0] = 1.0 / (distGridToArrayCenter[0] * distGridToArrayCenter[0]) / helpNormalize
     result[0] = scalarProd / (normalizeFactor * normalizeFactor) * signalLossNormalization[0]
 
 
-@nb.guvectorize([(nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
-              '(m,m),(),(m),(),()->()', nopython=True, target=parallelOption, cache=cachedOption)
-def _freqBeamformer_Formulation4AkaTrueLocation_FullCSM(csm, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result):
+@nb.guvectorize([(nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
+                 '(m,m),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+def _freqBeamformer_Formulation4AkaTrueLocation_FullCSM(csm, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = csm.shape[0]
     steerVec = np.zeros((nMics), np.complex128)
@@ -360,12 +376,13 @@ def _freqBeamformer_Formulation4AkaTrueLocation_FullCSM(csm, distGridToArrayCent
         scalarProd += 2 * (leftVecMatrixProd * steerVec[cntMics]).real  # use that csm is Hermitian (lower triangular of csm can be reduced to factor '2')
         scalarProd += (csm[cntMics, cntMics] * steerVec[cntMics].conjugate() * steerVec[cntMics]).real  # include diagonal of csm
     normalizeFactor = nMics * helpNormalize  # specific normalization of steering vector formulation
+    normalizeSteer[0] = 1.0 / nMics
     result[0] = scalarProd / normalizeFactor * signalLossNormalization[0]
 
 
-@nb.guvectorize([(nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
-              '(m,m),(),(m),(),()->()', nopython=True, target=parallelOption, cache=cachedOption)
-def _freqBeamformer_Formulation4AkaTrueLocation_CsmRemovedDiag(csm, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result):
+@nb.guvectorize([(nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
+                 '(m,m),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+def _freqBeamformer_Formulation4AkaTrueLocation_CsmRemovedDiag(csm, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = csm.shape[0]
     steerVec = np.zeros((nMics), np.complex128)
@@ -385,52 +402,61 @@ def _freqBeamformer_Formulation4AkaTrueLocation_CsmRemovedDiag(csm, distGridToAr
             leftVecMatrixProd += csm[cntMics2, cntMics] * steerVec[cntMics2].conjugate()
         scalarProd += 2 * (leftVecMatrixProd * steerVec[cntMics]).real  # use that csm is Hermitian (lower triangular of csm can be reduced to factor '2')
     normalizeFactor = nMics * helpNormalize  # specific normalization of steering vector formulation
+    normalizeSteer[0] = 1.0 / nMics
     result[0] = scalarProd / normalizeFactor * signalLossNormalization[0]
 
 
-@nb.guvectorize([(nb.complex128[:,:], nb.complex128[:], nb.float64[:], nb.float64[:])], '(m,m),(m),()->()', nopython=True, target=parallelOption, cache=cachedOption)
-def _freqBeamformer_SpecificSteerVec_FullCSM(csm, steerVec, signalLossNormalization, result):
+@nb.guvectorize([(nb.complex128[:,:], nb.complex128[:], nb.float64[:], nb.float64[:], nb.float64[:])], 
+                '(m,m),(m),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+def _freqBeamformer_SpecificSteerVec_FullCSM(csm, steerVec, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = csm.shape[0]
 
     # performing matrix-vector-multiplication (see bottom of information header of 'beamformerFreq')
     scalarProd = 0.0
+    helpNormalize = 0.0
     for cntMics in xrange(nMics):
+        helpNormalize += steerVec[cntMics] * steerVec[cntMics].conjugate()
         leftVecMatrixProd = 0.0 + 0.0j
         for cntMics2 in xrange(cntMics):  # calculate 'steer^H * CSM' of upper-triangular-part of csm (without diagonal)
             leftVecMatrixProd += csm[cntMics2, cntMics] * steerVec[cntMics2].conjugate()
         scalarProd += 2 * (leftVecMatrixProd * steerVec[cntMics]).real  # use that csm is Hermitian (lower triangular of csm can be reduced to factor '2')
         scalarProd += (csm[cntMics, cntMics] * steerVec[cntMics].conjugate() * steerVec[cntMics]).real  # include diagonal of csm
+    normalizeSteer[0] = helpNormalize.real
     result[0] = scalarProd * signalLossNormalization[0]
 
 
-@nb.guvectorize([(nb.complex128[:,:], nb.complex128[:], nb.float64[:], nb.float64[:])], '(m,m),(m),()->()', nopython=True, target=parallelOption, cache=cachedOption)
-def _freqBeamformer_SpecificSteerVec_CsmRemovedDiag(csm, steerVec, signalLossNormalization, result):
+@nb.guvectorize([(nb.complex128[:,:], nb.complex128[:], nb.float64[:], nb.float64[:], nb.float64[:])], 
+                '(m,m),(m),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+def _freqBeamformer_SpecificSteerVec_CsmRemovedDiag(csm, steerVec, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = csm.shape[0]
 
     # performing matrix-vector-multiplication (see bottom of information header of 'beamformerFreq')
     scalarProd = 0.0
+    helpNormalize = 0.0
     for cntMics in xrange(nMics):
+        helpNormalize += steerVec[cntMics] * steerVec[cntMics].conjugate()
         leftVecMatrixProd = 0.0 + 0.0j
         for cntMics2 in xrange(cntMics):  # calculate 'steer^H * CSM' of upper-triangular-part of csm (without diagonal)
             leftVecMatrixProd += csm[cntMics2, cntMics] * steerVec[cntMics2].conjugate()
         scalarProd += 2 * (leftVecMatrixProd * steerVec[cntMics]).real  # use that csm is Hermitian (lower triangular of csm can be reduced to factor '2')
+    normalizeSteer[0] = helpNormalize.real
     result[0] = scalarProd * signalLossNormalization[0]
 
 
 #%% beamformers - Eigenvalue Problem
 
-@nb.guvectorize([(nb.float64[:], nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
-              '(e),(m,e),(),(m),(),()->()', nopython=True, target=parallelOption, cache=cachedOption)
-def _freqBeamformer_EigValProb_Formulation1AkaClassic_FullCSM(eigVal, eigVec, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result):
+@nb.guvectorize([(nb.float64[:], nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
+                 '(e),(m,e),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+def _freqBeamformer_EigValProb_Formulation1AkaClassic_FullCSM(eigVal, eigVec, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = distGridToAllMics.shape[0]
     steerVec = np.zeros((nMics), np.complex128)
 
     # building steering vector: in order to save some operation -> some normalization steps are applied after mat-vec-multipl.
     for cntMics in xrange(nMics):
-        expArg = np.float32(waveNumber[0] * (distGridToAllMics[cntMics]))
+        expArg = np.float32(waveNumber[0] * distGridToAllMics[cntMics])
         steerVec[cntMics] = (np.cos(expArg) - 1j * np.sin(expArg))
 
     # performing matrix-vector-multplication via spectral decomp. (see bottom of information header of 'beamformerFreq')
@@ -442,19 +468,20 @@ def _freqBeamformer_EigValProb_Formulation1AkaClassic_FullCSM(eigVal, eigVec, di
         scalarProdFullCSMAbsSquared = (scalarProdFullCSMperEigVal * scalarProdFullCSMperEigVal.conjugate()).real  
         scalarProdFullCSM += scalarProdFullCSMAbsSquared * eigVal[cntEigVal]
     normalizeFactor = nMics  # specific normalization of steering vector formulation
+    normalizeSteer[0] = 1.0 / nMics
     result[0] = scalarProdFullCSM / (normalizeFactor * normalizeFactor) * signalLossNormalization[0]
 
 
-@nb.guvectorize([(nb.float64[:], nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
-              '(e),(m,e),(),(m),(),()->()', nopython=True, target=parallelOption, cache=cachedOption)
-def _freqBeamformer_EigValProb_Formulation1AkaClassic_CsmRemovedDiag(eigVal, eigVec, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result):
+@nb.guvectorize([(nb.float64[:], nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
+                 '(e),(m,e),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+def _freqBeamformer_EigValProb_Formulation1AkaClassic_CsmRemovedDiag(eigVal, eigVec, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = distGridToAllMics.shape[0]
     steerVec = np.zeros((nMics), np.complex128)
 
     # building steering vector: in order to save some operation -> some normalization steps are applied after mat-vec-multipl.
     for cntMics in xrange(nMics):
-        expArg = np.float32(waveNumber[0] * (distGridToAllMics[cntMics] - distGridToArrayCenter[0]))
+        expArg = np.float32(waveNumber[0] * distGridToAllMics[cntMics])
         steerVec[cntMics] = (np.cos(expArg) - 1j * np.sin(expArg))
 
     # performing matrix-vector-multplication via spectral decomp. (see bottom of information header of 'beamformerFreq')
@@ -469,19 +496,22 @@ def _freqBeamformer_EigValProb_Formulation1AkaClassic_CsmRemovedDiag(eigVal, eig
         scalarProdFullCSMAbsSquared = (scalarProdFullCSMperEigVal * scalarProdFullCSMperEigVal.conjugate()).real
         scalarProdReducedCSM += (scalarProdFullCSMAbsSquared - scalarProdDiagCSMperEigVal) * eigVal[cntEigVal]
     normalizeFactor = nMics  # specific normalization of steering vector formulation
+    normalizeSteer[0] = 1.0 / nMics
     result[0] = scalarProdReducedCSM / (normalizeFactor * normalizeFactor) * signalLossNormalization[0]
 
 
-@nb.guvectorize([(nb.float64[:], nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
-              '(e),(m,e),(),(m),(),()->()', nopython=True, target=parallelOption, cache=cachedOption)
-def _freqBeamformer_EigValProb_Formulation2AkaInverse_FullCSM(eigVal, eigVec, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result):
+@nb.guvectorize([(nb.float64[:], nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
+                 '(e),(m,e),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+def _freqBeamformer_EigValProb_Formulation2AkaInverse_FullCSM(eigVal, eigVec, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = distGridToAllMics.shape[0]
     steerVec = np.zeros((nMics), np.complex128)
 
     # building steering vector: in order to save some operation -> some normalization steps are applied after mat-vec-multipl.
+    helpNormalize = 0.0
     for cntMics in xrange(nMics):
-        expArg = np.float32(waveNumber[0] * (distGridToAllMics[cntMics] - distGridToArrayCenter[0]))
+        helpNormalize += distGridToAllMics[cntMics] * distGridToAllMics[cntMics]
+        expArg = np.float32(waveNumber[0] * distGridToAllMics[cntMics])
         steerVec[cntMics] = (np.cos(expArg) - 1j * np.sin(expArg)) * distGridToAllMics[cntMics]  # r_{t,i}-normalization is handled here
 
     # performing matrix-vector-multplication via spectral decomp. (see bottom of information header of 'beamformerFreq')
@@ -493,19 +523,23 @@ def _freqBeamformer_EigValProb_Formulation2AkaInverse_FullCSM(eigVal, eigVec, di
         scalarProdFullCSMAbsSquared = (scalarProdFullCSMperEigVal * scalarProdFullCSMperEigVal.conjugate()).real  
         scalarProdFullCSM += scalarProdFullCSMAbsSquared * eigVal[cntEigVal]
     normalizeFactor = nMics * distGridToArrayCenter[0]  # specific normalization of steering vector formulation
-    result[0] = scalarProdFullCSM / (normalizeFactor * normalizeFactor) * signalLossNormalization[0]
+    normalizeFactorSquared = normalizeFactor * normalizeFactor
+    normalizeSteer[0] = helpNormalize / normalizeFactorSquared
+    result[0] = scalarProdFullCSM / normalizeFactorSquared * signalLossNormalization[0]
 
 
-@nb.guvectorize([(nb.float64[:], nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
-              '(e),(m,e),(),(m),(),()->()', nopython=True, target=parallelOption, cache=cachedOption)
-def _freqBeamformer_EigValProb_Formulation2AkaInverse_CsmRemovedDiag(eigVal, eigVec, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result):
+@nb.guvectorize([(nb.float64[:], nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
+                 '(e),(m,e),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+def _freqBeamformer_EigValProb_Formulation2AkaInverse_CsmRemovedDiag(eigVal, eigVec, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = distGridToAllMics.shape[0]
     steerVec = np.zeros((nMics), np.complex128)
 
     # building steering vector: in order to save some operation -> some normalization steps are applied after mat-vec-multipl.
+    helpNormalize = 0.0
     for cntMics in xrange(nMics):
-        expArg = np.float32(waveNumber[0] * (distGridToAllMics[cntMics] - distGridToArrayCenter[0]))
+        helpNormalize += distGridToAllMics[cntMics] * distGridToAllMics[cntMics]
+        expArg = np.float32(waveNumber[0] * distGridToAllMics[cntMics])
         steerVec[cntMics] = (np.cos(expArg) - 1j * np.sin(expArg)) * distGridToAllMics[cntMics]  # r_{t,i}-normalization is handled here
 
     # performing matrix-vector-multplication via spectral decomp. (see bottom of information header of 'beamformerFreq')
@@ -520,12 +554,14 @@ def _freqBeamformer_EigValProb_Formulation2AkaInverse_CsmRemovedDiag(eigVal, eig
         scalarProdFullCSMAbsSquared = (scalarProdFullCSMperEigVal * scalarProdFullCSMperEigVal.conjugate()).real
         scalarProdReducedCSM += (scalarProdFullCSMAbsSquared - scalarProdDiagCSMperEigVal) * eigVal[cntEigVal]
     normalizeFactor = nMics * distGridToArrayCenter[0]  # specific normalization of steering vector formulation
-    result[0] = scalarProdReducedCSM / (normalizeFactor * normalizeFactor) * signalLossNormalization[0]
+    normalizeFactorSquared = normalizeFactor * normalizeFactor
+    normalizeSteer[0] = helpNormalize / normalizeFactorSquared
+    result[0] = scalarProdReducedCSM / normalizeFactorSquared * signalLossNormalization[0]
 
 
-@nb.guvectorize([(nb.float64[:], nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
-              '(e),(m,e),(),(m),(),()->()', nopython=True, target=parallelOption, cache=cachedOption)
-def _freqBeamformer_EigValProb_Formulation3AkaTrueLevel_FullCSM(eigVal, eigVec, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result):
+@nb.guvectorize([(nb.float64[:], nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
+                 '(e),(m,e),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+def _freqBeamformer_EigValProb_Formulation3AkaTrueLevel_FullCSM(eigVal, eigVec, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = distGridToAllMics.shape[0]
     steerVec = np.zeros((nMics), np.complex128)
@@ -534,7 +570,7 @@ def _freqBeamformer_EigValProb_Formulation3AkaTrueLevel_FullCSM(eigVal, eigVec, 
     helpNormalize = 0.0
     for cntMics in xrange(nMics):
         helpNormalize += 1.0 / (distGridToAllMics[cntMics] * distGridToAllMics[cntMics])  
-        expArg = np.float32(waveNumber[0] * (distGridToAllMics[cntMics] - distGridToArrayCenter[0]))
+        expArg = np.float32(waveNumber[0] * distGridToAllMics[cntMics])
         steerVec[cntMics] = (np.cos(expArg) - 1j * np.sin(expArg)) / distGridToAllMics[cntMics]  # r_{t,i}-normalization is handled here
 
     # performing matrix-vector-multplication via spectral decomp. (see bottom of information header of 'beamformerFreq')
@@ -546,12 +582,13 @@ def _freqBeamformer_EigValProb_Formulation3AkaTrueLevel_FullCSM(eigVal, eigVec, 
         scalarProdFullCSMAbsSquared = (scalarProdFullCSMperEigVal * scalarProdFullCSMperEigVal.conjugate()).real  
         scalarProdFullCSM += scalarProdFullCSMAbsSquared * eigVal[cntEigVal]
     normalizeFactor = distGridToArrayCenter[0] * helpNormalize  # specific normalization of steering vector formulation
+    normalizeSteer[0] = 1.0 / (distGridToArrayCenter[0] * distGridToArrayCenter[0]) / helpNormalize
     result[0] = scalarProdFullCSM / (normalizeFactor * normalizeFactor) * signalLossNormalization[0]
 
 
-@nb.guvectorize([(nb.float64[:], nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
-              '(e),(m,e),(),(m),(),()->()', nopython=True, target=parallelOption, cache=cachedOption)
-def _freqBeamformer_EigValProb_Formulation3AkaTrueLevel_CsmRemovedDiag(eigVal, eigVec, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result):
+@nb.guvectorize([(nb.float64[:], nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
+                 '(e),(m,e),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+def _freqBeamformer_EigValProb_Formulation3AkaTrueLevel_CsmRemovedDiag(eigVal, eigVec, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = distGridToAllMics.shape[0]
     steerVec = np.zeros((nMics), np.complex128)
@@ -560,7 +597,7 @@ def _freqBeamformer_EigValProb_Formulation3AkaTrueLevel_CsmRemovedDiag(eigVal, e
     helpNormalize = 0.0
     for cntMics in xrange(nMics):
         helpNormalize += 1.0 / (distGridToAllMics[cntMics] * distGridToAllMics[cntMics])  
-        expArg = np.float32(waveNumber[0] * (distGridToAllMics[cntMics] - distGridToArrayCenter[0]))
+        expArg = np.float32(waveNumber[0] * distGridToAllMics[cntMics])
         steerVec[cntMics] = (np.cos(expArg) - 1j * np.sin(expArg)) / distGridToAllMics[cntMics]  # r_{t,i}-normalization is handled here
 
     # performing matrix-vector-multplication via spectral decomp. (see bottom of information header of 'beamformerFreq')
@@ -575,12 +612,13 @@ def _freqBeamformer_EigValProb_Formulation3AkaTrueLevel_CsmRemovedDiag(eigVal, e
         scalarProdFullCSMAbsSquared = (scalarProdFullCSMperEigVal * scalarProdFullCSMperEigVal.conjugate()).real
         scalarProdReducedCSM += (scalarProdFullCSMAbsSquared - scalarProdDiagCSMperEigVal) * eigVal[cntEigVal]
     normalizeFactor = distGridToArrayCenter[0] * helpNormalize  # specific normalization of steering vector formulation
+    normalizeSteer[0] = 1.0 / (distGridToArrayCenter[0] * distGridToArrayCenter[0]) / helpNormalize
     result[0] = scalarProdReducedCSM / (normalizeFactor * normalizeFactor) * signalLossNormalization[0]
 
 
-@nb.guvectorize([(nb.float64[:], nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
-              '(e),(m,e),(),(m),(),()->()', nopython=True, target=parallelOption, cache=cachedOption)
-def _freqBeamformer_EigValProb_Formulation4AkaTrueLocation_FullCSM(eigVal, eigVec, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result):
+@nb.guvectorize([(nb.float64[:], nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
+                 '(e),(m,e),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+def _freqBeamformer_EigValProb_Formulation4AkaTrueLocation_FullCSM(eigVal, eigVec, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = distGridToAllMics.shape[0]
     steerVec = np.zeros((nMics), np.complex128)
@@ -589,7 +627,7 @@ def _freqBeamformer_EigValProb_Formulation4AkaTrueLocation_FullCSM(eigVal, eigVe
     helpNormalize = 0.0
     for cntMics in xrange(nMics):
         helpNormalize += 1.0 / (distGridToAllMics[cntMics] * distGridToAllMics[cntMics])  
-        expArg = np.float32(waveNumber[0] * (distGridToAllMics[cntMics] - distGridToArrayCenter[0]))
+        expArg = np.float32(waveNumber[0] * distGridToAllMics[cntMics])
         steerVec[cntMics] = (np.cos(expArg) - 1j * np.sin(expArg)) / distGridToAllMics[cntMics]  # r_{t,i}-normalization is handled here
 
     # performing matrix-vector-multplication via spectral decomp. (see bottom of information header of 'beamformerFreq')
@@ -601,12 +639,13 @@ def _freqBeamformer_EigValProb_Formulation4AkaTrueLocation_FullCSM(eigVal, eigVe
         scalarProdFullCSMAbsSquared = (scalarProdFullCSMperEigVal * scalarProdFullCSMperEigVal.conjugate()).real  
         scalarProdFullCSM += scalarProdFullCSMAbsSquared * eigVal[cntEigVal]
     normalizeFactor = nMics * helpNormalize  # specific normalization of steering vector formulation
+    normalizeSteer[0] = 1.0 / nMics
     result[0] = scalarProdFullCSM / normalizeFactor * signalLossNormalization[0]
 
 
-@nb.guvectorize([(nb.float64[:], nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
-              '(e),(m,e),(),(m),(),()->()', nopython=True, target=parallelOption, cache=cachedOption)
-def _freqBeamformer_EigValProb_Formulation4AkaTrueLocation_CsmRemovedDiag(eigVal, eigVec, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result):
+@nb.guvectorize([(nb.float64[:], nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
+                 '(e),(m,e),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+def _freqBeamformer_EigValProb_Formulation4AkaTrueLocation_CsmRemovedDiag(eigVal, eigVec, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = distGridToAllMics.shape[0]
     steerVec = np.zeros((nMics), np.complex128)
@@ -615,7 +654,7 @@ def _freqBeamformer_EigValProb_Formulation4AkaTrueLocation_CsmRemovedDiag(eigVal
     helpNormalize = 0.0
     for cntMics in xrange(nMics):
         helpNormalize += 1.0 / (distGridToAllMics[cntMics] * distGridToAllMics[cntMics])  
-        expArg = np.float32(waveNumber[0] * (distGridToAllMics[cntMics] - distGridToArrayCenter[0]))
+        expArg = np.float32(waveNumber[0] * distGridToAllMics[cntMics])
         steerVec[cntMics] = (np.cos(expArg) - 1j * np.sin(expArg)) / distGridToAllMics[cntMics]  # r_{t,i}-normalization is handled here
 
     # performing matrix-vector-multplication via spectral decomp. (see bottom of information header of 'beamformerFreq')
@@ -630,14 +669,20 @@ def _freqBeamformer_EigValProb_Formulation4AkaTrueLocation_CsmRemovedDiag(eigVal
         scalarProdFullCSMAbsSquared = (scalarProdFullCSMperEigVal * scalarProdFullCSMperEigVal.conjugate()).real
         scalarProdReducedCSM += (scalarProdFullCSMAbsSquared - scalarProdDiagCSMperEigVal) * eigVal[cntEigVal]
     normalizeFactor = nMics * helpNormalize  # specific normalization of steering vector formulation
+    normalizeSteer[0] = 1.0 / nMics
     result[0] = scalarProdReducedCSM / normalizeFactor * signalLossNormalization[0]
 
 
-@nb.guvectorize([(nb.float64[:], nb.complex128[:,:], nb.complex128[:], nb.float64[:], nb.float64[:])],
-                 '(e),(m,e),(m),()->()', nopython=True, target=parallelOption, cache=cachedOption)
-def _freqBeamformer_EigValProb_SpecificSteerVec_FullCSM(eigVal, eigVec, steerVec, signalLossNormalization, result):
+@nb.guvectorize([(nb.float64[:], nb.complex128[:,:], nb.complex128[:], nb.float64[:], nb.float64[:], nb.float64[:])],
+                 '(e),(m,e),(m),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+def _freqBeamformer_EigValProb_SpecificSteerVec_FullCSM(eigVal, eigVec, steerVec, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = eigVec.shape[0]
+    
+    # get h^H * h for normalization
+    helpNormalize = 0.0
+    for cntMics in xrange(nMics):
+        helpNormalize += steerVec[cntMics] * steerVec[cntMics].conjugate()
 
     # performing matrix-vector-multplication via spectral decomp. (see bottom of information header of 'beamformerFreq')
     scalarProdFullCSM = 0.0
@@ -647,14 +692,20 @@ def _freqBeamformer_EigValProb_SpecificSteerVec_FullCSM(eigVal, eigVec, steerVec
             scalarProdFullCSMperEigVal += eigVec[cntMics, cntEigVal].conjugate() * steerVec[cntMics]
         scalarProdFullCSMAbsSquared = (scalarProdFullCSMperEigVal * scalarProdFullCSMperEigVal.conjugate()).real  
         scalarProdFullCSM += scalarProdFullCSMAbsSquared * eigVal[cntEigVal]
+    normalizeSteer[0] = helpNormalize.real
     result[0] = scalarProdFullCSM * signalLossNormalization[0]
 
 
-@nb.guvectorize([(nb.float64[:], nb.complex128[:,:], nb.complex128[:], nb.float64[:], nb.float64[:])],
-                 '(e),(m,e),(m),()->()', nopython=True, target=parallelOption, cache=cachedOption)
-def _freqBeamformer_EigValProb_SpecificSteerVec_CsmRemovedDiag(eigVal, eigVec, steerVec, signalLossNormalization, result):
+@nb.guvectorize([(nb.float64[:], nb.complex128[:,:], nb.complex128[:], nb.float64[:], nb.float64[:], nb.float64[:])],
+                 '(e),(m,e),(m),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+def _freqBeamformer_EigValProb_SpecificSteerVec_CsmRemovedDiag(eigVal, eigVec, steerVec, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = eigVec.shape[0]
+    
+    # get h^H * h for normalization
+    helpNormalize = 0.0
+    for cntMics in xrange(nMics):
+        helpNormalize += steerVec[cntMics] * steerVec[cntMics].conjugate()
 
     # performing matrix-vector-multplication via spectral decomp. (see bottom of information header of 'beamformerFreq')
     scalarProdReducedCSM = 0.0
@@ -667,34 +718,29 @@ def _freqBeamformer_EigValProb_SpecificSteerVec_CsmRemovedDiag(eigVal, eigVec, s
             scalarProdDiagCSMperEigVal += (temp1 * temp1.conjugate()).real  
         scalarProdFullCSMAbsSquared = (scalarProdFullCSMperEigVal * scalarProdFullCSMperEigVal.conjugate()).real
         scalarProdReducedCSM += (scalarProdFullCSMAbsSquared - scalarProdDiagCSMperEigVal) * eigVal[cntEigVal]
+    normalizeSteer[0] = helpNormalize.real
     result[0] = scalarProdReducedCSM * signalLossNormalization[0]
 
 #%% Point - Spread - Function
-def calcPointSpreadFunction(steerVecType, inputTuple):
+def calcPointSpreadFunction(steerVecType, distGridToArrayCenter, distGridToAllMics, waveNumber, indSource, dtype):
     """ Calculates the Point-Spread-Functions. Use either a predefined steering vector 
     formulation (see :ref:`Sarradj, 2012<Sarradj2012>`) or pass it your own steering vector.
 
     Parameters
     ----------
-    steerVecType : (one of the following options: 1, 2, 3, 4, 'custom')
-        Either build the steering vector via the predefined formulations
-        I - IV (see :ref:`Sarradj, 2012<Sarradj2012>`) or pass it directly. (not implemented yet).
-    inputTuple: dependent of the inputs above. If
-        steerVecType != 'custom' :
-            inputTuple =(distGridToArrayCenter, distGridToAllMics, waveNumber, indSource)
-        steerVecType = 'custom' :
-            NOT IMPLEMENTED YET!!!!!!    #inputTuple =(steeringVector, transfer, indSource)
-    
-        Data types : In both cases the data types of inputTuple are
-            distGridToArrayCenter : float64[nGridpoints]
-                Distance of all gridpoints to the center of sensor array
-            distGridToAllMics : float64[nGridpoints, nMics]
-                Distance of all gridpoints to all sensors of array
-            waveNumber : complex128[nFreqs]
-                The wave number should be stored in the imag-part
-            indSource : a LIST of int (e.g. indSource=[5] is fine; indSource=5 doesn't work):
-                specifies which gridpoints should be assumed to be sources 
-                --> a seperate psf will be calculated for each source
+    steerVecType : (one of the following strings: 'classic' (I), 'inverse' (II), 'true level' (III), 'true location' (IV))
+        One of the predefined formulations I - IV (see :ref:`Sarradj, 2012<Sarradj2012>`).
+    distGridToArrayCenter : float64[nGridpoints]
+        Distance of all gridpoints to the center of sensor array
+    distGridToAllMics : float64[nGridpoints, nMics]
+        Distance of all gridpoints to all sensors of array
+    waveNumber : float64[nFreqs]
+        The free field wave number.
+    indSource : a LIST of int (e.g. indSource=[5] is fine; indSource=5 doesn't work):
+        specifies which gridpoints should be assumed to be sources 
+        --> a seperate psf will be calculated for each source
+    dtype : either 'float64' or 'float32'
+        Determines the precision of the result. For big maps this could be worth downgrading.
 
     Returns
     -------
@@ -721,37 +767,28 @@ def calcPointSpreadFunction(steerVecType, inputTuple):
         Both Versions are much faster than "abs(a)**2".
     """
     # get the steering vector formulation
-    psfDict = {1 : _psf_Formulation1AkaClassic,
-               2 : _psf_Formulation2AkaInverse,
-               3 : _psf_Formulation3AkaTrueLevel,
-               4 : _psf_Formulation4AkaTrueLocation}#,
-#               'custom' : _psf_SpecificSteerVec}
+    psfDict = {'classic' : _psf_Formulation1AkaClassic,
+               'inverse' : _psf_Formulation2AkaInverse,
+               'true level' : _psf_Formulation3AkaTrueLevel,
+               'true location' : _psf_Formulation4AkaTrueLocation}
     coreFunc = psfDict[steerVecType]
 
     # prepare input
-    if steerVecType == 'custom':  # PSF with custom steering vector
-        raise ValueError('custom Steering vectors are not implemented yet.')
-#        steerVec, transFunc, indSource = inputTuple[0], inputTuple[1], inputTuple[2]
-#        nFreqs, nGridPoints = steerVec.shape[0], steerVec.shape[1]
-    else:  # predefined steering vectors (Formulation I - IV)
-        distGridToArrayCenter, distGridToAllMics, waveNumber, indSource = inputTuple[0], inputTuple[1], inputTuple[2], inputTuple[3]
-        nFreqs, nGridPoints = waveNumber.shape[0], distGridToAllMics.shape[0]
+    nFreqs, nGridPoints = waveNumber.shape[0], distGridToAllMics.shape[0]
     nSources = len(indSource)
-
+    
     # psf routine: parallelized over Gridpoints
-    psfOutput = np.zeros((nFreqs, nGridPoints, nSources), np.float64)
+    psfOutput = np.zeros((nFreqs, nGridPoints, nSources), dtype=dtype)
     for cntFreqs in xrange(nFreqs):
-        result = np.zeros((nGridPoints, nSources), np.float64)
-        if steerVecType == 'custom':
-            raise ValueError('custom Steering vectors are not implemented yet.')
-#            coreFunc(steerVec[cntFreqs, :, :], transFunc[cntFreqs, indSource, :], result)
-        else:  # predefined steering vector (Formulation I - IV)
-            coreFunc(distGridToArrayCenter, distGridToAllMics, distGridToArrayCenter[indSource], distGridToAllMics[indSource, :], waveNumber[cntFreqs].imag, result)
+        result = np.zeros((nGridPoints, nSources), dtype=dtype)
+        coreFunc(distGridToArrayCenter, distGridToAllMics, distGridToArrayCenter[indSource], distGridToAllMics[indSource, :], waveNumber[cntFreqs], result)
         psfOutput[cntFreqs, :, :] = result
     return psfOutput
 
 
-@nb.guvectorize([(nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float64[:])], '(),(m),(s),(s,m),()->(s)', nopython=True, target=parallelOption, cache=cachedOption)
+@nb.guvectorize([(nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float64[:]),
+                 (nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float32[:])],
+                 '(),(m),(s),(s,m),()->(s)', nopython=True, target=parallelOption, cache=cachedOption)
 def _psf_Formulation1AkaClassic(distGridToArrayCenter, distGridToAllMics, distSourcesToArrayCenter, distSourcesToAllMics, waveNumber, result):
     nMics = distGridToAllMics.shape[0]
     for cntSources in range(len(distSourcesToArrayCenter)):
@@ -765,7 +802,9 @@ def _psf_Formulation1AkaClassic(distGridToArrayCenter, distGridToAllMics, distSo
         result[cntSources] = scalarProdAbsSquared * (normalizeFactor * normalizeFactor)
 
 
-@nb.guvectorize([(nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float64[:])], '(),(m),(s),(s,m),()->(s)', nopython=True, target=parallelOption, cache=cachedOption)
+@nb.guvectorize([(nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float64[:]),
+                 (nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float32[:])],
+                 '(),(m),(s),(s,m),()->(s)', nopython=True, target=parallelOption, cache=cachedOption)
 def _psf_Formulation2AkaInverse(distGridToArrayCenter, distGridToAllMics, distSourcesToArrayCenter, distSourcesToAllMics, waveNumber, result):
     nMics = distGridToAllMics.shape[0]
     for cntSources in range(len(distSourcesToArrayCenter)):
@@ -779,7 +818,9 @@ def _psf_Formulation2AkaInverse(distGridToArrayCenter, distGridToAllMics, distSo
         result[cntSources] = scalarProdAbsSquared * (normalizeFactor * normalizeFactor)  
 
 
-@nb.guvectorize([(nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float64[:])], '(),(m),(s),(s,m),()->(s)', nopython=True, target=parallelOption, cache=cachedOption)
+@nb.guvectorize([(nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float64[:]),
+                 (nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float32[:])],
+                 '(),(m),(s),(s,m),()->(s)', nopython=True, target=parallelOption, cache=cachedOption)
 def _psf_Formulation3AkaTrueLevel(distGridToArrayCenter, distGridToAllMics, distSourcesToArrayCenter, distSourcesToAllMics, waveNumber, result):
     nMics = distGridToAllMics.shape[0]
     for cntSources in range(len(distSourcesToArrayCenter)):
@@ -795,7 +836,9 @@ def _psf_Formulation3AkaTrueLevel(distGridToArrayCenter, distGridToAllMics, dist
         result[cntSources] = scalarProdAbsSquared * (normalizeFactor * normalizeFactor)
 
 
-@nb.guvectorize([(nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float64[:])], '(),(m),(s),(s,m),()->(s)', nopython=True, target=parallelOption, cache=cachedOption)
+@nb.guvectorize([(nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float64[:]),
+                 (nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float32[:])],
+                 '(),(m),(s),(s,m),()->(s)', nopython=True, target=parallelOption, cache=cachedOption)
 def _psf_Formulation4AkaTrueLocation(distGridToArrayCenter, distGridToAllMics, distSourcesToArrayCenter, distSourcesToAllMics, waveNumber, result):
     nMics = distGridToAllMics.shape[0]
     for cntSources in range(len(distSourcesToArrayCenter)):
@@ -808,10 +851,12 @@ def _psf_Formulation4AkaTrueLocation(distGridToArrayCenter, distGridToAllMics, d
             helpNormalizeGrid += 1.0 / (distGridToAllMics[cntMics] * distGridToAllMics[cntMics])
         normalizeFactor = distSourcesToArrayCenter[cntSources]
         scalarProdAbsSquared = (scalarProd * scalarProd.conjugate()).real
-        result[cntSources] = scalarProdAbsSquared * (normalizeFactor * normalizeFactor) / nMics / helpNormalizeGrid / helpNormalizeGrid  # ERROR: one helpNormalizeGrid too much! needs to be corrected after py3 migration
+        result[cntSources] = scalarProdAbsSquared * (normalizeFactor * normalizeFactor) / nMics / helpNormalizeGrid
 
-# NEEDS TO BE OVERLOOKED!!
-#@nb.guvectorize([(nb.complex128[:], nb.complex128[:,:], nb.float64[:])], '(m),(s,m)->(s)', nopython=True, target=parallelOption, cache=cachedOption)
+# CURRENTLY NOT NEEDED, AS CUSTOM PSF WILL BE CALCULATED IN fbeamform.SteeringVector WITH THE USE OF Trait transfer
+#@nb.guvectorize([(nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float64[:]),
+#                 (nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float32[:])],
+#                 '(),(m),(s),(s,m),()->(s)', nopython=True, target=parallelOption, cache=cachedOption)
 #def _psf_SpecificSteerVec(steerVec, steerVecSources, result):
 #    nMics = len(steerVec)
 #    for cntSources in range(steerVecSources.shape[0]):
@@ -825,37 +870,53 @@ def _psf_Formulation4AkaTrueLocation(distGridToArrayCenter, distGridToAllMics, d
 
 #%% Damas - Gauss Seidel
 # Formerly known as 'gseidel'
-@nb.guvectorize([(nb.float32[:,:], nb.float32[:], nb.int64[:], nb.float64[:], nb.float32[:]), 
-                 (nb.float64[:,:], nb.float64[:], nb.int64[:], nb.float64[:], nb.float64[:])], '(g,g),(g),(),()->(g)', nopython=True, target=parallelOption, cache=cachedOption)
+@nb.guvectorize([#(nb.float32[:,:], nb.float32[:], nb.int64[:], nb.float64[:], nb.float32[:]), 
+                 (nb.float64[:,:], nb.float64[:], nb.int64[:], nb.float64[:], nb.float64[:]),
+                 #(nb.float32[:,:], nb.float64[:], nb.int64[:], nb.float64[:], nb.float64[:]),
+                 #(nb.float64[:,:], nb.float32[:], nb.int64[:], nb.float64[:], nb.float32[:])
+                 ], 
+                 '(g,g),(g),(),()->(g)', nopython=True, target=parallelOption, cache=cachedOption,fastmath=True)
 def damasSolverGaussSeidel(A, dirtyMap, nIterations, relax, damasSolution):
     """ Solves the DAMAS inverse problem via modified gauss seidel.
     This is the original formulation from :ref:`Brooks and Humphreys, 2006<BrooksHumphreys2006>`.
     
     Parameters
     ----------
-    A : float32[nFreqs, nGridpoints, nGridpoints] (or float64[...])
+    A : float32/float64[nFreqs, nGridpoints, nGridpoints] (or float64[...])
         The PSF build matrix (see :ref:`Brooks and Humphreys, 2006<BrooksHumphreys2006>`)
-    dirtyMap : float32[nFreqs, nGridpoints] (or float64[...])
+    dirtyMap : float32/float64[nFreqs, nGridpoints] (or float64[...])
         The conventional beamformer map
     nIterations : int64[scalar] 
         number of Iterations the damas solver has to go through
     relax : int64[scalar] 
         relaxation parameter (=1.0 in :ref:`Brooks and Humphreys, 2006<BrooksHumphreys2006>`)
-    damasSolution : float32[nFreqs, nGridpoints] (or float64[...]) 
+    damasSolution : float32/float64[nFreqs, nGridpoints] (or float64[...]) 
         starting solution
     
     Returns
     -------
     None : as damasSolution is overwritten with end result of the damas iterative solver.
     """
+#    nGridPoints = len(dirtyMap)
+#    for cntIter in xrange(nIterations[0]):
+#        for cntGrid in xrange(nGridPoints):
+#            solHelp = np.float32(0)
+#            for cntGridHelp in xrange(cntGrid):  # lower sum
+#                solHelp += A[cntGrid, cntGridHelp] * damasSolution[cntGridHelp]
+#            for cntGridHelp in xrange(cntGrid + 1, nGridPoints):  # upper sum
+#                solHelp += A[cntGrid, cntGridHelp] * damasSolution[cntGridHelp]
+#            solHelp = (1 - relax[0]) * damasSolution[cntGrid] + relax[0] * (dirtyMap[cntGrid] - solHelp)
+#            if solHelp > 0.0:
+#                damasSolution[cntGrid] = solHelp
+#            else:
+#                damasSolution[cntGrid] = 0.0
     nGridPoints = len(dirtyMap)
     for cntIter in xrange(nIterations[0]):
         for cntGrid in xrange(nGridPoints):
-            solHelp = np.float32(0)
-            for cntGridHelp in xrange(cntGrid):  # lower sum
+            solHelp = 0.0
+            for cntGridHelp in xrange(nGridPoints):  # full sum
                 solHelp += A[cntGrid, cntGridHelp] * damasSolution[cntGridHelp]
-            for cntGridHelp in xrange(cntGrid + 1, nGridPoints):  # upper sum
-                solHelp += A[cntGrid, cntGridHelp] * damasSolution[cntGridHelp]
+            solHelp -= A[cntGrid, cntGrid] * damasSolution[cntGrid]
             solHelp = (1 - relax[0]) * damasSolution[cntGrid] + relax[0] * (dirtyMap[cntGrid] - solHelp)
             if solHelp > 0.0:
                 damasSolution[cntGrid] = solHelp
@@ -864,7 +925,7 @@ def damasSolverGaussSeidel(A, dirtyMap, nIterations, relax, damasSolution):
 
 
 #%% Transfer - Function
-def transfer(distGridToArrayCenter, distGridToAllMics, waveNumber):
+def calcTransfer(distGridToArrayCenter, distGridToAllMics, waveNumber):
     """ Calculates the transfer functions between the various mics and gridpoints.
     
     Parameters
@@ -873,25 +934,22 @@ def transfer(distGridToArrayCenter, distGridToAllMics, waveNumber):
         Distance of all gridpoints to the center of sensor array
     distGridToAllMics : float64[nGridpoints, nMics]
         Distance of all gridpoints to all sensors of array
-    waveNumber : complex128[nFreqs]
+    waveNumber : complex128
         The wave number should be stored in the imag-part
 
     Returns
     -------
-    The Transferfunctions in format complex128[nFreqs, nGridPoints, nMics].
+    The Transferfunctions in format complex128[nGridPoints, nMics].
     """
-    nFreqs, nGridPoints, nMics = waveNumber.shape[0], distGridToAllMics.shape[0], distGridToAllMics.shape[1]
+    nGridPoints, nMics = distGridToAllMics.shape[0], distGridToAllMics.shape[1]
+    result = np.zeros((nGridPoints, nMics), np.complex128)
     # transfer routine: parallelized over Gridpoints
-    transferOutput = np.zeros((nFreqs, nGridPoints, nMics), np.complex128)
-    for cntFreqs in xrange(nFreqs):
-        result = np.zeros((nGridPoints, nMics), np.complex128)
-        _transferCoreFunc(distGridToArrayCenter, distGridToAllMics, waveNumber[cntFreqs].imag, result)
-        transferOutput[cntFreqs, :, :] = result
-    return transferOutput
+    _transferCoreFunc(distGridToArrayCenter, distGridToAllMics, np.array([waveNumber]), result)
+    return result
 
 @nb.guvectorize([(nb.float64[:], nb.float64[:], nb.float64[:], nb.complex128[:])], '(),(m),()->(m)', nopython=True, target=parallelOption, cache=cachedOption)
 def _transferCoreFunc(distGridToArrayCenter, distGridToAllMics, waveNumber, result):
     nMics = distGridToAllMics.shape[0]
     for cntMics in xrange(nMics):
-        expArg = np.float32(waveNumber[0] * (distGridToAllMics[cntMics] - distGridToArrayCenter[0]))  # FLOAT32 ODER FLOAT64?
+        expArg = np.float32(waveNumber[0] * (distGridToAllMics[cntMics] - distGridToArrayCenter[0]))
         result[cntMics] = (np.cos(expArg) - 1j * np.sin(expArg)) * distGridToArrayCenter[0] / distGridToAllMics[cntMics]

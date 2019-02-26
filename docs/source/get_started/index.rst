@@ -1,31 +1,37 @@
 Getting Started
 ===============
 
-The acoular library is based on the Python programming language. While a basic knowledge of Python is definitely helpful, the following first steps do not require this. A number of good Python tutorials can be found on the web. 
+The Acoular library is based on the Python programming language. While a basic knowledge of Python is definitely helpful, the following first steps do not require this. A number of good Python tutorials can be found on the web. 
 
 Prerequisites
 -------------
-This "Getting started" tutorial assumes that the Acoular library is :doc:`installed<../install/index>` together with its dependencies and the demo finished successfully. If you did not run the demo yet, you should do so by typing into your comand line
+This "Getting started" tutorial assumes that the Acoular library is :doc:`installed<../install/index>` together with its dependencies and matplotlib, and that the demo finished successfully. If you did not run the demo yet, you should do so by typing into your command line
 
 .. code-block:: python
 
     $ acoular_demo.py
 
-which should, after some seconds, produce two pictures (a 64 microphone arrangement and a beamforming map with three sources). You may close the pictures in order to continue. 
+under Linux or Mac, and
 
-Apart from showing that everything works well the demo also produced some data to work on. You should now have a **file 'three_sources.h5' (13MB)** in your working directory.
+.. code-block:: python
+
+    > acoular_demo.exe
+
+under Windows respectively. This should, after some seconds, produce two pictures (a 64 microphone arrangement and a beamforming map with three sources). You may close the pictures in order to continue. 
+
+Apart from showing that everything works well, the demo also produced some data to work on. You should now have a **file 'three_sources.h5' (13MB)** in your working directory.
 
 Beamforming example step-by-step 
 --------------------------------
 
-One possible way to use the library is for doing classic delay-and-sum beamforming. This can either be done directly in the time domain or in the frequency domain. To get started with acoular, we will present a very basic example of beamforming in the frequency domain. In order to perform such an analysis we do need some data to work on. In a practical application, this data is acquired during multichannel measurements using a microphone array. The library provides some functionality to do so and stores the measured sound pressure time histories for all channels of the microphone array in a hierarchical data file (HDF5) format. 
+One possible way to use the library is for doing classic delay-and-sum beamforming. This can either be done directly in the time domain or in the frequency domain. To get started with Acoular, we will present a very basic example of beamforming in the frequency domain. In order to perform such an analysis we do need some data to work on. In a practical application, this data is acquired during multichannel measurements using a microphone array. The library provides some functionality to do so and stores the measured sound pressure time histories for all channels of the microphone array in a hierarchical data file (HDF5) format. 
 However, a working measurement set-up is required. Thus, we will use simulated data here. The 'three_sources.h5' file, generated using Acoular's simulation capabilities (see the :doc:`reference <../api_ref/index>`), contains the time history data for 64 microphone channels, which are sampled at 51200 Hz for a duration of 1 second, i.e. 51200 samples per channel. 
 
 In what follows, it is assumed that an interactive python session is started, preferably an IPython or jupyter session:
 
 >>> ipython
 
-Then, the first step to perform an analysis is to import the acoular library:
+Then, the first step to perform an analysis is to import the Acoular library:
 
 .. ipython::
 
@@ -44,7 +50,6 @@ The ts object now provides access to the HDF5 file and information stored in it.
     In [1]: ts
 
     In [1]: ts.sample_freq
-
 
 It is important to note that the data in the file is **not read into the memory** for it could be very large (i.e. several GB). Instead, the data is read in small chunks the moment it is needed. Because this is done automatically, the user does not have to take care of that.
 
@@ -106,13 +111,19 @@ In order to plot the microphone arrangement, we make use of the convenient matpl
    :align: center
    :scale: 50%
 
+The sound propagation model (including the source model and transfer path) is contained in a :class:`~acoular.fbeamform.SteeringVector` object, which is given the focus grid and microphone arrangement to calculate the steering vector, which also contains a weighting of the transfer functions from grid points to microphone positions:
+
+.. ipython:: 
+
+    In [1]: st = acoular.SteeringVector( grid=rg, mics=mg )
+
 Finally, we can create the object that encapsulates the delay-and-sum algorithm. The basic beamforming algorithm is provided by objects of the type :class:`~acoular.fbeamform.BeamformerBase` 
 
 .. ipython:: 
 
-    In [1]: bb = acoular.BeamformerBase( freq_data=ps, grid=rg, mpos=mg )
+    In [1]: bb = acoular.BeamformerBase( freq_data=ps, steer=st )
 
-The cross spectral matrix, grid and microphone arrangement created before are used here as input data. Still, **up to now, no computation has been done** because no result was needed yet. Using 
+The cross spectral matrix and the steering vector, which were created before, are used here as input data. Still, **up to now, no computation has been done** because no result was needed yet. Using 
 
 .. ipython:: 
 
@@ -120,7 +131,7 @@ The cross spectral matrix, grid and microphone arrangement created before are us
 
     In [1]: Lm = acoular.L_p( pm )
 
-the beamforming result mapped onto the grid is queried for a frequency of 8000 Hz and over a third-octave wide frequency band (thus the '3' in the second argument). As a consequence, processing starts: the data is read from the file, the cross spectral matrix is computed and the beamforming is performed. The result (sound pressure squared) is given as an array with same shape as the grid. Using the helper function :class:`~acoular.fbeamform.L_p`, this is converted to decibels.
+the beamforming result mapped onto the grid is queried for a frequency of 8000 Hz and over a third-octave wide frequency band (thus the '3' in the second argument). As a consequence, processing starts: the data is read from the file, the cross spectral matrix is computed and the beamforming is performed. The result (sound pressure squared) is given as an array with the same shape as the grid. Using the helper function :class:`~acoular.fbeamform.L_p`, this is converted to decibels.
 
 Now let us plot the result:
 

@@ -15,10 +15,11 @@
 """
 
 # imports from other packages
-from numpy import mgrid, s_, array, arange
-from traits.api import HasPrivateTraits, Float, Property, CArray, \
+from numpy import mgrid, s_, array, arange, isscalar, absolute
+from traits.api import HasPrivateTraits, Float, Property, CArray, Any, \
 property_depends_on, cached_property, on_trait_change
 from traitsui.api import View
+from traits.trait_errors import TraitError
 
 from .internal import digest
 
@@ -34,13 +35,15 @@ class Grid( HasPrivateTraits ):
 
     #: Overall number of grid points. Readonly; is set automatically when
     #: other grid defining properties are set
-    size = Property(
-        desc="overall number of grid points")
+    size = Property(desc="overall number of grid points")
 
     #: Shape of grid. Readonly, gives the shape as tuple, useful for cartesian
     #: grids
-    shape = Property(
-        desc="grid shape as tuple")
+    shape = Property(desc="grid shape as tuple")
+
+    #: Grid positions as (3, :attr:`size`) array of floats, without invalid
+    #: microphones; readonly.
+    gpos = Property(desc="x, y, z positions of grid points")
 
     # internal identifier
     digest = Property
@@ -62,16 +65,21 @@ class Grid( HasPrivateTraits ):
     def _get_shape ( self ):
         return (1, 1)
 
+    @property_depends_on('digest')
+    def _get_gpos( self ):
+        return array([[0.], [0.], [0.]])
+    
     def pos ( self ):
         """
-        Calculates grid co-ordinates.
+        Calculates grid co-ordinates. 
+        Deprecated; use :attr:`gpos` attribute instead.
         
         Returns
         -------
         array of floats of shape (3, :attr:`size`)
             The grid point x, y, z-coordinates in one array.
         """
-        return array([[0.], [0.], [0.]])
+        return self.gpos# array([[0.], [0.], [0.]])
 
 
 
@@ -155,7 +163,8 @@ class RectGrid( Grid ):
     def _get_digest( self ):
         return digest( self )
 
-    def pos ( self ):
+    @property_depends_on('x_min, x_max, y_min, y_max, increment')
+    def _get_gpos ( self ):
         """
         Calculates grid co-ordinates.
         
@@ -269,22 +278,59 @@ class RectGrid3D( RectGrid):
     nzsteps = Property(
         desc="number of grid points along x-axis")
 
-    #: Respective increments in x,y, and z-direction (in m), defaults 
-    #: to :attr:`~RectGrid.increment` for all three (whichever of the two
-    #: increment parameters is set last replaces the other). 
-    increment3D = CArray( dtype=float, shape=(3, ),
-                         desc="3D step sizes")
-    def _increment3D_default(self): 
-        return array([self.increment,self.increment,self.increment])
     
-    @on_trait_change('increment')
-    def reset_increment3D(self): 
-        self.increment3D = array([self.increment,self.increment,self.increment])
-     
+    # Private trait for increment handling
+    _increment = Any(0.1)
+    
+    #: The cell side length for the grid. This can either be a scalar (same 
+    #: increments in all 3 dimensions) or a (3,) array of floats with 
+    #: respective increments in x,y, and z-direction (in m). 
+    #: Defaults to 0.1.
+    increment = Property(desc="step size")
+    
+    def _get_increment(self):
+        return self._increment
+    
+    def _set_increment(self, increment):
+        if isscalar(increment):
+            try:
+                self._increment = absolute(float(increment))
+            except:
+                raise TraitError(args=self,
+                                 name='increment', 
+                                 info='Float or CArray(3,)',
+                                 value=increment) 
+        elif len(increment) == 3:
+            self._increment = array(increment,dtype=float)
+        else:
+            raise(TraitError(args=self,
+                             name='increment', 
+                             info='Float or CArray(3,)',
+                             value=increment))
+    
+    # Respective increments in x,y, and z-direction (in m).
+    # Deprecated: Use :attr:`~RectGrid.increment` for this functionality
+    increment3D = Property(desc="3D step sizes")
+    
+    def _get_increment3D(self):
+        if isscalar(self._increment):
+            return array([self._increment,self._increment,self._increment])
+        else:
+            return self._increment
+    
+    def _set_increment3D(self, inc):
+        if not isscalar(inc) and len(inc) == 3:
+            self._increment = array(inc,dtype=float)
+        else:
+            raise(TraitError(args=self,
+                             name='increment3D', 
+                             info='CArray(3,)',
+                             value=inc))
+    
     # internal identifier
     digest = Property(
         depends_on = ['x_min', 'x_max', 'y_min', 'y_max', 'z_min', 'z_max', \
-        'increment3D']
+        '_increment']
         )
 
     # increment3D omitted in view for easier handling, can be added later
@@ -326,11 +372,8 @@ class RectGrid3D( RectGrid):
             return int(round((abs(self.z_max-self.z_min)+i)/i))
         return 1
 
-    @cached_property
-    def _get_digest( self ):
-        return digest( self )
-
-    def pos ( self ):
+    @property_depends_on('digest')
+    def _get_gpos ( self ):
         """
         Calculates grid co-ordinates.
         
@@ -344,6 +387,12 @@ class RectGrid3D( RectGrid):
                      self.z_min:self.z_max:self.nzsteps*1j]
         bpos.resize((3, self.size))
         return bpos
+
+    @cached_property
+    def _get_digest( self ):
+        return digest( self )
+
+   
 
     def index ( self, x, y, z ):
         """

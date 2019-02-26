@@ -164,9 +164,9 @@ class nidaq_import( time_data_import ):
         #~ DAQmxGetTaskNumDevices(taskHandle,ctypes.byref(num))
         #~ self.numdevices = num.value
         DAQmxGetTaskChannels(taskHandle,ctypes.byref(buf),buf_size)
-        self.namechannels = buf.value.split(', ')
+        self.namechannels = buf.value.decode().split(', ')
         DAQmxGetTaskDevices(taskHandle,ctypes.byref(buf),buf_size)
-        self.namedevices = buf.value.split(', ')
+        self.namedevices = buf.value.decode().split(', ')
         self.numdevices = len(self.namedevices)
         DAQmxGetSampClkRate(taskHandle,ctypes.byref(fnum))
         self.sample_freq = fnum.value
@@ -210,7 +210,7 @@ class nidaq_import( time_data_import ):
             DAQmxSetSampClkRate(taskHandle,float64(self.sample_freq))
         except RuntimeError:
             # no valid task
-            time_data_import.getdata(self,td)
+            time_data_import.get_data(self,td)
             return
         #import data
         name = td.name
@@ -259,7 +259,7 @@ class nidaq_import( time_data_import ):
                 raise RuntimeError
         except RuntimeError:
             # no valid task
-            time_data_import.getdata(self,td)
+            time_data_import.get_data(self,td)
             return
         #import data
         ac = numpy.empty((self.numsamples,self.numchannels),numpy.float32)

@@ -1,9 +1,9 @@
 Reference Manual
 ================
 
-Modules in acoular
+Modules in Acoular
 ------------------
-The following modules are part of acoular:
+The following modules are part of Acoular:
 
 .. currentmodule:: acoular 
 
@@ -31,7 +31,7 @@ these modules still need some more documentation:
     h5cache
     internal
 
-Classes in acoular and their inheritance
+Classes in Acoular and their inheritance
 ----------------------------------------
 **Depending on the resolution of your browser window the cross links may not be positioned correctly!**
 

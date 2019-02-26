@@ -1,6 +1,6 @@
 package:
   name: acoular
-  version: "17.11"
+  version: "19.02"
 
 source:
   path: ../../acoular
@@ -32,15 +32,15 @@ requirements:
     - scikit-learn >=0.15
     - pytables >=3.1
     - traits >=4.4
-    - numba >=0.21
+    - numba >=0.30
 #    - chaco >=4.4
     - libpython [win]
 
   run:
     - python >=3.4,<3.5
-    - pyqt >=4.10,<5.6.0
+    - pyqt >=4.10
     - numpy >=1.10.2
-    - numba >=0.21
+    - numba >=0.30
     - scipy >=0.13
     - scikit-learn >=0.15
     - six >=1.10.0
@@ -50,8 +50,8 @@ requirements:
 
 test:
   # Python imports
-#  imports:
-#    - acoular
+  imports:
+    - acoular
 
   # commands:
     # You can put test commands to be run here.  Use this to test that the

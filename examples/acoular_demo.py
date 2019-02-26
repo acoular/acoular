@@ -26,7 +26,8 @@ Source Location        Level
 
 from os import path
 from acoular import __file__ as bpath, MicGeom, WNoiseGenerator, PointSource,\
- Mixer, WriteH5, TimeSamples, PowerSpectra, RectGrid, BeamformerBase, L_p
+ Mixer, WriteH5, TimeSamples, PowerSpectra, RectGrid, SteeringVector,\
+ BeamformerBase, L_p
 from pylab import figure, plot, axis, imshow, colorbar, show
 
 # set up the parameters
@@ -41,19 +42,25 @@ mg = MicGeom( from_file=micgeofile )
 n1 = WNoiseGenerator( sample_freq=sfreq, numsamples=nsamples, seed=1 )
 n2 = WNoiseGenerator( sample_freq=sfreq, numsamples=nsamples, seed=2, rms=0.7 )
 n3 = WNoiseGenerator( sample_freq=sfreq, numsamples=nsamples, seed=3, rms=0.5 )
-p1 = PointSource( signal=n1, mpos=mg,  loc=(-0.1,-0.1,0.3) )
-p2 = PointSource( signal=n2, mpos=mg,  loc=(0.15,0,0.3) )
-p3 = PointSource( signal=n3, mpos=mg,  loc=(0,0.1,0.3) )
+p1 = PointSource( signal=n1, mics=mg,  loc=(-0.1,-0.1,0.3) )
+p2 = PointSource( signal=n2, mics=mg,  loc=(0.15,0,0.3) )
+p3 = PointSource( signal=n3, mics=mg,  loc=(0,0.1,0.3) )
 pa = Mixer( source=p1, sources=[p2,p3] )
 wh5 = WriteH5( source=pa, name=h5savefile )
 wh5.save()
 
+
+
 # analyze the data and generate map
+
 ts = TimeSamples( name=h5savefile )
 ps = PowerSpectra( time_data=ts, block_size=128, window='Hanning' )
+
 rg = RectGrid( x_min=-0.2, x_max=0.2, y_min=-0.2, y_max=0.2, z=0.3, \
 increment=0.01 )
-bb = BeamformerBase( freq_data=ps, grid=rg, mpos=mg )
+st = SteeringVector(grid=rg, mics=mg)
+
+bb = BeamformerBase( freq_data=ps, steer=st )
 pm = bb.synthetic( 8000, 3 )
 Lm = L_p( pm )
 
