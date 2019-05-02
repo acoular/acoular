@@ -14,12 +14,12 @@ All rights reserved.
 
 # imports from acoular
 import acoular
-from acoular import L_p, Calib, MicGeom, PowerSpectra, \
+from acoular import L_p, Calib, MicGeom, Environment, PowerSpectra, \
 RectGrid, BeamformerBase, BeamformerEig, BeamformerOrth, BeamformerCleansc, \
 MaskedTimeSamples, FiltFiltOctave, BeamformerTimeSq, TimeAverage, \
 TimeCache, BeamformerTime, TimePower, BeamformerCMF, \
 BeamformerCapon, BeamformerMusic, BeamformerDamas, BeamformerClean, \
-BeamformerFunctional, BeamformerDamasPlus, BeamformerGIB
+BeamformerFunctional, BeamformerDamasPlus, BeamformerGIB, SteeringVector
 
 # other imports
 from numpy import zeros
@@ -66,6 +66,19 @@ m.invalid_channels = invalid
 g = RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=0.68,
              increment=0.05)
 
+
+#===============================================================================
+# the environment, i.e. medium characteristics
+# (in this case, the speed of sound is set)
+#===============================================================================
+env = Environment(c = 346.04)
+
+# =============================================================================
+# a steering vector instance. SteeringVector provides the standard freefield 
+# sound propagation model in the steering vectors.
+# =============================================================================
+st = SteeringVector(grid=g, mics=m, env=env)
+
 #===============================================================================
 # for frequency domain methods, this provides the cross spectral matrix and its
 # eigenvalues and eigenvectors, if only the matrix is needed then class 
@@ -80,20 +93,18 @@ f = PowerSpectra(time_data=t1,
 #===============================================================================
 # different beamformers in frequency domain
 #===============================================================================
-bb = BeamformerBase(freq_data=f, grid=g, mpos=m, r_diag=True, c=346.04)
-bc = BeamformerCapon(freq_data=f, grid=g, mpos=m, c=346.04, cached=False)
-be = BeamformerEig(freq_data=f, grid=g, mpos=m, r_diag=True, c=346.04, n=54)
-bm = BeamformerMusic(freq_data=f, grid=g, mpos=m, c=346.04, n=6)
+bb = BeamformerBase(freq_data=f, steer=st, r_diag=True)
+bc = BeamformerCapon(freq_data=f, steer=st, cached=False)
+be = BeamformerEig(freq_data=f, steer=st, r_diag=True, n=54)
+bm = BeamformerMusic(freq_data=f, steer=st, n=6)
 bd = BeamformerDamas(beamformer=bb, n_iter=100)
 bdp = BeamformerDamasPlus(beamformer=bb, n_iter=100)
 bo = BeamformerOrth(beamformer=be, eva_list=list(range(38,54)))
-bs = BeamformerCleansc(freq_data=f, grid=g, mpos=m, r_diag=True, c=346.04)
-bcmf = BeamformerCMF(freq_data=f, grid=g, mpos=m, c=346.04, \
-    method='LassoLarsBIC')
+bs = BeamformerCleansc(freq_data=f, steer=st, r_diag=True)
+bcmf = BeamformerCMF(freq_data=f, steer=st, method='LassoLarsBIC')
 bl = BeamformerClean(beamformer=bb, n_iter=100)
-bf = BeamformerFunctional(freq_data=f, grid=g, mpos=m, r_diag=False, c=346.04, \
-    gamma=4)
-bgib = BeamformerGIB(freq_data=f, grid=g, mpos=m, c=346.04,method= 'LassoLars', n=10)
+bf = BeamformerFunctional(freq_data=f, steer=st, r_diag=False, gamma=4)
+bgib = BeamformerGIB(freq_data=f, steer=st, method= 'LassoLars', n=10)
 
 #===============================================================================
 # plot result maps for different beamformers in frequency domain
@@ -114,7 +125,7 @@ for b in (bb, bc, be, bm, bl, bo, bs, bd, bcmf, bf, bdp, bgib):
 # delay and sum beamformer in time domain
 # processing chain: beamforming, filtering, power, average
 #===============================================================================
-bt = BeamformerTime(source=t1, grid=g, mpos=m, c=346.04)
+bt = BeamformerTime(source=t1, steer=st)
 ft = FiltFiltOctave(source=bt, band=cfreq)
 pt = TimePower(source=ft)
 avgt = TimeAverage(source=pt, naverage = 1024)
@@ -125,7 +136,7 @@ cacht = TimeCache( source = avgt) # cache to prevent recalculation
 # processing chain: zero-phase filtering, beamforming+power, average
 #===============================================================================
 fi = FiltFiltOctave(source=t1, band=cfreq)
-bts = BeamformerTimeSq(source = fi,grid=g, mpos=m, r_diag=True,c=346.04)
+bts = BeamformerTimeSq(source=fi, steer=st, r_diag=True)
 avgts = TimeAverage(source=bts, naverage = 1024)
 cachts = TimeCache( source = avgts) # cache to prevent recalculation
 

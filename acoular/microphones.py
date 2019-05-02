@@ -13,7 +13,7 @@
 """
 
 # imports from other packages
-from numpy import array
+from numpy import array, average
 from traits.api import HasPrivateTraits, Property, File, \
 CArray, List, cached_property, on_trait_change
 from traitsui.api import View
@@ -48,6 +48,10 @@ class MicGeom( HasPrivateTraits ):
     #: Number of microphones in the array; readonly.
     num_mics = Property( depends_on = ['mpos', ],
         desc="number of microphones in the geometry")
+
+    #: Center of the array (arithmetic mean of all used array positions); readonly.
+    center = Property( depends_on = ['mpos', ],
+        desc="array center")
 
     #: Positions as (3, :attr:`num_mics`) array of floats, may include also invalid
     #: microphones (if any). Set either automatically on change of the
@@ -90,6 +94,13 @@ class MicGeom( HasPrivateTraits ):
     @cached_property
     def _get_num_mics( self ):
         return self.mpos.shape[-1]
+
+    @cached_property
+    def _get_center( self ):
+        center = average(self.mpos,axis=1)
+        # set very small values to zero
+        center[abs(center) < 1e-16] = 0.
+        return center
 
     @on_trait_change('basename')
     def import_mpos( self ):

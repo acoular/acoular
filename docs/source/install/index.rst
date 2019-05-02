@@ -8,7 +8,8 @@ Requirements
 
 Acoular runs under 64bit Windows and Linux (it should also run under OS X, but this is untested).
 In order to install Acoular you need a Python 2.7 or Python 3 environment running on your machine. 
-Furthermore, Acoular requires the following Python Packages: 
+Furthermore, Acoular requires the following Python Packages:
+
     * `NumPy <http://www.numpy.org/>`_, 
     * `SciPy <http://www.scipy.org/scipylib/index.html>`_, 
     * `Traits <http://code.enthought.com/projects/traits/>`_, 

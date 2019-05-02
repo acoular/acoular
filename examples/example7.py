@@ -17,8 +17,8 @@ from __future__ import print_function
 
 # imports from acoular
 import acoular
-from acoular import L_p, Calib, MicGeom, PowerSpectra, \
-RectGrid, TimeSamples, BeamformerCMF
+from acoular import L_p, Calib, MicGeom, PowerSpectra, Environment, \
+RectGrid, TimeSamples, BeamformerCMF, SteeringVector
 
 # other imports
 from os import path
@@ -60,6 +60,18 @@ g = RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=0.68,
              increment=0.025)
 
 #===============================================================================
+# the environment, i.e. medium characteristics
+# (in this case, the speed of sound is set)
+#===============================================================================
+env = Environment(c = 346.04)
+
+# =============================================================================
+# a steering vector instance. SteeringVector provides the standard freefield 
+# sound propagation model in the steering vectors.
+# =============================================================================
+st = SteeringVector(grid=g, mics=m, env=env)
+
+#===============================================================================
 # for frequency domain methods, this provides the cross spectral matrix and its
 # eigenvalues and eigenvectors, if only the matrix is needed then class 
 # PowerSpectra can be used instead
@@ -72,7 +84,7 @@ f = PowerSpectra(time_data=t1,
 #===============================================================================
 # beamformers in frequency domain
 #===============================================================================
-b = BeamformerCMF(freq_data=f, grid=g, mpos=m, c=346.04, alpha=1e-8)
+b = BeamformerCMF(freq_data=f, steer=st, alpha=1e-8)
 
 #===============================================================================
 # plot result maps for different beamformers in frequency domain

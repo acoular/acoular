@@ -239,7 +239,7 @@ class PowerSpectra( HasPrivateTraits ):
                     obj = None
         name = 'csm_' + self.digest
         H5cache.get_cache( self, self.basename )
-        #print self.basename
+        #print(self.basename)
         if not self.cached  or not name in self.h5f.root:
             t = self.time_data
             wind = self.window_( self.block_size )
@@ -306,25 +306,33 @@ class PowerSpectra( HasPrivateTraits ):
         """
         eigenvalues / eigenvectors calculation
         """
+        
         name_eva = 'eva_' + self.digest
         name_eve = 'eve_' + self.digest
         csm = self.csm #trigger calculation
-        if (not name_eva in self.h5f.root) or (not name_eve in self.h5f.root):
+        
+        if not self.cached  or  (not name_eva in self.h5f.root) or (not name_eve in self.h5f.root):
             csm_shape = self.csm.shape
             precisionTuple = _precision(self.precision)
             eva = empty(csm_shape[0:2], dtype=precisionTuple[0])
             eve = empty(csm_shape, dtype=precisionTuple[1])
             for i in range(csm_shape[0]):
                 (eva[i], eve[i])=linalg.eigh(self.csm[i])
-            atom_eva = precisionTuple[3]()
-            atom_eve = tables.ComplexAtom(precisionTuple[2])
-            filters = tables.Filters(complevel=5, complib='blosc')
-            ac_eva = self.h5f.create_carray(self.h5f.root, name_eva, atom_eva, \
-                eva.shape, filters=filters)
-            ac_eve = self.h5f.create_carray(self.h5f.root, name_eve, atom_eve, \
-                eve.shape, filters=filters)
-            ac_eva[:] = eva
-            ac_eve[:] = eve
+                
+            if self.cached:   
+                atom_eva = precisionTuple[3]()
+                atom_eve = tables.ComplexAtom(precisionTuple[2])
+                filters = tables.Filters(complevel=5, complib='blosc')
+                ac_eva = self.h5f.create_carray(self.h5f.root, name_eva, atom_eva, \
+                                                eva.shape, filters=filters)
+                ac_eve = self.h5f.create_carray(self.h5f.root, name_eve, atom_eve, \
+                                                eve.shape, filters=filters)
+                ac_eva[:] = eva
+                ac_eve[:] = eve
+                return (ac_eva,ac_eve)
+            else:
+                return (eva,eve)
+            
         return (self.h5f.get_node('/', name_eva), \
                     self.h5f.get_node('/', name_eve))
             

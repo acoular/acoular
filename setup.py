@@ -1,6 +1,6 @@
 # coding=UTF-8
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2017, Acoular Development Team.
+# Copyright (c) 2007-2019, Acoular Development Team.
 #------------------------------------------------------------------------------
 
 from setuptools import setup
@@ -11,7 +11,7 @@ from os.path import join, abspath, dirname
 #bf_version = str(av.__version__)
 #bf_author = str(av.__author__)
 
-bf_version = "18.01"
+bf_version = "19.02"
 bf_author = "Acoular developers"
 
 
@@ -41,6 +41,7 @@ setup(name="acoular",
       'Programming Language :: Python :: 3.4',
       'Programming Language :: Python :: 3.5',
       'Programming Language :: Python :: 3.6',
+      'Programming Language :: Python :: 3.7',
       ],
       keywords='acoustic beamforming microphone array',
       packages = ['acoular'],
@@ -68,8 +69,7 @@ setup(name="acoular",
 #      'traitsui>=4.4.0',
 #      'chaco>=4.4'
 	],
-      scripts=['ResultExplorer.py','CalibHelper.py',
-               join('examples','acoular_demo.py')],
+      scripts=[join('examples','acoular_demo.py')],
       include_package_data = True,
       package_data={'acoular': ['xml/*.xml']}
 )

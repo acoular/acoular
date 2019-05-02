@@ -21,17 +21,18 @@ from six import next
 from numpy import array, newaxis, empty, sqrt, arange, clip, r_, zeros, \
 histogram, unique, cross, dot, where, s_ , sum
 from traits.api import Float, CArray, Property, Trait, Bool, Delegate, \
-cached_property, List
+cached_property, List, Instance
 from traitsui.api import View, Item
 from traitsui.menu import OKCancelButtons
+from traits.trait_errors import TraitError
+from warnings import warn
 
 # acoular imports
 from .internal import digest
-from .grids import RectGrid, Grid
-from .microphones import MicGeom
-from .environments import Environment
+from .grids import RectGrid
 from .trajectory import Trajectory
 from .tprocess import TimeInOut
+from .fbeamform import SteeringVector
 
 
 def const_power_weight( bf ):
@@ -53,7 +54,7 @@ def const_power_weight( bf ):
         The weight factors.
     """
 
-    r = bf.env.r( bf.c, zeros((3, 1)), bf.mpos.mpos) # distances to center
+    r = bf.steer.env._r(zeros((3, 1)), bf.steer.mics.mpos) # distances to center
     # round the relative distances to one decimal place
     r = (r/r.max()).round(decimals=1)
     ru, ind = unique(r, return_inverse=True)
@@ -75,52 +76,117 @@ class BeamformerTime( TimeInOut ):
     for a spatially fixed grid.
     """
 
-    #: :class:`~acoular.grids.Grid`-derived object that provides the grid locations.
-    grid = Trait(Grid, 
-        desc="beamforming grid")
+
+    # Instance of :class:`~acoular.fbeamform.SteeringVector` or its derived classes
+    # that contains information about the steering vector. This is a private trait.
+    # Do not set this directly, use `steer` trait instead.
+    _steer_obj = Instance(SteeringVector(), SteeringVector)   
+    
+    #: :class:`~acoular.fbeamform.SteeringVector` or derived object. 
+    #: Defaults to :class:`~acoular.fbeamform.SteeringVector` object.
+    steer = Property(desc="steering vector object")  
+    
+    def _get_steer(self):
+        return self._steer_obj
+    
+    def _set_steer(self, steer):
+        if type(steer) == SteeringVector:
+            # This condition may be replaced at a later time by: isinstance(steer, SteeringVector): -- (derived classes allowed)
+            self._steer_obj = steer
+        elif steer in ('true level', 'true location', 'classic', 'inverse'):
+            # Type of steering vectors, see also :ref:`Sarradj, 2012<Sarradj2012>`.
+            warn("Deprecated use of 'steer' trait. "
+                 "Please use object of class 'SteeringVector' in the future.", 
+                 Warning, stacklevel = 2)
+            self._steer_obj = SteeringVector(steer_type = steer)
+        else:
+            raise(TraitError(args=self,
+                             name='steer', 
+                             info='SteeringVector',
+                             value=steer))
+
+    # --- List of backwards compatibility traits and their setters/getters -----------
+    
+    # :class:`~acoular.environments.Environment` or derived object. 
+    # Deprecated! Only kept for backwards compatibility. 
+    # Now governed by :attr:`steer` trait.
+    env = Property()
+    
+    def _get_env(self):
+        return self._steer_obj.env    
+    
+    def _set_env(self, env):
+        warn("Deprecated use of 'env' trait. ", Warning, stacklevel = 2)
+        self._steer_obj.env = env
+    
+    # The speed of sound.
+    # Deprecated! Only kept for backwards compatibility. 
+    # Now governed by :attr:`steer` trait.
+    c = Property()
+    
+    def _get_c(self):
+        return self._steer_obj.env.c
+    
+    def _set_c(self, c):
+        warn("Deprecated use of 'c' trait. ", Warning, stacklevel = 2)
+        self._steer_obj.env.c = c
+   
+    # :class:`~acoular.grids.Grid`-derived object that provides the grid locations.
+    # Deprecated! Only kept for backwards compatibility. 
+    # Now governed by :attr:`steer` trait.
+    grid = Property()
+
+    def _get_grid(self):
+        return self._steer_obj.grid
+    
+    def _set_grid(self, grid):
+        warn("Deprecated use of 'grid' trait. ", Warning, stacklevel = 2)
+        self._steer_obj.grid = grid
+    
+    # :class:`~acoular.microphones.MicGeom` object that provides the microphone locations.
+    # Deprecated! Only kept for backwards compatibility. 
+    # Now governed by :attr:`steer` trait
+    mpos = Property()
+    
+    def _get_mpos(self):
+        return self._steer_obj.mics
+    
+    def _set_mpos(self, mpos):
+        warn("Deprecated use of 'mpos' trait. ", Warning, stacklevel = 2)
+        self._steer_obj.mics = mpos
+    
+    
+    # Sound travel distances from microphone array center to grid points (r0)
+    # and all array mics to grid points (rm). Readonly.
+    # Deprecated! Only kept for backwards compatibility. 
+    # Now governed by :attr:`steer` trait
+    r0 = Property()
+    def _get_r0(self):
+        return self._steer_obj.r0
+    
+    rm = Property()
+    def _get_rm(self):
+        return self._steer_obj.rm
+    
+    # --- End of backwards compatibility traits --------------------------------------
 
     #: Number of channels in output (=number of grid points).
     numchannels = Delegate('grid', 'size')
-
-    #: :class:`~acoular.microphones.MicGeom` object that provides the microphone locations.
-    mpos= Trait(MicGeom, 
-        desc="microphone geometry")
-        
-    #: :class:`~acoular.environments.Environment` or derived object, 
-    #: which provides information about the sound propagation in the medium.
-    env = Trait(Environment(), Environment)
 
     #: Spatial weighting function.
     weights = Trait('none', possible_weights, 
         desc="spatial weighting function")
     # (from timedomain.possible_weights)
-        
-    #: The speed of sound, defaults to 343 m/s
-    c = Float(343., 
-        desc="speed of sound")
     
-    #: Sound travel distances from microphone array center to grid 
-    #: points (readonly).
-    r0 = Property(
-        desc="array center to grid distances")
-
-    #: Sound travel distances from array microphones to grid 
-    #: points (readonly).
-    rm = Property(
-        desc="array center to grid distances")
-
     # internal identifier
     digest = Property( 
-        depends_on = ['mpos.digest', 'grid.digest', 'source.digest', 'c', \
-        'env.digest', 'weights', '__class__'], 
+        depends_on = ['_steer_obj.digest', 'source.digest', 'weights', '__class__'], 
         )
 
     traits_view = View(
         [
-            [Item('mpos{}', style='custom')], 
-            [Item('grid', style='custom'), '-<>'], 
-            [Item('c', label='speed of sound')], 
-            [Item('env{}', style='custom')], 
+            [Item('steer{}', style='custom')], 
+            [Item('source{}', style='custom'), '-<>'], 
             [Item('weights{}', style='simple')], 
             '|'
         ], 
@@ -131,15 +197,8 @@ class BeamformerTime( TimeInOut ):
     @cached_property
     def _get_digest( self ):
         return digest(self)
-        
-    #@cached_property
-    def _get_r0 ( self ):
-        return self.env.r( self.c, self.grid.pos())
-
-    #@cached_property
-    def _get_rm ( self ):
-        return self.env.r( self.c, self.grid.pos(), self.mpos.mpos)
-
+    
+         
     def result( self, num=2048 ):
         """
         Python generator that yields the beamformer output block-wise.
@@ -165,7 +224,7 @@ class BeamformerTime( TimeInOut ):
         d_index = array(delays, dtype=int) # integer index
         d_interp1 = delays % 1 # 1st coeff for lin interpolation between samples
         d_interp2 = 1-d_interp1 # 2nd coeff for lin interpolation 
-        d_index2 = arange(self.mpos.num_mics)
+        d_index2 = arange(self.steer.mics.num_mics)
 #        amp = (self.rm/self.r0[:, newaxis]) # multiplication factor
         amp = (w/(self.rm*self.rm)).sum(1) * self.r0
         amp = 1.0/(amp[:, newaxis]*self.rm) # multiplication factor
@@ -214,23 +273,22 @@ class BeamformerTimeSq( BeamformerTime ):
 
     # internal identifier
     digest = Property( 
-        depends_on = ['mpos.digest', 'grid.digest', 'source.digest', 'r_diag', \
-        'c', 'env.digest', 'weights', '__class__'], 
+        depends_on = ['_steer_obj.digest', 'source.digest', 'r_diag', \
+                      'weights', '__class__'], 
         )
 
     traits_view = View(
         [
-            [Item('mpos{}', style='custom')], 
-            [Item('grid', style='custom'), '-<>'], 
+            [Item('steer{}', style='custom')], 
+            [Item('source{}', style='custom'), '-<>'], 
             [Item('r_diag', label='diagonal removed')], 
-            [Item('c', label='speed of sound')], 
-            [Item('env{}', style='custom')], 
-            [Item('weights', style='simple')], 
+            [Item('weights{}', style='simple')], 
             '|'
         ], 
         title='Beamformer options', 
         buttons = OKCancelButtons
         )
+
 
     @cached_property
     def _get_digest( self ):
@@ -266,7 +324,7 @@ class BeamformerTimeSq( BeamformerTime ):
         d_index = array(delays, dtype=int) # integer index
         d_interp1 = delays % 1 # 1st coeff for lin interpolation between samples
         d_interp2 = 1-d_interp1 # 2nd coeff for lin interpolation 
-        d_index2 = arange(self.mpos.num_mics)
+        d_index2 = arange(self.steer.mics.num_mics)
 #        amp = (self.rm/self.r0[:, newaxis]) # multiplication factor
         amp = (w/(self.rm*self.rm)).sum(1) * self.r0
         amp = 1.0/(amp[:, newaxis]*self.rm) # multiplication factor
@@ -331,24 +389,22 @@ class BeamformerTimeTraj( BeamformerTime ):
     
     # internal identifier
     digest = Property( 
-        depends_on = ['mpos.digest', 'grid.digest', 'source.digest', \
-            'c', 'weights', 'rvec', 'env.digest', 'trajectory.digest', \
-            '__class__'], 
+        depends_on = ['_steer_obj.digest', 'source.digest', 'weights',  \
+                      'rvec', 'trajectory.digest', '__class__'], 
         )
 
     traits_view = View(
         [
-            [Item('mpos{}', style='custom')], 
-            [Item('grid', style='custom'), '-<>'], 
-            [Item('trajectory{}', style='custom')], 
-            [Item('c', label='speed of sound')], 
-            [Item('env{}', style='custom')], 
+            [Item('steer{}', style='custom')], 
+            [Item('source{}', style='custom'), '-<>'], 
+            [Item('trajectory{}', style='custom')],
             [Item('weights{}', style='simple')], 
             '|'
         ], 
         title='Beamformer options', 
         buttons = OKCancelButtons
         )
+
 
     @cached_property
     def _get_digest( self ):
@@ -383,19 +439,19 @@ class BeamformerTimeTraj( BeamformerTime ):
             w = self.weights_(self)[newaxis]
         else:
             w = 1.0
-        c = self.c/self.source.sample_freq
+        c = self.steer.env.c/self.source.sample_freq
         # temp array for the grid co-ordinates
         gpos = self.grid.pos()
         # max delay span = sum of
         # max diagonal lengths of circumscribing cuboids for grid and micarray
         dmax = sqrt(((gpos.max(1)-gpos.min(1))**2).sum())
-        dmax += sqrt(((self.mpos.mpos.max(1)-self.mpos.mpos.min(1))**2).sum())
+        dmax += sqrt(((self.steer.mics.mpos.max(1)-self.steer.mics.mpos.min(1))**2).sum())
         dmax = int(dmax/c)+1 # max index span
         zi = empty((dmax+num, self.source.numchannels), \
             dtype=float) #working copy of data
         o = empty((num, self.grid.size), dtype=float) # output array
         temp = empty((self.grid.size, self.source.numchannels), dtype=float)
-        d_index2 = arange(self.mpos.num_mics, dtype=int) # second index (static)
+        d_index2 = arange(self.steer.mics.num_mics, dtype=int) # second index (static)
         offset = dmax+num # start offset for working array
         ooffset = 0 # offset for output array      
         # generators for trajectory, starting at time zero
@@ -424,8 +480,8 @@ class BeamformerTimeTraj( BeamformerTime ):
                 RM = array((dx, dy, dz)).T # rotation matrix
                 RM /= sqrt((RM*RM).sum(0)) # column normalized
                 tpos = dot(RM, gpos)+loc[:, newaxis] # rotation+translation
-            rm = self.env.r( self.c, tpos, self.mpos.mpos)
-            r0 = self.env.r( self.c, tpos)
+            rm = self.steer.env._r( tpos, self.steer.mics.mpos)
+            r0 = self.steer.env._r( tpos)
             delays = rm/c
             d_index = array(delays, dtype=int) # integer index
             d_interp1 = delays % 1 # 1st coeff for lin interpolation
@@ -479,19 +535,16 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
     
     # internal identifier
     digest = Property( 
-        depends_on = ['mpos.digest', 'grid.digest', 'source.digest', 'r_diag', \
-            'c', 'weights', 'rvec', 'env.digest', 'trajectory.digest', \
-            '__class__'], 
+        depends_on = ['_steer_obj.digest', 'source.digest', 'r_diag', 'weights', \
+                      'rvec', 'trajectory.digest', '__class__'], 
         )
 
     traits_view = View(
         [
-            [Item('mpos{}', style='custom')], 
-            [Item('grid', style='custom'), '-<>'], 
-            [Item('trajectory{}', style='custom')], 
+            [Item('steer{}', style='custom')], 
+            [Item('source{}', style='custom'), '-<>'], 
+            [Item('trajectory{}', style='custom')],
             [Item('r_diag', label='diagonal removed')], 
-            [Item('c', label='speed of sound')], 
-            [Item('env{}', style='custom')], 
             [Item('weights{}', style='simple')], 
             '|'
         ], 
@@ -532,19 +585,19 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
             w = self.weights_(self)[newaxis]
         else:
             w = 1.0
-        c = self.c/self.source.sample_freq
+        c = self.env.c/self.source.sample_freq
         # temp array for the grid co-ordinates
         gpos = self.grid.pos()
         # max delay span = sum of
         # max diagonal lengths of circumscribing cuboids for grid and micarray
         dmax = sqrt(((gpos.max(1)-gpos.min(1))**2).sum())
-        dmax += sqrt(((self.mpos.mpos.max(1)-self.mpos.mpos.min(1))**2).sum())
+        dmax += sqrt(((self.steer.mics.mpos.max(1)-self.steer.mics.mpos.min(1))**2).sum())
         dmax = int(dmax/c)+1 # max index span
         zi = empty((dmax+num, self.source.numchannels), \
             dtype=float) #working copy of data
         o = empty((num, self.grid.size), dtype=float) # output array
         temp = empty((self.grid.size, self.source.numchannels), dtype=float)
-        d_index2 = arange(self.mpos.num_mics, dtype=int) # second index (static)
+        d_index2 = arange(self.steer.mics.num_mics, dtype=int) # second index (static)
         offset = dmax+num # start offset for working array
         ooffset = 0 # offset for output array      
         # generators for trajectory, starting at time zero
@@ -572,8 +625,8 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
                 RM = array((dx, dy, dz)).T # rotation matrix
                 RM /= sqrt((RM*RM).sum(0)) # column normalized
                 tpos = dot(RM, gpos)+loc[:, newaxis] # rotation+translation
-            rm = self.env.r( self.c, tpos, self.mpos.mpos)
-            r0 = self.env.r( self.c, tpos)
+            rm = self.steer.env._r( tpos, self.steer.mics.mpos)
+            r0 = self.steer.env._r( tpos)
             delays = rm/c
             d_index = array(delays, dtype=int) # integer index
             d_interp1 = delays % 1 # 1st coeff for lin interpolation

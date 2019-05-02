@@ -7,6 +7,8 @@
 
 .. autosummary::
     :toctree: generated/
+    
+    SteeringVector
 
     SteeringVector
     SteeringVectorInduct
@@ -33,12 +35,12 @@
 # imports from other packages
 from __future__ import print_function, division
 
-from numpy import array, ones, hanning, hamming, bartlett, blackman, invert, \
-dot, newaxis, zeros, empty, fft, float32, float64, complex64, linalg, where, \
-searchsorted, pi, multiply, sign, diag, arange, sqrt, exp, log10, int,\
+from numpy import array, ones, full, hanning, hamming, bartlett, blackman, \
+invert, dot, newaxis, zeros, empty, fft, float32, float64, complex64, linalg, \
+where, searchsorted, pi, multiply, sign, diag, arange, sqrt, exp, log10, int,\
 reshape, hstack, vstack, eye, tril, size, clip, tile, round, delete, \
 absolute, argsort, sort, sum, hsplit, fill_diagonal, zeros_like, isclose, \
-vdot, flatnonzero, unique, int32, in1d, mean, inf
+vdot, flatnonzero, einsum, ndarray, isscalar
 
 from sklearn.linear_model import LassoLars, LassoLarsCV, LassoLarsIC,\
 OrthogonalMatchingPursuit, ElasticNet, OrthogonalMatchingPursuitCV, Lasso
@@ -50,8 +52,9 @@ from warnings import warn
 
 import tables
 from traits.api import HasPrivateTraits, Float, Int, ListInt, ListFloat, \
-CArray, Property, Instance, Trait, Bool, Range, Delegate, Enum, \
+CArray, Property, Instance, Trait, Bool, Range, Delegate, Enum, Any, \
 cached_property, on_trait_change, property_depends_on
+from traits.trait_errors import TraitError
 
 from traitsui.api import View, Item
 from traitsui.menu import OKCancelButtons
@@ -69,403 +72,261 @@ from .spectra import PowerSpectra, _precision
 
 class SteeringVector( HasPrivateTraits ):
     """ 
-    Basic class for implementing steering vectors without flow in free field
-    environment.
+    Basic class for implementing steering vectors with monopole source transfer models
     """
-    #: List of frequency bins
-    f = ListFloat(desc="frequency bins")  # should be ListFloat: With Carray, traits 
-    # always recalculates everything (especially transferfunctions and psf),
-    # even though f got overwritten with its original List (which happens often with the current implementation)
-    
-    #: The speed of sound, defaults to 343 m/s
-    c = Float(343., 
-        desc="speed of sound")
-    
-    #: List of free field wave numbers, corresponding to :attr:`SteeringVector.f`
-    #: and :attr:`SteeringVector.c`; read only
-    k = Property(depends_on=['f', 'c'])
-
-    #: Type of steering vectors, see also :ref:`Sarradj, 2012<Sarradj2012>`.
-    steer_type = Trait('true level', 'true location', 'classic', 'inverse',
-                  desc="type of steering vectors used")
-    
-    #: :class:`~acoular.environments.Environment` or derived object, 
-    #: which provides information about the sound propagation in the medium.
-    env = Instance(Environment(), Environment)
     
     #: :class:`~acoular.grids.Grid`-derived object that provides the grid locations.
     grid = Trait(Grid, 
         desc="beamforming grid")
     
     #: :class:`~acoular.microphones.MicGeom` object that provides the microphone locations.
-    mpos = Trait(MicGeom, 
+    mics = Trait(MicGeom, 
         desc="microphone geometry")
+        
+    #: Type of steering vectors, see also :ref:`Sarradj, 2012<Sarradj2012>`. Defaults to 'true level'.
+    steer_type = Trait('true level', 'true location', 'classic', 'inverse',
+                  desc="type of steering vectors used")
     
-    #: Sound travel distances from microphone array center to grid 
-    #: points (readonly).
+    #: :class:`~acoular.environments.Environment` or derived object, 
+    #: which provides information about the sound propagation in the medium.
+    #: Defaults to standard :class:`~acoular.environments.Environment` object.
+    env = Instance(Environment(), Environment)
+    
+    # TODO: add caching capability for transfer function
+    # Flag, if "True" (not default), the transfer function is 
+    # cached in h5 files and does not have to be recomputed during subsequent 
+    # program runs. 
+    # Be aware that setting this to "True" may result in high memory usage.
+    #cached = Bool(False, 
+    #              desc="cache flag for transfer function")    
+    
+    
+    # Sound travel distances from microphone array center to grid 
+    # points or reference position (readonly). Feature may change.
     r0 = Property(desc="array center to grid distances")
 
-    #: Sound travel distances from array microphones to grid 
-    #: points (readonly).
+    # Sound travel distances from array microphones to grid 
+    # points (readonly). Feature may change.
     rm = Property(desc="all array mics to grid distances")
     
-    #: Transfer matrix (vector of transfer-vectors) of dimension [nFreq, nGrid, nMics]; read only
-    transfer = Property(depends_on=['f', 'c', 'env.digest', 'grid.digest', 'mpos.digest'], 
-                        desc = 'transfer matrix')
+    # mirror trait for ref
+    _ref = Any(array([0.,0.,0.]),
+               desc="reference position or distance")
     
-    #: Steering vector of dimension [nFreq, nGrid, nMics], corresponding to transfer; read-only
-    steer_vector = Property(depends_on='digest', desc = 'steering vector')
+    #: Reference position or distance at which to evaluate the sound pressure 
+    #: of a grid point. 
+    #: If set to a scalar, this is used as reference distance to the grid points.
+    #: If set to a vector, this is interpreted as x,y,z coordinates of the reference position.
+    #: Defaults to [0.,0.,0.].
+    ref = Property(desc="reference position or distance")
+    
+    def _set_ref (self, ref):
+        if isscalar(ref):
+            try:
+                self._ref = absolute(float(ref))
+            except:
+                raise TraitError(args=self,
+                                 name='ref', 
+                                 info='Float or CArray(3,)',
+                                 value=ref) 
+        elif len(ref) == 3:
+            self._ref = array(ref, dtype=float)
+        else:
+            raise TraitError(args=self,
+                             name='ref', 
+                             info='Float or CArray(3,)',
+                             value=ref)
+      
+    def _get_ref (self):
+        return self._ref
+    
     
     # internal identifier
     digest = Property( 
-        depends_on = ['f', 'c', 'steer_type', 'env.digest', 'grid.digest', 'mpos.digest'])
+        depends_on = ['steer_type', 'env.digest', 'grid.digest', 'mics.digest', '_ref'])
     
-    @cached_property
-    def _get_k(self):
-        return 2 * pi * array(self.f) / self.c
-    
-    @property_depends_on('c, grid.digest, env.digest')
+    # internal identifier, use for inverse methods, excluding steering vector type
+    inv_digest = Property( 
+        depends_on = ['env.digest', 'grid.digest', 'mics.digest', '_ref'])
+        
+    @property_depends_on('grid.digest, env.digest, _ref')
     def _get_r0 ( self ):
-        return self.env.r( self.c, self.grid.pos())
+        if isscalar(self.ref) and self.ref > 0:
+            return full((self.grid.size,), self.ref)
+        else:
+            return self.env._r(self.grid.pos())
 
-    @property_depends_on('c, grid.digest, mpos.digest, env.digest')
+    @property_depends_on('grid.digest, mics.digest, env.digest')
     def _get_rm ( self ):
-        return self.env.r( self.c, self.grid.pos(), self.mpos.mpos)
+        return self.env._r(self.grid.pos(), self.mics.mpos)
  
     @cached_property
     def _get_digest( self ):
         return digest( self )
     
     @cached_property
-    def _get_transfer(self):
-        trans = calcTransfer(self.r0, self.rm, array(self.k))
-        return trans
+    def _get_inv_digest( self ):
+        return digest( self )
     
-    @cached_property
-    def _get_steer_vector(self):
-        steer = zeros_like(self.transfer, 'complex128')
-        for indFreq in range(steer.shape[0]):
-            steer[indFreq, :, :] = self.calc_steer_vector(self.transfer[indFreq, :, :])
-        return steer
-    
-    def _transfer_specific_gridpoint(self, ind):
+    def transfer(self, f, ind=None):
         """
-        Calculates the transfer function of ONE grid point. Is used in clean-sc
-        when not the whole transfer matrix is needed.
+        Calculates the transfer matrix for one frequency. 
         
         Parameters
         ----------
-        ind : int
-            Identifier for wich gridpoint the transfer funtion is calculated
+        f   : float
+            Frequency for which to calculate the transfer matrix
+        ind : (optional) array of ints
+            If set, only the transfer function of the gridpoints addressed by 
+            the given indices will be calculated. Useful for algorithms like CLEAN-SC,
+            where not the full transfer matrix is needed
         
         Returns
         -------
-        trans : complex128[nFreqs, nMics]
+        array of complex128
+            array of shape (ngridpts, nmics) containing the transfer matrix for the given frequency
         """
-        trans = calcTransfer(self.r0[ind], self.rm[ind, :][newaxis], array(self.k))[:, 0, :]
+        #if self.cached:
+        #    warn('Caching of transfer function is not yet supported!', Warning)
+        #    self.cached = False
+        
+        if ind is None:
+            trans = calcTransfer(self.r0, self.rm, array(2*pi*f/self.env.c))
+        elif not isinstance(ind,ndarray):
+            trans = calcTransfer(self.r0[ind], self.rm[ind, :][newaxis], array(2*pi*f/self.env.c))#[0, :]
+        else:
+            trans = calcTransfer(self.r0[ind], self.rm[ind, :], array(2*pi*f/self.env.c))
         return trans
     
-    def calc_steer_vector(self, a):
+    def steer_vector(self, f, ind=None):
         """
-        Calculates the steering vector from a given transfer function a.
+        Calculates the steering vectors based on the transfer function
         See also :ref:`Sarradj, 2012<Sarradj2012>`.
         
         Parameters
         ----------
-        a : complex128[nGridpoints, nMics]
-            Transfer functions
+        f   : float
+            Frequency for which to calculate the transfer matrix
+        ind : (optional) array of ints
+            If set, only the steering vectors of the gridpoints addressed by 
+            the given indices will be calculated. Useful for algorithms like CLEAN-SC,
+            where not the full transfer matrix is needed
         
         Returns
         -------
-        h : complex128[nGridpoints, nMics]
-            Steering vectors
+        array of complex128
+            array of shape (ngridpts, nmics) containing the steering vectors for the given frequency
         """
-        nGrid, nMics = a.shape
-        func = {'classic' : lambda x: x / abs(x) / nMics,
-                'inverse' : lambda x: 1. / x.conj() / nMics,
-                'true level' : lambda x: x / vdot(x, x),
-                'true location' : lambda x: x / sqrt(vdot(x, x) * nMics)}[self.steer_type]
-        steerOutput = array([func(a[cntGrid, :]) for cntGrid in range(nGrid)])
-        return steerOutput
+        func = {'classic' : lambda x: x / absolute(x) / x.shape[-1],
+                'inverse' : lambda x: 1. / x.conj() / x.shape[-1],
+                'true level' : lambda x: x / einsum('ij,ij->i',x,x.conj())[:,newaxis],
+                'true location' : lambda x: x / sqrt(einsum('ij,ij->i',x,x.conj()) * x.shape[-1])[:,newaxis]
+                }[self.steer_type]
+        return func(self.transfer(f, ind))
     
-    def _beamformerCall(self, indFreq, rDiag, normFac, tupleCSM):
-        """
-        Manages the calling of the core beamformer functionality.
-        
-        Parameters
-        ----------
-        indFreq : int
-            The index for which item of this classes property k the beamformer should be performed.
-        rDiag : bool
-            Should the diagonal of the csm should be considered in beamformer
-            (rDiag==False) or not (rDiag==True).
-        normFac : float
-            Normalization factor for the beamforming result (e.g. removal of diag is compensated with this.)
-        tupleCSM : either (csm,) or (eigValues, eigVectors)
-            See information header of beamformerFreq in fastFuncs.py for information on those inputs.
-
-        Returns
-        -------
-        The results of beamformerFreq, see fastFuncs.py 
-        """
-        tupleSteer = (self.r0, self.rm, self.k[indFreq][newaxis])
-        result = beamformerFreq(self.steer_type, rDiag, normFac, tupleSteer, tupleCSM)
-        return result
     
-    def _psfCall(self, freqInd, sourceInd, precision):
-        """
-        Manages the calling of the core psf functionality.
-        
-        Parameters
-        ----------
-        freqInd : int
-            Index for which entry of Trait f the psf should be calculated.
-        sourceInd : list of int
-            Indices of gridpoints which are assumed to be sources.
-            Normalization factor for the beamforming result (e.g. removal of diag is compensated with this.)
-        precision : string ('float32' or 'float64')
-            Precision of psf.
-
-        Returns
-        -------
-        The psf [1, nGridPoints, len(sourceInd)]
-        """
-        result = calcPointSpreadFunction(self.steer_type, self.r0, self.rm, self.k[freqInd][newaxis], sourceInd, precision)
-        return result
-
-
-class SteeringVectorInduct( SteeringVector ):
-    """
-    Class for implementing a steering vector for sound 
-    propagation in a circular duct (without hub).
-    """
-    #: :class:`~acoular.environments.InductUniformFlow`, which provides 
-    #: information about the sound propagation in the medium.
-    env = Instance(InductUniformFlow)
-    
-    #: Maximum attenuation level (dB) per radius of duct. All modes with 
-    #: attenuation levels above this value are not taken into account.
-    max_attenuation = Float(0.0, 
-                            desc="Maximum level of attenuation of modes."
-                            "Modes with values above this Float are not taken into account.")
-
-    #: List of azimuthal mode orders which are observed (one Int per entry of Trait f).
-    #: E.g. if considered_azi_modes=[-5,10] then for the first entry of f only 
-    #: the (m,n) modes with m=-5 are taken into account for the transfer vectors,
-    #: respectively m=10 for the second entry of f. The default is on empty List
-    #: in which case for all entries of k all (m,n) modes of :attr:`modal_properties`
-    #: are taken into account for the transfer vectors.
-    considered_azi_modes = ListInt()
-    
-    #: When calculating the transfer function: Should the propagation from gridpoint to mics be
-    #: normalized with the propagation from gridpoint to specific point (e.g. array center)? 
-    #: Default is True (see :attr:`transfer_norm_ref_point`).
-    transfer_normalized = Bool(True)
-    
-    #: Only relevant if :attr:`transfer_normalized` is True. Specifies the normalization point
-    #: for the transfer function (see :attr:`transfer_normalized`). Default is [inf, inf, inf]
-    #: which normalizes with the propagation to the array center.
-    transfer_norm_ref_point = CArray(dtype=float64, shape=(3, ), value=(inf, inf, inf))
-    
-    #: grid positions in cylindrical coordinates; read only
-    grid_cyl = Property(depends_on='grid.digest')
-    
-    #: grid positions in cylindrical coordinates; read only
-    mpos_cyl = Property(depends_on='mpos.digest')
-    
-    #: List with table of modal properties of each (m,n)-mode (in rows). Column entries are:
-    #: [azim. order, rad. order, sigma, alpha.real, alpha.imag, k+, k-, norm-Factor].
-    #: The List contains nFreq tables. See Phd-thesis of Ulf Tapken (TU Berlin) for 
-    #: information on sigma, alpha, k+- and the normalization factor (=F_mn in the thesis); Read-only
-    modal_properties = Property(depends_on=['f', 'c', 'max_attenuation', 'env.digest'])
-    
-    #: Transfer matrix (vector of transfer-vectors) of dimension [nFreq, nGrid, nMics]; read only
-    transfer = Property(depends_on=['f', 'c', 'max_attenuation', 'env.digest', 'considered_azi_modes', \
-                                    'grid.digest', 'mpos.digest', 'transfer_normalized', 'transfer_norm_ref_point'], 
-                        desc = 'transfer matrix')
-    
-    # internal identifier
-    digest = Property(depends_on = ['f', 'c', 'steer_type', 'env.digest', 'grid.digest', 'mpos.digest', 'considered_azi_modes', \
-                                    'max_attenuation', 'transfer_normalized', 'transfer_norm_ref_point'])
- 
-    @cached_property
-    def _get_digest( self ):
-        return digest( self )
-    
-    @cached_property
-    def _get_grid_cyl(self):
-        return cartToCyl(self.grid.pos())
-    
-    @cached_property
-    def _get_mpos_cyl(self):
-        return cartToCyl(self.mpos.mpos)
-    
-    @cached_property
-    def _get_modal_properties(self):
-        if len(self.k) == 0:
-            raise Exception('Property f of SteeringVectorInduct must be set with Floats, but is [] instead!')
-        result = self.env.modal_properties(self.k, self.max_attenuation, self.c)
-        return result
-    
-    @cached_property
-    def _get_transfer(self):
-        nFreq, nMics, nGrid = len(self.k), self.mpos_cyl.shape[1], self.grid_cyl.shape[1]
-        trans = zeros((nFreq, nGrid, nMics), dtype='complex128')
-
-        for cntFreq in range(nFreq):
-            modeProps = self.modal_properties[cntFreq]
-            uniqueAziModes = unique(int32(modeProps[:, 0]))
-    
-            # Check which modegroups with same aziMode should be taken into account
-            if self.considered_azi_modes == []:  # default case
-                usedAziModes = uniqueAziModes  # create one transfer matrix for all (m,n) modes
-            else:
-                considerHelp= in1d(self.considered_azi_modes[cntFreq], uniqueAziModes)
-                if not considerHelp.all():
-                    raise Exception('Specified azi-mode of considered_azi_modes[%s] must be '
-                                    'within possible azimuthal mode range of [%s, %s], but %s was given.' 
-                                    % (cntFreq, uniqueAziModes[0], uniqueAziModes[-1], self.considered_azi_modes[cntFreq]))
-                usedAziModes = self.considered_azi_modes[cntFreq]  # create one transfer matrix for all (m,n) modes with fixed m
-            
-            # locate all active (m,n)-modes
-            usedModes = in1d(int32(modeProps[:, 0]), usedAziModes)
-            usedModesInd = flatnonzero(usedModes)
-            nActiveModes = usedModesInd.shape[0]
-            
-            # calc all needed bessel functions
-            besselMic = zeros((nActiveModes, nMics), dtype='float64')
-            besselGrid = zeros((nGrid, nActiveModes), dtype='float64')
-            for cntUsed in range(nActiveModes):
-                besselMic[cntUsed, :] = jn(modeProps[usedModesInd[cntUsed], 0], modeProps[usedModesInd[cntUsed], 2] * self.mpos_cyl[1, :] / self.env.R)
-                besselGrid[:, cntUsed] = jn(modeProps[usedModesInd[cntUsed], 0], modeProps[usedModesInd[cntUsed], 2] * self.grid_cyl[1, :] / self.env.R)
-
-            # calc greens function from all grids to all mics
-            greens_func_Induct(modeProps[usedModes, 0], modeProps[usedModes, 3], modeProps[usedModes, 4], 
-                      modeProps[usedModes, 5], modeProps[usedModes, 6], modeProps[usedModes, 7], 
-                      self.mpos_cyl[0, :], self.mpos_cyl[2, :], 
-                      self.grid_cyl[0, :], self.grid_cyl[2, :], 
-                      besselMic, besselGrid, trans[cntFreq, :, :])
-            
-            if self.transfer_normalized:
-                if (self.transfer_norm_ref_point == array([inf, inf, inf])).all():  # take center of array
-                    pointOfRef = mean(self.mpos.mpos, axis=-1)
-                else:  # take user defined point
-                    pointOfRef = self.transfer_norm_ref_point
-                pointOfRefCyl = cartToCyl(pointOfRef)
-                if pointOfRefCyl[1] < 1e-5:  # all modes except (0,0) have no influence here
-                    usedModesRef = (modeProps[:, 0:2] == [0,0]).sum(axis=1) == 2
-                else:
-                    usedModesRef = ones((modeProps.shape[0]), dtype='bool')
-                transHelpArrayCenter = zeros((nGrid, 1), dtype='complex128')
-                greens_func_Induct(modeProps[usedModesRef, 0], modeProps[usedModesRef, 3], modeProps[usedModesRef, 4],
-                          modeProps[usedModesRef, 5], modeProps[usedModesRef, 6], modeProps[usedModesRef, 7], 
-                          [pointOfRefCyl[0]], [pointOfRef[2]], 
-                          self.grid_cyl[0, :], self.grid_cyl[2, :], 
-                          array([1])[newaxis], ones((nGrid, 1)), transHelpArrayCenter)
-                trans[cntFreq, :, :] /= transHelpArrayCenter
-        return trans
-    
-    def _transfer_specific_gridpoint(self, ind):
-        """
-        Calculates the transfer function of ONE grid point. Is used in clean-sc
-        when not the whole transfer matrix is needed.
-        
-        Parameters
-        ----------
-        ind : int
-            Identifier for wich gridpoint the transfer funtion is calculated
-        
-        Returns
-        -------
-        trans : complex128[nFreqs, nMics]
-        """
-        # basically needed in clean-sc (freefield steering vectors), when not all transfer functions must be calculated.
-        # In here this is only implemented for class compatibility with SteeringVector (basically senseless as the full transfer
-        # vectors are calculated for any beamformer anyway).
-        trans = self.transfer[:, ind, :]
-        return trans
-    
-    def _beamformerCall(self, indFreq, rDiag, normFac, tupleCSM):
-        """
-        Manages the calling of the core beamformer functionality.
-        
-        Parameters
-        ----------
-        indFreq : int
-            The index for which item of this classes property k the beamformer should be performed.
-        rDiag : bool
-            Should the diagonal of the csm should be considered in beamformer
-            (rDiag==False) or not (rDiag==True).
-        normFac : float
-            Normalization factor for the beamforming result (e.g. removal of diag is compensated with this.)
-        tupleCSM : either (csm,) or (eigValues, eigVectors)
-            See information header of beamformerFreq in fastFuncs.py for information on those inputs.
-
-        Returns
-        -------
-        The results of beamformerFreq, see fastFuncs.py 
-        """
-        steer = self.steer_vector[indFreq, :, :][newaxis]
-        result = beamformerFreq('custom', rDiag, normFac, (steer,), tupleCSM)
-        return result
-    
-    def _psfCall(self, freqInd, sourceInd, precision):
-        """
-        Manages the calling of the core psf functionality.
-        
-        Parameters
-        ----------
-        freqInd : int
-            Index for which entry of Trait f the psf should be calculated.
-        sourceInd : list of int
-            Indices of gridpoints which are assumed to be sources.
-            Normalization factor for the beamforming result (e.g. removal of diag is compensated with this.)
-        precision : string ('float32' or 'float64')
-            Precision of psf.
-
-        Returns
-        -------
-        The psf [1, nGridPoints, len(sourceInd)]
-        """
-        # Perform steer^H * transfer (see information header in fastFuncs.calcPointSpreadFunction)
-        prelim = dot(self.steer_vector[freqInd, :, :].conj(), self.transfer[freqInd, sourceInd, :].T)
-        psf = (prelim * prelim.conj()).real.astype(precision)
-        return psf[newaxis]
-
-
 class BeamformerBase( HasPrivateTraits ):
     """
     Beamforming using the basic delay-and-sum algorithm in the frequency domain.
     """
-    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.c` for information.
-    c = Property(desc="speed of sound")
     
-    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.steer_type` for information.
-    steer = Property(desc="type of steering vectors used")
     
-    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.env` for information.
+    # Instance of :class:`~acoular.fbeamform.SteeringVector` or its derived classes
+    # that contains information about the steering vector. This is a private trait.
+    # Do not set this directly, use `steer` trait instead.
+    _steer_obj = Instance(SteeringVector(), SteeringVector)   
+    
+    #: :class:`~acoular.fbeamform.SteeringVector` or derived object. 
+    #: Defaults to :class:`~acoular.fbeamform.SteeringVector` object.
+    steer = Property(desc="steering vector object")  
+    
+    def _get_steer(self):
+        return self._steer_obj
+    
+    def _set_steer(self, steer):
+        if isinstance(steer, SteeringVector):
+            self._steer_obj = steer
+        elif steer in ('true level', 'true location', 'classic', 'inverse'):
+            # Type of steering vectors, see also :ref:`Sarradj, 2012<Sarradj2012>`.
+            warn("Deprecated use of 'steer' trait. "
+                 "Please use object of class 'SteeringVector' in the future.", 
+                 Warning, stacklevel = 2)
+            self._steer_obj = SteeringVector(steer_type = steer)
+        else:
+            raise(TraitError(args=self,
+                             name='steer', 
+                             info='SteeringVector',
+                             value=steer))
+
+    # --- List of backwards compatibility traits and their setters/getters -----------
+    
+    # :class:`~acoular.environments.Environment` or derived object. 
+    # Deprecated! Only kept for backwards compatibility. 
+    # Now governed by :attr:`steer` trait.
     env = Property()
     
-    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.grid` for information.
-    grid = Property(desc="beamforming grid")
+    def _get_env(self):
+        return self._steer_obj.env    
     
-    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.mpos` for information.
-    mpos = Property(desc="microphone geometry")
+    def _set_env(self, env):
+        warn("Deprecated use of 'env' trait. ", Warning, stacklevel = 2)
+        self._steer_obj.env = env
     
-    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.r0` for information.
-    r0 = Property(desc="array center to grid distances")
+    # The speed of sound.
+    # Deprecated! Only kept for backwards compatibility. 
+    # Now governed by :attr:`steer` trait.
+    c = Property()
     
-    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.rm` for information.
-    rm = Property(desc="all array mics to grid distances")
+    def _get_c(self):
+        return self._steer_obj.env.c
     
-    #: instance of :class:`~acoular.fbeamform.SteeringVector` or its derived classes,
-    #: that contains information about the steering vector.
-    steer_obj = Instance(SteeringVector(), SteeringVector)  # creates standard steering vector in constructor of BeamformerBase
+    def _set_c(self, c):
+        warn("Deprecated use of 'c' trait. ", Warning, stacklevel = 2)
+        self._steer_obj.env.c = c
+   
+    # :class:`~acoular.grids.Grid`-derived object that provides the grid locations.
+    # Deprecated! Only kept for backwards compatibility. 
+    # Now governed by :attr:`steer` trait.
+    grid = Property()
+
+    def _get_grid(self):
+        return self._steer_obj.grid
+    
+    def _set_grid(self, grid):
+        warn("Deprecated use of 'grid' trait. ", Warning, stacklevel = 2)
+        self._steer_obj.grid = grid
+    
+    # :class:`~acoular.microphones.MicGeom` object that provides the microphone locations.
+    # Deprecated! Only kept for backwards compatibility. 
+    # Now governed by :attr:`steer` trait
+    mpos = Property()
+    
+    def _get_mpos(self):
+        return self._steer_obj.mics
+    
+    def _set_mpos(self, mpos):
+        warn("Deprecated use of 'mpos' trait. ", Warning, stacklevel = 2)
+        self._steer_obj.mics = mpos
+    
+    
+    # Sound travel distances from microphone array center to grid points (r0)
+    # and all array mics to grid points (rm). Readonly.
+    # Deprecated! Only kept for backwards compatibility. 
+    # Now governed by :attr:`steer` trait
+    r0 = Property()
+    def _get_r0(self):
+        return self._steer_obj.r0
+    
+    rm = Property()
+    def _get_rm(self):
+        return self._steer_obj.rm
+    
+    # --- End of backwards compatibility traits --------------------------------------
 
     #: :class:`~acoular.spectra.PowerSpectra` object that provides the 
     #: cross spectral matrix and eigenvalues
     freq_data = Trait(PowerSpectra, 
-        desc="freq data object")
+                      desc="freq data object")
 
     #: Boolean flag, if 'True' (default), the main diagonal is removed before beamforming.
     r_diag = Bool(True, 
@@ -499,7 +360,7 @@ class BeamformerBase( HasPrivateTraits ):
     
     # internal identifier
     digest = Property( 
-        depends_on = ['freq_data.digest', 'r_diag', 'r_diag_norm', 'precision', 'steer_obj.digest'])
+        depends_on = ['freq_data.digest', 'r_diag', 'r_diag_norm', 'precision', '_steer_obj.digest'])
 
     # internal identifier
     ext_digest = Property( 
@@ -508,10 +369,8 @@ class BeamformerBase( HasPrivateTraits ):
 
     traits_view = View(
         [
-#            [Item('mpos{}', style='custom')], 
-#            [Item('grid', style='custom'), '-<>'], 
             [Item('r_diag', label='Diagonal removed')], 
-            [Item('c', label='Speed of sound')], 
+            [Item('steer', label='Steering vector')], 
 #            [Item('env{}', style='custom')], 
             '|'
         ], 
@@ -527,41 +386,6 @@ class BeamformerBase( HasPrivateTraits ):
     def _get_ext_digest( self ):
         return digest( self, 'ext_digest' )
     
-    def _get_c(self):
-        return self.steer_obj.c
-    
-    def _get_steer(self):
-        return self.steer_obj.steer_type
-    
-    def _get_env(self):
-        return self.steer_obj.env
-    
-    def _get_grid(self):
-        return self.steer_obj.grid
-    
-    def _get_mpos(self):
-        return self.steer_obj.mpos
-    
-    def _get_r0(self):
-        return self.steer_obj.r0
-    
-    def _get_rm(self):
-        return self.steer_obj.rm
-    
-    def _set_c(self, c):
-        self.steer_obj.c = c
-    
-    def _set_steer(self, steer):
-        self.steer_obj.steer_type = steer
-    
-    def _set_env(self, env):
-        self.steer_obj.env = env
-    
-    def _set_grid(self, grid):
-        self.steer_obj.grid = grid
-    
-    def _set_mpos(self, mpos):
-        self.steer_obj.mpos = mpos
 
     @property_depends_on('ext_digest')
     def _get_result ( self ):
@@ -574,15 +398,15 @@ class BeamformerBase( HasPrivateTraits ):
             _digest = self.digest
             name = self.__class__.__name__ + self.digest
             numchannels = self.freq_data.numchannels
-            if  numchannels != self.steer_obj.mpos.num_mics or numchannels == 0:
-                raise ValueError("%i channels do not fit %i mics" % (numchannels, self.steer_obj.mpos.num_mics))
-            numfreq = self.freq_data.fftfreq().shape[0]# block_size/2 + 1
+            if  numchannels != self.steer.mics.num_mics or numchannels == 0:
+                raise ValueError("%i channels do not fit %i mics" % (numchannels, self.steer.mics.num_mics))
+            numfreq = self.freq_data.fftfreq().shape[0]# block_size/2 + 1steer_obj
             precisionTuple = _precision(self.precision)
             if self.cached:
                 H5cache.get_cache( self, self.freq_data.basename)
                 if not name in self.h5f.root:
                     group = self.h5f.create_group(self.h5f.root, name)
-                    shape = (numfreq, self.steer_obj.grid.size)
+                    shape = (numfreq, self.steer.grid.size)
                     atom = precisionTuple[3]()
                     filters = tables.Filters(complevel=5, complib='blosc')
                     ac = self.h5f.create_carray(group, 'result', atom, shape, filters=filters)
@@ -596,7 +420,7 @@ class BeamformerBase( HasPrivateTraits ):
                     self.calc(ac, fr)                  
                     self.h5f.flush()
             else:
-                ac = zeros((numfreq, self.steer_obj.grid.size), dtype=self.precision)
+                ac = zeros((numfreq, self.steer.grid.size), dtype=self.precision)
                 fr = zeros(numfreq, dtype='int64')
                 self.calc(ac,fr)
         return ac
@@ -614,6 +438,27 @@ class BeamformerBase( HasPrivateTraits ):
         elif self.r_diag_norm != 0.0:  # Removed diag: user defined normalization factor 
             normFactor = self.r_diag_norm 
         return normFactor
+
+
+    def _beamformer_params(self):
+        """
+        Manages the parameters for calling of the core beamformer functionality.
+        This is a workaround to allow faster calculation and may change in the
+        future.
+        
+        Returns
+        -------
+            - String containing the steering vector type
+            - Function for frequency-dependent steering vector calculation
+                
+        """
+        if type(self.steer) == SteeringVector: # for simple steering vector, use faster method
+            param_type = self.steer.steer_type
+            def param_steer_func(f): return (self.steer.r0, self.steer.rm, 2*pi*f/self.steer.env.c )
+        else:
+            param_type = 'custom'
+            param_steer_func = self.steer.steer_vector
+        return param_type, param_steer_func
 
     def calc(self, ac, fr):
         """
@@ -641,18 +486,21 @@ class BeamformerBase( HasPrivateTraits ):
         -------
         This method only returns values through the *ac* and *fr* parameters
         """
-        i = self.freq_data.indices
-        self.steer_obj.f = (self.freq_data.fftfreq()[i]).tolist()
-        normFactor = self.sig_loss_norm()
-        for cntFreq in range(len(i)):
-            if not fr[i[cntFreq]]:
-                csm = array(self.freq_data.csm[i[cntFreq]][newaxis], dtype='complex128')
-                beamformerOutput = self.steer_obj._beamformerCall(cntFreq, self.r_diag, normFactor, (csm,))[0]
+        f = self.freq_data.fftfreq()#[inds]
+        param_steer_type, steer_vector = self._beamformer_params()
+        for i in self.freq_data.indices:
+            if not fr[i]:
+                csm = array(self.freq_data.csm[i], dtype='complex128')
+                beamformerOutput = beamformerFreq(param_steer_type, 
+                                                  self.r_diag, 
+                                                  self.sig_loss_norm(), 
+                                                  steer_vector(f[i]), 
+                                                  csm)[0]
                 if self.r_diag:  # set (unphysical) negative output values to 0
                     indNegSign = sign(beamformerOutput) < 0
                     beamformerOutput[indNegSign] = 0.0
-                ac[i[cntFreq]] = beamformerOutput
-                fr[i[cntFreq]] = True
+                ac[i] = beamformerOutput
+                fr[i] = True
     
     def synthetic( self, f, num=0):
         """
@@ -731,7 +579,7 @@ class BeamformerBase( HasPrivateTraits ):
                          'for all queried frequencies. Check '
                          'freq_data.ind_low and freq_data.ind_high!',
                           Warning, stacklevel = 2)
-        return h.reshape(self.steer_obj.grid.shape)
+        return h.reshape(self.steer.grid.shape)
 
 
     def integrate(self, sector):
@@ -762,8 +610,8 @@ class BeamformerBase( HasPrivateTraits ):
 #        mapshape = (rshape[0], ) + gshape
 #        h = r[:].reshape(mapshape)[ (s_[:], ) + ind ]
 #        return h.reshape(h.shape[0], prod(h.shape[1:])).sum(axis=1)
-        ind = self.steer_obj.grid.indices(*sector)
-        gshape = self.steer_obj.grid.shape
+        ind = self.steer.grid.indices(*sector)
+        gshape = self.steer.grid.shape
         r = self.result
         h = zeros(r.shape[0])
         for i in range(r.shape[0]):
@@ -780,7 +628,7 @@ class BeamformerFunctional( BeamformerBase ):
         desc="functional exponent")
 
     # internal identifier
-    digest = Property(depends_on = ['freq_data.digest', 'steer_obj.digest', 'r_diag', 'gamma'])
+    digest = Property(depends_on = ['freq_data.digest', '_steer_obj.digest', 'r_diag', 'gamma'])
     
     #: Functional Beamforming is only well defined for full CSM
     r_diag = Enum(False, 
@@ -788,10 +636,9 @@ class BeamformerFunctional( BeamformerBase ):
 
     traits_view = View(
         [
-#            [Item('mpos{}', style='custom')], 
+#            [Item('mics{}', style='custom')], 
 #            [Item('grid', style='custom'), '-<>'], 
             [Item('gamma', label='Exponent', style='simple')], 
-            [Item('c', label='Speed of sound')], 
 #            [Item('env{}', style='custom')], 
             '|'
         ], 
@@ -828,11 +675,11 @@ class BeamformerFunctional( BeamformerBase ):
         -------
         This method only returns values through the *ac* and *fr* parameters
         """
-        i = self.freq_data.indices
-        self.steer_obj.f = (self.freq_data.fftfreq()[i]).tolist()
+        f = self.freq_data.fftfreq()
         normFactor = self.sig_loss_norm()
-        for cntFreq in range(len(i)):
-            if not fr[i[cntFreq]]:
+        param_steer_type, steer_vector = self._beamformer_params()
+        for i in self.freq_data.indices:
+            if not fr[i]:
                 if self.r_diag:
                     # This case is not used at the moment (see Trait r_diag)  
                     # It would need some testing as structural changes were not tested...
@@ -843,22 +690,30 @@ class BeamformerFunctional( BeamformerBase ):
 #                     --> To avoid this the root of the csm (removed diag) is calculated directly.
 #                     WATCH OUT: This doesn't really produce good results.
 #==============================================================================
-                    csm = self.freq_data.csm[i[cntFreq]]
+                    csm = self.freq_data.csm[i]
                     fill_diagonal(csm, 0)
                     csmRoot = fractional_matrix_power(csm, 1.0 / self.gamma)
-                    beamformerOutput, steerNorm = self.steer_obj._beamformerCall(cntFreq, self.r_diag, 1.0, (csmRoot[newaxis],))
+                    beamformerOutput, steerNorm = beamformerFreq(param_steer_type, 
+                                                                 self.r_diag, 
+                                                                 1.0, 
+                                                                 steer_vector(f[i]), 
+                                                                 csmRoot)
                     beamformerOutput /= steerNorm  # take normalized steering vec
                     
                     # set (unphysical) negative output values to 0
                     indNegSign = sign(beamformerOutput) < 0
                     beamformerOutput[indNegSign] = 0.0
                 else:
-                    eva = array(self.freq_data.eva[i[cntFreq]][newaxis], dtype='float64') ** (1.0 / self.gamma)
-                    eve = array(self.freq_data.eve[i[cntFreq]][newaxis], dtype='complex128')
-                    beamformerOutput, steerNorm = self.steer_obj._beamformerCall(cntFreq, self.r_diag, 1.0, (eva, eve))  # takes all EigVal into account
+                    eva = array(self.freq_data.eva[i], dtype='float64') ** (1.0 / self.gamma)
+                    eve = array(self.freq_data.eve[i], dtype='complex128')
+                    beamformerOutput, steerNorm = beamformerFreq(param_steer_type, 
+                                                                 self.r_diag, 
+                                                                 1.0, 
+                                                                 steer_vector(f[i]), 
+                                                                 (eva, eve))
                     beamformerOutput /= steerNorm  # take normalized steering vec
-                ac[i[cntFreq]] = (beamformerOutput ** self.gamma) * steerNorm * normFactor  # the normalization must be done outside the beamformer
-                fr[i[cntFreq]] = True
+                ac[i] = (beamformerOutput ** self.gamma) * steerNorm * normFactor  # the normalization must be done outside the beamformer
+                fr[i] = True
             
 class BeamformerCapon( BeamformerBase ):
     """
@@ -872,9 +727,8 @@ class BeamformerCapon( BeamformerBase ):
 
     traits_view = View(
         [
-#            [Item('mpos{}', style='custom')], 
+#            [Item('mics{}', style='custom')], 
 #            [Item('grid', style='custom'), '-<>'], 
-            [Item('c', label='Speed of sound')], 
 #            [Item('env{}', style='custom')], 
             '|'
         ], 
@@ -907,16 +761,20 @@ class BeamformerCapon( BeamformerBase ):
         -------
         This method only returns values through the *ac* and *fr* parameters
         """        
-        i = self.freq_data.indices
-        self.steer_obj.f = (self.freq_data.fftfreq()[i]).tolist()
+        f = self.freq_data.fftfreq()
         nMics = self.freq_data.numchannels
         normFactor = self.sig_loss_norm() * nMics**2
-        for cntFreq in range(len(i)):
-            if not fr[i[cntFreq]]:
-                csm = array(linalg.inv(array(self.freq_data.csm[i[cntFreq]], dtype='complex128')), order='C')[newaxis]
-                beamformerOutput = self.steer_obj._beamformerCall(cntFreq, self.r_diag, normFactor, (csm,))[0]
-                ac[i[cntFreq]] = 1.0 / beamformerOutput
-                fr[i[cntFreq]] = True
+        param_steer_type, steer_vector = self._beamformer_params()
+        for i in self.freq_data.indices:
+            if not fr[i]:
+                csm = array(linalg.inv(array(self.freq_data.csm[i], dtype='complex128')), order='C')
+                beamformerOutput = beamformerFreq(param_steer_type, 
+                                                  self.r_diag, 
+                                                  normFactor, 
+                                                  steer_vector(f[i]), 
+                                                  csm)[0]
+                ac[i] = 1.0 / beamformerOutput
+                fr[i] = True
 
 class BeamformerEig( BeamformerBase ):
     """
@@ -935,15 +793,14 @@ class BeamformerEig( BeamformerBase ):
 
     # internal identifier
     digest = Property( 
-        depends_on = ['freq_data.digest', 'steer_obj.digest', 'r_diag', 'n'])
+        depends_on = ['freq_data.digest', '_steer_obj.digest', 'r_diag', 'n'])
 
     traits_view = View(
         [
-#            [Item('mpos{}', style='custom')], 
+#            [Item('mics{}', style='custom')], 
 #            [Item('grid', style='custom'), '-<>'], 
             [Item('n', label='Component No.', style='simple')], 
             [Item('r_diag', label='Diagonal removed')], 
-            [Item('c', label='Speed of sound')], 
 #            [Item('env{}', style='custom')], 
             '|'
         ], 
@@ -955,10 +812,10 @@ class BeamformerEig( BeamformerBase ):
     def _get_digest( self ):
         return digest( self )
     
-    @property_depends_on('steer_obj.mpos, n')
+    @property_depends_on('steer.mics, n')
     def _get_na( self ):
         na = self.n
-        nm = self.steer_obj.mpos.num_mics
+        nm = self.steer.mics.num_mics
         if na < 0:
             na = max(nm + na, 0)
         return min(nm - 1, na)
@@ -988,20 +845,24 @@ class BeamformerEig( BeamformerBase ):
         -------
         This method only returns values through the *ac* and *fr* parameters
         """
-        i = self.freq_data.indices
-        self.steer_obj.f = (self.freq_data.fftfreq()[i]).tolist()
+        f = self.freq_data.fftfreq()
         na = int(self.na)  # eigenvalue taken into account
         normFactor = self.sig_loss_norm()
-        for cntFreq in range(len(i)):
-            if not fr[i[cntFreq]]:
-                eva = array(self.freq_data.eva[i[cntFreq]][newaxis], dtype='float64')
-                eve = array(self.freq_data.eve[i[cntFreq]][newaxis], dtype='complex128')
-                beamformerOutput = self.steer_obj._beamformerCall(cntFreq, self.r_diag, normFactor, (eva[:, na:na+1], eve[:, :, na:na+1]))[0]
+        param_steer_type, steer_vector = self._beamformer_params()
+        for i in self.freq_data.indices:
+            if not fr[i]:
+                eva = array(self.freq_data.eva[i], dtype='float64')
+                eve = array(self.freq_data.eve[i], dtype='complex128')
+                beamformerOutput = beamformerFreq(param_steer_type, 
+                                                  self.r_diag, 
+                                                  normFactor, 
+                                                  steer_vector(f[i]), 
+                                                  (eva[na:na+1], eve[:, na:na+1]))[0]
                 if self.r_diag:  # set (unphysical) negative output values to 0
                     indNegSign = sign(beamformerOutput) < 0
                     beamformerOutput[indNegSign] = 0
-                ac[i[cntFreq]] = beamformerOutput
-                fr[i[cntFreq]] = True
+                ac[i] = beamformerOutput
+                fr[i] = True
 
 class BeamformerMusic( BeamformerEig ):
     """
@@ -1020,10 +881,9 @@ class BeamformerMusic( BeamformerEig ):
 
     traits_view = View(
         [
-#            [Item('mpos{}', style='custom')], 
+#            [Item('mics{}', style='custom')], 
 #            [Item('grid', style='custom'), '-<>'], 
             [Item('n', label='No. of sources', style='simple')], 
-            [Item('c', label='Speed of sound')], 
 #            [Item('env{}', style='custom')], 
             '|'
         ], 
@@ -1056,18 +916,22 @@ class BeamformerMusic( BeamformerEig ):
         -------
         This method only returns values through the *ac* and *fr* parameters
         """
-        i = self.freq_data.indices
-        self.steer_obj.f = (self.freq_data.fftfreq()[i]).tolist()
+        f = self.freq_data.fftfreq()
         nMics = self.freq_data.numchannels
-        n = int(self.steer_obj.mpos.num_mics-self.na)
+        n = int(self.steer.mics.num_mics-self.na)
         normFactor = self.sig_loss_norm() * nMics**2
-        for cntFreq in range(len(i)):
-            if not fr[i[cntFreq]]:
-                eva = array(self.freq_data.eva[i[cntFreq]][newaxis], dtype='float64')
-                eve = array(self.freq_data.eve[i[cntFreq]][newaxis], dtype='complex128')
-                beamformerOutput = self.steer_obj._beamformerCall(cntFreq, self.r_diag, normFactor, (eva[:, :n], eve[:, :, :n]))[0]
-                ac[i[cntFreq]] = 4e-10*beamformerOutput.min() / beamformerOutput
-                fr[i[cntFreq]] = True
+        param_steer_type, steer_vector = self._beamformer_params()
+        for i in self.freq_data.indices:
+            if not fr[i]:
+                eva = array(self.freq_data.eva[i], dtype='float64')
+                eve = array(self.freq_data.eve[i], dtype='complex128')
+                beamformerOutput = beamformerFreq(param_steer_type, 
+                                                  self.r_diag, 
+                                                  normFactor, 
+                                                  steer_vector(f[i]), 
+                                                  (eva[:n], eve[:, :n]))[0]
+                ac[i] = 4e-10*beamformerOutput.min() / beamformerOutput
+                fr[i] = True
 
 class PointSpreadFunction (HasPrivateTraits):
     """
@@ -1078,35 +942,104 @@ class PointSpreadFunction (HasPrivateTraits):
     The PSF is needed by several deconvolution algorithms to correct
     the aberrations when using simple delay-and-sum beamforming.
     """
-    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.grid` for information.
-    grid = Property(desc="beamforming grid")
+    
+        # Instance of :class:`~acoular.fbeamform.SteeringVector` or its derived classes
+    # that contains information about the steering vector. This is a private trait.
+    # Do not set this directly, use `steer` trait instead.
+    _steer_obj = Instance(SteeringVector(), SteeringVector)   
+    
+    #: :class:`~acoular.fbeamform.SteeringVector` or derived object. 
+    #: Defaults to :class:`~acoular.fbeamform.SteeringVector` object.
+    steer = Property(desc="steering vector object")  
+    
+    def _get_steer(self):
+        return self._steer_obj
+    
+    def _set_steer(self, steer):
+        if isinstance(steer, SteeringVector):
+            self._steer_obj = steer
+        elif steer in ('true level', 'true location', 'classic', 'inverse'):
+            # Type of steering vectors, see also :ref:`Sarradj, 2012<Sarradj2012>`.
+            warn("Deprecated use of 'steer' trait. "
+                 "Please use object of class 'SteeringVector' in the future.", 
+                 Warning, stacklevel = 2)
+            self._steer_obj = SteeringVector(steer_type = steer)
+        else:
+            raise(TraitError(args=self,
+                             name='steer', 
+                             info='SteeringVector',
+                             value=steer))
+
+    # --- List of backwards compatibility traits and their setters/getters -----------
+    
+    # :class:`~acoular.environments.Environment` or derived object. 
+    # Deprecated! Only kept for backwards compatibility. 
+    # Now governed by :attr:`steer` trait.
+    env = Property()
+    
+    def _get_env(self):
+        return self._steer_obj.env    
+    
+    def _set_env(self, env):
+        warn("Deprecated use of 'env' trait. ", Warning, stacklevel = 2)
+        self._steer_obj.env = env
+    
+    # The speed of sound.
+    # Deprecated! Only kept for backwards compatibility. 
+    # Now governed by :attr:`steer` trait.
+    c = Property()
+    
+    def _get_c(self):
+        return self._steer_obj.env.c
+    
+    def _set_c(self, c):
+        warn("Deprecated use of 'c' trait. ", Warning, stacklevel = 2)
+        self._steer_obj.env.c = c
+   
+    # :class:`~acoular.grids.Grid`-derived object that provides the grid locations.
+    # Deprecated! Only kept for backwards compatibility. 
+    # Now governed by :attr:`steer` trait.
+    grid = Property()
+
+    def _get_grid(self):
+        return self._steer_obj.grid
+    
+    def _set_grid(self, grid):
+        warn("Deprecated use of 'grid' trait. ", Warning, stacklevel = 2)
+        self._steer_obj.grid = grid
+    
+    # :class:`~acoular.microphones.MicGeom` object that provides the microphone locations.
+    # Deprecated! Only kept for backwards compatibility. 
+    # Now governed by :attr:`steer` trait
+    mpos = Property()
+    
+    def _get_mpos(self):
+        return self._steer_obj.mics
+    
+    def _set_mpos(self, mpos):
+        warn("Deprecated use of 'mpos' trait. ", Warning, stacklevel = 2)
+        self._steer_obj.mics = mpos
+    
+    
+    # Sound travel distances from microphone array center to grid points (r0)
+    # and all array mics to grid points (rm). Readonly.
+    # Deprecated! Only kept for backwards compatibility. 
+    # Now governed by :attr:`steer` trait
+    r0 = Property()
+    def _get_r0(self):
+        return self._steer_obj.r0
+    
+    rm = Property()
+    def _get_rm(self):
+        return self._steer_obj.rm
+    
+    # --- End of backwards compatibility traits --------------------------------------
+    
     
     #: Indices of grid points to calculate the PSF for.
     grid_indices = CArray( dtype=int, value=array([]), 
                      desc="indices of grid points for psf") #value=array([]), value=self.grid.pos(),
     
-    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.mpos` for information.
-    mpos = Property(desc="microphone geometry")
-    
-    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.env` for information.
-    env = Property()
-    
-    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.c` for information.
-    c = Property(desc="speed of sound")
-    
-    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.steer_type` for information.
-    steer = Property(desc="type of steering vectors used")
-    
-    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.r0` for information.
-    r0 = Property(desc="array center to grid distances")
-    
-    #: Dummy property for Backward compatibility. See :attr:`~acoular.fbeamform.SteeringVector.rm` for information.
-    rm = Property(desc="all array mics to grid distances")
-    
-    #: instance of :class:`~acoular.fbeamform.SteeringVector` or its derived classes,
-    #: that contains information about the steering vector.
-    steer_obj = Trait(SteeringVector)
-
     #: Flag that defines how to calculate and store the point spread function
     #: defaults to 'single'.
     #:
@@ -1131,54 +1064,46 @@ class PointSpreadFunction (HasPrivateTraits):
     h5f = Instance(tables.File, transient = True)
     
     # internal identifier
-    digest = Property( depends_on = ['steer_obj.digest', 'precision'], cached = True)
+    digest = Property( depends_on = ['_steer_obj.digest', 'precision'], cached = True)
 
     @cached_property
     def _get_digest( self ):
         return digest( self )
     
-    def _get_c(self):
-        return self.steer_obj.c
-    
-    def _get_steer(self):
-        return self.steer_obj.steer_type
-    
-    def _get_env(self):
-        return self.steer_obj.env
-    
-    def _get_grid(self):
-        return self.steer_obj.grid
-    
-    def _get_mpos(self):
-        return self.steer_obj.mpos
-    
-    def _get_r0(self):
-        return self.steer_obj.r0
-    
-    def _get_rm(self):
-        return self.steer_obj.rm
-    
-    def _set_c(self, c):
-        self.steer_obj.c = c
-    
-    def _set_steer(self, steer):
-        self.steer_obj.steer_type = steer
-    
-    def _set_env(self, env):
-        self.steer_obj.env = env
-    
-    def _set_grid(self, grid):
-        self.steer_obj.grid = grid
-    
-    def _set_mpos(self, mpos):
-        self.steer_obj.mpos = mpos
+
+    def _psfCall(self, ind):
+        """
+        Manages the calling of the core psf functionality.
+        
+        Parameters
+        ----------
+        ind : list of int
+            Indices of gridpoints which are assumed to be sources.
+            Normalization factor for the beamforming result (e.g. removal of diag is compensated with this.)
+
+        Returns
+        -------
+        The psf [1, nGridPoints, len(ind)]
+        """
+        if type(self.steer) == SteeringVector: # for simple steering vector, use faster method
+            result = calcPointSpreadFunction(self.steer.steer_type, 
+                                             self.steer.r0, 
+                                             self.steer.rm, 
+                                             2*pi*self.freq[newaxis]/self.env.c, 
+                                             ind, self.precision)[0]
+        else: # for arbitrary steering sectors, use general calculation
+            # there is a version of this in fastFuncs, may be used later after runtime testing and debugging
+            product = dot(self.steer.steer_vector(self.freq).conj(), self.steer.transfer(self.freq,ind).T)
+            result = (product * product.conj()).real
+        return result
 
     def _get_psf ( self ):
         """
         This is the :attr:`psf` getter routine.
         The point spread function is either loaded or calculated.
         """
-        gs = self.steer_obj.grid.size
+        steer = self.steer
+        gs = steer.grid.size
         if not self.grid_indices.size:
             self.grid_indices = arange(gs)
         name = 'psf' + self.digest
@@ -1187,14 +1112,14 @@ class PointSpreadFunction (HasPrivateTraits):
         precisionTuple = _precision(self.precision)
         
         # check wether self.freq is part of SteeringVector.f
-        freqInSteerObjFreq = isclose(array(self.steer_obj.f), self.freq)
-        if freqInSteerObjFreq.any():
-            freqInd = flatnonzero(freqInSteerObjFreq)[0]
-        else:
-            warn('PointSpreadFunction.freq (%s Hz) was appended to PointSpreadFunction.steer_obj.f, '\
-                 'as it was not an element of the original list!' % self.freq, Warning, stacklevel = 2)
-            self.steer_obj.f.append(self.freq)
-            freqInd = int(-1)
+        #freqInSteerObjFreq = isclose(array(self._steer_obj.f), self.freq)
+        #if freqInSteerObjFreq.any():
+        #    freqInd = flatnonzero(freqInSteerObjFreq)[0]
+        #else:
+        #    warn('PointSpreadFunction.freq (%s Hz) was appended to PointSpreadFunction._steer_obj.f, '\
+        #         'as it was not an element of the original list!' % self.freq, Warning, stacklevel = 2)
+        #    self._steer_obj.f.append(self.freq)
+        #    freqInd = int(-1)
         
         # get the cached data, or, if non-existing, create new structure
         if not fr in self.h5f.root:
@@ -1227,22 +1152,23 @@ class PointSpreadFunction (HasPrivateTraits):
                     calc_ind = [0]
                 else:
                     calc_ind = invert(gp[:][self.grid_indices])
-                
-                # get indices which have the value True = not yet calculated
+            
+            # get indices which have the value True = not yet calculated
                 g_ind_calc = self.grid_indices[calc_ind]
-            if self.calcmode == 'single':
+            
+            if self.calcmode == 'single': # calculate selected psfs one-by-one
                 for ind in g_ind_calc:
-                    ac[:,ind] = self.steer_obj._psfCall(freqInd, [ind], self.precision)[0,:,0]
+                    ac[:,ind] = self._psfCall([ind])[:,0]
                     gp[ind] = True
-            elif self.calcmode == 'full':
+            elif self.calcmode == 'full': # calculate all psfs in one go
                 gp[:] = True
-                ac[:] = self.steer_obj._psfCall(freqInd, arange(self.steer_obj.grid.size), self.precision)[0,:,:]
-            else: # 'block'
-                hh = self.steer_obj._psfCall(freqInd, g_ind_calc, self.precision)
+                ac[:] = self._psfCall(arange(gs))
+            else: # 'block' # calculate selected psfs in one go
+                hh = self._psfCall(g_ind_calc)
                 indh = 0
                 for ind in g_ind_calc:
                     gp[ind] = True
-                    ac[:,ind] = hh[0,:,indh]
+                    ac[:,ind] = hh[:,indh]
                     indh += 1
             self.h5f.flush()
         return ac[:][:,self.grid_indices]
@@ -1266,7 +1192,7 @@ class BeamformerDamas (BeamformerBase):
     
     #: instance of :class:`~acoular.fbeamform.SteeringVector` or its derived classes,
     #: that contains information about the steering vector. Is set automatically.
-    steer_obj = Delegate('beamformer')
+    steer = Delegate('beamformer')
     
     #: Floating point precision of result, is set automatically.
     precision = Delegate('beamformer')
@@ -1344,18 +1270,17 @@ class BeamformerDamas (BeamformerBase):
         -------
         This method only returns values through the *ac* and *fr* parameters
         """
-        i = self.freq_data.indices
-        self.steer_obj.f = (self.freq_data.fftfreq()[i]).tolist()
-        p = PointSpreadFunction(steer_obj=self.steer_obj, calcmode=self.calcmode, precision=self.psf_precision)
-        for cntFreq in range(len(i)):
-            if not fr[i[cntFreq]]:
-                y = array(self.beamformer.result[i[cntFreq]])
+        f = self.freq_data.fftfreq()
+        p = PointSpreadFunction(steer=self.steer, calcmode=self.calcmode, precision=self.psf_precision)
+        for i in self.freq_data.indices:
+            if not fr[i]:
+                y = array(self.beamformer.result[i])
                 x = y.copy()
-                p.freq = self.steer_obj.f[cntFreq]
+                p.freq = f[i]
                 psf = p.psf[:]
                 damasSolverGaussSeidel(psf, y, self.n_iter, self.damp, x)
-                ac[i[cntFreq]] = x
-                fr[i[cntFreq]] = True
+                ac[i] = x
+                fr[i] = True
 
 class BeamformerDamasPlus (BeamformerDamas):
     """
@@ -1450,14 +1375,13 @@ class BeamformerDamasPlus (BeamformerDamas):
         -------
         This method only returns values through the *ac* and *fr* parameters
         """
-        i = self.freq_data.indices
-        self.steer_obj.f = (self.freq_data.fftfreq()[i]).tolist()
-        p = PointSpreadFunction(steer_obj=self.steer_obj, calcmode=self.calcmode, precision=self.psf_precision)
+        f = self.freq_data.fftfreq()
+        p = PointSpreadFunction(steer=self.steer, calcmode=self.calcmode, precision=self.psf_precision)
         unit = self.unit_mult
-        for cntFreq in range(len(i)):
-            if not fr[i[cntFreq]]:
-                y = self.beamformer.result[i[cntFreq]] * unit
-                p.freq = self.steer_obj.f[cntFreq]
+        for i in self.freq_data.indices:
+            if not fr[i]:
+                y = self.beamformer.result[i] * unit
+                p.freq = f[i]
                 psf = p.psf[:]
 
                 if self.method == 'NNLS':
@@ -1477,12 +1401,12 @@ class BeamformerDamasPlus (BeamformerDamas):
                 
                 
                 if self.method in ('NNLS','LP'):
-                    ac[i[cntFreq]] = resopt / unit
+                    ac[i] = resopt / unit
                 else: # sklearn models
                     model.fit(psf,y)
-                    ac[i[cntFreq]] = model.coef_[:] / unit
+                    ac[i] = model.coef_[:] / unit
                 
-                fr[i[cntFreq]] = True
+                fr[i] = True
 
 class BeamformerOrth (BeamformerBase):
     """
@@ -1503,7 +1427,7 @@ class BeamformerOrth (BeamformerBase):
     
     #: instance of :class:`~acoular.fbeamform.SteeringVector` or its derived classes,
     #: that contains information about the steering vector. Is set automatically.
-    steer_obj = Delegate('beamformer')
+    steer = Delegate('beamformer')
 
     #: List of components to consider, use this to directly set the eigenvalues
     #: used in the beamformer. Alternatively, set :attr:`n`.
@@ -1532,7 +1456,6 @@ class BeamformerOrth (BeamformerBase):
 #            [Item('grid', style='custom'), '-<>'], 
             [Item('n', label='Number of components', style='simple')], 
             [Item('r_diag', label='Diagonal removed')], 
-            [Item('c', label='Speed of sound')], 
 #            [Item('env{}', style='custom')], 
             '|'
         ], 
@@ -1617,7 +1540,7 @@ class BeamformerCleansc( BeamformerBase ):
 
     # internal identifier
     digest = Property( 
-        depends_on = ['freq_data.digest', 'steer_obj.digest', 'r_diag', 'n', 'damp', 'stopn'])
+        depends_on = ['freq_data.digest', '_steer_obj.digest', 'r_diag', 'n', 'damp', 'stopn'])
 
     traits_view = View(
         [
@@ -1625,7 +1548,6 @@ class BeamformerCleansc( BeamformerBase ):
 #            [Item('grid', style='custom'), '-<>'], 
             [Item('n', label='No. of iterations', style='simple')], 
             [Item('r_diag', label='Diagonal removed')], 
-            [Item('c', label='Speed of sound')], 
 #            [Item('env{}', style='custom')], 
             '|'
         ], 
@@ -1666,9 +1588,8 @@ class BeamformerCleansc( BeamformerBase ):
         # prepare calculation
         normFactor = self.sig_loss_norm()
         numchannels = self.freq_data.numchannels
-        i = self.freq_data.indices
-        self.steer_obj.f = (self.freq_data.fftfreq()[i]).tolist()
-        result = zeros((self.steer_obj.grid.size), 'f') 
+        f = self.freq_data.fftfreq()
+        result = zeros((self.steer.grid.size), 'f') 
         normFac = self.sig_loss_norm()
         if not self.n:
             J = numchannels*2
@@ -1676,35 +1597,45 @@ class BeamformerCleansc( BeamformerBase ):
             J = self.n
         powers = zeros(J, 'd')
         
-        for cntFreq in range(len(i)):
-            if not fr[i[cntFreq]]:
-                csm = array(self.freq_data.csm[i[cntFreq]][newaxis], dtype='complex128', copy=1)
-                h = self.steer_obj._beamformerCall(cntFreq, self.r_diag, normFactor, (csm,))[0]
-
+        param_steer_type, steer_vector = self._beamformer_params()
+        for i in self.freq_data.indices:
+            if not fr[i]:
+                csm = array(self.freq_data.csm[i], dtype='complex128', copy=1)
+                #h = self.steer._beamformerCall(f[i], self.r_diag, normFactor, (csm,))[0]
+                h = beamformerFreq(param_steer_type, 
+                                   self.r_diag, 
+                                   normFactor, 
+                                   steer_vector(f[i]), 
+                                   csm)[0]
                 # CLEANSC Iteration
                 result *= 0.0
                 for j in range(J):
                     xi_max = h.argmax() #index of maximum
-                    powers[j] = hmax = h[0, xi_max] #maximum
+                    powers[j] = hmax = h[xi_max] #maximum
                     result[xi_max] += self.damp * hmax
                     if  j > self.stopn and hmax > powers[j-self.stopn]:
                         break
-                    trans = self.steer_obj._transfer_specific_gridpoint(xi_max)[cntFreq, :][newaxis]
-                    wmax = self.steer_obj.calc_steer_vector(trans)[0] * sqrt(normFac)
-                    wmax = wmax.conj()  # as old code worked with conjugated csm..should be updated
+                    wmax = self.steer.steer_vector(f[i],xi_max) * sqrt(normFac)
+                    wmax = wmax[0].conj()  # as old code worked with conjugated csm..should be updated
                     hh = wmax.copy()
-                    D1 = dot(csm[0].T - diag(diag(csm[0])), wmax)/hmax
+                    D1 = dot(csm.T - diag(diag(csm)), wmax)/hmax
                     ww = wmax.conj()*wmax
                     for m in range(20):
                         H = hh.conj()*hh
                         hh = (D1+H*wmax)/sqrt(1+dot(ww, H))
                     hh = hh[:, newaxis]
-                    csm1 = hmax*(hh*hh.conj().T)[newaxis, :, :]
-                    h1 = self.steer_obj._beamformerCall(cntFreq, self.r_diag, normFactor, (array((hmax, ))[newaxis, :], hh[newaxis, :].conjugate()))[0]
+                    csm1 = hmax*(hh*hh.conj().T)
+                    
+                    #h1 = self.steer._beamformerCall(f[i], self.r_diag, normFactor, (array((hmax, ))[newaxis, :], hh[newaxis, :].conjugate()))[0]
+                    h1 = beamformerFreq(param_steer_type, 
+                                        self.r_diag, 
+                                        normFactor, 
+                                        steer_vector(f[i]), 
+                                        (array((hmax, )), hh.conj()))[0]
                     h -= self.damp * h1
-                    csm -= self.damp * csm1.transpose(0,2,1)
-                ac[i[cntFreq]] = result
-                fr[i[cntFreq]] = True
+                    csm -= self.damp * csm1.T#transpose(0,2,1)
+                ac[i] = result
+                fr[i] = True
 
 class BeamformerClean (BeamformerBase):
     """
@@ -1723,7 +1654,7 @@ class BeamformerClean (BeamformerBase):
     
     #: instance of :class:`~acoular.fbeamform.SteeringVector` or its derived classes,
     #: that contains information about the steering vector. Is set automatically.
-    steer_obj = Delegate('beamformer')
+    steer = Delegate('beamformer')
     
     #: Floating point precision of result, is set automatically.
     precision = Delegate('beamformer')
@@ -1801,17 +1732,17 @@ class BeamformerClean (BeamformerBase):
         -------
         This method only returns values through the *ac* and *fr* parameters
         """
-        i = self.freq_data.indices
-        self.steer_obj.f = (self.freq_data.fftfreq()[i]).tolist()
-        gs = self.steer_obj.grid.size
+        f = self.freq_data.fftfreq()
+        gs = self.steer.grid.size
         
         if self.calcmode == 'full':
-            print('Warning: calcmode = \'full\', slow CLEAN performance. Better use \'block\' or \'single\'.')
-        p = PointSpreadFunction(steer_obj=self.steer_obj, calcmode=self.calcmode, precision=self.psf_precision)
-        for cntFreq in range(len(i)):
-            if not fr[i[cntFreq]]:
-                p.freq = self.steer_obj.f[cntFreq]
-                dirty = self.beamformer.result[i[cntFreq]]
+            warn("calcmode = 'full', possibly slow CLEAN performance. "
+                 "Better use 'block' or 'single'.", Warning, stacklevel = 2)
+        p = PointSpreadFunction(steer=self.steer, calcmode=self.calcmode, precision=self.psf_precision)
+        for i in self.freq_data.indices:
+            if not fr[i]:
+                p.freq = f[i]
+                dirty = self.beamformer.result[i]
                 clean = zeros(gs, dtype=dirty.dtype)
                 
                 i_iter = 0
@@ -1830,8 +1761,8 @@ class BeamformerClean (BeamformerBase):
                             and i_iter < self.n_iter \
                             and max(dirty) > 0)
                 
-                ac[i[cntFreq]] = clean            
-                fr[i[cntFreq]] = True
+                ac[i] = clean            
+                fr[i] = True
 
 class BeamformerCMF ( BeamformerBase ):
     """
@@ -1869,7 +1800,7 @@ class BeamformerCMF ( BeamformerBase ):
 
     # internal identifier
     digest = Property( 
-        depends_on = ['freq_data.digest', 'c', 'alpha', 'method', 'max_iter', 'unit_mult', 'r_diag', 'steer_obj.digest'], 
+        depends_on = ['freq_data.digest', 'alpha', 'method', 'max_iter', 'unit_mult', 'r_diag', 'steer.inv_digest'], 
         )
 
     traits_view = View(
@@ -1925,18 +1856,16 @@ class BeamformerCMF ( BeamformerBase ):
             
         # prepare calculation
         i = self.freq_data.indices
-        self.steer_obj.f = (self.freq_data.fftfreq()[i]).tolist()
+        f = self.freq_data.fftfreq()
         nc = self.freq_data.numchannels
-        numpoints = self.steer_obj.grid.size
+        numpoints = self.steer.grid.size
         unit = self.unit_mult
-        hh = zeros((1, numpoints, nc), dtype='D')
 
-        for cntFreq in range(len(i)):
-            if not fr[i[cntFreq]]:
-                csm = array(self.freq_data.csm[i[cntFreq]], dtype='complex128',copy=1)
+        for i in self.freq_data.indices:        
+            if not fr[i]:
+                csm = array(self.freq_data.csm[i], dtype='complex128',copy=1)
 
-                hh = self.steer_obj.transfer
-                h = hh[cntFreq].T
+                h = self.steer.transfer(f[i]).T
                 
                 # reduced Kronecker product (only where solution matrix != 0)
                 Bc = ( h[:,:,newaxis] * \
@@ -1977,12 +1906,12 @@ class BeamformerCMF ( BeamformerBase ):
 
                 # nnls is not in sklearn
                 if self.method == 'NNLS':
-                    ac[i[cntFreq]] , x = nnls(A,R.flat)
-                    ac[i[cntFreq]] /= unit
+                    ac[i] , x = nnls(A,R.flat)
+                    ac[i] /= unit
                 else:
                     model.fit(A,R[:,0])
-                    ac[i[cntFreq]] = model.coef_[:] / unit
-                fr[i[cntFreq]] = True
+                    ac[i] = model.coef_[:] / unit
+                fr[i] = True
 
 class BeamformerGIB(BeamformerEig):  #BeamformerEig #BeamformerBase
     """
@@ -2036,7 +1965,7 @@ class BeamformerGIB(BeamformerEig):  #BeamformerEig #BeamformerBase
     
     # internal identifier++++++++++++++++++++++++++++++++++++++++++++++++++
     digest = Property( 
-        depends_on = ['steer_obj.digest', 'freq_data.digest', \
+        depends_on = ['steer.inv_digest', 'freq_data.digest', \
             'alpha', 'method', 'max_iter', 'unit_mult', 'eps_perc',\
             'pnorm', 'beta','n', 'm'], 
         )
@@ -2063,7 +1992,7 @@ class BeamformerGIB(BeamformerEig):  #BeamformerEig #BeamformerBase
     @property_depends_on('n')
     def _get_na( self ):
         na = self.n
-        nm = self.steer_obj.mpos.num_mics
+        nm = self.steer.mics.num_mics
         if na < 0:
             na = max(nm + na, 0)
         return min(nm - 1, na)
@@ -2096,23 +2025,22 @@ class BeamformerGIB(BeamformerEig):  #BeamformerEig #BeamformerBase
 
         """        
         # prepare calculation
-        i = self.freq_data.indices
-        self.steer_obj.f = (self.freq_data.fftfreq()[i]).tolist()
+        f = self.freq_data.fftfreq()
         n = int(self.n)  
         m = int(self.m)                             #number of eigenvalues
         numchannels = self.freq_data.numchannels   #number of channels
-        numpoints = self.steer_obj.grid.size
+        numpoints = self.steer.grid.size
         hh = zeros((1, numpoints, numchannels), dtype='D')
         
         #Generate a cross spectral matrix, and perform the eigenvalue decomposition
-        for cntFreq in range(len(i)):
-            if not fr[i[cntFreq]]:
+        for i in self.freq_data.indices:        
+            if not fr[i]:
                 #for monopole and source strenght Q needs to define density
                 #calculate a transfer matrix A 
-                hh = self.steer_obj.transfer
-                A=hh[cntFreq].T                 
+                hh = self.steer.transfer(f[i])
+                A=hh.T                 
                 #eigenvalues and vectors               
-                csm = array(self.freq_data.csm[i[cntFreq]], dtype='complex128',copy=1)
+                csm = array(self.freq_data.csm[i], dtype='complex128',copy=1)
                 eva,eve=eigh(csm)
                 eva = eva[::-1]
                 eve = eve[:, ::-1] 
@@ -2189,9 +2117,9 @@ class BeamformerGIB(BeamformerEig):  #BeamformerEig #BeamformerBase
                         #print(s,qi.size)    
                         qi[s,locpoints] = qi_real+qi_imag*1j
                 #Generate source maps of all selected eigenmodes, and superpose source intensity for each source type.
-                ac[i[cntFreq]] = zeros([1,numpoints])
-                ac[i[cntFreq],locpoints] = sum(absolute(qi[:,locpoints])**2,axis=0)
-                fr[i[cntFreq]] = True    
+                ac[i] = zeros([1,numpoints])
+                ac[i,locpoints] = sum(absolute(qi[:,locpoints])**2,axis=0)
+                fr[i] = True    
 
 def L_p ( x ):
     """
