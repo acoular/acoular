@@ -418,12 +418,10 @@ class AngleTracker(MaskedTimeInOut):
                    desc ="rotation angle for trigger position")
     
     # revolutions per minute
-    rpm = CArray()(0,
-                   desc ="revolutions per minute")
+    rpm =  CArray(desc ="revolutions per minute")
           
     #rotation angle
-    angle = Float(0,
-                   desc ="rotation angle")
+    angle = CArray(desc ="rotation angle")
     
     # internal flag to determine whether AngleTracker has been processed
     calcflag = Bool(False) 
@@ -434,11 +432,12 @@ class AngleTracker(MaskedTimeInOut):
         return digest(self)
     
     #helperfunction for index detection
-    def find_nearest_idx(peakarray, value):
+    def find_nearest_idx(self, peakarray, value):
         peakarray = asarray(peakarray)
-        return (abs(peakarray - value)).argmin()
+        idx = (abs(peakarray - value)).argmin()
+        return idx
     
-    def _trigger_to_rpm_and_degree(self):
+    def _to_rpm_and_degree(self):
         """ 
         Returns angles in deg for one or more instants in time.
         
@@ -464,27 +463,26 @@ class AngleTracker(MaskedTimeInOut):
         TriggerPerRevo= self.TriggerPerRevo
         rotDirection = self.rotDirection
         nSamples =  self.source.numsamples
-        StartAngle = self.StartAngle
-        samplerate =  self.source.sample_rate()
-        rpm = zeros(nSamples)
-        angle = zeros(nSamples)
+        samplerate =  self.source.sample_freq
+        self.rpm = np.zeros(nSamples)
+        self.angle = np.zeros(nSamples)
         #number of spline points
-        InterpPoints=10
+        InterpPoints=4
         
         #loop over alle timesamples
         while ind < nSamples :     
             #when starting spline forward
             if ind<peakloc[InterpPoints]:
-                peakdist=peakloc[self.find_nearest_idx(peakloc, ind)+1] - peakloc[self.find_nearest_idx(peakloc, ind)]
-                splineData = stack((range(InterpPoints), peakloc[ind//peakdist:ind//peakdist+InterpPoints]), axis=0)
+                peakdist=peakloc[self.find_nearest_idx(peakarray= peakloc,value=ind)+1] - peakloc[self.find_nearest_idx(peakarray= peakloc,value=ind)]
+                splineData = np.stack((range(InterpPoints), peakloc[ind//peakdist:ind//peakdist+InterpPoints]), axis=0)
             #spline backwards    
             else:
-                peakdist=peakloc[self.find_nearest_idx(peakloc, ind)] - peakloc[self.find_nearest_idx(peakloc, ind)-1]
-                splineData = stack((range(InterpPoints), peakloc[ind//peakdist-InterpPoints:ind//peakdist]), axis=0)
+                peakdist=peakloc[self.find_nearest_idx(peakarray= peakloc,value=ind)] - peakloc[self.find_nearest_idx(peakarray= peakloc,value=ind)-1]
+                splineData = np.stack((range(InterpPoints), peakloc[ind//peakdist-InterpPoints:ind//peakdist]), axis=0)
             #calc angles and rpm    
-            Spline = splrep(splineData[:,:][1], splineData[:,:][0], k=3)    
-            rpm[ind]=splev(ind, Spline, der=1, ext=0)*60*samplerate
-            angle[ind] = splev(ind, Spline, der=0, ext=0)*360*rotDirection/TriggerPerRevo + StartAngle % 360
+            Spline = scipy.interpolate.splrep(splineData[:,:][1], splineData[:,:][0], k=3)    
+            self.rpm[ind]=scipy.interpolate.splev(ind, Spline, der=1, ext=0)*60*samplerate
+            self.angle[ind] = (scipy.interpolate.splev(ind, Spline, der=0, ext=0)*2*pi*rotDirection/TriggerPerRevo + self.StartAngle) % (2*pi)
             #next sample
             ind+=1
         #calculation complete    
@@ -494,15 +492,15 @@ class AngleTracker(MaskedTimeInOut):
     @cached_property
     def _get_rpm( self ):
         if not self.calcflag:
-            self._to_rpm_degree()
+            self._to_rpm_and_degree()
         return self.rpm
 
     #calc of angle from trigger data
     @cached_property
     def _get_angle(self):
         if not self.calcflag:
-            self._to_rpm_degree()
-        return self.angle
+            self._to_rpm_and_degree()
+        return self.angle[:]
 
 class EngineOrderAnalyzer(TimeInOut):
     """
