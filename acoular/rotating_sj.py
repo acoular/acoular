@@ -40,7 +40,6 @@ from acoular.environments import cartToCyl, Environment
 from acoular.microphones import MicGeom
 
 ####AngleTracker imports 
-
 from acoular.tprocess import TimeInOut,MaskedTimeInOut,Trigger
 from scipy.interpolate import splev
 
@@ -236,7 +235,8 @@ class AngleTracker(MaskedTimeInOut):
     trigger = Instance(Trigger) 
     
     #internal identifier
-    digest = Property(depends_on=['source.digest'])
+    digest = Property(depends_on=['source.digest', 'trigger.digest', 'TriggerPerRevo', \
+                                  'rotDirection', 'StartAngle','InterpPoints'])
     
     # trigger signals per revolution
     TriggerPerRevo = Int(1,
@@ -316,7 +316,7 @@ class AngleTracker(MaskedTimeInOut):
             else:
                 peakdist=peakloc[self.find_nearest_idx(peakarray= peakloc,value=ind)] - peakloc[self.find_nearest_idx(peakarray= peakloc,value=ind)-1]
                 splineData = np.stack((range(InterpPoints), peakloc[ind//peakdist-InterpPoints:ind//peakdist]), axis=0)
-            #calc angles and rpm    
+            #calc angles and rpm using spline interpolation   
             Spline = scipy.interpolate.splrep(splineData[:,:][1], splineData[:,:][0], k=3) 
             self.rpm[ind]=scipy.interpolate.splev(ind, Spline, der=1, ext=0)*60*samplerate
             self.angle[ind] = (scipy.interpolate.splev(ind, Spline, der=0, ext=0)*2*pi*rotDirection/TriggerPerRevo + self.StartAngle) % (2*pi)
@@ -368,14 +368,8 @@ class SpatialInterpolator(TimeInOut):
         'ring', '3D', 'custom', desc="spacial dimensionality of the array geometry")
     
 
-    basisVectors = CList()
-    
-    #: rtol for numpys isclose when comparing 
-    #: via cross/dot-products
-    eps = Float(1e-4)
-    
-    #: Stores the output of :meth:`_virtNewCoord_func`; Read-Only
-    _virtNewCoord_func = Property(depends_on=['mpos_real.digest', 'mpos_virtual.digest', 'method','array_dimension'])
+    #basisVectors = CList()
+
     
     #: Sampling frequency of output signal, as given by :attr:`source`.
     sample_freq = Delegate('source', 'sample_freq')
@@ -387,11 +381,11 @@ class SpatialInterpolator(TimeInOut):
     numsamples = Delegate('source', 'numsamples')
     
     #: Stores the output of :meth:`_reduced_interp_dim_core_func`; Read-Only
-    virtNewCoord = Property(depends_on=['mpos_real.digest', 'mpos_virtual.digest', 'ind_subarray', 'eps'])
+    _virtNewCoord_func = Property(depends_on=['mpos_real.digest', 'mpos_virtual.digest', 'method','array_dimension'])
     
     #: internal identifier
-    digest = Property(depends_on=['mpos_real.digest', 'mpos_virtual.digest', 'source.digest', 'ind_subarray', \
-                                  'eps', 'method','array_dimension'])
+    digest = Property(depends_on=['mpos_real.digest', 'mpos_virtual.digest', 'source.digest', \
+                                   'method','array_dimension'])
     
     def _get_numchannels(self):
         return self.mpos_virtual.num_mics
@@ -402,7 +396,7 @@ class SpatialInterpolator(TimeInOut):
     
     @cached_property
     def _get_virtNewCoord(self):
-        return self._virtNewCoord_func(self.mpos_real.mpos, self.mpos_virtual.mpos,self.method, self.array_dimension,self.basisVectors)
+        return self._virtNewCoord_func(self.mpos_real.mpos, self.mpos_virtual.mpos,self.method, self.array_dimension)
     
     
     def _virtNewCoord_func(self, mic, micVirt, method ,array_dimension,basisVectors=[]):
@@ -436,12 +430,12 @@ class SpatialInterpolator(TimeInOut):
                     same as 1d case, BUT with the difference, that here the rotational periodicy is handled, when constructing the mesh.
                     Therefor the mesh could have more vertices than the actual Array mics.
         virtNewCoord : float64[3, nVirtualMics]
-            Projection of each virtual mic onto its new coordinates. The columns of virtNewCoord correspond to [phi, rho, z]
+            Projection of each virtunVirtMicsal mic onto its new coordinates. The columns of virtNewCoord correspond to [phi, rho, z]
         """     
         # init
         nVirtMics = micVirt.shape[1]
         #take all real mics
-        ArrayMics = mic[:]
+        #ArrayMics = mic[:]
         #positions of virtual mics in polar coordinates
         virtNewCoord = zeros((3, nVirtMics))
         virtNewCoord.fill(nan)
@@ -449,41 +443,69 @@ class SpatialInterpolator(TimeInOut):
         mesh = []
 
         if self.array_dimension =='1D' or self.array_dimension =='ring':
-                # get projections onto new coordinate, for virtual mics
-                projectionOnNewAxis = arctan2(ArrayMics[0],ArrayMics[1])+pi   #projection to phi [0;2pi]
+                # get projections onto new coordinate, for real mics
+                projectionOnNewAxis = arctan2(mic[1],mic[0])   #projection to phi [0;2pi]
                 indReorderHelp = argsort(projectionOnNewAxis)             # reorder to start at 0
-                virtNewCoord[0] = array([arctan2(micVirt[0],micVirt[1])+pi]) # ordered coordinates
                 mesh.append([projectionOnNewAxis[indReorderHelp], indReorderHelp])
+                # and for virtual mics
+                virtNewCoord[0] = array([arctan2(micVirt[1],micVirt[0])]) # ordered coordinates  [0;2pi]
+                
                      
         elif self.array_dimension =='2D':  # 2d case
 
             # get real mic projections on new coord system
-            projectionOnNewAxis1 = (arctan2(ArrayMics[0],ArrayMics[1])+pi)[:,newaxis] #projection to phi [0;2pi]
-            projectionOnNewAxis2 = sqrt(ArrayMics[0]**2+ArrayMics[1]**2)[:,newaxis]
+            projectionOnNewAxis1 = (arctan2(mic[1],mic[0])+pi)[:,newaxis] #projection to phi [0;2pi]
+            projectionOnNewAxis2 = sqrt(mic[0]**2+mic[1]**2)[:,newaxis]
             newCoordinates = concatenate((projectionOnNewAxis1, projectionOnNewAxis2), axis=1)
                     
             # get virtual mic projections on new coord system
-            projectionvirt1 = (arctan2(micVirt[0],micVirt[1])+pi)[:,newaxis] #projection to phi [0;2pi]
+            projectionvirt1 = (arctan2(micVirt[1],micVirt[0])+pi)[:,newaxis] #projection to phi [0;2pi]
             projectionvirt2 = sqrt(micVirt[0]**2+micVirt[1]**2)[:,newaxis]
             virtNewCoord[:2] = concatenate((projectionvirt1, projectionvirt2), axis=1).T
             
             #scipy delauney triangulation
             tri = Delaunay(newCoordinates, incremental=True)
-            mesh.append([tri, arange(tri.points.shape[0])])
+            
+            #####testing#######
+            # extend mesh with closest boundary points of repeating mesh 
+            # (both left and right of original array)
+            pointsOriginal = arange(tri.points.shape[0])
+            hull = tri.convex_hull
+            hullPoints = unique(hull)
+                    
+            addRight = tri.points[hullPoints]
+            addRight[:, 0] += 2 * pi
+            addLeft= tri.points[hullPoints]
+            addLeft[:, 0] -= 2 * pi
+            indOrigPoints = concatenate((pointsOriginal, pointsOriginal[hullPoints], pointsOriginal[hullPoints]))
+        
+            # add all hull vertices to original mesh and check which of those 
+            # are actual neighbors of the original array. Cancel out all others.
+            tri.add_points(concatenate([addLeft, addRight]))
+            indices, indptr = tri.vertex_neighbor_vertices
+            hullNeighbor = empty((0), dtype='int32')
+            for currHull in hullPoints:
+                neighborOfHull = indptr[indices[currHull]:indices[currHull + 1]]
+                hullNeighbor = append(hullNeighbor, neighborOfHull)
+            hullNeighborUnique = unique(hullNeighbor)
+            pointsNew = unique(append(pointsOriginal, hullNeighborUnique))
+            tri = Delaunay(tri.points[pointsNew])  # re-meshing
+            mesh.append([tri, indOrigPoints[pointsNew]])
+            #mesh.append([tri, arange(tri.points.shape[0])])
                     
         elif self.array_dimension =='3D':  # 3d case
             
             # get real mic projections on new coord system
-            projectionOnNewAxis1 = (arctan2(micVirt[0],micVirt[1])+pi)[:,newaxis]
-            projectionOnNewAxis2 = sqrt(micVirt[0]**2+micVirt[1]**2)[:,newaxis]
-            projectionOnNewAxis3 = micVirt[2][:,newaxis]
+            projectionOnNewAxis1 = (arctan2(mic[1],mic[0])+pi)[:,newaxis]
+            projectionOnNewAxis2 = sqrt(mic[0]**2+mic[1]**2)[:,newaxis]
+            projectionOnNewAxis3 = mic[2][:,newaxis]
             newCoordinates = concatenate((projectionOnNewAxis1, projectionOnNewAxis2,projectionOnNewAxis3), axis=1)
             
             # get virtual mic projections on new coord system
-            projectionOnNewAxis1 = (arctan2(micVirt[0],micVirt[1])+pi)[:,newaxis]
-            projectionOnNewAxis2 = sqrt(micVirt[0]**2+micVirt[1]**2)[:,newaxis]
-            projectionOnNewAxis3 = micVirt[2][:,newaxis]     
-            virtNewCoord[:] = concatenate((projectionOnNewAxis1, projectionOnNewAxis2,projectionOnNewAxis3), axis=1).T
+            projectionvirt1 = (arctan2(micVirt[1],micVirt[0])+pi)[:,newaxis]
+            projectionvirt2 = sqrt(micVirt[0]**2+micVirt[1]**2)[:,newaxis]
+            projectionvirt3 = micVirt[2][:,newaxis]     
+            virtNewCoord[:] = concatenate((projectionvirt1, projectionvirt2,projectionvirt3), axis=1).T
             
             tri = Delaunay(newCoordinates, incremental=True)
             
@@ -501,11 +523,11 @@ class SpatialInterpolator(TimeInOut):
 
     def _result_core_func(self, p, phiDelay=[], period=None):
         """
-        Performs the actual Interpolation.
+        Performs the actual Interpolation._get_virtNewCoord
         
-        Parameters
+        ParametersvirtProj
         ----------
-        p : float[nSamples, nMicsReal]
+        p : float[nSamples, nMicsReal]        # Interpolation for ring Arrays may be merged with 1D array   
             The pressure field of the yielded sample at real mics.
         phiDelay : empty list (default) or float[nSamples] 
             If passed (rotational case), this list contains the angular delay 
@@ -522,25 +544,24 @@ class SpatialInterpolator(TimeInOut):
         
         #number of time samples
         nTime = p.shape[0]
-        #numberof mics
-        nMics = p.shape[1]
-        # mesh and projection onto polar Co
+        #number of virtual mixcs 
+        nVirtMics = self.mpos_virtual.mpos.shape[1]
+        # mesh and projection onto polar Coordinates
         meshList, virtProj = self._get_virtNewCoord()
         # pressure interpolation init     
-        pInterp = zeros((nTime,nMics))
+        pInterp = zeros((nTime,nVirtMics))
         #helpfunction reordered for reordered pressure values
-        pHelp = p[:][:, meshList[0][1]]
+        pHelp = p[:, meshList[0][1]]
         
-        # Interpolation for 1D Arrays
-        if self.array_dimension =='1D':
-            
-            wantedCoord = virtProj
+        # Interpolation for 1D Arrays 
+        if self.array_dimension =='1D' or self.array_dimension =='ring':
             #for rotation add phidelay
             if not phiDelay == []:
-                xInterpHelp = repmat(wantedCoord[0, :], nTime, 1) + repmat(phiDelay, wantedCoord.shape[1], 1).T
-                xInterp = ((xInterpHelp + pi ) % (2 * pi))  # -pi shifting phi cootrdinate into feasible area [-pi, pi]
+                xInterpHelp = repmat(virtProj[0, :], nTime, 1) + repmat(phiDelay, virtProj.shape[1], 1).T
+                xInterp = ((xInterpHelp ) % (2 * pi)) -pi #  shifting phi cootrdinate into feasible area [-pi, pi]
+            #if no rotation given
             else:
-                xInterp = repmat(wantedCoord[0, :], nTime, 1)
+                xInterp = repmat(virtProj[0, :], nTime, 1)
             #get ordered microphone posions in radiant
             x = meshList[0][0]
             for cntTime in range(nTime):
@@ -552,7 +573,7 @@ class SpatialInterpolator(TimeInOut):
                     
                 elif self.method == 'Spline':
                     #scipy cubic spline interpolation
-                    SplineInterp = CubicSpline(x, pHelp[cntTime, :], axis=0, bc_type='periodic', extrapolate=None)
+                    SplineInterp = CubicSpline(np.append(x,(2*pi)+x[0]), np.append(pHelp[cntTime, :],pHelp[cntTime, :][0]), axis=0, bc_type='periodic', extrapolate=None)
                     pInterp[cntTime] = SplineInterp(xInterp[cntTime, :])    
                     
            
@@ -560,38 +581,19 @@ class SpatialInterpolator(TimeInOut):
                     #not yet functional
                     #todo! from rotating branch
                     pInterp[cntTime] = interp(xInterp[cntTime, :], x, pHelp[cntTime, :], period=period, left=nan, right=nan)
-                          
-        # Interpolation for ring Arrays may be merged with 1D array     
-        elif self.array_dimension =='ring':
-            for cntTime in range(nTime):
-                wantedCoord = virtProj
-                if not phiDelay == []:
-                    xInterpHelp = repmat(wantedCoord[0, :], nTime, 1) + repmat(phiDelay, wantedCoord.shape[1], 1).T
-                    xInterp = ((xInterpHelp + pi ) % (2 * pi))  # -pi shifting phi cootrdinate into feasible area [-pi, pi]
-                else:
-                    xInterp = repmat(wantedCoord[0, :], nTime, 1)
-                x = meshList[0]
-        
-                
-                if self.method == 'Linear':
-                    pInterp[cntTime] = interp(xInterp[cntTime, :], x, pHelp[cntTime, :], period=period, left=nan, right=nan)
-
-                    
-                elif self.method == 'sinc': 
-                    #not yet functional
-                    #todo! from rotating branch
-                    pInterp[cntTime] = interp(xInterp[cntTime, :], x, pHelp[cntTime, :], period=period, left=nan, right=nan)
-              
+                            
+ 
         # Interpolation for arbitrary 2D Arrays
         elif self.array_dimension =='2D':
             if not phiDelay == []:
-                xInterpHelp = repmat(wantedCoord[0, :], nTime, 1) + repmat(phiDelay, wantedCoord.shape[1], 1).T
+                xInterpHelp = repmat(virtProj[0, :], nTime, 1) + repmat(phiDelay, virtProj.shape[1], 1).T
                 xInterp = ((xInterpHelp + pi ) % (2 * pi))  # -pi shifting phi cootrdinate into feasible area [-pi, pi]
             else:
-                xInterp = repmat(wantedCoord[0, :], nTime, 1)  
+                xInterp = repmat(virtProj[0, :], nTime, 1)  
+                
             mesh = meshList[0][0]
             for cntTime in range(nTime):
-                newPoint = concatenate((xInterp[cntTime, :][:, newaxis], wantedCoord[1:, :].T), axis=1)
+                newPoint = concatenate((xInterp[cntTime, :][:, newaxis], virtProj[1:, :].T), axis=1)
   
                 if self.method == 'Linear':
                     f = LinearNDInterpolator(mesh, pHelp[cntTime, :])
@@ -606,14 +608,14 @@ class SpatialInterpolator(TimeInOut):
         # Interpolation for arbitrary 3D Arrays             
         elif self.array_dimension =='3D':
             if not phiDelay == []:
-                xInterpHelp = repmat(wantedCoord[0, :], nTime, 1) + repmat(phiDelay, wantedCoord.shape[1], 1).T
+                xInterpHelp = repmat(virtProj[0, :], nTime, 1) + repmat(phiDelay, virtProj.shape[1], 1).T
                 xInterp = ((xInterpHelp + pi ) % (2 * pi))  #shifting phi cootrdinate into feasible area [-pi, pi]
             else:
-                xInterp = repmat(wantedCoord[0, :], nTime, 1)  
+                xInterp = repmat(virtProj[0, :], nTime, 1)  
+                
             mesh = meshList[0][0]
             for cntTime in range(nTime):
-                    
-                newPoint = concatenate((xInterp[cntTime, :][:, newaxis], wantedCoord[1:, :].T), axis=1)
+                newPoint = concatenate((xInterp[cntTime, :][:, newaxis], virtProj[1:, :].T), axis=1)
                 
                 if self.method == 'Linear':     
                     f = LinearNDInterpolator(mesh, pHelp[cntTime, :])
@@ -639,7 +641,7 @@ class SpatialInterpolator(TimeInOut):
             The last block may be shorter than num.
         """
         for timeData in self.source.result(num):
-            interpVal = self._result_core_func(timeData)
+            interpVal = self.__result_core_funcresult_core_func(timeData)
             yield interpVal
             
             
@@ -662,10 +664,10 @@ class SpatialInterpolatorRotation(SpatialInterpolator):
     #: transformation matrix Q can be used to modify the coordinates.
     #: It is assumed that with the modified coordinates the rotation is around the z-axis. 
     #: The transformation is done via [x,y,z]_mod = Q * [x,y,z]. (default is Identity).
-    Q = CArray(dtype=float64, shape=(3, 3), value=identity(3))
+    #Q = CArray(dtype=float64, shape=(3, 3), value=identity(3))
     
     #: Stores the output of :meth:`_virtNewCoord_func`; Read-Only
-    _virtNewCoord_func = Property(depends_on=['mpos_real.digest', 'mpos_virtual.digest', 'method','array_dimension'])
+    #_virtNewCoord_func = Property(depends_on=['mpos_real.digest', 'mpos_virtual.digest', 'method','array_dimension'])
     
     # internal identifier
     digest = Property( depends_on = ['source.digest', 'rotational_speed', 'Q', 'mpos_real.digest', 'ind_subarray', 'eps', 'mpos_virtual.digest'])
@@ -690,19 +692,19 @@ class SpatialInterpolatorRotation(SpatialInterpolator):
         Samples in blocks of shape (num, :attr:`numchannels`). 
             The last block may be shorter than num.
         """
+        
         period = 2 * pi
-        #phiOffset = 0.0
         #get angle
         angle = self.AngleTracker._get_angle()
         #counter to track angle position
         count=0
-        
         for timeData in self.source.result(num):
-            nTime = timeData.shape[0]
-            phiDelay = angle[count*num:nTime+count*num]       
+            #nTime = timeData.shape[0]
+            #phiDelay = angle[(count*num):(nTime+count*num)]  # index wrong  
+            phiDelay = angle[count:count+num]
             interpVal = self._result_core_func(timeData, phiDelay, period)
-            count=+1
             yield interpVal
+            count += num
     
     
 
