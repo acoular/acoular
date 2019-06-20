@@ -611,11 +611,102 @@ class OpenJet( FlowField ):
         Udx = (h1*h1/(x*x1*x1)-h1/(x*x1))*U
         if h1 < 0.0:
             Udx = 0
+
         # flow field
         v = array( (U, 0., 0.) )
         # Jacobi matrix
         dv = array( ((Udx, 0., 0.), (Udy, 0., 0.), (Udz, 0., 0.)) ).T
         return v, dv
+
+
+
+
+class RotatingFlow( FlowField ):
+    """
+    Provides an analytical approximation of the flow field of a rotating fluid, 
+
+    Notes
+    -----
+    This is not a full implementation 
+
+    """
+    #: Exit velocity at jet origin, i.e. the nozzle. Defaults to 0.
+    rpm = Float(0.0,
+        desc="revolutions per minute of the virtual array; negative values for clockwise rotation")
+
+    v0 = Float(0.0, 
+        desc="flow velocity")
+
+    #: Location of the nozzle center, defaults to the co-ordinate origin.
+    origin = CArray( dtype=float64, shape=(3, ), value=array((0., 0., 0.)), 
+        desc="center of nozzle")
+
+
+    # internal identifier
+    digest = Property(
+        depends_on=['v0', 'origin', 'rpm'], 
+        )
+
+    traits_view = View(
+            [
+                ['v0{flow velocity}', 'origin{Jet origin}', 
+                'rpm{ revolutions }'], 
+                '|[RotatingFlow]'
+            ]
+        )
+
+    @cached_property
+    def _get_omega(self):
+        return 2 * pi * self.rpm / 60
+
+    @cached_property
+    def _get_digest( self ):
+        return digest( self )
+
+    def v( self, xx):
+        """
+        Provides the rotating flow field around the z-Axis as a function of the location.
+
+        Parameters
+        ----------
+        xx : array of floats of shape (3, )
+            Location in the fluid for which to provide the data.
+
+        Returns
+        -------
+        tuple with two elements
+            The first element in the tuple is the velocity vector and the
+            second is the Jacobian of the velocity vector field, both at the
+            given location.
+        """
+        x, y, z = xx-self.origin
+
+        #polar coord and rotational speed
+        r = sqrt(x*x+y*y)
+        phi = arctan2(y, x)
+        omega = self._get_omega()
+
+        #velocity vector
+        U = omega * r * sin(phi)
+        V = -omega * r * cos(phi)
+        W = self.v0 
+    
+        #jacobian 
+        Udx = omega * ( sin(phi) * x/r +  cos(phi) * y/r)
+        Vdx = omega * (-cos(phi) * x/r +  sin(phi) * y/r)
+
+        Udy = omega * ( sin(phi) * y/r + cos(phi) * x/r)
+        Vdy = omega * (-cos(phi) * y/r + sin(phi) * x/r)
+
+
+        # flow field
+        v = array( (U, V, W) )
+        # Jacobi matrix
+        dv = array( ((Udx, Vdx, 0.), (Udy, Vdy, 0.), (0., 0., 0.)) ).T
+        return v, dv
+
+
+
 
 def spiral_sphere(N, Om=2*pi, b=array((0, 0, 1))):
     """
