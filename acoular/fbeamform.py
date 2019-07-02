@@ -1085,8 +1085,8 @@ class PointSpreadFunction (HasPrivateTraits):
             result = calcPointSpreadFunction(self.steer.steer_type, 
                                              self.steer.r0, 
                                              self.steer.rm, 
-                                             2*pi*self.freq[newaxis]/self.env.c, 
-                                             ind, self.precision)[0]
+                                             2*pi*self.freq/self.env.c, 
+                                             ind, self.precision)
         else: # for arbitrary steering sectors, use general calculation
             # there is a version of this in fastFuncs, may be used later after runtime testing and debugging
             product = dot(self.steer.steer_vector(self.freq).conj(), self.steer.transfer(self.freq,ind).T)
