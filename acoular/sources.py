@@ -191,8 +191,6 @@ class TimeSamples( SamplesGenerator ):
                 yield self.data[i:i+num]
                 i += num
 
-
-
 class MaskedTimeSamples( TimeSamples ):
     """
     Container for time data in `*.h5` format.
