@@ -87,7 +87,7 @@ class Environment( HasPrivateTraits ):
         ----------
         gpos : array of floats of shape (3, N)
             The locations of points in the beamforming map grid in 3D cartesian
-            co-ordinates.
+            co-ordinates. 
         mpos : array of floats of shape (3, M), optional
             The locations of microphones in 3D cartesian co-ordinates. If not
             given, then only one microphone at the origin (0, 0, 0) is
@@ -708,14 +708,14 @@ class RotatingFlow( FlowField ):
 
 
 
-def spiral_sphere(N, Om=2*pi, b=array((0, 0, 1))):
+def spiral_sphere(N, Om=2*pi, b=array((0, 0, 1))):    #change to 4*pi
     """
     Internal helper function for the raycasting that returns an array of
     unit vectors (N, 3) giving equally distributed directions on a part of
     sphere given by the center direction b and the solid angle Om.
     """
     # first produce 'equally' distributed directions in spherical coords
-    o = 4*pi/Om
+    o = 4*pi/Om 
     h = -1+ 2*arange(N)/(N*o-1.)
     theta = arccos(h)
     phi = zeros_like(theta)
