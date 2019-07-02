@@ -62,7 +62,7 @@ class TimeInOut( SamplesGenerator ):
     numsamples = Delegate('source')
             
     # internal identifier
-    digest = Property( depends_on = ['source.digest', '__class__'])
+    digest = Property( depends_on = ['source.digest'])
 
     traits_view = View(
         Item('source', style='custom')
