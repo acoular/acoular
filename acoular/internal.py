@@ -6,7 +6,7 @@
 from hashlib import md5
 
 def digest( obj, name='digest'):
-    str_ = []
+    str_ = [str(obj.__class__).encode("UTF-8")]
     for do_ in obj.trait(name).depends_on:
         vobj = obj
         try:
