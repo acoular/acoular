@@ -12,21 +12,14 @@ import tables
 from weakref import WeakValueDictionary
 import gc
 
-# path to cache directory, possibly in temp
-try:
-    cache_dir = path.join(environ['TEMP'],'acoular_cache')
-except KeyError:
-    cache_dir = path.join(path.curdir,'cache')
+# path to cache directory
+cache_dir = path.join(path.curdir,'cache')
 if not path.exists(cache_dir):
     mkdir(cache_dir)
 
-# path to td directory (used for import to *.h5 files)
-try:
-    td_dir = path.join(environ['HOMEDRIVE'], environ['HOMEPATH'], 'acoular_td')
-except KeyError:
-    td_dir = path.join(path.curdir,'td')
-if not path.exists(td_dir):
-    mkdir(td_dir)
+# path to working directory (used for import to *.h5 files)
+td_dir = path.join(path.curdir)
+
 
 class H5cache_class(HasPrivateTraits):
     """
