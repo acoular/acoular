@@ -18,7 +18,7 @@ if not path.exists(cache_dir):
     mkdir(cache_dir)
 
 # path to working directory (used for import to *.h5 files)
-td_dir = path.join(path.curdir)
+td_dir = path.curdir
 
 
 class H5cache_class(HasPrivateTraits):
