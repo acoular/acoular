@@ -776,6 +776,7 @@ def calcPointSpreadFunction(steerVecType, distGridToArrayCenter, distGridToAllMi
     # prepare input
     nGridPoints = distGridToAllMics.shape[0]
     nSources = len(indSource)
+    if not isinstance(waveNumber, np.ndarray): waveNumber = np.array([waveNumber])
     
     # psf routine: parallelized over Gridpoints
     psfOutput = np.zeros((nGridPoints, nSources), dtype=dtype)
