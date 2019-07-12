@@ -115,8 +115,12 @@ class TimeSamples( SamplesGenerator ):
     #: HDF5 file object
     h5f = Instance(tables.File, transient = True)
     
+    #: Cecksum over first data entries of all channels
+    datachecksum = Property(
+        desc="calculates check sum over time data")
+    
     # internal identifier
-    digest = Property( depends_on = ['basename', 'calib.digest'])
+    digest = Property( depends_on = ['basename', 'calib.digest', 'datachecksum'])
 
     traits_view = View(
         ['name{File name}', 
@@ -130,6 +134,9 @@ class TimeSamples( SamplesGenerator ):
         buttons = OKCancelButtons
                     )
 
+    def _get_datachecksum( self ):
+        return self.data[0,:].sum()
+    
     @cached_property
     def _get_digest( self ):
         return digest(self)
@@ -176,6 +183,7 @@ class TimeSamples( SamplesGenerator ):
         """
         if self.numsamples == 0:
             raise IOError("no samples available")
+        self.datachecksum # trigger checksum calculation
         i = 0
         if self.calib:
             if self.calib.num_mics == self.numchannels:
@@ -237,7 +245,7 @@ class MaskedTimeSamples( TimeSamples ):
 
     # internal identifier
     digest = Property( depends_on = ['basename', 'start', 'stop', \
-        'calib.digest', 'invalid_channels'])
+        'calib.digest', 'invalid_channels','datachecksum'])
 
     traits_view = View(
         ['name{File name}', 
@@ -320,6 +328,7 @@ class MaskedTimeSamples( TimeSamples ):
         cal_factor = 1.0
         if i >= stop:
             raise IOError("no samples available")
+        self.datachecksum # trigger checksum calculation
         if self.calib:
             if self.calib.num_mics == self.numchannels_total:
                 cal_factor = self.calib.data[self.channels][newaxis]
