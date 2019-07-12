@@ -734,7 +734,7 @@ def calcPointSpreadFunction(steerVecType, distGridToArrayCenter, distGridToAllMi
         Distance of all gridpoints to the center of sensor array
     distGridToAllMics : float64[nGridpoints, nMics]
         Distance of all gridpoints to all sensors of array
-    waveNumber : float64[nFreqs]
+    waveNumber : float64
         The free field wave number.
     indSource : a LIST of int (e.g. indSource=[5] is fine; indSource=5 doesn't work):
         specifies which gridpoints should be assumed to be sources 
@@ -774,15 +774,19 @@ def calcPointSpreadFunction(steerVecType, distGridToArrayCenter, distGridToAllMi
     coreFunc = psfDict[steerVecType]
 
     # prepare input
-    nFreqs, nGridPoints = waveNumber.shape[0], distGridToAllMics.shape[0]
+    nGridPoints = distGridToAllMics.shape[0]
     nSources = len(indSource)
+    if not isinstance(waveNumber, np.ndarray): waveNumber = np.array([waveNumber])
     
     # psf routine: parallelized over Gridpoints
-    psfOutput = np.zeros((nFreqs, nGridPoints, nSources), dtype=dtype)
-    for cntFreqs in xrange(nFreqs):
-        result = np.zeros((nGridPoints, nSources), dtype=dtype)
-        coreFunc(distGridToArrayCenter, distGridToAllMics, distGridToArrayCenter[indSource], distGridToAllMics[indSource, :], waveNumber[cntFreqs], result)
-        psfOutput[cntFreqs, :, :] = result
+    psfOutput = np.zeros((nGridPoints, nSources), dtype=dtype)
+    coreFunc(distGridToArrayCenter, 
+             distGridToAllMics, 
+             distGridToArrayCenter[indSource], 
+             distGridToAllMics[indSource, :], 
+             waveNumber, 
+             psfOutput)
+
     return psfOutput
 
 
