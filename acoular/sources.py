@@ -133,7 +133,7 @@ class TimeSamples( SamplesGenerator ):
         buttons = OKCancelButtons
                     )
 
-    def _get_datachecksum( self ):
+    def _get__datachecksum( self ):
         return self.data[0,:].sum()
     
     @cached_property
@@ -244,7 +244,7 @@ class MaskedTimeSamples( TimeSamples ):
 
     # internal identifier
     digest = Property( depends_on = ['basename', 'start', 'stop', \
-        'calib.digest', 'invalid_channels','datachecksum'])
+        'calib.digest', 'invalid_channels','_datachecksum'])
 
     traits_view = View(
         ['name{File name}', 
