@@ -127,6 +127,7 @@ ax0.set_ylabel('y')
 ax0.set_zlabel('z')
 ax0.set_title('Setup (mic and source positions)')
 
-show()
+# only display result on screen if this script is run directly
+if __name__ == '__main__': show()
 
 
