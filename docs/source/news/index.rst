@@ -1,5 +1,16 @@
 What's new
 ============
+19.08
+------------
+    
+    * Supports for Python 2.7, 3.5, 3.6, 3.7
+    * Bugfix: Steering vector backwards compatibility
+    * Bugfix: Ambiguous caching
+    * PowerSpectra: Frequency range to be evaluated can be set directly
+    * Some code clean-up
+    * Renamed examples
+
+
 
 19.02
 ------------
