@@ -9,7 +9,7 @@ calibration in file example_calib.xml
 microphone geometry in array_56.xml (part of acoular)
 
 
-Copyright (c) 2019 The Acoular developers.
+Copyright (c) 2019 Acoular Development Team.
 All rights reserved.
 """
 

@@ -11,8 +11,8 @@ from os.path import join, abspath, dirname
 #bf_version = str(av.__version__)
 #bf_author = str(av.__author__)
 
-bf_version = "19.02"
-bf_author = "Acoular developers"
+bf_version = "19.08"
+bf_author = "Acoular Development Team"
 
 
 
@@ -38,7 +38,6 @@ setup(name="acoular",
       'License :: OSI Approved :: BSD License',
       'Programming Language :: Python :: 2',
       'Programming Language :: Python :: 2.7',
-      'Programming Language :: Python :: 3.4',
       'Programming Language :: Python :: 3.5',
       'Programming Language :: Python :: 3.6',
       'Programming Language :: Python :: 3.7',
