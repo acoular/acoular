@@ -7,13 +7,13 @@ Prerequisites
 -------------
 This "Getting started" tutorial assumes that the Acoular library is :doc:`installed<../install/index>` together with its dependencies and matplotlib, and that the demo finished successfully. If you did not run the demo yet, you should do so by typing into your command line
 
-.. code-block:: python
+.. code-block:: console
 
     $ acoular_demo.py
 
 under Linux or Mac, and
 
-.. code-block:: python
+.. code-block:: console
 
     > acoular_demo.exe
 
