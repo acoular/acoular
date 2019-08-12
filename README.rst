@@ -22,4 +22,4 @@ Features
 Dependencies
 ============
 
-Acoular runs under Linux, Windows and MacOS, a Python 3.7, 3.6, 3.5, 3.4 or 2.7 installation is needed with the latest Numpy, Scipy, Traits, traitsui, scikit-learn, pytables, numba, pyqt packages available.
+Acoular runs under Linux, Windows and MacOS, a Python 3.7, 3.6, 3.5 or 2.7 installation is needed with the latest Numpy, Scipy, Traits, traitsui, scikit-learn, pytables, numba, pyqt packages available.

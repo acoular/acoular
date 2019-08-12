@@ -13,7 +13,7 @@ calibration in file example_calib.xml
 microphone geometry in array_56.xml (part of acoular)
 
 
-Copyright (c) 2006-2018 The Acoular developers.
+Copyright (c) 2006-2019 Acoular Development Team.
 All rights reserved.
 """
 
@@ -136,7 +136,7 @@ bo = BeamformerOrth(beamformer=be, eva_list=list(range(38,54)))
 #===============================================================================
 all_bf = (bb0, bb1, bb2, bb3, bs0, bs1, bs2, bs3, bo)
 fi = open('all_bf.sav','wb')
-dump(all_bf,fi,-1) # uses newest pickle protocol -1 (default = 0)
+dump(all_bf,fi,2) # uses newest pickle protocol -1 (default = 0)
 fi.close()
 
 #===============================================================================

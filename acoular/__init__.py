@@ -1,6 +1,6 @@
 # coding=UTF-8
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2017, Acoular Development Team.
+# Copyright (c) 2007-2019, Acoular Development Team.
 #------------------------------------------------------------------------------
 
 """
@@ -54,9 +54,6 @@ try:
     import pyface.qt
 except:
     os.environ['QT_API'] = 'pyqt' 
-
-# make sure that no OMP multithreading is used if OMP_NUM_THREADS is not defined
-os.environ.setdefault('OMP_NUM_THREADS','1')
 
 from .fileimport import time_data_import, csv_import, td_import, \
 bk_mat_import, datx_import

@@ -7,7 +7,7 @@ Demonstrates a 3D beamforming setup.
 Simulates data on 64 channel array,
 subsequent beamforming with CLEAN-SC on 3D grid.
 
-Copyright (c) 2019 The Acoular developers.
+Copyright (c) 2019 Acoular Development Team.
 All rights reserved.
 """
 from os import path
