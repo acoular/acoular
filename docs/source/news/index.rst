@@ -3,9 +3,11 @@ What's new
 19.08
 ------------
     
-    * Supports for Python 2.7, 3.5, 3.6, 3.7
+    * Supports Python 3.5, 3.6, 3.7
+    * This will be the last version to officially support Python 2.7
+    * Cache and data directories are now always created in current directory (Linux and Windows)
     * Bugfix: Steering vector backwards compatibility
-    * Bugfix: Ambiguous caching
+    * Bugfix: Ambiguous caching (changes in an object's class name as well as changes in the data file content are now monitored for caching)
     * PowerSpectra: Frequency range to be evaluated can be set directly
     * Some code clean-up
     * Renamed examples
@@ -44,7 +46,7 @@ What's new
 17.11
 ------------
 
-    * Added support for Python 3.4,3.5 and 3.6 
+    * Added support for Python 3.4, 3.5 and 3.6 
     * Implementation of fast/parallelized code now with Numba (instead of C++ and SciPy.weave)
     * cross spectral matrix (CSM) orientation changed (was transposed in earlier versions). Please do not use the cache files from earlier versions in version 17.11!
     	
