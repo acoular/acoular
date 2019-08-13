@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Example 3 for acoular library
+Example "3D beamforming" for Acoular library.
 
-Demonstrates a 3D beamforming setup.
+Demonstrates a 3D beamforming setup with point sources.
 
 Simulates data on 64 channel array,
 subsequent beamforming with CLEAN-SC on 3D grid.
@@ -127,6 +127,7 @@ ax0.set_ylabel('y')
 ax0.set_zlabel('z')
 ax0.set_title('Setup (mic and source positions)')
 
-show()
+# only display result on screen if this script is run directly
+if __name__ == '__main__': show()
 
 

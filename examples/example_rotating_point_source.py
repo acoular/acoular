@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-Example 2 for acoular library
+Example "Rotating point source" for Acoular library.
 
-demonstrates use of acoular for a point source moving on a circle trajectory
+Demonstrates the use of acoular for a point source 
+moving on a circle trajectory.
 
-uses synthesized data
+Uses synthesized data.
 
 Copyright (c) 2006-2019 Acoular Development Team.
 All rights reserved.

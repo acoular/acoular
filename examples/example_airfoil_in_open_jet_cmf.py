@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-Example 7 for acoular library
+Example "Airfoil in open jet -- CMF" for Acoular library.
 
-demonstrates CMF method 
-with same setup as in example 1
+Demonstrates the inverse CMF method with same setup as in example 
+"Airfoil in open jet -- beamformers".
 
-uses measured data in file example_data.h5
-calibration in file example_calib.xml
-microphone geometry in array_56.xml (part of acoular)
-
+Uses measured data in file example_data.h5,
+calibration in file example_calib.xml,
+microphone geometry in array_56.xml (part of Acoular).
 
 Copyright (c) 2006-2019 Acoular Development Team.
 All rights reserved.
@@ -92,8 +91,7 @@ b = BeamformerCMF(freq_data=f, steer=st, alpha=1e-8)
 figure(1,(7,7)) #no of figure
 i1 = 1 #no of subplot
 from time import time
-for method in ('LassoLars', 'LassoLarsBIC', \
-        'OMPCV', 'NNLS'):
+for method in ('LassoLars', 'LassoLarsBIC', 'OMPCV', 'NNLS'):
     b.method = method
     subplot(2,2,i1)
     i1 += 1
