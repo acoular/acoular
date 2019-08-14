@@ -118,7 +118,7 @@ colorbar()
 
 # plot the setup
 
-ax0 = fig.add_subplot((224), aspect='equal', projection='3d')
+ax0 = fig.add_subplot((224), projection='3d')
 ax0.scatter(m.mpos[0],m.mpos[1],-m.mpos[2])
 source_locs=array([p1.loc,p2.loc,p3.loc]).T
 ax0.scatter(source_locs[0],source_locs[1],-source_locs[2])
