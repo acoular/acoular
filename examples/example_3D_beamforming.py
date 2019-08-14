@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-Example 3 for acoular library
+Example "3D beamforming" for Acoular library.
 
-Demonstrates a 3D beamforming setup.
+Demonstrates a 3D beamforming setup with point sources.
 
 Simulates data on 64 channel array,
 subsequent beamforming with CLEAN-SC on 3D grid.
 
-Copyright (c) 2019 The Acoular developers.
+Copyright (c) 2019 Acoular Development Team.
 All rights reserved.
 """
 from os import path
@@ -118,7 +118,7 @@ colorbar()
 
 # plot the setup
 
-ax0 = fig.add_subplot((224), aspect='equal', projection='3d')
+ax0 = fig.add_subplot((224), projection='3d')
 ax0.scatter(m.mpos[0],m.mpos[1],-m.mpos[2])
 source_locs=array([p1.loc,p2.loc,p3.loc]).T
 ax0.scatter(source_locs[0],source_locs[1],-source_locs[2])
@@ -127,6 +127,7 @@ ax0.set_ylabel('y')
 ax0.set_zlabel('z')
 ax0.set_title('Setup (mic and source positions)')
 
-show()
+# only display result on screen if this script is run directly
+if __name__ == '__main__': show()
 
 

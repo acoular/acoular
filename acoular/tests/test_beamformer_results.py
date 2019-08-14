@@ -20,7 +20,7 @@ BeamformerCapon, BeamformerMusic, BeamformerDamas, BeamformerClean, \
 BeamformerFunctional, BeamformerDamasPlus, BeamformerGIB, SteeringVector,Environment
 
 from os import path
-import h5py
+import tables
 
 
 #load exampledata
@@ -32,15 +32,15 @@ micgeofile = path.join( path.split(acoular.__file__)[0],'xml','array_56.xml')
 cfreqs = 1000,8000
 
 #load numerical values from datafile
-h5file_num = h5py.File('Beamforer_numerical_values.h5', 'r')
+h5file_num = tables.open_file('Beamforer_numerical_values.h5', 'r')
 
-res_num = h5file_num.get('timebf_values').value
-resq_num = h5file_num.get('timebfsq_values').value
+res_num = h5file_num.get_node('/timebf_values').read()
+resq_num = h5file_num.get_node('/timebfsq_values').read()
 
 bfdata={}
 for b in ('bb', 'bc', 'be', 'bm', 'bl', 'bo', 'bs', 'bd', 'bcmf', 'bf', 'bdp', 'bgib'):
     for cfreq_num in cfreqs:
-        bfdata[b+'_num_'+str(cfreq_num)] = h5file_num.get(b+'_'+str(cfreq_num)+'_values').value
+        bfdata[b+'_num_'+str(cfreq_num)] = h5file_num.get_node('/'+b+'_'+str(cfreq_num)+'_values').read()
 
 
 #calc all values from example with low resolution

@@ -5,21 +5,32 @@ Examples
     :glob:
     :hidden:
     
-    example*
+    example_airfoil_in_open_jet_beamforming
+    example_airfoil_in_open_jet_steering_vectors
+    example_airfoil_in_open_jet_cmf
+    example_rotating_point_source
+    example_3D_beamforming
 
 .. list-table::
+    :widths: 30 70
     :class: borderless
 
-    * - :doc:`example1` demonstrates different features of Acoular using measured data from a wind tunnel experiment on trailing edge noise
-        
-    * - :doc:`example2` demonstrates a simple approach to beamforming on a rotating source
+    * - :doc:`example_airfoil_in_open_jet_beamforming`
 
-    * - :doc:`example3` demonstrates a 3D beamforming setup. 
+      - Demonstrates different features of Acoular using measured data from a wind tunnel experiment on trailing edge noise.
         
-    * - :doc:`example4` demonstrates different beamformers in frequency domain and persistence of objects (saving)
+    * - :doc:`example_airfoil_in_open_jet_steering_vectors`
 
-    * - :doc:`example5` demonstrates different beamformers in frequency domain and persistence of objects (loading)
+      - Demonstrates different steering vectors in Acoular and CSM diagonal removal.
 
-    * - :doc:`example6` demonstrates different steering vectors in Acoular and CSM diagonal removal
-        
-    * - :doc:`example7` demonstrates CMF method with different optimization schemes
+    * - :doc:`example_airfoil_in_open_jet_cmf`
+
+      - Demonstrates the CMF method with different optimization schemes.
+
+    * - :doc:`example_rotating_point_source`
+
+      - Demonstrates a simple approach to beamforming on a rotating source.
+
+    * - :doc:`example_3D_beamforming`
+
+      - Demonstrates a 3D beamforming setup.

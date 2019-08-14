@@ -41,7 +41,7 @@ This option assumes that you have the `Anaconda <https://www.anaconda.com/downlo
 Once Anaconda Python is properly installed and works, start a console, i.e. either "cmd" or the "Anaconda command prompt" on Windows, Terminal on Linux.
 In the command line, type
 
-.. code-block:: python
+.. code-block:: console
 
     $ conda install -c acoular acoular
 
@@ -50,13 +50,13 @@ Depending on your type of Anaconda installation (single user or system-wide), yo
 
 If the installation has finished, you may try out Acoular by typing
 
-.. code-block:: python
+.. code-block:: console
 
     $ acoular_demo.py
 
 under Linux or Mac, and
 
-.. code-block:: python
+.. code-block:: console
 
     > acoular_demo.exe
 
@@ -69,7 +69,7 @@ Download and run the `windows installer <https://pypi.python.org/pypi/acoular>`_
 
 If the installation has finished, you may try out Acoular by typing
 
-.. code-block:: python
+.. code-block:: console
 
     $ acoular_demo.exe
 
@@ -79,7 +79,7 @@ Option 3: pip
 -------------
 If you have pip installed on your system, you may type
 
-.. code-block:: python
+.. code-block:: console
 
 	$ pip install acoular
 
@@ -87,13 +87,13 @@ to install acoular. Note that the required packages are not installed this way a
 
 If the installation has finished, you may try out Acoular by typing
 
-.. code-block:: python
+.. code-block:: console
 
     $ acoular_demo.py
 
 under Linux or Mac, and
 
-.. code-block:: python
+.. code-block:: console
 
     > acoular_demo.exe
 
@@ -105,7 +105,7 @@ Option 4: Source install
 ------------------------
 You may download the `source tarball <https://pypi.python.org/pypi/acoular>`_. Unzip it and change into the "acoular" directory, then type
 
-.. code-block:: python
+.. code-block:: console
 
     $ python setup.py install
 
@@ -114,7 +114,7 @@ Another option to get the source is to clone or fork from `Github <https://githu
 
 If the installation has finished, you may try out Acoular by typing
 
-.. code-block:: python
+.. code-block:: console
 
     $ acoular_demo.py
 

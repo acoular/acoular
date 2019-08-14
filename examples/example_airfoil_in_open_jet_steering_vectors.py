@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 """
-Example 6 for acoular library
+Example "Airfoil in open jet -- steering vectors" for Acoular library.
 
-demonstrates different steering vectors in acoular,
-and CSM diagonal removal 
-with same setup as in example 1
+Demonstrates different steering vectors in Acoular
+and CSM diagonal removal with same setup as in example 
+"Airfoil in open jet -- beamformers".
 
-uses measured data in file example_data.h5
-calibration in file example_calib.xml
-microphone geometry in array_56.xml (part of acoular)
+Uses measured data in file example_data.h5,
+calibration in file example_calib.xml,
+microphone geometry in array_56.xml (part of Acoular).
 
 
-Copyright (c) 2006-2018 The Acoular developers.
+Copyright (c) 2006-2019 Acoular Development Team.
 All rights reserved.
 """
 from __future__ import print_function

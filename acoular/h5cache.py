@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #pylint: disable-msg=E0611,C0111,C0103,R0901,R0902,R0903,R0904,W0232
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2017, Acoular Development Team.
+# Copyright (c) 2007-2019, Acoular Development Team.
 #------------------------------------------------------------------------------
 
 # imports from other packages
@@ -12,21 +12,14 @@ import tables
 from weakref import WeakValueDictionary
 import gc
 
-# path to cache directory, possibly in temp
-try:
-    cache_dir = path.join(environ['TEMP'],'acoular_cache')
-except KeyError:
-    cache_dir = path.join(path.curdir,'cache')
+# path to cache directory
+cache_dir = path.join(path.curdir,'cache')
 if not path.exists(cache_dir):
     mkdir(cache_dir)
 
-# path to td directory (used for import to *.h5 files)
-try:
-    td_dir = path.join(environ['HOMEDRIVE'], environ['HOMEPATH'], 'acoular_td')
-except KeyError:
-    td_dir = path.join(path.curdir,'td')
-if not path.exists(td_dir):
-    mkdir(td_dir)
+# path to working directory (used for import to *.h5 files)
+td_dir = path.curdir
+
 
 class H5cache_class(HasPrivateTraits):
     """

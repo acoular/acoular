@@ -52,14 +52,14 @@ master_doc = 'index'
 
 # General substitutions.
 project = 'Acoular'
-copyright = '2007-2019, Acoular developers'
+copyright = '2007-2019, Acoular Development Team'
 
 # The default replacements for |version| and |release|, also used in various
 # other places throughout the built documents.
 #d = {}
 #execfile(os.path.join('..','..', 'acoular', '__init__.py'), d)
 #import acoular #acoular.__version__
-version = release =  '19.02'#'3.0'#d['__version__']
+version = release =  '19.08'#'3.0'#d['__version__']
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
