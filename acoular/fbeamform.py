@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2017, Acoular Development Team.
+# Copyright (c) 2007-2019, Acoular Development Team.
 #------------------------------------------------------------------------------
 """Implements beamformers in the frequency domain.
 
@@ -251,7 +251,7 @@ class BeamformerBase( HasPrivateTraits ):
             warn("Deprecated use of 'steer' trait. "
                  "Please use object of class 'SteeringVector' in the future.", 
                  Warning, stacklevel = 2)
-            self._steer_obj = SteeringVector(steer_type = steer)
+            self._steer_obj.steer_type = steer
         else:
             raise(TraitError(args=self,
                              name='steer', 
@@ -1089,8 +1089,8 @@ class PointSpreadFunction (HasPrivateTraits):
             result = calcPointSpreadFunction(self.steer.steer_type, 
                                              self.steer.r0, 
                                              self.steer.rm, 
-                                             2*pi*self.freq[newaxis]/self.env.c, 
-                                             ind, self.precision)[0]
+                                             2*pi*self.freq/self.env.c, 
+                                             ind, self.precision)
         else: # for arbitrary steering sectors, use general calculation
             # there is a version of this in fastFuncs, may be used later after runtime testing and debugging
             product = dot(self.steer.steer_vector(self.freq).conj(), self.steer.transfer(self.freq,ind).T)

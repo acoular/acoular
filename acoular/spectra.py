@@ -2,7 +2,7 @@
 #pylint: disable-msg=E0611, E1101, E1103, C0103, R0901, R0902, R0903, R0904
 #pylint: disable-msg=W0232
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2017, Acoular Development Team.
+# Copyright (c) 2007-2019, Acoular Development Team.
 #------------------------------------------------------------------------------
 """Estimation of power spectra and related tools
 
@@ -120,7 +120,10 @@ class PowerSpectra( HasPrivateTraits ):
     num_blocks = Property(
         desc="overall number of FFT blocks")
 
-    #: 2-element array with the lowest and highest frequency, readonly.
+    #: 2-element array with the lowest and highest frequency. If set, 
+    #: will overwrite :attr:`ind_low` and :attr:`ind_high` according to
+    #: the range. 
+    #: Values will be set to the next higher discrete frequencies.
     freq_range = Property(
         desc = "frequency range" )
         
@@ -195,6 +198,10 @@ class PowerSpectra( HasPrivateTraits ):
             return self.fftfreq()[[ self.ind_low, self.ind_high ]]
         except IndexError:
             return array([0., 0])
+
+    def _set_freq_range( self, freq_range ):
+        self.ind_low  = searchsorted(self.fftfreq(), freq_range[0])
+        self.ind_high = searchsorted(self.fftfreq(), freq_range[1])
 
     @property_depends_on( 'block_size, ind_low, ind_high' )
     def _get_indices ( self ):

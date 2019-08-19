@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 """
-Example 1 for acoular library
+Example "Airfoil in open jet -- Beamforming".
 
-demonstrates different features of acoular,
+Demonstrates different features of Acoular.
 
-uses measured data in file example_data.h5
-calibration in file example_calib.xml
-microphone geometry in array_56.xml (part of acoular)
+Uses measured data in file example_data.h5,
+calibration in file example_calib.xml,
+microphone geometry in array_56.xml (part of Acoular).
 
-Copyright (c) 2006-2018 The Acoular developers.
+Copyright (c) 2006-2019 Acoular Development Team.
 All rights reserved.
 """
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2017, Acoular Development Team.
+# Copyright (c) 2007-2019, Acoular Development Team.
 #------------------------------------------------------------------------------
 """Implements processing in the time domain.
 
@@ -75,7 +75,7 @@ class TimeInOut( SamplesGenerator ):
     numsamples = Delegate('source')
             
     # internal identifier
-    digest = Property( depends_on = ['source.digest', '__class__'])
+    digest = Property( depends_on = ['source.digest'])
 
     traits_view = View(
         Item('source', style='custom')

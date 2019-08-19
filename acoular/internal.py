@@ -1,12 +1,12 @@
 # coding=UTF-8
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2017, Acoular Development Team.
+# Copyright (c) 2007-2019, Acoular Development Team.
 #------------------------------------------------------------------------------
 
 from hashlib import md5
 
 def digest( obj, name='digest'):
-    str_ = []
+    str_ = [str(obj.__class__).encode("UTF-8")]
     for do_ in obj.trait(name).depends_on:
         vobj = obj
         try:

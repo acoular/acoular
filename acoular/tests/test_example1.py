@@ -20,22 +20,21 @@ BeamformerFunctional, BeamformerDamasPlus, BeamformerGIB, SteeringVector
 
 from numpy import zeros, empty
 from os import path
-
-import h5py
+import tables
 
 #load numerical values from Examples
-h5file_num = h5py.File('Example1_numerical_values_testsum.h5', 'r')
+h5file_num = tables.open_file('Example1_numerical_values_testsum.h5', 'r')
 
-mpos_num = h5file_num.get('mpos_values').value
-grid_pos_num = h5file_num.get('grid_pos_values').value
-transfer_num = h5file_num.get('transfer_values').value
-csm_num = h5file_num.get('csm_values').value
-eve_num = h5file_num.get('eva_values').value
-eva_num = h5file_num.get('eve_values').value
+mpos_num = h5file_num.get_node('/mpos_values').read()
+grid_pos_num = h5file_num.get_node('/grid_pos_values').read()
+transfer_num = h5file_num.get_node('/transfer_values').read()
+csm_num = h5file_num.get_node('/csm_values').read()
+eve_num = h5file_num.get_node('/eva_values').read()
+eva_num = h5file_num.get_node('/eve_values').read()
 
 d={}
 for b in ('bb', 'bc', 'be', 'bm', 'bl', 'bo', 'bs', 'bd', 'bcmf', 'bf', 'bdp', 'bgib'):
-    d[b+'num'] = h5file_num.get(str(b)+'_values').value
+    d[b+'num'] = h5file_num.get_node('/'+str(b)+'_values').read()
 
 
 #load exampledata
@@ -113,8 +112,6 @@ class acoular_test(unittest.TestCase):
     def test_beamformer_calculation(self):
         for beam,bfname in zip((bb, bc, be, bm, bl, bo, bs, bd, bcmf, bf, bdp, bgib),('bb', 'bc', 'be', 'bm', 'bl', 'bo', 'bs', 'bd', 'bcmf', 'bf', 'bdp', 'bgib')):   
             self.assertAlmostEqual(beam.synthetic(cfreq,1).sum()/d[bfname+'num'].sum(),1,3)      
-
-                
             
 if "__main__" == __name__:
     unittest.main(exit=False)
