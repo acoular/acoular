@@ -3,17 +3,10 @@
 Example 4 for acoular library
 
 demonstrates different beamformers in frequency domain,
-- setting of steering vector type,
-- disabling of result caching,
-- persistence (saving of configured beamformers), see example5 for 
-  the second part (loading)
-
-uses measured data in file example_data.h5
-calibration in file example_calib.xml
-microphone geometry in array_56.xml (part of acoular)
+- simulate timedata and save to different file formats
 
 
-Copyright (c) 2006-2018 The Acoular developers.
+Copyright (c) 2006-2019 The Acoular developers.
 All rights reserved.
 """
 
