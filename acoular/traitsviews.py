@@ -13,12 +13,13 @@
 """
 
 # imports from other packages
-from traitsui.api import View
+from traitsui.api import View, Item
 from traitsui.menu import OKCancelButtons
 
 from .microphones import MicGeom
 from .spectra import PowerSpectra
 from .calib import Calib
+from .trajectory import Trajectory
     
 MicGeom.class_trait_view('traits_view',
                          View(
@@ -61,4 +62,15 @@ Calib.class_trait_view('traits_view',
                                 buttons = OKCancelButtons
                                 )
                          )
+
+Trajectory.class_trait_view('traits_view',
+                            View(
+                                    [Item('points', style='custom')
+                                    ], 
+                                    title='Grid center trajectory', 
+                                    buttons = OKCancelButtons
+                                    )
+                            )
+                            
+
                          
