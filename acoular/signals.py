@@ -21,7 +21,6 @@ from numpy import pi, arange, sin, sqrt, repeat, log
 from numpy.random import RandomState
 from traits.api import HasPrivateTraits, Float, Int, Long, \
 Property, cached_property
-from traitsui.api import View
 from scipy.signal import resample
 
 # acoular imports
@@ -49,9 +48,6 @@ class SignalGenerator( HasPrivateTraits ):
     
     # internal identifier
     digest = Property
-
-    # no view necessary
-    traits_view = View()
 
     def _get_digest( self ):
         return ''
