@@ -22,8 +22,6 @@ from numpy import array, newaxis, empty, sqrt, arange, clip, r_, zeros, \
 histogram, unique, cross, dot, where, s_ , sum
 from traits.api import Float, CArray, Property, Trait, Bool, Delegate, \
 cached_property, List, Instance
-from traitsui.api import View, Item
-from traitsui.menu import OKCancelButtons
 from traits.trait_errors import TraitError
 from warnings import warn
 
@@ -183,17 +181,6 @@ class BeamformerTime( TimeInOut ):
         depends_on = ['_steer_obj.digest', 'source.digest', 'weights', '__class__'], 
         )
 
-    traits_view = View(
-        [
-            [Item('steer{}', style='custom')], 
-            [Item('source{}', style='custom'), '-<>'], 
-            [Item('weights{}', style='simple')], 
-            '|'
-        ], 
-        title='Beamformer options', 
-        buttons = OKCancelButtons
-        )
-
     @cached_property
     def _get_digest( self ):
         return digest(self)
@@ -276,19 +263,6 @@ class BeamformerTimeSq( BeamformerTime ):
         depends_on = ['_steer_obj.digest', 'source.digest', 'r_diag', \
                       'weights', '__class__'], 
         )
-
-    traits_view = View(
-        [
-            [Item('steer{}', style='custom')], 
-            [Item('source{}', style='custom'), '-<>'], 
-            [Item('r_diag', label='diagonal removed')], 
-            [Item('weights{}', style='simple')], 
-            '|'
-        ], 
-        title='Beamformer options', 
-        buttons = OKCancelButtons
-        )
-
 
     @cached_property
     def _get_digest( self ):
@@ -392,19 +366,6 @@ class BeamformerTimeTraj( BeamformerTime ):
         depends_on = ['_steer_obj.digest', 'source.digest', 'weights',  \
                       'rvec', 'trajectory.digest', '__class__'], 
         )
-
-    traits_view = View(
-        [
-            [Item('steer{}', style='custom')], 
-            [Item('source{}', style='custom'), '-<>'], 
-            [Item('trajectory{}', style='custom')],
-            [Item('weights{}', style='simple')], 
-            '|'
-        ], 
-        title='Beamformer options', 
-        buttons = OKCancelButtons
-        )
-
 
     @cached_property
     def _get_digest( self ):
@@ -537,19 +498,6 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
     digest = Property( 
         depends_on = ['_steer_obj.digest', 'source.digest', 'r_diag', 'weights', \
                       'rvec', 'trajectory.digest', '__class__'], 
-        )
-
-    traits_view = View(
-        [
-            [Item('steer{}', style='custom')], 
-            [Item('source{}', style='custom'), '-<>'], 
-            [Item('trajectory{}', style='custom')],
-            [Item('r_diag', label='diagonal removed')], 
-            [Item('weights{}', style='simple')], 
-            '|'
-        ], 
-        title='Beamformer options', 
-        buttons = OKCancelButtons
         )
 
     @cached_property
@@ -689,16 +637,6 @@ class IntegratorSectorTime( TimeInOut ):
     digest = Property( 
         depends_on = ['sectors', 'clip', 'grid.digest', 'source.digest', \
         '__class__'], 
-        )
-
-    traits_view = View(
-        [
-            [Item('sectors', style='custom')], 
-            [Item('grid', style='custom'), '-<>'], 
-            '|'
-        ], 
-        title='Integrator', 
-        buttons = OKCancelButtons
         )
 
     @cached_property

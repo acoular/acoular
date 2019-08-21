@@ -85,15 +85,85 @@ RectGrid.class_trait_view('traits_view',
 # increment3D omitted in view for easier handling, can be added later
 RectGrid3D.class_trait_view('traits_view',
                             View(
-                                    [
-                                            ['x_min', 'y_min', 'z_min', '|'],
-                                            ['x_max', 'y_max', 'z_max', 
-                                             'increment', 'size~{Grid size}', 
-                                             '|'],
-                                             '-[Map extension]'
-                                             ]
-                                            )
+        [
+                ['x_min', 'y_min', 'z_min', '|'],
+                ['x_max', 'y_max', 'z_max', 'increment', 
+                 'size~{Grid size}', '|'],
+                 '-[Map extension]'
+        ]
+        )
                             )
+
+from .tbeamform import BeamformerTime, BeamformerTimeSq, BeamformerTimeSqTraj,\
+BeamformerTimeTraj, IntegratorSectorTime
+    
+BeamformerTime.class_trait_view('traits_view',
+                                View(
+        [
+            [Item('steer{}', style='custom')], 
+            [Item('source{}', style='custom'), '-<>'], 
+            [Item('weights{}', style='simple')], 
+            '|'
+        ], 
+        title='Beamformer options', 
+        buttons = OKCancelButtons
+        )
+                                )
+
+BeamformerTimeSq.class_trait_view('traits_view',
+                                  View(
+        [
+            [Item('steer{}', style='custom')], 
+            [Item('source{}', style='custom'), '-<>'], 
+            [Item('r_diag', label='diagonal removed')], 
+            [Item('weights{}', style='simple')], 
+            '|'
+        ], 
+        title='Beamformer options', 
+        buttons = OKCancelButtons
+        )
+                                )
+
+BeamformerTimeTraj.class_trait_view('traits_view',
+                                    View(
+        [
+            [Item('steer{}', style='custom')], 
+            [Item('source{}', style='custom'), '-<>'], 
+            [Item('trajectory{}', style='custom')],
+            [Item('weights{}', style='simple')], 
+            '|'
+        ], 
+        title='Beamformer options', 
+        buttons = OKCancelButtons
+        )
+                                )
+
+BeamformerTimeSqTraj.class_trait_view('traits_view',
+                                      View(
+        [
+            [Item('steer{}', style='custom')], 
+            [Item('source{}', style='custom'), '-<>'], 
+            [Item('trajectory{}', style='custom')],
+            [Item('r_diag', label='diagonal removed')], 
+            [Item('weights{}', style='simple')], 
+            '|'
+        ], 
+        title='Beamformer options', 
+        buttons = OKCancelButtons
+        )
+                                )
+
+IntegratorSectorTime.class_trait_view('traits_view',
+                                      View(
+        [
+            [Item('sectors', style='custom')], 
+            [Item('grid', style='custom'), '-<>'], 
+            '|'
+        ], 
+        title='Integrator', 
+        buttons = OKCancelButtons
+        )
+                                )
 
 
 
