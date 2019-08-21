@@ -22,8 +22,6 @@ from .h5cache import td_dir
 from numpy import fromstring, float32, newaxis, empty, sort, zeros
 from traits.api import HasPrivateTraits, Float, Int, \
 File, CArray, Property, Any, Str
-from traitsui.api import View
-from traitsui.menu import OKCancelButtons
 from os import path
 from six import next
 import pickle
@@ -62,15 +60,6 @@ class csv_import( time_data_import ):
     #: Number of leading columns (will be ignored during import), defaults to 1.
     dummy_columns = Int(1, 
         desc = "number of leading columns to ignore during import")
-
-    traits_view = View(
-        ['from_file', 
-            ['header_length', 'dummy_columns', '-'], 
-            '|[Import]'
-        ], 
-        title = 'Time data', 
-        buttons = OKCancelButtons
-                    )
 
     def get_data (self, td):
         """
@@ -126,14 +115,6 @@ class td_import( time_data_import ):
     from_file = File(filter = ['*.td'], 
         desc = "name of the *.td file to import")
 
-    traits_view = View(
-        ['from_file', 
-            '|[Import]'
-        ], 
-        title  = 'Time data', 
-        buttons = OKCancelButtons
-                    )
-
     def get_data (self, td):
         """
         Main work is done here: imports the data from `*.td` file into
@@ -176,14 +157,6 @@ class bk_mat_import( time_data_import ):
     #: Name of the mat file to import
     from_file = File(filter = ['*.mat'], 
         desc = "name of the BK pulse mat file to import")
-
-    traits_view = View(
-        ['from_file', 
-            '|[Import]'
-        ], 
-        title = 'Time data', 
-        buttons = OKCancelButtons
-                    )
 
     def get_data (self, td):
         """
@@ -336,14 +309,6 @@ class datx_import(time_data_import):
     #: Name of the datx index file to import.
     from_file = File(filter = ['*.datx_index'], 
         desc = "name of the datx index file to import")
-
-    traits_view = View(
-        ['from_file', 
-            '|[Import]'
-        ], 
-        title = 'Time data', 
-        buttons = OKCancelButtons
-                    )
 
     def get_data (self, td):
         """
