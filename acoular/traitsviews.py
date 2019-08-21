@@ -3,13 +3,8 @@
 #------------------------------------------------------------------------------
 # Copyright (c) 2007-2019, Acoular Development Team.
 #------------------------------------------------------------------------------
-"""Implements support for array microphone arrangements
-
-.. autosummary::
-    :toctree: generated/
-
-    MicGeom
-
+"""Implements support separate traits_view definitions for all relevant
+classes to lift the traitsui requirement for the Acoular package
 """
 
 # imports from other packages
@@ -17,9 +12,6 @@ from traitsui.api import View, Item
 from traitsui.menu import OKCancelButtons
 
 from .microphones import MicGeom
-from .spectra import PowerSpectra
-from .calib import Calib
-from .trajectory import Trajectory
     
 MicGeom.class_trait_view('traits_view',
                          View(
@@ -31,6 +23,8 @@ MicGeom.class_trait_view('traits_view',
                                   )
                          )  
                          
+from .spectra import PowerSpectra
+
 PowerSpectra.class_trait_view('traits_view',
                               View(
                                       ['time_data@{}', 
@@ -51,6 +45,8 @@ PowerSpectra.class_trait_view('traits_view',
                                           )
                              )
 
+from .calib import Calib
+
 Calib.class_trait_view('traits_view',
                        View(
                                ['from_file{File name}', 
@@ -63,6 +59,8 @@ Calib.class_trait_view('traits_view',
                                 )
                          )
 
+from .trajectory import Trajectory
+
 Trajectory.class_trait_view('traits_view',
                             View(
                                     [Item('points', style='custom')
@@ -71,6 +69,32 @@ Trajectory.class_trait_view('traits_view',
                                     buttons = OKCancelButtons
                                     )
                             )
-                            
+
+from .grids import RectGrid, RectGrid3D
+
+RectGrid.class_trait_view('traits_view',
+                          View(
+                                  [['x_min', 'y_min', '|'],
+                                   ['x_max', 'y_max', 'z', 
+                                    'increment', 'size~{Grid size}', '|'],
+                                    '-[Map extension]'
+                                    ]
+                                   )
+                          )
+
+# increment3D omitted in view for easier handling, can be added later
+RectGrid3D.class_trait_view('traits_view',
+                            View(
+                                    [
+                                            ['x_min', 'y_min', 'z_min', '|'],
+                                            ['x_max', 'y_max', 'z_max', 
+                                             'increment', 'size~{Grid size}', 
+                                             '|'],
+                                             '-[Map extension]'
+                                             ]
+                                            )
+                            )
+
+
 
                          
