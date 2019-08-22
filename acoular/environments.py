@@ -25,7 +25,6 @@ from scipy.interpolate import LinearNDInterpolator
 from scipy.spatial import ConvexHull
 from traits.api import HasPrivateTraits, Float, Property, Int, \
 CArray, cached_property, Trait
-from traitsui.api import View
 
 from .internal import digest
 
@@ -40,9 +39,6 @@ class Environment( HasPrivateTraits ):
     digest = Property(
         depends_on=['c'], 
         )
-
-    # no view necessary
-    traits_view = View()
 
     #: The speed of sound, defaults to 343 m/s
     c = Float(343., 
@@ -103,13 +99,6 @@ class UniformFlowEnvironment( Environment):
         depends_on=['c', 'ma', 'fdv'], 
         )
 
-    traits_view = View(
-            [
-                ['ma{Flow Mach number}', 'fdv{Flow vector}'], 
-                '|[Uniform Flow]'
-            ]
-        )
-
     @cached_property
     def _get_digest( self ):
         return digest( self )
@@ -154,9 +143,6 @@ class FlowField( HasPrivateTraits ):
     An abstract base class for a spatial flow field.
     """
     digest = Property
-
-    traits_view = View(
-        )
 
     def _get_digest( self ):
         return ''
@@ -211,15 +197,6 @@ class SlotJet( FlowField ):
     # internal identifier
     digest = Property(
         depends_on=['v0', 'origin', 'flow', 'plane', 'B'], 
-        )
-
-    traits_view = View(
-            [
-                ['v0{Exit velocity}', 'origin{Jet origin}',
-                 'flow', 'plane',
-                'B{Slot width}'], 
-                '|[Slot jet]'
-            ]
         )
 
     @cached_property
@@ -300,14 +277,6 @@ class OpenJet( FlowField ):
     # internal identifier
     digest = Property(
         depends_on=['v0', 'origin', 'D'], 
-        )
-
-    traits_view = View(
-            [
-                ['v0{Exit velocity}', 'origin{Jet origin}', 
-                'D{Nozzle diameter}'], 
-                '|[Open jet]'
-            ]
         )
 
     @cached_property
@@ -409,13 +378,6 @@ class GeneralFlowEnvironment(Environment):
     # internal identifier
     digest = Property(
         depends_on=['c', 'ff.digest', 'N', 'Om'], 
-        )
-
-    traits_view = View(
-            [
-                ['ff{Flow field}', 'N{Max. number of rays}', 'Om{Max. solid angle }'], 
-                '|[General Flow]'
-            ]
         )
 
     @cached_property

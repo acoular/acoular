@@ -165,6 +165,47 @@ IntegratorSectorTime.class_trait_view('traits_view',
         )
                                 )
 
+from .environments import UniformFlowEnvironment, GeneralFlowEnvironment,\
+SlotJet, OpenJet
+
+UniformFlowEnvironment.class_trait_view('traits_view',
+                                        View(
+            [
+                ['ma{Flow Mach number}', 'fdv{Flow vector}'], 
+                '|[Uniform Flow]'
+            ]
+        )
+                                        )
+
+GeneralFlowEnvironment.class_trait_view('traits_view',
+                                        View(
+            [
+                ['ff{Flow field}', 'N{Max. number of rays}', 'Om{Max. solid angle }'], 
+                '|[General Flow]'
+            ]
+        )
+                                         )
+
+SlotJet.class_trait_view('traits_view',
+                         View(
+            [
+                ['v0{Exit velocity}', 'origin{Jet origin}',
+                 'flow', 'plane',
+                'B{Slot width}'], 
+                '|[Slot jet]'
+            ]
+        )
+                         )
+
+OpenJet.class_trait_view('traits_view',
+                         View(
+            [
+                ['v0{Exit velocity}', 'origin{Jet origin}', 
+                'D{Nozzle diameter}'], 
+                '|[Open jet]'
+            ]
+        )
+                         )
 
 
                          
