@@ -303,3 +303,184 @@ SourceMixer.class_trait_view('traits_view',
         Item('sources', style='custom')
                     )
                              )
+                             
+from .fbeamform import BeamformerBase, BeamformerFunctional, BeamformerCapon,\
+BeamformerEig, BeamformerMusic, BeamformerDamas, BeamformerDamasPlus,\
+BeamformerOrth, BeamformerCleansc, BeamformerClean, BeamformerCMF,\
+BeamformerGIB          
+
+BeamformerBase.class_trait_view('traits_view',
+                                View(
+        [
+            [Item('r_diag', label='Diagonal removed')], 
+            [Item('steer', label='Steering vector')], 
+#            [Item('env{}', style='custom')], 
+            '|'
+        ], 
+        title='Beamformer options', 
+        buttons = OKCancelButtons
+        )
+                                )
+
+BeamformerFunctional.class_trait_view('traits_view',
+                                      View(
+        [
+#            [Item('mics{}', style='custom')], 
+#            [Item('grid', style='custom'), '-<>'], 
+            [Item('gamma', label='Exponent', style='simple')], 
+#            [Item('env{}', style='custom')], 
+            '|'
+        ], 
+        title='Beamformer options', 
+        buttons = OKCancelButtons
+        )
+                                )
+
+BeamformerCapon.class_trait_view('traits_view',
+                                 View(
+        [
+#            [Item('mics{}', style='custom')], 
+#            [Item('grid', style='custom'), '-<>'], 
+#            [Item('env{}', style='custom')], 
+            '|'
+        ], 
+        title='Beamformer options', 
+        buttons = OKCancelButtons
+        )
+                                )
+
+BeamformerEig.class_trait_view('traits_view',
+                               View(
+        [
+#            [Item('mics{}', style='custom')], 
+#            [Item('grid', style='custom'), '-<>'], 
+            [Item('n', label='Component No.', style='simple')], 
+            [Item('r_diag', label='Diagonal removed')], 
+#            [Item('env{}', style='custom')], 
+            '|'
+        ], 
+        title='Beamformer options', 
+        buttons = OKCancelButtons
+        )
+                                )
+
+BeamformerMusic.class_trait_view('traits_view',
+                                 View(
+        [
+#            [Item('mics{}', style='custom')], 
+#            [Item('grid', style='custom'), '-<>'], 
+            [Item('n', label='No. of sources', style='simple')], 
+#            [Item('env{}', style='custom')], 
+            '|'
+        ], 
+        title='Beamformer options', 
+        buttons = OKCancelButtons
+        )
+                                )
+
+BeamformerDamas.class_trait_view('traits_view',
+                                 View(
+        [
+            [Item('beamformer{}', style='custom')], 
+            [Item('n_iter{Number of iterations}')], 
+#            [Item('steer{Type of steering vector}')], 
+            [Item('calcmode{How to calculate PSF}')], 
+            '|'
+        ], 
+        title='Beamformer denconvolution options', 
+        buttons = OKCancelButtons
+        )
+                                )
+
+BeamformerDamasPlus.class_trait_view('traits_view',
+                                     View(
+        [
+            [Item('beamformer{}', style='custom')], 
+            [Item('method{Solver}')],
+            [Item('max_iter{Max. number of iterations}')], 
+            [Item('alpha', label='Lasso weight factor')], 
+            [Item('calcmode{How to calculate PSF}')], 
+            '|'
+        ], 
+        title='Beamformer denconvolution options', 
+        buttons = OKCancelButtons
+        )
+                                )
+
+BeamformerOrth.class_trait_view('traits_view',
+                                View(
+        [
+#            [Item('mpos{}', style='custom')], 
+#            [Item('grid', style='custom'), '-<>'], 
+            [Item('n', label='Number of components', style='simple')], 
+            [Item('r_diag', label='Diagonal removed')], 
+#            [Item('env{}', style='custom')], 
+            '|'
+        ], 
+        title='Beamformer options', 
+        buttons = OKCancelButtons
+        )
+                                )
+
+BeamformerCleansc.class_trait_view('traits_view',
+                                   View(
+        [
+#            [Item('mpos{}', style='custom')], 
+#            [Item('grid', style='custom'), '-<>'], 
+            [Item('n', label='No. of iterations', style='simple')], 
+            [Item('r_diag', label='Diagonal removed')], 
+#            [Item('env{}', style='custom')], 
+            '|'
+        ], 
+        title='Beamformer options', 
+        buttons = OKCancelButtons
+        )
+                                )
+
+BeamformerClean.class_trait_view('traits_view',
+                                 View(
+        [
+            [Item('beamformer{}', style='custom')], 
+            [Item('n_iter{Number of iterations}')], 
+#            [Item('steer{Type of steering vector}')], 
+            [Item('calcmode{How to calculate PSF}')], 
+            '|'
+        ], 
+        title='Beamformer denconvolution options', 
+        buttons = OKCancelButtons
+        )
+                                )
+
+BeamformerCMF.class_trait_view('traits_view',
+                               View(
+        [
+#            [Item('mpos{}', style='custom')], 
+#            [Item('grid', style='custom'), '-<>'], 
+            [Item('method', label='Fit method')], 
+            [Item('max_iter', label='No. of iterations')], 
+            [Item('alpha', label='Lasso weight factor')], 
+            [Item('c', label='Speed of sound')], 
+#            [Item('env{}', style='custom')], 
+            '|'
+        ], 
+        title='Beamformer options', 
+        buttons = OKCancelButtons
+        )
+                                )
+
+BeamformerGIB.class_trait_view('traits_view',
+                               View(
+        [
+#            [Item('mpos{}', style='custom')], 
+#            [Item('grid', style='custom'), '-<>'], 
+            [Item('method', label='Fit method')], 
+            [Item('max_iter', label='No. of iterations')], 
+            [Item('alpha', label='Lasso weight factor')], 
+            [Item('c', label='Speed of sound')], 
+#            [Item('env{}', style='custom')], 
+            '|'
+        ], 
+        title='Beamformer options', 
+        buttons = OKCancelButtons
+        )
+                                )                             
