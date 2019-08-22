@@ -207,5 +207,62 @@ OpenJet.class_trait_view('traits_view',
         )
                          )
 
+from .tprocess import TimeInOut, TimeAverage, FiltFiltOctave, WriteWAV, WriteH5
 
-                         
+TimeInOut.class_trait_view('traits_view',
+                           View(
+        Item('source', style='custom')
+                    )
+                           )
+
+TimeAverage.class_trait_view('traits_view',
+                             View(
+        [Item('source', style='custom'), 
+         'naverage{Samples to average}', 
+            ['sample_freq~{Output sampling frequency}', 
+            '|[Properties]'], 
+            '|'
+        ], 
+        title='Linear average', 
+        buttons = OKCancelButtons
+                    )
+                             )
+
+FiltFiltOctave.class_trait_view('traits_view',
+                                View(
+        [Item('source', style='custom'), 
+         'band{Center frequency}', 
+         'fraction{Bandwidth}', 
+            ['sample_freq~{Output sampling frequency}', 
+            '|[Properties]'], 
+            '|'
+        ], 
+        title='Linear average', 
+        buttons = OKCancelButtons
+                    )
+                                )
+
+WriteWAV.class_trait_view('traits_view',
+                           View(
+        [Item('source', style='custom'), 
+            ['basename~{File name}', 
+            '|[Properties]'], 
+            '|'
+        ], 
+        title='Write wav file', 
+        buttons = OKCancelButtons
+                    )
+                          )
+
+WriteH5.class_trait_view('traits_view',
+                         View(
+        [Item('source', style='custom'), 
+            ['name{File name}', 
+            '|[Properties]'], 
+            '|'
+        ], 
+        title='write .h5', 
+        buttons = OKCancelButtons
+                    )
+                         )
+                        
