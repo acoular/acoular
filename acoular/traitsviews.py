@@ -8,7 +8,7 @@ classes to lift the traitsui requirement for the Acoular package
 """
 
 # imports from other packages
-from traitsui.api import View, Item
+from traitsui.api import View, Item, EnumEditor
 from traitsui.menu import OKCancelButtons
 
 from .microphones import MicGeom
@@ -483,4 +483,25 @@ BeamformerGIB.class_trait_view('traits_view',
         title='Beamformer options', 
         buttons = OKCancelButtons
         )
-                                )                             
+                                )              
+
+# Windows only                         
+try:
+    from .nidaqimport import nidaq_import
+    
+    nidaq_import.class_trait_view('traits_view',
+                                  View(
+        [   Item('taskname{Task name}', editor = EnumEditor(name = 'tasknames')),
+            ['sample_freq','numsamples','-'],
+            [
+                ['numdevices~{count}',Item('namedevices~{names}',height = 3),'-[Devices]'],
+                ['numchannels~{count}',Item('namechannels~{names}',height = 3),'-[Channels]'],
+            ],
+            '|[Task]'
+        ],
+        title='NI-DAQmx data aquisition',
+        buttons = OKCancelButtons
+                    )
+                                   )
+except:
+    pass                               

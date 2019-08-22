@@ -14,9 +14,6 @@ import ctypes
 import numpy
 import tables
 from traits.api import Float, List, Str, Long
-from traitsui.api import EnumEditor
-from traitsui.api import View, Item
-from traitsui.menu import OKCancelButtons
 from datetime import datetime
 from os import path
 
@@ -111,19 +108,6 @@ class nidaq_import( time_data_import ):
 
     #: Name of available and valid tasks.
     tasknames = List
-
-    traits_view = View(
-        [   Item('taskname{Task name}', editor = EnumEditor(name = 'tasknames')),
-            ['sample_freq','numsamples','-'],
-            [
-                ['numdevices~{count}',Item('namedevices~{names}',height = 3),'-[Devices]'],
-                ['numchannels~{count}',Item('namechannels~{names}',height = 3),'-[Channels]'],
-            ],
-            '|[Task]'
-        ],
-        title='NI-DAQmx data aquisition',
-        buttons = OKCancelButtons
-                    )
 
     def __init__ ( self, **traits ):
         time_data_import.__init__(self, **traits )
