@@ -24,8 +24,6 @@ from numpy import array, sqrt, ones, empty, newaxis, uint32, arange, dot, int64,
 from traits.api import Float, Int, Property, Trait, Delegate, \
 cached_property, Tuple, HasPrivateTraits, CLong, File, Instance, Any, \
 on_trait_change, List, CArray
-from traitsui.api import View, Item
-from traitsui.menu import OKCancelButtons
 import tables
 from os import path
 from warnings import warn
@@ -120,18 +118,6 @@ class TimeSamples( SamplesGenerator ):
     
     # internal identifier
     digest = Property( depends_on = ['basename', 'calib.digest', '_datachecksum'])
-
-    traits_view = View(
-        ['name{File name}', 
-            ['sample_freq~{Sampling frequency}', 
-            'numchannels~{Number of channels}', 
-            'numsamples~{Number of samples}', 
-            '|[Properties]'], 
-            '|'
-        ], 
-        title='Time data', 
-        buttons = OKCancelButtons
-                    )
 
     def _get__datachecksum( self ):
         return self.data[0,:].sum()
@@ -245,20 +231,6 @@ class MaskedTimeSamples( TimeSamples ):
     # internal identifier
     digest = Property( depends_on = ['basename', 'start', 'stop', \
         'calib.digest', 'invalid_channels','_datachecksum'])
-
-    traits_view = View(
-        ['name{File name}', 
-         ['start{From sample}', Item('stop', label='to', style='text'), '-'], 
-         'invalid_channels{Invalid channels}', 
-            ['sample_freq~{Sampling frequency}', 
-            'numchannels~{Number of channels}', 
-            'numsamples~{Number of samples}', 
-            '|[Properties]'], 
-            '|'
-        ], 
-        title='Time data', 
-        buttons = OKCancelButtons
-                    )
 
     @cached_property
     def _get_digest( self ):
@@ -792,10 +764,6 @@ class SourceMixer( SamplesGenerator ):
 
     # internal identifier
     digest = Property( depends_on = ['ldigest', '__class__'])
-
-    traits_view = View(
-        Item('sources', style='custom')
-                    )
 
     @cached_property
     def _get_ldigest( self ):

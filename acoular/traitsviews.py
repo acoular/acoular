@@ -265,4 +265,41 @@ WriteH5.class_trait_view('traits_view',
         buttons = OKCancelButtons
                     )
                          )
-                        
+
+from .sources import TimeSamples, MaskedTimeSamples, SourceMixer
+
+TimeSamples.class_trait_view('traits_view',
+                             View(
+        ['name{File name}', 
+            ['sample_freq~{Sampling frequency}', 
+            'numchannels~{Number of channels}', 
+            'numsamples~{Number of samples}', 
+            '|[Properties]'], 
+            '|'
+        ], 
+        title='Time data', 
+        buttons = OKCancelButtons
+                    )
+                             )
+
+MaskedTimeSamples.class_trait_view('traits_view',
+                                   View(
+        ['name{File name}', 
+         ['start{From sample}', Item('stop', label='to', style='text'), '-'], 
+         'invalid_channels{Invalid channels}', 
+            ['sample_freq~{Sampling frequency}', 
+            'numchannels~{Number of channels}', 
+            'numsamples~{Number of samples}', 
+            '|[Properties]'], 
+            '|'
+        ], 
+        title='Time data', 
+        buttons = OKCancelButtons
+                    )
+                                   )
+
+SourceMixer.class_trait_view('traits_view',
+                             View(
+        Item('sources', style='custom')
+                    )
+                             )
