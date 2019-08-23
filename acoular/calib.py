@@ -16,8 +16,6 @@ Implements calibration of multichannel time signals.
 from numpy import array
 from traits.api import HasPrivateTraits, CLong, File, CArray, Property, \
 cached_property, on_trait_change
-from traitsui.api import View
-from traitsui.menu import OKCancelButtons
 from os import path
 
 # acoular imports
@@ -51,16 +49,6 @@ class Calib( HasPrivateTraits ):
 
     # Internal identifier
     digest = Property( depends_on = ['basename', ] )
-
-    traits_view = View(
-        ['from_file{File name}', 
-            ['num_mics~{Number of microphones}', 
-                '|[Properties]'
-            ]
-        ], 
-        title='Calibration data', 
-        buttons = OKCancelButtons
-                    )
 
     @cached_property
     def _get_digest( self ):

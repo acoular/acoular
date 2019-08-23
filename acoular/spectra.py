@@ -21,8 +21,6 @@ searchsorted, isscalar, fill_diagonal, arange, zeros_like, sum
 import tables
 from traits.api import HasPrivateTraits, Int, Property, Instance, Trait, \
 Range, Bool, cached_property, property_depends_on, Delegate
-from traitsui.api import View
-from traitsui.menu import OKCancelButtons
 
 from .fastFuncs import calcCSM
 
@@ -166,24 +164,6 @@ class PowerSpectra( HasPrivateTraits ):
 
     # hdf5 cache file
     h5f = Instance(tables.File, transient = True )
-    
-    traits_view = View(
-        ['time_data@{}', 
-         'calib@{}', 
-            ['block_size', 
-                'window', 
-                'overlap', 
-                    ['ind_low{Low Index}', 
-                    'ind_high{High Index}', 
-                    '-[Frequency range indices]'], 
-                    ['num_blocks~{Number of blocks}', 
-                    'freq_range~{Frequency range}', 
-                    '-'], 
-                '[FFT-parameters]'
-            ], 
-        ], 
-        buttons = OKCancelButtons
-        )
     
     @property_depends_on('time_data.numsamples, block_size, overlap')
     def _get_num_blocks ( self ):

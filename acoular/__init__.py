@@ -86,3 +86,10 @@ TimeSamples, MaskedTimeSamples, PointSourceDipole, UncorrelatedNoiseSource, \
 SourceMixer
 from .signals import SineGenerator, WNoiseGenerator, SignalGenerator,\
 PNoiseGenerator
+
+# we cannot be sure to have a working traitsui available
+try:
+    from .traitsviews import * #nothing will actually be imported
+except:
+    from warnings import warn
+    warn("no traitsui features will be available", Warning, stacklevel = 2)

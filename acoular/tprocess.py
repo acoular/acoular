@@ -27,8 +27,6 @@ from numpy import array, empty, empty_like, pi, sin, sqrt, zeros, int16
 from traits.api import Float, Int, CLong, \
 File, Property, Instance, Trait, Delegate, \
 cached_property, on_trait_change, List
-from traitsui.api import View, Item
-from traitsui.menu import OKCancelButtons
 from datetime import datetime
 from os import path
 import tables
@@ -63,10 +61,6 @@ class TimeInOut( SamplesGenerator ):
             
     # internal identifier
     digest = Property( depends_on = ['source.digest'])
-
-    traits_view = View(
-        Item('source', style='custom')
-                    )
 
     @cached_property
     def _get_digest( self ):
@@ -233,10 +227,6 @@ class Mixer( TimeInOut ):
     # internal identifier
     digest = Property( depends_on = ['source.digest', 'ldigest', '__class__'])
 
-    traits_view = View(
-        Item('source', style='custom')
-                    )
-
     @cached_property
     def _get_ldigest( self ):
         res = ''
@@ -329,17 +319,6 @@ class TimeAverage( TimeInOut ) :
     # internal identifier
     digest = Property( depends_on = ['source.digest', '__class__', 'naverage'])
 
-    traits_view = View(
-        [Item('source', style='custom'), 
-         'naverage{Samples to average}', 
-            ['sample_freq~{Output sampling frequency}', 
-            '|[Properties]'], 
-            '|'
-        ], 
-        title='Linear average', 
-        buttons = OKCancelButtons
-                    )
-
     @cached_property
     def _get_digest( self ):
         return digest(self)
@@ -429,18 +408,6 @@ class FiltFiltOctave( TimeInOut ):
     # internal identifier
     digest = Property( depends_on = ['source.digest', '__class__', \
         'band', 'fraction'])
-
-    traits_view = View(
-        [Item('source', style='custom'), 
-         'band{Center frequency}', 
-         'fraction{Bandwidth}', 
-            ['sample_freq~{Output sampling frequency}', 
-            '|[Properties]'], 
-            '|'
-        ], 
-        title='Linear average', 
-        buttons = OKCancelButtons
-                    )
 
     @cached_property
     def _get_digest( self ):
@@ -549,16 +516,6 @@ class TimeCache( TimeInOut ):
     # internal identifier
     digest = Property( depends_on = ['source.digest', '__class__'])
 
-    traits_view = View(
-        [Item('source', style='custom'), 
-            ['basename~{Cache file name}', 
-            '|[Properties]'], 
-            '|'
-        ], 
-        title='TimeCache', 
-        buttons = OKCancelButtons
-                    )
-
     @cached_property
     def _get_digest( self ):
         return digest(self)
@@ -629,16 +586,6 @@ class WriteWAV( TimeInOut ):
     # internal identifier
     digest = Property( depends_on = ['source.digest', 'channels', '__class__'])
 
-    traits_view = View(
-        [Item('source', style='custom'), 
-            ['basename~{File name}', 
-            '|[Properties]'], 
-            '|'
-        ], 
-        title='Write wav file', 
-        buttons = OKCancelButtons
-                    )
-
     @cached_property
     def _get_digest( self ):
         return digest(self)
@@ -697,16 +644,6 @@ class WriteH5( TimeInOut ):
       
     # internal identifier
     digest = Property( depends_on = ['source.digest', '__class__'])
-
-    traits_view = View(
-        [Item('source', style='custom'), 
-            ['name{File name}', 
-            '|[Properties]'], 
-            '|'
-        ], 
-        title='write .h5', 
-        buttons = OKCancelButtons
-                    )
 
     @cached_property
     def _get_digest( self ):

@@ -52,9 +52,6 @@ CArray, Property, Instance, Trait, Bool, Range, Delegate, Enum, Any, \
 cached_property, on_trait_change, property_depends_on
 from traits.trait_errors import TraitError
 
-from traitsui.api import View, Item
-from traitsui.menu import OKCancelButtons
-
 from .fastFuncs import beamformerFreq, calcTransfer, calcPointSpreadFunction, \
 damasSolverGaussSeidel
 
@@ -363,17 +360,6 @@ class BeamformerBase( HasPrivateTraits ):
         depends_on = ['digest', 'freq_data.ind_low', 'freq_data.ind_high'], 
         )
 
-    traits_view = View(
-        [
-            [Item('r_diag', label='Diagonal removed')], 
-            [Item('steer', label='Steering vector')], 
-#            [Item('env{}', style='custom')], 
-            '|'
-        ], 
-        title='Beamformer options', 
-        buttons = OKCancelButtons
-        )
-
     @cached_property
     def _get_digest( self ):
         return digest( self )
@@ -630,18 +616,6 @@ class BeamformerFunctional( BeamformerBase ):
     r_diag = Enum(False, 
                   desc="False, as Functional Beamformer is only well defined for the full CSM")
 
-    traits_view = View(
-        [
-#            [Item('mics{}', style='custom')], 
-#            [Item('grid', style='custom'), '-<>'], 
-            [Item('gamma', label='Exponent', style='simple')], 
-#            [Item('env{}', style='custom')], 
-            '|'
-        ], 
-        title='Beamformer options', 
-        buttons = OKCancelButtons
-        )
-
     @cached_property
     def _get_digest( self ):
         return digest( self )
@@ -721,17 +695,6 @@ class BeamformerCapon( BeamformerBase ):
     r_diag = Enum(False, 
         desc="removal of diagonal")
 
-    traits_view = View(
-        [
-#            [Item('mics{}', style='custom')], 
-#            [Item('grid', style='custom'), '-<>'], 
-#            [Item('env{}', style='custom')], 
-            '|'
-        ], 
-        title='Beamformer options', 
-        buttons = OKCancelButtons
-        )
-
     def calc(self, ac, fr):
         """
         Calculates the Capon result for the frequencies defined by :attr:`freq_data`
@@ -791,19 +754,6 @@ class BeamformerEig( BeamformerBase ):
     digest = Property( 
         depends_on = ['freq_data.digest', '_steer_obj.digest', 'r_diag', 'n'])
 
-    traits_view = View(
-        [
-#            [Item('mics{}', style='custom')], 
-#            [Item('grid', style='custom'), '-<>'], 
-            [Item('n', label='Component No.', style='simple')], 
-            [Item('r_diag', label='Diagonal removed')], 
-#            [Item('env{}', style='custom')], 
-            '|'
-        ], 
-        title='Beamformer options', 
-        buttons = OKCancelButtons
-        )
-    
     @cached_property
     def _get_digest( self ):
         return digest( self )
@@ -874,18 +824,6 @@ class BeamformerMusic( BeamformerEig ):
     # defaults to 1
     n = Int(1, 
         desc="assumed number of sources")
-
-    traits_view = View(
-        [
-#            [Item('mics{}', style='custom')], 
-#            [Item('grid', style='custom'), '-<>'], 
-            [Item('n', label='No. of sources', style='simple')], 
-#            [Item('env{}', style='custom')], 
-            '|'
-        ], 
-        title='Beamformer options', 
-        buttons = OKCancelButtons
-        )
 
     def calc(self, ac, fr):
         """
@@ -1220,18 +1158,6 @@ class BeamformerDamas (BeamformerBase):
         depends_on = ['digest', 'beamformer.ext_digest'], 
         )
     
-    traits_view = View(
-        [
-            [Item('beamformer{}', style='custom')], 
-            [Item('n_iter{Number of iterations}')], 
-#            [Item('steer{Type of steering vector}')], 
-            [Item('calcmode{How to calculate PSF}')], 
-            '|'
-        ], 
-        title='Beamformer denconvolution options', 
-        buttons = OKCancelButtons
-        )
-    
     @cached_property
     def _get_digest( self ):
         return digest( self )
@@ -1325,19 +1251,6 @@ class BeamformerDamasPlus (BeamformerDamas):
         depends_on = ['digest', 'beamformer.ext_digest'], 
         )
     
-    traits_view = View(
-        [
-            [Item('beamformer{}', style='custom')], 
-            [Item('method{Solver}')],
-            [Item('max_iter{Max. number of iterations}')], 
-            [Item('alpha', label='Lasso weight factor')], 
-            [Item('calcmode{How to calculate PSF}')], 
-            '|'
-        ], 
-        title='Beamformer denconvolution options', 
-        buttons = OKCancelButtons
-        )
-
     @cached_property
     def _get_digest( self ):
         return digest( self )
@@ -1446,19 +1359,6 @@ class BeamformerOrth (BeamformerBase):
         depends_on = ['digest', 'beamformer.ext_digest'], 
         )
     
-    traits_view = View(
-        [
-#            [Item('mpos{}', style='custom')], 
-#            [Item('grid', style='custom'), '-<>'], 
-            [Item('n', label='Number of components', style='simple')], 
-            [Item('r_diag', label='Diagonal removed')], 
-#            [Item('env{}', style='custom')], 
-            '|'
-        ], 
-        title='Beamformer options', 
-        buttons = OKCancelButtons
-        )
-
     @cached_property
     def _get_digest( self ):
         return digest( self )
@@ -1537,19 +1437,6 @@ class BeamformerCleansc( BeamformerBase ):
     # internal identifier
     digest = Property( 
         depends_on = ['freq_data.digest', '_steer_obj.digest', 'r_diag', 'n', 'damp', 'stopn'])
-
-    traits_view = View(
-        [
-#            [Item('mpos{}', style='custom')], 
-#            [Item('grid', style='custom'), '-<>'], 
-            [Item('n', label='No. of iterations', style='simple')], 
-            [Item('r_diag', label='Diagonal removed')], 
-#            [Item('env{}', style='custom')], 
-            '|'
-        ], 
-        title='Beamformer options', 
-        buttons = OKCancelButtons
-        )
 
     @cached_property
     def _get_digest( self ):
@@ -1682,19 +1569,6 @@ class BeamformerClean (BeamformerBase):
         depends_on = ['digest', 'beamformer.ext_digest'], 
         )
     
-    traits_view = View(
-        [
-            [Item('beamformer{}', style='custom')], 
-            [Item('n_iter{Number of iterations}')], 
-#            [Item('steer{Type of steering vector}')], 
-            [Item('calcmode{How to calculate PSF}')], 
-            '|'
-        ], 
-        title='Beamformer denconvolution options', 
-        buttons = OKCancelButtons
-        )
-
-    
     @cached_property
     def _get_digest( self ):
         return digest( self )
@@ -1797,21 +1671,6 @@ class BeamformerCMF ( BeamformerBase ):
     # internal identifier
     digest = Property( 
         depends_on = ['freq_data.digest', 'alpha', 'method', 'max_iter', 'unit_mult', 'r_diag', 'steer.inv_digest'], 
-        )
-
-    traits_view = View(
-        [
-#            [Item('mpos{}', style='custom')], 
-#            [Item('grid', style='custom'), '-<>'], 
-            [Item('method', label='Fit method')], 
-            [Item('max_iter', label='No. of iterations')], 
-            [Item('alpha', label='Lasso weight factor')], 
-            [Item('c', label='Speed of sound')], 
-#            [Item('env{}', style='custom')], 
-            '|'
-        ], 
-        title='Beamformer options', 
-        buttons = OKCancelButtons
         )
 
     @cached_property
@@ -1966,21 +1825,6 @@ class BeamformerGIB(BeamformerEig):  #BeamformerEig #BeamformerBase
             'pnorm', 'beta','n', 'm'], 
         )
 
-    traits_view = View(
-        [
-#            [Item('mpos{}', style='custom')], 
-#            [Item('grid', style='custom'), '-<>'], 
-            [Item('method', label='Fit method')], 
-            [Item('max_iter', label='No. of iterations')], 
-            [Item('alpha', label='Lasso weight factor')], 
-            [Item('c', label='Speed of sound')], 
-#            [Item('env{}', style='custom')], 
-            '|'
-        ], 
-        title='Beamformer options', 
-        buttons = OKCancelButtons
-        )
-    
     @cached_property
     def _get_digest( self ):
         return digest( self )
