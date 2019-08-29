@@ -11,7 +11,7 @@ before_install:
   - chmod +x ./acoular/tests/run_tests.sh
   
 install:
-  - pip install ".[test]" . # install package + test dependencies
+  - pip install ".[install_requires]" . # install package + test dependencies
  
 script: 
 
