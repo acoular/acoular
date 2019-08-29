@@ -9,14 +9,14 @@ before_install:
   - pip install -U pytest
   - pip install codecov
 install:
-  - pip install .acoular # install package + test dependencies
+  - pip install ".[test]" . # install package + test dependencies
  
 script: 
 
   - acoular/tests/run_tests.sh # run tests
 
-after_success:
-  - codecov # submit coverage
+#after_success:
+ # - codecov # submit coverage
   
   
   
