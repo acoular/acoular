@@ -2,6 +2,7 @@
 #------------------------------------------------------------------------------
 # Copyright (c) 2007-2019, Acoular Development Team.
 #------------------------------------------------------------------------------
+#test for travis CI
 
 from setuptools import setup
 from os.path import join, abspath, dirname
