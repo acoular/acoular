@@ -3,15 +3,16 @@ python:
   - 2.7
   - 3.5
   - 3.6
+  - 3.7
 before_install:
   - python --version
   - pip install -U pip
-  - pip install -U pytest
+  - pip install -U unittest
   - pip install codecov
   - chmod +x ./acoular/tests/run_tests.sh
   
 install:
-  - pip install ".[install_requires]" . # install package + test dependencies
+  - pip install . # install package
  
 script: 
 
