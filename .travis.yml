@@ -1,20 +1,16 @@
 language: python
-
 python:
-  #- 2.7
-  #- 3.5
+  - 2.7
+  - 3.5
   - 3.6
-
 before_install:
-  # Python PIP install
   - python --version
   - pip install -U pip
   - pip install -U pytest
   - pip install codecov
-  
- install:
+install:
   - pip install ".acoular" . # install package + test dependencies
-  
+ 
 script: 
 
   - acoular/tests/run_tests.sh # run tests
