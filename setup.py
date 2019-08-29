@@ -58,9 +58,9 @@ setup(name="acoular",
       'chaco>=4.4'
 	],
       setup_requires = [
+      'numpy>=1.10.2',
       'setuptools',	
       'pyqt>=4',
-      'numpy>=1.10.2',
       'numba >=0.30.0',
       'scipy>=0.13',
       'scikit-learn>=0.15',
