@@ -4,22 +4,26 @@ matrix:
   # This will launch a separate build for each Python version you add
   # Feel free to add extra environment variables as needed
   include:
+    - python: 2.7
     - python: 3.5
     - python: 3.6
 
 before_install:
-  # Install the latest version of Miniconda
-  - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
-  - chmod +x miniconda.sh
-  - ./miniconda.sh -b
-  - export PATH=/home/travis/miniconda/bin:$PATH
-  - conda update --yes conda  # Update CONDA without command line prompt
+  # Python PIP install
+  - python --version
+  - pip install -U pip
+  - pip install -U pytest
+  - pip install codecov
   
+ install:
+  - pip install ".acoular" . # install package + test dependencies
   
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION dep1 dep2 ...
-  - source activate test-environment
-  - python setup.py install
-  
+script: 
+
+acoular/tests/run_tests.sh # run tests
+
+after_success:
+  - codecov # submit coverage
   
   
   
