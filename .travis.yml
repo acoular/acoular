@@ -13,7 +13,8 @@ before_install:
   - chmod +x ./acoular/tests/run_tests.sh
   
 install:
-  - pip install . # install package
+  #- pip install . # install package
+   - python setup.py install
  
 script: 
 
