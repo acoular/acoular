@@ -4,9 +4,10 @@ matrix:
   # This will launch a separate build for each Python version you add
   # Feel free to add extra environment variables as needed
   include:
-    - python: 2.7
-    - python: 3.5
+   # - python: 2.7
+   # - python: 3.5
     - python: 3.6
+    # - python: 3.7
 
 before_install:
   # Python PIP install
@@ -18,9 +19,9 @@ before_install:
  install:
   - pip install ".acoular" . # install package + test dependencies
   
-script: 
+#script: 
 
-acoular/tests/run_tests.sh # run tests
+  #- acoular/tests/run_tests.sh # run tests
 
 after_success:
   - codecov # submit coverage
