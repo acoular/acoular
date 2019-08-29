@@ -9,7 +9,7 @@ before_install:
   - pip install -U pytest
   - pip install codecov
 install:
-  - pip install ".acoular" . # install package + test dependencies
+  - pip install .acoular # install package + test dependencies
  
 script: 
 
