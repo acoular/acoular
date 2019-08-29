@@ -8,12 +8,14 @@ before_install:
   - pip install -U pip
   - pip install -U pytest
   - pip install codecov
+  - chmod +x ./acoular/tests/run_tests.sh
+  
 install:
   - pip install ".[test]" . # install package + test dependencies
  
 script: 
 
-  - acoular/tests/run_tests.sh # run tests
+  - ./acoular/tests/run_tests.sh # run tests
 
 #after_success:
  # - codecov # submit coverage
