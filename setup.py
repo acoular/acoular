@@ -23,8 +23,7 @@ with open(join(here, 'README.rst')) as f:
     long_description = f.read()
 
 
-#to solve numba errors
-zip_safe=False
+
     
 setup(name="acoular", 
       version=bf_version, 
@@ -77,8 +76,11 @@ setup(name="acoular",
       'traitsui>=6.0.0',
       #'libpython; platform_system == "Windows"',
 	],
+      
       scripts=[join('examples','acoular_demo.py')],
       include_package_data = True,
       package_data={'acoular': ['xml/*.xml']}
+      #to solve numba errors 
+      zip_safe=False
 )
 
