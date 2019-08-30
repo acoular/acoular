@@ -47,7 +47,7 @@ script:
   - python3 -c 'import acoular' || python -c 'import acoular' 
   # run tests
   - bash ./acoular/tests/run_tests.sh # run tests
-  - python './acoular/tests/test_beamformer_results.py'
+  - python '/home/travis/build/lib/acoular//tests/test_beamformer_results.py'
 
 #after_success:
  # - codecov # submit coverage
