@@ -79,7 +79,8 @@ setup(name="acoular",
       
       scripts=[join('examples','acoular_demo.py')],
       include_package_data = True,
-      package_data={'acoular': ['xml/*.xml']},
+      package_data={'acoular': ['xml/*.xml'],
+		    'acoular': ['tests/*.*']},
       #to solve numba errors 
       zip_safe=False
 )
