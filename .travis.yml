@@ -32,7 +32,7 @@ script:
   - python -c 'import acoular' #|| python -c 'import acoular' 
   # run tests
   - bash ./acoular/tests/run_tests.sh # run tests
-  - python './acoular/tests/test_beamformer_results.py'
+  - python '/home/travis/build/sjekosch/acoular/tests/test_beamformer_results.py'
 
 #after_success:
  # - codecov # submit coverage
