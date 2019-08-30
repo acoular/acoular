@@ -4,14 +4,19 @@ python:
   - 3.5
   - 3.6
   - 3.7
+  
+os:
+  - linux
+  - osx
+
 before_install:
   - python --version
   - pip install -U pip
   - chmod +x ./acoular/tests/run_tests.sh
   
 install:
-  - pip install . # install package
-  # - python setup.py install
+  #- pip install . # install package
+  - python setup.py install
  
 script: 
   # test import
