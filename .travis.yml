@@ -32,8 +32,8 @@ matrix:
 before_install: 
   - python --version
   - pip install -U pip
-  - chmod +x ./acoular/tests/run_tests.sh
-  
+  #- chmod +x ./acoular/tests/run_tests.sh
+  - chmod +x ./acoular/*
 install:
   # try pip
   #- pip install . # install package
