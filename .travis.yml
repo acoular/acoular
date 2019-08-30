@@ -8,11 +8,17 @@ python:
 os:
   - linux
   - osx
-  - windows
+  #- windows
   
-osx_image: xcode8.3
+#osx_image: xcode8.3
 
 before_install:
+# osx deps
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew list python &>/dev/null || brew install python; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew list python3 &>/dev/null || brew install python3; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install pyenv-virtualenv; fi
+  
   - python --version
   - pip install -U pip
   - chmod +x ./acoular/tests/run_tests.sh
