@@ -21,7 +21,10 @@ bf_author = "Acoular Development Team"
 here = abspath(dirname(__file__))
 with open(join(here, 'README.rst')) as f:
     long_description = f.read()
-                    
+
+
+#to solve numba errors
+zip_safe=False
     
 setup(name="acoular", 
       version=bf_version, 
