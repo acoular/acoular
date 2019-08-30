@@ -8,6 +8,9 @@ python:
 os:
   - linux
   - osx
+  - windows
+  
+osx_image: xcode8.3
 
 before_install:
   - python --version
@@ -23,6 +26,7 @@ script:
   - python -c 'import acoular'
   # run tests
   - ./acoular/tests/run_tests.sh # run tests
+  - python './acoular/tests/test_beamformer_results.py'
 
 #after_success:
  # - codecov # submit coverage
