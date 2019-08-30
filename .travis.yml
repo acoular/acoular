@@ -1,16 +1,33 @@
 language: python
-python:
-  - 2.7
-  - 3.5
-  - 3.6
-  - 3.7
+#python:
+#  - 2.7
+#  - 3.5
+#  - 3.6
+#  - 3.7
+ 
+#os:
+#  - linux
+#  - osx
+#  - windows
   
-os:
-  - linux
-  - osx
-  #- windows
-  
-#osx_image: xcode8.3
+matrix:
+  include:
+    - name: "Python 3.7 on Xenial Linux"
+      python: 3.7           # this works for Linux but is ignored on macOS or Windows
+    - name: "Python 3.7 on macOS"
+      os: osx
+      osx_image: xcode11  # Python 3.7 running on macOS 10.14.3
+      language: shell       # 'language: python' is an error on Travis CI macOS
+      # python: 3.7         # 'python:' is ignored on Travis CI macOS
+      before_install: python3 --version ; pip3 --version ; sw_vers
+    - name: "Python 3.7.4 on Windows"
+      os: windows           # Windows 10.0.17134 N/A Build 17134
+      language: shell       # 'language: python' is an error on Travis CI Windows
+      # python: 3.7         # 'python:' is ignored on Travis CI Windows 
+      before_install:
+        - choco install python  # this install takes at least 1 min 30 sec
+        - python -m pip install --upgrade pip
+      env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
 
 before_install:
 # osx deps
