@@ -32,14 +32,12 @@ matrix:
       before_install:
         #- choco install python  # this install takes at least 1 min 30 sec
         #- python -m pip install --upgrade pip
-        
-          MINICONDA_PATH=/c/tools/miniconda3/;
-          MINICONDA_PATH_WIN=`cygpath --windows $MINICONDA_PATH`;
-          MINICONDA_SUB_PATH=$MINICONDA_PATH/Scripts;
-          choco install openssl.light;
-          choco install miniconda3 --params="'/AddToPath:1 /D:$MINICONDA_PATH_WIN'";
-        
-    
+         - MINICONDA_PATH=/c/tools/miniconda3/;
+         - MINICONDA_PATH_WIN=`cygpath --windows $MINICONDA_PATH`;
+         - MINICONDA_SUB_PATH=$MINICONDA_PATH/Scripts;
+         - choco install openssl.light;
+         - choco install miniconda3 --params="'/AddToPath:1 /D:$MINICONDA_PATH_WIN'";
+       
       # env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
 
 before_install: 
@@ -57,7 +55,7 @@ install:
         python3 setup.py install;
     elif [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
           export PATH="$MINICONDA_PATH:$MINICONDA_SUB_PATH:$PATH";
-            # for conda version 4.4 or later
+          # for conda version 4.4 or later
           source $MINICONDA_PATH/etc/profile.d/conda.sh;
           hash -r;
           conda config --set always_yes yes --set changeps1 no;
@@ -65,7 +63,7 @@ install:
           echo "Python $CONDA_PYTHON running on $TRAVIS_OS_NAME";
           conda env create --name test-environment python=3.7 ;
           conda activate test-environment;
-          conda install libpython
+          conda install libpython;
           python setup.py install;
     else
         python setup.py install;
@@ -82,8 +80,7 @@ script:
   
   # run tests from test dir
   - cd acoular/tests/
-  - ls
-  
+    
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
        bash run_tests_osx.sh;
     else
