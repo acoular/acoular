@@ -50,20 +50,20 @@ install:
   # 'python3' is a 'command not found' error on Windows but 'py' works on Windows only
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
         python3 setup.py install;
-    elif [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
-          choco install openssl.light;
-          choco install miniconda3 --params="'/AddToPath:1 /D:$MINICONDA_PATH_WIN'";
-          export PATH="$MINICONDA_PATH:$MINICONDA_SUB_PATH:$PATH";
-          # for conda version 4.4 or later
-          source $MINICONDA_PATH/etc/profile.d/conda.sh;
-          hash -r;
-          conda config --set always_yes yes --set changeps1 no;
-          conda update -q conda;
-          echo "Python $CONDA_PYTHON running on $TRAVIS_OS_NAME";
-          conda env create --name test-environment python=3.7 ;
-          conda activate test-environment;
-          conda install libpython;
-          python setup.py install;
+   # elif [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
+   #       choco install openssl.light;
+   #       choco install miniconda3 --params="'/AddToPath:1 /D:$MINICONDA_PATH_WIN'";
+   #       export PATH="$MINICONDA_PATH:$MINICONDA_SUB_PATH:$PATH";
+   #       # for conda version 4.4 or later
+   #       source $MINICONDA_PATH/etc/profile.d/conda.sh;
+   #       hash -r;
+   #       conda config --set always_yes yes --set changeps1 no;
+   #       conda update -q conda;
+   #       echo "Python $CONDA_PYTHON running on $TRAVIS_OS_NAME";
+   #       conda env create --name test-environment python=3.7 ;
+   #       conda activate test-environment;
+   #       conda install libpython;
+   #      python setup.py install;
     else
         python setup.py install;
     fi
