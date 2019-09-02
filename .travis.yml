@@ -3,8 +3,9 @@ language: python
 #operating sys and python versions
 matrix:
   include:
-    - name: "Python 2.7 on Xenial Linux"
-      python: 2.7    
+    # Python 2 support will be dropped
+    #- name: "Python 2.7 on Xenial Linux"
+    #  python: 2.7    
     - name: "Python 3.5 on Xenial Linux"
       python: 3.5           # this works for Linux but is ignored on macOS or Windows
     - name: "Python 3.6 on Xenial Linux"
@@ -24,7 +25,7 @@ matrix:
       before_install:
         - choco install python  # this install takes at least 1 min 30 sec
         - python -m pip install --upgrade pip
-      env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
+      #env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
 
 before_install: 
   - python --version
