@@ -40,19 +40,19 @@ install:
   
   # 'python' points to Python 2.7 on macOS but points to Python 3.7 on Linux and Windows
   # 'python3' is a 'command not found' error on Windows but 'py' works on Windows only
-   - if [[ "$TRAVIS_OS_NAME" == "osx" ]];then
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
         python3 setup.py install;
-     else
+    else
         python setup.py install;
-     fi
+    fi
   
  
 script: 
   # test import
-     - if [[ "$TRAVIS_OS_NAME" == "osx" ]];then
-        python3 -c 'import acoular';
-     else
-        python -c 'import acoular';
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+       python3 -c 'import acoular';
+    else
+       python -c 'import acoular';
      fi
   
   # run tests
