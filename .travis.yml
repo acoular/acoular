@@ -29,12 +29,12 @@ matrix:
       os: windows           # Windows 10.0.17134 N/A Build 17134
       language: shell       # 'language: python' is an error on Travis CI Windows
       # python: 3.7         # 'python:' is ignored on Travis CI Windows 
-      before_install:
+      #before_install:
         #- choco install python  # this install takes at least 1 min 30 sec
         #- python -m pip install --upgrade pip
-         - MINICONDA_PATH=/c/tools/miniconda3/;
-         - MINICONDA_PATH_WIN=`cygpath --windows $MINICONDA_PATH`;
-         - MINICONDA_SUB_PATH=$MINICONDA_PATH/Scripts;
+        # - MINICONDA_PATH=/c/tools/miniconda3/;
+        # - MINICONDA_PATH_WIN=`cygpath --windows $MINICONDA_PATH`;
+        # - MINICONDA_SUB_PATH=$MINICONDA_PATH/Scripts;
       # env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
 
 before_install: 
