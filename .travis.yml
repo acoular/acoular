@@ -35,9 +35,6 @@ matrix:
          - MINICONDA_PATH=/c/tools/miniconda3/;
          - MINICONDA_PATH_WIN=`cygpath --windows $MINICONDA_PATH`;
          - MINICONDA_SUB_PATH=$MINICONDA_PATH/Scripts;
-         - choco install openssl.light;
-         - choco install miniconda3 --params="'/AddToPath:1 /D:$MINICONDA_PATH_WIN'";
-       
       # env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
 
 before_install: 
@@ -54,6 +51,8 @@ install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
         python3 setup.py install;
     elif [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
+          choco install openssl.light;
+          choco install miniconda3 --params="'/AddToPath:1 /D:$MINICONDA_PATH_WIN'";
           export PATH="$MINICONDA_PATH:$MINICONDA_SUB_PATH:$PATH";
           # for conda version 4.4 or later
           source $MINICONDA_PATH/etc/profile.d/conda.sh;
