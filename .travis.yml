@@ -30,9 +30,17 @@ matrix:
       language: shell       # 'language: python' is an error on Travis CI Windows
       # python: 3.7         # 'python:' is ignored on Travis CI Windows 
       before_install:
-        - choco install python  # this install takes at least 1 min 30 sec
-        - python -m pip install --upgrade pip
-      env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
+        #- choco install python  # this install takes at least 1 min 30 sec
+        #- python -m pip install --upgrade pip
+        
+          MINICONDA_PATH=/c/tools/miniconda3/;
+          MINICONDA_PATH_WIN=`cygpath --windows $MINICONDA_PATH`;
+          MINICONDA_SUB_PATH=$MINICONDA_PATH/Scripts;
+          choco install openssl.light;
+          choco install miniconda3 --params="'/AddToPath:1 /D:$MINICONDA_PATH_WIN'";
+        
+    
+      # env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
 
 before_install: 
   - python --version
@@ -47,6 +55,18 @@ install:
   # 'python3' is a 'command not found' error on Windows but 'py' works on Windows only
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
         python3 setup.py install;
+    elif [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
+          export PATH="$MINICONDA_PATH:$MINICONDA_SUB_PATH:$PATH";
+            # for conda version 4.4 or later
+          source $MINICONDA_PATH/etc/profile.d/conda.sh;
+          hash -r;
+          conda config --set always_yes yes --set changeps1 no;
+          conda update -q conda;
+          echo "Python $CONDA_PYTHON running on $TRAVIS_OS_NAME";
+          conda env create --name test-environment python=3.7 ;
+          conda activate test-environment;
+          conda install libpython
+          python setup.py install;
     else
         python setup.py install;
     fi
