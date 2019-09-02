@@ -62,6 +62,7 @@ setup(name="acoular",
       'tables>=3.4.4; platform_system == "darwin"',
       'traits>=4.6.0',
       'traitsui>=6.0.0',
+      'configparser;python_version<"2.7"',
 	],
       setup_requires = [
       'numpy>=1.11.3',
