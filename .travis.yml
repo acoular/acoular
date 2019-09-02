@@ -33,23 +33,35 @@ before_install:
   - python --version
   - pip install -U pip
   - chmod +x ./acoular/tests/run_tests.sh
-  #- chmod +x ./acoular/
+  
 install:
   # try pip
   #- pip install -e . # install package
   
   # 'python' points to Python 2.7 on macOS but points to Python 3.7 on Linux and Windows
   # 'python3' is a 'command not found' error on Windows but 'py' works on Windows only
-  - python3 setup.py install || python setup.py install
+   - if [[ "$TRAVIS_OS_NAME" == "osx" ]];then
+     python3 setup.py install;
+     
+     else
+     python setup.py install;
+     fi
+  
  
 script: 
   # test import
-  - python3 -c 'import acoular' || python -c 'import acoular' 
+     - if [[ "$TRAVIS_OS_NAME" == "osx" ]];then
+     python3 -c 'import acoular';
+     
+     else
+     python -c 'import acoular';
+     fi
+  
   # run tests
   - cd acoular/tests/
   - ls
   - bash run_tests.sh # run tests
-  - python 'test_beamformer_results.py'
+  #- python 'test_beamformer_results.py'
 
 #after_success:
  # - codecov # submit coverage
