@@ -44,6 +44,7 @@ matrix:
          - conda update -q conda;
          - conda create --name test-environment python=3.7 ;
          - conda activate test-environment;
+         - conda install -c anaconda pytables 
          - conda install libpython;
         #- choco install python  # this install takes at least 1 min 30 sec
         #- python -m pip install --upgrade pip
