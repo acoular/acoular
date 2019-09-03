@@ -1,9 +1,5 @@
 language: python
 
-#python versions for conda test
-env:
-  - CONDA_PYTHON=3.6
-  - CONDA_PYTHON=3.7
 
 #operating sys and python versions
 matrix:
@@ -30,7 +26,7 @@ matrix:
       # python: 3.6         # 'python:' is ignored on Travis CI macOS
       before_install: python3 --version ; pip3 --version ; sw_vers
       #Testing Windows
-    - name: "Python $CONDA_PYTHON on Windows"
+    - name: "Python 3.7 on Windows"
       os: windows           # Windows 10.0.17134 N/A Build 17134
       language: shell       # 'language: python' is an error on Travis CI Windows
       before_install:
@@ -46,7 +42,7 @@ matrix:
          - conda config --set always_yes yes --set changeps1 no;
          - conda update -q conda;
          #create env and install libpython and pytables
-         - conda create --name test-environment python=$CONDA_PYTHON ;
+         - conda create --name test-environment python=3.7 ;
          - conda activate test-environment;
          - conda install -c anaconda pytables 
          - conda install libpython;
@@ -57,9 +53,10 @@ before_install:
   - chmod +x ./acoular/tests/run_tests.sh
   
 install:
-  # try pip
+  #  pip installer 
   #- pip install -e . # install package
   
+  #setuptools installer
   # 'python' points to Python 2.7 on macOS but points to Python 3.7 on Linux and Windows
   # 'python3' is a 'command not found' error on Windows but 'py' works on Windows only
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
@@ -76,7 +73,7 @@ script:
        python -c 'import acoular';
      fi
   
-  # run acoular tests from test dir
+  # run acoular unittests from test dir
   - cd acoular/tests/
     
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
