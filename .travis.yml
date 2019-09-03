@@ -42,7 +42,7 @@ matrix:
          - hash -r;
          - conda config --set always_yes yes --set changeps1 no;
          - conda update -q conda;
-         - conda env create --name test-environment python=3.7 ;
+         - conda create --name test-environment python=3.7 ;
          - conda activate test-environment;
          - conda install libpython;
         #- choco install python  # this install takes at least 1 min 30 sec
