@@ -1,0 +1,20 @@
+
+stages:
+  - build
+  - test
+
+build:
+  image: python:3.7
+  stage: build
+  script:
+    - echo "Building"
+    - pip3 install .
+
+
+test:
+  image: python:3.7
+  stage: test
+  script:
+    - echo "Testing"
+    - pip3 install .
+
