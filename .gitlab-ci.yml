@@ -2,6 +2,9 @@
 
 before_script: 
   - python --version
+  - apt-get update
+  - apt-get install -y pip
+
 
 stages:
   - build
@@ -12,7 +15,7 @@ build:
   stage: build
   script:
     - echo "Building"
-    - pip3 install setuptools
+    - pip install setuptools
     - python setup.py install
 
 
@@ -21,7 +24,7 @@ test:
   stage: test
   script:
     - echo "Testing"
-    - pip3 install setuptools
+    - pip install setuptools
     - python setup.py install
     - python -c 'import acoular'
 
