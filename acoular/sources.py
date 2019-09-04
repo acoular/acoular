@@ -24,7 +24,6 @@ from numpy import array, sqrt, ones, empty, newaxis, uint32, arange, dot, int64,
 from traits.api import Float, Int, Property, Trait, Delegate, \
 cached_property, Tuple, HasPrivateTraits, CLong, File, Instance, Any, \
 on_trait_change, List, CArray
-import tables
 from os import path
 from warnings import warn
 
@@ -35,6 +34,7 @@ from .internal import digest
 from .microphones import MicGeom
 from .environments import Environment
 from .signals import SignalGenerator
+from .h5files import H5FileBase, _get_h5file_class
 
 class SamplesGenerator( HasPrivateTraits ):
     """
@@ -111,7 +111,7 @@ class TimeSamples( SamplesGenerator ):
         desc="the actual time data array")
 
     #: HDF5 file object
-    h5f = Instance(tables.File, transient = True)
+    h5f = Instance(H5FileBase, transient = True)
     
     # Checksum over first data entries of all channels
     _datachecksum = Property()
@@ -146,9 +146,10 @@ class TimeSamples( SamplesGenerator ):
                 self.h5f.close()
             except IOError:
                 pass
-        self.h5f = tables.open_file(self.name)
-        self.data = self.h5f.root.time_data
-        self.sample_freq = self.data.get_attr('sample_freq')
+        file = _get_h5file_class()
+        self.h5f = file(self.name)
+        self.data = self.h5f.get_data_by_reference('time_data')    
+        self.sample_freq = self.h5f.get_node_attribute(self.data,'sample_freq')
         (self.numsamples, self.numchannels) = self.data.shape
 
     def result(self, num=128):
@@ -273,9 +274,10 @@ class MaskedTimeSamples( TimeSamples ):
                 self.h5f.close()
             except IOError:
                 pass
-        self.h5f = tables.open_file(self.name)
-        self.data = self.h5f.root.time_data
-        self.sample_freq = self.data.get_attr('sample_freq')
+        file = _get_h5file_class()
+        self.h5f = file(self.name)
+        self.data = self.h5f.get_data_by_reference('time_data')    
+        self.sample_freq = self.h5f.get_node_attribute(self.data,'sample_freq')
         (self.numsamples_total, self.numchannels_total) = self.data.shape
 
     def result(self, num=128):
