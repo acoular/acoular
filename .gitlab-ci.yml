@@ -1,12 +1,12 @@
 #testbuild
+
+before_script: 
+  - python --version
+
 stages:
   - build
   - test
   
-default:
-  before_script: 
-  - python --version
-
 build:
   image: ubuntu:latest
   stage: build
