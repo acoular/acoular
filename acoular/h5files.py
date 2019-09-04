@@ -63,17 +63,21 @@ class H5CacheFileBase(object):
 
 if is_tables:
     
+    precision_to_atom = {
+        'float32' : tables.Float32Atom(),
+        'complex64' : tables.ComplexAtom(8),
+        'float64' : tables.Float64Atom(),
+        'complex128' : tables.ComplexAtom(16),
+        'bool' : tables.BoolAtom(),
+        'int32' : tables.Int32Atom(),
+        'int16' : tables.Int16Atom(),
+        'int8' : tables.Int8Atom(),        
+        }
+    
     class H5FileTables(H5FileBase,tables.File):
         
         def _translate_precision_to_dtype(self,precision):
-            if precision == 'float32': return tables.Float32Atom()
-            elif precision == 'complex64': return tables.ComplexAtom(8)
-            elif precision == 'float64':return tables.Float64Atom()
-            elif precision == 'complex128':return tables.ComplexAtom(16)
-            elif precision == 'bool': return tables.BoolAtom()
-            elif precision == 'int32': return tables.Int32Atom()
-            elif precision == 'int16': return tables.Int16Atom()
-            elif precision == 'int8': return tables.Int8Atom()
+            return precision_to_atom[precision]
             
         def create_extendable_array(self,nodename,shape,precision,group=None):
             if not group: group = self.root
