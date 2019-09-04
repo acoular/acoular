@@ -3,6 +3,7 @@
 # Copyright (c) 2007-2019, Acoular Development Team.
 #------------------------------------------------------------------------------
 
+
 from setuptools import setup
 from os.path import join, abspath, dirname
 
@@ -20,7 +21,9 @@ bf_author = "Acoular Development Team"
 here = abspath(dirname(__file__))
 with open(join(here, 'README.rst')) as f:
     long_description = f.read()
-                    
+
+
+
     
 setup(name="acoular", 
       version=bf_version, 
@@ -45,31 +48,42 @@ setup(name="acoular",
       keywords='acoustic beamforming microphone array',
       packages = ['acoular'],
       install_requires = [
-#      'setuptools',	
-#      'pyqt>=4',
-#      'numpy>=1.10.2',
-#      'numba >=0.30.0',
-#      'scipy>=0.13',
-#      'scikit-learn>=0.15',
-#      'pytables>=3.1',
-#      'traits>=4.4.0',
-#      'traitsui>=4.4.0',
-#      'chaco>=4.4'
+      'numpy>=1.11.3',
+      'setuptools',	
+      'python-qt5;python_version<="2.7"',
+      'PyQt5>=5.6;python_version>="3.4"',
+      'numba >=0.40.0',
+      'scipy<=0.12.0;python_version<="2.7"',
+      'scipy>=0.1.0;python_version>="3.4"',
+      'scikit-learn<=0.20.0;python_version<="2.7"',
+      'scikit-learn>=0.19.1;python_version>="3.4"',
+      'tables>=3.4.4',
+      'traits>=4.6.0',
+      'traitsui>=6.0.0',
+      'configparser;python_version<"3.4"',
 	],
       setup_requires = [
-#      'setuptools',	
-#      'pyqt>=4',
-#      'numpy>=1.10.2',
-#      'numba >=0.30.0',
-#      'scipy>=0.13',
-#      'scikit-learn>=0.15',
-#      'pytables>=3.1',
-#      'traits>=4.4.0',
-#      'traitsui>=4.4.0',
-#      'chaco>=4.4'
+      'numpy>=1.11.3',
+      'setuptools',	
+      'python-qt5;python_version<="2.7"',
+      'PyQt5>=5.6;python_version>="3.4"',
+      'numba >=0.40.0',
+      'scipy<=0.12.0;python_version<="2.7"',
+      'scipy>=0.1.0;python_version>="3.4"',
+      'scikit-learn<=0.20.0;python_version<="2.7"',
+      'scikit-learn>=0.19.1;python_version>="3.4"',
+      'tables>=3.4.4',
+      'traits>=4.6.0',
+      'traitsui>=6.0.0',
+      'configparser;python_version<="2.7"',
+      #'libpython; platform_system == "Windows"',
 	],
+      
       scripts=[join('examples','acoular_demo.py')],
       include_package_data = True,
-      package_data={'acoular': ['xml/*.xml']}
+      package_data={'acoular': ['xml/*.xml'],
+		    'acoular': ['tests/*.*']},
+      #to solve numba compiler 
+      zip_safe=False
 )
 
