@@ -16,7 +16,7 @@ try:
 except:
     is_h5py = False
 
-from .config import config
+from .configuration import config
 
 
 

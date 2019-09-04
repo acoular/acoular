@@ -38,7 +38,7 @@ from .internal import digest
 from .h5cache import H5cache, td_dir
 from .h5files import H5CacheFileBase, _get_h5file_class
 from .sources import SamplesGenerator
-from .config import config
+from .configuration import config
 
 
 class TimeInOut( SamplesGenerator ):

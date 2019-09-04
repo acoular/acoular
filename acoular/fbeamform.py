@@ -61,7 +61,7 @@ from .grids import Grid
 from .microphones import MicGeom
 from .environments import Environment
 from .spectra import PowerSpectra
-from .config import config
+from .configuration import config
 
 
 class SteeringVector( HasPrivateTraits ):

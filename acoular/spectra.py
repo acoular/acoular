@@ -27,7 +27,7 @@ from .h5files import H5CacheFileBase
 from .internal import digest
 from .sources import SamplesGenerator
 from .calib import Calib
-from .config import config
+from .configuration import config
 
 
 class PowerSpectra( HasPrivateTraits ):

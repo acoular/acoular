@@ -11,7 +11,7 @@ from os import path, mkdir, environ, listdir
 from weakref import WeakValueDictionary
 import gc
 
-from .config import config
+from .configuration import config
 from .h5files import _get_cachefile_class
 
 # path to cache directory

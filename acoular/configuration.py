@@ -4,19 +4,19 @@
 # Copyright (c) 2007-2019, Acoular Development Team.
 #------------------------------------------------------------------------------
 """
-Implements class for configuring acoular.
+Implements global configuration of Acoular.
 
 .. autosummary::
     :toctree: generated/
 
-    Config
+    config
 """
 
 from traits.api import Trait,Property, HasStrictTraits
 
 class Config(HasStrictTraits):
     """
-    This class implements the global configuration of the acoular package.
+    This class implements the global configuration of the Acoular package.
 
     An instance of this class can be accessed for adjustment of the following 
     properties.
@@ -25,18 +25,18 @@ class Config(HasStrictTraits):
     by :attr:`h5library`.    
     
     Example: 
-        For using acoular with h5py package and overwrite existing cache:
+        For using Acoular with h5py package and overwrite existing cache:
         
-        import acoular
-        acoular.config.h5library = "h5py"
-        acoular.config.global_caching = "overwrite"
+        >>>    import acoular
+        >>>    acoular.config.h5library = "h5py"
+        >>>    acoular.config.global_caching = "overwrite"
     """
     
     def __init__(self):
         HasStrictTraits.__init__(self)
         self._assert_h5library()
     
-    #: Flag that globally defines caching behaviour of acoular classes
+    #: Flag that globally defines caching behaviour of Acoular classes
     #: defaults to 'individual'.
     #:
     #: * 'individual': Acoular classes handle caching behavior individually.
@@ -76,6 +76,21 @@ class Config(HasStrictTraits):
                 self.h5library = 'h5py'
             except:
                 raise ImportError("packages h5py and pytables are missing!")
-            
+
+
+
 config = Config()
-        
+"""
+This instance implements the global configuration of the Acoular package.
+
+General caching behaviour can be controlled by :attr:`global_caching`.
+The package used to read and write .h5 files can be specified 
+by :attr:`h5library`.    
+
+Example: 
+    For using Acoular with h5py package and overwrite existing cache:
+    
+    >>>    import acoular
+    >>>    acoular.config.h5library = "h5py"
+    >>>    acoular.config.global_caching = "overwrite"
+"""
