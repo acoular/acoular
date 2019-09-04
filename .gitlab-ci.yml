@@ -2,6 +2,7 @@
 
 before_script: 
   - python3 --version
+  - uname -a
   #- python3 -m pip install --user setuptools
   #- sudo apt-get update
   #- sudo apt-get install -y pip
