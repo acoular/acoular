@@ -8,7 +8,7 @@ build:
   stage: build
   script:
     - echo "Building"
-    - pip3 install .
+    - python setup.py install
 
 
 test:
@@ -16,5 +16,6 @@ test:
   stage: test
   script:
     - echo "Testing"
-    - pip3 install .
+    - python setup.py install
+    - python -c 'import acoular'
 
