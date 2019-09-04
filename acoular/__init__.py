@@ -55,6 +55,9 @@ try:
 except:
     os.environ['QT_API'] = 'pyqt' 
 
+#     
+from .config import config
+
 from .fileimport import time_data_import, csv_import, td_import, \
 bk_mat_import, datx_import
 try:
