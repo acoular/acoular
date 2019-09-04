@@ -19,6 +19,7 @@
     TimeCache
     WriteWAV
     WriteH5
+    SampleSplitter
 """
 
 # imports from other packages
@@ -26,12 +27,15 @@ from six import next
 from numpy import array, empty, empty_like, pi, sin, sqrt, zeros, int16
 from traits.api import Float, Int, CLong, \
 File, Property, Instance, Trait, Delegate, \
-cached_property, on_trait_change, List
+cached_property, on_trait_change, List, Dict, Bool
 from datetime import datetime
 from os import path
 import wave
 from scipy.signal import butter, lfilter, filtfilt
 from warnings import warn
+from collections import deque
+from inspect import currentframe
+import threading
 
 # acoular imports
 from .internal import digest
@@ -706,6 +710,160 @@ class WriteH5( TimeInOut ):
         for data in self.source.result(4096):
             f5h.append_data(ac,data)
         f5h.close()
+
+class LockedGenerator():
+    """
+    Creates a Thread Safe Iterator.
+    Takes an iterator/generator and makes it thread-safe by
+    serializing call to the `next` method of given iterator/generator.
+    """
+    
+    def __init__(self, it):
+        self.it = it
+        self.lock = threading.Lock()
+
+    def __next__(self): # this function implementation is not python 2 compatible!
+        with self.lock:
+            return self.it.__next__()
+
+class SampleSplitter(TimeInOut): 
+    '''
+    This class distributes data blocks from source to several following objects.
+    A separate block buffer is created for each registered object in 
+    (:attr:`block_buffer`) .
+    '''
+
+    #: dictionary with block buffers (dict values) of registered objects (dict
+    #: keys).  
+    block_buffer = Dict(key_trait=Instance(SamplesGenerator)) 
+
+    #: max elements/blocks in block buffers. 
+    buffer_size = Int(100)
+
+    #: defines behaviour in case of block_buffer overflow. Can be set individually
+    #: for each registered object.
+    #:
+    #: * 'error': an IOError is thrown by the class
+    #: * 'warning': a warning is displayed. Possibly leads to lost blocks of data
+    #: * 'none': nothing happens. Possibly leads to lost blocks of data
+    buffer_overflow_treatment = Dict(key_trait=Instance(SamplesGenerator),
+                              value_trait=Trait('error','warning','none'),
+                              desc='defines buffer overflow behaviour.')       
+ 
+    # shadow trait to monitor if source deliver samples or is empty
+    _source_generator_exist = Bool(False) 
+
+    # shadow trait to monitor if buffer of objects with overflow treatment = 'error' 
+    # or warning is overfilled. Error will be raised in all threads.
+    _buffer_overflow = Bool(False)
+
+    # Helper Trait holds source generator     
+    _source_generator = Trait()
+           
+    def _create_block_buffer(self,obj):        
+        self.block_buffer[obj] = deque([],maxlen=self.buffer_size)
+        
+    def _create_buffer_overflow_treatment(self,obj):
+        self.buffer_overflow_treatment[obj] = 'error' 
+    
+    def _clear_block_buffer(self,obj):
+        self.block_buffer[obj].clear()
+        
+    def _remove_block_buffer(self,obj):
+        del self.block_buffer[obj]
+
+    def _remove_buffer_overflow_treatment(self,obj):
+        del self.buffer_overflow_treatment[obj]
+        
+    def _assert_obj_registered(self,obj):
+        if not obj in self.block_buffer.keys(): 
+            raise IOError("calling object %s is not registered." %obj)
+
+    def _get_objs_to_inspect(self):
+        return [obj for obj in self.buffer_overflow_treatment.keys() 
+                            if not self.buffer_overflow_treatment[obj] == 'none']
+ 
+    def _inspect_buffer_levels(self,inspect_objs):
+        for obj in inspect_objs:
+            if len(self.block_buffer[obj]) == self.buffer_size:
+                if self.buffer_overflow_treatment[obj] == 'error': 
+                    self._buffer_overflow = True
+                elif self.buffer_overflow_treatment[obj] == 'warning':
+                    warn(
+                        'overfilled buffer for object: %s data will get lost' %obj,
+                        UserWarning)
+
+    def _create_source_generator(self,num):
+        for obj in self.block_buffer.keys(): self._clear_block_buffer(obj)
+        self._buffer_overflow = False # reset overflow bool
+        self._source_generator = LockedGenerator(self.source.result(num))
+        self._source_generator_exist = True # indicates full generator
+
+    def _fill_block_buffers(self): 
+        next_block = next(self._source_generator)                
+        [self.block_buffer[obj].appendleft(next_block) for obj in self.block_buffer.keys()]
+
+    @on_trait_change('buffer_size')
+    def _change_buffer_size(self): # 
+        for obj in self.block_buffer.keys():
+            self._remove_block_buffer(obj)
+            self._create_block_buffer(obj)      
+
+    def register_object(self,*objects_to_register):
+        """
+        Function that can be used to register objects that receive blocks from 
+        this class.
+        """
+        for obj in objects_to_register:
+            if obj not in self.block_buffer.keys():
+                self._create_block_buffer(obj)
+                self._create_buffer_overflow_treatment(obj)
+
+    def remove_object(self,*objects_to_remove):
+        """
+        Function that can be used to remove registered objects.
+        """
+        for obj in objects_to_remove:
+            self._remove_block_buffer(obj)
+            self._remove_buffer_overflow_treatment(obj)
+            
+    def result(self,num):
+        """ 
+        Python generator that yields the output block-wise from block-buffer.
+
+        
+        Parameters
+        ----------
+        num : integer
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block).
+        
+        Returns
+        -------
+        Samples in blocks of shape (num, numchannels). 
+            Delivers a block of samples to the calling object.
+            The last block may be shorter than num.
+        """
+
+        calling_obj = currentframe().f_back.f_locals['self'] 
+        self._assert_obj_registered(calling_obj)
+        objs_to_inspect = self._get_objs_to_inspect() 
+        
+        if not self._source_generator_exist: 
+            self._create_source_generator(num) 
+
+        while not self._buffer_overflow:
+            if self.block_buffer[calling_obj]:
+                yield self.block_buffer[calling_obj].pop()
+            else:
+                self._inspect_buffer_levels(objs_to_inspect)
+                try: 
+                    self._fill_block_buffers()
+                except StopIteration:
+                    self._source_generator_exist = False
+                    return
+        else: 
+            raise IOError('Maximum size of block buffer is reached!')   
         
     def result(self, num):
         """ 
