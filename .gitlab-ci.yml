@@ -2,6 +2,9 @@
 stages:
   - build
   - test
+  
+before_install: 
+  - python --version
 
 build:
   image: ubuntu:latest
