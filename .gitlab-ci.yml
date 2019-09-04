@@ -4,20 +4,20 @@ stages:
   - test
 
 build:
-  image: python:3.7
+  image: ubuntu:latest
   stage: build
   script:
     - echo "Building"
-    - apt-get install python3-setuptools
+    - pip3 install setuptools
     - python setup.py install
 
 
 test:
-  image: python:3.7
+  image: ubuntu:latest
   stage: test
   script:
     - echo "Testing"
-    - apt-get install python3-setuptools
+    - pip3 install setuptools
     - python setup.py install
     - python -c 'import acoular'
 
