@@ -3,7 +3,8 @@ stages:
   - build
   - test
   
-before_install: 
+default:
+  before_script: 
   - python --version
 
 build:
