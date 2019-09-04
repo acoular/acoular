@@ -1113,7 +1113,7 @@ class PointSpreadFunction (HasPrivateTraits):
                         self.calc_psf(ac,gp)
                         self.h5f.flush()
                         return ac[:,self.grid_indices]
-                else:
+#                else:
 #                    print("cached results are complete! return.")
                 return ac[:,self.grid_indices]
             else: # no cached data/file
