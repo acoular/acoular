@@ -25,7 +25,7 @@ test:
   stage: test
   script:
     - echo "Testing"
-    #- pip install setuptools
     - python setup.py install
     - python -c 'import acoular'
+    
 
