@@ -76,13 +76,10 @@ if is_tables:
     
     class H5FileTables(H5FileBase,tables.File):
         
-        def _translate_precision_to_dtype(self,precision):
-            return precision_to_atom[precision]
-            
         def create_extendable_array(self,nodename,shape,precision,group=None):
             if not group: group = self.root
-            dtype = self._translate_precision_to_dtype(precision)
-            self.create_earray(group, nodename, dtype, shape) 
+            atom = precision_to_atom[precision]
+            self.create_earray(group, nodename, atom, shape) 
             
         def get_data_by_reference(self, nodename,group=None):
             if not group: group = self.root
@@ -119,8 +116,8 @@ if is_tables:
             
         def create_compressible_array(self,nodename,shape,precision,group=None):
             if not group: group = self.root
-            dtype = self._translate_precision_to_dtype(precision)
-            self.create_carray(group, nodename, dtype, shape, 
+            atom = precision_to_atom[precision]
+            self.create_carray(group, nodename, atom, shape, 
                                         filters=self.compressionFilter)
 
     
