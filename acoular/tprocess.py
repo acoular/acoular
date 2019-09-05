@@ -29,7 +29,6 @@ File, Property, Instance, Trait, Delegate, \
 cached_property, on_trait_change, List
 from datetime import datetime
 from os import path
-import tables
 import wave
 from scipy.signal import butter, lfilter, filtfilt
 from warnings import warn
@@ -37,7 +36,9 @@ from warnings import warn
 # acoular imports
 from .internal import digest
 from .h5cache import H5cache, td_dir
+from .h5files import H5CacheFileBase, _get_h5file_class
 from .sources import SamplesGenerator
+from .configuration import config
 
 
 class TimeInOut( SamplesGenerator ):
@@ -511,7 +512,7 @@ class TimeCache( TimeInOut ):
     basename = Property( depends_on = 'digest')
     
     # hdf5 cache file
-    h5f = Instance(tables.File,  transient = True)
+    h5f = Instance( H5CacheFileBase, transient = True )
     
     # internal identifier
     digest = Property( depends_on = ['source.digest', '__class__'])
@@ -535,6 +536,28 @@ class TimeCache( TimeInOut ):
                     obj = None
         return basename
 
+    def _pass_data(self,num):
+        for data in self.source.result(num):
+            yield data
+
+    def _write_data_to_cache(self,num):
+        nodename = 'tc_' + self.digest
+        self.h5f.create_extendable_array(
+                nodename, (0, self.numchannels), "float32")
+        ac = self.h5f.get_data_by_reference(nodename)
+        self.h5f.set_node_attribute(ac,'sample_freq',self.sample_freq)
+        for data in self.source.result(num):
+            self.h5f.append_data(ac,data)
+            yield data
+    
+    def _get_data_from_cache(self,num):
+        nodename = 'tc_' + self.digest
+        ac = self.h5f.get_data_by_reference(nodename)
+        i = 0
+        while i < ac.shape[0]:
+            yield ac[i:i+num]
+            i += num
+
     # result generator: delivers input, possibly from cache
     def result(self, num):
         """ 
@@ -554,22 +577,26 @@ class TimeCache( TimeInOut ):
             Echos the source output, but reads it from cache
             when available and prevents unnecassary recalculation.
         """
-        name = 'tc_' + self.digest
-        H5cache.get_cache( self, self.basename )
-        if not name in self.h5f.root:
-            ac = self.h5f.create_earray(self.h5f.root, name, \
-                                       tables.atom.Float32Atom(), \
-                                        (0, self.numchannels))
-            ac.set_attr('sample_freq', self.sample_freq)
-            for data in self.source.result(num):
-                ac.append(data)
-                yield data
-        else:
-            ac = self.h5f.get_node('/', name)
-            i = 0
-            while i < ac.shape[0]:
-                yield ac[i:i+num]
-                i += num
+        
+        if config.global_caching == 'none':
+            generator = self._pass_data
+        else: 
+            nodename = 'tc_' + self.digest
+            H5cache.get_cache_file( self, self.basename )
+            if not self.h5f:
+                generator = self._pass_data
+            elif self.h5f.is_cached(nodename):
+                generator = self._get_data_from_cache
+                if config.global_caching == 'overwrite':
+                    self.h5f.remove_data(nodename)
+                    generator = self._write_data_to_cache
+            elif not self.h5f.is_cached(nodename):
+                generator = self._write_data_to_cache
+                if config.global_caching == 'readonly':
+                    generator = self._pass_data
+        for temp in generator(num):
+            yield temp
+
 
 class WriteWAV( TimeInOut ):
     """
@@ -645,23 +672,64 @@ class WriteH5( TimeInOut ):
     # internal identifier
     digest = Property( depends_on = ['source.digest', '__class__'])
 
+    #: The floating-number-precision of entries of H5 File corresponding 
+    #: to numpy dtypes. Default is 32 bit.
+    precision = Trait('float32', 'float64', 
+                      desc="precision of H5 File")
+
     @cached_property
     def _get_digest( self ):
         return digest(self)
 
+    def create_filename(self):
+        if self.name == '':
+            name = datetime.now().isoformat('_').replace(':','-').replace('.','_')
+            self.name = path.join(td_dir,name+'.h5')
 
+    def get_initialized_file(self):
+        file = _get_h5file_class()
+        self.create_filename()
+        f5h = file(self.name, mode = 'w')
+        f5h.create_extendable_array(
+                'time_data', (0, self.numchannels), self.precision)
+        ac = f5h.get_data_by_reference('time_data')
+        f5h.set_node_attribute(ac,'sample_freq',self.sample_freq)
+        return f5h
+        
     def save(self):
         """ 
         Saves source output to `*.h5` file 
         """
-        if self.name == '':
-            name = datetime.now().isoformat('_').replace(':','-').replace('.','_')
-            self.name = path.join(td_dir,name+'.h5')
-        f5h = tables.open_file(self.name, mode = 'w')
-        ac = f5h.create_earray(f5h.root, 'time_data', \
-            tables.atom.Float32Atom(), (0, self.numchannels))
-        ac.set_attr('sample_freq', self.sample_freq)
+        
+        f5h = self.get_initialized_file()
+        ac = f5h.get_data_by_reference('time_data')
         for data in self.source.result(4096):
-            ac.append(data)
+            f5h.append_data(ac,data)
         f5h.close()
         
+    def result(self, num):
+        """ 
+        Python generator that saves source output to `*.h5` file and
+        yields the source output block-wise.
+
+        
+        Parameters
+        ----------
+        num : integer
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block).
+        
+        Returns
+        -------
+        Samples in blocks of shape (num, numchannels). 
+            The last block may be shorter than num.
+            Echos the source output, but reads it from cache
+            when available and prevents unnecassary recalculation.
+        """
+        
+        f5h = self.get_initialized_file()
+        ac = f5h.get_data_by_reference('time_data')
+        for data in self.source.result(num):
+            f5h.append_data(ac,data)
+            yield data
+        f5h.close()

@@ -18,27 +18,17 @@ from six.moves import xrange  # solves the xrange/range issue for python2/3: in 
 from numpy import array, ones, hanning, hamming, bartlett, blackman, \
 dot, newaxis, zeros, empty, fft, linalg, \
 searchsorted, isscalar, fill_diagonal, arange, zeros_like, sum
-import tables
 from traits.api import HasPrivateTraits, Int, Property, Instance, Trait, \
 Range, Bool, cached_property, property_depends_on, Delegate
 
 from .fastFuncs import calcCSM
-
 from .h5cache import H5cache
+from .h5files import H5CacheFileBase
 from .internal import digest
 from .sources import SamplesGenerator
 from .calib import Calib
+from .configuration import config
 
-
-def _precision(idString):
-    """
-    Internal method, needed for allocation of memory.
-    """
-    # Create dictionary: third value is needed as Argument for tables.ComplexAtoms.
-    # Quite ugly creation of dictionary needed because several keys have same value.
-    precDict = dict.fromkeys(['float32', 'complex64'], ('float32', 'complex64', 8, tables.Float32Atom))
-    precDict.update(dict.fromkeys(['float64', 'complex128'], ('float64', 'complex128', 16, tables.Float64Atom)))
-    return precDict[idString]
 
 class PowerSpectra( HasPrivateTraits ):
     """Provides the cross spectral matrix of multichannel time data
@@ -163,7 +153,7 @@ class PowerSpectra( HasPrivateTraits ):
         )
 
     # hdf5 cache file
-    h5f = Instance(tables.File, transient = True )
+    h5f = Instance( H5CacheFileBase, transient = True )
     
     @property_depends_on('time_data.numsamples, block_size, overlap')
     def _get_num_blocks ( self ):
@@ -199,14 +189,68 @@ class PowerSpectra( HasPrivateTraits ):
         else: 
             return self.time_data.__class__.__name__ + self.time_data.digest
 
-    @property_depends_on('digest')
-    def _get_csm ( self ):
-        """
-        Main work is done here:
-        Cross spectral matrix is either loaded from cache file or
-        calculated and then additionally stored into cache.
-        """
-        # test for dual calibration
+    def calc_csm( self ):
+        """ csm calculation """
+        t = self.time_data
+        wind = self.window_( self.block_size )
+        weight = dot( wind, wind )
+        wind = wind[newaxis, :].swapaxes( 0, 1 )
+        numfreq = int(self.block_size/2 + 1)
+        csm_shape = (numfreq, t.numchannels, t.numchannels)
+        csmUpper = zeros(csm_shape, dtype=self.precision)
+        #print "num blocks", self.num_blocks
+        # for backward compatibility
+        if self.calib and self.calib.num_mics > 0:
+            if self.calib.num_mics == t.numchannels:
+                wind = wind * self.calib.data[newaxis, :]
+            else:
+                raise ValueError(
+                        "Calibration data not compatible: %i, %i" % \
+                        (self.calib.num_mics, t.numchannels))
+        bs = self.block_size
+        temp = empty((2*bs, t.numchannels))
+        pos = bs
+        posinc = bs/self.overlap_
+        for data in t.result(bs):
+            ns = data.shape[0]
+            temp[bs:bs+ns] = data
+            while pos+bs <= bs+ns:
+                ft = fft.rfft(temp[int(pos):int(pos+bs)]*wind, None, 0).astype(self.precision)
+                calcCSM(csmUpper, ft)  # only upper triangular part of matrix is calculated (for speed reasons)
+                pos += posinc
+            temp[0:bs] = temp[bs:]
+            pos -= bs
+        
+        # create the full csm matrix via transposingand complex conj.
+        csmLower = csmUpper.conj().transpose(0,2,1)
+        [fill_diagonal(csmLower[cntFreq, :, :], 0) for cntFreq in xrange(csmLower.shape[0])]
+        csm = csmLower + csmUpper
+
+        # onesided spectrum: multiplication by 2.0=sqrt(2)^2
+        csm = csm*(2.0/self.block_size/weight/self.num_blocks)
+        return csm
+
+    def calc_ev ( self ):
+        """ eigenvalues / eigenvectors calculation """
+        if self.precision == 'complex128': eva_dtype = 'float64'
+        elif self.precision == 'complex64': eva_dtype = 'float32'
+#        csm = self.csm #trigger calculation
+        csm_shape = self.csm.shape
+        eva = empty(csm_shape[0:2], dtype=eva_dtype)
+        eve = empty(csm_shape, dtype=self.precision)
+        for i in range(csm_shape[0]):
+            (eva[i], eve[i])=linalg.eigh(self.csm[i])
+        return (eva,eve)
+
+    def calc_eva( self ):
+        """ calculates eigenvalues of csm """
+        return self.calc_ev()[0]
+    
+    def calc_eve( self ):
+        """ calculates eigenvectors of csm """
+        return self.calc_ev()[1]
+                
+    def _handle_dual_calibration(self):
         obj = self.time_data # start with time_data obj
         while obj:
             if 'calib' in obj.all_trait_names(): # at original source?
@@ -222,105 +266,92 @@ class PowerSpectra( HasPrivateTraits ):
                     obj = obj.source # traverse down until original data source
                 except AttributeError:
                     obj = None
-        name = 'csm_' + self.digest
-        H5cache.get_cache( self, self.basename )
-        #print(self.basename)
-        if not self.cached  or not name in self.h5f.root:
-            t = self.time_data
-            wind = self.window_( self.block_size )
-            weight = dot( wind, wind )
-            wind = wind[newaxis, :].swapaxes( 0, 1 )
+
+    def _get_filecache( self, traitname ):
+        """
+        function handles result caching of csm, eigenvectors and eigenvalues
+        calculation depending on global/local caching behaviour.  
+        """
+        if traitname == 'csm':
+            func = self.calc_csm
             numfreq = int(self.block_size/2 + 1)
-            csm_shape = (numfreq, t.numchannels, t.numchannels)
-            csmUpper = zeros(csm_shape, dtype=self.precision)
-            #print "num blocks", self.num_blocks
-            # for backward compatibility
-            if self.calib and self.calib.num_mics > 0:
-                if self.calib.num_mics == t.numchannels:
-                    wind = wind * self.calib.data[newaxis, :]
-                else:
-                    raise ValueError(
-                            "Calibration data not compatible: %i, %i" % \
-                            (self.calib.num_mics, t.numchannels))
-            bs = self.block_size
-            temp = empty((2*bs, t.numchannels))
-            pos = bs
-            posinc = bs/self.overlap_
-            for data in t.result(bs):
-                ns = data.shape[0]
-                temp[bs:bs+ns] = data
-                while pos+bs <= bs+ns:
-                    ft = fft.rfft(temp[int(pos):int(pos+bs)]*wind, None, 0).astype(self.precision)
-                    calcCSM(csmUpper, ft)  # only upper triangular part of matrix is calculated (for speed reasons)
-                    pos += posinc
-                temp[0:bs] = temp[bs:]
-                pos -= bs
-            
-            # create the full csm matrix via transposingand complex conj.
-            csmLower = csmUpper.conj().transpose(0,2,1)
-            [fill_diagonal(csmLower[cntFreq, :, :], 0) for cntFreq in xrange(csmLower.shape[0])]
-            csm = csmLower + csmUpper
+            shape = (numfreq, self.time_data.numchannels, self.time_data.numchannels)
+            precision = self.precision
+        elif traitname == 'eva':
+            func = self.calc_eva
+            shape = self.csm.shape[0:2]
+            if self.precision == 'complex128': precision = 'float64'
+            elif self.precision == 'complex64': precision = 'float32'
+        elif traitname == 'eve':
+            func = self.calc_eve
+            shape = self.csm.shape
+            precision = self.precision
 
-            # onesided spectrum: multiplication by 2.0=sqrt(2)^2
-            csm = csm*(2.0/self.block_size/weight/self.num_blocks)
+        H5cache.get_cache_file( self, self.basename ) 
+        if not self.h5f: # in case of global caching readonly
+            return func() 
+
+        nodename = traitname + '_' + self.digest 
+        if config.global_caching == 'overwrite' and self.h5f.is_cached(nodename):
+            #print("remove existing node",nodename)
+            self.h5f.remove_data(nodename) # remove old data before writing in overwrite mode
+        
+        if not self.h5f.is_cached(nodename): 
+            if config.global_caching == 'readonly': 
+                return func()
+#            print("create array, data not cached for",nodename)
+            self.h5f.create_compressible_array(nodename,shape,precision)
             
-            if self.cached:
-                precisionTuple = _precision(self.precision)
-                atom = tables.ComplexAtom(precisionTuple[2])
-                filters = tables.Filters(complevel=5, complib='blosc')
-                ac = self.h5f.create_carray(self.h5f.root, name, atom,
-                                            csm_shape, filters=filters)
-                ac[:] = csm
-                return ac
-            else:
-                return csm
+        ac = self.h5f.get_data_by_reference(nodename)
+        if ac[:].sum() == 0: # only initialized
+#            print("write {} to:".format(traitname),nodename)
+            ac[:] = func()
+        return ac
+             
+    @property_depends_on('digest')
+    def _get_csm ( self ):
+        """
+        Main work is done here:
+        Cross spectral matrix is either loaded from cache file or
+        calculated and then additionally stored into cache.
+        """
+        self._handle_dual_calibration()
+        if (
+                config.global_caching == 'none' or 
+                (config.global_caching == 'individual' and self.cached == False)
+            ):
+            return self.calc_csm()
         else:
-            return self.h5f.get_node('/', name)
-
-
-
+            return self._get_filecache('csm')
+                          
     @property_depends_on('digest')
     def _get_eva ( self ):
-        return self._calc_ev()[0]
+        """
+        Eigenvalues of cross spectral matrix are either loaded from cache file or
+        calculated and then additionally stored into cache.
+        """
+        if (
+                config.global_caching == 'none' or 
+                (config.global_caching == 'individual' and self.cached == False)
+            ):
+            return self.calc_eva()
+        else:
+            return self._get_filecache('eva')
 
     @property_depends_on('digest')
     def _get_eve ( self ):
-        return self._calc_ev()[1]
+        """
+        Eigenvectors of cross spectral matrix are either loaded from cache file or
+        calculated and then additionally stored into cache.
+        """
+        if (
+                config.global_caching == 'none' or 
+                (config.global_caching == 'individual' and self.cached == False)
+            ):
+            return self.calc_eve()
+        else:
+            return self._get_filecache('eve')
 
-    def _calc_ev ( self ):
-        """
-        eigenvalues / eigenvectors calculation
-        """
-        
-        name_eva = 'eva_' + self.digest
-        name_eve = 'eve_' + self.digest
-        csm = self.csm #trigger calculation
-        
-        if not self.cached  or  (not name_eva in self.h5f.root) or (not name_eve in self.h5f.root):
-            csm_shape = self.csm.shape
-            precisionTuple = _precision(self.precision)
-            eva = empty(csm_shape[0:2], dtype=precisionTuple[0])
-            eve = empty(csm_shape, dtype=precisionTuple[1])
-            for i in range(csm_shape[0]):
-                (eva[i], eve[i])=linalg.eigh(self.csm[i])
-                
-            if self.cached:   
-                atom_eva = precisionTuple[3]()
-                atom_eve = tables.ComplexAtom(precisionTuple[2])
-                filters = tables.Filters(complevel=5, complib='blosc')
-                ac_eva = self.h5f.create_carray(self.h5f.root, name_eva, atom_eva, \
-                                                eva.shape, filters=filters)
-                ac_eve = self.h5f.create_carray(self.h5f.root, name_eve, atom_eve, \
-                                                eve.shape, filters=filters)
-                ac_eva[:] = eva
-                ac_eve[:] = eve
-                return (ac_eva,ac_eve)
-            else:
-                return (eva,eve)
-            
-        return (self.h5f.get_node('/', name_eva), \
-                    self.h5f.get_node('/', name_eve))
-            
     def synthetic_ev( self, freq, num=0):
         """Return synthesized frequency band values of the eigenvalues.
         
