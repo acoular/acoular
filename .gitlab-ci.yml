@@ -1,7 +1,9 @@
 #testbuild
 
+image: "python:3.7"
+
 before_script: 
-  - python3 --version
+  - python --version
   - uname -a
   #- python3 -m pip install --user setuptools
   #- sudo apt-get update
@@ -13,20 +15,17 @@ stages:
   - test
   
 build:
-  image: ubuntu:latest
   stage: build
   script:
     - echo "Building"
     #- pip install setuptools
-    - python3 setup.py install
-
+    - python setup.py install
 
 test:
-  image: ubuntu:latest
   stage: test
   script:
     - echo "Testing"
     #- pip install setuptools
-    - python3 setup.py install
-    - python3 -c 'import acoular'
+    - python setup.py install
+    - python -c 'import acoular'
 
