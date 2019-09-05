@@ -711,6 +711,33 @@ class WriteH5( TimeInOut ):
             f5h.append_data(ac,data)
         f5h.close()
 
+    def result(self, num):
+        """ 
+        Python generator that saves source output to `*.h5` file and
+        yields the source output block-wise.
+
+        
+        Parameters
+        ----------
+        num : integer
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block).
+        
+        Returns
+        -------
+        Samples in blocks of shape (num, numchannels). 
+            The last block may be shorter than num.
+            Echos the source output, but reads it from cache
+            when available and prevents unnecassary recalculation.
+        """
+        
+        f5h = self.get_initialized_file()
+        ac = f5h.get_data_by_reference('time_data')
+        for data in self.source.result(num):
+            f5h.append_data(ac,data)
+            yield data
+        f5h.close()
+        
 class LockedGenerator():
     """
     Creates a Thread Safe Iterator.
@@ -865,29 +892,3 @@ class SampleSplitter(TimeInOut):
         else: 
             raise IOError('Maximum size of block buffer is reached!')   
         
-    def result(self, num):
-        """ 
-        Python generator that saves source output to `*.h5` file and
-        yields the source output block-wise.
-
-        
-        Parameters
-        ----------
-        num : integer
-            This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block).
-        
-        Returns
-        -------
-        Samples in blocks of shape (num, numchannels). 
-            The last block may be shorter than num.
-            Echos the source output, but reads it from cache
-            when available and prevents unnecassary recalculation.
-        """
-        
-        f5h = self.get_initialized_file()
-        ac = f5h.get_data_by_reference('time_data')
-        for data in self.source.result(num):
-            f5h.append_data(ac,data)
-            yield data
-        f5h.close()
