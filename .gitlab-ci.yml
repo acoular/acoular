@@ -19,14 +19,15 @@ build:
   script:
     - echo "Building"
     - pip3 install setuptools
-    - python3 setup.py install
+    - pwd
+    #- python3 setup.py install
 
 test:
   stage: test
   script:
     - echo "Testing"
     - pip3 install setuptools
-    - python3 setup.py install
-    - python3 -c 'import acoular'
+    #- python3 setup.py install
+    #- python3 -c 'import acoular'
     
 
