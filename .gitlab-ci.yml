@@ -8,10 +8,9 @@ before_script:
   #- python3 -m pip install --user setuptools
   - sudo apt-get update
   - sudo apt-get install -y python3-pip
-  - sudo chmod -x ./
+  - sudo chmod -x .
   
-after_script:
-    - echo "Clean up"
+
     #- sudo rm -rf /var/lib/gitlab-runner/builds
 
 stages:
@@ -23,7 +22,7 @@ build:
   script:
     - echo "Building"
     - sudo pip3 install setuptools
-    - pwd
+    #- pwd
     - sudo python3 setup.py install
 
 test:
