@@ -8,10 +8,11 @@ before_script:
   #- python3 -m pip install --user setuptools
   - sudo apt-get update
   - sudo apt-get install -y python3-pip
+  - sudo chmod -x ./
   
 after_script:
     - echo "Clean up"
-    - sudo rm -rf /var/lib/gitlab-runner/builds
+    #- sudo rm -rf /var/lib/gitlab-runner/builds
 
 stages:
   - build
