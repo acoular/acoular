@@ -3,7 +3,6 @@
 #image: "python:3.7"
 
 before_script: 
-  - sudo rm -rf /var/lib/gitlab-runner/builds
   - python3 --version
   - uname -a
   #- python3 -m pip install --user setuptools
