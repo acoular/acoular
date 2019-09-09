@@ -3,11 +3,11 @@
 #image: "python:3.7"
 
 before_script: 
-  - python --version
+  - python3 --version
   - uname -a
   #- python3 -m pip install --user setuptools
   - sudo apt-get update
-  - sudo apt-get install -y pip
+  - sudo apt-get install -y pip3
 
 
 stages:
@@ -18,15 +18,15 @@ build:
   stage: build
   script:
     - echo "Building"
-    - pip install setuptools
-    - python setup.py install
+    - pip3 install setuptools
+    - python3 setup.py install
 
 test:
   stage: test
   script:
     - echo "Testing"
-    - pip install setuptools
-    - python setup.py install
-    - python -c 'import acoular'
+    - pip3 install setuptools
+    - python3 setup.py install
+    - python3 -c 'import acoular'
     
 
