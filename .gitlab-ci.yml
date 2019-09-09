@@ -18,16 +18,16 @@ build:
   stage: build
   script:
     - echo "Building"
-    - pip3 install setuptools
+    - sudo pip3 install setuptools
     - pwd
-    #- python3 setup.py install
+    - sudo python3 setup.py install
 
 test:
   stage: test
   script:
     - echo "Testing"
-    - pip3 install setuptools
-    #- python3 setup.py install
-    #- python3 -c 'import acoular'
+    - sudo pip3 install setuptools
+    - sudo python3 setup.py install
+    - python3 -c 'import acoular'
     
 
