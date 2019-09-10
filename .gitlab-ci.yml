@@ -32,5 +32,8 @@ test:
     - sudo pip3 install setuptools
     - sudo python3 setup.py install
     - python3 -c 'import acoular'
+    - chmod +x ./acoular/tests/run_tests.sh
+    - cd acoular/tests/
+    - bash run_tests_osx.sh
     
 
