@@ -23,14 +23,16 @@ build:
     - echo "Building"
     - sudo pip3 install setuptools
     #- pwd
-    - sudo python3 setup.py install
+    #- sudo python3 setup.py install
+    - sudo pip3 install -e . # install package
 
 test:
   stage: test
   script:
     - echo "Testing"
     - sudo pip3 install setuptools
-    - sudo python3 setup.py install
+    - sudo pip3 install -e .
+    #- sudo python3 setup.py install
     - python3 -c 'import acoular'
     - chmod +x ./acoular/tests/run_tests.sh
     - cd acoular/tests/
