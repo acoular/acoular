@@ -38,6 +38,6 @@ test:
     - python3 -c 'import acoular'
     - chmod +x ./acoular/tests/run_tests.sh
     - cd acoular/tests/
-    - bash run_tests_osx.sh
+    - bash run_tests.sh
     
 
