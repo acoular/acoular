@@ -6,9 +6,9 @@ before_script:
   - python3 --version
   - uname -a
   #- python3 -m pip install --user setuptools
-  - sudo apt-get update
-  - sudo apt-get install -y python3-pip
-  - sudo chmod -x .
+  #- sudo apt-get update
+  #- sudo apt-get install -y python3-pip
+  #- sudo chmod -x .
   
 
     #- sudo rm -rf /var/lib/gitlab-runner/builds
@@ -21,18 +21,20 @@ build:
   stage: build
   script:
     - echo "Building"
-    - sudo pip3 install setuptools
+    #- sudo pip3 install setuptools
     #- pwd
     #- sudo python3 setup.py install
-    - sudo pip3 install -e . # install package
+    - python3 setup.py install
+    #- sudo pip3 install -e . # install package
 
 test:
   stage: test
   script:
     - echo "Testing"
-    - sudo pip3 install setuptools
-    - sudo pip3 install -e .
-    #- sudo python3 setup.py install
+    #- sudo pip3 install setuptools
+    #- sudo pip3 install -e .
+    #- sudo python3 setup.py 
+    - python3 setup.py install
     - python3 -c 'import acoular'
     - chmod +x ./acoular/tests/run_tests.sh
     - cd acoular/tests/
