@@ -21,6 +21,7 @@ The following modules are part of Acoular:
     tbeamform
     trajectory
     tprocess
+    configuration
 
 these modules still need some more documentation:
 

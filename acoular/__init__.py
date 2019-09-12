@@ -55,6 +55,9 @@ try:
 except:
     os.environ['QT_API'] = 'pyqt' 
 
+#     
+from .configuration import config
+
 from .fileimport import time_data_import, csv_import, td_import, \
 bk_mat_import, datx_import
 try:
@@ -67,7 +70,7 @@ from .tbeamform import IntegratorSectorTime, \
 BeamformerTime, BeamformerTimeSq, BeamformerTimeTraj, BeamformerTimeSqTraj
 from .tprocess import TimeInOut, MaskedTimeInOut, Mixer, TimeAverage, \
 TimeReverse, TimePower, FiltFiltOctave, FiltOctave, TimeCache, WriteWAV, \
-WriteH5 
+WriteH5, SampleSplitter 
 from .calib import Calib
 from .trajectory import Trajectory
 from .grids import Grid, RectGrid, RectGrid3D

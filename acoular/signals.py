@@ -162,7 +162,7 @@ class PNoiseGenerator( SignalGenerator ):
             ind = 2**_-1
             lind = nums-ind
             dind = 2**(_+1)
-            s[ind:] += repeat( rnd_gen.standard_normal(nums / dind+1 ), dind)[:lind]
+            s[ind:] += repeat( rnd_gen.standard_normal(nums // dind+1 ), dind)[:lind]
         # divide by sqrt(depth+1.5) to get same overall level as white noise
         return self.rms/sqrt(depth+1.5) * s
 
