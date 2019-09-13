@@ -1943,8 +1943,8 @@ class BeamformerGIB(BeamformerEig):  #BeamformerEig #BeamformerBase
         """        
         # prepare calculation
         f = self.freq_data.fftfreq()
-        n = int(self.n)  
-        m = int(self.m)                             #number of eigenvalues
+        n = int(self.na)   #number of eigenvalues
+        m = int(self.m)    #number of first eigenvalue
         numchannels = self.freq_data.numchannels   #number of channels
         numpoints = self.steer.grid.size
         hh = zeros((1, numpoints, numchannels), dtype='D')
