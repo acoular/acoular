@@ -23,7 +23,7 @@ with open(join(here, 'README.rst')) as f:
     long_description = f.read()
 
 
-install_requires = [
+install_requires = list([
       'numpy>=1.11.3',
       'setuptools',	
       'numba >=0.40.0',
@@ -35,13 +35,13 @@ install_requires = [
       'traits>=4.6.0',
       #'traitsui>=6.0.0',
       'configparser;python_version<"3.4"',
-	],
+	]),
 
 if "CONDA_PREFIX" not in os.environ:
     install_requires.append('python-qt5;python_version<="2.7"',
                             'PyQt5>=5.6;python_version>="3.4"',)
 
-setup_requires = [
+setup_requires = list([
       'numpy>=1.11.3',
       'setuptools',	
       #'python-qt5;python_version<="2.7"',
@@ -56,7 +56,7 @@ setup_requires = [
       #'traitsui>=6.0.0',
       'configparser;python_version<="2.7"',
       #'libpython; platform_system == "Windows"',
-	],
+	]),
 
 if "CONDA_PREFIX" not in os.environ:
     setup_requires.append('python-qt5;python_version<="2.7"',
