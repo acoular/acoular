@@ -1,0 +1,31 @@
+#testbuild
+#minimal script to install and run acoular tests on linux
+
+#unused docker image
+#image: "python:3.7"
+
+before_script: 
+  - python3 --version
+  - uname -a
+  
+stages:
+  - build
+  - test
+  
+build:
+  stage: build
+  script:
+    - echo "Building"
+    - python3 setup.py install
+
+test:
+  stage: test
+  script:
+    - echo "Testing"
+    - python3 setup.py install
+    - python3 -c 'import acoular'
+    - chmod +x ./acoular/tests/run_tests.sh
+    - cd acoular/tests/
+    - bash run_tests.sh
+    
+
