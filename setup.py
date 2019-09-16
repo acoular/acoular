@@ -35,7 +35,7 @@ install_requires = list([
       'traits>=4.6.0',
       #'traitsui>=6.0.0',
       'configparser;python_version<"3.4"',
-	]),
+	])
 
 if "CONDA_PREFIX" not in os.environ:
     install_requires.append('python-qt5;python_version<="2.7"',
@@ -56,7 +56,7 @@ setup_requires = list([
       #'traitsui>=6.0.0',
       'configparser;python_version<="2.7"',
       #'libpython; platform_system == "Windows"',
-	]),
+	])
 
 if "CONDA_PREFIX" not in os.environ:
     setup_requires.append('python-qt5;python_version<="2.7"',
