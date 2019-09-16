@@ -5,6 +5,8 @@
 #image: "python:3.7"
 
 before_script: 
+  #activate the compute0 python 3 env
+  - source activate py35
   - python3 --version
   - uname -a
   
