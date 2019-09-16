@@ -38,8 +38,8 @@ install_requires = list([
 	])
 
 if "CONDA_PREFIX" not in os.environ:
-    install_requires.append('python-qt5;python_version<="2.7"',
-                            'PyQt5>=5.6;python_version>="3.4"',)
+    install_requires.append('python-qt5;python_version<="2.7"')
+    install_requires.append('PyQt5>=5.6;python_version>="3.4"')
 
 setup_requires = list([
       'numpy>=1.11.3',
@@ -59,8 +59,8 @@ setup_requires = list([
 	])
 
 if "CONDA_PREFIX" not in os.environ:
-    setup_requires.append('python-qt5;python_version<="2.7"',
-                          'PyQt5>=5.6;python_version>="3.4"',)
+    setup_requires.append('python-qt5;python_version<="2.7"')
+    setup_requires.append('PyQt5>=5.6;python_version>="3.4"')
 
     
 setup(name="acoular", 
