@@ -209,8 +209,8 @@ class BeamformerTime( TimeInOut ):
         c = self.c/self.sample_freq
         delays = self.rm/c
         d_index = array(delays, dtype=int) # integer index
-        d_interp1 = delays % 1 # 1st coeff for lin interpolation between samples
-        d_interp2 = 1-d_interp1 # 2nd coeff for lin interpolation 
+        d_interp2 = delays % 1 # 2nd coeff for lin interpolation between samples
+        d_interp1 = 1-d_interp2 # 1st coeff for lin interpolation 
         d_index2 = arange(self.steer.mics.num_mics)
 #        amp = (self.rm/self.r0[:, newaxis]) # multiplication factor
         amp = (w/(self.rm*self.rm)).sum(1) * self.r0
@@ -296,8 +296,8 @@ class BeamformerTimeSq( BeamformerTime ):
         c = self.c/self.source.sample_freq
         delays = self.rm/c
         d_index = array(delays, dtype=int) # integer index
-        d_interp1 = delays % 1 # 1st coeff for lin interpolation between samples
-        d_interp2 = 1-d_interp1 # 2nd coeff for lin interpolation 
+        d_interp2 = delays % 1 # 2nd coeff for lin interpolation between samples
+        d_interp1 = 1-d_interp2 # 1st coeff for lin interpolation
         d_index2 = arange(self.steer.mics.num_mics)
 #        amp = (self.rm/self.r0[:, newaxis]) # multiplication factor
         amp = (w/(self.rm*self.rm)).sum(1) * self.r0
@@ -445,8 +445,8 @@ class BeamformerTimeTraj( BeamformerTime ):
             r0 = self.steer.env._r( tpos)
             delays = rm/c
             d_index = array(delays, dtype=int) # integer index
-            d_interp1 = delays % 1 # 1st coeff for lin interpolation
-            d_interp2 = 1-d_interp1 # 2nd coeff for lin interpolation
+            d_interp2 = delays % 1 # 2nd coeff for lin interpolation between samples
+            d_interp1 = 1-d_interp2 # 1st coeff for lin interpolation
             amp = (w/(rm*rm)).sum(1) * r0
             amp = 1.0/(amp[:, newaxis]*rm) # multiplication factor
             # now, we have to make sure that the needed data is available                 
@@ -577,8 +577,8 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
             r0 = self.steer.env._r( tpos)
             delays = rm/c
             d_index = array(delays, dtype=int) # integer index
-            d_interp1 = delays % 1 # 1st coeff for lin interpolation
-            d_interp2 = 1-d_interp1 # 2nd coeff for lin interpolation
+            d_interp2 = delays % 1 # 2nd coeff for lin interpolation between samples
+            d_interp1 = 1-d_interp2 # 1st coeff for lin interpolation
             amp = (w/(rm*rm)).sum(1) * r0
             amp = 1.0/(amp[:, newaxis]*rm) # multiplication factor
             # now, we have to make sure that the needed data is available                 
