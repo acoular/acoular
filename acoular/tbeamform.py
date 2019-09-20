@@ -96,7 +96,7 @@ class BeamformerTime( TimeInOut ):
             warn("Deprecated use of 'steer' trait. "
                  "Please use object of class 'SteeringVector' in the future.", 
                  Warning, stacklevel = 2)
-            self._steer_obj = SteeringVector(steer_type = steer)
+            self._steer_obj.steer_type = steer
         else:
             raise(TraitError(args=self,
                              name='steer', 
