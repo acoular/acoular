@@ -6,7 +6,7 @@
 
 before_script: 
   #activate the compute0 python 3 env
-  - source activate py35
+  - source activate py37
   - python3 --version
   - uname -a
   
