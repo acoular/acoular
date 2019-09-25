@@ -56,6 +56,38 @@ def cartToCyl(x, Q=identity(3)):
     cylCoord = array([arctan2(x[1], x[0]), sqrt(x[0]**2 + x[1]**2), x[2]])
     return cylCoord
 
+
+def CylToCart(x, Q=identity(3)):
+        """
+        Returns the cylindrical coordinate representation of a input position 
+        which was before transformed into a modified cartesian coordinate, which
+        has flow into positive z direction.
+        
+        Parameters
+        ----------
+        x : float[3, nPoints]
+            cylindrical representation of those n points with (phi, r, z)
+            cartesian coordinates of n points
+    
+        Q : float[3,3]
+        Orthogonal transformation matrix. If provided, the pos vectors are
+        transformed via posiMod = Q * x, before transforming those modified
+        coordinates into cylindrical ones. Default is identity matrix.
+        
+            
+        Returns
+        -------
+        CartCoord : [3, nPoints]
+        cartesian coordinates of n points
+            
+        """
+        if not (Q == identity(3)).all():
+            x = matmul(Q, x)  # modified position vector
+        CartCoord = array([x[1]*sin(x[0]),x[1]*cos(x[0]) , x[2]])
+        return CartCoord
+
+
+
 class Environment( HasPrivateTraits ):
     """
     A simple acoustic environment without flow.
@@ -623,11 +655,9 @@ class OpenJet( FlowField ):
 
 class RotatingFlow( FlowField ):
     """
-    Provides an analytical approximation of the flow field of a rotating fluid, 
+    Provides an analytical approximation of the flow field of a rotating fluid with constant flow, 
 
-    Notes
-    -----
-    This is not a full implementation 
+
 
     """
     #: Exit velocity at jet origin, i.e. the nozzle. Defaults to 0.

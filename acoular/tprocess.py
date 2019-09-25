@@ -1003,7 +1003,67 @@ class SpatialInterpolatorConstantRotation(SpatialInterpolator):
             interpVal = self._result_core_func(timeData, phiDelay, period)
             phiOffset = phiDelay[-1] + omega / self.sample_freq
             yield interpVal
+
    
+class SpatialInterpolatorRotation(SpatialInterpolator):
+    """
+    Spatial  Interpolation for rotating sources.Gets samples from :attr:`source`
+    and angles from  :attr:`AngleTracker`.Generates output via the generator :meth:`result`
+    
+    """
+    #: Angle data from AngleTracker class
+    AngleTracker = Instance(AngleTracker)
+    
+    #: Angle data from AngleTracker class
+    angle = CArray() 
+    
+    
+    #: The rotation must be around the z-axis, which means from x to y axis.
+    #: If the coordinates are not build like that, than this 3x3 orthogonal 
+    #: transformation matrix Q can be used to modify the coordinates.
+    #: It is assumed that with the modified coordinates the rotation is around the z-axis. 
+    #: The transformation is done via [x,y,z]_mod = Q * [x,y,z]. (default is Identity).
+    Q = CArray(dtype=float64, shape=(3, 3), value=identity(3))
+    
+    # internal identifier
+    digest = Property( depends_on = ['source.digest', 'AngleTracker.digest', 'mpos_real.digest', 'mpos_virtual.digest'])
+    
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+    
+    
+    def result(self, num=128):
+        """ 
+        Python generator that yields the output block-wise.
+        
+        Parameters
+        ----------
+        num : integer
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block).
+        
+        Returns
+        -------
+        Samples in blocks of shape (num, :attr:`numchannels`). 
+            The last block may be shorter than num.
+        """
+        #period for rotation
+        period = 2 * pi
+        #get angle
+        angle = self.AngleTracker._get_angle()
+        #counter to track angle position in time for each block
+        count=0
+        for timeData in self.source.result(num):
+            phiDelay = angle[count:count+num]
+            interpVal = self._result_core_func(timeData, phiDelay, period)
+            yield interpVal
+            count += num    
+    
+    
+    
+    
+    
     
 class Mixer( TimeInOut ):
     """

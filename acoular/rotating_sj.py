@@ -405,7 +405,7 @@ class SpatialInterpolator(TimeInOut):
         x : float[3, nPoints]
             cartesian coordinates of n points
             
-            Returns
+            ReturnsnewCoord = self.CartToCyl(mic)[indReorderHelp]
             -------
             cylCoord : [3, nPoints]
             cylindrical representation of those n points with (phi, r, z)
@@ -501,7 +501,7 @@ class SpatialInterpolator(TimeInOut):
                
                 #new coordinate
                 indReorderHelp = argsort(self.CartToCyl(mic)[0])
-                newCoord = self.CartToCyl(mic)[indReorderHelp]
+                newCoord = (self.CartToCyl(mic).T)[indReorderHelp].T
                 # ordered coordinates 
                 # and for virtual mics
                 #virtNewCoord = array([arctan2(micVirt[1],micVirt[0])]) 
