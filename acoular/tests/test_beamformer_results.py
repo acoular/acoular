@@ -109,7 +109,7 @@ class acoular_beamformer_test(unittest.TestCase):
             self.assertAlmostEqual(resq.flatten()[i]/resq_num.flatten()[i],1,3) 
         
 if "__main__" == __name__:
-    unittest.main(exit=False)
+    unittest.main() #exit=False
 
 
 
