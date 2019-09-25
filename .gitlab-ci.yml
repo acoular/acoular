@@ -5,22 +5,30 @@
 #image: "python:3.7"
 
 before_script: 
-  #activate the compute0 python 3 env
+  #create and activate the compute0 python 3 env
+  - conda create -n py37 python=3.7
   - source activate py37
+  - conda install gcc
   - python3 --version
   - uname -a
+  
+after_script: 
+  # delete the test enviroment 
+  - conda env remove --name py37
   
 stages:
   - build
   - test
   
 build:
+  # install acoular
   stage: build
   script:
     - echo "Building"
     - python3 setup.py install
 
 test:
+  #install and run tests
   stage: test
   script:
     - echo "Testing"
