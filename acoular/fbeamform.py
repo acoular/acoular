@@ -2035,7 +2035,7 @@ class BeamformerGIB(BeamformerEig):  #BeamformerEig #BeamformerBase
                             #print(s,qi.size)    
                             qi[s,locpoints] = qi_real+qi_imag*1j
                     else:
-                        print('Eigenvalue '+str(s)+' <= 0 for frequency index '+str(i)+'. Will not be calculated!')
+                        warn('Eigenvalue %g <= 0 for frequency index %g. Will not be calculated!' % (s, i),Warning, stacklevel = 2)
                     #Generate source maps of all selected eigenmodes, and superpose source intensity for each source type.
                 ac[i] = zeros([1,numpoints])
                 ac[i,locpoints] = sum(absolute(qi[:,locpoints])**2,axis=0)
