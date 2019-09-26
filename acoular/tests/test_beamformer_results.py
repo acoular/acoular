@@ -98,7 +98,7 @@ class acoular_beamformer_test(unittest.TestCase):
         for cfreq in cfreqs:     
             for beam,bfname in zip((bbase, bc, beig, bm, bl, bo, bs, bd, bcmf, bf, bdp, bgib),('bb', 'bc', 'be', 'bm', 'bl', 'bo', 'bs', 'bd', 'bcmf', 'bf', 'bdp', 'bgib')):   
                 for i in range(len(beam.synthetic(cfreq,1).flatten())):
-                    self.assertAlmostEqual(beam.synthetic(cfreq,1).flatten()[i]/bfdata[bfname+'_num_'+str(cfreq)][i],1,2)##,1,3)#.flatten()   
+                    self.assertAlmostEqual(beam.synthetic(cfreq,1).flatten()[i]+1/bfdata[bfname+'_num_'+str(cfreq)][i]+1,1,2)##,1,3)#.flatten()   
     
     def test_beamformer_time_results(self):
         #test beamformertime
