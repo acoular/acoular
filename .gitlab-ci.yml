@@ -1,0 +1,42 @@
+#testbuild
+#minimal script to install and run acoular tests on linux
+
+#unused docker image
+#image: "python:3.7"
+
+before_script: 
+  #create and activate the compute0 python 3 env
+  - conda config --set always_yes yes --set changeps1 no
+  - conda create -n test_py37 python=3.7
+  - source activate test_py37
+  - conda install gcc
+  - python3 --version
+  - uname -a
+  
+after_script: 
+  # delete the test enviroment 
+  - conda env remove --name test_py37
+  
+stages:
+  - build
+  - test
+  
+build:
+  # install acoular
+  stage: build
+  script:
+    - echo "Building"
+    - python3 setup.py install
+
+test:
+  #install and run tests
+  stage: test
+  script:
+    - echo "Testing"
+    - python3 setup.py install
+    - python3 -c 'import acoular'
+    - chmod +x ./acoular/tests/run_tests.sh
+    - cd acoular/tests/
+    - bash run_tests.sh
+    
+

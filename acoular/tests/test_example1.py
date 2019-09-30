@@ -114,7 +114,7 @@ class acoular_test(unittest.TestCase):
             self.assertAlmostEqual(beam.synthetic(cfreq,1).sum()/d[bfname+'num'].sum(),1,3)      
             
 if "__main__" == __name__:
-    unittest.main(exit=False)
+    unittest.main() #exit=False
 
 
                             

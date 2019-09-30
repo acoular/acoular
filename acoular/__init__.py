@@ -55,6 +55,9 @@ try:
 except:
     os.environ['QT_API'] = 'pyqt' 
 
+#     
+from .configuration import config
+
 from .fileimport import time_data_import, csv_import, td_import, \
 bk_mat_import, datx_import
 try:
@@ -67,8 +70,12 @@ from .tbeamform import IntegratorSectorTime, \
 BeamformerTime, BeamformerTimeSq, BeamformerTimeTraj, BeamformerTimeSqTraj
 from .tprocess import TimeInOut, MaskedTimeInOut, Mixer, TimeAverage, \
 TimeReverse, TimePower, FiltFiltOctave, FiltOctave, TimeCache, WriteWAV, \
+<<<<<<< HEAD
 WriteH5, SpatialInterpolator, SpatialInterpolatorConstantRotation, Trigger, \
 EngineOrderAnalyzer
+=======
+WriteH5, SampleSplitter 
+>>>>>>> master
 from .calib import Calib
 from .trajectory import Trajectory
 from .grids import Grid, RectGrid, RectGrid3D
@@ -87,5 +94,15 @@ TimeSamples, MaskedTimeSamples, PointSourceDipole, UncorrelatedNoiseSource, \
 SourceMixer
 from .signals import SineGenerator, WNoiseGenerator, SignalGenerator,\
 PNoiseGenerator
+<<<<<<< HEAD
 from .fastFuncs import greens_func_Induct
 
+=======
+
+# we cannot be sure to have a working traitsui available
+try:
+    from .traitsviews import * #nothing will actually be imported
+except:
+    from warnings import warn
+    warn("no traitsui features will be available", Warning, stacklevel = 2)
+>>>>>>> master

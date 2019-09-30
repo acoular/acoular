@@ -16,8 +16,6 @@
 from numpy import array, average
 from traits.api import HasPrivateTraits, Property, File, \
 CArray, List, cached_property, on_trait_change
-from traitsui.api import View
-from traitsui.menu import OKCancelButtons
 from os import path
 
 from .internal import digest
@@ -66,15 +64,6 @@ class MicGeom( HasPrivateTraits ):
 
     # internal identifier
     digest = Property( depends_on = ['mpos', ])
-
-    traits_view = View(
-        ['from_file',
-        'num_mics~',
-        '|[Microphone geometry]'
-        ],
-#        title='Microphone geometry',
-        buttons = OKCancelButtons
-                    )
 
     @cached_property
     def _get_digest( self ):

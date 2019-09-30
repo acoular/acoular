@@ -23,6 +23,7 @@
     TimeCache
     WriteWAV
     WriteH5
+    SampleSplitter
 """
 
 # imports from other packages
@@ -39,22 +40,33 @@ from scipy.spatial import Delaunay
 from scipy.interpolate import LinearNDInterpolator,splrep,splev ,CloughTocher2DInterpolator,CubicSpline,Rbf
 from traits.api import Float, Int, CLong, Bool, \
 File, Property, Instance, Trait, Delegate, \
+<<<<<<< HEAD
 cached_property, on_trait_change, List, ListInt, CArray
 from traitsui.api import View, Item
 from traitsui.menu import OKCancelButtons
+=======
+cached_property, on_trait_change, List, Dict, Bool
+>>>>>>> master
 from datetime import datetime
 from os import path
-import tables
 import wave
 from scipy.signal import butter, lfilter, filtfilt
 from warnings import warn
+from collections import deque
+from inspect import currentframe
+import threading
 
 # acoular imports
 from .internal import digest
 from .h5cache import H5cache, td_dir
+from .h5files import H5CacheFileBase, _get_h5file_class
 from .sources import SamplesGenerator
+<<<<<<< HEAD
 from .environments import cartToCyl,CylToCart
 from .microphones import MicGeom
+=======
+from .configuration import config
+>>>>>>> master
 
 
 class TimeInOut( SamplesGenerator ):
@@ -78,10 +90,6 @@ class TimeInOut( SamplesGenerator ):
             
     # internal identifier
     digest = Property( depends_on = ['source.digest'])
-
-    traits_view = View(
-        Item('source', style='custom')
-                    )
 
     @cached_property
     def _get_digest( self ):
@@ -1090,10 +1098,6 @@ class Mixer( TimeInOut ):
     # internal identifier
     digest = Property( depends_on = ['source.digest', 'ldigest', '__class__'])
 
-    traits_view = View(
-        Item('source', style='custom')
-                    )
-
     @cached_property
     def _get_ldigest( self ):
         res = ''
@@ -1186,17 +1190,6 @@ class TimeAverage( TimeInOut ) :
     # internal identifier
     digest = Property( depends_on = ['source.digest', '__class__', 'naverage'])
 
-    traits_view = View(
-        [Item('source', style='custom'), 
-         'naverage{Samples to average}', 
-            ['sample_freq~{Output sampling frequency}', 
-            '|[Properties]'], 
-            '|'
-        ], 
-        title='Linear average', 
-        buttons = OKCancelButtons
-                    )
-
     @cached_property
     def _get_digest( self ):
         return digest(self)
@@ -1286,18 +1279,6 @@ class FiltFiltOctave( TimeInOut ):
     # internal identifier
     digest = Property( depends_on = ['source.digest', '__class__', \
         'band', 'fraction'])
-
-    traits_view = View(
-        [Item('source', style='custom'), 
-         'band{Center frequency}', 
-         'fraction{Bandwidth}', 
-            ['sample_freq~{Output sampling frequency}', 
-            '|[Properties]'], 
-            '|'
-        ], 
-        title='Linear average', 
-        buttons = OKCancelButtons
-                    )
 
     @cached_property
     def _get_digest( self ):
@@ -1401,20 +1382,10 @@ class TimeCache( TimeInOut ):
     basename = Property( depends_on = 'digest')
     
     # hdf5 cache file
-    h5f = Instance(tables.File,  transient = True)
+    h5f = Instance( H5CacheFileBase, transient = True )
     
     # internal identifier
     digest = Property( depends_on = ['source.digest', '__class__'])
-
-    traits_view = View(
-        [Item('source', style='custom'), 
-            ['basename~{Cache file name}', 
-            '|[Properties]'], 
-            '|'
-        ], 
-        title='TimeCache', 
-        buttons = OKCancelButtons
-                    )
 
     @cached_property
     def _get_digest( self ):
@@ -1435,6 +1406,28 @@ class TimeCache( TimeInOut ):
                     obj = None
         return basename
 
+    def _pass_data(self,num):
+        for data in self.source.result(num):
+            yield data
+
+    def _write_data_to_cache(self,num):
+        nodename = 'tc_' + self.digest
+        self.h5f.create_extendable_array(
+                nodename, (0, self.numchannels), "float32")
+        ac = self.h5f.get_data_by_reference(nodename)
+        self.h5f.set_node_attribute(ac,'sample_freq',self.sample_freq)
+        for data in self.source.result(num):
+            self.h5f.append_data(ac,data)
+            yield data
+    
+    def _get_data_from_cache(self,num):
+        nodename = 'tc_' + self.digest
+        ac = self.h5f.get_data_by_reference(nodename)
+        i = 0
+        while i < ac.shape[0]:
+            yield ac[i:i+num]
+            i += num
+
     # result generator: delivers input, possibly from cache
     def result(self, num):
         """ 
@@ -1454,22 +1447,26 @@ class TimeCache( TimeInOut ):
             Echos the source output, but reads it from cache
             when available and prevents unnecassary recalculation.
         """
-        name = 'tc_' + self.digest
-        H5cache.get_cache( self, self.basename )
-        if not name in self.h5f.root:
-            ac = self.h5f.create_earray(self.h5f.root, name, \
-                                       tables.atom.Float32Atom(), \
-                                        (0, self.numchannels))
-            ac.set_attr('sample_freq', self.sample_freq)
-            for data in self.source.result(num):
-                ac.append(data)
-                yield data
-        else:
-            ac = self.h5f.get_node('/', name)
-            i = 0
-            while i < ac.shape[0]:
-                yield ac[i:i+num]
-                i += num
+        
+        if config.global_caching == 'none':
+            generator = self._pass_data
+        else: 
+            nodename = 'tc_' + self.digest
+            H5cache.get_cache_file( self, self.basename )
+            if not self.h5f:
+                generator = self._pass_data
+            elif self.h5f.is_cached(nodename):
+                generator = self._get_data_from_cache
+                if config.global_caching == 'overwrite':
+                    self.h5f.remove_data(nodename)
+                    generator = self._write_data_to_cache
+            elif not self.h5f.is_cached(nodename):
+                generator = self._write_data_to_cache
+                if config.global_caching == 'readonly':
+                    generator = self._pass_data
+        for temp in generator(num):
+            yield temp
+
 
 class WriteWAV( TimeInOut ):
     """
@@ -1485,16 +1482,6 @@ class WriteWAV( TimeInOut ):
        
     # internal identifier
     digest = Property( depends_on = ['source.digest', 'channels', '__class__'])
-
-    traits_view = View(
-        [Item('source', style='custom'), 
-            ['basename~{File name}', 
-            '|[Properties]'], 
-            '|'
-        ], 
-        title='Write wav file', 
-        buttons = OKCancelButtons
-                    )
 
     @cached_property
     def _get_digest( self ):
@@ -1555,33 +1542,219 @@ class WriteH5( TimeInOut ):
     # internal identifier
     digest = Property( depends_on = ['source.digest', '__class__'])
 
-    traits_view = View(
-        [Item('source', style='custom'), 
-            ['name{File name}', 
-            '|[Properties]'], 
-            '|'
-        ], 
-        title='write .h5', 
-        buttons = OKCancelButtons
-                    )
+    #: The floating-number-precision of entries of H5 File corresponding 
+    #: to numpy dtypes. Default is 32 bit.
+    precision = Trait('float32', 'float64', 
+                      desc="precision of H5 File")
 
     @cached_property
     def _get_digest( self ):
         return digest(self)
 
+    def create_filename(self):
+        if self.name == '':
+            name = datetime.now().isoformat('_').replace(':','-').replace('.','_')
+            self.name = path.join(td_dir,name+'.h5')
 
+    def get_initialized_file(self):
+        file = _get_h5file_class()
+        self.create_filename()
+        f5h = file(self.name, mode = 'w')
+        f5h.create_extendable_array(
+                'time_data', (0, self.numchannels), self.precision)
+        ac = f5h.get_data_by_reference('time_data')
+        f5h.set_node_attribute(ac,'sample_freq',self.sample_freq)
+        return f5h
+        
     def save(self):
         """ 
         Saves source output to `*.h5` file 
         """
-        if self.name == '':
-            name = datetime.now().isoformat('_').replace(':','-').replace('.','_')
-            self.name = path.join(td_dir,name+'.h5')
-        f5h = tables.open_file(self.name, mode = 'w')
-        ac = f5h.create_earray(f5h.root, 'time_data', \
-            tables.atom.Float32Atom(), (0, self.numchannels))
-        ac.set_attr('sample_freq', self.sample_freq)
+        
+        f5h = self.get_initialized_file()
+        ac = f5h.get_data_by_reference('time_data')
         for data in self.source.result(4096):
-            ac.append(data)
+            f5h.append_data(ac,data)
         f5h.close()
+
+    def result(self, num):
+        """ 
+        Python generator that saves source output to `*.h5` file and
+        yields the source output block-wise.
+
+        
+        Parameters
+        ----------
+        num : integer
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block).
+        
+        Returns
+        -------
+        Samples in blocks of shape (num, numchannels). 
+            The last block may be shorter than num.
+            Echos the source output, but reads it from cache
+            when available and prevents unnecassary recalculation.
+        """
+        
+        f5h = self.get_initialized_file()
+        ac = f5h.get_data_by_reference('time_data')
+        for data in self.source.result(num):
+            f5h.append_data(ac,data)
+            yield data
+        f5h.close()
+        
+class LockedGenerator():
+    """
+    Creates a Thread Safe Iterator.
+    Takes an iterator/generator and makes it thread-safe by
+    serializing call to the `next` method of given iterator/generator.
+    """
+    
+    def __init__(self, it):
+        self.it = it
+        self.lock = threading.Lock()
+
+    def __next__(self): # this function implementation is not python 2 compatible!
+        with self.lock:
+            return self.it.__next__()
+
+class SampleSplitter(TimeInOut): 
+    '''
+    This class distributes data blocks from source to several following objects.
+    A separate block buffer is created for each registered object in 
+    (:attr:`block_buffer`) .
+    '''
+
+    #: dictionary with block buffers (dict values) of registered objects (dict
+    #: keys).  
+    block_buffer = Dict(key_trait=Instance(SamplesGenerator)) 
+
+    #: max elements/blocks in block buffers. 
+    buffer_size = Int(100)
+
+    #: defines behaviour in case of block_buffer overflow. Can be set individually
+    #: for each registered object.
+    #:
+    #: * 'error': an IOError is thrown by the class
+    #: * 'warning': a warning is displayed. Possibly leads to lost blocks of data
+    #: * 'none': nothing happens. Possibly leads to lost blocks of data
+    buffer_overflow_treatment = Dict(key_trait=Instance(SamplesGenerator),
+                              value_trait=Trait('error','warning','none'),
+                              desc='defines buffer overflow behaviour.')       
+ 
+    # shadow trait to monitor if source deliver samples or is empty
+    _source_generator_exist = Bool(False) 
+
+    # shadow trait to monitor if buffer of objects with overflow treatment = 'error' 
+    # or warning is overfilled. Error will be raised in all threads.
+    _buffer_overflow = Bool(False)
+
+    # Helper Trait holds source generator     
+    _source_generator = Trait()
+           
+    def _create_block_buffer(self,obj):        
+        self.block_buffer[obj] = deque([],maxlen=self.buffer_size)
+        
+    def _create_buffer_overflow_treatment(self,obj):
+        self.buffer_overflow_treatment[obj] = 'error' 
+    
+    def _clear_block_buffer(self,obj):
+        self.block_buffer[obj].clear()
+        
+    def _remove_block_buffer(self,obj):
+        del self.block_buffer[obj]
+
+    def _remove_buffer_overflow_treatment(self,obj):
+        del self.buffer_overflow_treatment[obj]
+        
+    def _assert_obj_registered(self,obj):
+        if not obj in self.block_buffer.keys(): 
+            raise IOError("calling object %s is not registered." %obj)
+
+    def _get_objs_to_inspect(self):
+        return [obj for obj in self.buffer_overflow_treatment.keys() 
+                            if not self.buffer_overflow_treatment[obj] == 'none']
+ 
+    def _inspect_buffer_levels(self,inspect_objs):
+        for obj in inspect_objs:
+            if len(self.block_buffer[obj]) == self.buffer_size:
+                if self.buffer_overflow_treatment[obj] == 'error': 
+                    self._buffer_overflow = True
+                elif self.buffer_overflow_treatment[obj] == 'warning':
+                    warn(
+                        'overfilled buffer for object: %s data will get lost' %obj,
+                        UserWarning)
+
+    def _create_source_generator(self,num):
+        for obj in self.block_buffer.keys(): self._clear_block_buffer(obj)
+        self._buffer_overflow = False # reset overflow bool
+        self._source_generator = LockedGenerator(self.source.result(num))
+        self._source_generator_exist = True # indicates full generator
+
+    def _fill_block_buffers(self): 
+        next_block = next(self._source_generator)                
+        [self.block_buffer[obj].appendleft(next_block) for obj in self.block_buffer.keys()]
+
+    @on_trait_change('buffer_size')
+    def _change_buffer_size(self): # 
+        for obj in self.block_buffer.keys():
+            self._remove_block_buffer(obj)
+            self._create_block_buffer(obj)      
+
+    def register_object(self,*objects_to_register):
+        """
+        Function that can be used to register objects that receive blocks from 
+        this class.
+        """
+        for obj in objects_to_register:
+            if obj not in self.block_buffer.keys():
+                self._create_block_buffer(obj)
+                self._create_buffer_overflow_treatment(obj)
+
+    def remove_object(self,*objects_to_remove):
+        """
+        Function that can be used to remove registered objects.
+        """
+        for obj in objects_to_remove:
+            self._remove_block_buffer(obj)
+            self._remove_buffer_overflow_treatment(obj)
+            
+    def result(self,num):
+        """ 
+        Python generator that yields the output block-wise from block-buffer.
+
+        
+        Parameters
+        ----------
+        num : integer
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block).
+        
+        Returns
+        -------
+        Samples in blocks of shape (num, numchannels). 
+            Delivers a block of samples to the calling object.
+            The last block may be shorter than num.
+        """
+
+        calling_obj = currentframe().f_back.f_locals['self'] 
+        self._assert_obj_registered(calling_obj)
+        objs_to_inspect = self._get_objs_to_inspect() 
+        
+        if not self._source_generator_exist: 
+            self._create_source_generator(num) 
+
+        while not self._buffer_overflow:
+            if self.block_buffer[calling_obj]:
+                yield self.block_buffer[calling_obj].pop()
+            else:
+                self._inspect_buffer_levels(objs_to_inspect)
+                try: 
+                    self._fill_block_buffers()
+                except StopIteration:
+                    self._source_generator_exist = False
+                    return
+        else: 
+            raise IOError('Maximum size of block buffer is reached!')   
         
