@@ -639,18 +639,9 @@ class RotatingFlow( FlowField ):
     origin = CArray( dtype=float64, shape=(3, ), value=array((0., 0., 0.)), 
         desc="center of nozzle")
 
-
     # internal identifier
     digest = Property(
         depends_on=['v0', 'origin', 'rpm'], 
-        )
-
-    traits_view = View(
-            [
-                ['v0{flow velocity}', 'origin{Jet origin}', 
-                'rpm{ revolutions }'], 
-                '|[RotatingFlow]'
-            ]
         )
 
     @cached_property
