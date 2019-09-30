@@ -655,7 +655,7 @@ class OpenJet( FlowField ):
 
 class RotatingFlow( FlowField ):
     """
-    Provides an analytical approximation of the flow field of a rotating fluid with constant flow, 
+    Provides an analytical approximation of the flow field of a rotating fluid with constant flow. 
 
 
 
