@@ -63,8 +63,7 @@ from .grids import Grid
 from .microphones import MicGeom
 from .configuration import config
 from .environments import Environment, InductUniformFlow, cartToCyl
-from .spectra import PowerSpectra, _precision
-
+from .spectra import PowerSpectra
 
 class SteeringVector( HasPrivateTraits ):
     """ 
