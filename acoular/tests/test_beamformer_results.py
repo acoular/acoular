@@ -98,18 +98,18 @@ class acoular_beamformer_test(unittest.TestCase):
         for cfreq in cfreqs:     
             for beam,bfname in zip((bbase, bc, beig, bm, bl, bo, bs, bd, bcmf, bf, bdp, bgib),('bb', 'bc', 'be', 'bm', 'bl', 'bo', 'bs', 'bd', 'bcmf', 'bf', 'bdp', 'bgib')):   
                 for i in range(len(beam.synthetic(cfreq,1).flatten())):
-                    self.assertAlmostEqual(beam.synthetic(cfreq,1).flatten()[i],bfdata[bfname+'_num_'+str(cfreq)][i],8)##,1,3)#.flatten()   
-    
+                    self.assertAlmostEqual((beam.synthetic(cfreq,1).flatten()[i]+1)/(bfdata[bfname+'_num_'+str(cfreq)][i]+1),1,2)##,1,3)#.flatten()   
+   
     def test_beamformer_time_results(self):
         #test beamformertime
         for i in range(len(res.flatten())):
-            self.assertAlmostEqual(res.flatten()[i]/res_num.flatten()[i],1,3)
+            self.assertAlmostEqual(res.flatten()[i]/res_num.flatten()[i],1,2)
         #test beamformer time squared    
         for i in range(len(resq.flatten())):
-            self.assertAlmostEqual(resq.flatten()[i]/resq_num.flatten()[i],1,3) 
+            self.assertAlmostEqual(resq.flatten()[i]/resq_num.flatten()[i],1,2) 
         
 if "__main__" == __name__:
-    unittest.main(exit=False)
+    unittest.main() #exit=False
 
 
 
