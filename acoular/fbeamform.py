@@ -10,8 +10,6 @@
     
     SteeringVector
 
-    SteeringVector
-    SteeringVectorInduct
     
     BeamformerBase
     BeamformerFunctional

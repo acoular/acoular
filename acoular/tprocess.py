@@ -37,16 +37,11 @@ from numpy.linalg import norm
 from numpy.matlib import repmat
 
 from scipy.spatial import Delaunay
-from scipy.interpolate import LinearNDInterpolator,splrep,splev ,CloughTocher2DInterpolator,CubicSpline,Rbf
+from scipy.interpolate import LinearNDInterpolator,splrep, splev, CloughTocher2DInterpolator, CubicSpline, Rbf
 from traits.api import Float, Int, CLong, Bool, \
 File, Property, Instance, Trait, Delegate, \
-<<<<<<< HEAD
-cached_property, on_trait_change, List, ListInt, CArray
-from traitsui.api import View, Item
-from traitsui.menu import OKCancelButtons
-=======
-cached_property, on_trait_change, List, Dict, Bool
->>>>>>> master
+cached_property, on_trait_change, List, ListInt, CArray, Dict, Bool
+
 from datetime import datetime
 from os import path
 import wave
@@ -61,12 +56,9 @@ from .internal import digest
 from .h5cache import H5cache, td_dir
 from .h5files import H5CacheFileBase, _get_h5file_class
 from .sources import SamplesGenerator
-<<<<<<< HEAD
 from .environments import cartToCyl,CylToCart
 from .microphones import MicGeom
-=======
 from .configuration import config
->>>>>>> master
 
 
 class TimeInOut( SamplesGenerator ):

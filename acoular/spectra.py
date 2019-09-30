@@ -28,11 +28,9 @@ from .h5files import H5CacheFileBase
 from .internal import digest
 from .sources import SamplesGenerator
 from .calib import Calib
-<<<<<<< HEAD
 from .tprocess import EngineOrderAnalyzer
-=======
 from .configuration import config
->>>>>>> master
+
 
 
 class PowerSpectra( HasPrivateTraits ):
