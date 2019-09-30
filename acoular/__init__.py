@@ -101,4 +101,3 @@ try:
 except:
     from warnings import warn
     warn("no traitsui features will be available", Warning, stacklevel = 2)
->>>>>>> master
