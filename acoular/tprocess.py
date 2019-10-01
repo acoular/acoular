@@ -415,6 +415,11 @@ class AngleTracker(MaskedTimeInOut):
     rotDirection = Int(-1,
                    desc ="mathematical direction of rotation")
     
+    #Points of interpolation used for Spline
+    #defaults to 4.
+    InterpPoints = Int(4,
+                   desc ="Points of interpolation used for Spline")
+    
     #rotation angle for trigger position
     StartAngle = Float(0,
                    desc ="rotation angle for trigger position")
@@ -469,7 +474,7 @@ class AngleTracker(MaskedTimeInOut):
         self.rpm = zeros(nSamples)
         self.angle = zeros(nSamples)
         #number of spline points
-        InterpPoints=4
+        InterpPoints=self.InterpPoints
         
         #loop over alle timesamples
         while ind < nSamples :     
