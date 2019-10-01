@@ -1025,12 +1025,11 @@ class SpatialInterpolatorRotation(SpatialInterpolator):
     angle = CArray() 
     
     # internal identifier
-    digest = Property( depends_on = ['source.digest', 'AngleTracker.digest', 'mpos_real.digest', 'mpos_virtual.digest'])
+    digest = Property( depends_on = ['source.digest', 'AngleTracker.digest', 'mpos_real.digest', 'mpos_virtual.digest', 'Q'])
     
     @cached_property
     def _get_digest( self ):
-        return digest(self)
-    
+        return digest(self) 
     
     def result(self, num=128):
         """ 
@@ -1049,19 +1048,59 @@ class SpatialInterpolatorRotation(SpatialInterpolator):
         """
         #period for rotation
         period = 2 * pi
-        Q = self.Q
         #get angle
         angle = self.AngleTracker._get_angle()
         #counter to track angle position in time for each block
         count=0
         for timeData in self.source.result(num):
             phiDelay = angle[count:count+num]
-            interpVal = self._result_core_func(timeData, phiDelay, period, Q)
+            interpVal = self._result_core_func(timeData, phiDelay, period, self.Q)
             yield interpVal
             count += num    
+
+class SpatialInterpolatorConstantRotation(SpatialInterpolator):
+    """
+    Spatial linear Interpolation for constantly rotating sources.
+    Gets samples from :attr:`source` and generates output via the 
+    generator :meth:`result`
+    """
+    #: Rotational speed in rps. Positive, if rotation is around positive z-axis sense,
+    #: which means from x to y axis.
+    rotational_speed = Float(0.0)
     
+    # internal identifier
+    digest = Property( depends_on = ['source.digest', 'rotational_speed', 'Q', 'mpos_real.digest' 'mpos_virtual.digest'])
+    
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+    
+    
+    def result(self, num=1):
+        """ 
+        Python generator that yields the output block-wise.
+        
+        Parameters
+        ----------
+        num : integer
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block).
+        
+        Returns
+        -------
+        Samples in blocks of shape (num, :attr:`numchannels`). 
+            The last block may be shorter than num.
+        """
+        omega = 2 * pi * self.rotational_speed
+        period = 2 * pi
+        phiOffset = 0.0
+        for timeData in self.source.result(num):
+            nTime = timeData.shape[0]
+            phiDelay = phiOffset + linspace(0, nTime / self.sample_freq * omega, nTime, endpoint=False)
+            interpVal = self._result_core_func(timeData, phiDelay, period, self.Q)
+            phiOffset = phiDelay[-1] + omega / self.sample_freq
+            yield interpVal    
       
-    
     
 class Mixer( TimeInOut ):
     """
