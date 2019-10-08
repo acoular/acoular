@@ -56,7 +56,7 @@ from .internal import digest
 from .h5cache import H5cache, td_dir
 from .h5files import H5CacheFileBase, _get_h5file_class
 from .sources import SamplesGenerator
-from .environments import cartToCyl,CylToCart
+from .environments import cartToCyl,cylToCart
 from .microphones import MicGeom
 from .configuration import config
 
@@ -763,25 +763,25 @@ class SpatialInterpolator(TimeInOut):
         
         if self.array_dimension =='1D' or self.array_dimension =='ring':
                 # get projections onto new coordinate, for real mics
-                projectionOnNewAxis = self.CartToCyl(mic,self.Q)[0]
+                projectionOnNewAxis = cartToCyl(mic,self.Q)[0]
                 indReorderHelp = argsort(projectionOnNewAxis)
                 mesh.append([projectionOnNewAxis[indReorderHelp], indReorderHelp])
                
                 #new coordinates of real mics
-                indReorderHelp = argsort(self.CartToCyl(mic,self.Q)[0])
-                newCoord = (self.CartToCyl(mic,self.Q).T)[indReorderHelp].T
+                indReorderHelp = argsort(cartToCyl(mic,self.Q)[0])
+                newCoord = (cartToCyl(mic,self.Q).T)[indReorderHelp].T
 
                 # and for virtual mics
-                virtNewCoord = self.CartToCyl(micVirt)
+                virtNewCoord = cartToCyl(micVirt)
                 
         elif self.array_dimension =='2D':  # 2d case0
 
             # get virtual mic projections on new coord system
-            virtNewCoord = self.CartToCyl(micVirt,self.Q)
+            virtNewCoord = cartToCyl(micVirt,self.Q)
             
             #new coordinates of real mics
-            indReorderHelp = argsort(self.CartToCyl(mic,self.Q)[0])
-            newCoord = self.CartToCyl(mic,self.Q) 
+            indReorderHelp = argsort(cartToCyl(mic,self.Q)[0])
+            newCoord = cartToCyl(mic,self.Q) 
             
             #scipy delauney triangulation            
             #Delaunay
@@ -793,9 +793,10 @@ class SpatialInterpolator(TimeInOut):
             hullPoints = unique(hull)
                     
             addRight = tri.points[hullPoints]
-            addRight[:, 0] = pi
+            addRight[:, 0] += 2*pi
             addLeft= tri.points[hullPoints]
-            addLeft[:, 0] = -pi
+            addLeft[:, 0] -= 2*pi
+            
             indOrigPoints = concatenate((pointsOriginal, pointsOriginal[hullPoints], pointsOriginal[hullPoints]))
             # add all hull vertices to original mesh and check which of those 
             # are actual neighbors of the original array. Cancel out all others.
@@ -810,13 +811,21 @@ class SpatialInterpolator(TimeInOut):
             tri = Delaunay(tri.points[pointsNew])  # re-meshing
             mesh.append([tri, indOrigPoints[pointsNew]])
             
+            import matplotlib.pyplot as plt
+            plt.figure()
+            plt.triplot(tri.points[:,0], tri.points[:,1])#tri.simplices)#x= tri.points[:,0],y=  tri.points[:,1],
+            plt.plot(tri.points[:,0], tri.points[:,1], 'o')
+            #plt.savefig("delauney_2d_zylinder_full.pdf", bbox_inches = "tight")
+            plt.show()
+            
+            
         elif self.array_dimension =='3D':  # 3d case
             
             # get virtual mic projections on new coord system
-            virtNewCoord = self.CartToCyl(micVirt,self.Q)
+            virtNewCoord = cartToCyl(micVirt,self.Q)
             # get real mic projections on new coord system
-            indReorderHelp = argsort(self.CartToCyl(mic,self.Q)[0])
-            newCoord = (self.CartToCyl(mic,self.Q))
+            indReorderHelp = argsort(cartToCyl(mic,self.Q)[0])
+            newCoord = (cartToCyl(mic,self.Q))
             #Delaunay
             tri =Delaunay(newCoord.T, incremental=True) #, incremental=True,qhull_options =  "Qc QJ Q12" 
 
@@ -826,9 +835,9 @@ class SpatialInterpolator(TimeInOut):
             hullPoints = unique(hull)
                     
             addRight = tri.points[hullPoints]
-            addRight[:, 0] = pi
+            addRight[:, 0] += 2*pi
             addLeft= tri.points[hullPoints]
-            addLeft[:, 0] = -pi
+            addLeft[:, 0] -= 2*pi
             indOrigPoints = concatenate((pointsOriginal, pointsOriginal[hullPoints], pointsOriginal[hullPoints]))
         
             # add all hull vertices to original mesh and check which of those 

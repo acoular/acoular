@@ -56,7 +56,7 @@ def cartToCyl(x, Q=identity(3)):
     return cylCoord
 
 
-def CylToCart(x, Q=identity(3)):
+def cylToCart(x, Q=identity(3)):
         """
         Returns the cylindrical coordinate representation of a input position 
         which was before transformed into a modified cartesian coordinate, which
