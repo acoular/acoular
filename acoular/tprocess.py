@@ -774,8 +774,7 @@ class SpatialInterpolator(TimeInOut):
             interpolater = LinearNDInterpolator(cylToCart(newCoord[:,argsort(newCoord[0])])[:2,:].T,
                                             p[:, (argsort(newCoord[0]))].T, fill_value = 0)
             pZero  = interpolater((0,0))
-            print(str(pZero.shape))
-            print(str(pZero[:, newaxis]))
+            #add the interpolated pressure at origin to pressure channels
             p = concatenate((p, pZero[:, newaxis]), axis=1)
 
         
