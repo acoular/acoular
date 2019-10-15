@@ -45,7 +45,6 @@ OrthogonalMatchingPursuit, ElasticNet, OrthogonalMatchingPursuitCV, Lasso
 
 from scipy.optimize import nnls, linprog
 from scipy.linalg import inv, eigh, eigvals, fractional_matrix_power
-from scipy.special import jn
 from warnings import warn
 
 from traits.api import HasPrivateTraits, Float, Int, ListInt, ListFloat, \

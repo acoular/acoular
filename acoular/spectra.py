@@ -494,14 +494,3 @@ def synthetic (data, freqs, f, num=3):
             res += [h]
     return array(res)
 
-def _recursiv_source_class_check(source, classType):
-    # This method checks whether any source property (and their source properties, 
-    # and their...) is an instance of classType. If so, the respective instance
-    # is returned. If not: an empty list ([]) is returned.
-    try:
-        while not isinstance(source, classType):
-            source = source.source
-        returnClass = source
-    except:
-        returnClass = []
-    return returnClass

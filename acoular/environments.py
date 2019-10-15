@@ -445,13 +445,16 @@ class RotatingFlow( FlowField ):
         U = omega * r * sin(phi)
         V = -omega * r * cos(phi)
         W = self.v0 
-    
+        
+        #to avoid repeating calculation
+        sinPhi = sin(phi)
+        cosPhi = cos(phi)
         #jacobian 
-        Udx = omega * ( sin(phi) * x/r +  cos(phi) * y/r)
-        Vdx = omega * (-cos(phi) * x/r +  sin(phi) * y/r)
+        Udx = omega * ( sinPhi * x/r +  cosPhi * y/r)
+        Vdx = omega * (-cosPhi * x/r +  sinPhi * y/r)
 
-        Udy = omega * ( sin(phi) * y/r + cos(phi) * x/r)
-        Vdy = omega * (-cos(phi) * y/r + sin(phi) * x/r)
+        Udy = omega * ( sinPhi * y/r + cosPhi * x/r)
+        Vdy = omega * (-cosPhi * y/r + sinPhi * x/r)
 
 
         # flow field
