@@ -559,11 +559,11 @@ class SpatialInterpolator(TimeInOut):
     
     
     #: Stores the output of :meth:`_reduced_interp_dim_core_func`; Read-Only
-    _virtNewCoord_func = Property(depends_on=['mpos_real.digest', 'mpos_virtual.digest', 'method','array_dimension'])
+    _virtNewCoord_func = Property(depends_on=['mpos_real.digest', 'mpos_virtual.digest', 'method','array_dimension','interpAtZero'])
     
     #: internal identifier
     digest = Property(depends_on=['mpos_real.digest', 'mpos_virtual.digest', 'source.digest', \
-                                   'method','array_dimension', 'Q'])
+                                   'method','array_dimension', 'Q', 'interpAtZero'])
     
     def _get_numchannels(self):
         return self.mpos_virtual.num_mics
