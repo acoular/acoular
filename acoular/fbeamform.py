@@ -54,7 +54,7 @@ cached_property, on_trait_change, property_depends_on
 from traits.trait_errors import TraitError
 
 from .fastFuncs import beamformerFreq, calcTransfer, calcPointSpreadFunction, \
-damasSolverGaussSeidel, greens_func_Induct
+damasSolverGaussSeidel
 
 from .h5cache import H5cache
 from .h5files import H5CacheFileBase
@@ -62,7 +62,7 @@ from .internal import digest
 from .grids import Grid
 from .microphones import MicGeom
 from .configuration import config
-from .environments import Environment, InductUniformFlow, cartToCyl
+from .environments import Environment
 from .spectra import PowerSpectra
 
 class SteeringVector( HasPrivateTraits ):
