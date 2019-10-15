@@ -11,8 +11,9 @@
     TimeInOut
     MaskedTimeInOut
     Trigger
-    EngineOrderAnalyzer
+    AngleTracker
     SpatialInterpolator
+    SpatialInterpolatorRotation
     SpatialInterpolatorConstantRotation
     Mixer
     TimePower
@@ -40,7 +41,7 @@ from scipy.spatial import Delaunay
 from scipy.interpolate import LinearNDInterpolator,splrep, splev, CloughTocher2DInterpolator, CubicSpline, Rbf
 from traits.api import Float, Int, CLong, Bool, \
 File, Property, Instance, Trait, Delegate, \
-cached_property, on_trait_change, List, ListInt, CArray, Dict, Bool
+cached_property, on_trait_change, List, ListInt, CArray, Dict
 
 from datetime import datetime
 from os import path
@@ -401,7 +402,7 @@ class AngleTracker(MaskedTimeInOut):
     source = Instance(SamplesGenerator)    
     
     #trigger
-    trigger = Instance(Trigger) 
+    trigger = Instance(SamplesGenerator) 
     
     #internal identifier
     digest = Property(depends_on=['source.digest'])
@@ -509,140 +510,6 @@ class AngleTracker(MaskedTimeInOut):
             self._to_rpm_and_degree()
         return self.angle[:]
 
-class EngineOrderAnalyzer(TimeInOut):
-    """
-    Signal processing block for Engine-Order-Analysis or Order-Tracking of 
-    rotating sound sources.
-    
-    If a signal with 1/Rev triggers is provided, this class upsamples its 
-    :attr:`~acoular.tprocess.TimeInOut.source` samples, s.t. each revolution 
-    consists of the same number of samples N.
-    Here N is the next power of 2 which contains all original samples of the 
-    slowest revolution.
-    
-    Because of the common samples per revolution, possible fluctuations of the
-    rotational speed still result in the same phase of frequency bins, when 
-    performing a subsequent FFT. Averaging those FFTs would mean that 
-    non-rotor-coherent sources decay, whereas rotor-coherent sources don't.
-    
-    The output is delivered via the generator :meth:`result`.
-    """
-    #: Upsampled sample frequency. Is calculated via 
-    #: round(mean(:attr:`rpm`) / 60 * :attr:`samples_per_rev`).
-    sample_freq = Property(depends_on = ['source.sample_freq', 'trigger.digest'])
-    
-    #: Number of samples 
-    numsamples = Property(depends_on = ['source.sample_freq', 'trigger.digest'])
-    
-    #: Trigger source; :class:`~acoular.tprocess.Trigger` object.
-    trigger = Instance(Trigger)
-    
-    #: Integer containing the samples per revolution for the upsampled signal.
-    #: Is the next power of 2 which contains all original samples of the 
-    #: slowest revolution.
-    samples_per_rev = Property(depends_on = 'trigger.digest')
-    
-    #: Rotational speed in rpm for each revolution. A vector of floats of 
-    #: length n-1, where n are the trigger-peaks delivered by :attr:`trigger`.
-    rpm = Property(depends_on = ['source.sample_freq', 'trigger.digest'])
-    
-    # internal identifier
-    digest = Property(depends_on = ['source.digest', 'trigger.digest'])
-    
-    @cached_property
-    def _get_sample_freq(self):
-        rps = mean(self.rpm) / 60
-        fs = int(round(rps * self.samples_per_rev))
-        return fs
-    
-    @cached_property
-    def _get_numsamples(self):
-        return self.samples_per_rev * len(self.rpm)
-    
-    @cached_property
-    def _get_digest( self ):
-        return digest(self)
-    
-    @cached_property
-    def _get_samples_per_rev(self):
-        maxLen = self.trigger.trigger_data[1]
-        nResample = int(2 ** ceil(log2(maxLen)))  # round to next power of 2
-        return nResample
-    
-    @cached_property
-    def _get_rpm(self):
-        fsMeasured = self.source.sample_freq
-        peakLoc = self.trigger.trigger_data[0]
-        samplesPerRev = peakLoc[1:] - peakLoc[:-1]
-        durationPerRev = samplesPerRev / fsMeasured  # in seconds
-        return 60. / durationPerRev
-    
-    def result(self, num):
-        """ 
-        Python generator that yields the output block-wise.
-        
-        Parameters
-        ----------
-        num : integer
-            This parameter defines the size of the blocks to be yielded. This 
-            parameter must be passed and should be a multiple of the number
-            of samples per revolution of the trigger signal.
-        
-        Returns
-        -------
-        Samples in blocks of shape (num, :attr:`numchannels`). 
-            This generator only yields full revolutions, which means that all
-            samples following the last trigger peak are cropped.
-        """
-        nMics = self.numchannels
-        oncePerRevInd, maxLen, minLen = self.trigger.trigger_data
-        nRev = len(oncePerRevInd) - 1
-        nAdjacentRevs = int(num / self.samples_per_rev)
-        tNew = linspace(0, 1, self.samples_per_rev, endpoint=False)
-        indStart = cntRev = cntAdjacentRevs = 0
-        samplesIDPerRev = arange(oncePerRevInd[0], oncePerRevInd[1])
-        valuesPerRev = zeros((len(samplesIDPerRev), nMics))
-        valuesPerRev.fill(nan)
-        resampled = zeros((len(tNew), nMics))
-        resamplesStack = zeros((num, nMics))
-
-        for timeDataRaw in self.source.result(minLen):
-            # check which entries of timeDataRaw can be used for current Revolution
-            indEnd = indStart + timeDataRaw.shape[0]
-            correctSamplesPerRev = logical_and(samplesIDPerRev >= indStart, samplesIDPerRev < indEnd)
-            samplesIDRawInput = arange(indStart, indEnd)
-            correctSamplesRawInput = logical_and(samplesIDRawInput >= oncePerRevInd[cntRev], samplesIDRawInput < oncePerRevInd[cntRev + 1])
-            valuesPerRev[correctSamplesPerRev, :] = timeDataRaw[correctSamplesRawInput]
-            
-            # check whether current Revolution is filled completely
-            if not isnan(valuesPerRev).any():
-                cntAdjacentRevs += 1
-                cntRev += 1
-                tOld = linspace(0, 1, len(samplesIDPerRev), endpoint=False)
-                
-                # actual resampling
-                resampled = asarray([interp(tNew, tOld, valuesPerRev[:, cntMic]) for cntMic in range(nMics)]).T
-                stackStart = int((cntAdjacentRevs - 1) * self.samples_per_rev)
-                stackEnd = int(stackStart + self.samples_per_rev)
-                resamplesStack[stackStart : stackEnd, :] = resampled
-                
-                # if nAdjacentRevs resamples are calculated -> yield them
-                if cntAdjacentRevs == nAdjacentRevs:
-                    yield resamplesStack
-                    cntAdjacentRevs = 0
-            
-                if cntRev < nRev:
-                    # fill all entries of next Revolution with the left over stuff of current timeDataRaw
-                    samplesIDPerRev = arange(oncePerRevInd[cntRev], oncePerRevInd[cntRev + 1])
-                    correctSamplesPerRev = logical_and(samplesIDPerRev >= indStart, samplesIDPerRev < indEnd)
-                    valuesPerRev = zeros((len(samplesIDPerRev), nMics))
-                    valuesPerRev.fill(nan)
-                    valuesPerRev[correctSamplesPerRev, :] = timeDataRaw[~correctSamplesRawInput]
-                else:
-                    # stop if the last revolution with beginning and end trigger peak is done
-                    break
-            indStart = indEnd
-
 
 class SpatialInterpolator(TimeInOut):
     """
@@ -678,6 +545,11 @@ class SpatialInterpolator(TimeInOut):
     #: Number of samples in output, as given by :attr:`source`.
     numsamples = Delegate('source', 'numsamples')
     
+    
+    #:Interpolate a point at the origin of the Array geometry 
+    interpAtZero =  Bool(False)
+
+    
     #: The rotation must be around the z-axis, which means from x to y axis.
     #: If the coordinates are not build like that, than this 3x3 orthogonal 
     #: transformation matrix Q can be used to modify the coordinates.
@@ -712,7 +584,7 @@ class SpatialInterpolator(TimeInOut):
         """
         return sinc((r*self.mpos_virtual.mpos.shape[1])/(pi))    
     
-    def _virtNewCoord_func(self, mic, micVirt, method ,array_dimension):
+    def _virtNewCoord_func(self, mic, micVirt, method ,array_dimension, interpAtZero = False):
         """ 
         Core functionality for getting the  interpolation .
         
@@ -787,6 +659,11 @@ class SpatialInterpolator(TimeInOut):
             #Delaunay
             tri = Delaunay(newCoord.T[:,:2], incremental=True) #
             
+            
+            if interpAtZero:
+                #add a point at zero 
+                tri.add_points(array([[0 ], [0]]).T)
+            
             # extend mesh with closest boundary points of repeating mesh 
             pointsOriginal = arange(tri.points.shape[0])
             hull = tri.convex_hull
@@ -810,6 +687,7 @@ class SpatialInterpolator(TimeInOut):
             pointsNew = unique(append(pointsOriginal, hullNeighborUnique))
             tri = Delaunay(tri.points[pointsNew])  # re-meshing
             mesh.append([tri, indOrigPoints[pointsNew]])
+            
             
             import matplotlib.pyplot as plt
             plt.figure()
@@ -829,17 +707,21 @@ class SpatialInterpolator(TimeInOut):
             #Delaunay
             tri =Delaunay(newCoord.T, incremental=True) #, incremental=True,qhull_options =  "Qc QJ Q12" 
 
+            if interpAtZero:
+                #add a point at zero 
+                tri.add_points(array([[0 ], [0], [0]]).T)
+
             # extend mesh with closest boundary points of repeating mesh 
             pointsOriginal = arange(tri.points.shape[0])
             hull = tri.convex_hull
             hullPoints = unique(hull)
-                    
+        
             addRight = tri.points[hullPoints]
             addRight[:, 0] += 2*pi
             addLeft= tri.points[hullPoints]
             addLeft[:, 0] -= 2*pi
+            
             indOrigPoints = concatenate((pointsOriginal, pointsOriginal[hullPoints], pointsOriginal[hullPoints]))
-        
             # add all hull vertices to original mesh and check which of those 
             # are actual neighbors of the original array. Cancel out all others.
             tri.add_points(concatenate([addLeft, addRight]))
@@ -852,14 +734,13 @@ class SpatialInterpolator(TimeInOut):
             pointsNew = unique(append(pointsOriginal, hullNeighborUnique))
             tri = Delaunay(tri.points[pointsNew])  # re-meshing
             mesh.append([tri, indOrigPoints[pointsNew]])
-            
          
         return  mesh, virtNewCoord , newCoord
     
 
-    def _result_core_func(self, p, phiDelay=[], period=None, Q=Q):
+    def _result_core_func(self, p, phiDelay=[], period=None, Q=Q, interpAtZero = False):
         """
-        Performs the actual Interpolation._get_virtNewCoord
+        Performs the actual Interpolation
         
         Parameters
         ----------
@@ -886,7 +767,19 @@ class SpatialInterpolator(TimeInOut):
         meshList, virtNewCoord, newCoord = self._get_virtNewCoord()
         # pressure interpolation init     
         pInterp = zeros((nTime,nVirtMics))
-        #helpfunction reordered for reordered pressure values
+        
+        
+        if interpAtZero:
+            #interpolate point at 0 in Kartesian CO
+            interpolater = LinearNDInterpolator(cylToCart(newCoord[:,argsort(newCoord[0])])[:2,:].T,
+                                            p[:, (argsort(newCoord[0]))].T, fill_value = 0)
+            pZero  = interpolater((0,0))
+            print(str(pZero.shape))
+            print(str(pZero[:, newaxis]))
+            p = concatenate((p, pZero[:, newaxis]), axis=1)
+
+        
+        #helpfunction reordered for reordered pressure values 
         pHelp = p[:, meshList[0][1]]
         
         # Interpolation for 1D Arrays 
@@ -1033,7 +926,7 @@ class SpatialInterpolatorRotation(SpatialInterpolator):
     
     """
     #: Angle data from AngleTracker class
-    AngleTracker = Instance(AngleTracker)
+    AngleTracker = Instance(SamplesGenerator)
     
     #: Angle data from AngleTracker class
     angle = CArray() 
@@ -1068,7 +961,7 @@ class SpatialInterpolatorRotation(SpatialInterpolator):
         count=0
         for timeData in self.source.result(num):
             phiDelay = angle[count:count+num]
-            interpVal = self._result_core_func(timeData, phiDelay, period, self.Q)
+            interpVal = self._result_core_func(timeData, phiDelay, period, self.Q, interpAtZero = False)
             yield interpVal
             count += num    
 
@@ -1111,7 +1004,7 @@ class SpatialInterpolatorConstantRotation(SpatialInterpolator):
         for timeData in self.source.result(num):
             nTime = timeData.shape[0]
             phiDelay = phiOffset + linspace(0, nTime / self.sample_freq * omega, nTime, endpoint=False)
-            interpVal = self._result_core_func(timeData, phiDelay, period, self.Q)
+            interpVal = self._result_core_func(timeData, phiDelay, period, self.Q, interpAtZero = False)
             phiOffset = phiDelay[-1] + omega / self.sample_freq
             yield interpVal    
       

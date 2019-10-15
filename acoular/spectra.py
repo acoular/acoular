@@ -10,7 +10,6 @@
     :toctree: generated/
 
     PowerSpectra
-    PowerSpectraEngineOrderAnalyzed
     synthetic
 """
 from warnings import warn
@@ -28,7 +27,6 @@ from .h5files import H5CacheFileBase
 from .internal import digest
 from .sources import SamplesGenerator
 from .calib import Calib
-from .tprocess import EngineOrderAnalyzer
 from .configuration import config
 
 
@@ -407,114 +405,7 @@ class PowerSpectra( HasPrivateTraits ):
                     [:int(self.block_size/2+1)])
 
 
-class PowerSpectraEngineOrderAnalyzed( PowerSpectra ):
-    """An copy of the PowerSpectra for Engine Ordered analysed signals.
-    """
-    #: The cross spectral matrix, 
-    #: (number of frequencies, numchannels, numchannels) array of complex;
-    #: readonly.
-    csm = Property( 
-        desc="cross spectral matrix")
-    
-    @property_depends_on('digest')
-    def _get_csm ( self ):
-        """
-        Main work is done here:
-        Cross spectral matrix is either loaded from cache file or
-        calculated and then additionally stored into cache.
-        """
-        # test for dual calibration
-        obj = self.time_data # start with time_data obj
-        while obj:
-            if 'calib' in obj.all_trait_names(): # at original source?
-                if obj.calib and self.calib:
-                    if obj.calib.digest == self.calib.digest:
-                        self.calib = None # ignore it silently
-                    else:
-                        raise ValueError("Non-identical dual calibration for "\
-                                    "both TimeSamples and PowerSpectra object")
-                obj = None
-            else:
-                try:
-                    obj = obj.source # traverse down until original data source
-                except AttributeError:
-                    obj = None
-        name = 'csm_' + self.digest
-        H5cache.get_cache( self, self.basename )
-        #print self.basename
-        if not self.cached  or not name in self.h5f.root:
-            t = self.time_data
-            wind = self.window_( self.block_size )
-            weight = dot( wind, wind )
-            wind = wind[newaxis, :].swapaxes( 0, 1 )
-            numfreq = int(self.block_size/2 + 1)
-            csm_shape = (numfreq, t.numchannels, t.numchannels)
-            csmUpper = zeros(csm_shape, dtype=self.precision)
-            spectrumEO = zeros(csmUpper.shape[:2], dtype=self.precision)
-            #print "num blocks", self.num_blocks
-            # for backward compatibility
-            if self.calib and self.calib.num_mics > 0:
-                if self.calib.num_mics == t.numchannels:
-                    wind = wind * self.calib.data[newaxis, :]
-                else:
-                    raise ValueError(
-                            "Calibration data not compatible: %i, %i" % \
-                            (self.calib.num_mics, t.numchannels))
-            bs = self.block_size
-            temp = empty((2*bs, t.numchannels))
-            pos = bs
-            posinc = bs/self.overlap_
-            for data in t.result(bs):
-                ns = data.shape[0]
-                temp[bs:bs+ns] = data
-                while pos+bs <= bs+ns:
-                    ft = fft.rfft(temp[int(pos):int(pos+bs)]*wind, None, 0).astype(self.precision)
-                    spectrumEO += ft
-                    pos += posinc
-                temp[0:bs] = temp[bs:]
-                pos -= bs
-            
-            spectrumEO /= self.num_blocks
-            calcCSM(csmUpper, spectrumEO)
 
-            # create the full csm matrix via transposingand complex conj.
-            csmLower = csmUpper.conj().transpose(0,2,1)
-            [fill_diagonal(csmLower[cntFreq, :, :], 0) for cntFreq in xrange(csmLower.shape[0])]
-            csm = csmLower + csmUpper
-
-            # onesided spectrum: multiplication by 2.0=sqrt(2)^2
-            csm = csm*(2.0/self.block_size/weight)
-            
-            if self.cached:
-                precisionTuple = _precision(self.precision)
-                atom = tables.ComplexAtom(precisionTuple[2])
-                filters = tables.Filters(complevel=5, complib='blosc')
-                ac = self.h5f.create_carray(self.h5f.root, name, atom,
-                                            csm_shape, filters=filters)
-                ac[:] = csm
-                return ac
-            else:
-                return csm
-        else:
-            return self.h5f.get_node('/', name)
-
-    def eofreq ( self ):
-        """
-        Return the Discrete Fourier Transform sample frequencies in Engine Order.
-        
-        Returns
-        -------
-        f : ndarray
-            Array of length *block_size/2+1* containing the sample frequencies.
-        """
-        EOInstance = _recursiv_source_class_check(self.time_data, EngineOrderAnalyzer)
-        if EOInstance == []:
-            raise Exception ('For this feature PowerSpectra.time_data must be an instance of '
-                             'EngineOrderAnalyzer but is %s instead!' % self.time_data.__class__.__name__)
-        else:
-            bs = self.block_size
-            f = abs(fft.fftfreq(bs, 1. / EOInstance.samples_per_rev)[:int(bs / 2 + 1)])
-        return f
 
 
 def synthetic (data, freqs, f, num=3):
