@@ -166,7 +166,7 @@ IntegratorSectorTime.class_trait_view('traits_view',
                                 )
 
 from .environments import UniformFlowEnvironment, GeneralFlowEnvironment,\
-SlotJet, OpenJet
+SlotJet, OpenJet ,RotatingFlow
 
 UniformFlowEnvironment.class_trait_view('traits_view',
                                         View(
@@ -206,6 +206,20 @@ OpenJet.class_trait_view('traits_view',
             ]
         )
                          )
+
+RotatingFlow.class_trait_view('traits_view', 
+                              View(
+            [
+                ['v0{flow velocity}', 'origin{Jet origin}', 
+                'rpm{ revolutions }'], 
+                '|[RotatingFlow]'
+            ]
+        )
+                        )
+
+
+
+
 
 from .tprocess import TimeInOut, TimeAverage, FiltFiltOctave, WriteWAV, WriteH5
 

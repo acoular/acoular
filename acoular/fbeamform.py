@@ -10,6 +10,7 @@
     
     SteeringVector
 
+    
     BeamformerBase
     BeamformerFunctional
     BeamformerCapon
@@ -59,10 +60,9 @@ from .h5files import H5CacheFileBase
 from .internal import digest
 from .grids import Grid
 from .microphones import MicGeom
+from .configuration import config
 from .environments import Environment
 from .spectra import PowerSpectra
-from .configuration import config
-
 
 class SteeringVector( HasPrivateTraits ):
     """ 

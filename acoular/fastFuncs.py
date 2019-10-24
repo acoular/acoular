@@ -957,3 +957,4 @@ def _transferCoreFunc(distGridToArrayCenter, distGridToAllMics, waveNumber, resu
     for cntMics in xrange(nMics):
         expArg = np.float32(waveNumber[0] * (distGridToAllMics[cntMics] - distGridToArrayCenter[0]))
         result[cntMics] = (np.cos(expArg) - 1j * np.sin(expArg)) * distGridToArrayCenter[0] / distGridToAllMics[cntMics]
+

@@ -30,6 +30,7 @@ from .calib import Calib
 from .configuration import config
 
 
+
 class PowerSpectra( HasPrivateTraits ):
     """Provides the cross spectral matrix of multichannel time data
      and its eigen-decomposition.
@@ -62,9 +63,9 @@ class PowerSpectra( HasPrivateTraits ):
     #: :class:`~acoular.sources.TimeSamples` objects
     calib = Instance(Calib)
 
-    #: FFT block size, one of: 128, 256, 512, 1024, 2048 ... 16384,
+    #: FFT block size, one of: 128, 256, 512, 1024, 2048 ... 65536,
     #: defaults to 1024.
-    block_size = Trait(1024, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 
+    block_size = Trait(1024, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536,
         desc="number of samples per FFT block")
 
     #: Index of lowest frequency line to compute, integer, defaults to 1,
@@ -405,6 +406,8 @@ class PowerSpectra( HasPrivateTraits ):
 
 
 
+
+
 def synthetic (data, freqs, f, num=3):
     """
     Returns synthesized frequency band values of spectral data.
@@ -490,4 +493,4 @@ def synthetic (data, freqs, f, num=3):
                 h = sum(data[ind1:ind2], 0)
             res += [h]
     return array(res)
-        
+

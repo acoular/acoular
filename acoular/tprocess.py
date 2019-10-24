@@ -10,6 +10,11 @@
 
     TimeInOut
     MaskedTimeInOut
+    Trigger
+    AngleTracker
+    SpatialInterpolator
+    SpatialInterpolatorRotation
+    SpatialInterpolatorConstantRotation
     Mixer
     TimePower
     TimeAverage
@@ -24,10 +29,20 @@
 
 # imports from other packages
 from six import next
-from numpy import array, empty, empty_like, pi, sin, sqrt, zeros, int16
-from traits.api import Float, Int, CLong, \
+
+from numpy import array, empty, empty_like, pi, sin, sqrt, zeros, newaxis, unique, \
+int16, cross, isclose, zeros_like, dot, nan, concatenate, isnan, nansum, float64, \
+identity, argsort, interp, arange, append, linspace, flatnonzero, argmin, argmax, \
+delete, mean, inf, ceil, log2, logical_and, asarray, stack, sinc
+from numpy.linalg import norm
+from numpy.matlib import repmat
+
+from scipy.spatial import Delaunay
+from scipy.interpolate import LinearNDInterpolator,splrep, splev, CloughTocher2DInterpolator, CubicSpline, Rbf
+from traits.api import Float, Int, CLong, Bool, \
 File, Property, Instance, Trait, Delegate, \
-cached_property, on_trait_change, List, Dict, Bool
+cached_property, on_trait_change, List, ListInt, CArray, Dict
+
 from datetime import datetime
 from os import path
 import wave
@@ -42,6 +57,8 @@ from .internal import digest
 from .h5cache import H5cache, td_dir
 from .h5files import H5CacheFileBase, _get_h5file_class
 from .sources import SamplesGenerator
+from .environments import cartToCyl,cylToCart
+from .microphones import MicGeom
 from .configuration import config
 
 
@@ -204,7 +221,786 @@ class MaskedTimeInOut ( TimeInOut ):
                 yield block[:, self.channels]
                 
 
+class Trigger(TimeInOut):
+    """
+    Class for identifying trigger signals.
+    Gets samples from :attr:`source` and stores the trigger samples in :meth:`trigger_data`.
+    
+    The algorithm searches for peaks which are above/below a signed threshold.
+    A estimate for approximative length of one revolution is found via the greatest
+    number of samples between the adjacent peaks.
+    The algorithm then defines hunks as percentages of the estimated length of one revolution.
+    If there are multiple peaks within one hunk, the algorithm just takes one of them 
+    into account (e.g. the first peak, the peak with extremum value, ...).
+    In the end, the algorithm checks if the found peak locations result in rpm that don't
+    vary too much.
+    """
+    #: Data source; :class:`~acoular.sources.SamplesGenerator` or derived object.
+    source = Instance(SamplesGenerator)
+    
+    #: Threshold of trigger. Has different meanings for different 
+    #: :attr:`~acoular.tprocess.Trigger.trigger_type`. The sign is relevant.
+    #: If a sample of the signal is above/below the positive/negative threshold, 
+    #: it is assumed to be a peak.
+    #: Default is None, in which case a first estimate is used: The threshold
+    #: is assumed to be 75% of the max/min difference between all extremums and the 
+    #: mean value of the trigger signal. E.g: the mean value is 0 and there are positive
+    #: extremums at 400 and negative extremums at -800. Then the estimated threshold would be 
+    #: 0.75 * -800 = -600.
+    threshold = Float(None)
+    
+    #: Maximum allowable variation of length of each revolution duration. Default is
+    #: 2%. A warning is thrown, if any revolution length surpasses this value:
+    #: abs(durationEachRev - meanDuration) > 0.02 * meanDuration
+    max_variation_of_duration = Float(0.02)
+    
+    #: Defines the length of hunks via lenHunk = hunk_length * maxOncePerRevDuration.
+    #: If there are multiple peaks within lenHunk, then the algorithm will 
+    #: cancel all but one out (see :attr:`~acoular.tprocess.Trigger.multiple_peaks_in_hunk`).
+    #: Default is to 0.1.
+    hunk_length = Float(0.1)
+    
+    #: Type of trigger.
+    #: - 'Dirac': a single puls is assumed (sign of 
+    #:      :attr:`~acoular.tprocess.Trigger.trigger_type` is important).
+    #:      Sample will trigger if its value is above/below the pos/neg threshold.
+    #: - 'Rect' : repeating rectangular functions. Only every second 
+    #:      edge is assumed to be a trigger. The sign of 
+    #:      :attr:`~acoular.tprocess.Trigger.trigger_type` gives information
+    #:      on which edge should be used (+ for rising edge, - for falling edge).
+    #:      Sample will trigger if the difference between its value and its predecessors value
+    #:      is above/below the pos/neg threshold.
+    #: Default is to 'Dirac'.
+    trigger_type = Trait('Dirac', 'Rect')
+    
+    #: Identifier which peak to consider, if there are multiple peaks in one hunk
+    #: (see :attr:`~acoular.tprocess.Trigger.hunk_length`). Default is to 'extremum', 
+    #: in which case the extremal peak (maximum if threshold > 0, minimum if threshold < 0) is considered.
+    multiple_peaks_in_hunk = Trait('extremum', 'first')
+    
+    #: Tuple consisting of 3 entries: 
+    #: 1.: -Vector with the sample indices of the 1/Rev trigger samples
+    #: 2.: -maximum of number of samples between adjacent trigger samples
+    #: 3.: -minimum of number of samples between adjacent trigger samples
+    trigger_data = Property(depends_on=['source.digest', 'threshold', 'max_variation_of_duration', \
+                                        'hunk_length', 'trigger_type', 'multiple_peaks_in_hunk'])
+    
+    # internal identifier
+    digest = Property(depends_on=['source.digest', 'threshold', 'max_variation_of_duration', \
+                                        'hunk_length', 'trigger_type', 'multiple_peaks_in_hunk'])
+    
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+    
+    @cached_property
+    def _get_trigger_data(self):
+        self._check_trigger_existence()
+        triggerFunc = {'Dirac' : self._trigger_dirac,
+                       'Rect' : self._trigger_rect}[self.trigger_type]
+        nSamples = 2048  # number samples for result-method of source
+        threshold = self._threshold(nSamples)
+        
+        # get all samples which surpasse the threshold
+        peakLoc = array([], dtype='int')  # all indices which surpasse the threshold
+        triggerData = array([])
+        x0 = []
+        dSamples = 0
+        for triggerSignal in self.source.result(nSamples):
+            localTrigger = flatnonzero(triggerFunc(x0, triggerSignal, threshold))
+            if not len(localTrigger) == 0:
+                peakLoc = append(peakLoc, localTrigger + dSamples)
+                triggerData = append(triggerData, triggerSignal[localTrigger])
+            dSamples += nSamples
+            x0 = triggerSignal[-1]
+        if len(peakLoc) <= 1:
+            raise Exception('Not enough trigger info. Check *threshold* sign and value!')
 
+        peakDist = peakLoc[1:] - peakLoc[:-1]
+        maxPeakDist = max(peakDist)  # approximate distance between the revolutions
+        
+        # if there are hunks which contain multiple peaks -> check for each hunk, 
+        # which peak is the correct one -> delete the other one.
+        # if there are no multiple peaks in any hunk left -> leave the while 
+        # loop and continue with program
+        multiplePeaksWithinHunk = flatnonzero(peakDist < self.hunk_length * maxPeakDist)
+        while len(multiplePeaksWithinHunk) > 0:
+            peakLocHelp = multiplePeaksWithinHunk[0]
+            indHelp = [peakLocHelp, peakLocHelp + 1]
+            if self.multiple_peaks_in_hunk == 'extremum':
+                values = triggerData[indHelp]
+                deleteInd = indHelp[argmin(abs(values))]
+            elif self.multiple_peaks_in_hunk == 'first':
+                deleteInd = indHelp[1]
+            peakLoc = delete(peakLoc, deleteInd)
+            triggerData = delete(triggerData, deleteInd)
+            peakDist = peakLoc[1:] - peakLoc[:-1]
+            multiplePeaksWithinHunk = flatnonzero(peakDist < self.hunk_length * maxPeakDist)
+        
+        # check whether distances between peaks are evenly distributed
+        meanDist = mean(peakDist)
+        diffDist = abs(peakDist - meanDist)
+        faultyInd = flatnonzero(diffDist > self.max_variation_of_duration * meanDist)
+        if faultyInd.size != 0:
+            warn('In Trigger-Identification: The distances between the peaks (and therefor the lengths of the revolutions) vary too much (check samples %s).' % str(peakLoc[faultyInd] + self.source.start), Warning, stacklevel = 2)
+        return peakLoc, max(peakDist), min(peakDist)
+    
+    def _trigger_dirac(self, x0, x, threshold):
+        # x0 not needed here, but needed in _trigger_rect
+        return self._trigger_value_comp(x, threshold)
+    
+    def _trigger_rect(self, x0, x, threshold):
+        # x0 stores the last value of the the last generator cycle
+        xNew = append(x0, x)
+       #indPeakHunk = abs(xNew[1:] - xNew[:-1]) > abs(threshold)  # with this line: every edge would be located
+        indPeakHunk = self._trigger_value_comp(xNew[1:] - xNew[:-1], threshold)
+        return indPeakHunk
+    
+    def _trigger_value_comp(self, triggerData, threshold):
+        if threshold > 0.0:
+            indPeaks= triggerData > threshold
+        else:
+            indPeaks = triggerData < threshold
+        return indPeaks
+    
+    def _threshold(self, nSamples):
+        if self.threshold == None:  # take a guessed threshold
+            # get max and min values of whole trigger signal
+            maxVal = -inf
+            minVal = inf
+            meanVal = 0
+            cntMean = 0
+            for triggerData in self.source.result(nSamples):
+                maxVal = max(maxVal, triggerData.max())
+                minVal = min(minVal, triggerData.min())
+                meanVal += triggerData.mean()
+                cntMean += 1
+            meanVal /= cntMean
+            
+            # get 75% of maximum absolute value of trigger signal
+            maxTriggerHelp = [minVal, maxVal] - meanVal
+            argInd = argmax(abs(maxTriggerHelp))
+            thresh = maxTriggerHelp[argInd] * 0.75  # 0.75 for 75% of max trigger signal
+            warn('No threshold was passed. An estimated threshold of %s is assumed.' % thresh, Warning, stacklevel = 2)
+        else:  # take user defined  threshold
+            thresh = self.threshold
+        return thresh
+    
+    def _check_trigger_existence(self):
+        nChannels = self.source.numchannels
+        if not nChannels == 1:
+            raise Exception('Trigger signal must consist of ONE channel, instead %s channels are given!' % nChannels)
+        return 0
+
+class AngleTracker(MaskedTimeInOut):
+    '''
+    Calculates rotation angle from a trigger signal using spline interpolation
+    in the time domain. Moved from AngleTrajectory
+    '''
+
+    #Data source; :class:`~acoular.SamplesGenerator or derived object.
+    source = Instance(SamplesGenerator)    
+    
+    #trigger
+    trigger = Instance(SamplesGenerator) 
+    
+    #internal identifier
+    digest = Property(depends_on=['source.digest'])
+    
+    # trigger signals per revolution
+    TriggerPerRevo = Int(1,
+                   desc =" trigger signals per revolution")
+        
+    # Flag to set counter-clockwise (1) or clockwise (-1) rotation,
+    # defaults to -1.
+    rotDirection = Int(-1,
+                   desc ="mathematical direction of rotation")
+    
+    #Points of interpolation used for Spline
+    #defaults to 4.
+    InterpPoints = Int(4,
+                   desc ="Points of interpolation used for Spline")
+    
+    #rotation angle for trigger position
+    StartAngle = Float(0,
+                   desc ="rotation angle for trigger position")
+    
+    # revolutions per minute
+    rpm =  CArray(desc ="revolutions per minute")
+          
+    #rotation angle
+    angle = CArray(desc ="rotation angle")
+    
+    # internal flag to determine whether AngleTracker has been processed
+    calcflag = Bool(False) 
+    
+    
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+    
+    #helperfunction for index detection
+    def find_nearest_idx(self, peakarray, value):
+        peakarray = asarray(peakarray)
+        idx = (abs(peakarray - value)).argmin()
+        return idx
+    
+    def _to_rpm_and_degree(self):
+        """ 
+        Returns angles in deg for one or more instants in time.
+        
+        Parameters
+        ----------
+        t : array of floats
+            Instances in time to calculate the positions at.
+        
+        Returns
+        -------
+        rpm and angle: arrays of floats
+            Angles in degree at the given times; array has the same shape as t .
+            rpm in 1/min. Only returns ver _get_functions
+        """
+        
+        # spline data, internal use
+        Spline = Property(depends_on = 'digest') 
+
+        #init
+        ind=0
+        #trigger data
+        peakloc,maxdist,mindist= self.trigger._get_trigger_data()
+        TriggerPerRevo= self.TriggerPerRevo
+        rotDirection = self.rotDirection
+        nSamples =  self.source.numsamples
+        samplerate =  self.source.sample_freq
+        self.rpm = zeros(nSamples)
+        self.angle = zeros(nSamples)
+        #number of spline points
+        InterpPoints=self.InterpPoints
+        
+        #loop over alle timesamples
+        while ind < nSamples :     
+            #when starting spline forward
+            if ind<peakloc[InterpPoints]:
+                peakdist=peakloc[self.find_nearest_idx(peakarray= peakloc,value=ind)+1] - peakloc[self.find_nearest_idx(peakarray= peakloc,value=ind)]
+                splineData = stack((range(InterpPoints), peakloc[ind//peakdist:ind//peakdist+InterpPoints]), axis=0)
+            #spline backwards    
+            else:
+                peakdist=peakloc[self.find_nearest_idx(peakarray= peakloc,value=ind)] - peakloc[self.find_nearest_idx(peakarray= peakloc,value=ind)-1]
+                splineData = stack((range(InterpPoints), peakloc[ind//peakdist-InterpPoints:ind//peakdist]), axis=0)
+            #calc angles and rpm    
+            Spline = splrep(splineData[:,:][1], splineData[:,:][0], k=3)    
+            self.rpm[ind]=splev(ind, Spline, der=1, ext=0)*60*samplerate
+            self.angle[ind] = (splev(ind, Spline, der=0, ext=0)*2*pi*rotDirection/TriggerPerRevo + self.StartAngle) % (2*pi)
+            #next sample
+            ind+=1
+        #calculation complete    
+        self.calcflag = True
+    
+    #calc rpm from trigger data
+    @cached_property
+    def _get_rpm( self ):
+        if not self.calcflag:
+            self._to_rpm_and_degree()
+        return self.rpm
+
+    #calc of angle from trigger data
+    @cached_property
+    def _get_angle(self):
+        if not self.calcflag:
+            self._to_rpm_and_degree()
+        return self.angle[:]
+
+
+class SpatialInterpolator(TimeInOut):
+    """
+    Base class for spatial  Interpolation of microphone data.
+    Gets samples from :attr:`source` and generates output via the 
+    generator :meth:`result`
+    """
+    #: :class:`~acoular.microphones.MicGeom` object that provides the real microphone locations.
+    mpos_real = Instance(MicGeom, 
+        desc="microphone geometry")
+    
+    #: :class:`~acoular.microphones.MicGeom` object that provides the virtual microphone locations.
+    mpos_virtual = Instance(MicGeom, 
+        desc="microphone geometry")
+    
+    #: Data source; :class:`~acoular.sources.SamplesGenerator` or derived object.
+    source = Instance(SamplesGenerator)
+    
+    #: interpolation method in spacial domain
+    method = Trait('Linear', 'Spline', 'rbf-multiquadric', 'rbf-cubic',\
+        'custom', 'sinc', desc="method for interpolation used")
+    
+    #: spacial dimensionality of the array geometry
+    array_dimension= Trait('1D', '2D',  \
+        'ring', '3D', 'custom', desc="spacial dimensionality of the array geometry")
+    
+    #: Sampling frequency of output signal, as given by :attr:`source`.
+    sample_freq = Delegate('source', 'sample_freq')
+    
+    #: Number of channels in output.
+    numchannels = Property()
+    
+    #: Number of samples in output, as given by :attr:`source`.
+    numsamples = Delegate('source', 'numsamples')
+    
+    
+    #:Interpolate a point at the origin of the Array geometry 
+    interpAtZero =  Bool(False)
+
+    
+    #: The rotation must be around the z-axis, which means from x to y axis.
+    #: If the coordinates are not build like that, than this 3x3 orthogonal 
+    #: transformation matrix Q can be used to modify the coordinates.
+    #: It is assumed that with the modified coordinates the rotation is around the z-axis. 
+    #: The transformation is done via [x,y,z]_mod = Q * [x,y,z]. (default is Identity).
+    Q = CArray(dtype=float64, shape=(3, 3), value=identity(3))
+    
+    
+    #: Stores the output of :meth:`_reduced_interp_dim_core_func`; Read-Only
+    _virtNewCoord_func = Property(depends_on=['mpos_real.digest', 'mpos_virtual.digest', 'method','array_dimension','interpAtZero'])
+    
+    #: internal identifier
+    digest = Property(depends_on=['mpos_real.digest', 'mpos_virtual.digest', 'source.digest', \
+                                   'method','array_dimension', 'Q', 'interpAtZero'])
+    
+    def _get_numchannels(self):
+        return self.mpos_virtual.num_mics
+    
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+    
+    @cached_property
+    def _get_virtNewCoord(self):
+        return self._virtNewCoord_func(self.mpos_real.mpos, self.mpos_virtual.mpos,self.method, self.array_dimension)
+        
+    
+    def sinc_mic(self, r):
+        """
+        Modified Sinc function for Radial Basis function approximation
+        
+        """
+        return sinc((r*self.mpos_virtual.mpos.shape[1])/(pi))    
+    
+    def _virtNewCoord_func(self, mic, micVirt, method ,array_dimension, interpAtZero = False):
+        """ 
+        Core functionality for getting the  interpolation .
+        
+        Parameters
+        ----------
+        mic : float[3, nPhysicalMics]
+            The mic positions of the physical (really existing) mics
+        micVirt : float[3, nVirtualMics]
+            The mic positions of the virtual mics
+        method : string
+            The Interpolation method to use     
+        array_dimension : string
+            The Array Dimensions in cylinder coordinates
+
+        Returns
+        -------
+        mesh : List[]
+            The items of these lists are dependent of the reduced interpolation dimension of each subarray.
+            If the Array is 1D the list items are:
+                1. item : float64[nMicsInSpecificSubarray]
+                    Ordered positions of the real mics on the new 1d axis, to be used as inputs for numpys interp.
+                2. item : int64[nMicsInArray]
+                    Indices identifying how the measured pressures must be evaluated, s.t. the entries of the previous item (see last line)
+                    correspond to their initial pressure values
+            If the Array is 2D or 3d the list items are:
+                1. item : Delaunay mesh object
+                    Delauney mesh (see scipy.spatial.Delaunay) for the specific Array
+                2. item : int64[nMicsInArray]
+                    same as 1d case, BUT with the difference, that here the rotational periodicy is handled, when constructing the mesh.
+                    Therefor the mesh could have more vertices than the actual Array mics.
+                    
+        virtNewCoord : float64[3, nVirtualMics]
+            Projection of each virtual mic onto its new coordinates. The columns of virtNewCoord correspond to [phi, rho, z]
+            
+        newCoord : float64[3, nMics]
+            Projection of each mic onto its new coordinates. The columns of newCoordinates correspond to [phi, rho, z]
+        """     
+        # init positions of virtual mics in cyl coordinates
+        nVirtMics = micVirt.shape[1]
+        virtNewCoord = zeros((3, nVirtMics))
+        virtNewCoord.fill(nan)
+        #init real positions in cyl coordinates
+        nMics = mic.shape[1]
+        newCoord = zeros((3, nMics))
+        newCoord.fill(nan)
+        #empty mesh object
+        mesh = []
+        
+        if self.array_dimension =='1D' or self.array_dimension =='ring':
+                # get projections onto new coordinate, for real mics
+                projectionOnNewAxis = cartToCyl(mic,self.Q)[0]
+                indReorderHelp = argsort(projectionOnNewAxis)
+                mesh.append([projectionOnNewAxis[indReorderHelp], indReorderHelp])
+               
+                #new coordinates of real mics
+                indReorderHelp = argsort(cartToCyl(mic,self.Q)[0])
+                newCoord = (cartToCyl(mic,self.Q).T)[indReorderHelp].T
+
+                # and for virtual mics
+                virtNewCoord = cartToCyl(micVirt)
+                
+        elif self.array_dimension =='2D':  # 2d case0
+
+            # get virtual mic projections on new coord system
+            virtNewCoord = cartToCyl(micVirt,self.Q)
+            
+            #new coordinates of real mics
+            indReorderHelp = argsort(cartToCyl(mic,self.Q)[0])
+            newCoord = cartToCyl(mic,self.Q) 
+            
+            #scipy delauney triangulation            
+            #Delaunay
+            tri = Delaunay(newCoord.T[:,:2], incremental=True) #
+            
+            
+            if interpAtZero:
+                #add a point at zero 
+                tri.add_points(array([[0 ], [0]]).T)
+            
+            # extend mesh with closest boundary points of repeating mesh 
+            pointsOriginal = arange(tri.points.shape[0])
+            hull = tri.convex_hull
+            hullPoints = unique(hull)
+                    
+            addRight = tri.points[hullPoints]
+            addRight[:, 0] += 2*pi
+            addLeft= tri.points[hullPoints]
+            addLeft[:, 0] -= 2*pi
+            
+            indOrigPoints = concatenate((pointsOriginal, pointsOriginal[hullPoints], pointsOriginal[hullPoints]))
+            # add all hull vertices to original mesh and check which of those 
+            # are actual neighbors of the original array. Cancel out all others.
+            tri.add_points(concatenate([addLeft, addRight]))
+            indices, indptr = tri.vertex_neighbor_vertices
+            hullNeighbor = empty((0), dtype='int32')
+            for currHull in hullPoints:
+                neighborOfHull = indptr[indices[currHull]:indices[currHull + 1]]
+                hullNeighbor = append(hullNeighbor, neighborOfHull)
+            hullNeighborUnique = unique(hullNeighbor)
+            pointsNew = unique(append(pointsOriginal, hullNeighborUnique))
+            tri = Delaunay(tri.points[pointsNew])  # re-meshing
+            mesh.append([tri, indOrigPoints[pointsNew]])
+            
+            
+            
+        elif self.array_dimension =='3D':  # 3d case
+            
+            # get virtual mic projections on new coord system
+            virtNewCoord = cartToCyl(micVirt,self.Q)
+            # get real mic projections on new coord system
+            indReorderHelp = argsort(cartToCyl(mic,self.Q)[0])
+            newCoord = (cartToCyl(mic,self.Q))
+            #Delaunay
+            tri =Delaunay(newCoord.T, incremental=True) #, incremental=True,qhull_options =  "Qc QJ Q12" 
+
+            if interpAtZero:
+                #add a point at zero 
+                tri.add_points(array([[0 ], [0], [0]]).T)
+
+            # extend mesh with closest boundary points of repeating mesh 
+            pointsOriginal = arange(tri.points.shape[0])
+            hull = tri.convex_hull
+            hullPoints = unique(hull)
+        
+            addRight = tri.points[hullPoints]
+            addRight[:, 0] += 2*pi
+            addLeft= tri.points[hullPoints]
+            addLeft[:, 0] -= 2*pi
+            
+            indOrigPoints = concatenate((pointsOriginal, pointsOriginal[hullPoints], pointsOriginal[hullPoints]))
+            # add all hull vertices to original mesh and check which of those 
+            # are actual neighbors of the original array. Cancel out all others.
+            tri.add_points(concatenate([addLeft, addRight]))
+            indices, indptr = tri.vertex_neighbor_vertices
+            hullNeighbor = empty((0), dtype='int32')
+            for currHull in hullPoints:
+                neighborOfHull = indptr[indices[currHull]:indices[currHull + 1]]
+                hullNeighbor = append(hullNeighbor, neighborOfHull)
+            hullNeighborUnique = unique(hullNeighbor)
+            pointsNew = unique(append(pointsOriginal, hullNeighborUnique))
+            tri = Delaunay(tri.points[pointsNew])  # re-meshing
+            mesh.append([tri, indOrigPoints[pointsNew]])
+         
+        return  mesh, virtNewCoord , newCoord
+    
+
+    def _result_core_func(self, p, phiDelay=[], period=None, Q=Q, interpAtZero = False):
+        """
+        Performs the actual Interpolation
+        
+        Parameters
+        ----------
+        p : float[nSamples, nMicsReal]
+            The pressure field of the yielded sample at real mics.
+        phiDelay : empty list (default) or float[nSamples] 
+            If passed (rotational case), this list contains the angular delay 
+            of each sample in rad.
+        period : None (default) or float
+            If periodicity can be assumed (rotational case) 
+            this parameter contains the periodicity length
+        
+        Returns
+        -------
+        pInterp : float[nSamples, nMicsVirtual]
+            The interpolated time data at the virtual mics
+        """
+        
+        #number of time samples
+        nTime = p.shape[0]
+        #number of virtual mixcs 
+        nVirtMics = self.mpos_virtual.mpos.shape[1]
+        # mesh and projection onto polar Coordinates
+        meshList, virtNewCoord, newCoord = self._get_virtNewCoord()
+        # pressure interpolation init     
+        pInterp = zeros((nTime,nVirtMics))
+        
+        
+        if interpAtZero:
+            #interpolate point at 0 in Kartesian CO
+            interpolater = LinearNDInterpolator(cylToCart(newCoord[:,argsort(newCoord[0])])[:2,:].T,
+                                            p[:, (argsort(newCoord[0]))].T, fill_value = 0)
+            pZero  = interpolater((0,0))
+            #add the interpolated pressure at origin to pressure channels
+            p = concatenate((p, pZero[:, newaxis]), axis=1)
+
+        
+        #helpfunction reordered for reordered pressure values 
+        pHelp = p[:, meshList[0][1]]
+        
+        # Interpolation for 1D Arrays 
+        if self.array_dimension =='1D' or self.array_dimension =='ring':
+            #for rotation add phidelay
+            if not phiDelay == []:
+                xInterpHelp = repmat(virtNewCoord[0, :], nTime, 1) + repmat(phiDelay, virtNewCoord.shape[1], 1).T
+                xInterp = ((xInterpHelp + pi ) % (2 * pi)) - pi #  shifting phi cootrdinate into feasible area [-pi, pi]
+            #if no rotation given
+            else:
+                xInterp = repmat(virtNewCoord[0, :], nTime, 1)
+            #get ordered microphone posions in radiant
+            x = newCoord[0]
+            for cntTime in range(nTime):
+                
+                if self.method == 'Linear':
+                    #numpy 1-d interpolation
+                    pInterp[cntTime] = interp(xInterp[cntTime, :], x, pHelp[cntTime, :], period=period, left=nan, right=nan)
+                    
+                    
+                elif self.method == 'Spline':
+                    #scipy cubic spline interpolation
+                    SplineInterp = CubicSpline(append(x,(2*pi)+x[0]), append(pHelp[cntTime, :],pHelp[cntTime, :][0]), axis=0, bc_type='periodic', extrapolate=None)
+                    pInterp[cntTime] = SplineInterp(xInterp[cntTime, :]+pi)    
+                    
+                elif self.method == 'sinc':
+                    #compute using 3-D Rbfs for sinc
+                    rbfi = Rbf(x,newCoord[1],
+                                 newCoord[2] ,
+                                 pHelp[cntTime, :], function=self.sinc_mic)  # radial basis function interpolator instance
+                    
+                    pInterp[cntTime] = rbfi(xInterp[cntTime, :]+pi,
+                                            virtNewCoord[1],
+                                            virtNewCoord[2]) 
+                    
+                elif self.method == 'rbf-cubic':
+                    #compute using 3-D Rbfs with multiquadratics
+                    rbfi = Rbf(x,newCoord[1],
+                                 newCoord[2] ,
+                                 pHelp[cntTime, :], function='cubic')  # radial basis function interpolator instance
+                    
+                    pInterp[cntTime] = rbfi(xInterp[cntTime, :]+pi,
+                                            virtNewCoord[1],
+                                            virtNewCoord[2]) 
+                    
+        
+        # Interpolation for arbitrary 2D Arrays
+        elif self.array_dimension =='2D':
+            #check rotation
+            if not phiDelay == []:
+                xInterpHelp = repmat(virtNewCoord[0, :], nTime, 1) + repmat(phiDelay, virtNewCoord.shape[1], 1).T
+                xInterp = ((xInterpHelp) % (2 * pi)) - pi #shifting phi cootrdinate into feasible area [-pi, pi]
+            else:
+                xInterp = repmat(virtNewCoord[0, :], nTime, 1)  
+                
+            mesh = meshList[0][0]
+            for cntTime in range(nTime):    
+
+                # points for interpolation
+                newPoint = concatenate((xInterp[cntTime, :][:, newaxis], virtNewCoord[1, :][:, newaxis]), axis=1) 
+                #scipy 1D interpolation
+                if self.method == 'Linear':
+                    interpolater = LinearNDInterpolator(mesh, pHelp[cntTime, :], fill_value = 0)
+                    pInterp[cntTime] = interpolater(newPoint)    
+                    
+                elif self.method == 'Spline':
+                    # scipy CloughTocher interpolation
+                    f = CloughTocher2DInterpolator(mesh, pHelp[cntTime, :], fill_value = 0)
+                    pInterp[cntTime] = f(newPoint)    
+                    
+                elif self.method == 'sinc':
+                    #compute using 3-D Rbfs for sinc
+                    rbfi = Rbf(newCoord[0],
+                               newCoord[1],
+                               newCoord[2] ,
+                                 pHelp[cntTime, :len(newCoord[0])], function=self.sinc_mic)  # radial basis function interpolator instance
+                    
+                    pInterp[cntTime] = rbfi(xInterp[cntTime, :],
+                                            virtNewCoord[1],
+                                            virtNewCoord[2]) 
+                    
+                    
+                elif self.method == 'rbf-cubic':
+                    #compute using 3-D Rbfs   self.CylToCart()
+                    rbfi = Rbf( newCoord[0],
+                                newCoord[1],
+                                newCoord[2],
+                               pHelp[cntTime, :len(newCoord[0])], function='cubic')  # radial basis function interpolator instance
+                    
+                    virtshiftcoord= array([xInterp[cntTime, :],virtNewCoord[1], virtNewCoord[2]])
+                    pInterp[cntTime] = rbfi(virtshiftcoord[0],
+                                            virtshiftcoord[1],
+                                            virtshiftcoord[2]) 
+                                 
+        # Interpolation for arbitrary 3D Arrays             
+        elif self.array_dimension =='3D':
+            #check rotation
+            if not phiDelay == []:
+                xInterpHelp = repmat(virtNewCoord[0, :], nTime, 1) + repmat(phiDelay, virtNewCoord.shape[1], 1).T
+                xInterp = ((xInterpHelp ) % (2 * pi)) - pi  #shifting phi cootrdinate into feasible area [-pi, pi]
+            else:
+                xInterp = repmat(virtNewCoord[0, :], nTime, 1)  
+                
+            mesh = meshList[0][0]
+            for cntTime in range(nTime):
+                # points for interpolation
+                newPoint = concatenate((xInterp[cntTime, :][:, newaxis], virtNewCoord[1:, :].T), axis=1)
+                
+                if self.method == 'Linear':     
+                    interpolater = LinearNDInterpolator(mesh, pHelp[cntTime, :], fill_value = 0)
+                    pInterp[cntTime] = interpolater(newPoint)
+                
+                elif self.method == 'sinc':
+                    #compute using 3-D Rbfs for sinc
+                    rbfi = Rbf(newCoord[0],
+                               newCoord[1],
+                               newCoord[2],
+                                 pHelp[cntTime, :len(newCoord[0])], function=self.sinc_mic)  # radial basis function interpolator instance
+                    
+                    pInterp[cntTime] = rbfi(xInterp[cntTime, :],
+                                            virtNewCoord[1],
+                                            virtNewCoord[2]) 
+                                       
+                elif self.method == 'rbf-cubic':
+                    #compute using 3-D Rbfs
+                    rbfi = Rbf(newCoord[0],
+                               newCoord[1],
+                               newCoord[2],
+                               pHelp[cntTime, :len(newCoord[0])], function='cubic')  # radial basis function interpolator instance
+                    
+                    pInterp[cntTime] = rbfi(xInterp[cntTime, :],
+                                            virtNewCoord[1],
+                                            virtNewCoord[2]) 
+                          
+                       
+        #return interpolated pressure values            
+        return pInterp
+
+   
+class SpatialInterpolatorRotation(SpatialInterpolator):
+    """
+    Spatial  Interpolation for rotating sources.Gets samples from :attr:`source`
+    and angles from  :attr:`AngleTracker`.Generates output via the generator :meth:`result`
+    
+    """
+    #: Angle data from AngleTracker class
+    AngleTracker = Instance(SamplesGenerator)
+    
+    #: Angle data from AngleTracker class
+    angle = CArray() 
+    
+    # internal identifier
+    digest = Property( depends_on = ['source.digest', 'AngleTracker.digest', 'mpos_real.digest', 'mpos_virtual.digest', 'Q'])
+    
+    @cached_property
+    def _get_digest( self ):
+        return digest(self) 
+    
+    def result(self, num=128):
+        """ 
+        Python generator that yields the output block-wise.
+        
+        Parameters
+        ----------
+        num : integer
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block).
+        
+        Returns
+        -------
+        Samples in blocks of shape (num, :attr:`numchannels`). 
+            The last block may be shorter than num.
+        """
+        #period for rotation
+        period = 2 * pi
+        #get angle
+        angle = self.AngleTracker._get_angle()
+        #counter to track angle position in time for each block
+        count=0
+        for timeData in self.source.result(num):
+            phiDelay = angle[count:count+num]
+            interpVal = self._result_core_func(timeData, phiDelay, period, self.Q, interpAtZero = False)
+            yield interpVal
+            count += num    
+
+class SpatialInterpolatorConstantRotation(SpatialInterpolator):
+    """
+    Spatial linear Interpolation for constantly rotating sources.
+    Gets samples from :attr:`source` and generates output via the 
+    generator :meth:`result`
+    """
+    #: Rotational speed in rps. Positive, if rotation is around positive z-axis sense,
+    #: which means from x to y axis.
+    rotational_speed = Float(0.0)
+    
+    # internal identifier
+    digest = Property( depends_on = ['source.digest', 'rotational_speed', 'Q', 'mpos_real.digest' 'mpos_virtual.digest'])
+    
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+    
+    
+    def result(self, num=1):
+        """ 
+        Python generator that yields the output block-wise.
+        
+        Parameters
+        ----------
+        num : integer
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block).
+        
+        Returns
+        -------
+        Samples in blocks of shape (num, :attr:`numchannels`). 
+            The last block may be shorter than num.
+        """
+        omega = 2 * pi * self.rotational_speed
+        period = 2 * pi
+        phiOffset = 0.0
+        for timeData in self.source.result(num):
+            nTime = timeData.shape[0]
+            phiDelay = phiOffset + linspace(0, nTime / self.sample_freq * omega, nTime, endpoint=False)
+            interpVal = self._result_core_func(timeData, phiDelay, period, self.Q, interpAtZero = False)
+            phiOffset = phiDelay[-1] + omega / self.sample_freq
+            yield interpVal    
+      
+    
 class Mixer( TimeInOut ):
     """
     Mixes the signals from several sources.
