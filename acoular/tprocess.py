@@ -689,13 +689,6 @@ class SpatialInterpolator(TimeInOut):
             mesh.append([tri, indOrigPoints[pointsNew]])
             
             
-            import matplotlib.pyplot as plt
-            plt.figure()
-            plt.triplot(tri.points[:,0], tri.points[:,1])#tri.simplices)#x= tri.points[:,0],y=  tri.points[:,1],
-            plt.plot(tri.points[:,0], tri.points[:,1], 'o')
-            #plt.savefig("delauney_2d_zylinder_full.pdf", bbox_inches = "tight")
-            plt.show()
-            
             
         elif self.array_dimension =='3D':  # 3d case
             
