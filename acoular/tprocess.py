@@ -413,21 +413,21 @@ class AngleTracker(MaskedTimeInOut):
     
     #: trigger signals per revolution
     #: defaults to 1
-    TriggerPerRevo = Int(1,
+    trigger_per_revo = Int(1,
                    desc =" trigger signals per revolution")
         
     #: Flag to set counter-clockwise (1) or clockwise (-1) rotation,
     #: defaults to -1.
-    rotDirection = Int(-1,
+    rot_direction = Int(-1,
                    desc ="mathematical direction of rotation")
     
     #:Points of interpolation used for Spline
     #: defaults to 4.
-    InterpPoints = Int(4,
+    interp_points = Int(4,
                    desc ="Points of interpolation used for Spline")
     
     #: rotation angle for trigger position
-    StartAngle = Float(0,
+    start_angle = Float(0,
                    desc ="rotation angle for trigger position")
     
     #: revolutions per minute
@@ -438,7 +438,7 @@ class AngleTracker(MaskedTimeInOut):
     
     #: internal flag to determine whether AngleTracker has been processed
     #: prevents recalculation
-    calcflag = Bool(False) 
+    calc_flag = Bool(False) 
     
     
     @cached_property
@@ -466,22 +466,20 @@ class AngleTracker(MaskedTimeInOut):
             Angles in degree at the given times; array has the same shape as t .
             rpm in 1/min. Only returns ver _get_functions
         """
-        
-        # spline data, internal use
-        Spline = Property(depends_on = 'digest') 
+
 
         #init
         ind=0
         #trigger data
         peakloc,maxdist,mindist= self.trigger._get_trigger_data()
-        TriggerPerRevo= self.TriggerPerRevo
-        rotDirection = self.rotDirection
+        TriggerPerRevo= self.trigger_per_revo
+        rotDirection = self.rot_direction
         nSamples =  self.source.numsamples
         samplerate =  self.source.sample_freq
         self.rpm = zeros(nSamples)
         self.angle = zeros(nSamples)
         #number of spline points
-        InterpPoints=self.InterpPoints
+        InterpPoints=self.interp_points
         
         #loop over alle timesamples
         while ind < nSamples :     
@@ -496,23 +494,23 @@ class AngleTracker(MaskedTimeInOut):
             #calc angles and rpm    
             Spline = splrep(splineData[:,:][1], splineData[:,:][0], k=3)    
             self.rpm[ind]=splev(ind, Spline, der=1, ext=0)*60*samplerate
-            self.angle[ind] = (splev(ind, Spline, der=0, ext=0)*2*pi*rotDirection/TriggerPerRevo + self.StartAngle) % (2*pi)
+            self.angle[ind] = (splev(ind, Spline, der=0, ext=0)*2*pi*rotDirection/TriggerPerRevo + self.start_angle) % (2*pi)
             #next sample
             ind+=1
         #calculation complete    
-        self.calcflag = True
+        self.calc_flag = True
     
     #calc rpm from trigger data
     @cached_property
     def _get_rpm( self ):
-        if not self.calcflag:
+        if not self.calc_flag:
             self._to_rpm_and_degree()
         return self.rpm
 
     #calc of angle from trigger data
     @cached_property
     def _get_angle(self):
-        if not self.calcflag:
+        if not self.calc_flag:
             self._to_rpm_and_degree()
         return self.angle[:]
 
@@ -553,9 +551,8 @@ class SpatialInterpolator(TimeInOut):
     
     
     #:Interpolate a point at the origin of the Array geometry 
-    interpAtZero =  Bool(False)
+    interp_at_zero =  Bool(False)
 
-    
     #: The rotation must be around the z-axis, which means from x to y axis.
     #: If the coordinates are not build like that, than this 3x3 orthogonal 
     #: transformation matrix Q can be used to modify the coordinates.
@@ -565,11 +562,11 @@ class SpatialInterpolator(TimeInOut):
     
     
     #: Stores the output of :meth:`_reduced_interp_dim_core_func`; Read-Only
-    _virtNewCoord_func = Property(depends_on=['mpos_real.digest', 'mpos_virtual.digest', 'method','array_dimension','interpAtZero'])
+    _virtNewCoord_func = Property(depends_on=['mpos_real.digest', 'mpos_virtual.digest', 'method','array_dimension','interp_at_zero'])
     
     #: internal identifier
     digest = Property(depends_on=['mpos_real.digest', 'mpos_virtual.digest', 'source.digest', \
-                                   'method','array_dimension', 'Q', 'interpAtZero'])
+                                   'method','array_dimension', 'Q', 'interp_at_zero'])
     
     def _get_numchannels(self):
         return self.mpos_virtual.num_mics
@@ -590,7 +587,7 @@ class SpatialInterpolator(TimeInOut):
         """
         return sinc((r*self.mpos_virtual.mpos.shape[1])/(pi))    
     
-    def _virtNewCoord_func(self, mic, micVirt, method ,array_dimension, interpAtZero = False):
+    def _virtNewCoord_func(self, mic, micVirt, method ,array_dimension, interp_at_zero = False):
         """ 
         Core functionality for getting the  interpolation .
         
@@ -666,7 +663,7 @@ class SpatialInterpolator(TimeInOut):
             tri = Delaunay(newCoord.T[:,:2], incremental=True) #
             
             
-            if interpAtZero:
+            if self.interp_at_zero:
                 #add a point at zero 
                 tri.add_points(array([[0 ], [0]]).T)
             
@@ -706,7 +703,7 @@ class SpatialInterpolator(TimeInOut):
             #Delaunay
             tri =Delaunay(newCoord.T, incremental=True) #, incremental=True,qhull_options =  "Qc QJ Q12" 
 
-            if interpAtZero:
+            if self.interp_at_zero:
                 #add a point at zero 
                 tri.add_points(array([[0 ], [0], [0]]).T)
 
@@ -737,7 +734,7 @@ class SpatialInterpolator(TimeInOut):
         return  mesh, virtNewCoord , newCoord
     
 
-    def _result_core_func(self, p, phiDelay=[], period=None, Q=Q, interpAtZero = False):
+    def _result_core_func(self, p, phiDelay=[], period=None, Q=Q, interp_at_zero = False):
         """
         Performs the actual Interpolation
         
@@ -768,7 +765,7 @@ class SpatialInterpolator(TimeInOut):
         pInterp = zeros((nTime,nVirtMics))
         
         
-        if interpAtZero:
+        if self.interp_at_zero:
             #interpolate point at 0 in Kartesian CO
             interpolater = LinearNDInterpolator(cylToCart(newCoord[:,argsort(newCoord[0])])[:2,:].T,
                                             p[:, (argsort(newCoord[0]))].T, fill_value = 0)
@@ -956,7 +953,7 @@ class SpatialInterpolatorRotation(SpatialInterpolator):
         count=0
         for timeData in self.source.result(num):
             phiDelay = angle[count:count+num]
-            interpVal = self._result_core_func(timeData, phiDelay, period, self.Q, interpAtZero = False)
+            interpVal = self._result_core_func(timeData, phiDelay, period, self.Q, interp_at_zero = False)
             yield interpVal
             count += num    
 
@@ -999,7 +996,7 @@ class SpatialInterpolatorConstantRotation(SpatialInterpolator):
         for timeData in self.source.result(num):
             nTime = timeData.shape[0]
             phiDelay = phiOffset + linspace(0, nTime / self.sample_freq * omega, nTime, endpoint=False)
-            interpVal = self._result_core_func(timeData, phiDelay, period, self.Q, interpAtZero = False)
+            interpVal = self._result_core_func(timeData, phiDelay, period, self.Q, interp_at_zero = False)
             phiOffset = phiDelay[-1] + omega / self.sample_freq
             yield interpVal    
       
