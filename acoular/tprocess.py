@@ -464,7 +464,7 @@ class AngleTracker(MaskedTimeInOut):
         -------
         rpm and angle: arrays of floats
             Angles in degree at the given times; array has the same shape as t .
-            rpm in 1/min. Only returns ver _get_functions
+            rpm in 1/min. Only returns over _get_functions
         """
 
 
@@ -499,6 +499,26 @@ class AngleTracker(MaskedTimeInOut):
             ind+=1
         #calculation complete    
         self.calc_flag = True
+    
+    
+    def _to_average_rpm(self):
+        """ 
+        Returns average revolutions per minute (rpm).
+    
+        Returns
+        -------
+        rpm : float
+            rpm in 1/min.
+        """
+        #trigger data
+        peakloc,maxdist,mindist= self.trigger._get_trigger_data()
+        #samplefreq and number of samples from source
+        nSamples =  self.source.numsamples
+        samplerate =  self.source.sample_freq
+        #calculation of average rpm
+        average_rpm = len(peakloc)/nSamples*samplerate*60
+            
+        return average_rpm
     
     #calc rpm from trigger data
     @cached_property
