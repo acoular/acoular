@@ -394,44 +394,50 @@ class Trigger(TimeInOut):
 
 class AngleTracker(MaskedTimeInOut):
     '''
-    Calculates rotation angle from a trigger signal using spline interpolation
-    in the time domain. Moved from AngleTrajectory
+    Calculates rotation angle and rpm per sample from a trigger signal 
+    using spline interpolation in the time domain. 
+    
+    Gets samples from :attr:`trigger` and stores the angle and rpm samples in :meth:`angle` and :meth:`rpm`.
+    
+    
     '''
 
-    #Data source; :class:`~acoular.SamplesGenerator or derived object.
+    #:Data source; :class:`~acoular.SamplesGenerator or derived object.
     source = Instance(SamplesGenerator)    
     
-    #trigger
-    trigger = Instance(SamplesGenerator) 
+    #: trigger data from :class:`acoular.tprocess.Trigger 
+    trigger = Instance(Trigger) 
     
-    #internal identifier
+    #: internal identifier
     digest = Property(depends_on=['source.digest'])
     
-    # trigger signals per revolution
+    #: trigger signals per revolution
+    #: defaults to 1
     TriggerPerRevo = Int(1,
                    desc =" trigger signals per revolution")
         
-    # Flag to set counter-clockwise (1) or clockwise (-1) rotation,
-    # defaults to -1.
+    #: Flag to set counter-clockwise (1) or clockwise (-1) rotation,
+    #: defaults to -1.
     rotDirection = Int(-1,
                    desc ="mathematical direction of rotation")
     
-    #Points of interpolation used for Spline
-    #defaults to 4.
+    #:Points of interpolation used for Spline
+    #: defaults to 4.
     InterpPoints = Int(4,
                    desc ="Points of interpolation used for Spline")
     
-    #rotation angle for trigger position
+    #: rotation angle for trigger position
     StartAngle = Float(0,
                    desc ="rotation angle for trigger position")
     
-    # revolutions per minute
+    #: revolutions per minute
     rpm =  CArray(desc ="revolutions per minute")
           
-    #rotation angle
+    #: rotation angle
     angle = CArray(desc ="rotation angle")
     
-    # internal flag to determine whether AngleTracker has been processed
+    #: internal flag to determine whether AngleTracker has been processed
+    #: prevents recalculation
     calcflag = Bool(False) 
     
     
@@ -439,7 +445,7 @@ class AngleTracker(MaskedTimeInOut):
     def _get_digest( self ):
         return digest(self)
     
-    #helperfunction for index detection
+    #helperfunction for trigger index detection
     def find_nearest_idx(self, peakarray, value):
         peakarray = asarray(peakarray)
         idx = (abs(peakarray - value)).argmin()
@@ -913,18 +919,15 @@ class SpatialInterpolator(TimeInOut):
    
 class SpatialInterpolatorRotation(SpatialInterpolator):
     """
-    Spatial  Interpolation for rotating sources.Gets samples from :attr:`source`
+    Spatial  Interpolation for rotating sources. Gets samples from :attr:`source`
     and angles from  :attr:`AngleTracker`.Generates output via the generator :meth:`result`
     
     """
     #: Angle data from AngleTracker class
-    AngleTracker = Instance(SamplesGenerator)
-    
-    #: Angle data from AngleTracker class
-    angle = CArray() 
+    Angle = Instance(AngleTracker)
     
     # internal identifier
-    digest = Property( depends_on = ['source.digest', 'AngleTracker.digest', 'mpos_real.digest', 'mpos_virtual.digest', 'Q'])
+    digest = Property( depends_on = ['source.digest', 'Angle.digest', 'mpos_real.digest', 'mpos_virtual.digest', 'Q'])
     
     @cached_property
     def _get_digest( self ):
@@ -948,7 +951,7 @@ class SpatialInterpolatorRotation(SpatialInterpolator):
         #period for rotation
         period = 2 * pi
         #get angle
-        angle = self.AngleTracker._get_angle()
+        angle = self.Angle._get_angle()
         #counter to track angle position in time for each block
         count=0
         for timeData in self.source.result(num):
