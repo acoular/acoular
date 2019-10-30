@@ -398,8 +398,7 @@ class AngleTracker(MaskedTimeInOut):
     using spline interpolation in the time domain. 
     
     Gets samples from :attr:`trigger` and stores the angle and rpm samples in :meth:`angle` and :meth:`rpm`.
-    
-    
+
     '''
 
     #:Data source; :class:`~acoular.SamplesGenerator or derived object.
@@ -409,7 +408,12 @@ class AngleTracker(MaskedTimeInOut):
     trigger = Instance(Trigger) 
     
     #: internal identifier
-    digest = Property(depends_on=['source.digest'])
+    digest = Property(depends_on=['source.digest', 
+                                  'trigger.digest', 
+                                  'trigger_per_revo',
+                                  'rot_direction',
+                                  'interp_points',
+                                  'start_angle'])
     
     #: trigger signals per revolution
     #: defaults to 1
@@ -426,19 +430,25 @@ class AngleTracker(MaskedTimeInOut):
     interp_points = Int(4,
                    desc ="Points of interpolation used for Spline")
     
-    #: rotation angle for trigger position
+    #: rotation angle in degree for first trigger position
     start_angle = Float(0,
                    desc ="rotation angle for trigger position")
     
-    #: revolutions per minute
-    rpm =  CArray(desc ="revolutions per minute")
+    #: revolutions per minute for each sample, read-only
+    rpm = Property( depends_on = 'digest', desc ="revolutions per minute for each sample")
           
-    #: rotation angle
-    angle = CArray(desc ="rotation angle")
+    #: rotation angle in degree for each sample, read-only
+    angle = Property( depends_on = 'digest', desc ="rotation angle for each sample")
     
-    #: internal flag to determine whether AngleTracker has been processed
-    #: prevents recalculation
-    calc_flag = Bool(False) 
+    # internal flag to determine whether AngleTracker has been processed,
+    # prevents recalculation
+    _calc_flag = Bool(False) 
+    
+    # revolutions per minute, internal use
+    _rpm = CArray()
+          
+    #: rotation angle in degree, internal use
+    _angle = CArray()
     
     
     @cached_property
@@ -446,27 +456,16 @@ class AngleTracker(MaskedTimeInOut):
         return digest(self)
     
     #helperfunction for trigger index detection
-    def find_nearest_idx(self, peakarray, value):
+    def _find_nearest_idx(self, peakarray, value):
         peakarray = asarray(peakarray)
         idx = (abs(peakarray - value)).argmin()
         return idx
     
     def _to_rpm_and_degree(self):
         """ 
-        Returns angles in deg for one or more instants in time.
-        
-        Parameters
-        ----------
-        t : array of floats
-            Instances in time to calculate the positions at.
-        
-        Returns
-        -------
-        rpm and angle: arrays of floats
-            Angles in degree at the given times; array has the same shape as t .
-            rpm in 1/min. Only returns ver _get_functions
+        Internal helper function 
+        Calculates angles in deg for one or more instants in time.
         """
-
 
         #init
         ind=0
@@ -476,8 +475,8 @@ class AngleTracker(MaskedTimeInOut):
         rotDirection = self.rot_direction
         nSamples =  self.source.numsamples
         samplerate =  self.source.sample_freq
-        self.rpm = zeros(nSamples)
-        self.angle = zeros(nSamples)
+        self._rpm = zeros(nSamples)
+        self._angle = zeros(nSamples)
         #number of spline points
         InterpPoints=self.interp_points
         
@@ -485,34 +484,39 @@ class AngleTracker(MaskedTimeInOut):
         while ind < nSamples :     
             #when starting spline forward
             if ind<peakloc[InterpPoints]:
-                peakdist=peakloc[self.find_nearest_idx(peakarray= peakloc,value=ind)+1] - peakloc[self.find_nearest_idx(peakarray= peakloc,value=ind)]
+                peakdist=peakloc[self._find_nearest_idx(peakarray= peakloc,value=ind)+1] - peakloc[self._find_nearest_idx(peakarray= peakloc,value=ind)]
                 splineData = stack((range(InterpPoints), peakloc[ind//peakdist:ind//peakdist+InterpPoints]), axis=0)
             #spline backwards    
             else:
-                peakdist=peakloc[self.find_nearest_idx(peakarray= peakloc,value=ind)] - peakloc[self.find_nearest_idx(peakarray= peakloc,value=ind)-1]
+                peakdist=peakloc[self._find_nearest_idx(peakarray= peakloc,value=ind)] - peakloc[self._find_nearest_idx(peakarray= peakloc,value=ind)-1]
                 splineData = stack((range(InterpPoints), peakloc[ind//peakdist-InterpPoints:ind//peakdist]), axis=0)
             #calc angles and rpm    
             Spline = splrep(splineData[:,:][1], splineData[:,:][0], k=3)    
-            self.rpm[ind]=splev(ind, Spline, der=1, ext=0)*60*samplerate
-            self.angle[ind] = (splev(ind, Spline, der=0, ext=0)*2*pi*rotDirection/TriggerPerRevo + self.start_angle) % (2*pi)
+            self._rpm[ind]=splev(ind, Spline, der=1, ext=0)*60*samplerate
+            self._angle[ind] = (splev(ind, Spline, der=0, ext=0)*2*pi*rotDirection/TriggerPerRevo + self.start_angle) % (2*pi)
             #next sample
             ind+=1
         #calculation complete    
-        self.calc_flag = True
+        self._calc_flag = True
+    
+    # reset calc flag if something has changed
+    @on_trait_change('digest')
+    def _reset_calc_flag( self ):
+        self._calc_flag = False
     
     #calc rpm from trigger data
     @cached_property
     def _get_rpm( self ):
-        if not self.calc_flag:
+        if not self._calc_flag:
             self._to_rpm_and_degree()
-        return self.rpm
+        return self._rpm
 
     #calc of angle from trigger data
     @cached_property
     def _get_angle(self):
-        if not self.calc_flag:
+        if not self._calc_flag:
             self._to_rpm_and_degree()
-        return self.angle[:]
+        return self._angle
 
 
 class SpatialInterpolator(TimeInOut):
