@@ -34,14 +34,14 @@ from numpy import array, empty, empty_like, pi, sin, sqrt, zeros, newaxis, uniqu
 int16, cross, isclose, zeros_like, dot, nan, concatenate, isnan, nansum, float64, \
 identity, argsort, interp, arange, append, linspace, flatnonzero, argmin, argmax, \
 delete, mean, inf, ceil, log2, logical_and, asarray, stack, sinc
-from numpy.linalg import norm
+
 from numpy.matlib import repmat
 
 from scipy.spatial import Delaunay
 from scipy.interpolate import LinearNDInterpolator,splrep, splev, CloughTocher2DInterpolator, CubicSpline, Rbf
 from traits.api import Float, Int, CLong, Bool, \
 File, Property, Instance, Trait, Delegate, \
-cached_property, on_trait_change, List, ListInt, CArray, Dict
+cached_property, on_trait_change, List, CArray, Dict
 
 from datetime import datetime
 from os import path
@@ -924,10 +924,10 @@ class SpatialInterpolatorRotation(SpatialInterpolator):
     
     """
     #: Angle data from AngleTracker class
-    Angle = Instance(AngleTracker)
+    angle_source = Instance(AngleTracker)
     
     # internal identifier
-    digest = Property( depends_on = ['source.digest', 'Angle.digest', 'mpos_real.digest', 'mpos_virtual.digest', 'Q'])
+    digest = Property( depends_on = ['source.digest', 'angle_source.digest', 'mpos_real.digest', 'mpos_virtual.digest', 'Q'])
     
     @cached_property
     def _get_digest( self ):
@@ -951,7 +951,7 @@ class SpatialInterpolatorRotation(SpatialInterpolator):
         #period for rotation
         period = 2 * pi
         #get angle
-        angle = self.Angle._get_angle()
+        angle = self.angle_source._get_angle()
         #counter to track angle position in time for each block
         count=0
         for timeData in self.source.result(num):
