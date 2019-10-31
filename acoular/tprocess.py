@@ -436,7 +436,10 @@ class AngleTracker(MaskedTimeInOut):
     
     #: revolutions per minute for each sample, read-only
     rpm = Property( depends_on = 'digest', desc ="revolutions per minute for each sample")
-          
+    
+    #: average revolutions per minute for each sample, read-only
+    average_rpm = Property( depends_on = 'digest', desc ="average revolutions per minute for each sample")      
+    
     #: rotation angle in radians for each sample, read-only
     angle = Property( depends_on = 'digest', desc ="rotation angle for each sample")
     
@@ -450,8 +453,9 @@ class AngleTracker(MaskedTimeInOut):
     #: rotation angle in radians, internal use
     _angle = CArray()
     
+
     
-    @cached_property
+    @cached_property 
     def _get_digest( self ):
         return digest(self)
     
@@ -465,6 +469,9 @@ class AngleTracker(MaskedTimeInOut):
         """ 
         Internal helper function 
         Calculates angles in radians for one or more instants in time.
+        
+        Current version supports trigger and sources with the same samplefreq. 
+        This behaviour may change in future releases 
         """
 
         #init
@@ -518,6 +525,21 @@ class AngleTracker(MaskedTimeInOut):
             self._to_rpm_and_angle()
         return self._angle
 
+    #calc average rpm from trigger data
+    def _get_average_rpm( self ):
+        """ 
+        Returns average revolutions per minute (rpm) over the source samples.
+    
+        Returns
+        -------
+        rpm : float
+            rpm in 1/min.
+        """
+        #trigger data
+        peakloc = self.trigger._get_trigger_data()[0]
+        #get samplefreq and number of samples from source
+        #calculation of average rpm in 1/min
+        return len(peakloc)/self.source.numsamples*self.source.sample_freq*60
 
 class SpatialInterpolator(TimeInOut):
     """
