@@ -430,14 +430,14 @@ class AngleTracker(MaskedTimeInOut):
     interp_points = Int(4,
                    desc ="Points of interpolation used for Spline")
     
-    #: rotation angle in degree for first trigger position
+    #: rotation angle in radians for first trigger position
     start_angle = Float(0,
                    desc ="rotation angle for trigger position")
     
     #: revolutions per minute for each sample, read-only
     rpm = Property( depends_on = 'digest', desc ="revolutions per minute for each sample")
           
-    #: rotation angle in degree for each sample, read-only
+    #: rotation angle in radians for each sample, read-only
     angle = Property( depends_on = 'digest', desc ="rotation angle for each sample")
     
     # internal flag to determine whether AngleTracker has been processed,
@@ -447,7 +447,7 @@ class AngleTracker(MaskedTimeInOut):
     # revolutions per minute, internal use
     _rpm = CArray()
           
-    #: rotation angle in degree, internal use
+    #: rotation angle in radians, internal use
     _angle = CArray()
     
     
@@ -461,10 +461,10 @@ class AngleTracker(MaskedTimeInOut):
         idx = (abs(peakarray - value)).argmin()
         return idx
     
-    def _to_rpm_and_degree(self):
+    def _to_rpm_and_angle(self):
         """ 
         Internal helper function 
-        Calculates angles in deg for one or more instants in time.
+        Calculates angles in radians for one or more instants in time.
         """
 
         #init
@@ -508,14 +508,14 @@ class AngleTracker(MaskedTimeInOut):
     @cached_property
     def _get_rpm( self ):
         if not self._calc_flag:
-            self._to_rpm_and_degree()
+            self._to_rpm_and_angle()
         return self._rpm
 
     #calc of angle from trigger data
     @cached_property
     def _get_angle(self):
         if not self._calc_flag:
-            self._to_rpm_and_degree()
+            self._to_rpm_and_angle()
         return self._angle
 
 
