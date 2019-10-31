@@ -503,7 +503,7 @@ class AngleTracker(MaskedTimeInOut):
     
     def _to_average_rpm(self):
         """ 
-        Returns average revolutions per minute (rpm).
+        Returns average revolutions per minute (rpm) over the source samples.
     
         Returns
         -------
@@ -515,7 +515,7 @@ class AngleTracker(MaskedTimeInOut):
         #samplefreq and number of samples from source
         nSamples =  self.source.numsamples
         samplerate =  self.source.sample_freq
-        #calculation of average rpm
+        #calculation of average rpm in 1/min
         average_rpm = len(peakloc)/nSamples*samplerate*60
             
         return average_rpm
