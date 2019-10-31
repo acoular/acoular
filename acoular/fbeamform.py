@@ -1943,8 +1943,8 @@ class BeamformerGIB(BeamformerEig):  #BeamformerEig #BeamformerBase
         """        
         # prepare calculation
         f = self.freq_data.fftfreq()
-        n = int(self.n)  
-        m = int(self.m)                             #number of eigenvalues
+        n = int(self.na)   #number of eigenvalues
+        m = int(self.m)    #number of first eigenvalue
         numchannels = self.freq_data.numchannels   #number of channels
         numpoints = self.steer.grid.size
         hh = zeros((1, numpoints, numchannels), dtype='D')
@@ -1966,74 +1966,77 @@ class BeamformerGIB(BeamformerEig):  #BeamformerEig #BeamformerBase
                 qi=zeros([n+m,numpoints], dtype='complex128')
                 #Select the number of coherent modes to be processed referring to the eigenvalue distribution.
                 #for s in arange(n):  
-                for s in list(range(m,n+m)): 
-                    #Generate the corresponding eigenmodes
-                    emode=array(sqrt(eva[s])*eve[:,s], dtype='complex128')
-                    # choose method for computation
-                    if self.method == 'Suzuki':
-                        leftpoints=numpoints
-                        locpoints=arange(numpoints)         
-                        weights=diag(ones(numpoints))             
-                        epsilon=arange(self.max_iter)              
-                        for it in arange(self.max_iter): 
-                            if numchannels<=leftpoints:
-                                AWA= dot(dot(A[:,locpoints],weights),A[:,locpoints].conj().T)
-                                epsilon[it] = max(absolute(eigvals(AWA)))*self.eps_perc
-                                qi[s,locpoints]=dot(dot(dot(weights,A[:,locpoints].conj().T),inv(AWA+eye(numchannels)*epsilon[it])),emode)
-                            elif numchannels>leftpoints:
-                                AA=dot(A[:,locpoints].conj().T,A[:,locpoints])
-                                epsilon[it] = max(absolute(eigvals(AA)))*self.eps_perc
-                                qi[s,locpoints]=dot(dot(inv(AA+inv(weights)*epsilon[it]),A[:,locpoints].conj().T),emode)                                                       
-                            if self.beta < 1 and it > 1:   
-                                #Reorder from the greatest to smallest magnitude to define a reduced-point source distribution , and reform a reduced transfer matrix 
-                                leftpoints=int(round(numpoints*self.beta**(it+1)))                                                                                          
-                                idx = argsort(abs(qi[s,locpoints]))[::-1]   
-                                #print(it, leftpoints, locpoints, idx )
-                                locpoints= delete(locpoints,[idx[leftpoints::]])             
-                                qix=zeros([n+m,leftpoints], dtype='complex128')                      
-                                qix[s,:]=qi[s,locpoints]
-                                #calc weights for next iteration 
-                                weights=diag(absolute(qix[s,:])**(2-self.pnorm))    
-                            else:                          
-                                weights=diag((absolute(qi[s,:])**(2-self.pnorm)))    
-                         
-                    elif self.method == 'InverseIRLS':                         
-                        weights=eye(numpoints)
-                        locpoints=arange(numpoints)
-                        for it in arange(self.max_iter): 
-                            if numchannels<=numpoints: 
-                                wtwi=inv(dot(weights.T,weights))  
-                                aH=A.conj().T                       
-                                qi[s,:]=dot(dot(wtwi,aH),dot(inv(dot(A,dot(wtwi,aH))),emode))                            
-                                weights=diag(absolute(qi[s,:])**((2-self.pnorm)/2))
-                                weights=weights/sum(absolute(weights))                                 
-                            elif numchannels>numpoints:
-                                wtw=dot(weights.T,weights)
-                                qi[s,:]= dot(dot(inv(dot(dot(A.conj.T,wtw),A)),dot( A.conj().T,wtw)) ,emode)
-                                weights=diag(absolute(qi[s,:])**((2-self.pnorm)/2))
-                                weights=weights/sum(absolute(weights))                  
-                    else:
-                        locpoints=arange(numpoints) 
-                        unit = self.unit_mult
-                        AB = vstack([hstack([A.real,-A.imag]),hstack([A.imag,A.real])])
-                        R  = hstack([emode.real.T,emode.imag.T]) * unit
-                        if self.method == 'LassoLars':
-                            model = LassoLars(alpha=self.alpha * unit,max_iter=self.max_iter)
-                        elif self.method == 'LassoLarsBIC':
-                            model = LassoLarsIC(criterion='bic',max_iter=self.max_iter)
-                        elif self.method == 'OMPCV':
-                            model = OrthogonalMatchingPursuitCV()
-                        elif self.method == 'LassoLarsCV':
-                            model = LassoLarsCV()                        
-                        if self.method == 'NNLS':
-                            x , zz = nnls(AB,R)
-                            qi_real,qi_imag = hsplit(x/unit, 2) 
+                for s in list(range(m,n+m)):
+                    if eva[s] > 0:                    
+                        #Generate the corresponding eigenmodes
+                        emode=array(sqrt(eva[s])*eve[:,s], dtype='complex128')
+                        # choose method for computation
+                        if self.method == 'Suzuki':
+                            leftpoints=numpoints
+                            locpoints=arange(numpoints)         
+                            weights=diag(ones(numpoints))             
+                            epsilon=arange(self.max_iter)              
+                            for it in arange(self.max_iter): 
+                                if numchannels<=leftpoints:
+                                    AWA= dot(dot(A[:,locpoints],weights),A[:,locpoints].conj().T)
+                                    epsilon[it] = max(absolute(eigvals(AWA)))*self.eps_perc
+                                    qi[s,locpoints]=dot(dot(dot(weights,A[:,locpoints].conj().T),inv(AWA+eye(numchannels)*epsilon[it])),emode)
+                                elif numchannels>leftpoints:
+                                    AA=dot(A[:,locpoints].conj().T,A[:,locpoints])
+                                    epsilon[it] = max(absolute(eigvals(AA)))*self.eps_perc
+                                    qi[s,locpoints]=dot(dot(inv(AA+inv(weights)*epsilon[it]),A[:,locpoints].conj().T),emode)                                                       
+                                if self.beta < 1 and it > 1:   
+                                    #Reorder from the greatest to smallest magnitude to define a reduced-point source distribution , and reform a reduced transfer matrix 
+                                    leftpoints=int(round(numpoints*self.beta**(it+1)))                                                                                          
+                                    idx = argsort(abs(qi[s,locpoints]))[::-1]   
+                                    #print(it, leftpoints, locpoints, idx )
+                                    locpoints= delete(locpoints,[idx[leftpoints::]])             
+                                    qix=zeros([n+m,leftpoints], dtype='complex128')                      
+                                    qix[s,:]=qi[s,locpoints]
+                                    #calc weights for next iteration 
+                                    weights=diag(absolute(qix[s,:])**(2-self.pnorm))    
+                                else:                          
+                                    weights=diag((absolute(qi[s,:])**(2-self.pnorm)))    
+                             
+                        elif self.method == 'InverseIRLS':                         
+                            weights=eye(numpoints)
+                            locpoints=arange(numpoints)
+                            for it in arange(self.max_iter): 
+                                if numchannels<=numpoints: 
+                                    wtwi=inv(dot(weights.T,weights))  
+                                    aH=A.conj().T                       
+                                    qi[s,:]=dot(dot(wtwi,aH),dot(inv(dot(A,dot(wtwi,aH))),emode))                            
+                                    weights=diag(absolute(qi[s,:])**((2-self.pnorm)/2))
+                                    weights=weights/sum(absolute(weights))                                 
+                                elif numchannels>numpoints:
+                                    wtw=dot(weights.T,weights)
+                                    qi[s,:]= dot(dot(inv(dot(dot(A.conj.T,wtw),A)),dot( A.conj().T,wtw)) ,emode)
+                                    weights=diag(absolute(qi[s,:])**((2-self.pnorm)/2))
+                                    weights=weights/sum(absolute(weights))                  
                         else:
-                            model.fit(AB,R)
-                            qi_real,qi_imag = hsplit(model.coef_[:]/unit, 2)
-                        #print(s,qi.size)    
-                        qi[s,locpoints] = qi_real+qi_imag*1j
-                #Generate source maps of all selected eigenmodes, and superpose source intensity for each source type.
+                            locpoints=arange(numpoints) 
+                            unit = self.unit_mult
+                            AB = vstack([hstack([A.real,-A.imag]),hstack([A.imag,A.real])])
+                            R  = hstack([emode.real.T,emode.imag.T]) * unit
+                            if self.method == 'LassoLars':
+                                model = LassoLars(alpha=self.alpha * unit,max_iter=self.max_iter)
+                            elif self.method == 'LassoLarsBIC':
+                                model = LassoLarsIC(criterion='bic',max_iter=self.max_iter)
+                            elif self.method == 'OMPCV':
+                                model = OrthogonalMatchingPursuitCV()
+                            elif self.method == 'LassoLarsCV':
+                                model = LassoLarsCV()                        
+                            if self.method == 'NNLS':
+                                x , zz = nnls(AB,R)
+                                qi_real,qi_imag = hsplit(x/unit, 2) 
+                            else:
+                                model.fit(AB,R)
+                                qi_real,qi_imag = hsplit(model.coef_[:]/unit, 2)
+                            #print(s,qi.size)    
+                            qi[s,locpoints] = qi_real+qi_imag*1j
+                    else:
+                        warn('Eigenvalue %g <= 0 for frequency index %g. Will not be calculated!' % (s, i),Warning, stacklevel = 2)
+                    #Generate source maps of all selected eigenmodes, and superpose source intensity for each source type.
                 ac[i] = zeros([1,numpoints])
                 ac[i,locpoints] = sum(absolute(qi[:,locpoints])**2,axis=0)
                 fr[i] = 1    
