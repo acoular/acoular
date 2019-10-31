@@ -450,6 +450,9 @@ class AngleTracker(MaskedTimeInOut):
     #: rotation angle in radians, internal use
     _angle = CArray()
     
+    #average revolutions per minute, internal use 
+    _average_rpm = Float()
+    
     
     @cached_property
     def _get_digest( self ):
@@ -520,9 +523,9 @@ class AngleTracker(MaskedTimeInOut):
         nSamples =  self.source.numsamples
         samplerate =  self.source.sample_freq
         #calculation of average rpm in 1/min
-        average_rpm = len(peakloc)/nSamples*samplerate*60
+        _average_rpm = len(peakloc)/nSamples*samplerate*60
             
-        return average_rpm
+        return _average_rpm
     
     #calc rpm from trigger data
     @cached_property
