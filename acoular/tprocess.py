@@ -261,17 +261,20 @@ class Trigger(TimeInOut):
     hunk_length = Float(0.1)
     
     #: Type of trigger.
-    #: - 'Dirac': a single puls is assumed (sign of 
-    #:      :attr:`~acoular.tprocess.Trigger.trigger_type` is important).
-    #:      Sample will trigger if its value is above/below the pos/neg threshold.
-    #: - 'Rect' : repeating rectangular functions. Only every second 
-    #:      edge is assumed to be a trigger. The sign of 
-    #:      :attr:`~acoular.tprocess.Trigger.trigger_type` gives information
-    #:      on which edge should be used (+ for rising edge, - for falling edge).
-    #:      Sample will trigger if the difference between its value and its predecessors value
-    #:      is above/below the pos/neg threshold.
-    #: Default is to 'Dirac'.
-    trigger_type = Trait('Dirac', 'Rect')
+    #:
+    #: 'dirac': a single puls is assumed (sign of  
+    #: :attr:`~acoular.tprocess.Trigger.trigger_type` is important).
+    #: Sample will trigger if its value is above/below the pos/neg threshold.
+    #: 
+    #: 'rect' : repeating rectangular functions. Only every second 
+    #: edge is assumed to be a trigger. The sign of 
+    #: :attr:`~acoular.tprocess.Trigger.trigger_type` gives information
+    #: on which edge should be used (+ for rising edge, - for falling edge).
+    #: Sample will trigger if the difference between its value and its predecessors value
+    #: is above/below the pos/neg threshold.
+    #: 
+    #: Default is 'dirac'.
+    trigger_type = Trait('dirac', 'rect')
     
     #: Identifier which peak to consider, if there are multiple peaks in one hunk
     #: (see :attr:`~acoular.tprocess.Trigger.hunk_length`). Default is to 'extremum', 
@@ -279,8 +282,11 @@ class Trigger(TimeInOut):
     multiple_peaks_in_hunk = Trait('extremum', 'first')
     
     #: Tuple consisting of 3 entries: 
+    #: 
     #: 1.: -Vector with the sample indices of the 1/Rev trigger samples
+    #: 
     #: 2.: -maximum of number of samples between adjacent trigger samples
+    #: 
     #: 3.: -minimum of number of samples between adjacent trigger samples
     trigger_data = Property(depends_on=['source.digest', 'threshold', 'max_variation_of_duration', \
                                         'hunk_length', 'trigger_type', 'multiple_peaks_in_hunk'])
@@ -296,8 +302,8 @@ class Trigger(TimeInOut):
     @cached_property
     def _get_trigger_data(self):
         self._check_trigger_existence()
-        triggerFunc = {'Dirac' : self._trigger_dirac,
-                       'Rect' : self._trigger_rect}[self.trigger_type]
+        triggerFunc = {'dirac' : self._trigger_dirac,
+                       'rect' : self._trigger_rect}[self.trigger_type]
         nSamples = 2048  # number samples for result-method of source
         threshold = self._threshold(nSamples)
         
@@ -401,13 +407,13 @@ class AngleTracker(MaskedTimeInOut):
 
     '''
 
-    #:Data source; :class:`~acoular.SamplesGenerator or derived object.
+    #: Data source; :class:`~acoular.SamplesGenerator` or derived object.
     source = Instance(SamplesGenerator)    
     
-    #: trigger data from :class:`acoular.tprocess.Trigger 
+    #: Trigger data from :class:`acoular.tprocess.Trigger`.
     trigger = Instance(Trigger) 
     
-    #: internal identifier
+    # internal identifier
     digest = Property(depends_on=['source.digest', 
                                   'trigger.digest', 
                                   'trigger_per_revo',
@@ -415,20 +421,20 @@ class AngleTracker(MaskedTimeInOut):
                                   'interp_points',
                                   'start_angle'])
     
-    #: trigger signals per revolution
-    #: defaults to 1
+    #: Trigger signals per revolution,
+    #: defaults to 1.
     trigger_per_revo = Int(1,
-                   desc =" trigger signals per revolution")
+                   desc ="trigger signals per revolution")
         
     #: Flag to set counter-clockwise (1) or clockwise (-1) rotation,
     #: defaults to -1.
     rot_direction = Int(-1,
                    desc ="mathematical direction of rotation")
     
-    #:Points of interpolation used for Spline
+    #: Points of interpolation used for spline,
     #: defaults to 4.
     interp_points = Int(4,
-                   desc ="Points of interpolation used for Spline")
+                   desc ="Points of interpolation used for spline")
     
     #: rotation angle in radians for first trigger position
     start_angle = Float(0,
@@ -437,20 +443,20 @@ class AngleTracker(MaskedTimeInOut):
     #: revolutions per minute for each sample, read-only
     rpm = Property( depends_on = 'digest', desc ="revolutions per minute for each sample")
     
-    #: average revolutions per minute for each sample, read-only
-    average_rpm = Property( depends_on = 'digest', desc ="average revolutions per minute for each sample")      
+    #: average revolutions per minute, read-only
+    average_rpm = Property( depends_on = 'digest', desc ="average revolutions per minute")      
     
     #: rotation angle in radians for each sample, read-only
     angle = Property( depends_on = 'digest', desc ="rotation angle for each sample")
     
-    # internal flag to determine whether AngleTracker has been processed,
+    # Internal flag to determine whether rpm and angle calculation has been processed,
     # prevents recalculation
     _calc_flag = Bool(False) 
     
-    # revolutions per minute, internal use
+    # Revolutions per minute, internal use
     _rpm = CArray()
           
-    #: rotation angle in radians, internal use
+    # Rotation angle in radians, internal use
     _angle = CArray()
     
 
@@ -470,7 +476,7 @@ class AngleTracker(MaskedTimeInOut):
         Internal helper function 
         Calculates angles in radians for one or more instants in time.
         
-        Current version supports trigger and sources with the same samplefreq. 
+        Current version supports only trigger and sources with the same samplefreq. 
         This behaviour may change in future releases 
         """
 
@@ -526,6 +532,7 @@ class AngleTracker(MaskedTimeInOut):
         return self._angle
 
     #calc average rpm from trigger data
+    @cached_property
     def _get_average_rpm( self ):
         """ 
         Returns average revolutions per minute (rpm) over the source samples.
@@ -535,15 +542,14 @@ class AngleTracker(MaskedTimeInOut):
         rpm : float
             rpm in 1/min.
         """
-        #trigger data
+        #trigger indices data
         peakloc = self.trigger._get_trigger_data()[0]
-        #get samplefreq and number of samples from source
         #calculation of average rpm in 1/min
-        return len(peakloc)/self.source.numsamples*self.source.sample_freq*60
+        return (len(peakloc)-1) / (peakloc[-1]-peakloc[0]) / self.trigger_per_revo * self.source.sample_freq * 60
 
 class SpatialInterpolator(TimeInOut):
     """
-    Base class for spatial  Interpolation of microphone data.
+    Base class for spatial interpolation of microphone data.
     Gets samples from :attr:`source` and generates output via the 
     generator :meth:`result`
     """
@@ -558,8 +564,8 @@ class SpatialInterpolator(TimeInOut):
     #: Data source; :class:`~acoular.sources.SamplesGenerator` or derived object.
     source = Instance(SamplesGenerator)
     
-    #: interpolation method in spacial domain
-    method = Trait('Linear', 'Spline', 'rbf-multiquadric', 'rbf-cubic',\
+    #: Interpolation method in spacial domain, defaults to
+    method = Trait('linear', 'spline', 'rbf-multiquadric', 'rbf-cubic',\
         'custom', 'sinc', desc="method for interpolation used")
     
     #: spacial dimensionality of the array geometry
@@ -816,12 +822,12 @@ class SpatialInterpolator(TimeInOut):
             x = newCoord[0]
             for cntTime in range(nTime):
                 
-                if self.method == 'Linear':
+                if self.method == 'linear':
                     #numpy 1-d interpolation
                     pInterp[cntTime] = interp(xInterp[cntTime, :], x, pHelp[cntTime, :], period=period, left=nan, right=nan)
                     
                     
-                elif self.method == 'Spline':
+                elif self.method == 'spline':
                     #scipy cubic spline interpolation
                     SplineInterp = CubicSpline(append(x,(2*pi)+x[0]), append(pHelp[cntTime, :],pHelp[cntTime, :][0]), axis=0, bc_type='periodic', extrapolate=None)
                     pInterp[cntTime] = SplineInterp(xInterp[cntTime, :]+pi)    
@@ -862,11 +868,11 @@ class SpatialInterpolator(TimeInOut):
                 # points for interpolation
                 newPoint = concatenate((xInterp[cntTime, :][:, newaxis], virtNewCoord[1, :][:, newaxis]), axis=1) 
                 #scipy 1D interpolation
-                if self.method == 'Linear':
+                if self.method == 'linear':
                     interpolater = LinearNDInterpolator(mesh, pHelp[cntTime, :], fill_value = 0)
                     pInterp[cntTime] = interpolater(newPoint)    
                     
-                elif self.method == 'Spline':
+                elif self.method == 'spline':
                     # scipy CloughTocher interpolation
                     f = CloughTocher2DInterpolator(mesh, pHelp[cntTime, :], fill_value = 0)
                     pInterp[cntTime] = f(newPoint)    
@@ -909,7 +915,7 @@ class SpatialInterpolator(TimeInOut):
                 # points for interpolation
                 newPoint = concatenate((xInterp[cntTime, :][:, newaxis], virtNewCoord[1:, :].T), axis=1)
                 
-                if self.method == 'Linear':     
+                if self.method == 'linear':     
                     interpolater = LinearNDInterpolator(mesh, pHelp[cntTime, :], fill_value = 0)
                     pInterp[cntTime] = interpolater(newPoint)
                 
