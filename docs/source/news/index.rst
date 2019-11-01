@@ -2,10 +2,10 @@ What's new
 ============
 19.11
 ------------
-    * Adds new classes for handling rotating data, including detection of trigger signals and interpolation of sensor data for virtual array rotation
-    * Introduces new SampleSplitter class, which allows distribution of data streams 
-    * Adds new (global) caching options for more flexible cache file handling (e.g. never cache results, always cache, cache read-only)
-    * User can choose whether to use h5py or pytables package for handling hdf files
+    * Adds new classes for handling rotating data, including detection of trigger signals and interpolation of sensor data for virtual array emulation (:class:`~acoular.tprocess.Trigger`, :class:`~acoular.tprocess.AngleTracker`, :class:`~acoular.tprocess.SpatialInterpolator`, :class:`~acoular.tprocess.SpatialInterpolatorRotation`, :class:`~acoular.tprocess.SpatialInterpolatorConstantRotation`)
+    * Introduces new :class:`~acoular.tprocess.SampleSplitter` class, which allows distribution of data streams 
+    * Adds new (global) caching options for more flexible cache file handling (e.g. never cache results, always cache, cache read-only). See :class:`~acoular.configuration.config` for information on how to use this.
+    * User can choose whether to use h5py or pytables package for handling hdf files. See :class:`~acoular.configuration.config` for information on how to use this.
     * Change: BeamformerGIB behaviour (not calculating sources with eigenvalue of zero)
     * Bugfix: BeamformerTime interpolation
     * Bugfix: Integer division in PNoiseGenerator
