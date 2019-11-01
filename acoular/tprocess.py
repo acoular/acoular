@@ -261,16 +261,18 @@ class Trigger(TimeInOut):
     hunk_length = Float(0.1)
     
     #: Type of trigger.
-    #: - 'Dirac': a single puls is assumed (sign of 
-    #:      :attr:`~acoular.tprocess.Trigger.trigger_type` is important).
-    #:      Sample will trigger if its value is above/below the pos/neg threshold.
-    #: - 'Rect' : repeating rectangular functions. Only every second 
-    #:      edge is assumed to be a trigger. The sign of 
-    #:      :attr:`~acoular.tprocess.Trigger.trigger_type` gives information
-    #:      on which edge should be used (+ for rising edge, - for falling edge).
-    #:      Sample will trigger if the difference between its value and its predecessors value
-    #:      is above/below the pos/neg threshold.
-    #: Default is to 'Dirac'.
+    #: 'Dirac': a single puls is assumed (sign of  
+    #: :attr:`~acoular.tprocess.Trigger.trigger_type` is important).
+    #: Sample will trigger if its value is above/below the pos/neg threshold.
+    #: 
+    #: 'Rect' : repeating rectangular functions. Only every second 
+    #: edge is assumed to be a trigger. The sign of 
+    #: :attr:`~acoular.tprocess.Trigger.trigger_type` gives information
+    #: on which edge should be used (+ for rising edge, - for falling edge).
+    #: Sample will trigger if the difference between its value and its predecessors value
+    #: is above/below the pos/neg threshold.
+    #: 
+    #: Default is 'Dirac'.
     trigger_type = Trait('Dirac', 'Rect')
     
     #: Identifier which peak to consider, if there are multiple peaks in one hunk
@@ -401,13 +403,13 @@ class AngleTracker(MaskedTimeInOut):
 
     '''
 
-    #:Data source; :class:`~acoular.SamplesGenerator or derived object.
+    #: Data source; :class:`~acoular.SamplesGenerator` or derived object.
     source = Instance(SamplesGenerator)    
     
-    #: trigger data from :class:`acoular.tprocess.Trigger 
+    #: Trigger data from :class:`acoular.tprocess.Trigger`.
     trigger = Instance(Trigger) 
     
-    #: internal identifier
+    # internal identifier
     digest = Property(depends_on=['source.digest', 
                                   'trigger.digest', 
                                   'trigger_per_revo',
@@ -415,17 +417,17 @@ class AngleTracker(MaskedTimeInOut):
                                   'interp_points',
                                   'start_angle'])
     
-    #: trigger signals per revolution
-    #: defaults to 1
+    #: Trigger signals per revolution,
+    #: defaults to 1.
     trigger_per_revo = Int(1,
-                   desc =" trigger signals per revolution")
+                   desc ="trigger signals per revolution")
         
     #: Flag to set counter-clockwise (1) or clockwise (-1) rotation,
     #: defaults to -1.
     rot_direction = Int(-1,
                    desc ="mathematical direction of rotation")
     
-    #:Points of interpolation used for Spline
+    #: Points of interpolation used for spline,
     #: defaults to 4.
     interp_points = Int(4,
                    desc ="Points of interpolation used for Spline")
@@ -443,14 +445,14 @@ class AngleTracker(MaskedTimeInOut):
     #: rotation angle in radians for each sample, read-only
     angle = Property( depends_on = 'digest', desc ="rotation angle for each sample")
     
-    # internal flag to determine whether AngleTracker has been processed,
+    # Internal flag to determine whether rpm and angle calculation has been processed,
     # prevents recalculation
     _calc_flag = Bool(False) 
     
-    # revolutions per minute, internal use
+    # Revolutions per minute, internal use
     _rpm = CArray()
           
-    #: rotation angle in radians, internal use
+    # Rotation angle in radians, internal use
     _angle = CArray()
     
 
@@ -543,7 +545,7 @@ class AngleTracker(MaskedTimeInOut):
 
 class SpatialInterpolator(TimeInOut):
     """
-    Base class for spatial  Interpolation of microphone data.
+    Base class for spatial interpolation of microphone data.
     Gets samples from :attr:`source` and generates output via the 
     generator :meth:`result`
     """
@@ -558,7 +560,7 @@ class SpatialInterpolator(TimeInOut):
     #: Data source; :class:`~acoular.sources.SamplesGenerator` or derived object.
     source = Instance(SamplesGenerator)
     
-    #: interpolation method in spacial domain
+    #: Interpolation method in spacial domain, defaults to
     method = Trait('Linear', 'Spline', 'rbf-multiquadric', 'rbf-cubic',\
         'custom', 'sinc', desc="method for interpolation used")
     
