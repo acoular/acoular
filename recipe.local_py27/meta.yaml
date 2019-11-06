@@ -1,6 +1,6 @@
 package:
   name: acoular
-  version: "19.08"
+  version: "19.11"
 
 source:
   path: ../../acoular
@@ -44,7 +44,6 @@ requirements:
     - scikit-learn >=0.15
     - pytables >=3.1
     - traits >=4.4
-    - traitsui >=4.4
     - configparser #just for python version 2.7
 
 test:

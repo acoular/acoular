@@ -18,7 +18,6 @@
 from numpy import mgrid, s_, array, arange, isscalar, absolute
 from traits.api import HasPrivateTraits, Float, Property, CArray, Any, \
 property_depends_on, cached_property, on_trait_change
-from traitsui.api import View
 from traits.trait_errors import TraitError
 
 from .internal import digest
@@ -47,9 +46,6 @@ class Grid( HasPrivateTraits ):
 
     # internal identifier
     digest = Property
-
-    # no view necessary
-    traits_view = View()
 
     def _get_digest( self ):
         return ''
@@ -127,14 +123,6 @@ class RectGrid( Grid ):
     # internal identifier
     digest = Property(
         depends_on = ['x_min', 'x_max', 'y_min', 'y_max', 'z', 'increment']
-        )
-
-    traits_view = View(
-            [
-                ['x_min', 'y_min', '|'],
-                ['x_max', 'y_max', 'z', 'increment', 'size~{Grid size}', '|'],
-                '-[Map extension]'
-            ]
         )
 
     @property_depends_on('nxsteps, nysteps')
@@ -331,16 +319,6 @@ class RectGrid3D( RectGrid):
     digest = Property(
         depends_on = ['x_min', 'x_max', 'y_min', 'y_max', 'z_min', 'z_max', \
         '_increment']
-        )
-
-    # increment3D omitted in view for easier handling, can be added later
-    traits_view = View(
-            [
-                ['x_min', 'y_min', 'z_min', '|'],
-                ['x_max', 'y_max', 'z_max', 'increment', \
-                'size~{Grid size}', '|'],
-                '-[Map extension]'
-            ]
         )
 
     @property_depends_on('nxsteps, nysteps, nzsteps')

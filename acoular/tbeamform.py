@@ -22,8 +22,6 @@ from numpy import array, newaxis, empty, sqrt, arange, clip, r_, zeros, \
 histogram, unique, cross, dot, where, s_ , sum
 from traits.api import Float, CArray, Property, Trait, Bool, Delegate, \
 cached_property, List, Instance
-from traitsui.api import View, Item
-from traitsui.menu import OKCancelButtons
 from traits.trait_errors import TraitError
 from warnings import warn
 
@@ -98,7 +96,7 @@ class BeamformerTime( TimeInOut ):
             warn("Deprecated use of 'steer' trait. "
                  "Please use object of class 'SteeringVector' in the future.", 
                  Warning, stacklevel = 2)
-            self._steer_obj = SteeringVector(steer_type = steer)
+            self._steer_obj.steer_type = steer
         else:
             raise(TraitError(args=self,
                              name='steer', 
@@ -183,17 +181,6 @@ class BeamformerTime( TimeInOut ):
         depends_on = ['_steer_obj.digest', 'source.digest', 'weights', '__class__'], 
         )
 
-    traits_view = View(
-        [
-            [Item('steer{}', style='custom')], 
-            [Item('source{}', style='custom'), '-<>'], 
-            [Item('weights{}', style='simple')], 
-            '|'
-        ], 
-        title='Beamformer options', 
-        buttons = OKCancelButtons
-        )
-
     @cached_property
     def _get_digest( self ):
         return digest(self)
@@ -222,8 +209,8 @@ class BeamformerTime( TimeInOut ):
         c = self.c/self.sample_freq
         delays = self.rm/c
         d_index = array(delays, dtype=int) # integer index
-        d_interp1 = delays % 1 # 1st coeff for lin interpolation between samples
-        d_interp2 = 1-d_interp1 # 2nd coeff for lin interpolation 
+        d_interp2 = delays % 1 # 2nd coeff for lin interpolation between samples
+        d_interp1 = 1-d_interp2 # 1st coeff for lin interpolation 
         d_index2 = arange(self.steer.mics.num_mics)
 #        amp = (self.rm/self.r0[:, newaxis]) # multiplication factor
         amp = (w/(self.rm*self.rm)).sum(1) * self.r0
@@ -277,19 +264,6 @@ class BeamformerTimeSq( BeamformerTime ):
                       'weights', '__class__'], 
         )
 
-    traits_view = View(
-        [
-            [Item('steer{}', style='custom')], 
-            [Item('source{}', style='custom'), '-<>'], 
-            [Item('r_diag', label='diagonal removed')], 
-            [Item('weights{}', style='simple')], 
-            '|'
-        ], 
-        title='Beamformer options', 
-        buttons = OKCancelButtons
-        )
-
-
     @cached_property
     def _get_digest( self ):
         return digest(self)
@@ -322,8 +296,8 @@ class BeamformerTimeSq( BeamformerTime ):
         c = self.c/self.source.sample_freq
         delays = self.rm/c
         d_index = array(delays, dtype=int) # integer index
-        d_interp1 = delays % 1 # 1st coeff for lin interpolation between samples
-        d_interp2 = 1-d_interp1 # 2nd coeff for lin interpolation 
+        d_interp2 = delays % 1 # 2nd coeff for lin interpolation between samples
+        d_interp1 = 1-d_interp2 # 1st coeff for lin interpolation
         d_index2 = arange(self.steer.mics.num_mics)
 #        amp = (self.rm/self.r0[:, newaxis]) # multiplication factor
         amp = (w/(self.rm*self.rm)).sum(1) * self.r0
@@ -392,19 +366,6 @@ class BeamformerTimeTraj( BeamformerTime ):
         depends_on = ['_steer_obj.digest', 'source.digest', 'weights',  \
                       'rvec', 'trajectory.digest', '__class__'], 
         )
-
-    traits_view = View(
-        [
-            [Item('steer{}', style='custom')], 
-            [Item('source{}', style='custom'), '-<>'], 
-            [Item('trajectory{}', style='custom')],
-            [Item('weights{}', style='simple')], 
-            '|'
-        ], 
-        title='Beamformer options', 
-        buttons = OKCancelButtons
-        )
-
 
     @cached_property
     def _get_digest( self ):
@@ -484,8 +445,8 @@ class BeamformerTimeTraj( BeamformerTime ):
             r0 = self.steer.env._r( tpos)
             delays = rm/c
             d_index = array(delays, dtype=int) # integer index
-            d_interp1 = delays % 1 # 1st coeff for lin interpolation
-            d_interp2 = 1-d_interp1 # 2nd coeff for lin interpolation
+            d_interp2 = delays % 1 # 2nd coeff for lin interpolation between samples
+            d_interp1 = 1-d_interp2 # 1st coeff for lin interpolation
             amp = (w/(rm*rm)).sum(1) * r0
             amp = 1.0/(amp[:, newaxis]*rm) # multiplication factor
             # now, we have to make sure that the needed data is available                 
@@ -537,19 +498,6 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
     digest = Property( 
         depends_on = ['_steer_obj.digest', 'source.digest', 'r_diag', 'weights', \
                       'rvec', 'trajectory.digest', '__class__'], 
-        )
-
-    traits_view = View(
-        [
-            [Item('steer{}', style='custom')], 
-            [Item('source{}', style='custom'), '-<>'], 
-            [Item('trajectory{}', style='custom')],
-            [Item('r_diag', label='diagonal removed')], 
-            [Item('weights{}', style='simple')], 
-            '|'
-        ], 
-        title='Beamformer options', 
-        buttons = OKCancelButtons
         )
 
     @cached_property
@@ -629,8 +577,8 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
             r0 = self.steer.env._r( tpos)
             delays = rm/c
             d_index = array(delays, dtype=int) # integer index
-            d_interp1 = delays % 1 # 1st coeff for lin interpolation
-            d_interp2 = 1-d_interp1 # 2nd coeff for lin interpolation
+            d_interp2 = delays % 1 # 2nd coeff for lin interpolation between samples
+            d_interp1 = 1-d_interp2 # 1st coeff for lin interpolation
             amp = (w/(rm*rm)).sum(1) * r0
             amp = 1.0/(amp[:, newaxis]*rm) # multiplication factor
             # now, we have to make sure that the needed data is available                 
@@ -689,16 +637,6 @@ class IntegratorSectorTime( TimeInOut ):
     digest = Property( 
         depends_on = ['sectors', 'clip', 'grid.digest', 'source.digest', \
         '__class__'], 
-        )
-
-    traits_view = View(
-        [
-            [Item('sectors', style='custom')], 
-            [Item('grid', style='custom'), '-<>'], 
-            '|'
-        ], 
-        title='Integrator', 
-        buttons = OKCancelButtons
         )
 
     @cached_property
