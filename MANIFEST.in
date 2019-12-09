@@ -1,5 +1,9 @@
-include README.rst
-include examples/*.py
-include acoular/xml/*.*
 include LICENSE
-include AUTHORS.rst
+include *.rst
+
+recursive-include acoular *
+
+graft examples
+
+graft tests
+include importtest.py
