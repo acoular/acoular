@@ -202,7 +202,7 @@ class MaskedTimeSamples( TimeSamples ):
         desc="start of valid samples")
     
     #: Index of the last sample to be considered valid.
-    stop = Trait(None, None, CLong, 
+    stop = CLong(None, 
         desc="stop of valid samples")
     
     #: Channels that are to be treated as invalid.
