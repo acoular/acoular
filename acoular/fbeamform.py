@@ -22,6 +22,7 @@
     BeamformerOrth
     BeamformerCleansc
     BeamformerCMF
+    BeamformerSODIX
     BeamformerGIB
 
     PointSpreadFunction
@@ -38,12 +39,12 @@ invert, dot, newaxis, zeros, empty, fft, float32, float64, complex64, linalg, \
 where, searchsorted, pi, multiply, sign, diag, arange, sqrt, exp, log10, int,\
 reshape, hstack, vstack, eye, tril, size, clip, tile, round, delete, \
 absolute, argsort, sort, sum, hsplit, fill_diagonal, zeros_like, isclose, \
-vdot, flatnonzero, einsum, ndarray, isscalar
+vdot, flatnonzero, einsum, ndarray, isscalar, inf
 
 from sklearn.linear_model import LassoLars, LassoLarsCV, LassoLarsIC,\
 OrthogonalMatchingPursuit, ElasticNet, OrthogonalMatchingPursuitCV, Lasso
 
-from scipy.optimize import nnls, linprog
+from scipy.optimize import nnls, linprog, fmin_l_bfgs_b
 from scipy.linalg import inv, eigh, eigvals, fractional_matrix_power
 from warnings import warn
 
@@ -1723,7 +1724,7 @@ class BeamformerCMF ( BeamformerBase ):
     #: the `scikit-learn <http://scikit-learn.org/stable/user_guide.html>`_ 
     #: module.
     method = Trait('LassoLars', 'LassoLarsBIC',  \
-        'OMPCV', 'NNLS', desc="fit method used")
+        'OMPCV', 'NNLS','fmin_l_bfgs_b', desc="fit method used")
         
     #: Weight factor for LassoLars method,
     #: defaults to 0.0.
@@ -1840,11 +1841,193 @@ class BeamformerCMF ( BeamformerBase ):
                 if self.method == 'NNLS':
                     ac[i] , x = nnls(A,R.flat)
                     ac[i] /= unit
+                    
+                elif self.method == 'fmin_l_bfgs_b':
+                    #function to minimize
+                    def function(x):
+                        #function
+                        func = x.T@A.T@A@x - 2*R.T@A@x + R.T@R                
+                        #derivitaive
+                        der = 2*A.T@A@x.T[:, newaxis] - 2*A.T@R 
+                        return  func[0].T, der[:,0]
+                    
+                    # initial guess
+                    x0 = zeros([numpoints])
+                    
+                    #boundarys - set to non negative
+                    boundarys = tile((0, +inf), (len(x0),1))
+                    #print(boundarys.shape)
+                    
+                    #test the function and derivative                    
+                    #C1 = x0.T@A.T@A@x0 - 2*R.T@A@x0 + R.T@R
+                    #C2 = 2*A.T@A@x0.T[:, newaxis] - 2*A.T@R 
+                    #print(A.shape,R.shape,A.T.shape)
+                    #print(C1[0].shape,C2[:,0].shape) 
+                    #print((2*A.T@A@x0.T[:, newaxis]).shape, (2*A.T@R).shape)
+                    #print(x0.shape, (R.T@R).shape)
+                    
+                    #optimize
+                    ac[i], yval, dicts =  fmin_l_bfgs_b(function, x0, fprime=None, args=(),  #None  derivitaive
+                                                          approx_grad=0, bounds=boundarys, m=10,   #0 True
+                                                          factr=10000000.0, pgtol=1e-05, epsilon=1e-08,
+                                                          iprint=-1, maxfun=15000, maxiter=self.max_iter,
+                                                          disp=None, callback=None, maxls=20)
+                    
+                    ac[i] /= unit
                 else:
                     model.fit(A,R[:,0])
                     ac[i] = model.coef_[:] / unit
                 fr[i] = 1
+                
 
+
+
+class BeamformerSODIX ( BeamformerBase ):
+    """
+    SODIX, see Funke,Ein Mikrofonarray-Verfahren zur Untersuchung der
+    Schallabstrahlung von Turbofantriebwerken, 2017.
+    
+    source directivity modeling in the cross-spectral matrix
+    """
+
+    #: Type of fit method to be used ('NNLS','fmin_l_bfgs_b').
+    #: These methods are implemented in 
+    #: the `scikit-learn <http://scikit-learn.org/stable/user_guide.html>`_ 
+    #: module.
+    method = Trait('fmin_l_bfgs_b', desc="fit method used")
+        
+    #: Maximum number of iterations,
+    #: tradeoff between speed and precision;
+    #: defaults to 200
+    max_iter = Int(200, 
+        desc="maximum number of iterations")
+
+    
+    #: Unit multiplier for evaluating, e.g., nPa instead of Pa. 
+    #: Values are converted back before returning. 
+    #: Temporary conversion may be necessary to not reach machine epsilon
+    #: within fitting method algorithms. Defaults to 1e9.
+    unit_mult = Float(1e9,
+                      desc = "unit multiplier")
+
+    # internal identifier
+    digest = Property( 
+        depends_on = ['freq_data.digest', 'alpha', 'method', 'max_iter', 'unit_mult', 'r_diag', 'steer.inv_digest'], 
+        )
+
+    @cached_property
+    def _get_digest( self ):
+        return digest( self )
+   
+
+    def calc(self, ac, fr):
+        """
+        Calculates the SODIX result for the frequencies defined by :attr:`freq_data`
+        
+        This is an internal helper function that is automatically called when 
+        accessing the beamformer's :attr:`~BeamformerBase.result` or calling
+        its :meth:`~BeamformerBase.synthetic` method.        
+        
+        Parameters
+        ----------
+        ac : array of floats
+            This array of dimension ([number of frequencies]x[number of gridpoints]x[number of microphones])
+            is used as call-by-reference parameter and contains the calculated
+            value after calling this method. 
+        fr : array of booleans
+            The entries of this [number of frequencies]-sized array are either 
+            'True' (if the result for this frequency has already been calculated)
+            or 'False' (for the frequencies where the result has yet to be calculated).
+            After the calculation at a certain frequency the value will be set
+            to 'True'
+        
+        Returns
+        -------
+        This method only returns values through the *ac* and *fr* parameters
+        """
+        
+        # gradient solver https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.fmin_l_bfgs_b.html
+        #copy from cmf
+                    
+        # function to repack complex matrices to deal with them in real number space
+        def realify(M):
+            return vstack([M.real,M.imag])
+
+        # prepare calculation
+        i = self.freq_data.indices
+        f = self.freq_data.fftfreq()
+        nc = self.freq_data.numchannels
+        numpoints = self.steer.grid.size
+        unit = self.unit_mult
+
+        for i in self.freq_data.indices:        
+            if not fr[i]:
+                csm = array(self.freq_data.csm[i], dtype='complex128',copy=1)
+
+                h = self.steer.transfer(f[i]).T
+                
+                # reduced Kronecker product (only where solution matrix != 0)
+                Bc = ( h[:,:,newaxis] * \
+                       h.conjugate().T[newaxis,:,:] )\
+                         .transpose(2,0,1)
+                Ac = Bc.reshape(nc*nc,numpoints)
+                
+                # get indices for upper triangular matrices (use tril b/c transposed)
+                ind = reshape(tril(ones((nc,nc))), (nc*nc,)) > 0
+                
+                ind_im0 = (reshape(eye(nc),(nc*nc,)) == 0)[ind]
+                if self.r_diag:
+                    # omit main diagonal for noise reduction
+                    ind_reim = hstack([ind_im0, ind_im0])
+                else:
+                    # take all real parts -- also main diagonal
+                    ind_reim = hstack([ones(size(ind_im0),)>0,ind_im0])
+                    ind_reim[0]=True # TODO: warum hier extra definiert??
+
+                A = realify( Ac [ind,:] )[ind_reim,:]
+                # use csm.T for column stacking reshape!
+                R = realify( reshape(csm.T, (nc*nc,1))[ind,:] )[ind_reim,:] * unit
+                    
+                if self.method == 'fmin_l_bfgs_b':
+                    #function to minimize
+                    def function(x):
+                        #function
+                        func = x.T@A.T@A@x - 2*R.T@A@x + R.T@R                
+                        #derivitaive
+                        der = 2*A.T@A@x.T[:, newaxis] - 2*A.T@R 
+                        return  func[0].T, der[:,0]
+                    
+                    # initial guess
+                    x0 = zeros([numpoints])
+                    
+                    #boundarys - set to non negative
+                    boundarys = tile((0, +inf), (len(x0),1))
+                    #print(boundarys.shape)
+                    
+                    #test the function                    
+                    #C1 = x0.T@A.T@A@x0 - 2*R.T@A@x0 + R.T@R
+                    #C2 = 2*A.T@A@x0.T[:, newaxis] - 2*A.T@R 
+                    #print(A.shape,R.shape,A.T.shape)
+                    #print(C1[0].shape,C2[:,0].shape) 
+                    #print((2*A.T@A@x0.T[:, newaxis]).shape, (2*A.T@R).shape)
+                    #print(x0.shape, (R.T@R).shape)
+                    
+                    #optimize
+                    ac[i], yval, dicts =  fmin_l_bfgs_b(function, x0, fprime=None, args=(),  #None  derivitaive
+                                                          approx_grad=0, bounds=boundarys, m=10,   #0 True
+                                                          factr=10000000.0, pgtol=1e-05, epsilon=1e-08,
+                                                          iprint=-1, maxfun=15000, maxiter=self.max_iter,
+                                                          disp=None, callback=None, maxls=20)
+                    
+                    ac[i] /= unit
+                else:
+                    pass
+                fr[i] = 1
+
+                
+                
+                
+                
 class BeamformerGIB(BeamformerEig):  #BeamformerEig #BeamformerBase
     """
     Beamforming GIB methods with different normalizations,
