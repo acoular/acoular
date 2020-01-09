@@ -1959,11 +1959,15 @@ class BeamformerSODIX ( BeamformerBase ):
         nc = self.freq_data.numchannels
         numpoints = self.steer.grid.size
         unit = self.unit_mult
+        num_mics = self.num_mics
 
         for i in self.freq_data.indices:        
             if not fr[i]:
+                
+                #measured csm
                 csm = array(self.freq_data.csm[i], dtype='complex128',copy=1)
 
+                #steering 
                 h = self.steer.transfer(f[i]).T
                 
                 # reduced Kronecker product (only where solution matrix != 0)
@@ -1974,8 +1978,8 @@ class BeamformerSODIX ( BeamformerBase ):
                 
                 # get indices for upper triangular matrices (use tril b/c transposed)
                 ind = reshape(tril(ones((nc,nc))), (nc*nc,)) > 0
-                
                 ind_im0 = (reshape(eye(nc),(nc*nc,)) == 0)[ind]
+                
                 if self.r_diag:
                     # omit main diagonal for noise reduction
                     ind_reim = hstack([ind_im0, ind_im0])
@@ -1983,22 +1987,38 @@ class BeamformerSODIX ( BeamformerBase ):
                     # take all real parts -- also main diagonal
                     ind_reim = hstack([ones(size(ind_im0),)>0,ind_im0])
                     ind_reim[0]=True # TODO: warum hier extra definiert??
-
+                    
+                    
+                # real transfer matrix 
                 A = realify( Ac [ind,:] )[ind_reim,:]
+                
+                
                 # use csm.T for column stacking reshape!
+                # real csm matrix
                 R = realify( reshape(csm.T, (nc*nc,1))[ind,:] )[ind_reim,:] * unit
                     
                 if self.method == 'fmin_l_bfgs_b':
                     #function to minimize
-                    def function(x):
+                    def function(D):
                         #function
-                        func = x.T@A.T@A@x - 2*R.T@A@x + R.T@R                
-                        #derivitaive
-                        der = 2*A.T@A@x.T[:, newaxis] - 2*A.T@R 
-                        return  func[0].T, der[:,0]
+                        
+                        #cmf functions
+                        #func =  x.T@A.T@A@x - 2*R.T@A@x + R.T@R
+                        #der = 2*A.T@A@x.T[:, newaxis] - 2*A.T@R
+                        
+                        #sodix func 
+                        Djm = D
+                        Djn = D
+                        Drm = D
+                        func = Djm.T@A.T@A@Djn - 2*R.T@A@Djm + R.T@R
+                        
+            
+                        #sodix  derivitaive
+                        derdrl = -4 * Drm @  A @ (R  -  Djm.T@A.T@A@Djn)  
+                        return  func[0].T, derdrl[:,0]
                     
                     # initial guess
-                    x0 = zeros([numpoints])
+                    x0 = zeros([numpoints,num_mics])
                     
                     #boundarys - set to non negative
                     boundarys = tile((0, +inf), (len(x0),1))
@@ -2013,7 +2033,7 @@ class BeamformerSODIX ( BeamformerBase ):
                     #print(x0.shape, (R.T@R).shape)
                     
                     #optimize
-                    ac[i], yval, dicts =  fmin_l_bfgs_b(function, x0, fprime=None, args=(),  #None  derivitaive
+                    ac[i,m], yval, dicts =  fmin_l_bfgs_b(function, x0, fprime=None, args=(),  #None  derivitaive
                                                           approx_grad=0, bounds=boundarys, m=10,   #0 True
                                                           factr=10000000.0, pgtol=1e-05, epsilon=1e-08,
                                                           iprint=-1, maxfun=15000, maxiter=self.max_iter,
