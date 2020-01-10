@@ -607,7 +607,7 @@ class BeamformerBase( HasPrivateTraits ):
                          'for all queried frequencies. Check '
                          'freq_data.ind_low and freq_data.ind_high!',
                           Warning, stacklevel = 2)
-        return h.reshape(self.steer.grid.shape)
+        return h#.reshape(self.steer.grid.shape)
 
 
     def integrate(self, sector):
@@ -1918,6 +1918,125 @@ class BeamformerSODIX ( BeamformerBase ):
     @cached_property
     def _get_digest( self ):
         return digest( self )
+    
+    @property_depends_on('ext_digest')
+    def _get_result ( self ):
+        """
+        This is the :attr:`result` getter routine.
+        The beamforming result is either loaded or calculated.
+        """
+        f = self.freq_data
+        numfreq = f.fftfreq().shape[0]# block_size/2 + 1steer_obj
+        _digest = ''
+        while self.digest != _digest:
+            _digest = self.digest
+            self._assert_equal_channels()
+            if not ( # if result caching is active
+                    config.global_caching == 'none' or 
+                    (config.global_caching == 'individual' and self.cached == False)
+                ):
+#                print("get filecache..")
+                (ac,fr) = self._get_filecache() 
+                if ac and fr: 
+#                    print("cached data existent")
+                    if not fr[f.ind_low:f.ind_high].all():
+#                        print("calculate missing results")                            
+                        if config.global_caching == 'readonly': 
+                            (ac, fr) = (ac[:], fr[:])
+                        self.calc(ac,fr)
+                        self.h5f.flush()
+#                    else:
+#                        print("cached results are complete! return.")
+                else:
+#                    print("no caching, calculate result")
+                    ac = zeros((numfreq, self.steer.grid.size*self.steer.mics.num_mics), dtype=self.precision)
+                    fr = zeros(numfreq, dtype='int8')
+                    self.calc(ac,fr)
+            else:
+#                print("no caching activated, calculate result")
+                ac = zeros((numfreq, self.steer.grid.size*self.steer.mics.num_mics), dtype=self.precision)
+                fr = zeros(numfreq, dtype='int8')
+                self.calc(ac,fr)
+        return ac
+    
+    def synthetic( self, f, num=0):
+        """
+        Evaluates the beamforming result for an arbitrary frequency band.
+        
+        Parameters
+        ----------
+        f: float
+            Band center frequency. 
+        num : integer
+            Controls the width of the frequency bands considered; defaults to
+            0 (single frequency line).
+            
+            ===  =====================
+            num  frequency band width
+            ===  =====================
+            0    single frequency line
+            1    octave band
+            3    third-octave band
+            n    1/n-octave band
+            ===  =====================
+              
+        Returns
+        -------
+        array of floats
+            The synthesized frequency band values of the beamforming result at 
+            each grid point .
+            Note that the frequency resolution and therefore the bandwidth 
+            represented by a single frequency line depends on 
+            the :attr:`sampling frequency<acoular.sources.SamplesGenerator.sample_freq>` and 
+            used :attr:`FFT block size<acoular.spectra.PowerSpectra.block_size>`.
+        """
+        res = self.result # trigger calculation
+        freq = self.freq_data.fftfreq()
+        if len(freq) == 0:
+            return None
+        
+        indices = self.freq_data.indices
+        
+        if num == 0:
+            # single frequency line
+            ind = searchsorted(freq, f)
+            if ind >= len(freq):
+                warn('Queried frequency (%g Hz) not in resolved '
+                              'frequency range. Returning zeros.' % f, 
+                              Warning, stacklevel = 2)
+                h = zeros_like(res[0])
+            else:
+                if freq[ind] != f:
+                    warn('Queried frequency (%g Hz) not in set of '
+                         'discrete FFT sample frequencies. '
+                         'Using frequency %g Hz instead.' % (f,freq[ind]), 
+                         Warning, stacklevel = 2)
+                if not (ind in indices):
+                    warn('Beamforming result may not have been calculated '
+                         'for queried frequency. Check '
+                         'freq_data.ind_low and freq_data.ind_high!',
+                          Warning, stacklevel = 2)
+                h = res[ind]
+        else:
+            # fractional octave band
+            f1 = f*2.**(-0.5/num)
+            f2 = f*2.**(+0.5/num)
+            ind1 = searchsorted(freq, f1)
+            ind2 = searchsorted(freq, f2)
+            if ind1 == ind2:
+                warn('Queried frequency band (%g to %g Hz) does not '
+                     'include any discrete FFT sample frequencies. '
+                     'Returning zeros.' % (f1,f2), 
+                     Warning, stacklevel = 2)
+                h = zeros_like(res[0])
+            else:
+                h = sum(res[ind1:ind2], 0)
+                if not ((ind1 in indices) and (ind2 in indices)):
+                    warn('Beamforming result may not have been calculated '
+                         'for all queried frequencies. Check '
+                         'freq_data.ind_low and freq_data.ind_high!',
+                          Warning, stacklevel = 2)
+        return h.reshape([self.steer.grid.size,self.steer.mics.num_mics])
    
 
     def calc(self, ac, fr):
@@ -1933,7 +2052,7 @@ class BeamformerSODIX ( BeamformerBase ):
         ac : array of floats
             This array of dimension ([number of frequencies]x[number of gridpoints]x[number of microphones])
             is used as call-by-reference parameter and contains the calculated
-            value after calling this method. 
+          #/= unit   value after calling this method. 
         fr : array of booleans
             The entries of this [number of frequencies]-sized array are either 
             'True' (if the result for this frequency has already been calculated)
@@ -1958,18 +2077,15 @@ class BeamformerSODIX ( BeamformerBase ):
         f = self.freq_data.fftfreq()
         nc = self.freq_data.numchannels
         numpoints = self.steer.grid.size
-        unit = self.unit_mult
-        num_mics = self.num_mics
+        num_mics = self.steer.mics.num_mics
 
         for i in self.freq_data.indices:        
             if not fr[i]:
                 
                 #measured csm
                 csm = array(self.freq_data.csm[i], dtype='complex128',copy=1)
-
                 #steering 
-                h = self.steer.transfer(f[i]).T
-                
+                h = self.steer.transfer(f[i]).T           
                 # reduced Kronecker product (only where solution matrix != 0)
                 Bc = ( h[:,:,newaxis] * \
                        h.conjugate().T[newaxis,:,:] )\
@@ -1987,59 +2103,68 @@ class BeamformerSODIX ( BeamformerBase ):
                     # take all real parts -- also main diagonal
                     ind_reim = hstack([ones(size(ind_im0),)>0,ind_im0])
                     ind_reim[0]=True # TODO: warum hier extra definiert??
-                    
-                    
+                       
                 # real transfer matrix 
                 A = realify( Ac [ind,:] )[ind_reim,:]
                 
-                
                 # use csm.T for column stacking reshape!
                 # real csm matrix
-                R = realify( reshape(csm.T, (nc*nc,1))[ind,:] )[ind_reim,:] * unit
+                R = realify( reshape(csm.T, (nc*nc,1))[ind,:] )[ind_reim,:] #* unit
                     
                 if self.method == 'fmin_l_bfgs_b':
                     #function to minimize
-                    def function(D):
-                        #function
+                    def function(D): 
+                        '''
+                        Parameters
+                        ----------
+                        D 
+                        [numpoints*num_mics]
                         
-                        #cmf functions
-                        #func =  x.T@A.T@A@x - 2*R.T@A@x + R.T@R
-                        #der = 2*A.T@A@x.T[:, newaxis] - 2*A.T@R
+                        Returns
+                        -------
+                        func
+                             [num_mics]
+                        derdrl
+                            [num_mics*numpoints].
+
+                        '''
+                                           
+                        #sodix function 
+                        Djm = D.reshape([numpoints,num_mics])   
+                        Djn = D.reshape([numpoints,num_mics])
+                        Drm = D.reshape([numpoints,num_mics])               
+                        #daad = (Djm.T@A.T@A@Djn).T   @  (Djm.T@A.T@A@Djn) # [nummics]                       
+                        #daad = (Djm.T@A.T@A@Djn).T  
+                        #twoRAd = 2 * R.T@A@Djm @ (R.T@A@Djm).T
+                        #csmhoch2 = R.T@R
+                        #func = daad -  twoRAd + csmhoch2
                         
-                        #sodix func 
-                        Djm = D
-                        Djn = D
-                        Drm = D
-                        func = Djm.T@A.T@A@Djn - 2*R.T@A@Djm + R.T@R
+                        func = (R  - realify( reshape(Djm.T@A.T@A@Djn, (nc*nc,1))[ind,:] )[ind_reim,:]).T@(R  - realify( reshape(Djm.T@A.T@A@Djn, (nc*nc,1))[ind,:] )[ind_reim,:]) 
                         
-            
                         #sodix  derivitaive
-                        derdrl = -4 * Drm @  A @ (R  -  Djm.T@A.T@A@Djn)  
-                        return  func[0].T, derdrl[:,0]
+                        derdrl = (-4 * Drm.T *  (A.T @ (R  - realify( reshape(Djm.T@A.T@A@Djn, (nc*nc,1))[ind,:] )[ind_reim,:])).flatten()).flatten()  
+                        print(derdrl.shape) 
+                        return  func[0].T, derdrl[:]
                     
                     # initial guess
-                    x0 = zeros([numpoints,num_mics])
+                    D0 = ones([numpoints,num_mics])
                     
                     #boundarys - set to non negative
-                    boundarys = tile((0, +inf), (len(x0),1))
+                    boundarys = tile((0, +inf), (numpoints*num_mics,1))
                     #print(boundarys.shape)
                     
                     #test the function                    
-                    #C1 = x0.T@A.T@A@x0 - 2*R.T@A@x0 + R.T@R
-                    #C2 = 2*A.T@A@x0.T[:, newaxis] - 2*A.T@R 
                     #print(A.shape,R.shape,A.T.shape)
-                    #print(C1[0].shape,C2[:,0].shape) 
-                    #print((2*A.T@A@x0.T[:, newaxis]).shape, (2*A.T@R).shape)
-                    #print(x0.shape, (R.T@R).shape)
+                    #print(D0.shape, (R.T@R).shape)
                     
                     #optimize
-                    ac[i,m], yval, dicts =  fmin_l_bfgs_b(function, x0, fprime=None, args=(),  #None  derivitaive
-                                                          approx_grad=0, bounds=boundarys, m=10,   #0 True
-                                                          factr=10000000.0, pgtol=1e-05, epsilon=1e-08,
+                    ac[i], yval, dicts =  fmin_l_bfgs_b(function, D0, fprime=None, args=(),  
+                                                          approx_grad=0, bounds=boundarys, m=10, #0 True #boundarys
+                                                          factr=1000.0, pgtol=1e-08, epsilon=1e-08,
                                                           iprint=-1, maxfun=15000, maxiter=self.max_iter,
                                                           disp=None, callback=None, maxls=20)
                     
-                    ac[i] /= unit
+                    ac[i] #/= unit
                 else:
                     pass
                 fr[i] = 1
