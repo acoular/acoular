@@ -23,7 +23,7 @@ from six import next
 from numpy import array, sqrt, ones, empty, newaxis, uint32, arange, dot, int64, sum
 from traits.api import Float, Int, Property, Trait, Delegate, \
 cached_property, Tuple, HasPrivateTraits, CLong, File, Instance, Any, \
-on_trait_change, List, CArray
+on_trait_change, List, ListInt, CArray
 from os import path
 from warnings import warn
 
@@ -202,11 +202,11 @@ class MaskedTimeSamples( TimeSamples ):
         desc="start of valid samples")
     
     #: Index of the last sample to be considered valid.
-    stop = CLong(None, 
+    stop = Trait(None, None, CLong, 
         desc="stop of valid samples")
     
     #: Channels that are to be treated as invalid.
-    invalid_channels = List(
+    invalid_channels = ListInt(
         desc="list of invalid channels")
     
     #: Channel mask to serve as an index for all valid channels, is set automatically.

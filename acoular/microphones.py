@@ -15,7 +15,7 @@
 # imports from other packages
 from numpy import array, average
 from traits.api import HasPrivateTraits, Property, File, \
-CArray, List, cached_property, on_trait_change, ListInt
+CArray, cached_property, on_trait_change, ListInt
 from os import path
 
 from .internal import digest
@@ -86,13 +86,11 @@ class MicGeom( HasPrivateTraits ):
 
     @cached_property
     def _get_center( self ):
-        if self.from_file:
+        if self.mpos.any():
             center = average(self.mpos,axis=1)
             # set very small values to zero
             center[abs(center) < 1e-16] = 0.
-        else:
-            center = None
-        return center
+            return center
 
     @on_trait_change('basename')
     def import_mpos( self ):
