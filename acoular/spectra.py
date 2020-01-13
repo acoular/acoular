@@ -71,7 +71,7 @@ class PowerSpectra( HasPrivateTraits ):
     #: Index of lowest frequency line to compute, integer, defaults to 1,
     #: is used only by objects that fetch the csm, PowerSpectra computes every
     #: frequency line.
-    ind_low = Range(1, 
+    ind_low = Int(1, 
         desc="index of lowest frequency line")
 
     #: Index of highest frequency line to compute, integer, 
@@ -144,8 +144,6 @@ class PowerSpectra( HasPrivateTraits ):
     #: readonly.
     eve = Property( 
         desc="eigenvectors of cross spectral matrix")
-
-
 
     # internal identifier
     digest = Property( 

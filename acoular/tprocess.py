@@ -39,7 +39,7 @@ from numpy.matlib import repmat
 
 from scipy.spatial import Delaunay
 from scipy.interpolate import LinearNDInterpolator,splrep, splev, CloughTocher2DInterpolator, CubicSpline, Rbf
-from traits.api import Float, Int, CLong, Bool, \
+from traits.api import Float, Int, CLong, Bool, ListInt, \
 File, Property, Instance, Trait, Delegate, \
 cached_property, on_trait_change, List, CArray, Dict
 
@@ -119,7 +119,7 @@ class MaskedTimeInOut ( TimeInOut ):
         desc="stop of valid samples")
     
     #: Channels that are to be treated as invalid.
-    invalid_channels = List(
+    invalid_channels = ListInt(
         desc="list of invalid channels")
     
     #: Channel mask to serve as an index for all valid channels, is set automatically.
@@ -1440,7 +1440,7 @@ class WriteWAV( TimeInOut ):
     basename = Property( depends_on = 'digest')
        
     #: Channel(s) to save. List can only contain one or two channels.
-    channels = List(desc="channel to save")
+    channels = ListInt(desc="channel to save")
        
     # internal identifier
     digest = Property( depends_on = ['source.digest', 'channels', '__class__'])

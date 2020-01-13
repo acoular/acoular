@@ -1417,7 +1417,7 @@ class BeamformerOrth (BeamformerBase):
 
     #: List of components to consider, use this to directly set the eigenvalues
     #: used in the beamformer. Alternatively, set :attr:`n`.
-    eva_list = CArray(
+    eva_list = CArray(dtype=int,
         desc="components")
         
     #: Number of components to consider, defaults to 1. If set, 
