@@ -607,7 +607,7 @@ class BeamformerBase( HasPrivateTraits ):
                          'for all queried frequencies. Check '
                          'freq_data.ind_low and freq_data.ind_high!',
                           Warning, stacklevel = 2)
-        return h#.reshape(self.steer.grid.shape)
+        return h.reshape(self.steer.grid.shape)
 
 
     def integrate(self, sector):
