@@ -38,12 +38,12 @@ invert, dot, newaxis, zeros, empty, fft, float32, float64, complex64, linalg, \
 where, searchsorted, pi, multiply, sign, diag, arange, sqrt, exp, log10, int,\
 reshape, hstack, vstack, eye, tril, size, clip, tile, round, delete, \
 absolute, argsort, sort, sum, hsplit, fill_diagonal, zeros_like, isclose, \
-vdot, flatnonzero, einsum, ndarray, isscalar
+vdot, flatnonzero, einsum, ndarray, isscalar, inf
 
 from sklearn.linear_model import LassoLars, LassoLarsCV, LassoLarsIC,\
 OrthogonalMatchingPursuit, ElasticNet, OrthogonalMatchingPursuitCV, Lasso
 
-from scipy.optimize import nnls, linprog
+from scipy.optimize import nnls, linprog, fmin_l_bfgs_b
 from scipy.linalg import inv, eigh, eigvals, fractional_matrix_power
 from warnings import warn
 
@@ -1723,7 +1723,7 @@ class BeamformerCMF ( BeamformerBase ):
     #: the `scikit-learn <http://scikit-learn.org/stable/user_guide.html>`_ 
     #: module.
     method = Trait('LassoLars', 'LassoLarsBIC',  \
-        'OMPCV', 'NNLS', desc="fit method used")
+        'OMPCV', 'NNLS','fmin_l_bfgs_b', desc="fit method used")
         
     #: Weight factor for LassoLars method,
     #: defaults to 0.0.
@@ -1840,11 +1840,37 @@ class BeamformerCMF ( BeamformerBase ):
                 if self.method == 'NNLS':
                     ac[i] , x = nnls(A,R.flat)
                     ac[i] /= unit
+                    
+                elif self.method == 'fmin_l_bfgs_b':
+                    #function to minimize
+                    def function(x):
+                        #function
+                        func = x.T@A.T@A@x - 2*R.T@A@x + R.T@R                
+                        #derivitaive
+                        der = 2*A.T@A@x.T[:, newaxis] - 2*A.T@R 
+                        return  func[0].T, der[:,0]
+                    
+                    # initial guess
+                    x0 = ones([numpoints])   
+                    #boundarys - set to non negative
+                    boundarys = tile((0, +inf), (len(x0),1))
+                    
+                    #optimize
+                    ac[i], yval, dicts =  fmin_l_bfgs_b(function, x0, fprime=None, args=(),  
+                                                          approx_grad=0, bounds=boundarys, m=10,
+                                                          factr=10000000.0, pgtol=1e-05, epsilon=1e-08,
+                                                          iprint=-1, maxfun=15000, maxiter=self.max_iter,
+                                                          disp=None, callback=None, maxls=20)
+                    
+                    ac[i] /= unit
                 else:
                     model.fit(A,R[:,0])
                     ac[i] = model.coef_[:] / unit
                 fr[i] = 1
-
+        
+                
+                
+                
 class BeamformerGIB(BeamformerEig):  #BeamformerEig #BeamformerBase
     """
     Beamforming GIB methods with different normalizations,
