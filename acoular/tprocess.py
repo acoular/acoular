@@ -554,12 +554,25 @@ class SpatialInterpolator(TimeInOut):
     generator :meth:`result`
     """
     #: :class:`~acoular.microphones.MicGeom` object that provides the real microphone locations.
-    mpos_real = Instance(MicGeom, 
+    mics = Instance(MicGeom(), 
         desc="microphone geometry")
     
     #: :class:`~acoular.microphones.MicGeom` object that provides the virtual microphone locations.
-    mpos_virtual = Instance(MicGeom, 
+    mics_virtual = Property(
         desc="microphone geometry")
+    
+    _mics_virtual = Instance(MicGeom,
+        desc="internal microphone geometry;internal usage, read only")
+        
+    def _get_mics_virtual(self):
+        if not self._mics_virtual and self.mics:
+            self._mics_virtual=MicGeom(**self.mics.__dict__)
+        else:
+            return self._mics_virtual
+    
+    def _set_mics_virtual(self, mics_virtual):
+        self._mics_virtual = mics_virtual
+
     
     #: Data source; :class:`~acoular.sources.SamplesGenerator` or derived object.
     source = Instance(SamplesGenerator)
@@ -593,15 +606,18 @@ class SpatialInterpolator(TimeInOut):
     Q = CArray(dtype=float64, shape=(3, 3), value=identity(3))
     
     
-    #: Stores the output of :meth:`_reduced_interp_dim_core_func`; Read-Only
-    _virtNewCoord_func = Property(depends_on=['mpos_real.digest', 'mpos_virtual.digest', 'method','array_dimension','interp_at_zero'])
+    #: Stores the output of :meth:`_virtNewCoord_func`; Read-Only
+    _virtNewCoord_func = Property(depends_on=['mics.digest',
+                                              'mics_virtual.digest',
+                                              'method','array_dimension',
+                                              'interp_at_zero'])
     
     #: internal identifier
-    digest = Property(depends_on=['mpos_real.digest', 'mpos_virtual.digest', 'source.digest', \
+    digest = Property(depends_on=['mics.digest', 'mics_virtual.digest', 'source.digest', \
                                    'method','array_dimension', 'Q', 'interp_at_zero'])
     
     def _get_numchannels(self):
-        return self.mpos_virtual.num_mics
+        return self.mics_virtual.num_mics
     
     @cached_property
     def _get_digest( self ):
@@ -609,15 +625,15 @@ class SpatialInterpolator(TimeInOut):
     
     @cached_property
     def _get_virtNewCoord(self):
-        return self._virtNewCoord_func(self.mpos_real.mpos, self.mpos_virtual.mpos,self.method, self.array_dimension)
+        return self._virtNewCoord_func(self.mics.mpos, self.mics_virtual.mpos,self.method, self.array_dimension)
         
     
     def sinc_mic(self, r):
-        """
+        """ 
         Modified Sinc function for Radial Basis function approximation
         
         """
-        return sinc((r*self.mpos_virtual.mpos.shape[1])/(pi))    
+        return sinc((r*self.mics_virtual.mpos.shape[1])/(pi))    
     
     def _virtNewCoord_func(self, mic, micVirt, method ,array_dimension, interp_at_zero = False):
         """ 
@@ -790,12 +806,11 @@ class SpatialInterpolator(TimeInOut):
         #number of time samples
         nTime = p.shape[0]
         #number of virtual mixcs 
-        nVirtMics = self.mpos_virtual.mpos.shape[1]
+        nVirtMics = self.mics_virtual.mpos.shape[1]
         # mesh and projection onto polar Coordinates
         meshList, virtNewCoord, newCoord = self._get_virtNewCoord()
         # pressure interpolation init     
         pInterp = zeros((nTime,nVirtMics))
-        
         
         if self.interp_at_zero:
             #interpolate point at 0 in Kartesian CO
@@ -955,8 +970,10 @@ class SpatialInterpolatorRotation(SpatialInterpolator):
     #: Angle data from AngleTracker class
     angle_source = Instance(AngleTracker)
     
-    # internal identifier
-    digest = Property( depends_on = ['source.digest', 'angle_source.digest', 'mpos_real.digest', 'mpos_virtual.digest', 'Q'])
+    #: Internal identifier
+    digest = Property( depends_on = ['source.digest', 'angle_source.digest',\
+                                     'mics.digest', 'mics_virtual.digest', \
+                                     'method','array_dimension', 'Q', 'interp_at_zero'])
     
     @cached_property
     def _get_digest( self ):
@@ -1000,7 +1017,9 @@ class SpatialInterpolatorConstantRotation(SpatialInterpolator):
     rotational_speed = Float(0.0)
     
     # internal identifier
-    digest = Property( depends_on = ['source.digest', 'rotational_speed', 'Q', 'mpos_real.digest' 'mpos_virtual.digest'])
+    digest = Property( depends_on = ['source.digest','mics.digest', \
+                                     'mics_virtual.digest','method','array_dimension', \
+                                     'Q', 'interp_at_zero','rotational_speed'])
     
     @cached_property
     def _get_digest( self ):

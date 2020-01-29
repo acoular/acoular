@@ -1852,7 +1852,7 @@ class BeamformerCMF ( BeamformerBase ):
                         return  func[0].T, der[:,0]
                     
                     # initial guess
-                    x0 = zeros([numpoints])
+                    x0 = ones([numpoints])
                     
                     #boundarys - set to non negative
                     boundarys = tile((0, +inf), (len(x0),1))
