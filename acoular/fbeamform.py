@@ -22,7 +22,6 @@
     BeamformerOrth
     BeamformerCleansc
     BeamformerCMF
-    BeamformerSODIX
     BeamformerGIB
 
     PointSpreadFunction

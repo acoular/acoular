@@ -566,9 +566,8 @@ class SpatialInterpolator(TimeInOut):
         
     def _get_mics_virtual(self):
         if not self._mics_virtual and self.mics:
-            self._mics_virtual=MicGeom(**self.mics.__dict__)
-        else:
-            return self._mics_virtual
+            self._mics_virtual = self.mics
+        return self._mics_virtual
     
     def _set_mics_virtual(self, mics_virtual):
         self._mics_virtual = mics_virtual
