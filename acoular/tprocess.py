@@ -1518,6 +1518,13 @@ class WriteH5( TimeInOut ):
     #: automatically generated from a time stamp.
     name = File(filter=['*.h5'], 
         desc="name of data file")    
+
+    #: Number of samples to write to file by `result` method. 
+    #: defaults to -1 (write as long as source yields data). 
+    numsamples_write = Int(-1)
+    
+    # flag that can be raised to stop file writing
+    writeflag = Bool(True)
       
     # internal identifier
     digest = Property( depends_on = ['source.digest', '__class__'])
@@ -1577,11 +1584,28 @@ class WriteH5( TimeInOut ):
             when available and prevents unnecassary recalculation.
         """
         
+        self.writeflag = True
         f5h = self.get_initialized_file()
         ac = f5h.get_data_by_reference('time_data')
-        for data in self.source.result(num):
-            f5h.append_data(ac,data)
+        scount = 0
+        stotal = self.numsamples_write
+        source_gen = self.source.result(num)
+        while self.writeflag: 
+            sleft = stotal-scount
+            if not stotal == -1 and sleft > 0: 
+                anz = min(num,sleft)
+            elif stotal == -1:
+                anz = num
+            else:
+                break
+            try:
+                data = next(source_gen)
+            except:
+                break
+            f5h.append_data(ac,data[:anz])
             yield data
+            f5h.flush()
+            scount += anz
         f5h.close()
         
 class LockedGenerator():
