@@ -437,24 +437,24 @@ class RotatingFlow( FlowField ):
         x, y, z = xx-self.origin
 
         #polar coord and rotational speed
-        r = sqrt(x*x+y*y)
-        phi = arctan2(y, x)
+        #r = sqrt(x*x+y*y)
+        #phi = arctan2(y, x)
         omega = self._get_omega()
 
         #velocity vector
-        U = omega * r * sin(phi)
-        V = -omega * r * cos(phi)
+        U = omega * y   # omega * r * sin(phi)
+        V = -omega * x  # omega * r * cos(phi)
         W = self.v0 
         
         #to avoid repeating calculation
-        sinPhi = sin(phi)
-        cosPhi = cos(phi)
+        #sinPhi = sin(phi)
+        #cosPhi = cos(phi)
         #jacobian 
-        Udx = omega * ( sinPhi * x/r +  cosPhi * y/r)
-        Vdx = omega * (-cosPhi * x/r +  sinPhi * y/r)
+        Udx = 0     #omega * ( sinPhi * x/r -  cosPhi * y/r)
+        Vdx = - omega #omega * (-cosPhi * x/r +  sinPhi * y/r)
 
-        Udy = omega * ( sinPhi * y/r + cosPhi * x/r)
-        Vdy = omega * (-cosPhi * y/r + sinPhi * x/r)
+        Udy = omega #omega * ( sinPhi * y/r + cosPhi * x/r)
+        Vdy = 0     #omega * (-cosPhi * y/r + sinPhi * x/r)
 
 
         # flow field
