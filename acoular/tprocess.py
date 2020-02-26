@@ -844,7 +844,7 @@ class SpatialInterpolator(TimeInOut):
                 elif self.method == 'spline':
                     #scipy cubic spline interpolation
                     SplineInterp = CubicSpline(append(x,(2*pi)+x[0]), append(pHelp[cntTime, :],pHelp[cntTime, :][0]), axis=0, bc_type='periodic', extrapolate=None)
-                    pInterp[cntTime] = SplineInterp(xInterp[cntTime, :]+pi)    
+                    pInterp[cntTime] = SplineInterp(xInterp[cntTime, :])    
                     
                 elif self.method == 'sinc':
                     #compute using 3-D Rbfs for sinc
@@ -852,7 +852,7 @@ class SpatialInterpolator(TimeInOut):
                                  newCoord[2] ,
                                  pHelp[cntTime, :], function=self.sinc_mic)  # radial basis function interpolator instance
                     
-                    pInterp[cntTime] = rbfi(xInterp[cntTime, :]+pi,
+                    pInterp[cntTime] = rbfi(xInterp[cntTime, :],
                                             virtNewCoord[1],
                                             virtNewCoord[2]) 
                     
@@ -862,7 +862,7 @@ class SpatialInterpolator(TimeInOut):
                                  newCoord[2] ,
                                  pHelp[cntTime, :], function='cubic')  # radial basis function interpolator instance
                     
-                    pInterp[cntTime] = rbfi(xInterp[cntTime, :]+pi,
+                    pInterp[cntTime] = rbfi(xInterp[cntTime, :],
                                             virtNewCoord[1],
                                             virtNewCoord[2]) 
                     
@@ -909,6 +909,18 @@ class SpatialInterpolator(TimeInOut):
                                 newCoord[1],
                                 newCoord[2],
                                pHelp[cntTime, :len(newCoord[0])], function='cubic')  # radial basis function interpolator instance
+                    
+                    virtshiftcoord= array([xInterp[cntTime, :],virtNewCoord[1], virtNewCoord[2]])
+                    pInterp[cntTime] = rbfi(virtshiftcoord[0],
+                                            virtshiftcoord[1],
+                                            virtshiftcoord[2]) 
+                
+                elif self.method == 'rbf-multiquadric':
+                    #compute using 3-D Rbfs   self.CylToCart()
+                    rbfi = Rbf( newCoord[0],
+                                newCoord[1],
+                                newCoord[2],
+                               pHelp[cntTime, :len(newCoord[0])], function='multiquadric')  # radial basis function interpolator instance
                     
                     virtshiftcoord= array([xInterp[cntTime, :],virtNewCoord[1], virtNewCoord[2]])
                     pInterp[cntTime] = rbfi(virtshiftcoord[0],
