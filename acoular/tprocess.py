@@ -28,8 +28,6 @@
 """
 
 # imports from other packages
-from six import next
-
 from numpy import array, empty, empty_like, pi, sin, sqrt, zeros, newaxis, unique, \
 int16, cross, isclose, zeros_like, dot, nan, concatenate, isnan, nansum, float64, \
 identity, argsort, interp, arange, append, linspace, flatnonzero, argmin, argmax, \

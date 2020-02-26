@@ -13,7 +13,6 @@
     synthetic
 """
 from warnings import warn
-from six.moves import xrange  # solves the xrange/range issue for python2/3: in py3 'xrange' is now treated as 'range' and in py2 nothing changes
 
 from numpy import array, ones, hanning, hamming, bartlett, blackman, \
 dot, newaxis, zeros, empty, fft, linalg, \
@@ -222,7 +221,7 @@ class PowerSpectra( HasPrivateTraits ):
         
         # create the full csm matrix via transposingand complex conj.
         csmLower = csmUpper.conj().transpose(0,2,1)
-        [fill_diagonal(csmLower[cntFreq, :, :], 0) for cntFreq in xrange(csmLower.shape[0])]
+        [fill_diagonal(csmLower[cntFreq, :, :], 0) for cntFreq in range(csmLower.shape[0])]
         csm = csmLower + csmUpper
 
         # onesided spectrum: multiplication by 2.0=sqrt(2)^2
