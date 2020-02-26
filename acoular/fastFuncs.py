@@ -9,7 +9,6 @@ computational costs. All functionalities are optimized via NUMBA.
 """
 import numpy as np
 import numba as nb
-from six.moves import xrange  # solves the xrange/range issue for python2/3: in py3 'xrange' is now treated as 'range' and in py2 nothing changes
 
 cachedOption = True  # if True: saves the numba func as compiled func in sub directory
 parallelOption = 'parallel'  # if numba.guvectorize is used: 'CPU' for single threading; 'parallel' for multithreading; 'cuda' for calculating on GPU
@@ -204,15 +203,15 @@ def _freqBeamformer_Formulation1AkaClassic_FullCSM(csm, distGridToArrayCenter, d
     steerVec = np.zeros((nMics), np.complex128)
 
     # building steering vector: in order to save some operation -> some normalization steps are applied after mat-vec-multipl.
-    for cntMics in xrange(nMics):
+    for cntMics in range(nMics):
         expArg = np.float32(waveNumber[0] * distGridToAllMics[cntMics])
         steerVec[cntMics] = (np.cos(expArg) - 1j * np.sin(expArg))
 
     # performing matrix-vector-multiplication (see bottom of information header of 'beamformerFreq)
     scalarProd = 0.0
-    for cntMics in xrange(nMics):
+    for cntMics in range(nMics):
         leftVecMatrixProd = 0.0 + 0.0j
-        for cntMics2 in xrange(cntMics):  # calculate 'steer^H * CSM' of upper-triangular-part of csm (without diagonal)
+        for cntMics2 in range(cntMics):  # calculate 'steer^H * CSM' of upper-triangular-part of csm (without diagonal)
             leftVecMatrixProd += csm[cntMics2, cntMics] * steerVec[cntMics2].conjugate()
         scalarProd += 2 * (leftVecMatrixProd * steerVec[cntMics]).real  # use that csm is Hermitian (lower triangular of csm can be reduced to factor '2')
         scalarProd += (csm[cntMics, cntMics] * steerVec[cntMics].conjugate() * steerVec[cntMics]).real  # include diagonal of csm
@@ -229,15 +228,15 @@ def _freqBeamformer_Formulation1AkaClassic_CsmRemovedDiag(csm, distGridToArrayCe
     steerVec = np.zeros((nMics), np.complex128)
 
     # building steering vector: in order to save some operation -> some normalization steps are applied after mat-vec-multipl.
-    for cntMics in xrange(nMics):
+    for cntMics in range(nMics):
         expArg = np.float32(waveNumber[0] * distGridToAllMics[cntMics])
         steerVec[cntMics] = (np.cos(expArg) - 1j * np.sin(expArg))
 
     # performing matrix-vector-multiplication (see bottom of information header of 'beamformerFreq')
     scalarProd = 0.0
-    for cntMics in xrange(nMics):
+    for cntMics in range(nMics):
         leftVecMatrixProd = 0.0 + 0.0j
-        for cntMics2 in xrange(cntMics):  # calculate 'steer^H * CSM' of upper-triangular-part of csm (without diagonal)
+        for cntMics2 in range(cntMics):  # calculate 'steer^H * CSM' of upper-triangular-part of csm (without diagonal)
             leftVecMatrixProd += csm[cntMics2, cntMics] * steerVec[cntMics2].conjugate()
         scalarProd += 2 * (leftVecMatrixProd * steerVec[cntMics]).real  # use that csm is Hermitian (lower triangular of csm can be reduced to factor '2')
     normalizeFactor = nMics  # specific normalization of steering vector formulation
@@ -254,16 +253,16 @@ def _freqBeamformer_Formulation2AkaInverse_FullCSM(csm, distGridToArrayCenter, d
 
     # building steering vector: in order to save some operation -> some normalization steps are applied after mat-vec-multipl.
     helpNormalize = 0.0
-    for cntMics in xrange(nMics):
+    for cntMics in range(nMics):
         helpNormalize += distGridToAllMics[cntMics] * distGridToAllMics[cntMics]
         expArg = np.float32(waveNumber[0] * distGridToAllMics[cntMics])
         steerVec[cntMics] = (np.cos(expArg) - 1j * np.sin(expArg)) * distGridToAllMics[cntMics]  # r_{t,i}-normalization is handled here
 
     # performing matrix-vector-multiplication (see bottom of information header of 'beamformerFreq')
     scalarProd = 0.0
-    for cntMics in xrange(nMics):
+    for cntMics in range(nMics):
         leftVecMatrixProd = 0.0 + 0.0j
-        for cntMics2 in xrange(cntMics):  # calculate 'steer^H * CSM' of upper-triangular-part of csm (without diagonal)
+        for cntMics2 in range(cntMics):  # calculate 'steer^H * CSM' of upper-triangular-part of csm (without diagonal)
             leftVecMatrixProd += csm[cntMics2, cntMics] * steerVec[cntMics2].conjugate()
         scalarProd += 2 * (leftVecMatrixProd * steerVec[cntMics]).real  # use that csm is Hermitian (lower triangular of csm can be reduced to factor '2')
         scalarProd += (csm[cntMics, cntMics] * steerVec[cntMics].conjugate() * steerVec[cntMics]).real  # include diagonal of csm
@@ -282,16 +281,16 @@ def _freqBeamformer_Formulation2AkaInverse_CsmRemovedDiag(csm, distGridToArrayCe
 
     # building steering vector: in order to save some operation -> some normalization steps are applied after mat-vec-multipl.
     helpNormalize = 0.0
-    for cntMics in xrange(nMics):
+    for cntMics in range(nMics):
         helpNormalize += distGridToAllMics[cntMics] * distGridToAllMics[cntMics]
         expArg = np.float32(waveNumber[0] * distGridToAllMics[cntMics])
         steerVec[cntMics] = (np.cos(expArg) - 1j * np.sin(expArg)) * distGridToAllMics[cntMics]  # r_{t,i}-normalization is handled here
 
     # performing matrix-vector-multiplication (see bottom of information header of 'beamformerFreq')
     scalarProd = 0.0
-    for cntMics in xrange(nMics):
+    for cntMics in range(nMics):
         leftVecMatrixProd = 0.0 + 0.0j
-        for cntMics2 in xrange(cntMics):  # calculate 'steer^H * CSM' of upper-triangular-part of csm (without diagonal)
+        for cntMics2 in range(cntMics):  # calculate 'steer^H * CSM' of upper-triangular-part of csm (without diagonal)
             leftVecMatrixProd += csm[cntMics2, cntMics] * steerVec[cntMics2].conjugate()
         scalarProd += 2 * (leftVecMatrixProd * steerVec[cntMics]).real  # use that csm is Hermitian (lower triangular of csm can be reduced to factor '2')
     normalizeFactor = nMics * distGridToArrayCenter[0]  # specific normalization of steering vector formulation
@@ -309,16 +308,16 @@ def _freqBeamformer_Formulation3AkaTrueLevel_FullCSM(csm, distGridToArrayCenter,
 
     # building steering vector: in order to save some operation -> some normalization steps are applied after mat-vec-multipl.
     helpNormalize = 0.0
-    for cntMics in xrange(nMics):
+    for cntMics in range(nMics):
         helpNormalize += 1.0 / (distGridToAllMics[cntMics] * distGridToAllMics[cntMics])  
         expArg = np.float32(waveNumber[0] * distGridToAllMics[cntMics])
         steerVec[cntMics] = (np.cos(expArg) - 1j * np.sin(expArg)) / distGridToAllMics[cntMics]  # r_{t,i}-normalization is handled here
 
     # performing matrix-vector-multiplication (see bottom of information header of 'beamformerFreq')
     scalarProd = 0.0
-    for cntMics in xrange(nMics):
+    for cntMics in range(nMics):
         leftVecMatrixProd = 0.0 + 0.0j
-        for cntMics2 in xrange(cntMics):  # calculate 'steer^H * CSM' of upper-triangular-part of csm (without diagonal)
+        for cntMics2 in range(cntMics):  # calculate 'steer^H * CSM' of upper-triangular-part of csm (without diagonal)
             leftVecMatrixProd += csm[cntMics2, cntMics] * steerVec[cntMics2].conjugate()
         scalarProd += 2 * (leftVecMatrixProd * steerVec[cntMics]).real  # use that csm is Hermitian (lower triangular of csm can be reduced to factor '2')
         scalarProd += (csm[cntMics, cntMics] * steerVec[cntMics].conjugate() * steerVec[cntMics]).real  # include diagonal of csm
@@ -336,16 +335,16 @@ def _freqBeamformer_Formulation3AkaTrueLevel_CsmRemovedDiag(csm, distGridToArray
 
     # building steering vector: in order to save some operation -> some normalization steps are applied after mat-vec-multipl.
     helpNormalize = 0.0
-    for cntMics in xrange(nMics):
+    for cntMics in range(nMics):
         helpNormalize += 1.0 / (distGridToAllMics[cntMics] * distGridToAllMics[cntMics])  
         expArg = np.float32(waveNumber[0] * distGridToAllMics[cntMics])
         steerVec[cntMics] = (np.cos(expArg) - 1j * np.sin(expArg)) / distGridToAllMics[cntMics]  # r_{t,i}-normalization is handled here
 
     # performing matrix-vector-multiplication (see bottom of information header of 'beamformerFreq')
     scalarProd = 0.0
-    for cntMics in xrange(nMics):
+    for cntMics in range(nMics):
         leftVecMatrixProd = 0.0 + 0.0j
-        for cntMics2 in xrange(cntMics):  # calculate 'steer^H * CSM' of upper-triangular-part of csm (without diagonal)
+        for cntMics2 in range(cntMics):  # calculate 'steer^H * CSM' of upper-triangular-part of csm (without diagonal)
             leftVecMatrixProd += csm[cntMics2, cntMics] * steerVec[cntMics2].conjugate()
         scalarProd += 2 * (leftVecMatrixProd * steerVec[cntMics]).real  # use that csm is Hermitian (lower triangular of csm can be reduced to factor '2')
     normalizeFactor = distGridToArrayCenter[0] * helpNormalize  # specific normalization of steering vector formulation
@@ -362,16 +361,16 @@ def _freqBeamformer_Formulation4AkaTrueLocation_FullCSM(csm, distGridToArrayCent
 
     # building steering vector: in order to save some operation -> some normalization steps are applied after mat-vec-multipl.
     helpNormalize = 0.0
-    for cntMics in xrange(nMics):
+    for cntMics in range(nMics):
         helpNormalize += 1.0 / (distGridToAllMics[cntMics] * distGridToAllMics[cntMics])  
         expArg = np.float32(waveNumber[0] * distGridToAllMics[cntMics])
         steerVec[cntMics] = (np.cos(expArg) - 1j * np.sin(expArg)) / distGridToAllMics[cntMics]  # r_{t,i}-normalization is handled here
 
     # performing matrix-vector-multiplication (see bottom of information header of 'beamformerFreq')
     scalarProd = 0.0
-    for cntMics in xrange(nMics):
+    for cntMics in range(nMics):
         leftVecMatrixProd = 0.0 + 0.0j
-        for cntMics2 in xrange(cntMics):  # calculate 'steer^H * CSM' of upper-triangular-part of csm (without diagonal)
+        for cntMics2 in range(cntMics):  # calculate 'steer^H * CSM' of upper-triangular-part of csm (without diagonal)
             leftVecMatrixProd += csm[cntMics2, cntMics] * steerVec[cntMics2].conjugate()
         scalarProd += 2 * (leftVecMatrixProd * steerVec[cntMics]).real  # use that csm is Hermitian (lower triangular of csm can be reduced to factor '2')
         scalarProd += (csm[cntMics, cntMics] * steerVec[cntMics].conjugate() * steerVec[cntMics]).real  # include diagonal of csm
@@ -389,16 +388,16 @@ def _freqBeamformer_Formulation4AkaTrueLocation_CsmRemovedDiag(csm, distGridToAr
 
     # building steering vector: in order to save some operation -> some normalization steps are applied after mat-vec-multipl.
     helpNormalize = 0.0
-    for cntMics in xrange(nMics):
+    for cntMics in range(nMics):
         helpNormalize += 1.0 / (distGridToAllMics[cntMics] * distGridToAllMics[cntMics])  
         expArg = np.float32(waveNumber[0] * distGridToAllMics[cntMics])
         steerVec[cntMics] = (np.cos(expArg) - 1j * np.sin(expArg)) / distGridToAllMics[cntMics]  # r_{t,i}-normalization is handled here
 
     # performing matrix-vector-multiplication (see bottom of information header of 'beamformerFreq')
     scalarProd = 0.0
-    for cntMics in xrange(nMics):
+    for cntMics in range(nMics):
         leftVecMatrixProd = 0.0 + 0.0j
-        for cntMics2 in xrange(cntMics):  # calculate 'steer^H * CSM' of upper-triangular-part of csm (without diagonal)
+        for cntMics2 in range(cntMics):  # calculate 'steer^H * CSM' of upper-triangular-part of csm (without diagonal)
             leftVecMatrixProd += csm[cntMics2, cntMics] * steerVec[cntMics2].conjugate()
         scalarProd += 2 * (leftVecMatrixProd * steerVec[cntMics]).real  # use that csm is Hermitian (lower triangular of csm can be reduced to factor '2')
     normalizeFactor = nMics * helpNormalize  # specific normalization of steering vector formulation
@@ -415,10 +414,10 @@ def _freqBeamformer_SpecificSteerVec_FullCSM(csm, steerVec, signalLossNormalizat
     # performing matrix-vector-multiplication (see bottom of information header of 'beamformerFreq')
     scalarProd = 0.0
     helpNormalize = 0.0
-    for cntMics in xrange(nMics):
+    for cntMics in range(nMics):
         helpNormalize += steerVec[cntMics] * steerVec[cntMics].conjugate()
         leftVecMatrixProd = 0.0 + 0.0j
-        for cntMics2 in xrange(cntMics):  # calculate 'steer^H * CSM' of upper-triangular-part of csm (without diagonal)
+        for cntMics2 in range(cntMics):  # calculate 'steer^H * CSM' of upper-triangular-part of csm (without diagonal)
             leftVecMatrixProd += csm[cntMics2, cntMics] * steerVec[cntMics2].conjugate()
         scalarProd += 2 * (leftVecMatrixProd * steerVec[cntMics]).real  # use that csm is Hermitian (lower triangular of csm can be reduced to factor '2')
         scalarProd += (csm[cntMics, cntMics] * steerVec[cntMics].conjugate() * steerVec[cntMics]).real  # include diagonal of csm
@@ -435,10 +434,10 @@ def _freqBeamformer_SpecificSteerVec_CsmRemovedDiag(csm, steerVec, signalLossNor
     # performing matrix-vector-multiplication (see bottom of information header of 'beamformerFreq')
     scalarProd = 0.0
     helpNormalize = 0.0
-    for cntMics in xrange(nMics):
+    for cntMics in range(nMics):
         helpNormalize += steerVec[cntMics] * steerVec[cntMics].conjugate()
         leftVecMatrixProd = 0.0 + 0.0j
-        for cntMics2 in xrange(cntMics):  # calculate 'steer^H * CSM' of upper-triangular-part of csm (without diagonal)
+        for cntMics2 in range(cntMics):  # calculate 'steer^H * CSM' of upper-triangular-part of csm (without diagonal)
             leftVecMatrixProd += csm[cntMics2, cntMics] * steerVec[cntMics2].conjugate()
         scalarProd += 2 * (leftVecMatrixProd * steerVec[cntMics]).real  # use that csm is Hermitian (lower triangular of csm can be reduced to factor '2')
     normalizeSteer[0] = helpNormalize.real
@@ -455,7 +454,7 @@ def _freqBeamformer_EigValProb_Formulation1AkaClassic_FullCSM(eigVal, eigVec, di
     steerVec = np.zeros((nMics), np.complex128)
 
     # building steering vector: in order to save some operation -> some normalization steps are applied after mat-vec-multipl.
-    for cntMics in xrange(nMics):
+    for cntMics in range(nMics):
         expArg = np.float32(waveNumber[0] * distGridToAllMics[cntMics])
         steerVec[cntMics] = (np.cos(expArg) - 1j * np.sin(expArg))
 
@@ -480,7 +479,7 @@ def _freqBeamformer_EigValProb_Formulation1AkaClassic_CsmRemovedDiag(eigVal, eig
     steerVec = np.zeros((nMics), np.complex128)
 
     # building steering vector: in order to save some operation -> some normalization steps are applied after mat-vec-multipl.
-    for cntMics in xrange(nMics):
+    for cntMics in range(nMics):
         expArg = np.float32(waveNumber[0] * distGridToAllMics[cntMics])
         steerVec[cntMics] = (np.cos(expArg) - 1j * np.sin(expArg))
 
@@ -509,7 +508,7 @@ def _freqBeamformer_EigValProb_Formulation2AkaInverse_FullCSM(eigVal, eigVec, di
 
     # building steering vector: in order to save some operation -> some normalization steps are applied after mat-vec-multipl.
     helpNormalize = 0.0
-    for cntMics in xrange(nMics):
+    for cntMics in range(nMics):
         helpNormalize += distGridToAllMics[cntMics] * distGridToAllMics[cntMics]
         expArg = np.float32(waveNumber[0] * distGridToAllMics[cntMics])
         steerVec[cntMics] = (np.cos(expArg) - 1j * np.sin(expArg)) * distGridToAllMics[cntMics]  # r_{t,i}-normalization is handled here
@@ -537,7 +536,7 @@ def _freqBeamformer_EigValProb_Formulation2AkaInverse_CsmRemovedDiag(eigVal, eig
 
     # building steering vector: in order to save some operation -> some normalization steps are applied after mat-vec-multipl.
     helpNormalize = 0.0
-    for cntMics in xrange(nMics):
+    for cntMics in range(nMics):
         helpNormalize += distGridToAllMics[cntMics] * distGridToAllMics[cntMics]
         expArg = np.float32(waveNumber[0] * distGridToAllMics[cntMics])
         steerVec[cntMics] = (np.cos(expArg) - 1j * np.sin(expArg)) * distGridToAllMics[cntMics]  # r_{t,i}-normalization is handled here
@@ -568,7 +567,7 @@ def _freqBeamformer_EigValProb_Formulation3AkaTrueLevel_FullCSM(eigVal, eigVec, 
 
     # building steering vector: in order to save some operation -> some normalization steps are applied after mat-vec-multipl.
     helpNormalize = 0.0
-    for cntMics in xrange(nMics):
+    for cntMics in range(nMics):
         helpNormalize += 1.0 / (distGridToAllMics[cntMics] * distGridToAllMics[cntMics])  
         expArg = np.float32(waveNumber[0] * distGridToAllMics[cntMics])
         steerVec[cntMics] = (np.cos(expArg) - 1j * np.sin(expArg)) / distGridToAllMics[cntMics]  # r_{t,i}-normalization is handled here
@@ -595,7 +594,7 @@ def _freqBeamformer_EigValProb_Formulation3AkaTrueLevel_CsmRemovedDiag(eigVal, e
 
     # building steering vector: in order to save some operation -> some normalization steps are applied after mat-vec-multipl.
     helpNormalize = 0.0
-    for cntMics in xrange(nMics):
+    for cntMics in range(nMics):
         helpNormalize += 1.0 / (distGridToAllMics[cntMics] * distGridToAllMics[cntMics])  
         expArg = np.float32(waveNumber[0] * distGridToAllMics[cntMics])
         steerVec[cntMics] = (np.cos(expArg) - 1j * np.sin(expArg)) / distGridToAllMics[cntMics]  # r_{t,i}-normalization is handled here
@@ -625,7 +624,7 @@ def _freqBeamformer_EigValProb_Formulation4AkaTrueLocation_FullCSM(eigVal, eigVe
 
     # building steering vector: in order to save some operation -> some normalization steps are applied after mat-vec-multipl.
     helpNormalize = 0.0
-    for cntMics in xrange(nMics):
+    for cntMics in range(nMics):
         helpNormalize += 1.0 / (distGridToAllMics[cntMics] * distGridToAllMics[cntMics])  
         expArg = np.float32(waveNumber[0] * distGridToAllMics[cntMics])
         steerVec[cntMics] = (np.cos(expArg) - 1j * np.sin(expArg)) / distGridToAllMics[cntMics]  # r_{t,i}-normalization is handled here
@@ -652,7 +651,7 @@ def _freqBeamformer_EigValProb_Formulation4AkaTrueLocation_CsmRemovedDiag(eigVal
 
     # building steering vector: in order to save some operation -> some normalization steps are applied after mat-vec-multipl.
     helpNormalize = 0.0
-    for cntMics in xrange(nMics):
+    for cntMics in range(nMics):
         helpNormalize += 1.0 / (distGridToAllMics[cntMics] * distGridToAllMics[cntMics])  
         expArg = np.float32(waveNumber[0] * distGridToAllMics[cntMics])
         steerVec[cntMics] = (np.cos(expArg) - 1j * np.sin(expArg)) / distGridToAllMics[cntMics]  # r_{t,i}-normalization is handled here
@@ -681,7 +680,7 @@ def _freqBeamformer_EigValProb_SpecificSteerVec_FullCSM(eigVal, eigVec, steerVec
     
     # get h^H * h for normalization
     helpNormalize = 0.0
-    for cntMics in xrange(nMics):
+    for cntMics in range(nMics):
         helpNormalize += steerVec[cntMics] * steerVec[cntMics].conjugate()
 
     # performing matrix-vector-multplication via spectral decomp. (see bottom of information header of 'beamformerFreq')
@@ -704,7 +703,7 @@ def _freqBeamformer_EigValProb_SpecificSteerVec_CsmRemovedDiag(eigVal, eigVec, s
     
     # get h^H * h for normalization
     helpNormalize = 0.0
-    for cntMics in xrange(nMics):
+    for cntMics in range(nMics):
         helpNormalize += steerVec[cntMics] * steerVec[cntMics].conjugate()
 
     # performing matrix-vector-multplication via spectral decomp. (see bottom of information header of 'beamformerFreq')
@@ -798,7 +797,7 @@ def _psf_Formulation1AkaClassic(distGridToArrayCenter, distGridToAllMics, distSo
     for cntSources in range(len(distSourcesToArrayCenter)):
         # see bottom of information header of 'calcPointSpreadFunction' for infos on the PSF calculation and speed improvements.
         scalarProd = 0.0 + 0.0j
-        for cntMics in xrange(nMics):
+        for cntMics in range(nMics):
             expArg = np.float32(waveNumber[0] * (distGridToAllMics[cntMics] - distSourcesToAllMics[cntSources, cntMics]))
             scalarProd += (np.cos(expArg) - 1j * np.sin(expArg)) / distSourcesToAllMics[cntSources, cntMics]
         normalizeFactor = distSourcesToArrayCenter[cntSources] / nMics
@@ -814,7 +813,7 @@ def _psf_Formulation2AkaInverse(distGridToArrayCenter, distGridToAllMics, distSo
     for cntSources in range(len(distSourcesToArrayCenter)):
         # see bottom of information header of 'calcPointSpreadFunction' for infos on the PSF calculation and speed improvements.
         scalarProd = 0.0 + 0.0j
-        for cntMics in xrange(nMics):
+        for cntMics in range(nMics):
             expArg = np.float32(waveNumber[0] * (distGridToAllMics[cntMics] - distSourcesToAllMics[cntSources, cntMics]))
             scalarProd += (np.cos(expArg) - 1j * np.sin(expArg)) / distSourcesToAllMics[cntSources, cntMics] * distGridToAllMics[cntMics]
         normalizeFactor = distSourcesToArrayCenter[cntSources] / distGridToArrayCenter[0] / nMics
@@ -831,7 +830,7 @@ def _psf_Formulation3AkaTrueLevel(distGridToArrayCenter, distGridToAllMics, dist
         # see bottom of information header of 'calcPointSpreadFunction' for infos on the PSF calculation and speed improvements.
         scalarProd = 0.0 + 0.0j
         helpNormalizeGrid = 0.0
-        for cntMics in xrange(nMics):
+        for cntMics in range(nMics):
             expArg = np.float32(waveNumber[0] * (distGridToAllMics[cntMics] - distSourcesToAllMics[cntSources, cntMics]))
             scalarProd += (np.cos(expArg) - 1j * np.sin(expArg)) / distSourcesToAllMics[cntSources, cntMics] / distGridToAllMics[cntMics]
             helpNormalizeGrid += 1.0 / (distGridToAllMics[cntMics] * distGridToAllMics[cntMics])
@@ -849,7 +848,7 @@ def _psf_Formulation4AkaTrueLocation(distGridToArrayCenter, distGridToAllMics, d
         # see bottom of information header of 'calcPointSpreadFunction' for infos on the PSF calculation and speed improvements.
         scalarProd = 0.0 + 0.0j
         helpNormalizeGrid = 0.0
-        for cntMics in xrange(nMics):
+        for cntMics in range(nMics):
             expArg = np.float32(waveNumber[0] * (distGridToAllMics[cntMics] - distSourcesToAllMics[cntSources, cntMics]))
             scalarProd += (np.cos(expArg) - 1j * np.sin(expArg)) / distSourcesToAllMics[cntSources, cntMics] / distGridToAllMics[cntMics]
             helpNormalizeGrid += 1.0 / (distGridToAllMics[cntMics] * distGridToAllMics[cntMics])
@@ -866,7 +865,7 @@ def _psf_Formulation4AkaTrueLocation(distGridToArrayCenter, distGridToAllMics, d
 #    for cntSources in range(steerVecSources.shape[0]):
 #        # see bottom of information header of 'calcPointSpreadFunction' for infos on the PSF calculation and speed improvements.
 #        scalarProd = 0.0 + 0.0j
-#        for cntMics in xrange(nMics):
+#        for cntMics in range(nMics):
 #            scalarProd += steerVec[cntMics].conjugate() * steerVecSources[cntSources, cntMics]
 #        scalarProdAbsSquared = (scalarProd * scalarProd.conjugate()).real  
 #        result[cntSources] = scalarProdAbsSquared
@@ -902,12 +901,12 @@ def damasSolverGaussSeidel(A, dirtyMap, nIterations, relax, damasSolution):
     None : as damasSolution is overwritten with end result of the damas iterative solver.
     """
 #    nGridPoints = len(dirtyMap)
-#    for cntIter in xrange(nIterations[0]):
-#        for cntGrid in xrange(nGridPoints):
+#    for cntIter in range(nIterations[0]):
+#        for cntGrid in range(nGridPoints):
 #            solHelp = np.float32(0)
-#            for cntGridHelp in xrange(cntGrid):  # lower sum
+#            for cntGridHelp in range(cntGrid):  # lower sum
 #                solHelp += A[cntGrid, cntGridHelp] * damasSolution[cntGridHelp]
-#            for cntGridHelp in xrange(cntGrid + 1, nGridPoints):  # upper sum
+#            for cntGridHelp in range(cntGrid + 1, nGridPoints):  # upper sum
 #                solHelp += A[cntGrid, cntGridHelp] * damasSolution[cntGridHelp]
 #            solHelp = (1 - relax[0]) * damasSolution[cntGrid] + relax[0] * (dirtyMap[cntGrid] - solHelp)
 #            if solHelp > 0.0:
@@ -915,10 +914,10 @@ def damasSolverGaussSeidel(A, dirtyMap, nIterations, relax, damasSolution):
 #            else:
 #                damasSolution[cntGrid] = 0.0
     nGridPoints = len(dirtyMap)
-    for cntIter in xrange(nIterations[0]):
-        for cntGrid in xrange(nGridPoints):
+    for cntIter in range(nIterations[0]):
+        for cntGrid in range(nGridPoints):
             solHelp = 0.0
-            for cntGridHelp in xrange(nGridPoints):  # full sum
+            for cntGridHelp in range(nGridPoints):  # full sum
                 solHelp += A[cntGrid, cntGridHelp] * damasSolution[cntGridHelp]
             solHelp -= A[cntGrid, cntGrid] * damasSolution[cntGrid]
             solHelp = (1 - relax[0]) * damasSolution[cntGrid] + relax[0] * (dirtyMap[cntGrid] - solHelp)
@@ -954,7 +953,7 @@ def calcTransfer(distGridToArrayCenter, distGridToAllMics, waveNumber):
 @nb.guvectorize([(nb.float64[:], nb.float64[:], nb.float64[:], nb.complex128[:])], '(),(m),()->(m)', nopython=True, target=parallelOption, cache=cachedOption)
 def _transferCoreFunc(distGridToArrayCenter, distGridToAllMics, waveNumber, result):
     nMics = distGridToAllMics.shape[0]
-    for cntMics in xrange(nMics):
+    for cntMics in range(nMics):
         expArg = np.float32(waveNumber[0] * (distGridToAllMics[cntMics] - distGridToArrayCenter[0]))
         result[cntMics] = (np.cos(expArg) - 1j * np.sin(expArg)) * distGridToArrayCenter[0] / distGridToAllMics[cntMics]
 
