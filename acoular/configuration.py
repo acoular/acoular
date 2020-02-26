@@ -112,6 +112,13 @@ by :attr:`h5library`:
   * 'pytables': Use 'tables' (or 'pytables', depending on python distribution).
   * 'h5py': Use 'h5py'.
 
+Some Acoular classes support GUI elements for usage with tools from the TraitsUI package.
+If desired, this package has to be installed manually, as it is not a prerequisite for
+installing Acoular.
+To enable the functionality, the flag attribute :attr:`use_traitsui` has to be set to True (default: False).
+Note: this is independent from the GUI tools implemented in the spectAcoular package.
+
+
 Example: 
     For using Acoular with h5py package and overwrite existing cache:
     
