@@ -12,7 +12,7 @@ Implements global configuration of Acoular.
     config
 """
 
-from traits.api import Trait,Property, HasStrictTraits
+from traits.api import Trait, Bool, Property, HasStrictTraits
 
 class Config(HasStrictTraits):
     """
@@ -54,6 +54,14 @@ class Config(HasStrictTraits):
     
     _h5library = Trait('pytables','h5py')
     
+    
+    #: Boolean Flag that determines whether user has access to traitsui features.
+    #: Defaults to False.
+    use_traitsui = Property()
+    
+    _use_traitsui = Bool(False)
+    
+    
     def _get_global_caching(self):
         return self._global_caching
 
@@ -65,7 +73,16 @@ class Config(HasStrictTraits):
     
     def _set_h5library(self,libraryName):
         self._h5library = libraryName 
-        
+    
+    def _get_use_traitsui(self):
+        return self._use_traitsui
+    
+    def _set_use_traitsui(self, use_tui):
+        if use_tui:
+            from  . import traitsviews
+            # If user tries to use traitsuis and it's not installed, this will throw an error.
+        self._use_traitsui = use_tui 
+    
     def _assert_h5library(self):
         try:
             import tables  
