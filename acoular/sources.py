@@ -306,6 +306,8 @@ class MaskedTimeSamples( TimeSamples ):
                 cal_factor = self.calib.data[self.channels][newaxis]
             elif self.calib.num_mics == self.numchannels:
                 cal_factor = self.calib.data[newaxis]
+            elif self.calib.num_mics == 0:
+                warn("No calibration data used.", Warning, stacklevel = 2)    
             else:
                 raise ValueError("calibration data not compatible: %i, %i" % \
                             (self.calib.num_mics, self.numchannels))
