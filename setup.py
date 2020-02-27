@@ -1,6 +1,6 @@
 # coding=UTF-8
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2019, Acoular Development Team.
+# Copyright (c) 2007-2020, Acoular Development Team.
 #------------------------------------------------------------------------------
 
 
@@ -13,7 +13,7 @@ import os
 #bf_version = str(av.__version__)
 #bf_author = str(av.__author__)
 
-bf_version = "19.11"
+bf_version = "20.02"
 bf_author = "Acoular Development Team"
 
 
@@ -59,7 +59,7 @@ setup_requires = list([
 	])
 
 if "CONDA_PREFIX" not in os.environ:
-    setup_requires.append('python-qt5;python_version<="2.7"')
+    #setup_requires.append('python-qt5;python_version<="2.7"')
     setup_requires.append('PyQt5>=5.6;python_version>="3.4"')
 
     
@@ -77,8 +77,6 @@ setup(name="acoular",
       'Intended Audience :: Science/Research',
       'Topic :: Scientific/Engineering :: Physics',
       'License :: OSI Approved :: BSD License',
-      'Programming Language :: Python :: 2',
-      'Programming Language :: Python :: 2.7',
       'Programming Language :: Python :: 3.5',
       'Programming Language :: Python :: 3.6',
       'Programming Language :: Python :: 3.7',
