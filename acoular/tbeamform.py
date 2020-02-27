@@ -497,7 +497,7 @@ class BeamformerTimeTraj( BeamformerTime ):
                     conv_amp = (1-macostheta)**2
                     amp = (w/(rm*conv_amp)**2).sum(1) * r0
                     amp = 1.0/(amp[:, newaxis]*rm*conv_amp) # multiplication factor
-                elif not self.conv_amp:
+                else:
                     amp = (w/(rm*rm)).sum(1) * r0
                     amp = 1.0/(amp[:, newaxis]*rm) # multiplication factor
                 # the next line needs to be implemented faster
@@ -614,7 +614,7 @@ class BeamformerTimeSqTraj( BeamformerTimeSq, BeamformerTimeTraj ):
                     conv_amp = (1-macostheta)**2
                     amp = (w/(rm*conv_amp)**2).sum(1) * r0
                     amp = 1.0/(amp[:, newaxis]*rm*conv_amp) # multiplication factor
-                elif not self.conv_amp:
+                else:
                     amp = (w/(rm*rm)).sum(1) * r0
                     amp = 1.0/(amp[:, newaxis]*rm) # multiplication factor
                 # the next line needs to be implemented faster
