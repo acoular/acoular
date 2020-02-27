@@ -18,7 +18,8 @@
 # imports from other packages
 from __future__ import print_function, division
 from numpy import array, newaxis, empty, sqrt, arange, clip, r_, zeros, \
-histogram, unique, cross, dot, where, s_ , sum
+histogram, unique, cross, dot, where, s_ , sum,isscalar, full
+from numpy.linalg import norm
 from traits.api import Float, CArray, Property, Trait, Bool, Delegate, \
 cached_property, List, Instance
 from traits.trait_errors import TraitError
@@ -360,16 +361,57 @@ class BeamformerTimeTraj( BeamformerTime ):
     rvec = CArray( dtype=float, shape=(3, ), value=array((0, 0, 0)), 
         desc="reference vector")
     
+    #: Considering of convective amplification in beamforming formula.
+    conv_amp = Bool(False, 
+        desc="determines if convective amplification of source is considered")
+
     # internal identifier
     digest = Property( 
         depends_on = ['_steer_obj.digest', 'source.digest', 'weights',  \
-                      'rvec', 'trajectory.digest', '__class__'], 
+                      'rvec','conv_amp','trajectory.digest', '__class__'], 
         )
 
     @cached_property
     def _get_digest( self ):
         return digest(self)
         
+    def get_moving_gpos(self):
+        """
+        Python generator that yields the moving grid coordinates samplewise 
+        """
+        start_t = 0.0
+        gpos = self.grid.pos()
+        trajg = self.trajectory.traj( start_t, delta_t=1/self.source.sample_freq)
+        trajg1 = self.trajectory.traj( start_t, delta_t=1/self.source.sample_freq, 
+                                  der=1)
+        rflag = (self.rvec == 0).all() #flag translation vs. rotation
+        if rflag:
+            for g in trajg:
+                # grid is only translated, not rotated
+                tpos = gpos + array(g)[:, newaxis]
+                yield tpos
+        else:
+            for (g,g1) in zip(trajg,trajg1):
+                # grid is both translated and rotated
+                loc = array(g) #translation array([0., 0.4, 1.])
+                dx = array(g1) #direction vector (new x-axis)
+                dy = cross(self.rvec, dx) # new y-axis
+                dz = cross(dx, dy) # new z-axis
+                RM = array((dx, dy, dz)).T # rotation matrix
+                RM /= sqrt((RM*RM).sum(0)) # column normalized
+                tpos = dot(RM, gpos)+loc[:, newaxis] # rotation+translation
+#                print(loc[:])
+                yield tpos
+
+    def get_macostheta(self,g1,tpos,rm):
+        vvec = array(g1) # velocity vector
+        ma = norm(vvec)/self.steer.env.c # machnumber
+        fdv = (vvec/sqrt((vvec*vvec).sum()))[:, newaxis] # unit vecor velocity
+        mpos = self.steer.mics.mpos[:, newaxis, :]
+        rmv = tpos[:, :, newaxis]-mpos
+        return (ma*sum(rmv.reshape((3, -1))*fdv, 0)\
+                                  /rm.reshape(-1)).reshape(rm.shape)
+
     def result( self, num=2048 ):
         """
         Python generator that yields the beamformer 
@@ -413,14 +455,10 @@ class BeamformerTimeTraj( BeamformerTime ):
         temp = empty((self.grid.size, self.source.numchannels), dtype=float)
         d_index2 = arange(self.steer.mics.num_mics, dtype=int) # second index (static)
         offset = dmax+num # start offset for working array
-        ooffset = 0 # offset for output array      
-        # generators for trajectory, starting at time zero
-        start_t = 0.0
-        g = self.trajectory.traj( start_t, delta_t=1/self.source.sample_freq)
-        g1 = self.trajectory.traj( start_t, delta_t=1/self.source.sample_freq, 
-                                  der=1)
-                                  
-        rflag = (self.rvec == 0).all() #flag translation vs. rotation
+        ooffset = 0 # offset for output array     
+        movgpos = self.get_moving_gpos() # create moving grid pos generator
+        movgspeed = self.trajectory.traj( 0.0, delta_t=1/self.source.sample_freq, 
+                          der=1)
         data = self.source.result(num)
         flag = True
         while flag:
@@ -428,26 +466,16 @@ class BeamformerTimeTraj( BeamformerTime ):
             if ooffset == num:
                 yield o
                 ooffset = 0
-            if rflag:
-                # grid is only translated, not rotated
-                tpos = gpos + array(next(g))[:, newaxis]
-            else:
-                # grid is both translated and rotated
-                loc = array(next(g)) #translation array([0., 0.4, 1.])
-                dx = array(next(g1)) #direction vector (new x-axis)
-                dy = cross(self.rvec, dx) # new y-axis
-                dz = cross(dx, dy) # new z-axis
-                RM = array((dx, dy, dz)).T # rotation matrix
-                RM /= sqrt((RM*RM).sum(0)) # column normalized
-                tpos = dot(RM, gpos)+loc[:, newaxis] # rotation+translation
+            tpos = next(movgpos)
             rm = self.steer.env._r( tpos, self.steer.mics.mpos)
-            r0 = self.steer.env._r( tpos)
+            if isscalar(self.steer.ref) and self.steer.ref > 0:
+                r0 = full((self.steer.grid.size,), self.steer.ref)
+            else:
+                r0 = self.env._r(tpos)
             delays = rm/c
             d_index = array(delays, dtype=int) # integer index
             d_interp2 = delays % 1 # 2nd coeff for lin interpolation between samples
             d_interp1 = 1-d_interp2 # 1st coeff for lin interpolation
-            amp = (w/(rm*rm)).sum(1) * r0
-            amp = 1.0/(amp[:, newaxis]*rm) # multiplication factor
             # now, we have to make sure that the needed data is available                 
             while offset+d_index.max()+2>dmax+num:
                 # copy remaining samples in front of next block
@@ -456,16 +484,22 @@ class BeamformerTimeTraj( BeamformerTime ):
                 offset -= num
                 # test if data generator is exhausted
                 try:
-                    # get next data
-                    block = next(data)
+                    block = next(data) # get next data
                 except StopIteration:
-                    print(loc)
                     flag = False
                     break
                 # samples in the block, equals to num except for the last block
                 ns = block.shape[0]                
                 zi[dmax:dmax+ns] = block * w# copy data to working array
             else:
+                if self.conv_amp:
+                    macostheta=self.get_macostheta(next(movgspeed),tpos,rm) 
+                    conv_amp = (1-macostheta)**2
+                    amp = (w/(rm*conv_amp)**2).sum(1) * r0
+                    amp = 1.0/(amp[:, newaxis]*rm*conv_amp) # multiplication factor
+                else:
+                    amp = (w/(rm*rm)).sum(1) * r0
+                    amp = 1.0/(amp[:, newaxis]*rm) # multiplication factor
                 # the next line needs to be implemented faster
                 # it eats half of the time
                 temp[:, :] = (zi[offset+d_index, d_index2]*d_interp1 \
@@ -477,26 +511,17 @@ class BeamformerTimeTraj( BeamformerTime ):
         yield o[:ooffset]
 
         
-class BeamformerTimeSqTraj( BeamformerTimeSq ):
+class BeamformerTimeSqTraj( BeamformerTimeSq, BeamformerTimeTraj ):
     """
     Provides a time domain beamformer with time-dependent
     power signal output and possible autopower removal
     for a grid moving along a trajectory.
     """
     
-    #: :class:`~acoular.trajectory.Trajectory` or derived object.
-    #: Start time is assumed to be the same as for the samples.
-    trajectory = Trait(Trajectory, 
-        desc="trajectory of the grid center")
-
-    #: Reference vector, perpendicular to the y-axis of moving grid.
-    rvec = CArray( dtype=float, shape=(3, ), value=array((0, 0, 0)), 
-        desc="reference vector")
-    
     # internal identifier
     digest = Property( 
         depends_on = ['_steer_obj.digest', 'source.digest', 'r_diag', 'weights', \
-                      'rvec', 'trajectory.digest', '__class__'], 
+                      'rvec','conv_amp','trajectory.digest', '__class__'], 
         )
 
     @cached_property
@@ -547,12 +572,9 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
         d_index2 = arange(self.steer.mics.num_mics, dtype=int) # second index (static)
         offset = dmax+num # start offset for working array
         ooffset = 0 # offset for output array      
-        # generators for trajectory, starting at time zero
-        start_t = 0.0
-        g = self.trajectory.traj( start_t, delta_t=1/self.source.sample_freq)
-        g1 = self.trajectory.traj( start_t, delta_t=1/self.source.sample_freq, 
-                                  der=1)
-        rflag = (self.rvec == 0).all() #flag translation vs. rotation
+        movgpos = self.get_moving_gpos() # create moving grid pos generator
+        movgspeed = self.trajectory.traj( 0.0, delta_t=1/self.source.sample_freq, 
+                          der=1)
         data = self.source.result(num)
         flag = True
         while flag:
@@ -560,26 +582,16 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
             if ooffset == num:
                 yield o
                 ooffset = 0
-            if rflag:
-                # grid is only translated, not rotated
-                tpos = gpos + array(next(g))[:, newaxis]
-            else:
-                # grid is both translated and rotated
-                loc = array(next(g)) #translation
-                dx = array(next(g1)) #direction vector (new x-axis)
-                dy = cross(self.rvec, dx) # new y-axis
-                dz = cross(dx, dy) # new z-axis
-                RM = array((dx, dy, dz)).T # rotation matrix
-                RM /= sqrt((RM*RM).sum(0)) # column normalized
-                tpos = dot(RM, gpos)+loc[:, newaxis] # rotation+translation
+            tpos = next(movgpos)
             rm = self.steer.env._r( tpos, self.steer.mics.mpos)
-            r0 = self.steer.env._r( tpos)
+            if isscalar(self.steer.ref) and self.steer.ref > 0:
+                r0 = full((self.steer.grid.size,), self.steer.ref)
+            else:
+                r0 = self.env._r(tpos)
             delays = rm/c
             d_index = array(delays, dtype=int) # integer index
             d_interp2 = delays % 1 # 2nd coeff for lin interpolation between samples
             d_interp1 = 1-d_interp2 # 1st coeff for lin interpolation
-            amp = (w/(rm*rm)).sum(1) * r0
-            amp = 1.0/(amp[:, newaxis]*rm) # multiplication factor
             # now, we have to make sure that the needed data is available                 
             while offset+d_index.max()+2>dmax+num:
                 # copy remaining samples in front of next block
@@ -597,6 +609,14 @@ class BeamformerTimeSqTraj( BeamformerTimeSq ):
                 ns = block.shape[0]                
                 zi[dmax:dmax+ns] = block * w# copy data to working array
             else:
+                if self.conv_amp:
+                    macostheta=self.get_macostheta(next(movgspeed),tpos,rm) 
+                    conv_amp = (1-macostheta)**2
+                    amp = (w/(rm*conv_amp)**2).sum(1) * r0
+                    amp = 1.0/(amp[:, newaxis]*rm*conv_amp) # multiplication factor
+                else:
+                    amp = (w/(rm*rm)).sum(1) * r0
+                    amp = 1.0/(amp[:, newaxis]*rm) # multiplication factor
                 # the next line needs to be implemented faster
                 # it eats half of the time
                 temp[:, :] = (zi[offset+d_index, d_index2]*d_interp1 \
