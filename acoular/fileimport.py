@@ -18,18 +18,18 @@ Standard HDF (`*.h5`) import can be done using
     datx_import
 """
 
-from .h5cache import td_dir
 from numpy import fromstring, float32, newaxis, empty, sort, zeros
 from traits.api import HasPrivateTraits, Float, Int, \
 File, CArray, Property, Any, Str
-from traitsui.api import View
-from traitsui.menu import OKCancelButtons
 from os import path
-from six import next
 import pickle
-import tables
 import configparser
 import struct
+
+# acoular imports
+from .h5cache import td_dir
+from .h5files import H5CacheFileBase, _get_h5file_class
+
 
 class time_data_import( HasPrivateTraits ):
     """
@@ -62,15 +62,6 @@ class csv_import( time_data_import ):
     #: Number of leading columns (will be ignored during import), defaults to 1.
     dummy_columns = Int(1, 
         desc = "number of leading columns to ignore during import")
-
-    traits_view = View(
-        ['from_file', 
-            ['header_length', 'dummy_columns', '-'], 
-            '|[Import]'
-        ], 
-        title = 'Time data', 
-        buttons = OKCancelButtons
-                    )
 
     def get_data (self, td):
         """
@@ -106,13 +97,15 @@ class csv_import( time_data_import ):
             if td.h5f !=  None:
                 td.h5f.close()
         # TODO problems with already open h5 files from other instances
-        f5h = tables.open_file(name, mode = 'w')
-        ac = f5h.create_earray(f5h.root, 'time_data', \
-            tables.atom.Float32Atom(), (0, numchannels))
-        ac.set_attr('sample_freq', sample_freq)
-        ac.append(data[newaxis, :])
+        file = _get_h5file_class()
+        f5h = file(name, mode = 'w')
+        f5h.create_extendable_array(
+                'time_data', (0, numchannels), "float32")
+        ac = f5h.get_data_by_reference('time_data')
+        f5h.set_node_attribute(ac,'sample_freq',sample_freq)
+        f5h.append_data(ac,data[newaxis, :])
         for line in f:
-            ac.append(fromstring(line, dtype=float32, sep=', ')[newaxis, d:])
+            f5h.append_data(ac,fromstring(line, dtype=float32, sep=', ')[newaxis, d:])
         f5h.close()
         td.name = name
         td.load_data()
@@ -125,14 +118,6 @@ class td_import( time_data_import ):
     #: Name of the comma delimited file to import.
     from_file = File(filter = ['*.td'], 
         desc = "name of the *.td file to import")
-
-    traits_view = View(
-        ['from_file', 
-            '|[Import]'
-        ], 
-        title  = 'Time data', 
-        buttons = OKCancelButtons
-                    )
 
     def get_data (self, td):
         """
@@ -158,11 +143,13 @@ class td_import( time_data_import ):
             if td.h5f !=  None:
                 td.h5f.close()
         # TODO problems with already open h5 files from other instances
-        f5h = tables.open_file(name, mode = 'w')
-        ac = f5h.create_earray(f5h.root, 'time_data', \
-            tables.atom.Float32Atom(), (0, numchannels))
-        ac.set_attr('sample_freq', sample_freq)
-        ac.append(data)
+        file = _get_h5file_class()
+        f5h = file(name, mode = 'w')
+        f5h.create_extendable_array(
+                'time_data', (0, numchannels), "float32")
+        ac = f5h.get_data_by_reference('time_data')
+        f5h.set_node_attribute(ac,'sample_freq',sample_freq)
+        f5h.append_data(ac,data)
         f5h.close()
         td.name = name
         td.load_data()
@@ -176,14 +163,6 @@ class bk_mat_import( time_data_import ):
     #: Name of the mat file to import
     from_file = File(filter = ['*.mat'], 
         desc = "name of the BK pulse mat file to import")
-
-    traits_view = View(
-        ['from_file', 
-            '|[Import]'
-        ], 
-        title = 'Time data', 
-        buttons = OKCancelButtons
-                    )
 
     def get_data (self, td):
         """
@@ -215,11 +194,13 @@ class bk_mat_import( time_data_import ):
             if td.h5f !=  None:
                 td.h5f.close()
         # TODO problems with already open h5 files from other instances
-        f5h = tables.open_file(name, mode = 'w')
-        ac = f5h.create_earray(f5h.root, 'time_data', \
-            tables.atom.Float32Atom(), (0, numchannels))
-        ac.set_attr('sample_freq', sample_freq)
-        ac.append(data)
+        file = _get_h5file_class()
+        f5h = file(name, mode = 'w')
+        f5h.create_extendable_array(
+                'time_data', (0, numchannels), "float32")
+        ac = f5h.get_data_by_reference('time_data')
+        f5h.set_node_attribute(ac,'sample_freq',sample_freq)
+        f5h.append_data(ac,data)
         f5h.close()
         td.name = name
         td.load_data()
@@ -337,14 +318,6 @@ class datx_import(time_data_import):
     from_file = File(filter = ['*.datx_index'], 
         desc = "name of the datx index file to import")
 
-    traits_view = View(
-        ['from_file', 
-            '|[Import]'
-        ], 
-        title = 'Time data', 
-        buttons = OKCancelButtons
-                    )
-
     def get_data (self, td):
         """
         Main work is done here: imports the data from datx files into
@@ -382,10 +355,12 @@ class datx_import(time_data_import):
             if td.h5f !=  None:
                 td.h5f.close()
         # TODO problems with already open h5 files from other instances
-        f5h = tables.open_file(name, mode = 'w')
-        ac = f5h.create_earray(f5h.root, 'time_data', \
-            tables.atom.Float32Atom(), (0, numchannels))
-        ac.set_attr('sample_freq', sample_rate)
+        file = _get_h5file_class()
+        f5h = file(name, mode = 'w')
+        f5h.create_extendable_array(
+                'time_data', (0, numchannels), "float32")
+        ac = f5h.get_data_by_reference('time_data')
+        f5h.set_node_attribute(ac,'sample_freq',sample_rate)
         block_data = \
             zeros((128*d_files[channels[0].d_file].num_samples_per_block, \
                 numchannels), 'Float32')
@@ -398,7 +373,7 @@ class datx_import(time_data_import):
             for i in range(numchannels):
                 data = d_files[channels[i].d_file].data[channels[i].ch_no]
                 block_data[:data.size, i] = channels[i].scale(data)
-            ac.append(block_data[:data.size])
+            f5h.append_data(ac,block_data[:data.size])
         f5h.close()
         f0.close()
         for i in d_files.values():

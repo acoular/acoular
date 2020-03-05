@@ -1,5 +1,27 @@
 What's new
 ============
+20.02
+------------
+	* Adds gradient-based solver for BeamformerCMF (L_BFGS_B)
+	* Adds possibilty to take into account convective amplification of moving sources in BeamformerTimeTraj
+	* TraitsUI support of the classes has to be activated via :class:`~acoular.configuration.config` 
+    * Bugfix: use left-orientated coordinate system in rotating flow environment
+    * Bugfix: correct wrong angle shift in spline interpolation
+    * Removes several Python 2.7-specific implementations
+
+
+19.11
+------------
+    * Adds new classes for handling rotating data, including detection of trigger signals and interpolation of sensor data for virtual array emulation (:class:`~acoular.tprocess.Trigger`, :class:`~acoular.tprocess.AngleTracker`, :class:`~acoular.tprocess.SpatialInterpolator`, :class:`~acoular.tprocess.SpatialInterpolatorRotation`, :class:`~acoular.tprocess.SpatialInterpolatorConstantRotation`)
+    * Introduces new :class:`~acoular.tprocess.SampleSplitter` class, which allows distribution of data streams 
+    * Adds new (global) caching options for more flexible cache file handling (e.g. never cache results, always cache, cache read-only). See :class:`~acoular.configuration.config` for information on how to use this.
+    * User can choose whether to use h5py or pytables package for handling hdf files. See :class:`~acoular.configuration.config` for information on how to use this.
+    * Change: BeamformerGIB behaviour (not calculating sources with eigenvalue of zero)
+    * Bugfix: BeamformerTime interpolation
+    * Bugfix: Integer division in PNoiseGenerator
+    * Test suite and CI updates
+
+
 19.08
 ------------
     

@@ -10,6 +10,7 @@
     
     SteeringVector
 
+    
     BeamformerBase
     BeamformerFunctional
     BeamformerCapon
@@ -37,34 +38,31 @@ invert, dot, newaxis, zeros, empty, fft, float32, float64, complex64, linalg, \
 where, searchsorted, pi, multiply, sign, diag, arange, sqrt, exp, log10, int,\
 reshape, hstack, vstack, eye, tril, size, clip, tile, round, delete, \
 absolute, argsort, sort, sum, hsplit, fill_diagonal, zeros_like, isclose, \
-vdot, flatnonzero, einsum, ndarray, isscalar
+vdot, flatnonzero, einsum, ndarray, isscalar, inf
 
 from sklearn.linear_model import LassoLars, LassoLarsCV, LassoLarsIC,\
 OrthogonalMatchingPursuit, ElasticNet, OrthogonalMatchingPursuitCV, Lasso
 
-from scipy.optimize import nnls, linprog
+from scipy.optimize import nnls, linprog, fmin_l_bfgs_b
 from scipy.linalg import inv, eigh, eigvals, fractional_matrix_power
 from warnings import warn
 
-import tables
 from traits.api import HasPrivateTraits, Float, Int, ListInt, ListFloat, \
 CArray, Property, Instance, Trait, Bool, Range, Delegate, Enum, Any, \
 cached_property, on_trait_change, property_depends_on
 from traits.trait_errors import TraitError
 
-from traitsui.api import View, Item
-from traitsui.menu import OKCancelButtons
-
 from .fastFuncs import beamformerFreq, calcTransfer, calcPointSpreadFunction, \
 damasSolverGaussSeidel
 
 from .h5cache import H5cache
+from .h5files import H5CacheFileBase
 from .internal import digest
 from .grids import Grid
 from .microphones import MicGeom
+from .configuration import config
 from .environments import Environment
-from .spectra import PowerSpectra, _precision
-
+from .spectra import PowerSpectra
 
 class SteeringVector( HasPrivateTraits ):
     """ 
@@ -346,7 +344,7 @@ class BeamformerBase( HasPrivateTraits ):
         desc="cached flag")
                   
     # hdf5 cache file
-    h5f = Instance(tables.File, transient = True )
+    h5f = Instance( H5CacheFileBase, transient = True )
     
     #: The beamforming result as squared sound pressure values 
     #: at all grid point locations (readonly).
@@ -363,17 +361,6 @@ class BeamformerBase( HasPrivateTraits ):
         depends_on = ['digest', 'freq_data.ind_low', 'freq_data.ind_high'], 
         )
 
-    traits_view = View(
-        [
-            [Item('r_diag', label='Diagonal removed')], 
-            [Item('steer', label='Steering vector')], 
-#            [Item('env{}', style='custom')], 
-            '|'
-        ], 
-        title='Beamformer options', 
-        buttons = OKCancelButtons
-        )
-
     @cached_property
     def _get_digest( self ):
         return digest( self )
@@ -382,6 +369,48 @@ class BeamformerBase( HasPrivateTraits ):
     def _get_ext_digest( self ):
         return digest( self, 'ext_digest' )
     
+    def _get_filecache( self ):
+        """
+        function collects cached results from file depending on 
+        global/local caching behaviour. Returns (None, None) if no cachefile/data 
+        exist and global caching mode is 'readonly'.
+        """
+#        print("get cachefile:", self.freq_data.basename)
+        H5cache.get_cache_file( self, self.freq_data.basename ) 
+        if not self.h5f: 
+#            print("no cachefile:", self.freq_data.basename)
+            return (None, None)# only happens in case of global caching readonly
+
+        nodename = self.__class__.__name__ + self.digest
+#        print("collect filecache for nodename:",nodename)
+        if config.global_caching == 'overwrite' and self.h5f.is_cached(nodename):
+#            print("remove existing data for nodename",nodename)
+            self.h5f.remove_data(nodename) # remove old data before writing in overwrite mode
+        
+        if not self.h5f.is_cached(nodename):
+#            print("no data existent for nodename:", nodename)
+            if config.global_caching == 'readonly': 
+                return (None, None)
+            else:
+#                print("initialize data.")
+                numfreq = self.freq_data.fftfreq().shape[0]# block_size/2 + 1steer_obj
+                group = self.h5f.create_new_group(nodename)
+                self.h5f.create_compressible_array('result',
+                                      (numfreq, self.steer.grid.size),
+                                      self.precision,
+                                      group)
+                self.h5f.create_compressible_array('freqs',
+                                      (numfreq, ),
+                                      'int8',#'bool', 
+                                      group)
+        ac = self.h5f.get_data_by_reference('result','/'+nodename)
+        fr = self.h5f.get_data_by_reference('freqs','/'+nodename)
+        return (ac,fr)        
+
+    def _assert_equal_channels(self):
+        numchannels = self.freq_data.numchannels
+        if  numchannels != self.steer.mics.num_mics or numchannels == 0:
+            raise ValueError("%i channels do not fit %i mics" % (numchannels, self.steer.mics.num_mics))        
 
     @property_depends_on('ext_digest')
     def _get_result ( self ):
@@ -389,38 +418,40 @@ class BeamformerBase( HasPrivateTraits ):
         This is the :attr:`result` getter routine.
         The beamforming result is either loaded or calculated.
         """
+        f = self.freq_data
+        numfreq = f.fftfreq().shape[0]# block_size/2 + 1steer_obj
         _digest = ''
         while self.digest != _digest:
             _digest = self.digest
-            name = self.__class__.__name__ + self.digest
-            numchannels = self.freq_data.numchannels
-            if  numchannels != self.steer.mics.num_mics or numchannels == 0:
-                raise ValueError("%i channels do not fit %i mics" % (numchannels, self.steer.mics.num_mics))
-            numfreq = self.freq_data.fftfreq().shape[0]# block_size/2 + 1steer_obj
-            precisionTuple = _precision(self.precision)
-            if self.cached:
-                H5cache.get_cache( self, self.freq_data.basename)
-                if not name in self.h5f.root:
-                    group = self.h5f.create_group(self.h5f.root, name)
-                    shape = (numfreq, self.steer.grid.size)
-                    atom = precisionTuple[3]()
-                    filters = tables.Filters(complevel=5, complib='blosc')
-                    ac = self.h5f.create_carray(group, 'result', atom, shape, filters=filters)
-                    shape = (numfreq, )
-                    atom = tables.BoolAtom()
-                    fr = self.h5f.create_carray(group, 'freqs', atom, shape, filters=filters)
+            self._assert_equal_channels()
+            if not ( # if result caching is active
+                    config.global_caching == 'none' or 
+                    (config.global_caching == 'individual' and self.cached == False)
+                ):
+#                print("get filecache..")
+                (ac,fr) = self._get_filecache() 
+                if ac and fr: 
+#                    print("cached data existent")
+                    if not fr[f.ind_low:f.ind_high].all():
+#                        print("calculate missing results")                            
+                        if config.global_caching == 'readonly': 
+                            (ac, fr) = (ac[:], fr[:])
+                        self.calc(ac,fr)
+                        self.h5f.flush()
+#                    else:
+#                        print("cached results are complete! return.")
                 else:
-                    ac = self.h5f.get_node('/'+name, 'result')
-                    fr = self.h5f.get_node('/'+name, 'freqs')
-                if not fr[self.freq_data.ind_low:self.freq_data.ind_high].all():
-                    self.calc(ac, fr)                  
-                    self.h5f.flush()
+#                    print("no caching, calculate result")
+                    ac = zeros((numfreq, self.steer.grid.size), dtype=self.precision)
+                    fr = zeros(numfreq, dtype='int8')
+                    self.calc(ac,fr)
             else:
+#                print("no caching activated, calculate result")
                 ac = zeros((numfreq, self.steer.grid.size), dtype=self.precision)
-                fr = zeros(numfreq, dtype='int64')
+                fr = zeros(numfreq, dtype='int8')
                 self.calc(ac,fr)
         return ac
-        
+      
     def sig_loss_norm(self):
         """ 
         If the diagonal of the CSM is removed one has to handle the loss 
@@ -496,7 +527,7 @@ class BeamformerBase( HasPrivateTraits ):
                     indNegSign = sign(beamformerOutput) < 0
                     beamformerOutput[indNegSign] = 0.0
                 ac[i] = beamformerOutput
-                fr[i] = True
+                fr[i] = 1
     
     def synthetic( self, f, num=0):
         """
@@ -630,18 +661,6 @@ class BeamformerFunctional( BeamformerBase ):
     r_diag = Enum(False, 
                   desc="False, as Functional Beamformer is only well defined for the full CSM")
 
-    traits_view = View(
-        [
-#            [Item('mics{}', style='custom')], 
-#            [Item('grid', style='custom'), '-<>'], 
-            [Item('gamma', label='Exponent', style='simple')], 
-#            [Item('env{}', style='custom')], 
-            '|'
-        ], 
-        title='Beamformer options', 
-        buttons = OKCancelButtons
-        )
-
     @cached_property
     def _get_digest( self ):
         return digest( self )
@@ -709,7 +728,7 @@ class BeamformerFunctional( BeamformerBase ):
                                                                  (eva, eve))
                     beamformerOutput /= steerNorm  # take normalized steering vec
                 ac[i] = (beamformerOutput ** self.gamma) * steerNorm * normFactor  # the normalization must be done outside the beamformer
-                fr[i] = True
+                fr[i] = 1
             
 class BeamformerCapon( BeamformerBase ):
     """
@@ -720,17 +739,6 @@ class BeamformerCapon( BeamformerBase ):
     # for Capon beamforming r_diag is set to 'False'.
     r_diag = Enum(False, 
         desc="removal of diagonal")
-
-    traits_view = View(
-        [
-#            [Item('mics{}', style='custom')], 
-#            [Item('grid', style='custom'), '-<>'], 
-#            [Item('env{}', style='custom')], 
-            '|'
-        ], 
-        title='Beamformer options', 
-        buttons = OKCancelButtons
-        )
 
     def calc(self, ac, fr):
         """
@@ -770,7 +778,7 @@ class BeamformerCapon( BeamformerBase ):
                                                   steer_vector(f[i]), 
                                                   csm)[0]
                 ac[i] = 1.0 / beamformerOutput
-                fr[i] = True
+                fr[i] = 1
 
 class BeamformerEig( BeamformerBase ):
     """
@@ -791,19 +799,6 @@ class BeamformerEig( BeamformerBase ):
     digest = Property( 
         depends_on = ['freq_data.digest', '_steer_obj.digest', 'r_diag', 'n'])
 
-    traits_view = View(
-        [
-#            [Item('mics{}', style='custom')], 
-#            [Item('grid', style='custom'), '-<>'], 
-            [Item('n', label='Component No.', style='simple')], 
-            [Item('r_diag', label='Diagonal removed')], 
-#            [Item('env{}', style='custom')], 
-            '|'
-        ], 
-        title='Beamformer options', 
-        buttons = OKCancelButtons
-        )
-    
     @cached_property
     def _get_digest( self ):
         return digest( self )
@@ -858,7 +853,7 @@ class BeamformerEig( BeamformerBase ):
                     indNegSign = sign(beamformerOutput) < 0
                     beamformerOutput[indNegSign] = 0
                 ac[i] = beamformerOutput
-                fr[i] = True
+                fr[i] = 1
 
 class BeamformerMusic( BeamformerEig ):
     """
@@ -874,18 +869,6 @@ class BeamformerMusic( BeamformerEig ):
     # defaults to 1
     n = Int(1, 
         desc="assumed number of sources")
-
-    traits_view = View(
-        [
-#            [Item('mics{}', style='custom')], 
-#            [Item('grid', style='custom'), '-<>'], 
-            [Item('n', label='No. of sources', style='simple')], 
-#            [Item('env{}', style='custom')], 
-            '|'
-        ], 
-        title='Beamformer options', 
-        buttons = OKCancelButtons
-        )
 
     def calc(self, ac, fr):
         """
@@ -927,7 +910,7 @@ class BeamformerMusic( BeamformerEig ):
                                                   steer_vector(f[i]), 
                                                   (eva[:n], eve[:, :n]))[0]
                 ac[i] = 4e-10*beamformerOutput.min() / beamformerOutput
-                fr[i] = True
+                fr[i] = 1
 
 class PointSpreadFunction (HasPrivateTraits):
     """
@@ -1057,7 +1040,7 @@ class PointSpreadFunction (HasPrivateTraits):
     freq = Float(1.0, desc="frequency")
 
     # hdf5 cache file
-    h5f = Instance(tables.File, transient = True)
+    h5f = Instance( H5CacheFileBase, transient = True )
     
     # internal identifier
     digest = Property( depends_on = ['_steer_obj.digest', 'precision'], cached = True)
@@ -1066,6 +1049,114 @@ class PointSpreadFunction (HasPrivateTraits):
     def _get_digest( self ):
         return digest( self )
     
+    def _get_filecache( self ):
+        """
+        function collects cached results from file depending on 
+        global/local caching behaviour. Returns (None, None) if no cachefile/data 
+        exist and global caching mode is 'readonly'.
+        """
+        filename = 'psf' + self.digest
+        nodename = ('Hz_%.2f' % self.freq).replace('.', '_')
+#        print("get cachefile:", filename)
+        H5cache.get_cache_file( self, filename ) 
+        if not self.h5f: # only happens in case of global caching readonly
+#            print("no cachefile:", filename)
+            return (None, None)# only happens in case of global caching readonly
+                    
+        if config.global_caching == 'overwrite' and self.h5f.is_cached(nodename):
+#            print("remove existing data for nodename",nodename)
+            self.h5f.remove_data(nodename) # remove old data before writing in overwrite mode
+        
+        if not self.h5f.is_cached(nodename):
+#            print("no data existent for nodename:", nodename)
+            if config.global_caching == 'readonly':
+                return (None, None)
+            else:
+#                print("initialize data.")
+                gs = self.steer.grid.size
+                group = self.h5f.create_new_group(nodename)
+                self.h5f.create_compressible_array('result',
+                                      (gs, gs),
+                                      self.precision,
+                                      group)
+                self.h5f.create_compressible_array('gridpts',
+                                      (gs,),
+                                      'int8',#'bool', 
+                                      group)
+        ac = self.h5f.get_data_by_reference('result','/'+nodename)
+        gp = self.h5f.get_data_by_reference('gridpts','/'+nodename)
+        return (ac,gp)        
+
+    def _get_psf ( self ):
+        """
+        This is the :attr:`psf` getter routine.
+        The point spread function is either loaded or calculated.
+        """
+        gs = self.steer.grid.size
+        if not self.grid_indices.size: 
+            self.grid_indices = arange(gs)
+
+        if not config.global_caching == 'none':
+#            print("get filecache..")
+            (ac,gp) = self._get_filecache()
+            if ac and gp: 
+#                print("cached data existent")
+                if not gp[:][self.grid_indices].all():
+#                    print("calculate missing results")                            
+                    if self.calcmode == 'readonly':
+                        raise ValueError('Cannot calculate missing PSF (points) in \'readonly\' mode.')
+                    if config.global_caching == 'readonly':
+                        (ac, gp) = (ac[:], gp[:])
+                        self.calc_psf(ac,gp)
+                        return ac[:,self.grid_indices]
+                    else:
+                        self.calc_psf(ac,gp)
+                        self.h5f.flush()
+                        return ac[:,self.grid_indices]
+#                else:
+#                    print("cached results are complete! return.")
+                return ac[:,self.grid_indices]
+            else: # no cached data/file
+#                print("no caching, calculate result")
+                ac = zeros((gs, gs), dtype=self.precision)
+                gp = zeros((gs,), dtype='int8')
+                self.calc_psf(ac,gp)
+        else: # no caching activated
+#            print("no caching activated, calculate result")
+            ac = zeros((gs, gs), dtype=self.precision)
+            gp = zeros((gs,), dtype='int8')
+            self.calc_psf(ac,gp)
+        return ac[:,self.grid_indices] 
+
+    def calc_psf( self, ac, gp ):
+        """
+        point-spread function calculation
+        """
+        if self.calcmode != 'full':
+            # calc_ind has the form [True, True, False, True], except
+            # when it has only 1 entry (value True/1 would be ambiguous)
+            if self.grid_indices.size == 1:
+                calc_ind = [0]
+            else:
+                calc_ind = invert(gp[:][self.grid_indices])
+        
+        # get indices which have the value True = not yet calculated
+            g_ind_calc = self.grid_indices[calc_ind]
+        
+        if self.calcmode == 'single': # calculate selected psfs one-by-one
+            for ind in g_ind_calc:
+                ac[:,ind] = self._psfCall([ind])[:,0]
+                gp[ind] = 1
+        elif self.calcmode == 'full': # calculate all psfs in one go
+            gp[:] = 1
+            ac[:] = self._psfCall(arange(self.steer.grid.size))
+        else: # 'block' # calculate selected psfs in one go
+            hh = self._psfCall(g_ind_calc)
+            indh = 0
+            for ind in g_ind_calc:
+                gp[ind] = 1
+                ac[:,ind] = hh[:,indh]
+                indh += 1
 
     def _psfCall(self, ind):
         """
@@ -1092,82 +1183,6 @@ class PointSpreadFunction (HasPrivateTraits):
             product = dot(self.steer.steer_vector(self.freq).conj(), self.steer.transfer(self.freq,ind).T)
             result = (product * product.conj()).real
         return result
-
-    def _get_psf ( self ):
-        """
-        This is the :attr:`psf` getter routine.
-        The point spread function is either loaded or calculated.
-        """
-        steer = self.steer
-        gs = steer.grid.size
-        if not self.grid_indices.size:
-            self.grid_indices = arange(gs)
-        name = 'psf' + self.digest
-        H5cache.get_cache( self, name)
-        fr = ('Hz_%.2f' % self.freq).replace('.', '_')
-        precisionTuple = _precision(self.precision)
-        
-        # check wether self.freq is part of SteeringVector.f
-        #freqInSteerObjFreq = isclose(array(self._steer_obj.f), self.freq)
-        #if freqInSteerObjFreq.any():
-        #    freqInd = flatnonzero(freqInSteerObjFreq)[0]
-        #else:
-        #    warn('PointSpreadFunction.freq (%s Hz) was appended to PointSpreadFunction._steer_obj.f, '\
-        #         'as it was not an element of the original list!' % self.freq, Warning, stacklevel = 2)
-        #    self._steer_obj.f.append(self.freq)
-        #    freqInd = int(-1)
-        
-        # get the cached data, or, if non-existing, create new structure
-        if not fr in self.h5f.root:
-            if self.calcmode == 'readonly':
-                raise ValueError('Cannot calculate missing PSF (freq %s) in \'readonly\' mode.' % fr)
-            
-            group = self.h5f.create_group(self.h5f.root, fr) 
-            shape = (gs, gs)
-            atom = precisionTuple[3]()
-            filters = tables.Filters(complevel=5, complib='blosc')
-            ac = self.h5f.create_carray(group, 'result', atom, shape, filters=filters)
-            shape = (gs,)
-            atom = tables.BoolAtom()
-            gp = self.h5f.create_carray(group, 'gridpts', atom, shape, filters=filters)
-            
-        else:
-            ac = self.h5f.get_node('/'+fr, 'result')
-            gp = self.h5f.get_node('/'+fr, 'gridpts')
-        
-        # are there grid points for which the PSF hasn't been calculated yet?
-        if not gp[:][self.grid_indices].all():
-
-            if self.calcmode == 'readonly':
-                raise ValueError('Cannot calculate missing PSF (points) in \'readonly\' mode.')
-
-            elif self.calcmode != 'full':
-                # calc_ind has the form [True, True, False, True], except
-                # when it has only 1 entry (value True/1 would be ambiguous)
-                if self.grid_indices.size == 1:
-                    calc_ind = [0]
-                else:
-                    calc_ind = invert(gp[:][self.grid_indices])
-            
-            # get indices which have the value True = not yet calculated
-                g_ind_calc = self.grid_indices[calc_ind]
-            
-            if self.calcmode == 'single': # calculate selected psfs one-by-one
-                for ind in g_ind_calc:
-                    ac[:,ind] = self._psfCall([ind])[:,0]
-                    gp[ind] = True
-            elif self.calcmode == 'full': # calculate all psfs in one go
-                gp[:] = True
-                ac[:] = self._psfCall(arange(gs))
-            else: # 'block' # calculate selected psfs in one go
-                hh = self._psfCall(g_ind_calc)
-                indh = 0
-                for ind in g_ind_calc:
-                    gp[ind] = True
-                    ac[:,ind] = hh[:,indh]
-                    indh += 1
-            self.h5f.flush()
-        return ac[:][:,self.grid_indices]
 
 class BeamformerDamas (BeamformerBase):
     """
@@ -1220,18 +1235,6 @@ class BeamformerDamas (BeamformerBase):
         depends_on = ['digest', 'beamformer.ext_digest'], 
         )
     
-    traits_view = View(
-        [
-            [Item('beamformer{}', style='custom')], 
-            [Item('n_iter{Number of iterations}')], 
-#            [Item('steer{Type of steering vector}')], 
-            [Item('calcmode{How to calculate PSF}')], 
-            '|'
-        ], 
-        title='Beamformer denconvolution options', 
-        buttons = OKCancelButtons
-        )
-    
     @cached_property
     def _get_digest( self ):
         return digest( self )
@@ -1276,7 +1279,7 @@ class BeamformerDamas (BeamformerBase):
                 psf = p.psf[:]
                 damasSolverGaussSeidel(psf, y, self.n_iter, self.damp, x)
                 ac[i] = x
-                fr[i] = True
+                fr[i] = 1
 
 class BeamformerDamasPlus (BeamformerDamas):
     """
@@ -1325,19 +1328,6 @@ class BeamformerDamasPlus (BeamformerDamas):
         depends_on = ['digest', 'beamformer.ext_digest'], 
         )
     
-    traits_view = View(
-        [
-            [Item('beamformer{}', style='custom')], 
-            [Item('method{Solver}')],
-            [Item('max_iter{Max. number of iterations}')], 
-            [Item('alpha', label='Lasso weight factor')], 
-            [Item('calcmode{How to calculate PSF}')], 
-            '|'
-        ], 
-        title='Beamformer denconvolution options', 
-        buttons = OKCancelButtons
-        )
-
     @cached_property
     def _get_digest( self ):
         return digest( self )
@@ -1402,7 +1392,7 @@ class BeamformerDamasPlus (BeamformerDamas):
                     model.fit(psf,y)
                     ac[i] = model.coef_[:] / unit
                 
-                fr[i] = True
+                fr[i] = 1
 
 class BeamformerOrth (BeamformerBase):
     """
@@ -1427,7 +1417,7 @@ class BeamformerOrth (BeamformerBase):
 
     #: List of components to consider, use this to directly set the eigenvalues
     #: used in the beamformer. Alternatively, set :attr:`n`.
-    eva_list = CArray(
+    eva_list = CArray(dtype=int,
         desc="components")
         
     #: Number of components to consider, defaults to 1. If set, 
@@ -1446,19 +1436,6 @@ class BeamformerOrth (BeamformerBase):
         depends_on = ['digest', 'beamformer.ext_digest'], 
         )
     
-    traits_view = View(
-        [
-#            [Item('mpos{}', style='custom')], 
-#            [Item('grid', style='custom'), '-<>'], 
-            [Item('n', label='Number of components', style='simple')], 
-            [Item('r_diag', label='Diagonal removed')], 
-#            [Item('env{}', style='custom')], 
-            '|'
-        ], 
-        title='Beamformer options', 
-        buttons = OKCancelButtons
-        )
-
     @cached_property
     def _get_digest( self ):
         return digest( self )
@@ -1510,7 +1487,7 @@ class BeamformerOrth (BeamformerBase):
             for i in ii:
                 ac[i, e.result[i].argmax()]+=e.freq_data.eva[i, n]/numchannels
         for i in ii:
-            fr[i] = True
+            fr[i] = 1
     
 class BeamformerCleansc( BeamformerBase ):
     """
@@ -1537,19 +1514,6 @@ class BeamformerCleansc( BeamformerBase ):
     # internal identifier
     digest = Property( 
         depends_on = ['freq_data.digest', '_steer_obj.digest', 'r_diag', 'n', 'damp', 'stopn'])
-
-    traits_view = View(
-        [
-#            [Item('mpos{}', style='custom')], 
-#            [Item('grid', style='custom'), '-<>'], 
-            [Item('n', label='No. of iterations', style='simple')], 
-            [Item('r_diag', label='Diagonal removed')], 
-#            [Item('env{}', style='custom')], 
-            '|'
-        ], 
-        title='Beamformer options', 
-        buttons = OKCancelButtons
-        )
 
     @cached_property
     def _get_digest( self ):
@@ -1631,7 +1595,7 @@ class BeamformerCleansc( BeamformerBase ):
                     h -= self.damp * h1
                     csm -= self.damp * csm1.T#transpose(0,2,1)
                 ac[i] = result
-                fr[i] = True
+                fr[i] = 1
 
 class BeamformerClean (BeamformerBase):
     """
@@ -1681,19 +1645,6 @@ class BeamformerClean (BeamformerBase):
     ext_digest = Property( 
         depends_on = ['digest', 'beamformer.ext_digest'], 
         )
-    
-    traits_view = View(
-        [
-            [Item('beamformer{}', style='custom')], 
-            [Item('n_iter{Number of iterations}')], 
-#            [Item('steer{Type of steering vector}')], 
-            [Item('calcmode{How to calculate PSF}')], 
-            '|'
-        ], 
-        title='Beamformer denconvolution options', 
-        buttons = OKCancelButtons
-        )
-
     
     @cached_property
     def _get_digest( self ):
@@ -1758,7 +1709,7 @@ class BeamformerClean (BeamformerBase):
                             and max(dirty) > 0)
                 
                 ac[i] = clean            
-                fr[i] = True
+                fr[i] = 1
 
 class BeamformerCMF ( BeamformerBase ):
     """
@@ -1772,7 +1723,7 @@ class BeamformerCMF ( BeamformerBase ):
     #: the `scikit-learn <http://scikit-learn.org/stable/user_guide.html>`_ 
     #: module.
     method = Trait('LassoLars', 'LassoLarsBIC',  \
-        'OMPCV', 'NNLS', desc="fit method used")
+        'OMPCV', 'NNLS','fmin_l_bfgs_b', desc="fit method used")
         
     #: Weight factor for LassoLars method,
     #: defaults to 0.0.
@@ -1797,21 +1748,6 @@ class BeamformerCMF ( BeamformerBase ):
     # internal identifier
     digest = Property( 
         depends_on = ['freq_data.digest', 'alpha', 'method', 'max_iter', 'unit_mult', 'r_diag', 'steer.inv_digest'], 
-        )
-
-    traits_view = View(
-        [
-#            [Item('mpos{}', style='custom')], 
-#            [Item('grid', style='custom'), '-<>'], 
-            [Item('method', label='Fit method')], 
-            [Item('max_iter', label='No. of iterations')], 
-            [Item('alpha', label='Lasso weight factor')], 
-            [Item('c', label='Speed of sound')], 
-#            [Item('env{}', style='custom')], 
-            '|'
-        ], 
-        title='Beamformer options', 
-        buttons = OKCancelButtons
         )
 
     @cached_property
@@ -1904,11 +1840,37 @@ class BeamformerCMF ( BeamformerBase ):
                 if self.method == 'NNLS':
                     ac[i] , x = nnls(A,R.flat)
                     ac[i] /= unit
+                    
+                elif self.method == 'fmin_l_bfgs_b':
+                    #function to minimize
+                    def function(x):
+                        #function
+                        func = x.T@A.T@A@x - 2*R.T@A@x + R.T@R                
+                        #derivitaive
+                        der = 2*A.T@A@x.T[:, newaxis] - 2*A.T@R 
+                        return  func[0].T, der[:,0]
+                    
+                    # initial guess
+                    x0 = ones([numpoints])   
+                    #boundarys - set to non negative
+                    boundarys = tile((0, +inf), (len(x0),1))
+                    
+                    #optimize
+                    ac[i], yval, dicts =  fmin_l_bfgs_b(function, x0, fprime=None, args=(),  
+                                                          approx_grad=0, bounds=boundarys, m=10,
+                                                          factr=10000000.0, pgtol=1e-05, epsilon=1e-08,
+                                                          iprint=-1, maxfun=15000, maxiter=self.max_iter,
+                                                          disp=None, callback=None, maxls=20)
+                    
+                    ac[i] /= unit
                 else:
                     model.fit(A,R[:,0])
                     ac[i] = model.coef_[:] / unit
-                fr[i] = True
-
+                fr[i] = 1
+        
+                
+                
+                
 class BeamformerGIB(BeamformerEig):  #BeamformerEig #BeamformerBase
     """
     Beamforming GIB methods with different normalizations,
@@ -1966,21 +1928,6 @@ class BeamformerGIB(BeamformerEig):  #BeamformerEig #BeamformerBase
             'pnorm', 'beta','n', 'm'], 
         )
 
-    traits_view = View(
-        [
-#            [Item('mpos{}', style='custom')], 
-#            [Item('grid', style='custom'), '-<>'], 
-            [Item('method', label='Fit method')], 
-            [Item('max_iter', label='No. of iterations')], 
-            [Item('alpha', label='Lasso weight factor')], 
-            [Item('c', label='Speed of sound')], 
-#            [Item('env{}', style='custom')], 
-            '|'
-        ], 
-        title='Beamformer options', 
-        buttons = OKCancelButtons
-        )
-    
     @cached_property
     def _get_digest( self ):
         return digest( self )
@@ -2022,8 +1969,8 @@ class BeamformerGIB(BeamformerEig):  #BeamformerEig #BeamformerBase
         """        
         # prepare calculation
         f = self.freq_data.fftfreq()
-        n = int(self.n)  
-        m = int(self.m)                             #number of eigenvalues
+        n = int(self.na)   #number of eigenvalues
+        m = int(self.m)    #number of first eigenvalue
         numchannels = self.freq_data.numchannels   #number of channels
         numpoints = self.steer.grid.size
         hh = zeros((1, numpoints, numchannels), dtype='D')
@@ -2045,77 +1992,80 @@ class BeamformerGIB(BeamformerEig):  #BeamformerEig #BeamformerBase
                 qi=zeros([n+m,numpoints], dtype='complex128')
                 #Select the number of coherent modes to be processed referring to the eigenvalue distribution.
                 #for s in arange(n):  
-                for s in list(range(m,n+m)): 
-                    #Generate the corresponding eigenmodes
-                    emode=array(sqrt(eva[s])*eve[:,s], dtype='complex128')
-                    # choose method for computation
-                    if self.method == 'Suzuki':
-                        leftpoints=numpoints
-                        locpoints=arange(numpoints)         
-                        weights=diag(ones(numpoints))             
-                        epsilon=arange(self.max_iter)              
-                        for it in arange(self.max_iter): 
-                            if numchannels<=leftpoints:
-                                AWA= dot(dot(A[:,locpoints],weights),A[:,locpoints].conj().T)
-                                epsilon[it] = max(absolute(eigvals(AWA)))*self.eps_perc
-                                qi[s,locpoints]=dot(dot(dot(weights,A[:,locpoints].conj().T),inv(AWA+eye(numchannels)*epsilon[it])),emode)
-                            elif numchannels>leftpoints:
-                                AA=dot(A[:,locpoints].conj().T,A[:,locpoints])
-                                epsilon[it] = max(absolute(eigvals(AA)))*self.eps_perc
-                                qi[s,locpoints]=dot(dot(inv(AA+inv(weights)*epsilon[it]),A[:,locpoints].conj().T),emode)                                                       
-                            if self.beta < 1 and it > 1:   
-                                #Reorder from the greatest to smallest magnitude to define a reduced-point source distribution , and reform a reduced transfer matrix 
-                                leftpoints=int(round(numpoints*self.beta**(it+1)))                                                                                          
-                                idx = argsort(abs(qi[s,locpoints]))[::-1]   
-                                #print(it, leftpoints, locpoints, idx )
-                                locpoints= delete(locpoints,[idx[leftpoints::]])             
-                                qix=zeros([n+m,leftpoints], dtype='complex128')                      
-                                qix[s,:]=qi[s,locpoints]
-                                #calc weights for next iteration 
-                                weights=diag(absolute(qix[s,:])**(2-self.pnorm))    
-                            else:                          
-                                weights=diag((absolute(qi[s,:])**(2-self.pnorm)))    
-                         
-                    elif self.method == 'InverseIRLS':                         
-                        weights=eye(numpoints)
-                        locpoints=arange(numpoints)
-                        for it in arange(self.max_iter): 
-                            if numchannels<=numpoints: 
-                                wtwi=inv(dot(weights.T,weights))  
-                                aH=A.conj().T                       
-                                qi[s,:]=dot(dot(wtwi,aH),dot(inv(dot(A,dot(wtwi,aH))),emode))                            
-                                weights=diag(absolute(qi[s,:])**((2-self.pnorm)/2))
-                                weights=weights/sum(absolute(weights))                                 
-                            elif numchannels>numpoints:
-                                wtw=dot(weights.T,weights)
-                                qi[s,:]= dot(dot(inv(dot(dot(A.conj.T,wtw),A)),dot( A.conj().T,wtw)) ,emode)
-                                weights=diag(absolute(qi[s,:])**((2-self.pnorm)/2))
-                                weights=weights/sum(absolute(weights))                  
-                    else:
-                        locpoints=arange(numpoints) 
-                        unit = self.unit_mult
-                        AB = vstack([hstack([A.real,-A.imag]),hstack([A.imag,A.real])])
-                        R  = hstack([emode.real.T,emode.imag.T]) * unit
-                        if self.method == 'LassoLars':
-                            model = LassoLars(alpha=self.alpha * unit,max_iter=self.max_iter)
-                        elif self.method == 'LassoLarsBIC':
-                            model = LassoLarsIC(criterion='bic',max_iter=self.max_iter)
-                        elif self.method == 'OMPCV':
-                            model = OrthogonalMatchingPursuitCV()
-                        elif self.method == 'LassoLarsCV':
-                            model = LassoLarsCV()                        
-                        if self.method == 'NNLS':
-                            x , zz = nnls(AB,R)
-                            qi_real,qi_imag = hsplit(x/unit, 2) 
+                for s in list(range(m,n+m)):
+                    if eva[s] > 0:                    
+                        #Generate the corresponding eigenmodes
+                        emode=array(sqrt(eva[s])*eve[:,s], dtype='complex128')
+                        # choose method for computation
+                        if self.method == 'Suzuki':
+                            leftpoints=numpoints
+                            locpoints=arange(numpoints)         
+                            weights=diag(ones(numpoints))             
+                            epsilon=arange(self.max_iter)              
+                            for it in arange(self.max_iter): 
+                                if numchannels<=leftpoints:
+                                    AWA= dot(dot(A[:,locpoints],weights),A[:,locpoints].conj().T)
+                                    epsilon[it] = max(absolute(eigvals(AWA)))*self.eps_perc
+                                    qi[s,locpoints]=dot(dot(dot(weights,A[:,locpoints].conj().T),inv(AWA+eye(numchannels)*epsilon[it])),emode)
+                                elif numchannels>leftpoints:
+                                    AA=dot(A[:,locpoints].conj().T,A[:,locpoints])
+                                    epsilon[it] = max(absolute(eigvals(AA)))*self.eps_perc
+                                    qi[s,locpoints]=dot(dot(inv(AA+inv(weights)*epsilon[it]),A[:,locpoints].conj().T),emode)                                                       
+                                if self.beta < 1 and it > 1:   
+                                    #Reorder from the greatest to smallest magnitude to define a reduced-point source distribution , and reform a reduced transfer matrix 
+                                    leftpoints=int(round(numpoints*self.beta**(it+1)))                                                                                          
+                                    idx = argsort(abs(qi[s,locpoints]))[::-1]   
+                                    #print(it, leftpoints, locpoints, idx )
+                                    locpoints= delete(locpoints,[idx[leftpoints::]])             
+                                    qix=zeros([n+m,leftpoints], dtype='complex128')                      
+                                    qix[s,:]=qi[s,locpoints]
+                                    #calc weights for next iteration 
+                                    weights=diag(absolute(qix[s,:])**(2-self.pnorm))    
+                                else:                          
+                                    weights=diag((absolute(qi[s,:])**(2-self.pnorm)))    
+                             
+                        elif self.method == 'InverseIRLS':                         
+                            weights=eye(numpoints)
+                            locpoints=arange(numpoints)
+                            for it in arange(self.max_iter): 
+                                if numchannels<=numpoints: 
+                                    wtwi=inv(dot(weights.T,weights))  
+                                    aH=A.conj().T                       
+                                    qi[s,:]=dot(dot(wtwi,aH),dot(inv(dot(A,dot(wtwi,aH))),emode))                            
+                                    weights=diag(absolute(qi[s,:])**((2-self.pnorm)/2))
+                                    weights=weights/sum(absolute(weights))                                 
+                                elif numchannels>numpoints:
+                                    wtw=dot(weights.T,weights)
+                                    qi[s,:]= dot(dot(inv(dot(dot(A.conj.T,wtw),A)),dot( A.conj().T,wtw)) ,emode)
+                                    weights=diag(absolute(qi[s,:])**((2-self.pnorm)/2))
+                                    weights=weights/sum(absolute(weights))                  
                         else:
-                            model.fit(AB,R)
-                            qi_real,qi_imag = hsplit(model.coef_[:]/unit, 2)
-                        #print(s,qi.size)    
-                        qi[s,locpoints] = qi_real+qi_imag*1j
-                #Generate source maps of all selected eigenmodes, and superpose source intensity for each source type.
+                            locpoints=arange(numpoints) 
+                            unit = self.unit_mult
+                            AB = vstack([hstack([A.real,-A.imag]),hstack([A.imag,A.real])])
+                            R  = hstack([emode.real.T,emode.imag.T]) * unit
+                            if self.method == 'LassoLars':
+                                model = LassoLars(alpha=self.alpha * unit,max_iter=self.max_iter)
+                            elif self.method == 'LassoLarsBIC':
+                                model = LassoLarsIC(criterion='bic',max_iter=self.max_iter)
+                            elif self.method == 'OMPCV':
+                                model = OrthogonalMatchingPursuitCV()
+                            elif self.method == 'LassoLarsCV':
+                                model = LassoLarsCV()                        
+                            if self.method == 'NNLS':
+                                x , zz = nnls(AB,R)
+                                qi_real,qi_imag = hsplit(x/unit, 2) 
+                            else:
+                                model.fit(AB,R)
+                                qi_real,qi_imag = hsplit(model.coef_[:]/unit, 2)
+                            #print(s,qi.size)    
+                            qi[s,locpoints] = qi_real+qi_imag*1j
+                    else:
+                        warn('Eigenvalue %g <= 0 for frequency index %g. Will not be calculated!' % (s, i),Warning, stacklevel = 2)
+                    #Generate source maps of all selected eigenmodes, and superpose source intensity for each source type.
                 ac[i] = zeros([1,numpoints])
                 ac[i,locpoints] = sum(absolute(qi[:,locpoints])**2,axis=0)
-                fr[i] = True    
+                fr[i] = 1    
 
 def L_p ( x ):
     """

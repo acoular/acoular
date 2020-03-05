@@ -16,8 +16,6 @@ from numpy import array, arange, sort, r_
 from scipy.interpolate import splprep, splev
 from traits.api import HasPrivateTraits, Float, \
 Property, cached_property, property_depends_on, Dict, Tuple
-from traitsui.api import View, Item
-from traitsui.menu import OKCancelButtons
 
 # acoular imports
 from .internal import digest
@@ -47,13 +45,6 @@ class Trajectory( HasPrivateTraits ):
     # internal identifier
     digest = Property( 
         depends_on = ['points[]'], 
-        )
-
-    traits_view = View(
-        [Item('points', style='custom')
-        ], 
-        title='Grid center trajectory', 
-        buttons = OKCancelButtons
         )
 
     @cached_property

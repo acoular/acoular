@@ -13,21 +13,78 @@
     GeneralFlowEnvironment
     FlowField
     OpenJet
+    RotatingFlow
     SlotJet
 
 """
-from numpy import array, isscalar, float32, float64, newaxis, \
+from numpy import array, isscalar, float32, float64, newaxis, zeros, \
 sqrt, arange, pi, exp, sin, cos, arccos, zeros_like, empty, dot, hstack, \
-vstack, identity, cross, sign, sum
+vstack, identity, cross, sign, arctan2, matmul, sum, lexsort, stack, nonzero, append, outer, asarray
 from numpy.linalg.linalg import norm
 from scipy.integrate import ode
 from scipy.interpolate import LinearNDInterpolator
 from scipy.spatial import ConvexHull
 from traits.api import HasPrivateTraits, Float, Property, Int, \
 CArray, cached_property, Trait
-from traitsui.api import View
 
 from .internal import digest
+
+def cartToCyl(x, Q=identity(3)):
+    """
+    Returns the cylindrical coordinate representation of a input position 
+    which was before transformed into a modified cartesian coordinate, which
+    has flow into positive z direction.
+    
+    Parameters
+    ----------
+    x : float[3, nPoints]
+        cartesian coordinates of n points
+    Q : float[3,3]
+        Orthogonal transformation matrix. If provided, the pos vectors are
+        transformed via posiMod = Q * x, before transforming those modified
+        coordinates into cylindrical ones. Default is identity matrix.
+        
+    Returns
+    -------
+    cylCoord : [3, nPoints]
+        cylindrical representation of those n points with (phi, r, z)
+    """
+    if not (Q == identity(3)).all():
+        x = matmul(Q, x)  # modified position vector
+    cylCoord = array([arctan2(x[1], x[0]), sqrt(x[0]**2 + x[1]**2), x[2]])
+    return cylCoord
+
+
+def cylToCart(x, Q=identity(3)):
+        """
+        Returns the cartesian coordinate representation of a input position 
+        which was before transformed into a cylindrical coordinate, which
+        has flow into positive z direction.
+        
+        Parameters
+        ----------
+        x : float[3, nPoints]
+            cylindrical representation of those n points with (phi, r, z)
+            cartesian coordinates of n points
+    
+        Q : float[3,3]
+        Orthogonal transformation matrix. If provided, the pos vectors are
+        transformed via posiMod = Q * x, before transforming those modified
+        coordinates into cylindrical ones. Default is identity matrix.
+        
+            
+        Returns
+        -------
+        CartCoord : [3, nPoints]
+        cartesian coordinates of n points
+            
+        """
+        if not (Q == identity(3)).all():
+            x = matmul(Q, x)  # modified position vector
+        CartCoord = array([x[1]*sin(x[0]),x[1]*cos(x[0]) , x[2]])
+        return CartCoord
+
+
 
 class Environment( HasPrivateTraits ):
     """
@@ -40,9 +97,6 @@ class Environment( HasPrivateTraits ):
     digest = Property(
         depends_on=['c'], 
         )
-
-    # no view necessary
-    traits_view = View()
 
     #: The speed of sound, defaults to 343 m/s
     c = Float(343., 
@@ -60,7 +114,7 @@ class Environment( HasPrivateTraits ):
         ----------
         gpos : array of floats of shape (3, N)
             The locations of points in the beamforming map grid in 3D cartesian
-            co-ordinates.
+            co-ordinates. 
         mpos : array of floats of shape (3, M), optional
             The locations of microphones in 3D cartesian co-ordinates. If not
             given, then only one microphone at the origin (0, 0, 0) is
@@ -103,13 +157,6 @@ class UniformFlowEnvironment( Environment):
         depends_on=['c', 'ma', 'fdv'], 
         )
 
-    traits_view = View(
-            [
-                ['ma{Flow Mach number}', 'fdv{Flow vector}'], 
-                '|[Uniform Flow]'
-            ]
-        )
-
     @cached_property
     def _get_digest( self ):
         return digest( self )
@@ -148,15 +195,13 @@ class UniformFlowEnvironment( Environment):
         if rm.shape[1] == 1:
             rm = rm[:, 0]
         return rm
+    
 
 class FlowField( HasPrivateTraits ):
     """
     An abstract base class for a spatial flow field.
     """
     digest = Property
-
-    traits_view = View(
-        )
 
     def _get_digest( self ):
         return ''
@@ -211,15 +256,6 @@ class SlotJet( FlowField ):
     # internal identifier
     digest = Property(
         depends_on=['v0', 'origin', 'flow', 'plane', 'B'], 
-        )
-
-    traits_view = View(
-            [
-                ['v0{Exit velocity}', 'origin{Jet origin}',
-                 'flow', 'plane',
-                'B{Slot width}'], 
-                '|[Slot jet]'
-            ]
         )
 
     @cached_property
@@ -302,14 +338,6 @@ class OpenJet( FlowField ):
         depends_on=['v0', 'origin', 'D'], 
         )
 
-    traits_view = View(
-            [
-                ['v0{Exit velocity}', 'origin{Jet origin}', 
-                'D{Nozzle diameter}'], 
-                '|[Open jet]'
-            ]
-        )
-
     @cached_property
     def _get_digest( self ):
         return digest( self )
@@ -350,20 +378,94 @@ class OpenJet( FlowField ):
         Udx = (h1*h1/(x*x1*x1)-h1/(x*x1))*U
         if h1 < 0.0:
             Udx = 0
+
         # flow field
         v = array( (U, 0., 0.) )
         # Jacobi matrix
         dv = array( ((Udx, 0., 0.), (Udy, 0., 0.), (Udz, 0., 0.)) ).T
         return v, dv
 
-def spiral_sphere(N, Om=2*pi, b=array((0, 0, 1))):
+
+
+
+class RotatingFlow( FlowField ):
+    """
+    Provides an analytical approximation of the flow field of a rotating fluid with constant flow. 
+
+
+    """
+    #: Exit velocity at jet origin, i.e. the nozzle. Defaults to 0.
+    rpm = Float(0.0,
+        desc="revolutions per minute of the virtual array; negative values for clockwise rotation")
+
+    v0 = Float(0.0, 
+        desc="flow velocity")
+
+    #: Location of the nozzle center, defaults to the co-ordinate origin.
+    origin = CArray( dtype=float64, shape=(3, ), value=array((0., 0., 0.)), 
+        desc="center of nozzle")
+
+    # internal identifier
+    digest = Property(
+        depends_on=['v0', 'origin', 'rpm'], 
+        )
+
+    # internal identifier
+    omega = Property(
+        depends_on=['rpm'], 
+        )
+
+    @cached_property
+    def _get_omega(self):
+        return 2 * pi * self.rpm / 60
+
+    @cached_property
+    def _get_digest( self ):
+        return digest( self )
+
+    def v( self, xx):
+        """
+        Provides the rotating flow field around the z-Axis as a function of the location.
+
+        Parameters
+        ----------
+        xx : array of floats of shape (3, )
+            Location in the fluid for which to provide the data.
+
+        Returns
+        -------
+        tuple with two elements
+            The first element in the tuple is the velocity vector and the
+            second is the Jacobian of the velocity vector field, both at the
+            given location.
+        """
+        x, y, z = xx-self.origin
+
+        # rotational speed
+        omega = self.omega
+
+        #velocity vector
+        U = omega * y
+        V = -omega * x
+        W = self.v0 
+        
+        # flow field
+        v = array( (U, V, W) )
+        # Jacobi matrix
+        dv = array( ((0, -omega, 0.), (omega, 0, 0.), (0., 0., 0.)) ).T
+        return v, dv
+
+
+
+
+def spiral_sphere(N, Om=2*pi, b=array((0, 0, 1))):    #change to 4*pi
     """
     Internal helper function for the raycasting that returns an array of
     unit vectors (N, 3) giving equally distributed directions on a part of
     sphere given by the center direction b and the solid angle Om.
     """
     # first produce 'equally' distributed directions in spherical coords
-    o = 4*pi/Om
+    o = 4*pi/Om 
     h = -1+ 2*arange(N)/(N*o-1.)
     theta = arccos(h)
     phi = zeros_like(theta)
@@ -409,13 +511,6 @@ class GeneralFlowEnvironment(Environment):
     # internal identifier
     digest = Property(
         depends_on=['c', 'ff.digest', 'N', 'Om'], 
-        )
-
-    traits_view = View(
-            [
-                ['ff{Flow field}', 'N{Max. number of rays}', 'Om{Max. solid angle }'], 
-                '|[General Flow]'
-            ]
         )
 
     @cached_property

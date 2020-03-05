@@ -19,14 +19,10 @@
 """
 
 # imports from other packages
-from six import next
 from numpy import array, sqrt, ones, empty, newaxis, uint32, arange, dot, int64, sum
 from traits.api import Float, Int, Property, Trait, Delegate, \
 cached_property, Tuple, HasPrivateTraits, CLong, File, Instance, Any, \
-on_trait_change, List, CArray
-from traitsui.api import View, Item
-from traitsui.menu import OKCancelButtons
-import tables
+on_trait_change, List, ListInt, CArray
 from os import path
 from warnings import warn
 
@@ -37,6 +33,7 @@ from .internal import digest
 from .microphones import MicGeom
 from .environments import Environment
 from .signals import SignalGenerator
+from .h5files import H5FileBase, _get_h5file_class
 
 class SamplesGenerator( HasPrivateTraits ):
     """
@@ -113,25 +110,13 @@ class TimeSamples( SamplesGenerator ):
         desc="the actual time data array")
 
     #: HDF5 file object
-    h5f = Instance(tables.File, transient = True)
+    h5f = Instance(H5FileBase, transient = True)
     
     # Checksum over first data entries of all channels
     _datachecksum = Property()
     
     # internal identifier
     digest = Property( depends_on = ['basename', 'calib.digest', '_datachecksum'])
-
-    traits_view = View(
-        ['name{File name}', 
-            ['sample_freq~{Sampling frequency}', 
-            'numchannels~{Number of channels}', 
-            'numsamples~{Number of samples}', 
-            '|[Properties]'], 
-            '|'
-        ], 
-        title='Time data', 
-        buttons = OKCancelButtons
-                    )
 
     def _get__datachecksum( self ):
         return self.data[0,:].sum()
@@ -160,9 +145,10 @@ class TimeSamples( SamplesGenerator ):
                 self.h5f.close()
             except IOError:
                 pass
-        self.h5f = tables.open_file(self.name)
-        self.data = self.h5f.root.time_data
-        self.sample_freq = self.data.get_attr('sample_freq')
+        file = _get_h5file_class()
+        self.h5f = file(self.name)
+        self.data = self.h5f.get_data_by_reference('time_data')    
+        self.sample_freq = self.h5f.get_node_attribute(self.data,'sample_freq')
         (self.numsamples, self.numchannels) = self.data.shape
 
     def result(self, num=128):
@@ -219,7 +205,7 @@ class MaskedTimeSamples( TimeSamples ):
         desc="stop of valid samples")
     
     #: Channels that are to be treated as invalid.
-    invalid_channels = List(
+    invalid_channels = ListInt(
         desc="list of invalid channels")
     
     #: Channel mask to serve as an index for all valid channels, is set automatically.
@@ -245,20 +231,6 @@ class MaskedTimeSamples( TimeSamples ):
     # internal identifier
     digest = Property( depends_on = ['basename', 'start', 'stop', \
         'calib.digest', 'invalid_channels','_datachecksum'])
-
-    traits_view = View(
-        ['name{File name}', 
-         ['start{From sample}', Item('stop', label='to', style='text'), '-'], 
-         'invalid_channels{Invalid channels}', 
-            ['sample_freq~{Sampling frequency}', 
-            'numchannels~{Number of channels}', 
-            'numsamples~{Number of samples}', 
-            '|[Properties]'], 
-            '|'
-        ], 
-        title='Time data', 
-        buttons = OKCancelButtons
-                    )
 
     @cached_property
     def _get_digest( self ):
@@ -301,9 +273,10 @@ class MaskedTimeSamples( TimeSamples ):
                 self.h5f.close()
             except IOError:
                 pass
-        self.h5f = tables.open_file(self.name)
-        self.data = self.h5f.root.time_data
-        self.sample_freq = self.data.get_attr('sample_freq')
+        file = _get_h5file_class()
+        self.h5f = file(self.name)
+        self.data = self.h5f.get_data_by_reference('time_data')    
+        self.sample_freq = self.h5f.get_node_attribute(self.data,'sample_freq')
         (self.numsamples_total, self.numchannels_total) = self.data.shape
 
     def result(self, num=128):
@@ -333,6 +306,8 @@ class MaskedTimeSamples( TimeSamples ):
                 cal_factor = self.calib.data[self.channels][newaxis]
             elif self.calib.num_mics == self.numchannels:
                 cal_factor = self.calib.data[newaxis]
+            elif self.calib.num_mics == 0:
+                warn("No calibration data used.", Warning, stacklevel = 2)    
             else:
                 raise ValueError("calibration data not compatible: %i, %i" % \
                             (self.calib.num_mics, self.numchannels))
@@ -792,10 +767,6 @@ class SourceMixer( SamplesGenerator ):
 
     # internal identifier
     digest = Property( depends_on = ['ldigest', '__class__'])
-
-    traits_view = View(
-        Item('sources', style='custom')
-                    )
 
     @cached_property
     def _get_ldigest( self ):
