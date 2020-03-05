@@ -1475,6 +1475,11 @@ class WriteWAV( TimeInOut ):
     `*.wav` file.
     """
     
+    #: Name of the file to be saved. If none is given, the name will be
+    #: automatically generated from the sources.
+    name = File(filter=['*.wav'], 
+        desc="name of wave file")    
+    
     #: Basename for cache, readonly.
     basename = Property( depends_on = 'digest')
        
@@ -1513,10 +1518,13 @@ class WriteWAV( TimeInOut ):
             raise ValueError("No channels given for output.")
         if nc > 2:
             warn("More than two channels given for output, exported file will have %i channels" % nc)
-        name = self.basename
-        for nr in self.channels:
-            name += '_%i' % nr
-        name += '.wav'
+        if self.name == '':
+            name = self.basename
+            for nr in self.channels:
+                name += '_%i' % nr
+            name += '.wav'
+        else:
+            name = self.name
         wf = wave.open(name,'w')
         wf.setnchannels(nc)
         wf.setsampwidth(2)
