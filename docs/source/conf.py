@@ -59,7 +59,7 @@ copyright = '2007-2019, Acoular Development Team'
 #d = {}
 #execfile(os.path.join('..','..', 'acoular', '__init__.py'), d)
 #import acoular #acoular.__version__
-version = release =  '19.11'#'3.0'#d['__version__']
+version = release =  '20.02'#'3.0'#d['__version__']
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:

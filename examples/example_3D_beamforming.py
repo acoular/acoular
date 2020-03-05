@@ -68,7 +68,7 @@ f = PowerSpectra(time_data=pa,
                  overlap='50%', 
                  block_size=128, 
                  ind_low=5, ind_high=16)
-st = SteeringVector(grid=g, mics=m, steer_type='true level') 
+st = SteeringVector(grid=g, mics=m, steer_type='true location') 
 b = BeamformerCleansc(freq_data=f, steer=st)
 
 #===============================================================================
