@@ -7,8 +7,9 @@ matrix:
     # Python 2 support will be dropped
     #- name: "Python 2.7 on Xenial Linux"
     #  python: 2.7    
-    - name: "Python 3.5 on Xenial Linux"
-      python: 3.5           # this works only for Linux 
+    # Python 3.5 support will be dropped
+    #- name: "Python 3.5 on Xenial Linux"
+    #  python: 3.5           # this works only for Linux 
     - name: "Python 3.6 on Xenial Linux"
       python: 3.6           
     - name: "Python 3.7 on Xenial Linux"
