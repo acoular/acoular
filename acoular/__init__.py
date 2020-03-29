@@ -67,7 +67,8 @@ except:
 
 from .h5cache import td_dir, cache_dir
 from .tbeamform import IntegratorSectorTime, \
-BeamformerTime, BeamformerTimeSq, BeamformerTimeTraj, BeamformerTimeSqTraj
+BeamformerTime, BeamformerTimeSq, BeamformerTimeTraj, BeamformerTimeSqTraj,\
+BeamformerCleant
 from .tprocess import TimeInOut, MaskedTimeInOut, Mixer, TimeAverage, \
 TimeReverse, TimePower, FiltFiltOctave, FiltOctave, TimeCache, WriteWAV, \
 WriteH5, SpatialInterpolator, SpatialInterpolatorRotation, Trigger, \
