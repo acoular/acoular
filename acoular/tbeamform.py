@@ -12,8 +12,9 @@
     BeamformerTimeTraj
     BeamformerTimeSq
     BeamformerTimeSqTraj
-    IntegratorSectorTime
     BeamformerCleant
+    BeamformerCleantSq
+    IntegratorSectorTime
 """
 
 # imports from other packages
@@ -636,72 +637,6 @@ class BeamformerTimeSqTraj( BeamformerTimeSq, BeamformerTimeTraj ):
         yield o[:ooffset]
                        
 
-class IntegratorSectorTime( TimeInOut ):
-    """
-    Provides an Integrator in the time domain.
-    """
-
-    #: :class:`~acoular.grids.RectGrid` object that provides the grid locations.
-    grid = Trait(RectGrid, 
-        desc="beamforming grid")
-        
-    #: List of sectors in grid
-    sectors = List()
-
-    #: Clipping, in Dezibel relative to maximum (negative values)
-    clip = Float(-350.0)
-
-    #: Number of channels in output (= number of sectors).
-    numchannels = Property( depends_on = ['sectors', ])
-
-    # internal identifier
-    digest = Property( 
-        depends_on = ['sectors', 'clip', 'grid.digest', 'source.digest', \
-        '__class__'], 
-        )
-
-    @cached_property
-    def _get_digest( self ):
-        return digest(self)
-        
-    @cached_property
-    def _get_numchannels ( self ):
-        return len(self.sectors)
-
-    def result( self, num=1 ):
-        """
-        Python generator that yields the source output integrated over the given 
-        sectors, block-wise.
-        
-        Parameters
-        ----------
-        num : integer, defaults to 1
-            This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block).
-        
-        Returns
-        -------
-        Samples in blocks of shape (num, :attr:`numchannels`). 
-        :attr:`numchannels` is the number of sectors.
-        The last block may be shorter than num.
-        """
-        inds = [self.grid.indices(*sector) for sector in self.sectors]
-        gshape = self.grid.shape
-        o = empty((num, self.numchannels), dtype=float) # output array
-        for r in self.source.result(num):
-            ns = r.shape[0]
-            mapshape = (ns,) + gshape
-            rmax = r.max()
-            rmin = rmax * 10**(self.clip/10.0)
-            r = where(r>rmin, r, 0.0)
-            i = 0
-            for ind in inds:
-                h = r[:].reshape(mapshape)[ (s_[:],) + ind ]
-                o[:ns, i] = h.reshape(h.shape[0], -1).sum(axis=1)
-                i += 1
-            yield o[:ns]
-
-
 class BeamformerCleant( BeamformerTime ):
     """
     CLEANT deconvolution method, see :ref:`Cousson et al., 2019<Cousson2019>`.
@@ -754,7 +689,7 @@ class BeamformerCleant( BeamformerTime ):
             self.bufferIndex -= ns
             yield
 
-    def result( self, num=256 ):
+    def result( self, num=2048 ):
         """
         Python generator that yields the deconvolved output block-wise. 
         
@@ -854,7 +789,8 @@ class BeamformerCleant( BeamformerTime ):
 
 class BeamformerCleantSq( BeamformerCleant ):
     """
-    CLEANT deconvolution method, see :ref:`Cousson et al., 2019<Cousson2019>`.
+    CLEANT deconvolution method, see :ref:`Cousson et al., 2019<Cousson2019>`
+    with optional removal of autocorrelation.
     
     An implementation of the CLEAN method in time domain. This class can only 
     be used for static sources.
@@ -874,9 +810,10 @@ class BeamformerCleantSq( BeamformerCleant ):
     def _get_digest( self ):
         return digest(self)
     
-    def result( self, num=256 ):
+    def result( self, num=2048 ):
         """
-        Python generator that yields the deconvolved output block-wise. 
+        Python generator that yields the *squared* deconvolved beamformer 
+        output with optional removal of autocorrelation block-wise.
         
         Parameters
         ----------
@@ -988,3 +925,69 @@ class BeamformerCleantSq( BeamformerCleant ):
             if self.r_diag:
                 autopow[res_index] = (temp**2).sum(-1)
         return result, autopow  
+
+
+class IntegratorSectorTime( TimeInOut ):
+    """
+    Provides an Integrator in the time domain.
+    """
+
+    #: :class:`~acoular.grids.RectGrid` object that provides the grid locations.
+    grid = Trait(RectGrid, 
+        desc="beamforming grid")
+        
+    #: List of sectors in grid
+    sectors = List()
+
+    #: Clipping, in Dezibel relative to maximum (negative values)
+    clip = Float(-350.0)
+
+    #: Number of channels in output (= number of sectors).
+    numchannels = Property( depends_on = ['sectors', ])
+
+    # internal identifier
+    digest = Property( 
+        depends_on = ['sectors', 'clip', 'grid.digest', 'source.digest', \
+        '__class__'], 
+        )
+
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+        
+    @cached_property
+    def _get_numchannels ( self ):
+        return len(self.sectors)
+
+    def result( self, num=1 ):
+        """
+        Python generator that yields the source output integrated over the given 
+        sectors, block-wise.
+        
+        Parameters
+        ----------
+        num : integer, defaults to 1
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block).
+        
+        Returns
+        -------
+        Samples in blocks of shape (num, :attr:`numchannels`). 
+        :attr:`numchannels` is the number of sectors.
+        The last block may be shorter than num.
+        """
+        inds = [self.grid.indices(*sector) for sector in self.sectors]
+        gshape = self.grid.shape
+        o = empty((num, self.numchannels), dtype=float) # output array
+        for r in self.source.result(num):
+            ns = r.shape[0]
+            mapshape = (ns,) + gshape
+            rmax = r.max()
+            rmin = rmax * 10**(self.clip/10.0)
+            r = where(r>rmin, r, 0.0)
+            i = 0
+            for ind in inds:
+                h = r[:].reshape(mapshape)[ (s_[:],) + ind ]
+                o[:ns, i] = h.reshape(h.shape[0], -1).sum(axis=1)
+                i += 1
+            yield o[:ns]
