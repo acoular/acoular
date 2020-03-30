@@ -749,7 +749,7 @@ class BeamformerCleant( BeamformerTime ):
             block *= weights
             ns = block.shape[0]
             bufferSize = self.buffer.shape[0]
-            self.buffer[0:(bufferSize-ns)] = self.buffer[-(bufferSize-ns):]  # copy remaining samples in front of next block
+            self.buffer[0:(bufferSize-ns)] = self.buffer[-(bufferSize-ns):] 
             self.buffer[-ns:,:] = block
             self.bufferIndex -= ns
             yield
@@ -785,7 +785,6 @@ class BeamformerCleant( BeamformerTime ):
         d_interp1 = 1-d_interp2 # 1st coeff for lin interpolation 
         w = self._get_weights()
         amp = (w/(self.rm*self.rm)).sum(1) * self.r0
-        # amp = (w/(self.rm*self.rm)).sum(1)
         amp = 1.0/(amp[:, newaxis]*self.rm) # multiplication factor
         d_interp1 *= amp # premultiplication, to save later ops
         d_interp2 *= amp
@@ -847,8 +846,145 @@ class BeamformerCleant( BeamformerTime ):
     def delay_and_sum(self,num,p_res,d_interp1,d_interp2,d_index,m_index): 
         ''' standard delay-and-sum method ''' 
         result = empty((num, self.grid.size), dtype=float) # output array
-        for resIndex in range(num):
-            result[resIndex]=(p_res[resIndex+d_index, m_index]*d_interp1 \
-                        + p_res[resIndex+d_index+1, m_index]*d_interp2).sum(-1)
+        for res_index in range(num):
+            result[res_index]=(p_res[res_index+d_index, m_index]*d_interp1 \
+                        + p_res[res_index+d_index+1, m_index]*d_interp2).sum(-1)
         return result
 
+
+class BeamformerCleantSq( BeamformerCleant ):
+    """
+    CLEANT deconvolution method, see :ref:`Cousson et al., 2019<Cousson2019>`.
+    
+    An implementation of the CLEAN method in time domain. This class can only 
+    be used for static sources.
+    """
+
+    #: Boolean flag, if 'True' (default), the main diagonal is removed before beamforming.
+    r_diag = Bool(True, 
+        desc="removal of diagonal")
+
+    # internal identifier
+    digest = Property( 
+        depends_on = ['_steer_obj.digest', 'source.digest', 'weights',  \
+                      '__class__','damp','n_iter','r_diag'],
+        )
+
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+    
+    def result( self, num=256 ):
+        """
+        Python generator that yields the deconvolved output block-wise. 
+        
+        Parameters
+        ----------
+        num : integer, defaults to 2048
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block).
+        
+        Returns
+        -------
+        Samples in blocks of shape  \
+        (num, :attr:`~BeamformerTime.numchannels`). 
+            :attr:`~BeamformerTime.numchannels` is usually very \
+            large (number of grid points).
+            The last block may be shorter than num. \
+            The output starts for signals that were emitted 
+            from the grid at `t=0`.
+        """
+        # initialize values
+        numMics = self.steer.mics.num_mics
+        m_index = arange(numMics, dtype=int)
+        n_index = arange(0,num)[:,newaxis]
+        c = self.steer.env.c/self.source.sample_freq
+        delays = self.rm/c
+        d_index = array(delays, dtype=int) # integer index
+        d_interp2 = delays % 1 # 2nd coeff for lin interpolation between samples
+        d_interp1 = 1-d_interp2 # 1st coeff for lin interpolation 
+        w = self._get_weights()
+        amp = (w/(self.rm*self.rm)).sum(1) * self.r0
+        amp = 1.0/(amp[:, newaxis]*self.rm) # multiplication factor
+        temp = empty((self.grid.size, self.source.numchannels), dtype=float)
+        d_interp1 *= amp # premultiplication, to save later ops
+        d_interp2 *= amp
+        maxdelay = int((self.rm/c).max())+2 + num # +2 because interpolation
+        initialNumberOfBlocks = int(ceil(maxdelay/num))
+        bufferSize=initialNumberOfBlocks*num
+        self.buffer = zeros((bufferSize,numMics), dtype=float)
+        self.bufferIndex = bufferSize # indexing current time sample in buffer 
+        fill_buffer_generator = self._fill_buffer(num)
+        for _ in range(initialNumberOfBlocks):
+            next(fill_buffer_generator)
+
+        # start processing
+        flag = True
+        while flag:
+            samplesleft = self.buffer.shape[0]-self.bufferIndex
+            if samplesleft-maxdelay <= 0:
+                num += samplesleft-maxdelay
+                maxdelay += samplesleft-maxdelay
+                n_index = arange(0,num)[:,newaxis]
+                flag=False
+            # init step
+            p_res = array(
+                self.buffer[self.bufferIndex:self.bufferIndex+maxdelay,:])
+            Phi, autopow = self.delay_and_sum(
+                num,p_res,d_interp1,d_interp2,d_index,m_index,temp)
+            Gamma = zeros(Phi.shape)
+            Gamma_autopow = zeros(Phi.shape)
+            J = 0
+            # deconvolution 
+            while (J < self.n_iter):
+                # print(f"start clean iteration {J+1} of max {self.n_iter}")
+                if self.r_diag:
+                    powPhi = clip((Phi[:num]**2-autopow).sum(0),1e-100,1e+100)
+                else:
+                    powPhi = (Phi[:num]**2).sum(0)
+                imax = argmax(powPhi)
+                t_float = delays[imax,m_index]+n_index
+                t_ind = t_float.astype(int)
+                for m in range(numMics): 
+                    p_res[t_ind[:num,m],m] -= self.damp*interp(t_ind[:num,m],
+                                                               t_float[:num,m],
+                                                                Phi[:num,imax]*self.r0[m]/self.rm[imax,m],
+                                                                )
+                nextPhi, nextAutopow = self.delay_and_sum(
+                            num,p_res,d_interp1,d_interp2,d_index,m_index,temp)
+                if self.r_diag:
+                    pownextPhi = clip((nextPhi[:num]**2-nextAutopow).sum(0),
+                                      1e-100,1e+100)
+                else:
+                    pownextPhi = (nextPhi[:num]**2).sum(0)
+                # print(f"total signal power: {powPhi.sum()}")
+                if pownextPhi.sum() < powPhi.sum(): # stopping criterion
+                    Gamma[:num,imax] += self.damp*Phi[:num,imax]
+                    Gamma_autopow[:num,imax] = autopow[:num,imax].copy()
+                    Phi=nextPhi
+                    autopow=nextAutopow
+                    # print(f"clean max: {L_p((Gamma**2).sum(0)/num).max()} dB")
+                    J += 1
+                else:
+                    break
+            if self.r_diag: 
+                yield Gamma[:num]**2 - (self.damp**2)*Gamma_autopow[:num]
+            else:
+                yield Gamma[:num]**2
+            self.bufferIndex += num
+            try:
+                next(fill_buffer_generator)
+            except: 
+                pass
+
+    def delay_and_sum(self,num,p_res,d_interp1,d_interp2,d_index,m_index,temp): 
+        ''' standard delay-and-sum method ''' 
+        result = empty((num, self.grid.size), dtype=float) # output array
+        autopow = empty((num, self.grid.size), dtype=float) # output array
+        for res_index in range(num):
+            temp[:,:]=(p_res[res_index+d_index, m_index]*d_interp1 \
+                        + p_res[res_index+d_index+1, m_index]*d_interp2)
+            result[res_index] = temp.sum(-1) # sum over channels (ngridpts,)
+            if self.r_diag:
+                autopow[res_index] = (temp**2).sum(-1)
+        return result, autopow  
