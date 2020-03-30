@@ -19,7 +19,8 @@ RectGrid, BeamformerBase, BeamformerEig, BeamformerOrth, BeamformerCleansc, \
 MaskedTimeSamples, FiltFiltOctave, BeamformerTimeSq, TimeAverage, \
 TimeCache, BeamformerTime, TimePower, BeamformerCMF, \
 BeamformerCapon, BeamformerMusic, BeamformerDamas, BeamformerClean, \
-BeamformerFunctional, BeamformerDamasPlus, BeamformerGIB, SteeringVector
+BeamformerFunctional, BeamformerDamasPlus, BeamformerGIB, SteeringVector, \
+BeamformerCleant,BeamformerCleantSq
 
 # other imports
 from numpy import zeros
@@ -141,10 +142,30 @@ avgts = TimeAverage(source=bts, naverage = 1024)
 cachts = TimeCache( source = avgts) # cache to prevent recalculation
 
 #===============================================================================
+# clean deconvolution in time domain
+# processing chain: zero-phase filtering, clean in time domain, power, average
+#===============================================================================
+fct = FiltFiltOctave(source=t1, band=cfreq)
+bct = BeamformerCleant(source=fct, steer=st, n_iter=20,damp=.7)
+ptct = TimePower(source=bct)
+avgct = TimeAverage(source=ptct, naverage = 1024)
+cachct = TimeCache( source = avgct) # cache to prevent recalculation
+
+#===============================================================================
+# clean deconvolution in time domain
+# processing chain: zero-phase filtering, clean in time domain with 
+# autocorrelation removal, average
+#===============================================================================
+fcts = FiltFiltOctave(source=t1, band=cfreq)
+bcts = BeamformerCleantSq(source=fcts, steer=st, n_iter=20,damp=.7,r_diag=True)
+avgcts = TimeAverage(source=bcts, naverage = 1024)
+cachcts = TimeCache( source = avgcts) # cache to prevent recalculation
+
+#===============================================================================
 # plot result maps for different beamformers in time domain
 #===============================================================================
-i2 = 2 # no of figure
-for b in (cacht, cachts):
+i2 = 4 # no of figure
+for b in (cacht, cachts, cachct, cachcts):
     # first, plot time-dependent result (block-wise)
     figure(i2,(7,7))
     i2 += 1
@@ -170,7 +191,8 @@ for b in (cacht, cachts):
     imshow(L_p(map.T), vmax=mx, vmin=mx-15, origin='lower',
            interpolation='nearest', extent=g.extend())
     colorbar()
-    title(('BeamformerTime','BeamformerTimeSq')[i2-3])
+    title(('BeamformerTime','BeamformerTimeSq','BeamformerCleant',
+           'BeamformerCleantSq')[i2-5])
 tight_layout()
 # only display result on screen if this script is run directly
 if __name__ == '__main__': show()
