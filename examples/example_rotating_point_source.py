@@ -26,7 +26,7 @@ MaskedTimeSamples, FiltFiltOctave, Trajectory, BeamformerTimeSq, TimeAverage, \
 BeamformerTimeSqTraj, \
 TimeCache, FiltOctave, BeamformerTime, TimePower, IntegratorSectorTime, \
 PointSource, MovingPointSource, SineGenerator, WNoiseGenerator, Mixer, WriteWAV, \
-SteeringVector, BeamformerCleantTraj
+SteeringVector, BeamformerCleantSqTraj
 
 from pylab import subplot, imshow, show, colorbar, plot, transpose, figure, \
 psd, axis, xlim, ylim, title, tight_layout, text
@@ -169,12 +169,10 @@ tight_layout()
 #===============================================================================
 # moving focus time domain deconvolution
 #===============================================================================
-
 # beamforming with trajectory (rvec axis perpendicular to trajectory)
-bct = BeamformerCleantTraj(source=fi, steer=st1, trajectory=tr, \
+bct = BeamformerCleantSqTraj(source=fi, steer=st1, trajectory=tr, \
     rvec = array((0,0,1.0)), n_iter=5)
-tpct = TimePower(source=bct)
-avgct = TimeAverage(source=tpct, naverage=int(sfreq*tmax/16)) # 16 single images
+avgct = TimeAverage(source=bct, naverage=int(sfreq*tmax/16)) # 16 single images
 cachct = TimeCache(source=avgct) # cache to prevent recalculation
 map4 = zeros(g1.shape) # accumulator for average
 # plot single frames
