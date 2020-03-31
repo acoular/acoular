@@ -1001,8 +1001,8 @@ class BeamformerCleantTraj( BeamformerCleant, BeamformerTimeTraj ):
         dflag = True # data is available 
         while flag:
             for i in range(num):
-                tpos = next(movgpos)
-                rm = self.steer.env._r( tpos, self.steer.mics.mpos ) 
+                tpos = next(movgpos).astype(float32)
+                rm = self.steer.env._r( tpos, self.steer.mics.mpos ).astype(float32) 
                 blockr0[i,:] = self.get_r0(tpos)
                 blockrm[i,:,:] = rm
                 delays[i,:,:] = rm/c
@@ -1018,7 +1018,7 @@ class BeamformerCleantTraj( BeamformerCleant, BeamformerTimeTraj ):
             samplesleft = self.buffer.shape[0]-self.bufferIndex
             if samplesleft-maxdelay <= 0:
                 num = sum((delays.astype(int32).max((1,2))+1+arange(0,num)) < samplesleft)
-                n_index = arange(0,num)[:,newaxis]
+                n_index = arange(0,num,dtype=int32)[:,newaxis]
                 flag=False
             # init step
             d_interp2 = delays % 1 # 2nd coeff for lin interpolation between samples
@@ -1035,7 +1035,7 @@ class BeamformerCleantTraj( BeamformerCleant, BeamformerTimeTraj ):
                 print(f"start clean iteration {J+1} of max {self.n_iter}")
                 powPhi = (Phi[:num]**2).sum(0)
                 imax = argmax(powPhi)
-                t_float = delays[:num,imax,m_index]+n_index
+                t_float = (delays[:num,imax,m_index]+n_index).astype(float32)
                 t_ind = t_float.astype(int32)
                 for m in range(numMics): 
                     p_res[t_ind[:num,m],m] -= self.damp*interp(
