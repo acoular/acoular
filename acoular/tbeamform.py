@@ -1000,7 +1000,6 @@ class BeamformerCleantTraj( BeamformerCleant, BeamformerTimeTraj ):
         flag = True
         dflag = True # data is available 
         while flag:
-            self.fill_blocks(num, movgpos, movgspeed, blockrm, blockr0, delays)
             for i in range(num):
                 tpos = next(movgpos)
                 rm = self.steer.env._r( tpos, self.steer.mics.mpos ) 
