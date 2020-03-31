@@ -1074,7 +1074,8 @@ class BeamformerCleantTraj( BeamformerCleant, BeamformerTimeTraj ):
 
 class BeamformerCleantSqTraj( BeamformerCleantTraj, BeamformerTimeSq ):
     """
-    CLEANT deconvolution method, see :ref:`Cousson et al., 2019<Cousson2019>`.
+    CLEANT deconvolution method, see :ref:`Cousson et al., 2019<Cousson2019>`
+    with optional removal of autocorrelation.
     
     An implementation of the CLEAN method in time domain for moving sources
     with known trajectory. 
@@ -1104,7 +1105,8 @@ class BeamformerCleantSqTraj( BeamformerCleantTraj, BeamformerTimeSq ):
 
     def result( self, num=2048 ):
         """
-        Python generator that yields the deconvolved output block-wise. 
+        Python generator that yields the *squared* deconvolved beamformer 
+        output with optional removal of autocorrelation block-wise.
         
         Parameters
         ----------
@@ -1196,7 +1198,11 @@ class BeamformerCleantSqTraj( BeamformerCleantTraj, BeamformerTimeSq ):
                             )
                 nextPhi, nextAutopow = self.delay_and_sum(
                             num,p_res,d_interp1,d_interp2,delays,m_index,amp,temp)
-                pownextPhi = (nextPhi[:num]**2).sum(0)
+                if self.r_diag:
+                    pownextPhi = clip((nextPhi[:num]**2-nextAutopow).sum(0),
+                                      1e-100,1e+100)
+                else:
+                    pownextPhi = (nextPhi[:num]**2).sum(0)
                 # print(f"total signal power: {powPhi.sum()}")
                 if pownextPhi.sum() < powPhi.sum(): # stopping criterion
                     Gamma[:num,imax] += self.damp*Phi[:num,imax]
