@@ -712,7 +712,7 @@ class BeamformerCleant( BeamformerTime ):
         # initialize values
         numMics = self.steer.mics.num_mics
         m_index = arange(numMics, dtype=int)
-        n_index = arange(0,num)[:,newaxis]
+        n_index = arange(0,num+1)[:,newaxis]
         c = self.steer.env.c/self.source.sample_freq
         delays = self.rm/c
         d_index = array(delays, dtype=int) # integer index
@@ -739,7 +739,7 @@ class BeamformerCleant( BeamformerTime ):
             if samplesleft-maxdelay <= 0:
                 num += samplesleft-maxdelay
                 maxdelay += samplesleft-maxdelay
-                n_index = arange(0,num)[:,newaxis]
+                n_index = arange(0,num+1)[:,newaxis]
                 flag=False
             # init step
             p_res = array(
@@ -755,9 +755,8 @@ class BeamformerCleant( BeamformerTime ):
                 imax = argmax(powPhi)
                 t_float = delays[imax,m_index]+n_index
                 t_ind = t_float.astype(int)
-                # t_ind = (delays[imax,m_index]+arange(0,num+1)[:,newaxis]).astype(int)
                 for m in range(numMics): 
-                    p_res[t_ind[:num,m],m] -= self.damp*interp(t_ind[:num,m],
+                    p_res[t_ind[:num+1,m],m] -= self.damp*interp(t_ind[:num+1,m],
                                                                t_float[:num,m],
                                                                 Phi[:num,imax]*self.r0[imax]/self.rm[imax,m],
                                                                 )
@@ -835,7 +834,7 @@ class BeamformerCleantSq( BeamformerCleant ):
         # initialize values
         numMics = self.steer.mics.num_mics
         m_index = arange(numMics, dtype=int)
-        n_index = arange(0,num)[:,newaxis]
+        n_index = arange(0,num+1)[:,newaxis]
         c = self.steer.env.c/self.source.sample_freq
         delays = self.rm/c
         d_index = array(delays, dtype=int) # integer index
@@ -863,7 +862,7 @@ class BeamformerCleantSq( BeamformerCleant ):
             if samplesleft-maxdelay <= 0:
                 num += samplesleft-maxdelay
                 maxdelay += samplesleft-maxdelay
-                n_index = arange(0,num)[:,newaxis]
+                n_index = arange(0,num+1)[:,newaxis]
                 flag=False
             # init step
             p_res = array(
@@ -884,7 +883,7 @@ class BeamformerCleantSq( BeamformerCleant ):
                 t_float = delays[imax,m_index]+n_index
                 t_ind = t_float.astype(int)
                 for m in range(numMics): 
-                    p_res[t_ind[:num,m],m] -= self.damp*interp(t_ind[:num,m],
+                    p_res[t_ind[:num+1,m],m] -= self.damp*interp(t_ind[:num+1,m],
                                                                t_float[:num,m],
                                                                 Phi[:num,imax]*self.r0[imax]/self.rm[imax,m],
                                                                 )
