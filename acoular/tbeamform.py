@@ -755,10 +755,11 @@ class BeamformerCleant( BeamformerTime ):
                 imax = argmax(powPhi)
                 t_float = delays[imax,m_index]+n_index
                 t_ind = t_float.astype(int)
+                # t_ind = (delays[imax,m_index]+arange(0,num+1)[:,newaxis]).astype(int)
                 for m in range(numMics): 
                     p_res[t_ind[:num,m],m] -= self.damp*interp(t_ind[:num,m],
                                                                t_float[:num,m],
-                                                                Phi[:num,imax]*self.r0[m]/self.rm[imax,m],
+                                                                Phi[:num,imax]*self.r0[imax]/self.rm[imax,m],
                                                                 )
                 nextPhi = self.delay_and_sum(
                             num,p_res,d_interp1,d_interp2,d_index,m_index)
@@ -885,7 +886,7 @@ class BeamformerCleantSq( BeamformerCleant ):
                 for m in range(numMics): 
                     p_res[t_ind[:num,m],m] -= self.damp*interp(t_ind[:num,m],
                                                                t_float[:num,m],
-                                                                Phi[:num,imax]*self.r0[m]/self.rm[imax,m],
+                                                                Phi[:num,imax]*self.r0[imax]/self.rm[imax,m],
                                                                 )
                 nextPhi, nextAutopow = self.delay_and_sum(
                             num,p_res,d_interp1,d_interp2,d_index,m_index,temp)
@@ -1041,7 +1042,7 @@ class BeamformerCleantTraj( BeamformerCleant, BeamformerTimeTraj ):
                     p_res[t_ind[:num,m],m] -= self.damp*interp(
                         t_ind[:num,m], 
                         t_float[:num,m],
-                        Phi[:num,imax]*blockr0[:num,m] \
+                        Phi[:num,imax]*blockr0[:num,imax] \
                             /blockrm[:num,imax,m],
                             )
                 nextPhi = self.delay_and_sum(
@@ -1193,7 +1194,7 @@ class BeamformerCleantSqTraj( BeamformerCleantTraj, BeamformerTimeSq ):
                     p_res[t_ind[:num,m],m] -= self.damp*interp(
                         t_ind[:num,m], 
                         t_float[:num,m],
-                        Phi[:num,imax]*blockr0[:num,m] \
+                        Phi[:num,imax]*blockr0[:num,imax] \
                             /blockrm[:num,imax,m],
                             )
                 nextPhi, nextAutopow = self.delay_and_sum(
