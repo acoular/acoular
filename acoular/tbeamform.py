@@ -21,7 +21,7 @@
 from __future__ import print_function, division
 from numpy import array, newaxis, empty, sqrt, arange, clip, r_, zeros, \
 histogram, unique, cross, dot, where, s_ , sum,isscalar, full, ceil, argmax,\
-interp
+interp,concatenate, float32, int32
 from numpy.linalg import norm
 from traits.api import Float, CArray, Property, Trait, Bool, Delegate, \
 cached_property, List, Instance, Range, Int
@@ -712,7 +712,7 @@ class BeamformerCleant( BeamformerTime ):
         # initialize values
         numMics = self.steer.mics.num_mics
         m_index = arange(numMics, dtype=int)
-        n_index = arange(0,num)[:,newaxis]
+        n_index = arange(0,num+1)[:,newaxis]
         c = self.steer.env.c/self.source.sample_freq
         delays = self.rm/c
         d_index = array(delays, dtype=int) # integer index
@@ -739,7 +739,7 @@ class BeamformerCleant( BeamformerTime ):
             if samplesleft-maxdelay <= 0:
                 num += samplesleft-maxdelay
                 maxdelay += samplesleft-maxdelay
-                n_index = arange(0,num)[:,newaxis]
+                n_index = arange(0,num+1)[:,newaxis]
                 flag=False
             # init step
             p_res = array(
@@ -756,9 +756,9 @@ class BeamformerCleant( BeamformerTime ):
                 t_float = delays[imax,m_index]+n_index
                 t_ind = t_float.astype(int)
                 for m in range(numMics): 
-                    p_res[t_ind[:num,m],m] -= self.damp*interp(t_ind[:num,m],
+                    p_res[t_ind[:num+1,m],m] -= self.damp*interp(t_ind[:num+1,m],
                                                                t_float[:num,m],
-                                                                Phi[:num,imax]*self.r0[m]/self.rm[imax,m],
+                                                                Phi[:num,imax]*self.r0[imax]/self.rm[imax,m],
                                                                 )
                 nextPhi = self.delay_and_sum(
                             num,p_res,d_interp1,d_interp2,d_index,m_index)
@@ -834,7 +834,7 @@ class BeamformerCleantSq( BeamformerCleant ):
         # initialize values
         numMics = self.steer.mics.num_mics
         m_index = arange(numMics, dtype=int)
-        n_index = arange(0,num)[:,newaxis]
+        n_index = arange(0,num+1)[:,newaxis]
         c = self.steer.env.c/self.source.sample_freq
         delays = self.rm/c
         d_index = array(delays, dtype=int) # integer index
@@ -862,7 +862,7 @@ class BeamformerCleantSq( BeamformerCleant ):
             if samplesleft-maxdelay <= 0:
                 num += samplesleft-maxdelay
                 maxdelay += samplesleft-maxdelay
-                n_index = arange(0,num)[:,newaxis]
+                n_index = arange(0,num+1)[:,newaxis]
                 flag=False
             # init step
             p_res = array(
@@ -883,9 +883,9 @@ class BeamformerCleantSq( BeamformerCleant ):
                 t_float = delays[imax,m_index]+n_index
                 t_ind = t_float.astype(int)
                 for m in range(numMics): 
-                    p_res[t_ind[:num,m],m] -= self.damp*interp(t_ind[:num,m],
+                    p_res[t_ind[:num+1,m],m] -= self.damp*interp(t_ind[:num+1,m],
                                                                t_float[:num,m],
-                                                                Phi[:num,imax]*self.r0[m]/self.rm[imax,m],
+                                                                Phi[:num,imax]*self.r0[imax]/self.rm[imax,m],
                                                                 )
                 nextPhi, nextAutopow = self.delay_and_sum(
                             num,p_res,d_interp1,d_interp2,d_index,m_index,temp)
@@ -924,6 +924,316 @@ class BeamformerCleantSq( BeamformerCleant ):
             result[res_index] = temp.sum(-1) # sum over channels (ngridpts,)
             if self.r_diag:
                 autopow[res_index] = (temp**2).sum(-1)
+        return result, autopow  
+
+
+class BeamformerCleantTraj( BeamformerCleant, BeamformerTimeTraj ):
+    """
+    CLEANT deconvolution method, see :ref:`Cousson et al., 2019<Cousson2019>`.
+    
+    An implementation of the CLEAN method in time domain for moving sources
+    with known trajectory. 
+    """
+
+    # internal identifier
+    digest = Property( 
+        depends_on = ['_steer_obj.digest', 'source.digest', 'weights',  \
+                      '__class__','damp','n_iter', 'rvec','conv_amp',
+                      'trajectory.digest'],
+        )
+
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+    
+    def get_r0( self, tpos ):
+        if isscalar(self.steer.ref) and self.steer.ref > 0:
+            return full((self.steer.grid.size,), self.steer.ref)
+        else:
+            return self.env._r(tpos)
+
+    def increase_buffer( self, num ): 
+        ar = zeros((num,self.steer.mics.num_mics))
+        self.buffer = concatenate((ar,self.buffer), axis=0)
+        self.bufferIndex += num
+
+    def result( self, num=2048 ):
+        """
+        Python generator that yields the deconvolved output block-wise. 
+        
+        Parameters
+        ----------
+        num : integer, defaults to 2048
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block).
+        
+        Returns
+        -------
+        Samples in blocks of shape  \
+        (num, :attr:`~BeamformerTime.numchannels`). 
+            :attr:`~BeamformerTime.numchannels` is usually very \
+            large (number of grid points).
+            The last block may be shorter than num. \
+            The output starts for signals that were emitted 
+            from the grid at `t=0`.
+        """
+        # initialize values
+        w = self._get_weights()
+        c = self.steer.env.c/self.source.sample_freq
+        numMics = self.steer.mics.num_mics
+        m_index = arange(numMics, dtype=int32)
+        n_index = arange(0,num,dtype=int32)[:,newaxis]
+        blockrm = empty((num,self.grid.size,numMics),dtype=float32)
+        amp = empty((num,self.grid.size,numMics),dtype=float32)
+        delays = empty((num,self.grid.size,numMics),dtype=float32)
+        blockr0 = empty((num,self.grid.size),dtype=float32)
+        self.buffer = zeros((2*num,numMics), dtype=float32)
+        self.bufferIndex = self.buffer.shape[0] 
+        movgpos = self.get_moving_gpos() # create moving grid pos generator
+        movgspeed = self.trajectory.traj(0.0, delta_t=1/self.source.sample_freq, 
+              der=1)
+        fill_buffer_generator = self._fill_buffer(num)
+        for i in range(2): 
+            next(fill_buffer_generator)
+
+        # start processing
+        flag = True
+        dflag = True # data is available 
+        while flag:
+            for i in range(num):
+                tpos = next(movgpos).astype(float32)
+                rm = self.steer.env._r( tpos, self.steer.mics.mpos ).astype(float32) 
+                blockr0[i,:] = self.get_r0(tpos)
+                blockrm[i,:,:] = rm
+                delays[i,:,:] = rm/c
+                if self.conv_amp:
+                    blockrm[i,:,:] *= (1-self.get_macostheta(next(movgspeed),tpos,rm))**2 
+            d_interp2 = delays % 1 # 2nd coeff for lin interpolation between samples
+            d_interp1 = 1-d_interp2 # 1st coeff for lin interpolation 
+            amp[:,:,:] = 1.0/(((w/(blockrm**2)).sum(2) * blockr0)[:,:, newaxis]*blockrm) # multiplication factor
+            maxdelay = (delays.astype(int32).max((1,2)) + arange(0,num)).max()+2 # + because of interpolation
+            while maxdelay > self.buffer.shape[0] and dflag:
+                self.increase_buffer(num)
+                try:
+                    next(fill_buffer_generator)
+                except:
+                    dflag = False
+            samplesleft = self.buffer.shape[0]-self.bufferIndex
+            if samplesleft-maxdelay <= 0:
+                num = sum((delays.astype(int32).max((1,2))+1+arange(0,num)) < samplesleft)
+                n_index = arange(0,num,dtype=int32)[:,newaxis]
+                flag=False
+            # init step
+            p_res = array(
+                self.buffer[self.bufferIndex:self.bufferIndex+maxdelay,:])
+            Phi = self.delay_and_sum(
+                num,p_res,d_interp1,d_interp2,delays,m_index,amp)
+            Gamma = zeros(Phi.shape,dtype=float32)
+            J = 0
+            # deconvolution 
+            while (J < self.n_iter):
+                # print(f"start clean iteration {J+1} of max {self.n_iter}")
+                powPhi = (Phi[:num]**2).sum(0)
+                imax = argmax(powPhi)
+                t_float = (delays[:num,imax,m_index]+n_index).astype(float32)
+                t_ind = t_float.astype(int32)
+                for m in range(numMics): 
+                    p_res[t_ind[:num,m],m] -= self.damp*interp(
+                        t_ind[:num,m], 
+                        t_float[:num,m],
+                        Phi[:num,imax]*blockr0[:num,imax] \
+                            /blockrm[:num,imax,m],
+                            )
+                nextPhi = self.delay_and_sum(
+                            num,p_res,d_interp1,d_interp2,delays,m_index,amp)
+                pownextPhi = (nextPhi[:num]**2).sum(0)
+                # print(f"total signal power: {powPhi.sum()}")
+                if pownextPhi.sum() < powPhi.sum(): # stopping criterion
+                    Gamma[:num,imax] += self.damp*Phi[:num,imax]
+                    Phi=nextPhi
+                    # print(f"clean max: {L_p((Gamma**2).sum(0)/num).max()} dB")
+                    J += 1
+                else:
+                    break
+            yield Gamma[:num]
+            self.bufferIndex += num
+            try:
+                next(fill_buffer_generator)
+            except: 
+                dflag = False
+                pass
+
+    def delay_and_sum(self,num,p_res,d_interp1,d_interp2,delays,m_index,amp): 
+        ''' standard delay-and-sum method ''' 
+        result = empty((num, self.grid.size), dtype=float32) # output array
+        for i in range(num):
+            result[i] =((p_res[i+delays[i].astype(int32), m_index]*d_interp1[i] \
+                        + p_res[i+delays[i].astype(int32)+1, m_index]*d_interp2[i])*amp[i]).sum(-1) 
+        return result
+
+
+class BeamformerCleantSqTraj( BeamformerCleantTraj, BeamformerTimeSq ):
+    """
+    CLEANT deconvolution method, see :ref:`Cousson et al., 2019<Cousson2019>`
+    with optional removal of autocorrelation.
+    
+    An implementation of the CLEAN method in time domain for moving sources
+    with known trajectory. 
+    """
+
+    # internal identifier
+    digest = Property( 
+        depends_on = ['_steer_obj.digest', 'source.digest', 'weights',  \
+                      '__class__','damp','n_iter', 'rvec','conv_amp',
+                      'trajectory.digest','r_diag'],
+        )
+
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+    
+    def get_r0( self, tpos ):
+        if isscalar(self.steer.ref) and self.steer.ref > 0:
+            return full((self.steer.grid.size,), self.steer.ref)
+        else:
+            return self.env._r(tpos)
+
+    def increase_buffer( self, num ): 
+        ar = zeros((num,self.steer.mics.num_mics))
+        self.buffer = concatenate((ar,self.buffer), axis=0)
+        self.bufferIndex += num
+
+    def result( self, num=2048 ):
+        """
+        Python generator that yields the *squared* deconvolved beamformer 
+        output with optional removal of autocorrelation block-wise.
+        
+        Parameters
+        ----------
+        num : integer, defaults to 2048
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block).
+        
+        Returns
+        -------
+        Samples in blocks of shape  \
+        (num, :attr:`~BeamformerTime.numchannels`). 
+            :attr:`~BeamformerTime.numchannels` is usually very \
+            large (number of grid points).
+            The last block may be shorter than num. \
+            The output starts for signals that were emitted 
+            from the grid at `t=0`.
+        """
+        # initialize values
+        w = self._get_weights()
+        c = self.steer.env.c/self.source.sample_freq
+        numMics = self.steer.mics.num_mics
+        m_index = arange(numMics, dtype=int32)
+        n_index = arange(0,num,dtype=int32)[:,newaxis]
+        blockrm = empty((num,self.grid.size,numMics),dtype=float32)
+        amp = empty((num,self.grid.size,numMics),dtype=float32)
+        delays = empty((num,self.grid.size,numMics),dtype=float32)
+        blockr0 = empty((num,self.grid.size),dtype=float32)
+        temp = empty((self.grid.size, self.source.numchannels),dtype=float32)
+        self.buffer = zeros((2*num,numMics), dtype=float32)
+        self.bufferIndex = self.buffer.shape[0] 
+        movgpos = self.get_moving_gpos() # create moving grid pos generator
+        movgspeed = self.trajectory.traj(0.0, delta_t=1/self.source.sample_freq, 
+              der=1)
+        fill_buffer_generator = self._fill_buffer(num)
+        for i in range(2): 
+            next(fill_buffer_generator)
+
+        # start processing
+        flag = True
+        dflag = True # data is available 
+        while flag:
+            for i in range(num):
+                tpos = next(movgpos).astype(float32)
+                rm = self.steer.env._r( tpos, self.steer.mics.mpos ).astype(float32) 
+                blockr0[i,:] = self.get_r0(tpos)
+                blockrm[i,:,:] = rm
+                delays[i,:,:] = rm/c
+                if self.conv_amp:
+                    blockrm[i,:,:] *= (1-self.get_macostheta(next(movgspeed),tpos,rm))**2 
+            d_interp2 = delays % 1 # 2nd coeff for lin interpolation between samples
+            d_interp1 = 1-d_interp2 # 1st coeff for lin interpolation 
+            amp[:,:,:] = 1.0/(((w/(blockrm**2)).sum(2) * blockr0)[:,:, newaxis]*blockrm) # multiplication factor
+            maxdelay = (delays.astype(int32).max((1,2)) + arange(0,num)).max()+2 # + because of interpolation
+            while maxdelay > self.buffer.shape[0] and dflag:
+                self.increase_buffer(num)
+                try:
+                    next(fill_buffer_generator)
+                except:
+                    dflag = False
+            samplesleft = self.buffer.shape[0]-self.bufferIndex
+            if samplesleft-maxdelay <= 0:
+                num = sum((delays.astype(int32).max((1,2))+1+arange(0,num)) < samplesleft)
+                n_index = arange(0,num,dtype=int32)[:,newaxis]
+                flag=False
+            # init step
+            p_res = array(
+                self.buffer[self.bufferIndex:self.bufferIndex+maxdelay,:])
+            Phi,autopow = self.delay_and_sum(
+                num,p_res,d_interp1,d_interp2,delays,m_index,amp,temp)
+            Gamma = zeros(Phi.shape,dtype=float32)
+            Gamma_autopow = zeros(Phi.shape,dtype=float32)
+            J = 0
+            # deconvolution 
+            while (J < self.n_iter):
+                # print(f"start clean iteration {J+1} of max {self.n_iter}")
+                if self.r_diag:
+                    powPhi = clip((Phi[:num]**2-autopow).sum(0),1e-100,1e+100)
+                else:
+                    powPhi = (Phi[:num]**2).sum(0)
+                imax = argmax(powPhi)
+                t_float = (delays[:num,imax,m_index]+n_index).astype(float32)
+                t_ind = t_float.astype(int32)
+                for m in range(numMics): 
+                    p_res[t_ind[:num,m],m] -= self.damp*interp(
+                        t_ind[:num,m], 
+                        t_float[:num,m],
+                        Phi[:num,imax]*blockr0[:num,imax] \
+                            /blockrm[:num,imax,m],
+                            )
+                nextPhi, nextAutopow = self.delay_and_sum(
+                            num,p_res,d_interp1,d_interp2,delays,m_index,amp,temp)
+                if self.r_diag:
+                    pownextPhi = clip((nextPhi[:num]**2-nextAutopow).sum(0),
+                                      1e-100,1e+100)
+                else:
+                    pownextPhi = (nextPhi[:num]**2).sum(0)
+                # print(f"total signal power: {powPhi.sum()}")
+                if pownextPhi.sum() < powPhi.sum(): # stopping criterion
+                    Gamma[:num,imax] += self.damp*Phi[:num,imax]
+                    Gamma_autopow[:num,imax] = autopow[:num,imax].copy()
+                    Phi=nextPhi
+                    autopow=nextAutopow
+                    # print(f"clean max: {L_p((Gamma**2).sum(0)/num).max()} dB")
+                    J += 1
+                else:
+                    break
+            if self.r_diag: 
+                yield Gamma[:num]**2 - (self.damp**2)*Gamma_autopow[:num]
+            else:
+                yield Gamma[:num]**2
+            self.bufferIndex += num
+            try:
+                next(fill_buffer_generator)
+            except: 
+                dflag = False
+                pass
+
+    def delay_and_sum(self,num,p_res,d_interp1,d_interp2,delays,m_index,amp,temp): 
+        ''' standard delay-and-sum method ''' 
+        result = empty((num, self.grid.size), dtype=float32) # output array
+        autopow = empty((num, self.grid.size), dtype=float32) # output array
+        for i in range(num):
+            temp[:,:] =((p_res[i+delays[i].astype(int32), m_index]*d_interp1[i] \
+                        + p_res[i+delays[i].astype(int32)+1, m_index]*d_interp2[i])*amp[i])
+            result[i] = temp.sum(-1) # sum over channels (ngridpts,)
+            if self.r_diag:
+                autopow[i] = (temp**2).sum(-1)
         return result, autopow  
 
 
