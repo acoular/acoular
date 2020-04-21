@@ -19,9 +19,23 @@ from numpy import mgrid, s_, array, arange, isscalar, absolute
 from traits.api import HasPrivateTraits, Float, Property, CArray, Any, \
 property_depends_on, cached_property, on_trait_change
 from traits.trait_errors import TraitError
-from matplotlib.path import Path
-
+#from matplotlib.path import Path
+from scipy.spatial import Delaunay
 from .internal import digest
+
+
+def in_hull(p, hull):
+    """
+    test if points in `p` are in `hull`
+    `p` should be a `NxK` coordinates of `N` points in `K` dimensions
+    `hull` is either a scipy.spatial.Delaunay object or the `MxK` array of the 
+    coordinates of `M` points in `K`dimensions for which Delaunay triangulation
+    will be computed
+    """
+    if not isinstance(hull,Delaunay):
+        hull = Delaunay(hull)
+    return hull.find_simplex(p)>=0
+
 
 class Grid( HasPrivateTraits ):
     """
@@ -242,8 +256,10 @@ class RectGrid( Grid ):
             xpos = self.pos()
             xis = []
             yis = []
-            p = Path(array(r).reshape(-1,2))
-            inds = p.contains_points(xpos[:2,:].T)
+            #replace Path by scipy spatial 
+            #p = Path(array(r).reshape(-1,2))
+            #inds = p.contains_points()
+            inds = in_hull(xpos[:2,:].T,array(r).reshape(-1,2))
             for np in arange(self.size)[inds]: # np -- points in x2-circle
                 xi, yi = self.index(xpos[0, np], xpos[1, np])
                 xis += [xi]
