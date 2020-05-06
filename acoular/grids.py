@@ -15,9 +15,9 @@
 """
 
 # imports from other packages
-from numpy import mgrid, s_, array, arange, isscalar, absolute
+from numpy import mgrid, s_, array, arange, isscalar, absolute,ones,argmin,zeros
 from traits.api import HasPrivateTraits, Float, Property, CArray, Any, \
-property_depends_on, cached_property, on_trait_change
+property_depends_on, cached_property, on_trait_change,Bool,List,Instance
 from traits.trait_errors import TraitError
 #from matplotlib.path import Path
 from scipy.spatial import Delaunay
@@ -462,3 +462,252 @@ class RectGrid3D( RectGrid):
         xi1, yi1, zi1 = self.index(min(x1, x2), min(y1, y2), min(z1, z2))
         xi2, yi2, zi2 = self.index(max(x1, x2), max(y1, y2), max(z1, z2))
         return s_[xi1:xi2+1], s_[yi1:yi2+1], s_[zi1:zi2+1]
+
+
+
+class Sector( HasPrivateTraits ):
+    """
+    Base class for sector types.
+    
+    Defines the common interface for all sector classes. This class
+    may be used as a base for diverse sector implementaions. If used
+    directly, it implements a sector encompassing the whole grid.
+    """
+    
+    #: Boolean flag, if 'True' (default), grid points lying on the sector border are included.
+    include_border = Bool(True, 
+                          desc="include points on the border")    
+
+    #: Boolean flag, if 'True' (default), the nearest grid point is returned if none is inside the sector.
+    default_nearest = Bool(True, 
+                          desc="return nearest grid point to center of none inside sector")
+
+    def contains ( self, pos ):
+        """
+        Queries whether the coordinates in a given array lie within the 
+        defined sector. 
+        For this sector type, any position is valid.
+        
+        Parameters
+        ----------
+        pos : array of floats
+            Array with the shape 3x[number of gridpoints] containing the
+            grid positions
+        
+        Returns
+        -------
+        array of bools with as many entries as columns in pos
+            Array indicating which of the given positions lie within the
+            given sector                
+        """
+        return ones(pos.shape[1], dtype=bool)
+
+
+class RectSector( Sector ):
+    """
+    Class for defining a rectangular sector.
+    
+    Can be used for 2D Grids for definining a rectangular sector or
+    for 3D grids for a rectangular cylinder sector parallel to the z-axis.
+    """
+    
+    #: The lower x position of the rectangle
+    x_min = Float(-1.0,
+                  desc="minimum x position of the rectangle")
+
+    #: The upper x position of the rectangle
+    x_max = Float(1.0,
+                  desc="maximum x position of the rectangle")
+
+    #: The lower y position of the rectangle
+    y_min = Float(-1.0,
+                  desc="minimum y position of the rectangle")
+    
+    #: The upper y position of the rectangle
+    y_max = Float(1.0,
+                  desc="maximum y position of the rectangle")
+
+    def contains ( self, pos ):
+        """
+        Queries whether the coordinates in a given array lie within the 
+        rectangular sector. 
+        If no coordinate is inside, the nearest one to the rectangle center
+        is returned if :attr:`~Sector.default_nearest` is True.
+        
+        Parameters
+        ----------
+        pos : array of floats
+            Array with the shape 3x[number of gridpoints] containing the
+            grid positions
+        
+        Returns
+        -------
+        array of bools with as many entries as columns in pos
+            Array indicating which of the given positions lie within the
+            given sector                
+        """
+        # make sure xmin is minimum etc
+        xmin = min(self.x_min,self.x_max)
+        xmax = max(self.x_min,self.x_max)
+        ymin = min(self.y_min,self.y_max)
+        ymax = max(self.y_min,self.y_max)
+        
+        # get pos indices inside rectangle (* == and)
+        if self.include_border:
+            inds = (pos[0, :] >= xmin) * \
+                   (pos[0, :] <= xmax) * \
+                   (pos[1, :] >= ymin) * \
+                   (pos[1, :] <= ymax)
+        else:
+            inds = (pos[0, :] > xmin) * \
+                   (pos[0, :] < xmax) * \
+                   (pos[1, :] > ymin) * \
+                   (pos[1, :] < ymax)
+        
+        # if none inside, take nearest
+        if ~inds.any() and self.default_nearest:
+            x = (xmin + xmax) / 2.0
+            y = (ymin + ymax) / 2.0
+            dr2 = (pos[0, :] - x)**2 + (pos[1, :] - y)**2
+            inds[argmin(dr2)] = True
+        
+        return inds.astype(bool)
+
+
+class CircSector( Sector ):
+    """
+    Class for defining a circular sector.
+    
+    Can be used for 2D Grids for definining a circular sector or
+    for 3D grids for a cylindrical sector parallel to the z-axis.
+    """
+    
+    #: x position of the circle center
+    x = Float(0.0,
+        desc="x position of the circle center")
+
+    #: y position of the circle center
+    y = Float(0.0,
+        desc="y position of the circle center")
+    
+    #: radius of the circle
+    r = Float(1.0,
+        desc="radius of the circle")
+        
+    
+    def contains ( self, pos ):
+        """
+        Queries whether the coordinates in a given array lie within the 
+        circular sector. 
+        If no coordinate is inside, the nearest one outside is returned
+        if :attr:`~Sector.default_nearest` is True.
+        
+        Parameters
+        ----------
+        pos : array of floats
+            Array with the shape 3x[number of gridpoints] containing the
+            grid positions
+        
+        Returns
+        -------
+        array of bools with as many entries as columns in pos
+            Array indicating which of the given positions lie within the
+            given sector                
+        """
+        dr2 = (pos[0, :]-self.x)**2 + (pos[1, :]-self.y)**2
+        # which points are in the circle?
+        if self.include_border:
+            inds = dr2 <= self.r**2
+        else:
+            inds = dr2 < self.r**2
+        
+        # if there's no poit inside
+        if ~inds.any() and self.default_nearest: 
+            inds[argmin(dr2)] = True
+        
+        return inds
+
+
+class PolySector( HasPrivateTraits ):
+    """
+    Base class for sector types.
+    
+    Defines the common interface for all sector classes. This class
+    may be used as a base for diverse sector implementaions. If used
+    directly, it implements a sector encompassing the whole grid.
+    """
+    
+    #: Boolean flag, if 'True' (default), grid points lying on the sector border are included.
+    include_border = Bool(True, 
+                          desc="include points on the border")    
+
+    #: Boolean flag, if 'True' (default), the nearest grid point is returned if none is inside the sector.
+    default_nearest = Bool(True, 
+                          desc="return nearest grid point to center of none inside sector")
+
+    def contains ( self, pos ):
+        """
+        Queries whether the coordinates in a given array lie within the 
+        defined sector. 
+        For this sector type 
+        
+        Parameters
+        ----------
+        pos : array of floats
+            Array with the shape 3x[number of gridpoints] containing the
+            grid positions
+        
+        Returns
+        -------
+        array of bools with as many entries as columns in pos
+            Array indicating which of the given positions lie within the
+            given sector                
+        """
+        return ones(pos.shape[1], dtype=bool)
+
+
+
+
+
+class MultiSector (Sector):
+    """
+    Class for defining a sector consisting of arbitrary sub-sectors.
+    
+    """
+    
+    #: List of :class:`~beamfpy.sources.SamplesGenerator` objects
+    #: to be mixed.
+    sectors = List( Instance(Sector, ()) ) 
+    
+    
+    def contains ( self, pos ):
+        """
+        Queries whether the coordinates in a given array lie within any 
+        of the sub-sectors. 
+        
+        Parameters
+        ----------
+        pos : array of floats
+            Array with the shape 3x[number of gridpoints] containing the
+            grid positions
+        
+        Returns
+        -------
+        array of bools with as many entries as columns in pos
+            Array indicating which of the given positions lie within the
+            sectors              
+        """
+        # initialize with only "False" entries
+        inds = zeros(pos.shape[1], dtype=bool)
+        
+        # add points contained in sub-sectors
+        for sec in self.sectors:
+            inds += sec.contains(pos)
+        
+        return inds.astype(bool)
+
+
+
+
+
+
