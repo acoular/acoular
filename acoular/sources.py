@@ -56,7 +56,10 @@ class SamplesGenerator( HasPrivateTraits ):
     numsamples = CLong
     
     # internal identifier
-    digest = ''
+    digest = Property
+    
+    def _get_digest( self ): 
+        return '' 
                
     def result(self, num):
         """
