@@ -19,7 +19,7 @@
 """
 
 # imports from other packages
-from numpy import array, sqrt, ones, empty, newaxis, uint32, arange, dot, int64, sum
+from numpy import array, sqrt, ones, empty, newaxis, uint32, arange, dot, int64
 from traits.api import Float, Int, Property, Trait, Delegate, \
 cached_property, Tuple, HasPrivateTraits, CLong, File, Instance, Any, \
 on_trait_change, List, ListInt, CArray, Bool
@@ -56,7 +56,10 @@ class SamplesGenerator( HasPrivateTraits ):
     numsamples = CLong
     
     # internal identifier
-    digest = ''
+    digest = Property
+    
+    def _get_digest( self ): 
+        return '' 
                
     def result(self, num):
         """
