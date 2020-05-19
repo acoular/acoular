@@ -716,7 +716,7 @@ class SourceMixer( SamplesGenerator ):
     Mixes the signals from several sources. 
     """
 
-    #: List of :class:`~acoular.sources.SamplesGenerator` objects
+    #: List of :class:`~acoular.tprocess.SamplesGenerator` objects
     #: to be mixed.
     sources = List( Instance(SamplesGenerator, ()) ) 
 

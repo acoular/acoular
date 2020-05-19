@@ -207,9 +207,9 @@ class SineGenerator( SignalGenerator ):
 
 class GenericSignalGenerator( SignalGenerator ):
     """
-    Generate signal from output of :class:`~acoular.sources.SamplesGenerator` object.
+    Generate signal from output of :class:`~acoular.tprocess.SamplesGenerator` object.
     """
-    #: Data source; :class:`~acoular.sources.SamplesGenerator` or derived object.
+    #: Data source; :class:`~acoular.tprocess.SamplesGenerator` or derived object.
     source = Trait(SamplesGenerator)
     
     _numsamples = CLong(0)

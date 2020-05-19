@@ -323,7 +323,7 @@ class Trigger(TimeInOut):
     In the end, the algorithm checks if the found peak locations result in rpm that don't
     vary too much.
     """
-    #: Data source; :class:`~acoular.sources.SamplesGenerator` or derived object.
+    #: Data source; :class:`~acoular.tprocess.SamplesGenerator` or derived object.
     source = Instance(SamplesGenerator)
     
     #: Threshold of trigger. Has different meanings for different 
@@ -495,7 +495,7 @@ class AngleTracker(MaskedTimeInOut):
 
     '''
 
-    #: Data source; :class:`~acoular.SamplesGenerator` or derived object.
+    #: Data source; :class:`~acoular.tprocess.SamplesGenerator` or derived object.
     source = Instance(SamplesGenerator)    
     
     #: Trigger data from :class:`acoular.tprocess.Trigger`.
@@ -661,7 +661,7 @@ class SpatialInterpolator(TimeInOut):
         self._mics_virtual = mics_virtual
 
     
-    #: Data source; :class:`~acoular.sources.SamplesGenerator` or derived object.
+    #: Data source; :class:`~acoular.tprocess.SamplesGenerator` or derived object.
     source = Instance(SamplesGenerator)
     
     #: Interpolation method in spacial domain, defaults to
@@ -1167,10 +1167,10 @@ class Mixer( TimeInOut ):
     Mixes the signals from several sources.
     """
 
-    #: Data source; :class:`~acoular.sources.SamplesGenerator` object.
+    #: Data source; :class:`~acoular.tprocess.SamplesGenerator` object.
     source = Trait(SamplesGenerator)
 
-    #: List of additional :class:`~acoular.sources.SamplesGenerator` objects
+    #: List of additional :class:`~acoular.tprocess.SamplesGenerator` objects
     #: to be mixed.
     sources = List( Instance(SamplesGenerator, ()) ) 
 
