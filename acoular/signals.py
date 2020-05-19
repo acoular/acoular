@@ -20,7 +20,7 @@ from __future__ import print_function, division
 from numpy import pi, arange, sin, sqrt, repeat, tile, log, zeros
 from numpy.random import RandomState
 from traits.api import HasPrivateTraits, Trait, Float, Int, CLong, Bool, \
-Property, cached_property
+Property, cached_property, Delegate
 from scipy.signal import resample
 from warnings import warn
 
@@ -212,6 +212,9 @@ class GenericSignalGenerator( SignalGenerator ):
     #: Data source; :class:`~acoular.tprocess.SamplesGenerator` or derived object.
     source = Trait(SamplesGenerator)
     
+    #: Sampling frequency of output signal, as given by :attr:`source`.
+    sample_freq = Delegate('source')
+    
     _numsamples = CLong(0)
    
     #: Number of samples to generate. Is set to source.numsamples by default.
@@ -275,5 +278,6 @@ class GenericSignalGenerator( SignalGenerator ):
             res = nums % stop # last part of unfinished loop
             if res > 0: track[stop*nloops:] = track[:res]
         
+        # The rms value is just an amplification here
         return self.rms*track
     
