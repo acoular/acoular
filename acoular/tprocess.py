@@ -268,7 +268,7 @@ class ChannelMixer( TimeInOut ):
     Outputs a single channel.
     """
     
-    #: Amplitude weight(s) for the channels. If not set, all channels are equally weighted.
+    #: Amplitude weight(s) for the channels as array. If not set, all channels are equally weighted.
     weights = CArray(desc="channel weights")
     
     # Number of channels is always one here.
@@ -296,11 +296,11 @@ class ChannelMixer( TimeInOut ):
         Samples in blocks of shape (num, 1). 
             The last block may be shorter than num.
         """
-        if self.weights:
+        if self.weights.size:
             if self.weights.shape in {(self.source.numchannels,), (1,)}:
                 weights = self.weights
             else:
-                raise ValueError("weight factors can not be mapped: %i, %i" % \
+                raise ValueError("Weight factors can not be broadcasted: %s, %s" % \
                             (self.weights.shape, (self.source.numchannels,)))
         else: 
             weights = 1
