@@ -19,7 +19,7 @@
 from __future__ import print_function, division
 from numpy import pi, arange, sin, sqrt, repeat, tile, log, zeros
 from numpy.random import RandomState
-from traits.api import HasPrivateTraits, Trait, Float, Int, CLong, \
+from traits.api import HasPrivateTraits, Trait, Float, Int, CLong, Bool, \
 Property, cached_property
 from scipy.signal import resample
 from warnings import warn
@@ -228,7 +228,7 @@ class GenericSignalGenerator( SignalGenerator ):
 
     #: Boolean flag, if 'True' (default), signal track is repeated if requested 
     #: :attr:`numsamples` is higher than available sample number
-    loop_signal = True
+    loop_signal = Bool(True)
     
     # internal identifier
     digest = Property( 
@@ -262,7 +262,7 @@ class GenericSignalGenerator( SignalGenerator ):
             if nums > stop:
                 track[start:stop] = temp[:,0]
             else: # exit loop preliminarily if wanted signal samples are reached
-                track[start:nums] = temp[nums-start,0]
+                track[start:nums] = temp[:nums-start,0]
                 break
         
         # if the signal should be repeated after finishing and there are still samples open
