@@ -69,7 +69,7 @@ from .h5cache import td_dir, cache_dir
 from .tbeamform import IntegratorSectorTime, \
 BeamformerTime, BeamformerTimeSq, BeamformerTimeTraj, BeamformerTimeSqTraj,\
 BeamformerCleant, BeamformerCleantSq, BeamformerCleantTraj, BeamformerCleantSqTraj
-from .tprocess import TimeInOut, MaskedTimeInOut, Mixer, TimeAverage, \
+from .tprocess import TimeInOut, MaskedTimeInOut, ChannelMixer, Mixer, TimeAverage, \
 TimeReverse, TimePower, FiltFiltOctave, FiltOctave, TimeCache, WriteWAV, \
 WriteH5, SpatialInterpolator, SpatialInterpolatorRotation, Trigger, \
 SampleSplitter, AngleTracker, SpatialInterpolatorConstantRotation

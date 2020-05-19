@@ -29,15 +29,14 @@
 
 # imports from other packages
 from numpy import array, empty, empty_like, pi, sin, sqrt, zeros, newaxis, unique, \
-int16, cross, isclose, zeros_like, dot, nan, concatenate, isnan, nansum, float64, \
-identity, argsort, interp, arange, append, linspace, flatnonzero, argmin, argmax, \
-delete, mean, inf, ceil, log2, logical_and, asarray, stack, sinc
+int16, nan, concatenate, sum, float64, identity, argsort, interp, arange, append, \
+linspace, flatnonzero, argmin, argmax, delete, mean, inf, asarray, stack, sinc
 
 from numpy.matlib import repmat
 
 from scipy.spatial import Delaunay
 from scipy.interpolate import LinearNDInterpolator,splrep, splev, CloughTocher2DInterpolator, CubicSpline, Rbf
-from traits.api import Float, Int, CLong, Bool, ListInt, \
+from traits.api import Float, Int, CLong, Bool, ListInt, Constant, \
 File, Property, Instance, Trait, Delegate, \
 cached_property, on_trait_change, List, CArray, Dict
 
@@ -217,8 +216,55 @@ class MaskedTimeInOut ( TimeInOut ):
         else: # if no start/stop given, don't do the resorting thing
             for block in self.source.result(num):
                 yield block[:, self.channels]
-                
 
+
+class ChannelMixer( TimeInOut ):
+    """
+    Class for directly mixing the channels of a multi-channel source. 
+    Outputs a single channel.
+    """
+    
+    #: Amplitude weight(s) for the channels. If not set, all channels are equally weighted.
+    weights = CArray(desc="channel weights")
+    
+    # Number of channels is always one here.
+    numchannels = Constant(1)
+    
+    # internal identifier
+    digest = Property( depends_on = ['source.digest', 'weights'])
+
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)         
+
+    def result(self, num):
+        """ 
+        Python generator that yields the output block-wise.
+        
+        Parameters
+        ----------
+        num : integer
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block).
+        
+        Returns
+        -------
+        Samples in blocks of shape (num, 1). 
+            The last block may be shorter than num.
+        """
+        if self.weights:
+            if self.weights.shape in {(self.source.numchannels,), (1,)}:
+                weights = self.weights
+            else:
+                raise ValueError("weight factors can not be mapped: %i, %i" % \
+                            (self.weights.shape, (self.source.numchannels,)))
+        else: 
+            weights = 1
+        
+        for block in self.source.result(num):
+                yield sum(weights*block, 1, keepdims=True)
+  
+    
 class Trigger(TimeInOut):
     """
     Class for identifying trigger signals.
