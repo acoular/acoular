@@ -17,13 +17,15 @@
 
 # imports from other packages
 from __future__ import print_function, division
-from numpy import pi, arange, sin, sqrt, repeat, log
+from numpy import pi, arange, sin, sqrt, repeat, tile, log, zeros
 from numpy.random import RandomState
-from traits.api import HasPrivateTraits, Float, Int, Long, \
+from traits.api import HasPrivateTraits, Trait, Float, Int, CLong, \
 Property, cached_property
 from scipy.signal import resample
+from warnings import warn
 
 # acoular imports
+from .sources import SamplesGenerator
 from .internal import digest
 
 class SignalGenerator( HasPrivateTraits ):
@@ -44,7 +46,7 @@ class SignalGenerator( HasPrivateTraits ):
         desc="sampling frequency")
                    
     #: Number of samples to generate.
-    numsamples = Long
+    numsamples = CLong
     
     # internal identifier
     digest = Property
@@ -201,3 +203,77 @@ class SineGenerator( SignalGenerator ):
         """
         t = arange(self.numsamples, dtype=float)/self.sample_freq
         return self.rms*sin(2*pi*self.freq*t+self.phase)
+
+
+class GenericSignalGenerator( SignalGenerator ):
+    """
+    Generate signal from output of :class:`~acoular.sources.SamplesGenerator` object.
+    """
+    #: Data source; :class:`~acoular.sources.SamplesGenerator` or derived object.
+    source = Trait(SamplesGenerator)
+    
+    _numsamples = CLong(0)
+   
+    #: Number of samples to generate. Is set to source.numsamples by default.
+    numsamples = Property()
+    
+    def _get_numsamples( self ):
+        if self._numsamples:
+            return self._numsamples
+        else:
+            return self.source.numsamples
+    
+    def _set_numsamples( self, numsamples ):
+        self._numsamples = numsamples
+
+    #: Boolean flag, if 'True' (default), signal track is repeated if requested 
+    #: :attr:`numsamples` is higher than available sample number
+    loop_signal = True
+    
+    # internal identifier
+    digest = Property( 
+        depends_on = ['source.digest', 'loop_signal', 'numsamples', \
+        'rms', '__class__'], 
+        )
+               
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+    
+    def signal(self):
+        """
+        Deliver the signal.
+
+        Returns
+        -------
+        array of floats
+            The resulting signal as an array of length :attr:`~GenericSignalGenerator.numsamples`.
+        """
+        block = 1024
+        if self.source.numchannels > 1:
+            warn("Signal source has more than one channel. Only channel 0 will be used for signal.", Warning, stacklevel = 2)
+        nums = self.numsamples
+        track = zeros(nums)
+        
+        # iterate through source generator to fill signal track
+        for i, temp in enumerate(self.source.result(block)):
+            start = block*i
+            stop = start + len(temp[:,0])
+            if nums > stop:
+                track[start:stop] = temp[:,0]
+            else: # exit loop preliminarily if wanted signal samples are reached
+                track[start:nums] = temp[nums-start,0]
+                break
+        
+        # if the signal should be repeated after finishing and there are still samples open
+        if self.loop_signal and (nums > stop):
+            
+            # fill up empty track with as many full source signals as possible
+            nloops = nums // stop
+            if nloops>1: track[stop:stop*nloops] = tile(track[:stop], nloops-1)
+            # fill up remaining empty track
+            res = nums % stop # last part of unfinished loop
+            if res > 0: track[stop*nloops:] = track[:res]
+        
+        return self.rms*track
+    

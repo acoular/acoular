@@ -91,4 +91,4 @@ from .sources import PointSource, MovingPointSource, SamplesGenerator, \
 TimeSamples, MaskedTimeSamples, PointSourceDipole, UncorrelatedNoiseSource, \
 SourceMixer
 from .signals import SineGenerator, WNoiseGenerator, SignalGenerator,\
-PNoiseGenerator
+PNoiseGenerator, GenericSignalGenerator
