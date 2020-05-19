@@ -8,7 +8,6 @@
 .. autosummary::
     :toctree: generated/
 
-    SamplesGenerator
     TimeSamples
     MaskedTimeSamples
     PointSource
@@ -21,7 +20,7 @@
 # imports from other packages
 from numpy import array, sqrt, ones, empty, newaxis, uint32, arange, dot, int64
 from traits.api import Float, Int, Property, Trait, Delegate, \
-cached_property, Tuple, HasPrivateTraits, CLong, File, Instance, Any, \
+cached_property, Tuple, CLong, File, Instance, Any, \
 on_trait_change, List, ListInt, CArray, Bool
 from os import path
 from warnings import warn
@@ -32,51 +31,10 @@ from .trajectory import Trajectory
 from .internal import digest
 from .microphones import MicGeom
 from .environments import Environment
+from .tprocess import SamplesGenerator
 from .signals import SignalGenerator
 from .h5files import H5FileBase, _get_h5file_class
 
-class SamplesGenerator( HasPrivateTraits ):
-    """
-    Base class for any generating signal processing block
-    
-    It provides a common interface for all SamplesGenerator classes, which
-    generate an output via the generator :meth:`result`.
-    This class has no real functionality on its own and should not be 
-    used directly.
-    """
-
-    #: Sampling frequency of the signal, defaults to 1.0
-    sample_freq = Float(1.0, 
-        desc="sampling frequency")
-    
-    #: Number of channels 
-    numchannels = CLong
-               
-    #: Number of samples 
-    numsamples = CLong
-    
-    # internal identifier
-    digest = Property
-    
-    def _get_digest( self ): 
-        return '' 
-               
-    def result(self, num):
-        """
-        Python generator that yields the output block-wise.
-                
-        Parameters
-        ----------
-        num : integer
-            This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block) 
-        
-        Returns
-        -------
-        No output since `SamplesGenerator` only represents a base class to derive
-        other classes from.
-        """
-        pass
 
 class TimeSamples( SamplesGenerator ):
     """

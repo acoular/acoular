@@ -25,7 +25,7 @@ from scipy.signal import resample
 from warnings import warn
 
 # acoular imports
-from .sources import SamplesGenerator
+from .tprocess import SamplesGenerator
 from .internal import digest
 
 class SignalGenerator( HasPrivateTraits ):

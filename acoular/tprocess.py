@@ -8,6 +8,7 @@
 .. autosummary::
     :toctree: generated/
 
+    SamplesGenerator
     TimeInOut
     MaskedTimeInOut
     Trigger
@@ -36,8 +37,8 @@ from numpy.matlib import repmat
 
 from scipy.spatial import Delaunay
 from scipy.interpolate import LinearNDInterpolator,splrep, splev, CloughTocher2DInterpolator, CubicSpline, Rbf
-from traits.api import Float, Int, CLong, Bool, ListInt, Constant, \
-File, Property, Instance, Trait, Delegate, \
+from traits.api import HasPrivateTraits, Float, Int, CLong, Bool, ListInt, \
+Constant, File, Property, Instance, Trait, Delegate, \
 cached_property, on_trait_change, List, CArray, Dict
 
 from datetime import datetime
@@ -53,10 +54,53 @@ import threading
 from .internal import digest
 from .h5cache import H5cache, td_dir
 from .h5files import H5CacheFileBase, _get_h5file_class
-from .sources import SamplesGenerator
 from .environments import cartToCyl,cylToCart
 from .microphones import MicGeom
 from .configuration import config
+
+
+class SamplesGenerator( HasPrivateTraits ):
+    """
+    Base class for any generating signal processing block
+    
+    It provides a common interface for all SamplesGenerator classes, which
+    generate an output via the generator :meth:`result`.
+    This class has no real functionality on its own and should not be 
+    used directly.
+    """
+
+    #: Sampling frequency of the signal, defaults to 1.0
+    sample_freq = Float(1.0, 
+        desc="sampling frequency")
+    
+    #: Number of channels 
+    numchannels = CLong
+               
+    #: Number of samples 
+    numsamples = CLong
+    
+    # internal identifier
+    digest = Property
+    
+    def _get_digest( self ): 
+        return '' 
+               
+    def result(self, num):
+        """
+        Python generator that yields the output block-wise.
+                
+        Parameters
+        ----------
+        num : integer
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block) 
+        
+        Returns
+        -------
+        No output since `SamplesGenerator` only represents a base class to derive
+        other classes from.
+        """
+        pass
 
 
 class TimeInOut( SamplesGenerator ):
