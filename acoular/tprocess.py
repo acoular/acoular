@@ -301,12 +301,12 @@ class ChannelMixer( TimeInOut ):
                 weights = self.weights
             else:
                 raise ValueError("Weight factors can not be broadcasted: %s, %s" % \
-                            (self.weights.shape, (self.source.numchannels,)))
+                                 (self.weights.shape, (self.source.numchannels,)))
         else: 
             weights = 1
         
         for block in self.source.result(num):
-                yield sum(weights*block, 1, keepdims=True)
+            yield sum(weights*block, 1, keepdims=True)
   
     
 class Trigger(TimeInOut):
