@@ -24,7 +24,7 @@ from .fastFuncs import calcCSM
 from .h5cache import H5cache
 from .h5files import H5CacheFileBase
 from .internal import digest
-from .sources import SamplesGenerator
+from .tprocess import SamplesGenerator
 from .calib import Calib
 from .configuration import config
 
@@ -48,7 +48,7 @@ class PowerSpectra( HasPrivateTraits ):
     and the same file name in case of that the data is read from a file.
     """
 
-    #: The :class:`~acoular.sources.SamplesGenerator` object that provides the data.
+    #: The :class:`~acoular.tprocess.SamplesGenerator` object that provides the data.
     time_data = Trait(SamplesGenerator, 
         desc="time data object")
 
@@ -449,7 +449,7 @@ def synthetic (data, freqs, f, num=3):
         each grid point (the sum of all values that are contained in the band).
         Note that the frequency resolution and therefore the bandwidth 
         represented by a single frequency line depends on 
-        the :attr:`sampling frequency<acoular.sources.SamplesGenerator.sample_freq>` 
+        the :attr:`sampling frequency<acoular.tprocess.SamplesGenerator.sample_freq>` 
         and used :attr:`FFT block size<acoular.spectra.PowerSpectra.block_size>`.
     """
     if isscalar(f):

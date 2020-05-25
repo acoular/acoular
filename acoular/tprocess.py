@@ -8,6 +8,7 @@
 .. autosummary::
     :toctree: generated/
 
+    SamplesGenerator
     TimeInOut
     MaskedTimeInOut
     Trigger
@@ -29,16 +30,15 @@
 
 # imports from other packages
 from numpy import array, empty, empty_like, pi, sin, sqrt, zeros, newaxis, unique, \
-int16, cross, isclose, zeros_like, dot, nan, concatenate, isnan, nansum, float64, \
-identity, argsort, interp, arange, append, linspace, flatnonzero, argmin, argmax, \
-delete, mean, inf, ceil, log2, logical_and, asarray, stack, sinc
+int16, nan, concatenate, sum, float64, identity, argsort, interp, arange, append, \
+linspace, flatnonzero, argmin, argmax, delete, mean, inf, asarray, stack, sinc
 
 from numpy.matlib import repmat
 
 from scipy.spatial import Delaunay
 from scipy.interpolate import LinearNDInterpolator,splrep, splev, CloughTocher2DInterpolator, CubicSpline, Rbf
-from traits.api import Float, Int, CLong, Bool, ListInt, \
-File, Property, Instance, Trait, Delegate, \
+from traits.api import HasPrivateTraits, Float, Int, CLong, Bool, ListInt, \
+Constant, File, Property, Instance, Trait, Delegate, \
 cached_property, on_trait_change, List, CArray, Dict
 
 from datetime import datetime
@@ -54,10 +54,53 @@ import threading
 from .internal import digest
 from .h5cache import H5cache, td_dir
 from .h5files import H5CacheFileBase, _get_h5file_class
-from .sources import SamplesGenerator
 from .environments import cartToCyl,cylToCart
 from .microphones import MicGeom
 from .configuration import config
+
+
+class SamplesGenerator( HasPrivateTraits ):
+    """
+    Base class for any generating signal processing block
+    
+    It provides a common interface for all SamplesGenerator classes, which
+    generate an output via the generator :meth:`result`.
+    This class has no real functionality on its own and should not be 
+    used directly.
+    """
+
+    #: Sampling frequency of the signal, defaults to 1.0
+    sample_freq = Float(1.0, 
+        desc="sampling frequency")
+    
+    #: Number of channels 
+    numchannels = CLong
+               
+    #: Number of samples 
+    numsamples = CLong
+    
+    # internal identifier
+    digest = Property
+    
+    def _get_digest( self ): 
+        return '' 
+               
+    def result(self, num):
+        """
+        Python generator that yields the output block-wise.
+                
+        Parameters
+        ----------
+        num : integer
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block) 
+        
+        Returns
+        -------
+        No output since `SamplesGenerator` only represents a base class to derive
+        other classes from.
+        """
+        pass
 
 
 class TimeInOut( SamplesGenerator ):
@@ -217,8 +260,55 @@ class MaskedTimeInOut ( TimeInOut ):
         else: # if no start/stop given, don't do the resorting thing
             for block in self.source.result(num):
                 yield block[:, self.channels]
-                
 
+
+class ChannelMixer( TimeInOut ):
+    """
+    Class for directly mixing the channels of a multi-channel source. 
+    Outputs a single channel.
+    """
+    
+    #: Amplitude weight(s) for the channels as array. If not set, all channels are equally weighted.
+    weights = CArray(desc="channel weights")
+    
+    # Number of channels is always one here.
+    numchannels = Constant(1)
+    
+    # internal identifier
+    digest = Property( depends_on = ['source.digest', 'weights'])
+
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)         
+
+    def result(self, num):
+        """ 
+        Python generator that yields the output block-wise.
+        
+        Parameters
+        ----------
+        num : integer
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block).
+        
+        Returns
+        -------
+        Samples in blocks of shape (num, 1). 
+            The last block may be shorter than num.
+        """
+        if self.weights.size:
+            if self.weights.shape in {(self.source.numchannels,), (1,)}:
+                weights = self.weights
+            else:
+                raise ValueError("Weight factors can not be broadcasted: %s, %s" % \
+                                 (self.weights.shape, (self.source.numchannels,)))
+        else: 
+            weights = 1
+        
+        for block in self.source.result(num):
+            yield sum(weights*block, 1, keepdims=True)
+  
+    
 class Trigger(TimeInOut):
     """
     Class for identifying trigger signals.
@@ -233,7 +323,7 @@ class Trigger(TimeInOut):
     In the end, the algorithm checks if the found peak locations result in rpm that don't
     vary too much.
     """
-    #: Data source; :class:`~acoular.sources.SamplesGenerator` or derived object.
+    #: Data source; :class:`~acoular.tprocess.SamplesGenerator` or derived object.
     source = Instance(SamplesGenerator)
     
     #: Threshold of trigger. Has different meanings for different 
@@ -405,7 +495,7 @@ class AngleTracker(MaskedTimeInOut):
 
     '''
 
-    #: Data source; :class:`~acoular.SamplesGenerator` or derived object.
+    #: Data source; :class:`~acoular.tprocess.SamplesGenerator` or derived object.
     source = Instance(SamplesGenerator)    
     
     #: Trigger data from :class:`acoular.tprocess.Trigger`.
@@ -571,7 +661,7 @@ class SpatialInterpolator(TimeInOut):
         self._mics_virtual = mics_virtual
 
     
-    #: Data source; :class:`~acoular.sources.SamplesGenerator` or derived object.
+    #: Data source; :class:`~acoular.tprocess.SamplesGenerator` or derived object.
     source = Instance(SamplesGenerator)
     
     #: Interpolation method in spacial domain, defaults to
@@ -1077,10 +1167,10 @@ class Mixer( TimeInOut ):
     Mixes the signals from several sources.
     """
 
-    #: Data source; :class:`~acoular.sources.SamplesGenerator` object.
+    #: Data source; :class:`~acoular.tprocess.SamplesGenerator` object.
     source = Trait(SamplesGenerator)
 
-    #: List of additional :class:`~acoular.sources.SamplesGenerator` objects
+    #: List of additional :class:`~acoular.tprocess.SamplesGenerator` objects
     #: to be mixed.
     sources = List( Instance(SamplesGenerator, ()) ) 
 
