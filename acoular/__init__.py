@@ -67,7 +67,8 @@ except:
 
 from .h5cache import td_dir, cache_dir
 from .tbeamform import IntegratorSectorTime, \
-BeamformerTime, BeamformerTimeSq, BeamformerTimeTraj, BeamformerTimeSqTraj
+BeamformerTime, BeamformerTimeSq, BeamformerTimeTraj, BeamformerTimeSqTraj,\
+BeamformerCleant, BeamformerCleantSq, BeamformerCleantTraj, BeamformerCleantSqTraj
 from .tprocess import TimeInOut, MaskedTimeInOut, Mixer, TimeAverage, \
 TimeReverse, TimePower, FiltFiltOctave, FiltOctave, TimeCache, WriteWAV, \
 WriteH5, SpatialInterpolator, SpatialInterpolatorRotation, Trigger, \
@@ -92,11 +93,3 @@ TimeSamples, MaskedTimeSamples, PointSourceDipole, UncorrelatedNoiseSource, \
 SourceMixer
 from .signals import SineGenerator, WNoiseGenerator, SignalGenerator,\
 PNoiseGenerator
-
-
-# we cannot be sure to have a working traitsui available
-try:
-    from .traitsviews import * #nothing will actually be imported
-except:
-    from warnings import warn
-    warn("no traitsui features will be available", Warning, stacklevel = 2)

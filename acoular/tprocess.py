@@ -28,8 +28,6 @@
 """
 
 # imports from other packages
-from six import next
-
 from numpy import array, empty, empty_like, pi, sin, sqrt, zeros, newaxis, unique, \
 int16, cross, isclose, zeros_like, dot, nan, concatenate, isnan, nansum, float64, \
 identity, argsort, interp, arange, append, linspace, flatnonzero, argmin, argmax, \
@@ -904,7 +902,7 @@ class SpatialInterpolator(TimeInOut):
                     
                     
                 elif self.method == 'rbf-cubic':
-                    #compute using 3-D Rbfs   self.CylToCart()
+                    #compute using 3-D Rbfs
                     rbfi = Rbf( newCoord[0],
                                 newCoord[1],
                                 newCoord[2],
@@ -916,16 +914,16 @@ class SpatialInterpolator(TimeInOut):
                                             virtshiftcoord[2]) 
                 
                 elif self.method == 'rbf-multiquadric':
-                    #compute using 3-D Rbfs   self.CylToCart()
-                    rbfi = Rbf( newCoord[0],
-                                newCoord[1],
-                                newCoord[2],
+                    #compute using 3-D Rbfs
+                    rbfi = Rbf(newCoord[0],
+                               newCoord[1],
+                               newCoord[2],
                                pHelp[cntTime, :len(newCoord[0])], function='multiquadric')  # radial basis function interpolator instance
                     
-                    virtshiftcoord= array([xInterp[cntTime, :],virtNewCoord[1], virtNewCoord[2]])
-                    pInterp[cntTime] = rbfi(virtshiftcoord[0],
-                                            virtshiftcoord[1],
-                                            virtshiftcoord[2]) 
+                    pInterp[cntTime] = rbfi(xInterp[cntTime, :],
+                                            virtNewCoord[1],
+                                            virtNewCoord[2]) 
+                          
                                  
         # Interpolation for arbitrary 3D Arrays             
         elif self.array_dimension =='3D':
@@ -962,6 +960,17 @@ class SpatialInterpolator(TimeInOut):
                                newCoord[1],
                                newCoord[2],
                                pHelp[cntTime, :len(newCoord[0])], function='cubic')  # radial basis function interpolator instance
+                    
+                    pInterp[cntTime] = rbfi(xInterp[cntTime, :],
+                                            virtNewCoord[1],
+                                            virtNewCoord[2])
+                
+                elif self.method == 'rbf-multiquadric':
+                    #compute using 3-D Rbfs
+                    rbfi = Rbf(newCoord[0],
+                               newCoord[1],
+                               newCoord[2],
+                               pHelp[cntTime, :len(newCoord[0])], function='multiquadric')  # radial basis function interpolator instance
                     
                     pInterp[cntTime] = rbfi(xInterp[cntTime, :],
                                             virtNewCoord[1],
@@ -1466,6 +1475,11 @@ class WriteWAV( TimeInOut ):
     `*.wav` file.
     """
     
+    #: Name of the file to be saved. If none is given, the name will be
+    #: automatically generated from the sources.
+    name = File(filter=['*.wav'], 
+        desc="name of wave file")    
+    
     #: Basename for cache, readonly.
     basename = Property( depends_on = 'digest')
        
@@ -1504,10 +1518,13 @@ class WriteWAV( TimeInOut ):
             raise ValueError("No channels given for output.")
         if nc > 2:
             warn("More than two channels given for output, exported file will have %i channels" % nc)
-        name = self.basename
-        for nr in self.channels:
-            name += '_%i' % nr
-        name += '.wav'
+        if self.name == '':
+            name = self.basename
+            for nr in self.channels:
+                name += '_%i' % nr
+            name += '.wav'
+        else:
+            name = self.name
         wf = wave.open(name,'w')
         wf.setnchannels(nc)
         wf.setsampwidth(2)

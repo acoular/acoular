@@ -8,3 +8,4 @@ python3 -m unittest discover -v -p "test_*.py"
 
 #remove cache data after testing
 rm -rf ./cache/*
+

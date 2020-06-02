@@ -19,11 +19,10 @@
 """
 
 # imports from other packages
-from six import next
-from numpy import array, sqrt, ones, empty, newaxis, uint32, arange, dot, int64, sum
+from numpy import array, sqrt, ones, empty, newaxis, uint32, arange, dot, int64
 from traits.api import Float, Int, Property, Trait, Delegate, \
 cached_property, Tuple, HasPrivateTraits, CLong, File, Instance, Any, \
-on_trait_change, List, ListInt, CArray
+on_trait_change, List, ListInt, CArray, Bool
 from os import path
 from warnings import warn
 
@@ -57,7 +56,10 @@ class SamplesGenerator( HasPrivateTraits ):
     numsamples = CLong
     
     # internal identifier
-    digest = ''
+    digest = Property
+    
+    def _get_digest( self ): 
+        return '' 
                
     def result(self, num):
         """
@@ -307,6 +309,8 @@ class MaskedTimeSamples( TimeSamples ):
                 cal_factor = self.calib.data[self.channels][newaxis]
             elif self.calib.num_mics == self.numchannels:
                 cal_factor = self.calib.data[newaxis]
+            elif self.calib.num_mics == 0:
+                warn("No calibration data used.", Warning, stacklevel = 2)    
             else:
                 raise ValueError("calibration data not compatible: %i, %i" % \
                             (self.calib.num_mics, self.numchannels))
@@ -452,6 +456,10 @@ class MovingPointSource( PointSource ):
     The output is being generated via the :meth:`result` generator.
     """
 
+    #: Considering of convective amplification
+    conv_amp = Bool(False, 
+        desc="determines if convective amplification is considered")
+
     #: Trajectory of the source, 
     #: instance of the :class:`~acoular.trajectory.Trajectory` class.
     #: The start time is assumed to be the same as for the samples.
@@ -460,7 +468,7 @@ class MovingPointSource( PointSource ):
 
     # internal identifier
     digest = Property( 
-        depends_on = ['mics.digest', 'signal.digest', 'loc', \
+        depends_on = ['mics.digest', 'signal.digest', 'loc', 'conv_amp', \
          'env.digest', 'start_t', 'start', 'trajectory.digest', '__class__'], 
         )
                
@@ -515,6 +523,7 @@ class MovingPointSource( PointSource ):
             t += 1./self.sample_freq
             # emission time relative to start time
             ind = (te-self.start_t+self.start)*self.sample_freq
+            if self.conv_amp: rm *= (1-Mr)**2
             try:
                 out[i] = signal[array(0.5+ind*self.up, dtype=int64)]/rm
                 i += 1
@@ -525,6 +534,7 @@ class MovingPointSource( PointSource ):
                 break
         if i > 0: # if there are still samples to yield
             yield out[:i]
+            
 
 class PointSourceDipole ( PointSource ):
     """

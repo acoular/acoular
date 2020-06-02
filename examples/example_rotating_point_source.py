@@ -26,7 +26,7 @@ MaskedTimeSamples, FiltFiltOctave, Trajectory, BeamformerTimeSq, TimeAverage, \
 BeamformerTimeSqTraj, \
 TimeCache, FiltOctave, BeamformerTime, TimePower, IntegratorSectorTime, \
 PointSource, MovingPointSource, SineGenerator, WNoiseGenerator, Mixer, WriteWAV, \
-SteeringVector
+SteeringVector, BeamformerCleantSqTraj
 
 from pylab import subplot, imshow, show, colorbar, plot, transpose, figure, \
 psd, axis, xlim, ylim, title, tight_layout, text
@@ -167,28 +167,63 @@ axis('off')
 tight_layout()
 
 #===============================================================================
+# moving focus time domain deconvolution
+#===============================================================================
+# beamforming with trajectory (rvec axis perpendicular to trajectory)
+bct = BeamformerCleantSqTraj(source=fi, steer=st1, trajectory=tr, \
+    rvec = array((0,0,1.0)), n_iter=5)
+avgct = TimeAverage(source=bct, naverage=int(sfreq*tmax/16)) # 16 single images
+cachct = TimeCache(source=avgct) # cache to prevent recalculation
+map4 = zeros(g1.shape) # accumulator for average
+# plot single frames
+
+figure(3,(8,7))
+i = 1
+for res in cachct.result(1):
+    res0 = res[0].reshape(g1.shape)
+    map4 += res0 # average
+    i += 1  
+    subplot(4,4,i)
+    mx = L_p(res0.max())
+    imshow(L_p(transpose(res0)), vmax=mx, vmin=mx-10, interpolation='nearest',\
+        extent=g1.extend(), origin='lower')
+    colorbar()
+map4 /= i
+
+subplot(4,4,1)
+text(0.4,0.25,'moving\nfocus\ndeconvolution', fontsize=15, ha='center')
+axis('off')
+tight_layout()
+
+#===============================================================================
 # compare all three results
 #===============================================================================
 
-figure(3,(10,3))
-subplot(1,3,1)
+figure(4,(10,3))
+subplot(1,4,1)
 mx = L_p(map1.max())
 imshow(L_p(transpose(map1)), vmax=mx, vmin=mx-10, interpolation='nearest',\
     extent=g.extend(), origin='lower')
 colorbar()
 title('frequency domain\n fixed focus')
-subplot(1,3,2)
+subplot(1,4,2)
 mx = L_p(map2.max())
 imshow(L_p(transpose(map2)), vmax=mx, vmin=mx-10, interpolation='nearest',\
     extent=g.extend(), origin='lower')
 colorbar()
 title('time domain\n fixed focus')
-subplot(1,3,3)
+subplot(1,4,3)
 mx = L_p(map3.max())
 imshow(L_p(transpose(map3)), vmax=mx, vmin=mx-10, interpolation='nearest',\
     extent=g.extend(), origin='lower')
 colorbar()
 title('time domain\n moving focus')
+subplot(1,4,4)
+mx = L_p(map4.max())
+imshow(L_p(transpose(map4)), vmax=mx, vmin=mx-10, interpolation='none',\
+    extent=g.extend(), origin='lower')
+colorbar()
+title('time domain\n deconvolution (moving focus)')
 
 tight_layout()
 
