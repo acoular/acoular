@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2019, Acoular Development Team.
+# Copyright (c) 2007-2020, Acoular Development Team.
 #------------------------------------------------------------------------------
 """Implements support for two- and threedimensional grids
 
@@ -11,13 +11,18 @@
     Grid
     RectGrid
     RectGrid3D
+    Sector
+    RectSector
+    CircSector
+    PolySector
+    MultiSector
 
 """
 
 # imports from other packages
-from numpy import mgrid, s_, array, arange, isscalar, absolute,ones,argmin,zeros
-from traits.api import HasPrivateTraits, Float, Property, CArray, Any, \
-property_depends_on, cached_property, on_trait_change,Bool,List,Instance
+from numpy import mgrid, s_, array, arange, isscalar, absolute,ones,argmin,zeros,where
+from traits.api import HasPrivateTraits, Float, Property, Any, \
+property_depends_on, cached_property,Bool,List,Instance
 from traits.trait_errors import TraitError
 #from matplotlib.path import Path
 from scipy.spatial import Delaunay
@@ -91,7 +96,30 @@ class Grid( HasPrivateTraits ):
             The grid point x, y, z-coordinates in one array.
         """
         return self.gpos# array([[0.], [0.], [0.]])
+    
+    def subdomain (self, sector) :
+        """
+        Queries the indices for a subdomain in the grid.
+        
+        Allows arbitrary subdomains of type :class:`Sector`
+        
+        Parameters
+        ----------
+        sector : :class:`Sector`
+            Sector describing the subdomain.
 
+        Returns
+        -------
+        2-tuple of arrays of integers or of numpy slice objects
+            The indices that can be used to mask/select the grid subdomain from 
+            an array with the same shape as the grid.            
+        """
+        
+        xpos = self.pos()
+        # construct grid-shaped array with "True" entries where sector is
+        xyi = sector.contains(xpos).reshape(self.shape)
+        # return indices of "True" entries
+        return where(xyi)
 
 
 class RectGrid( Grid ):
@@ -256,7 +284,7 @@ class RectGrid( Grid ):
             xpos = self.pos()
             xis = []
             yis = []
-            #replace Path by scipy spatial 
+            #replaced matplotlib Path by scipy spatial 
             #p = Path(array(r).reshape(-1,2))
             #inds = p.contains_points()
             inds = in_hull(xpos[:2,:].T,array(r).reshape(-1,2))
@@ -477,6 +505,10 @@ class Sector( HasPrivateTraits ):
     #: Boolean flag, if 'True' (default), grid points lying on the sector border are included.
     include_border = Bool(True, 
                           desc="include points on the border")    
+    
+    #: Absolute tolerance for sector border
+    abs_tol = Float(1e-12,
+                    desc="absolute tolerance for sector border")
 
     #: Boolean flag, if 'True' (default), the nearest grid point is returned if none is inside the sector.
     default_nearest = Bool(True, 
@@ -552,17 +584,19 @@ class RectSector( Sector ):
         ymin = min(self.y_min,self.y_max)
         ymax = max(self.y_min,self.y_max)
         
+        abs_tol = self.abs_tol
         # get pos indices inside rectangle (* == and)
         if self.include_border:
-            inds = (pos[0, :] >= xmin) * \
-                   (pos[0, :] <= xmax) * \
-                   (pos[1, :] >= ymin) * \
-                   (pos[1, :] <= ymax)
+            inds = (pos[0, :] - xmin > -abs_tol) * \
+                   (pos[0, :] - xmax < abs_tol) * \
+                   (pos[1, :] - ymin > -abs_tol) * \
+                   (pos[1, :] - ymax < abs_tol)
         else:
-            inds = (pos[0, :] > xmin) * \
-                   (pos[0, :] < xmax) * \
-                   (pos[1, :] > ymin) * \
-                   (pos[1, :] < ymax)
+            inds = (pos[0, :] - xmin > abs_tol) * \
+                   (pos[0, :] - xmax < -abs_tol) * \
+                   (pos[1, :] - ymin > abs_tol) * \
+                   (pos[1, :] - ymax < -abs_tol)
+        
         
         # if none inside, take nearest
         if ~inds.any() and self.default_nearest:
@@ -617,9 +651,10 @@ class CircSector( Sector ):
         dr2 = (pos[0, :]-self.x)**2 + (pos[1, :]-self.y)**2
         # which points are in the circle?
         if self.include_border:
-            inds = dr2 <= self.r**2
+            inds = (dr2 - self.r**2) < self.abs_tol
         else:
-            inds = dr2 < self.r**2
+            inds = (dr2 - self.r**2) < -self.abs_tol
+        
         
         # if there's no poit inside
         if ~inds.any() and self.default_nearest: 
@@ -628,22 +663,18 @@ class CircSector( Sector ):
         return inds
 
 
-class PolySector( HasPrivateTraits ):
+class PolySector( Sector ):
     """
-    Base class for sector types.
+     Class for poly sector types.
     
     Defines the common interface for all sector classes. This class
     may be used as a base for diverse sector implementaions. If used
     directly, it implements a sector encompassing the whole grid.
     """
+    # x1, y1, x2, y2, ... xn, yn :
+    edges = List( Float ) 
     
-    #: Boolean flag, if 'True' (default), grid points lying on the sector border are included.
-    include_border = Bool(True, 
-                          desc="include points on the border")    
-
-    #: Boolean flag, if 'True' (default), the nearest grid point is returned if none is inside the sector.
-    default_nearest = Bool(True, 
-                          desc="return nearest grid point to center of none inside sector")
+    
 
     def contains ( self, pos ):
         """
@@ -663,7 +694,17 @@ class PolySector( HasPrivateTraits ):
             Array indicating which of the given positions lie within the
             given sector                
         """
-        return ones(pos.shape[1], dtype=bool)
+        
+        #pos = self.pos()
+        inds = in_hull(pos[:2,:].T, array(self.edges).reshape(-1,2)  )
+        
+        
+                # if none inside, take nearest
+        if ~inds.any() and self.default_nearest:
+            dr2 = array(self.edges).reshape(-1,2).mean(0)
+            inds[argmin(dr2)] = True
+          
+        return inds
 
 
 
@@ -677,7 +718,7 @@ class MultiSector (Sector):
     
     #: List of :class:`~beamfpy.sources.SamplesGenerator` objects
     #: to be mixed.
-    sectors = List( Instance(Sector, ()) ) 
+    sectors = List(Instance(Sector)) 
     
     
     def contains ( self, pos ):

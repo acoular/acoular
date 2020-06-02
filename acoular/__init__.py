@@ -1,6 +1,6 @@
 # coding=UTF-8
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2019, Acoular Development Team.
+# Copyright (c) 2007-2020, Acoular Development Team.
 #------------------------------------------------------------------------------
 
 """
@@ -75,7 +75,8 @@ SampleSplitter, AngleTracker, SpatialInterpolatorConstantRotation
 
 from .calib import Calib
 from .trajectory import Trajectory
-from .grids import Grid, RectGrid, RectGrid3D
+from .grids import Grid, RectGrid, RectGrid3D, Sector,RectSector,CircSector,\
+    PolySector, MultiSector
 from .environments import cartToCyl, cylToCart, Environment, UniformFlowEnvironment, RotatingFlow, \
 FlowField, OpenJet, SlotJet, GeneralFlowEnvironment
 from .microphones import MicGeom
