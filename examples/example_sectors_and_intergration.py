@@ -13,9 +13,8 @@ Shows acoular Sector und Sound Pressure level Integration functionallity.
 from os import path
 from numpy import array,arange
 import acoular
-from pylab import figure, plot, axis, imshow, colorbar, show ,semilogx,xlim, ylim,legend,cm
+from pylab import figure, plot, imshow, colorbar, show,xlim, ylim,legend,cm
 import matplotlib.pyplot as plt
-
 from matplotlib.patches import Polygon,Rectangle
 
 #fft block size
