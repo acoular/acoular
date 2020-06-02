@@ -41,8 +41,8 @@ circle = array([-0.3,-0.1, 0.05])
 rect  =  array([-0.5,   -0.15, -0.4 , 0.15])
 
 #3. a polygon containing of vector tuples: x_i,y_i
-poly = array([[-0.1, -0.1,   -0.2,  -0.25, -0.3 ],
-              [ -0.1,  -0.25,  -0.15,   -0.1,  -0.2]] ).T
+poly = array([[-0.1, -0.1,   -0.2, -0.3 , -0.25 ],
+              [ -0.1,  -0.2,  -0.25,-0.2,   -0.1  ]] ).T
 
 #4 alternative: define those sectors as Classes
 circle_sector = acoular.CircSector(x=-0.3,y= -0.1, r= 0.05)
@@ -50,7 +50,7 @@ circle_sector = acoular.CircSector(x=-0.3,y= -0.1, r= 0.05)
 rect_sector = acoular.RectSector(x_min=-0.5,x_max=-0.4, y_min=-0.15, y_max= 0.15)
 
 #list of points containing x1,y1,x2,y2,...,xi,yi
-poly_sector =  acoular.PolySector(edges=[-0.1, -0.1, -0.1, -0.25,   -0.2, -0.15,  -0.25, -0.1, -0.3, -0.2 ])
+poly_sector =  acoular.PolySector(edges=[-0.1, -0.1, -0.1, -0.2,   -0.2, -0.25,  -0.25, -0.1, -0.3, -0.2 ])
 
 #multisector allows to sum over multiple different sectors
 multi_sector = acoular.MultiSector( sectors = [circle_sector,rect_sector,poly_sector])
