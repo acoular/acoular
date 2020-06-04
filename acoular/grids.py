@@ -115,7 +115,7 @@ class Grid( HasPrivateTraits ):
             an array with the same shape as the grid.            
         """
         
-        xpos = self.gpos()
+        xpos = self.gpos
         # construct grid-shaped array with "True" entries where sector is
         xyi = sector.contains(xpos).reshape(self.shape)
         # return indices of "True" entries
@@ -262,7 +262,7 @@ class RectGrid( Grid ):
         """
         
         if len(r) == 3: # only 3 values given -> use x,y,radius method
-            xpos = self.gpos()
+            xpos = self.gpos
             xis = []
             yis = []
             dr2 = (xpos[0, :]-r[0])**2 + (xpos[1, :]-r[1])**2
