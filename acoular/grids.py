@@ -20,9 +20,9 @@
 """
 
 # imports from other packages
-from numpy import mgrid, s_, array, arange, isscalar, absolute,ones,argmin,zeros,where
+from numpy import mgrid, s_, array, arange, isscalar, absolute, ones, argmin, zeros, where
 from traits.api import HasPrivateTraits, Float, Property, Any, \
-property_depends_on, cached_property,Bool,List,Instance
+property_depends_on, cached_property, Bool, List, Instance
 from traits.trait_errors import TraitError
 #from matplotlib.path import Path
 from scipy.spatial import Delaunay
@@ -41,9 +41,9 @@ def in_hull(p, hull, border= True, tol = 0 ):
         hull = Delaunay(hull)
     
     if border:
-        return hull.find_simplex(p)>=-tol
+        return hull.find_simplex(p,tol = tol)>=0
     else:
-        return hull.find_simplex(p)>0
+        return hull.find_simplex(p,tol = tol)>0
         
 
 
@@ -698,14 +698,8 @@ class PolySector( Sector ):
             given sector                
         """
         
-        #pos = self.pos()
-        if self.include_border:
-            inds = in_hull(pos[:2,:].T, array(self.edges).reshape(-1,2), \
-                           border = True ,tol = self.abs_tol)
-        else:
-            inds = in_hull(pos[:2,:].T, array(self.edges).reshape(-1,2), \
-                           border = False ,tol = self.abs_tol)
-            
+        inds = in_hull(pos[:2,:].T, array(self.edges).reshape(-1,2), \
+                           border = self.include_border ,tol = self.abs_tol)
         
         # if none inside, take nearest
         if ~inds.any() and self.default_nearest:
@@ -727,7 +721,7 @@ class MultiSector(Sector):
     
     """
     
-    #: List of :class:`~beamfpy.sources.SamplesGenerator` objects
+    #: List of :class:`acoular.grids.Sector` objects
     #: to be mixed.
     sectors = List(Instance(Sector)) 
     

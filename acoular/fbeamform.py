@@ -58,7 +58,7 @@ damasSolverGaussSeidel
 from .h5cache import H5cache
 from .h5files import H5CacheFileBase
 from .internal import digest
-from .grids import Grid,Sector
+from .grids import Grid, Sector
 from .microphones import MicGeom
 from .configuration import config
 from .environments import Environment
