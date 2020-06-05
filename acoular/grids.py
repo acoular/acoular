@@ -29,7 +29,7 @@ from scipy.spatial import Delaunay
 from .internal import digest
 
 
-def in_hull(p, hull):
+def in_hull(p, hull, border= True, tol = 0 ):
     """
     test if points in `p` are in `hull`
     `p` should be a `NxK` coordinates of `N` points in `K` dimensions
@@ -39,7 +39,12 @@ def in_hull(p, hull):
     """
     if not isinstance(hull,Delaunay):
         hull = Delaunay(hull)
-    return hull.find_simplex(p)>=0
+    
+    if border:
+        return hull.find_simplex(p)>=-tol
+    else:
+        return hull.find_simplex(p)>0
+        
 
 
 class Grid( HasPrivateTraits ):
@@ -281,7 +286,7 @@ class RectGrid( Grid ):
             xi2, yi2 = self.index(max(r[0], r[2]), max(r[1], r[3]))
             return s_[xi1:xi2+1], s_[yi1:yi2+1]
         else: # use enveloping polygon
-            xpos = self.gpos()
+            xpos = self.gpos
             xis = []
             yis = []
             #replaced matplotlib Path by scipy spatial 
@@ -665,11 +670,9 @@ class CircSector( Sector ):
 
 class PolySector( Sector ):
     """
-     Class for poly sector types.
+     Class for defining a polygon sector.
     
-    Defines the common interface for all sector classes. This class
-    may be used as a base for diverse sector implementaions. If used
-    directly, it implements a sector encompassing the whole grid.
+     Can be used for 2D Grids for definining a convex polygon sector.
     """
     # x1, y1, x2, y2, ... xn, yn :
     edges = List( Float ) 
@@ -696,10 +699,15 @@ class PolySector( Sector ):
         """
         
         #pos = self.pos()
-        inds = in_hull(pos[:2,:].T, array(self.edges).reshape(-1,2)  )
+        if self.include_border:
+            inds = in_hull(pos[:2,:].T, array(self.edges).reshape(-1,2), \
+                           border = True ,tol = self.abs_tol)
+        else:
+            inds = in_hull(pos[:2,:].T, array(self.edges).reshape(-1,2), \
+                           border = False ,tol = self.abs_tol)
+            
         
-        
-                # if none inside, take nearest
+        # if none inside, take nearest
         if ~inds.any() and self.default_nearest:
             dr2 = array(self.edges).reshape(-1,2).mean(0)
             inds[argmin(dr2)] = True
@@ -710,9 +718,12 @@ class PolySector( Sector ):
 
 
 
-class MultiSector (Sector):
+class MultiSector(Sector):
     """
-    Class for defining a sector consisting of arbitrary sub-sectors.
+    Class for defining a sector consisting of multiple sectors.
+    
+    Can be used to sum over different sectors. Takes a list of sectors
+    and returns the points contained in each sector.
     
     """
     
@@ -741,7 +752,7 @@ class MultiSector (Sector):
         # initialize with only "False" entries
         inds = zeros(pos.shape[1], dtype=bool)
         
-        # add points contained in sub-sectors
+        # add points contained in each sector
         for sec in self.sectors:
             inds += sec.contains(pos)
         
