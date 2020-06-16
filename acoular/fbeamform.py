@@ -1857,20 +1857,12 @@ class BeamformerCMF ( BeamformerBase ):
                     #boundarys - set to non negative
                     boundarys = tile((0, +inf), (len(x0),1))
                     #print(boundarys.shape)
-                    
-                    #test the function and derivative                    
-                    #C1 = x0.T@A.T@A@x0 - 2*R.T@A@x0 + R.T@R
-                    #C2 = 2*A.T@A@x0.T[:, newaxis] - 2*A.T@R 
-                    #print(A.shape,R.shape,A.T.shape)
-                    #print(C1[0].shape,C2[:,0].shape) 
-                    #print((2*A.T@A@x0.T[:, newaxis]).shape, (2*A.T@R).shape)
-                    #print(x0.shape, (R.T@R).shape)
-                    
+                                    
                     #optimize
                     ac[i], yval, dicts =  fmin_l_bfgs_b(function, x0, fprime=None, args=(),  #None  derivitaive
                                                           approx_grad=0, bounds=boundarys, m=10,   #0 True
-                                                          factr=10000000.0, pgtol=1e-05, epsilon=1e-08,
-                                                          iprint=-1, maxfun=15000, maxiter=self.max_iter,
+                                                          factr=100.0, pgtol=1e-05, epsilon=1e-08,
+                                                          iprint=0, maxfun=1500000, maxiter=self.max_iter,  #-1
                                                           disp=None, callback=None, maxls=20)
                     
                     ac[i] /= unit
