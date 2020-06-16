@@ -20,7 +20,8 @@
 """
 
 # imports from other packages
-from numpy import mgrid, s_, array, arange, isscalar, absolute, ones, argmin, zeros, where
+from numpy import mgrid, s_, array, arange, isscalar, absolute, ones, argmin,\
+zeros, where, bool_, nonzero
 from traits.api import HasPrivateTraits, Float, Property, Any, \
 property_depends_on, cached_property, Bool, List, Instance
 from traits.trait_errors import TraitError
@@ -45,6 +46,32 @@ def in_hull(p, hull, border= True, tol = 0 ):
     else:
         return hull.find_simplex(p,tol = tol)>0
         
+def in_poly(p,poly, border= True, tol = 0 ):
+    """
+    test if points in `p` are in `poly`
+    `p` should be a `NxK` coordinates of `N` points in `K` dimensions
+    `poly` is the `MxK` array of the coordinates of `M` points in `K`dimensions
+    
+    """  
+    n = len(poly)
+    inside = zeros(len(p[:,0]),bool_)
+    p2x = 0.0
+    p2y = 0.0
+    xints = 0.0
+    p1x,p1y = poly[0]
+    for i in range(n+1):
+        p2x,p2y = poly[i % n]
+        idx = nonzero((p[:,1] > min(p1y,p2y)) & (p[:,1] <= max(p1y,p2y)) & (p[:,0] <= max(p1x,p2x)))[0]
+        if p1y != p2y:
+            xints = (p[:,1][idx]-p1y)*(p2x-p1x)/(p2y-p1y)+p1x
+        if p1x == p2x:
+            inside[idx] = ~inside[idx]
+        else:
+            idxx = idx[p[:,0][idx] <= xints]
+            inside[idxx] = ~inside[idxx]    
+        p1x,p1y = p2x,p2y
+    return inside
+
 
 
 class Grid( HasPrivateTraits ):
@@ -677,7 +704,6 @@ class PolySector( Sector ):
     # x1, y1, x2, y2, ... xn, yn :
     edges = List( Float ) 
     
-    
 
     def contains ( self, pos ):
         """
@@ -698,7 +724,7 @@ class PolySector( Sector ):
             given sector                
         """
         
-        inds = in_hull(pos[:2,:].T, array(self.edges).reshape(-1,2), \
+        inds = in_poly(pos[:2,:].T, array(self.edges).reshape(-1,2), \
                            border = self.include_border ,tol = self.abs_tol)
         
         # if none inside, take nearest
