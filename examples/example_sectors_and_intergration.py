@@ -26,7 +26,7 @@ mg = acoular.MicGeom( from_file=micgeofile )
 ts = acoular.TimeSamples( name='example_data.h5' )
 ps = acoular.PowerSpectra( time_data=ts, block_size=128, window='Hanning' )
 rg = acoular.RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=0.68,
-             increment=0.05)
+             increment=0.02)
 st = acoular.SteeringVector( grid = rg, mics=mg )
 f = acoular.PowerSpectra(time_data=ts,block_size=block)
 bf  = acoular.BeamformerBase(freq_data = f,steer= st)
@@ -40,9 +40,8 @@ circle = array([-0.3,-0.1, 0.05])
 #2. a rektange containing of 4 values: lower corner(x1, y1) and upper corner(x2, y2).
 rect  =  array([-0.5,   -0.15, -0.4 , 0.15])
 
-#3. a polygon containing of vector tuples: x_i,y_i
-poly = array([[-0.1, -0.1,   -0.2, -0.3 , -0.25 ],
-              [ -0.1,  -0.2,  -0.25,-0.2,   -0.1  ]] ).T
+#3. a polygon containing of vector tuples: x1,y1,x2,y2,...,xi,yi
+poly = array([ -0.25, -0.1, -0.1, -0.1, -0.1, -0.2, -0.2, -0.25, -0.3, -0.2])
 
 #4 alternative: define those sectors as Classes
 circle_sector = acoular.CircSector(x=-0.3,y= -0.1, r= 0.05)
@@ -50,7 +49,7 @@ circle_sector = acoular.CircSector(x=-0.3,y= -0.1, r= 0.05)
 rect_sector = acoular.RectSector(x_min=-0.5,x_max=-0.4, y_min=-0.15, y_max= 0.15)
 
 #list of points containing x1,y1,x2,y2,...,xi,yi
-poly_sector =  acoular.PolySector(edges=[-0.1, -0.1, -0.1, -0.2,   -0.2, -0.25,  -0.25, -0.1, -0.3, -0.2 ])
+poly_sector =  acoular.PolySector(edges=[ -0.25, -0.1, -0.1, -0.1, -0.1, -0.2, -0.2, -0.25, -0.3, -0.2])
 
 #multisector allows to sum over multiple different sectors
 multi_sector = acoular.MultiSector( sectors = [circle_sector,rect_sector,poly_sector])
@@ -77,7 +76,7 @@ imshow(acoular.L_p(map.T), origin='lower', vmin=mx-15,interpolation='nearest', e
 colorbar()
 circle1 = plt.Circle((-0.3,0.1), 0.05, color='k', fill=False)
 plt.gcf().gca().add_artist(circle1)
-polygon = Polygon(poly, color='k', fill=False)
+polygon = Polygon(poly.reshape(-1,2), color='k', fill=False)
 plt.gcf().gca().add_artist(polygon)
 rect = Rectangle((-0.5,-0.15),0.1,0.3,linewidth=1,edgecolor='k',facecolor='none')
 plt.gcf().gca().add_artist(rect)

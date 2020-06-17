@@ -46,28 +46,50 @@ def in_hull(p, hull, border= True, tol = 0 ):
     else:
         return hull.find_simplex(p,tol = tol)>0
         
-def in_poly(p,poly, border= True, tol = 0 ):
+def in_poly(p,poly, border= False, tol = 0 ):
     """
     test if points in `p` are in `poly`
-    `p` should be a `NxK` coordinates of `N` points in `K` dimensions
-    `poly` is the `MxK` array of the coordinates of `M` points in `K`dimensions
-    
+    `p` should be a `Nx2` coordinates of `N` points in `2` dimensions
+    `poly` is the `Mx2` array of the coordinates of `M` points in `2`dimensions.
+        
     """  
+    tol = 0.000005
     n = len(poly)
     inside = zeros(len(p[:,0]),bool_)
     p2x = 0.0
     p2y = 0.0
     xints = 0.0
     p1x,p1y = poly[0]
-    for i in range(n+1):
+    
+    #if point is a vertex
+    if (p[:,0],p[:,1]) in poly: 
+        return inside
+    
+    #boundary check
+    # for i in range(n):
+    #   p1 = None
+    #   p2 = None
+    #   if i==0:
+    #       p1 = poly[0]
+    #       p2 = poly[1]
+    #   else:
+    #       p1 = poly[i-1]
+    #       p2 = poly[i]
+    #   if p1[1] == p2[1] and p1[1] == p[:,1] and p[:,0] > min(p1[0], p2[0]) and p[:,0] < max(p1[0], p2[0]):
+    #       return inside
+    
+    #raycasting loop
+    for i in range(n+1): # +1
         p2x,p2y = poly[i % n]
-        idx = nonzero((p[:,1] > min(p1y,p2y)) & (p[:,1] <= max(p1y,p2y)) & (p[:,0] <= max(p1x,p2x)))[0]
+        idx = nonzero((p[:,1] >= min(p1y,p2y)) & (p[:,1] <= max(p1y,p2y)-tol) & (p[:,0]  <= max(p1x,p2x)+ tol))[0] #
+        #idx = nonzero((p[:,1] > min(p1y,p2y)) & (p[:,1] <= max(p1y,p2y)) & (p[:,0] <= max(p1x,p2x)))[0]
         if p1y != p2y:
             xints = (p[:,1][idx]-p1y)*(p2x-p1x)/(p2y-p1y)+p1x
         if p1x == p2x:
             inside[idx] = ~inside[idx]
         else:
-            idxx = idx[p[:,0][idx] <= xints]
+            idxx = idx[p[:,0][idx]+tol <= xints]
+            #idxx = idx[p[:,0][idx] <= xints]
             inside[idxx] = ~inside[idxx]    
         p1x,p1y = p2x,p2y
     return inside
@@ -316,10 +338,10 @@ class RectGrid( Grid ):
             xpos = self.gpos
             xis = []
             yis = []
-            #replaced matplotlib Path by scipy spatial 
+            #replaced matplotlib Path by numpy
             #p = Path(array(r).reshape(-1,2))
             #inds = p.contains_points()
-            inds = in_hull(xpos[:2,:].T,array(r).reshape(-1,2))
+            inds = in_poly(xpos[:2,:].T,array(r).reshape(-1,2))
             for np in arange(self.size)[inds]: # np -- points in x2-circle
                 xi, yi = self.index(xpos[0, np], xpos[1, np])
                 xis += [xi]
@@ -699,7 +721,7 @@ class PolySector( Sector ):
     """
      Class for defining a polygon sector.
     
-     Can be used for 2D Grids for definining a convex polygon sector.
+     Can be used for 2D Grids for definining a polygon sector.
     """
     # x1, y1, x2, y2, ... xn, yn :
     edges = List( Float ) 
@@ -708,8 +730,9 @@ class PolySector( Sector ):
     def contains ( self, pos ):
         """
         Queries whether the coordinates in a given array lie within the 
-        defined sector. 
-        For this sector type 
+        ploygon sector. 
+        If no coordinate is inside, the nearest one to the rectangle center
+        is returned if :attr:`~Sector.default_nearest` is True.
         
         Parameters
         ----------
@@ -734,7 +757,45 @@ class PolySector( Sector ):
           
         return inds
 
+class ConvexSector( Sector ):
+    """
+     Class for defining a convex hull sector.
+    
+     Can be used for 2D Grids for definining a convex hull sector.
+    """
+    # x1, y1, x2, y2, ... xn, yn :
+    edges = List( Float ) 
+    
 
+    def contains ( self, pos ):
+        """
+        Queries whether the coordinates in a given array lie within the 
+        convex sector. 
+        If no coordinate is inside, the nearest one to the rectangle center
+        is returned if :attr:`~Sector.default_nearest` is True. 
+        
+        Parameters
+        ----------
+        pos : array of floats
+            Array with the shape 3x[number of gridpoints] containing the
+            grid positions
+        
+        Returns
+        -------
+        array of bools with as many entries as columns in pos
+            Array indicating which of the given positions lie within the
+            given sector                
+        """
+        
+        inds = in_hull(pos[:2,:].T, array(self.edges).reshape(-1,2), \
+                           border = self.include_border ,tol = self.abs_tol)
+        
+        # if none inside, take nearest
+        if ~inds.any() and self.default_nearest:
+            dr2 = array(self.edges).reshape(-1,2).mean(0)
+            inds[argmin(dr2)] = True
+          
+        return inds
 
 
 
