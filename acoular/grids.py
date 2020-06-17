@@ -21,7 +21,7 @@
 
 # imports from other packages
 from numpy import mgrid, s_, array, arange, isscalar, absolute, ones, argmin,\
-zeros, where, bool_, nonzero
+zeros, where, bool_, nonzero,isclose
 from traits.api import HasPrivateTraits, Float, Property, Any, \
 property_depends_on, cached_property, Bool, List, Instance
 from traits.trait_errors import TraitError
@@ -46,54 +46,41 @@ def in_hull(p, hull, border= True, tol = 0 ):
     else:
         return hull.find_simplex(p,tol = tol)>0
         
-def in_poly(p,poly, border= False, tol = 0 ):
+def in_poly(p,poly, border= True, tol = 0.00005 ):
     """
     test if points in `p` are in `poly`
     `p` should be a `Nx2` coordinates of `N` points in `2` dimensions
     `poly` is the `Mx2` array of the coordinates of `M` points in `2`dimensions.
         
     """  
-    tol = 0.000005
+    tol = tol
+    if border == False:
+        tol = -tol
     n = len(poly)
     inside = zeros(len(p[:,0]),bool_)
     p2x = 0.0
     p2y = 0.0
     xints = 0.0
     p1x,p1y = poly[0]
-    
-    #if point is a vertex
-    if (p[:,0],p[:,1]) in poly: 
-        return inside
-    
-    #boundary check
-    # for i in range(n):
-    #   p1 = None
-    #   p2 = None
-    #   if i==0:
-    #       p1 = poly[0]
-    #       p2 = poly[1]
-    #   else:
-    #       p1 = poly[i-1]
-    #       p2 = poly[i]
-    #   if p1[1] == p2[1] and p1[1] == p[:,1] and p[:,0] > min(p1[0], p2[0]) and p[:,0] < max(p1[0], p2[0]):
-    #       return inside
-    
     #raycasting loop
     for i in range(n+1): # +1
         p2x,p2y = poly[i % n]
-        idx = nonzero((p[:,1] >= min(p1y,p2y)) & (p[:,1] <= max(p1y,p2y)-tol) & (p[:,0]  <= max(p1x,p2x)+ tol))[0] #
-        #idx = nonzero((p[:,1] > min(p1y,p2y)) & (p[:,1] <= max(p1y,p2y)) & (p[:,0] <= max(p1x,p2x)))[0]
-        if p1y != p2y:
-            xints = (p[:,1][idx]-p1y)*(p2x-p1x)/(p2y-p1y)+p1x
-        if p1x == p2x:
+        idx = nonzero((p[:,1] >= min(p1y,p2y)) & (p[:,1] <= max(p1y,p2y)) & (p[:,0]  <= max(p1x,p2x)+ tol))[0] #
+        if not isclose(p1y,p2y):
+            xints = (p[:,1][idx]+tol-p1y)*(p2x-p1x)/(p2y-p1y)+p1x
+        else:
+            #upper boarder
+            if border == True:
+                idyy = nonzero((p[:,0] > min(p1x, p2x)-tol) & (p[:,0] < max(p1x,p2x)) & (isclose(p[:,1],max(p1y,p2y))))
+                inside[idyy] = ~inside[idyy] 
+        #horizotals    
+        if isclose(p1x,p2x):
             inside[idx] = ~inside[idx]
         else:
             idxx = idx[p[:,0][idx]+tol <= xints]
-            #idxx = idx[p[:,0][idx] <= xints]
-            inside[idxx] = ~inside[idxx]    
+            inside[idxx] = ~inside[idxx]  
         p1x,p1y = p2x,p2y
     return inside
-
 
 
 class Grid( HasPrivateTraits ):
