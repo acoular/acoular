@@ -58,7 +58,7 @@ damasSolverGaussSeidel
 from .h5cache import H5cache
 from .h5files import H5CacheFileBase
 from .internal import digest
-from .grids import Grid
+from .grids import Grid, Sector
 from .microphones import MicGeom
 from .configuration import config
 from .environments import Environment
@@ -589,8 +589,12 @@ class BeamformerBase( HasPrivateTraits ):
                 h = res[ind]
         else:
             # fractional octave band
-            f1 = f*2.**(-0.5/num)
-            f2 = f*2.**(+0.5/num)
+            if isinstance(num,list):
+                f1=num[0]
+                f2=num[-1]
+            else:
+                f1 = f*2.**(-0.5/num)
+                f2 = f*2.**(+0.5/num)
             ind1 = searchsorted(freq, f1)
             ind2 = searchsorted(freq, f2)
             if ind1 == ind2:
@@ -2127,7 +2131,11 @@ def integrate(data, grid, sector):
         The spectrum (all calculated frequency bands) for the integrated sector.
     """
     
-    ind = grid.indices(*sector)
+    if isinstance(sector, Sector):
+        ind = grid.subdomain(sector)
+    else:
+        ind = grid.indices(*sector)
+    
     gshape = grid.shape
     gsize = grid.size
     if size(data) == gsize: # one value per grid point

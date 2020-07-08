@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2019, Acoular Development Team.
+# Copyright (c) 2007-2020, Acoular Development Team.
 #------------------------------------------------------------------------------
 """Implements support for two- and threedimensional grids
 
@@ -11,16 +11,200 @@
     Grid
     RectGrid
     RectGrid3D
+    Sector
+    RectSector
+    CircSector
+    PolySector
+    MultiSector
 
 """
 
 # imports from other packages
-from numpy import mgrid, s_, array, arange, isscalar, absolute
-from traits.api import HasPrivateTraits, Float, Property, CArray, Any, \
-property_depends_on, cached_property, on_trait_change
-from traits.trait_errors import TraitError
+from numpy import mgrid, s_, array, arange, isscalar, absolute, ones, argmin,\
+zeros, where,  asfarray,concatenate,sum,ma,ones_like,inf,copysign,fabs
 
+from traits.api import HasPrivateTraits, Float, Property, Any, \
+property_depends_on, cached_property, Bool, List, Instance
+from traits.trait_errors import TraitError
+#from matplotlib.path import Path
+from scipy.spatial import Delaunay
 from .internal import digest
+
+
+def in_hull(p, hull, border= True, tol = 0 ):
+    """
+    test if points in `p` are in `hull`
+    `p` should be a `NxK` coordinates of `N` points in `K` dimensions
+    `hull` is either a scipy.spatial.Delaunay object or the `MxK` array of the 
+    coordinates of `M` points in `K`dimensions for which Delaunay triangulation
+    will be computed
+    """
+    if not isinstance(hull,Delaunay):
+        hull = Delaunay(hull)
+    
+    if border:
+        return hull.find_simplex(p,tol = tol)>=0
+    else:
+        return hull.find_simplex(p,tol = tol)>0
+        
+
+def _det(xvert, yvert):
+    '''Compute twice the area of the triangle defined by points with using
+    determinant formula.
+
+    Input parameters:
+
+    xvert -- A vector of nodal x-coords (array-like).
+    yvert -- A vector of nodal y-coords (array-like).
+
+    Output parameters:
+    Twice the area of the triangle defined by the points.
+
+    Notes:
+
+    _det is positive if points define polygon in anticlockwise order.
+    _det is negative if points define polygon in clockwise order.
+    _det is zero if at least two of the points are concident or if
+        all points are collinear.
+
+    '''
+    xvert = asfarray(xvert)
+    yvert = asfarray(yvert)
+    x_prev = concatenate(([xvert[-1]], xvert[:-1]))
+    y_prev = concatenate(([yvert[-1]], yvert[:-1]))
+    return sum(yvert * x_prev - xvert * y_prev, axis=0)
+
+
+class Polygon:
+    '''Polygon object.
+    Input parameters:
+    x -- A sequence of nodal x-coords.
+    y -- A sequence of nodal y-coords.
+    '''
+
+    def __init__(self, x, y):
+        if len(x) != len(y):
+            raise IndexError('x and y must be equally sized.')
+        self.x = asfarray(x)
+        self.y = asfarray(y)
+        # Closes the polygon if were open
+        x1, y1 = x[0], y[0]
+        xn, yn = x[-1], y[-1]
+        if x1 != xn or y1 != yn:
+            self.x = concatenate((self.x, [x1]))
+            self.y = concatenate((self.y, [y1]))
+        # Anti-clockwise coordinates
+        if _det(self.x, self.y) < 0:
+            self.x = self.x[::-1]
+            self.y = self.y[::-1]
+
+    def is_inside(self, xpoint, ypoint, smalld=1e-12):
+        '''Check if point is inside a general polygon.
+
+        Input parameters:
+        xpoint -- The x-coord of the point to be tested.
+        ypoint -- The y-coords of the point to be tested.
+        smalld -- A small float number.
+
+        xpoint and ypoint could be scalars or array-like sequences.
+
+        Output parameters:
+
+        mindst -- The distance from the point to the nearest point of the
+                  polygon.
+                  If mindst < 0 then point is outside the polygon.
+                  If mindst = 0 then point in on a side of the polygon.
+                  If mindst > 0 then point is inside the polygon.
+
+        Notes:
+        An improved version of the algorithm of Nordbeck and Rydstedt.
+        REF: SLOAN, S.W. (1985): A point-in-polygon program. Adv. Eng.
+             Software, Vol 7, No. 1, pp 45-47.
+
+        '''
+        xpoint = asfarray(xpoint)
+        ypoint = asfarray(ypoint)
+        # Scalar to array
+        if xpoint.shape is tuple():
+            xpoint = array([xpoint], dtype=float)
+            ypoint = array([ypoint], dtype=float)
+            scalar = True
+        else:
+            scalar = False
+        # Check consistency
+        if xpoint.shape != ypoint.shape:
+            raise IndexError('x and y has different shapes')
+        # If snear = True: Dist to nearest side < nearest vertex
+        # If snear = False: Dist to nearest vertex < nearest side
+        snear = ma.masked_all(xpoint.shape, dtype=bool)
+        # Initialize arrays
+        mindst = ones_like(xpoint, dtype=float) * inf
+        j = ma.masked_all(xpoint.shape, dtype=int)
+        x = self.x
+        y = self.y
+        n = len(x) - 1  # Number of sides/vertices defining the polygon
+        # Loop over each side defining polygon
+        for i in range(n):
+            d = ones_like(xpoint, dtype=float) * inf
+            # Start of side has coords (x1, y1)
+            # End of side has coords (x2, y2)
+            # Point has coords (xpoint, ypoint)
+            x1 = x[i]
+            y1 = y[i]
+            x21 = x[i + 1] - x1
+            y21 = y[i + 1] - y1
+            x1p = x1 - xpoint
+            y1p = y1 - ypoint
+            # Points on infinite line defined by
+            #     x = x1 + t * (x1 - x2)
+            #     y = y1 + t * (y1 - y2)
+            # where
+            #     t = 0    at (x1, y1)
+            #     t = 1    at (x2, y2)
+            # Find where normal passing through (xpoint, ypoint) intersects
+            # infinite line
+            t = -(x1p * x21 + y1p * y21) / (x21 ** 2 + y21 ** 2)
+            tlt0 = t < 0
+            tle1 = (0 <= t) & (t <= 1)
+            # Normal intersects side
+            d[tle1] = ((x1p[tle1] + t[tle1] * x21) ** 2 +
+                       (y1p[tle1] + t[tle1] * y21) ** 2)
+            # Normal does not intersects side
+            # Point is closest to vertex (x1, y1)
+            # Compute square of distance to this vertex
+            d[tlt0] = x1p[tlt0] ** 2 + y1p[tlt0] ** 2
+            # Store distances
+            mask = d < mindst
+            mindst[mask] = d[mask]
+            j[mask] = i
+            # Point is closer to (x1, y1) than any other vertex or side
+            snear[mask & tlt0] = False
+            # Point is closer to this side than to any other side or vertex
+            snear[mask & tle1] = True
+        if ma.count(snear) != snear.size:
+            raise IndexError('Error computing distances')
+        mindst **= 0.5
+        # Point is closer to its nearest vertex than its nearest side, check if
+        # nearest vertex is concave.
+        # If the nearest vertex is concave then point is inside the polygon,
+        # else the point is outside the polygon.
+        jo = j.copy()
+        jo[j == 0] -= 1
+        area = _det([x[j + 1], x[j], x[jo - 1]], [y[j + 1], y[j], y[jo - 1]])
+        mindst[~snear] = copysign(mindst, area)[~snear]
+        # Point is closer to its nearest side than to its nearest vertex, check
+        # if point is to left or right of this side.
+        # If point is to left of side it is inside polygon, else point is
+        # outside polygon.
+        area = _det([x[j], x[j + 1], xpoint], [y[j], y[j + 1], ypoint])
+        mindst[snear] = copysign(mindst, area)[snear]
+        # Point is on side of polygon
+        mindst[fabs(mindst) < smalld] = 0
+        # If input values were scalar then the output should be too
+        if scalar:
+            mindst = float(mindst)
+        return mindst
+
 
 class Grid( HasPrivateTraits ):
     """
@@ -76,7 +260,30 @@ class Grid( HasPrivateTraits ):
             The grid point x, y, z-coordinates in one array.
         """
         return self.gpos# array([[0.], [0.], [0.]])
+    
+    def subdomain (self, sector) :
+        """
+        Queries the indices for a subdomain in the grid.
+        
+        Allows arbitrary subdomains of type :class:`Sector`
+        
+        Parameters
+        ----------
+        sector : :class:`Sector`
+            Sector describing the subdomain.
 
+        Returns
+        -------
+        2-tuple of arrays of integers or of numpy slice objects
+            The indices that can be used to mask/select the grid subdomain from 
+            an array with the same shape as the grid.            
+        """
+        
+        xpos = self.gpos
+        # construct grid-shaped array with "True" entries where sector is
+        xyi = sector.contains(xpos).reshape(self.shape)
+        # return indices of "True" entries
+        return where(xyi)
 
 
 class RectGrid( Grid ):
@@ -186,27 +393,30 @@ class RectGrid( Grid ):
             co-ordinates from an array with the same shape as the grid.            
         """
         if x < self.x_min or x > self.x_max:
-           # raise ValueError, "x-value out of range"
-            if y  <  self.y_min or y > self.y_max:
-                raise ValueError("y-value out of range")
+            raise ValueError("x-value out of range")
+        if y  <  self.y_min or y > self.y_max:
+            raise ValueError("y-value out of range")
         xi = int((x-self.x_min)/self.increment+0.5)
         yi = int((y-self.y_min)/self.increment+0.5)
         return xi, yi
 
-    def indices ( self, x1, y1, x2, y2=None ):
+    def indices ( self, *r):
         """
         Queries the indices for a subdomain in the grid.
         
-        Allows either rectangular or circular subdomains. This can be used to
-        mask or to query results from a certain sector or subdomain.
+        Allows either rectangular, circular or polygonial subdomains.
+        This can be used to mask or to query results from a certain 
+        sector or subdomain.
         
         Parameters
         ----------
-        x1, x2, y1, y2 : float
-            If all four parameters are given, then a rectangular sector is
-            assumed that is given by two corners (x1, y1) and (x2, y2). If
-            only three parameters are given, then a circular sector is assumed
+        x1, y1, x2, y2, ... : float
+            If three parameters are given, then a circular sector is assumed
             that is given by its center (x1, y1) and the radius x2.
+            If four paramters are given, then a rectangular sector is
+            assumed that is given by two corners (x1, y1) and (x2, y2). 
+            If more parameters are given, the subdomain is assumed to have
+            polygonial shape with corners at (x_n, y_n).
 
         Returns
         -------
@@ -214,26 +424,47 @@ class RectGrid( Grid ):
             The indices that can be used to mask/select the grid subdomain from 
             an array with the same shape as the grid.            
         """
-        # only 3 values given -> use x,y,radius method
-        if y2 is None: 
-            xpos = self.pos()
+        
+        if len(r) == 3: # only 3 values given -> use x,y,radius method
+            xpos = self.gpos
             xis = []
             yis = []
-            dr2 = (xpos[0, :]-x1)**2 + (xpos[1, :]-y1)**2
+            dr2 = (xpos[0, :]-r[0])**2 + (xpos[1, :]-r[1])**2
             # array with true/false entries
-            inds = dr2 <= x2**2 
+            inds = dr2 <= r[2]**2 
             for np in arange(self.size)[inds]: # np -- points in x2-circle
                 xi, yi = self.index(xpos[0, np], xpos[1, np])
                 xis += [xi]
                 yis += [yi]
             if not (xis and yis): # if no points in circle, take nearest one
-                return self.index(x1, y1)
+                return self.index(r[0], r[1])
             else:
                 return array(xis), array(yis)
-        else: # rectangular subdomain - old functionality
-            xi1, yi1 = self.index(min(x1, x2), min(y1, y2))
-            xi2, yi2 = self.index(max(x1, x2), max(y1, y2))
+        elif len(r) == 4: # rectangular subdomain - old functionality
+            xi1, yi1 = self.index(min(r[0], r[2]), min(r[1], r[3]))
+            xi2, yi2 = self.index(max(r[0], r[2]), max(r[1], r[3]))
             return s_[xi1:xi2+1], s_[yi1:yi2+1]
+        else: # use enveloping polygon
+            xpos = self.gpos
+            xis = []
+            yis = []
+            #replaced matplotlib Path by numpy
+            #p = Path(array(r).reshape(-1,2))
+            #inds = p.contains_points()
+            #inds = in_poly(xpos[:2,:].T,array(r).reshape(-1,2))
+            poly = Polygon(array(r).reshape(-1,2)[:,0],array(r).reshape(-1,2)[:,1])
+            dists = poly.is_inside(xpos[0,:],xpos[1,:])   
+            inds = dists >= 0
+            for np in arange(self.size)[inds]: # np -- points in x2-circle
+                xi, yi = self.index(xpos[0, np], xpos[1, np])
+                xis += [xi]
+                yis += [yi]
+            if not (xis and yis): # if no points inside, take nearest to center
+                center = array(r).reshape(-1,2).mean(0)
+                return self.index(center[0], center[1])
+            else:
+                return array(xis), array(yis)
+                #return arange(self.size)[inds]
 
     def extend (self) :
         """
@@ -426,3 +657,308 @@ class RectGrid3D( RectGrid):
         xi1, yi1, zi1 = self.index(min(x1, x2), min(y1, y2), min(z1, z2))
         xi2, yi2, zi2 = self.index(max(x1, x2), max(y1, y2), max(z1, z2))
         return s_[xi1:xi2+1], s_[yi1:yi2+1], s_[zi1:zi2+1]
+
+
+
+class Sector( HasPrivateTraits ):
+    """
+    Base class for sector types.
+    
+    Defines the common interface for all sector classes. This class
+    may be used as a base for diverse sector implementaions. If used
+    directly, it implements a sector encompassing the whole grid.
+    """
+    
+    #: Boolean flag, if 'True' (default), grid points lying on the sector border are included.
+    include_border = Bool(True, 
+                          desc="include points on the border")    
+    
+    #: Absolute tolerance for sector border
+    abs_tol = Float(1e-12,
+                    desc="absolute tolerance for sector border")
+
+    #: Boolean flag, if 'True' (default), the nearest grid point is returned if none is inside the sector.
+    default_nearest = Bool(True, 
+                          desc="return nearest grid point to center of none inside sector")
+
+    def contains ( self, pos ):
+        """
+        Queries whether the coordinates in a given array lie within the 
+        defined sector. 
+        For this sector type, any position is valid.
+        
+        Parameters
+        ----------
+        pos : array of floats
+            Array with the shape 3x[number of gridpoints] containing the
+            grid positions
+        
+        Returns
+        -------
+        array of bools with as many entries as columns in pos
+            Array indicating which of the given positions lie within the
+            given sector                
+        """
+        return ones(pos.shape[1], dtype=bool)
+
+
+class RectSector( Sector ):
+    """
+    Class for defining a rectangular sector.
+    
+    Can be used for 2D Grids for definining a rectangular sector or
+    for 3D grids for a rectangular cylinder sector parallel to the z-axis.
+    """
+    
+    #: The lower x position of the rectangle
+    x_min = Float(-1.0,
+                  desc="minimum x position of the rectangle")
+
+    #: The upper x position of the rectangle
+    x_max = Float(1.0,
+                  desc="maximum x position of the rectangle")
+
+    #: The lower y position of the rectangle
+    y_min = Float(-1.0,
+                  desc="minimum y position of the rectangle")
+    
+    #: The upper y position of the rectangle
+    y_max = Float(1.0,
+                  desc="maximum y position of the rectangle")
+
+    def contains ( self, pos ):
+        """
+        Queries whether the coordinates in a given array lie within the 
+        rectangular sector. 
+        If no coordinate is inside, the nearest one to the rectangle center
+        is returned if :attr:`~Sector.default_nearest` is True.
+        
+        Parameters
+        ----------
+        pos : array of floats
+            Array with the shape 3x[number of gridpoints] containing the
+            grid positions
+        
+        Returns
+        -------
+        array of bools with as many entries as columns in pos
+            Array indicating which of the given positions lie within the
+            given sector                
+        """
+        # make sure xmin is minimum etc
+        xmin = min(self.x_min,self.x_max)
+        xmax = max(self.x_min,self.x_max)
+        ymin = min(self.y_min,self.y_max)
+        ymax = max(self.y_min,self.y_max)
+        
+        abs_tol = self.abs_tol
+        # get pos indices inside rectangle (* == and)
+        if self.include_border:
+            inds = (pos[0, :] - xmin > -abs_tol) * \
+                   (pos[0, :] - xmax < abs_tol) * \
+                   (pos[1, :] - ymin > -abs_tol) * \
+                   (pos[1, :] - ymax < abs_tol)
+        else:
+            inds = (pos[0, :] - xmin > abs_tol) * \
+                   (pos[0, :] - xmax < -abs_tol) * \
+                   (pos[1, :] - ymin > abs_tol) * \
+                   (pos[1, :] - ymax < -abs_tol)
+        
+        
+        # if none inside, take nearest
+        if ~inds.any() and self.default_nearest:
+            x = (xmin + xmax) / 2.0
+            y = (ymin + ymax) / 2.0
+            dr2 = (pos[0, :] - x)**2 + (pos[1, :] - y)**2
+            inds[argmin(dr2)] = True
+        
+        return inds.astype(bool)
+
+
+class CircSector( Sector ):
+    """
+    Class for defining a circular sector.
+    
+    Can be used for 2D Grids for definining a circular sector or
+    for 3D grids for a cylindrical sector parallel to the z-axis.
+    """
+    
+    #: x position of the circle center
+    x = Float(0.0,
+        desc="x position of the circle center")
+
+    #: y position of the circle center
+    y = Float(0.0,
+        desc="y position of the circle center")
+    
+    #: radius of the circle
+    r = Float(1.0,
+        desc="radius of the circle")
+        
+    
+    def contains ( self, pos ):
+        """
+        Queries whether the coordinates in a given array lie within the 
+        circular sector. 
+        If no coordinate is inside, the nearest one outside is returned
+        if :attr:`~Sector.default_nearest` is True.
+        
+        Parameters
+        ----------
+        pos : array of floats
+            Array with the shape 3x[number of gridpoints] containing the
+            grid positions
+        
+        Returns
+        -------
+        array of bools with as many entries as columns in pos
+            Array indicating which of the given positions lie within the
+            given sector                
+        """
+        dr2 = (pos[0, :]-self.x)**2 + (pos[1, :]-self.y)**2
+        # which points are in the circle?
+        if self.include_border:
+            inds = (dr2 - self.r**2) < self.abs_tol
+        else:
+            inds = (dr2 - self.r**2) < -self.abs_tol
+        
+        
+        # if there's no poit inside
+        if ~inds.any() and self.default_nearest: 
+            inds[argmin(dr2)] = True
+        
+        return inds
+
+
+class PolySector( Sector ):
+    """
+     Class for defining a polygon sector.
+     
+     Can be used for 2D Grids for definining a polygon sector.
+    """
+    # x1, y1, x2, y2, ... xn, yn :
+    edges = List( Float ) 
+    
+
+    def contains ( self, pos ):
+        """
+        Queries whether the coordinates in a given array lie within the 
+        ploygon sector. 
+        If no coordinate is inside, the nearest one to the rectangle center
+        is returned if :attr:`~Sector.default_nearest` is True.
+        
+        Parameters
+        ----------
+        pos : array of floats
+            Array with the shape 3x[number of gridpoints] containing the
+            grid positions
+        
+        Returns
+        -------
+        array of bools with as many entries as columns in pos
+            Array indicating which of the given positions lie within the
+            given sector                
+        """
+                
+        poly = Polygon(array(self.edges).reshape(-1,2)[:,0],array(self.edges).reshape(-1,2)[:,1])
+        dists = poly.is_inside(pos[0,:],pos[1,:])   
+        if  self.include_border:
+            inds = dists >= -self.abs_tol
+        else:
+            inds = dists > 0
+            
+        
+        # if none inside, take nearest
+        if ~inds.any() and self.default_nearest:
+            dr2 = array(self.edges).reshape(-1,2).mean(0)
+            inds[argmin(dr2)] = True
+          
+        return inds
+
+class ConvexSector( Sector ):
+    """
+     Class for defining a convex hull sector.
+    
+     Can be used for 2D Grids for definining a convex hull sector.
+    """
+    # x1, y1, x2, y2, ... xn, yn :
+    edges = List( Float ) 
+    
+
+    def contains ( self, pos ):
+        """
+        Queries whether the coordinates in a given array lie within the 
+        convex sector. 
+        If no coordinate is inside, the nearest one to the rectangle center
+        is returned if :attr:`~Sector.default_nearest` is True. 
+        
+        Parameters
+        ----------
+        pos : array of floats
+            Array with the shape 3x[number of gridpoints] containing the
+            grid positions
+        
+        Returns
+        -------
+        array of bools with as many entries as columns in pos
+            Array indicating which of the given positions lie within the
+            given sector                
+        """
+        
+        inds = in_hull(pos[:2,:].T, array(self.edges).reshape(-1,2), \
+                           border = self.include_border ,tol = self.abs_tol)
+        
+        # if none inside, take nearest
+        if ~inds.any() and self.default_nearest:
+            dr2 = array(self.edges).reshape(-1,2).mean(0)
+            inds[argmin(dr2)] = True
+          
+        return inds
+
+
+
+class MultiSector(Sector):
+    """
+    Class for defining a sector consisting of multiple sectors.
+    
+    Can be used to sum over different sectors. Takes a list of sectors
+    and returns the points contained in each sector.
+    
+    """
+    
+    #: List of :class:`acoular.grids.Sector` objects
+    #: to be mixed.
+    sectors = List(Instance(Sector)) 
+    
+    
+    def contains ( self, pos ):
+        """
+        Queries whether the coordinates in a given array lie within any 
+        of the sub-sectors. 
+        
+        Parameters
+        ----------
+        pos : array of floats
+            Array with the shape 3x[number of gridpoints] containing the
+            grid positions
+        
+        Returns
+        -------
+        array of bools with as many entries as columns in pos
+            Array indicating which of the given positions lie within the
+            sectors              
+        """
+        # initialize with only "False" entries
+        inds = zeros(pos.shape[1], dtype=bool)
+        
+        # add points contained in each sector
+        for sec in self.sectors:
+            inds += sec.contains(pos)
+        
+        return inds.astype(bool)
+
+
+
+
+
+
