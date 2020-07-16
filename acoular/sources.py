@@ -21,7 +21,7 @@
 from numpy import array, sqrt, ones, empty, newaxis, uint32, arange, dot, int64
 from traits.api import Float, Int, Property, Trait, Delegate, \
 cached_property, Tuple, CLong, File, Instance, Any, \
-on_trait_change, List, ListInt, CArray, Bool
+on_trait_change, List, ListInt, CArray, Bool, Dict
 from os import path
 from warnings import warn
 
@@ -73,6 +73,10 @@ class TimeSamples( SamplesGenerator ):
     #: HDF5 file object
     h5f = Instance(H5FileBase, transient = True)
     
+    #: Provides metadata stored in HDF5 file object
+    metadata = Dict(
+        desc="metadata contained in .h5 file")
+    
     # Checksum over first data entries of all channels
     _datachecksum = Property()
     
@@ -108,9 +112,21 @@ class TimeSamples( SamplesGenerator ):
                 pass
         file = _get_h5file_class()
         self.h5f = file(self.name)
+        self.load_timedata()
+        self.load_metadata()
+
+    def load_timedata( self ):
+        """ loads timedata from .h5 file. Only for internal use. """
         self.data = self.h5f.get_data_by_reference('time_data')    
         self.sample_freq = self.h5f.get_node_attribute(self.data,'sample_freq')
         (self.numsamples, self.numchannels) = self.data.shape
+
+    def load_metadata( self ):
+        """ loads metadata from .h5 file. Only for internal use. """
+        self.metadata = {}
+        if '/metadata' in self.h5f:
+            for nodename, nodedata in self.h5f.get_child_nodes('/metadata'):
+                self.metadata[nodename] = nodedata
 
     def result(self, num=128):
         """
@@ -219,23 +235,8 @@ class MaskedTimeSamples( TimeSamples ):
         sli = slice(self.start, self.stop).indices(self.numsamples_total)
         return sli[1]-sli[0]
 
-    @on_trait_change('basename')
-    def load_data( self ):
-        #""" open the .h5 file and set attributes
-        #"""
-        if not path.isfile(self.name):
-            # no file there
-            self.numsamples_total = 0
-            self.numchannels_total = 0
-            self.sample_freq = 0
-            raise IOError("No such file: %s" % self.name)
-        if self.h5f != None:
-            try:
-                self.h5f.close()
-            except IOError:
-                pass
-        file = _get_h5file_class()
-        self.h5f = file(self.name)
+    def load_timedata( self ):
+        """ loads timedata from .h5 file. Only for internal use. """
         self.data = self.h5f.get_data_by_reference('time_data')    
         self.sample_freq = self.h5f.get_node_attribute(self.data,'sample_freq')
         (self.numsamples_total, self.numchannels_total) = self.data.shape
