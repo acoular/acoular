@@ -1,19 +1,23 @@
+# -*- coding: utf-8 -*-
+#pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
 #------------------------------------------------------------------------------
-# Copyright (c) 2017, Acoular Development Team.
+# Copyright (c) 2007-2021, Acoular Development Team.
 #------------------------------------------------------------------------------
-# Example script to plot a third-octave band spectrum
+"""
+Implements tools for Acoular.
 
-# The function can be imported into other scripts without 
-# running the example:      from plotband import barspectrum
+.. autosummary::
+    :toctree: generated/
 
+    tools
+"""
 
-###################################################################
-### Helper function for band spectra ###
-
-
-from acoular import synthetic
+from traits.api import HasStrictTraits
 from numpy import array, concatenate, newaxis, where
 from numpy.ma import masked_where
+from .spectra import synthetic
+
+
 def barspectrum(data, fftfreqs, num = 3, bar = True, xoffset = 0.0):
     """
     Returns synthesized frequency band values of spectral data to be plotted
@@ -69,7 +73,6 @@ def barspectrum(data, fftfreqs, num = 3, bar = True, xoffset = 0.0):
     # exponent for band width calculation
     ep = 1. / (2.*num)
     
-    
     # lowest and highest possible center frequencies 
     # for chosen band and sampling frequency
     f_low = fftfreqs[1]*2**ep
@@ -85,7 +88,7 @@ def barspectrum(data, fftfreqs, num = 3, bar = True, xoffset = 0.0):
     else:
         i_high = where(fc > f_high)[0][0]
         
-    # 1/3 octave sound pressure values for first mic
+    # synthesize sound pressure values
     p = array([ synthetic(data, fftfreqs, list(fc[i_low:i_high]), num) ])
  
     if bar:
@@ -160,55 +163,20 @@ def bardata(data, fc, num=3, bar = True, xoffset = 0.0, masked = -360):
 
 
 
-# only execute this example when script is not 
-# imported as module but started explicitely:
-if __name__ == '__main__':
-    ###################################################################
-    ### Defining noise source ###
-    from acoular import WNoiseGenerator, PointSource, PowerSpectra, MicGeom
+class Tools(HasStrictTraits):
+    """
+    This class implements helpful tools of the Acoular package.
+
+    An instance of this class is used to access the individual tools as methods.
+    """
     
-    sfreq= 12800
+    #: function to create data ready for plotting
+    barspectrum = barspectrum
     
-    n1 = WNoiseGenerator(sample_freq = sfreq, 
-                         numsamples = 10*sfreq, 
-                         seed = 1)
+    bardata = bardata
+
+
+tools = Tools()
     
-    m = MicGeom()
-    m.mpos_tot = array([[0,0,0]])
-    
-    t = PointSource(signal = n1, 
-                    mpos = m,  
-                    loc = (1, 0, 1))
-    
-    
-    f = PowerSpectra(time_data = t, 
-                     window = 'Hanning', 
-                     overlap = '50%', 
-                     block_size = 4096)
-    ###################################################################
-    ### Plotting ###
-    from pylab import figure,plot,show,xlim,ylim,xscale,xticks,xlabel,ylabel,grid,real
-    from acoular import L_p              
-    
-                     
-    band = 3 # octave: 1 ;   1/3-octave: 3
-    (f_borders, p, f_center) = barspectrum(real(f.csm[:,0,0]), f.fftfreq(), band)
-    
-    label_freqs = [str(int(_)) for _ in f_center]
-    
-    
-    figure(figsize=(20, 6))
-    
-    plot(f_borders,L_p(p))
-    
-    xlim(f_borders[0]*2**(-1./6),f_borders[-1]*2**(1./6))
-    ylim(40,90)
-    
-    xscale('symlog')
-    xticks(f_center,label_freqs)
-    xlabel('f in Hz')
-    ylabel('SPL in dB')
-    grid(True)
-    show()
 
 
