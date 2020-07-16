@@ -94,4 +94,4 @@ SourceMixer
 from .signals import SineGenerator, WNoiseGenerator, SignalGenerator,\
 PNoiseGenerator, GenericSignalGenerator
 
-from .tools import tools
+from . import tools

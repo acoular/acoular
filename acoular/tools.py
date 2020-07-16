@@ -9,7 +9,8 @@ Implements tools for Acoular.
 .. autosummary::
     :toctree: generated/
 
-    tools
+    barspectrum
+    bardata
 """
 
 from traits.api import HasStrictTraits
@@ -160,23 +161,4 @@ def bardata(data, fc, num=3, bar = True, xoffset = 0.0, masked = -360):
     if masked > -360:
         plist = masked_where(plist <= masked, plist)
     return (flulist, plist)
-
-
-
-class Tools(HasStrictTraits):
-    """
-    This class implements helpful tools of the Acoular package.
-
-    An instance of this class is used to access the individual tools as methods.
-    """
-    
-    #: function to create data ready for plotting
-    barspectrum = barspectrum
-    
-    bardata = bardata
-
-
-tools = Tools()
-    
-
 
