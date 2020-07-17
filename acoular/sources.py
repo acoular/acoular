@@ -235,6 +235,26 @@ class MaskedTimeSamples( TimeSamples ):
         sli = slice(self.start, self.stop).indices(self.numsamples_total)
         return sli[1]-sli[0]
 
+    @on_trait_change('basename')
+    def load_data( self ):
+        #""" open the .h5 file and set attributes
+        #"""
+        if not path.isfile(self.name):
+            # no file there
+            self.numsamples_total = 0
+            self.numchannels_total = 0
+            self.sample_freq = 0
+            raise IOError("No such file: %s" % self.name)
+        if self.h5f != None:
+            try:
+                self.h5f.close()
+            except IOError:
+                pass
+        file = _get_h5file_class()
+        self.h5f = file(self.name)
+        self.load_timedata()
+        self.load_metadata()
+
     def load_timedata( self ):
         """ loads timedata from .h5 file. Only for internal use. """
         self.data = self.h5f.get_data_by_reference('time_data')    
