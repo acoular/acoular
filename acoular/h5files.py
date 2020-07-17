@@ -136,6 +136,9 @@ if is_h5py:
         def _get_in_file_path(self,nodename,group=None):
             if not group: return '/'+nodename
             else: return group+'/'+nodename
+
+        def create_array(self,where, name, obj):
+            self.create_dataset(f'{where}/{name}',data=obj)
                   
         def create_extendable_array(self,nodename,shape,precision,group=None):
             in_file_path = self._get_in_file_path(nodename,group)
@@ -170,6 +173,7 @@ if is_h5py:
         def get_child_nodes(self, nodename):
             for childnode in self[nodename]:
                 yield (childnode, self[f'{nodename}/{childnode}'])
+
 
     class H5CacheFileH5py(H5CacheFileBase, H5FileH5py):
 

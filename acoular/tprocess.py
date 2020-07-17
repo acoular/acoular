@@ -1653,6 +1653,10 @@ class WriteH5( TimeInOut ):
     precision = Trait('float32', 'float64', 
                       desc="precision of H5 File")
 
+    #: Metadata to be stored in HDF5 file object
+    metadata = Dict(
+        desc="metadata to be stored in .h5 file")
+
     @cached_property
     def _get_digest( self ):
         return digest(self)
@@ -1670,6 +1674,7 @@ class WriteH5( TimeInOut ):
                 'time_data', (0, self.numchannels), self.precision)
         ac = f5h.get_data_by_reference('time_data')
         f5h.set_node_attribute(ac,'sample_freq',self.sample_freq)
+        self.add_metadata(f5h)
         return f5h
         
     def save(self):
@@ -1682,6 +1687,14 @@ class WriteH5( TimeInOut ):
         for data in self.source.result(4096):
             f5h.append_data(ac,data)
         f5h.close()
+
+    def add_metadata(self, f5h):
+        """ adds metadata to .h5 file """
+        nitems = len(self.metadata.items())
+        if nitems > 0:
+            f5h.create_new_group("metadata","/")
+            for key, value in self.metadata.items():
+                f5h.create_array('/metadata',key, value)
 
     def result(self, num):
         """ 
