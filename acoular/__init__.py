@@ -93,3 +93,5 @@ TimeSamples, MaskedTimeSamples, PointSourceDipole, UncorrelatedNoiseSource, \
 SourceMixer
 from .signals import SineGenerator, WNoiseGenerator, SignalGenerator,\
 PNoiseGenerator, GenericSignalGenerator
+
+from . import tools
