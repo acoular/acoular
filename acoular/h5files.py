@@ -46,6 +46,10 @@ class H5FileBase(object):
     def create_new_group(self,name,group=None):
         pass
 
+    def get_node_children(self, group):
+        yield
+
+
 class H5CacheFileBase(object):
     '''
     Base class for File objects that handle writing and reading of .h5 cache files 
@@ -101,6 +105,9 @@ if is_tables:
             if not group: group = self.root
             return self.create_group(group,name)
 
+        def get_child_nodes(self, nodename):
+            for childnode in self.list_nodes(nodename):
+                yield (childnode.name, childnode)
 
 
     class H5CacheFileTables(H5FileTables, H5CacheFileBase):
@@ -129,6 +136,9 @@ if is_h5py:
         def _get_in_file_path(self,nodename,group=None):
             if not group: return '/'+nodename
             else: return group+'/'+nodename
+
+        def create_array(self,where, name, obj):
+            self.create_dataset(f'{where}/{name}',data=obj)
                   
         def create_extendable_array(self,nodename,shape,precision,group=None):
             in_file_path = self._get_in_file_path(nodename,group)
@@ -160,6 +170,9 @@ if is_h5py:
             self.create_group(in_file_path)    
             return in_file_path
 
+        def get_child_nodes(self, nodename):
+            for childnode in self[nodename]:
+                yield (childnode, self[f'{nodename}/{childnode}'])
 
 
     class H5CacheFileH5py(H5CacheFileBase, H5FileH5py):
