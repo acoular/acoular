@@ -11,7 +11,7 @@ def digest( obj, name='digest'):
         vobj = obj
         try:
             for i in do_.split('.'):               
-                vobj = list(vobj.get(i.rstrip('[]')).values())[0]
+                vobj = list(vobj.trait_get(i.rstrip('[]')).values())[0]
             str_.append(str(vobj).encode("UTF-8"))
         except:
             pass
