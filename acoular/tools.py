@@ -24,7 +24,7 @@ def return_result(source, nmax=-1, num=128):
     """
     Collects the output from a 
     :meth:`SamplesGenerator.result()<acoular.tprocess.SamplesGenerator.result`
-    generator and returns an assembled array with the all the data.
+    generator and returns an assembled array with all the data.
    
     Parameters
     ----------
@@ -32,9 +32,8 @@ def return_result(source, nmax=-1, num=128):
         This is the data source.
     nmax: integer
         With this parameter, a maximum number of output samples can be set 
-        (first dimension of array). This overrides the `num` parameter.
-        If set to -1 (default), samples are collected as long as the 
-        generator yields them.
+        (first dimension of array). If set to -1 (default), samples are 
+        collected as long as the generator yields them.
     num : integer
         This parameter defines the size of the blocks that are fetched.
         Defaults to 128.
@@ -45,9 +44,13 @@ def return_result(source, nmax=-1, num=128):
         Array that holds all the data.
     """
     if nmax > 0: 
-        return next(source.result(nmax))
+        nblocks = (nmax-1) // num + 1
+        return concatenate( 
+                      list( res for _, res in 
+                            zip(range(nblocks), 
+                                source.result(num)) ) )[:nmax]
     else:
-        return concatenate([p for p in source.result(num)])
+        return concatenate(list(source.result(num)))
 
 
 
