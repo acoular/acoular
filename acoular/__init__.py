@@ -72,7 +72,7 @@ BeamformerCleant, BeamformerCleantSq, BeamformerCleantTraj, BeamformerCleantSqTr
 from .tprocess import SamplesGenerator, TimeInOut, MaskedTimeInOut, ChannelMixer, \
 Mixer, TimeAverage, TimeReverse, TimePower, FiltFiltOctave, FiltOctave, TimeCache, \
 WriteWAV, WriteH5, SpatialInterpolator, SpatialInterpolatorRotation, Trigger, \
-SampleSplitter, AngleTracker, SpatialInterpolatorConstantRotation
+SampleSplitter, AngleTracker, SpatialInterpolatorConstantRotation, Filter
 
 from .calib import Calib
 from .trajectory import Trajectory

@@ -1352,6 +1352,42 @@ class TimeReverse( TimeInOut ):
             temp[:nsh] = h[nsh-1::-1]
         yield temp[:nsh]
         
+class Filter(TimeInOut):
+    """
+    Abstract base class for IIR filters based on scipy lfilter
+    implements a filter with coefficients that may be changed
+    during processing
+    
+    Should not be instanciated by itself
+    """
+    #: Filter coefficients
+    ba = Property()
+
+    def result(self, num):
+        """ 
+        Python generator that yields the output block-wise.
+
+        
+        Parameters
+        ----------
+        num : integer
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block).
+        
+        Returns
+        -------
+        Samples in blocks of shape (num, numchannels). 
+            Delivers the bandpass filtered output of source.
+            The last block may be shorter than num.
+        """
+        b, a = self.ba
+        zi = zeros((max(len(a), len(b))-1, self.source.numchannels))
+        for block in self.source.result(num):
+            b, a = self.ba # this line is useful in case of changes 
+                            # to self.ba during generator lifetime
+            block, zi = lfilter(b, a, block, axis=0, zi=zi)
+            yield block
+
 class FiltFiltOctave( TimeInOut ):
     """
     Octave or third-octave filter with zero phase delay.
