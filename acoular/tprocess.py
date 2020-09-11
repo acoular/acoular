@@ -31,7 +31,7 @@
 # imports from other packages
 from numpy import array, empty, empty_like, pi, sin, sqrt, zeros, newaxis, unique, \
 int16, nan, concatenate, sum, float64, identity, argsort, interp, arange, append, \
-linspace, flatnonzero, argmin, argmax, delete, mean, inf, asarray, stack, sinc
+linspace, flatnonzero, argmin, argmax, delete, mean, inf, asarray, stack, sinc, exp
 
 from numpy.matlib import repmat
 
@@ -1513,6 +1513,35 @@ class FiltOctave( Filter ):
         om1 = fr/alpha 
         om2 = fr*alpha
         return butter(self.order, [om1, om2], 'bandpass') 
+
+class TimeExpAverage(Filter):
+    """
+    Computes exponential averaging according to IEC 61672-1
+    time constant: F -> 125 ms, S -> 1 s
+    I (non-standard) -> 35 ms 
+    """
+
+    #: time weighting
+    weight = Trait('F', {'F':0.125, 'S':1.0, 'I':0.035}, 
+        desc = "time weighting")    
+
+    ba = Property( depends_on = ['weight', 'source.digest'])
+       
+    # internal identifier
+    digest = Property( depends_on = ['source.digest', '__class__', \
+        'weight'])
+
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+        
+    @cached_property
+    def _get_ba( self ):
+        alpha = 1-exp(-1/self.weight_/self.sample_freq)
+        a = [1, alpha-1]
+        b = [alpha]
+        return b,a 
+
 
                       
 class TimeCache( TimeInOut ):

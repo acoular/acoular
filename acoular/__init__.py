@@ -72,8 +72,8 @@ BeamformerCleant, BeamformerCleantSq, BeamformerCleantTraj, BeamformerCleantSqTr
 from .tprocess import SamplesGenerator, TimeInOut, MaskedTimeInOut, ChannelMixer, \
 Mixer, TimeAverage, TimeReverse, TimePower, FiltFiltOctave, FiltOctave, TimeCache, \
 WriteWAV, WriteH5, SpatialInterpolator, SpatialInterpolatorRotation, Trigger, \
-SampleSplitter, AngleTracker, SpatialInterpolatorConstantRotation, Filter
-
+SampleSplitter, AngleTracker, SpatialInterpolatorConstantRotation, Filter, \
+TimeExpAverage
 from .calib import Calib
 from .trajectory import Trajectory
 from .grids import Grid, RectGrid, RectGrid3D, Sector,RectSector,CircSector,\
