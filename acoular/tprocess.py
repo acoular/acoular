@@ -1472,35 +1472,49 @@ class FiltFiltOctave( TimeInOut ):
             yield data[j:j+num]
             j += num
 
-class FiltOctave( FiltFiltOctave ):
+
+class FiltOctave( Filter ):
     """
-    Octave or third-octave filter (not zero-phase).
+    Octave or third-octave filter (causal, non-zero phase delay).    
     """
-
-    def result(self, num):
-        """ 
-        Python generator that yields the output block-wise.
-
+    #: Band center frequency; defaults to 1000.
+    band = Float(1000.0, 
+        desc = "band center frequency")
         
-        Parameters
-        ----------
-        num : integer
-            This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block).
-        
-        Returns
-        -------
-        Samples in blocks of shape (num, numchannels). 
-            Delivers the bandpass filtered output of source.
-            The last block may be shorter than num.
-        """
-        b, a = self.ba(3) # filter order = 3
-        zi = zeros((max(len(a), len(b))-1, self.source.numchannels))
-        for block in self.source.result(num):
-            block, zi = lfilter(b, a, block, axis=0, zi=zi)
-            yield block
+    #: Octave fraction: 'Octave' or 'Third octave'; defaults to 'Octave'.
+    fraction = Trait('Octave', {'Octave':1, 'Third octave':3}, 
+        desc = "fraction of octave")
 
-                       
+    #: Filter order
+    order = Int(3, desc = "IIR filter order")
+        
+    ba = Property( depends_on = ['band', 'fraction', 'source.digest', 'order'])
+
+    # internal identifier
+    digest = Property( depends_on = ['source.digest', '__class__', \
+        'band', 'fraction','order'])
+
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+        
+    @cached_property
+    def _get_ba( self ):
+        # filter design
+        fs = self.sample_freq
+        # adjust filter edge frequencies
+        beta = pi/(4*self.order)
+        alpha = pow(2.0, 1.0/(2.0*self.fraction_))
+        beta = 2 * beta / sin(beta) / (alpha-1/alpha)
+        alpha = (1+sqrt(1+beta*beta))/beta
+        fr = 2*self.band/fs
+        if fr > 1/sqrt(2):
+            raise ValueError("band frequency too high:%f,%f" % (self.band, fs))
+        om1 = fr/alpha 
+        om2 = fr*alpha
+        return butter(self.order, [om1, om2], 'bandpass') 
+
+                      
 class TimeCache( TimeInOut ):
     """
     Caches time signal in cache file.
