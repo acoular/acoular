@@ -31,12 +31,14 @@
 # imports from other packages
 from numpy import array, empty, empty_like, pi, sin, sqrt, zeros, newaxis, unique, \
 int16, nan, concatenate, sum, float64, identity, argsort, interp, arange, append, \
-linspace, flatnonzero, argmin, argmax, delete, mean, inf, asarray, stack, sinc, exp
+linspace, flatnonzero, argmin, argmax, delete, mean, inf, asarray, stack, sinc, exp, \
+polymul
 
 from numpy.matlib import repmat
 
 from scipy.spatial import Delaunay
-from scipy.interpolate import LinearNDInterpolator,splrep, splev, CloughTocher2DInterpolator, CubicSpline, Rbf
+from scipy.interpolate import LinearNDInterpolator,splrep, splev, \
+CloughTocher2DInterpolator, CubicSpline, Rbf
 from traits.api import HasPrivateTraits, Float, Int, CLong, Bool, ListInt, \
 Constant, File, Property, Instance, Trait, Delegate, \
 cached_property, on_trait_change, List, CArray, Dict
@@ -44,7 +46,7 @@ cached_property, on_trait_change, List, CArray, Dict
 from datetime import datetime
 from os import path
 import wave
-from scipy.signal import butter, lfilter, filtfilt
+from scipy.signal import butter, lfilter, filtfilt, bilinear
 from warnings import warn
 from collections import deque
 from inspect import currentframe
@@ -1542,7 +1544,45 @@ class TimeExpAverage(Filter):
         b = [alpha]
         return b,a 
 
+class FiltFreqWeight( Filter ):
+    """
+    Frequency weighting filter accoring to IEC 61672
+    """
+    #: weighting characteristics
+    weight = Trait('A',('A','C','Z'), desc="frequency weighting")
 
+    ba = Property( depends_on = ['weight', 'source.digest'])
+
+    # internal identifier
+    digest = Property( depends_on = ['source.digest', '__class__'])
+
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+
+    @cached_property
+    def _get_ba( self ):
+        # s domain coefficients
+        f1 = 20.598997
+        f2 = 107.65265
+        f3 = 737.86223
+        f4 = 12194.217
+        a = polymul([1, 4*pi * f4, (2*pi * f4)**2],
+                    [1, 4*pi * f1, (2*pi * f1)**2])
+        if self.weight == 'A':
+            a = polymul(polymul(a, [1, 2*pi * f3]), [1, 2*pi * f2])
+            b = [(2*pi * f4)**2 * 10**(1.9997/20) , 0, 0, 0, 0]
+            b,a = bilinear(b,a,self.sample_freq)
+        elif self.weight == 'C':
+            b = [(2*pi * f4)**2 * 10**(0.0619/20) , 0, 0]
+            b,a = bilinear(b,a,self.sample_freq)
+            b = append(b,zeros(2)) # make 6th order
+            a = append(a,zeros(2))
+        else:
+            b = zeros(7)
+            b[0] = 1.0
+            a = b # 6th order flat response
+        return b,a
                       
 class TimeCache( TimeInOut ):
     """
