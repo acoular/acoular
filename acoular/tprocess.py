@@ -20,8 +20,11 @@
     TimePower
     TimeAverage
     TimeReverse
+    Filter
     FiltFiltOctave
     FiltOctave
+    TimeExpAverage
+    FiltFreqWeight
     TimeCache
     WriteWAV
     WriteH5
@@ -31,12 +34,14 @@
 # imports from other packages
 from numpy import array, empty, empty_like, pi, sin, sqrt, zeros, newaxis, unique, \
 int16, nan, concatenate, sum, float64, identity, argsort, interp, arange, append, \
-linspace, flatnonzero, argmin, argmax, delete, mean, inf, asarray, stack, sinc
+linspace, flatnonzero, argmin, argmax, delete, mean, inf, asarray, stack, sinc, exp, \
+polymul
 
 from numpy.matlib import repmat
 
 from scipy.spatial import Delaunay
-from scipy.interpolate import LinearNDInterpolator,splrep, splev, CloughTocher2DInterpolator, CubicSpline, Rbf
+from scipy.interpolate import LinearNDInterpolator,splrep, splev, \
+CloughTocher2DInterpolator, CubicSpline, Rbf
 from traits.api import HasPrivateTraits, Float, Int, CLong, Bool, ListInt, \
 Constant, File, Property, Instance, Trait, Delegate, \
 cached_property, on_trait_change, List, CArray, Dict
@@ -44,7 +49,7 @@ cached_property, on_trait_change, List, CArray, Dict
 from datetime import datetime
 from os import path
 import wave
-from scipy.signal import butter, lfilter, filtfilt
+from scipy.signal import butter, lfilter, filtfilt, bilinear
 from warnings import warn
 from collections import deque
 from inspect import currentframe
@@ -1352,6 +1357,45 @@ class TimeReverse( TimeInOut ):
             temp[:nsh] = h[nsh-1::-1]
         yield temp[:nsh]
         
+class Filter(TimeInOut):
+    """
+    Abstract base class for IIR filters based on scipy lfilter
+    implements a filter with coefficients that may be changed
+    during processing
+    
+    Should not be instanciated by itself
+    """
+    #: Filter coefficients
+    ba = Property()
+
+    def _get_ba( self ):
+        return [1],[1]
+
+    def result(self, num):
+        """ 
+        Python generator that yields the output block-wise.
+
+        
+        Parameters
+        ----------
+        num : integer
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block).
+        
+        Returns
+        -------
+        Samples in blocks of shape (num, numchannels). 
+            Delivers the bandpass filtered output of source.
+            The last block may be shorter than num.
+        """
+        b, a = self.ba
+        zi = zeros((max(len(a), len(b))-1, self.source.numchannels))
+        for block in self.source.result(num):
+            b, a = self.ba # this line is useful in case of changes 
+                            # to self.ba during generator lifetime
+            block, zi = lfilter(b, a, block, axis=0, zi=zi)
+            yield block
+
 class FiltFiltOctave( TimeInOut ):
     """
     Octave or third-octave filter with zero phase delay.
@@ -1436,35 +1480,116 @@ class FiltFiltOctave( TimeInOut ):
             yield data[j:j+num]
             j += num
 
-class FiltOctave( FiltFiltOctave ):
+
+class FiltOctave( Filter ):
     """
-    Octave or third-octave filter (not zero-phase).
+    Octave or third-octave filter (causal, non-zero phase delay).    
+    """
+    #: Band center frequency; defaults to 1000.
+    band = Float(1000.0, 
+        desc = "band center frequency")
+        
+    #: Octave fraction: 'Octave' or 'Third octave'; defaults to 'Octave'.
+    fraction = Trait('Octave', {'Octave':1, 'Third octave':3}, 
+        desc = "fraction of octave")
+
+    #: Filter order
+    order = Int(3, desc = "IIR filter order")
+        
+    ba = Property( depends_on = ['band', 'fraction', 'source.digest', 'order'])
+
+    # internal identifier
+    digest = Property( depends_on = ['source.digest', '__class__', \
+        'band', 'fraction','order'])
+
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+        
+    @cached_property
+    def _get_ba( self ):
+        # filter design
+        fs = self.sample_freq
+        # adjust filter edge frequencies
+        beta = pi/(4*self.order)
+        alpha = pow(2.0, 1.0/(2.0*self.fraction_))
+        beta = 2 * beta / sin(beta) / (alpha-1/alpha)
+        alpha = (1+sqrt(1+beta*beta))/beta
+        fr = 2*self.band/fs
+        if fr > 1/sqrt(2):
+            raise ValueError("band frequency too high:%f,%f" % (self.band, fs))
+        om1 = fr/alpha 
+        om2 = fr*alpha
+        return butter(self.order, [om1, om2], 'bandpass') 
+
+class TimeExpAverage(Filter):
+    """
+    Computes exponential averaging according to IEC 61672-1
+    time constant: F -> 125 ms, S -> 1 s
+    I (non-standard) -> 35 ms 
     """
 
-    def result(self, num):
-        """ 
-        Python generator that yields the output block-wise.
+    #: time weighting
+    weight = Trait('F', {'F':0.125, 'S':1.0, 'I':0.035}, 
+        desc = "time weighting")    
 
-        
-        Parameters
-        ----------
-        num : integer
-            This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block).
-        
-        Returns
-        -------
-        Samples in blocks of shape (num, numchannels). 
-            Delivers the bandpass filtered output of source.
-            The last block may be shorter than num.
-        """
-        b, a = self.ba(3) # filter order = 3
-        zi = zeros((max(len(a), len(b))-1, self.source.numchannels))
-        for block in self.source.result(num):
-            block, zi = lfilter(b, a, block, axis=0, zi=zi)
-            yield block
+    ba = Property( depends_on = ['weight', 'source.digest'])
+       
+    # internal identifier
+    digest = Property( depends_on = ['source.digest', '__class__', \
+        'weight'])
 
-                       
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+        
+    @cached_property
+    def _get_ba( self ):
+        alpha = 1-exp(-1/self.weight_/self.sample_freq)
+        a = [1, alpha-1]
+        b = [alpha]
+        return b,a 
+
+class FiltFreqWeight( Filter ):
+    """
+    Frequency weighting filter accoring to IEC 61672
+    """
+    #: weighting characteristics
+    weight = Trait('A',('A','C','Z'), desc="frequency weighting")
+
+    ba = Property( depends_on = ['weight', 'source.digest'])
+
+    # internal identifier
+    digest = Property( depends_on = ['source.digest', '__class__'])
+
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+
+    @cached_property
+    def _get_ba( self ):
+        # s domain coefficients
+        f1 = 20.598997
+        f2 = 107.65265
+        f3 = 737.86223
+        f4 = 12194.217
+        a = polymul([1, 4*pi * f4, (2*pi * f4)**2],
+                    [1, 4*pi * f1, (2*pi * f1)**2])
+        if self.weight == 'A':
+            a = polymul(polymul(a, [1, 2*pi * f3]), [1, 2*pi * f2])
+            b = [(2*pi * f4)**2 * 10**(1.9997/20) , 0, 0, 0, 0]
+            b,a = bilinear(b,a,self.sample_freq)
+        elif self.weight == 'C':
+            b = [(2*pi * f4)**2 * 10**(0.0619/20) , 0, 0]
+            b,a = bilinear(b,a,self.sample_freq)
+            b = append(b,zeros(2)) # make 6th order
+            a = append(a,zeros(2))
+        else:
+            b = zeros(7)
+            b[0] = 1.0
+            a = b # 6th order flat response
+        return b,a
+                      
 class TimeCache( TimeInOut ):
     """
     Caches time signal in cache file.
