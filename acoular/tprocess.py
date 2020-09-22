@@ -20,8 +20,11 @@
     TimePower
     TimeAverage
     TimeReverse
+    Filter
     FiltFiltOctave
     FiltOctave
+    TimeExpAverage
+    FiltFreqWeight
     TimeCache
     WriteWAV
     WriteH5
@@ -1364,6 +1367,9 @@ class Filter(TimeInOut):
     """
     #: Filter coefficients
     ba = Property()
+
+    def _get_ba( self ):
+        return [[1],[1]]
 
     def result(self, num):
         """ 
