@@ -35,7 +35,7 @@
 from numpy import array, empty, empty_like, pi, sin, sqrt, zeros, newaxis, unique, \
 int16, nan, concatenate, sum, float64, identity, argsort, interp, arange, append, \
 linspace, flatnonzero, argmin, argmax, delete, mean, inf, asarray, stack, sinc, exp, \
-polymul
+polymul, arange, cumsum
 
 from numpy.matlib import repmat
 
@@ -1271,7 +1271,7 @@ class TimePower( TimeInOut ):
     
 class TimeAverage( TimeInOut ) :
     """
-    Calculates time-depended average of the signal
+    Calculates time-dependent average of the signal
     """
     #: Number of samples to average over, defaults to 64.
     naverage = Int(64, 
@@ -1323,7 +1323,38 @@ class TimeAverage( TimeInOut ) :
             nso = int(ns/nav)
             if nso > 0:
                 yield temp[:nso*nav].reshape((nso, -1, nc)).mean(axis=1)
-                
+
+class TimeCumAverage( TimeInOut):
+    """
+    Calculates cumulative average of the signal, useful for Leq
+    """
+    def result(self, num):
+        """
+        Python generator that yields the output block-wise.
+
+        
+        Parameters
+        ----------
+        num : integer
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block).
+        
+        Returns
+        -------
+        Cumulative average of the output of source. 
+            Yields samples in blocks of shape (num, numchannels). 
+            The last block may be shorter than num.
+        """
+        count = (arange(num) + 1)[:,newaxis]
+        for i,temp in enumerate(self.source.result(num)):
+            ns, nc = temp.shape
+            if not i:
+                accu = zeros((1,nc))
+            temp = (accu*(count[0]-1) + cumsum(temp,axis=0))/count[:ns]
+            accu = temp[-1]
+            count += ns
+            yield temp
+        
 class TimeReverse( TimeInOut ):
     """
     Calculates the time-reversed signal of a source. 
