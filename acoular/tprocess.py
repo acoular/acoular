@@ -1620,7 +1620,118 @@ class FiltFreqWeight( Filter ):
             b[0] = 1.0
             a = b # 6th order flat response
         return b,a
-                      
+
+class FilterBank(TimeInOut):
+    """
+    Abstract base class for IIR filter banks based on scipy lfilter
+    implements a bank of parallel filters 
+    
+    Should not be instanciated by itself
+    """
+
+    #: List of filter coefficients for all filters
+    ba = Property()
+
+    #: List of labels for bands
+    bands = Property()
+
+    #: Number of bands
+    numbands = Property()
+
+    #: Number of bands
+    numchannels = Property()
+
+    def _get_ba( self ):
+        return [[1]],[[1]]
+
+    def _get_bands( self ):
+        return ['']
+
+    def _get_numbands( self ):
+        return 0
+
+    def _get_numchannels( self ):
+        return self.numbands*self.source.numchannels
+
+    def result(self, num):
+        """ 
+        Python generator that yields the output block-wise.
+        
+        Parameters
+        ----------
+        num : integer
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block).
+        
+        Returns
+        -------
+        Samples in blocks of shape (num, numchannels). 
+            Delivers the bandpass filtered output of source.
+            The last block may be shorter than num.
+        """
+        numbands = self.numbands
+        snumch = self.source.numchannels
+        b, a = self.ba
+        zi = [zeros( (max(len(a[0]), len(b[0]))-1, snumch)) for _ in range(numbands)]
+        res = zeros((num,self.numchannels),dtype='float')
+        for block in self.source.result(num):
+            bl = block.shape[0]
+            for i in range(numbands):
+                res[:,i*snumch:(i+1)*snumch], zi[i] = lfilter(b[i], a[i], block, axis=0, zi=zi[i])
+            yield res
+
+class OctaveFilterBank(FilterBank):
+    """
+    Octave or third-octave filter bank
+    """
+    #: Lowest band center frequency index; defaults to 21 (=125 Hz).
+    lband = Int(21, 
+        desc = "lowest band center frequency index")
+
+    #: Lowest band center frequency index + 1; defaults to 40 (=8000 Hz).
+    hband = Int(40, 
+        desc = "lowest band center frequency index")
+        
+    #: Octave fraction: 'Octave' or 'Third octave'; defaults to 'Octave'.
+    fraction = Trait('Octave', {'Octave':1, 'Third octave':3}, 
+        desc = "fraction of octave")
+
+    #: List of filter coefficients for all filters
+    ba = Property( depends_on = ['lband', 'hband', 'fraction', 'source.digest'])
+
+    #: List of labels for bands
+    bands = Property(depends_on = ['lband', 'hband', 'fraction'])
+
+    #: Number of bands
+    numbands = Property(depends_on = ['lband', 'hband', 'fraction'])
+    
+        # internal identifier
+    digest = Property( depends_on = ['source.digest', '__class__', \
+        'lband','hband','fraction','order'])
+
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+
+    @cached_property
+    def _get_bands( self ):
+        return [10**(i/10) for i in range(self.lband,self.hband,4-self.fraction_)]
+
+    @cached_property
+    def _get_numbands( self ):
+        return len(self.bands)
+
+    @cached_property
+    def _get_ba( self ):
+        of = FiltOctave(source=self.source, fraction=self.fraction)
+        b, a = [], []
+        for i in range(self.lband,self.hband,4-self.fraction_):
+            of.band = 10**(i/10)
+            b_,a_ = of.ba
+            b.append(b_)
+            a.append(a_)
+        return b, a
+
 class TimeCache( TimeInOut ):
     """
     Caches time signal in cache file.
