@@ -1727,7 +1727,6 @@ class OctaveFilterBank(FilterBank):
         b, a = [], []
         for i in range(self.lband,self.hband,4-self.fraction_):
             of.band = 10**(i/10)
-            print(of.band)
             b_,a_ = of.ba
             b.append(b_)
             a.append(a_)
