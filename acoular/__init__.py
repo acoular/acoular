@@ -65,6 +65,11 @@ try:
 except:
     pass
 
+try:
+    from .sdinput import SoundDeviceSamplesGenerator
+except:
+    pass
+
 from .h5cache import td_dir, cache_dir
 from .tbeamform import IntegratorSectorTime, \
 BeamformerTime, BeamformerTimeSq, BeamformerTimeTraj, BeamformerTimeSqTraj,\
