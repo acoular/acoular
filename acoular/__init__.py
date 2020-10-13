@@ -100,3 +100,5 @@ from .signals import SineGenerator, WNoiseGenerator, SignalGenerator,\
 PNoiseGenerator, GenericSignalGenerator
 
 from . import tools
+
+from .demo import acoular_demo
