@@ -2,7 +2,7 @@
 #minimal script to install and run acoular tests on linux
 
 #unused docker image
-#image: "python:3.7"
+#image: "python:3.8"
 
 before_script: 
   #create and activate the compute0 python 3 env
@@ -15,7 +15,7 @@ before_script:
   
 after_script: 
   # delete the test enviroment 
-  - conda env remove --name test_py37
+  - conda env remove --name test_py38
   
 stages:
   - build
