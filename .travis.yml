@@ -4,16 +4,14 @@ language: python
 matrix:
   include:
       #### Testing Linux ####
-    # Python 2 support will be dropped
-    #- name: "Python 2.7 on Xenial Linux"
-    #  python: 2.7    
-    # Python 3.5 support will be dropped
-    #- name: "Python 3.5 on Xenial Linux"
-    #  python: 3.5           # this works only for Linux 
+    # Python 2 support  dropped
+    # Python 3.5 support dropped
     - name: "Python 3.6 on Xenial Linux"
-      python: 3.6           
+      python: 3.6      # this works only for Linux      
     - name: "Python 3.7 on Xenial Linux"
       python: 3.7
+    - name: "Python 3.8 on Xenial Linux"
+      python: 3.78
       #### Testing OSX ####
     - name: "Python 3.7 on macOS"
       os: osx

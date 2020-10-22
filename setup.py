@@ -7,7 +7,7 @@ from setuptools import setup
 from os.path import join, abspath, dirname
 import os
 
-bf_version = "20.02"
+bf_version = "20.10"
 bf_author = "Acoular Development Team"
 
 
@@ -51,9 +51,9 @@ setup(name="acoular",
       'Intended Audience :: Science/Research',
       'Topic :: Scientific/Engineering :: Physics',
       'License :: OSI Approved :: BSD License',
-      'Programming Language :: Python :: 3.5',
       'Programming Language :: Python :: 3.6',
       'Programming Language :: Python :: 3.7',
+      'Programming Language :: Python :: 3.8',
       ],
       keywords='acoustic beamforming microphone array',
       packages = ['acoular'],
