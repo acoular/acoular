@@ -2,20 +2,20 @@
 #minimal script to install and run acoular tests on linux
 
 #unused docker image
-#image: "python:3.7"
+#image: "python:3.8"
 
 before_script: 
   #create and activate the compute0 python 3 env
   - conda config --set always_yes yes --set changeps1 no
-  - conda create -n test_py37 python=3.7
-  - source activate test_py37
-  - conda install gcc
+  - conda create -n test_py38 python=3.8
+  - source activate test_py38
+  - conda install gcc_linux-64
   - python3 --version
   - uname -a
   
 after_script: 
   # delete the test enviroment 
-  - conda env remove --name test_py37
+  - conda env remove --name test_py38
   
 stages:
   - build
