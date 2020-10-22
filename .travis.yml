@@ -15,6 +15,12 @@ matrix:
     - name: "Python 3.7 on Xenial Linux"
       python: 3.7
       #### Testing OSX ####
+    - name: "Python 3.8 on macOS"
+      os: osx
+      osx_image: xcode12  # Python 3.7 running on macOS 10.14.3
+      language: shell       # 'language: python' is an error on Travis CI macOS
+      # python: 3.7         # 'python:' is ignored on Travis CI macOS
+      before_install: python3 --version ; pip3 --version ; sw_vers
     - name: "Python 3.7 on macOS"
       os: osx
       osx_image: xcode11  # Python 3.7 running on macOS 10.14.3
