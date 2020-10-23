@@ -100,5 +100,3 @@ from .signals import SineGenerator, WNoiseGenerator, SignalGenerator,\
 PNoiseGenerator, GenericSignalGenerator
 
 from . import tools
-
-from . import demo
