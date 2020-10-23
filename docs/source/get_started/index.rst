@@ -5,19 +5,14 @@ The Acoular library is based on the Python programming language. While a basic k
 
 Prerequisites
 -------------
-This "Getting started" tutorial assumes that the Acoular library is :doc:`installed<../install/index>` together with its dependencies and matplotlib, and that the demo finished successfully. If you did not run the demo yet, you should do so by typing into your command line
+This "Getting started" tutorial assumes that the Acoular library is :doc:`installed<../install/index>` together with its dependencies and matplotlib, and that the demo finished successfully. If you did not run the demo yet, you should do so by typing into your python console
 
 .. code-block:: console
 
-    $ acoular_demo.py
+    > import acoular
+    > acoular.demo.acoular_demo.run()
 
-under Linux or Mac, and
-
-.. code-block:: console
-
-    > acoular_demo.exe
-
-under Windows respectively. This should, after some seconds, produce two pictures (a 64 microphone arrangement and a beamforming map with three sources). You may close the pictures in order to continue. 
+This should, after some seconds, produce two pictures (a 64 microphone arrangement and a beamforming map with three sources). You may close the pictures in order to continue. 
 
 Apart from showing that everything works well, the demo also produced some data to work on. You should now have a **file 'three_sources.h5' (13MB)** in your working directory.
 
