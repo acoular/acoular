@@ -80,7 +80,7 @@ If the installation has finished, you may try out Acoular by importing the modul
 .. code-block:: console
 
     > import acoular
-    > acoular.acoular_demo.run()
+    > acoular.demo.acoular_demo.run()
 
 After some seconds, this should produce two pictures (a 64 microphone arrangement and a beamforming map with three sources).
 
