@@ -101,4 +101,4 @@ PNoiseGenerator, GenericSignalGenerator
 
 from . import tools
 
-from .demo import acoular_demo
+from . import demo
