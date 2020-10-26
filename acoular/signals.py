@@ -181,10 +181,38 @@ class SineGenerator( SignalGenerator ):
     #: Sine wave phase (in radians), float, defaults to 0.0.
     phase = Float(0.0, 
         desc="Phase")
-        
+
+    # Internal shadow trait for rms/amplitude values.
+    # Do not set directly.
+    _amp = Float(1.0)
+    
+    #: RMS of source signal (for point source: in 1 m distance).
+    #: Deprecated. For amplitude use :attr:`amplitude`.
+    rms = Property(desc='rms amplitude')
+    
+    def _get_rms(self):
+        return self._amp/2**0.5
+    
+    def _set_rms(self, rms):
+        warn("Up to Acoular 20.02, rms is interpreted as sine amplitude. "
+             "This has since been corrected (rms now is 1/sqrt(2) of amplitude). "
+             "Use 'amplitude' trait to directly set the ampltiude.", 
+             Warning, stacklevel = 2)
+        self._amp = rms * 2**0.5
+    
+    #: Amplitude of source signal (for point source: in 1 m distance). 
+    #: Defaults to 1.0.
+    amplitude = Property(desc='amplitude')
+    
+    def _get_amplitude(self):
+        return self._amp
+    
+    def _set_amplitude(self, amp):
+        self._amp = amp
+    
     # internal identifier
     digest = Property( 
-        depends_on = ['rms', 'numsamples', \
+        depends_on = ['_amp', 'numsamples', \
         'sample_freq', 'freq', 'phase', '__class__'], 
         )
                
@@ -202,7 +230,7 @@ class SineGenerator( SignalGenerator ):
             The resulting signal as an array of length :attr:`~SignalGenerator.numsamples`.
         """
         t = arange(self.numsamples, dtype=float)/self.sample_freq
-        return self.rms*sin(2*pi*self.freq*t+self.phase)
+        return self.amplitude * sin(2*pi*self.freq * t + self.phase)
 
 
 class GenericSignalGenerator( SignalGenerator ):
