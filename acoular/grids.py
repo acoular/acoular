@@ -13,7 +13,7 @@
     RectGrid3D
     ImportGrid
     LineGrid
-    GridList
+    MergeGrid
     Sector
     RectSector
     CircSector
@@ -880,7 +880,7 @@ class LineGrid( Grid ):
         return pos.T
 
 
-class GridMerger( Grid ):
+class MergeGrid( Grid ):
     """
     Base class for merging different grid geometries.
     
