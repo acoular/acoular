@@ -39,7 +39,9 @@ invert, dot, newaxis, zeros, empty, fft, float32, float64, complex64, linalg, \
 where, searchsorted, pi, multiply, sign, diag, arange, sqrt, exp, log10, int,\
 reshape, hstack, vstack, eye, tril, size, clip, tile, round, delete, \
 absolute, argsort, sort, sum, hsplit, fill_diagonal, zeros_like, isclose, \
-vdot, flatnonzero, einsum, ndarray, isscalar, inf
+vdot, flatnonzero, einsum, ndarray, isscalar, inf, real
+
+from numpy.linalg import norm
 
 from sklearn.linear_model import LassoLars, LassoLarsCV, LassoLarsIC,\
 OrthogonalMatchingPursuit, ElasticNet, OrthogonalMatchingPursuitCV, Lasso
@@ -1874,18 +1876,18 @@ class BeamformerCMF ( BeamformerBase ):
 
 
 
-class BeamformerSODIX ( BeamformerBase ):
+class BeamformerSODIX( BeamformerBase ):
     """
-    SODIX, see Funke,Ein Mikrofonarray-Verfahren zur Untersuchung der
-    Schallabstrahlung von Turbofantriebwerken, 2017.
+    SODIX, see Funke, Ein Mikrofonarray-Verfahren zur Untersuchung der
+    Schallabstrahlung von Turbofantriebwerken, 2017. and 
+    Oertwig, Advancements in the source localization method SODIX and
+    application to short cowl engine data, 2020
     
     source directivity modeling in the cross-spectral matrix
     """
-
-    #: Type of fit method to be used ('NNLS','fmin_l_bfgs_b').
-    #: These methods are implemented in 
-    #: the `scikit-learn <http://scikit-learn.org/stable/user_guide.html>`_ 
-    #: module.
+    #: Type of fit method to be used ('fmin_l_bfgs_b').
+    #: These methods is implemented in 
+    #: the `scipy module.
     method = Trait('fmin_l_bfgs_b', desc="fit method used")
         
     #: Maximum number of iterations,
@@ -1893,8 +1895,16 @@ class BeamformerSODIX ( BeamformerBase ):
     #: defaults to 200
     max_iter = Int(200, 
         desc="maximum number of iterations")
-
     
+    #: Norm to consider for the regularization in InverseIRLS and Suzuki methods 
+    #: defaults to L-1 Norm
+    pnorm= Float(1,desc="Norm for regularization")
+    
+    #: Weight factor for regularization,
+    #: defaults to 0.0.
+    alpha = Range(0.0, 1.0, 0.0, 
+        desc="Lasso weight factor")
+
     #: Unit multiplier for evaluating, e.g., nPa instead of Pa. 
     #: Values are converted back before returning. 
     #: Temporary conversion may be necessary to not reach machine epsilon
@@ -1927,25 +1937,19 @@ class BeamformerSODIX ( BeamformerBase ):
                     config.global_caching == 'none' or 
                     (config.global_caching == 'individual' and self.cached == False)
                 ):
-#                print("get filecache..")
                 (ac,fr) = self._get_filecache() 
                 if ac and fr: 
-#                    print("cached data existent")
-                    if not fr[f.ind_low:f.ind_high].all():
-#                        print("calculate missing results")                            
+                    if not fr[f.ind_low:f.ind_high].all():                       
                         if config.global_caching == 'readonly': 
                             (ac, fr) = (ac[:], fr[:])
                         self.calc(ac,fr)
                         self.h5f.flush()
-#                    else:
-#                        print("cached results are complete! return.")
+
                 else:
-#                    print("no caching, calculate result")
                     ac = zeros((numfreq, self.steer.grid.size*self.steer.mics.num_mics), dtype=self.precision)
                     fr = zeros(numfreq, dtype='int8')
                     self.calc(ac,fr)
             else:
-#                print("no caching activated, calculate result")
                 ac = zeros((numfreq, self.steer.grid.size*self.steer.mics.num_mics), dtype=self.precision)
                 fr = zeros(numfreq, dtype='int8')
                 self.calc(ac,fr)
@@ -1979,7 +1983,7 @@ class BeamformerSODIX ( BeamformerBase ):
             each grid point .
             Note that the frequency resolution and therefore the bandwidth 
             represented by a single frequency line depends on 
-            the :attr:`sampling frequency<acoular.sources.SamplesGenerator.sample_freq>` and 
+            the :attr:`sampling frequency<acoular.sources.SamplesGenerator.sample_freq>` and conjugate
             used :attr:`FFT block size<acoular.spectra.PowerSpectra.block_size>`.
         """
         res = self.result # trigger calculation
@@ -2057,52 +2061,23 @@ class BeamformerSODIX ( BeamformerBase ):
         This method only returns values through the *ac* and *fr* parameters
         """
         
-        # gradient solver https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.fmin_l_bfgs_b.html
-        #copy from cmf
-                    
-        # function to repack complex matrices to deal with them in real number space
-        def realify(M):
-            return vstack([M.real,M.imag])
+        # gradient solver https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.fmin_l_bfgs_b.html                    
 
         # prepare calculation
         i = self.freq_data.indices
         f = self.freq_data.fftfreq()
-        nc = self.freq_data.numchannels
         numpoints = self.steer.grid.size
+        #unit = self.unit_mult
         num_mics = self.steer.mics.num_mics
 
         for i in self.freq_data.indices:        
             if not fr[i]:
                 
                 #measured csm
-                csm = array(self.freq_data.csm[i], dtype='complex128',copy=1)
+                csm = array(self.freq_data.csm[i], dtype='complex128',copy=1) 
                 #steering 
                 h = self.steer.transfer(f[i]).T           
-                # reduced Kronecker product (only where solution matrix != 0)
-                Bc = ( h[:,:,newaxis] * \
-                       h.conjugate().T[newaxis,:,:] )\
-                         .transpose(2,0,1)
-                Ac = Bc.reshape(nc*nc,numpoints)
-                
-                # get indices for upper triangular matrices (use tril b/c transposed)
-                ind = reshape(tril(ones((nc,nc))), (nc*nc,)) > 0
-                ind_im0 = (reshape(eye(nc),(nc*nc,)) == 0)[ind]
-                
-                if self.r_diag:
-                    # omit main diagonal for noise reduction
-                    ind_reim = hstack([ind_im0, ind_im0])
-                else:
-                    # take all real parts -- also main diagonal
-                    ind_reim = hstack([ones(size(ind_im0),)>0,ind_im0])
-                    ind_reim[0]=True # TODO: warum hier extra definiert??
-                       
-                # real transfer matrix 
-                A = realify( Ac [ind,:] )[ind_reim,:]
-                
-                # use csm.T for column stacking reshape!
-                # real csm matrix
-                R = realify( reshape(csm.T, (nc*nc,1))[ind,:] )[ind_reim,:] #* unit
-                    
+                   
                 if self.method == 'fmin_l_bfgs_b':
                     #function to minimize
                     def function(D): 
@@ -2114,49 +2089,38 @@ class BeamformerSODIX ( BeamformerBase ):
                         
                         Returns
                         -------
-                        func
-                             [num_mics]
-                        derdrl
+                        func - Sodix function to optimize
+                             [1]
+                        derdrl - derivitaives in direction of D
                             [num_mics*numpoints].
 
-                        '''
-                                           
-                        #sodix function 
-                        Djm = D.reshape([numpoints,num_mics])   
-                        Djn = D.reshape([numpoints,num_mics])
-                        Drm = D.reshape([numpoints,num_mics])               
-                        #daad = (Djm.T@A.T@A@Djn).T   @  (Djm.T@A.T@A@Djn) # [nummics]                       
-                        #daad = (Djm.T@A.T@A@Djn).T  
-                        #twoRAd = 2 * R.T@A@Djm @ (R.T@A@Djm).T
-                        #csmhoch2 = R.T@R
-                        #func = daad -  twoRAd + csmhoch2
-                        
-                        func = (R  - realify( reshape(Djm.T@A.T@A@Djn, (nc*nc,1))[ind,:] )[ind_reim,:]).T@(R  - realify( reshape(Djm.T@A.T@A@Djn, (nc*nc,1))[ind,:] )[ind_reim,:]) 
-                        
-                        #sodix  derivitaive
-                        derdrl = (-4 * Drm.T *  (A.T @ (R  - realify( reshape(Djm.T@A.T@A@Djn, (nc*nc,1))[ind,:] )[ind_reim,:])).flatten()).flatten()  
-                        print(derdrl.shape) 
-                        return  func[0].T, derdrl[:]
+                        '''           
+                        #### the sodix function####
+                        Djm = D.reshape([numpoints,num_mics])                           
+                        csmmod = einsum('jm,jm,jn,jn->mn',h.T,Djm,Djm,h.T.conj() )        
+                        func = sum(absolute((csm - csmmod)))**2 + self.alpha*norm(absolute((csm - csmmod)),self.pnorm)
+                        ####the sodix  derivitaive ####
+                        inner = csm - einsum('jl,jl,jm,jm->lm',h.T,Djm,Djm,h.T.conj() )      
+                        derdrl = -4 *  Djm * real(einsum('rm,rl,lm->rl',h.T,h.T.conj(),inner))
+
+                        return  func, derdrl[:].flatten()  #func[0]
                     
-                    # initial guess
-                    D0 = ones([numpoints,num_mics])
+                    ##### initial guess #### 
+                    if all(ac[(i-1)]==0):
+                         D0 = ones([numpoints,num_mics])
+                    else:
+                         D0 = ac[(i-1)]
                     
-                    #boundarys - set to non negative
+                    #boundarys - set to non negative [2*(numpoints*num_mics)]
                     boundarys = tile((0, +inf), (numpoints*num_mics,1))
-                    #print(boundarys.shape)
-                    
-                    #test the function                    
-                    #print(A.shape,R.shape,A.T.shape)
-                    #print(D0.shape, (R.T@R).shape)
-                    
-                    #optimize
-                    ac[i], yval, dicts =  fmin_l_bfgs_b(function, D0, fprime=None, args=(),  
-                                                          approx_grad=0, bounds=boundarys, m=10, #0 True #boundarys
-                                                          factr=1000.0, pgtol=1e-08, epsilon=1e-08,
-                                                          iprint=-1, maxfun=15000, maxiter=self.max_iter,
+
+                    #optimize with gradient solver
+                    ac[i], yval, dicts =  fmin_l_bfgs_b(function, D0, fprime=None, args=(),  #None  derivitaive
+                                                         approx_grad=0, bounds=boundarys, #m=10,   #approx 0  or True
+                                                         factr=100.0, pgtol=1e-09, epsilon=1e-08,
+                                                          iprint=0, maxfun=1500000, maxiter=self.max_iter,
                                                           disp=None, callback=None, maxls=20)
-                    
-                    ac[i] #/= unit
+                     
                 else:
                     pass
                 fr[i] = 1
