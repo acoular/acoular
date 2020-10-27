@@ -130,9 +130,9 @@ class PowerSpectra( HasPrivateTraits ):
     #: the range. 
     #: The freq_range interval will be the smallest discrete frequency
     #: inside the half-open interval [_freqlc, _freqhc[ and the smallest
-    #: upper frequency outside of the interval
+    #: upper frequency outside of the interval.
     #: If user chooses the higher frequency larger than the max frequency,
-    #: the max frequency will be the upper bound
+    #: the max frequency will be the upper bound.
     freq_range = Property(
         desc = "frequency range" )
         
