@@ -93,7 +93,7 @@ class PowerSpectra( HasPrivateTraits ):
     _freqhc = Float(0)
 
     # Saves whether the user set indices or frequencies last, for internal use only,
-    # not be set directly, if True (default), indices are used for setting
+    # not to be set directly, if True (default), indices are used for setting
     # the freq_range interval.
     _index_set_last = Bool(True)
 
@@ -184,14 +184,7 @@ class PowerSpectra( HasPrivateTraits ):
     @property_depends_on('time_data.sample_freq, block_size, _ind_low, _ind_high, _freqlc, _freqhc')
     def _get_freq_range ( self ):
         try:
-            if self._index_set_last :
-                # getting freq_range from ind_low and ind_high
-                return self.fftfreq()[[ self.ind_low, self.ind_high ]]
-            else :
-                # getting freq_range from _freqlc and _freqhc
-                ind_low  = searchsorted(self.fftfreq(), self._freqlc)
-                ind_high = searchsorted(self.fftfreq(), self._freqhc)
-                return self.fftfreq()[[ind_low, ind_high ]]
+		      return self.fftfreq()[[ind_low, ind_high ]]
         except IndexError:
             return array([0., 0])
 
@@ -225,14 +218,7 @@ class PowerSpectra( HasPrivateTraits ):
     @property_depends_on( 'time_data.sample_freq, block_size, _ind_low, _ind_high, _freqlc, _freqhc' )
     def _get_indices ( self ):
         try:
-            if self._index_set_last :
-                # getting indices from ind_low and ind_high
-                return arange(self.block_size/2+1,dtype=int)[ self.ind_low: self.ind_high ]
-            else :
-                # getting indices from _freqlc and _freqhc
-                ind_low  = searchsorted(self.fftfreq(), self._freqlc)
-                ind_high = searchsorted(self.fftfreq(), self._freqhc)
-                return arange(self.block_size/2+1,dtype=int)[ ind_low: ind_high ]
+		      return arange(self.block_size/2+1,dtype=int)[ self.ind_low: self.ind_high ]
         except IndexError:
             return range(0)
 
