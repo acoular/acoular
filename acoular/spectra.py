@@ -184,7 +184,7 @@ class PowerSpectra( HasPrivateTraits ):
     @property_depends_on('time_data.sample_freq, block_size, _ind_low, _ind_high, _freqlc, _freqhc')
     def _get_freq_range ( self ):
         try:
-		      return self.fftfreq()[[ind_low, ind_high ]]
+            return self.fftfreq()[[self.ind_low, self.ind_high ]]
         except IndexError:
             return array([0., 0])
 
@@ -218,7 +218,7 @@ class PowerSpectra( HasPrivateTraits ):
     @property_depends_on( 'time_data.sample_freq, block_size, _ind_low, _ind_high, _freqlc, _freqhc' )
     def _get_indices ( self ):
         try:
-		      return arange(self.block_size/2+1,dtype=int)[ self.ind_low: self.ind_high ]
+            return arange(self.block_size/2+1,dtype=int)[ self.ind_low: self.ind_high ]
         except IndexError:
             return range(0)
 
