@@ -686,12 +686,18 @@ class ImportGrid( Grid ):
     basename = Property( depends_on = 'from_file',
         desc="basename of xml file")
     
+        # internal identifier
+    digest = Property(
+        depends_on = ['from_file']
+        )
+    
     @cached_property
     def _get_basename( self ):
         return path.splitext(path.basename(self.from_file))[0]
 
+    @cached_property
     def _get_digest( self ):
-        return ''
+        return digest( self )
 
     # 'digest' is a placeholder for other properties in derived classes,
     # necessary to trigger the depends on mechanism
@@ -852,11 +858,13 @@ class LineGrid( Grid ):
     #: microphones; readonly.
     gpos = Property(desc="x, y, z positions of grid points")
 
-    # internal identifier
-    digest = Property
+    digest = Property(
+    depends_on = ['loc', 'direction', 'length', 'numpoints', 'size']
+    )
 
+    @cached_property
     def _get_digest( self ):
-        ''
+        return digest( self )
 
     # 'digest' is a placeholder for other properties in derived classes,
     # necessary to trigger the depends on mechanism
@@ -889,15 +897,27 @@ class MergeGrid( Grid ):
     #: List of Grids to be merged
     #: each grid gets a new subdomain in the new grid
     #: other grid defining properties are set
-    Grids = List(desc="List of Grids")
+    grids = List(desc="list of grids")
+    
+    grid_digest = Property(desc="digest of the merged grids")
 
     subgrids = Property(desc="names of subgrids for each point")
     
     # internal identifier
-    digest = Property
+    digest = Property(
+    depends_on = ['grids','grid_digest']
+    )
 
+    @cached_property
     def _get_digest( self ):
-        return ''
+        return digest( self )
+    
+    @cached_property
+    def _get_grid_digest( self ):
+        griddigest = []
+        for grid in self.grids:
+            griddigest.append(grid.digest)
+        return griddigest
 
     # 'digest' is a placeholder for other properties in derived classes,
     # necessary to trigger the depends on mechanism
@@ -912,9 +932,9 @@ class MergeGrid( Grid ):
     
     @property_depends_on('digest')
     def _get_subgrids( self ):
-        subgrids = zeros((1,0))
-        for grid in self.Grids:
-            subgrids = append(subgrids,tile(str(grid),grid.size))
+        subgrids = zeros((1,0),dtype=str)
+        for grid in self.grids:
+            subgrids = append(subgrids,tile(grid.__class__.__name__+grid.digest,grid.size))
         return subgrids[:,newaxis].T
     
 
@@ -922,7 +942,7 @@ class MergeGrid( Grid ):
     def _get_gpos( self ):
         bpos = zeros((3,0))
         #subgrids = zeros((1,0))
-        for grid in self.Grids:
+        for grid in self.grids:
             bpos = append(bpos,grid.gpos, axis = 1)
             #subgrids = append(subgrids,str(grid))
         return bpos
