@@ -2098,10 +2098,11 @@ class BeamformerSODIX( BeamformerBase ):
                         #### the sodix function####
                         Djm = D.reshape([numpoints,num_mics])                           
                         csmmod = einsum('jm,jm,jn,jn->mn',h.T,Djm,Djm,h.T.conj() )        
-                        func = sum(absolute((csm - csmmod)))**2 + self.alpha*norm(absolute((csm - csmmod)),self.pnorm)
+                        func = sum(absolute((csm - csmmod)))**2 + self.alpha*norm(Djm,self.pnorm)
                         ####the sodix  derivitaive ####
                         inner = csm - einsum('jl,jl,jm,jm->lm',h.T,Djm,Djm,h.T.conj() )      
-                        derdrl = -4 *  Djm * real(einsum('rm,rl,lm->rl',h.T,h.T.conj(),inner))
+                        derdrl = -4 *  Djm * real(einsum('rm,rl,lm->rl',h.T,h.T.conj(),inner)) + \
+                            self.alpha * (abs(Djm)/norm(Djm,self.pnorm))**(1-self.pnorm)*sign(Djm)
 
                         return  func, derdrl[:].flatten()  #func[0]
                     
