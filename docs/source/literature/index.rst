@@ -15,6 +15,10 @@ Brooks, T. F., & Humphreys, W. M. (2006). A deconvolution approach for the mappi
 
 Capon, J. (1969). High-resolution frequency-wavenumber spectrum analysis. Proceedings of the IEEE, 57(8), 1408-1418.
 
+.. _Cousson2019:
+
+R. Cousson, Q. Leclère, M.-A. Pallas, and M. Berengier (2019). A time domain clean approach for the identification of acoustic moving sources. Journal of Sound and Vibration, 443, 47-62. doi:10.1016/j.jsv.2018.11.026.
+
 .. _Dougherty2014:
 
 Dougherty, R. P. (2014). Functional Beamforming. In: Proceedings of the Berlin Beamforming Conference 2014.

@@ -10,27 +10,23 @@ The following modules are part of Acoular:
 .. autosummary::
     :toctree: generated/
 
+    calib
+    configuration
     environments
+    fbeamform
     grids
     microphones
-    spectra
+    sdinput
     signals
     sources
-    calib
-    fbeamform
+    spectra
     tbeamform
-    trajectory
+    tools
     tprocess
-    configuration
+    trajectory
 
-these modules still need some more documentation:
 
-.. autosummary::
-    :toctree: generated/
 
-    fileimport
-    h5cache
-    internal
 
 Classes in Acoular and their inheritance
 ----------------------------------------
@@ -38,6 +34,7 @@ Classes in Acoular and their inheritance
 
 
 .. inheritance-diagram:: acoular.environments acoular.grids acoular.microphones
+                         acoular.sdinput
                          acoular.spectra acoular.signals acoular.sources
                          acoular.calib acoular.trajectory acoular.fbeamform
                          acoular.tbeamform acoular.tprocess
