@@ -28,8 +28,8 @@ def return_result(source, nmax=-1, num=128):
    
     Parameters
     ----------
-    source: :class:`~acoular.sources.SamplesGenerator` or derived object.
-        This is the data source.
+    source: SamplesGenerator or derived object.
+        This is the  :class:`SamplesGenerator<acoular.tprocess.SamplesGenerator>` data source.
     nmax: integer
         With this parameter, a maximum number of output samples can be set 
         (first dimension of array). If set to -1 (default), samples are 

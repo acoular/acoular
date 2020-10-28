@@ -16,7 +16,7 @@ What's new
 	* New class for using arbitrary sources as signal: :class:`~acoular.signals.GenericSignalGenerator`
 	* New time-domain beamforming classes for CLEAN-T method: :class:`~acoular.tbeamform.BeamformerCleant`, :class:`~acoular.tbeamform.BeamformerCleantSq`, :class:`~acoular.tbeamform.BeamformerCleantTraj`, :class:`~acoular.tbeamform.BeamformerCleantSqTraj`
 	* Adds possibility to store/load metadata to/from HDF files with :class:`~acoular.tprocess.WriteH5`/:class:`~acoular.sources.TimeSamples` classes
-	* New tools submodule :mod:`~acoular.tools` containing several helper functions, e.g. for data aggregation
+	* New submodule :mod:`~acoular.tools` containing several helper functions, e.g. for data aggregation
 	* :class:`~acoular.tprocess.WriteWAV`: user can optionally set name of output wav file
 	* Bugfix: PowerSpectra.freq_range / .ind_low / .ind_high are now correctly updated depending on changed attributes
 	* Bugfix: :class:`~acoular.signals.SineGenerator` amplitude is now set via :attr:`~acoular.signals.SineGenerator.amplitude` attribute
