@@ -5,7 +5,7 @@ What's new
 ------------
 	
 	* Supports Python 3.6, 3.7, 3.8
-	* New base classes for time signal processing: :class:`~acoular.tprocess.FilterBank`, :class:`~acoular.tprocess.FilterBank`
+	* New base classes for time signal processing: :class:`~acoular.tprocess.Filter`, :class:`~acoular.tprocess.FilterBank`
 		* New filter classes: :class:`~acoular.tprocess.TimeExpAverage`, :class:`~acoular.tprocess.FiltFreqWeight`, :class:`~acoular.tprocess.OctaveFilterBank`
 		* Demo script is now part of module (see :doc:`../get_started/index` for usage)
 	* New class for processing sound card input: :class:`~acoular.sdinput.SoundDeviceSamplesGenerator`
@@ -14,7 +14,7 @@ What's new
 	* New versatile integration sector classes :class:`~acoular.grids.RectSector`, :class:`~acoular.grids.CircSector`, :class:`~acoular.grids.PolySector`, :class:`~acoular.grids.ConvexSector`, :class:`~acoular.grids.MultiSector`
 	* New class for mixing multiple channels :class:`~acoular.tprocess.ChannelMixer`
 	* New class for using arbitrary sources as signal: :class:`~acoular.signals.GenericSignalGenerator`
-	* New time-domain beamforming classes for CLEAN-T method: :class:`~acoular.tbeamform.CleantSq`, :class:`~acoular.tbeamform.CleantTraj`, :class:`~acoular.tbeamform.CleantSqTraj`
+	* New time-domain beamforming classes for CLEAN-T method: :class:`~acoular.tbeamform.BeamformerCleant`, :class:`~acoular.tbeamform.BeamformerCleantSq`, :class:`~acoular.tbeamform.BeamformerCleantTraj`, :class:`~acoular.tbeamform.BeamformerCleantSqTraj`
 	* Adds possibility to store/load metadata to/from HDF files with :class:`~acoular.tprocess.WriteH5`/:class:`~acoular.sources.TimeSamples` classes
 	* New tools submodule :mod:`~acoular.tools` containing several helper functions, e.g. for data aggregation
 	* :class:`~acoular.tprocess.WriteWAV`: user can optionally set name of output wav file
@@ -28,7 +28,7 @@ What's new
 	
 	* Adds gradient-based solver for BeamformerCMF (L_BFGS_B)
 	* Adds possibilty to take into account convective amplification of moving sources in BeamformerTimeTraj
-	* TraitsUI support of the classes has to be activated via :class:`~acoular.configuration.config` 
+	* TraitsUI support of the classes has to be activated via :attr:`~acoular.configuration.config` 
     * Bugfix: use left-orientated coordinate system in rotating flow environment
     * Bugfix: correct wrong angle shift in spline interpolation
     * Removes several Python 2.7-specific implementations

@@ -23,7 +23,7 @@ from .spectra import synthetic
 def return_result(source, nmax=-1, num=128):
     """
     Collects the output from a 
-    :meth:`SamplesGenerator.result()<acoular.tprocess.SamplesGenerator.result`
+    :meth:`SamplesGenerator.result()<acoular.tprocess.SamplesGenerator.result>`
     generator and returns an assembled array with all the data.
    
     Parameters
