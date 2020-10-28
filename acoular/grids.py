@@ -897,18 +897,27 @@ class MergeGrid( Grid ):
     #: List of Grids to be merged
     #: each grid gets a new subdomain in the new grid
     #: other grid defining properties are set
-    grids = List(desc="List of Grids")
+    grids = List(desc="list of grids")
+    
+    grid_digest = Property(desc="digest of the merged grids")
 
     subgrids = Property(desc="names of subgrids for each point")
     
     # internal identifier
     digest = Property(
-    depends_on = ['grids']
+    depends_on = ['grids','grid_digest']
     )
 
     @cached_property
     def _get_digest( self ):
         return digest( self )
+    
+    @cached_property
+    def _get_grid_digest( self ):
+        griddigest = []
+        for grid in self.grids:
+            griddigest.append(grid.digest)
+        return griddigest
 
     # 'digest' is a placeholder for other properties in derived classes,
     # necessary to trigger the depends on mechanism
