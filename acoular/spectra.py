@@ -181,10 +181,10 @@ class PowerSpectra( HasPrivateTraits ):
         return self.overlap_*self.time_data.numsamples/self.block_size-\
         self.overlap_+1
 
-    @property_depends_on('time_data.sample_freq, block_size, _ind_low, _ind_high, _freqlc, _freqhc')
+    @property_depends_on('time_data.sample_freq, block_size, ind_low, ind_high')
     def _get_freq_range ( self ):
         try:
-            return self.fftfreq()[[ self.ind_low, self.ind_high ]]
+            return self.fftfreq()[[ self.ind_low, self.ind_high]]
         except IndexError:
             return array([0., 0])
 
@@ -193,19 +193,19 @@ class PowerSpectra( HasPrivateTraits ):
         self._freqlc = freq_range[0]
         self._freqhc = freq_range[1]
 
+    @property_depends_on( 'time_data.sample_freq, block_size, _ind_low, _freqlc' )
     def _get_ind_low( self ):
         if self._index_set_last:
-            return self._ind_low
+            return min(self._ind_low, self.block_size//2)
         else:
-            ind_low = searchsorted(self.fftfreq(), self._freqlc)
-            return ind_low
+            return searchsorted(self.fftfreq()[:-1], self._freqlc)
 
+    @property_depends_on( 'time_data.sample_freq, block_size, _ind_high, _freqhc' )
     def _get_ind_high( self ):
         if self._index_set_last:
             return min(self._ind_high, self.block_size//2)
         else:
-            ind_high = searchsorted(self.fftfreq(), self._freqhc)
-            return min(ind_high, self.block_size//2)
+            return searchsorted(self.fftfreq()[:-1], self._freqhc)
 
     def _set_ind_high(self, ind_high):# by setting this the user sets the lower index
         self._index_set_last = True
@@ -215,7 +215,7 @@ class PowerSpectra( HasPrivateTraits ):
         self._index_set_last = True
         self._ind_low = ind_low
 
-    @property_depends_on( 'time_data.sample_freq, block_size, _ind_low, _ind_high, _freqlc, _freqhc' )
+    @property_depends_on( 'block_size, ind_low, ind_high' )
     def _get_indices ( self ):
         try:
             return arange(self.block_size/2+1,dtype=int)[ self.ind_low: self.ind_high ]
