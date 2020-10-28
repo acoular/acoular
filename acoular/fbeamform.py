@@ -22,7 +22,6 @@
     BeamformerOrth
     BeamformerCleansc
     BeamformerCMF
-    BeamformerSODIX
     BeamformerGIB
 
     PointSpreadFunction
@@ -61,7 +60,7 @@ damasSolverGaussSeidel
 from .h5cache import H5cache
 from .h5files import H5CacheFileBase
 from .internal import digest
-from .grids import Grid
+from .grids import Grid, Sector
 from .microphones import MicGeom
 from .configuration import config
 from .environments import Environment
@@ -560,7 +559,7 @@ class BeamformerBase( HasPrivateTraits ):
             each grid point .
             Note that the frequency resolution and therefore the bandwidth 
             represented by a single frequency line depends on 
-            the :attr:`sampling frequency<acoular.sources.SamplesGenerator.sample_freq>` and 
+            the :attr:`sampling frequency<acoular.tprocess.SamplesGenerator.sample_freq>` and 
             used :attr:`FFT block size<acoular.spectra.PowerSpectra.block_size>`.
         """
         res = self.result # trigger calculation
@@ -592,8 +591,12 @@ class BeamformerBase( HasPrivateTraits ):
                 h = res[ind]
         else:
             # fractional octave band
-            f1 = f*2.**(-0.5/num)
-            f2 = f*2.**(+0.5/num)
+            if isinstance(num,list):
+                f1=num[0]
+                f2=num[-1]
+            else:
+                f1 = f*2.**(-0.5/num)
+                f2 = f*2.**(+0.5/num)
             ind1 = searchsorted(freq, f1)
             ind2 = searchsorted(freq, f2)
             if ind1 == ind2:
@@ -789,7 +792,7 @@ class BeamformerEig( BeamformerBase ):
     see :ref:`Sarradj et al., 2005<Sarradj2005>`.
     """
     #: Number of component to calculate: 
-    #: 0 (smallest) ... :attr:`~acoular.sources.SamplesGenerator.numchannels`-1;
+    #: 0 (smallest) ... :attr:`~acoular.tprocess.SamplesGenerator.numchannels`-1;
     #: defaults to -1, i.e. numchannels-1
     n = Int(-1, 
         desc="No. of eigenvalue")
@@ -1420,7 +1423,7 @@ class BeamformerOrth (BeamformerBase):
 
     #: List of components to consider, use this to directly set the eigenvalues
     #: used in the beamformer. Alternatively, set :attr:`n`.
-    eva_list = CArray(
+    eva_list = CArray(dtype=int,
         desc="components")
         
     #: Number of components to consider, defaults to 1. If set, 
@@ -1854,17 +1857,15 @@ class BeamformerCMF ( BeamformerBase ):
                         return  func[0].T, der[:,0]
                     
                     # initial guess
-                    x0 = ones([numpoints])
-                    
+                    x0 = ones([numpoints])   
                     #boundarys - set to non negative
                     boundarys = tile((0, +inf), (len(x0),1))
-                    #print(boundarys.shape)
-                                    
+                    
                     #optimize
-                    ac[i], yval, dicts =  fmin_l_bfgs_b(function, x0, fprime=None, args=(),  #None  derivitaive
-                                                          approx_grad=0, bounds=boundarys, m=10,   #0 True
-                                                          factr=100.0, pgtol=1e-05, epsilon=1e-08,
-                                                          iprint=0, maxfun=1500000, maxiter=self.max_iter,  #-1
+                    ac[i], yval, dicts =  fmin_l_bfgs_b(function, x0, fprime=None, args=(),  
+                                                          approx_grad=0, bounds=boundarys, m=10,
+                                                          factr=10000000.0, pgtol=1e-05, epsilon=1e-08,
+                                                          iprint=-1, maxfun=15000, maxiter=self.max_iter,
                                                           disp=None, callback=None, maxls=20)
                     
                     ac[i] /= unit
@@ -2386,7 +2387,11 @@ def integrate(data, grid, sector):
         The spectrum (all calculated frequency bands) for the integrated sector.
     """
     
-    ind = grid.indices(*sector)
+    if isinstance(sector, Sector):
+        ind = grid.subdomain(sector)
+    else:
+        ind = grid.indices(*sector)
+    
     gshape = grid.shape
     gsize = grid.size
     if size(data) == gsize: # one value per grid point

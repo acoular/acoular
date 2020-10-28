@@ -17,13 +17,15 @@
 
 # imports from other packages
 from __future__ import print_function, division
-from numpy import pi, arange, sin, sqrt, repeat, log
+from numpy import pi, arange, sin, sqrt, repeat, tile, log, zeros
 from numpy.random import RandomState
-from traits.api import HasPrivateTraits, Float, Int, Long, \
-Property, cached_property
+from traits.api import HasPrivateTraits, Trait, Float, Int, CLong, Bool, \
+Property, cached_property, Delegate
 from scipy.signal import resample
+from warnings import warn
 
 # acoular imports
+from .tprocess import SamplesGenerator
 from .internal import digest
 
 class SignalGenerator( HasPrivateTraits ):
@@ -44,7 +46,7 @@ class SignalGenerator( HasPrivateTraits ):
         desc="sampling frequency")
                    
     #: Number of samples to generate.
-    numsamples = Long
+    numsamples = CLong
     
     # internal identifier
     digest = Property
@@ -179,10 +181,38 @@ class SineGenerator( SignalGenerator ):
     #: Sine wave phase (in radians), float, defaults to 0.0.
     phase = Float(0.0, 
         desc="Phase")
-        
+
+    # Internal shadow trait for rms/amplitude values.
+    # Do not set directly.
+    _amp = Float(1.0)
+    
+    #: RMS of source signal (for point source: in 1 m distance).
+    #: Deprecated. For amplitude use :attr:`amplitude`.
+    rms = Property(desc='rms amplitude')
+    
+    def _get_rms(self):
+        return self._amp/2**0.5
+    
+    def _set_rms(self, rms):
+        warn("Up to Acoular 20.02, rms is interpreted as sine amplitude. "
+             "This has since been corrected (rms now is 1/sqrt(2) of amplitude). "
+             "Use 'amplitude' trait to directly set the ampltiude.", 
+             Warning, stacklevel = 2)
+        self._amp = rms * 2**0.5
+    
+    #: Amplitude of source signal (for point source: in 1 m distance). 
+    #: Defaults to 1.0.
+    amplitude = Property(desc='amplitude')
+    
+    def _get_amplitude(self):
+        return self._amp
+    
+    def _set_amplitude(self, amp):
+        self._amp = amp
+    
     # internal identifier
     digest = Property( 
-        depends_on = ['rms', 'numsamples', \
+        depends_on = ['_amp', 'numsamples', \
         'sample_freq', 'freq', 'phase', '__class__'], 
         )
                
@@ -200,4 +230,82 @@ class SineGenerator( SignalGenerator ):
             The resulting signal as an array of length :attr:`~SignalGenerator.numsamples`.
         """
         t = arange(self.numsamples, dtype=float)/self.sample_freq
-        return self.rms*sin(2*pi*self.freq*t+self.phase)
+        return self.amplitude * sin(2*pi*self.freq * t + self.phase)
+
+
+class GenericSignalGenerator( SignalGenerator ):
+    """
+    Generate signal from output of :class:`~acoular.tprocess.SamplesGenerator` object.
+    """
+    #: Data source; :class:`~acoular.tprocess.SamplesGenerator` or derived object.
+    source = Trait(SamplesGenerator)
+    
+    #: Sampling frequency of output signal, as given by :attr:`source`.
+    sample_freq = Delegate('source')
+    
+    _numsamples = CLong(0)
+   
+    #: Number of samples to generate. Is set to source.numsamples by default.
+    numsamples = Property()
+    
+    def _get_numsamples( self ):
+        if self._numsamples:
+            return self._numsamples
+        else:
+            return self.source.numsamples
+    
+    def _set_numsamples( self, numsamples ):
+        self._numsamples = numsamples
+
+    #: Boolean flag, if 'True' (default), signal track is repeated if requested 
+    #: :attr:`numsamples` is higher than available sample number
+    loop_signal = Bool(True)
+    
+    # internal identifier
+    digest = Property( 
+        depends_on = ['source.digest', 'loop_signal', 'numsamples', \
+        'rms', '__class__'], 
+        )
+               
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+    
+    def signal(self):
+        """
+        Deliver the signal.
+
+        Returns
+        -------
+        array of floats
+            The resulting signal as an array of length :attr:`~GenericSignalGenerator.numsamples`.
+        """
+        block = 1024
+        if self.source.numchannels > 1:
+            warn("Signal source has more than one channel. Only channel 0 will be used for signal.", Warning, stacklevel = 2)
+        nums = self.numsamples
+        track = zeros(nums)
+        
+        # iterate through source generator to fill signal track
+        for i, temp in enumerate(self.source.result(block)):
+            start = block*i
+            stop = start + len(temp[:,0])
+            if nums > stop:
+                track[start:stop] = temp[:,0]
+            else: # exit loop preliminarily if wanted signal samples are reached
+                track[start:nums] = temp[:nums-start,0]
+                break
+        
+        # if the signal should be repeated after finishing and there are still samples open
+        if self.loop_signal and (nums > stop):
+            
+            # fill up empty track with as many full source signals as possible
+            nloops = nums // stop
+            if nloops>1: track[stop:stop*nloops] = tile(track[:stop], nloops-1)
+            # fill up remaining empty track
+            res = nums % stop # last part of unfinished loop
+            if res > 0: track[stop*nloops:] = track[:res]
+        
+        # The rms value is just an amplification here
+        return self.rms*track
+    

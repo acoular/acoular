@@ -12,7 +12,7 @@ Implements global configuration of Acoular.
     config
 """
 
-from traits.api import Trait,Property, HasStrictTraits
+from traits.api import Trait, Bool, Property, HasStrictTraits
 
 class Config(HasStrictTraits):
     """
@@ -54,6 +54,14 @@ class Config(HasStrictTraits):
     
     _h5library = Trait('pytables','h5py')
     
+    
+    #: Boolean Flag that determines whether user has access to traitsui features.
+    #: Defaults to False.
+    use_traitsui = Property()
+    
+    _use_traitsui = Bool(False)
+    
+    
     def _get_global_caching(self):
         return self._global_caching
 
@@ -65,7 +73,16 @@ class Config(HasStrictTraits):
     
     def _set_h5library(self,libraryName):
         self._h5library = libraryName 
-        
+    
+    def _get_use_traitsui(self):
+        return self._use_traitsui
+    
+    def _set_use_traitsui(self, use_tui):
+        if use_tui:
+            from  . import traitsviews
+            # If user tries to use traitsuis and it's not installed, this will throw an error.
+        self._use_traitsui = use_tui 
+    
     def _assert_h5library(self):
         try:
             import tables  
@@ -94,6 +111,13 @@ The package used to read and write .h5 files can be specified
 by :attr:`h5library`:  
   * 'pytables': Use 'tables' (or 'pytables', depending on python distribution).
   * 'h5py': Use 'h5py'.
+
+Some Acoular classes support GUI elements for usage with tools from the TraitsUI package.
+If desired, this package has to be installed manually, as it is not a prerequisite for
+installing Acoular.
+To enable the functionality, the flag attribute :attr:`use_traitsui` has to be set to True (default: False).
+Note: this is independent from the GUI tools implemented in the spectAcoular package.
+
 
 Example: 
     For using Acoular with h5py package and overwrite existing cache:

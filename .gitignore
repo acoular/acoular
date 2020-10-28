@@ -23,3 +23,5 @@ __pycache__/
 *.nbi
 *.pyd
 docs/source/api_ref/generated/
+
+acoular/demo/three_sources.h5

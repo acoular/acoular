@@ -7,7 +7,7 @@ Requirements
 ------------
 
 Acoular runs under 64bit Windows and Linux (it should also run under OS X, but this is untested).
-In order to install Acoular you need a Python 2.7 or Python 3 environment running on your machine. 
+In order to install Acoular you need a Python 3 environment running on your machine. 
 Furthermore, Acoular requires the following Python Packages:
 
     * `NumPy <http://www.numpy.org/>`_, 
@@ -19,8 +19,7 @@ Furthermore, Acoular requires the following Python Packages:
     * `PyQt <https://www.riverbankcomputing.com/software/pyqt/intro>`_, 
     * `traitsui <http://docs.enthought.com/traitsui/>`_,  
     * `libpython <https://anaconda.org/anaconda/libpython>`_ (only for Windows),
-    * `configparser <https://docs.python.org/2/library/configparser.html>`_ (only for Python 2.7), 
-    * `six <https://pythonhosted.org/six/>`_ (only for Python 3). 
+    * `six <https://pythonhosted.org/six/>`_ . 
 
 If you do not chose option 1 below for installation, you may have to take care that these are all installed on your machine before you can install Acoular.
 
@@ -28,7 +27,7 @@ In order to run the demo and examples you will also need:
 
     * `matplotlib <http://matplotlib.org>`_.
 
-and for the example 3:
+and for the example_3D_beamforming:
 
     * `Mayavi <http://docs.enthought.com/mayavi/mayavi/>`_.
 
@@ -48,32 +47,9 @@ In the command line, type
 This will install Acoular in your Anaconda Python enviroment and make the Acoular library available from Python. In addition, this will install all dependencies (those other packages mentioned above) if they are not already present on your system.
 Depending on your type of Anaconda installation (single user or system-wide), you may be asked for admin privileges in order to start the installation process.
 
-If the installation has finished, you may try out Acoular by typing
-
-.. code-block:: console
-
-    $ acoular_demo.py
-
-under Linux or Mac, and
-
-.. code-block:: console
-
-    > acoular_demo.exe
-
-under Windows respectively.
-After some seconds, this should produce two pictures (a 64 microphone arrangement and a beamforming map with three sources).
-
 Option 2: Windows with other Python distributions
 -------------------------------------------------
 Download and run the `windows installer <https://pypi.python.org/pypi/acoular>`_. You will have to take care by yourself that all required packages are installed, otherwise you will not be able to use Acoular.
-
-If the installation has finished, you may try out Acoular by typing
-
-.. code-block:: console
-
-    $ acoular_demo.exe
-
-After some seconds, this should produce two pictures (a 64 microphone arrangement and a beamforming map with three sources).
 
 Option 3: pip
 -------------
@@ -84,22 +60,6 @@ If you have pip installed on your system, you may type
 	$ pip install acoular
 
 to install acoular. Note that the required packages are not installed this way and you have to do it by yourself.
-
-If the installation has finished, you may try out Acoular by typing
-
-.. code-block:: console
-
-    $ acoular_demo.py
-
-under Linux or Mac, and
-
-.. code-block:: console
-
-    > acoular_demo.exe
-
-under Windows respectively.
-After some seconds, this should produce two pictures (a 64 microphone arrangement and a beamforming map with three sources).
-
 
 Option 4: Source install
 ------------------------
@@ -112,13 +72,16 @@ You may download the `source tarball <https://pypi.python.org/pypi/acoular>`_. U
 to compile and install the software. This requires a properly set up system with all installed dependencies and a compiler.  
 Another option to get the source is to clone or fork from `Github <https://github.com/acoular/acoular>`_.
 
-If the installation has finished, you may try out Acoular by typing
+Verify Acoular installation
+---------------------------
+
+If the installation has finished, you may try out Acoular by importing the module and running the acoular demo script in a Python console. 
 
 .. code-block:: console
 
-    $ acoular_demo.py
+    > import acoular
+    > acoular.demo.acoular_demo.run()
 
 After some seconds, this should produce two pictures (a 64 microphone arrangement and a beamforming map with three sources).
-    
 
 

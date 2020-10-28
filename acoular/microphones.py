@@ -15,7 +15,7 @@
 # imports from other packages
 from numpy import array, average
 from traits.api import HasPrivateTraits, Property, File, \
-CArray, List, cached_property, on_trait_change
+CArray, cached_property, on_trait_change, ListInt
 from os import path
 
 from .internal import digest
@@ -40,7 +40,7 @@ class MicGeom( HasPrivateTraits ):
 
     #: List that gives the indices of channels that should not be considered.
     #: Defaults to a blank list.
-    invalid_channels = List(
+    invalid_channels = ListInt(
         desc="list of invalid channels")
 
     #: Number of microphones in the array; readonly.
@@ -54,7 +54,7 @@ class MicGeom( HasPrivateTraits ):
     #: Positions as (3, :attr:`num_mics`) array of floats, may include also invalid
     #: microphones (if any). Set either automatically on change of the
     #: :attr:`from_file` argument or explicitely by assigning an array of floats.
-    mpos_tot = CArray(
+    mpos_tot = CArray(dtype=float,
         desc="x, y, z position of all microphones")
 
     #: Positions as (3, :attr:`num_mics`) array of floats, without invalid
@@ -86,10 +86,11 @@ class MicGeom( HasPrivateTraits ):
 
     @cached_property
     def _get_center( self ):
-        center = average(self.mpos,axis=1)
-        # set very small values to zero
-        center[abs(center) < 1e-16] = 0.
-        return center
+        if self.mpos.any():
+            center = average(self.mpos,axis=1)
+            # set very small values to zero
+            center[abs(center) < 1e-16] = 0.
+            return center
 
     @on_trait_change('basename')
     def import_mpos( self ):

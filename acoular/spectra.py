@@ -13,19 +13,18 @@
     synthetic
 """
 from warnings import warn
-from six.moves import xrange  # solves the xrange/range issue for python2/3: in py3 'xrange' is now treated as 'range' and in py2 nothing changes
 
 from numpy import array, ones, hanning, hamming, bartlett, blackman, \
 dot, newaxis, zeros, empty, fft, linalg, \
 searchsorted, isscalar, fill_diagonal, arange, zeros_like, sum
 from traits.api import HasPrivateTraits, Int, Property, Instance, Trait, \
-Range, Bool, cached_property, property_depends_on, Delegate
+Range, Bool, cached_property, property_depends_on, Delegate, Float
 
 from .fastFuncs import calcCSM
 from .h5cache import H5cache
 from .h5files import H5CacheFileBase
 from .internal import digest
-from .sources import SamplesGenerator
+from .tprocess import SamplesGenerator
 from .calib import Calib
 from .configuration import config
 
@@ -49,7 +48,7 @@ class PowerSpectra( HasPrivateTraits ):
     and the same file name in case of that the data is read from a file.
     """
 
-    #: The :class:`~acoular.sources.SamplesGenerator` object that provides the data.
+    #: The :class:`~acoular.tprocess.SamplesGenerator` object that provides the data.
     time_data = Trait(SamplesGenerator, 
         desc="time data object")
 
@@ -68,16 +67,35 @@ class PowerSpectra( HasPrivateTraits ):
     block_size = Trait(1024, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536,
         desc="number of samples per FFT block")
 
+    # Shadow trait, should not be set directly, for internal use.
+    _ind_low = Int(1,
+        desc="index of lowest frequency line")
+
+    # Shadow trait, should not be set directly, for internal use.
+    _ind_high = Int(-1,
+        desc="index of highest frequency line")
+
     #: Index of lowest frequency line to compute, integer, defaults to 1,
     #: is used only by objects that fetch the csm, PowerSpectra computes every
     #: frequency line.
-    ind_low = Range(1, 
+    ind_low = Property(_ind_low,
         desc="index of lowest frequency line")
 
     #: Index of highest frequency line to compute, integer, 
     #: defaults to -1 (last possible line for default block_size).
-    ind_high = Int(-1, 
-        desc="index of highest frequency line")
+    ind_high = Property(_ind_high,
+        desc="index of lowest frequency line")
+
+    # Stores the set lower frequency, for internal use, should not be set directly.
+    _freqlc = Float(0)
+
+    # Stores the set higher frequency, for internal use, should not be set directly.
+    _freqhc = Float(0)
+
+    # Saves whether the user set indices or frequencies last, for internal use only,
+    # not to be set directly, if True (default), indices are used for setting
+    # the freq_range interval.
+    _index_set_last = Bool(True)
 
     #: Window function for FFT, one of:
     #:   * 'Rectangular' (default)
@@ -108,9 +126,13 @@ class PowerSpectra( HasPrivateTraits ):
         desc="overall number of FFT blocks")
 
     #: 2-element array with the lowest and highest frequency. If set, 
-    #: will overwrite :attr:`ind_low` and :attr:`ind_high` according to
+    #: will overwrite :attr:`_freqlc` and :attr:`_freqhc` according to
     #: the range. 
-    #: Values will be set to the next higher discrete frequencies.
+    #: The freq_range interval will be the smallest discrete frequency
+    #: inside the half-open interval [_freqlc, _freqhc[ and the smallest
+    #: upper frequency outside of the interval.
+    #: If user chooses the higher frequency larger than the max frequency,
+    #: the max frequency will be the upper bound.
     freq_range = Property(
         desc = "frequency range" )
         
@@ -145,8 +167,6 @@ class PowerSpectra( HasPrivateTraits ):
     eve = Property( 
         desc="eigenvectors of cross spectral matrix")
 
-
-
     # internal identifier
     digest = Property( 
         depends_on = ['time_data.digest', 'calib.digest', 'block_size', 
@@ -168,9 +188,32 @@ class PowerSpectra( HasPrivateTraits ):
         except IndexError:
             return array([0., 0])
 
-    def _set_freq_range( self, freq_range ):
-        self.ind_low  = searchsorted(self.fftfreq(), freq_range[0])
-        self.ind_high = searchsorted(self.fftfreq(), freq_range[1])
+    def _set_freq_range( self, freq_range ):# by setting this the user sets _freqlc and _freqhc
+        self._index_set_last = False
+        self._freqlc = freq_range[0]
+        self._freqhc = freq_range[1]
+
+    @property_depends_on( 'time_data.sample_freq, block_size, _ind_low, _freqlc' )
+    def _get_ind_low( self ):
+        if self._index_set_last:
+            return min(self._ind_low, self.block_size//2)
+        else:
+            return searchsorted(self.fftfreq()[:-1], self._freqlc)
+
+    @property_depends_on( 'time_data.sample_freq, block_size, _ind_high, _freqhc' )
+    def _get_ind_high( self ):
+        if self._index_set_last:
+            return min(self._ind_high, self.block_size//2)
+        else:
+            return searchsorted(self.fftfreq()[:-1], self._freqhc)
+
+    def _set_ind_high(self, ind_high):# by setting this the user sets the lower index
+        self._index_set_last = True
+        self._ind_high = ind_high
+
+    def _set_ind_low( self, ind_low):# by setting this the user sets the higher index
+        self._index_set_last = True
+        self._ind_low = ind_low
 
     @property_depends_on( 'block_size, ind_low, ind_high' )
     def _get_indices ( self ):
@@ -222,9 +265,9 @@ class PowerSpectra( HasPrivateTraits ):
             temp[0:bs] = temp[bs:]
             pos -= bs
         
-        # create the full csm matrix via transposingand complex conj.
+        # create the full csm matrix via transposing and complex conj.
         csmLower = csmUpper.conj().transpose(0,2,1)
-        [fill_diagonal(csmLower[cntFreq, :, :], 0) for cntFreq in xrange(csmLower.shape[0])]
+        [fill_diagonal(csmLower[cntFreq, :, :], 0) for cntFreq in range(csmLower.shape[0])]
         csm = csmLower + csmUpper
 
         # onesided spectrum: multiplication by 2.0=sqrt(2)^2
@@ -452,7 +495,7 @@ def synthetic (data, freqs, f, num=3):
         each grid point (the sum of all values that are contained in the band).
         Note that the frequency resolution and therefore the bandwidth 
         represented by a single frequency line depends on 
-        the :attr:`sampling frequency<acoular.sources.SamplesGenerator.sample_freq>` 
+        the :attr:`sampling frequency<acoular.tprocess.SamplesGenerator.sample_freq>` 
         and used :attr:`FFT block size<acoular.spectra.PowerSpectra.block_size>`.
     """
     if isscalar(f):

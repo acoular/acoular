@@ -410,6 +410,11 @@ class RotatingFlow( FlowField ):
         depends_on=['v0', 'origin', 'rpm'], 
         )
 
+    # internal identifier
+    omega = Property(
+        depends_on=['rpm'], 
+        )
+
     @cached_property
     def _get_omega(self):
         return 2 * pi * self.rpm / 60
@@ -436,31 +441,18 @@ class RotatingFlow( FlowField ):
         """
         x, y, z = xx-self.origin
 
-        #polar coord and rotational speed
-        #r = sqrt(x*x+y*y)
-        #phi = arctan2(y, x)
-        omega = self._get_omega()
+        # rotational speed
+        omega = self.omega
 
         #velocity vector
-        U = omega * y   # omega * r * sin(phi)
-        V = -omega * x  # omega * r * cos(phi)
+        U = omega * y
+        V = -omega * x
         W = self.v0 
         
-        #to avoid repeating calculation
-        #sinPhi = sin(phi)
-        #cosPhi = cos(phi)
-        #jacobian 
-        Udx = 0     #omega * ( sinPhi * x/r -  cosPhi * y/r)
-        Vdx = - omega #omega * (-cosPhi * x/r +  sinPhi * y/r)
-
-        Udy = omega #omega * ( sinPhi * y/r + cosPhi * x/r)
-        Vdy = 0     #omega * (-cosPhi * y/r + sinPhi * x/r)
-
-
         # flow field
         v = array( (U, V, W) )
         # Jacobi matrix
-        dv = array( ((Udx, Vdx, 0.), (Udy, Vdy, 0.), (0., 0., 0.)) ).T
+        dv = array( ((0, -omega, 0.), (omega, 0, 0.), (0., 0., 0.)) ).T
         return v, dv
 
 

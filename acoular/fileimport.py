@@ -22,7 +22,6 @@ from numpy import fromstring, float32, newaxis, empty, sort, zeros
 from traits.api import HasPrivateTraits, Float, Int, \
 File, CArray, Property, Any, Str
 from os import path
-from six import next
 import pickle
 import configparser
 import struct

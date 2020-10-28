@@ -1,6 +1,6 @@
 # coding=UTF-8
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2019, Acoular Development Team.
+# Copyright (c) 2007-2020, Acoular Development Team.
 #------------------------------------------------------------------------------
 
 """
@@ -65,17 +65,24 @@ try:
 except:
     pass
 
+try:
+    from .sdinput import SoundDeviceSamplesGenerator
+except:
+    pass
+
 from .h5cache import td_dir, cache_dir
 from .tbeamform import IntegratorSectorTime, \
-BeamformerTime, BeamformerTimeSq, BeamformerTimeTraj, BeamformerTimeSqTraj
-from .tprocess import TimeInOut, MaskedTimeInOut, Mixer, TimeAverage, \
-TimeReverse, TimePower, FiltFiltOctave, FiltOctave, TimeCache, WriteWAV, \
-WriteH5, SpatialInterpolator, SpatialInterpolatorRotation, Trigger, \
-SampleSplitter, AngleTracker, SpatialInterpolatorConstantRotation
-
+BeamformerTime, BeamformerTimeSq, BeamformerTimeTraj, BeamformerTimeSqTraj,\
+BeamformerCleant, BeamformerCleantSq, BeamformerCleantTraj, BeamformerCleantSqTraj
+from .tprocess import SamplesGenerator, TimeInOut, MaskedTimeInOut, ChannelMixer, \
+Mixer, TimeAverage, TimeReverse, TimePower, FiltFiltOctave, FiltOctave, TimeCache, \
+WriteWAV, WriteH5, SpatialInterpolator, SpatialInterpolatorRotation, Trigger, \
+SampleSplitter, AngleTracker, SpatialInterpolatorConstantRotation, Filter, \
+TimeExpAverage, FiltFreqWeight, TimeCumAverage, FilterBank, OctaveFilterBank
 from .calib import Calib
 from .trajectory import Trajectory
-from .grids import Grid, RectGrid, RectGrid3D
+from .grids import Grid, RectGrid, RectGrid3D, Sector,RectSector,CircSector,\
+    PolySector, MultiSector
 from .environments import cartToCyl, cylToCart, Environment, UniformFlowEnvironment, RotatingFlow, \
 FlowField, OpenJet, SlotJet, GeneralFlowEnvironment
 from .microphones import MicGeom
@@ -86,16 +93,10 @@ BeamformerMusic, BeamformerDamas, BeamformerDamasPlus, BeamformerOrth,Beamformer
 BeamformerCMF,BeamformerSODIX, BeamformerClean, BeamformerFunctional, BeamformerGIB, L_p, integrate, \
 PointSpreadFunction, SteeringVector
 
-from .sources import PointSource, MovingPointSource, SamplesGenerator, \
+from .sources import PointSource, MovingPointSource, \
 TimeSamples, MaskedTimeSamples, PointSourceDipole, UncorrelatedNoiseSource, \
 SourceMixer
 from .signals import SineGenerator, WNoiseGenerator, SignalGenerator,\
-PNoiseGenerator
+PNoiseGenerator, GenericSignalGenerator
 
-
-# we cannot be sure to have a working traitsui available
-try:
-    from .traitsviews import * #nothing will actually be imported
-except:
-    from warnings import warn
-    warn("no traitsui features will be available", Warning, stacklevel = 2)
+from . import tools
