@@ -2117,12 +2117,14 @@ class BeamformerSODIX( BeamformerBase ):
                     boundarys = tile((0, +inf), (numpoints*num_mics,1))
 
                     #optimize with gradient solver
-                    ac[i], yval, dicts =  fmin_l_bfgs_b(function, D0, fprime=None, args=(),  #None  derivitaive
+                    qi = ones([numpoints,num_mics])
+                    qi, yval, dicts =  fmin_l_bfgs_b(function, D0, fprime=None, args=(),  #None  derivitaive
                                                          approx_grad=0, bounds=boundarys, #m=10,   #approx 0  or True
                                                          factr=100.0, pgtol=1e-09, epsilon=1e-08,
                                                           iprint=0, maxfun=1500000, maxiter=self.max_iter,
                                                           disp=None, callback=None, maxls=20)
-                     
+                    #squared pressure
+                    ac[i]=qi**2
                 else:
                     pass
                 fr[i] = 1
