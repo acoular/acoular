@@ -56,7 +56,7 @@ setup(name="acoular",
       'Programming Language :: Python :: 3.8',
       ],
       keywords='acoustic beamforming microphone array',
-      packages = ['acoular'],
+      packages = ['acoular','acoular.demo'],
 
       install_requires = install_requires,
 
