@@ -18,6 +18,7 @@
     RectSector
     CircSector
     PolySector
+    ConvexSector
     MultiSector
 
 """
