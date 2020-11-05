@@ -1912,6 +1912,12 @@ class BeamformerSODIX( BeamformerBase ):
     #: within fitting method algorithms. Defaults to 1e9.
     unit_mult = Float(1e9,
                       desc = "unit multiplier")
+    
+    #: The beamforming result as squared sound pressure values 
+    #: at all grid point locations (readonly).
+    #: Returns a (number of frequencies, number of gridpoints) array of floats.
+    sodix_result = Property(
+        desc="beamforming result")
 
     # internal identifier
     digest = Property( 
@@ -1922,8 +1928,46 @@ class BeamformerSODIX( BeamformerBase ):
     def _get_digest( self ):
         return digest( self )
     
+    def _get_filecache( self ):
+            """
+            function collects cached results from file depending on 
+            global/local caching behaviour. Returns (None, None) if no cachefile/data 
+            exist and global caching mode is 'readonly'.
+            """
+    #        print("get cachefile:", self.freq_data.basename)
+            H5cache.get_cache_file( self, self.freq_data.basename ) 
+            if not self.h5f: 
+    #            print("no cachefile:", self.freq_data.basename)
+                return (None, None)# only happens in case of global caching readonly
+    
+            nodename = self.__class__.__name__ + self.digest
+    #        print("collect filecache for nodename:",nodename)
+            if config.global_caching == 'overwrite' and self.h5f.is_cached(nodename):
+    #            print("remove existing data for nodename",nodename)
+                self.h5f.remove_data(nodename) # remove old data before writing in overwrite mode
+            
+            if not self.h5f.is_cached(nodename):
+    #            print("no data existent for nodename:", nodename)
+                if config.global_caching == 'readonly': 
+                    return (None, None)
+                else:
+    #                print("initialize data.")
+                    numfreq = self.freq_data.fftfreq().shape[0]# block_size/2 + 1steer_obj
+                    group = self.h5f.create_new_group(nodename)
+                    self.h5f.create_compressible_array('result',
+                                          (numfreq, self.steer.grid.size*self.steer.mics.num_mics),
+                                          self.precision,
+                                          group)
+                    self.h5f.create_compressible_array('freqs',
+                                          (numfreq, ),
+                                          'int8',#'bool', 
+                                          group)
+            ac = self.h5f.get_data_by_reference('result','/'+nodename)
+            fr = self.h5f.get_data_by_reference('freqs','/'+nodename)
+            return (ac,fr)    
+    
     @property_depends_on('ext_digest')
-    def _get_result ( self ):
+    def _get_sodix_result ( self ):
         """
         This is the :attr:`result` getter routine.
         The beamforming result is either loaded or calculated.
@@ -1987,7 +2031,7 @@ class BeamformerSODIX( BeamformerBase ):
             the :attr:`sampling frequency<acoular.sources.SamplesGenerator.sample_freq>` and conjugate
             used :attr:`FFT block size<acoular.spectra.PowerSpectra.block_size>`.
         """
-        res = self.result # trigger calculation
+        res = self.sodix_result # trigger calculation
         freq = self.freq_data.fftfreq()
         if len(freq) == 0:
             return None
