@@ -18,7 +18,7 @@
 
 # imports from other packages
 from __future__ import print_function, division
-from numpy import pi, arange, sin, sqrt, repeat, tile, log, zeros
+from numpy import pi, sin, sqrt, repeat, tile, log, zeros, linspace
 from numpy.random import RandomState
 from traits.api import HasPrivateTraits, Trait, Float, Int, CLong, Bool, \
 Property, cached_property, Delegate
@@ -230,7 +230,7 @@ class SineGenerator( SignalGenerator ):
         array of floats
             The resulting signal as an array of length :attr:`~SignalGenerator.numsamples`.
         """
-        t = arange(self.numsamples, dtype=float)/self.sample_freq
+        t = linspace(0,self.numsamples/self.sample_freq,self.numsamples, dtype = float)
         return self.amplitude * sin(2*pi*self.freq * t + self.phase)
 
 
