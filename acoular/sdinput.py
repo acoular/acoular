@@ -15,24 +15,24 @@ from traits.api import Int, Long, Bool, Property, Any, observe, cached_property
 from .tprocess import SamplesGenerator
 from .internal import digest
 
-class SoundDeviceSamplesGenerator(SamplesGenerator): 
+class SoundDeviceSamplesGenerator(SamplesGenerator):
 
     """
     Controller for sound card hardware using sounddevice library
-    
-    Uses the device with index :attr:`device` to read samples 
-    from input stream, generates output stream via the generator 
+
+    Uses the device with index :attr:`device` to read samples
+    from input stream, generates output stream via the generator
     :meth:`result`.
     """
-    
+
     #: input device index, refers to sounddevice list
     device = Int(0, desc="input device index")
-            
+
     #: Number of input channels, maximum depends on device
-    numchannels = Long( 1,
+    numchannels = Long(1,
        desc="number of analog input channels that collects data")
 
-    #: Number of samples to collect; defaults to -1. 
+    #: Number of samples to collect; defaults to -1.
     # If is set to -1 device collects till user breaks streaming by setting Trait: collectsamples = False
     numsamples = Long(-1,
         desc="number of samples to collect")    
@@ -57,7 +57,7 @@ class SoundDeviceSamplesGenerator(SamplesGenerator):
     stream = Any
 
     # internal identifier
-    digest = Property( depends_on = ['device', 'numchannels', 'numsamples'])
+    digest = Property( depends_on=['device', 'numchannels', 'numsamples'])
     
     @cached_property
     def _get_digest( self ):
@@ -104,18 +104,15 @@ class SoundDeviceSamplesGenerator(SamplesGenerator):
             self.running = True
             if self.numsamples == -1: 
                 while self.collectsamples: # yield data as long as collectsamples is True
-                    print(stream.read_available,self.overflow,self.collectsamples)
-                    # print(stream.read_available,self.overflow,self.collectsamples)
-                    # print(stream.read_available,self.overflow,self.collectsamples)
                     data,self.overflow = stream.read(num)
                     yield data[:num]   
                                            
             elif self.numsamples > 0: # amount of samples to collect is specified by user            
-                samples_count=0 # numsamples counter 
+                samples_count = 0 # numsamples counter 
                 while samples_count < self.numsamples: 
-                        anz = min(num,self.numsamples-samples_count)
-                        data,self.overflow = stream.read(num)
-                        yield data[:anz]   
-                        samples_count += anz
+                    anz = min(num, self.numsamples-samples_count)
+                    data, self.overflow = stream.read(num)
+                    yield data[:anz]   
+                    samples_count += anz
         self.running = False
         return  
