@@ -6,7 +6,7 @@
 """
 
 Loads the example data set, sets diffrent Sectors for intergration.
-Shows acoular Sector und Sound Pressure level Integration functionallity.
+Shows acoular Sector und Sound Pressure level Integration functionality.
 
 """
 
@@ -37,7 +37,7 @@ bf  = acoular.BeamformerBase(freq_data = f,steer= st)
 #1. a circle containing of three values: x-center, y-center and radius
 circle = array([-0.3,-0.1, 0.05])
 
-#2. a rektange containing of 4 values: lower corner(x1, y1) and upper corner(x2, y2).
+#2. a rectangle containing of 4 values: lower corner(x1, y1) and upper corner(x2, y2).
 rect  =  array([-0.5,   -0.15, -0.4 , 0.15])
 
 #3. a polygon containing of vector tuples: x1,y1,x2,y2,...,xi,yi
@@ -57,6 +57,10 @@ multi_sector = acoular.MultiSector( sectors = [circle_sector,rect_sector,poly_se
 #calculate the discrete frequencies for the integration
 fftfreqs = arange(block/2+1)*(51200/block)
 
+
+# two integration variants exist (with same outcome):
+# 1. use acoulars integrate function    
+
 #integrate SPL values from beamforming results using the shapes
 levels_circ = acoular.integrate(bf.result, rg, circle)
 levels_rect = acoular.integrate(bf.result, rg, rect)
@@ -64,9 +68,24 @@ levels_poly = acoular.integrate(bf.result, rg, poly)
 
 #integrate SPL values from beamforming results using sector classes
 levels_circ_sector = acoular.integrate(bf.result, rg, circle_sector)
-levels_rekt_sector = acoular.integrate(bf.result, rg, rect_sector)
+levels_rect_sector = acoular.integrate(bf.result, rg, rect_sector)
 levels_poly_sector = acoular.integrate(bf.result, rg, poly_sector)
 levels_multi_sector = acoular.integrate(bf.result, rg, multi_sector)
+
+# 2. use beamformers integrate function (does not require explicit assignment 
+# of grid object)
+
+#integrate SPL values from beamforming results using the shapes
+levels_circ = bf.integrate(circle)
+levels_rect = bf.integrate(rect)
+levels_poly = bf.integrate(poly)
+
+#integrate SPL values from beamforming results using sector classes
+levels_circ_sector = bf.integrate(circle_sector)
+levels_rect_sector = bf.integrate(rect_sector)
+levels_poly_sector = bf.integrate(poly_sector)
+levels_multi_sector = bf.integrate(multi_sector)
+
 
 #plot map and sectors
 figure()
@@ -94,7 +113,7 @@ legend(['Circle','Rectangle','Polygon'])
 #plot from sector classes
 figure()
 plot(fftfreqs,acoular.L_p(levels_circ_sector))
-plot(fftfreqs,acoular.L_p(levels_rekt_sector))
+plot(fftfreqs,acoular.L_p(levels_rect_sector))
 plot(fftfreqs,acoular.L_p(levels_poly_sector))
 plot(fftfreqs,acoular.L_p(levels_multi_sector))
 xlim([2000,20000])
