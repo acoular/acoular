@@ -70,6 +70,7 @@ from .h5files import H5CacheFileBase, _get_h5file_class
 from .environments import cartToCyl,cylToCart
 from .microphones import MicGeom
 from .configuration import config
+import pdb
 
 
 class SamplesGenerator( HasPrivateTraits ):
@@ -265,10 +266,13 @@ class MaskedTimeInOut ( TimeInOut ):
                     ns = block.shape[0] # numbers of samples
                     buf[offset:offset+ns] = block[:, self.channels]
                     if i > start + num:
-                        yield buf[:num]
-                    buf[:offset] = buf[num:num+offset]
-            if offset-stopoff != 0:
-                yield buf[:(offset-stopoff)]
+                        if (offset+ns < num):
+                            yield buf[:offset+ns]
+                        else:
+                            yield buf[:num]
+                buf[:offset] = buf[num:num+offset]
+            if (num - offset < ns):
+                yield buf[:offset+ns-num]
         
         else: # if no start/stop given, don't do the resorting thing
             for block in self.source.result(num):
