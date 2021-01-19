@@ -833,7 +833,7 @@ class SourceMixer( SamplesGenerator ):
     ldigest = Property( depends_on = ['sources.digest', ])
 
     # internal identifier
-    digest = Property( depends_on = ['ldigest', '__class__'])
+    digest = Property( depends_on = ['ldigest', '__class__','sources[]'])
 
     @cached_property
     def _get_ldigest( self ):
@@ -846,7 +846,7 @@ class SourceMixer( SamplesGenerator ):
     def _get_digest( self ):
         return digest(self)
 
-    @on_trait_change('sources')
+    @on_trait_change('sources[]')
     def validate_sources( self ):
         """ Validates if sources fit together. """
         if self.sources:
