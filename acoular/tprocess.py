@@ -70,7 +70,6 @@ from .h5files import H5CacheFileBase, _get_h5file_class
 from .environments import cartToCyl,cylToCart
 from .microphones import MicGeom
 from .configuration import config
-import pdb
 
 
 class SamplesGenerator( HasPrivateTraits ):
