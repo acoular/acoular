@@ -246,11 +246,13 @@ class MaskedTimeInOut ( TimeInOut ):
         Samples in blocks of shape (num, :attr:`numchannels`). 
             The last block may be shorter than num.
         """
-        sli = slice(self.start, self.stop).indices(self.numsamples_total)
+        sli = slice(self.start, self.stop).indices(self.numsamples_total-1)
         start = sli[0]
         stop = sli[1]
-        if start >= stop:
+        if start > stop:
             raise IOError("no samples available")
+        if stop > self.numsamples_total - 1:
+            raise IOError("stop larger then number of samples")
         
         if start != 0 or stop != self.numsamples_total:
 
@@ -265,13 +267,10 @@ class MaskedTimeInOut ( TimeInOut ):
                     ns = block.shape[0] # numbers of samples
                     buf[offset:offset+ns] = block[:, self.channels]
                     if i > start + num:
-                        if (offset+ns < num):
-                            yield buf[:offset+ns]
-                        else:
-                            yield buf[:num]
+                        yield buf[:num]
                 buf[:offset] = buf[num:num+offset]
-            if (num - offset < ns):
-                yield buf[:offset+ns-num]
+            indx= (stop-start+1)%num
+            yield buf[:indx]
         
         else: # if no start/stop given, don't do the resorting thing
             for block in self.source.result(num):
