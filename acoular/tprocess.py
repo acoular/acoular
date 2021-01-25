@@ -268,7 +268,7 @@ class MaskedTimeInOut ( TimeInOut ):
                     buf[offset:offset+ns] = block[:, self.channels]
                     if i > start + num:
                         yield buf[:num]
-                buf[:offset] = buf[num:num+offset]
+                    buf[:offset] = buf[num:num+offset]
             indx= (stop-start+1)%num
             yield buf[:indx]
         
