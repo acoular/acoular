@@ -20,7 +20,7 @@
 # imports from other packages
 from __future__ import print_function, division
 from numpy import pi, arange, sin, sqrt, repeat, tile, log, zeros, array
-from numpy.random import RandomState, default_rng
+from numpy.random import RandomState
 from traits.api import HasPrivateTraits, Trait, Float, Int, CLong, Bool, \
 Property, cached_property, Delegate, CArray
 from scipy.signal import resample, sosfilt, tf2sos
@@ -217,7 +217,7 @@ class FiltWNoiseGenerator(WNoiseGenerator):
         Array of floats
             The resulting signal as an array of length :attr:`~SignalGenerator.numsamples`.
         """
-        rnd_gen = default_rng(self.seed)
+        rnd_gen = RandomState(self.seed)
         ma = self.handle_empty_coefficients(self.ma)
         ar = self.handle_empty_coefficients(self.ar)
         sos = tf2sos(ma, ar)
