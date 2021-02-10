@@ -1,6 +1,6 @@
 import unittest
 from acoular import FiltWNoiseGenerator
-from numpy.random import default_rng
+from numpy.random import RandomState
 from numpy import array
 #from parameterized import parameterized
 
@@ -39,7 +39,7 @@ class Test_FiltWNoiseGenerator(unittest.TestCase):
     def test_no_coefficients(self):
         """test that white noise and filtered white noise is equal when no coefficients are
         specified"""
-        wn_signal = default_rng(seed=1).standard_normal(400)
+        wn_signal = RandomState(seed=1).standard_normal(400)
         signal = self.fwn.signal()
         self.assertEqual(wn_signal.sum(),signal.sum())
 
