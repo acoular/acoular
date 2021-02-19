@@ -101,7 +101,6 @@ class MicGeom( HasPrivateTraits ):
         if not path.isfile(self.from_file):
             # no file there
             self.mpos_tot = array([], 'd')
-            self.num_mics = 0
             return
         import xml.dom.minidom
         doc = xml.dom.minidom.parse(self.from_file)
