@@ -425,7 +425,7 @@ class PointSource( SamplesGenerator ):
                 ind += 1.
                 i += 1
                 if i == num:
-                    yield out
+                    yield out.copy()
                     i = 0
             except IndexError: #if no more samples available from the source
                 break
