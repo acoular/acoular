@@ -1196,7 +1196,7 @@ class Mixer( TimeInOut ):
     ldigest = Property( depends_on = ['sources.digest', ])
 
     # internal identifier
-    digest = Property( depends_on = ['source.digest', 'ldigest', '__class__'])
+    digest = Property( depends_on = ['sources','source.digest', 'ldigest', '__class__'])
 
     @cached_property
     def _get_ldigest( self ):
