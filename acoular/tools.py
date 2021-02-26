@@ -49,14 +49,16 @@ def return_result(source, nmax=-1, num=128):
     array of floats (number of samples, source.numchannels)
         Array that holds all the data.
     """
+    resulter = (_.copy() for _ in source.result(num))
+    
     if nmax > 0: 
         nblocks = (nmax-1) // num + 1
         return concatenate( 
                       list( res for _, res in 
                             zip(range(nblocks), 
-                                source.result(num)) ) )[:nmax]
+                                resulter) ) )[:nmax]
     else:
-        return concatenate(list(source.result(num)))
+        return concatenate(list(resulter))
 
 
 def spherical_hn1(n,z,derivativearccos=False):
