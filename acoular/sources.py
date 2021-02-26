@@ -846,7 +846,7 @@ class SourceMixer( SamplesGenerator ):
     def _get_digest( self ):
         return digest(self)
 
-    @on_trait_change('sources[]')
+    @on_trait_change('sources')
     def validate_sources( self ):
         """ Validates if sources fit together. """
         if self.sources:
