@@ -31,7 +31,7 @@ requirements:
     - scipy >=1.1.0
     - scikit-learn >=0.19.1
     - pytables >=3.4.4
-    - traits >=4.6.0
+    - traits >=6.
     - numba >=0.40.0
     - libpython [win]
 
@@ -43,7 +43,7 @@ requirements:
     - scipy >=0.1.0
     - scikit-learn >=0.19.1
     - pytables >=3.4.4
-    - traits >=4.6.0
+    - traits >=6.
 
 test:
   # Python imports
