@@ -30,7 +30,8 @@ CArray, cached_property, Trait
 
 from .internal import digest
 
-@nb.njit([(nb.float64[:,:], nb.float64[:,:])],
+@nb.njit([(nb.float64[:,:], nb.float64[:,:]), (nb.float64[:,:], nb.float32[:,:]), 
+        (nb.float32[:,:], nb.float64[:,:]),(nb.float32[:,:], nb.float32[:,:])],
                 cache=True, fastmath=True)
 def dist_mat(gpos,mpos):
     """computes distance matrix, accelerated with numba
