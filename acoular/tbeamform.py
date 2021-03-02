@@ -436,8 +436,6 @@ class BeamformerTimeTraj( BeamformerTime ):
         zi = empty((dmax+num, self.source.numchannels), \
             dtype=float) #working copy of data
         o = empty((num, self.grid.size), dtype=float) # output array
-        temp = empty((self.grid.size, self.source.numchannels), dtype=float)
-        d_index2 = arange(self.steer.mics.num_mics, dtype=int) # second index (static)
         offset = dmax+num # start offset for working array
         ooffset = 0 # offset for output array     
         movgpos = self.get_moving_gpos() # create moving grid pos generator
@@ -459,7 +457,6 @@ class BeamformerTimeTraj( BeamformerTime ):
             delays = rm/c
             d_index = array(delays, dtype=int) # integer index
             d_interp2 = delays % 1 # 2nd coeff for lin interpolation between samples
-            d_interp1 = 1-d_interp2 # 1st coeff for lin interpolation
             # now, we have to make sure that the needed data is available                 
             while offset+d_index.max()+2>dmax+num:
                 # copy remaining samples in front of next block
@@ -484,11 +481,7 @@ class BeamformerTimeTraj( BeamformerTime ):
                 else:
                     amp = (w/(rm*rm)).sum(1) * r0
                     amp = 1.0/(amp[:, newaxis]*rm) # multiplication factor
-                # the next line needs to be implemented faster
-                # it eats half of the time
-                temp[:, :] = (zi[offset+d_index, d_index2]*d_interp1 \
-                            + zi[offset+d_index+1, d_index2]*d_interp2)*amp
-                o[ooffset] = temp.sum(-1)
+                _delayandsum(zi,offset+d_index,d_interp2,amp,o[ooffset])
                 offset += 1
                 ooffset += 1
         # remaining data chunk
@@ -552,13 +545,14 @@ class BeamformerTimeSqTraj( BeamformerTimeSq, BeamformerTimeTraj ):
         zi = empty((dmax+num, self.source.numchannels), \
             dtype=float) #working copy of data
         o = empty((num, self.grid.size), dtype=float) # output array
-        temp = empty((self.grid.size, self.source.numchannels), dtype=float)
-        d_index2 = arange(self.steer.mics.num_mics, dtype=int) # second index (static)
         offset = dmax+num # start offset for working array
         ooffset = 0 # offset for output array      
         movgpos = self.get_moving_gpos() # create moving grid pos generator
         movgspeed = self.trajectory.traj( 0.0, delta_t=1/self.source.sample_freq, 
                           der=1)
+        dr = 0.0
+        if self.r_diag:
+            dr = 1.0
         data = self.source.result(num)
         flag = True
         while flag:
@@ -575,7 +569,6 @@ class BeamformerTimeSqTraj( BeamformerTimeSq, BeamformerTimeTraj ):
             delays = rm/c
             d_index = array(delays, dtype=int) # integer index
             d_interp2 = delays % 1 # 2nd coeff for lin interpolation between samples
-            d_interp1 = 1-d_interp2 # 1st coeff for lin interpolation
             # now, we have to make sure that the needed data is available                 
             while offset+d_index.max()+2>dmax+num:
                 # copy remaining samples in front of next block
@@ -601,17 +594,7 @@ class BeamformerTimeSqTraj( BeamformerTimeSq, BeamformerTimeTraj ):
                 else:
                     amp = (w/(rm*rm)).sum(1) * r0
                     amp = 1.0/(amp[:, newaxis]*rm) # multiplication factor
-                # the next line needs to be implemented faster
-                # it eats half of the time
-                temp[:, :] = (zi[offset+d_index, d_index2]*d_interp1 \
-                            + zi[offset+d_index+1, d_index2]*d_interp2)*amp
-                if self.r_diag:
-                    # simple sum and remove autopower
-                    o[ooffset] = clip(temp.sum(-1)**2 - \
-                        (temp**2).sum(-1), 1e-100, 1e+100)
-                else:
-                    # simple sum
-                    o[ooffset] = temp.sum(-1)**2
+                _delayandsum2(zi,offset+d_index,d_interp2,amp,dr,o[ooffset])
                 offset += 1
                 ooffset += 1
         # remaining data chunk
