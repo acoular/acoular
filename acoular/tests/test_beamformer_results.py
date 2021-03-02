@@ -11,6 +11,7 @@ import unittest
 
 #acoular imports
 import acoular
+acoular.config.global_caching="none" # to make sure that nothing is cached
 
 from acoular import L_p, Calib, MicGeom, PowerSpectra, \
 RectGrid, BeamformerBase, BeamformerEig, BeamformerOrth, BeamformerCleansc, \
@@ -32,7 +33,7 @@ micgeofile = path.join( path.split(acoular.__file__)[0],'xml','array_56.xml')
 cfreqs = 1000,8000
 
 #load numerical values from datafile
-h5file_num = tables.open_file('Beamforer_numerical_values.h5', 'r')
+h5file_num = tables.open_file('reference_data/Beamforer_numerical_values.h5', 'r')
 
 res_num = h5file_num.get_node('/timebf_values').read()
 resq_num = h5file_num.get_node('/timebfsq_values').read()
