@@ -16,7 +16,7 @@ parallelOption = 'parallel'  # if numba.guvectorize is used: 'CPU' for single th
 
 # Formerly known as 'faverage'
 @nb.njit([nb.complex128[:,:,:](nb.complex128[:,:,:], nb.complex128[:,:]), 
-          nb.complex64[:,:,:](nb.complex64[:,:,:], nb.complex64[:,:])], cache=cachedOption)
+          nb.complex64[:,:,:](nb.complex64[:,:,:], nb.complex64[:,:])], cache=cachedOption, parallel=True)
 def calcCSM(csm, SpecAllMics):
     """ Adds a given spectrum to the Cross-Spectral-Matrix (CSM).
     Here only the upper triangular matrix of the CSM is calculated. After
@@ -45,7 +45,7 @@ def calcCSM(csm, SpecAllMics):
 #==============================================================================
     nFreqs = csm.shape[0]
     nMics = csm.shape[1]
-    for cntFreq in range(nFreqs):
+    for cntFreq in nb.prange(nFreqs):
         for cntColumn in range(nMics):
             temp = SpecAllMics[cntFreq, cntColumn].conjugate()
             for cntRow in range(cntColumn + 1):  # calculate upper triangular matrix (of every frequency-slice) only
