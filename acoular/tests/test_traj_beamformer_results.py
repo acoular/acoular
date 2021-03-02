@@ -182,8 +182,7 @@ class BeamformerTimeTest(unittest.TestCase):
                 name = f"reference_data/reference_results_{beamformer.__name__}.h5"
                 ref_data = get_beamformer_reference_data_from_h5(name)
                 actual_data = get_beamformer_traj_result(beamformer)
-                dif_sum =(actual_data-ref_data).sum()
-                self.assertEqual(dif_sum,0)
+                np.testing.assert_allclose(actual_data, ref_data, rtol=1e-7, atol=0)
 
     def test_beamformer_time_result(self):
         """compare results of time beamformers with fixed focus against previous
@@ -193,8 +192,7 @@ class BeamformerTimeTest(unittest.TestCase):
                 name = f"reference_data/reference_results_{beamformer.__name__}.h5"
                 ref_data = get_beamformer_reference_data_from_h5(name)
                 actual_data = get_beamformer_time_result(beamformer)
-                dif_sum =(actual_data-ref_data).sum()
-                self.assertEqual(dif_sum,0)
+                np.testing.assert_allclose(actual_data, ref_data, rtol=1e-7, atol=0)
     
 if __name__ == '__main__':
     """ run tests """
