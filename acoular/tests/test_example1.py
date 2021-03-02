@@ -23,7 +23,7 @@ from os import path
 import tables
 
 #load numerical values from Examples
-h5file_num = tables.open_file('Example1_numerical_values_testsum.h5', 'r')
+h5file_num = tables.open_file('reference_data/Example1_numerical_values_testsum.h5', 'r')
 
 mpos_num = h5file_num.get_node('/mpos_values').read()
 grid_pos_num = h5file_num.get_node('/grid_pos_values').read()
