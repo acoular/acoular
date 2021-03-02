@@ -363,6 +363,14 @@ class BeamformerTimeTraj( BeamformerTime ):
         """
         Python generator that yields the moving grid coordinates samplewise 
         """
+        def cross(a, b):
+            """ cross product for fast computation
+                because numpy.cross is ultra slow in this case
+            """
+            return array([a[1]*b[2] - a[2]*b[1],
+                        a[2]*b[0] - a[0]*b[2],
+                        a[0]*b[1] - a[1]*b[0]])
+
         start_t = 0.0
         gpos = self.grid.pos()
         trajg = self.trajectory.traj( start_t, delta_t=1/self.source.sample_freq)
@@ -456,7 +464,7 @@ class BeamformerTimeTraj( BeamformerTime ):
                 r0 = self.env._r(tpos)
             delays = rm/c
             d_index = array(delays, dtype=int) # integer index
-            d_interp2 = delays % 1 # 2nd coeff for lin interpolation between samples
+            d_interp2 = delays - d_index # 2nd coeff for lin interpolation between samples
             # now, we have to make sure that the needed data is available                 
             while offset+d_index.max()+2>dmax+num:
                 # copy remaining samples in front of next block
@@ -568,7 +576,7 @@ class BeamformerTimeSqTraj( BeamformerTimeSq, BeamformerTimeTraj ):
                 r0 = self.env._r(tpos)
             delays = rm/c
             d_index = array(delays, dtype=int) # integer index
-            d_interp2 = delays % 1 # 2nd coeff for lin interpolation between samples
+            d_interp2 = delays - d_index # 2nd coeff for lin interpolation between samples
             # now, we have to make sure that the needed data is available                 
             while offset+d_index.max()+2>dmax+num:
                 # copy remaining samples in front of next block
