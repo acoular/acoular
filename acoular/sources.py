@@ -833,7 +833,7 @@ class SourceMixer( SamplesGenerator ):
     ldigest = Property( depends_on = ['sources.digest', ])
 
     # internal identifier
-    digest = Property( depends_on = ['ldigest', '__class__'])
+    digest = Property( depends_on = ['ldigest', '__class__','sources'])
 
     @cached_property
     def _get_ldigest( self ):
