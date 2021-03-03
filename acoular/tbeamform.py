@@ -36,6 +36,7 @@ from .grids import RectGrid
 from .trajectory import Trajectory
 from .tprocess import TimeInOut
 from .fbeamform import SteeringVector, L_p
+from .tfastfuncs import _delayandsum, _delayandsum2
 
 
 def const_power_weight( bf ):
@@ -215,13 +216,8 @@ class BeamformerTime( TimeInOut ):
         delays = self.rm/c
         d_index = array(delays, dtype=int) # integer index
         d_interp2 = delays % 1 # 2nd coeff for lin interpolation between samples
-        d_interp1 = 1-d_interp2 # 1st coeff for lin interpolation 
-        d_index2 = arange(self.steer.mics.num_mics)
-#        amp = (self.rm/self.r0[:, newaxis]) # multiplication factor
         amp = (w/(self.rm*self.rm)).sum(1) * self.r0
         amp = 1.0/(amp[:, newaxis]*self.rm) # multiplication factor
-        d_interp1 *= amp # premultiplication, to save later ops
-        d_interp2 *= amp
         dmin = d_index.min() # minimum index
         dmax = d_index.max()+1 # maximum index
         aoff = dmax-dmin # index span
@@ -240,9 +236,7 @@ class BeamformerTime( TimeInOut ):
                 if ooffset == num:
                     yield o
                     ooffset = 0
-                # the next line needs to be implemented faster
-                o[ooffset] = (zi[offset+d_index, d_index2]*d_interp1 + \
-                        zi[offset+d_index+1, d_index2]*d_interp2).sum(-1)
+                _delayandsum(zi,offset+d_index,d_interp2,amp,o[ooffset])
                 offset += 1
                 ooffset += 1
             # copy remaining samples in front of next block
@@ -302,23 +296,19 @@ class BeamformerTimeSq( BeamformerTime ):
         delays = self.rm/c
         d_index = array(delays, dtype=int) # integer index
         d_interp2 = delays % 1 # 2nd coeff for lin interpolation between samples
-        d_interp1 = 1-d_interp2 # 1st coeff for lin interpolation
-        d_index2 = arange(self.steer.mics.num_mics)
-#        amp = (self.rm/self.r0[:, newaxis]) # multiplication factor
         amp = (w/(self.rm*self.rm)).sum(1) * self.r0
         amp = 1.0/(amp[:, newaxis]*self.rm) # multiplication factor
-        d_interp1 *= amp # premultiplication, to save later ops
-        d_interp2 *= amp
         dmin = d_index.min() # minimum index
         dmax = d_index.max()+1 # maximum index
-#        print dmin, dmax
         aoff = dmax-dmin # index span
         #working copy of data:
         zi = empty((aoff+num, self.source.numchannels), dtype=float)
         o = empty((num, self.grid.size), dtype=float) # output array
-        temp = empty((self.grid.size, self.source.numchannels), dtype=float)
         offset = aoff # start offset for working array
         ooffset = 0 # offset for output array
+        dr = 0.0
+        if self.r_diag:
+            dr = 1.0
         for block in self.source.result(num):
             ns = block.shape[0] # numbers of samples and channels
             maxoffset = ns-dmin # ns - aoff +aoff -dmin
@@ -329,16 +319,7 @@ class BeamformerTimeSq( BeamformerTime ):
                 if ooffset == num:
                     yield o
                     ooffset = 0
-                # the next line needs to be implemented faster
-                temp[:, :] = (zi[offset+d_index, d_index2]*d_interp1 \
-                    + zi[offset+d_index+1, d_index2]*d_interp2)
-                if self.r_diag:
-                    # simple sum and remove autopower
-                    o[ooffset] = clip(temp.sum(-1)**2 - \
-                            (temp**2).sum(-1), 1e-100, 1e+100)
-                else:
-                    # simple sum
-                    o[ooffset] = temp.sum(-1)**2
+                _delayandsum2(zi,offset+d_index,d_interp2,amp,dr,o[ooffset])
                 offset += 1
                 ooffset += 1
             # copy remaining samples in front of next block
@@ -346,8 +327,6 @@ class BeamformerTimeSq( BeamformerTime ):
             offset -= num
         # remaining data chunk 
         yield o[:ooffset]
-
-
 
 
 class BeamformerTimeTraj( BeamformerTime ):
@@ -384,6 +363,14 @@ class BeamformerTimeTraj( BeamformerTime ):
         """
         Python generator that yields the moving grid coordinates samplewise 
         """
+        def cross(a, b):
+            """ cross product for fast computation
+                because numpy.cross is ultra slow in this case
+            """
+            return array([a[1]*b[2] - a[2]*b[1],
+                        a[2]*b[0] - a[0]*b[2],
+                        a[0]*b[1] - a[1]*b[0]])
+
         start_t = 0.0
         gpos = self.grid.pos()
         trajg = self.trajectory.traj( start_t, delta_t=1/self.source.sample_freq)
@@ -457,8 +444,6 @@ class BeamformerTimeTraj( BeamformerTime ):
         zi = empty((dmax+num, self.source.numchannels), \
             dtype=float) #working copy of data
         o = empty((num, self.grid.size), dtype=float) # output array
-        temp = empty((self.grid.size, self.source.numchannels), dtype=float)
-        d_index2 = arange(self.steer.mics.num_mics, dtype=int) # second index (static)
         offset = dmax+num # start offset for working array
         ooffset = 0 # offset for output array     
         movgpos = self.get_moving_gpos() # create moving grid pos generator
@@ -479,8 +464,7 @@ class BeamformerTimeTraj( BeamformerTime ):
                 r0 = self.env._r(tpos)
             delays = rm/c
             d_index = array(delays, dtype=int) # integer index
-            d_interp2 = delays % 1 # 2nd coeff for lin interpolation between samples
-            d_interp1 = 1-d_interp2 # 1st coeff for lin interpolation
+            d_interp2 = delays - d_index # 2nd coeff for lin interpolation between samples
             # now, we have to make sure that the needed data is available                 
             while offset+d_index.max()+2>dmax+num:
                 # copy remaining samples in front of next block
@@ -505,11 +489,7 @@ class BeamformerTimeTraj( BeamformerTime ):
                 else:
                     amp = (w/(rm*rm)).sum(1) * r0
                     amp = 1.0/(amp[:, newaxis]*rm) # multiplication factor
-                # the next line needs to be implemented faster
-                # it eats half of the time
-                temp[:, :] = (zi[offset+d_index, d_index2]*d_interp1 \
-                            + zi[offset+d_index+1, d_index2]*d_interp2)*amp
-                o[ooffset] = temp.sum(-1)
+                _delayandsum(zi,offset+d_index,d_interp2,amp,o[ooffset])
                 offset += 1
                 ooffset += 1
         # remaining data chunk
@@ -573,13 +553,14 @@ class BeamformerTimeSqTraj( BeamformerTimeSq, BeamformerTimeTraj ):
         zi = empty((dmax+num, self.source.numchannels), \
             dtype=float) #working copy of data
         o = empty((num, self.grid.size), dtype=float) # output array
-        temp = empty((self.grid.size, self.source.numchannels), dtype=float)
-        d_index2 = arange(self.steer.mics.num_mics, dtype=int) # second index (static)
         offset = dmax+num # start offset for working array
         ooffset = 0 # offset for output array      
         movgpos = self.get_moving_gpos() # create moving grid pos generator
         movgspeed = self.trajectory.traj( 0.0, delta_t=1/self.source.sample_freq, 
                           der=1)
+        dr = 0.0
+        if self.r_diag:
+            dr = 1.0
         data = self.source.result(num)
         flag = True
         while flag:
@@ -595,8 +576,7 @@ class BeamformerTimeSqTraj( BeamformerTimeSq, BeamformerTimeTraj ):
                 r0 = self.env._r(tpos)
             delays = rm/c
             d_index = array(delays, dtype=int) # integer index
-            d_interp2 = delays % 1 # 2nd coeff for lin interpolation between samples
-            d_interp1 = 1-d_interp2 # 1st coeff for lin interpolation
+            d_interp2 = delays - d_index # 2nd coeff for lin interpolation between samples
             # now, we have to make sure that the needed data is available                 
             while offset+d_index.max()+2>dmax+num:
                 # copy remaining samples in front of next block
@@ -622,17 +602,7 @@ class BeamformerTimeSqTraj( BeamformerTimeSq, BeamformerTimeTraj ):
                 else:
                     amp = (w/(rm*rm)).sum(1) * r0
                     amp = 1.0/(amp[:, newaxis]*rm) # multiplication factor
-                # the next line needs to be implemented faster
-                # it eats half of the time
-                temp[:, :] = (zi[offset+d_index, d_index2]*d_interp1 \
-                            + zi[offset+d_index+1, d_index2]*d_interp2)*amp
-                if self.r_diag:
-                    # simple sum and remove autopower
-                    o[ooffset] = clip(temp.sum(-1)**2 - \
-                        (temp**2).sum(-1), 1e-100, 1e+100)
-                else:
-                    # simple sum
-                    o[ooffset] = temp.sum(-1)**2
+                _delayandsum2(zi,offset+d_index,d_interp2,amp,dr,o[ooffset])
                 offset += 1
                 ooffset += 1
         # remaining data chunk

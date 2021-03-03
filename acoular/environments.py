@@ -17,6 +17,7 @@
     SlotJet
 
 """
+import numba as nb
 from numpy import array, isscalar, float32, float64, newaxis, zeros, \
 sqrt, arange, pi, exp, sin, cos, arccos, zeros_like, empty, dot, hstack, \
 vstack, identity, cross, sign, arctan2, matmul, sum, lexsort, stack, nonzero, append, outer, asarray
@@ -28,6 +29,29 @@ from traits.api import HasPrivateTraits, Float, Property, Int, \
 CArray, cached_property, Trait
 
 from .internal import digest
+
+@nb.njit([(nb.float64[:,:], nb.float64[:,:]), (nb.float64[:,:], nb.float32[:,:]), 
+        (nb.float32[:,:], nb.float64[:,:]),(nb.float32[:,:], nb.float32[:,:])],
+                cache=True, fastmath=True)
+def dist_mat(gpos,mpos):
+    """computes distance matrix, accelerated with numba
+
+    Args:
+        gpos (3,N)
+        mpos (3,M)
+
+    Returns:
+        (N,M) distance matrix
+    """    
+    _,M = mpos.shape
+    _,N = gpos.shape
+    rm = empty((N,M),dtype=float64)
+    for n in range(N):
+        g = gpos[:,n]
+        for m in range(M):
+            rm[n,m] = sqrt((g[0] - mpos[0,m])**2 + (g[1] - mpos[1,m])**2 + (g[2] - mpos[2,m])**2)
+    return rm
+
 
 def cartToCyl(x, Q=identity(3)):
     """
@@ -85,7 +109,6 @@ def cylToCart(x, Q=identity(3)):
         return CartCoord
 
 
-
 class Environment( HasPrivateTraits ):
     """
     A simple acoustic environment without flow.
@@ -127,10 +150,11 @@ class Environment( HasPrivateTraits ):
             then only a one-dimensional array is returned.
         """
         if isscalar(mpos):
-            mpos = array((0, 0, 0), dtype = float32)[:, newaxis]
-        mpos = mpos[:, newaxis, :]
-        rmv = gpos[:, :, newaxis]-mpos
-        rm = sqrt(sum(rmv*rmv, 0))
+            mpos = array((0, 0, 0), dtype = float64)[:, newaxis]
+        rm = dist_mat(gpos,mpos)
+#        mpos = mpos[:, newaxis, :]
+#        rmv = gpos[:, :, newaxis]-mpos
+#        rm = sum(rmv*rmv, 0)**0.5
         if rm.shape[1] == 1:
             rm = rm[:, 0]
         return rm
