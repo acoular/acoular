@@ -79,7 +79,7 @@ class acoular_beamformer_test(unittest.TestCase):
                 if WRITE_NEW_REFERENCE_DATA:
                     np.save(name,actual_data)
                 ref_data = np.load(name)
-                np.testing.assert_allclose(actual_data, ref_data, rtol=1e-5, atol=0)
+                np.testing.assert_allclose(actual_data, ref_data, rtol=1e-5, atol=1e-8)
 
 if __name__ == '__main__':
     unittest.main() #exit=False
