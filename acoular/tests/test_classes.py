@@ -8,7 +8,7 @@
 
 import unittest
 import acoular as ac
-from traits.api import HasTraits, Int, Float, Bool, Range
+from traits.api import HasTraits, Int, Float, Bool, Range, TraitEnum, Enum
 
 class Test_Instancing(unittest.TestCase):
     """Test that ensures that digest of Acoular classes changes correctly on
@@ -52,6 +52,9 @@ class Test_Instancing(unittest.TestCase):
                                     low = tr.handler._low
                                     high = tr.handler._high
                                     setattr(obj,k,(high+low)/2)
+                                elif tr.is_trait_type(TraitEnum) or tr.is_trait_type(Enum):
+                                    v = tr.handler.values
+                                    setattr(obj,k,v[len(v)//2])
 
 if __name__ == '__main__':
     unittest.main()
