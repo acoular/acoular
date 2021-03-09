@@ -47,6 +47,10 @@ R. Schmidt (1986). Multiple emitter location and signal parameter estimation. IE
 
 Sijtsma, P. (2007). CLEAN based on spatial source coherence. International Journal of Aeroacoustics, 6(4), 357-374.
 
+.. _Wefers2015:
+
+Wefers, F. (2015). Partitioned Convolution Algorithms for Real-Time Auralization. Logos Verlag. isbn:3832539433.
+
 .. _Yardibi2008:
 
 Yardibi, T., Li, J., Stoica, P., & Cattafesta, L. N. (2008). Sparsity constrained deconvolution approaches for acoustic source mapping. The Journal of the Acoustical Society of America, 123(5), 2631-2642.
