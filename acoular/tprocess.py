@@ -2238,7 +2238,7 @@ class TimeConvolve(TimeInOut):
 
         return blocks
 
-    def result(self, num):
+    def result(self, num=128):
         """
         Python generator that yields the output block-wise.
         The source output is convolved with the kernel.
