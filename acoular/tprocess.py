@@ -33,13 +33,14 @@
     WriteWAV
     WriteH5
     SampleSplitter
+    TimeConvolve
 """
 
 # imports from other packages
 from numpy import array, empty, empty_like, pi, sin, sqrt, zeros, newaxis, unique, \
 int16, nan, concatenate, sum, float64, identity, argsort, interp, arange, append, \
 linspace, flatnonzero, argmin, argmax, delete, mean, inf, asarray, stack, sinc, exp, \
-polymul, arange, cumsum
+polymul, arange, cumsum, ceil, split
 
 from numpy.matlib import repmat
 
@@ -48,7 +49,10 @@ from scipy.interpolate import LinearNDInterpolator,splrep, splev, \
 CloughTocher2DInterpolator, CubicSpline, Rbf
 from traits.api import HasPrivateTraits, Float, Int, CLong, Bool, ListInt, \
 Constant, File, Property, Instance, Trait, Delegate, \
-cached_property, on_trait_change, List, CArray, Dict
+cached_property, on_trait_change, List, CArray, Dict, PrefixMap, Callable
+
+import scipy.fft as sf
+import numpy.fft as nf
 
 from datetime import datetime
 from os import path
@@ -2164,4 +2168,151 @@ class SampleSplitter(TimeInOut):
                     return
         else: 
             raise IOError('Maximum size of block buffer is reached!')   
+
         
+class TimeConvolve(TimeInOut):
+    """
+    Uniformly partitioned overlap-save method (UPOLS) for fast convolution in the frequency domain, see :ref:`Wefers, 2015<Wefers2015>`.
+    """
+
+    #: Convolution kernel in the time domain.
+    #: The second dimension of the kernel array has to be either 1 or match :attr:`~SamplesGenerator.numchannels`.
+    #: If only a single kernel is supplied, it is applied to all channels.
+    kernel = CArray(dtype=float, desc="Convolution kernel.")
+
+    _block_size = Int(desc="Block size")
+
+    _kernel_blocks = Property(
+        depends_on=["kernel", "_block_size"],
+        desc="Frequency domain Kernel blocks",
+    )
+
+    #: FFT backend library, defaults to `scipy`.
+    fft_backend = PrefixMap(
+        {
+            "scipy": (lambda x: sf.rfft(x, axis=0), lambda x: sf.irfft(x, axis=0)),
+            "numpy": (lambda x: nf.rfft(x, axis=0), lambda x: nf.irfft(x, axis=0)),
+        },
+        default_value="scipy",
+    )
+
+    _fft = Callable(lambda x: sf.rfft(x, axis=0))
+    _ifft = Callable(lambda x: sf.irfft(x, axis=0))
+
+    @on_trait_change("kernel")
+    def _validate_kernel(self):
+        # reshape kernel for broadcasting
+        if self.kernel.ndim == 1:
+            print("Kernel was reshaped for broadcasting.")
+            self.kernel = self.kernel.reshape([-1, 1])
+            return
+        # check dimensionality
+        elif self.kernel.ndim > 2:
+            raise ValueError("Only one or two dimensional kernels accepted.")
+
+        # check if number of kernels matches numchannels
+        if self.kernel.shape[1] not in (1, self.source.numchannels):
+            raise ValueError("Number of kernels must be either `numchannels` or one.")
+
+    @on_trait_change("fft_backend")
+    def _change_fft_backend(self):
+        self._fft = self.fft_backend_[0]
+        self._ifft = self.fft_backend_[1]
+
+    # compute the rfft of the kernel blockwise
+    # TODO: handle case where kernel is smaller than num
+    @cached_property
+    def _get__kernel_blocks(self):
+        [L, N] = self.kernel.shape
+        num = self._block_size
+        P = int(ceil(L / num))
+        trim = num * (P - 1)
+        blocks = zeros([P, num + 1, N], dtype="complex128")
+
+        for i, block in enumerate(split(self.kernel[:trim], P - 1, axis=0)):
+            blocks[i] = self._fft(concatenate([block, zeros([num, N])], axis=0))
+
+        blocks[-1] = self._fft(
+            concatenate([self.kernel[trim:], zeros([2 * num - L + trim, N])], axis=0)
+        )
+
+        return blocks
+
+    def result(self, num):
+        """
+        Python generator that yields the output block-wise.
+        The source output is convolved with the kernel.
+
+        Parameters
+        ----------
+        num : integer
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block).
+
+        Returns
+        -------
+        Samples in blocks of shape (num, numchannels).
+            The last block may be shorter than num.
+        """
+        # initialize variables
+        self._block_size = num
+        [L, N] = self.kernel.shape
+        P = int(ceil(L / num))  # number of kernel partitions
+        FDL = FrequencyDelayLine(shape=[P, num + 1, N])
+        buff = zeros([2 * num, N])  # time-domain input buffer
+
+        # stream processing of source signal
+        for temp in self.source.result(num):
+            buff = concatenate(
+                [buff[num:], zeros([num, N])], axis=0
+            )  # shift input buffer to the left
+            buff[num : num + temp.shape[0]] = temp  # append new time-data
+            FDL.append(self._fft(buff))  # append rfft of input buffer to FDL
+            spec_sum = sum(FDL.buffer * self._kernel_blocks, axis=0)
+            yield self._ifft(spec_sum)[num:]
+
+        # no more source signal -> empty remaining contents of FDL
+        # shift input buffer one last time
+        buff = concatenate([buff[num:], zeros([num, N])], axis=0)
+        FDL.append(self._fft(buff))
+        spec_sum = sum(FDL.buffer * self._kernel_blocks, axis=0)
+        yield self._ifft(spec_sum)[num:]
+
+        # now only append zeroes
+        Z = int(ceil((L - num + (conv.source.numsamples % num)) / num) - 2)
+        for temp in range(Z):
+            FDL.append(zeros([num + 1, N]))
+            spec_sum = sum(FDL.buffer * self._kernel_blocks, axis=0)
+            yield self._ifft(spec_sum)[num:]
+
+        # truncate s.t. total length is N+M-1 (like numpy convolve w/ mode="full")
+        FDL.append(zeros([num + 1, N]))
+        spec_sum = sum(FDL.buffer * self._kernel_blocks, axis=0)
+        yield self._ifft(spec_sum)[num : (self.source.numsamples + L - 1) % num + num]
+
+
+# class that handles data structure of the frequency delay line
+class FrequencyDelayLine(HasPrivateTraits):
+    shape = CArray(shape=(3,), desc="(P,B,N)")
+    buffer = Property(depends_on="shape")
+    _buffer = CArray(dtype=complex)
+    _idx = Int(0)
+    _permutation = Property(depends_on="_idx")
+
+    @on_trait_change("shape")
+    def _init_buffer(self):
+        self._buffer = zeros(self.shape, "complex")
+
+    def _increment_index(self):
+        self._idx = int((self._idx + 1) % self.shape[0])
+
+    def _get_buffer(self):
+        return self._buffer[self._permutation]
+
+    @cached_property
+    def _get__permutation(self):
+        return [(self._idx - 1 - x) % self.shape[0] for x in range(self.shape[0])]
+
+    def append(self, buff):
+        self._buffer[self._idx] = buff
+        self._increment_index()
