@@ -21,11 +21,10 @@ from acoular import MicGeom, RectGrid3D, \
 
 # if this flag is set to True
 WRITE_NEW_REFERENCE_DATA = False
-# results are generated for comparison during testing. 
-# Should always be False. Only set to True if it is necessary to 
+# results are generated for comparison during testing.
+# Should always be False. Only set to True if it is necessary to
 # recalculate the data due to intended changes of the Beamformers.
 
-#calc all values from example with low resolution
 m = MicGeom()
 m.mpos_tot = ((0.5,0.5,0),(0,0,0),(-0.5,-0.5,0))
 mc = m.mpos
@@ -46,8 +45,8 @@ envs = [
 ]
 
 
-class acoular_env_test(unittest.TestCase):  
-    
+class acoular_env_test(unittest.TestCase):
+
     def test_flow_results(self):
         for fl in flows:
             with self.subTest(fl.__class__.__name__):
@@ -71,8 +70,4 @@ class acoular_env_test(unittest.TestCase):
                 np.testing.assert_allclose(actual_data, ref_data, rtol=1e-5, atol=1e-8)
 
 if __name__ == '__main__':
-    unittest.main() #exit=False
-
-
-
-
+    unittest.main()
