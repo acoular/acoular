@@ -95,7 +95,8 @@ PointSpreadFunction, SteeringVector
 
 from .sources import PointSource, MovingPointSource, \
 TimeSamples, MaskedTimeSamples, PointSourceDipole, UncorrelatedNoiseSource, \
-SourceMixer, SphericalHarmonicSource
+SourceMixer, SphericalHarmonicSource, Linesource, MovingPointSourceDipole, \
+MovingLinesource
 from .signals import SineGenerator, WNoiseGenerator, SignalGenerator,\
 PNoiseGenerator, GenericSignalGenerator, FiltWNoiseGenerator
 
