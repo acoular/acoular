@@ -13,10 +13,10 @@
     PointSource
     PointSourceDipole
     SphericalHarmonicSource
-    Linesource
+    LineSource
     MovingPointSource
     MovingPointSourceDipole
-    MovingLinesource
+    MovingLineSource
     UncorrelatedNoiseSource
     SourceMixer
 """
@@ -911,7 +911,6 @@ class LineSource( PointSource ):
                 self.signal.seed = s + abs(int(hash(self.digest)//10e12))
             self.signal.rms = self.signal.rms * self.source_strength[s]
             signals[s] = self.signal.usignal(self.up)
-        
         i = 0
         n = self.numsamples        
         while n:
@@ -931,7 +930,6 @@ class LineSource( PointSource ):
                 break
             
         yield out[:i]
-        
         
 class MovingLineSource(LineSource,MovingPointSource):
     
