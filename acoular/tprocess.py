@@ -252,7 +252,7 @@ class MaskedTimeInOut ( TimeInOut ):
         if start > stop:
             raise IOError("no samples available")
         if stop > self.numsamples_total - 1:
-            raise IOError("stop larger then number of samples")
+            raise IOError("stop larger than number of samples")
         
         if start != 0 or stop != self.numsamples_total:
 
