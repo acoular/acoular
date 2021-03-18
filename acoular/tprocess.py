@@ -263,14 +263,17 @@ class MaskedTimeInOut ( TimeInOut ):
             i = 0
             for block in self.source.result(num):
                 i += num
-                if i > start and i <= stop+stopoff:
+                if i > start and i <= stop+stopoff+num:
                     ns = block.shape[0] # numbers of samples
                     buf[offset:offset+ns] = block[:, self.channels]
-                    if i > start + num:
+                    if i > start + num and ns==num:
                         yield buf[:num]
-                    buf[:offset] = buf[num:num+offset]
+                buf[:offset] = buf[num:num+offset]
             indx= (stop-start+1)%num
-            yield buf[:indx]
+            if indx!=0:
+                yield buf[:indx]
+            else:
+                yield buf[:num]
         
         else: # if no start/stop given, don't do the resorting thing
             for block in self.source.result(num):
