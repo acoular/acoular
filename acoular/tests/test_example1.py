@@ -111,7 +111,8 @@ class acoular_test(unittest.TestCase):
     #test beamformer results  
     def test_beamformer_calculation(self):
         for beam,bfname in zip((bb, bc, be, bm, bl, bo, bs, bd, bcmf, bf, bdp, bgib),('bb', 'bc', 'be', 'bm', 'bl', 'bo', 'bs', 'bd', 'bcmf', 'bf', 'bdp', 'bgib')):   
-            self.assertAlmostEqual(beam.synthetic(cfreq,1).sum()/d[bfname+'num'].sum(),1,3)      
+            with self.subTest(bfname):
+                self.assertAlmostEqual(beam.synthetic(cfreq,1).sum()/d[bfname+'num'].sum(),1,3)      
             
 if "__main__" == __name__:
     unittest.main() #exit=False
