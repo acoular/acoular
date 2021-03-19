@@ -49,30 +49,35 @@ f = PowerSpectra(time_data=t1,
                window='Hanning', overlap='50%', block_size=128, #FFT-parameters
                cached = False )  #cached = False
 
-bb = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached = False)
-be = BeamformerEig(freq_data=f, steer=st, r_diag=True, n=54, cached = False)
 
-#frequency beamformers to test
-bbase = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached = False)
-bc = BeamformerCapon(freq_data=f, steer=st, cached=False)
-beig = BeamformerEig(freq_data=f, steer=st, r_diag=True, n=54, cached = False)
-bm = BeamformerMusic(freq_data=f, steer=st, n=6, cached = False)
-bd = BeamformerDamas(beamformer=bb, n_iter=10, cached = False)
-bdp = BeamformerDamasPlus(beamformer=bb, n_iter=100, cached = False)
-bo = BeamformerOrth(beamformer=be, eva_list=list(range(38,54)), cached = False)
-bs = BeamformerCleansc(freq_data=f, steer=st, r_diag=True, cached = False)
-bcmf = BeamformerCMF(freq_data=f, steer=st, method='LassoLarsBIC', cached = False)
-bl = BeamformerClean(beamformer=bb, n_iter=10, cached = False)
-bf = BeamformerFunctional(freq_data=f, steer=st, r_diag=False, gamma=3, cached = False)
-bgib = BeamformerGIB(freq_data=f, steer=st, method= 'LassoLars', n=2, cached = False)
+# produces a tuple of beamformer objects to test
+# because we need new objects for each test we have to call this more than once
+def fbeamformers():
+    bb = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached = False)
+    be = BeamformerEig(freq_data=f, steer=st, r_diag=True, n=54, cached = False)
 
-fbeamformers = (bbase, bc, beig, bm, bl, bo, bs, bd, bcmf, bf, bdp, bgib)
+    #frequency beamformers to test
+    bbase = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached = False)
+    bc = BeamformerCapon(freq_data=f, steer=st, cached=False)
+    beig = BeamformerEig(freq_data=f, steer=st, r_diag=True, n=54, cached = False)
+    bm = BeamformerMusic(freq_data=f, steer=st, n=6, cached = False)
+    bd = BeamformerDamas(beamformer=bb, n_iter=10, cached = False)
+    bdp = BeamformerDamasPlus(beamformer=bb, n_iter=100, cached = False)
+    bo = BeamformerOrth(beamformer=be, eva_list=list(range(38,54)), cached = False)
+    bs = BeamformerCleansc(freq_data=f, steer=st, r_diag=True, cached = False)
+    bcmf = BeamformerCMF(freq_data=f, steer=st, method='LassoLarsBIC', cached = False)
+    bl = BeamformerClean(beamformer=bb, n_iter=10, cached = False)
+    bf = BeamformerFunctional(freq_data=f, steer=st, r_diag=False, gamma=3, cached = False)
+    bgib = BeamformerGIB(freq_data=f, steer=st, method= 'LassoLars', n=2, cached = False)
+    return (bbase, bc, beig, bm, bl, bo, bs, bd, bcmf, bf, bdp, bgib)
 
 class acoular_beamformer_test(unittest.TestCase):  
     
     def test_beamformer_freq_results(self):
-        for b in fbeamformers:
-            with self.subTest(b.__class__.__name__):
+        # we excpect the results to computed
+        acoular.config.global_caching = 'none'
+        for b in fbeamformers():
+            with self.subTest(b.__class__.__name__+" global_caching = none"):
                 name = join('reference_data',f'{b.__class__.__name__}.npy')
                 # stack all frequency band results together
                 actual_data = np.array([b.synthetic(cf,1) for cf in cfreqs],dtype=np.float32)
@@ -80,6 +85,50 @@ class acoular_beamformer_test(unittest.TestCase):
                     np.save(name,actual_data)
                 ref_data = np.load(name)
                 np.testing.assert_allclose(actual_data, ref_data, rtol=1e-5, atol=1e-8)
+        # we excpect the results to be computed and written to cache
+        acoular.config.global_caching = 'individual'
+        for b in fbeamformers():
+            b.cached = True
+            with self.subTest(b.__class__.__name__+" global_caching = none"):
+                name = join('reference_data',f'{b.__class__.__name__}.npy')
+                actual_data = np.array([b.synthetic(cf,1) for cf in cfreqs],dtype=np.float32)
+                ref_data = np.load(name)
+                np.testing.assert_allclose(actual_data, ref_data, rtol=1e-5, atol=1e-8)
+        # we excpect the results to be read from cache
+        acoular.config.global_caching = 'all'
+        for b in fbeamformers():
+            b.cached = True
+            with self.subTest(b.__class__.__name__+" global_caching = none"):
+                name = join('reference_data',f'{b.__class__.__name__}.npy')
+                actual_data = np.array([b.synthetic(cf,1) for cf in cfreqs],dtype=np.float32)
+                ref_data = np.load(name)
+                np.testing.assert_allclose(actual_data, ref_data, rtol=1e-5, atol=1e-8)
+
+    def test_beamformer_caching(self):
+        # within each subcase, we need new beamformer objects because result is not updated when
+        # global_caching or cached changes
+        with self.subTest("global_caching = 'none'"):
+            acoular.config.global_caching = 'none'
+            b0 = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached = True)
+            b1 = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached = True)
+            self.assertNotEqual(id(b0.result),id(b1.result))
+        with self.subTest("global_caching = 'individual'"):
+            acoular.config.global_caching = 'individual'
+            b0 = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached = True)
+            b1 = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached = True)
+            self.assertEqual(id(b0.result),id(b1.result))
+            b1 = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached = False)
+            self.assertNotEqual(id(b0.result),id(b1.result))
+        with self.subTest("global_caching = 'all'"):
+            acoular.config.global_caching = 'all'
+            b0 = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached = True)
+            b1 = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached = False)
+            self.assertEqual(id(b0.result),id(b1.result))
+        with self.subTest("global_caching = 'readonly'"):
+            acoular.config.global_caching = 'readonly'
+            b0 = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached = True)
+            b1 = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached = True)
+            self.assertEqual(id(b0.result),id(b1.result))
 
 if __name__ == '__main__':
     unittest.main() #exit=False
