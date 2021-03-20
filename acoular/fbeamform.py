@@ -1696,7 +1696,7 @@ class BeamformerClean (BeamformerBase):
         for i in self.freq_data.indices:
             if not fr[i]:
                 p.freq = f[i]
-                dirty = self.beamformer.result[i]
+                dirty = self.beamformer.result[i].copy()
                 clean = zeros(gs, dtype=dirty.dtype)
                 
                 i_iter = 0
