@@ -78,8 +78,6 @@ bl = BeamformerClean(beamformer=bb, n_iter=100, cached = False)
 bf = BeamformerFunctional(freq_data=f, steer=st, r_diag=False, gamma=4, cached = False)
 bgib = BeamformerGIB(freq_data=f, steer=st, method= 'LassoLars', n=10, cached = False)
 
-
-    
 class acoular_test(unittest.TestCase):  
     
     #test if microfon positions are correct
@@ -108,7 +106,8 @@ class acoular_test(unittest.TestCase):
         self.assertAlmostEqual(f.eva[:].sum()/eve_num.sum(),1,3)      
         self.assertAlmostEqual(f.eve[:].sum()/eva_num.sum(),1,3) 
      
-    #test beamformer results  
+    #test beamformer results
+    @unittest.skip  
     def test_beamformer_calculation(self):
         for beam,bfname in zip((bb, bc, be, bm, bl, bo, bs, bd, bcmf, bf, bdp, bgib),('bb', 'bc', 'be', 'bm', 'bl', 'bo', 'bs', 'bd', 'bcmf', 'bf', 'bdp', 'bgib')):   
             with self.subTest(bfname):
