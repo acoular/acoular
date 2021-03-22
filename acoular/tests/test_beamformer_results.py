@@ -27,6 +27,10 @@ WRITE_NEW_REFERENCE_DATA = False
 # Should always be False. Only set to True if it is necessary to 
 # recalculate the data due to intended changes of the Beamformers.
 
+# uncomment one of these lines if problems persist 
+#np.warnings.filterwarnings('error', category=np.VisibleDeprecationWarning)
+#np.warnings.filterwarnings('ignore', category=np.VisibleDeprecationWarning)
+
 #load exampledata
 datafile = join('..','..','examples','example_data.h5')
 calibfile = join('..','..','examples','example_calib.xml')
@@ -35,20 +39,22 @@ micgeofile = join( '..','xml','array_56.xml')
 #frequencies to test
 cfreqs = 1000,8000
 
-#calc all values from example with low resolution
-t1 = MaskedTimeSamples(name= datafile)
+# values from example 1
+t1 = MaskedTimeSamples(name=datafile)
 t1.start = 0 # first sample, default
 t1.stop = 16000 # last valid sample = 15999
+invalid = [1,7] # list of invalid channels (unwanted microphones etc.)
+t1.invalid_channels = invalid 
 t1.calib = Calib(from_file=calibfile)
 m = MicGeom(from_file=micgeofile)
-g = RectGrid(x_min=-0.2, x_max=-0.0, y_min=-0.3, y_max=0.2, z=0.68,
-             increment=0.1 )
+m.invalid_channels = invalid
+g = RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=0.68,
+             increment=0.05 )
 env=Environment(c=346.04)
 st = SteeringVector(grid=g, mics=m, env=env)
 f = PowerSpectra(time_data=t1, 
                window='Hanning', overlap='50%', block_size=128, #FFT-parameters
                cached = False )  #cached = False
-
 
 # produces a tuple of beamformer objects to test
 # because we need new objects for each test we have to call this more than once
@@ -71,10 +77,10 @@ def fbeamformers():
     bgib = BeamformerGIB(freq_data=f, steer=st, method= 'LassoLars', n=2, cached = False)
     return (bbase, bc, beig, bm, bl, bo, bs, bd, bcmf, bf, bdp, bgib)
 
-class acoular_beamformer_test(unittest.TestCase):  
-    
+class acoular_beamformer_test(unittest.TestCase):
+
     def test_beamformer_freq_results(self):
-        # we excpect the results to computed
+        # we expect the results to computed
         acoular.config.global_caching = 'none'
         for b in fbeamformers():
             with self.subTest(b.__class__.__name__+" global_caching = none"):
@@ -85,7 +91,7 @@ class acoular_beamformer_test(unittest.TestCase):
                     np.save(name,actual_data)
                 ref_data = np.load(name)
                 np.testing.assert_allclose(actual_data, ref_data, rtol=1e-5, atol=1e-8)
-        # we excpect the results to be computed and written to cache
+        # we expect the results to be computed and written to cache
         acoular.config.global_caching = 'individual'
         for b in fbeamformers():
             b.cached = True
@@ -94,7 +100,7 @@ class acoular_beamformer_test(unittest.TestCase):
                 actual_data = np.array([b.synthetic(cf,1) for cf in cfreqs],dtype=np.float32)
                 ref_data = np.load(name)
                 np.testing.assert_allclose(actual_data, ref_data, rtol=1e-5, atol=1e-8)
-        # we excpect the results to be read from cache
+        # we expect the results to be read from cache
         acoular.config.global_caching = 'all'
         for b in fbeamformers():
             b.cached = True
