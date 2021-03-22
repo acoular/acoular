@@ -11,6 +11,7 @@ import unittest
 from os.path import join
 
 import numpy as np
+
 #acoular imports
 import acoular
 acoular.config.global_caching = 'none' # to make sure that nothing is cached
@@ -27,9 +28,6 @@ WRITE_NEW_REFERENCE_DATA = False
 # Should always be False. Only set to True if it is necessary to 
 # recalculate the data due to intended changes of the Beamformers.
 
-# uncomment one of these lines if problems persist 
-#np.warnings.filterwarnings('error', category=np.VisibleDeprecationWarning)
-#np.warnings.filterwarnings('ignore', category=np.VisibleDeprecationWarning)
 
 #load exampledata
 datafile = join('..','..','examples','example_data.h5')
@@ -107,6 +105,21 @@ class acoular_beamformer_test(unittest.TestCase):
             with self.subTest(b.__class__.__name__+" global_caching = none"):
                 name = join('reference_data',f'{b.__class__.__name__}.npy')
                 actual_data = np.array([b.synthetic(cf,1) for cf in cfreqs],dtype=np.float32)
+                ref_data = np.load(name)
+                np.testing.assert_allclose(actual_data, ref_data, rtol=1e-5, atol=1e-8)
+        # we expect the cached results to be overwritten
+        acoular.config.global_caching = 'overwrite'
+        for b0,b1 in zip(fbeamformers(),fbeamformers()):
+            b0.cached = True
+            b1.cached = True
+            with self.subTest(b0.__class__.__name__+" global_caching = overwrite"):
+                if hasattr(b0,'beamformer'): # BeamformerClean, BeamformerDamas, BeamformerDamasplus 
+                                            # do not pass because the .beamformer result is not take from cache
+                    continue                         # nor recalculated   
+                b0.result[:] = 0
+                self.assertFalse(np.any(b0.result))
+                name = join('reference_data',f'{b1.__class__.__name__}.npy')
+                actual_data = np.array([b1.synthetic(cf,1) for cf in cfreqs],dtype=np.float32)
                 ref_data = np.load(name)
                 np.testing.assert_allclose(actual_data, ref_data, rtol=1e-5, atol=1e-8)
 
