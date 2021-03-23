@@ -349,7 +349,6 @@ class PointSource( SamplesGenerator ):
     mics = Trait(MicGeom, 
         desc="microphone geometry")
 
-    @on_trait_change(["loc","mics"])
     def _validate_locations(self):
         dist = self.env._r(array(self.loc).reshape((3, 1)), self.mics.mpos)
         if npany(dist < 1e-7):
@@ -439,6 +438,7 @@ class PointSource( SamplesGenerator ):
             The last block may be shorter than num.
         """
         
+        self._validate_locations()
         signal = self.signal.usignal(self.up)
         out = empty((num, self.numchannels))
         # distances
