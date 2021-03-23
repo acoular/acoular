@@ -624,7 +624,7 @@ class MovingPointSource( PointSource ):
                 out[i] = signal[array(0.5+ind*self.up, dtype=int64)]/rm
                 i += 1
                 if i == num:
-                    yield out.copy()
+                    yield out
                     i = 0
             except IndexError: #if no more samples available from the source 
                 break
@@ -728,7 +728,7 @@ class PointSourceDipole ( PointSource ):
                 
                 i += 1
                 if i == num:
-                    yield out.copy()
+                    yield out
                     i = 0
             except IndexError:
                 break
