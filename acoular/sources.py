@@ -444,7 +444,6 @@ class PointSource( SamplesGenerator ):
         # distances
         rm = self.env._r(array(self.loc).reshape((3, 1)), self.mics.mpos).reshape(1,-1)
         # emission time relative to start_t (in samples) for first sample
-
         ind = (-rm/self.env.c-self.start_t+self.start)*self.sample_freq*self.up
 
         if self.prepadding == 'zeros':
