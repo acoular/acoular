@@ -444,6 +444,7 @@ class PointSource( SamplesGenerator ):
         # distances
         rm = self.env._r(array(self.loc).reshape((3, 1)), self.mics.mpos).reshape(1,-1)
         # emission time relative to start_t (in samples) for first sample
+<<<<<<< HEAD
         ind = (-rm/self.env.c-self.start_t+self.start)*self.sample_freq*self.up
 
         if self.prepadding == 'zeros':
@@ -465,6 +466,24 @@ class PointSource( SamplesGenerator ):
         blocksize = self.numsamples%num
         out = _fill_mic_signal_block(out,signal,rm,ind,blocksize,self.numchannels,self.up,False)
         yield out[:blocksize]
+=======
+        ind = (-rm/self.env.c-self.start_t+self.start)*self.sample_freq   
+        i = 0
+        n = self.numsamples        
+        while n:
+            n -= 1
+            try:
+                out[i] = signal[array(0.5+ind*self.up, dtype=int64)]/rm
+                ind += 1.
+                i += 1
+                if i == num:
+                    yield out
+                    i = 0
+            except IndexError: #if no more samples available from the source
+                break
+        if i > 0: # if there are still samples to yield
+            yield out[:i]         
+>>>>>>> removed copy statements in sources.py
 
 
 class SphericalHarmonicSource( PointSource ):
@@ -624,7 +643,7 @@ class MovingPointSource( PointSource ):
                 out[i] = signal[array(0.5+ind*self.up, dtype=int64)]/rm
                 i += 1
                 if i == num:
-                    yield out.copy()
+                    yield out
                     i = 0
             except IndexError: #if no more samples available from the source 
                 break
@@ -728,7 +747,7 @@ class PointSourceDipole ( PointSource ):
                 
                 i += 1
                 if i == num:
-                    yield out.copy()
+                    yield out
                     i = 0
             except IndexError:
                 break
