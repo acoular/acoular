@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2019, Acoular Development Team.
+# Copyright (c) 2007-2020, Acoular Development Team.
 #------------------------------------------------------------------------------
 """
 This file contains all the functionalities which are very expansive, regarding
@@ -12,11 +12,12 @@ import numba as nb
 
 cachedOption = True  # if True: saves the numba func as compiled func in sub directory
 parallelOption = 'parallel'  # if numba.guvectorize is used: 'CPU' for single threading; 'parallel' for multithreading; 'cuda' for calculating on GPU
+fastOption = True # fastmath options 
 
 
 # Formerly known as 'faverage'
 @nb.njit([nb.complex128[:,:,:](nb.complex128[:,:,:], nb.complex128[:,:]), 
-          nb.complex64[:,:,:](nb.complex64[:,:,:], nb.complex64[:,:])], cache=cachedOption)
+          nb.complex64[:,:,:](nb.complex64[:,:,:], nb.complex64[:,:])], cache=cachedOption, parallel=True)
 def calcCSM(csm, SpecAllMics):
     """ Adds a given spectrum to the Cross-Spectral-Matrix (CSM).
     Here only the upper triangular matrix of the CSM is calculated. After
@@ -45,7 +46,7 @@ def calcCSM(csm, SpecAllMics):
 #==============================================================================
     nFreqs = csm.shape[0]
     nMics = csm.shape[1]
-    for cntFreq in range(nFreqs):
+    for cntFreq in nb.prange(nFreqs):
         for cntColumn in range(nMics):
             temp = SpecAllMics[cntFreq, cntColumn].conjugate()
             for cntRow in range(cntColumn + 1):  # calculate upper triangular matrix (of every frequency-slice) only
@@ -196,7 +197,7 @@ def beamformerFreq(steerVecType, boolRemovedDiagOfCSM, normFactor, inputTupleSte
 
 #%% beamformers - steer * CSM * steer
 @nb.guvectorize([(nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
-                 '(m,m),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+                 '(m,m),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption, fastmath=fastOption)
 def _freqBeamformer_Formulation1AkaClassic_FullCSM(csm, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = csm.shape[0]
@@ -221,7 +222,7 @@ def _freqBeamformer_Formulation1AkaClassic_FullCSM(csm, distGridToArrayCenter, d
 
 
 @nb.guvectorize([(nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
-                 '(m,m),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+                 '(m,m),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption, fastmath=fastOption)
 def _freqBeamformer_Formulation1AkaClassic_CsmRemovedDiag(csm, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = csm.shape[0]
@@ -245,7 +246,7 @@ def _freqBeamformer_Formulation1AkaClassic_CsmRemovedDiag(csm, distGridToArrayCe
 
 
 @nb.guvectorize([(nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
-                 '(m,m),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+                 '(m,m),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption, fastmath=fastOption)
 def _freqBeamformer_Formulation2AkaInverse_FullCSM(csm, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = csm.shape[0]
@@ -273,7 +274,7 @@ def _freqBeamformer_Formulation2AkaInverse_FullCSM(csm, distGridToArrayCenter, d
 
 
 @nb.guvectorize([(nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
-                 '(m,m),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+                 '(m,m),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption, fastmath=fastOption)
 def _freqBeamformer_Formulation2AkaInverse_CsmRemovedDiag(csm, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = csm.shape[0]
@@ -300,7 +301,7 @@ def _freqBeamformer_Formulation2AkaInverse_CsmRemovedDiag(csm, distGridToArrayCe
 
 
 @nb.guvectorize([(nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
-                 '(m,m),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+                 '(m,m),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption, fastmath=fastOption)
 def _freqBeamformer_Formulation3AkaTrueLevel_FullCSM(csm, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = csm.shape[0]
@@ -327,7 +328,7 @@ def _freqBeamformer_Formulation3AkaTrueLevel_FullCSM(csm, distGridToArrayCenter,
 
 
 @nb.guvectorize([(nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
-                 '(m,m),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+                 '(m,m),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption, fastmath=fastOption)
 def _freqBeamformer_Formulation3AkaTrueLevel_CsmRemovedDiag(csm, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = csm.shape[0]
@@ -353,7 +354,7 @@ def _freqBeamformer_Formulation3AkaTrueLevel_CsmRemovedDiag(csm, distGridToArray
 
 
 @nb.guvectorize([(nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
-                 '(m,m),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+                 '(m,m),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption, fastmath=fastOption)
 def _freqBeamformer_Formulation4AkaTrueLocation_FullCSM(csm, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = csm.shape[0]
@@ -380,7 +381,7 @@ def _freqBeamformer_Formulation4AkaTrueLocation_FullCSM(csm, distGridToArrayCent
 
 
 @nb.guvectorize([(nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
-                 '(m,m),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+                 '(m,m),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption, fastmath=fastOption)
 def _freqBeamformer_Formulation4AkaTrueLocation_CsmRemovedDiag(csm, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = csm.shape[0]
@@ -406,7 +407,7 @@ def _freqBeamformer_Formulation4AkaTrueLocation_CsmRemovedDiag(csm, distGridToAr
 
 
 @nb.guvectorize([(nb.complex128[:,:], nb.complex128[:], nb.float64[:], nb.float64[:], nb.float64[:])], 
-                '(m,m),(m),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+                '(m,m),(m),()->(),()', nopython=True, target=parallelOption, cache=cachedOption, fastmath=fastOption)
 def _freqBeamformer_SpecificSteerVec_FullCSM(csm, steerVec, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = csm.shape[0]
@@ -426,7 +427,7 @@ def _freqBeamformer_SpecificSteerVec_FullCSM(csm, steerVec, signalLossNormalizat
 
 
 @nb.guvectorize([(nb.complex128[:,:], nb.complex128[:], nb.float64[:], nb.float64[:], nb.float64[:])], 
-                '(m,m),(m),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+                '(m,m),(m),()->(),()', nopython=True, target=parallelOption, cache=cachedOption, fastmath=fastOption)
 def _freqBeamformer_SpecificSteerVec_CsmRemovedDiag(csm, steerVec, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = csm.shape[0]
@@ -447,7 +448,7 @@ def _freqBeamformer_SpecificSteerVec_CsmRemovedDiag(csm, steerVec, signalLossNor
 #%% beamformers - Eigenvalue Problem
 
 @nb.guvectorize([(nb.float64[:], nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
-                 '(e),(m,e),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+                 '(e),(m,e),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption, fastmath=fastOption)
 def _freqBeamformer_EigValProb_Formulation1AkaClassic_FullCSM(eigVal, eigVec, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = distGridToAllMics.shape[0]
@@ -472,7 +473,7 @@ def _freqBeamformer_EigValProb_Formulation1AkaClassic_FullCSM(eigVal, eigVec, di
 
 
 @nb.guvectorize([(nb.float64[:], nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
-                 '(e),(m,e),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+                 '(e),(m,e),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption, fastmath=fastOption)
 def _freqBeamformer_EigValProb_Formulation1AkaClassic_CsmRemovedDiag(eigVal, eigVec, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = distGridToAllMics.shape[0]
@@ -500,7 +501,7 @@ def _freqBeamformer_EigValProb_Formulation1AkaClassic_CsmRemovedDiag(eigVal, eig
 
 
 @nb.guvectorize([(nb.float64[:], nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
-                 '(e),(m,e),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+                 '(e),(m,e),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption, fastmath=fastOption)
 def _freqBeamformer_EigValProb_Formulation2AkaInverse_FullCSM(eigVal, eigVec, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = distGridToAllMics.shape[0]
@@ -528,7 +529,7 @@ def _freqBeamformer_EigValProb_Formulation2AkaInverse_FullCSM(eigVal, eigVec, di
 
 
 @nb.guvectorize([(nb.float64[:], nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
-                 '(e),(m,e),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+                 '(e),(m,e),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption, fastmath=fastOption)
 def _freqBeamformer_EigValProb_Formulation2AkaInverse_CsmRemovedDiag(eigVal, eigVec, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = distGridToAllMics.shape[0]
@@ -559,7 +560,7 @@ def _freqBeamformer_EigValProb_Formulation2AkaInverse_CsmRemovedDiag(eigVal, eig
 
 
 @nb.guvectorize([(nb.float64[:], nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
-                 '(e),(m,e),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+                 '(e),(m,e),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption, fastmath=fastOption)
 def _freqBeamformer_EigValProb_Formulation3AkaTrueLevel_FullCSM(eigVal, eigVec, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = distGridToAllMics.shape[0]
@@ -586,7 +587,7 @@ def _freqBeamformer_EigValProb_Formulation3AkaTrueLevel_FullCSM(eigVal, eigVec, 
 
 
 @nb.guvectorize([(nb.float64[:], nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
-                 '(e),(m,e),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+                 '(e),(m,e),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption, fastmath=fastOption)
 def _freqBeamformer_EigValProb_Formulation3AkaTrueLevel_CsmRemovedDiag(eigVal, eigVec, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = distGridToAllMics.shape[0]
@@ -616,7 +617,7 @@ def _freqBeamformer_EigValProb_Formulation3AkaTrueLevel_CsmRemovedDiag(eigVal, e
 
 
 @nb.guvectorize([(nb.float64[:], nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
-                 '(e),(m,e),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+                 '(e),(m,e),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption, fastmath=fastOption)
 def _freqBeamformer_EigValProb_Formulation4AkaTrueLocation_FullCSM(eigVal, eigVec, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = distGridToAllMics.shape[0]
@@ -643,7 +644,7 @@ def _freqBeamformer_EigValProb_Formulation4AkaTrueLocation_FullCSM(eigVal, eigVe
 
 
 @nb.guvectorize([(nb.float64[:], nb.complex128[:,:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:])],
-                 '(e),(m,e),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+                 '(e),(m,e),(),(m),(),()->(),()', nopython=True, target=parallelOption, cache=cachedOption, fastmath=fastOption)
 def _freqBeamformer_EigValProb_Formulation4AkaTrueLocation_CsmRemovedDiag(eigVal, eigVec, distGridToArrayCenter, distGridToAllMics, waveNumber, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = distGridToAllMics.shape[0]
@@ -673,7 +674,7 @@ def _freqBeamformer_EigValProb_Formulation4AkaTrueLocation_CsmRemovedDiag(eigVal
 
 
 @nb.guvectorize([(nb.float64[:], nb.complex128[:,:], nb.complex128[:], nb.float64[:], nb.float64[:], nb.float64[:])],
-                 '(e),(m,e),(m),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+                 '(e),(m,e),(m),()->(),()', nopython=True, target=parallelOption, cache=cachedOption, fastmath=fastOption)
 def _freqBeamformer_EigValProb_SpecificSteerVec_FullCSM(eigVal, eigVec, steerVec, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = eigVec.shape[0]
@@ -696,7 +697,7 @@ def _freqBeamformer_EigValProb_SpecificSteerVec_FullCSM(eigVal, eigVec, steerVec
 
 
 @nb.guvectorize([(nb.float64[:], nb.complex128[:,:], nb.complex128[:], nb.float64[:], nb.float64[:], nb.float64[:])],
-                 '(e),(m,e),(m),()->(),()', nopython=True, target=parallelOption, cache=cachedOption)
+                 '(e),(m,e),(m),()->(),()', nopython=True, target=parallelOption, cache=cachedOption, fastmath=fastOption)
 def _freqBeamformer_EigValProb_SpecificSteerVec_CsmRemovedDiag(eigVal, eigVec, steerVec, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
     nMics = eigVec.shape[0]
@@ -791,7 +792,7 @@ def calcPointSpreadFunction(steerVecType, distGridToArrayCenter, distGridToAllMi
 
 @nb.guvectorize([(nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float64[:]),
                  (nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float32[:])],
-                 '(),(m),(s),(s,m),()->(s)', nopython=True, target=parallelOption, cache=cachedOption)
+                 '(),(m),(s),(s,m),()->(s)', nopython=True, target=parallelOption, cache=cachedOption, fastmath=fastOption)
 def _psf_Formulation1AkaClassic(distGridToArrayCenter, distGridToAllMics, distSourcesToArrayCenter, distSourcesToAllMics, waveNumber, result):
     nMics = distGridToAllMics.shape[0]
     for cntSources in range(len(distSourcesToArrayCenter)):
@@ -807,7 +808,7 @@ def _psf_Formulation1AkaClassic(distGridToArrayCenter, distGridToAllMics, distSo
 
 @nb.guvectorize([(nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float64[:]),
                  (nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float32[:])],
-                 '(),(m),(s),(s,m),()->(s)', nopython=True, target=parallelOption, cache=cachedOption)
+                 '(),(m),(s),(s,m),()->(s)', nopython=True, target=parallelOption, cache=cachedOption, fastmath=fastOption)
 def _psf_Formulation2AkaInverse(distGridToArrayCenter, distGridToAllMics, distSourcesToArrayCenter, distSourcesToAllMics, waveNumber, result):
     nMics = distGridToAllMics.shape[0]
     for cntSources in range(len(distSourcesToArrayCenter)):
@@ -823,7 +824,7 @@ def _psf_Formulation2AkaInverse(distGridToArrayCenter, distGridToAllMics, distSo
 
 @nb.guvectorize([(nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float64[:]),
                  (nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float32[:])],
-                 '(),(m),(s),(s,m),()->(s)', nopython=True, target=parallelOption, cache=cachedOption)
+                 '(),(m),(s),(s,m),()->(s)', nopython=True, target=parallelOption, cache=cachedOption, fastmath=fastOption)
 def _psf_Formulation3AkaTrueLevel(distGridToArrayCenter, distGridToAllMics, distSourcesToArrayCenter, distSourcesToAllMics, waveNumber, result):
     nMics = distGridToAllMics.shape[0]
     for cntSources in range(len(distSourcesToArrayCenter)):
@@ -841,7 +842,7 @@ def _psf_Formulation3AkaTrueLevel(distGridToArrayCenter, distGridToAllMics, dist
 
 @nb.guvectorize([(nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float64[:]),
                  (nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float32[:])],
-                 '(),(m),(s),(s,m),()->(s)', nopython=True, target=parallelOption, cache=cachedOption)
+                 '(),(m),(s),(s,m),()->(s)', nopython=True, target=parallelOption, cache=cachedOption, fastmath=fastOption)
 def _psf_Formulation4AkaTrueLocation(distGridToArrayCenter, distGridToAllMics, distSourcesToArrayCenter, distSourcesToAllMics, waveNumber, result):
     nMics = distGridToAllMics.shape[0]
     for cntSources in range(len(distSourcesToArrayCenter)):
@@ -878,7 +879,7 @@ def _psf_Formulation4AkaTrueLocation(distGridToArrayCenter, distGridToAllMics, d
                  #(nb.float32[:,:], nb.float64[:], nb.int64[:], nb.float64[:], nb.float64[:]),
                  #(nb.float64[:,:], nb.float32[:], nb.int64[:], nb.float64[:], nb.float32[:])
                  ], 
-                 '(g,g),(g),(),()->(g)', nopython=True, target=parallelOption, cache=cachedOption,fastmath=True)
+                 '(g,g),(g),(),()->(g)', nopython=True, target=parallelOption, cache=cachedOption, fastmath=fastOption)
 def damasSolverGaussSeidel(A, dirtyMap, nIterations, relax, damasSolution):
     """ Solves the DAMAS inverse problem via modified gauss seidel.
     This is the original formulation from :ref:`Brooks and Humphreys, 2006<BrooksHumphreys2006>`.
@@ -950,7 +951,8 @@ def calcTransfer(distGridToArrayCenter, distGridToAllMics, waveNumber):
     _transferCoreFunc(distGridToArrayCenter, distGridToAllMics, np.array([waveNumber]), result)
     return result
 
-@nb.guvectorize([(nb.float64[:], nb.float64[:], nb.float64[:], nb.complex128[:])], '(),(m),()->(m)', nopython=True, target=parallelOption, cache=cachedOption)
+@nb.guvectorize([(nb.float64[:], nb.float64[:], nb.float64[:], nb.complex128[:])], '(),(m),()->(m)', 
+                nopython=True, target=parallelOption, cache=cachedOption, fastmath=fastOption)
 def _transferCoreFunc(distGridToArrayCenter, distGridToAllMics, waveNumber, result):
     nMics = distGridToAllMics.shape[0]
     for cntMics in range(nMics):

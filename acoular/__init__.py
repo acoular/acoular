@@ -82,7 +82,7 @@ TimeExpAverage, FiltFreqWeight, TimeCumAverage, FilterBank, OctaveFilterBank
 from .calib import Calib
 from .trajectory import Trajectory
 from .grids import Grid, RectGrid, RectGrid3D, Sector,RectSector,CircSector,\
-    PolySector, MultiSector
+    PolySector, MultiSector, MergeGrid, LineGrid, ImportGrid, ConvexSector
 from .environments import cartToCyl, cylToCart, Environment, UniformFlowEnvironment, RotatingFlow, \
 FlowField, OpenJet, SlotJet, GeneralFlowEnvironment
 from .microphones import MicGeom
@@ -95,8 +95,10 @@ PointSpreadFunction, SteeringVector
 
 from .sources import PointSource, MovingPointSource, \
 TimeSamples, MaskedTimeSamples, PointSourceDipole, UncorrelatedNoiseSource, \
-SourceMixer
+SourceMixer, SphericalHarmonicSource
 from .signals import SineGenerator, WNoiseGenerator, SignalGenerator,\
-PNoiseGenerator, GenericSignalGenerator
+PNoiseGenerator, GenericSignalGenerator, FiltWNoiseGenerator
 
 from . import tools
+
+from . import demo

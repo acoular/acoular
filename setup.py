@@ -24,7 +24,7 @@ install_requires = list([
       'scipy>=0.1.0',
       'scikit-learn>=0.19.1',
       'tables>=3.4.4',
-      'traits>=4.6.0',
+      'traits>=6.',
 	])
 
 setup_requires = list([
@@ -34,7 +34,7 @@ setup_requires = list([
       'scipy>=0.1.0',
       'scikit-learn>=0.19.1',
       'tables>=3.4.4',
-      'traits>=4.6.0',
+      'traits>=6.',
 	])
     
 setup(name="acoular", 
@@ -56,7 +56,7 @@ setup(name="acoular",
       'Programming Language :: Python :: 3.8',
       ],
       keywords='acoustic beamforming microphone array',
-      packages = ['acoular'],
+      packages = ['acoular','acoular.demo'],
 
       install_requires = install_requires,
 

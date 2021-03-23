@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2019, Acoular Development Team.
+# Copyright (c) 2007-2020, Acoular Development Team.
 #------------------------------------------------------------------------------
 """Implements the definition of trajectories.
 
@@ -118,6 +118,9 @@ class Trajectory( HasPrivateTraits ):
             t_start, t_end = self.interval
         if not t_end:
             t_end = self.interval[1]
-        for t in arange(t_start, t_end, delta_t):
-            yield self.location(t, der)
+        # all locations are fetched in one go because thats much faster
+        # further improvement could be possible if interpolated locations are fetched
+        # in blocks
+        for l in zip(*self.location(arange(t_start, t_end, delta_t),der)):
+            yield l
         

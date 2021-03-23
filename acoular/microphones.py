@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #pylint: disable-msg=E0611, E1103, C0103, R0901, R0902, R0903, R0904, W0232
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2019, Acoular Development Team.
+# Copyright (c) 2007-2020, Acoular Development Team.
 #------------------------------------------------------------------------------
 """Implements support for array microphone arrangements
 
@@ -15,8 +15,9 @@
 # imports from other packages
 from numpy import array, average
 from traits.api import HasPrivateTraits, Property, File, \
-CArray, cached_property, on_trait_change, ListInt
-from os import path
+CArray, cached_property, on_trait_change, ListInt , Bool
+from os import path, strerror
+import errno
 
 from .internal import digest
 
@@ -33,6 +34,10 @@ class MicGeom( HasPrivateTraits ):
     #: Name of the .xml-file from wich to read the data.
     from_file = File(filter=['*.xml'],
         desc="name of the xml file to import")
+
+    #: Validate mic geom from file
+    validate_file = Bool(True,
+            desc="Validate mic geom from file")
 
     #: Basename of the .xml-file, without the extension; is set automatically / readonly.
     basename = Property( depends_on = 'from_file',
@@ -75,10 +80,14 @@ class MicGeom( HasPrivateTraits ):
 
     @cached_property
     def _get_mpos( self ):
-        if len(self.invalid_channels)==0:
-            return self.mpos_tot
-        allr=[i for i in range(self.mpos_tot.shape[-1]) if i not in self.invalid_channels]
-        return self.mpos_tot[:, array(allr)]
+        if self.validate_file:
+            if len(self.invalid_channels)==0:
+                return self.mpos_tot
+            allr=[i for i in range(self.mpos_tot.shape[-1]) if i not in self.invalid_channels]
+            return self.mpos_tot[:, array(allr)]
+        else:             
+            raise FileNotFoundError(
+                    errno.ENOENT, strerror(errno.ENOENT), self.from_file)
 
     @cached_property
     def _get_num_mics( self ):
@@ -101,8 +110,9 @@ class MicGeom( HasPrivateTraits ):
         if not path.isfile(self.from_file):
             # no file there
             self.mpos_tot = array([], 'd')
-            self.num_mics = 0
-            return
+            # raise error: File not found on _get functions
+            self.validate_file = False
+
         import xml.dom.minidom
         doc = xml.dom.minidom.parse(self.from_file)
         names = []
@@ -111,4 +121,5 @@ class MicGeom( HasPrivateTraits ):
             names.append(el.getAttribute('Name'))
             xyz.append(list(map(lambda a : float(el.getAttribute(a)), 'xyz')))
         self.mpos_tot = array(xyz, 'd').swapaxes(0, 1)
+        self.validate_file = True
 

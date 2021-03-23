@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2019, Acoular Development Team.
+# Copyright (c) 2007-2020, Acoular Development Team.
 #------------------------------------------------------------------------------
 """Implements beamformers in the frequency domain.
 
@@ -643,7 +643,10 @@ class BeamformerBase( HasPrivateTraits ):
 #        mapshape = (rshape[0], ) + gshape
 #        h = r[:].reshape(mapshape)[ (s_[:], ) + ind ]
 #        return h.reshape(h.shape[0], prod(h.shape[1:])).sum(axis=1)
-        ind = self.steer.grid.indices(*sector)
+        if isinstance(sector, Sector):
+            ind = self.steer.grid.subdomain(sector)
+        else:
+            ind = self.steer.grid.indices(*sector)
         gshape = self.steer.grid.shape
         r = self.result
         h = zeros(r.shape[0])

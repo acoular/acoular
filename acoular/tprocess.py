@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2019, Acoular Development Team.
+# Copyright (c) 2007-2020, Acoular Development Team.
 #------------------------------------------------------------------------------
 """Implements processing in the time domain.
 
@@ -13,6 +13,7 @@
     MaskedTimeInOut
     Trigger
     AngleTracker
+    ChannelMixer
     SpatialInterpolator
     SpatialInterpolatorRotation
     SpatialInterpolatorConstantRotation
@@ -21,11 +22,14 @@
     TimeAverage
     TimeReverse
     Filter
+    FilterBank
     FiltFiltOctave
     FiltOctave
     TimeExpAverage
     FiltFreqWeight
+    OctaveFilterBank
     TimeCache
+    TimeCumAverage
     WriteWAV
     WriteH5
     SampleSplitter
@@ -1204,7 +1208,7 @@ class Mixer( TimeInOut ):
     ldigest = Property( depends_on = ['sources.digest', ])
 
     # internal identifier
-    digest = Property( depends_on = ['source.digest', 'ldigest', '__class__'])
+    digest = Property( depends_on = ['sources','source.digest', 'ldigest', '__class__'])
 
     @cached_property
     def _get_ldigest( self ):

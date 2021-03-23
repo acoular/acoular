@@ -15,7 +15,7 @@ import sys, os
 # If your extensions are in another directory, add it here. If the directory
 # is relative to the documentation root, use os.path.abspath to make it
 # absolute, like shown here.
-sys.path.append(os.path.abspath('sphinxext'))
+# sys.path.append(os.path.abspath('sphinxext'))
 sys.path.insert(0,os.path.abspath('../..')) # in order to document the source in trunk
 
 # General configuration
@@ -26,13 +26,13 @@ sys.path.insert(0,os.path.abspath('../..')) # in order to document the source in
 #extensions = ['sphinx.ext.autodoc', 'traitsdoc','sphinx.ext.pngmath','sphinx.ext.inheritance_diagram']
 extensions = [
     'sphinx.ext.autodoc', 
-    'trait_documenter',
+#    'trait_documenter',
 #    'matplotlib.sphinxext.only_directives',
     'matplotlib.sphinxext.plot_directive',
     'IPython.sphinxext.ipython_directive',
     'IPython.sphinxext.ipython_console_highlighting',
 #    'refactordoc',
-#    'traits.util.trait_documenter',
+    'traits.util.trait_documenter',
     'sphinx.ext.mathjax',
     'sphinx.ext.inheritance_diagram',
     'sphinx.ext.autosummary',
@@ -52,14 +52,14 @@ master_doc = 'index'
 
 # General substitutions.
 project = 'Acoular'
-copyright = '2007-2019, Acoular Development Team'
+copyright = '2007-2020, Acoular Development Team'
 
 # The default replacements for |version| and |release|, also used in various
 # other places throughout the built documents.
 #d = {}
 #execfile(os.path.join('..','..', 'acoular', '__init__.py'), d)
 #import acoular #acoular.__version__
-version = release =  '20.02'#'3.0'#d['__version__']
+version = release =  '20.10'#'3.0'#d['__version__']
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:

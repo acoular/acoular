@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2019, Acoular Development Team.
+# Copyright (c) 2007-2020, Acoular Development Team.
 #------------------------------------------------------------------------------
 """Implements signal generators for the simulation of acoustic sources.
 
@@ -11,17 +11,19 @@
     SignalGenerator
     WNoiseGenerator
     PNoiseGenerator
+    FiltWNoiseGenerator
     SineGenerator
+    GenericSignalGenerator
 
 """
 
 # imports from other packages
 from __future__ import print_function, division
-from numpy import pi, arange, sin, sqrt, repeat, tile, log, zeros
+from numpy import pi, arange, sin, sqrt, repeat, tile, log, zeros, array
 from numpy.random import RandomState
 from traits.api import HasPrivateTraits, Trait, Float, Int, CLong, Bool, \
-Property, cached_property, Delegate
-from scipy.signal import resample
+Property, cached_property, Delegate, CArray
+from scipy.signal import resample, sosfilt, tf2sos
 from warnings import warn
 
 # acoular imports
@@ -167,6 +169,62 @@ class PNoiseGenerator( SignalGenerator ):
             s[ind:] += repeat( rnd_gen.standard_normal(nums // dind+1 ), dind)[:lind]
         # divide by sqrt(depth+1.5) to get same overall level as white noise
         return self.rms/sqrt(depth+1.5) * s
+
+
+class FiltWNoiseGenerator(WNoiseGenerator):
+    """
+    Filtered white noise signal following an autoregressive (AR), moving-average
+    (MA) or autoregressive moving-average (ARMA) process.
+    
+    The desired frequency response of the filter can be defined by specifying 
+    the filter coefficients :attr:`ar` and :attr:`ma`. 
+    The RMS value specified via the :attr:`rms` attribute belongs to the white noise 
+    signal and differs from the RMS value of the filtered signal.  
+    For numerical stability at high orders, the filter is a combination of second order 
+    sections (sos). 
+    """
+
+    ar = CArray(value=array([]),dtype=float,
+        desc="autoregressive coefficients (coefficients of the denominator)")
+    
+    ma = CArray(value=array([]),dtype=float,
+        desc="moving-average coefficients (coefficients of the numerator)")
+    
+    # internal identifier
+    digest = Property( 
+        depends_on = [
+            'ar', 'ma', 'rms', 'numsamples', \
+        'sample_freq', 'seed', '__class__'
+        ], 
+        )
+        
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+
+    def handle_empty_coefficients(self,coefficients):
+        if coefficients.size == 0:
+            return array([1.0])
+        else:
+            return coefficients
+      
+    def signal(self):
+        """
+        Deliver the signal.
+
+        Returns
+        -------
+        Array of floats
+            The resulting signal as an array of length :attr:`~SignalGenerator.numsamples`.
+        """
+        rnd_gen = RandomState(self.seed)
+        ma = self.handle_empty_coefficients(self.ma)
+        ar = self.handle_empty_coefficients(self.ar)
+        sos = tf2sos(ma, ar)
+        ntaps = ma.shape[0]
+        sdelay = round(0.5*(ntaps-1)) 
+        wnoise = self.rms*rnd_gen.standard_normal(self.numsamples+sdelay) # create longer signal to compensate delay
+        return sosfilt(sos, x=wnoise)[sdelay:]
 
 
 class SineGenerator( SignalGenerator ):
