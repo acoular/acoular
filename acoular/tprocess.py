@@ -2206,11 +2206,11 @@ class TimeConvolve(TimeInOut):
             return
         # check dimensionality
         elif self.kernel.ndim > 2:
-            raise ValueError("Only one or two dimensional kernels accepted.")
+            warn("Only one or two dimensional kernels accepted.", stacklevel=2)
 
         # check if number of kernels matches numchannels
         if self.kernel.shape[1] not in (1, self.source.numchannels):
-            raise ValueError("Number of kernels must be either `numchannels` or one.")
+            warn("Number of kernels must be either `numchannels` or one.")
 
     @on_trait_change("fft_backend")
     def _change_fft_backend(self):
