@@ -19,7 +19,7 @@
 """
 
 # imports from other packages
-from numpy import array, sqrt, ones, empty, newaxis, uint32, arange, dot, int64 ,real, pi, tile, cross, zeros
+from numpy import array, sqrt, ones, empty, newaxis, uint32, arange, dot, int64 ,real, pi, tile, cross, zeros, ceil
 from numpy import min as npmin
 from numpy import any as npany
 
@@ -439,6 +439,7 @@ class PointSource( SamplesGenerator ):
         """
         
         self._validate_locations()
+        N = int(ceil(self.numsamples/num)) # number of output blocks
         signal = self.signal.usignal(self.up)
         out = empty((num, self.numchannels))
         # distances
@@ -450,19 +451,31 @@ class PointSource( SamplesGenerator ):
             # number of blocks where signal behaviour is amended
             pre = -int(npmin(ind[0])//(self.up*num))
             # amend signal for first blocks
-            for nb in range(pre):
-                out = _fill_mic_signal_block(out,signal,rm,ind,num,self.numchannels,self.up,True)
-                yield out
+            # if signal stops during prepadding, terminate
+            if N <= pre:
+                for nb in range(N-1):
+                    out = _fill_mic_signal_block(out,signal,rm,ind,num,self.numchannels,self.up,True)
+                    yield out
+
+                blocksize = self.numsamples%num or num
+                out = _fill_mic_signal_block(out,signal,rm,ind,blocksize,self.numchannels,self.up,True)
+                yield out[:blocksize]
+                return
+            else:
+                for nb in range(pre):
+                    out = _fill_mic_signal_block(out,signal,rm,ind,num,self.numchannels,self.up,True)
+                    yield out
+
         else:
             pre = 0
 
         # main generator
-        for nb in range((self.numsamples//num)-pre):
+        for nb in range(N-pre-1):
             out = _fill_mic_signal_block(out,signal,rm,ind,num,self.numchannels,self.up,False)
             yield out
 
         # last block of variable size
-        blocksize = self.numsamples%num
+        blocksize = self.numsamples%num or num
         out = _fill_mic_signal_block(out,signal,rm,ind,blocksize,self.numchannels,self.up,False)
         yield out[:blocksize]
 
