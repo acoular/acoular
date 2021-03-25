@@ -51,9 +51,7 @@ from traits.api import HasPrivateTraits, Float, Int, CLong, Bool, ListInt, \
 Constant, File, Property, Instance, Trait, Delegate, \
 cached_property, on_trait_change, List, CArray, Dict, PrefixMap, Callable
 
-import scipy.fft as sf
-import numpy.fft as nf
-
+from scipy.fft import rfft, irfft
 import numba as nb
 
 from datetime import datetime
@@ -2189,18 +2187,6 @@ class TimeConvolve(TimeInOut):
         desc="Frequency domain Kernel blocks",
     )
 
-    #: FFT backend library, defaults to `scipy`.
-    fft_backend = PrefixMap(
-        {
-            "scipy": (lambda x: sf.rfft(x, axis=0), lambda x: sf.irfft(x, axis=0)),
-            "numpy": (lambda x: nf.rfft(x, axis=0), lambda x: nf.irfft(x, axis=0)),
-        },
-        default_value="scipy",
-    )
-
-    _fft = Callable(lambda x: sf.rfft(x, axis=0))
-    _ifft = Callable(lambda x: sf.irfft(x, axis=0))
-
     def _validate_kernel(self):
         # reshape kernel for broadcasting
         if self.kernel.ndim == 1:
@@ -2214,11 +2200,6 @@ class TimeConvolve(TimeInOut):
         if self.kernel.shape[1] not in (1, self.source.numchannels):
             warn("Number of kernels must be either `numchannels` or one.", stacklevel=2)
 
-    @on_trait_change("fft_backend")
-    def _change_fft_backend(self):
-        self._fft = self.fft_backend_[0]
-        self._ifft = self.fft_backend_[1]
-
     # compute the rfft of the kernel blockwise
     @cached_property
     def _get__kernel_blocks(self):
@@ -2230,81 +2211,15 @@ class TimeConvolve(TimeInOut):
 
         if P > 1:
             for i, block in enumerate(split(self.kernel[:trim], P - 1, axis=0)):
-                blocks[i] = self._fft(concatenate([block, zeros([num, N])], axis=0))
+                blocks[i] = rfft(concatenate([block, zeros([num, N])], axis=0),axis=0)
 
-        blocks[-1] = self._fft(
-            concatenate([self.kernel[trim:], zeros([2 * num - L + trim, N])], axis=0)
+        blocks[-1] = rfft(
+            concatenate([self.kernel[trim:], zeros([2 * num - L + trim, N])], axis=0),axis=0
         )
         return blocks
 
+    
     def result(self, num=128):
-        """
-        Python generator that yields the output block-wise.
-        The source output is convolved with the kernel.
-
-        Parameters
-        ----------
-        num : integer
-            This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block).
-
-        Returns
-        -------
-        Samples in blocks of shape (num, numchannels).
-            The last block may be shorter than num.
-        """
-
-        self._validate_kernel()
-        # initialize variables
-        self._block_size = num
-        L = self.kernel.shape[0]
-        N = self.source.numchannels
-        M = self.source.numsamples
-        P = int(ceil(L / num))  # number of kernel blocks
-        Q = int(ceil(M / num))  # number of signal blocks
-        R = int(ceil((L + M - 1) / num))  # number of output blocks
-        last_size = (L + M - 1) % num # size of final block
-        
-        FDL = FrequencyDelayLine(shape=[P, num + 1, N])
-        buff = zeros([2 * num, N])  # time-domain input buffer
-
-        signal_blocks = self.source.result(num)
-        temp = next(signal_blocks)
-        buff[num : num + temp.shape[0]] = temp # append new time-data
-
-        # for very short signals, we are already done
-        if R == 1:
-            FDL.append(self._fft(buff))
-            spec_sum = sum(FDL.buffer * self._kernel_blocks, axis=0)
-            # truncate s.t. total length is L+M-1 (like numpy convolve w/ mode="full")
-            yield self._ifft(spec_sum)[num: last_size + num]
-            return
-
-        # stream processing of source signal
-        for temp in signal_blocks:
-            FDL.append(self._fft(buff))  # append rfft of input buffer to FDL
-            spec_sum = sum(FDL.buffer * self._kernel_blocks, axis=0)
-            yield self._ifft(spec_sum)[num:]
-            buff = concatenate(
-                [buff[num:], zeros([num, N])], axis=0
-            )  # shift input buffer to the left
-            buff[num : num + temp.shape[0]] = temp # append new time-data
-
-        for _ in range(R-Q):
-            FDL.append(self._fft(buff))  # append rfft of input buffer to FDL
-            spec_sum = sum(FDL.buffer * self._kernel_blocks, axis=0)
-            yield self._ifft(spec_sum)[num:]
-            buff = concatenate(
-                [buff[num:], zeros([num, N])], axis=0
-            )  # shift input buffer to the left
-            
-        FDL.append(self._fft(buff))
-        spec_sum = sum(FDL.buffer * self._kernel_blocks, axis=0)
-        # truncate s.t. total length is L+M-1 (like numpy convolve w/ mode="full")
-        yield self._ifft(spec_sum)[num: last_size + num]
-
-
-    def result_numba(self, num=128):
         """
         Python generator that yields the output block-wise.
         The source output is convolved with the kernel.
@@ -2335,6 +2250,7 @@ class TimeConvolve(TimeInOut):
         idx = 0
         FDL = zeros([P, num + 1, N], dtype="complex128")
         buff = zeros([2 * num, N])  # time-domain input buffer
+        spec_sum = zeros([num+1,N],dtype="complex128")
 
         signal_blocks = self.source.result(num)
         temp = next(signal_blocks)
@@ -2342,35 +2258,34 @@ class TimeConvolve(TimeInOut):
 
         # for very short signals, we are already done
         if R == 1:
-            _append_to_FDL(FDL, idx, P, self._fft(buff))
-            spec_sum = sum(FDL * self._kernel_blocks, axis=0)
+            _append_to_FDL(FDL, idx, P, rfft(buff,axis=0))
+            spec_sum = _spectral_sum(spec_sum, FDL, self._kernel_blocks) 
             # truncate s.t. total length is L+M-1 (like numpy convolve w/ mode="full")
-            yield self._ifft(spec_sum)[num: last_size + num]
+            yield irfft(spec_sum,axis=0)[num: last_size + num]
             return
 
         # stream processing of source signal
         for temp in signal_blocks:
-            _append_to_FDL(FDL, idx, P, self._fft(buff))
-            spec_sum = sum(FDL * self._kernel_blocks, axis=0)
-            yield self._ifft(spec_sum)[num:]
+            _append_to_FDL(FDL, idx, P, rfft(buff,axis=0))
+            spec_sum = _spectral_sum(spec_sum, FDL, self._kernel_blocks )
+            yield irfft(spec_sum,axis=0)[num:]
             buff = concatenate(
                 [buff[num:], zeros([num, N])], axis=0
             )  # shift input buffer to the left
             buff[num : num + temp.shape[0]] = temp # append new time-data
 
         for _ in range(R-Q):
-            _append_to_FDL(FDL, idx, P, self._fft(buff))
-            spec_sum = sum(FDL * self._kernel_blocks, axis=0)
-            yield self._ifft(spec_sum)[num:]
+            _append_to_FDL(FDL, idx, P, rfft(buff,axis=0))
+            spec_sum = _spectral_sum(spec_sum, FDL, self._kernel_blocks )
+            yield irfft(spec_sum,axis=0)[num:]
             buff = concatenate(
                 [buff[num:], zeros([num, N])], axis=0
             )  # shift input buffer to the left
 
-        _append_to_FDL(FDL, idx, P, self._fft(buff))
-        spec_sum = sum(FDL * self._kernel_blocks, axis=0)
+        _append_to_FDL(FDL, idx, P, rfft(buff,axis=0))
+        spec_sum = _spectral_sum(spec_sum, FDL, self._kernel_blocks )
         # truncate s.t. total length is L+M-1 (like numpy convolve w/ mode="full")
-        yield self._ifft(spec_sum)[num: last_size + num]
-
+        yield irfft(spec_sum, axis=0)[num: last_size + num]
 
 @nb.jit(nopython=True, cache=True)
 def _append_to_FDL(FDL,idx,P,buff):
@@ -2378,33 +2293,12 @@ def _append_to_FDL(FDL,idx,P,buff):
     idx = int(idx +1 % P)
 
 @nb.jit(nopython=True, cache=True)
-def _spectral_sum(FDL,KB,P,blocksize):
-    #out = zeros(blocksize)
-    #for i in range()
-    return sum(FDL*KB,axis=0)
+def _spectral_sum(out,FDL,KB):
+    P,B,N = KB.shape
+    for n in range(N):
+        for b in range(B):
+            out[b,n] = 0
+            for i in range(P):
+                out[b,n] += FDL[i,b,n]*KB[i,b,n]
 
-# class that handles data structure of the frequency delay line
-class FrequencyDelayLine(HasPrivateTraits):
-    shape = CArray(shape=(3,), desc="(P,B,N)")
-    buffer = Property(depends_on="shape")
-    _buffer = CArray(dtype=complex)
-    _idx = Int(0)
-    _permutation = Property(depends_on="_idx")
-
-    @on_trait_change("shape")
-    def _init_buffer(self):
-        self._buffer = zeros(self.shape, "complex")
-
-    def _increment_index(self):
-        self._idx = int((self._idx + 1) % self.shape[0])
-
-    def _get_buffer(self):
-        return self._buffer[self._permutation]
-
-    @cached_property
-    def _get__permutation(self):
-        return [(self._idx - 1 - x) % self.shape[0] for x in range(self.shape[0])]
-
-    def append(self, buff):
-        self._buffer[self._idx] = buff
-        self._increment_index()
+    return out
