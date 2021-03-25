@@ -54,6 +54,8 @@ cached_property, on_trait_change, List, CArray, Dict, PrefixMap, Callable
 import scipy.fft as sf
 import numpy.fft as nf
 
+import numba as nb
+
 from datetime import datetime
 from os import path
 import wave
@@ -2301,6 +2303,85 @@ class TimeConvolve(TimeInOut):
         # truncate s.t. total length is L+M-1 (like numpy convolve w/ mode="full")
         yield self._ifft(spec_sum)[num: last_size + num]
 
+
+    def result_numba(self, num=128):
+        """
+        Python generator that yields the output block-wise.
+        The source output is convolved with the kernel.
+
+        Parameters
+        ----------
+        num : integer
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block).
+
+        Returns
+        -------
+        Samples in blocks of shape (num, numchannels).
+            The last block may be shorter than num.
+        """
+
+        self._validate_kernel()
+        # initialize variables
+        self._block_size = num
+        L = self.kernel.shape[0]
+        N = self.source.numchannels
+        M = self.source.numsamples
+        P = int(ceil(L / num))  # number of kernel blocks
+        Q = int(ceil(M / num))  # number of signal blocks
+        R = int(ceil((L + M - 1) / num))  # number of output blocks
+        last_size = (L + M - 1) % num # size of final block
+
+        idx = 0
+        FDL = zeros([P, num + 1, N], dtype="complex128")
+        buff = zeros([2 * num, N])  # time-domain input buffer
+
+        signal_blocks = self.source.result(num)
+        temp = next(signal_blocks)
+        buff[num : num + temp.shape[0]] = temp # append new time-data
+
+        # for very short signals, we are already done
+        if R == 1:
+            _append_to_FDL(FDL, idx, P, self._fft(buff))
+            spec_sum = sum(FDL * self._kernel_blocks, axis=0)
+            # truncate s.t. total length is L+M-1 (like numpy convolve w/ mode="full")
+            yield self._ifft(spec_sum)[num: last_size + num]
+            return
+
+        # stream processing of source signal
+        for temp in signal_blocks:
+            _append_to_FDL(FDL, idx, P, self._fft(buff))
+            spec_sum = sum(FDL * self._kernel_blocks, axis=0)
+            yield self._ifft(spec_sum)[num:]
+            buff = concatenate(
+                [buff[num:], zeros([num, N])], axis=0
+            )  # shift input buffer to the left
+            buff[num : num + temp.shape[0]] = temp # append new time-data
+
+        for _ in range(R-Q):
+            _append_to_FDL(FDL, idx, P, self._fft(buff))
+            spec_sum = sum(FDL * self._kernel_blocks, axis=0)
+            yield self._ifft(spec_sum)[num:]
+            buff = concatenate(
+                [buff[num:], zeros([num, N])], axis=0
+            )  # shift input buffer to the left
+
+        _append_to_FDL(FDL, idx, P, self._fft(buff))
+        spec_sum = sum(FDL * self._kernel_blocks, axis=0)
+        # truncate s.t. total length is L+M-1 (like numpy convolve w/ mode="full")
+        yield self._ifft(spec_sum)[num: last_size + num]
+
+
+@nb.jit(nopython=True, cache=True)
+def _append_to_FDL(FDL,idx,P,buff):
+    FDL[idx] = buff
+    idx = int(idx +1 % P)
+
+@nb.jit(nopython=True, cache=True)
+def _spectral_sum(FDL,KB,P,blocksize):
+    #out = zeros(blocksize)
+    #for i in range()
+    return sum(FDL*KB,axis=0)
 
 # class that handles data structure of the frequency delay line
 class FrequencyDelayLine(HasPrivateTraits):
