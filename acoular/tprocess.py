@@ -2194,11 +2194,11 @@ class TimeConvolve(TimeInOut):
             return
         # check dimensionality
         elif self.kernel.ndim > 2:
-            warn("Only one or two dimensional kernels accepted.", stacklevel=2)
+            raise ValueError("Only one or two dimensional kernels accepted.")
 
         # check if number of kernels matches numchannels
         if self.kernel.shape[1] not in (1, self.source.numchannels):
-            warn("Number of kernels must be either `numchannels` or one.", stacklevel=2)
+            raise ValueError("Number of kernels must be either `numchannels` or one.")
 
     # compute the rfft of the kernel blockwise
     @cached_property
