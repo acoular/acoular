@@ -882,11 +882,16 @@ class SourceMixer( SamplesGenerator ):
     #: Number of samples.
     numsamples = Trait( SamplesGenerator().numsamples )
     
+    #: Amplitude weight(s) for the sources as array. If not set, 
+    #: all source signals are equally weighted.
+    #: Must match the number of sources in :attr:`sources`.
+    weights = CArray(desc="channel weights")
+
     # internal identifier
     ldigest = Property( depends_on = ['sources.digest', ])
 
     # internal identifier
-    digest = Property( depends_on = ['ldigest', 'sources'])
+    digest = Property( depends_on = ['ldigest', 'sources','weights'])
 
     @cached_property
     def _get_ldigest( self ):
@@ -931,10 +936,15 @@ class SourceMixer( SamplesGenerator ):
         """
         self.validate_sources()
         gens = [i.result(num) for i in self.sources[1:]]
+        weights = self.weights.copy()
+        if weights.size == 0:
+            weights = array([1. for j in range(len( self.sources))])
+        assert weights.shape[0] == len(self.sources)
         for temp in self.sources[0].result(num):
+            temp *= weights[0]
             sh = temp.shape[0]
-            for g in gens:
-                temp1 = next(g)
+            for j,g in enumerate(gens):
+                temp1 = next(g)*weights[j+1]
                 if temp.shape[0] > temp1.shape[0]:
                     temp = temp[:temp1.shape[0]]
                 temp += temp1[:temp.shape[0]]
