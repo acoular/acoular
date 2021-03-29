@@ -886,7 +886,7 @@ class SourceMixer( SamplesGenerator ):
     ldigest = Property( depends_on = ['sources.digest', ])
 
     # internal identifier
-    digest = Property( depends_on = ['ldigest', '__class__','sources'])
+    digest = Property( depends_on = ['ldigest', 'sources'])
 
     @cached_property
     def _get_ldigest( self ):
@@ -899,7 +899,6 @@ class SourceMixer( SamplesGenerator ):
     def _get_digest( self ):
         return digest(self)
 
-    @on_trait_change('sources')
     def validate_sources( self ):
         """ Validates if sources fit together. """
         if self.sources:
@@ -913,7 +912,6 @@ class SourceMixer( SamplesGenerator ):
                     raise ValueError("Channel count of %s does not fit" % s)
                 if self.numsamples != s.numsamples:
                     raise ValueError("Number of samples of %s does not fit" % s)
-
 
     def result(self, num):
         """
@@ -931,6 +929,7 @@ class SourceMixer( SamplesGenerator ):
         Samples in blocks of shape (num, numchannels). 
             The last block may be shorter than num.
         """
+        self.validate_sources()
         gens = [i.result(num) for i in self.sources[1:]]
         for temp in self.sources[0].result(num):
             sh = temp.shape[0]
