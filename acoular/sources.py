@@ -874,19 +874,24 @@ class SourceMixer( SamplesGenerator ):
     sources = List( Instance(SamplesGenerator, ()) ) 
 
     #: Sampling frequency of the signal.
-    sample_freq = Trait( SamplesGenerator().sample_freq )
+    sample_freq = Property( depends_on=['ldigest'] )
     
     #: Number of channels.
-    numchannels = Trait( SamplesGenerator().numchannels )
+    numchannels = Property( depends_on=['ldigest'] )
                
     #: Number of samples.
-    numsamples = Trait( SamplesGenerator().numsamples )
+    numsamples = Property( depends_on=['ldigest'] )
     
+    #: Amplitude weight(s) for the sources as array. If not set, 
+    #: all source signals are equally weighted.
+    #: Must match the number of sources in :attr:`sources`.
+    weights = CArray(desc="channel weights")
+
     # internal identifier
     ldigest = Property( depends_on = ['sources.digest', ])
 
     # internal identifier
-    digest = Property( depends_on = ['ldigest', '__class__','sources'])
+    digest = Property( depends_on = ['ldigest', 'weights', '__class__'])
 
     @cached_property
     def _get_ldigest( self ):
@@ -899,21 +904,39 @@ class SourceMixer( SamplesGenerator ):
     def _get_digest( self ):
         return digest(self)
 
-    @on_trait_change('sources')
+    @cached_property
+    def _get_sample_freq( self ):
+        if self.sources:
+            sample_freq = self.sources[0].sample_freq
+        else:
+            sample_freq = 0
+        return sample_freq
+
+    @cached_property
+    def _get_numchannels( self ):
+        if self.sources:
+            numchannels = self.sources[0].numchannels
+        else:
+            numchannels = 0
+        return numchannels
+
+    @cached_property
+    def _get_numsamples( self ):
+        if self.sources:
+            numsamples = self.sources[0].numsamples
+        else:
+            numsamples = 0
+        return numsamples
+
     def validate_sources( self ):
         """ Validates if sources fit together. """
-        if self.sources:
-            self.sample_freq = self.sources[0].sample_freq
-            self.numchannels = self.sources[0].numchannels
-            self.numsamples = self.sources[0].numsamples
-            for s in self.sources[1:]:
-                if self.sample_freq != s.sample_freq:
-                    raise ValueError("Sample frequency of %s does not fit" % s)
-                if self.numchannels != s.numchannels:
-                    raise ValueError("Channel count of %s does not fit" % s)
-                if self.numsamples != s.numsamples:
-                    raise ValueError("Number of samples of %s does not fit" % s)
-
+        for s in self.sources[1:]:
+            if self.sample_freq != s.sample_freq:
+                raise ValueError("Sample frequency of %s does not fit" % s)
+            if self.numchannels != s.numchannels:
+                raise ValueError("Channel count of %s does not fit" % s)
+            if self.numsamples != s.numsamples:
+                raise ValueError("Number of samples of %s does not fit" % s)
 
     def result(self, num):
         """
@@ -931,11 +954,17 @@ class SourceMixer( SamplesGenerator ):
         Samples in blocks of shape (num, numchannels). 
             The last block may be shorter than num.
         """
+        self.validate_sources()
         gens = [i.result(num) for i in self.sources[1:]]
+        weights = self.weights.copy()
+        if weights.size == 0:
+            weights = array([1. for j in range(len( self.sources))])
+        assert weights.shape[0] == len(self.sources)
         for temp in self.sources[0].result(num):
+            temp *= weights[0]
             sh = temp.shape[0]
-            for g in gens:
-                temp1 = next(g)
+            for j,g in enumerate(gens):
+                temp1 = next(g)*weights[j+1]
                 if temp.shape[0] > temp1.shape[0]:
                     temp = temp[:temp1.shape[0]]
                 temp += temp1[:temp.shape[0]]

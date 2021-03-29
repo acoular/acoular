@@ -3,7 +3,7 @@ from acoular import UniformFlowEnvironment,SlotJet,OpenJet,RotatingFlow,MicGeom,
         UncorrelatedNoiseSource, SourceMixer, SamplesGenerator, BeamformerTimeTraj, BeamformerTimeSqTraj,\
             BeamformerCleantTraj, BeamformerCleantSqTraj, IntegratorSectorTime, MaskedTimeInOut, ChannelMixer,\
                 SpatialInterpolator, SpatialInterpolatorRotation, SpatialInterpolatorConstantRotation, Mixer,\
-                    WriteWAV, MergeGrid, FiltWNoiseGenerator, SphericalHarmonicSource
+                    WriteWAV, MergeGrid, FiltWNoiseGenerator, SphericalHarmonicSource, PointSource
 from numpy import array
 from unittest import TestCase
 
@@ -49,8 +49,8 @@ UNEQUAL_DIGEST_TEST_DICT = {
     "SphericalHarmonicSource.alpha array assignment": (SphericalHarmonicSource(alpha=array((0, 1))), "obj.alpha = array((1., 1., 1.))"),  
 #    "UncorrelatedNoiseSource.seed item assignment": (UncorrelatedNoiseSource(seed=array((1, 2))), "obj.seed[0] = 3"),  
     "UncorrelatedNoiseSource.seed array assignment": (UncorrelatedNoiseSource(seed=array((1, 2))), "obj.seed = array((3,4))"),  
-    "SourceMixer.sources item assignment": (SourceMixer(sources=[SamplesGenerator()]), "obj.sources[0] = SamplesGenerator()"),  
-    "SourceMixer.sources list assignment": (SourceMixer(sources=[SamplesGenerator()]), "obj.sources = [SamplesGenerator()]"),  
+    "SourceMixer.sources item assignment": (SourceMixer(sources=[SamplesGenerator()]), "obj.sources[0] = PointSource()"),  
+    "SourceMixer.sources list assignment": (SourceMixer(sources=[SamplesGenerator()]), "obj.sources = [PointSource()]"),  
     # tbeamform.py
 #    "BeamformerTimeTraj.rvec item assignment": (BeamformerTimeTraj(), "obj.rvec[0] = 1."),
     "BeamformerTimeTraj.rvec array assignment": (BeamformerTimeTraj(), "obj.rvec = array((1., 0., 0.))"),
