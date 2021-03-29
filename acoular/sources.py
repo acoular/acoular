@@ -874,13 +874,13 @@ class SourceMixer( SamplesGenerator ):
     sources = List( Instance(SamplesGenerator, ()) ) 
 
     #: Sampling frequency of the signal.
-    sample_freq = Trait( SamplesGenerator().sample_freq )
+    sample_freq = Property( depends_on=['ldigest'] )
     
     #: Number of channels.
-    numchannels = Trait( SamplesGenerator().numchannels )
+    numchannels = Property( depends_on=['ldigest'] )
                
     #: Number of samples.
-    numsamples = Trait( SamplesGenerator().numsamples )
+    numsamples = Property( depends_on=['ldigest'] )
     
     #: Amplitude weight(s) for the sources as array. If not set, 
     #: all source signals are equally weighted.
@@ -891,7 +891,7 @@ class SourceMixer( SamplesGenerator ):
     ldigest = Property( depends_on = ['sources.digest', ])
 
     # internal identifier
-    digest = Property( depends_on = ['ldigest', 'sources','weights'])
+    digest = Property( depends_on = ['ldigest', 'weights', '__class__'])
 
     @cached_property
     def _get_ldigest( self ):
@@ -904,19 +904,39 @@ class SourceMixer( SamplesGenerator ):
     def _get_digest( self ):
         return digest(self)
 
+    @cached_property
+    def _get_sample_freq( self ):
+        if self.sources:
+            sample_freq = self.sources[0].sample_freq
+        else:
+            sample_freq = 0
+        return sample_freq
+
+    @cached_property
+    def _get_numchannels( self ):
+        if self.sources:
+            numchannels = self.sources[0].numchannels
+        else:
+            numchannels = 0
+        return numchannels
+
+    @cached_property
+    def _get_numsamples( self ):
+        if self.sources:
+            numsamples = self.sources[0].numsamples
+        else:
+            numsamples = 0
+        return numsamples
+
     def validate_sources( self ):
         """ Validates if sources fit together. """
-        if self.sources:
-            self.sample_freq = self.sources[0].sample_freq
-            self.numchannels = self.sources[0].numchannels
-            self.numsamples = self.sources[0].numsamples
-            for s in self.sources[1:]:
-                if self.sample_freq != s.sample_freq:
-                    raise ValueError("Sample frequency of %s does not fit" % s)
-                if self.numchannels != s.numchannels:
-                    raise ValueError("Channel count of %s does not fit" % s)
-                if self.numsamples != s.numsamples:
-                    raise ValueError("Number of samples of %s does not fit" % s)
+        for s in self.sources[1:]:
+            if self.sample_freq != s.sample_freq:
+                raise ValueError("Sample frequency of %s does not fit" % s)
+            if self.numchannels != s.numchannels:
+                raise ValueError("Channel count of %s does not fit" % s)
+            if self.numsamples != s.numsamples:
+                raise ValueError("Number of samples of %s does not fit" % s)
 
     def result(self, num):
         """
