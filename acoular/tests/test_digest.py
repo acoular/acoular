@@ -3,7 +3,7 @@ from acoular import UniformFlowEnvironment,SlotJet,OpenJet,RotatingFlow,MicGeom,
         UncorrelatedNoiseSource, SourceMixer, SamplesGenerator, BeamformerTimeTraj, BeamformerTimeSqTraj,\
             BeamformerCleantTraj, BeamformerCleantSqTraj, IntegratorSectorTime, MaskedTimeInOut, ChannelMixer,\
                 SpatialInterpolator, SpatialInterpolatorRotation, SpatialInterpolatorConstantRotation, Mixer,\
-                    WriteWAV, MergeGrid, FiltWNoiseGenerator, SphericalHarmonicSource
+                    WriteWAV, MergeGrid, FiltWNoiseGenerator, SphericalHarmonicSource, PointSource
 from numpy import array
 from unittest import TestCase
 
