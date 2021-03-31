@@ -23,15 +23,19 @@
 
 # imports from other packages
 
-from numpy import array, sqrt, ones, empty, newaxis, uint32, arange, dot, int64 ,real, pi,\
-tile, cross ,zeros
+from numpy import array, sqrt, ones, empty, newaxis, uint32, arange, dot, int64 ,real, pi, tile,\
+cross, zeros, ceil
+from numpy import min as npmin
+from numpy import any as npany
 
 from numpy.fft import ifft, fft
 from numpy.linalg import norm
 
+import numba as nb
+
 from traits.api import Float, Int, Property, Trait, Delegate, \
 cached_property, Tuple, CLong, File, Instance, Any, \
-on_trait_change, List, ListInt, CArray, Bool, Dict
+on_trait_change, List, ListInt, CArray, Bool, Dict, Enum
 from os import path
 from warnings import warn
 
@@ -45,6 +49,24 @@ from .tprocess import SamplesGenerator
 from .signals import SignalGenerator
 from .h5files import H5FileBase, _get_h5file_class
 from .tools import get_modes
+
+
+@nb.njit(cache=True, error_model="numpy") # jit with nopython        
+def _fill_mic_signal_block(out,signal,rm,ind,blocksize,numchannels,up,prepadding):
+    if prepadding:
+        for b in range(blocksize):
+            for m in range(numchannels):
+                if ind[0,m]<0:
+                    out[b,m] = 0
+                else:
+                    out[b,m] = signal[int(0.5+ind[0,m])]/rm[0,m]
+            ind += up
+    else:
+        for b in range(blocksize):
+            for m in range(numchannels):
+                out[b,m] = signal[int(0.5+ind[0,m])]/rm[0,m]
+            ind += up
+    return out
 
 
 class TimeSamples( SamplesGenerator ):
@@ -328,10 +350,14 @@ class PointSource( SamplesGenerator ):
     #: depends on used microphone geometry.
     numchannels = Delegate('mics', 'num_mics')
 
-
     #: :class:`~acoular.microphones.MicGeom` object that provides the microphone locations.
     mics = Trait(MicGeom, 
         desc="microphone geometry")
+
+    def _validate_locations(self):
+        dist = self.env._r(array(self.loc).reshape((3, 1)), self.mics.mpos)
+        if npany(dist < 1e-7):
+            warn("Source and microphone locations are identical.", Warning, stacklevel = 2)
     
     #: :class:`~acoular.environments.Environment` or derived object, 
     #: which provides information about the sound propagation in the medium.
@@ -373,6 +399,12 @@ class PointSource( SamplesGenerator ):
     start = Float(0.0,
         desc="sample start time")
 
+    #: Signal behaviour for negative time indices, i.e. if :attr:`start` < :attr:start_t.
+    #: `loop` take values from the end of :attr:`signal.signal()` array.
+    #: `zeros` set source signal to zero, advisable for deterministic signals.
+    #: defaults to `loop`.
+    prepadding = Trait('loop','zeros', desc="Behaviour for negative time indices.")
+
     #: Upsampling factor, internal use, defaults to 16.
     up = Int(16, 
         desc="upsampling factor")        
@@ -388,53 +420,69 @@ class PointSource( SamplesGenerator ):
     # internal identifier
     digest = Property( 
         depends_on = ['mics.digest', 'signal.digest', 'loc', \
-         'env.digest', 'start_t', 'start', 'up', '__class__'], 
+         'env.digest', 'start_t', 'start', 'up', 'prepadding', '__class__'], 
         )
                
     @cached_property
     def _get_digest( self ):
         return digest(self)
-           
+
     def result(self, num=128):
         """
         Python generator that yields the output at microphones block-wise.
-                
+
         Parameters
         ----------
         num : integer, defaults to 128
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block) .
-        
+
         Returns
         -------
         Samples in blocks of shape (num, numchannels). 
             The last block may be shorter than num.
         """
-        #If signal samples are needed for te < t_start, then samples are taken
-        #from the end of the calculated signal.
         
-   
+        self._validate_locations()
+        N = int(ceil(self.numsamples/num)) # number of output blocks
         signal = self.signal.usignal(self.up)
         out = empty((num, self.numchannels))
         # distances
-        rm = self.env._r(array(self.loc).reshape((3, 1)), self.mics.mpos)
+        rm = self.env._r(array(self.loc).reshape((3, 1)), self.mics.mpos).reshape(1,-1)
         # emission time relative to start_t (in samples) for first sample
-        ind = (-rm/self.env.c-self.start_t+self.start)*self.sample_freq   
-        i = 0
-        n = self.numsamples        
-        while n:
-            n -= 1
-            try:
-                out[i] = signal[array(0.5+ind*self.up, dtype=int64)]/rm
-                ind += 1.
-                i += 1
-                if i == num:
-                    yield out.copy()
-                    i = 0
-            except IndexError: #if no more samples available from the source
-                break
-        if i > 0: # if there are still samples to yield
-            yield out[:i]         
+        ind = (-rm/self.env.c-self.start_t+self.start)*self.sample_freq*self.up
+
+        if self.prepadding == 'zeros':
+            # number of blocks where signal behaviour is amended
+            pre = -int(npmin(ind[0])//(self.up*num))
+            # amend signal for first blocks
+            # if signal stops during prepadding, terminate
+            if N <= pre:
+                for nb in range(N-1):
+                    out = _fill_mic_signal_block(out,signal,rm,ind,num,self.numchannels,self.up,True)
+                    yield out
+
+                blocksize = self.numsamples%num or num
+                out = _fill_mic_signal_block(out,signal,rm,ind,blocksize,self.numchannels,self.up,True)
+                yield out[:blocksize]
+                return
+            else:
+                for nb in range(pre):
+                    out = _fill_mic_signal_block(out,signal,rm,ind,num,self.numchannels,self.up,True)
+                    yield out
+
+        else:
+            pre = 0
+
+        # main generator
+        for nb in range(N-pre-1):
+            out = _fill_mic_signal_block(out,signal,rm,ind,num,self.numchannels,self.up,False)
+            yield out
+
+        # last block of variable size
+        blocksize = self.numsamples%num or num
+        out = _fill_mic_signal_block(out,signal,rm,ind,blocksize,self.numchannels,self.up,False)
+        yield out[:blocksize]
 
 
 class SphericalHarmonicSource( PointSource ):
@@ -455,11 +503,13 @@ class SphericalHarmonicSource( PointSource ):
     #: Vector to define the orientation of the SphericalHarmonic. 
     direction = Tuple((1.0, 0.0, 0.0),
         desc="Spherical Harmonic orientation")
+
+    prepadding = Enum('loop', desc="Behaviour for negative time indices.")
     
     # internal identifier
     digest = Property( 
         depends_on = ['mics.digest', 'signal.digest', 'loc', \
-         'env.digest', 'start_t', 'start', 'up', '__class__', 'alpha','lOrder'], 
+         'env.digest', 'start_t', 'start', 'up', '__class__', 'alpha','lOrder', 'prepadding'], 
         )
                
     @cached_property
@@ -528,10 +578,12 @@ class MovingPointSource( PointSource ):
     trajectory = Trait(Trajectory, 
         desc="trajectory of the source")
 
+    prepadding = Enum('loop', desc="Behaviour for negative time indices.")
+
     # internal identifier
     digest = Property( 
         depends_on = ['mics.digest', 'signal.digest', 'loc', 'conv_amp', \
-         'env.digest', 'start_t', 'start', 'trajectory.digest', '__class__'], 
+         'env.digest', 'start_t', 'start', 'trajectory.digest', 'prepadding', '__class__'], 
         )
                
     @cached_property
@@ -590,7 +642,7 @@ class MovingPointSource( PointSource ):
                 out[i] = signal[array(0.5+ind*self.up, dtype=int64)]/rm
                 i += 1
                 if i == num:
-                    yield out.copy()
+                    yield out
                     i = 0
             except IndexError: #if no more samples available from the source 
                 break
@@ -615,11 +667,13 @@ class PointSourceDipole ( PointSource ):
     #: for good results.
     direction = Tuple((0.0, 0.0, 1.0),
         desc="dipole orientation and distance of the inversely phased monopoles")
+
+    prepadding = Enum('loop', desc="Behaviour for negative time indices.")
     
     # internal identifier
     digest = Property( 
         depends_on = ['mics.digest', 'signal.digest', 'loc', \
-         'env.digest', 'start_t', 'start', 'up', 'direction', '__class__'], 
+         'env.digest', 'start_t', 'start', 'up', 'direction', 'prepadding', '__class__'], 
         )
                
     @cached_property
@@ -683,7 +737,7 @@ class PointSourceDipole ( PointSource ):
             n -= 1
             try:
                 # subtract the second signal b/c of phase inversion
-                out[i,:,n] = rm / dist * \
+                out[i] = rm / dist * \
                          (signal[array(0.5 + ind1 * self.up, dtype=int64)] / rm1 - \
                           signal[array(0.5 + ind2 * self.up, dtype=int64)] / rm2)
                 ind1 += 1.
@@ -691,7 +745,7 @@ class PointSourceDipole ( PointSource ):
                 
                 i += 1
                 if i == num:
-                    yield out.copy()
+                    yield out
                     i = 0
             except IndexError:
                 break
@@ -1196,19 +1250,24 @@ class SourceMixer( SamplesGenerator ):
     sources = List( Instance(SamplesGenerator, ()) ) 
 
     #: Sampling frequency of the signal.
-    sample_freq = Trait( SamplesGenerator().sample_freq )
+    sample_freq = Property( depends_on=['ldigest'] )
     
     #: Number of channels.
-    numchannels = Trait( SamplesGenerator().numchannels )
+    numchannels = Property( depends_on=['ldigest'] )
                
     #: Number of samples.
-    numsamples = Trait( SamplesGenerator().numsamples )
+    numsamples = Property( depends_on=['ldigest'] )
     
+    #: Amplitude weight(s) for the sources as array. If not set, 
+    #: all source signals are equally weighted.
+    #: Must match the number of sources in :attr:`sources`.
+    weights = CArray(desc="channel weights")
+
     # internal identifier
     ldigest = Property( depends_on = ['sources.digest', ])
 
     # internal identifier
-    digest = Property( depends_on = ['ldigest', '__class__','sources'])
+    digest = Property( depends_on = ['ldigest', 'weights', '__class__'])
 
     @cached_property
     def _get_ldigest( self ):
@@ -1221,21 +1280,39 @@ class SourceMixer( SamplesGenerator ):
     def _get_digest( self ):
         return digest(self)
 
-    @on_trait_change('sources')
+    @cached_property
+    def _get_sample_freq( self ):
+        if self.sources:
+            sample_freq = self.sources[0].sample_freq
+        else:
+            sample_freq = 0
+        return sample_freq
+
+    @cached_property
+    def _get_numchannels( self ):
+        if self.sources:
+            numchannels = self.sources[0].numchannels
+        else:
+            numchannels = 0
+        return numchannels
+
+    @cached_property
+    def _get_numsamples( self ):
+        if self.sources:
+            numsamples = self.sources[0].numsamples
+        else:
+            numsamples = 0
+        return numsamples
+
     def validate_sources( self ):
         """ Validates if sources fit together. """
-        if self.sources:
-            self.sample_freq = self.sources[0].sample_freq
-            self.numchannels = self.sources[0].numchannels
-            self.numsamples = self.sources[0].numsamples
-            for s in self.sources[1:]:
-                if self.sample_freq != s.sample_freq:
-                    raise ValueError("Sample frequency of %s does not fit" % s)
-                if self.numchannels != s.numchannels:
-                    raise ValueError("Channel count of %s does not fit" % s)
-                if self.numsamples != s.numsamples:
-                    raise ValueError("Number of samples of %s does not fit" % s)
-
+        for s in self.sources[1:]:
+            if self.sample_freq != s.sample_freq:
+                raise ValueError("Sample frequency of %s does not fit" % s)
+            if self.numchannels != s.numchannels:
+                raise ValueError("Channel count of %s does not fit" % s)
+            if self.numsamples != s.numsamples:
+                raise ValueError("Number of samples of %s does not fit" % s)
 
     def result(self, num):
         """
@@ -1253,11 +1330,17 @@ class SourceMixer( SamplesGenerator ):
         Samples in blocks of shape (num, numchannels). 
             The last block may be shorter than num.
         """
+        self.validate_sources()
         gens = [i.result(num) for i in self.sources[1:]]
+        weights = self.weights.copy()
+        if weights.size == 0:
+            weights = array([1. for j in range(len( self.sources))])
+        assert weights.shape[0] == len(self.sources)
         for temp in self.sources[0].result(num):
+            temp *= weights[0]
             sh = temp.shape[0]
-            for g in gens:
-                temp1 = next(g)
+            for j,g in enumerate(gens):
+                temp1 = next(g)*weights[j+1]
                 if temp.shape[0] > temp1.shape[0]:
                     temp = temp[:temp1.shape[0]]
                 temp += temp1[:temp.shape[0]]

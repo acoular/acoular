@@ -1,12 +1,16 @@
 import unittest
+
+from os.path import join
+
 import numpy as np
+
+from acoular import config
+config.global_caching = 'none'
+
 from acoular import WNoiseGenerator, MovingPointSource, WriteH5, Trajectory, MicGeom,\
     RectGrid, MaskedTimeSamples, SteeringVector, TimeAverage, BeamformerTimeSqTraj, BeamformerTimeTraj,\
     BeamformerCleantTraj, BeamformerCleantSqTraj, BeamformerTime, BeamformerTimeSq,\
     BeamformerCleant, BeamformerCleantSq
-import tables as tb
-from acoular import config
-config.global_caching = "none"
 
 # if this flag is set to True, new time data will be simulated and
 WRITE_NEW_REFERENCE_DATA = False
@@ -14,7 +18,7 @@ WRITE_NEW_REFERENCE_DATA = False
 # true, if it is necessary to recalculate the data, due to wanted changes of the Beamformers (or MovingPointSource).
 
 # Parameters
-FNAME = f"reference_data/beamformer_traj_time_data.h5"
+FNAME = join('reference_data','beamformer_traj_time_data.h5')
 SFREQ = 6000
 SPEED = 10  # km/h
 SEED = 1
@@ -118,49 +122,6 @@ def get_beamformer_time_result(Beamformer, num=32):
         bt.n_iter = 2
     return next(bt.result(num)).astype(np.float32)
 
-
-def write_beamformer_reference_data_to_h5(fname, data):
-    """
-    writes reference values to .h5 file
-    
-
-    Parameters
-    ----------
-    fname : str
-        file name of reference file.
-    data : array
-        reference data that is used for test comparison.
-
-    Returns
-    -------
-    None.
-
-    """
-    h5file = tb.open_file(fname, mode="w")
-    h5file.create_array('/', name="ref_values", obj=data,
-                        shape=data.shape, atom=tb.Float32Atom())
-    h5file.close()
-
-def get_beamformer_reference_data_from_h5(fname):
-    """
-    reads reference values from .h5 file
-
-    Parameters
-    ----------
-    fname : str
-        file name of reference file.
-
-    Returns
-    -------
-    array
-        a copy of the reference data as array.
-
-    """
-    h5file = tb.open_file(fname, mode="r")
-    return h5file.get_node('/', "ref_values")[:]
-
-
-# TestCase
 class BeamformerTimeTest(unittest.TestCase):
     """
     A simple test case that varifies that the results of trajectory beamformers 
@@ -179,41 +140,25 @@ class BeamformerTimeTest(unittest.TestCase):
         results from .h5 file"""
         for beamformer in self.traj_beamformers:
             with self.subTest(beamformer.__name__):
-                name = f"reference_data/reference_results_{beamformer.__name__}.h5"
-                ref_data = get_beamformer_reference_data_from_h5(name)
+                name = join('reference_data',f'{beamformer.__name__}.npy')
                 actual_data = get_beamformer_traj_result(beamformer)
-                np.testing.assert_allclose(actual_data, ref_data, rtol=1e-5, atol=0)
+                if WRITE_NEW_REFERENCE_DATA:
+                    np.save(name,actual_data)
+                ref_data = np.load(name)
+                np.testing.assert_allclose(actual_data, ref_data, rtol=1e-5, atol=1e-8)
 
     def test_beamformer_time_result(self):
         """compare results of time beamformers with fixed focus against previous
         results from .h5 file"""
         for beamformer in self.time_beamformers:
             with self.subTest(beamformer.__name__):
-                name = f"reference_data/reference_results_{beamformer.__name__}.h5"
-                ref_data = get_beamformer_reference_data_from_h5(name)
+                name = join('reference_data',f'{beamformer.__name__}.npy')
                 actual_data = get_beamformer_time_result(beamformer)
-                np.testing.assert_allclose(actual_data, ref_data, rtol=1e-5, atol=0)
+                if WRITE_NEW_REFERENCE_DATA:
+                    np.save(name,actual_data)
+                ref_data = np.load(name)
+                np.testing.assert_allclose(actual_data, ref_data, rtol=1e-5, atol=1e-8)
+
     
 if __name__ == '__main__':
-    """ run tests """
-
-    if WRITE_NEW_REFERENCE_DATA:
-        traj_beamformers = [BeamformerTimeTraj, BeamformerTimeSqTraj,
-                            BeamformerCleantTraj, BeamformerCleantSqTraj]
-        time_beamformers = [BeamformerTime, BeamformerTimeSq,
-                            BeamformerCleant, BeamformerCleantSq]
-        # create time data
-        create_test_time_data(nsamples)
-        # save output of traj beamformers as reference
-        for beamformer in traj_beamformers:
-            name = f"reference_data/reference_results_{beamformer.__name__}.h5"
-            data = get_beamformer_traj_result(beamformer)
-            write_beamformer_reference_data_to_h5(name, data)
-        # save output of time beamformers as reference
-        for beamformer in time_beamformers:
-            name = f"reference_data/reference_results_{beamformer.__name__}.h5"
-            data = get_beamformer_time_result(beamformer)
-            write_beamformer_reference_data_to_h5(name, data)
-
-    # run tests
     unittest.main()
