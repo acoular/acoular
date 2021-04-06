@@ -70,6 +70,7 @@ class H5cache_class(HasPrivateTraits):
     def is_reference_existent(self,file):
         existFlag = False
         # inspect all refererres to the file object
+        gc.collect() #clear garbage before collecting referrers
         for ref in gc.get_referrers(file):
             # does the file object have a referrer that has a 'h5f' 
             # attribute?
