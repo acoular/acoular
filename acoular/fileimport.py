@@ -27,10 +27,8 @@ import configparser
 import struct
 
 # acoular imports
-from .h5cache import td_dir
 from .h5files import H5CacheFileBase, _get_h5file_class
-
-
+from .configuration import config
 class time_data_import( HasPrivateTraits ):
     """
     Base class for import of time data.
@@ -91,7 +89,7 @@ class csv_import( time_data_import ):
         numchannels = len(data)
         name = td.name
         if name == "":
-            name = path.join(td_dir, \
+            name = path.join(config.td_dir, \
                 path.splitext(path.basename(self.from_file))[0]+'.h5')
         else:
             if td.h5f !=  None:
@@ -137,7 +135,7 @@ class td_import( time_data_import ):
         numchannels = data.shape[1]
         name = td.name
         if name == "":
-            name = path.join(td_dir, \
+            name = path.join(config.td_dir, \
                         path.splitext(path.basename(self.from_file))[0]+'.h5')
         else:
             if td.h5f !=  None:
@@ -188,7 +186,7 @@ class bk_mat_import( time_data_import ):
             data[:, ii] = m["Channel_%i_Data" % (i+1)]
         name = td.name
         if name == "":
-            name = path.join(td_dir, \
+            name = path.join(config.td_dir, \
                 path.splitext(path.basename(self.from_file))[0]+'.h5')
         else:
             if td.h5f !=  None:
@@ -349,7 +347,7 @@ class datx_import(time_data_import):
         # prepare hdf5
         name = td.name
         if name == "":
-            name = path.join(td_dir, \
+            name = path.join(config.td_dir, \
                 path.splitext(path.basename(self.from_file))[0]+'.h5')
         else:
             if td.h5f !=  None:
