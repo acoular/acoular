@@ -350,6 +350,7 @@ class PowerSpectra( HasPrivateTraits ):
         if ac[:].sum() == 0: # only initialized
 #            print("write {} to:".format(traitname),nodename)
             ac[:] = func()
+            self.h5f.flush()
         return ac
              
     @property_depends_on('digest')
