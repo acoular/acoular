@@ -2187,6 +2187,13 @@ class TimeConvolve(TimeInOut):
         desc="Frequency domain Kernel blocks",
     )
 
+    # internal identifier
+    digest = Property( depends_on = ['source.digest', 'kernel', '__class__'])
+
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+
     def _validate_kernel(self):
         # reshape kernel for broadcasting
         if self.kernel.ndim == 1:
