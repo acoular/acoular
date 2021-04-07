@@ -11,7 +11,8 @@
     config
 """
 
-from traits.api import Trait, Bool, Property, HasStrictTraits
+from os import path, mkdir
+from traits.api import Trait, Bool, Str, Property, HasStrictTraits
 
 class Config(HasStrictTraits):
     """
@@ -53,7 +54,20 @@ class Config(HasStrictTraits):
     
     _h5library = Trait('pytables','h5py')
     
-    
+    #: Defines the path to the directory containing Acoulars cache files.
+    #: If the specified :attr:`cache_dir` directory does not exist,
+    #: it will be created. attr:`cache_dir` defaults to current session path.  
+    cache_dir = Property()
+
+    _cache_dir = Str("")
+
+    #: Defines the working directory containing files that can be loaded by the
+    #: fileimport.py module. 
+    #: Defaults to current session path.  
+    td_dir = Property()
+
+    _td_dir = Str(path.curdir)
+
     #: Boolean Flag that determines whether user has access to traitsui features.
     #: Defaults to False.
     use_traitsui = Property()
@@ -93,7 +107,24 @@ class Config(HasStrictTraits):
             except:
                 raise ImportError("packages h5py and pytables are missing!")
 
+    def _get_cache_dir(self):
+        if self._cache_dir == "":
+            cache_dir = path.join(path.curdir,'cache')
+            if not path.exists(cache_dir):
+                mkdir(cache_dir)
+            self._cache_dir = cache_dir
+        return self._cache_dir
+    
+    def _set_cache_dir(self,cdir):
+        if not path.exists(cdir):
+            mkdir(cdir)
+        self._cache_dir = cdir
 
+    def _get_td_dir(self):
+        return self._td_dir
+    
+    def _set_td_dir(self,tddir):
+        self._td_dir = tddir
 
 config = Config()
 """

@@ -65,7 +65,7 @@ import threading
 
 # acoular imports
 from .internal import digest
-from .h5cache import H5cache, td_dir
+from .h5cache import H5cache
 from .h5files import H5CacheFileBase, _get_h5file_class
 from .environments import cartToCyl,cylToCart
 from .microphones import MicGeom
@@ -1939,7 +1939,7 @@ class WriteH5( TimeInOut ):
     def create_filename(self):
         if self.name == '':
             name = datetime.now().isoformat('_').replace(':','-').replace('.','_')
-            self.name = path.join(td_dir,name+'.h5')
+            self.name = path.join(config.td_dir,name+'.h5')
 
     def get_initialized_file(self):
         file = _get_h5file_class()
