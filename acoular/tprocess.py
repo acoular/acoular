@@ -246,32 +246,35 @@ class MaskedTimeInOut ( TimeInOut ):
         Samples in blocks of shape (num, :attr:`numchannels`). 
             The last block may be shorter than num.
         """
-        sli = slice(self.start, self.stop).indices(self.numsamples_total-1) #sets the stop index automatically if self.stop > numsamples_total - 1
+        sli = slice(self.start, self.stop).indices(self.numsamples_total)
         start = sli[0]
         stop = sli[1]
-        if start > stop:
+        if start >= stop:
             raise IOError("no samples available")
         
-        if start != 0 or stop != self.numsamples_total-1:
+        if start != 0 or stop != self.numsamples_total:
 
-            stopoff = -stop % num
-            offset = -start % num
-            if offset == 0: offset = num      
-            buf = empty((num + offset , self.numchannels), dtype=float) # buffer array
+            buf = empty((0,self.numchannels),dtype=float) # buffer array
             i = 0
+            fblock = True
             for block in self.source.result(num):
-                i += num
-                if i > start and i <= stop+stopoff+num:
-                    ns = block.shape[0] # numbers of samples
-                    buf[offset:offset+ns] = block[:, self.channels]
-                    if i > start + num and ns==num:
-                        yield buf[:num]
-                buf[:offset] = buf[num:num+offset]
-            indx= (stop-start+1)%num
-            if indx!=0:
-                yield buf[:indx]
-            else:
-                yield buf[:num]
+                bs = block.shape[0]
+                i += bs
+                if fblock and i >= start : # first block in the chosen interval
+                    if i>= stop: # special case that start and stop are in one block
+                        yield block[bs-(i-start):bs-(i-stop)]
+                        break
+                    buf = concatenate((buf,block[bs -(i-start):]))
+                    fblock = False
+                elif i >= stop: # last block
+                    buf = concatenate((buf,block[:bs- (i-stop)]))
+                    yield buf
+                    break
+                elif i >=start :
+                    buf = concatenate((buf,block))
+                if buf.shape[0]>=num:
+                    yield buf[:num]
+                    buf = buf[num:]
         
         else: # if no start/stop given, don't do the resorting thing
             for block in self.source.result(num):
