@@ -1798,14 +1798,18 @@ class TimeCache( TimeInOut ):
                 nodename, (0, self.numchannels), "float32")
         ac = self.h5f.get_data_by_reference(nodename)
         self.h5f.set_node_attribute(ac,'sample_freq',self.sample_freq)
+        self.h5f.set_node_attribute(ac,'complete',False)
         for data in self.source.result(num):
             self.h5f.append_data(ac,data)
             yield data
+        self.h5f.set_node_attribute(ac,'complete',True)
     
     def _get_data_from_cache(self,num):
         nodename = 'tc_' + self.digest
         ac = self.h5f.get_data_by_reference(nodename)
         i = 0
+        if ac.attrs['complete'] == False:
+            warn("using not complete cache %s" %str(nodename), Warning, stacklevel = 2)
         while i < ac.shape[0]:
             yield ac[i:i+num]
             i += num
