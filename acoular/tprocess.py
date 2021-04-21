@@ -253,8 +253,10 @@ class MaskedTimeInOut ( TimeInOut ):
             raise IOError("no samples available")
         
         if start != 0 or stop != self.numsamples_total:
-
-            buf = empty((0,self.numchannels),dtype=float) # buffer array
+            offset = -start % num
+            if offset == 0: offset = num
+            buf = empty((num + offset , self.numchannels), dtype=float)
+            bsize = 0
             i = 0
             fblock = True
             for block in self.source.result(num):
@@ -264,17 +266,25 @@ class MaskedTimeInOut ( TimeInOut ):
                     if i>= stop: # special case that start and stop are in one block
                         yield block[bs-(i-start):bs-(i-stop)]
                         break
-                    buf = concatenate((buf,block[bs -(i-start):]))
+                    bsize += (i-start)
+                    buf[:(i-start),:] = block[bs-(i-start):]
                     fblock = False
                 elif i >= stop: # last block
-                    buf = concatenate((buf,block[:bs- (i-stop)]))
-                    yield buf
+                    buf[bsize:bsize+bs-(i-stop),:] = block[:bs-(i-stop)]
+                    bsize += bs-(i-stop)
+                    if bsize >num:
+                        yield buf[:num]
+                        buf[:bsize-num,:] = buf[num:bsize,:]
+                        bsize -= num
+                    yield buf[:bsize,:]
                     break
                 elif i >=start :
-                    buf = concatenate((buf,block))
-                if buf.shape[0]>=num:
+                    buf[bsize:bsize+bs,:] = block
+                    bsize += bs
+                if bsize>=num:
                     yield buf[:num]
-                    buf = buf[num:]
+                    buf[:bsize-num,:] = buf[num:bsize,:]
+                    bsize -= num
         
         else: # if no start/stop given, don't do the resorting thing
             for block in self.source.result(num):
