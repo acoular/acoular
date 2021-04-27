@@ -36,7 +36,7 @@ from .grids import RectGrid
 from .trajectory import Trajectory
 from .tprocess import TimeInOut
 from .fbeamform import SteeringVector, L_p
-from .tfastfuncs import _delayandsum, _delayandsum2, _delayandsum3
+from .tfastfuncs import _delayandsum, _delayandsum2, _delayandsum3, _delayandsum4, _delayandsum5
 
 
 def const_power_weight( bf ):
@@ -768,8 +768,7 @@ class BeamformerCleant( BeamformerTime ):
         ''' standard delay-and-sum method ''' 
         result = empty((num, self.grid.size), dtype=float) # output array
         autopow = empty((num, self.grid.size), dtype=float) # output array
-        for res_index in range(num):
-            _delayandsum3(p_res, res_index+d_index, d_interp2, amp, result[res_index], autopow[res_index])
+        _delayandsum4(p_res, d_index, d_interp2, amp, result, autopow)
         return result, autopow          
 
 
@@ -936,21 +935,11 @@ class BeamformerCleantTraj( BeamformerCleant, BeamformerTimeTraj ):
 
     def delay_and_sum(self,num,p_res,d_interp1,d_interp2,delays,m_index,amp): 
         ''' standard delay-and-sum method ''' 
-        # result = empty((num, self.grid.size), dtype=float32) # output array
-        # for i in range(num):
-        #     result[i] =((p_res[i+delays[i].astype(int32), m_index]*d_interp1[i] \
-        #                 + p_res[i+delays[i].astype(int32)+1, m_index]*d_interp2[i])*amp[i]).sum(-1) 
-        # return result
-
-    # def delay_and_sum(self,num,p_res,d_interp2,d_index,amp): 
-    #     ''' standard delay-and-sum method ''' 
-        d_index = delays.astype(int)
-        p_res64 = p_res.astype(float)
-        result = empty((num, self.grid.size), dtype=float) # output array
-        autopow = empty((num, self.grid.size), dtype=float) # output array
-        for i in range(num):
-            _delayandsum3(p_res64, i+d_index[i], d_interp2[i].astype(float), amp[i].astype(float), result[i], autopow[i])
-        return result.astype(float32)#, autopow          
+        d_index = delays.astype(int32)
+        result = empty((num, self.grid.size), dtype=float32) # output array
+        autopow = empty((num, self.grid.size), dtype=float32) # output array
+        _delayandsum5(p_res, d_index, d_interp2, amp, result, autopow)
+        return result#, autopow          
 
 
 class BeamformerCleantSqTraj( BeamformerCleantTraj, BeamformerTimeSq ):
