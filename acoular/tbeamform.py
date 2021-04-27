@@ -23,7 +23,7 @@
 from __future__ import print_function, division
 from numpy import array, newaxis, empty, sqrt, arange, clip, r_, zeros, \
 histogram, unique, cross, dot, where, s_ , sum,isscalar, full, ceil, argmax,\
-interp,concatenate, float32, int32, ones
+interp,concatenate, float32, int32, ones, subtract
 from numpy.linalg import norm
 from traits.api import Float, CArray, Property, Trait, Bool, Delegate, \
 cached_property, List, Instance, Range, Int, Enum
@@ -878,10 +878,10 @@ class BeamformerCleantTraj( BeamformerCleant, BeamformerTimeTraj ):
                 delays[i,:,:] = rm/c
                 if self.conv_amp:
                     blockrm[i,:,:] *= (1-self.get_macostheta(next(movgspeed),tpos,rm))**2 
-            d_interp2 = delays % 1 # 2nd coeff for lin interpolation between samples
-            d_interp1 = 1-d_interp2 # 1st coeff for lin interpolation 
+            d_index = array(delays, dtype=int32) # integer index
+            d_interp2 = subtract(delays, d_index, dtype=float32) # 2nd coeff for lin interpolation between samples
             amp[:,:,:] = 1.0/(((w/(blockrm**2)).sum(2) * blockr0)[:,:, newaxis]*blockrm) # multiplication factor
-            maxdelay = (delays.astype(int32).max((1,2)) + arange(0,num)).max()+2 # + because of interpolation
+            maxdelay = (d_index.max((1,2)) + arange(0,num)).max()+2 # + because of interpolation
             while maxdelay > self.buffer.shape[0] and dflag:
                 self.increase_buffer(num)
                 try:
@@ -890,14 +890,13 @@ class BeamformerCleantTraj( BeamformerCleant, BeamformerTimeTraj ):
                     dflag = False
             samplesleft = self.buffer.shape[0]-self.bufferIndex
             if samplesleft-maxdelay <= 0:
-                num = sum((delays.astype(int32).max((1,2))+1+arange(0,num)) < samplesleft)
+                num = sum((d_index.max((1,2))+1+arange(0,num)) < samplesleft)
                 n_index = arange(0,num,dtype=int32)[:,newaxis]
                 flag=False
             # init step
             p_res = array(
                 self.buffer[self.bufferIndex:self.bufferIndex+maxdelay,:])
-            Phi = self.delay_and_sum(
-                num,p_res,d_interp1,d_interp2,delays,m_index,amp)
+            Phi = self.delay_and_sum(num,p_res,d_interp2,d_index,amp)
             Gamma = zeros(Phi.shape,dtype=float32)
             J = 0
             # deconvolution 
@@ -907,15 +906,15 @@ class BeamformerCleantTraj( BeamformerCleant, BeamformerTimeTraj ):
                 imax = argmax(powPhi)
                 t_float = (delays[:num,imax,m_index]+n_index).astype(float32)
                 t_ind = t_float.astype(int32)
+                h = Phi[:num,imax]*blockr0[:num,imax] 
                 for m in range(numMics): 
                     p_res[t_ind[:num,m],m] -= self.damp*interp(
                         t_ind[:num,m], 
                         t_float[:num,m],
-                        Phi[:num,imax]*blockr0[:num,imax] \
+                        h \
                             /blockrm[:num,imax,m],
                             )
-                nextPhi = self.delay_and_sum(
-                            num,p_res,d_interp1,d_interp2,delays,m_index,amp)
+                nextPhi = self.delay_and_sum(num,p_res,d_interp2,d_index,amp)
                 pownextPhi = (nextPhi[:num]**2).sum(0)
                 # print(f"total signal power: {powPhi.sum()}")
                 if pownextPhi.sum() < powPhi.sum(): # stopping criterion
@@ -933,9 +932,8 @@ class BeamformerCleantTraj( BeamformerCleant, BeamformerTimeTraj ):
                 dflag = False
                 pass
 
-    def delay_and_sum(self,num,p_res,d_interp1,d_interp2,delays,m_index,amp): 
+    def delay_and_sum(self,num,p_res,d_interp2,d_index,amp): 
         ''' standard delay-and-sum method ''' 
-        d_index = delays.astype(int32)
         result = empty((num, self.grid.size), dtype=float32) # output array
         autopow = empty((num, self.grid.size), dtype=float32) # output array
         _delayandsum5(p_res, d_index, d_interp2, amp, result, autopow)

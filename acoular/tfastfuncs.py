@@ -154,7 +154,8 @@ def _delayandsum4(data, offsets, ifactor2, steeramp, out, autopower):
                 out[n,gi] += r
                 autopower[n,gi] += r*r
 
-@nb.njit([(nb.float32[:,:], nb.int32[:,:,:], nb.float32[:,:,:], nb.float32[:,:,:], nb.float32[:,:], nb.float32[:,:])],
+@nb.njit([(nb.float32[:,:], nb.int32[:,:,:], nb.float32[:,:,:], nb.float32[:,:,:], nb.float32[:,:], nb.float32[:,:]),
+            (nb.float64[:,:], nb.int64[:,:,:], nb.float64[:,:,:], nb.float64[:,:,:], nb.float64[:,:], nb.float64[:,:])],
                 cache=True, parallel=True, fastmath=True)
 def _delayandsum5(data, offsets, ifactor2, steeramp, out, autopower):
     """ Performs one time step of delay and sum with output and additional autopower removal
