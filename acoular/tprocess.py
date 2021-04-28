@@ -973,7 +973,7 @@ class SpatialInterpolator(TimeInOut):
             #check rotation
             if not phiDelay == []:
                 xInterpHelp = repmat(virtNewCoord[0, :], nTime, 1) + repmat(phiDelay, virtNewCoord.shape[1], 1).T
-                xInterp = ((xInterpHelp) % (2 * pi)) - pi #shifting phi cootrdinate into feasible area [-pi, pi]
+                xInterp = ((xInterpHelp + pi ) % (2 * pi)) - pi #shifting phi cootrdinate into feasible area [-pi, pi]
             else:
                 xInterp = repmat(virtNewCoord[0, :], nTime, 1)  
                 
@@ -1033,7 +1033,7 @@ class SpatialInterpolator(TimeInOut):
             #check rotation
             if not phiDelay == []:
                 xInterpHelp = repmat(virtNewCoord[0, :], nTime, 1) + repmat(phiDelay, virtNewCoord.shape[1], 1).T
-                xInterp = ((xInterpHelp ) % (2 * pi)) - pi  #shifting phi cootrdinate into feasible area [-pi, pi]
+                xInterp = ((xInterpHelp + pi  ) % (2 * pi)) - pi  #shifting phi cootrdinate into feasible area [-pi, pi]
             else:
                 xInterp = repmat(virtNewCoord[0, :], nTime, 1)  
                 
