@@ -1816,8 +1816,10 @@ class TimeCache( TimeInOut ):
         nodename = 'tc_' + self.digest
         ac = self.h5f.get_data_by_reference(nodename)
         i = 0
+        nblocks = 0
         while i < ac.shape[0]:
             yield ac[i:i+num]
+            nblocks += 1
             i += num
         self.h5f.remove_data(nodename)
         self.h5f.create_extendable_array(
@@ -1825,12 +1827,11 @@ class TimeCache( TimeInOut ):
         ac = self.h5f.get_data_by_reference(nodename)
         self.h5f.set_node_attribute(ac,'sample_freq',self.sample_freq)
         self.h5f.set_node_attribute(ac,'complete',False)
-        for data in self.source.result(num):
+        for j,data in enumerate(self.source.result(num)):
             self.h5f.append_data(ac,data)
+            if j>=nblocks:
+                yield block
         self.h5f.set_node_attribute(ac,'complete',True)
-        while i < ac.shape[0]:
-            yield ac[i:i+num]
-            i += num
 
     # result generator: delivers input, possibly from cache
     def result(self, num):
