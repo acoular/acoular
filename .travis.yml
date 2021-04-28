@@ -1,7 +1,7 @@
 language: python
 
 #operating sys and python versions
-matrix:
+jobs:
   include:
       #### Testing Linux ####
     # Python 2 support  dropped
@@ -12,27 +12,50 @@ matrix:
       python: 3.7
     - name: "Python 3.8 on Xenial Linux"
       python: 3.8
+    - name: "Python 3.9 on Xenial Linux"
+      python: 3.9
       #### Testing OSX ####
     - name: "Python 3.8 on macOS"
       os: osx
-      osx_image: xcode12  # Python 3.7 running on macOS 10.14.3
-      language: shell       # 'language: python' is an error on Travis CI macOS
+      osx_image: xcode12  # Python 3.8 running on macOS 10.14.3
+      language: shell      
       # python: 3.7         # 'python:' is ignored on Travis CI macOS
       before_install: python3 --version ; pip3 --version ; sw_vers
     - name: "Python 3.7 on macOS"
       os: osx
       osx_image: xcode11  # Python 3.7 running on macOS 10.14.3
-      language: shell       # 'language: python' is an error on Travis CI macOS
+      language: shell       
       # python: 3.7         # 'python:' is ignored on Travis CI macOS
       before_install: python3 --version ; pip3 --version ; sw_vers
     - name: "Python 3.6 on macOS"
       os: osx
       osx_image: xcode9.4  # Python 3.6
-      language: shell       # 'language: python' is an error on Travis CI macOS
+      language: shell      
       # python: 3.6         # 'python:' is ignored on Travis CI macOS
       before_install: python3 --version ; pip3 --version ; sw_vers
       ##### Testing Windows  #####
-    - name: "Python 3.8 on Windows"
+    - name: "Python 3.9 on Windows"
+      os: windows           # Windows 10.0.17134 N/A Build 17134
+      language: shell      
+      before_install:
+      #use conda python
+         - MINICONDA_PATH=/c/tools/miniconda3/;
+         - MINICONDA_PATH_WIN=`cygpath --windows $MINICONDA_PATH`;
+         - MINICONDA_SUB_PATH=$MINICONDA_PATH/Scripts;
+         - choco install openssl.light;
+         - choco install miniconda3 --params="'/AddToPath:1 /D:$MINICONDA_PATH_WIN'";
+         - export PATH="$MINICONDA_PATH:$MINICONDA_SUB_PATH:$PATH";
+         - source $MINICONDA_PATH/etc/profile.d/conda.sh;
+         - hash -r;
+         - conda config --set always_yes yes --set changeps1 no;
+         - conda update -q conda;
+         #create env and install libpython and pytables
+         - conda create --name test-environment python=3.9 ;
+         - conda activate test-environment;
+         - conda install -c anaconda pytables 
+         - conda install libpython;   
+ 	#####
+     - name: "Python 3.8 on Windows"
       os: windows           # Windows 10.0.17134 N/A Build 17134
       language: shell       # 'language: python' is an error on Travis CI Windows
       before_install:
@@ -51,7 +74,8 @@ matrix:
          - conda create --name test-environment python=3.8 ;
          - conda activate test-environment;
          - conda install -c anaconda pytables 
-         - conda install libpython;    
+         - conda install libpython;   
+	#### 
     - name: "Python 3.7 on Windows"
       os: windows           # Windows 10.0.17134 N/A Build 17134
       language: shell       # 'language: python' is an error on Travis CI Windows
@@ -72,9 +96,10 @@ matrix:
          - conda activate test-environment;
          - conda install -c anaconda pytables 
          - conda install libpython;    
+	####
     - name: "Python 3.6 on Windows"
       os: windows           # Windows 10.0.17134 N/A Build 17134
-      language: shell       # 'language: python' is an error on Travis CI Windows
+      language: shell       
       before_install:
       #use conda python
          - MINICONDA_PATH=/c/tools/miniconda3/;

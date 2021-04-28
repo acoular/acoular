@@ -14,5 +14,5 @@ People
 * Tom Gensch
 * Simon Jekosch
 * Mikolaj Czuchaj
-
+* Art Pelling
 
