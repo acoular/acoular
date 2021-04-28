@@ -264,13 +264,13 @@ class MaskedTimeInOut ( TimeInOut ):
                 i += bs
                 if fblock and i >= start : # first block in the chosen interval
                     if i>= stop: # special case that start and stop are in one block
-                        yield block[bs-(i-start):bs-(i-stop)]
+                        yield block[bs-(i-start):bs-(i-stop),self.channels]
                         break
                     bsize += (i-start)
-                    buf[:(i-start),:] = block[bs-(i-start):]
+                    buf[:(i-start),:] = block[bs-(i-start):,self.channels]
                     fblock = False
                 elif i >= stop: # last block
-                    buf[bsize:bsize+bs-(i-stop),:] = block[:bs-(i-stop)]
+                    buf[bsize:bsize+bs-(i-stop),:] = block[:bs-(i-stop),self.channels]
                     bsize += bs-(i-stop)
                     if bsize >num:
                         yield buf[:num]
@@ -279,7 +279,7 @@ class MaskedTimeInOut ( TimeInOut ):
                     yield buf[:bsize,:]
                     break
                 elif i >=start :
-                    buf[bsize:bsize+bs,:] = block
+                    buf[bsize:bsize+bs,:] = block[:,self.channels]
                     bsize += bs
                 if bsize>=num:
                     yield buf[:num]
