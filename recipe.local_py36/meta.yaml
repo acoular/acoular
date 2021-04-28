@@ -53,6 +53,7 @@ test:
 
   source_files: # from acoular folder
     - acoular/tests/
+    - acoular/xml/
     - examples/
 
   # commands:
