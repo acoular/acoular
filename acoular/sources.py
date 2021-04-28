@@ -13,13 +13,18 @@
     PointSource
     PointSourceDipole
     SphericalHarmonicSource
+    LineSource
     MovingPointSource
+    MovingPointSourceDipole
+    MovingLineSource
     UncorrelatedNoiseSource
     SourceMixer
 """
 
 # imports from other packages
-from numpy import array, sqrt, ones, empty, newaxis, uint32, arange, dot, int64 ,real, pi, tile, cross, zeros, ceil
+
+from numpy import array, sqrt, ones, empty, newaxis, uint32, arange, dot, int64 ,real, pi, tile,\
+cross, zeros, ceil
 from numpy import min as npmin
 from numpy import any as npany
 
@@ -695,7 +700,6 @@ class PointSourceDipole ( PointSource ):
         #from the end of the calculated signal.
         
         mpos = self.mics.mpos
-        
         # position of the dipole as (3,1) vector
         loc = array(self.loc, dtype = float).reshape((3, 1)) 
         # direction vector from tuple
@@ -746,6 +750,378 @@ class PointSourceDipole ( PointSource ):
             except IndexError:
                 break
             
+        yield out[:i]
+
+class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
+    
+    # internal identifier
+    digest = Property( 
+        depends_on = ['mics.digest', 'signal.digest', 'loc', \
+         'env.digest', 'start_t', 'start', 'up', 'direction', '__class__'], 
+        )
+               
+    #: Reference vector, perpendicular to the x and y-axis of moving source.
+    #: rotation source directivity around this axis
+    rvec = CArray( dtype=float, shape=(3, ), value=array((0, 0, 0)), 
+        desc="reference vector")
+    
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)    
+
+    def get_emission_time(self,t,direction):
+        eps = ones(self.mics.num_mics)
+        epslim = 0.1/self.up/self.sample_freq
+        te = t.copy() # init emission time = receiving time
+        j = 0
+        # Newton-Rhapson iteration
+        while abs(eps).max()>epslim and j<100:
+            xs = array(self.trajectory.location(te))
+            loc = xs.copy()
+            loc += direction
+            rm = loc-self.mics.mpos# distance vectors to microphones
+            rm = sqrt((rm*rm).sum(0))# absolute distance
+            loc /= sqrt((loc*loc).sum(0))# distance unit vector
+            der = array(self.trajectory.location(te, der=1))
+            Mr = (der*loc).sum(0)/self.env.c# radial Mach number
+            eps = (te + rm/self.env.c - t)/(1+Mr)# discrepancy in time 
+            te -= eps
+            j += 1 #iteration count
+        return te, rm, Mr, xs
+           
+                
+    def get_moving_direction(self,direction,time=0):
+        """
+        function that yields the moving coordinates along the trajectory  
+        """
+
+        trajg1 = array(self.trajectory.location( time, der=1))[:,0][:,newaxis]
+        rflag = (self.rvec == 0).all() #flag translation vs. rotation
+        if rflag:
+            return direction 
+        else:
+            dx = array(trajg1.T) #direction vector (new x-axis)
+            dy = cross(self.rvec, dx) # new y-axis
+            dz = cross(dx, dy) # new z-axis
+            RM = array((dx, dy, dz)).T # rotation matrix
+            RM /= sqrt((RM*RM).sum(0)) # column normalized
+            newdir = dot(RM, direction)
+            return cross(newdir[:,0].T,self.rvec.T).T
+
+    def result(self, num=128):
+        """
+        Python generator that yields the output at microphones block-wise.
+                
+        Parameters
+        ----------
+        num : integer, defaults to 128
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block) .
+        
+        Returns
+        -------
+        Samples in blocks of shape (num, numchannels). 
+            The last block may be shorter than num.
+        """
+        #If signal samples are needed for te < t_start, then samples are taken
+        #from the end of the calculated signal.
+        mpos = self.mics.mpos
+        
+        # direction vector from tuple
+        direc = array(self.direction, dtype = float) * 1e-5
+        direc_mag =  sqrt(dot(direc,direc))   
+        # normed direction vector
+        direc_n = direc / direc_mag
+        c = self.env.c
+        # distance between monopoles as function of c, sample freq, direction vector
+        dist = c / self.sample_freq * direc_mag * 2
+        
+        # vector from dipole center to one of the monopoles
+        dir2 = (direc_n * dist / 2.0).reshape((3, 1))
+        
+        signal = self.signal.usignal(self.up)
+        out = empty((num, self.numchannels))
+        # shortcuts and intial values
+        m = self.mics
+        t = self.start*ones(m.num_mics)
+
+        i = 0
+        n = self.numsamples        
+        while n:
+            n -= 1
+            te, rm, Mr, locs = self.get_emission_time(t,0)                
+            t += 1./self.sample_freq
+            #location of the center
+            loc = array(self.trajectory.location(te), dtype = float)[:,0][:,newaxis] 
+            #distance of the dipoles from the center
+            diff = self.get_moving_direction(dir2,te)
+ 
+            # distance of sources
+            rm1 = self.env._r(loc + diff, mpos) 
+            rm2 = self.env._r(loc - diff, mpos)
+                                   
+            ind = (te-self.start_t+self.start)*self.sample_freq
+            if self.conv_amp: 
+                rm *= (1-Mr)**2
+                rm1 *= (1-Mr)**2 # assume that Mr is the same for both poles
+                rm2 *= (1-Mr)**2
+            try:
+                # subtract the second signal b/c of phase inversion
+                out[i] = rm / dist * \
+                         (signal[array(0.5 + ind * self.up, dtype=int64)] / rm1 - \
+                          signal[array(0.5 + ind * self.up, dtype=int64)] / rm2)
+                i += 1
+                if i == num:
+                    yield out
+                    i = 0
+            except IndexError:
+                break
+        yield out[:i]        
+
+
+
+class LineSource( PointSource ):
+    """
+    Class to define a fixed Line source with an arbitrary signal.
+    This can be used in simulations.
+    
+    The output is being generated via the :meth:`result` generator.
+    """
+    
+    #: Vector to define the orientation of the line source
+    direction = Tuple((0.0, 0.0, 1.0),
+        desc="Line orientation ")
+    
+    #: Vector to define the length of the line source in m
+    length = Float(1,desc="length of the line source")
+    
+    #: number of monopol sources in the line source
+    num_sources = Int(1)
+    
+    #: source strength for every monopole
+    source_strength = CArray(desc="coefficients of the source strength")
+    
+    #:coherence
+    coherence = Trait( 'coherent', 'incoherent', 
+        desc="coherence mode")
+       
+    # internal identifier
+    digest = Property( 
+        depends_on = ['mics.digest', 'signal.digest', 'loc', \
+         'env.digest', 'start_t', 'start', 'up', 'direction',\
+             'source_strength','coherence','__class__'], 
+
+        )
+               
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+
+    def result(self, num=128):
+        """
+        Python generator that yields the output at microphones block-wise.
+                
+        Parameters
+        ----------
+        num : integer, defaults to 128
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block) .
+        
+        Returns
+        -------
+        Samples in blocks of shape (num, numchannels). 
+            The last block may be shorter than num.
+        """
+        #If signal samples are needed for te < t_start, then samples are taken
+        #from the end of the calculated signal.
+
+        mpos = self.mics.mpos
+        
+        # direction vector from tuple
+        direc = array(self.direction, dtype = float)         
+        # normed direction vector
+        direc_n = direc/norm(direc)
+        c = self.env.c
+        
+        # distance between monopoles in the line 
+        dist = self.length / self.num_sources 
+        
+        #blocwise output
+        out = zeros((num, self.numchannels))
+        
+        # distance from line start position to microphones   
+        loc = array(self.loc, dtype = float).reshape((3, 1)) 
+        
+        # distances from monopoles in the line to microphones
+        rms = empty(( self.numchannels,self.num_sources))
+        inds = empty((self.numchannels,self.num_sources))
+        signals = empty((self.num_sources, len(self.signal.usignal(self.up))))
+        #for every source - distances
+        for s in range(self.num_sources):
+            rms[:,s] = self.env._r((loc.T+direc_n*dist*s).T, mpos)
+            inds[:,s] = (-rms[:,s]  / c - self.start_t + self.start) * self.sample_freq 
+            #new seed for every source
+            if self.coherence == 'incoherent':
+                self.signal.seed = s + abs(int(hash(self.digest)//10e12))
+            self.signal.rms = self.signal.rms * self.source_strength[s]
+            signals[s] = self.signal.usignal(self.up)
+        i = 0
+        n = self.numsamples        
+        while n:
+            n -= 1
+            try:
+                for s in range(self.num_sources):
+                # sum sources
+                    out[i] += (signals[s,array(0.5 + inds[:,s].T * self.up, dtype=int64)] / rms[:,s])
+                
+                inds += 1.
+                i += 1
+                if i == num:
+                    yield out
+                    out = zeros((num, self.numchannels))
+                    i = 0
+            except IndexError:
+                break
+            
+        yield out[:i]
+        
+class MovingLineSource(LineSource,MovingPointSource):
+    
+    # internal identifier
+    digest = Property( 
+        depends_on = ['mics.digest', 'signal.digest', 'loc', \
+         'env.digest', 'start_t', 'start', 'up', 'direction', '__class__'], 
+        )
+        
+
+    #: Reference vector, perpendicular to the x and y-axis of moving source.
+    #: rotation source directivity around this axis
+    rvec = CArray( dtype=float, shape=(3, ), value=array((0, 0, 0)), 
+        desc="reference vector")
+    
+    @cached_property
+    def _get_digest( self ):
+        return digest(self) 
+    
+    def get_moving_direction(self,direction,time=0):
+        """
+        function that yields the moving coordinates along the trajectory  
+        """
+    
+        trajg1 = array(self.trajectory.location( time, der=1))[:,0][:,newaxis]
+        rflag = (self.rvec == 0).all() #flag translation vs. rotation
+        if rflag:
+            return direction 
+        else:
+            dx = array(trajg1.T) #direction vector (new x-axis)
+            dy = cross(self.rvec, dx) # new y-axis
+            dz = cross(dx, dy) # new z-axis
+            RM = array((dx, dy, dz)).T # rotation matrix
+            RM /= sqrt((RM*RM).sum(0)) # column normalized
+            newdir = dot(RM, direction)
+            return cross(newdir[:,0].T,self.rvec.T).T
+
+    def get_emission_time(self,t,direction):
+        eps = ones(self.mics.num_mics)
+        epslim = 0.1/self.up/self.sample_freq
+        te = t.copy() # init emission time = receiving time
+        j = 0
+        # Newton-Rhapson iteration
+        while abs(eps).max()>epslim and j<100:
+            xs = array(self.trajectory.location(te))
+            loc = xs.copy()
+            loc += direction
+            rm = loc-self.mics.mpos# distance vectors to microphones
+            rm = sqrt((rm*rm).sum(0))# absolute distance
+            loc /= sqrt((loc*loc).sum(0))# distance unit vector
+            der = array(self.trajectory.location(te, der=1))
+            Mr = (der*loc).sum(0)/self.env.c# radial Mach number
+            eps = (te + rm/self.env.c - t)/(1+Mr)# discrepancy in time 
+            te -= eps
+            j += 1 #iteration count
+        return te, rm, Mr, xs
+        
+    def result(self, num=128):
+        """
+        Python generator that yields the output at microphones block-wise.
+                
+        Parameters
+        ----------
+        num : integer, defaults to 128
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block) .
+        
+        Returns
+        -------
+        Samples in blocks of shape (num, numchannels). 
+            The last block may be shorter than num.
+        """
+        
+        #If signal samples are needed for te < t_start, then samples are taken
+        #from the end of the calculated signal.
+        mpos = self.mics.mpos
+        
+        # direction vector from tuple
+        direc = array(self.direction, dtype = float)         
+        # normed direction vector
+        direc_n = direc/norm(direc)
+        
+        # distance between monopoles in the line 
+        dist = self.length / self.num_sources 
+        dir2 = (direc_n * dist).reshape((3, 1))
+        
+        #blocwise output
+        out = zeros((num, self.numchannels))
+        
+        # distances from monopoles in the line to microphones
+        rms = empty(( self.numchannels,self.num_sources))
+        inds = empty((self.numchannels,self.num_sources))
+        signals = empty((self.num_sources, len(self.signal.usignal(self.up))))
+        #coherence
+        for s in range(self.num_sources):
+            #new seed for every source
+            if self.coherence == 'incoherent':
+                self.signal.seed = s + abs(int(hash(self.digest)//10e12))
+            self.signal.rms = self.signal.rms * self.source_strength[s]
+            signals[s] = self.signal.usignal(self.up)
+        mpos = self.mics.mpos
+    
+        # shortcuts and intial values
+        m = self.mics
+        t = self.start*ones(m.num_mics)
+        i = 0
+        n = self.numsamples        
+        while n:
+            n -= 1                         
+            t += 1./self.sample_freq
+            te1, rm1, Mr1, locs1 = self.get_emission_time(t,0)         
+            #trajg1 = array(self.trajectory.location( te1, der=1))[:,0][:,newaxis]
+            
+            # get distance and ind for every source in the line
+            for s in range(self.num_sources):
+                diff = self.get_moving_direction(dir2,te1)
+                te, rm, Mr, locs = self.get_emission_time(t,tile((diff*s).T,(self.numchannels,1)).T)
+                loc = array(self.trajectory.location(te), dtype = float)[:,0][:,newaxis] 
+                diff = self.get_moving_direction(dir2,te)
+                rms[:,s] = self.env._r((loc+diff*s), mpos)
+                inds[:,s] = (te-self.start_t+self.start)*self.sample_freq      
+            
+            if self.conv_amp: 
+                rm *= (1-Mr)**2
+                rms[:,s] *= (1-Mr)**2 # assume that Mr is the same 
+            try:
+                # subtract the second signal b/c of phase inversion
+                for s in range(self.num_sources):
+                # sum sources
+                    out[i] += (signals[s,array(0.5 + inds[:,s].T * self.up, dtype=int64)] / rms[:,s])
+                                    
+                i += 1
+                if i == num:
+                    yield out
+                    out = zeros((num, self.numchannels))
+                    i = 0
+            except IndexError:
+                break
         yield out[:i]
 
 
