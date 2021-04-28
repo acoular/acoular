@@ -7,15 +7,15 @@
 before_script: 
   #create and activate the compute0 python 3 env
   - conda config --set always_yes yes --set changeps1 no
-  - conda create -n test_py38 python=3.8
-  - source activate test_py38
+  - conda create -n test_py39 python=3.9
+  - source activate test_py39
   - conda install gcc_linux-64
   - python3 --version
   - uname -a
   
 after_script: 
   # delete the test enviroment 
-  - conda env remove --name test_py38
+  - conda env remove --name test_py39
   
 stages:
   - build
