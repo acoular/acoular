@@ -1830,7 +1830,7 @@ class TimeCache( TimeInOut ):
         for j,data in enumerate(self.source.result(num)):
             self.h5f.append_data(ac,data)
             if j>=nblocks:
-                yield block
+                yield data
         self.h5f.set_node_attribute(ac,'complete',True)
 
     # result generator: delivers input, possibly from cache
