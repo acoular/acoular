@@ -1808,8 +1808,26 @@ class TimeCache( TimeInOut ):
         nodename = 'tc_' + self.digest
         ac = self.h5f.get_data_by_reference(nodename)
         i = 0
-        if ac.attrs['complete'] == False:
-            warn("using not complete cache %s" %str(nodename), Warning, stacklevel = 2)
+        while i < ac.shape[0]:
+            yield ac[i:i+num]
+            i += num
+
+    def _get_data_from_incomplete_cache(self,num):
+        nodename = 'tc_' + self.digest
+        ac = self.h5f.get_data_by_reference(nodename)
+        i = 0
+        while i < ac.shape[0]:
+            yield ac[i:i+num]
+            i += num
+        self.h5f.remove_data(nodename)
+        self.h5f.create_extendable_array(
+                nodename, (0, self.numchannels), "float32")
+        ac = self.h5f.get_data_by_reference(nodename)
+        self.h5f.set_node_attribute(ac,'sample_freq',self.sample_freq)
+        self.h5f.set_node_attribute(ac,'complete',False)
+        for data in self.source.result(num):
+            self.h5f.append_data(ac,data)
+        self.h5f.set_node_attribute(ac,'complete',True)
         while i < ac.shape[0]:
             yield ac[i:i+num]
             i += num
@@ -1846,6 +1864,8 @@ class TimeCache( TimeInOut ):
                 if config.global_caching == 'overwrite':
                     self.h5f.remove_data(nodename)
                     generator = self._write_data_to_cache
+                if not self.h5f.get_data_by_reference(nodename).attrs['complete']:
+                    generator = self._get_data_from_incomplete_cache
             elif not self.h5f.is_cached(nodename):
                 generator = self._write_data_to_cache
                 if config.global_caching == 'readonly':
