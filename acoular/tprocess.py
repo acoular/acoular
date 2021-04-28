@@ -253,22 +253,38 @@ class MaskedTimeInOut ( TimeInOut ):
             raise IOError("no samples available")
         
         if start != 0 or stop != self.numsamples_total:
-
-            stopoff = -stop % num
             offset = -start % num
-            if offset == 0: offset = num      
-            buf = empty((num + offset , self.numchannels), dtype=float) # buffer array
+            if offset == 0: offset = num
+            buf = empty((num + offset , self.numchannels), dtype=float)
+            bsize = 0
             i = 0
+            fblock = True
             for block in self.source.result(num):
-                i += num
-                if i > start and i <= stop+stopoff:
-                    ns = block.shape[0] # numbers of samples
-                    buf[offset:offset+ns] = block[:, self.channels]
-                    if i > start + num:
+                bs = block.shape[0]
+                i += bs
+                if fblock and i >= start : # first block in the chosen interval
+                    if i>= stop: # special case that start and stop are in one block
+                        yield block[bs-(i-start):bs-(i-stop),self.channels]
+                        break
+                    bsize += (i-start)
+                    buf[:(i-start),:] = block[bs-(i-start):,self.channels]
+                    fblock = False
+                elif i >= stop: # last block
+                    buf[bsize:bsize+bs-(i-stop),:] = block[:bs-(i-stop),self.channels]
+                    bsize += bs-(i-stop)
+                    if bsize >num:
                         yield buf[:num]
-                    buf[:offset] = buf[num:num+offset]
-            if offset-stopoff != 0:
-                yield buf[:(offset-stopoff)]
+                        buf[:bsize-num,:] = buf[num:bsize,:]
+                        bsize -= num
+                    yield buf[:bsize,:]
+                    break
+                elif i >=start :
+                    buf[bsize:bsize+bs,:] = block[:,self.channels]
+                    bsize += bs
+                if bsize>=num:
+                    yield buf[:num]
+                    buf[:bsize-num,:] = buf[num:bsize,:]
+                    bsize -= num
         
         else: # if no start/stop given, don't do the resorting thing
             for block in self.source.result(num):
