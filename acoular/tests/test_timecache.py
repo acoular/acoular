@@ -18,7 +18,7 @@ tc = TimeCache(source=ps)
 class TimeCacheTest(unittest.TestCase):
     def test_incompolete_cash(self):
         """
-        manually creates an incomplete cash file and then read it 
+        manually create an incomplete cash file and then read it 
         """
         for i,(block_c, block_nc) in enumerate(zip(tc.result(BLOCK_SIZE), ps.result(BLOCK_SIZE))):
             np.testing.assert_array_almost_equal(block_c,block_nc)
