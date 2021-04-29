@@ -1,37 +1,27 @@
 language: python
-
+# ===== Linux ======
+os: linux
+dist: xenial
+python:
+  - 3.6
+  - 3.7
+  - 3.8
+  - 3.9
 #operating sys and python versions
 jobs:
   include:
-      #### Testing Linux ####
-    # Python 2 support  dropped
-    # Python 3.5 support dropped
-    - name: "Python 3.6 on Xenial Linux"
-      python: 3.6      # this works only for Linux      
-    - name: "Python 3.7 on Xenial Linux"
-      python: 3.7
-    - name: "Python 3.8 on Xenial Linux"
-      python: 3.8
-    - name: "Python 3.9 on Xenial Linux"
-      python: 3.9
       #### Testing OSX ####
     - name: "Python 3.8 on macOS"
       os: osx
-      osx_image: xcode12  # Python 3.8 running on macOS 10.14.3
+      osx_image: xcode11.3  # Python 3.8 running on macOS 10.14.3
       language: shell      
       # python: 3.7         # 'python:' is ignored on Travis CI macOS
       before_install: python3 --version ; pip3 --version ; sw_vers
     - name: "Python 3.7 on macOS"
       os: osx
-      osx_image: xcode11  # Python 3.7 running on macOS 10.14.3
+      osx_image: xcode10.2  # Python 3.7 running on macOS 10.14.3
       language: shell       
       # python: 3.7         # 'python:' is ignored on Travis CI macOS
-      before_install: python3 --version ; pip3 --version ; sw_vers
-    - name: "Python 3.6 on macOS"
-      os: osx
-      osx_image: xcode9.4  # Python 3.6
-      language: shell      
-      # python: 3.6         # 'python:' is ignored on Travis CI macOS
       before_install: python3 --version ; pip3 --version ; sw_vers
       #Testing Windows
     - name: "Python 3.9 on Windows"
@@ -114,7 +104,6 @@ jobs:
          - conda activate test-environment;
          - conda install -c anaconda pytables;
          - conda install libpython;
-
 before_install: 
   # test Python version
   - python --version
