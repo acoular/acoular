@@ -1865,8 +1865,12 @@ class TimeCache( TimeInOut ):
                 if config.global_caching == 'overwrite':
                     self.h5f.remove_data(nodename)
                     generator = self._write_data_to_cache
-                if not self.h5f.get_data_by_reference(nodename).attrs['complete']:
-                    generator = self._get_data_from_incomplete_cache
+                elif not self.h5f.get_data_by_reference(nodename).attrs['complete']:
+                    if config.global_caching =='readonly':
+                        warn("Cashfile is incomplete for nodename %s. With config.global_cashing='readonly', the cashfile will not be used!" %str(nodename), Warning, stacklevel = 1)
+                        generator = self._pass_data
+                    else:
+                        generator = self._get_data_from_incomplete_cache
             elif not self.h5f.is_cached(nodename):
                 generator = self._write_data_to_cache
                 if config.global_caching == 'readonly':
