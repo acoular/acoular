@@ -1817,7 +1817,7 @@ class TimeCache( TimeInOut ):
         ac = self.h5f.get_data_by_reference(nodename)
         i = 0
         nblocks = 0
-        while i < ac.shape[0]:
+        while i+num <= ac.shape[0]:
             yield ac[i:i+num]
             nblocks += 1
             i += num
