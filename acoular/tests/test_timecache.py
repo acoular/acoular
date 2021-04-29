@@ -16,9 +16,6 @@ tc = TimeCache(source=ps)
 
 
 class TimeCacheTest(unittest.TestCase):
-    """
-    Some test cases that the time cash works correctly
-    """
     def test_incompolete_cash(self):
         """
         manually creates an incomplete cash file and then read it 
