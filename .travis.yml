@@ -18,6 +18,10 @@ jobs:
       os: osx
       osx_image: xcode11.3  # Python 3.8.0 running on macOS 10.14.6
       language: shell       # 'language: python' is an error on Travis CI macOS
+    - name: "Python 3.9 on macOS 10.15.7"
+      os: osx
+      osx_image: xcode12.2  # Python 3.9 running on macOS 10.15.7
+      language: shell       # 'language: python' is an error on Travis CI macOS
     #  ====== WINDOWS =========
     # - name: "Python 3.6.8 on Windows"
     #   os: windows           # Windows 10.0.17134 N/A Build 17134
