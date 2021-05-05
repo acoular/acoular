@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2020, Acoular Development Team.
+# Copyright (c) 2007-2021, Acoular Development Team.
 #------------------------------------------------------------------------------
 """
 This file contains all the functionalities which are very expansive, regarding
