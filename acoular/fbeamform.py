@@ -2070,8 +2070,9 @@ class BeamformerGIB(BeamformerEig):  #BeamformerEig #BeamformerBase
                     else:
                         warn('Eigenvalue %g <= 0 for frequency index %g. Will not be calculated!' % (s, i),Warning, stacklevel = 2)
                     #Generate source maps of all selected eigenmodes, and superpose source intensity for each source type.
-                ac[i] = zeros([1,numpoints])
-                ac[i,locpoints] = sum(absolute(qi[:,locpoints])**2,axis=0)
+                temp = zeros(numpoints)
+                temp[locpoints] = sum(absolute(qi[:,locpoints])**2,axis=0)
+                ac[i] = temp
                 fr[i] = 1    
 
 def L_p ( x ):
