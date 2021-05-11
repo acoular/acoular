@@ -1907,7 +1907,7 @@ class BeamformerSODIX( BeamformerBase ):
     #: Weight factor for regularization,
     #: defaults to 0.0.
     alpha = Range(0.0, 1.0, 0.0, 
-        desc="Lasso weight factor")
+        desc="regularization factor")
 
     #: Unit multiplier for evaluating, e.g., nPa instead of Pa. 
     #: Values are converted back before returning. 
