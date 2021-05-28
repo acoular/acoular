@@ -30,8 +30,8 @@ jobs:
         python -c 'import acoular'
     - name: Test with unittest
       run: |
-        chmod +x ../acoular/tests/run_tests.sh
-        cd ../acoular/tests/
+        chmod +x ../acoular/acoular/tests/run_tests.sh
+        cd ../acoular/acoular/tests/
         bash run_tests.sh
 
 
