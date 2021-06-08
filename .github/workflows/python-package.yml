@@ -1,0 +1,37 @@
+# This workflow will install acoular and run tests a variety of Python versions
+
+name: Acoular install and test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.7, 3.8, 3.9]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install acoular
+      run: |
+        python -m pip install --upgrade pip
+        python setup.py install;
+        python -c 'import acoular'
+    - name: Test with unittest
+      run: |
+        chmod +x ../acoular/acoular/tests/run_tests.sh
+        cd ../acoular/acoular/tests/
+        bash run_tests.sh
+
+

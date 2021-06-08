@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2020, Acoular Development Team.
+# Copyright (c) 2007-2021, Acoular Development Team.
 #------------------------------------------------------------------------------
 """Implements processing in the time domain.
 
@@ -1865,9 +1865,14 @@ class TimeCache( TimeInOut ):
                 if config.global_caching == 'overwrite':
                     self.h5f.remove_data(nodename)
                     generator = self._write_data_to_cache
+                elif not self.h5f.get_data_by_reference(nodename).attrs.__contains__('complete'):
+                    if config.global_caching =='readonly':
+                        generator = self._pass_data
+                    else:
+                        generator = self._get_data_from_incomplete_cache
                 elif not self.h5f.get_data_by_reference(nodename).attrs['complete']:
                     if config.global_caching =='readonly':
-                        warn("Cashfile is incomplete for nodename %s. With config.global_cashing='readonly', the cashfile will not be used!" %str(nodename), Warning, stacklevel = 1)
+                        warn("Cache file is incomplete for nodename %s. With config.global_caching='readonly', the cache file will not be used!" %str(nodename), Warning, stacklevel = 1)
                         generator = self._pass_data
                     else:
                         generator = self._get_data_from_incomplete_cache

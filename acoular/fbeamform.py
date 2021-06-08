@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2020, Acoular Development Team.
+# Copyright (c) 2007-2021, Acoular Development Team.
 #------------------------------------------------------------------------------
 """Implements beamformers in the frequency domain.
 
@@ -2070,8 +2070,9 @@ class BeamformerGIB(BeamformerEig):  #BeamformerEig #BeamformerBase
                     else:
                         warn('Eigenvalue %g <= 0 for frequency index %g. Will not be calculated!' % (s, i),Warning, stacklevel = 2)
                     #Generate source maps of all selected eigenmodes, and superpose source intensity for each source type.
-                ac[i] = zeros([1,numpoints])
-                ac[i,locpoints] = sum(absolute(qi[:,locpoints])**2,axis=0)
+                temp = zeros(numpoints)
+                temp[locpoints] = sum(absolute(qi[:,locpoints])**2,axis=0)
+                ac[i] = temp
                 fr[i] = 1    
 
 def L_p ( x ):
