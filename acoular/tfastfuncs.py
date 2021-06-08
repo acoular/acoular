@@ -83,3 +83,110 @@ def _delayandsum2(data, offsets, ifactor2, steeramp, dr, out):
         out[gi] = out[gi]*out[gi] - dr * autopower
         if out[gi]<1e-100:
             out[gi] = 1e-100
+
+@nb.njit([(nb.float32[:,:], nb.int32[:,:], nb.float32[:,:], nb.float32[:,:], nb.float32[:], nb.float32[:])],
+                cache=True, parallel=False, fastmath=True)
+def _delayandsum3(data, offsets, ifactor2, steeramp, out, autopower):
+    """ Performs one time step of delay and sum with output and additional autopower removal
+    
+    **Note**: parallel could be set to true, but unless the number of gridpoints gets huge, it
+    will be _slower_ in parallel mode
+    
+    Parameters
+    ----------
+    data : float64[nSamples, nMics] 
+        The time history for all channels.
+    offsets : int64[gridSize, nMics] 
+        Indices for each grid point and each channel.
+    ifactor2: float64[gridSize, nMics] 
+        Second interpolation factor, the first one is computed internally.
+    steeramp: float64[gridSize, nMics] 
+        Amplitude factor from steering vector.        
+    
+    Returns
+    -------
+    None : as the inputs out and autopower get overwritten.
+    """
+    gridsize, numchannels = offsets.shape
+    for gi in nb.prange(gridsize):
+        out[gi] = 0
+        autopower[gi] = 0
+        for mi in range(numchannels):
+            ind = offsets[gi,mi]
+            r = (data[ind,mi] * (1-ifactor2[gi,mi]) \
+                + data[ind+1,mi] * ifactor2[gi,mi]) * steeramp[gi,mi]
+            out[gi] += r
+            autopower[gi] += r*r
+
+@nb.njit([(nb.float64[:,:], nb.int64[:,:], nb.float64[:,:], nb.float64[:,:], nb.float64[:,:], nb.float64[:,:])],
+                cache=True, parallel=True, fastmath=True)
+def _delayandsum4(data, offsets, ifactor2, steeramp, out, autopower):
+    """ Performs one time step of delay and sum with output and additional autopower removal
+    
+    **Note**: parallel could be set to true, but unless the number of gridpoints gets huge, it
+    will be _slower_ in parallel mode
+    
+    Parameters
+    ----------
+    data : float64[nSamples, nMics] 
+        The time history for all channels.
+    offsets : int64[gridSize, nMics] 
+        Indices for each grid point and each channel.
+    ifactor2: float64[gridSize, nMics] 
+        Second interpolation factor, the first one is computed internally.
+    steeramp: float64[gridSize, nMics] 
+        Amplitude factor from steering vector.        
+    
+    Returns
+    -------
+    None : as the inputs out and autopower get overwritten.
+    """
+    gridsize, numchannels = offsets.shape
+    num = out.shape[0]
+    for n in nb.prange(num):
+        for gi in nb.prange(gridsize):
+            out[n,gi] = 0
+            autopower[n,gi] = 0
+            for mi in range(numchannels):
+                ind = offsets[gi,mi]
+                r = (data[ind+n,mi] * (1-ifactor2[gi,mi]) \
+                    + data[ind+n+1,mi] * ifactor2[gi,mi]) * steeramp[gi,mi]
+                out[n,gi] += r
+                autopower[n,gi] += r*r
+
+@nb.njit([(nb.float32[:,:], nb.int32[:,:,:], nb.float32[:,:,:], nb.float32[:,:,:], nb.float32[:,:], nb.float32[:,:]),
+            (nb.float64[:,:], nb.int64[:,:,:], nb.float64[:,:,:], nb.float64[:,:,:], nb.float64[:,:], nb.float64[:,:])],
+                cache=True, parallel=True, fastmath=True)
+def _delayandsum5(data, offsets, ifactor2, steeramp, out, autopower):
+    """ Performs one time step of delay and sum with output and additional autopower removal
+    
+    **Note**: parallel could be set to true, but unless the number of gridpoints gets huge, it
+    will be _slower_ in parallel mode
+    
+    Parameters
+    ----------
+    data : float64[nSamples, nMics] 
+        The time history for all channels.
+    offsets : int64[nBlockSamples, gridSize, nMics] 
+        Indices for each grid point and each channel.
+    ifactor2: float64[nBlockSamples,gridSize, nMics] 
+        Second interpolation factor, the first one is computed internally.
+    steeramp: float64[nBlockSamples,gridSize, nMics] 
+        Amplitude factor from steering vector.        
+    
+    Returns
+    -------
+    None : as the inputs out and autopower get overwritten.
+    """
+    num, gridsize, numchannels = offsets.shape
+    num = out.shape[0]
+    for n in nb.prange(num):
+        for gi in nb.prange(gridsize):
+            out[n,gi] = 0
+            autopower[n,gi] = 0
+            for mi in range(numchannels):
+                ind = offsets[n,gi,mi] + n
+                r = (data[ind,mi] * (1-ifactor2[n,gi,mi]) \
+                    + data[ind+1,mi] * ifactor2[n,gi,mi]) * steeramp[n,gi,mi]
+                out[n,gi] += r
+                autopower[n,gi] += r*r 

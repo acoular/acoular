@@ -70,7 +70,6 @@ try:
 except:
     pass
 
-from .h5cache import td_dir, cache_dir
 from .tbeamform import IntegratorSectorTime, \
 BeamformerTime, BeamformerTimeSq, BeamformerTimeTraj, BeamformerTimeSqTraj,\
 BeamformerCleant, BeamformerCleantSq, BeamformerCleantTraj, BeamformerCleantSqTraj
@@ -95,7 +94,8 @@ PointSpreadFunction, SteeringVector
 
 from .sources import PointSource, MovingPointSource, \
 TimeSamples, MaskedTimeSamples, PointSourceDipole, UncorrelatedNoiseSource, \
-SourceMixer, SphericalHarmonicSource
+SourceMixer, SphericalHarmonicSource, LineSource, MovingPointSourceDipole, \
+MovingLineSource
 from .signals import SineGenerator, WNoiseGenerator, SignalGenerator,\
 PNoiseGenerator, GenericSignalGenerator, FiltWNoiseGenerator
 

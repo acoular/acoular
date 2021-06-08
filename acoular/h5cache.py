@@ -6,30 +6,23 @@
 
 # imports from other packages
 from __future__ import print_function
-from traits.api import HasPrivateTraits, Bool, Str, Dict
+from traits.api import HasPrivateTraits, Bool, Str, Dict, Instance, Delegate
 from os import path, mkdir, environ, listdir
 from weakref import WeakValueDictionary
 import gc
 
-from .configuration import config
+from .configuration import Config, config
 from .h5files import _get_cachefile_class
-
-# path to cache directory
-cache_dir = path.join(path.curdir,'cache')
-if not path.exists(cache_dir):
-    mkdir(cache_dir)
-
-# path to working directory (used for import to *.h5 files)
-td_dir = path.curdir
-
 
 class H5cache_class(HasPrivateTraits):
     """
     Cache class that handles opening and closing 'tables.File' objects
     """
-    # cache directory
-    cache_dir = Str
-    
+
+    config = Instance(Config)
+
+    cache_dir = Delegate('config')    
+
     busy = Bool(False)
     
     open_files = WeakValueDictionary()
@@ -70,6 +63,7 @@ class H5cache_class(HasPrivateTraits):
     def is_reference_existent(self,file):
         existFlag = False
         # inspect all refererres to the file object
+        gc.collect() #clear garbage before collecting referrers
         for ref in gc.get_referrers(file):
             # does the file object have a referrer that has a 'h5f' 
             # attribute?
@@ -135,7 +129,7 @@ class H5cache_class(HasPrivateTraits):
         self.busy = False
         self._print_open_files()   
 
-H5cache = H5cache_class(cache_dir=cache_dir)
+H5cache = H5cache_class(config=config)
 
 def get_basename(file): 
     return path.basename(file.filename)
