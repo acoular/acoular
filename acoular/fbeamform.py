@@ -22,6 +22,7 @@
     BeamformerOrth
     BeamformerCleansc
     BeamformerCMF
+    BeamformerSODIX
     BeamformerGIB
 
     PointSpreadFunction
@@ -38,7 +39,9 @@ invert, dot, newaxis, zeros, empty, fft, float32, float64, complex64, linalg, \
 where, searchsorted, pi, multiply, sign, diag, arange, sqrt, exp, log10, int,\
 reshape, hstack, vstack, eye, tril, size, clip, tile, round, delete, \
 absolute, argsort, sort, sum, hsplit, fill_diagonal, zeros_like, isclose, \
-vdot, flatnonzero, einsum, ndarray, isscalar, inf
+vdot, flatnonzero, einsum, ndarray, isscalar, inf, real
+
+from numpy.linalg import norm
 
 from sklearn.linear_model import LassoLars, LassoLarsCV, LassoLarsIC,\
 OrthogonalMatchingPursuit, ElasticNet, OrthogonalMatchingPursuitCV, Lasso
@@ -1874,7 +1877,302 @@ class BeamformerCMF ( BeamformerBase ):
                     model.fit(A,R[:,0])
                     ac[i] = model.coef_[:] / unit
                 fr[i] = 1
+                
+
+
+
+class BeamformerSODIX( BeamformerBase ):
+    """
+    SODIX, see Funke, Ein Mikrofonarray-Verfahren zur Untersuchung der
+    Schallabstrahlung von Turbofantriebwerken, 2017. and 
+    Oertwig, Advancements in the source localization method SODIX and
+    application to short cowl engine data, 2019
+    
+    Source directivity modeling in the cross-spectral matrix
+    """
+    #: Type of fit method to be used ('fmin_l_bfgs_b').
+    #: These methods is implemented in 
+    #: the `scipy module.
+    method = Trait('fmin_l_bfgs_b', desc="fit method used")
         
+    #: Maximum number of iterations,
+    #: tradeoff between speed and precision;
+    #: defaults to 200
+    max_iter = Int(200, 
+        desc="maximum number of iterations")
+    
+    #: Norm to consider for the regularization 
+    #: defaults to L-1 Norm
+    pnorm= Float(1,desc="Norm for regularization")
+    
+    #: Weight factor for regularization,
+    #: defaults to 0.0.
+    alpha = Range(0.0, 1.0, 0.0, 
+        desc="regularization factor")
+
+    #: Unit multiplier for evaluating, e.g., nPa instead of Pa. 
+    #: Values are converted back before returning. 
+    #: Temporary conversion may be necessary to not reach machine epsilon
+    #: within fitting method algorithms. Defaults to 1e9.
+    unit_mult = Float(1e9,
+                      desc = "unit multiplier")
+    
+    #: The beamforming result as squared sound pressure values 
+    #: at all grid point locations (readonly).
+    #: Returns a (number of frequencies, number of gridpoints) array of floats.
+    sodix_result = Property(
+        desc="beamforming result")
+
+    # internal identifier
+    digest = Property( 
+        depends_on = ['freq_data.digest', 'alpha', 'method', 'max_iter', 'unit_mult', 'r_diag', 'steer.inv_digest'], 
+        )
+
+    @cached_property
+    def _get_digest( self ):
+        return digest( self )
+    
+    def _get_filecache( self ):
+            """
+            function collects cached results from file depending on 
+            global/local caching behaviour. Returns (None, None) if no cachefile/data 
+            exist and global caching mode is 'readonly'.
+            """
+            H5cache.get_cache_file( self, self.freq_data.basename ) 
+            if not self.h5f: 
+                return (None, None)# only happens in case of global caching readonly
+    
+            nodename = self.__class__.__name__ + self.digest
+            if config.global_caching == 'overwrite' and self.h5f.is_cached(nodename):
+                self.h5f.remove_data(nodename) # remove old data before writing in overwrite mode
+            
+            if not self.h5f.is_cached(nodename):
+                if config.global_caching == 'readonly': 
+                    return (None, None)
+                else:
+    #                print("initialize data.")
+                    numfreq = self.freq_data.fftfreq().shape[0]# block_size/2 + 1steer_obj
+                    group = self.h5f.create_new_group(nodename)
+                    self.h5f.create_compressible_array('result',
+                                          (numfreq, self.steer.grid.size*self.steer.mics.num_mics),
+                                          self.precision,
+                                          group)
+                    self.h5f.create_compressible_array('freqs',
+                                          (numfreq, ),
+                                          'int8',#'bool', 
+                                          group)
+            ac = self.h5f.get_data_by_reference('result','/'+nodename)
+            fr = self.h5f.get_data_by_reference('freqs','/'+nodename)
+            return (ac,fr)    
+    
+    @property_depends_on('ext_digest')
+    def _get_sodix_result ( self ):
+        """
+        This is the :attr:`result` getter routine.
+        The sodix beamforming result is either loaded or calculated.
+        """
+        f = self.freq_data
+        numfreq = f.fftfreq().shape[0]# block_size/2 + 1steer_obj
+        _digest = ''
+        while self.digest != _digest:
+            _digest = self.digest
+            self._assert_equal_channels()
+            if not ( # if result caching is active
+                    config.global_caching == 'none' or 
+                    (config.global_caching == 'individual' and self.cached == False)
+                ):
+                (ac,fr) = self._get_filecache() 
+                if ac and fr: 
+                    if not fr[f.ind_low:f.ind_high].all():                       
+                        if config.global_caching == 'readonly': 
+                            (ac, fr) = (ac[:], fr[:])
+                        self.calc(ac,fr)
+                        self.h5f.flush()
+
+                else:
+                    ac = zeros((numfreq, self.steer.grid.size*self.steer.mics.num_mics), dtype=self.precision)
+                    fr = zeros(numfreq, dtype='int8')
+                    self.calc(ac,fr)
+            else:
+                ac = zeros((numfreq, self.steer.grid.size*self.steer.mics.num_mics), dtype=self.precision)
+                fr = zeros(numfreq, dtype='int8')
+                self.calc(ac,fr)
+        return ac
+    
+    def synthetic( self, f, num=0):
+        """
+        Evaluates the beamforming result for an arbitrary frequency band.
+        
+        Parameters
+        ----------
+        f: float
+            Band center frequency. 
+        num : integer
+            Controls the width of the frequency bands considered; defaults to
+            0 (single frequency line).
+            
+            ===  =====================
+            num  frequency band width
+            ===  =====================
+            0    single frequency line
+            1    octave band
+            3    third-octave band
+            n    1/n-octave band
+            ===  =====================
+              
+        Returns
+        -------
+        array of floats
+            The synthesized frequency band values of the beamforming result at 
+            each grid point and each microphone .
+            Note that the frequency resolution and therefore the bandwidth 
+            represented by a single frequency line depends on 
+            the :attr:`sampling frequency<acoular.sources.SamplesGenerator.sample_freq>` and conjugate
+            used :attr:`FFT block size<acoular.spectra.PowerSpectra.block_size>`.
+        """
+        res = self.sodix_result # trigger calculation
+        freq = self.freq_data.fftfreq()
+        if len(freq) == 0:
+            return None
+        
+        indices = self.freq_data.indices
+        
+        if num == 0:
+            # single frequency line
+            ind = searchsorted(freq, f)
+            if ind >= len(freq):
+                warn('Queried frequency (%g Hz) not in resolved '
+                              'frequency range. Returning zeros.' % f, 
+                              Warning, stacklevel = 2)
+                h = zeros_like(res[0])
+            else:
+                if freq[ind] != f:
+                    warn('Queried frequency (%g Hz) not in set of '
+                         'discrete FFT sample frequencies. '
+                         'Using frequency %g Hz instead.' % (f,freq[ind]), 
+                         Warning, stacklevel = 2)
+                if not (ind in indices):
+                    warn('Beamforming result may not have been calculated '
+                         'for queried frequency. Check '
+                         'freq_data.ind_low and freq_data.ind_high!',
+                          Warning, stacklevel = 2)
+                h = res[ind]
+        else:
+            # fractional octave band
+            f1 = f*2.**(-0.5/num)
+            f2 = f*2.**(+0.5/num)
+            ind1 = searchsorted(freq, f1)
+            ind2 = searchsorted(freq, f2)
+            if ind1 == ind2:
+                warn('Queried frequency band (%g to %g Hz) does not '
+                     'include any discrete FFT sample frequencies. '
+                     'Returning zeros.' % (f1,f2), 
+                     Warning, stacklevel = 2)
+                h = zeros_like(res[0])
+            else:
+                h = sum(res[ind1:ind2], 0)
+                if not ((ind1 in indices) and (ind2 in indices)):
+                    warn('Beamforming result may not have been calculated '
+                         'for all queried frequencies. Check '
+                         'freq_data.ind_low and freq_data.ind_high!',
+                          Warning, stacklevel = 2)
+        return h.reshape([self.steer.grid.size,self.steer.mics.num_mics])
+   
+
+    def calc(self, ac, fr):
+        """
+        Calculates the SODIX result for the frequencies defined by :attr:`freq_data`
+        
+        This is an internal helper function that is automatically called when 
+        accessing the beamformer's :attr:`~Beamformer.sodix_result` or calling
+        its :meth:`~BeamformerSODIX.synthetic` method.        
+        
+        Parameters
+        ----------
+        ac : array of floats
+            This array of dimension ([number of frequencies]x[number of gridpoints]x[number of microphones])
+            is used as call-by-reference parameter and contains the calculated
+          #/= unit   value after calling this method. 
+        fr : array of booleans
+            The entries of this [number of frequencies]-sized array are either 
+            'True' (if the result for this frequency has already been calculated)
+            or 'False' (for the frequencies where the result has yet to be calculated).
+            After the calculation at a certain frequency the value will be set
+            to 'True'
+        
+        Returns
+        -------
+        This method only returns values through the *ac* and *fr* parameters
+        """
+        
+        # prepare calculation
+        i = self.freq_data.indices
+        f = self.freq_data.fftfreq()
+        numpoints = self.steer.grid.size
+        #unit = self.unit_mult
+        num_mics = self.steer.mics.num_mics
+
+        for i in self.freq_data.indices:        
+            if not fr[i]:
+                
+                #measured csm
+                csm = array(self.freq_data.csm[i], dtype='complex128',copy=1) 
+                #transfer function
+                h = self.steer.transfer(f[i]).T           
+                   
+                if self.method == 'fmin_l_bfgs_b':
+                    #function to minimize
+                    def function(D): 
+                        '''
+                        Parameters
+                        ----------
+                        D 
+                        [numpoints*num_mics]
+                        
+                        Returns
+                        -------
+                        func - Sodix function to optimize
+                             [1]
+                        derdrl - derivitaives in direction of D
+                            [num_mics*numpoints].
+
+                        '''           
+                        #### the sodix function ####
+                        Djm = D.reshape([numpoints,num_mics])                           
+                        csmmod = einsum('jm,jm,jn,jn->mn',h.T,Djm,Djm,h.T.conj() )        
+                        func = sum(absolute((csm - csmmod)))**2 + self.alpha*norm(Djm,self.pnorm)
+                        ####the sodix  derivitaive ####
+                        inner = csm - einsum('jl,jl,jm,jm->lm',h.T,Djm,Djm,h.T.conj() )      
+                        derdrl = -4 *  Djm * real(einsum('rm,rl,lm->rl',h.T,h.T.conj(),inner)) + \
+                            self.alpha * (abs(Djm)/norm(Djm,self.pnorm))**(1-self.pnorm)*sign(Djm)
+
+                        return  func, derdrl[:].flatten()  #func[0]
+                    
+                    ##### initial guess #### 
+                    if all(ac[(i-1)]==0):
+                         D0 = ones([numpoints,num_mics])
+                    else:
+                         D0 = ac[(i-1)]
+                    
+                    #boundarys - set to non negative [2*(numpoints*num_mics)]
+                    boundarys = tile((0, +inf), (numpoints*num_mics,1))
+
+                    #optimize with gradient solver
+                    # see https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.fmin_l_bfgs_b.html                    
+
+                    qi = ones([numpoints,num_mics])
+                    qi, yval, dicts =  fmin_l_bfgs_b(function, D0, fprime=None, args=(),  #None  
+                                                         approx_grad=0, bounds=boundarys, #approx_grad 0 or True
+                                                         factr=100.0, pgtol=1e-09, epsilon=1e-08,
+                                                          iprint=0, maxfun=1500000, maxiter=self.max_iter,
+                                                          disp=None, callback=None, maxls=20)
+                    #squared pressure
+                    ac[i]=qi**2
+                else:
+                    pass
+                fr[i] = 1
+
+                
                 
                 
                 

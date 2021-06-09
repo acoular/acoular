@@ -1039,10 +1039,10 @@ class SpatialInterpolator(TimeInOut):
                                newCoord[2],
                                pHelp[cntTime, :len(newCoord[0])], function='multiquadric')  # radial basis function interpolator instance
                     
-                    pInterp[cntTime] = rbfi(xInterp[cntTime, :],
-                                            virtNewCoord[1],
-                                            virtNewCoord[2]) 
-                          
+                    virtshiftcoord= array([xInterp[cntTime, :],virtNewCoord[1], virtNewCoord[2]])
+                    pInterp[cntTime] = rbfi(virtshiftcoord[0],
+                                            virtshiftcoord[1],
+                                            virtshiftcoord[2])                           
                                  
         # Interpolation for arbitrary 3D Arrays             
         elif self.array_dimension =='3D':
