@@ -1028,15 +1028,15 @@ class SpatialInterpolator(TimeInOut):
                                pHelp[cntTime, :len(newCoord[0])], function='cubic')  # radial basis function interpolator instance
                     
                     virtshiftcoord= array([xInterp[cntTime, :],virtNewCoord[1], virtNewCoord[2]])
-                    pInterp[cntTime] = rbfi(virtshiftcoord[0], 
+                    pInterp[cntTime] = rbfi(virtshiftcoord[0],
                                             virtshiftcoord[1],
                                             virtshiftcoord[2]) 
-                    
+                
                 elif self.method == 'rbf-multiquadric':
-                    #compute using 3-D Rbfs   self.CylToCart()
-                    rbfi = Rbf( newCoord[0],
-                                newCoord[1],
-                                newCoord[2],
+                    #compute using 3-D Rbfs
+                    rbfi = Rbf(newCoord[0],
+                               newCoord[1],
+                               newCoord[2],
                                pHelp[cntTime, :len(newCoord[0])], function='multiquadric')  # radial basis function interpolator instance
                     
                     virtshiftcoord= array([xInterp[cntTime, :],virtNewCoord[1], virtNewCoord[2]])
