@@ -991,7 +991,7 @@ class SpatialInterpolator(TimeInOut):
                 xInterpHelp = repmat(virtNewCoord[0, :], nTime, 1) + repmat(phiDelay, virtNewCoord.shape[1], 1).T
                 xInterp = ((xInterpHelp + pi ) % (2 * pi)) - pi #shifting phi cootrdinate into feasible area [-pi, pi]
             else:
-                xInterp = repmat(virtNewCoord[0, :], nTime, 1)   
+                xInterp = repmat(virtNewCoord[0, :], nTime, 1)  
                 
             mesh = meshList[0][0]
             for cntTime in range(nTime):    
@@ -1042,19 +1042,7 @@ class SpatialInterpolator(TimeInOut):
                     virtshiftcoord= array([xInterp[cntTime, :],virtNewCoord[1], virtNewCoord[2]])
                     pInterp[cntTime] = rbfi(virtshiftcoord[0],
                                             virtshiftcoord[1],
-                                            virtshiftcoord[2]) 
-                
-                elif self.method == 'rbf-multiquadric':
-                    #compute using 3-D Rbfs
-                    rbfi = Rbf(newCoord[0],
-                               newCoord[1],
-                               newCoord[2],
-                               pHelp[cntTime, :len(newCoord[0])], function='multiquadric')  # radial basis function interpolator instance
-                    
-                    pInterp[cntTime] = rbfi(xInterp[cntTime, :],
-                                            virtNewCoord[1],
-                                            virtNewCoord[2]) 
-                          
+                                            virtshiftcoord[2])                           
                                  
         # Interpolation for arbitrary 3D Arrays             
         elif self.array_dimension =='3D':
@@ -1063,7 +1051,7 @@ class SpatialInterpolator(TimeInOut):
                 xInterpHelp = repmat(virtNewCoord[0, :], nTime, 1) + repmat(phiDelay, virtNewCoord.shape[1], 1).T
                 xInterp = ((xInterpHelp + pi  ) % (2 * pi)) - pi  #shifting phi cootrdinate into feasible area [-pi, pi]
             else:
-                xInterp = repmat(virtNewCoord[0, :], nTime, 1) 
+                xInterp = repmat(virtNewCoord[0, :], nTime, 1)  
                 
             mesh = meshList[0][0]
             for cntTime in range(nTime):

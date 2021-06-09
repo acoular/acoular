@@ -22,6 +22,7 @@
     BeamformerOrth
     BeamformerCleansc
     BeamformerCMF
+    BeamformerSODIX
     BeamformerGIB
 
     PointSpreadFunction
@@ -1885,9 +1886,9 @@ class BeamformerSODIX( BeamformerBase ):
     SODIX, see Funke, Ein Mikrofonarray-Verfahren zur Untersuchung der
     Schallabstrahlung von Turbofantriebwerken, 2017. and 
     Oertwig, Advancements in the source localization method SODIX and
-    application to short cowl engine data, 2020
+    application to short cowl engine data, 2019
     
-    source directivity modeling in the cross-spectral matrix
+    Source directivity modeling in the cross-spectral matrix
     """
     #: Type of fit method to be used ('fmin_l_bfgs_b').
     #: These methods is implemented in 
@@ -1900,7 +1901,7 @@ class BeamformerSODIX( BeamformerBase ):
     max_iter = Int(200, 
         desc="maximum number of iterations")
     
-    #: Norm to consider for the regularization in InverseIRLS and Suzuki methods 
+    #: Norm to consider for the regularization 
     #: defaults to L-1 Norm
     pnorm= Float(1,desc="Norm for regularization")
     
@@ -1937,20 +1938,15 @@ class BeamformerSODIX( BeamformerBase ):
             global/local caching behaviour. Returns (None, None) if no cachefile/data 
             exist and global caching mode is 'readonly'.
             """
-    #        print("get cachefile:", self.freq_data.basename)
             H5cache.get_cache_file( self, self.freq_data.basename ) 
             if not self.h5f: 
-    #            print("no cachefile:", self.freq_data.basename)
                 return (None, None)# only happens in case of global caching readonly
     
             nodename = self.__class__.__name__ + self.digest
-    #        print("collect filecache for nodename:",nodename)
             if config.global_caching == 'overwrite' and self.h5f.is_cached(nodename):
-    #            print("remove existing data for nodename",nodename)
                 self.h5f.remove_data(nodename) # remove old data before writing in overwrite mode
             
             if not self.h5f.is_cached(nodename):
-    #            print("no data existent for nodename:", nodename)
                 if config.global_caching == 'readonly': 
                     return (None, None)
                 else:
@@ -1973,7 +1969,7 @@ class BeamformerSODIX( BeamformerBase ):
     def _get_sodix_result ( self ):
         """
         This is the :attr:`result` getter routine.
-        The beamforming result is either loaded or calculated.
+        The sodix beamforming result is either loaded or calculated.
         """
         f = self.freq_data
         numfreq = f.fftfreq().shape[0]# block_size/2 + 1steer_obj
@@ -2028,7 +2024,7 @@ class BeamformerSODIX( BeamformerBase ):
         -------
         array of floats
             The synthesized frequency band values of the beamforming result at 
-            each grid point .
+            each grid point and each microphone .
             Note that the frequency resolution and therefore the bandwidth 
             represented by a single frequency line depends on 
             the :attr:`sampling frequency<acoular.sources.SamplesGenerator.sample_freq>` and conjugate
@@ -2088,8 +2084,8 @@ class BeamformerSODIX( BeamformerBase ):
         Calculates the SODIX result for the frequencies defined by :attr:`freq_data`
         
         This is an internal helper function that is automatically called when 
-        accessing the beamformer's :attr:`~BeamformerBase.result` or calling
-        its :meth:`~BeamformerBase.synthetic` method.        
+        accessing the beamformer's :attr:`~Beamformer.sodix_result` or calling
+        its :meth:`~BeamformerSODIX.synthetic` method.        
         
         Parameters
         ----------
@@ -2109,8 +2105,6 @@ class BeamformerSODIX( BeamformerBase ):
         This method only returns values through the *ac* and *fr* parameters
         """
         
-        # gradient solver https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.fmin_l_bfgs_b.html                    
-
         # prepare calculation
         i = self.freq_data.indices
         f = self.freq_data.fftfreq()
@@ -2123,7 +2117,7 @@ class BeamformerSODIX( BeamformerBase ):
                 
                 #measured csm
                 csm = array(self.freq_data.csm[i], dtype='complex128',copy=1) 
-                #steering 
+                #transfer function
                 h = self.steer.transfer(f[i]).T           
                    
                 if self.method == 'fmin_l_bfgs_b':
@@ -2143,7 +2137,7 @@ class BeamformerSODIX( BeamformerBase ):
                             [num_mics*numpoints].
 
                         '''           
-                        #### the sodix function####
+                        #### the sodix function ####
                         Djm = D.reshape([numpoints,num_mics])                           
                         csmmod = einsum('jm,jm,jn,jn->mn',h.T,Djm,Djm,h.T.conj() )        
                         func = sum(absolute((csm - csmmod)))**2 + self.alpha*norm(Djm,self.pnorm)
@@ -2164,9 +2158,11 @@ class BeamformerSODIX( BeamformerBase ):
                     boundarys = tile((0, +inf), (numpoints*num_mics,1))
 
                     #optimize with gradient solver
+                    # see https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.fmin_l_bfgs_b.html                    
+
                     qi = ones([numpoints,num_mics])
-                    qi, yval, dicts =  fmin_l_bfgs_b(function, D0, fprime=None, args=(),  #None  derivitaive
-                                                         approx_grad=0, bounds=boundarys, #m=10,   #approx 0  or True
+                    qi, yval, dicts =  fmin_l_bfgs_b(function, D0, fprime=None, args=(),  #None  
+                                                         approx_grad=0, bounds=boundarys, #approx_grad 0 or True
                                                          factr=100.0, pgtol=1e-09, epsilon=1e-08,
                                                           iprint=0, maxfun=1500000, maxiter=self.max_iter,
                                                           disp=None, callback=None, maxls=20)
