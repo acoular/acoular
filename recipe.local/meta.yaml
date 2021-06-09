@@ -1,0 +1,45 @@
+package:
+  name: acoular
+  version: "21.05"
+
+source:
+  path: ../../acoular
+
+build:
+  noarch: python
+
+requirements:
+  build:
+    - python >=3.6
+    - numpy >=1.11.3
+    - scipy >=1.1.0
+    - scikit-learn >=0.19.1
+    - pytables >=3.4.4
+    - traits >=6.0
+    - numba >=0.40.0
+    - libpython [win]
+
+  run:
+    - python >=3.6
+    - pyqt >=5.6
+    - numpy >=1.11.3
+    - numba >=0.40.0
+    - scipy >=0.1.0
+    - scikit-learn >=0.19.1
+    - pytables >=3.4.4
+    - traits >=6.0
+
+test:
+
+  source_files: # from acoular folder
+    - acoular/tests/
+    - acoular/xml/
+    - examples/
+
+  imports:
+    - acoular
+
+about:
+  home: http://www.acoular.org
+  license: BSD License
+  summary: 'Library for acoustic beamforming'

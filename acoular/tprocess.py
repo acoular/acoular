@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2020, Acoular Development Team.
+# Copyright (c) 2007-2021, Acoular Development Team.
 #------------------------------------------------------------------------------
 """Implements processing in the time domain.
 
@@ -1798,9 +1798,11 @@ class TimeCache( TimeInOut ):
                 nodename, (0, self.numchannels), "float32")
         ac = self.h5f.get_data_by_reference(nodename)
         self.h5f.set_node_attribute(ac,'sample_freq',self.sample_freq)
+        self.h5f.set_node_attribute(ac,'complete',False)
         for data in self.source.result(num):
             self.h5f.append_data(ac,data)
             yield data
+        self.h5f.set_node_attribute(ac,'complete',True)
     
     def _get_data_from_cache(self,num):
         nodename = 'tc_' + self.digest
@@ -1809,6 +1811,27 @@ class TimeCache( TimeInOut ):
         while i < ac.shape[0]:
             yield ac[i:i+num]
             i += num
+
+    def _get_data_from_incomplete_cache(self,num):
+        nodename = 'tc_' + self.digest
+        ac = self.h5f.get_data_by_reference(nodename)
+        i = 0
+        nblocks = 0
+        while i+num <= ac.shape[0]:
+            yield ac[i:i+num]
+            nblocks += 1
+            i += num
+        self.h5f.remove_data(nodename)
+        self.h5f.create_extendable_array(
+                nodename, (0, self.numchannels), "float32")
+        ac = self.h5f.get_data_by_reference(nodename)
+        self.h5f.set_node_attribute(ac,'sample_freq',self.sample_freq)
+        self.h5f.set_node_attribute(ac,'complete',False)
+        for j,data in enumerate(self.source.result(num)):
+            self.h5f.append_data(ac,data)
+            if j>=nblocks:
+                yield data
+        self.h5f.set_node_attribute(ac,'complete',True)
 
     # result generator: delivers input, possibly from cache
     def result(self, num):
@@ -1842,6 +1865,17 @@ class TimeCache( TimeInOut ):
                 if config.global_caching == 'overwrite':
                     self.h5f.remove_data(nodename)
                     generator = self._write_data_to_cache
+                elif not self.h5f.get_data_by_reference(nodename).attrs.__contains__('complete'):
+                    if config.global_caching =='readonly':
+                        generator = self._pass_data
+                    else:
+                        generator = self._get_data_from_incomplete_cache
+                elif not self.h5f.get_data_by_reference(nodename).attrs['complete']:
+                    if config.global_caching =='readonly':
+                        warn("Cache file is incomplete for nodename %s. With config.global_caching='readonly', the cache file will not be used!" %str(nodename), Warning, stacklevel = 1)
+                        generator = self._pass_data
+                    else:
+                        generator = self._get_data_from_incomplete_cache
             elif not self.h5f.is_cached(nodename):
                 generator = self._write_data_to_cache
                 if config.global_caching == 'readonly':

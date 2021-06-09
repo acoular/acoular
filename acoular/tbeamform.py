@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2020, Acoular Development Team.
+# Copyright (c) 2007-2021, Acoular Development Team.
 #------------------------------------------------------------------------------
 """Implements beamformers in the time domain.
 
@@ -23,7 +23,7 @@
 from __future__ import print_function, division
 from numpy import array, newaxis, empty, sqrt, arange, clip, r_, zeros, \
 histogram, unique, cross, dot, where, s_ , sum,isscalar, full, ceil, argmax,\
-interp,concatenate, float32, int32, ones, subtract
+interp,concatenate, float32, int32, int64, ones, subtract
 from numpy.linalg import norm
 from traits.api import Float, CArray, Property, Trait, Bool, Delegate, \
 cached_property, List, Instance, Range, Int, Enum
@@ -36,7 +36,7 @@ from .grids import RectGrid
 from .trajectory import Trajectory
 from .tprocess import TimeInOut
 from .fbeamform import SteeringVector, L_p
-from .tfastfuncs import _delayandsum, _delayandsum2, _delayandsum3, _delayandsum4, _delayandsum5
+from .tfastfuncs import _delayandsum, _delayandsum2, _delayandsum4, _delayandsum5
 
 
 def const_power_weight( bf ):
@@ -214,7 +214,7 @@ class BeamformerTime( TimeInOut ):
             w = 1.0
         c = self.c/self.sample_freq
         delays = self.rm/c
-        d_index = array(delays, dtype=int) # integer index
+        d_index = array(delays, dtype=int64) # integer index
         d_interp2 = delays % 1 # 2nd coeff for lin interpolation between samples
         amp = (w/(self.rm*self.rm)).sum(1) * self.r0
         amp = 1.0/(amp[:, newaxis]*self.rm) # multiplication factor
@@ -294,7 +294,7 @@ class BeamformerTimeSq( BeamformerTime ):
             w = 1.0
         c = self.c/self.source.sample_freq
         delays = self.rm/c
-        d_index = array(delays, dtype=int) # integer index
+        d_index = array(delays, dtype=int64) # integer index
         d_interp2 = delays % 1 # 2nd coeff for lin interpolation between samples
         amp = (w/(self.rm*self.rm)).sum(1) * self.r0
         amp = 1.0/(amp[:, newaxis]*self.rm) # multiplication factor
@@ -463,7 +463,7 @@ class BeamformerTimeTraj( BeamformerTime ):
             else:
                 r0 = self.env._r(tpos)
             delays = rm/c
-            d_index = array(delays, dtype=int) # integer index
+            d_index = array(delays, dtype=int64) # integer index
             d_interp2 = delays - d_index # 2nd coeff for lin interpolation between samples
             # now, we have to make sure that the needed data is available                 
             while offset+d_index.max()+2>dmax+num:
@@ -575,7 +575,7 @@ class BeamformerTimeSqTraj( BeamformerTimeSq, BeamformerTimeTraj ):
             else:
                 r0 = self.env._r(tpos)
             delays = rm/c
-            d_index = array(delays, dtype=int) # integer index
+            d_index = array(delays, dtype=int64) # integer index
             d_interp2 = delays - d_index # 2nd coeff for lin interpolation between samples
             # now, we have to make sure that the needed data is available                 
             while offset+d_index.max()+2>dmax+num:
@@ -691,7 +691,7 @@ class BeamformerCleant( BeamformerTime ):
         n_index = arange(0,num+1)[:,newaxis]
         c = self.steer.env.c/self.source.sample_freq
         delays = self.rm/c
-        d_index = array(delays, dtype=int) # integer index
+        d_index = array(delays, dtype=int64) # integer index
         d_interp2 = delays % 1 # 2nd coeff for lin interpolation between samples
         w = self._get_weights()
         amp = (w/(self.rm*self.rm)).sum(1) * self.r0
@@ -730,7 +730,7 @@ class BeamformerCleant( BeamformerTime ):
                     powPhi = (Phi[:num]**2).sum(0)
                 imax = argmax(powPhi)
                 t_float = delays[imax]+n_index
-                t_ind = t_float.astype(int)
+                t_ind = t_float.astype(int64)
                 for m in range(numMics): 
                     p_res[t_ind[:num+1,m],m] -= self.damp*interp(t_ind[:num+1,m],
                                                                t_float[:num,m],

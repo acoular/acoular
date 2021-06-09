@@ -2,7 +2,7 @@
 #pylint: disable-msg=E0611, E1101, E1103, C0103, R0901, R0902, R0903, R0904
 #pylint: disable-msg=W0232
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2020, Acoular Development Team.
+# Copyright (c) 2007-2021, Acoular Development Team.
 #------------------------------------------------------------------------------
 """Estimation of power spectra and related tools
 

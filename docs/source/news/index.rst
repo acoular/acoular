@@ -1,6 +1,22 @@
 What's new
 ============
 
+21.05
+------------
+
+    * Supports Python 3.6, 3.7, 3.8, 3.9 on Linux, MacOS, Windows
+    * New class :class:`~acoular.signals.FiltWNoiseGenerator`
+    * New classes :class:`~acoular.sources.SphericalHarmonicSource`, :class:`~acoular.sources.Linesource`, :class:`~acoular.sources.MovingPointSourceDipole`, :class:`~acoular.sources.MovingLineSource`
+    * New class :class:`~acoular.tprocess.TimeConvolve`
+    * Speedups: 
+        * CSM works now in parallel and is faster
+        * frequency domain beamformers are abaout 30% faster
+        * time domain beamformers and CLEAN-T is now about 10 x faster
+    * Unittests for all major features, much better coverage
+    * Bugfixes:
+        * integration sectors
+        * new grid classes from 20.10 are now imported into module namespace
+
 20.10
 ------------
 	
