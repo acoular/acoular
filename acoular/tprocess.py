@@ -42,6 +42,7 @@ int16, nan, concatenate, sum, float64, identity, argsort, interp, arange, append
 linspace, flatnonzero, argmin, argmax, delete, mean, inf, asarray, stack, sinc, exp, \
 polymul, arange, cumsum, ceil, split
 
+from numpy.linalg import norm
 from numpy.matlib import repmat
 
 from scipy.spatial import Delaunay
@@ -694,7 +695,7 @@ class SpatialInterpolator(TimeInOut):
     source = Instance(SamplesGenerator)
     
     #: Interpolation method in spacial domain, defaults to
-    method = Trait('linear', 'spline', 'rbf-multiquadric', 'rbf-cubic',\
+    method = Trait('linear', 'spline', 'rbf-multiquadric', 'rbf-cubic','IDW',\
         'custom', 'sinc', desc="method for interpolation used")
     
     #: spacial dimensionality of the array geometry
@@ -721,7 +722,13 @@ class SpatialInterpolator(TimeInOut):
     #: The transformation is done via [x,y,z]_mod = Q * [x,y,z]. (default is Identity).
     Q = CArray(dtype=float64, shape=(3, 3), value=identity(3))
     
-    
+    num_IDW= Trait(3,dtype = int, \
+                    dese='Number of neighboring microphones,DEFAULT=3')
+
+    p_weight = Trait(2,dtype = float,\
+                desc='used in interpolation for virtual microphone,Weighting power exponent for IDW')
+
+
     #: Stores the output of :meth:`_virtNewCoord_func`; Read-Only
     _virtNewCoord_func = Property(depends_on=['mics.digest',
                                               'mics_virtual.digest',
@@ -927,6 +934,8 @@ class SpatialInterpolator(TimeInOut):
         meshList, virtNewCoord, newCoord = self._get_virtNewCoord()
         # pressure interpolation init     
         pInterp = zeros((nTime,nVirtMics))
+        #Coordinates in cartesian CO - for IDW interpolation
+        newCoordCart=cylToCart(newCoord)
         
         if self.interp_at_zero:
             #interpolate point at 0 in Kartesian CO
@@ -1042,7 +1051,27 @@ class SpatialInterpolator(TimeInOut):
                     virtshiftcoord= array([xInterp[cntTime, :],virtNewCoord[1], virtNewCoord[2]])
                     pInterp[cntTime] = rbfi(virtshiftcoord[0],
                                             virtshiftcoord[1],
-                                            virtshiftcoord[2])                           
+                                            virtshiftcoord[2])        
+
+                elif self.method=='IDW':                
+                    newPoint2_M = newPoint.T
+                    newPoint3_M = append(newPoint2_M,zeros([1,self.numchannels]),axis=0)
+                    newPointCart = cylToCart(newPoint3_M)
+                    for ind in arange(len(newPoint[:,0])):
+                        newPoint_Rep = repmat(newPointCart[:,ind], len(newPoint[:,0]),1).T  
+                        subtract = newPoint_Rep - newCoordCart
+                        normDistance = norm(subtract,axis=0)
+                        index_norm = argsort(normDistance)[:self.num_IDW]
+                        pHelpNew = pHelp[cntTime,index_norm]
+                        normNew = normDistance[index_norm]
+                        if normNew[0] < 1e-3:
+                            pInterp[cntTime,ind] = pHelpNew[0]
+                        else:
+                            wholeD = sum((1 / normNew ** self.p_weight))
+                            weight = (1 / normNew ** self.p_weight) / wholeD
+                            weight_sum = sum(weight)
+                            pInterp[cntTime,ind] = sum(pHelpNew * weight)
+                 
                                  
         # Interpolation for arbitrary 3D Arrays             
         elif self.array_dimension =='3D':
