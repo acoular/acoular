@@ -694,7 +694,11 @@ class SpatialInterpolator(TimeInOut):
     #: Data source; :class:`~acoular.tprocess.SamplesGenerator` or derived object.
     source = Instance(SamplesGenerator)
     
-    #: Interpolation method in spacial domain, defaults to
+    #: Interpolation method in spacial domain, defaults to linear
+    #: linear uses numpy linear interpolation
+    #: spline uses scipy CloughTocher algorithm
+    #: rbf is scipy radial basis function with multiquadric, cubic and sinc functions
+    #: idw refers to the inverse distance weighting algorithm 
     method = Trait('linear', 'spline', 'rbf-multiquadric', 'rbf-cubic','IDW',\
         'custom', 'sinc', desc="method for interpolation used")
     
@@ -711,7 +715,7 @@ class SpatialInterpolator(TimeInOut):
     #: Number of samples in output, as given by :attr:`source`.
     numsamples = Delegate('source', 'numsamples')
     
-    
+
     #:Interpolate a point at the origin of the Array geometry 
     interp_at_zero =  Bool(False)
 
@@ -723,10 +727,10 @@ class SpatialInterpolator(TimeInOut):
     Q = CArray(dtype=float64, shape=(3, 3), value=identity(3))
     
     num_IDW= Trait(3,dtype = int, \
-                    dese='Number of neighboring microphones,DEFAULT=3')
+                    desc='number of neighboring microphones, DEFAULT=3')
 
     p_weight = Trait(2,dtype = float,\
-                desc='used in interpolation for virtual microphone,Weighting power exponent for IDW')
+                desc='used in interpolation for virtual microphone, weighting power exponent for IDW')
 
 
     #: Stores the output of :meth:`_virtNewCoord_func`; Read-Only
@@ -1052,7 +1056,7 @@ class SpatialInterpolator(TimeInOut):
                     pInterp[cntTime] = rbfi(virtshiftcoord[0],
                                             virtshiftcoord[1],
                                             virtshiftcoord[2])        
-
+                # using inverse distance weighting
                 elif self.method=='IDW':                
                     newPoint2_M = newPoint.T
                     newPoint3_M = append(newPoint2_M,zeros([1,self.numchannels]),axis=0)
