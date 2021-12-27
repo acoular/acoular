@@ -21,7 +21,7 @@
 
 # imports from other packages
 from __future__ import print_function, division
-from numpy import array, newaxis, empty, sqrt, arange, clip, r_, zeros, \
+from numpy import array, newaxis, empty, sqrt, arange, r_, zeros, \
 histogram, unique, dot, where, s_ , sum,isscalar, full, ceil, argmax,\
 interp,concatenate, float32, float64, int32, int64
 from numpy.linalg import norm
@@ -284,7 +284,7 @@ class BeamformerTime( TimeInOut ):
                 while (J < self.n_iter):
                     # print(f"start clean iteration {J+1} of max {self.n_iter}")
                     if self.r_diag:
-                        powPhi = clip((Phi[:num]**2-autopow).sum(0),1e-100,1e+100)
+                        powPhi = (Phi[:num]**2-autopow).sum(0).clip(min=0)
                     else:
                         powPhi = (Phi[:num]**2).sum(0)
                     imax = argmax(powPhi)
@@ -297,8 +297,7 @@ class BeamformerTime( TimeInOut ):
                                                                     )
                     nextPhi, nextAutopow = self.delay_and_sum(num,p_res,d_interp2,d_index,amp)
                     if self.r_diag:
-                        pownextPhi = clip((nextPhi[:num]**2-nextAutopow).sum(0),
-                                        1e-100,1e+100)
+                        pownextPhi = (nextPhi[:num]**2-nextAutopow).sum(0).clip(min=0)
                     else:
                         pownextPhi = (nextPhi[:num]**2).sum(0)
                     # print(f"total signal power: {powPhi.sum()}")
@@ -536,7 +535,7 @@ class BeamformerTimeTraj( BeamformerTime ):
                 while (J < self.n_iter):
                     # print(f"start clean iteration {J+1} of max {self.n_iter}")
                     if self.r_diag:
-                        powPhi = clip((Phi[:num]*Phi[:num]-autopow).sum(0),1e-100,1e+100)
+                        powPhi = (Phi[:num]*Phi[:num]-autopow).sum(0).clip(min=0)
                     else:
                         powPhi = (Phi[:num]*Phi[:num]).sum(0)
                     imax = argmax(powPhi)
@@ -551,8 +550,7 @@ class BeamformerTimeTraj( BeamformerTime ):
                                 )
                     nextPhi, nextAutopow = self.delay_and_sum(num,p_res,d_interp2,d_index,amp)
                     if self.r_diag:
-                        pownextPhi = clip((nextPhi[:num]*nextPhi[:num]-nextAutopow).sum(0),
-                                        1e-100,1e+100)
+                        pownextPhi = (nextPhi[:num]*nextPhi[:num]-nextAutopow).sum(0).clip(min=0)
                     else:
                         pownextPhi = (nextPhi[:num]*nextPhi[:num]).sum(0)                 
                     # print(f"total signal power: {powPhi.sum()}")
