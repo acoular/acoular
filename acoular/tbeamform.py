@@ -238,16 +238,22 @@ class BeamformerTime( TimeInOut ):
             from the grid at `t=0`.
         """
         # initialize values
+        fdtype = float64
+        idtype = int64
         numMics = self.steer.mics.num_mics
         n_index = arange(0,num+1)[:,newaxis]
         c = self.steer.env.c/self.source.sample_freq
-        delays = self.rm/c
-        d_index = array(delays, dtype=int64) # integer index
-        d_interp2 = delays % 1 # 2nd coeff for lin interpolation between samples
-        w = self._get_weights()
-        amp = (w/(self.rm*self.rm)).sum(1) * self.r0
-        amp = 1.0/(amp[:, newaxis]*self.rm) # multiplication factor
-        maxdelay = int((self.rm/c).max())+2 + num # +2 because interpolation
+        amp = empty((1,self.grid.size,numMics),dtype=fdtype)
+        delays = empty((1,self.grid.size,numMics),dtype=fdtype)
+        d_index = empty((1,self.grid.size,numMics),dtype=idtype)
+        d_interp2 = empty((1,self.grid.size,numMics),dtype=fdtype)
+        _steer_III(self.rm[newaxis,:,:],self.r0[newaxis,:],amp,delays,c)
+        _modf(delays, d_interp2, d_index)
+        amp.shape = amp.shape[1:]
+        delays.shape = delays.shape[1:]
+        d_index.shape = d_index.shape[1:]
+        d_interp2.shape = d_interp2.shape[1:]
+        maxdelay = int((self.rm/c).max())+2 + num # +2 because of interpolation
         initialNumberOfBlocks = int(ceil(maxdelay/num))
         bufferSize=initialNumberOfBlocks*num
         self.buffer = zeros((bufferSize,numMics), dtype=float)
