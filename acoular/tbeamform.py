@@ -559,13 +559,15 @@ class BeamformerTimeTraj( BeamformerTime ):
                         powPhi = (Phi[:num]*Phi[:num]-autopow).sum(0).clip(min=0)
                     else:
                         powPhi = (Phi[:num]*Phi[:num]).sum(0)
+                    # find index of max power focus point
                     imax = argmax(powPhi)
                     # find backward delays
                     t_float = (delays[:num,imax,m_index]+n_index).astype(fdtype)
                     # determine max/min delays in sample units
-                    ind_max = t_float.max(0).astype(idtype)+1
+                    # + 2 because we do not want to extrapolate behind the last sample
+                    ind_max = t_float.max(0).astype(idtype)+2 
                     ind_min = t_float.min(0).astype(idtype)
-                    # store time history at max focus point
+                    # store time history at max power focus point
                     h = Phi[:num,imax]*blockr0[:num,imax]
                     for m in range(numMics):
                         # subtract interpolated time history from microphone signals
