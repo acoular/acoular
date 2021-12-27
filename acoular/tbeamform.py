@@ -444,7 +444,7 @@ class BeamformerTimeTraj( BeamformerTime ):
             return self.env._r(tpos)
 
     def increase_buffer( self, num ): 
-        ar = zeros((num,self.steer.mics.num_mics))
+        ar = zeros((num,self.steer.mics.num_mics), dtype=self.buffer.dtype)
         self.buffer = concatenate((ar,self.buffer), axis=0)
         self.bufferIndex += num
 
@@ -495,7 +495,7 @@ class BeamformerTimeTraj( BeamformerTime ):
         fill_buffer_generator = self._fill_buffer(num)
         for i in range(2): 
             next(fill_buffer_generator)
-
+        
         # start processing
         flag = True
         dflag = True # data is available 
@@ -524,7 +524,7 @@ class BeamformerTimeTraj( BeamformerTime ):
                 n_index = arange(num,dtype=idtype)[:,newaxis]
                 flag=False
             # init step
-            p_res = array(self.buffer[self.bufferIndex:self.bufferIndex+maxdelay,:])
+            p_res = self.buffer[self.bufferIndex:self.bufferIndex+maxdelay,:].copy()
             Phi, autopow = self.delay_and_sum(num,p_res,d_interp2,d_index,amp)
             if 'Cleant' not in self.__class__.__name__:
                 if 'Sq' not in self.__class__.__name__:
