@@ -248,8 +248,8 @@ class BeamformerTime( TimeInOut ):
         delays = empty((1,self.grid.size,numMics),dtype=fdtype)
         d_index = empty((1,self.grid.size,numMics),dtype=idtype)
         d_interp2 = empty((1,self.grid.size,numMics),dtype=fdtype)
-        _steer_III(self.rm[newaxis,:,:],self.r0[newaxis,:],amp,delays,c)
-        _modf(delays, d_interp2, d_index)
+        _steer_III(self.rm[newaxis,:,:],self.r0[newaxis,:],amp)
+        _delays(self.rm[newaxis,:,:], delays, c, d_interp2, d_index)
         amp.shape = amp.shape[1:]
         delays.shape = delays.shape[1:]
         d_index.shape = d_index.shape[1:]
@@ -551,6 +551,7 @@ class BeamformerTimeTraj( BeamformerTime ):
                 Gamma = zeros(Phi.shape,dtype=fdtype)
                 Gamma_autopow = zeros(Phi.shape,dtype=fdtype)
                 J = 0
+                t_ind = arange(p_res.shape[0],dtype=idtype)
                 # deconvolution 
                 while (J < self.n_iter):
                     # print(f"start clean iteration {J+1} of max {self.n_iter}")
@@ -559,12 +560,17 @@ class BeamformerTimeTraj( BeamformerTime ):
                     else:
                         powPhi = (Phi[:num]*Phi[:num]).sum(0)
                     imax = argmax(powPhi)
+                    # find backward delays
                     t_float = (delays[:num,imax,m_index]+n_index).astype(fdtype)
-                    t_ind = t_float.astype(idtype)
-                    h = Phi[:num,imax]*blockr0[:num,imax] 
-                    for m in range(numMics): 
-                        p_res[t_ind[:num,m],m] -= self.damp*interp(
-                            t_ind[:num,m], 
+                    # determine max/min delays in sample units
+                    ind_max = t_float.max(0).astype(idtype)+1
+                    ind_min = t_float.min(0).astype(idtype)
+                    # store time history at max focus point
+                    h = Phi[:num,imax]*blockr0[:num,imax]
+                    for m in range(numMics):
+                        # subtract interpolated time history from microphone signals
+                        p_res[ind_min[m]:ind_max[m],m] -= self.damp*interp(
+                            t_ind[ind_min[m]:ind_max[m]], 
                             t_float[:num,m],
                             h/blockrm[:num,imax,m],
                                 )
