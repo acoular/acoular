@@ -18,9 +18,9 @@ with open(join(here, 'README.rst')) as f:
 
 
 install_requires = list([
-      'numpy>=1.11.3',
+      'numpy<1.21',
       'setuptools',	
-      'numba >=0.40.0',
+      'numba',
       'scipy>=1.1.0',
       'scikit-learn>=0.19.1',
       'tables>=3.4.4',
@@ -28,9 +28,9 @@ install_requires = list([
 	])
 
 setup_requires = list([
-      'numpy>=1.11.3',
+      'numpy<1.21',
       'setuptools',	
-      'numba >=0.40.0',
+      'numba',
       'scipy>=1.1.0',
       'scikit-learn>=0.19.1',
       'tables>=3.4.4',
