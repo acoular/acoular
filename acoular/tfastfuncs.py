@@ -86,10 +86,10 @@ def _delayandsum5(data, offsets, ifactor2, steeramp, out, autopower):
                 out[n,gi] += r
                 autopower[n,gi] += r*r 
 
-@nb.njit([(nb.float32[:,:,:], nb.float32[:,:], nb.float32[:,:,:], nb.float32[:,:,:], nb.float32),
-            (nb.float64[:,:,:], nb.float64[:,:], nb.float64[:,:,:], nb.float64[:,:,:], nb.float64)],
+@nb.njit([(nb.float32[:,:,:], nb.float32[:,:], nb.float32[:,:,:]),
+            (nb.float64[:,:,:], nb.float64[:,:], nb.float64[:,:,:])],
                 cache=True, parallel=True, fastmath=True)
-def _steer_I(rm, r0, amp, delays, c):
+def _steer_I(rm, r0, amp):
     num, gridsize, numchannels = rm.shape
     amp[0,0,0] = 1.0/numchannels# to get the same type for rm2 as for rm
     Nr = amp[0,0,0]
@@ -97,12 +97,11 @@ def _steer_I(rm, r0, amp, delays, c):
         for gi in nb.prange(gridsize):
             for mi in nb.prange(numchannels):
                 amp[n,gi,mi] = Nr
-                delays[n,gi,mi] = np.divide(rm[n,gi,mi],c)
 
-@nb.njit([(nb.float32[:,:,:], nb.float32[:,:], nb.float32[:,:,:], nb.float32[:,:,:], nb.float32),
-            (nb.float64[:,:,:], nb.float64[:,:], nb.float64[:,:,:], nb.float64[:,:,:], nb.float64)],
+@nb.njit([(nb.float32[:,:,:], nb.float32[:,:], nb.float32[:,:,:]),
+            (nb.float64[:,:,:], nb.float64[:,:], nb.float64[:,:,:])],
                 cache=True, parallel=True, fastmath=True)
-def _steer_II(rm, r0, amp, delays, c):
+def _steer_II(rm, r0, amp):
     num, gridsize, numchannels = rm.shape
     amp[0,0,0] = 1.0/numchannels# to get the same type for rm2 as for rm
     Nr = amp[0,0,0]    
@@ -111,12 +110,11 @@ def _steer_II(rm, r0, amp, delays, c):
             rm2 = np.divide(Nr,r0[n,gi])
             for mi in nb.prange(numchannels):
                 amp[n,gi,mi] = rm[n,gi,mi]*rm2
-                delays[n,gi,mi] = np.divide(rm[n,gi,mi],c)
 
-@nb.njit([(nb.float32[:,:,:], nb.float32[:,:], nb.float32[:,:,:], nb.float32[:,:,:], nb.float32),
-            (nb.float64[:,:,:], nb.float64[:,:], nb.float64[:,:,:], nb.float64[:,:,:], nb.float64)],
+@nb.njit([(nb.float32[:,:,:], nb.float32[:,:], nb.float32[:,:,:]),
+            (nb.float64[:,:,:], nb.float64[:,:], nb.float64[:,:,:])],
                 cache=True, parallel=True, fastmath=True)
-def _steer_III(rm, r0, amp, delays, c):
+def _steer_III(rm, r0, amp):
     num, gridsize, numchannels = rm.shape
     rm20 = rm[0,0,0]-rm[0,0,0] # to get the same type for rm2 as for rm
     rm1 = rm[0,0,0]/rm[0,0,0]
@@ -128,12 +126,11 @@ def _steer_III(rm, r0, amp, delays, c):
             rm2 *= r0[n,gi]
             for mi in nb.prange(numchannels):
                 amp[n,gi,mi] = np.divide(rm1,rm[n,gi,mi]*rm2)
-                delays[n,gi,mi] = np.divide(rm[n,gi,mi],c)
 
-@nb.njit([(nb.float32[:,:,:], nb.float32[:,:], nb.float32[:,:,:], nb.float32[:,:,:], nb.float32),
-            (nb.float64[:,:,:], nb.float64[:,:], nb.float64[:,:,:], nb.float64[:,:,:], nb.float64)],
+@nb.njit([(nb.float32[:,:,:], nb.float32[:,:], nb.float32[:,:,:]),
+            (nb.float64[:,:,:], nb.float64[:,:], nb.float64[:,:,:])],
                 cache=True, parallel=True, fastmath=True)
-def _steer_IV(rm, r0, amp, delays, c):
+def _steer_IV(rm, r0, amp):
     num, gridsize, numchannels = rm.shape
     amp[0,0,0] = np.sqrt(1.0/numchannels)# to get the same type for rm2 as for rm
     Nr = amp[0,0,0]
@@ -147,7 +144,19 @@ def _steer_IV(rm, r0, amp, delays, c):
             rm2 = np.sqrt(rm2)
             for mi in nb.prange(numchannels):
                 amp[n,gi,mi] = np.divide(Nr,rm[n,gi,mi]*rm2)
+
+@nb.njit([(nb.float32[:,:,:],  nb.float32[:,:,:], nb.float32, nb.float32[:,:,:], nb.int32[:,:,:]),
+            (nb.float64[:,:,:],  nb.float64[:,:,:], nb.float64, nb.float64[:,:,:], nb.int64[:,:,:])],
+                cache=True, parallel=True, fastmath=True)
+def _delays(rm, delays, c, interp2, index):
+    num, gridsize, numchannels = rm.shape
+    for n in nb.prange(num):  
+        for gi in nb.prange(gridsize):
+            for mi in nb.prange(numchannels):
                 delays[n,gi,mi] = np.divide(rm[n,gi,mi],c)
+                index[n,gi,mi] = int(delays[n,gi,mi])
+                interp2[n,gi,mi] = delays[n,gi,mi] - index[n,gi,mi]
+
 
 @nb.njit([(nb.float32[:,:,:], nb.float32[:,:,:], nb.int32[:,:,:]),
             (nb.float64[:,:,:], nb.float64[:,:,:], nb.int64[:,:,:])],
@@ -163,5 +172,5 @@ def _modf(delays, interp2, index):
 
 
 if __name__ == '__main__':
-    foo = _steer_II
+    foo = _delays
     print(foo.parallel_diagnostics(level=4))

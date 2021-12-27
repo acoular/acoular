@@ -22,7 +22,7 @@
 # imports from other packages
 from __future__ import print_function, division
 from numpy import array, newaxis, empty, sqrt, arange, r_, zeros, \
-histogram, unique, dot, where, s_ , sum,isscalar, full, ceil, argmax,\
+histogram, unique, dot, where, s_ , sum, isscalar, full, ceil, argmax,\
 interp,concatenate, float32, float64, int32, int64
 from numpy.linalg import norm
 from traits.api import Float, CArray, Property, Trait, Bool, Delegate, \
@@ -36,7 +36,8 @@ from .grids import RectGrid
 from .trajectory import Trajectory
 from .tprocess import TimeInOut
 from .fbeamform import SteeringVector, L_p
-from .tfastfuncs import _delayandsum4, _delayandsum5, _steer_III, _modf
+from .tfastfuncs import _delayandsum4, _delayandsum5, \
+    _steer_I, _steer_II, _steer_III, _steer_IV, _delays, _modf
 
 
 def const_power_weight( bf ):
@@ -439,7 +440,7 @@ class BeamformerTimeTraj( BeamformerTime ):
 
     def get_r0( self, tpos ):
         if isscalar(self.steer.ref) and self.steer.ref > 0:
-            return full((self.steer.grid.size,), self.steer.ref)
+            return self.steer.ref#full((self.steer.grid.size,), self.steer.ref)
         else:
             return self.env._r(tpos)
 
@@ -482,6 +483,7 @@ class BeamformerTimeTraj( BeamformerTime ):
         m_index = arange(numMics, dtype=idtype)
         n_index = arange(num,dtype=idtype)[:,newaxis]
         blockrm = empty((num,self.grid.size,numMics),dtype=fdtype)
+        blockrmconv = empty((num,self.grid.size,numMics),dtype=fdtype)
         amp = empty((num,self.grid.size,numMics),dtype=fdtype)
         delays = empty((num,self.grid.size,numMics),dtype=fdtype)
         d_index = empty((num,self.grid.size,numMics),dtype=idtype)
@@ -496,19 +498,31 @@ class BeamformerTimeTraj( BeamformerTime ):
         for i in range(2): 
             next(fill_buffer_generator)
         
+        # preliminary implementation of different steering vectors
+        steer_func = {'classic' : _steer_I,
+                'inverse' : _steer_II,
+                'true level' : _steer_III,
+                'true location' : _steer_IV
+                }[self.steer.steer_type]
+
         # start processing
         flag = True
         dflag = True # data is available 
         while flag:
             for i in range(num):
                 tpos = next(movgpos).astype(fdtype)
-                rm = self.steer.env._r( tpos, mpos ).astype(fdtype) 
+                rm = self.steer.env._r( tpos, mpos )#.astype(fdtype) 
                 blockr0[i,:] = self.get_r0(tpos)
                 blockrm[i,:,:] = rm
                 if self.conv_amp:
-                    blockrm[i,:,:] *= (1-self.get_macostheta(next(movgspeed),tpos,rm))**2
-            _steer_III(blockrm, blockr0, amp, delays, c)
-            _modf(delays, d_interp2, d_index)
+                    ht = next(movgspeed)
+                    blockrmconv[i,:,:] = rm*(1-self.get_macostheta(ht,tpos,rm))**2
+            if self.conv_amp:
+                steer_func(blockrmconv, blockr0, amp)
+            else:
+                steer_func(blockrm, blockr0, amp)
+            _delays(blockrm, delays, c, d_interp2, d_index)
+            #_modf(delays, d_interp2, d_index)
             maxdelay = (d_index.max((1,2)) + arange(0,num)).max()+2 # + because of interpolation
             # increase buffer size because of greater delays
             while maxdelay > self.buffer.shape[0] and dflag:
