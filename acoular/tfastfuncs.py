@@ -7,116 +7,11 @@
 This file contains NUMBA accelerated functions for time-domain beamformers
 """
 import numba as nb
+import numpy as np
+
 
 cachedOption = True  # if True: saves the numba func as compiled func in sub directory
 fastOption = True # fastmath options 
-
-
-@nb.njit([(nb.float64[:,:], nb.int64[:,:], nb.float64[:,:], nb.float64[:,:], nb.float64[:])],
-                cache=True, parallel=False, fastmath=True)
-def _delayandsum(data, offsets, ifactor2, steeramp, out):
-    """ Performs one time step of plain delay and sum
-    
-    **Note**: parallel could be set to true, but unless the number of gridpoints gets huge, it
-    will be _slower_ in parallel mode
-    
-    Parameters
-    ----------
-    data : float64[nSamples, nMics] 
-        The time history for all channels.
-    offsets : int64[gridSize, nMics] 
-        Indices for each grid point and each channel.
-    ifactor2: float64[gridSize, nMics] 
-        Second interpolation factor, the first one is computed internally.
-    steeramp: float64[gridSize, nMics] 
-        Amplitude factor from steering vector.
-    
-    Returns
-    -------
-    None : as the input out gets overwritten.
-    """
-    gridsize, numchannels = offsets.shape
-    for gi in nb.prange(gridsize):
-        out[gi] = 0
-        for mi in range(numchannels):
-            ind = offsets[gi,mi]
-            out[gi] += (data[ind,mi] * (1-ifactor2[gi,mi]) \
-                + data[ind+1,mi] * ifactor2[gi,mi]) * steeramp[gi,mi]  
-
-@nb.njit([(nb.float64[:,:], nb.int64[:,:], nb.float64[:,:], nb.float64[:,:], nb.float64, nb.float64[:])],
-                cache=True, parallel=False, fastmath=True)
-def _delayandsum2(data, offsets, ifactor2, steeramp, dr, out):
-    """ Performs one time step of delay and sum with output squared and optional autopower
-    removal
-    
-    **Note**: parallel could be set to true, but unless the number of gridpoints gets huge, it
-    will be _slower_ in parallel mode
-    
-    Parameters
-    ----------
-    data : float64[nSamples, nMics] 
-        The time history for all channels.
-    offsets : int64[gridSize, nMics] 
-        Indices for each grid point and each channel.
-    ifactor2: float64[gridSize, nMics] 
-        Second interpolation factor, the first one is computed internally.
-    steeramp: float64[gridSize, nMics] 
-        Amplitude factor from steering vector.
-    dr: float
-        between 0 (no autopower removal) and 1.0 (full autopower removal)
-        
-    
-    Returns
-    -------
-    None : as the input out gets overwritten.
-    """
-    gridsize, numchannels = offsets.shape
-    for gi in nb.prange(gridsize):
-        out[gi] = 0
-        autopower = 0
-        for mi in range(numchannels):
-            ind = offsets[gi,mi]
-            r = (data[ind,mi] * (1-ifactor2[gi,mi]) \
-                + data[ind+1,mi] * ifactor2[gi,mi]) * steeramp[gi,mi]
-            out[gi] += r
-            autopower += r*r
-        out[gi] = out[gi]*out[gi] - dr * autopower
-        if out[gi]<1e-100:
-            out[gi] = 1e-100
-
-@nb.njit([(nb.float32[:,:], nb.int32[:,:], nb.float32[:,:], nb.float32[:,:], nb.float32[:], nb.float32[:])],
-                cache=True, parallel=False, fastmath=True)
-def _delayandsum3(data, offsets, ifactor2, steeramp, out, autopower):
-    """ Performs one time step of delay and sum with output and additional autopower removal
-    
-    **Note**: parallel could be set to true, but unless the number of gridpoints gets huge, it
-    will be _slower_ in parallel mode
-    
-    Parameters
-    ----------
-    data : float64[nSamples, nMics] 
-        The time history for all channels.
-    offsets : int64[gridSize, nMics] 
-        Indices for each grid point and each channel.
-    ifactor2: float64[gridSize, nMics] 
-        Second interpolation factor, the first one is computed internally.
-    steeramp: float64[gridSize, nMics] 
-        Amplitude factor from steering vector.        
-    
-    Returns
-    -------
-    None : as the inputs out and autopower get overwritten.
-    """
-    gridsize, numchannels = offsets.shape
-    for gi in nb.prange(gridsize):
-        out[gi] = 0
-        autopower[gi] = 0
-        for mi in range(numchannels):
-            ind = offsets[gi,mi]
-            r = (data[ind,mi] * (1-ifactor2[gi,mi]) \
-                + data[ind+1,mi] * ifactor2[gi,mi]) * steeramp[gi,mi]
-            out[gi] += r
-            autopower[gi] += r*r
 
 @nb.njit([(nb.float64[:,:], nb.int64[:,:], nb.float64[:,:], nb.float64[:,:], nb.float64[:,:], nb.float64[:,:])],
                 cache=True, parallel=True, fastmath=True)
@@ -190,3 +85,92 @@ def _delayandsum5(data, offsets, ifactor2, steeramp, out, autopower):
                     + data[ind+1,mi] * ifactor2[n,gi,mi]) * steeramp[n,gi,mi]
                 out[n,gi] += r
                 autopower[n,gi] += r*r 
+
+@nb.njit([(nb.float32[:,:,:], nb.float32[:,:], nb.float32[:,:,:]),
+            (nb.float64[:,:,:], nb.float64[:,:], nb.float64[:,:,:])],
+                cache=True, parallel=True, fastmath=True)
+def _steer_I(rm, r0, amp):
+    num, gridsize, numchannels = rm.shape
+    amp[0,0,0] = 1.0/numchannels# to get the same type for rm2 as for rm
+    Nr = amp[0,0,0]
+    for n in nb.prange(num): 
+        for gi in nb.prange(gridsize):
+            for mi in nb.prange(numchannels):
+                amp[n,gi,mi] = Nr
+
+@nb.njit([(nb.float32[:,:,:], nb.float32[:,:], nb.float32[:,:,:]),
+            (nb.float64[:,:,:], nb.float64[:,:], nb.float64[:,:,:])],
+                cache=True, parallel=True, fastmath=True)
+def _steer_II(rm, r0, amp):
+    num, gridsize, numchannels = rm.shape
+    amp[0,0,0] = 1.0/numchannels# to get the same type for rm2 as for rm
+    Nr = amp[0,0,0]    
+    for n in nb.prange(num): 
+        for gi in nb.prange(gridsize):
+            rm2 = np.divide(Nr,r0[n,gi])
+            for mi in nb.prange(numchannels):
+                amp[n,gi,mi] = rm[n,gi,mi]*rm2
+
+@nb.njit([(nb.float32[:,:,:], nb.float32[:,:], nb.float32[:,:,:]),
+            (nb.float64[:,:,:], nb.float64[:,:], nb.float64[:,:,:])],
+                cache=True, parallel=True, fastmath=True)
+def _steer_III(rm, r0, amp):
+    num, gridsize, numchannels = rm.shape
+    rm20 = rm[0,0,0]-rm[0,0,0] # to get the same type for rm2 as for rm
+    rm1 = rm[0,0,0]/rm[0,0,0]
+    for n in nb.prange(num): 
+        for gi in nb.prange(gridsize):
+            rm2 = rm20
+            for mi in nb.prange(numchannels):
+                rm2 += np.divide(rm1,np.square(rm[n,gi,mi]))
+            rm2 *= r0[n,gi]
+            for mi in nb.prange(numchannels):
+                amp[n,gi,mi] = np.divide(rm1,rm[n,gi,mi]*rm2)
+
+@nb.njit([(nb.float32[:,:,:], nb.float32[:,:], nb.float32[:,:,:]),
+            (nb.float64[:,:,:], nb.float64[:,:], nb.float64[:,:,:])],
+                cache=True, parallel=True, fastmath=True)
+def _steer_IV(rm, r0, amp):
+    num, gridsize, numchannels = rm.shape
+    amp[0,0,0] = np.sqrt(1.0/numchannels)# to get the same type for rm2 as for rm
+    Nr = amp[0,0,0]
+    rm1 = rm[0,0,0]/rm[0,0,0]
+    rm20 = rm[0,0,0]-rm[0,0,0] # to get the same type for rm2 as for rm
+    for n in nb.prange(num): 
+        for gi in nb.prange(gridsize):
+            rm2 = rm20
+            for mi in nb.prange(numchannels):
+                rm2 += np.divide(rm1,np.square(rm[n,gi,mi]))
+            rm2 = np.sqrt(rm2)
+            for mi in nb.prange(numchannels):
+                amp[n,gi,mi] = np.divide(Nr,rm[n,gi,mi]*rm2)
+
+@nb.njit([(nb.float32[:,:,:],  nb.float32[:,:,:], nb.float32, nb.float32[:,:,:], nb.int32[:,:,:]),
+            (nb.float64[:,:,:],  nb.float64[:,:,:], nb.float64, nb.float64[:,:,:], nb.int64[:,:,:])],
+                cache=True, parallel=True, fastmath=True)
+def _delays(rm, delays, c, interp2, index):
+    num, gridsize, numchannels = rm.shape
+    for n in nb.prange(num):  
+        for gi in nb.prange(gridsize):
+            for mi in nb.prange(numchannels):
+                delays[n,gi,mi] = np.divide(rm[n,gi,mi],c)
+                index[n,gi,mi] = int(delays[n,gi,mi])
+                interp2[n,gi,mi] = delays[n,gi,mi] - index[n,gi,mi]
+
+
+@nb.njit([(nb.float32[:,:,:], nb.float32[:,:,:], nb.int32[:,:,:]),
+            (nb.float64[:,:,:], nb.float64[:,:,:], nb.int64[:,:,:])],
+                cache=True, parallel=True, fastmath=True)
+def _modf(delays, interp2, index):
+    num, gridsize, numchannels = delays.shape
+    for n in nb.prange(num): 
+        for gi in nb.prange(gridsize):
+            for mi in nb.prange(numchannels):
+                index[n,gi,mi] = int(delays[n,gi,mi])
+                interp2[n,gi,mi] = delays[n,gi,mi] - index[n,gi,mi]
+     
+
+
+if __name__ == '__main__':
+    foo = _delays
+    print(foo.parallel_diagnostics(level=4))
