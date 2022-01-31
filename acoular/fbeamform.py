@@ -50,8 +50,12 @@ from scipy.optimize import nnls, linprog, fmin_l_bfgs_b
 from scipy.linalg import inv, eigh, eigvals, fractional_matrix_power
 from warnings import warn
 
-from  pylops import Identity, MatrixMult
-from pylops.optimization.sparsity import SplitBregman,FISTA
+#pylops imports for CMF solvers
+try:
+    from  pylops import Identity, MatrixMult
+    from pylops.optimization.sparsity import SplitBregman,FISTA
+except:
+    print('No Pylops installed. Pylops Solvers not available.')
 
 from traits.api import HasPrivateTraits, Float, Int, ListInt, ListFloat, \
 CArray, Property, Instance, Trait, Bool, Range, Delegate, Enum, Any, \
@@ -1757,6 +1761,11 @@ class BeamformerCMF ( BeamformerBase ):
     #: within fitting method algorithms. Defaults to 1e9.
     unit_mult = Float(1e9,
                       desc = "unit multiplier")
+    
+    #: If True, shows the status of the solver
+    show = Bool(False,
+                desc = "show output of solvers")
+    
 
     # internal identifier
     digest = Property( 
@@ -1859,9 +1868,8 @@ class BeamformerCMF ( BeamformerBase ):
                     ac[i],iterations = SplitBregman(Oop, [Iop] , R[:,0], 
                                                     niter_outer=self.max_iter, niter_inner=5,
                                                     RegsL2=None, dataregsL2=None,
-                                                    mu=1.0, epsRL1s=[1], epsRL2s=None,
-                                                    tol=1e-10, tau=1.0, x0=None,
-                                                    restart=False, show=False)
+                                                    mu=1.0, epsRL1s=[1],tol=1e-10, tau=1.0,
+                                                    show=self.show)
                     ac[i] /= unit
                 
                 elif self.method == 'FISTA':   
@@ -1869,7 +1877,7 @@ class BeamformerCMF ( BeamformerBase ):
                     ac[i],iterations = FISTA(Op=Oop, data= R[:,0],
                                              niter=self.max_iter, eps=self.alpha,
                                              alpha=None, eigsiter=None, eigstol=0, tol=1e-10,
-                                             returninfo=False, show=False)
+                                             show=self.show)
                     ac[i] /= unit   
                 elif self.method == 'fmin_l_bfgs_b':
                     #function to minimize
