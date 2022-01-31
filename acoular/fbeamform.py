@@ -54,8 +54,10 @@ from warnings import warn
 try:
     from  pylops import Identity, MatrixMult
     from pylops.optimization.sparsity import SplitBregman,FISTA
+    PYLOPS_TRUE = True
 except:
     print('No Pylops installed. Pylops Solvers not available.')
+    PYLOPS_TRUE = False
 
 from traits.api import HasPrivateTraits, Float, Int, ListInt, ListFloat, \
 CArray, Property, Instance, Trait, Bool, Range, Delegate, Enum, Any, \
@@ -1862,7 +1864,7 @@ class BeamformerCMF ( BeamformerBase ):
                 if self.method == 'NNLS':
                     ac[i] , x = nnls(A,R.flat)
                     ac[i] /= unit
-                elif self.method == 'Split_Bregman':   
+                elif self.method == 'Split_Bregman' and PYLOPS_TRUE:   
                     Oop = MatrixMult(A) #tranfer operator 
                     Iop = self.alpha*Identity(numpoints) # regularisation 
                     ac[i],iterations = SplitBregman(Oop, [Iop] , R[:,0], 
@@ -1872,7 +1874,7 @@ class BeamformerCMF ( BeamformerBase ):
                                                     show=self.show)
                     ac[i] /= unit
                 
-                elif self.method == 'FISTA':   
+                elif self.method == 'FISTA' and PYLOPS_TRUE:   
                     Oop= MatrixMult(A) #tranfer operator 
                     ac[i],iterations = FISTA(Op=Oop, data= R[:,0],
                                              niter=self.max_iter, eps=self.alpha,
