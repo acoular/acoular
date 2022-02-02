@@ -1763,9 +1763,9 @@ class BeamformerCMF ( BeamformerBase ):
     unit_mult = Float(1e9,
                       desc = "unit multiplier")
     
-    #: If True, shows the status of the solver
+    #: If True, shows the status of the PyLops solver. Only relevant in case of FISTA or Split_Bregman
     show = Bool(False,
-                desc = "show output of solvers")
+                desc = "show output of PyLops solvers")
     
 
     # internal identifier
@@ -1881,7 +1881,7 @@ class BeamformerCMF ( BeamformerBase ):
                                              show=self.show)
                     ac[i] /= unit
                 elif self.method == 'FISTA' or self.method == 'Split_Bregman' and not PYLOPS_TRUE :
-                    raise Exception('No Pylops installed. Pylops Solvers not available.')
+                    raise Exception(f'No Pylops installed. Solver for {self.method} in BeamformerCMF not available.')
                 elif self.method == 'fmin_l_bfgs_b':
                     #function to minimize
                     def function(x):
