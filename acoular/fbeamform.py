@@ -50,6 +50,14 @@ from scipy.optimize import nnls, linprog, fmin_l_bfgs_b
 from scipy.linalg import inv, eigh, eigvals, fractional_matrix_power
 from warnings import warn
 
+#pylops imports for CMF solvers
+try:
+    from  pylops import Identity, MatrixMult
+    from pylops.optimization.sparsity import SplitBregman,FISTA
+    PYLOPS_TRUE = True
+except:
+    PYLOPS_TRUE = False
+
 from traits.api import HasPrivateTraits, Float, Int, ListInt, ListFloat, \
 CArray, Property, Instance, Trait, Bool, Range, Delegate, Enum, Any, \
 cached_property, on_trait_change, property_depends_on
@@ -1733,7 +1741,7 @@ class BeamformerCMF ( BeamformerBase ):
     #: the `scikit-learn <http://scikit-learn.org/stable/user_guide.html>`_ 
     #: module.
     method = Trait('LassoLars', 'LassoLarsBIC',  \
-        'OMPCV', 'NNLS','fmin_l_bfgs_b', desc="fit method used")
+        'OMPCV', 'NNLS','fmin_l_bfgs_b','Split_Bregman','FISTA', desc="fit method used")
         
     #: Weight factor for LassoLars method,
     #: defaults to 0.0.
@@ -1754,6 +1762,11 @@ class BeamformerCMF ( BeamformerBase ):
     #: within fitting method algorithms. Defaults to 1e9.
     unit_mult = Float(1e9,
                       desc = "unit multiplier")
+    
+    #: If True, shows the status of the PyLops solver. Only relevant in case of FISTA or Split_Bregman
+    show = Bool(False,
+                desc = "show output of PyLops solvers")
+    
 
     # internal identifier
     digest = Property( 
@@ -1850,7 +1863,25 @@ class BeamformerCMF ( BeamformerBase ):
                 if self.method == 'NNLS':
                     ac[i] , x = nnls(A,R.flat)
                     ac[i] /= unit
-                    
+                elif self.method == 'Split_Bregman' and PYLOPS_TRUE:   
+                    Oop = MatrixMult(A) #tranfer operator 
+                    Iop = self.alpha*Identity(numpoints) # regularisation 
+                    ac[i],iterations = SplitBregman(Oop, [Iop] , R[:,0], 
+                                                    niter_outer=self.max_iter, niter_inner=5,
+                                                    RegsL2=None, dataregsL2=None,
+                                                    mu=1.0, epsRL1s=[1],tol=1e-10, tau=1.0,
+                                                    show=self.show)
+                    ac[i] /= unit
+                
+                elif self.method == 'FISTA' and PYLOPS_TRUE:   
+                    Oop= MatrixMult(A) #tranfer operator 
+                    ac[i],iterations = FISTA(Op=Oop, data= R[:,0],
+                                             niter=self.max_iter, eps=self.alpha,
+                                             alpha=None, eigsiter=None, eigstol=0, tol=1e-10,
+                                             show=self.show)
+                    ac[i] /= unit
+                elif self.method == 'FISTA' or self.method == 'Split_Bregman' and not PYLOPS_TRUE :
+                    raise Exception(f'No Pylops installed. Solver for {self.method} in BeamformerCMF not available.')
                 elif self.method == 'fmin_l_bfgs_b':
                     #function to minimize
                     def function(x):
