@@ -56,7 +56,6 @@ try:
     from pylops.optimization.sparsity import SplitBregman,FISTA
     PYLOPS_TRUE = True
 except:
-    print('No Pylops installed. Pylops Solvers not available.')
     PYLOPS_TRUE = False
 
 from traits.api import HasPrivateTraits, Float, Int, ListInt, ListFloat, \
@@ -1880,7 +1879,9 @@ class BeamformerCMF ( BeamformerBase ):
                                              niter=self.max_iter, eps=self.alpha,
                                              alpha=None, eigsiter=None, eigstol=0, tol=1e-10,
                                              show=self.show)
-                    ac[i] /= unit   
+                    ac[i] /= unit
+                elif self.method == 'FISTA' or self.method == 'Split_Bregman' and not PYLOPS_TRUE :
+                    raise Exception('No Pylops installed. Pylops Solvers not available.')
                 elif self.method == 'fmin_l_bfgs_b':
                     #function to minimize
                     def function(x):
