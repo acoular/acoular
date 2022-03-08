@@ -1909,9 +1909,9 @@ class BeamformerCMF ( BeamformerBase ):
                 else:
                     # get rid of annoying sklearn warnings that appear despite any settings
                     with warnings.catch_warnings():
-                        warnings.filterwarnings("ignore")
+                        warnings.simplefilter("ignore", category=FutureWarning)
                         model.fit(A,R[:,0])
-                        ac[i] = model.coef_[:] / unit
+                    ac[i] = model.coef_[:] / unit
                 fr[i] = 1
                 
 
@@ -2397,7 +2397,9 @@ class BeamformerGIB(BeamformerEig):  #BeamformerEig #BeamformerBase
                                 x , zz = nnls(AB,R)
                                 qi_real,qi_imag = hsplit(x/unit, 2) 
                             else:
-                                model.fit(AB,R)
+                                with warnings.catch_warnings():
+                                    warnings.simplefilter("ignore", category=FutureWarning)
+                                    model.fit(AB,R)
                                 qi_real,qi_imag = hsplit(model.coef_[:]/unit, 2)
                             #print(s,qi.size)    
                             qi[s,locpoints] = qi_real+qi_imag*1j
