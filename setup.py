@@ -22,7 +22,7 @@ install_requires = list([
       'setuptools',	
       'numba',
       'scipy>=1.1.0',
-      'scikit-learn<1.0',
+      'scikit-learn',
       'tables>=3.4.4',
       'traits>=6.0',
 	])
@@ -32,7 +32,7 @@ setup_requires = list([
       'setuptools',	
       'numba',
       'scipy>=1.1.0',
-      'scikit-learn<1.0',
+      'scikit-learn',
       'tables>=3.4.4',
       'traits>=6.0',
 	])
