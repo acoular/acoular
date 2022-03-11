@@ -7,7 +7,7 @@ from setuptools import setup
 from os.path import join, abspath, dirname
 import os
 
-bf_version = "21.05"
+bf_version = "22.3"
 bf_author = "Acoular Development Team"
 
 
