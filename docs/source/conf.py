@@ -52,7 +52,7 @@ master_doc = 'index'
 
 # General substitutions.
 project = 'Acoular'
-copyright = '2007-2021, Acoular Development Team'
+copyright = ', Acoular Development Team'
 
 # The default replacements for |version| and |release|, also used in various
 # other places throughout the built documents.

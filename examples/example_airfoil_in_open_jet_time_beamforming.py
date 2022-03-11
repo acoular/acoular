@@ -10,7 +10,7 @@ Uses measured data in file example_data.h5,
 calibration in file example_calib.xml,
 microphone geometry in array_56.xml (part of Acoular).
 
-Copyright (c) 2006-2021 Acoular Development Team.
+Copyright (c)  Acoular Development Team.
 All rights reserved.
 """
 

@@ -1,6 +1,6 @@
 # coding=UTF-8
 #------------------------------------------------------------------------------
-# Copyright (c) 2007-2021, Acoular Development Team.
+# Copyright (c) , Acoular Development Team.
 #------------------------------------------------------------------------------
 
 # separate file to find out about version without importing the acoular lib
