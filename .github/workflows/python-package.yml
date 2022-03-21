@@ -35,11 +35,11 @@ jobs:
         chmod +x ../acoular/acoular/tests/run_tests.sh
         cd ../acoular/acoular/tests/
         bash run_tests.sh
-      if: $${{ matrix.os != 'windows-latest'}}
+      if: ${{ matrix.os != 'windows-latest'}}
     - name: Test with unittest Windows
       run: |
         cd ..\acoular\acoular\tests
         python -m unittest discover -v -p "test_*.py"
-      if: $${{ matrix.os == 'windows-latest'}}
+      if: ${{ matrix.os == 'windows-latest'}}
 
 
