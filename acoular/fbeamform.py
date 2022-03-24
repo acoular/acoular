@@ -156,10 +156,13 @@ class SteeringVector( HasPrivateTraits ):
         
     @property_depends_on('grid.digest, env.digest, _ref')
     def _get_r0 ( self ):
-        if isscalar(self.ref) and self.ref > 0:
-            return full((self.grid.size,), self.ref)
+        if isscalar(self.ref):
+            if self.ref > 0:
+                return full((self.grid.size,), self.ref)
+            else:
+                return self.env._r(self.grid.pos())
         else:
-            return self.env._r(self.grid.pos())
+            return self.env._r(self.grid.pos(), self.ref[:,newaxis])
 
     @property_depends_on('grid.digest, mics.digest, env.digest')
     def _get_rm ( self ):
