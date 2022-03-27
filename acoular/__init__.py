@@ -12,13 +12,6 @@ from .version import __author__, __date__, __version__
 
 import os 
 
-# workaround for problems with pyqt5 support, may be removed in the future
-try:
-    import pyface.qt
-except:
-    os.environ['QT_API'] = 'pyqt' 
-
-#     
 from .configuration import config
 
 from .fileimport import time_data_import, csv_import, td_import, \
