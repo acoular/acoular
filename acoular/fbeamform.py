@@ -34,6 +34,8 @@
 # imports from other packages
 from __future__ import print_function, division
 
+import warnings
+
 from numpy import array, ones, full, hanning, hamming, bartlett, blackman, \
 invert, dot, newaxis, zeros, empty, fft, float32, float64, complex64, linalg, \
 where, searchsorted, pi, multiply, sign, diag, arange, sqrt, exp, log10, int,\
@@ -1905,7 +1907,10 @@ class BeamformerCMF ( BeamformerBase ):
                     
                     ac[i] /= unit
                 else:
-                    model.fit(A,R[:,0])
+                    # get rid of annoying sklearn warnings that appear despite any settings
+                    with warnings.catch_warnings():
+                        warnings.simplefilter("ignore", category=FutureWarning)
+                        model.fit(A,R[:,0])
                     ac[i] = model.coef_[:] / unit
                 fr[i] = 1
                 
@@ -2392,7 +2397,9 @@ class BeamformerGIB(BeamformerEig):  #BeamformerEig #BeamformerBase
                                 x , zz = nnls(AB,R)
                                 qi_real,qi_imag = hsplit(x/unit, 2) 
                             else:
-                                model.fit(AB,R)
+                                with warnings.catch_warnings():
+                                    warnings.simplefilter("ignore", category=FutureWarning)
+                                    model.fit(AB,R)
                                 qi_real,qi_imag = hsplit(model.coef_[:]/unit, 2)
                             #print(s,qi.size)    
                             qi[s,locpoints] = qi_real+qi_imag*1j
