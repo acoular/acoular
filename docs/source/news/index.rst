@@ -1,6 +1,19 @@
 What's new
 ============
 
+22.3
+------------
+    * New class :class:`~acoular.fbeamform.BeamformerSodix`
+    * New SplitBregman and FISTA solvers in :class:`~acoular.fbeamform.BeamformerCMF`
+    * IDW is now available for virtual rotation
+    * different steering vector formulations are now available for time beamformers as well
+    * Speedups:
+        * time domain beamformers and CleanT deconvolution now share a common core codebase and all do blockwise processing
+    * Bugfixes:
+        * broken digest in :class:`~acoular.grids.RectGrid3D` repaired 
+        * :class:`~acoular.tbeamform.BeamformerCleant` and derived classes now never miss samples
+
+
 21.05
 ------------
 

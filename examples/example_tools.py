@@ -7,7 +7,7 @@ Demonstrates barspectrum tool of Acoular.
 A noise source emitting white noise is simulated. Its spectrum at a single 
 microphone is plotted by using functions from acoular.tools.
 
-Copyright (c) 2006-2021 Acoular Development Team.
+Copyright (c)  Acoular Development Team.
 All rights reserved.
 """
 
