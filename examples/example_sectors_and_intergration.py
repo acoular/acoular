@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #------------------------------------------------------------------------------
-# Copyright (c) , Acoular Development Team.
+# Copyright (c) Acoular Development Team.
 #------------------------------------------------------------------------------
 """
 
