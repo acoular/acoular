@@ -2480,7 +2480,35 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
     Orthogonal beamforming without predefined grid
     """
 
+    #: List of components to consider, use this to directly set the eigenvalues
+    #: used in the beamformer. Alternatively, set :attr:`n`.
+    eva_list = CArray(dtype=int,
+        desc="components")
+        
+    #: Number of components to consider, defaults to 1. If set, 
+    #: :attr:`eva_list` will contain
+    #: the indices of the n largest eigenvalues. Setting :attr:`eva_list` 
+    #: afterwards will override this value.
+    n = Int(1)
 
+    # internal identifier
+    digest = Property( 
+        depends_on = ['freq_data.digest', '_steer_obj.digest', 'r_diag', 'eva_list'], 
+        )
+   
+    @cached_property
+    def _get_digest( self ):
+        return digest( self )
+
+    @on_trait_change('n')
+    def set_eva_list(self):
+        """ sets the list of eigenvalues to consider """
+        self.eva_list = arange(-1, -1-self.n, -1)
+
+    @on_trait_change('eva_list')
+    def set_n(self):
+        """ sets the list of eigenvalues to consider """
+        self.n = self.eva_list.shape[0]
 
 
 def L_p ( x ):
