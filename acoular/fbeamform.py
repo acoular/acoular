@@ -395,7 +395,7 @@ class BeamformerBase( HasPrivateTraits ):
         H5cache.get_cache_file( self, self.freq_data.basename ) 
         if not self.h5f: 
 #            print("no cachefile:", self.freq_data.basename)
-            return (None, None)# only happens in case of global caching readonly
+            return (None, None, None)# only happens in case of global caching readonly
 
         nodename = self.__class__.__name__ + self.digest
 #        print("collect filecache for nodename:",nodename)
@@ -406,22 +406,37 @@ class BeamformerBase( HasPrivateTraits ):
         if not self.h5f.is_cached(nodename):
 #            print("no data existent for nodename:", nodename)
             if config.global_caching == 'readonly': 
-                return (None, None)
+                return (None, None, None)
             else:
 #                print("initialize data.")
                 numfreq = self.freq_data.fftfreq().shape[0]# block_size/2 + 1steer_obj
                 group = self.h5f.create_new_group(nodename)
-                self.h5f.create_compressible_array('result',
-                                      (numfreq, self.steer.grid.size),
-                                      self.precision,
-                                      group)
                 self.h5f.create_compressible_array('freqs',
                                       (numfreq, ),
                                       'int8',#'bool', 
                                       group)
+                if isinstance(self,BeamformerAdaptiveGrid):
+                    self.h5f.create_compressible_array('gpos',
+                                      (3, self.size),
+                                      'float64',
+                                      group)
+                    self.h5f.create_compressible_array('result',
+                                      (numfreq, self.size),
+                                      self.precision,
+                                      group)
+                else:
+                    self.h5f.create_compressible_array('result',
+                                      (numfreq, self.steer.grid.size),
+                                      self.precision,
+                                      group)
+
         ac = self.h5f.get_data_by_reference('result','/'+nodename)
         fr = self.h5f.get_data_by_reference('freqs','/'+nodename)
-        return (ac,fr)        
+        if isinstance(self,BeamformerAdaptiveGrid):
+            gpos = self.h5f.get_data_by_reference('gpos','/'+nodename)
+        else:
+            gpos = None
+        return (ac,fr,gpos)        
 
     def _assert_equal_channels(self):
         numchannels = self.freq_data.numchannels
@@ -440,30 +455,32 @@ class BeamformerBase( HasPrivateTraits ):
         while self.digest != _digest:
             _digest = self.digest
             self._assert_equal_channels()
+            ac, fr = (None, None)
             if not ( # if result caching is active
                     config.global_caching == 'none' or 
                     (config.global_caching == 'individual' and self.cached == False)
                 ):
 #                print("get filecache..")
-                (ac,fr) = self._get_filecache() 
-                if ac and fr: 
+                (ac,fr,gpos) = self._get_filecache() 
+                if gpos:
+                    self._gpos = gpos
+            if ac and fr: 
 #                    print("cached data existent")
-                    if not fr[f.ind_low:f.ind_high].all():
+                if not fr[f.ind_low:f.ind_high].all():
 #                        print("calculate missing results")                            
-                        if config.global_caching == 'readonly': 
-                            (ac, fr) = (ac[:], fr[:])
-                        self.calc(ac,fr)
-                        self.h5f.flush()
+                    if config.global_caching == 'readonly': 
+                        (ac, fr) = (ac[:], fr[:])
+                    self.calc(ac,fr)
+                    self.h5f.flush()
 #                    else:
 #                        print("cached results are complete! return.")
-                else:
-#                    print("no caching, calculate result")
-                    ac = zeros((numfreq, self.steer.grid.size), dtype=self.precision)
-                    fr = zeros(numfreq, dtype='int8')
-                    self.calc(ac,fr)
             else:
-#                print("no caching activated, calculate result")
-                ac = zeros((numfreq, self.steer.grid.size), dtype=self.precision)
+#                print("no caching or not activated, calculate result")
+                if isinstance(self,BeamformerAdaptiveGrid):
+                    self._gpos = zeros((3, self.size), dtype=self.precision)
+                    ac = zeros((numfreq, self.size), dtype=self.precision)
+                else:
+                    ac = zeros((numfreq, self.steer.grid.size), dtype=self.precision)
                 fr = zeros(numfreq, dtype='int8')
                 self.calc(ac,fr)
         return ac
