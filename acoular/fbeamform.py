@@ -41,14 +41,14 @@ invert, dot, newaxis, zeros, empty, fft, float32, float64, complex64, linalg, \
 where, searchsorted, pi, multiply, sign, diag, arange, sqrt, exp, log10, int,\
 reshape, hstack, vstack, eye, tril, size, clip, tile, round, delete, \
 absolute, argsort, sort, sum, hsplit, fill_diagonal, zeros_like, isclose, \
-vdot, flatnonzero, einsum, ndarray, isscalar, inf, real
+vdot, flatnonzero, einsum, ndarray, isscalar, inf, real, unique
 
 from numpy.linalg import norm
 
 from sklearn.linear_model import LassoLars, LassoLarsCV, LassoLarsIC,\
 OrthogonalMatchingPursuit, ElasticNet, OrthogonalMatchingPursuitCV, Lasso
 
-from scipy.optimize import nnls, linprog, fmin_l_bfgs_b
+from scipy.optimize import nnls, linprog, fmin_l_bfgs_b, shgo
 from scipy.linalg import inv, eigh, eigvals, fractional_matrix_power
 from warnings import warn
 
@@ -2509,6 +2509,77 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
     def set_n(self):
         """ sets the list of eigenvalues to consider """
         self.n = self.eva_list.shape[0]
+    
+    @property_depends_on('n')
+    def _get_size ( self ):
+        return self.n*self.freq_data.fftfreq().shape[0]
+
+    def calc(self, ac, fr):
+        """
+        Calculates the result for the frequencies defined by :attr:`freq_data`
+        
+        This is an internal helper function that is automatically called when 
+        accessing the beamformer's :attr:`~BeamformerBase.result` or calling
+        its :meth:`~BeamformerBase.synthetic` method.        
+        
+        Parameters
+        ----------
+        ac : array of floats
+            This array of dimension ([number of frequencies]x[number of gridpoints])
+            is used as call-by-reference parameter and contains the calculated
+            value after calling this method. 
+        fr : array of booleans
+            The entries of this [number of frequencies]-sized array are either 
+            'True' (if the result for this frequency has already been calculated)
+            or 'False' (for the frequencies where the result has yet to be calculated).
+            After the calculation at a certain frequency the value will be set
+            to 'True'
+        
+        Returns
+        -------
+        This method only returns values through the *ac* and *fr* parameters
+        """
+        f = self.freq_data.fftfreq()
+        numchannels = self.freq_data.numchannels
+        # eigenvalue number list in standard form from largest to smallest 
+        eva_list = unique(self.eva_list % self.steer.mics.num_mics)[::-1]
+        steer_type = self.steer.steer_type
+        if steer_type == 'custom':
+            raise NotImplementedError('custom steer_type is not implemented')
+        mpos = self.steer.mics.mpos
+        env = self.steer.env
+        for i in self.freq_data.indices:
+            if not fr[i]:
+                eva = array(self.freq_data.eva[i], dtype='float64')
+                eve = array(self.freq_data.eve[i], dtype='complex128')
+                k = 2*pi*f[i]/env.c
+                for j,n in enumerate(eva_list):
+                    #print(f[i],n)
+
+                    def func(xy):
+                        # function to minimize globally
+                        r0 = env._r(xy[:,newaxis])
+                        rm = env._r(xy[:,newaxis],mpos)
+                        return -beamformerFreq(steer_type,
+                                                self.r_diag,
+                                                1.0,
+                                                (r0, rm, k),
+                                                (ones(1), eve[:,n:n+1]))[0][0]
+
+                    # simplical global homotopy optimizer
+                    odict = {'n':64,'iters':4}
+                    bounds = [(-0.2,0.2),(-0.2,0.2),(0.2,0.4)]
+                    oR = shgo(func,bounds,sampling_method='sobol',
+                        options={'local_iter':1},
+                        minimizer_kwargs={'method':'Nelder-Mead'},**odict)
+                    # index in grid
+                    ind = i*self.n+j 
+                    # store result for position
+                    self._gpos[:,ind] = oR['x']
+                    # store result for level
+                    ac[i,ind] = eva[n]/numchannels
+                    #print(oR['x'],eva[n]/numchannels,oR)
+                fr[i] = 1
 
 
 def L_p ( x ):
