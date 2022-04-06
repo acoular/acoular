@@ -62,7 +62,7 @@ except:
 
 from traits.api import HasPrivateTraits, Float, Int, ListInt, ListFloat, \
 CArray, Property, Instance, Trait, Bool, Range, Delegate, Enum, Any, \
-cached_property, on_trait_change, property_depends_on
+cached_property, on_trait_change, property_depends_on, Long
 from traits.trait_errors import TraitError
 
 from .fastFuncs import beamformerFreq, calcTransfer, calcPointSpreadFunction, \
@@ -2413,6 +2413,34 @@ class BeamformerGIB(BeamformerEig):  #BeamformerEig #BeamformerBase
                 temp[locpoints] = sum(absolute(qi[:,locpoints])**2,axis=0)
                 ac[i] = temp
                 fr[i] = 1    
+
+class BeamformerAdaptiveGrid(BeamformerBase,Grid):
+    """
+    Base class for array methods without predefined grid
+    """
+    
+    # the grid size shadow trait, will be typically set by a derived class according to the method
+    _size = Long(0)
+
+    # the grid positions live in a shadow trait
+    _gpos = Any
+
+    def _get_size ( self ):
+        return self._size
+
+    def _get_shape ( self ):
+        return (self._size,)
+
+    def _get_gpos( self ):
+        return self._gpos
+
+class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
+    """
+    Orthogonal beamforming without predefined grid
+    """
+
+
+
 
 def L_p ( x ):
     """
