@@ -643,7 +643,10 @@ class BeamformerBase( HasPrivateTraits ):
                          'for all queried frequencies. Check '
                          'freq_data.ind_low and freq_data.ind_high!',
                           Warning, stacklevel = 2)
-        return h.reshape(self.steer.grid.shape)
+        if isinstance(self,BeamformerAdaptiveGrid):
+            return h
+        else:
+            return h.reshape(self.steer.grid.shape)
 
 
     def integrate(self, sector):
@@ -2450,6 +2453,27 @@ class BeamformerAdaptiveGrid(BeamformerBase,Grid):
 
     def _get_gpos( self ):
         return self._gpos
+
+    def integrate(self, sector):
+        """
+        Integrates result map over a given sector.
+        
+        Parameters
+        ----------
+        sector: :class:`~acoular.grids.Sector` or derived
+            Gives the sector over which to integrate
+              
+        Returns
+        -------
+        array of floats
+            The spectrum (all calculated frequency bands) for the integrated sector.
+        """
+        ind = self.steer.grid.subdomain(sector)
+        r = self.result
+        h = zeros(r.shape[0])
+        for i in range(r.shape[0]):
+            h[i] = r[i][ind].sum()
+        return h
 
 class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
     """
