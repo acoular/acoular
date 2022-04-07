@@ -2490,9 +2490,9 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
     #: Geometrical bounds of the search domain to consider.
     #: :attr:`bound` ist a list that contains exactly three tuple of 
     #: (min,max) for each of the coordinates x, y, z. 
-    #: Defaults to [(-1.,1.),(-1.,1.),(-1.,1.)]
+    #: Defaults to [(-1.,1.),(-1.,1.),(0.01,1.)]
     bounds = List( Tuple(Float,Float), minlen=3, maxlen=3,
-        value = [(-1.,1.),(-1.,1.),(-1.,1.)])
+        value = [(-1.,1.),(-1.,1.),(0.01,1.)])
 
     #: options dictionary for the SHGO solver, see 
     #: `scipy docs <https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.shgo.html>`_.
