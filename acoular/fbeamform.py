@@ -2439,17 +2439,11 @@ class BeamformerAdaptiveGrid(BeamformerBase,Grid):
     Base class for array methods without predefined grid
     """
     
-    # the grid size shadow trait, will be typically set by a derived class according to the method
-    _size = Long(0)
-
     # the grid positions live in a shadow trait
     _gpos = Any
 
-    def _get_size ( self ):
-        return self._size
-
     def _get_shape ( self ):
-        return (self._size,)
+        return (self.size,)
 
     def _get_gpos( self ):
         return self._gpos
@@ -2468,7 +2462,7 @@ class BeamformerAdaptiveGrid(BeamformerBase,Grid):
         array of floats
             The spectrum (all calculated frequency bands) for the integrated sector.
         """
-        ind = self.steer.grid.subdomain(sector)
+        ind = self.subdomain(sector)
         r = self.result
         h = zeros(r.shape[0])
         for i in range(r.shape[0]):
