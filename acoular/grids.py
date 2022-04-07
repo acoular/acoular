@@ -16,6 +16,7 @@
     MergeGrid
     Sector
     RectSector
+    RectSector3D
     CircSector
     PolySector
     ConvexSector
@@ -1060,6 +1061,76 @@ class RectSector( Sector ):
                    (pos[0, :] - xmax < -abs_tol) * \
                    (pos[1, :] - ymin > abs_tol) * \
                    (pos[1, :] - ymax < -abs_tol)
+        
+        
+        # if none inside, take nearest
+        if ~inds.any() and self.default_nearest:
+            x = (xmin + xmax) / 2.0
+            y = (ymin + ymax) / 2.0
+            dr2 = (pos[0, :] - x)**2 + (pos[1, :] - y)**2
+            inds[argmin(dr2)] = True
+        
+        return inds.astype(bool)
+
+
+class RectSector3D( RectSector ):
+    """
+    Class for defining a cuboid sector.
+    
+    Can be used for 3D Grids for definining a cuboid sector.
+    """
+    
+    #: The lower z position of the cuboid
+    z_min = Float(-1.0,
+                  desc="minimum x position of the cuboid")
+
+    #: The upper z position of the cuboid
+    z_max = Float(1.0,
+                  desc="maximum x position of the cuboid")
+
+    def contains ( self, pos ):
+        """
+        Queries whether the coordinates in a given array lie within the 
+        rectangular sector. 
+        If no coordinate is inside, the nearest one to the rectangle center
+        is returned if :attr:`~Sector.default_nearest` is True.
+        
+        Parameters
+        ----------
+        pos : array of floats
+            Array with the shape 3x[number of gridpoints] containing the
+            grid positions
+        
+        Returns
+        -------
+        array of bools with as many entries as columns in pos
+            Array indicating which of the given positions lie within the
+            given sector                
+        """
+        # make sure xmin is minimum etc
+        xmin = min(self.x_min,self.x_max)
+        xmax = max(self.x_min,self.x_max)
+        ymin = min(self.y_min,self.y_max)
+        ymax = max(self.y_min,self.y_max)
+        zmin = min(self.z_min,self.z_max)
+        zmax = max(self.z_min,self.z_max)
+        
+        abs_tol = self.abs_tol
+        # get pos indices inside rectangle (* == and)
+        if self.include_border:
+            inds = (pos[0, :] - xmin > -abs_tol) * \
+                   (pos[0, :] - xmax < abs_tol) * \
+                   (pos[1, :] - ymin > -abs_tol) * \
+                   (pos[1, :] - ymax < abs_tol) * \
+                   (pos[2, :] - zmin > -abs_tol) * \
+                   (pos[2, :] - zmax < abs_tol)
+        else:
+            inds = (pos[0, :] - xmin > abs_tol) * \
+                   (pos[0, :] - xmax < -abs_tol) * \
+                   (pos[1, :] - ymin > abs_tol) * \
+                   (pos[1, :] - ymax < -abs_tol) * \
+                   (pos[2, :] - zmin > abs_tol) * \
+                   (pos[2, :] - zmax < -abs_tol)
         
         
         # if none inside, take nearest

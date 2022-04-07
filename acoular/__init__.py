@@ -36,7 +36,7 @@ SampleSplitter, AngleTracker, SpatialInterpolatorConstantRotation, Filter, \
 TimeExpAverage, FiltFreqWeight, TimeCumAverage, FilterBank, OctaveFilterBank, TimeConvolve
 from .calib import Calib
 from .trajectory import Trajectory
-from .grids import Grid, RectGrid, RectGrid3D, Sector,RectSector,CircSector,\
+from .grids import Grid, RectGrid, RectGrid3D, Sector, RectSector, RectSector3D, CircSector,\
     PolySector, MultiSector, MergeGrid, LineGrid, ImportGrid, ConvexSector
 from .environments import cartToCyl, cylToCart, Environment, UniformFlowEnvironment, RotatingFlow, \
 FlowField, OpenJet, SlotJet, GeneralFlowEnvironment
