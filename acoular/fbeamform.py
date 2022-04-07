@@ -24,6 +24,8 @@
     BeamformerCMF
     BeamformerSODIX
     BeamformerGIB
+    BeamformerAdaptiveGrid
+    BeamformerGridlessOrth
 
     PointSpreadFunction
     L_p
@@ -2493,7 +2495,7 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
         value = [(-1.,1.),(-1.,1.),(-1.,1.)])
 
     #: options dictionary for the SHGO solver, see 
-    #: (scipy docs)[https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.shgo.html].
+    #: `scipy docs <https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.shgo.html>`_.
     #: Default is Sobol sampling Nelder-Mead local minimizer, 16 initial sampling points 
     #: and 4 iterations
     shgo = Dict
