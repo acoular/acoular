@@ -2496,8 +2496,8 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
 
     #: options dictionary for the SHGO solver, see 
     #: `scipy docs <https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.shgo.html>`_.
-    #: Default is Sobol sampling Nelder-Mead local minimizer, 16 initial sampling points 
-    #: and 4 iterations
+    #: Default is Sobol sampling Nelder-Mead local minimizer, 256 initial sampling points 
+    #: and 1 iteration
     shgo = Dict
 
     # internal identifier
@@ -2558,7 +2558,7 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
             raise NotImplementedError('custom steer_type is not implemented')
         mpos = self.steer.mics.mpos
         env = self.steer.env
-        shgo_opts = {'n':16,'iters':4,'sampling_method':'sobol',
+        shgo_opts = {'n':256,'iters':1,'sampling_method':'sobol',
                         'options':{'local_iter':1},
                         'minimizer_kwargs':{'method':'Nelder-Mead'}
                         }
