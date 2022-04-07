@@ -1082,11 +1082,11 @@ class RectSector3D( RectSector ):
     
     #: The lower z position of the cuboid
     z_min = Float(-1.0,
-                  desc="minimum x position of the cuboid")
+                  desc="minimum z position of the cuboid")
 
     #: The upper z position of the cuboid
     z_max = Float(1.0,
-                  desc="maximum x position of the cuboid")
+                  desc="maximum z position of the cuboid")
 
     def contains ( self, pos ):
         """
@@ -1131,7 +1131,6 @@ class RectSector3D( RectSector ):
                    (pos[1, :] - ymax < -abs_tol) * \
                    (pos[2, :] - zmin > abs_tol) * \
                    (pos[2, :] - zmax < -abs_tol)
-        
         
         # if none inside, take nearest
         if ~inds.any() and self.default_nearest:
