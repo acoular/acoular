@@ -60,9 +60,9 @@ try:
 except:
     PYLOPS_TRUE = False
 
-from traits.api import HasPrivateTraits, Float, Int, ListInt, ListFloat, \
+from traits.api import HasPrivateTraits, Float, Int, \
 CArray, Property, Instance, Trait, Bool, Range, Delegate, Enum, Any, \
-cached_property, on_trait_change, property_depends_on, Long
+cached_property, on_trait_change, property_depends_on, Long, List, Tuple, Dict
 from traits.trait_errors import TraitError
 
 from .fastFuncs import beamformerFreq, calcTransfer, calcPointSpreadFunction, \
@@ -2491,9 +2491,23 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
     #: afterwards will override this value.
     n = Int(1)
 
+    #: Geometrical bounds of the search domain to consider.
+    #: :attr:`bound` ist a list that contains exactly three tuple of 
+    #: (min,max) for each of the coordinates x, y, z. 
+    #: Defaults to [(-1.,1.),(-1.,1.),(-1.,1.)]
+    bounds = List( Tuple(Float,Float), minlen=3, maxlen=3,
+        value = [(-1.,1.),(-1.,1.),(-1.,1.)])
+
+    #: options dictionary for the SHGO solver, see 
+    #: (scipy docs)[https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.shgo.html].
+    #: Default is Sobol sampling Nelder-Mead local minimizer, 16 initial sampling points 
+    #: and 4 iterations
+    shgo = Dict
+
     # internal identifier
     digest = Property( 
-        depends_on = ['freq_data.digest', '_steer_obj.digest', 'r_diag', 'eva_list'], 
+        depends_on = ['freq_data.digest', '_steer_obj.digest', 'r_diag', 
+            'eva_list','bounds','shgo'], 
         )
    
     @cached_property
@@ -2548,6 +2562,11 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
             raise NotImplementedError('custom steer_type is not implemented')
         mpos = self.steer.mics.mpos
         env = self.steer.env
+        shgo_opts = {'n':16,'iters':4,'sampling_method':'sobol',
+                        'options':{'local_iter':1},
+                        'minimizer_kwargs':{'method':'Nelder-Mead'}
+                        }
+        shgo_opts.update(self.shgo)
         for i in self.freq_data.indices:
             if not fr[i]:
                 eva = array(self.freq_data.eva[i], dtype='float64')
@@ -2567,11 +2586,7 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
                                                 (ones(1), eve[:,n:n+1]))[0][0]
 
                     # simplical global homotopy optimizer
-                    odict = {'n':64,'iters':4}
-                    bounds = [(-0.2,0.2),(-0.2,0.2),(0.2,0.4)]
-                    oR = shgo(func,bounds,sampling_method='sobol',
-                        options={'local_iter':1},
-                        minimizer_kwargs={'method':'Nelder-Mead'},**odict)
+                    oR = shgo(func,self.bounds,**shgo_opts)
                     # index in grid
                     ind = i*self.n+j 
                     # store result for position
