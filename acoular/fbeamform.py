@@ -24,6 +24,8 @@
     BeamformerCMF
     BeamformerSODIX
     BeamformerGIB
+    BeamformerAdaptiveGrid
+    BeamformerGridlessOrth
 
     PointSpreadFunction
     L_p
@@ -41,14 +43,14 @@ invert, dot, newaxis, zeros, empty, fft, float32, float64, complex64, linalg, \
 where, searchsorted, pi, multiply, sign, diag, arange, sqrt, exp, log10, int,\
 reshape, hstack, vstack, eye, tril, size, clip, tile, round, delete, \
 absolute, argsort, sort, sum, hsplit, fill_diagonal, zeros_like, isclose, \
-vdot, flatnonzero, einsum, ndarray, isscalar, inf, real
+vdot, flatnonzero, einsum, ndarray, isscalar, inf, real, unique
 
 from numpy.linalg import norm
 
 from sklearn.linear_model import LassoLars, LassoLarsCV, LassoLarsIC,\
 OrthogonalMatchingPursuit, ElasticNet, OrthogonalMatchingPursuitCV, Lasso
 
-from scipy.optimize import nnls, linprog, fmin_l_bfgs_b
+from scipy.optimize import nnls, linprog, fmin_l_bfgs_b, shgo
 from scipy.linalg import inv, eigh, eigvals, fractional_matrix_power
 from warnings import warn
 
@@ -60,9 +62,9 @@ try:
 except:
     PYLOPS_TRUE = False
 
-from traits.api import HasPrivateTraits, Float, Int, ListInt, ListFloat, \
+from traits.api import HasPrivateTraits, Float, Int, \
 CArray, Property, Instance, Trait, Bool, Range, Delegate, Enum, Any, \
-cached_property, on_trait_change, property_depends_on
+cached_property, on_trait_change, property_depends_on, Long, List, Tuple, Dict
 from traits.trait_errors import TraitError
 
 from .fastFuncs import beamformerFreq, calcTransfer, calcPointSpreadFunction, \
@@ -395,7 +397,7 @@ class BeamformerBase( HasPrivateTraits ):
         H5cache.get_cache_file( self, self.freq_data.basename ) 
         if not self.h5f: 
 #            print("no cachefile:", self.freq_data.basename)
-            return (None, None)# only happens in case of global caching readonly
+            return (None, None, None)# only happens in case of global caching readonly
 
         nodename = self.__class__.__name__ + self.digest
 #        print("collect filecache for nodename:",nodename)
@@ -406,22 +408,37 @@ class BeamformerBase( HasPrivateTraits ):
         if not self.h5f.is_cached(nodename):
 #            print("no data existent for nodename:", nodename)
             if config.global_caching == 'readonly': 
-                return (None, None)
+                return (None, None, None)
             else:
 #                print("initialize data.")
                 numfreq = self.freq_data.fftfreq().shape[0]# block_size/2 + 1steer_obj
                 group = self.h5f.create_new_group(nodename)
-                self.h5f.create_compressible_array('result',
-                                      (numfreq, self.steer.grid.size),
-                                      self.precision,
-                                      group)
                 self.h5f.create_compressible_array('freqs',
                                       (numfreq, ),
                                       'int8',#'bool', 
                                       group)
+                if isinstance(self,BeamformerAdaptiveGrid):
+                    self.h5f.create_compressible_array('gpos',
+                                      (3, self.size),
+                                      'float64',
+                                      group)
+                    self.h5f.create_compressible_array('result',
+                                      (numfreq, self.size),
+                                      self.precision,
+                                      group)
+                else:
+                    self.h5f.create_compressible_array('result',
+                                      (numfreq, self.steer.grid.size),
+                                      self.precision,
+                                      group)
+
         ac = self.h5f.get_data_by_reference('result','/'+nodename)
         fr = self.h5f.get_data_by_reference('freqs','/'+nodename)
-        return (ac,fr)        
+        if isinstance(self,BeamformerAdaptiveGrid):
+            gpos = self.h5f.get_data_by_reference('gpos','/'+nodename)
+        else:
+            gpos = None
+        return (ac,fr,gpos)        
 
     def _assert_equal_channels(self):
         numchannels = self.freq_data.numchannels
@@ -440,30 +457,32 @@ class BeamformerBase( HasPrivateTraits ):
         while self.digest != _digest:
             _digest = self.digest
             self._assert_equal_channels()
+            ac, fr = (None, None)
             if not ( # if result caching is active
                     config.global_caching == 'none' or 
                     (config.global_caching == 'individual' and self.cached == False)
                 ):
 #                print("get filecache..")
-                (ac,fr) = self._get_filecache() 
-                if ac and fr: 
+                (ac,fr,gpos) = self._get_filecache() 
+                if gpos:
+                    self._gpos = gpos
+            if ac and fr: 
 #                    print("cached data existent")
-                    if not fr[f.ind_low:f.ind_high].all():
+                if not fr[f.ind_low:f.ind_high].all():
 #                        print("calculate missing results")                            
-                        if config.global_caching == 'readonly': 
-                            (ac, fr) = (ac[:], fr[:])
-                        self.calc(ac,fr)
-                        self.h5f.flush()
+                    if config.global_caching == 'readonly': 
+                        (ac, fr) = (ac[:], fr[:])
+                    self.calc(ac,fr)
+                    self.h5f.flush()
 #                    else:
 #                        print("cached results are complete! return.")
-                else:
-#                    print("no caching, calculate result")
-                    ac = zeros((numfreq, self.steer.grid.size), dtype=self.precision)
-                    fr = zeros(numfreq, dtype='int8')
-                    self.calc(ac,fr)
             else:
-#                print("no caching activated, calculate result")
-                ac = zeros((numfreq, self.steer.grid.size), dtype=self.precision)
+#                print("no caching or not activated, calculate result")
+                if isinstance(self,BeamformerAdaptiveGrid):
+                    self._gpos = zeros((3, self.size), dtype=self.precision)
+                    ac = zeros((numfreq, self.size), dtype=self.precision)
+                else:
+                    ac = zeros((numfreq, self.steer.grid.size), dtype=self.precision)
                 fr = zeros(numfreq, dtype='int8')
                 self.calc(ac,fr)
         return ac
@@ -626,7 +645,10 @@ class BeamformerBase( HasPrivateTraits ):
                          'for all queried frequencies. Check '
                          'freq_data.ind_low and freq_data.ind_high!',
                           Warning, stacklevel = 2)
-        return h.reshape(self.steer.grid.shape)
+        if isinstance(self,BeamformerAdaptiveGrid):
+            return h
+        else:
+            return h.reshape(self.steer.grid.shape)
 
 
     def integrate(self, sector):
@@ -2413,6 +2435,163 @@ class BeamformerGIB(BeamformerEig):  #BeamformerEig #BeamformerBase
                 temp[locpoints] = sum(absolute(qi[:,locpoints])**2,axis=0)
                 ac[i] = temp
                 fr[i] = 1    
+
+class BeamformerAdaptiveGrid(BeamformerBase,Grid):
+    """
+    Base class for array methods without predefined grid
+    """
+    
+    # the grid positions live in a shadow trait
+    _gpos = Any
+
+    def _get_shape ( self ):
+        return (self.size,)
+
+    def _get_gpos( self ):
+        return self._gpos
+
+    def integrate(self, sector):
+        """
+        Integrates result map over a given sector.
+        
+        Parameters
+        ----------
+        sector: :class:`~acoular.grids.Sector` or derived
+            Gives the sector over which to integrate
+              
+        Returns
+        -------
+        array of floats
+            The spectrum (all calculated frequency bands) for the integrated sector.
+        """
+        ind = self.subdomain(sector)
+        r = self.result
+        h = zeros(r.shape[0])
+        for i in range(r.shape[0]):
+            h[i] = r[i][ind].sum()
+        return h
+
+class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
+    """
+    Orthogonal beamforming without predefined grid
+    """
+
+    #: List of components to consider, use this to directly set the eigenvalues
+    #: used in the beamformer. Alternatively, set :attr:`n`.
+    eva_list = CArray(dtype=int,
+        desc="components")
+        
+    #: Number of components to consider, defaults to 1. If set, 
+    #: :attr:`eva_list` will contain
+    #: the indices of the n largest eigenvalues. Setting :attr:`eva_list` 
+    #: afterwards will override this value.
+    n = Int(1)
+
+    #: Geometrical bounds of the search domain to consider.
+    #: :attr:`bound` ist a list that contains exactly three tuple of 
+    #: (min,max) for each of the coordinates x, y, z. 
+    #: Defaults to [(-1.,1.),(-1.,1.),(0.01,1.)]
+    bounds = List( Tuple(Float,Float), minlen=3, maxlen=3,
+        value = [(-1.,1.),(-1.,1.),(0.01,1.)])
+
+    #: options dictionary for the SHGO solver, see 
+    #: `scipy docs <https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.shgo.html>`_.
+    #: Default is Sobol sampling Nelder-Mead local minimizer, 256 initial sampling points 
+    #: and 1 iteration
+    shgo = Dict
+
+    # internal identifier
+    digest = Property( 
+        depends_on = ['freq_data.digest', '_steer_obj.digest', 'r_diag', 
+            'eva_list','bounds','shgo'], 
+        )
+   
+    @cached_property
+    def _get_digest( self ):
+        return digest( self )
+
+    @on_trait_change('n')
+    def set_eva_list(self):
+        """ sets the list of eigenvalues to consider """
+        self.eva_list = arange(-1, -1-self.n, -1)
+
+    @on_trait_change('eva_list')
+    def set_n(self):
+        """ sets the list of eigenvalues to consider """
+        self.n = self.eva_list.shape[0]
+    
+    @property_depends_on('n')
+    def _get_size ( self ):
+        return self.n*self.freq_data.fftfreq().shape[0]
+
+    def calc(self, ac, fr):
+        """
+        Calculates the result for the frequencies defined by :attr:`freq_data`
+        
+        This is an internal helper function that is automatically called when 
+        accessing the beamformer's :attr:`~BeamformerBase.result` or calling
+        its :meth:`~BeamformerBase.synthetic` method.        
+        
+        Parameters
+        ----------
+        ac : array of floats
+            This array of dimension ([number of frequencies]x[number of gridpoints])
+            is used as call-by-reference parameter and contains the calculated
+            value after calling this method. 
+        fr : array of booleans
+            The entries of this [number of frequencies]-sized array are either 
+            'True' (if the result for this frequency has already been calculated)
+            or 'False' (for the frequencies where the result has yet to be calculated).
+            After the calculation at a certain frequency the value will be set
+            to 'True'
+        
+        Returns
+        -------
+        This method only returns values through the *ac* and *fr* parameters
+        """
+        f = self.freq_data.fftfreq()
+        numchannels = self.freq_data.numchannels
+        # eigenvalue number list in standard form from largest to smallest 
+        eva_list = unique(self.eva_list % self.steer.mics.num_mics)[::-1]
+        steer_type = self.steer.steer_type
+        if steer_type == 'custom':
+            raise NotImplementedError('custom steer_type is not implemented')
+        mpos = self.steer.mics.mpos
+        env = self.steer.env
+        shgo_opts = {'n':256,'iters':1,'sampling_method':'sobol',
+                        'options':{'local_iter':1},
+                        'minimizer_kwargs':{'method':'Nelder-Mead'}
+                        }
+        shgo_opts.update(self.shgo)
+        for i in self.freq_data.indices:
+            if not fr[i]:
+                eva = array(self.freq_data.eva[i], dtype='float64')
+                eve = array(self.freq_data.eve[i], dtype='complex128')
+                k = 2*pi*f[i]/env.c
+                for j,n in enumerate(eva_list):
+                    #print(f[i],n)
+
+                    def func(xy):
+                        # function to minimize globally
+                        r0 = env._r(xy[:,newaxis])
+                        rm = env._r(xy[:,newaxis],mpos)
+                        return -beamformerFreq(steer_type,
+                                                self.r_diag,
+                                                1.0,
+                                                (r0, rm, k),
+                                                (ones(1), eve[:,n:n+1]))[0][0]
+
+                    # simplical global homotopy optimizer
+                    oR = shgo(func,self.bounds,**shgo_opts)
+                    # index in grid
+                    ind = i*self.n+j 
+                    # store result for position
+                    self._gpos[:,ind] = oR['x']
+                    # store result for level
+                    ac[i,ind] = eva[n]/numchannels
+                    #print(oR['x'],eva[n]/numchannels,oR)
+                fr[i] = 1
+
 
 def L_p ( x ):
     """
