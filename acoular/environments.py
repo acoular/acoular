@@ -28,7 +28,7 @@ from scipy.spatial import ConvexHull
 from traits.api import HasPrivateTraits, Float, Property, Int, \
 CArray, cached_property, Trait, Dict
 
-from .internal import digest
+from .internal import digest, ldigest
 
 f64ro = nb.types.Array(nb.types.float64,2,'A',readonly=True)
 f32ro = nb.types.Array(nb.types.float32,2,'A',readonly=True)
@@ -126,6 +126,9 @@ class Environment( HasPrivateTraits ):
     #: The speed of sound, defaults to 343 m/s
     c = Float(343., 
         desc="speed of sound")
+
+    #: The region of interest (ROI), not needed for most types of environment
+    roi = Trait(None,CArray)
 
     def _get_digest( self ):
         return digest( self )
@@ -575,20 +578,28 @@ class GeneralFlowEnvironment(Environment):
             mpos = array((0, 0, 0), dtype = float32)[:, newaxis]
 
         gt = empty((gpos.shape[-1], mpos.shape[-1]))
+        roi = gpos
+        if self.roi:
+            roi = self.roi
         for micnum, x0 in enumerate(mpos.T):
-            li = self.get_interpolator(gpos, x0)
+            key = ldigest([x0,roi])
+            try:
+                li = self.idict[key]
+            except KeyError:
+                li = self.get_interpolator(roi, x0)
+                self.idict[key] = li
             gt[:, micnum] = li(gpos.T)
         if gt.shape[1] == 1:
             gt = gt[:, 0]
         return c*gt #return distance along ray
 
-    def get_interpolator( self, gpos, x0 ):
+    def get_interpolator( self, roi, x0 ):
         """
         gets an LinearNDInterpolator object
 
         Parameters
         ----------
-        gpos : array of floats of shape (3, N)
+        roi : array of floats of shape (3, N)
             The locations of points in the region of interest in 3D cartesian
             co-ordinates. Used to estimate the maximum distance and ROI
             extension and center.
@@ -629,11 +640,11 @@ class GeneralFlowEnvironment(Environment):
                     break
                 oo.integrate(oo.t+dt)
 
-        gs2 = gpos.shape[-1]
+        gs2 = roi.shape[-1]
         vv = self.ff.v
         NN = int(sqrt(self.N))
-        xe = gpos.mean(1) # center of grid
-        r = x0[:, newaxis]-gpos
+        xe = roi.mean(1) # center of grid
+        r = x0[:, newaxis]-roi
         rmax = sqrt((r*r).sum(0).max()) # maximum distance
         nv = spiral_sphere(self.N, self.Om, b=xe-x0)
         rstep = rmax/sqrt(self.N)
@@ -646,7 +657,7 @@ class GeneralFlowEnvironment(Environment):
             fr(x0, n0, rmax, tstep, vv, xyz, t)
             if i and i % NN == 0:
                 if not lastind:
-                    dd = ConvexHull(vstack((gpos.T, xyz)), incremental=True)
+                    dd = ConvexHull(vstack((roi.T, xyz)), incremental=True)
                 else:
                     dd.add_points(xyz[lastind:], restart=True)
                 lastind = len(xyz)
