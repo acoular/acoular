@@ -2563,6 +2563,14 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
                         'minimizer_kwargs':{'method':'Nelder-Mead'}
                         }
         shgo_opts.update(self.shgo)
+        roi = []
+        for x in self.bounds[0]:
+            for y in self.bounds[1]:
+                for z in self.bounds[2]:
+                    roi.append((x,y,z))
+        self.steer.env.roi = array(roi).T
+        bmin = array(tuple(map(min,self.bounds)))
+        bmax = array(tuple(map(max,self.bounds)))
         for i in self.freq_data.indices:
             if not fr[i]:
                 eva = array(self.freq_data.eva[i], dtype='float64')
@@ -2573,6 +2581,7 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
 
                     def func(xy):
                         # function to minimize globally
+                        xy = clip(xy,bmin,bmax)
                         r0 = env._r(xy[:,newaxis])
                         rm = env._r(xy[:,newaxis],mpos)
                         return -beamformerFreq(steer_type,

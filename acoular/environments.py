@@ -578,16 +578,20 @@ class GeneralFlowEnvironment(Environment):
             mpos = array((0, 0, 0), dtype = float32)[:, newaxis]
 
         gt = empty((gpos.shape[-1], mpos.shape[-1]))
-        roi = gpos
-        if self.roi:
-            roi = self.roi
         for micnum, x0 in enumerate(mpos.T):
-            key = ldigest([x0,roi])
+            key = x0.tobytes() # make array hashable
+            #todo: the interpolator also depends the roi, so idict keys should also depend on roi
+            # OR the idict should be cleaned if roi changes
             try:
-                li = self.idict[key]
+                li = self.idict[key] # fetch stored interpolator
             except KeyError:
+                # if interpolator doesn't exist, construct it
+                roi = gpos
+                if self.roi is not None:
+                    roi = self.roi
                 li = self.get_interpolator(roi, x0)
                 self.idict[key] = li
+            # do the interpolation
             gt[:, micnum] = li(gpos.T)
         if gt.shape[1] == 1:
             gt = gt[:, 0]
