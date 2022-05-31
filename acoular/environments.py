@@ -26,9 +26,9 @@ from scipy.integrate import ode
 from scipy.interpolate import LinearNDInterpolator
 from scipy.spatial import ConvexHull
 from traits.api import HasPrivateTraits, Float, Property, Int, \
-CArray, cached_property, Trait
+CArray, cached_property, Trait, Dict
 
-from .internal import digest
+from .internal import digest, ldigest
 
 f64ro = nb.types.Array(nb.types.float64,2,'A',readonly=True)
 f32ro = nb.types.Array(nb.types.float32,2,'A',readonly=True)
@@ -126,6 +126,9 @@ class Environment( HasPrivateTraits ):
     #: The speed of sound, defaults to 343 m/s
     c = Float(343., 
         desc="speed of sound")
+
+    #: The region of interest (ROI), not needed for most types of environment
+    roi = Trait(None,CArray)
 
     def _get_digest( self ):
         return digest( self )
@@ -539,6 +542,9 @@ class GeneralFlowEnvironment(Environment):
         depends_on=['c', 'ff.digest', 'N', 'Om'], 
         )
 
+    # internal dictionary of interpolators
+    idict = Dict
+
     @cached_property
     def _get_digest( self ):
         return digest( self )
@@ -571,6 +577,45 @@ class GeneralFlowEnvironment(Environment):
         if isscalar(mpos):
             mpos = array((0, 0, 0), dtype = float32)[:, newaxis]
 
+        gt = empty((gpos.shape[-1], mpos.shape[-1]))
+        for micnum, x0 in enumerate(mpos.T):
+            key = x0.tobytes() # make array hashable
+            #todo: the interpolator also depends the roi, so idict keys should also depend on roi
+            # OR the idict should be cleaned if roi changes
+            try:
+                li = self.idict[key] # fetch stored interpolator
+            except KeyError:
+                # if interpolator doesn't exist, construct it
+                roi = gpos
+                if self.roi is not None:
+                    roi = self.roi
+                li = self.get_interpolator(roi, x0)
+                self.idict[key] = li
+            # do the interpolation
+            gt[:, micnum] = li(gpos.T)
+        if gt.shape[1] == 1:
+            gt = gt[:, 0]
+        return c*gt #return distance along ray
+
+    def get_interpolator( self, roi, x0 ):
+        """
+        gets an LinearNDInterpolator object
+
+        Parameters
+        ----------
+        roi : array of floats of shape (3, N)
+            The locations of points in the region of interest in 3D cartesian
+            co-ordinates. Used to estimate the maximum distance and ROI
+            extension and center.
+        x0 : array of floats of shape (3)
+            The location of the microphone in 3D cartesian co-ordinates. 
+
+        Returns
+        -------
+        LinearNDInterpolator object
+        """
+        c = self.c
+
         # the DE system
         def f1(t, y, v):
             x = y[0:3]
@@ -599,37 +644,32 @@ class GeneralFlowEnvironment(Environment):
                     break
                 oo.integrate(oo.t+dt)
 
-        gs2 = gpos.shape[-1]
-        gt = empty((gs2, mpos.shape[-1]))
+        gs2 = roi.shape[-1]
         vv = self.ff.v
         NN = int(sqrt(self.N))
-        for micnum, x0 in enumerate(mpos.T):
-            xe = gpos.mean(1) # center of grid
-            r = x0[:, newaxis]-gpos
-            rmax = sqrt((r*r).sum(0).max()) # maximum distance
-            nv = spiral_sphere(self.N, self.Om, b=xe-x0)
-            rstep = rmax/sqrt(self.N)
-            rmax += rstep
-            tstep = rstep/c
-            xyz = []
-            t = []
-            lastind = 0
-            for i, n0 in enumerate(nv.T):
-                fr(x0, n0, rmax, tstep, vv, xyz, t)
-                if i and i % NN == 0:
-                    if not lastind:
-                        dd = ConvexHull(vstack((gpos.T, xyz)), incremental=True)
-                    else:
-                        dd.add_points(xyz[lastind:], restart=True)
-                    lastind = len(xyz)
-                    # ConvexHull includes grid if no grid points on hull
-                    if dd.simplices.min()>=gs2:
-                        break
-            xyz = array(xyz)
-            t = array(t)
-            li = LinearNDInterpolator(xyz, t)
-            gt[:, micnum] = li(gpos.T)
-        if gt.shape[1] == 1:
-            gt = gt[:, 0]
-        return c*gt #return distance along ray
+        xe = roi.mean(1) # center of grid
+        r = x0[:, newaxis]-roi
+        rmax = sqrt((r*r).sum(0).max()) # maximum distance
+        nv = spiral_sphere(self.N, self.Om, b=xe-x0)
+        rstep = rmax/sqrt(self.N)
+        rmax += rstep
+        tstep = rstep/c
+        xyz = []
+        t = []
+        lastind = 0
+        for i, n0 in enumerate(nv.T):
+            fr(x0, n0, rmax, tstep, vv, xyz, t)
+            if i and i % NN == 0:
+                if not lastind:
+                    dd = ConvexHull(vstack((roi.T, xyz)), incremental=True)
+                else:
+                    dd.add_points(xyz[lastind:], restart=True)
+                lastind = len(xyz)
+                # ConvexHull includes grid if no grid points on hull
+                if dd.simplices.min()>=gs2:
+                    break
+        xyz = array(xyz)
+        t = array(t)
+        return LinearNDInterpolator(xyz, t)
+
 
