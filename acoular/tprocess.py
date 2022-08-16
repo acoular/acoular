@@ -94,10 +94,10 @@ class SamplesGenerator( HasPrivateTraits ):
     numsamples = CLong
     
     # internal identifier
-    digest = Property
+    digest = Property(depends_on = ['sample_freq', 'numchannels', 'numsamples'])
     
     def _get_digest( self ): 
-        return '' 
+        return digest( self )
                
     def result(self, num):
         """
