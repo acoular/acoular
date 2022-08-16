@@ -1249,7 +1249,7 @@ class Mixer( TimeInOut ):
     # internal identifier    
     sdigest = Str()
 
-    @observe('sources:items:digest')
+    @observe('sources.items.digest')
     def _set_sources_digest( self, event ):
         self.sdigest = ldigest(self.sources) 
     
