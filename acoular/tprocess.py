@@ -49,8 +49,9 @@ from scipy.spatial import Delaunay
 from scipy.interpolate import LinearNDInterpolator,splrep, splev, \
 CloughTocher2DInterpolator, CubicSpline, Rbf
 from traits.api import HasPrivateTraits, Float, Int, CLong, Bool, ListInt, \
-Constant, File, Property, Instance, Trait, Delegate, \
-cached_property, on_trait_change, List, CArray, Dict, PrefixMap, Callable
+Constant, File, Property, Instance, Trait, Delegate, Str, \
+cached_property, on_trait_change, List, CArray, Dict, PrefixMap, Callable,\
+observe
 
 from scipy.fft import rfft, irfft
 import numba as nb
@@ -65,7 +66,7 @@ from inspect import currentframe
 import threading
 
 # acoular imports
-from .internal import digest
+from .internal import digest, ldigest
 from .h5cache import H5cache
 from .h5files import H5CacheFileBase, _get_h5file_class
 from .environments import cartToCyl,cylToCart
@@ -94,10 +95,10 @@ class SamplesGenerator( HasPrivateTraits ):
     numsamples = CLong
     
     # internal identifier
-    digest = Property
+    digest = Property(depends_on = ['sample_freq', 'numchannels', 'numsamples'])
     
     def _get_digest( self ): 
-        return '' 
+        return digest( self )
                
     def result(self, num):
         """
@@ -1245,24 +1246,20 @@ class Mixer( TimeInOut ):
     #: Number of samples in output as given by :attr:`source`.
     numsamples = Delegate('source')
 
-    # internal identifier
-    ldigest = Property( depends_on = ['sources.digest', ])
+    # internal identifier    
+    sdigest = Str()
 
+    @observe('sources.items.digest')
+    def _set_sources_digest( self, event ):
+        self.sdigest = ldigest(self.sources) 
+    
     # internal identifier
-    digest = Property( depends_on = ['sources','source.digest', 'ldigest', '__class__'])
-
-    @cached_property
-    def _get_ldigest( self ):
-        res = ''
-        for s in self.sources:
-            res += s.digest
-        return res
+    digest = Property( depends_on = ['source.digest','sdigest'])
 
     @cached_property
     def _get_digest( self ):
         return digest(self)
 
-    @on_trait_change('sources,source')
     def validate_sources( self ):
         """ validates if sources fit together """
         if self.source:
@@ -1289,6 +1286,10 @@ class Mixer( TimeInOut ):
         Samples in blocks of shape (num, numchannels). 
             The last block may be shorter than num.
         """
+        
+        # check whether all sources fit together
+        self.validate_sources()
+        
         gens = [i.result(num) for i in self.sources]
         for temp in self.source.result(num):
             sh = temp.shape[0]

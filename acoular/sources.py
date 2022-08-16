@@ -34,15 +34,15 @@ from numpy.linalg import norm
 import numba as nb
 
 from traits.api import Float, Int, Property, Trait, Delegate, \
-cached_property, Tuple, CLong, File, Instance, Any, \
-on_trait_change, List, ListInt, CArray, Bool, Dict, Enum
+cached_property, Tuple, CLong, File, Instance, Any, Str, \
+on_trait_change, observe, List, ListInt, CArray, Bool, Dict, Enum
 from os import path
 from warnings import warn
 
 # acoular imports
 from .calib import Calib
 from .trajectory import Trajectory
-from .internal import digest
+from .internal import digest, ldigest
 from .microphones import MicGeom
 from .environments import Environment
 from .tprocess import SamplesGenerator
@@ -1250,31 +1250,28 @@ class SourceMixer( SamplesGenerator ):
     sources = List( Instance(SamplesGenerator, ()) ) 
 
     #: Sampling frequency of the signal.
-    sample_freq = Property( depends_on=['ldigest'] )
+    sample_freq = Property( depends_on=['sdigest'] )
     
     #: Number of channels.
-    numchannels = Property( depends_on=['ldigest'] )
+    numchannels = Property( depends_on=['sdigest'] )
                
     #: Number of samples.
-    numsamples = Property( depends_on=['ldigest'] )
+    numsamples = Property( depends_on=['sdigest'] )
     
     #: Amplitude weight(s) for the sources as array. If not set, 
     #: all source signals are equally weighted.
     #: Must match the number of sources in :attr:`sources`.
     weights = CArray(desc="channel weights")
 
-    # internal identifier
-    ldigest = Property( depends_on = ['sources.digest', ])
+    # internal identifier    
+    sdigest = Str()
+
+    @observe('sources.items.digest')
+    def _set_sources_digest( self, event ):
+        self.sdigest = ldigest(self.sources) 
 
     # internal identifier
-    digest = Property( depends_on = ['ldigest', 'weights', '__class__'])
-
-    @cached_property
-    def _get_ldigest( self ):
-        res = ''
-        for s in self.sources:
-            res += s.digest
-        return res
+    digest = Property( depends_on = ['sdigest', 'weights'])
 
     @cached_property
     def _get_digest( self ):
@@ -1306,6 +1303,8 @@ class SourceMixer( SamplesGenerator ):
 
     def validate_sources( self ):
         """ Validates if sources fit together. """
+        if len(self.sources) <= 1:
+            raise ValueError("Number of sources in SourceMixer should be greater than 1.")
         for s in self.sources[1:]:
             if self.sample_freq != s.sample_freq:
                 raise ValueError("Sample frequency of %s does not fit" % s)
@@ -1330,7 +1329,9 @@ class SourceMixer( SamplesGenerator ):
         Samples in blocks of shape (num, numchannels). 
             The last block may be shorter than num.
         """
+        # check whether all sources fit together
         self.validate_sources()
+
         gens = [i.result(num) for i in self.sources[1:]]
         weights = self.weights.copy()
         if weights.size == 0:

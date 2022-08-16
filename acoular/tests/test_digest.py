@@ -73,8 +73,8 @@ UNEQUAL_DIGEST_TEST_DICT = {
     "SpatialInterpolatorRotation.Q array assignment": (SpatialInterpolatorRotation(), "obj.Q = array([[0.,0.,0.],[0.,0.,0.],[0.,0.,0.]])"),
 #    "SpatialInterpolatorConstantRotation.Q item assignment": (SpatialInterpolatorConstantRotation(), "obj.Q[0] = 0."),
     "SpatialInterpolatorConstantRotation.Q array assignment": (SpatialInterpolatorConstantRotation(), "obj.Q = array([[0.,0.,0.],[0.,0.,0.],[0.,0.,0.]])"),
-    "Mixer.sources item assignment": (Mixer(sources=[SamplesGenerator()]), "obj.sources[0] = SamplesGenerator()"),  
-    "Mixer.sources list assignment": (Mixer(sources=[SamplesGenerator()]), "obj.sources = [SamplesGenerator()]"),  
+    "Mixer.sources item assignment": (Mixer(source=SamplesGenerator(), sources=[SamplesGenerator()]), "obj.sources[0] = SamplesGenerator(numchannels=1)"),  
+    "Mixer.sources list assignment": (Mixer(sources=[SamplesGenerator()]), "obj.sources = [SamplesGenerator(), SamplesGenerator()]"),  
     "WriteWAV.channels item assignment": (WriteWAV(channels=[1]), "obj.channels[0] = 0"),  
     "WriteWAV.channels list assignment": (WriteWAV(), "obj.channels = [0]"),
     }

@@ -20,7 +20,7 @@ def digest( obj, name='digest'):
 def ldigest(l):
     str_ = []
     for i in l:
-        str_.append(str(i).encode('UTF-8'))
+        str_.append(str(i.digest).encode('UTF-8'))
     return '_' + md5(''.encode("UTF-8").join(str_)).hexdigest()
 
 
