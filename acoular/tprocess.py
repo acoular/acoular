@@ -1260,7 +1260,6 @@ class Mixer( TimeInOut ):
     def _get_digest( self ):
         return digest(self)
 
-    @on_trait_change('digest')
     def validate_sources( self ):
         """ validates if sources fit together """
         if self.source:
@@ -1287,6 +1286,10 @@ class Mixer( TimeInOut ):
         Samples in blocks of shape (num, numchannels). 
             The last block may be shorter than num.
         """
+        
+        # check whether all sources fit together
+        self.validate_sources()
+        
         gens = [i.result(num) for i in self.sources]
         for temp in self.source.result(num):
             sh = temp.shape[0]
