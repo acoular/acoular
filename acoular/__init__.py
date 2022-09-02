@@ -41,7 +41,7 @@ from .grids import Grid, RectGrid, RectGrid3D, Sector, RectSector, RectSector3D,
 from .environments import cartToCyl, cylToCart, Environment, UniformFlowEnvironment, RotatingFlow, \
 FlowField, OpenJet, SlotJet, GeneralFlowEnvironment
 from .microphones import MicGeom
-from .spectra import PowerSpectra, PowerSpectra as EigSpectra, synthetic
+from .spectra import BaseSpectra, SpectraInOut, PowerSpectra, PowerSpectraImport, PowerSpectra as EigSpectra, synthetic
 
 from .fbeamform import BeamformerBase, BeamformerCapon, BeamformerEig, \
 BeamformerMusic, BeamformerDamas, BeamformerDamasPlus, BeamformerOrth,BeamformerCleansc, \
