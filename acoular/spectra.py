@@ -9,13 +9,15 @@
 .. autosummary::
     :toctree: generated/
 
+    BaseSpectra
+    SpectraInOut    
     PowerSpectra
     synthetic
 """
 from warnings import warn
 
 from numpy import array, ones, hanning, hamming, bartlett, blackman, \
-dot, newaxis, zeros, empty, fft, linalg, \
+dot, newaxis, zeros, empty, fft, linalg, sqrt,\
 searchsorted, isscalar, fill_diagonal, arange, zeros_like, sum
 from traits.api import HasPrivateTraits, Int, Property, Instance, Trait, \
 Range, Bool, cached_property, property_depends_on, Delegate, Float
@@ -24,10 +26,122 @@ from .fastFuncs import calcCSM
 from .h5cache import H5cache
 from .h5files import H5CacheFileBase
 from .internal import digest
-from .tprocess import SamplesGenerator
+from .tprocess import SamplesGenerator, TimeInOut
 from .calib import Calib
 from .configuration import config
 
+
+class BaseSpectra( HasPrivateTraits ):
+
+    #: Window function for FFT, one of:
+    #:   * 'Rectangular' (default)
+    #:   * 'Hanning'
+    #:   * 'Hamming'
+    #:   * 'Bartlett'
+    #:   * 'Blackman'
+    window = Trait('Rectangular', 
+        {'Rectangular':ones, 
+        'Hanning':hanning, 
+        'Hamming':hamming, 
+        'Bartlett':bartlett, 
+        'Blackman':blackman}, 
+        desc="type of window for FFT")
+
+    #: Overlap factor for averaging: 'None'(default), '50%', '75%', '87.5%'.
+    overlap = Trait('None', {'None':1, '50%':2, '75%':4, '87.5%':8}, 
+        desc="overlap of FFT blocks")
+    
+    #: FFT block size, one of: 128, 256, 512, 1024, 2048 ... 65536,
+    #: defaults to 1024.
+    block_size = Trait(1024, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536,
+        desc="number of samples per FFT block")
+
+    #: The floating-number-precision of entries of csm, eigenvalues and 
+    #: eigenvectors, corresponding to numpy dtypes. Default is 64 bit.
+    precision = Trait('complex128', 'complex64', 
+                      desc="precision of the fft")
+    
+    # internal identifier
+    digest = Property( depends_on = ['precision','block_size',
+                                    'window','overlap'])
+
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+
+
+
+class SpectraInOut( BaseSpectra,TimeInOut ):
+    """Provides the spectra of multichannel time data. 
+    
+    Returns Spectra per block over a Generator.       
+    """
+    
+    #: Data source; :class:`~acoular.sources.SamplesGenerator` or derived object.
+    source = Trait(SamplesGenerator)
+
+    #: Sampling frequency of output signal, as given by :attr:`source`.
+    sample_freq = Delegate('source')
+    
+    # internal identifier
+    digest = Property( depends_on = ['source.digest','precision','block_size',
+                                    'window','overlap'])
+
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+
+    def fftfreq ( self ):
+        """
+        Return the Discrete Fourier Transform sample frequencies.
+        
+        Returns
+        -------
+        f : ndarray
+            Array of length *block_size/2+1* containing the sample frequencies.
+        """
+        return abs(fft.fftfreq(self.block_size, 1./self.source.sample_freq)\
+                    [:int(self.block_size/2+1)])
+
+    #generator that yields the time data blocks for every channel (with optional overlap)
+    def get_source_data(self):
+        bs = self.block_size
+        temp = empty((2*bs, self.numchannels))
+        pos = bs
+        posinc = bs/self.overlap_
+        for data_block in self.source.result(bs):
+            ns = data_block.shape[0]
+            temp[bs:bs+ns] = data_block # fill from right
+            while pos+bs <= bs+ns:
+                yield temp[int(pos):int(pos+bs)]
+                pos += posinc
+            else:
+                temp[0:bs] = temp[bs:] # copy to left
+                pos -= bs
+
+    #generator that yields the fft for every channel
+    def result(self):
+        """ 
+        Python generator that yields the output block-wise.
+        
+        Parameters
+        ----------
+        num : integer
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block).
+        
+        Returns
+        -------
+        Samples in blocks of shape (numfreq, :attr:`numchannels`). 
+            The last block may be shorter than num.
+            """
+        wind = self.window_( self.block_size )
+        weight = sqrt(self.block_size/dot(wind,wind)) # signal energy correction
+        fweight = (sqrt(2)/self.block_size)
+        wind = wind[:, newaxis]
+        for data in self.get_source_data():
+            ft = fft.rfft(data*wind*weight, None, 0).astype(self.precision)*fweight
+            yield ft
 
 
 class PowerSpectra( HasPrivateTraits ):
@@ -62,11 +176,6 @@ class PowerSpectra( HasPrivateTraits ):
     #: :class:`~acoular.sources.TimeSamples` objects
     calib = Instance(Calib)
 
-    #: FFT block size, one of: 128, 256, 512, 1024, 2048 ... 65536,
-    #: defaults to 1024.
-    block_size = Trait(1024, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536,
-        desc="number of samples per FFT block")
-
     # Shadow trait, should not be set directly, for internal use.
     _ind_low = Int(1,
         desc="index of lowest frequency line")
@@ -96,25 +205,7 @@ class PowerSpectra( HasPrivateTraits ):
     # not to be set directly, if True (default), indices are used for setting
     # the freq_range interval.
     _index_set_last = Bool(True)
-
-    #: Window function for FFT, one of:
-    #:   * 'Rectangular' (default)
-    #:   * 'Hanning'
-    #:   * 'Hamming'
-    #:   * 'Bartlett'
-    #:   * 'Blackman'
-    window = Trait('Rectangular', 
-        {'Rectangular':ones, 
-        'Hanning':hanning, 
-        'Hamming':hamming, 
-        'Bartlett':bartlett, 
-        'Blackman':blackman}, 
-        desc="type of window for FFT")
-
-    #: Overlap factor for averaging: 'None'(default), '50%', '75%', '87.5%'.
-    overlap = Trait('None', {'None':1, '50%':2, '75%':4, '87.5%':8}, 
-        desc="overlap of FFT blocks")
-        
+      
     #: Flag, if true (default), the result is cached in h5 files and need not
     #: to be recomputed during subsequent program runs.
     cached = Bool(True, 
@@ -151,11 +242,6 @@ class PowerSpectra( HasPrivateTraits ):
     csm = Property( 
         desc="cross spectral matrix")
     
-    #: The floating-number-precision of entries of csm, eigenvalues and 
-    #: eigenvectors, corresponding to numpy dtypes. Default is 64 bit.
-    precision = Trait('complex128', 'complex64', 
-                      desc="precision csm, eva, eve")
-
     #: Eigenvalues of the cross spectral matrix as an
     #: (number of frequencies) array of floats, readonly.
     eva = Property( 
