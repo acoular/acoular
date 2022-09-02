@@ -17,10 +17,11 @@
 from warnings import warn
 
 from numpy import array, ones, hanning, hamming, bartlett, blackman, \
-dot, newaxis, zeros, empty, fft, linalg, sqrt,\
+dot, newaxis, zeros, empty, fft, linalg, sqrt,real, imag,\
 searchsorted, isscalar, fill_diagonal, arange, zeros_like, sum
 from traits.api import HasPrivateTraits, Int, Property, Instance, Trait, \
-Range, Bool, cached_property, property_depends_on, Delegate, Float
+Range, Bool, cached_property, property_depends_on, Delegate, Float, Enum, \
+    CArray
 
 from .fastFuncs import calcCSM
 from .h5cache import H5cache
@@ -144,7 +145,7 @@ class SpectraInOut( BaseSpectra,TimeInOut ):
             yield ft
 
 
-class PowerSpectra( HasPrivateTraits ):
+class PowerSpectra( BaseSpectra ):
     """Provides the cross spectral matrix of multichannel time data
      and its eigen-decomposition.
     
@@ -166,7 +167,10 @@ class PowerSpectra( HasPrivateTraits ):
     time_data = Trait(SamplesGenerator, 
         desc="time data object")
 
-    #: Number of samples 
+    #: Sampling frequency of output signal, as given by :attr:`source`.
+    sample_freq = Delegate('time_data')
+
+    #: Number of time data channels 
     numchannels = Delegate('time_data')
 
     #: The :class:`~acoular.calib.Calib` object that provides the calibration data, 
@@ -531,7 +535,7 @@ class PowerSpectra( HasPrivateTraits ):
         f : ndarray
             Array of length *block_size/2+1* containing the sample frequencies.
         """
-        return abs(fft.fftfreq(self.block_size, 1./self.time_data.sample_freq)\
+        return abs(fft.fftfreq(self.block_size, 1./self.sample_freq)\
                     [:int(self.block_size/2+1)])
 
 
@@ -623,4 +627,94 @@ def synthetic (data, freqs, f, num=3):
                 h = sum(data[ind1:ind2], 0)
             res += [h]
     return array(res)
+
+
+class PowerSpectraImport( PowerSpectra ):
+    """Provides a dummy class for using pre-calculated cross-spectral
+    matrices. 
+
+    This class does not calculate the cross-spectral matrix. Instead, 
+    the user can assign an existing CSM to the :attr:`csm` attribute. 
+    For example, this can be useful when algorithms shall be
+    tested with theoretically calculated matrices.
+    In contrast to the PowerSpectra object, the :attr:`sample_freq` needs to
+    be set by the user as it cannot be obtained from the time data. 
+    The attr:`block_size` and the attr:`numchannels` attributes
+    are determined on the basis of the CSM shape.
+    """
+
+    #: The cross spectral matrix, 
+    #: (number of frequencies, numchannels, numchannels) array of complex;
+    #: readonly.
+    csm = Property( 
+        desc="cross spectral matrix")
+
+    #: Sampling frequency of the signal, defaults to None
+    sample_freq = Float( 
+        desc="sampling frequency")
+
+    #: FFT block size
+    #: readonly     
+    block_size = Property(
+        desc="number of samples per FFT block")
+
+    #: Number of time data channels 
+    numchannels = Property(depends_on=['digest'])
+
+    time_data = Enum(None, 
+        desc="PowerSpectraImport cannot consume time data")
+
+    calib = Enum(None,
+        desc="PowerSpectraImport cannot calibrate the time data")
+
+    window = Enum(None,
+            desc="PowerSpectraImport does not perform windowing")
+
+    overlap = Enum(None,
+            desc="PowerSpectraImport does not consume time data")
+
+    cached = Enum(None,
+            desc="PowerSpectraImport has no caching capabilities")
+
+    num_blocks = Enum(None,
+            desc="PowerSpectraImport cannot determine the number of blocks")
+
+    # internal identifier
+    digest = Property( 
+        depends_on = ['_csmsum', 'sample_freq', 'block_size',
+            ], 
+        )
+
+    #: Name of the cache file without extension, readonly.
+    basename = Property( depends_on = 'digest', 
+        desc="basename for cache file")
+
+    # csm shadow trait
+    _csm = CArray()
+        
+    # CSM checksum to trigger digest calculation
+    _csmsum = Float() 
+
+    def _get_basename( self ):
+        return "csm_import_"+self.digest
+
+    @cached_property
+    def _get_digest( self ):
+        return digest( self )
+
+    def _get_numchannels( self ):
+        return self.csm.shape[1]
+
+    def _get_block_size( self ):
+        return (self.csm.shape[0]-1)*2
+
+    def _get_csm ( self ):
+        return self._csm
+
+    def _set_csm (self, csm):
+        if (len(csm.shape) != 3) or (csm.shape[1] != csm.shape[2]):
+            raise ValueError(
+                "The cross spectral matrix must have the following shape: (number of frequencies, numchannels, numchannels)!")
+        self._csmsum = real(self._csm).sum() + imag(self._csm).sum() # to trigger new digest creation
+        self._csm = csm
 
