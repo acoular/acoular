@@ -356,25 +356,14 @@ class PowerSpectra( BaseSpectra ):
                 raise ValueError(
                         "Calibration data not compatible: %i, %i" % \
                         (self.calib.num_mics, t.numchannels))
-        bs = self.block_size
-        temp = empty((2*bs, t.numchannels))
-        pos = bs
-        posinc = bs/self.overlap_
-        for data in t.result(bs):
-            ns = data.shape[0]
-            temp[bs:bs+ns] = data
-            while pos+bs <= bs+ns:
-                ft = fft.rfft(temp[int(pos):int(pos+bs)]*wind, None, 0).astype(self.precision)
-                calcCSM(csmUpper, ft)  # only upper triangular part of matrix is calculated (for speed reasons)
-                pos += posinc
-            temp[0:bs] = temp[bs:]
-            pos -= bs
-        
+        # get time data blockwise
+        for data in self.get_source_data():
+            ft = fft.rfft(data*wind, None, 0).astype(self.precision)
+            calcCSM(csmUpper, ft)  # only upper triangular part of matrix is calculated (for speed reasons)
         # create the full csm matrix via transposing and complex conj.
         csmLower = csmUpper.conj().transpose(0,2,1)
         [fill_diagonal(csmLower[cntFreq, :, :], 0) for cntFreq in range(csmLower.shape[0])]
         csm = csmLower + csmUpper
-
         # onesided spectrum: multiplication by 2.0=sqrt(2)^2
         csm = csm*(2.0/self.block_size/weight/self.num_blocks)
         return csm
