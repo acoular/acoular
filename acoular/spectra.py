@@ -34,6 +34,15 @@ from .configuration import config
 
 class BaseSpectra( HasPrivateTraits ):
 
+    #: Data source; :class:`~acoular.sources.SamplesGenerator` or derived object.
+    source = Trait(SamplesGenerator)
+
+    #: Sampling frequency of output signal, as given by :attr:`source`.
+    sample_freq = Delegate('source')
+
+    #: Number of time data channels 
+    numchannels = Delegate('source')
+
     #: Window function for FFT, one of:
     #:   * 'Rectangular' (default)
     #:   * 'Hanning'
@@ -70,28 +79,6 @@ class BaseSpectra( HasPrivateTraits ):
     def _get_digest( self ):
         return digest(self)
 
-
-
-class SpectraInOut( BaseSpectra,TimeInOut ):
-    """Provides the spectra of multichannel time data. 
-    
-    Returns Spectra per block over a Generator.       
-    """
-    
-    #: Data source; :class:`~acoular.sources.SamplesGenerator` or derived object.
-    source = Trait(SamplesGenerator)
-
-    #: Sampling frequency of output signal, as given by :attr:`source`.
-    sample_freq = Delegate('source')
-    
-    # internal identifier
-    digest = Property( depends_on = ['source.digest','precision','block_size',
-                                    'window','overlap'])
-
-    @cached_property
-    def _get_digest( self ):
-        return digest(self)
-
     def fftfreq ( self ):
         """
         Return the Discrete Fourier Transform sample frequencies.
@@ -119,6 +106,21 @@ class SpectraInOut( BaseSpectra,TimeInOut ):
             else:
                 temp[0:bs] = temp[bs:] # copy to left
                 pos -= bs
+
+
+class SpectraInOut( BaseSpectra,TimeInOut ):
+    """Provides the spectra of multichannel time data. 
+    
+    Returns Spectra per block over a Generator.       
+    """
+    
+    # internal identifier
+    digest = Property( depends_on = ['source.digest','precision','block_size',
+                                    'window','overlap'])
+
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
 
     #generator that yields the fft for every channel
     def result(self):
@@ -163,15 +165,16 @@ class PowerSpectra( BaseSpectra ):
     and the same file name in case of that the data is read from a file.
     """
 
-    #: The :class:`~acoular.tprocess.SamplesGenerator` object that provides the data.
-    time_data = Trait(SamplesGenerator, 
+    # Shadow trait, should not be set directly, for internal use.
+    _source = Trait(SamplesGenerator)
+
+    #: Data source; :class:`~acoular.sources.SamplesGenerator` or derived object. 
+    source = Property(_source,
         desc="time data object")
 
-    #: Sampling frequency of output signal, as given by :attr:`source`.
-    sample_freq = Delegate('time_data')
-
-    #: Number of time data channels 
-    numchannels = Delegate('time_data')
+    #: The :class:`~acoular.tprocess.SamplesGenerator` object that provides the data.
+    time_data = Property(_source, 
+        desc="deprecated attribute holding the time data object. Use PowerSpectra.source instead!")
 
     #: The :class:`~acoular.calib.Calib` object that provides the calibration data, 
     #: defaults to no calibration, i.e. the raw time data is used.
@@ -237,7 +240,7 @@ class PowerSpectra( BaseSpectra ):
         desc = "index range" )
         
     #: Name of the cache file without extension, readonly.
-    basename = Property( depends_on = 'time_data.digest', 
+    basename = Property( depends_on = '_source.digest', 
         desc="basename for cache file")
 
     #: The cross spectral matrix, 
@@ -259,19 +262,19 @@ class PowerSpectra( BaseSpectra ):
 
     # internal identifier
     digest = Property( 
-        depends_on = ['time_data.digest', 'calib.digest', 'block_size', 
+        depends_on = ['_source.digest', 'calib.digest', 'block_size', 
             'window', 'overlap', 'precision'], 
         )
 
     # hdf5 cache file
     h5f = Instance( H5CacheFileBase, transient = True )
     
-    @property_depends_on('time_data.numsamples, block_size, overlap')
+    @property_depends_on('_source.numsamples, block_size, overlap')
     def _get_num_blocks ( self ):
-        return self.overlap_*self.time_data.numsamples/self.block_size-\
+        return self.overlap_*self._source.numsamples/self.block_size-\
         self.overlap_+1
 
-    @property_depends_on('time_data.sample_freq, block_size, ind_low, ind_high')
+    @property_depends_on('_source.sample_freq, block_size, ind_low, ind_high')
     def _get_freq_range ( self ):
         try:
             return self.fftfreq()[[ self.ind_low, self.ind_high ]]
@@ -283,14 +286,14 @@ class PowerSpectra( BaseSpectra ):
         self._freqlc = freq_range[0]
         self._freqhc = freq_range[1]
 
-    @property_depends_on( 'time_data.sample_freq, block_size, _ind_low, _freqlc' )
+    @property_depends_on( '_source.sample_freq, block_size, _ind_low, _freqlc' )
     def _get_ind_low( self ):
         if self._index_set_last:
             return min(self._ind_low, self.block_size//2)
         else:
             return searchsorted(self.fftfreq()[:-1], self._freqlc)
 
-    @property_depends_on( 'time_data.sample_freq, block_size, _ind_high, _freqhc' )
+    @property_depends_on( '_source.sample_freq, block_size, _ind_high, _freqhc' )
     def _get_ind_high( self ):
         if self._index_set_last:
             return min(self._ind_high, self.block_size//2)
@@ -305,6 +308,18 @@ class PowerSpectra( BaseSpectra ):
         self._index_set_last = True
         self._ind_low = ind_low
 
+    def _set_time_data(self, time_data):
+        self._source = time_data
+
+    def _set_source(self, source):
+        self._source = source
+
+    def _get_time_data(self):
+        return self._source
+
+    def _get_source(self):
+        return self._source
+
     @property_depends_on( 'block_size, ind_low, ind_high' )
     def _get_indices ( self ):
         try:
@@ -318,14 +333,14 @@ class PowerSpectra( BaseSpectra ):
 
     @cached_property
     def _get_basename( self ):
-        if 'basename' in self.time_data.all_trait_names():
-            return self.time_data.basename
+        if 'basename' in self._source.all_trait_names():
+            return self._source.basename
         else: 
-            return self.time_data.__class__.__name__ + self.time_data.digest
+            return self._source.__class__.__name__ + self._source.digest
 
     def calc_csm( self ):
         """ csm calculation """
-        t = self.time_data
+        t = self.source
         wind = self.window_( self.block_size )
         weight = dot( wind, wind )
         wind = wind[newaxis, :].swapaxes( 0, 1 )
@@ -385,7 +400,7 @@ class PowerSpectra( BaseSpectra ):
         return self.calc_ev()[1]
                 
     def _handle_dual_calibration(self):
-        obj = self.time_data # start with time_data obj
+        obj = self.source # start with time_data obj
         while obj:
             if 'calib' in obj.all_trait_names(): # at original source?
                 if obj.calib and self.calib:
@@ -409,7 +424,7 @@ class PowerSpectra( BaseSpectra ):
         if traitname == 'csm':
             func = self.calc_csm
             numfreq = int(self.block_size/2 + 1)
-            shape = (numfreq, self.time_data.numchannels, self.time_data.numchannels)
+            shape = (numfreq, self._source.numchannels, self._source.numchannels)
             precision = self.precision
         elif traitname == 'eva':
             func = self.calc_eva
@@ -524,21 +539,6 @@ class PowerSpectra( BaseSpectra ):
                 return self.eva[f1]
             else:
                 return sum(self.eva[f1:f2], 0)
-
-
-    def fftfreq ( self ):
-        """
-        Return the Discrete Fourier Transform sample frequencies.
-        
-        Returns
-        -------
-        f : ndarray
-            Array of length *block_size/2+1* containing the sample frequencies.
-        """
-        return abs(fft.fftfreq(self.block_size, 1./self.sample_freq)\
-                    [:int(self.block_size/2+1)])
-
-
 
 
 
@@ -662,6 +662,9 @@ class PowerSpectraImport( PowerSpectra ):
     numchannels = Property(depends_on=['digest'])
 
     time_data = Enum(None, 
+        desc="PowerSpectraImport cannot consume time data")
+
+    source = Enum(None, 
         desc="PowerSpectraImport cannot consume time data")
 
     calib = Enum(None,
