@@ -13,6 +13,7 @@
     SpectraInOut    
     PowerSpectra
     synthetic
+    PowerSpectraImport
 """
 from warnings import warn
 
@@ -289,14 +290,14 @@ class PowerSpectra( BaseSpectra ):
     @property_depends_on( '_source.sample_freq, block_size, _ind_low, _freqlc' )
     def _get_ind_low( self ):
         if self._index_set_last:
-            return min(self._ind_low, self.block_size//2)
+            return min(self._ind_low, self.fftfreq().shape[0]-1)
         else:
             return searchsorted(self.fftfreq()[:-1], self._freqlc)
 
     @property_depends_on( '_source.sample_freq, block_size, _ind_high, _freqhc' )
     def _get_ind_high( self ):
         if self._index_set_last:
-            return min(self._ind_high, self.block_size//2)
+            return min(self._ind_high, self.fftfreq().shape[0]-1)
         else:
             return searchsorted(self.fftfreq()[:-1], self._freqhc)
 
@@ -323,7 +324,7 @@ class PowerSpectra( BaseSpectra ):
     @property_depends_on( 'block_size, ind_low, ind_high' )
     def _get_indices ( self ):
         try:
-            return arange(self.block_size/2+1,dtype=int)[ self.ind_low: self.ind_high ]
+            return arange(self.fftfreq().shape[0],dtype=int)[ self.ind_low: self.ind_high ]
         except IndexError:
             return range(0)
 
@@ -625,11 +626,15 @@ class PowerSpectraImport( PowerSpectra ):
     This class does not calculate the cross-spectral matrix. Instead, 
     the user can assign an existing CSM to the :attr:`csm` attribute. 
     For example, this can be useful when algorithms shall be
-    tested with theoretically calculated matrices.
-    In contrast to the PowerSpectra object, the :attr:`sample_freq` needs to
-    be set by the user as it cannot be obtained from the time data. 
-    The attr:`block_size` and the attr:`numchannels` attributes
-    are determined on the basis of the CSM shape.
+    evaluated with existing CSM matrices.
+    The frequency or frequencies contained by the CSM can be set via the 
+    attr:`frequencies` attribute. The attr:`numchannels` attributes
+    is determined on the basis of the CSM shape. 
+    In contrast to the PowerSpectra object, the attributes 
+    :attr:`sample_freq`, :attr:`time_data`, :attr:`source`,
+    :attr:`block_size`, :attr:`calib`, :attr:`window`, 
+    :attr:`overlap`, :attr:`cached`, and :attr:`num_blocks`
+    have no functionality. 
     """
 
     #: The cross spectral matrix, 
@@ -638,14 +643,14 @@ class PowerSpectraImport( PowerSpectra ):
     csm = Property( 
         desc="cross spectral matrix")
 
+    #: frequencies included in the cross-spectral matrix in ascending order.
+    #: Compound trait that accepts arguments of type list, array, and float
+    frequencies = Trait(None,(CArray,Float),
+        desc="frequencies included in the cross-spectral matrix")
+
     #: Sampling frequency of the signal, defaults to None
     sample_freq = Float( 
         desc="sampling frequency")
-
-    #: FFT block size
-    #: readonly     
-    block_size = Property(
-        desc="number of samples per FFT block")
 
     #: Number of time data channels 
     numchannels = Property(depends_on=['digest'])
@@ -655,6 +660,9 @@ class PowerSpectraImport( PowerSpectra ):
 
     source = Enum(None, 
         desc="PowerSpectraImport cannot consume time data")
+
+    block_size = Enum(None, 
+        desc="PowerSpectraImport does not operate on blocks of time data")
 
     calib = Enum(None,
         desc="PowerSpectraImport cannot calibrate the time data")
@@ -673,7 +681,7 @@ class PowerSpectraImport( PowerSpectra ):
 
     # internal identifier
     digest = Property( 
-        depends_on = ['_csmsum', 'sample_freq', 'block_size',
+        depends_on = ['_csmsum', 
             ], 
         )
 
@@ -707,6 +715,21 @@ class PowerSpectraImport( PowerSpectra ):
         if (len(csm.shape) != 3) or (csm.shape[1] != csm.shape[2]):
             raise ValueError(
                 "The cross spectral matrix must have the following shape: (number of frequencies, numchannels, numchannels)!")
-        self._csmsum = real(self._csm).sum() + imag(self._csm).sum() # to trigger new digest creation
+        self._csmsum = real(self._csm).sum() + (imag(self._csm)**2).sum() # to trigger new digest creation
         self._csm = csm
 
+    def fftfreq ( self ):
+        """
+        Return the Discrete Fourier Transform sample frequencies.
+        
+        Returns
+        -------
+        f : ndarray
+            Array containing the frequencies.
+        """
+        if self.frequencies == None:
+            warn("No frequencies defined for PowerSpectraImport object!")
+        elif isinstance(self.frequencies,float): 
+            return array([self.frequencies])
+        else:
+            return self.frequencies
