@@ -726,9 +726,6 @@ class PowerSpectraImport( PowerSpectra ):
     def _get_numchannels( self ):
         return self.csm.shape[1]
 
-    def _get_block_size( self ):
-        return (self.csm.shape[0]-1)*2
-
     def _get_csm ( self ):
         return self._csm
 
