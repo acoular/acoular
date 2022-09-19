@@ -1,14 +1,8 @@
-from acoular import PowerSpectraImport
-from pylab import figure, imshow, colorbar, linspace, diag, zeros, array
-
-
+from pylab import figure, imshow, colorbar, newaxis, diag, array
 from os import path
-from acoular import __file__ as bpath, config, MicGeom, WNoiseGenerator, PointSource,\
- Mixer, WriteH5, TimeSamples, PowerSpectra, RectGrid, SteeringVector,\
- BeamformerBase, L_p, BeamformerEig, BeamformerOrth, BeamformerCleansc, \
-     UncorrelatedNoiseSource, PowerSpectraImport, ImportGrid
-from pylab import figure, plot, axis, imshow, colorbar, show, title, subplot
-import numpy as np
+from acoular import __file__ as bpath, MicGeom, RectGrid, SteeringVector,\
+ BeamformerBase, L_p, PowerSpectraImport, ImportGrid
+     
 
 # set up the parameters
 f = 8000
@@ -35,10 +29,8 @@ H_h = H.transpose().conjugate() # H hermetian
 Q = diag(rms)**2 # matrix containing the source strength 
 
 # create full csm
-csm = zeros((1,mg.num_mics,mg.num_mics),dtype=complex)
-csm[0,:,:] = H@Q.astype(complex)@H_h # calculate csm
+csm = (H@Q.astype(complex)@H_h)[newaxis] # calculate csm
 ps_import = PowerSpectraImport(csm=csm.copy(), frequencies=f)
-
 bb = BeamformerBase( freq_data=ps_import, steer=st, r_diag=False, cached=False )
 pm = bb.synthetic( f, 0 )
 Lm = L_p( pm )
