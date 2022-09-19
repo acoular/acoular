@@ -19,7 +19,7 @@ from warnings import warn
 
 from numpy import array, ones, hanning, hamming, bartlett, blackman, \
 dot, newaxis, zeros, empty, fft, linalg, sqrt,real, imag,\
-searchsorted, isscalar, fill_diagonal, arange, zeros_like, sum
+searchsorted, isscalar, fill_diagonal, arange, zeros_like, sum, ndarray
 from traits.api import HasPrivateTraits, Int, Property, Instance, Trait, \
 Range, Bool, cached_property, property_depends_on, Delegate, Float, Enum, \
     CArray
@@ -189,7 +189,7 @@ class PowerSpectra( BaseSpectra ):
         desc="index of lowest frequency line")
 
     # Shadow trait, should not be set directly, for internal use.
-    _ind_high = Int(-1,
+    _ind_high = Trait(-1,(Int,None),
         desc="index of highest frequency line")
 
     #: Index of lowest frequency line to compute, integer, defaults to 1,
@@ -207,7 +207,7 @@ class PowerSpectra( BaseSpectra ):
     _freqlc = Float(0)
 
     # Stores the set higher frequency, for internal use, should not be set directly.
-    _freqhc = Float(0)
+    _freqhc = Trait(0,(Float,None))
 
     # Saves whether the user set indices or frequencies last, for internal use only,
     # not to be set directly, if True (default), indices are used for setting
@@ -278,7 +278,10 @@ class PowerSpectra( BaseSpectra ):
     @property_depends_on('_source.sample_freq, block_size, ind_low, ind_high')
     def _get_freq_range ( self ):
         try:
-            return self.fftfreq()[[ self.ind_low, self.ind_high ]]
+            if self._ind_high == None:
+                return array([self.fftfreq()[self.ind_low],None])
+            else:
+                return self.fftfreq()[[ self.ind_low, self.ind_high ]]
         except IndexError:
             return array([0., 0])
 
@@ -297,9 +300,15 @@ class PowerSpectra( BaseSpectra ):
     @property_depends_on( '_source.sample_freq, block_size, _ind_high, _freqhc' )
     def _get_ind_high( self ):
         if self._index_set_last:
-            return min(self._ind_high, self.fftfreq().shape[0]-1)
+            if self._ind_high == None: 
+                return None
+            else:
+                return min(self._ind_high, self.fftfreq().shape[0]-1)
         else:
-            return searchsorted(self.fftfreq()[:-1], self._freqhc)
+            if self._freqhc == None:
+                return None
+            else:
+                return searchsorted(self.fftfreq()[:-1], self._freqhc)
 
     def _set_ind_high(self, ind_high):# by setting this the user sets the lower index
         self._index_set_last = True
@@ -324,7 +333,11 @@ class PowerSpectra( BaseSpectra ):
     @property_depends_on( 'block_size, ind_low, ind_high' )
     def _get_indices ( self ):
         try:
-            return arange(self.fftfreq().shape[0],dtype=int)[ self.ind_low: self.ind_high ]
+            indices = arange(self.fftfreq().shape[0],dtype=int)
+            if self.ind_high == None:
+                return indices[ self.ind_low:]
+            else:
+                return indices[ self.ind_low: self.ind_high ]
         except IndexError:
             return range(0)
 
@@ -624,10 +637,10 @@ class PowerSpectraImport( PowerSpectra ):
     matrices. 
 
     This class does not calculate the cross-spectral matrix. Instead, 
-    the user can assign an existing CSM to the :attr:`csm` attribute. 
-    For example, this can be useful when algorithms shall be
+    the user can inject one or multiple existing CSMs by setting the 
+    :attr:`csm` attribute. This can be useful when algorithms shall be
     evaluated with existing CSM matrices.
-    The frequency or frequencies contained by the CSM can be set via the 
+    The frequency or frequencies contained by the CSM must be set via the 
     attr:`frequencies` attribute. The attr:`numchannels` attributes
     is determined on the basis of the CSM shape. 
     In contrast to the PowerSpectra object, the attributes 
@@ -648,10 +661,6 @@ class PowerSpectraImport( PowerSpectra ):
     frequencies = Trait(None,(CArray,Float),
         desc="frequencies included in the cross-spectral matrix")
 
-    #: Sampling frequency of the signal, defaults to None
-    sample_freq = Float( 
-        desc="sampling frequency")
-
     #: Number of time data channels 
     numchannels = Property(depends_on=['digest'])
 
@@ -660,6 +669,10 @@ class PowerSpectraImport( PowerSpectra ):
 
     source = Enum(None, 
         desc="PowerSpectraImport cannot consume time data")
+
+    # Sampling frequency of the signal, defaults to None
+    sample_freq = Enum(None, 
+        desc="sampling frequency")
 
     block_size = Enum(None, 
         desc="PowerSpectraImport does not operate on blocks of time data")
@@ -673,11 +686,19 @@ class PowerSpectraImport( PowerSpectra ):
     overlap = Enum(None,
             desc="PowerSpectraImport does not consume time data")
 
-    cached = Enum(None,
+    cached = Enum(False,
             desc="PowerSpectraImport has no caching capabilities")
 
     num_blocks = Enum(None,
             desc="PowerSpectraImport cannot determine the number of blocks")
+
+    # Shadow trait, should not be set directly, for internal use.
+    _ind_low = Int(0,
+        desc="index of lowest frequency line")
+
+    # Shadow trait, should not be set directly, for internal use.
+    _ind_high = Trait(None,(Int,None),
+        desc="index of highest frequency line")
 
     # internal identifier
     digest = Property( 
@@ -689,10 +710,10 @@ class PowerSpectraImport( PowerSpectra ):
     basename = Property( depends_on = 'digest', 
         desc="basename for cache file")
 
-    # csm shadow trait
+    # csm shadow trait, only for internal use.
     _csm = CArray()
         
-    # CSM checksum to trigger digest calculation
+    # CSM checksum to trigger digest calculation, only for internal use.
     _csmsum = Float() 
 
     def _get_basename( self ):
@@ -718,6 +739,31 @@ class PowerSpectraImport( PowerSpectra ):
         self._csmsum = real(self._csm).sum() + (imag(self._csm)**2).sum() # to trigger new digest creation
         self._csm = csm
 
+    @property_depends_on('digest')
+    def _get_csm ( self ):
+        """
+        Main work is done here:
+        Cross spectral matrix is either loaded from cache file or
+        calculated and then additionally stored into cache.
+        """
+        return self.calc_csm()
+                          
+    @property_depends_on('digest')
+    def _get_eva ( self ):
+        """
+        Eigenvalues of cross spectral matrix are either loaded from cache file or
+        calculated and then additionally stored into cache.
+        """
+        return self.calc_eva()
+
+    @property_depends_on('digest')
+    def _get_eve ( self ):
+        """
+        Eigenvectors of cross spectral matrix are either loaded from cache file or
+        calculated and then additionally stored into cache.
+        """
+        return self.calc_eve()
+
     def fftfreq ( self ):
         """
         Return the Discrete Fourier Transform sample frequencies.
@@ -727,9 +773,12 @@ class PowerSpectraImport( PowerSpectra ):
         f : ndarray
             Array containing the frequencies.
         """
-        if self.frequencies == None:
-            warn("No frequencies defined for PowerSpectraImport object!")
-        elif isinstance(self.frequencies,float): 
+        if isinstance(self.frequencies,float): 
             return array([self.frequencies])
+        elif isinstance(self.frequencies,ndarray):
+            return self.frequencies
+        elif self.frequencies == None:
+            warn("No frequencies defined for PowerSpectraImport object!")
+            return self.frequencies
         else:
             return self.frequencies
