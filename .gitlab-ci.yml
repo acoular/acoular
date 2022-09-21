@@ -7,7 +7,7 @@
 before_script: 
   #create and activate the compute0 python 3 env
   - conda config --set always_yes yes --set changeps1 no
-  - conda create -n test_py39 python=3.9
+  - conda create -n test_py39 python=3.9 setuptools"<60"
   - source activate test_py39
   - conda install gcc_linux-64
   - python3 --version
