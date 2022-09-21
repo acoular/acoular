@@ -559,7 +559,7 @@ def synthetic (data, freqs, f, num=3):
     Parameters
     ----------
     data : array of floats
-        The spectral data (sound pressures in Pa) in an array with one value 
+        The spectral data (squared sound pressures in Pa^2) in an array with one value 
         per frequency line.
         The number of entries must be identical to the number of
         grid points.
@@ -736,15 +736,6 @@ class PowerSpectraImport( PowerSpectra ):
         self._csmsum = real(self._csm).sum() + (imag(self._csm)**2).sum() # to trigger new digest creation
         self._csm = csm
 
-    @property_depends_on('digest')
-    def _get_csm ( self ):
-        """
-        Main work is done here:
-        Cross spectral matrix is either loaded from cache file or
-        calculated and then additionally stored into cache.
-        """
-        return self.calc_csm()
-                          
     @property_depends_on('digest')
     def _get_eva ( self ):
         """
