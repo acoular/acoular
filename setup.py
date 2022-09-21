@@ -30,7 +30,7 @@ install_requires = list([
 setup_requires = list([
       'numba',
       'numpy<1.22',
-      'setuptools',	
+      'setuptools<60',	
       'scipy>=1.1.0',
       'scikit-learn',
       'tables>=3.4.4',
