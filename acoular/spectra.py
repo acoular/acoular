@@ -10,7 +10,7 @@
     :toctree: generated/
 
     BaseSpectra
-    SpectraInOut    
+    FFTSpectra    
     PowerSpectra
     synthetic
     PowerSpectraImport
@@ -109,7 +109,7 @@ class BaseSpectra( HasPrivateTraits ):
                 pos -= bs
 
 
-class SpectraInOut( BaseSpectra,TimeInOut ):
+class FFTSpectra( BaseSpectra,TimeInOut ):
     """Provides the spectra of multichannel time data. 
     
     Returns Spectra per block over a Generator.       
