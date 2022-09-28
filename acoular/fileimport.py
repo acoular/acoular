@@ -339,7 +339,7 @@ class datx_import(time_data_import):
             ch = datx_channel(config, channel)
             if ch.label.find('Mic') >= 0:
                 channels.append(ch)
-                if not d_files.has_key(ch.d_file):
+                if ch.d_file not in d_files:
                     d_files[ch.d_file] = \
                         datx_d_file(path.join(path.dirname(self.from_file), \
                             config.get(ch.d_file, 'fn')), 32)
