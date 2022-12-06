@@ -128,7 +128,7 @@ class Environment( HasPrivateTraits ):
         desc="speed of sound")
 
     #: The region of interest (ROI), not needed for most types of environment
-    roi = Trait(None,CArray)
+    roi = Trait(None,(None,CArray))
 
     def _get_digest( self ):
         return digest( self )
