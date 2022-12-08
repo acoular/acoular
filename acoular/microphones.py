@@ -13,8 +13,8 @@
 """
 
 # imports from other packages
-from numpy import array, average, newaxis 
-from numpy.linalg import norm
+from numpy import array, average 
+from scipy.spatial.distance import cdist
 from traits.api import HasPrivateTraits, Property, File, \
 CArray, cached_property, on_trait_change, ListInt , Bool
 from os import path, strerror
@@ -109,9 +109,7 @@ class MicGeom( HasPrivateTraits ):
     @cached_property
     def _get_aperture( self ):
         if self.mpos.any():
-            return norm(
-                (self.mpos[:,:,newaxis] - self.mpos[:,newaxis,:]),
-                axis=0).max()
+            return cdist(self.mpos.T,self.mpos.T).max()
 
     @on_trait_change('basename')
     def import_mpos( self ):
