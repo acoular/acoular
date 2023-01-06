@@ -1,0 +1,64 @@
+#------------------------------------------------------------------------------
+# Copyright (c) Acoular Development Team.
+#------------------------------------------------------------------------------
+
+[project]
+name = "acoular"
+version = "22.3"
+description = "Python library for acoustic beamforming"
+requires-python = ">=3.7,<11"
+authors = [
+    {name = "Acoular Development Team", email = "info@acoular.org"},
+]
+readme = "README.md"
+license = {file = "LICENSE"}
+keywords = [
+    "acoustics",
+    "beamforming",
+    "microphone array"
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Physics",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+]
+dependencies = [
+    "numba",
+    "numpy",
+    "setuptools",
+    "scipy>=1.1.0",
+    "scikit-learn<=1.1.3",
+    "tables>=3.4.4",
+    "traits>=6.0",
+]
+maintainers = [
+    {name = "Adam Kujawski", email = "adam.kujawski@tu-berlin.de"},
+    {name = "Art Pelling", email = "a.pelling@tu-berlin.de"},
+    {name = "Ennes Sarradj", email = "ennes.sarradj@tu-berlin.de"},
+    {name = "Gert Herlod", email = "gert.herold@tu-berlin.de"},
+    {name = "Mikolaj Czuchaj", email = "mikolaj.czuchaj@tu-berlin.de"},
+    {name = "Simon Jekosch", email = "s.jekosch@tu-berlin.de"},
+]
+
+[project.optional-dependencies]
+dev = [
+    "nox",
+]
+full = [
+    "matplotlib",
+    "pylops"
+]
+
+[project.urls]
+homepage = "https://acoular.org"
+documentation = "https://acoular.org"
+repository = "https://github.com/acoular/acoular"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
