@@ -21,7 +21,7 @@ from numpy import array, ones, hanning, hamming, bartlett, blackman, \
 dot, newaxis, zeros, empty, fft, linalg, sqrt,real, imag,\
 searchsorted, isscalar, fill_diagonal, arange, zeros_like, sum, ndarray
 from traits.api import HasPrivateTraits, Int, Property, Instance, Trait, \
-Range, Bool, cached_property, property_depends_on, Delegate, Float, Enum, \
+Bool, cached_property, property_depends_on, Delegate, Float, Enum, \
     CArray
 
 from .fastFuncs import calcCSM
@@ -276,7 +276,7 @@ class PowerSpectra( BaseSpectra ):
     @property_depends_on('_source.sample_freq, block_size, ind_low, ind_high')
     def _get_freq_range ( self ):
         try:
-            if self._ind_high == None:
+            if self._ind_high is None:
                 return array([self.fftfreq()[self.ind_low],None])
             else:
                 return self.fftfreq()[[ self.ind_low, self.ind_high ]]
@@ -298,12 +298,12 @@ class PowerSpectra( BaseSpectra ):
     @property_depends_on( '_source.sample_freq, block_size, _ind_high, _freqhc' )
     def _get_ind_high( self ):
         if self._index_set_last:
-            if self._ind_high == None: 
+            if self._ind_high is None: 
                 return None
             else:
                 return min(self._ind_high, self.fftfreq().shape[0]-1)
         else:
-            if self._freqhc == None:
+            if self._freqhc is None:
                 return None
             else:
                 return searchsorted(self.fftfreq()[:-1], self._freqhc)
@@ -332,7 +332,7 @@ class PowerSpectra( BaseSpectra ):
     def _get_indices ( self ):
         try:
             indices = arange(self.fftfreq().shape[0],dtype=int)
-            if self.ind_high == None:
+            if self.ind_high is None:
                 return indices[ self.ind_low:]
             else:
                 return indices[ self.ind_low: self.ind_high ]
@@ -469,7 +469,7 @@ class PowerSpectra( BaseSpectra ):
         self._handle_dual_calibration()
         if (
                 config.global_caching == 'none' or 
-                (config.global_caching == 'individual' and self.cached == False)
+                (config.global_caching == 'individual' and self.cached is False)
             ):
             return self.calc_csm()
         else:
@@ -483,7 +483,7 @@ class PowerSpectra( BaseSpectra ):
         """
         if (
                 config.global_caching == 'none' or 
-                (config.global_caching == 'individual' and self.cached == False)
+                (config.global_caching == 'individual' and self.cached is False)
             ):
             return self.calc_eva()
         else:
@@ -497,7 +497,7 @@ class PowerSpectra( BaseSpectra ):
         """
         if (
                 config.global_caching == 'none' or 
-                (config.global_caching == 'individual' and self.cached == False)
+                (config.global_caching == 'individual' and self.cached is False)
             ):
             return self.calc_eve()
         else:
@@ -763,7 +763,7 @@ class PowerSpectraImport( PowerSpectra ):
             return array([self.frequencies])
         elif isinstance(self.frequencies,ndarray):
             return self.frequencies
-        elif self.frequencies == None:
+        elif self.frequencies is None:
             warn("No frequencies defined for PowerSpectraImport object!")
             return self.frequencies
         else:
