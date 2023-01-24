@@ -89,8 +89,11 @@ class BaseSpectra( HasPrivateTraits ):
         f : ndarray
             Array of length *block_size/2+1* containing the sample frequencies.
         """
-        return abs(fft.fftfreq(self.block_size, 1./self.source.sample_freq)\
-                    [:int(self.block_size/2+1)])
+        if self.source is not None:
+            return abs(fft.fftfreq(self.block_size, 1./self.source.sample_freq)\
+                        [:int(self.block_size/2+1)])
+        else:
+            return None
 
     #generator that yields the time data blocks for every channel (with optional overlap)
     def get_source_data(self):
@@ -275,13 +278,12 @@ class PowerSpectra( BaseSpectra ):
 
     @property_depends_on('_source.sample_freq, block_size, ind_low, ind_high')
     def _get_freq_range ( self ):
-        try:
+        fftfreq = self.fftfreq()
+        if fftfreq is not None:
             if self._ind_high is None:
-                return array([self.fftfreq()[self.ind_low],None])
+                return array([fftfreq[self.ind_low],None])
             else:
-                return self.fftfreq()[[ self.ind_low, self.ind_high ]]
-        except IndexError:
-            return array([0., 0])
+                return fftfreq[[ self.ind_low, self.ind_high ]]
 
     def _set_freq_range( self, freq_range ):# by setting this the user sets _freqlc and _freqhc
         self._index_set_last = False
@@ -290,23 +292,27 @@ class PowerSpectra( BaseSpectra ):
 
     @property_depends_on( '_source.sample_freq, block_size, _ind_low, _freqlc' )
     def _get_ind_low( self ):
-        if self._index_set_last:
-            return min(self._ind_low, self.fftfreq().shape[0]-1)
-        else:
-            return searchsorted(self.fftfreq()[:-1], self._freqlc)
+        fftfreq = self.fftfreq()
+        if fftfreq is not None:
+            if self._index_set_last:
+                return min(self._ind_low, fftfreq.shape[0]-1)
+            else:
+                return searchsorted(fftfreq[:-1], self._freqlc)
 
     @property_depends_on( '_source.sample_freq, block_size, _ind_high, _freqhc' )
     def _get_ind_high( self ):
-        if self._index_set_last:
-            if self._ind_high is None: 
-                return None
+        fftfreq = self.fftfreq()
+        if fftfreq is not None:
+            if self._index_set_last:
+                if self._ind_high is None: 
+                    return None
+                else:
+                    return min(self._ind_high, fftfreq.shape[0]-1)
             else:
-                return min(self._ind_high, self.fftfreq().shape[0]-1)
-        else:
-            if self._freqhc is None:
-                return None
-            else:
-                return searchsorted(self.fftfreq()[:-1], self._freqhc)
+                if self._freqhc is None:
+                    return None
+                else:
+                    return searchsorted(fftfreq[:-1], self._freqhc)
 
     def _set_ind_high(self, ind_high):# by setting this the user sets the lower index
         self._index_set_last = True
@@ -330,14 +336,16 @@ class PowerSpectra( BaseSpectra ):
 
     @property_depends_on( 'block_size, ind_low, ind_high' )
     def _get_indices ( self ):
-        try:
-            indices = arange(self.fftfreq().shape[0],dtype=int)
-            if self.ind_high is None:
-                return indices[ self.ind_low:]
-            else:
-                return indices[ self.ind_low: self.ind_high ]
-        except IndexError:
-            return range(0)
+        fftfreq = self.fftfreq()
+        if fftfreq is not None:
+            try:
+                indices = arange(fftfreq.shape[0],dtype=int)
+                if self.ind_high is None:
+                    return indices[ self.ind_low:]
+                else:
+                    return indices[ self.ind_low: self.ind_high ]
+            except IndexError:
+                return range(0)
 
     @cached_property
     def _get_digest( self ):
