@@ -1303,8 +1303,8 @@ class SourceMixer( SamplesGenerator ):
 
     def validate_sources( self ):
         """ Validates if sources fit together. """
-        if len(self.sources) <= 1:
-            raise ValueError("Number of sources in SourceMixer should be greater than 1.")
+        if len(self.sources) < 1:
+            raise ValueError("Number of sources in SourceMixer should be at least 1.")
         for s in self.sources[1:]:
             if self.sample_freq != s.sample_freq:
                 raise ValueError("Sample frequency of %s does not fit" % s)

@@ -1,42 +1,40 @@
-#testbuild
-#minimal script to install and run acoular tests on linux
-
-#unused docker image
-#image: "python:3.8"
-
-before_script: 
-  #create and activate the compute0 python 3 env
-  - conda config --set always_yes yes --set changeps1 no
-  - conda create -n test_py39 python=3.9 setuptools"<60"
-  - source activate test_py39
-  - conda install gcc_linux-64
-  - python3 --version
-  - uname -a
-  
-after_script: 
-  # delete the test enviroment 
-  - conda env remove --name test_py39
-  
+#________________________________________
+# Stages
+#----------------------------------------
 stages:
   - build
   - test
-  
-build:
-  # install acoular
+
+#________________________________________
+# Jobs
+#----------------------------------------
+.build-job:
   stage: build
-  script:
-    - echo "Building"
-    - python3 setup.py install
+  before_script:
+    - python -m pip install --upgrade pip
+    - pip install -U nox
+    - uname -a
 
-test:
-  #install and run tests
-  stage: test
+Python3.7:
+  extends: .build-job
+  image: python:3.7.16
   script:
-    - echo "Testing"
-    - python3 setup.py install
-    - python3 -c 'import acoular'
-    - chmod +x ./acoular/tests/run_tests.sh
-    - cd acoular/tests/
-    - bash run_tests.sh
-    
+    - nox -r -f ./noxfile.py -s build
 
+Python3.8:
+  extends: .build-job
+  image: python:3.8.16
+  script:
+    - nox -r -f ./noxfile.py -s build
+
+Python3.9:
+  extends: .build-job
+  image: python:3.9.16
+  script:
+    - nox -r -f ./noxfile.py -s build
+
+Python3.10:
+  extends: .build-job
+  image: python:3.10.9
+  script:
+    - nox -r -f ./noxfile.py -s build

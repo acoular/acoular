@@ -9,93 +9,40 @@
 .. autosummary::
     :toctree: generated/
 
+    BaseSpectra
+    FFTSpectra    
     PowerSpectra
     synthetic
+    PowerSpectraImport
 """
 from warnings import warn
 
 from numpy import array, ones, hanning, hamming, bartlett, blackman, \
-dot, newaxis, zeros, empty, fft, linalg, \
-searchsorted, isscalar, fill_diagonal, arange, zeros_like, sum
+dot, newaxis, zeros, empty, fft, linalg, sqrt,real, imag,\
+searchsorted, isscalar, fill_diagonal, arange, zeros_like, sum, ndarray
 from traits.api import HasPrivateTraits, Int, Property, Instance, Trait, \
-Range, Bool, cached_property, property_depends_on, Delegate, Float
+Range, Bool, cached_property, property_depends_on, Delegate, Float, Enum, \
+    CArray
 
 from .fastFuncs import calcCSM
 from .h5cache import H5cache
 from .h5files import H5CacheFileBase
 from .internal import digest
-from .tprocess import SamplesGenerator
+from .tprocess import SamplesGenerator, TimeInOut
 from .calib import Calib
 from .configuration import config
 
 
+class BaseSpectra( HasPrivateTraits ):
 
-class PowerSpectra( HasPrivateTraits ):
-    """Provides the cross spectral matrix of multichannel time data
-     and its eigen-decomposition.
-    
-    This class includes the efficient calculation of the full cross spectral
-    matrix using the Welch method with windows and overlap. It also contains 
-    the CSM's eigenvalues and eigenvectors and additional properties. 
-    
-    The result is computed only when needed, that is when the :attr:`csm`,
-    :attr:`eva`, or :attr:`eve` attributes are acturally read.
-    Any change in the input data or parameters leads to a new calculation, 
-    again triggered when an attribute is read. The result may be 
-    cached on disk in HDF5 files and need not to be recomputed during
-    subsequent program runs with identical input data and parameters. The
-    input data is taken to be identical if the source has identical parameters
-    and the same file name in case of that the data is read from a file.
-    """
+    #: Data source; :class:`~acoular.sources.SamplesGenerator` or derived object.
+    source = Trait(SamplesGenerator)
 
-    #: The :class:`~acoular.tprocess.SamplesGenerator` object that provides the data.
-    time_data = Trait(SamplesGenerator, 
-        desc="time data object")
+    #: Sampling frequency of output signal, as given by :attr:`source`.
+    sample_freq = Delegate('source')
 
-    #: Number of samples 
-    numchannels = Delegate('time_data')
-
-    #: The :class:`~acoular.calib.Calib` object that provides the calibration data, 
-    #: defaults to no calibration, i.e. the raw time data is used.
-    #:
-    #: **deprecated**:      use :attr:`~acoular.sources.TimeSamples.calib` property of 
-    #: :class:`~acoular.sources.TimeSamples` objects
-    calib = Instance(Calib)
-
-    #: FFT block size, one of: 128, 256, 512, 1024, 2048 ... 65536,
-    #: defaults to 1024.
-    block_size = Trait(1024, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536,
-        desc="number of samples per FFT block")
-
-    # Shadow trait, should not be set directly, for internal use.
-    _ind_low = Int(1,
-        desc="index of lowest frequency line")
-
-    # Shadow trait, should not be set directly, for internal use.
-    _ind_high = Int(-1,
-        desc="index of highest frequency line")
-
-    #: Index of lowest frequency line to compute, integer, defaults to 1,
-    #: is used only by objects that fetch the csm, PowerSpectra computes every
-    #: frequency line.
-    ind_low = Property(_ind_low,
-        desc="index of lowest frequency line")
-
-    #: Index of highest frequency line to compute, integer, 
-    #: defaults to -1 (last possible line for default block_size).
-    ind_high = Property(_ind_high,
-        desc="index of lowest frequency line")
-
-    # Stores the set lower frequency, for internal use, should not be set directly.
-    _freqlc = Float(0)
-
-    # Stores the set higher frequency, for internal use, should not be set directly.
-    _freqhc = Float(0)
-
-    # Saves whether the user set indices or frequencies last, for internal use only,
-    # not to be set directly, if True (default), indices are used for setting
-    # the freq_range interval.
-    _index_set_last = Bool(True)
+    #: Number of time data channels 
+    numchannels = Delegate('source')
 
     #: Window function for FFT, one of:
     #:   * 'Rectangular' (default)
@@ -114,7 +61,157 @@ class PowerSpectra( HasPrivateTraits ):
     #: Overlap factor for averaging: 'None'(default), '50%', '75%', '87.5%'.
     overlap = Trait('None', {'None':1, '50%':2, '75%':4, '87.5%':8}, 
         desc="overlap of FFT blocks")
+    
+    #: FFT block size, one of: 128, 256, 512, 1024, 2048 ... 65536,
+    #: defaults to 1024.
+    block_size = Trait(1024, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536,
+        desc="number of samples per FFT block")
+
+    #: The floating-number-precision of entries of csm, eigenvalues and 
+    #: eigenvectors, corresponding to numpy dtypes. Default is 64 bit.
+    precision = Trait('complex128', 'complex64', 
+                      desc="precision of the fft")
+    
+    # internal identifier
+    digest = Property( depends_on = ['precision','block_size',
+                                    'window','overlap'])
+
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+
+    def fftfreq ( self ):
+        """
+        Return the Discrete Fourier Transform sample frequencies.
         
+        Returns
+        -------
+        f : ndarray
+            Array of length *block_size/2+1* containing the sample frequencies.
+        """
+        return abs(fft.fftfreq(self.block_size, 1./self.source.sample_freq)\
+                    [:int(self.block_size/2+1)])
+
+    #generator that yields the time data blocks for every channel (with optional overlap)
+    def get_source_data(self):
+        bs = self.block_size
+        temp = empty((2*bs, self.numchannels))
+        pos = bs
+        posinc = bs/self.overlap_
+        for data_block in self.source.result(bs):
+            ns = data_block.shape[0]
+            temp[bs:bs+ns] = data_block # fill from right
+            while pos+bs <= bs+ns:
+                yield temp[int(pos):int(pos+bs)]
+                pos += posinc
+            else:
+                temp[0:bs] = temp[bs:] # copy to left
+                pos -= bs
+
+
+class FFTSpectra( BaseSpectra,TimeInOut ):
+    """Provides the spectra of multichannel time data. 
+    
+    Returns Spectra per block over a Generator.       
+    """
+    
+    # internal identifier
+    digest = Property( depends_on = ['source.digest','precision','block_size',
+                                    'window','overlap'])
+
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+
+    #generator that yields the fft for every channel
+    def result(self):
+        """ 
+        Python generator that yields the output block-wise.
+        
+        Parameters
+        ----------
+        num : integer
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block).
+        
+        Returns
+        -------
+        Samples in blocks of shape (numfreq, :attr:`numchannels`). 
+            The last block may be shorter than num.
+            """
+        wind = self.window_( self.block_size )
+        weight=sqrt(2)/self.block_size*sqrt(self.block_size/dot(wind,wind))*wind[:, newaxis]
+        for data in self.get_source_data():
+            ft = fft.rfft(data*weight, None, 0).astype(self.precision)
+            yield ft
+
+
+class PowerSpectra( BaseSpectra ):
+    """Provides the cross spectral matrix of multichannel time data
+     and its eigen-decomposition.
+    
+    This class includes the efficient calculation of the full cross spectral
+    matrix using the Welch method with windows and overlap. It also contains 
+    the CSM's eigenvalues and eigenvectors and additional properties. 
+    
+    The result is computed only when needed, that is when the :attr:`csm`,
+    :attr:`eva`, or :attr:`eve` attributes are acturally read.
+    Any change in the input data or parameters leads to a new calculation, 
+    again triggered when an attribute is read. The result may be 
+    cached on disk in HDF5 files and need not to be recomputed during
+    subsequent program runs with identical input data and parameters. The
+    input data is taken to be identical if the source has identical parameters
+    and the same file name in case of that the data is read from a file.
+    """
+
+    # Shadow trait, should not be set directly, for internal use.
+    _source = Trait(SamplesGenerator)
+
+    #: Data source; :class:`~acoular.sources.SamplesGenerator` or derived object. 
+    source = Property(_source,
+        desc="time data object")
+
+    #: The :class:`~acoular.tprocess.SamplesGenerator` object that provides the data.
+    time_data = Property(_source, 
+        desc="deprecated attribute holding the time data object. Use PowerSpectra.source instead!")
+
+    #: The :class:`~acoular.calib.Calib` object that provides the calibration data, 
+    #: defaults to no calibration, i.e. the raw time data is used.
+    #:
+    #: **deprecated**:      use :attr:`~acoular.sources.TimeSamples.calib` property of 
+    #: :class:`~acoular.sources.TimeSamples` objects
+    calib = Instance(Calib)
+
+    # Shadow trait, should not be set directly, for internal use.
+    _ind_low = Int(1,
+        desc="index of lowest frequency line")
+
+    # Shadow trait, should not be set directly, for internal use.
+    _ind_high = Trait(-1,(Int,None),
+        desc="index of highest frequency line")
+
+    #: Index of lowest frequency line to compute, integer, defaults to 1,
+    #: is used only by objects that fetch the csm, PowerSpectra computes every
+    #: frequency line.
+    ind_low = Property(_ind_low,
+        desc="index of lowest frequency line")
+
+    #: Index of highest frequency line to compute, integer, 
+    #: defaults to -1 (last possible line for default block_size).
+    ind_high = Property(_ind_high,
+        desc="index of lowest frequency line")
+
+    # Stores the set lower frequency, for internal use, should not be set directly.
+    _freqlc = Float(0)
+
+    # Stores the set higher frequency, for internal use, should not be set directly.
+    _freqhc = Trait(0,(Float,None))
+
+    # Saves whether the user set indices or frequencies last, for internal use only,
+    # not to be set directly, if True (default), indices are used for setting
+    # the freq_range interval.
+    _index_set_last = Bool(True)
+      
     #: Flag, if true (default), the result is cached in h5 files and need not
     #: to be recomputed during subsequent program runs.
     cached = Bool(True, 
@@ -142,7 +239,7 @@ class PowerSpectra( HasPrivateTraits ):
         desc = "index range" )
         
     #: Name of the cache file without extension, readonly.
-    basename = Property( depends_on = 'time_data.digest', 
+    basename = Property( depends_on = '_source.digest', 
         desc="basename for cache file")
 
     #: The cross spectral matrix, 
@@ -151,11 +248,6 @@ class PowerSpectra( HasPrivateTraits ):
     csm = Property( 
         desc="cross spectral matrix")
     
-    #: The floating-number-precision of entries of csm, eigenvalues and 
-    #: eigenvectors, corresponding to numpy dtypes. Default is 64 bit.
-    precision = Trait('complex128', 'complex64', 
-                      desc="precision csm, eva, eve")
-
     #: Eigenvalues of the cross spectral matrix as an
     #: (number of frequencies) array of floats, readonly.
     eva = Property( 
@@ -169,22 +261,25 @@ class PowerSpectra( HasPrivateTraits ):
 
     # internal identifier
     digest = Property( 
-        depends_on = ['time_data.digest', 'calib.digest', 'block_size', 
+        depends_on = ['_source.digest', 'calib.digest', 'block_size', 
             'window', 'overlap', 'precision'], 
         )
 
     # hdf5 cache file
     h5f = Instance( H5CacheFileBase, transient = True )
     
-    @property_depends_on('time_data.numsamples, block_size, overlap')
+    @property_depends_on('_source.numsamples, block_size, overlap')
     def _get_num_blocks ( self ):
-        return self.overlap_*self.time_data.numsamples/self.block_size-\
+        return self.overlap_*self._source.numsamples/self.block_size-\
         self.overlap_+1
 
-    @property_depends_on('time_data.sample_freq, block_size, ind_low, ind_high')
+    @property_depends_on('_source.sample_freq, block_size, ind_low, ind_high')
     def _get_freq_range ( self ):
         try:
-            return self.fftfreq()[[ self.ind_low, self.ind_high ]]
+            if self._ind_high == None:
+                return array([self.fftfreq()[self.ind_low],None])
+            else:
+                return self.fftfreq()[[ self.ind_low, self.ind_high ]]
         except IndexError:
             return array([0., 0])
 
@@ -193,19 +288,25 @@ class PowerSpectra( HasPrivateTraits ):
         self._freqlc = freq_range[0]
         self._freqhc = freq_range[1]
 
-    @property_depends_on( 'time_data.sample_freq, block_size, _ind_low, _freqlc' )
+    @property_depends_on( '_source.sample_freq, block_size, _ind_low, _freqlc' )
     def _get_ind_low( self ):
         if self._index_set_last:
-            return min(self._ind_low, self.block_size//2)
+            return min(self._ind_low, self.fftfreq().shape[0]-1)
         else:
             return searchsorted(self.fftfreq()[:-1], self._freqlc)
 
-    @property_depends_on( 'time_data.sample_freq, block_size, _ind_high, _freqhc' )
+    @property_depends_on( '_source.sample_freq, block_size, _ind_high, _freqhc' )
     def _get_ind_high( self ):
         if self._index_set_last:
-            return min(self._ind_high, self.block_size//2)
+            if self._ind_high == None: 
+                return None
+            else:
+                return min(self._ind_high, self.fftfreq().shape[0]-1)
         else:
-            return searchsorted(self.fftfreq()[:-1], self._freqhc)
+            if self._freqhc == None:
+                return None
+            else:
+                return searchsorted(self.fftfreq()[:-1], self._freqhc)
 
     def _set_ind_high(self, ind_high):# by setting this the user sets the lower index
         self._index_set_last = True
@@ -215,10 +316,26 @@ class PowerSpectra( HasPrivateTraits ):
         self._index_set_last = True
         self._ind_low = ind_low
 
+    def _set_time_data(self, time_data):
+        self._source = time_data
+
+    def _set_source(self, source):
+        self._source = source
+
+    def _get_time_data(self):
+        return self._source
+
+    def _get_source(self):
+        return self._source
+
     @property_depends_on( 'block_size, ind_low, ind_high' )
     def _get_indices ( self ):
         try:
-            return arange(self.block_size/2+1,dtype=int)[ self.ind_low: self.ind_high ]
+            indices = arange(self.fftfreq().shape[0],dtype=int)
+            if self.ind_high == None:
+                return indices[ self.ind_low:]
+            else:
+                return indices[ self.ind_low: self.ind_high ]
         except IndexError:
             return range(0)
 
@@ -228,14 +345,14 @@ class PowerSpectra( HasPrivateTraits ):
 
     @cached_property
     def _get_basename( self ):
-        if 'basename' in self.time_data.all_trait_names():
-            return self.time_data.basename
+        if 'basename' in self._source.all_trait_names():
+            return self._source.basename
         else: 
-            return self.time_data.__class__.__name__ + self.time_data.digest
+            return self._source.__class__.__name__ + self._source.digest
 
     def calc_csm( self ):
         """ csm calculation """
-        t = self.time_data
+        t = self.source
         wind = self.window_( self.block_size )
         weight = dot( wind, wind )
         wind = wind[newaxis, :].swapaxes( 0, 1 )
@@ -251,25 +368,14 @@ class PowerSpectra( HasPrivateTraits ):
                 raise ValueError(
                         "Calibration data not compatible: %i, %i" % \
                         (self.calib.num_mics, t.numchannels))
-        bs = self.block_size
-        temp = empty((2*bs, t.numchannels))
-        pos = bs
-        posinc = bs/self.overlap_
-        for data in t.result(bs):
-            ns = data.shape[0]
-            temp[bs:bs+ns] = data
-            while pos+bs <= bs+ns:
-                ft = fft.rfft(temp[int(pos):int(pos+bs)]*wind, None, 0).astype(self.precision)
-                calcCSM(csmUpper, ft)  # only upper triangular part of matrix is calculated (for speed reasons)
-                pos += posinc
-            temp[0:bs] = temp[bs:]
-            pos -= bs
-        
+        # get time data blockwise
+        for data in self.get_source_data():
+            ft = fft.rfft(data*wind, None, 0).astype(self.precision)
+            calcCSM(csmUpper, ft)  # only upper triangular part of matrix is calculated (for speed reasons)
         # create the full csm matrix via transposing and complex conj.
         csmLower = csmUpper.conj().transpose(0,2,1)
         [fill_diagonal(csmLower[cntFreq, :, :], 0) for cntFreq in range(csmLower.shape[0])]
         csm = csmLower + csmUpper
-
         # onesided spectrum: multiplication by 2.0=sqrt(2)^2
         csm = csm*(2.0/self.block_size/weight/self.num_blocks)
         return csm
@@ -295,7 +401,7 @@ class PowerSpectra( HasPrivateTraits ):
         return self.calc_ev()[1]
                 
     def _handle_dual_calibration(self):
-        obj = self.time_data # start with time_data obj
+        obj = self.source # start with time_data obj
         while obj:
             if 'calib' in obj.all_trait_names(): # at original source?
                 if obj.calib and self.calib:
@@ -319,7 +425,7 @@ class PowerSpectra( HasPrivateTraits ):
         if traitname == 'csm':
             func = self.calc_csm
             numfreq = int(self.block_size/2 + 1)
-            shape = (numfreq, self.time_data.numchannels, self.time_data.numchannels)
+            shape = (numfreq, self._source.numchannels, self._source.numchannels)
             precision = self.precision
         elif traitname == 'eva':
             func = self.calc_eva
@@ -436,21 +542,6 @@ class PowerSpectra( HasPrivateTraits ):
                 return sum(self.eva[f1:f2], 0)
 
 
-    def fftfreq ( self ):
-        """
-        Return the Discrete Fourier Transform sample frequencies.
-        
-        Returns
-        -------
-        f : ndarray
-            Array of length *block_size/2+1* containing the sample frequencies.
-        """
-        return abs(fft.fftfreq(self.block_size, 1./self.time_data.sample_freq)\
-                    [:int(self.block_size/2+1)])
-
-
-
-
 
 def synthetic (data, freqs, f, num=3):
     """
@@ -466,7 +557,11 @@ def synthetic (data, freqs, f, num=3):
     Parameters
     ----------
     data : array of floats
+<<<<<<< HEAD
         The spectral data (squared sound pressure values in Pa**2) in an array with one value 
+=======
+        The spectral data (squared sound pressures in Pa^2) in an array with one value 
+>>>>>>> 0bfe3d0205a2a084b135bce43ebd5ad629994490
         per frequency line.
         The number of entries must be identical to the number of
         grid points.
@@ -538,3 +633,142 @@ def synthetic (data, freqs, f, num=3):
             res += [h]
     return array(res)
 
+
+class PowerSpectraImport( PowerSpectra ):
+    """Provides a dummy class for using pre-calculated cross-spectral
+    matrices. 
+
+    This class does not calculate the cross-spectral matrix. Instead, 
+    the user can inject one or multiple existing CSMs by setting the 
+    :attr:`csm` attribute. This can be useful when algorithms shall be
+    evaluated with existing CSM matrices.
+    The frequency or frequencies contained by the CSM must be set via the 
+    attr:`frequencies` attribute. The attr:`numchannels` attributes
+    is determined on the basis of the CSM shape. 
+    In contrast to the PowerSpectra object, the attributes 
+    :attr:`sample_freq`, :attr:`time_data`, :attr:`source`,
+    :attr:`block_size`, :attr:`calib`, :attr:`window`, 
+    :attr:`overlap`, :attr:`cached`, and :attr:`num_blocks`
+    have no functionality. 
+    """
+
+    #: The cross spectral matrix, 
+    #: (number of frequencies, numchannels, numchannels) array of complex;
+    #: readonly.
+    csm = Property( 
+        desc="cross spectral matrix")
+
+    #: frequencies included in the cross-spectral matrix in ascending order.
+    #: Compound trait that accepts arguments of type list, array, and float
+    frequencies = Trait(None,(CArray,Float),
+        desc="frequencies included in the cross-spectral matrix")
+
+    #: Number of time data channels 
+    numchannels = Property(depends_on=['digest'])
+
+    time_data = Enum(None, 
+        desc="PowerSpectraImport cannot consume time data")
+
+    source = Enum(None, 
+        desc="PowerSpectraImport cannot consume time data")
+
+    # Sampling frequency of the signal, defaults to None
+    sample_freq = Enum(None, 
+        desc="sampling frequency")
+
+    block_size = Enum(None, 
+        desc="PowerSpectraImport does not operate on blocks of time data")
+
+    calib = Enum(None,
+        desc="PowerSpectraImport cannot calibrate the time data")
+
+    window = Enum(None,
+            desc="PowerSpectraImport does not perform windowing")
+
+    overlap = Enum(None,
+            desc="PowerSpectraImport does not consume time data")
+
+    cached = Enum(False,
+            desc="PowerSpectraImport has no caching capabilities")
+
+    num_blocks = Enum(None,
+            desc="PowerSpectraImport cannot determine the number of blocks")
+
+    # Shadow trait, should not be set directly, for internal use.
+    _ind_low = Int(0,
+        desc="index of lowest frequency line")
+
+    # Shadow trait, should not be set directly, for internal use.
+    _ind_high = Trait(None,(Int,None),
+        desc="index of highest frequency line")
+
+    # internal identifier
+    digest = Property( 
+        depends_on = ['_csmsum', 
+            ], 
+        )
+
+    #: Name of the cache file without extension, readonly.
+    basename = Property( depends_on = 'digest', 
+        desc="basename for cache file")
+
+    # csm shadow trait, only for internal use.
+    _csm = CArray()
+        
+    # CSM checksum to trigger digest calculation, only for internal use.
+    _csmsum = Float() 
+
+    def _get_basename( self ):
+        return "csm_import_"+self.digest
+
+    @cached_property
+    def _get_digest( self ):
+        return digest( self )
+
+    def _get_numchannels( self ):
+        return self.csm.shape[1]
+
+    def _get_csm ( self ):
+        return self._csm
+
+    def _set_csm (self, csm):
+        if (len(csm.shape) != 3) or (csm.shape[1] != csm.shape[2]):
+            raise ValueError(
+                "The cross spectral matrix must have the following shape: (number of frequencies, numchannels, numchannels)!")
+        self._csmsum = real(self._csm).sum() + (imag(self._csm)**2).sum() # to trigger new digest creation
+        self._csm = csm
+
+    @property_depends_on('digest')
+    def _get_eva ( self ):
+        """
+        Eigenvalues of cross spectral matrix are either loaded from cache file or
+        calculated and then additionally stored into cache.
+        """
+        return self.calc_eva()
+
+    @property_depends_on('digest')
+    def _get_eve ( self ):
+        """
+        Eigenvectors of cross spectral matrix are either loaded from cache file or
+        calculated and then additionally stored into cache.
+        """
+        return self.calc_eve()
+
+    def fftfreq ( self ):
+        """
+        Return the Discrete Fourier Transform sample frequencies.
+        
+        Returns
+        -------
+        f : ndarray
+            Array containing the frequencies.
+        """
+        if isinstance(self.frequencies,float): 
+            return array([self.frequencies])
+        elif isinstance(self.frequencies,ndarray):
+            return self.frequencies
+        elif self.frequencies == None:
+            warn("No frequencies defined for PowerSpectraImport object!")
+            return self.frequencies
+        else:
+            return self.frequencies
