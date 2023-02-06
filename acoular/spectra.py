@@ -466,7 +466,7 @@ def synthetic (data, freqs, f, num=3):
     Parameters
     ----------
     data : array of floats
-        The spectral data (sound pressures in Pa) in an array with one value 
+        The spectral data (squared sound pressure values in Pa**2) in an array with one value 
         per frequency line.
         The number of entries must be identical to the number of
         grid points.

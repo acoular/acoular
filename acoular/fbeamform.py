@@ -2639,7 +2639,7 @@ def integrate(data, grid, sector):
     Parameters
     ----------
     data: array of floats
-        Contains the calculated sound pressures in Pa.        
+        Contains the calculated squared sound pressure values in Pa**2.        
         If data has the same number of entries than the number of grid points
         only one value is returned.
         In case of a 2-D array with the second dimension identical 
