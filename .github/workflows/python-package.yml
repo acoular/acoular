@@ -28,7 +28,7 @@ jobs:
     - name: Install acoular
       run: |
         python -m pip install --upgrade pip
-        python setup.py install;
+        pip install .
         python -c 'import acoular'
     - name: Test with unittest *nix
       run: |
