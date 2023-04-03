@@ -719,7 +719,7 @@ class ImportGrid( Grid ):
     # 'digest' is a placeholder for other properties in derived classes
     @property_depends_on('basename')
     def _get_shape ( self ):
-        return self.gpos.shape[-1]
+        return (self.gpos.shape[-1],)
 
     @property_depends_on('basename')
     def _get_gpos( self ):
