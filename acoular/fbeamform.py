@@ -40,7 +40,7 @@ import warnings
 
 from numpy import array, ones, full, hanning, hamming, bartlett, blackman, \
 invert, dot, newaxis, zeros, empty, fft, float32, float64, complex64, linalg, \
-where, searchsorted, pi, multiply, sign, diag, arange, sqrt, exp, log10, int,\
+where, searchsorted, pi, multiply, sign, diag, arange, sqrt, exp, log10, \
 reshape, hstack, vstack, eye, tril, size, clip, tile, round, delete, \
 absolute, argsort, sort, sum, hsplit, fill_diagonal, zeros_like, isclose, \
 vdot, flatnonzero, einsum, ndarray, isscalar, inf, real, unique
