@@ -38,17 +38,17 @@ from __future__ import print_function, division
 
 import warnings
 
-from numpy import array, ones, full, hanning, hamming, bartlett, blackman, \
-invert, dot, newaxis, zeros, empty, fft, float32, float64, complex64, linalg, \
-where, searchsorted, pi, multiply, sign, diag, arange, sqrt, exp, log10, int,\
+from numpy import array, ones, full, \
+invert, dot, newaxis, zeros, linalg, \
+searchsorted, pi, sign, diag, arange, sqrt, log10, \
 reshape, hstack, vstack, eye, tril, size, clip, tile, round, delete, \
-absolute, argsort, sort, sum, hsplit, fill_diagonal, zeros_like, isclose, \
-vdot, flatnonzero, einsum, ndarray, isscalar, inf, real, unique
+absolute, argsort, sum, hsplit, fill_diagonal, zeros_like, \
+einsum, ndarray, isscalar, inf, real, unique
 
 from numpy.linalg import norm
 
 from sklearn.linear_model import LassoLars, LassoLarsCV, LassoLarsIC,\
-OrthogonalMatchingPursuit, ElasticNet, OrthogonalMatchingPursuitCV, Lasso
+OrthogonalMatchingPursuitCV
 
 from scipy.optimize import nnls, linprog, fmin_l_bfgs_b, shgo
 from scipy.linalg import inv, eigh, eigvals, fractional_matrix_power
@@ -64,7 +64,7 @@ except:
 
 from traits.api import HasPrivateTraits, Float, Int, \
 CArray, Property, Instance, Trait, Bool, Range, Delegate, Enum, Any, \
-cached_property, on_trait_change, property_depends_on, Long, List, Tuple, Dict
+cached_property, on_trait_change, property_depends_on, List, Tuple, Dict
 from traits.trait_errors import TraitError
 
 from .fastFuncs import beamformerFreq, calcTransfer, calcPointSpreadFunction, \
