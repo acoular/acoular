@@ -104,7 +104,7 @@ class acoular_test(unittest.TestCase):
     #test eve/eva    
     def test_eigenvalue_calculation(self):
         self.assertAlmostEqual(f.eva[:].sum()/eve_num.sum(),1,3)
-        print(f.eve[:].sum()/eva_num.sum())      
+        print(f.eve[:].sum(),eva_num)      
         self.assertAlmostEqual(f.eve[:].sum()/eva_num.sum(),1,3) 
      
     #test beamformer results
