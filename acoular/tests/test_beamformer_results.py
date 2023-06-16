@@ -151,6 +151,29 @@ class acoular_beamformer_test(unittest.TestCase):
             b1 = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached = True)
             self.assertEqual(id(b0.result),id(b1.result))
 
+class Test_PowerSpectra(unittest.TestCase):
+
+    def test_csm(self):
+        """ test that csm result has not changed over different releases"""
+        name = join('reference_data',f'{f.__class__.__name__}_csm.npy')
+        # test only two frequencies
+        actual_data = np.array(f.csm[(16,32),:,:],dtype=np.complex64)
+        if WRITE_NEW_REFERENCE_DATA:
+            np.save(name,actual_data)
+        ref_data = np.load(name)
+        np.testing.assert_allclose(actual_data, ref_data, rtol=1e-5, atol=1e-8)
+
+    def test_ev(self):
+        """ test that eve and eva result has not changed over different releases"""
+        name = join('reference_data',f'{f.__class__.__name__}_ev.npy')
+        # test only two frequencies
+        actual_data = np.array((f.eve*f.eva[:,:,np.newaxis])[(16,32),:,:],dtype=np.complex64)
+        if WRITE_NEW_REFERENCE_DATA:
+            np.save(name,actual_data)
+        ref_data = np.load(name)
+        np.testing.assert_allclose(actual_data, ref_data, rtol=1e-5, atol=1e-8)
+
+
 if __name__ == '__main__':
     unittest.main() #exit=False
 
