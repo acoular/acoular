@@ -21,7 +21,7 @@ Source Location        Level
 """
 
 from os import path
-from acoular import __file__ as bpath, td_dir, MicGeom, WNoiseGenerator, PointSource, Mixer, WriteH5
+from acoular import __file__ as bpath, MicGeom, WNoiseGenerator, PointSource, Mixer, WriteH5
 
 sfreq = 51200
 duration = 1
