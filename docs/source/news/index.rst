@@ -1,6 +1,25 @@
 What's new
 ============
 
+23.6
+------------
+    * Supports Python 3.7, 3.8, 3.9, 3.10, 3.11 on Linux, MacOS, Windows
+    * New build system using hatch, purge setuptools
+    * New base class :class:`~acoular.fbeamform.BeamformerAdaptiveGrid` for gridless algorithms
+    * New class :class:`~acoular.fbeamform.BeamformerGridlessOrth` for gridless orthogonal beamforming
+    * New class :class:`~acoular.grids.RectSector3D`
+    * Improved ray casting implementation for :class:`~acoular.environments.GeneralFlowEnvironment`
+    * Improved handling of spectra calculation:
+        * New base class :class:`~acoular.spectra.BaseSpectra`
+        * New class :class:`~acoular.spectra.FFTSpectra` for time-frequency analysis
+        * New class :class:`~acoular.spectra.PowerSpectraImport` for cross spectral matrix import
+    * :class:`~acoular.microphones.MicGeom` now has an aperture trait
+    * Tests are improved
+    * Bugfixes:
+        * broken numpy.int import 
+        * on off bug in :class:`~acoular.grids.LineGrid` 
+
+
 22.3
 ------------
     * New class :class:`~acoular.fbeamform.BeamformerSodix`
@@ -54,10 +73,10 @@ What's new
 
 20.02
 ------------
-	
-	* Adds gradient-based solver for BeamformerCMF (L_BFGS_B)
-	* Adds possibilty to take into account convective amplification of moving sources in BeamformerTimeTraj
-	* TraitsUI support of the classes has to be activated via :attr:`~acoular.configuration.config` 
+
+    * Adds gradient-based solver for BeamformerCMF (L_BFGS_B)
+    * Adds possibilty to take into account convective amplification of moving sources in BeamformerTimeTraj
+    * TraitsUI support of the classes has to be activated via :attr:`~acoular.configuration.config`
     * Bugfix: use left-orientated coordinate system in rotating flow environment
     * Bugfix: correct wrong angle shift in spline interpolation
     * Removes several Python 2.7-specific implementations
