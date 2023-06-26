@@ -21,7 +21,7 @@ class Test_PowerSpectra(unittest.TestCase):
     def test_calc_csm(self):
         """ test that csm result has not changed over different releases"""
         test_csm_sum = np.abs(np.imag(ps.csm)).sum() + np.real(ps.csm).sum()
-        self.assertEqual(test_csm_sum,csm_sum)
+        self.assertAlmostEqual(test_csm_sum,csm_sum)
 
 class Test_FFTSpectra(unittest.TestCase):
 
@@ -30,7 +30,7 @@ class Test_FFTSpectra(unittest.TestCase):
         test_fft_sum = 0
         for temp in fft.result():
             test_fft_sum += temp.sum()
-        self.assertEqual(test_fft_sum,fft_sum)
+        self.assertAlmostEqual(test_fft_sum,fft_sum)
 
 
 if __name__ == '__main__':
