@@ -21,6 +21,11 @@ requirements:
   run:
     - python >=3.7
     - scikit-learn <=1.1.3
+    - numba
+    - numpy
+    - scipy
+    - traits
+    - pytables
 
 test:
   source_files: # from acoular folder
