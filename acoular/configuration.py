@@ -8,8 +8,8 @@
 .. autosummary::
     :toctree: generated/
 
+    Config
     config
-
 """
 
 from os import path, mkdir
@@ -132,16 +132,16 @@ config = Config()
 This instance implements the global configuration of the Acoular package.
 
 General caching behaviour can be controlled by the :attr:`global_caching` attribute:
-  * 'individual': Acoular classes handle caching behavior individually.
-  * 'all': Acoular classes cache everything and read from cache if possible.
-  * 'none': Acoular classes do not cache results. Cachefiles are not created.
-  * 'readonly': Acoular classes do not actively cache, but read from cache if existing.
-  * 'overwrite': Acoular classes replace existing cachefile content with new data.
+* 'individual': Acoular classes handle caching behavior individually.
+* 'all': Acoular classes cache everything and read from cache if possible.
+* 'none': Acoular classes do not cache results. Cachefiles are not created.
+* 'readonly': Acoular classes do not actively cache, but read from cache if existing.
+* 'overwrite': Acoular classes replace existing cachefile content with new data.
 
 The package used to read and write .h5 files can be specified 
 by :attr:`h5library`:  
-  * 'pytables': Use 'tables' (or 'pytables', depending on python distribution).
-  * 'h5py': Use 'h5py'.
+* 'pytables': Use 'tables' (or 'pytables', depending on python distribution).
+* 'h5py': Use 'h5py'.
 
 Some Acoular classes support GUI elements for usage with tools from the TraitsUI package.
 If desired, this package has to be installed manually, as it is not a prerequisite for

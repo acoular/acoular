@@ -33,11 +33,24 @@ Classes in Acoular and their inheritance
 **Depending on the resolution of your browser window the cross links may not be positioned correctly!**
 
 
-.. inheritance-diagram:: acoular.environments acoular.grids acoular.microphones
-                         acoular.sdinput
-                         acoular.spectra acoular.signals acoular.sources
-                         acoular.calib acoular.trajectory acoular.fbeamform
-                         acoular.tbeamform acoular.tprocess
+.. inheritance-diagram:: acoular.environments acoular.calib acoular.configuration
+                acoular.fbeamform acoular.grids acoular.microphones acoular.sdinput 
+                acoular.signals acoular.sources acoular.spectra acoular.tbeamform
+                acoular.tools acoular.tprocess acoular.trajectory
+    :top-classes: acoular.environments.Environment, 
+                acoular.environments.FlowField,
+                acoular.calib.Calib,
+                acoular.configuration.Config,
+                acoular.fbeamform.BeamformerBase,
+                acoular.fbeamform.SteeringVector,
+                acoular.fbeamform.PointSpreadFunction,
+                acoular.grids.Grid, 
+                acoular.grids.Sector,
+                acoular.microphones.MicGeom,
+                acoular.signals.SignalGenerator,
+                acoular.tprocess.SamplesGenerator,           
+                acoular.spectra.BaseSpectra,
+                acoular.trajectory.Trajectory
     :parts: 1
 
 :mod:`acoular` Package

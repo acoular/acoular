@@ -76,11 +76,9 @@ def get_radiation_angles(direction,mpos, sourceposition):
     direction : array of floats
         Spherical Harmonic orientation
     mpos : array of floats
-            x, y, z position of microphones
+        x, y, z position of microphones
     sourceposition : array of floats
-            position of the source
-            
-        ========================
+        position of the source        
         
     Returns
     -------
@@ -117,11 +115,9 @@ def get_modes(lOrder, direction, mpos , sourceposition = array([0,0,0])):
     direction : array of floats
         Spherical Harmonic orientation
     mpos : array of floats
-            x, y, z position of microphones
+        x, y, z position of microphones
     sourceposition : array of floats
-            position of the source
-            
-        ========================
+        position of the source
 
     Returns
     -------

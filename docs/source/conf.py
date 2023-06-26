@@ -59,7 +59,7 @@ copyright = 'Acoular Development Team'
 #d = {}
 #execfile(os.path.join('..','..', 'acoular', '__init__.py'), d)
 #import acoular #acoular.__version__
-version = release =  '22.3'#'3.0'#d['__version__']
+version = release =  '23.6'#'3.0'#d['__version__']
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
@@ -176,7 +176,7 @@ html_copy_source = False
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'Acoulardoc'
 
-inheritance_graph_attrs = dict(rankdir="LR", size='"10.0,10.0"',
+inheritance_graph_attrs = dict(rankdir="LR", size='"11.0,24.0"',
                                fontsize=18, ratio='compress')
 
 autosummary_generate = True
