@@ -38,3 +38,9 @@ Python3.10:
   image: python:3.10.9
   script:
     - nox -r -f ./noxfile.py -s build
+
+Python3.11:
+  extends: .build-job
+  image: python:3.11.4-slim
+  script:
+    - nox -r -f ./noxfile.py -s build
