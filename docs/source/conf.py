@@ -176,7 +176,7 @@ html_copy_source = False
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'Acoulardoc'
 
-inheritance_graph_attrs = dict(rankdir="LR", size='"10.0,10.0"',
+inheritance_graph_attrs = dict(rankdir="LR", size='"11.0,24.0"',
                                fontsize=18, ratio='compress')
 
 autosummary_generate = True
