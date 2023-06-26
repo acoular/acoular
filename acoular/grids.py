@@ -890,7 +890,7 @@ class LineGrid( Grid ):
 
     @property_depends_on('numpoints,length,direction,loc')
     def _get_gpos( self ):
-        dist = self.length / self.numpoints 
+        dist = self.length / (self.numpoints - 1)
         loc = array(self.loc, dtype = float).reshape((3, 1)) 
         direc_n = self.direction/norm(self.direction)
         pos = zeros((self.numpoints,3))
