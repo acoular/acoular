@@ -1952,8 +1952,8 @@ class BeamformerSODIX( BeamformerBase ):
     Source directivity modeling in the cross-spectral matrix
     """
     #: Type of fit method to be used ('fmin_l_bfgs_b').
-    #: These methods is implemented in 
-    #: the `scipy module.
+    #: These methods are implemented in 
+    #: the scipy module.
     method = Trait('fmin_l_bfgs_b', desc="fit method used")
         
     #: Maximum number of iterations,
@@ -2153,7 +2153,7 @@ class BeamformerSODIX( BeamformerBase ):
         ac : array of floats
             This array of dimension ([number of frequencies]x[number of gridpoints]x[number of microphones])
             is used as call-by-reference parameter and contains the calculated
-          #/= unit   value after calling this method. 
+            value after calling this method. 
         fr : array of booleans
             The entries of this [number of frequencies]-sized array are either 
             'True' (if the result for this frequency has already been calculated)
