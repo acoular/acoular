@@ -14,4 +14,4 @@ It is aimed at applications in acoustic testing. Multichannel data recorded by a
 - easily extendible and well documented
 
 # Dependencies
-Acoular runs under Linux, Windows and MacOS, a Python 3.9, 3.8, 3.7 or 3.6 installation is needed with the Numpy, Scipy, Traits, scikit-learn, pytables, numba packages available. Matplotlib is recommended, but not necessary.
+Acoular runs under Linux, Windows and MacOS, a Python 3.11, 3.10, 3.9, 3.8 or 3.7 installation is needed with the Numpy, Scipy, Traits, scikit-learn, pytables, numba packages available. Matplotlib is recommended, but not necessary.
