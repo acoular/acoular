@@ -658,7 +658,6 @@ class PowerSpectraImport( PowerSpectra ):
 
     #: The cross spectral matrix, 
     #: (number of frequencies, numchannels, numchannels) array of complex;
-    #: readonly.
     csm = Property( 
         desc="cross spectral matrix")
 
