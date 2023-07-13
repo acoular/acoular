@@ -1649,7 +1649,8 @@ class FiltFreqWeight( Filter ):
     ba = Property( depends_on = ['weight', 'source.digest'])
 
     # internal identifier
-    digest = Property( depends_on = ['source.digest', '__class__'])
+    digest = Property( depends_on = ['source.digest', '__class__', \
+        'weight'])
 
     @cached_property
     def _get_digest( self ):
