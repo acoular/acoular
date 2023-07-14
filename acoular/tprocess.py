@@ -59,7 +59,7 @@ import numba as nb
 from datetime import datetime
 from os import path
 import wave
-from scipy.signal import butter, lfilter, filtfilt, bilinear
+from scipy.signal import butter, lfilter, filtfilt, bilinear, tf2sos, sosfilt
 from warnings import warn
 from collections import deque
 from inspect import currentframe
@@ -1455,10 +1455,10 @@ class Filter(TimeInOut):
     Should not be instanciated by itself
     """
     #: Filter coefficients
-    ba = Property()
+    sos = Property()
 
-    def _get_ba( self ):
-        return [1],[1]
+    def _get_sos( self ):
+        return tf2sos([1],[1])
 
     def result(self, num):
         """ 
@@ -1477,12 +1477,12 @@ class Filter(TimeInOut):
             Delivers the bandpass filtered output of source.
             The last block may be shorter than num.
         """
-        b, a = self.ba
-        zi = zeros((max(len(a), len(b))-1, self.source.numchannels))
+        sos = self.sos
+        zi = zeros((sos.shape[0], 2, self.source.numchannels))
         for block in self.source.result(num):
-            b, a = self.ba # this line is useful in case of changes 
-                            # to self.ba during generator lifetime
-            block, zi = lfilter(b, a, block, axis=0, zi=zi)
+            sos = self.sos # this line is useful in case of changes 
+                            # to self.sos during generator lifetime
+            block, zi = sosfilt(sos, block, axis=0, zi=zi)
             yield block
 
 class FiltFiltOctave( TimeInOut ):
@@ -1585,7 +1585,7 @@ class FiltOctave( Filter ):
     #: Filter order
     order = Int(3, desc = "IIR filter order")
         
-    ba = Property( depends_on = ['band', 'fraction', 'source.digest', 'order'])
+    sos = Property( depends_on = ['band', 'fraction', 'source.digest', 'order'])
 
     # internal identifier
     digest = Property( depends_on = ['source.digest', '__class__', \
@@ -1596,11 +1596,11 @@ class FiltOctave( Filter ):
         return digest(self)
         
     @cached_property
-    def _get_ba( self ):
+    def _get_sos( self ):
         # filter design
         fs = self.sample_freq
         # adjust filter edge frequencies
-        beta = pi/(4*self.order)
+        beta = pi/(2*self.order)
         alpha = pow(2.0, 1.0/(2.0*self.fraction_))
         beta = 2 * beta / sin(beta) / (alpha-1/alpha)
         alpha = (1+sqrt(1+beta*beta))/beta
@@ -1609,7 +1609,7 @@ class FiltOctave( Filter ):
             raise ValueError("band frequency too high:%f,%f" % (self.band, fs))
         om1 = fr/alpha 
         om2 = fr*alpha
-        return butter(self.order, [om1, om2], 'bandpass') 
+        return butter(self.order, [om1, om2], 'bandpass', output = 'sos') 
 
 class TimeExpAverage(Filter):
     """
@@ -1622,7 +1622,7 @@ class TimeExpAverage(Filter):
     weight = Trait('F', {'F':0.125, 'S':1.0, 'I':0.035}, 
         desc = "time weighting")    
 
-    ba = Property( depends_on = ['weight', 'source.digest'])
+    sos = Property( depends_on = ['weight', 'source.digest'])
        
     # internal identifier
     digest = Property( depends_on = ['source.digest', '__class__', \
@@ -1633,11 +1633,11 @@ class TimeExpAverage(Filter):
         return digest(self)
         
     @cached_property
-    def _get_ba( self ):
+    def _get_sos( self ):
         alpha = 1-exp(-1/self.weight_/self.sample_freq)
         a = [1, alpha-1]
         b = [alpha]
-        return b,a 
+        return tf2sos(b,a)
 
 class FiltFreqWeight( Filter ):
     """
@@ -1646,7 +1646,7 @@ class FiltFreqWeight( Filter ):
     #: weighting characteristics
     weight = Trait('A',('A','C','Z'), desc="frequency weighting")
 
-    ba = Property( depends_on = ['weight', 'source.digest'])
+    sos = Property( depends_on = ['weight', 'source.digest'])
 
     # internal identifier
     digest = Property( depends_on = ['source.digest', '__class__', \
@@ -1657,7 +1657,7 @@ class FiltFreqWeight( Filter ):
         return digest(self)
 
     @cached_property
-    def _get_ba( self ):
+    def _get_sos( self ):
         # s domain coefficients
         f1 = 20.598997
         f2 = 107.65265
@@ -1678,7 +1678,7 @@ class FiltFreqWeight( Filter ):
             b = zeros(7)
             b[0] = 1.0
             a = b # 6th order flat response
-        return b,a
+        return tf2sos(b,a)
 
 class FilterBank(TimeInOut):
     """
@@ -1689,7 +1689,7 @@ class FilterBank(TimeInOut):
     """
 
     #: List of filter coefficients for all filters
-    ba = Property()
+    sos = Property()
 
     #: List of labels for bands
     bands = Property()
@@ -1700,8 +1700,8 @@ class FilterBank(TimeInOut):
     #: Number of bands
     numchannels = Property()
 
-    def _get_ba( self ):
-        return [[1]],[[1]]
+    def _get_sos( self ):
+        return [tf2sos([1],[1])]
 
     def _get_bands( self ):
         return ['']
@@ -1730,13 +1730,13 @@ class FilterBank(TimeInOut):
         """
         numbands = self.numbands
         snumch = self.source.numchannels
-        b, a = self.ba
-        zi = [zeros( (max(len(a[0]), len(b[0]))-1, snumch)) for _ in range(numbands)]
+        sos = self.sos
+        zi = [zeros( (sos[0].shape[0],2, snumch)) for _ in range(numbands)]
         res = zeros((num,self.numchannels),dtype='float')
         for block in self.source.result(num):
             bl = block.shape[0]
             for i in range(numbands):
-                res[:,i*snumch:(i+1)*snumch], zi[i] = lfilter(b[i], a[i], block, axis=0, zi=zi[i])
+                res[:,i*snumch:(i+1)*snumch], zi[i] = sosfilt(sos[i], block, axis=0, zi=zi[i])
             yield res
 
 class OctaveFilterBank(FilterBank):
@@ -1781,15 +1781,14 @@ class OctaveFilterBank(FilterBank):
         return len(self.bands)
 
     @cached_property
-    def _get_ba( self ):
+    def _get_sos( self ):
         of = FiltOctave(source=self.source, fraction=self.fraction)
-        b, a = [], []
+        sos = []
         for i in range(self.lband,self.hband,4-self.fraction_):
             of.band = 10**(i/10)
-            b_,a_ = of.ba
-            b.append(b_)
-            a.append(a_)
-        return b, a
+            sos_ = of.sos
+            sos.append(sos_)
+        return sos
 
 class TimeCache( TimeInOut ):
     """
