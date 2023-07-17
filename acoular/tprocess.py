@@ -59,7 +59,7 @@ import numba as nb
 from datetime import datetime
 from os import path
 import wave
-from scipy.signal import butter, lfilter, filtfilt, bilinear, tf2sos, sosfilt
+from scipy.signal import butter, filtfilt, bilinear, tf2sos, sosfilt, sosfiltfilt
 from warnings import warn
 from collections import deque
 from inspect import currentframe
@@ -1485,91 +1485,6 @@ class Filter(TimeInOut):
             block, zi = sosfilt(sos, block, axis=0, zi=zi)
             yield block
 
-class FiltFiltOctave( TimeInOut ):
-    """
-    Octave or third-octave filter with zero phase delay.
-    
-    This filter can be applied on time signals.
-    It requires large amounts of memory!   
-    """
-    #: Band center frequency; defaults to 1000.
-    band = Float(1000.0, 
-        desc = "band center frequency")
-        
-    #: Octave fraction: 'Octave' or 'Third octave'; defaults to 'Octave'.
-    fraction = Trait('Octave', {'Octave':1, 'Third octave':3}, 
-        desc = "fraction of octave")
-        
-    # internal identifier
-    digest = Property( depends_on = ['source.digest', '__class__', \
-        'band', 'fraction'])
-
-    @cached_property
-    def _get_digest( self ):
-        return digest(self)
-        
-    def ba(self, order):
-        """ 
-        Internal Butterworth filter design routine.
-        
-        Parameters
-        ----------
-        order : integer
-            The order of the filter.
-        
-        Returns
-        -------
-            b, a : ndarray, ndarray
-                Filter coefficients.
-        """
-        # filter design
-        fs = self.sample_freq
-        # adjust filter edge frequencies
-        beta = pi/(4*order)
-        alpha = pow(2.0, 1.0/(2.0*self.fraction_))
-        beta = 2 * beta / sin(beta) / (alpha-1/alpha)
-        alpha = (1+sqrt(1+beta*beta))/beta
-        fr = 2*self.band/fs
-        if fr > 1/sqrt(2):
-            raise ValueError("band frequency too high:%f,%f" % (self.band, fs))
-        om1 = fr/alpha 
-        om2 = fr*alpha
-#        print om1, om2
-        return butter(order, [om1, om2], 'bandpass') 
-        
-    def result(self, num):
-        """
-        Python generator that yields the output block-wise.
-
-        
-        Parameters
-        ----------
-        num : integer
-            This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block).
-        
-        Returns
-        -------
-        Samples in blocks of shape (num, numchannels). 
-            Delivers the zero-phase bandpass filtered output of source.
-            The last block may be shorter than num.
-        """
-        b, a = self.ba(3) # filter order = 3
-        data = empty((self.source.numsamples, self.source.numchannels))
-        j = 0
-        for block in self.source.result(num):
-            ns, nc = block.shape
-            data[j:j+ns] = block
-            j += ns
-        for j in range(self.source.numchannels):
-            data[:, j] = filtfilt(b, a, data[:, j])
-        j = 0
-        ns = data.shape[0]
-        while j < ns:
-            yield data[j:j+num]
-            j += num
-
-
 class FiltOctave( Filter ):
     """
     Octave or third-octave filter (causal, non-zero phase delay).    
@@ -1599,7 +1514,9 @@ class FiltOctave( Filter ):
     def _get_sos( self ):
         # filter design
         fs = self.sample_freq
-        # adjust filter edge frequencies
+        # adjust filter edge frequencies for correct power bandwidth (see ANSI 1.11 1987
+        # and Kalb,J.T.: "A thirty channel real time audio analyzer and its applications",
+        # PhD Thesis: Georgia Inst. of Techn., 1975
         beta = pi/(2*self.order)
         alpha = pow(2.0, 1.0/(2.0*self.fraction_))
         beta = 2 * beta / sin(beta) / (alpha-1/alpha)
@@ -1610,6 +1527,75 @@ class FiltOctave( Filter ):
         om1 = fr/alpha 
         om2 = fr*alpha
         return butter(self.order, [om1, om2], 'bandpass', output = 'sos') 
+
+class FiltFiltOctave( FiltOctave ):
+    """
+    Octave or third-octave filter with zero phase delay.
+    
+    This filter can be applied on time signals.
+    It requires large amounts of memory!   
+    """
+    #: Filter order (applied for forward filter and backward filter)
+    order = Int(2, desc = "IIR filter half order")
+
+    # internal identifier
+    digest = Property( depends_on = ['source.digest', '__class__', \
+        'band', 'fraction','order'])
+
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+ 
+    @cached_property
+    def _get_sos( self ):
+        # filter design
+        fs = self.sample_freq
+        # adjust filter edge frequencies for correct power bandwidth (see FiltOctave)
+        beta = pi/(2*self.order)
+        alpha = pow(2.0, 1.0/(2.0*self.fraction_))
+        beta = 2 * beta / sin(beta) / (alpha-1/alpha)
+        alpha = (1+sqrt(1+beta*beta))/beta
+        # additional bandwidth correction for double-pass
+        alpha = alpha * {6:1.01,5:1.012,4:1.016,3:1.022,2:1.036,1:1.083}.get(self.order,1.0)**(3/self.fraction_)
+        fr = 2*self.band/fs
+        if fr > 1/sqrt(2):
+            raise ValueError("band frequency too high:%f,%f" % (self.band, fs))
+        om1 = fr/alpha 
+        om2 = fr*alpha
+        return butter(self.order, [om1, om2], 'bandpass', output = 'sos')   
+           
+    def result(self, num):
+        """
+        Python generator that yields the output block-wise.
+
+        
+        Parameters
+        ----------
+        num : integer
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block).
+        
+        Returns
+        -------
+        Samples in blocks of shape (num, numchannels). 
+            Delivers the zero-phase bandpass filtered output of source.
+            The last block may be shorter than num.
+        """
+        sos = self.sos 
+        data = empty((self.source.numsamples, self.source.numchannels))
+        j = 0
+        for block in self.source.result(num):
+            ns, nc = block.shape
+            data[j:j+ns] = block
+            j += ns
+        # filter one channel at a time to save memory
+        for j in range(self.source.numchannels):
+            data[:, j] = sosfiltfilt(sos, data[:, j])
+        j = 0
+        ns = data.shape[0]
+        while j < ns:
+            yield data[j:j+num]
+            j += num
 
 class TimeExpAverage(Filter):
     """
