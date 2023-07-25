@@ -1,4 +1,4 @@
-![pyMOR Logo](./docs/source/_static/Acoular_logo.png)
+![Acoular Logo](./docs/source/_static/Acoular_logo.png)
 
 [![PyPI](https://img.shields.io/pypi/pyversions/acoular.svg)](https://pypi.python.org/pypi/pymor)
 [![PyPI](https://img.shields.io/pypi/v/acoular.svg)](https://pypi.python.org/pypi/pymor)
@@ -10,7 +10,7 @@ Acoular is a Python module for acoustic beamforming that is distributed under th
 It is aimed at applications in acoustic testing. Multichannel data recorded by a microphone array can be processed and analyzed in order to generate mappings of sound source distributions. The maps (acoustic photographs) can then be used to locate sources of interest and to characterize them using their spectra. 
 
 # Features
-- frequency domain beamforming algorithms: delay & sum, Capon (Adaptive), MUSIC, functional beamforming, eigenvalue beamforming
+- frequency domain beamforming algorithms: delay & sum, Capon (adaptive), MUSIC, functional beamforming, eigenvalue beamforming
 - frequency domain deconvolution algorithms: DAMAS, DAMAS+, Clean, CleanSC, orthogonal deconvolution
 - frequency domain inverse methods: CMF (covariance matrix fitting), general inverse beamforming, SODIX
 - time domain methods: delay & sum beamforming, CleanT deconvolution
@@ -40,8 +40,9 @@ If you use Acoular for academic work, please consider citing our
     Ennes Sarradj, Gert Herold,
     A Python framework for microphone array data processing,
     Applied Acoustics, Volume 116, 2017, Pages 50-58
+
 # Dependencies
-Acoular runs under Linux, Windows and MacOS and needs Numpy, Scipy, Traits, scikit-learn, pytables, numba packages available. 
+Acoular runs under Linux, Windows and MacOS and needs Numpy, Scipy, Traits, scikit-learn, pytables, Numba packages available. 
 Matplotlib is needed for some of the examples.
 
 If you want to use input from a soundcard hardware, you will also need to install the [sounddevice](https://python-sounddevice.readthedocs.io/en/0.3.12/installation.html) package. Some solvers for the CMF method need [Pylops](https://pylops.readthedocs.io/en/stable/installation.html).
