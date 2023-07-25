@@ -1,7 +1,7 @@
 ![Acoular Logo](./docs/source/_static/Acoular_logo.png)
 
-[![PyPI](https://img.shields.io/pypi/pyversions/acoular.svg)](https://pypi.python.org/pypi/pymor)
-[![PyPI](https://img.shields.io/pypi/v/acoular.svg)](https://pypi.python.org/pypi/pymor)
+[![PyPI](https://img.shields.io/pypi/pyversions/acoular.svg)](https://pypi.org/project/acoular)
+[![PyPI](https://img.shields.io/pypi/v/acoular.svg)](https://pypi.org/project/acoular)
 [![Github](https://github.com/acoular/acoular/actions/workflows/python-package.yml/badge.svg)](https://github.com/acoular/acoular/actions/workflows/python-package.yml)
 
 # Acoular
