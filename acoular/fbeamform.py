@@ -1415,27 +1415,42 @@ class BeamformerDamasPlus (BeamformerDamas):
                 p.freq = f[i]
                 psf = p.psf[:]
 
-                if self.method == 'NNLS':
-                    resopt = nnls(psf,y)[0]
-                elif self.method == 'LP': # linear programming (Dougherty)
+                if self.method == "NNLS":
+                    ac[i] = nnls(psf, y)[0] / unit
+                elif self.method == "LP":  # linear programming (Dougherty)
                     if self.r_diag:
-                        warn('Linear programming solver may fail when CSM main '
-                              'diagonal is removed for delay-and-sum beamforming.', 
-                              Warning, stacklevel = 5)
-                    cT = -1*psf.sum(1) # turn the minimization into a maximization
-                    resopt = linprog(c=cT, A_ub=psf, b_ub=y).x # defaults to simplex method and non-negative x
-                elif self.method == 'LassoLars':
-                    model = LassoLars(alpha = self.alpha * unit, 
-                                      max_iter = self.max_iter)
-                else: # self.method == 'OMPCV':
-                    model = OrthogonalMatchingPursuitCV()
-                
-                
-                if self.method in ('NNLS','LP'):
-                    ac[i] = resopt / unit
-                else: # sklearn models
-                    model.fit(psf,y)
-                    ac[i] = model.coef_[:] / unit
+                        warn(
+                            "Linear programming solver may fail when CSM main "
+                            "diagonal is removed for delay-and-sum beamforming.",
+                            Warning,
+                            stacklevel=5,
+                        )
+                    cT = -1 * psf.sum(1)  # turn the minimization into a maximization
+                    ac[i] = (
+                        linprog(c=cT, A_ub=psf, b_ub=y).x / unit
+                    )  # defaults to simplex method and non-negative x
+                else:
+                    if self.method == "LassoLars":
+                        model = LassoLars(
+                            alpha=self.alpha * unit, max_iter=self.max_iter
+                        )
+                    elif self.method == "OMPCV":
+                        model = OrthogonalMatchingPursuitCV()
+                    else:
+                        raise NotImplementedError(f"%model solver not implemented")
+                    model.normalize = False
+                    # from sklearn 1.2, normalize=True does not work the same way anymore and the pipeline approach
+                    # with StandardScaler does scale in a different way, thus we monkeypatch the code and normalize
+                    # ourselves to make results the same over different sklearn versions
+                    norms = norm(psf, axis=0)
+                    # get rid of annoying sklearn warnings that appear
+                    # for sklearn<1.2 despite any settings
+                    with warnings.catch_warnings():
+                        warnings.simplefilter("ignore", category=FutureWarning)
+                        # normalized psf
+                        model.fit(psf / norms, y)
+                    # recover normalization in the coef's
+                    ac[i] = model.coef_[:] / norms / unit
                 
                 fr[i] = 1
 
