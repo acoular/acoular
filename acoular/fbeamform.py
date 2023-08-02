@@ -48,7 +48,7 @@ einsum, ndarray, isscalar, inf, real, unique
 from numpy.linalg import norm
 
 from sklearn.linear_model import LassoLars, LassoLarsCV, LassoLarsIC,\
-OrthogonalMatchingPursuitCV
+OrthogonalMatchingPursuitCV, LinearRegression
 
 from scipy.optimize import nnls, linprog, fmin_l_bfgs_b, shgo
 from scipy.linalg import inv, eigh, eigvals, fractional_matrix_power
@@ -1865,13 +1865,7 @@ class BeamformerCMF ( BeamformerBase ):
                 else:
                     # take all real parts -- also main diagonal
                     ind_reim = hstack([ones(size(ind_im0),)>0,ind_im0])
-                    ind_reim[0]=True # TODO: warum hier extra definiert??
-#                    if sigma2:
-#                        # identity matrix, needed when noise term sigma is used
-#                        I  = eye(nc).reshape(nc*nc,1)                
-#                        A = realify( hstack([Ac, I])[ind,:] )[ind_reim,:]
-#                        # ... ac[i] = model.coef_[:-1]
-#                    else:
+                    ind_reim[0]=True # why this ?
 
                 A = realify( Ac [ind,:] )[ind_reim,:]
                 # use csm.T for column stacking reshape!
@@ -1879,18 +1873,18 @@ class BeamformerCMF ( BeamformerBase ):
                 # choose method
                 if self.method == 'LassoLars':
                     model = LassoLars(alpha = self.alpha * unit,
-                                      max_iter = self.max_iter)
+                                      max_iter = self.max_iter, 
+                                      normalize=False)
                 elif self.method == 'LassoLarsBIC':
                     model = LassoLarsIC(criterion = 'bic',
-                                        max_iter = self.max_iter)
+                                        max_iter = self.max_iter, 
+                                        normalize=False,)
                 elif self.method == 'OMPCV':
-                    model = OrthogonalMatchingPursuitCV()
+                    model = OrthogonalMatchingPursuitCV(normalize=False)
+                elif self.method == 'NNLS':
+                    model = LinearRegression(normalize=False, positive=True)
 
-                # nnls is not in sklearn
-                if self.method == 'NNLS':
-                    ac[i] , x = nnls(A,R.flat)
-                    ac[i] /= unit
-                elif self.method == 'Split_Bregman' and PYLOPS_TRUE:   
+                if self.method == 'Split_Bregman' and PYLOPS_TRUE:   
                     Oop = MatrixMult(A) #tranfer operator 
                     Iop = self.alpha*Identity(numpoints) # regularisation 
                     ac[i],iterations = SplitBregman(Oop, [Iop] , R[:,0], 
@@ -1932,11 +1926,17 @@ class BeamformerCMF ( BeamformerBase ):
                     
                     ac[i] /= unit
                 else:
-                    # get rid of annoying sklearn warnings that appear despite any settings
+                    # from sklearn 1.2, normalize=True does not work the same way anymore and the pipeline
+                    # approach with StandardScaler does scale in a different way, thus we monkeypatch the 
+                    # code and normalize ourselves to make results the same over different sklearn versions
+                    norms = norm(A, axis=0)
+                    # get rid of annoying sklearn warnings that appear for sklearn<1.2 despite any settings
                     with warnings.catch_warnings():
                         warnings.simplefilter("ignore", category=FutureWarning)
-                        model.fit(A,R[:,0])
-                    ac[i] = model.coef_[:] / unit
+                        # normalized A
+                        model.fit(A/norms,R[:,0])
+                    # recover normalization in the coef's
+                    ac[i] = model.coef_[:] / norms / unit
                 fr[i] = 1
                 
 
@@ -2411,21 +2411,34 @@ class BeamformerGIB(BeamformerEig):  #BeamformerEig #BeamformerBase
                             AB = vstack([hstack([A.real,-A.imag]),hstack([A.imag,A.real])])
                             R  = hstack([emode.real.T,emode.imag.T]) * unit
                             if self.method == 'LassoLars':
-                                model = LassoLars(alpha=self.alpha * unit,max_iter=self.max_iter)
+                                model = LassoLars(alpha=self.alpha * unit,
+                                                  max_iter=self.max_iter)
                             elif self.method == 'LassoLarsBIC':
-                                model = LassoLarsIC(criterion='bic',max_iter=self.max_iter)
+                                model = LassoLarsIC(criterion='bic',
+                                                    max_iter=self.max_iter)
                             elif self.method == 'OMPCV':
                                 model = OrthogonalMatchingPursuitCV()
                             elif self.method == 'LassoLarsCV':
-                                model = LassoLarsCV()                        
-                            if self.method == 'NNLS':
-                                x , zz = nnls(AB,R)
-                                qi_real,qi_imag = hsplit(x/unit, 2) 
-                            else:
-                                with warnings.catch_warnings():
-                                    warnings.simplefilter("ignore", category=FutureWarning)
-                                    model.fit(AB,R)
-                                qi_real,qi_imag = hsplit(model.coef_[:]/unit, 2)
+                                model = LassoLarsCV()
+                            elif self.method == 'NNLS':
+                                model = LinearRegression(positive=True)
+                            model.normalize = False
+                            # from sklearn 1.2, normalize=True does not work 
+                            # the same way anymore and the pipeline approach 
+                            # with StandardScaler does scale in a different 
+                            # way, thus we monkeypatch the code and normalize
+                            # ourselves to make results the same over different
+                            # sklearn versions
+                            norms = norm(AB, axis=0)
+                            # get rid of annoying sklearn warnings that appear
+                            # for sklearn<1.2 despite any settings
+                            with warnings.catch_warnings():
+                                warnings.simplefilter("ignore",
+                                                      category=FutureWarning)
+                                # normalized A
+                                model.fit(AB/norms,R)
+                            # recover normalization in the coef's
+                            qi_real,qi_imag = hsplit(model.coef_[:]/norms/unit, 2)
                             #print(s,qi.size)    
                             qi[s,locpoints] = qi_real+qi_imag*1j
                     else:
