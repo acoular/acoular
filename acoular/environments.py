@@ -47,11 +47,17 @@ def dist_mat(gpos,mpos):
     """    
     _,M = mpos.shape
     _,N = gpos.shape
-    rm = empty((N,M),dtype=float64)
+    rm = empty((N,M),dtype=gpos.dtype)
+    TWO = rm.dtype.type(2.0) # make sure to have a float32 or float 64 literal
+    m0 = mpos[0]
+    m1 = mpos[1]
+    m2 = mpos[2]
     for n in range(N):
-        g = gpos[:,n]
+        g0 = gpos[0,n]
+        g1 = gpos[1,n]
+        g2 = gpos[2,n]
         for m in range(M):
-            rm[n,m] = sqrt((g[0] - mpos[0,m])**2 + (g[1] - mpos[1,m])**2 + (g[2] - mpos[2,m])**2)
+            rm[n,m] = sqrt((g0 - m0[m])**TWO + (g1 - m1[m])**TWO + (g2 - m2[m])**TWO)
     return rm
 
 
