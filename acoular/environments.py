@@ -30,8 +30,8 @@ CArray, cached_property, Trait, Dict
 
 from .internal import digest, ldigest
 
-f64ro = nb.types.Array(nb.types.float64,2,'A',readonly=True)
-f32ro = nb.types.Array(nb.types.float32,2,'A',readonly=True)
+f64ro = nb.types.Array(nb.types.float64,2,'C',readonly=True)
+f32ro = nb.types.Array(nb.types.float32,2,'C',readonly=True)
 
 @nb.njit([(f64ro, f64ro), (f64ro, f32ro), (f32ro, f64ro),(f32ro, f32ro)],
                 cache=True, fastmath=True)
