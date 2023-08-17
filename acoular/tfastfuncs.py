@@ -13,14 +13,11 @@ import numpy as np
 cachedOption = True  # if True: saves the numba func as compiled func in sub directory
 fastOption = True # fastmath options 
 
-@nb.njit([(nb.float64[:,:], nb.int64[:,:], nb.float64[:,:], nb.float64[:,:], nb.float64[:,:], nb.float64[:,:])],
+@nb.njit([(nb.float64[:,::1], nb.int64[:,::1], nb.float64[:,::1], nb.float64[:,::1], nb.float64[:,::1], nb.float64[:,::1])],
                 cache=True, parallel=True, fastmath=True)
 def _delayandsum4(data, offsets, ifactor2, steeramp, out, autopower):
     """ Performs one time step of delay and sum with output and additional autopower removal
-    
-    **Note**: parallel could be set to true, but unless the number of gridpoints gets huge, it
-    will be _slower_ in parallel mode
-    
+      
     Parameters
     ----------
     data : float64[nSamples, nMics] 
@@ -38,26 +35,25 @@ def _delayandsum4(data, offsets, ifactor2, steeramp, out, autopower):
     """
     gridsize, numchannels = offsets.shape
     num = out.shape[0]
+    ZERO = data.dtype.type(0.)
+    ONE = data.dtype.type(1.)    
     for n in nb.prange(num):
         for gi in nb.prange(gridsize):
-            out[n,gi] = 0
-            autopower[n,gi] = 0
+            out[n,gi] = ZERO
+            autopower[n,gi] = ZERO
             for mi in range(numchannels):
-                ind = offsets[gi,mi]
-                r = (data[ind+n,mi] * (1-ifactor2[gi,mi]) \
-                    + data[ind+n+1,mi] * ifactor2[gi,mi]) * steeramp[gi,mi]
+                ind = (gi,mi)
+                r = (data[offsets[ind]+n,mi] * (1.-ifactor2[ind]) \
+                    + data[offsets[ind]+n+1,mi] * ifactor2[ind]) * steeramp[ind]
                 out[n,gi] += r
                 autopower[n,gi] += r*r
 
-@nb.njit([(nb.float32[:,:], nb.int32[:,:,:], nb.float32[:,:,:], nb.float32[:,:,:], nb.float32[:,:], nb.float32[:,:]),
-            (nb.float64[:,:], nb.int64[:,:,:], nb.float64[:,:,:], nb.float64[:,:,:], nb.float64[:,:], nb.float64[:,:])],
+@nb.njit([(nb.float32[:,::1], nb.int32[:,:,::1], nb.float32[:,:,::1], nb.float32[:,:,::1], nb.float32[:,::1], nb.float32[:,::1]),
+            (nb.float64[:,::1], nb.int64[:,:,::1], nb.float64[:,:,::1], nb.float64[:,:,::1], nb.float64[:,::1], nb.float64[:,::1])],
                 cache=True, parallel=True, fastmath=True)
 def _delayandsum5(data, offsets, ifactor2, steeramp, out, autopower):
     """ Performs one time step of delay and sum with output and additional autopower removal
-    
-    **Note**: parallel could be set to true, but unless the number of gridpoints gets huge, it
-    will be _slower_ in parallel mode
-    
+        
     Parameters
     ----------
     data : float64[nSamples, nMics] 
@@ -75,13 +71,15 @@ def _delayandsum5(data, offsets, ifactor2, steeramp, out, autopower):
     """
     num, gridsize, numchannels = offsets.shape
     num = out.shape[0]
+    #ZERO = data.dtype.type(0.)
+    ONE = data.dtype.type(1.)
     for n in nb.prange(num):
         for gi in nb.prange(gridsize):
             out[n,gi] = 0
             autopower[n,gi] = 0
             for mi in range(numchannels):
-                ind = offsets[n,gi,mi] + n
-                r = (data[ind,mi] * (1-ifactor2[n,gi,mi]) \
+                ind = offsets[n,gi,mi]+n
+                r = (data[ind,mi] * (ONE - ifactor2[n,gi,mi]) \
                     + data[ind+1,mi] * ifactor2[n,gi,mi]) * steeramp[n,gi,mi]
                 out[n,gi] += r
                 autopower[n,gi] += r*r 
