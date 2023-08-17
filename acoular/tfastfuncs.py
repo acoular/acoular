@@ -143,18 +143,19 @@ def _steer_IV(rm, r0, amp):
             for mi in nb.prange(numchannels):
                 amp[n,gi,mi] = np.divide(Nr,rm[n,gi,mi]*rm2)
 
-@nb.njit([(nb.float32[:,:,:],  nb.float32[:,:,:], nb.float32, nb.float32[:,:,:], nb.int32[:,:,:]),
-            (nb.float64[:,:,:],  nb.float64[:,:,:], nb.float64, nb.float64[:,:,:], nb.int64[:,:,:])],
+@nb.njit([(nb.float32[:,:,::1],  nb.float32, nb.float32[:,:,::1], nb.int32[:,:,::1]),
+            (nb.float64[:,:,::1], nb.float64, nb.float64[:,:,::1], nb.int64[:,:,::1])],
                 cache=True, parallel=True, fastmath=True)
-def _delays(rm, delays, c, interp2, index):
+def _delays(rm, c, interp2, index):
     num, gridsize, numchannels = rm.shape
+    invc = 1/c
+    intt = index.dtype.type
     for n in nb.prange(num):  
         for gi in nb.prange(gridsize):
             for mi in nb.prange(numchannels):
-                delays[n,gi,mi] = np.divide(rm[n,gi,mi],c)
-                index[n,gi,mi] = int(delays[n,gi,mi])
-                interp2[n,gi,mi] = delays[n,gi,mi] - index[n,gi,mi]
-
+                delays = invc * rm[n,gi,mi]
+                index[n,gi,mi] = intt(delays)
+                interp2[n,gi,mi] = delays - nb.int64(delays)
 
 @nb.njit([(nb.float32[:,:,:], nb.float32[:,:,:], nb.int32[:,:,:]),
             (nb.float64[:,:,:], nb.float64[:,:,:], nb.int64[:,:,:])],
