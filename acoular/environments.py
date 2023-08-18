@@ -18,9 +18,9 @@
 
 """
 import numba as nb
-from numpy import array, isscalar, float32, float64, newaxis, zeros, \
+from numpy import array, isscalar, float32, float64, newaxis, \
 sqrt, arange, pi, exp, sin, cos, arccos, zeros_like, empty, dot, hstack, \
-vstack, identity, cross, sign, arctan2, matmul, sum, lexsort, stack, nonzero, append, outer, asarray
+vstack, identity, cross, sign, arctan2, matmul, sum, ascontiguousarray
 from numpy.linalg.linalg import norm
 from scipy.integrate import ode
 from scipy.interpolate import LinearNDInterpolator
@@ -28,7 +28,7 @@ from scipy.spatial import ConvexHull
 from traits.api import HasPrivateTraits, Float, Property, Int, \
 CArray, cached_property, Trait, Dict
 
-from .internal import digest, ldigest
+from .internal import digest
 
 f64ro = nb.types.Array(nb.types.float64,2,'C',readonly=True)
 f32ro = nb.types.Array(nb.types.float32,2,'C',readonly=True)
@@ -162,7 +162,7 @@ class Environment( HasPrivateTraits ):
         """
         if isscalar(mpos):
             mpos = array((0, 0, 0), dtype = float64)[:, newaxis]
-        rm = dist_mat(gpos,mpos)
+        rm = dist_mat(ascontiguousarray(gpos),ascontiguousarray(mpos))
 #        mpos = mpos[:, newaxis, :]
 #        rmv = gpos[:, :, newaxis]-mpos
 #        rm = sum(rmv*rmv, 0)**0.5
