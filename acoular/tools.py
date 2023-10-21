@@ -66,7 +66,7 @@ class MetricEvaluator(HasPrivateTraits):
     #: size of the integration sector.
     #: If attr:`adaptive_r` is True and the distance between two sources is smaller
     #: than 2*r,  the true radius of the integration area will be shrinked.
-    r = Float(0.05,
+    r = Float(1.,
         desc="radius of integration around true source position")
 
     #: if set True: use shrink integration area if two sources are closer
@@ -93,9 +93,9 @@ class MetricEvaluator(HasPrivateTraits):
             raise ValueError("target_data and target_grid must have the same number of grid points!")
 
     def _get_sector_radii(self):
-        ns = self.target_grid.gpos.size
+        ns = self.target_data.shape[1]
         radii = ones(ns)*self.r
-        if self.variable_sector_radii:
+        if self.adaptive_r:
             locs = self.target_grid.gpos.T
             intersrcdist = cdist(locs, locs)
             intersrcdist[intersrcdist == 0] = inf
@@ -103,10 +103,10 @@ class MetricEvaluator(HasPrivateTraits):
             radii = minimum(radii,intersrcdist)
         return radii
 
-    def _get_circ_sectors(self):
+    def _get_sectors(self):
         """Returns a list of CircSector objects for each target location."""
         r = self._get_sector_radii()
-        ns = self.target_grid.gpos.size
+        ns = self.target_data.shape[1]
         sectors = []
         for i in range(ns):
             loc = self.target_grid.gpos[:,i]
@@ -123,16 +123,13 @@ class MetricEvaluator(HasPrivateTraits):
             returns the integrated Pa**2 values for each sector
         """
         results = empty(shape=self.target_data.shape)
-        if self.sector_type == 'circular':
-            sectors = self._get_circ_sectors()
-        else:
-            raise ValueError(f"sector_type {self.sector_type} not supported!")
         for f in range(self.target_data.shape[0]):
             data = self.data[f]
             for i in range(self.target_data.shape[1]):
-                results[f,i] = ac.integrate(data,self.grid,sectors[i])
+                sector = self.sectors[i]
+                results[f,i] = ac.integrate(data,self.grid,sector)
                 if not self.multi_assignment:
-                    indices = self.grid.subdomain(sectors[i])
+                    indices = self.grid.subdomain(sector)
                     data[indices] = 0 # set values to zero (can not be assigned again)
         return results
 
@@ -168,7 +165,7 @@ class MetricEvaluator(HasPrivateTraits):
             inverse level error of shape=(nf,1)
         """
         self._validate_shapes()
-        sector_result = self._integrate_sectors(multi_assignment=False)
+        sector_result = self._integrate_sectors()
         return ac.L_p(sector_result.sum(axis=1)) - ac.L_p(self.data.sum(axis=1))
 
 
