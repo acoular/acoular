@@ -9,6 +9,7 @@ Implements tools for Acoular.
 .. autosummary::
     :toctree: generated/
     
+    MetricEvaluator
     return_result
     spherical_hn1
     get_radiation_angles
@@ -17,13 +18,159 @@ Implements tools for Acoular.
     bardata
 """
 
-from traits.api import HasStrictTraits
-from numpy import array, concatenate, newaxis, where,arctan2,sqrt,pi,mod,zeros,complex128
+import acoular as ac
+from numpy import array, concatenate, newaxis, where,arctan2,sqrt,pi,mod,zeros,\
+    complex128, ones, inf, minimum, empty
 from numpy.linalg import norm
 from numpy.ma import masked_where
 from .spectra import synthetic
+from traits.api import Bool, CArray, Float, HasPrivateTraits, Instance, Property, Either
 
 from scipy.special import spherical_yn, spherical_jn, sph_harm
+from scipy.spatial.distance import cdist
+
+
+class MetricEvaluator(HasPrivateTraits):
+    """Evaluate the reconstruction performance of source mapping methods.
+
+    This class can be used to calculate the following performance metrics
+    according to Herold and Sarradj (2017):
+    * Specific level error
+    * Overall level error
+    * Inverse level error
+    """
+
+    #: an array of shape=(nf,ng) containing the squared sound pressure data of the   
+    #: source mapping. (nf: number of frequencies, ng: number of grid points)
+    data = CArray(shape=(None,None),
+        desc="Contains the calculated squared sound pressure values in Pa**2.")
+
+    #: an array of shape=(nf,ns) containing the squared sound pressure data of the
+    #: ground-truth sources. (nf: number of frequencies, ns: number of sources)
+    target_data = CArray(shape=(None,None),
+        desc="Contains the ground-truth squared sound pressure values in Pa**2.")
+
+    #: :class:`~acoular.grids.Grid`-derived object that provides the grid locations
+    #: for the calculated source mapping data.
+    grid = Instance(ac.Grid,
+        desc="Grid instance that belongs to the calculated data")
+
+    #: :class:`~acoular.grids.Grid`-derived object that provides the grid locations
+    #: for the ground-truth data.
+    target_grid = Instance(ac.Grid,
+        desc="Grid instance that belongs to the ground-truth data")
+
+    #: sector type. Currently only circular sectors are supported.
+    sector_type = Either('circular')
+
+    #: size of the integration sector.
+    #: If attr:`adaptive_r` is True and the distance between two sources is smaller
+    #: than 2*r,  the true radius of the integration area will be shrinked.
+    r = Float(0.05,
+        desc="radius of integration around true source position")
+
+    #: if set True: use shrink integration area if two sources are closer
+    #: than 2*r. The radius of the integration area is then set to half the
+    #: distance between the two sources.
+    adaptive_r = Bool(True,
+        desc="adaptive integration area")
+
+    #: if set `True`, the same amplitude can be assigned to multiple targets if
+    #: the integration area overlaps. If set `False`, the amplitude is assigned
+    #: to the first target and the other targets are ignored.
+    multi_assignment = Bool(True,
+        desc="if set True, the same amplitude can be assigned to multiple targets if the integration area overlaps")
+
+    #: returns the determined sector sizes for each ground-truth source position
+    sectors = Property()
+
+    def _validate_shapes(self):
+        if self.data.shape[0] != self.target_data.shape[0]:
+            raise ValueError("data and target_data must have the same number of frequencies!")
+        if self.data.shape[1] != self.grid.size:
+            raise ValueError("data and grid must have the same number of grid points!")
+        if self.target_data.shape[1] != self.target_grid.size:
+            raise ValueError("target_data and target_grid must have the same number of grid points!")
+
+    def _get_sector_radii(self):
+        ns = self.target_grid.gpos.size
+        radii = ones(ns)*self.r
+        if self.variable_sector_radii:
+            locs = self.target_grid.gpos.T
+            intersrcdist = cdist(locs, locs)
+            intersrcdist[intersrcdist == 0] = inf
+            intersrcdist = intersrcdist.min(0)/2
+            radii = minimum(radii,intersrcdist)
+        return radii
+
+    def _get_circ_sectors(self):
+        """Returns a list of CircSector objects for each target location."""
+        r = self._get_sector_radii()
+        ns = self.target_grid.gpos.size
+        sectors = []
+        for i in range(ns):
+            loc = self.target_grid.gpos[:,i]
+            sectors.append(
+                ac.CircSector(r=r[i],x=loc[0],y=loc[1]))
+        return sectors
+
+    def _integrate_sectors(self):
+        """Integrates over target sectors.
+
+        Returns
+        -------
+        array (num_freqs,num_sources)
+            returns the integrated Pa**2 values for each sector
+        """
+        results = empty(shape=self.target_data.shape)
+        if self.sector_type == 'circular':
+            sectors = self._get_circ_sectors()
+        else:
+            raise ValueError(f"sector_type {self.sector_type} not supported!")
+        for f in range(self.target_data.shape[0]):
+            data = self.data[f]
+            for i in range(self.target_data.shape[1]):
+                results[f,i] = ac.integrate(data,self.grid,sectors[i])
+                if not self.multi_assignment:
+                    indices = self.grid.subdomain(sectors[i])
+                    data[indices] = 0 # set values to zero (can not be assigned again)
+        return results
+
+    def get_overall_level_error(self):
+        """Returns the overall level error (Herold and Sarradj, 2017).
+
+        Returns
+        -------
+        numpy.array
+            overall level error of shape=(nf,)
+        """
+        self._validate_shapes()
+        return ac.L_p(self.data.sum(axis=1)) - ac.L_p(self.target_data.sum(axis=1))
+
+    def get_specific_level_error(self):
+        """Returns the specific level error (Herold and Sarradj, 2017).
+
+        Returns
+        -------
+        numpy.array
+            specific level error of shape=(nf,ns). nf: number of frequencies, ns: number of sources
+        """
+        self._validate_shapes()
+        sector_result = self._integrate_sectors()
+        return ac.L_p(sector_result) - ac.L_p(self.target_data)
+
+    def get_inverse_level_error(self):
+        """Returns the inverse level error (Herold and Sarradj, 2017).
+
+        Returns
+        -------
+        numpy.array
+            inverse level error of shape=(nf,1)
+        """
+        self._validate_shapes()
+        sector_result = self._integrate_sectors(multi_assignment=False)
+        return ac.L_p(sector_result.sum(axis=1)) - ac.L_p(self.data.sum(axis=1))
+
 
 
 def return_result(source, nmax=-1, num=128):
