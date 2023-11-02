@@ -25,7 +25,7 @@ g = RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=0.68,
 env = Environment(c=346.04)
 st = SteeringVector(grid=g, mics=m, env=env, steer_type='classic')
 f = PowerSpectra(time_data=t1, 
-               window='Hanning', overlap='50%', block_size=128, #FFT-parameters
+               window='Hanning', overlap='50%', block_size=4096, #FFT-parameters
                cached = False )  
 b = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached = False)
 
@@ -42,6 +42,6 @@ def test_beamformerFreq():
 def test_beamformerFreqE():
     acoular.fastFuncs.beamformerFreq(param_steer_type, False, sln, svt, (eva[30:],eve[:,30:]))
 
-
-
-
+def test_csm():
+    t1.stop=-1
+    f.calc_csm()

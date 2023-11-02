@@ -1,10 +1,27 @@
+# -*- coding: utf-8 -*-
+#------------------------------------------------------------------------------
+# Copyright (c) Acoular Development Team.
+#------------------------------------------------------------------------------
+"""Simple speed benchmark tool using pyperf. Reads test* modules, and runs all
+functions starting with 'test'. The results are stored per machine in the
+./results subdirectory. If result already exists for a particular benchmark,
+benchmark is skipped. Any command line arguments are interpreted as modules to
+run. In this case, only these are considered for benchmarking. No arguments
+means all test* modules are benchmarked.
+"""
+
 import glob
 import types
 import subprocess
 import socket
+import sys
 from os import path, mkdir
 
-testmodules = glob.glob("test*.py")
+if len(sys.argv)>1:
+    testmodules = sys.argv[1:]
+else:
+    testmodules = glob.glob("test*.py")
+
 machine = socket.gethostname()
 if not path.exists("results"):
     mkdir("results")
