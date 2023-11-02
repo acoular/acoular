@@ -18,8 +18,9 @@
 from warnings import warn
 
 from numpy import array, ones, hanning, hamming, bartlett, blackman, \
-dot, newaxis, zeros, empty, fft, linalg, sqrt,real, imag,\
+dot, newaxis, zeros, empty, linalg, sqrt,real, imag,\
 searchsorted, isscalar, fill_diagonal, arange, zeros_like, sum, ndarray
+from scipy import fft
 from traits.api import HasPrivateTraits, Int, Property, Instance, Trait, \
 Bool, cached_property, property_depends_on, Delegate, Float, Enum, \
     CArray

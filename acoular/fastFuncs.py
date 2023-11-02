@@ -16,8 +16,8 @@ fastOption = True # fastmath options
 
 
 # Formerly known as 'faverage'
-@nb.njit([nb.complex128[:,:,:](nb.complex128[:,:,:], nb.complex128[:,:]), 
-          nb.complex64[:,:,:](nb.complex64[:,:,:], nb.complex64[:,:])], cache=cachedOption, parallel=True)
+@nb.njit([nb.complex128[:,:,::1](nb.complex128[:,:,::1], nb.complex128[:,::1]), 
+          nb.complex64[:,:,::1](nb.complex64[:,:,::1], nb.complex64[:,::1])], cache=cachedOption, parallel=True, fastmath=fastOption)
 def calcCSM(csm, SpecAllMics):
     """ Adds a given spectrum to the Cross-Spectral-Matrix (CSM).
     Here only the upper triangular matrix of the CSM is calculated. After
@@ -37,13 +37,6 @@ def calcCSM(csm, SpecAllMics):
     -------
     None : as the input csm gets overwritten.
     """
-#==============================================================================
-#     It showed, that parallelizing brings no benefit when calling calcCSM once per 
-#     ensemble (as its done at the moment). BUT it could be whorth, taking a closer 
-#     look to parallelization, when averaging over all ensembles inside this numba 
-#     optimized function. See "vglOptimierungFAverage.py" for some information on 
-#     the various implementations and their limitations.
-#==============================================================================
     nFreqs = csm.shape[0]
     nMics = csm.shape[1]
     for cntFreq in nb.prange(nFreqs):
