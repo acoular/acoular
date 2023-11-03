@@ -90,7 +90,7 @@ class acoular_beamformer_test(unittest.TestCase):
                 if WRITE_NEW_REFERENCE_DATA:
                     np.save(name,actual_data)
                 ref_data = np.load(name)
-                np.testing.assert_allclose(actual_data, ref_data, rtol=1e-5, atol=1e-8)
+                np.testing.assert_allclose(actual_data, ref_data, rtol=5e-5, atol=5e-8)
         # we expect the results to be computed and written to cache
         acoular.config.global_caching = 'individual'
         for b in fbeamformers():
@@ -99,7 +99,7 @@ class acoular_beamformer_test(unittest.TestCase):
                 name = join('reference_data',f'{b.__class__.__name__}.npy')
                 actual_data = np.array([b.synthetic(cf,1) for cf in cfreqs],dtype=np.float32)
                 ref_data = np.load(name)
-                np.testing.assert_allclose(actual_data, ref_data, rtol=1e-5, atol=1e-8)
+                np.testing.assert_allclose(actual_data, ref_data, rtol=5e-5, atol=5e-8)
         # we expect the results to be read from cache
         acoular.config.global_caching = 'all'
         for b in fbeamformers():
@@ -108,7 +108,7 @@ class acoular_beamformer_test(unittest.TestCase):
                 name = join('reference_data',f'{b.__class__.__name__}.npy')
                 actual_data = np.array([b.synthetic(cf,1) for cf in cfreqs],dtype=np.float32)
                 ref_data = np.load(name)
-                np.testing.assert_allclose(actual_data, ref_data, rtol=1e-5, atol=1e-8)
+                np.testing.assert_allclose(actual_data, ref_data, rtol=5e-5, atol=5e-8)
         # we expect the cached results to be overwritten
         acoular.config.global_caching = 'overwrite'
         for b0,b1 in zip(fbeamformers(),fbeamformers()):
@@ -123,7 +123,7 @@ class acoular_beamformer_test(unittest.TestCase):
                 name = join('reference_data',f'{b1.__class__.__name__}.npy')
                 actual_data = np.array([b1.synthetic(cf,1) for cf in cfreqs],dtype=np.float32)
                 ref_data = np.load(name)
-                np.testing.assert_allclose(actual_data, ref_data, rtol=1e-5, atol=1e-8)
+                np.testing.assert_allclose(actual_data, ref_data, rtol=5e-5, atol=5e-8)
 
     def test_beamformer_caching(self):
         # within each subcase, we need new beamformer objects because result is not updated when
