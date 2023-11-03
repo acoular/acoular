@@ -174,6 +174,28 @@ class Test_PowerSpectra(unittest.TestCase):
         np.testing.assert_allclose(actual_data, ref_data, rtol=1e-5, atol=1e-8)
 
 
+class TestSteerFormulation(unittest.TestCase):
+
+    def test_all_steer_formulation(self):
+        """ tests all variants of beamformerFreq subroutines
+        """
+        st = SteeringVector(grid=g, mics=m, env=env)
+        b0 = BeamformerBase(freq_data=f, steer=st, cached = False)
+        b1 = BeamformerEig(freq_data=f, steer=st, n=54, cached = False)
+        for ki,kind in enumerate(('classic', 'inverse','true level', 'true location')):
+            st.steer_type = kind
+            for b in (b0,b1):
+                for dr in (True,False):
+                    b.r_diag = dr
+                    with self.subTest(f"{b.__class__.__name__} r_diag:{dr} steer:{kind}"):
+                        name = join('reference_data',f"{b.__class__.__name__}{dr}{ki+1}.npy")
+                        actual_data = np.array([b.synthetic(cf,1) for cf in cfreqs],dtype=np.float32)
+                        if WRITE_NEW_REFERENCE_DATA:
+                            np.save(name,actual_data)
+                        ref_data = np.load(name)
+                        np.testing.assert_allclose(actual_data, ref_data, rtol=1e-5, atol=1e-8)
+
+
 if __name__ == '__main__':
     unittest.main() #exit=False
 

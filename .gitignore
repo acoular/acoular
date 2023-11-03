@@ -5,6 +5,7 @@
 *~
 examples/three_sources.h5
 examples/all_bf.sav
+examples/benchmark/results/
 MANIFEST
 
 # ignore the build directories

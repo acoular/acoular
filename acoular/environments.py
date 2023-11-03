@@ -18,9 +18,9 @@
 
 """
 import numba as nb
-from numpy import array, isscalar, float32, float64, newaxis, zeros, \
+from numpy import array, isscalar, float32, float64, newaxis, \
 sqrt, arange, pi, exp, sin, cos, arccos, zeros_like, empty, dot, hstack, \
-vstack, identity, cross, sign, arctan2, matmul, sum, lexsort, stack, nonzero, append, outer, asarray
+vstack, identity, cross, sign, arctan2, matmul, sum, ascontiguousarray
 from numpy.linalg.linalg import norm
 from scipy.integrate import ode
 from scipy.interpolate import LinearNDInterpolator
@@ -28,10 +28,10 @@ from scipy.spatial import ConvexHull
 from traits.api import HasPrivateTraits, Float, Property, Int, \
 CArray, cached_property, Trait, Dict
 
-from .internal import digest, ldigest
+from .internal import digest
 
-f64ro = nb.types.Array(nb.types.float64,2,'A',readonly=True)
-f32ro = nb.types.Array(nb.types.float32,2,'A',readonly=True)
+f64ro = nb.types.Array(nb.types.float64,2,'C',readonly=True)
+f32ro = nb.types.Array(nb.types.float32,2,'C',readonly=True)
 
 @nb.njit([(f64ro, f64ro), (f64ro, f32ro), (f32ro, f64ro),(f32ro, f32ro)],
                 cache=True, fastmath=True)
@@ -47,11 +47,17 @@ def dist_mat(gpos,mpos):
     """    
     _,M = mpos.shape
     _,N = gpos.shape
-    rm = empty((N,M),dtype=float64)
+    rm = empty((N,M),dtype=gpos.dtype)
+    TWO = rm.dtype.type(2.0) # make sure to have a float32 or float 64 literal
+    m0 = mpos[0]
+    m1 = mpos[1]
+    m2 = mpos[2]
     for n in range(N):
-        g = gpos[:,n]
+        g0 = gpos[0,n]
+        g1 = gpos[1,n]
+        g2 = gpos[2,n]
         for m in range(M):
-            rm[n,m] = sqrt((g[0] - mpos[0,m])**2 + (g[1] - mpos[1,m])**2 + (g[2] - mpos[2,m])**2)
+            rm[n,m] = sqrt((g0 - m0[m])**TWO + (g1 - m1[m])**TWO + (g2 - m2[m])**TWO)
     return rm
 
 
@@ -156,7 +162,7 @@ class Environment( HasPrivateTraits ):
         """
         if isscalar(mpos):
             mpos = array((0, 0, 0), dtype = float64)[:, newaxis]
-        rm = dist_mat(gpos,mpos)
+        rm = dist_mat(ascontiguousarray(gpos),ascontiguousarray(mpos))
 #        mpos = mpos[:, newaxis, :]
 #        rmv = gpos[:, :, newaxis]-mpos
 #        rm = sum(rmv*rmv, 0)**0.5

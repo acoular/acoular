@@ -245,13 +245,13 @@ class BeamformerTime( TimeInOut ):
         n_index = arange(0,num+1)[:,newaxis]
         c = self.steer.env.c/self.source.sample_freq
         amp = empty((1,self.grid.size,numMics),dtype=fdtype)
-        delays = empty((1,self.grid.size,numMics),dtype=fdtype)
+        #delays = empty((1,self.grid.size,numMics),dtype=fdtype)
         d_index = empty((1,self.grid.size,numMics),dtype=idtype)
         d_interp2 = empty((1,self.grid.size,numMics),dtype=fdtype)
         _steer_III(self.rm[newaxis,:,:],self.r0[newaxis,:],amp)
-        _delays(self.rm[newaxis,:,:], delays, c, d_interp2, d_index)
+        _delays(self.rm[newaxis,:,:], c, d_interp2, d_index)
         amp.shape = amp.shape[1:]
-        delays.shape = delays.shape[1:]
+        #delays.shape = delays.shape[1:]
         d_index.shape = d_index.shape[1:]
         d_interp2.shape = d_interp2.shape[1:]
         maxdelay = int((self.rm/c).max())+2 + num # +2 because of interpolation
@@ -295,7 +295,7 @@ class BeamformerTime( TimeInOut ):
                     else:
                         powPhi = (Phi[:num]**2).sum(0)
                     imax = argmax(powPhi)
-                    t_float = delays[imax]+n_index
+                    t_float = d_interp2[imax] + d_index[imax] + n_index
                     t_ind = t_float.astype(int64)
                     for m in range(numMics): 
                         p_res[t_ind[:num+1,m],m] -= self.damp*interp(t_ind[:num+1,m],
@@ -485,7 +485,7 @@ class BeamformerTimeTraj( BeamformerTime ):
         blockrm = empty((num,self.grid.size,numMics),dtype=fdtype)
         blockrmconv = empty((num,self.grid.size,numMics),dtype=fdtype)
         amp = empty((num,self.grid.size,numMics),dtype=fdtype)
-        delays = empty((num,self.grid.size,numMics),dtype=fdtype)
+        #delays = empty((num,self.grid.size,numMics),dtype=fdtype)
         d_index = empty((num,self.grid.size,numMics),dtype=idtype)
         d_interp2 = empty((num,self.grid.size,numMics),dtype=fdtype)
         blockr0 = empty((num,self.grid.size),dtype=fdtype)
@@ -521,7 +521,7 @@ class BeamformerTimeTraj( BeamformerTime ):
                 steer_func(blockrmconv, blockr0, amp)
             else:
                 steer_func(blockrm, blockr0, amp)
-            _delays(blockrm, delays, c, d_interp2, d_index)
+            _delays(blockrm, c, d_interp2, d_index)
             #_modf(delays, d_interp2, d_index)
             maxdelay = (d_index.max((1,2)) + arange(0,num)).max()+2 # + because of interpolation
             # increase buffer size because of greater delays
@@ -562,7 +562,9 @@ class BeamformerTimeTraj( BeamformerTime ):
                     # find index of max power focus point
                     imax = argmax(powPhi)
                     # find backward delays
-                    t_float = (delays[:num,imax,m_index]+n_index).astype(fdtype)
+                    t_float = (d_interp2[:num,imax,m_index] + \
+                               d_index[:num,imax,m_index] + \
+                               n_index).astype(fdtype)
                     # determine max/min delays in sample units
                     # + 2 because we do not want to extrapolate behind the last sample
                     ind_max = t_float.max(0).astype(idtype)+2 
