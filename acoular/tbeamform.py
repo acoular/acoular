@@ -548,6 +548,11 @@ class BeamformerTimeTraj( BeamformerTime ):
                 else:
                     yield Phi[:num]**2
             else:
+                # choose correct distance
+                if self.conv_amp: 
+                    blockrm1 = blockrmconv
+                else:
+                    blockrm1 = blockrm
                 Gamma = zeros(Phi.shape,dtype=fdtype)
                 Gamma_autopow = zeros(Phi.shape,dtype=fdtype)
                 J = 0
@@ -576,7 +581,7 @@ class BeamformerTimeTraj( BeamformerTime ):
                         p_res[ind_min[m]:ind_max[m],m] -= self.damp*interp(
                             t_ind[ind_min[m]:ind_max[m]], 
                             t_float[:num,m],
-                            h/blockrm[:num,imax,m],
+                            h/blockrm1[:num,imax,m],
                                 )
                     nextPhi, nextAutopow = self.delay_and_sum(num,p_res,d_interp2,d_index,amp)
                     if self.r_diag:
