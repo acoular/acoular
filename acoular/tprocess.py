@@ -1294,7 +1294,10 @@ class Mixer( TimeInOut ):
         for temp in self.source.result(num):
             sh = temp.shape[0]
             for g in gens:
-                temp1 = next(g)
+                try:
+                    temp1 = next(g)
+                except StopIteration:
+                    return
                 if temp.shape[0] > temp1.shape[0]:
                     temp = temp[:temp1.shape[0]]
                 temp += temp1[:temp.shape[0]]

@@ -1236,7 +1236,10 @@ class UncorrelatedNoiseSource( SamplesGenerator ):
             yield signal[n-num:n,:]
             n += num
         else:
-            yield signal[n-num:,:]
+            if (n-num) < self.numsamples:
+                yield signal[n-num:,:]
+            else:
+                return
 
 
 
