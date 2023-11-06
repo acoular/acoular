@@ -20,6 +20,7 @@
     BeamformerDamas
     BeamformerDamasPlus
     BeamformerOrth
+    BeamformerOrth2
     BeamformerCleansc
     BeamformerCMF
     BeamformerSODIX
@@ -1548,7 +1549,87 @@ class BeamformerOrth (BeamformerBase):
                 ac[i, e.result[i].argmax()]+=e.freq_data.eva[i, n]/numchannels
         for i in ii:
             fr[i] = 1
+
+class BeamformerOrth2( BeamformerBase ):
+    """
+    Orthogonal deconvolution, see :ref:`Sarradj, 2010<Sarradj2010>`.
+    New faster implementation without explicit (:class:`BeamformerEig`).
+    """
+
+    #: List of components to consider, use this to directly set the eigenvalues
+    #: used in the beamformer. Alternatively, set :attr:`n`.
+    eva_list = CArray(dtype=int,
+        desc="components")
+        
+    #: Number of components to consider, defaults to 1. If set, 
+    #: :attr:`eva_list` will contain
+    #: the indices of the n largest eigenvalues. Setting :attr:`eva_list` 
+    #: afterwards will override this value.
+    n = Int(1)
+
+    # internal identifier
+    digest = Property( 
+        depends_on = ['freq_data.digest', '_steer_obj.digest', 'r_diag', 
+            'eva_list'], 
+        )
+   
+    @cached_property
+    def _get_digest( self ):
+        return digest( self )
+
+    @cached_property
+    def _get_ext_digest( self ):
+        return digest( self, 'ext_digest' )
     
+    @on_trait_change('n')
+    def set_eva_list(self):
+        """ sets the list of eigenvalues to consider """
+        self.eva_list = arange(-1, -1-self.n, -1)
+
+    def calc(self, ac, fr):
+        """
+        Calculates the Orthogonal Beamforming result for the frequencies 
+        defined by :attr:`freq_data`.
+        
+        This is an internal helper function that is automatically called when 
+        accessing the beamformer's :attr:`~BeamformerBase.result` or calling
+        its :meth:`~BeamformerBase.synthetic` method.        
+        
+        Parameters
+        ----------
+        ac : array of floats
+            This array of dimension ([number of frequencies]x[number of gridpoints])
+            is used as call-by-reference parameter and contains the calculated
+            value after calling this method. 
+        fr : array of booleans
+            The entries of this [number of frequencies]-sized array are either 
+            'True' (if the result for this frequency has already been calculated)
+            or 'False' (for the frequencies where the result has yet to be calculated).
+            After the calculation at a certain frequency the value will be set
+            to 'True'
+        
+        Returns
+        -------
+        This method only returns values through the *ac* and *fr* parameters
+        """
+        # prepare calculation
+        f = self.freq_data.fftfreq()
+        numchannels = self.freq_data.numchannels
+        normFactor = self.sig_loss_norm()
+        param_steer_type, steer_vector = self._beamformer_params()
+        for i in self.freq_data.indices:        
+            if not fr[i]:
+                eva = array(self.freq_data.eva[i], dtype='float64')
+                eve = array(self.freq_data.eve[i], dtype='complex128')
+                for n in self.eva_list:
+                    beamformerOutput = beamformerFreq(param_steer_type, 
+                                                self.r_diag, 
+                                                normFactor, 
+                                                steer_vector(f[i]), 
+                                                (ones(1), eve[:, n:n+1]))[0]
+                    ac[i, beamformerOutput.argmax()]+=eva[n]/numchannels
+                fr[i] = 1
+
 class BeamformerCleansc( BeamformerBase ):
     """
     CLEAN-SC deconvolution, see :ref:`Sijtsma, 2007<Sijtsma2007>`.
