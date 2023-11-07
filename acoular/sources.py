@@ -19,6 +19,7 @@
     MovingLineSource
     UncorrelatedNoiseSource
     SourceMixer
+    PointSourceConvolve
 """
 
 # imports from other packages
@@ -45,7 +46,7 @@ from .trajectory import Trajectory
 from .internal import digest, ldigest
 from .microphones import MicGeom
 from .environments import Environment
-from .tprocess import SamplesGenerator
+from .tprocess import SamplesGenerator, TimeConvolve
 from .signals import SignalGenerator
 from .h5files import H5FileBase, _get_h5file_class
 from .tools import get_modes
@@ -1351,3 +1352,68 @@ class SourceMixer( SamplesGenerator ):
             yield temp
             if sh > temp.shape[0]:
                 break
+
+
+class PointSourceConvolve( PointSource ):
+
+    #: Convolution kernel in the time domain.
+    #: The second dimension of the kernel array has to be either 1 or match :attr:`~SamplesGenerator.numchannels`.
+    #: If only a single kernel is supplied, it is applied to all channels.
+    kernel = CArray(dtype=float, desc="Convolution kernel.")
+
+    # ------------- overwrite traits that are not supported by this class -------------
+    
+    #: Start time of the signal in seconds, defaults to 0 s.
+    start_t = Enum(0.0,
+        desc="signal start time")
+    
+    #: Start time of the data aquisition at microphones in seconds, 
+    #: defaults to 0 s.
+    start = Enum(0.0,
+        desc="sample start time")
+
+    #: Signal behaviour for negative time indices, i.e. if :attr:`start` < :attr:start_t.
+    #: `loop` take values from the end of :attr:`signal.signal()` array.
+    #: `zeros` set source signal to zero, advisable for deterministic signals.
+    #: defaults to `loop`.
+    prepadding = Enum(None, desc="Behaviour for negative time indices.")
+
+    #: Upsampling factor, internal use, defaults to 16.
+    up = Enum(None, desc="upsampling factor") 
+            
+    # internal identifier
+    digest = Property( 
+        depends_on = ['mics.digest', 'signal.digest', 'loc', 'kernel', '__class__'], 
+        )
+               
+    @cached_property
+    def _get_digest( self ):
+        return digest(self)
+
+    def result(self, num=128):
+        """
+        Python generator that yields the output at microphones block-wise.
+
+        Parameters
+        ----------
+        num : integer, defaults to 128
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block) .
+
+        Returns
+        -------
+        Samples in blocks of shape (num, numchannels). 
+            The last block may be shorter than num.
+        """
+        source = TimeSamples(
+            data=self.signal.signal()[:,newaxis],
+            sample_freq=self.sample_freq,
+            numsamples=self.numsamples,
+            numchannels=1,
+        )
+        time_convolve = TimeConvolve(
+            source = source,
+            kernel = self.kernel,
+        )
+        for block in time_convolve.result(num):
+            yield block
