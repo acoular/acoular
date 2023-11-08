@@ -25,7 +25,7 @@
 # imports from other packages
 
 from numpy import array, sqrt, ones, empty, newaxis, uint32, arange, dot, int64 ,real, pi, tile,\
-cross, zeros, ceil
+cross, zeros, ceil, repeat
 from numpy import min as npmin
 from numpy import any as npany
 
@@ -1405,11 +1405,13 @@ class PointSourceConvolve( PointSource ):
         Samples in blocks of shape (num, numchannels). 
             The last block may be shorter than num.
         """
+        data = repeat(
+            self.signal.signal()[:,newaxis],self.mics.num_mics,axis=1)
         source = TimeSamples(
-            data=self.signal.signal()[:,newaxis],
+            data=data,
             sample_freq=self.sample_freq,
             numsamples=self.numsamples,
-            numchannels=1,
+            numchannels=self.mics.num_mics,
         )
         time_convolve = TimeConvolve(
             source = source,
