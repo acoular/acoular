@@ -51,7 +51,7 @@ PointSpreadFunction, SteeringVector, BeamformerAdaptiveGrid, BeamformerGridlessO
 from .sources import PointSource, MovingPointSource, \
 TimeSamples, MaskedTimeSamples, PointSourceDipole, UncorrelatedNoiseSource, \
 SourceMixer, SphericalHarmonicSource, LineSource, MovingPointSourceDipole, \
-MovingLineSource
+MovingLineSource, PointSourceConvolve
 from .signals import SineGenerator, WNoiseGenerator, SignalGenerator,\
 PNoiseGenerator, GenericSignalGenerator, FiltWNoiseGenerator
 
