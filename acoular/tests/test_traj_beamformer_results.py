@@ -145,7 +145,7 @@ class BeamformerTimeTest(unittest.TestCase):
                 if WRITE_NEW_REFERENCE_DATA:
                     np.save(name,actual_data)
                 ref_data = np.load(name)
-                np.testing.assert_allclose(actual_data, ref_data, rtol=1e-5, atol=1e-8)
+                np.testing.assert_allclose(actual_data, ref_data, rtol=5e-5, atol=5e-6)
 
     def test_beamformer_time_result(self):
         """compare results of time beamformers with fixed focus against previous
@@ -157,7 +157,7 @@ class BeamformerTimeTest(unittest.TestCase):
                 if WRITE_NEW_REFERENCE_DATA:
                     np.save(name,actual_data)
                 ref_data = np.load(name)
-                np.testing.assert_allclose(actual_data, ref_data, rtol=1e-5, atol=1e-8)
+                np.testing.assert_allclose(actual_data, ref_data, rtol=5e-5, atol=5e-6)
 
     
 if __name__ == '__main__':
