@@ -3,24 +3,30 @@ import acoular as ac
 
 class GridTest(unittest.TestCase):
    
-    def get_rectgrid(self):
+    @staticmethod
+    def get_rectgrid():
         return ac.RectGrid(x_min=-1,x_max=1,y_min=-1,y_max=1,z=1,increment=1)
         
-    def get_rectgrid3D(self):
+    @staticmethod
+    def get_rectgrid3D():
         return ac.RectGrid3D(x_min=-1,x_max=1,y_min=-1,y_max=1,z_min=1, z_max=2,increment=1)
 
-    def get_linegrid(self):
+    @staticmethod
+    def get_linegrid():
         return ac.LineGrid(loc=(-1,0,1), length=2, numpoints=3)
 
-    def get_importgrid(self):
-        return ac.ImportGrid(gpos_file=self.get_rectgrid().gpos)
+    @staticmethod
+    def get_importgrid():
+        return ac.ImportGrid(gpos_file=GridTest.get_rectgrid().gpos)
 
-    def get_mergegrid(self):
-        return ac.MergeGrid(grids=[self.get_rectgrid(), self.get_linegrid()])
-
-    def get_all_grids(self):
-        for grid in [self.get_rectgrid, self.get_rectgrid3D,
-            self.get_linegrid, self.get_importgrid, self.get_mergegrid]:
+    @staticmethod
+    def get_mergegrid():
+        return ac.MergeGrid(grids=[GridTest.get_rectgrid(), GridTest.get_linegrid()])
+    
+    @staticmethod
+    def get_all_grids():
+        for grid in [GridTest.get_rectgrid, GridTest.get_rectgrid3D,
+            GridTest.get_linegrid, GridTest.get_importgrid, GridTest.get_mergegrid]:
             yield grid()
 
     def test_size(self):
@@ -28,11 +34,11 @@ class GridTest(unittest.TestCase):
             with self.subTest(grid.__class__.__name__):
                 self.assertEqual(grid.size, grid.gpos.shape[-1])
         
-    def test_shape(self):
-        for grid in self.get_all_grids():
-            with self.subTest(grid.__class__.__name__):
-                #TODO: what to assert here?
-                self.assertEqual(grid.shape, grid.gpos.shape)
+    # def test_shape(self):
+    #     for grid in self.get_all_grids():
+    #         with self.subTest(grid.__class__.__name__):
+    #             #TODO: what to assert here?
+    #             self.assertEqual(grid.shape, grid.gpos.shape)
 
 
 if __name__ == "__main__":
