@@ -35,8 +35,9 @@ class TestIntegrate(unittest.TestCase):
             for grid in GridTest.get_all_grids():
                 # if sector.__class__.__name__ == 'CircSector' and grid.__class__.__name__ in ['RectGrid3D']:
                 #     continue
-                with self.subTest(grid.__class__.__name__):
-                    print(f"test sector {sector.__class__.__name__} on grid {grid.__class__.__name__}")
+                grid_name =  grid.__class__.__name__
+                sector_name = sector.__class__.__name__
+                with self.subTest(f"Grid: {grid_name} Sector:{sector_name}"):
                     bf = self.get_beamformer(grid)
                     # class method result
                     class_result = bf.integrate(sector)
