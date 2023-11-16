@@ -4,12 +4,22 @@ import acoular as ac
 class GridTest(unittest.TestCase):
    
     @staticmethod
+    def get_sector_classes():
+        # for later testing condition: sector only includes (0,0,1) point 
+        return [ac.CircSector(x=0,y=0,r=0.2)]
+
+    @staticmethod
+    def get_emtpy_sector_classes():
+        # for later testing condition: sector should not cover any grid point
+        return [ac.CircSector(x=10,y=10,r=0.2, include_border=False, default_nearest=False)]
+
+    @staticmethod
     def get_rectgrid():
         return ac.RectGrid(x_min=-1,x_max=1,y_min=-1,y_max=1,z=1,increment=1)
         
     @staticmethod
     def get_rectgrid3D():
-        return ac.RectGrid3D(x_min=-1,x_max=1,y_min=-1,y_max=1,z_min=1, z_max=2,increment=1)
+        return ac.RectGrid3D(x_min=-1,x_max=1,y_min=-1,y_max=1,z_min=1, z_max=1,increment=1)
 
     @staticmethod
     def get_linegrid():
@@ -33,12 +43,24 @@ class GridTest(unittest.TestCase):
         for grid in self.get_all_grids():
             with self.subTest(grid.__class__.__name__):
                 self.assertEqual(grid.size, grid.gpos.shape[-1])
-        
-    # def test_shape(self):
-    #     for grid in self.get_all_grids():
-    #         with self.subTest(grid.__class__.__name__):
-    #             #TODO: what to assert here?
-    #             self.assertEqual(grid.shape, grid.gpos.shape)
+
+    def test_existing_subdomain(self):
+        for grid in self.get_all_grids():
+            for sector in self.get_sector_classes():
+                with self.subTest(grid.__class__.__name__):
+                    indices = grid.subdomain(sector)
+                    self.assertEqual(indices[0].shape[0], 1)
+
+    def test_empty_subdomain(self):
+        for grid in self.get_all_grids():
+            for sector in self.get_emtpy_sector_classes():
+                with self.subTest(grid.__class__.__name__):
+                    indices = grid.subdomain(sector)
+                    self.assertEqual(indices[0].shape[0], 0)
+                    sector.default_nearest = True
+                    indices = grid.subdomain(sector)
+                    self.assertEqual(indices[0].shape[0], 1)
+                   
 
 
 if __name__ == "__main__":
