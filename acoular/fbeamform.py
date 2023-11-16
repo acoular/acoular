@@ -73,7 +73,7 @@ damasSolverGaussSeidel
 from .h5cache import H5cache
 from .h5files import H5CacheFileBase
 from .internal import digest
-from .grids import Grid, Sector
+from .grids import Grid, Sector, MultiSector
 from .microphones import MicGeom
 from .configuration import config
 from .environments import Environment
@@ -679,7 +679,7 @@ class BeamformerBase( HasPrivateTraits ):
 #        mapshape = (rshape[0], ) + gshape
 #        h = r[:].reshape(mapshape)[ (s_[:], ) + ind ]
 #        return h.reshape(h.shape[0], prod(h.shape[1:])).sum(axis=1)
-        if isinstance(sector, Sector):
+        if isinstance(sector, Sector) or isinstance(sector, MultiSector):
             ind = self.steer.grid.subdomain(sector)
         elif hasattr(self.steer.grid, 'indices'):
             ind = self.steer.grid.indices(*sector)
@@ -2698,7 +2698,7 @@ def integrate(data, grid, sector):
         The spectrum (all calculated frequency bands) for the integrated sector.
     """
     
-    if isinstance(sector, Sector):
+    if isinstance(sector, Sector) or isinstance(sector, MultiSector):
         ind = grid.subdomain(sector)
     elif hasattr(grid, 'indices'):
         ind = grid.indices(*sector)

@@ -26,7 +26,7 @@ class GridTest(unittest.TestCase):
                     edges=[0.2+off,0.2+off,-0.2+off,0.2+off,-0.2+off,-0.2+off,0.2+off,-0.2+off], 
                     include_border=False, default_nearest=False)]
         multi_sector = ac.MultiSector(
-            sectors=deepcopy(sectors), include_border=False, default_nearest=False)
+            sectors=deepcopy(sectors))
         return sectors + [multi_sector]
 
     @staticmethod
@@ -73,7 +73,7 @@ class GridTest(unittest.TestCase):
                 with self.subTest(f"Grid: {grid.__class__.__name__} Sector:{sector.__class__.__name__}"):
                     indices = grid.subdomain(sector)
                     self.assertEqual(indices[0].shape[0], 0)
-                    if not  isinstance(sector, ac.MultiSector): #TODO: this needs to be fixed! 
+                    if hasattr(sector, 'default_nearest'):
                         sector.default_nearest = True
                         indices = grid.subdomain(sector)
                         self.assertEqual(indices[0].shape[0], 1)

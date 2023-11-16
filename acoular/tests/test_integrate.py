@@ -36,7 +36,7 @@ class TestIntegrate(unittest.TestCase):
             for grid in GridTest.get_all_grids():
                 bf = self.get_beamformer(grid)
                 with self.subTest(
-                    f"Grid: {grid.__class__.__name__} Sector:{sector.__class__.__name__}"):                   
+                    f"Grid: {grid.__class__.__name__} Sector: {sector.__class__.__name__}"):
                     for i,f in enumerate(self.f):
                         bf_res = bf.synthetic(f)
                         bf_max = bf_res.max()

@@ -1192,7 +1192,7 @@ class ConvexSector( Sector ):
 
 
 
-class MultiSector(Sector):
+class MultiSector(HasPrivateTraits):
     """
     Class for defining a sector consisting of multiple sectors.
     
