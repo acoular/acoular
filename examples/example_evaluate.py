@@ -4,7 +4,7 @@ from numpy import array, round
 import matplotlib.pyplot as plt
 from acoular import __file__ as bpath, MicGeom, WNoiseGenerator, PointSource,\
     Mixer, WriteH5, TimeSamples, PowerSpectra, RectGrid, SteeringVector,\
-    BeamformerCleansc, L_p, ImportGrid
+    BeamformerCleansc, L_p, ImportGrid,CircSector
 from acoular.tools import MetricEvaluator
 
 # set up the parameters
@@ -55,7 +55,7 @@ target_data = array([
     [n3.rms**2/nfft]]).T
 
 mv = MetricEvaluator(
-    r = 0.05*mg.aperture,
+    sector = CircSector(r=0.05*mg.aperture),
     grid = rg,
     data = pm.reshape((1,-1)),
     target_grid = target_grid,
