@@ -1215,7 +1215,7 @@ class MultiSector(Sector):
     
     #: List of :class:`acoular.grids.Sector` objects
     #: to be mixed.
-    sectors = List(Instance(SingleSector)) 
+    sectors = List(Instance(Sector)) 
     
     def contains ( self, pos ):
         """
