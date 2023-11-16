@@ -73,7 +73,7 @@ damasSolverGaussSeidel
 from .h5cache import H5cache
 from .h5files import H5CacheFileBase
 from .internal import digest
-from .grids import Grid, Sector, MultiSector
+from .grids import Grid, Sector
 from .microphones import MicGeom
 from .configuration import config
 from .environments import Environment
@@ -679,7 +679,7 @@ class BeamformerBase( HasPrivateTraits ):
 #        mapshape = (rshape[0], ) + gshape
 #        h = r[:].reshape(mapshape)[ (s_[:], ) + ind ]
 #        return h.reshape(h.shape[0], prod(h.shape[1:])).sum(axis=1)
-        if isinstance(sector, Sector) or isinstance(sector, MultiSector):
+        if isinstance(sector, Sector):
             ind = self.steer.grid.subdomain(sector)
         elif hasattr(self.steer.grid, 'indices'):
             ind = self.steer.grid.indices(*sector)
@@ -2498,7 +2498,7 @@ class BeamformerAdaptiveGrid(BeamformerBase,Grid):
         array of floats
             The spectrum (all calculated frequency bands) for the integrated sector.
         """
-        if not isinstance(sector, Sector) or isinstance(sector, MultiSector):
+        if not isinstance(sector, Sector):
             raise NotImplementedError(
             f'Please use a sector derived instance of type :class:`~acoular.grids.Sector` '
             f'instead of type {type(sector)}.'
@@ -2704,7 +2704,7 @@ def integrate(data, grid, sector):
         The spectrum (all calculated frequency bands) for the integrated sector.
     """
     
-    if isinstance(sector, Sector) or isinstance(sector, MultiSector):
+    if isinstance(sector, Sector):
         ind = grid.subdomain(sector)
     elif hasattr(grid, 'indices'):
         ind = grid.indices(*sector)

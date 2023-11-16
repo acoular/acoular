@@ -15,6 +15,7 @@
     LineGrid
     MergeGrid
     Sector
+    SingleSector
     RectSector
     RectSector3D
     CircSector
@@ -733,7 +734,7 @@ class ImportGrid( Grid ):
     @on_trait_change('basename')
     def import_gpos( self ):
         """
-        Import the microphone positions from .xml file.
+        Import the the grid point locations from .xml file.
         Called when :attr:`basename` changes.
         """
         if not path.isfile(self.from_file):
@@ -868,25 +869,13 @@ class MergeGrid( Grid ):
 
 class Sector( HasPrivateTraits ):
     """
-    Base class for sector types.
+    Base class for all sector types.
     
-    Defines the common interface for all sector classes. This class
+    Defines the common interface for all tbdsector classes. This class
     may be used as a base for diverse sector implementaions. If used
     directly, it implements a sector encompassing the whole grid.
     """
     
-    #: Boolean flag, if 'True' (default), grid points lying on the sector border are included.
-    include_border = Bool(True, 
-                          desc="include points on the border")    
-    
-    #: Absolute tolerance for sector border
-    abs_tol = Float(1e-12,
-                    desc="absolute tolerance for sector border")
-
-    #: Boolean flag, if 'True' (default), the nearest grid point is returned if none is inside the sector.
-    default_nearest = Bool(True, 
-                          desc="return nearest grid point to center of none inside sector")
-
     def contains ( self, pos ):
         """
         Queries whether the coordinates in a given array lie within the 
@@ -908,7 +897,30 @@ class Sector( HasPrivateTraits ):
         return ones(pos.shape[1], dtype=bool)
 
 
-class RectSector( Sector ):
+class SingleSector( Sector ):
+    """
+    Base class for single sector types.
+    
+    Defines the common interface for all single sector classes. This class
+    may be used as a base for diverse single sector implementaions. If used
+    directly, it implements a sector encompassing the whole grid.
+    """
+    
+    #: Boolean flag, if 'True' (default), grid points lying on the sector border are included.
+    include_border = Bool(True, 
+                          desc="include points on the border")    
+    
+    #: Absolute tolerance for sector border
+    abs_tol = Float(1e-12,
+                    desc="absolute tolerance for sector border")
+
+    #: Boolean flag, if 'True' (default), the nearest grid point is returned if none is inside the sector.
+    default_nearest = Bool(True, 
+                          desc="return nearest grid point to center of none inside sector")
+
+
+
+class RectSector( SingleSector ):
     """
     Class for defining a rectangular sector.
     
@@ -1050,7 +1062,7 @@ class RectSector3D( RectSector ):
         return inds.astype(bool)
 
 
-class CircSector( Sector ):
+class CircSector( SingleSector ):
     """
     Class for defining a circular sector.
     
@@ -1105,7 +1117,7 @@ class CircSector( Sector ):
         return inds
 
 
-class PolySector( Sector ):
+class PolySector( SingleSector ):
     """
      Class for defining a polygon sector.
      
@@ -1150,7 +1162,7 @@ class PolySector( Sector ):
           
         return inds
 
-class ConvexSector( Sector ):
+class ConvexSector( SingleSector ):
     """
      Class for defining a convex hull sector.
     
@@ -1192,7 +1204,7 @@ class ConvexSector( Sector ):
 
 
 
-class MultiSector(HasPrivateTraits):
+class MultiSector(Sector):
     """
     Class for defining a sector consisting of multiple sectors.
     
@@ -1203,7 +1215,7 @@ class MultiSector(HasPrivateTraits):
     
     #: List of :class:`acoular.grids.Sector` objects
     #: to be mixed.
-    sectors = List(Instance(Sector)) 
+    sectors = List(Instance(SingleSector)) 
     
     def contains ( self, pos ):
         """

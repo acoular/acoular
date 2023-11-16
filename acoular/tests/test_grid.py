@@ -8,6 +8,8 @@ class GridTest(unittest.TestCase):
         # for later testing condition: sector only includes (0,0,1) point 
         sectors = [
             ac.CircSector(x=0,y=0,r=0.2), 
+            ac.RectSector(x_min=-0.2,x_max=0.2,y_min=-0.2,y_max=0.2),
+            ac.RectSector3D(x_min=-0.2,x_max=0.2,y_min=-0.2,y_max=0.2,z_min=1,z_max=1),
             ac.PolySector(edges=[0.2,0.2,-0.2,0.2,-0.2,-0.2,0.2,-0.2]),
             ac.ConvexSector(edges=[0.2,0.2,-0.2,0.2,-0.2,-0.2,0.2,-0.2]),            
             ]
@@ -18,13 +20,20 @@ class GridTest(unittest.TestCase):
     def get_emtpy_sector_classes():
         # for later testing condition: sector should not cover any grid point
         off = 10
-        sectors = [ac.CircSector(x=off,y=off,r=0.2, include_border=False, default_nearest=False),
-                ac.PolySector(
-                    edges=[0.2+off,0.2+off,-0.2+off,0.2+off,-0.2+off,-0.2+off,0.2+off,-0.2+off], 
-                    include_border=False, default_nearest=False),
-                ac.ConvexSector(
-                    edges=[0.2+off,0.2+off,-0.2+off,0.2+off,-0.2+off,-0.2+off,0.2+off,-0.2+off], 
-                    include_border=False, default_nearest=False)]
+        sectors = [
+            ac.CircSector(x=off,y=off,r=0.2, include_border=False, default_nearest=False),
+            ac.RectSector(
+                x_min=-0.2+off,x_max=0.2+off,y_min=-0.2+off,y_max=0.2+off, 
+                include_border=False, default_nearest=False), 
+            ac.RectSector3D(
+                x_min=-0.2+off,x_max=0.2+off,y_min=-0.2+off,y_max=0.2+off,z_min=1+off,z_max=1+off, 
+                include_border=False, default_nearest=False),               
+            ac.PolySector(
+                edges=[0.2+off,0.2+off,-0.2+off,0.2+off,-0.2+off,-0.2+off,0.2+off,-0.2+off], 
+                include_border=False, default_nearest=False),
+            ac.ConvexSector(
+                edges=[0.2+off,0.2+off,-0.2+off,0.2+off,-0.2+off,-0.2+off,0.2+off,-0.2+off], 
+                include_border=False, default_nearest=False)]
         multi_sector = ac.MultiSector(
             sectors=deepcopy(sectors))
         return sectors + [multi_sector]
