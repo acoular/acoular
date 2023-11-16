@@ -61,18 +61,12 @@ class MetricEvaluator(HasPrivateTraits):
         desc="Grid instance that belongs to the ground-truth data")
 
     #: sector type. Currently only circular sectors are supported.
-    sector_type = Either('circular')
-
-    #: size of the integration sector.
-    #: If attr:`adaptive_r` is True and the distance between two sources is smaller
-    #: than 2*r,  the true radius of the integration area will be shrinked.
-    r = Float(1.,
-        desc="radius of integration around true source position")
+    sector = Instance(ac.CircSector, default=ac.CircSector(),)
 
     #: if set True: use shrink integration area if two sources are closer
     #: than 2*r. The radius of the integration area is then set to half the
     #: distance between the two sources.
-    adaptive_r = Bool(True,
+    adaptive_sector_size = Bool(True,
         desc="adaptive integration area")
 
     #: if set `True`, the same amplitude can be assigned to multiple targets if
@@ -94,8 +88,8 @@ class MetricEvaluator(HasPrivateTraits):
 
     def _get_sector_radii(self):
         ns = self.target_data.shape[1]
-        radii = ones(ns)*self.r
-        if self.adaptive_r:
+        radii = ones(ns)*self.sector.r
+        if self.adaptive_sector_size:
             locs = self.target_grid.gpos.T
             intersrcdist = cdist(locs, locs)
             intersrcdist[intersrcdist == 0] = inf
