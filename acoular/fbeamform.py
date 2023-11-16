@@ -2498,6 +2498,12 @@ class BeamformerAdaptiveGrid(BeamformerBase,Grid):
         array of floats
             The spectrum (all calculated frequency bands) for the integrated sector.
         """
+        if not isinstance(sector, Sector) or isinstance(sector, MultiSector):
+            raise NotImplementedError(
+            f'Please use a sector derived instance of type :class:`~acoular.grids.Sector` '
+            f'instead of type {type(sector)}.'
+            )
+
         ind = self.subdomain(sector)
         r = self.result
         h = zeros(r.shape[0])
