@@ -12,7 +12,43 @@
     config
 """
 
-from os import path, mkdir
+from os import path, mkdir, environ
+from warnings import warn
+import sys 
+
+# When numpy is using OpenBLAS then it runs with OPENBLAS_NUM_THREADS which may lead to
+# overcommittment when called from within numba jitted function that run on
+# NUMBA_NUM_THREADS. If overcommitted, things get extremely! slow. Therefore we make an
+# attempt to avoid this situation. The main problem is that OPENBLAS_NUM_THREADS is
+# only respected once numpy starts. Later on, it cannot be changed.
+
+# we check if numpy already loaded
+if 'numpy' in sys.modules: 
+    # numpy is loaded 
+    # temporarily route stdout to string
+    import io
+    import numpy 
+    orig_stdout = sys.stdout
+    temp_stdout = io.StringIO()
+    sys.stdout = temp_stdout
+    numpy.show_config()
+    sys.stdout = orig_stdout
+    # check if it uses OpenBLAS or another library
+    if 'openblas' in temp_stdout.getvalue().lower():
+        # it's OpenBLAS, set numba threads=1 to avoid overcommittment
+        import numba
+        numba.set_num_threads(1)
+        warn("We detected that Numpy is already loaded and uses OpenBLAS. Because "
+             "this conflicts with Numba parallel execution, we disable parallel "
+             "execution for now and processing might be slower. To speed up, "
+             "either import Numpy after Acoular or set environment variable "
+             "OPENBLAS_NUM_THREADS=1 before start of the program.",
+             UserWarning, stacklevel = 2)
+else:
+    # numpy is not loaded
+    environ['OPENBLAS_NUM_THREADS'] = "1"
+
+# this loads numpy, so we have to defer loading until OpenBLAS check is done
 from traits.api import Trait, Bool, Str, Property, HasStrictTraits
 
 class Config(HasStrictTraits):
