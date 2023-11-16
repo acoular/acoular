@@ -681,8 +681,14 @@ class BeamformerBase( HasPrivateTraits ):
 #        return h.reshape(h.shape[0], prod(h.shape[1:])).sum(axis=1)
         if isinstance(sector, Sector):
             ind = self.steer.grid.subdomain(sector)
-        else:
+        elif hasattr(self.steer.grid, 'indices'):
             ind = self.steer.grid.indices(*sector)
+        else:
+            raise NotImplementedError(
+            f'Grid of type {self.steer.grid.__class__.__name__} does not have an indices method! '
+            f'Please use a sector derived instance of type :class:`~acoular.grids.Sector` '
+            'instead of type numpy.array.'
+            )
         gshape = self.steer.grid.shape
         r = self.result
         h = zeros(r.shape[0])
@@ -2676,13 +2682,15 @@ def integrate(data, grid, sector):
     grid: Grid object 
         Object of a :class:`~acoular.grids.Grid`-derived class 
         that provides the grid locations.        
-    sector: array of floats
+    sector: array of floats or :class:`~acoular.grids.Sector`-derived object
         Tuple with arguments for the `indices` method 
         of a :class:`~acoular.grids.Grid`-derived class 
         (e.g. :meth:`RectGrid.indices<acoular.grids.RectGrid.indices>` 
         or :meth:`RectGrid3D.indices<acoular.grids.RectGrid3D.indices>`).
         Possible sectors would be `array([xmin, ymin, xmax, ymax])`
         or `array([x, y, radius])`.
+        Alternatively, a :class:`~acoular.grids.Sector`-derived object
+        can be used.
           
     Returns
     -------
@@ -2692,8 +2700,14 @@ def integrate(data, grid, sector):
     
     if isinstance(sector, Sector):
         ind = grid.subdomain(sector)
-    else:
+    elif hasattr(grid, 'indices'):
         ind = grid.indices(*sector)
+    else:
+        raise NotImplementedError(
+        f'Grid of type {grid.__class__.__name__} does not have an indices method! '
+        f'Please use a sector derived instance of type :class:`~acoular.grids.Sector` '
+        'instead of type numpy.array.'
+        )
     
     gshape = grid.shape
     gsize = grid.size
