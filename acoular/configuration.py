@@ -13,6 +13,7 @@
 """
 
 from os import path, mkdir, environ
+from warnings import warn
 import sys 
 
 # When numpy is using OpenBLAS then it runs with OPENBLAS_NUM_THREADS which may lead to
@@ -35,14 +36,16 @@ if 'numpy' in sys.modules:
     # check if it uses OpenBLAS or another library
     if 'openblas' in temp_stdout.getvalue().lower():
         # it's OpenBLAS, set numba threads=1 to avoid overcommittment
-        print('openblas')
         import numba
         numba.set_num_threads(1)
-    else:
-        print('mkl')
+        warn("We detected that Numpy is already loaded and uses OpenBLAS. Because "
+             "this conflicts with Numba parallel execution, we disable parallel "
+             "execution for now and processing might be slower. To speed up, "
+             "either import Numpy after Acoular or set environment variable "
+             "OPENBLAS_NUM_THREADS=1 before start of the program.",
+             UserWarning, stacklevel = 2)
 else:
     # numpy is not loaded
-    print('no numpy')
     environ['OPENBLAS_NUM_THREADS'] = "1"
 
 # this loads numpy, so we have to defer loading until OpenBLAS check is done
