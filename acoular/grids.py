@@ -15,6 +15,7 @@
     LineGrid
     MergeGrid
     Sector
+    SingleSector
     RectSector
     RectSector3D
     CircSector
@@ -27,7 +28,7 @@
 # imports from other packages
 from numpy import mgrid, s_, array, arange, isscalar, absolute, ones, argmin,\
 zeros, where,  asfarray,concatenate,sum,ma,ones_like,inf,copysign,fabs ,append,\
-tile,newaxis
+tile,newaxis, unique
 from numpy.linalg import norm
 from traits.api import HasPrivateTraits, Float, Property, Any, \
 property_depends_on, cached_property, Bool, List, Instance, File ,on_trait_change,\
@@ -733,7 +734,7 @@ class ImportGrid( Grid ):
     @on_trait_change('basename')
     def import_gpos( self ):
         """
-        Import the microphone positions from .xml file.
+        Import the the grid point locations from .xml file.
         Called when :attr:`basename` changes.
         """
         if not path.isfile(self.from_file):
@@ -749,98 +750,6 @@ class ImportGrid( Grid ):
             xyz.append(list(map(lambda a : float(el.getAttribute(a)), 'xyz')))
         self.gpos_file = array(xyz, 'd').swapaxes(0, 1)
         self.subgrids = array(names)
-        
-    def index ( self, x, y ):
-        """
-        Queries the indices for a grid point near a certain co-ordinate.
-
-        This can be used to query results or co-ordinates at/near a certain
-        co-ordinate.
-        
-        Parameters
-        ----------
-        x, y : float
-            The co-ordinates for which the indices are queried.
-
-        Returns
-        -------
-        2-tuple of integers
-            The indices that give the grid point nearest to the given x, y
-            co-ordinates from an array with the same shape as the grid.            
-        """
-        if x < self.x_min or x > self.x_max:
-            raise ValueError("x-value out of range")
-        if y  <  self.y_min or y > self.y_max:
-            raise ValueError("y-value out of range")
-        xi = int((x-self.x_min)/self.increment+0.5)
-        yi = int((y-self.y_min)/self.increment+0.5)
-        return xi, yi
-
-    def indices ( self, *r):
-        """
-        Queries the indices for a subdomain in the grid.
-        
-        Allows either rectangular, circular or polygonial subdomains.
-        This can be used to mask or to query results from a certain 
-        sector or subdomain.
-        
-        Parameters
-        ----------
-        x1, y1, x2, y2, ... : float
-            If three parameters are given, then a circular sector is assumed
-            that is given by its center (x1, y1) and the radius x2.
-            If four paramters are given, then a rectangular sector is
-            assumed that is given by two corners (x1, y1) and (x2, y2). 
-            If more parameters are given, the subdomain is assumed to have
-            polygonial shape with corners at (x_n, y_n).
-
-        Returns
-        -------
-        2-tuple of arrays of integers or of numpy slice objects
-            The indices that can be used to mask/select the grid subdomain from 
-            an array with the same shape as the grid.            
-        """
-        
-        if len(r) == 3: # only 3 values given -> use x,y,radius method
-            xpos = self.gpos
-            xis = []
-            yis = []
-            dr2 = (xpos[0, :]-r[0])**2 + (xpos[1, :]-r[1])**2
-            # array with true/false entries
-            inds = dr2 <= r[2]**2 
-            for np in arange(self.size)[inds]: # np -- points in x2-circle
-                xi, yi = self.index(xpos[0, np], xpos[1, np])
-                xis += [xi]
-                yis += [yi]
-            if not (xis and yis): # if no points in circle, take nearest one
-                return self.index(r[0], r[1])
-            else:
-                return array(xis), array(yis)
-        elif len(r) == 4: # rectangular subdomain - old functionality
-            xi1, yi1 = self.index(min(r[0], r[2]), min(r[1], r[3]))
-            xi2, yi2 = self.index(max(r[0], r[2]), max(r[1], r[3]))
-            return s_[xi1:xi2+1], s_[yi1:yi2+1]
-        else: # use enveloping polygon
-            xpos = self.gpos
-            xis = []
-            yis = []
-            #replaced matplotlib Path by numpy
-            #p = Path(array(r).reshape(-1,2))
-            #inds = p.contains_points()
-            #inds = in_poly(xpos[:2,:].T,array(r).reshape(-1,2))
-            poly = Polygon(array(r).reshape(-1,2)[:,0],array(r).reshape(-1,2)[:,1])
-            dists = poly.is_inside(xpos[0,:],xpos[1,:])   
-            inds = dists >= 0
-            for np in arange(self.size)[inds]: # np -- points in x2-circle
-                xi, yi = self.index(xpos[0, np], xpos[1, np])
-                xis += [xi]
-                yis += [yi]
-            if not (xis and yis): # if no points inside, take nearest to center
-                center = array(r).reshape(-1,2).mean(0)
-                return self.index(center[0], center[1])
-            else:
-                return array(xis), array(yis)
-                #return arange(self.size)[inds]
 
 class LineGrid( Grid ):
     """
@@ -948,7 +857,6 @@ class MergeGrid( Grid ):
             subgrids = append(subgrids,tile(grid.__class__.__name__+grid.digest,grid.size))
         return subgrids[:,newaxis].T
     
-
     @property_depends_on('digest')
     def _get_gpos( self ):
         bpos = zeros((3,0))
@@ -956,29 +864,18 @@ class MergeGrid( Grid ):
         for grid in self.grids:
             bpos = append(bpos,grid.gpos, axis = 1)
             #subgrids = append(subgrids,str(grid))
+        bpos = unique(bpos,axis=1)
         return bpos
 
 class Sector( HasPrivateTraits ):
     """
-    Base class for sector types.
+    Base class for all sector types.
     
-    Defines the common interface for all sector classes. This class
+    Defines the common interface for all tbdsector classes. This class
     may be used as a base for diverse sector implementaions. If used
     directly, it implements a sector encompassing the whole grid.
     """
     
-    #: Boolean flag, if 'True' (default), grid points lying on the sector border are included.
-    include_border = Bool(True, 
-                          desc="include points on the border")    
-    
-    #: Absolute tolerance for sector border
-    abs_tol = Float(1e-12,
-                    desc="absolute tolerance for sector border")
-
-    #: Boolean flag, if 'True' (default), the nearest grid point is returned if none is inside the sector.
-    default_nearest = Bool(True, 
-                          desc="return nearest grid point to center of none inside sector")
-
     def contains ( self, pos ):
         """
         Queries whether the coordinates in a given array lie within the 
@@ -1000,7 +897,30 @@ class Sector( HasPrivateTraits ):
         return ones(pos.shape[1], dtype=bool)
 
 
-class RectSector( Sector ):
+class SingleSector( Sector ):
+    """
+    Base class for single sector types.
+    
+    Defines the common interface for all single sector classes. This class
+    may be used as a base for diverse single sector implementaions. If used
+    directly, it implements a sector encompassing the whole grid.
+    """
+    
+    #: Boolean flag, if 'True' (default), grid points lying on the sector border are included.
+    include_border = Bool(True, 
+                          desc="include points on the border")    
+    
+    #: Absolute tolerance for sector border
+    abs_tol = Float(1e-12,
+                    desc="absolute tolerance for sector border")
+
+    #: Boolean flag, if 'True' (default), the nearest grid point is returned if none is inside the sector.
+    default_nearest = Bool(True, 
+                          desc="return nearest grid point to center of none inside sector")
+
+
+
+class RectSector( SingleSector ):
     """
     Class for defining a rectangular sector.
     
@@ -1142,7 +1062,7 @@ class RectSector3D( RectSector ):
         return inds.astype(bool)
 
 
-class CircSector( Sector ):
+class CircSector( SingleSector ):
     """
     Class for defining a circular sector.
     
@@ -1197,7 +1117,7 @@ class CircSector( Sector ):
         return inds
 
 
-class PolySector( Sector ):
+class PolySector( SingleSector ):
     """
      Class for defining a polygon sector.
      
@@ -1242,7 +1162,7 @@ class PolySector( Sector ):
           
         return inds
 
-class ConvexSector( Sector ):
+class ConvexSector( SingleSector ):
     """
      Class for defining a convex hull sector.
     
@@ -1296,7 +1216,6 @@ class MultiSector(Sector):
     #: List of :class:`acoular.grids.Sector` objects
     #: to be mixed.
     sectors = List(Instance(Sector)) 
-    
     
     def contains ( self, pos ):
         """
