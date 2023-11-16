@@ -1,17 +1,33 @@
 import unittest
 import acoular as ac
-
+from copy import deepcopy
 class GridTest(unittest.TestCase):
    
     @staticmethod
     def get_sector_classes():
         # for later testing condition: sector only includes (0,0,1) point 
-        return [ac.CircSector(x=0,y=0,r=0.2)]
+        sectors = [
+            ac.CircSector(x=0,y=0,r=0.2), 
+            ac.PolySector(edges=[0.2,0.2,-0.2,0.2,-0.2,-0.2,0.2,-0.2]),
+            ac.ConvexSector(edges=[0.2,0.2,-0.2,0.2,-0.2,-0.2,0.2,-0.2]),            
+            ]
+        multi_sector = ac.MultiSector(sectors=deepcopy(sectors))
+        return sectors + [multi_sector]
 
     @staticmethod
     def get_emtpy_sector_classes():
         # for later testing condition: sector should not cover any grid point
-        return [ac.CircSector(x=10,y=10,r=0.2, include_border=False, default_nearest=False)]
+        off = 10
+        sectors = [ac.CircSector(x=off,y=off,r=0.2, include_border=False, default_nearest=False),
+                ac.PolySector(
+                    edges=[0.2+off,0.2+off,-0.2+off,0.2+off,-0.2+off,-0.2+off,0.2+off,-0.2+off], 
+                    include_border=False, default_nearest=False),
+                ac.ConvexSector(
+                    edges=[0.2+off,0.2+off,-0.2+off,0.2+off,-0.2+off,-0.2+off,0.2+off,-0.2+off], 
+                    include_border=False, default_nearest=False)]
+        multi_sector = ac.MultiSector(
+            sectors=deepcopy(sectors), include_border=False, default_nearest=False)
+        return sectors + [multi_sector]
 
     @staticmethod
     def get_rectgrid():
@@ -47,21 +63,21 @@ class GridTest(unittest.TestCase):
     def test_existing_subdomain(self):
         for grid in self.get_all_grids():
             for sector in self.get_sector_classes():
-                with self.subTest(grid.__class__.__name__):
+                with self.subTest(f"Grid: {grid.__class__.__name__} Sector:{sector.__class__.__name__}"):
                     indices = grid.subdomain(sector)
                     self.assertEqual(indices[0].shape[0], 1)
 
     def test_empty_subdomain(self):
         for grid in self.get_all_grids():
             for sector in self.get_emtpy_sector_classes():
-                with self.subTest(grid.__class__.__name__):
+                with self.subTest(f"Grid: {grid.__class__.__name__} Sector:{sector.__class__.__name__}"):
                     indices = grid.subdomain(sector)
                     self.assertEqual(indices[0].shape[0], 0)
-                    sector.default_nearest = True
-                    indices = grid.subdomain(sector)
-                    self.assertEqual(indices[0].shape[0], 1)
+                    if not  isinstance(sector, ac.MultiSector): #TODO: this needs to be fixed! 
+                        sector.default_nearest = True
+                        indices = grid.subdomain(sector)
+                        self.assertEqual(indices[0].shape[0], 1)
                    
-
 
 if __name__ == "__main__":
     unittest.main()

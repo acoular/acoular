@@ -1205,7 +1205,6 @@ class MultiSector(Sector):
     #: to be mixed.
     sectors = List(Instance(Sector)) 
     
-    
     def contains ( self, pos ):
         """
         Queries whether the coordinates in a given array lie within any 
