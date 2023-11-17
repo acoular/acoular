@@ -44,7 +44,7 @@ from .microphones import MicGeom
 from .spectra import BaseSpectra, FFTSpectra, PowerSpectra, PowerSpectraImport, PowerSpectra as EigSpectra, synthetic
 
 from .fbeamform import BeamformerBase, BeamformerCapon, BeamformerEig, \
-BeamformerMusic, BeamformerDamas, BeamformerDamasPlus, BeamformerOrth,BeamformerCleansc, \
+BeamformerMusic, BeamformerDamas, BeamformerDamasPlus, BeamformerOrth, BeamformerCleansc, \
 BeamformerCMF,BeamformerSODIX, BeamformerClean, BeamformerFunctional, BeamformerGIB, L_p, integrate, \
 PointSpreadFunction, SteeringVector, BeamformerAdaptiveGrid, BeamformerGridlessOrth
 

@@ -1460,26 +1460,16 @@ class BeamformerDamasPlus (BeamformerDamas):
                 
                 fr[i] = 1
 
-class BeamformerOrth (BeamformerBase):
-    """
-    Orthogonal beamforming, see :ref:`Sarradj, 2010<Sarradj2010>`.
-    Needs a-priori beamforming with eigenvalue decomposition (:class:`BeamformerEig`).
-    """
 
-    #: :class:`BeamformerEig` object that provides data for deconvolution.
+class BeamformerOrth( BeamformerBase ):
+    """
+    Orthogonal deconvolution, see :ref:`Sarradj, 2010<Sarradj2010>`.
+    New faster implementation without explicit (:class:`BeamformerEig`).
+    """
+    #: (only for backward compatibility) :class:`BeamformerEig` object
+    #: if set, provides :attr:`freq_data`, :attr:`steer`, :attr:`r_diag`
+    #: if not set, these have to be set explicitly
     beamformer = Trait(BeamformerEig)
-
-    #: :class:`~acoular.spectra.PowerSpectra` object that provides the cross spectral matrix 
-    #: and eigenvalues, is set automatically.    
-    freq_data = Delegate('beamformer')
-
-    #: Flag, if 'True' (default), the main diagonal is removed before beamforming, 
-    #: is set automatically.
-    r_diag =  Delegate('beamformer')
-    
-    #: instance of :class:`~acoular.fbeamform.SteeringVector` or its derived classes,
-    #: that contains information about the steering vector. Is set automatically.
-    steer = Delegate('beamformer')
 
     #: List of components to consider, use this to directly set the eigenvalues
     #: used in the beamformer. Alternatively, set :attr:`n`.
@@ -1494,14 +1484,10 @@ class BeamformerOrth (BeamformerBase):
 
     # internal identifier
     digest = Property( 
-        depends_on = ['beamformer.digest', 'eva_list'], 
+        depends_on = ['freq_data.digest', '_steer_obj.digest', 'r_diag', 
+            'eva_list'], 
         )
-
-    # internal identifier
-    ext_digest = Property( 
-        depends_on = ['digest', 'beamformer.ext_digest'], 
-        )
-    
+   
     @cached_property
     def _get_digest( self ):
         return digest( self )
@@ -1509,7 +1495,13 @@ class BeamformerOrth (BeamformerBase):
     @cached_property
     def _get_ext_digest( self ):
         return digest( self, 'ext_digest' )
-    
+
+    @on_trait_change('beamformer.digest')
+    def delegate_beamformer_traits(self):
+        self.freq_data = self.beamformer.freq_data
+        self.r_diag = self.beamformer.r_diag
+        self.steer = self.beamformer.steer
+
     @on_trait_change('n')
     def set_eva_list(self):
         """ sets the list of eigenvalues to consider """
@@ -1542,19 +1534,23 @@ class BeamformerOrth (BeamformerBase):
         This method only returns values through the *ac* and *fr* parameters
         """
         # prepare calculation
-        ii = []
+        f = self.freq_data.fftfreq()
+        numchannels = self.freq_data.numchannels
+        normFactor = self.sig_loss_norm()
+        param_steer_type, steer_vector = self._beamformer_params()
         for i in self.freq_data.indices:        
             if not fr[i]:
-                ii.append(i)
-        numchannels = self.freq_data.numchannels
-        e = self.beamformer
-        for n in self.eva_list:
-            e.n = n
-            for i in ii:
-                ac[i, e.result[i].argmax()]+=e.freq_data.eva[i, n]/numchannels
-        for i in ii:
-            fr[i] = 1
-    
+                eva = array(self.freq_data.eva[i], dtype='float64')
+                eve = array(self.freq_data.eve[i], dtype='complex128')
+                for n in self.eva_list:
+                    beamformerOutput = beamformerFreq(param_steer_type, 
+                                                self.r_diag, 
+                                                normFactor, 
+                                                steer_vector(f[i]), 
+                                                (ones(1), eve[:, n:n+1]))[0]
+                    ac[i, beamformerOutput.argmax()]+=eva[n]/numchannels
+                fr[i] = 1
+
 class BeamformerCleansc( BeamformerBase ):
     """
     CLEAN-SC deconvolution, see :ref:`Sijtsma, 2007<Sijtsma2007>`.

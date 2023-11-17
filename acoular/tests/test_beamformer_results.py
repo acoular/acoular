@@ -68,7 +68,7 @@ def fbeamformers():
     bm = BeamformerMusic(freq_data=f, steer=st, n=6, cached = False)
     bd = BeamformerDamas(beamformer=bb, n_iter=10, cached = False)
     bdp = BeamformerDamasPlus(beamformer=bb, n_iter=100, cached = False)
-    bo = BeamformerOrth(beamformer=be, eva_list=list(range(38,54)), cached = False)
+    bo = BeamformerOrth(freq_data=f, steer=st, r_diag=True, eva_list=list(range(38,54)), cached = False)
     bs = BeamformerCleansc(freq_data=f, steer=st, r_diag=True, cached = False)
     bcmf = BeamformerCMF(freq_data=f, steer=st, method='LassoLarsBIC', cached = False)
     bl = BeamformerClean(beamformer=bb, n_iter=10, cached = False)
