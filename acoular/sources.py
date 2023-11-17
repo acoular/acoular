@@ -1355,6 +1355,9 @@ class SourceMixer( SamplesGenerator ):
 
 
 class PointSourceConvolve( PointSource ):
+    """
+    Class to blockwise convolve an arbitrary source signal with a spatial room impulse response
+    """
 
     #: Convolution kernel in the time domain.
     #: The second dimension of the kernel array has to be either 1 or match :attr:`~SamplesGenerator.numchannels`.
