@@ -1,6 +1,21 @@
 What's new
 ============
 
+23.11
+------------
+    * New class :class:`~acoular.tools.MetricEvaluator` to evaluate the performance of source mapping methods according to Herold and Sarradj (2017)
+    * New class :class:`~acoular.sources.PointSourceConvolve` to blockwise convolve an arbitrary source signal with a spatial room impulse response
+    * All filter classes derived from :class:`~acoular.tprocess.Filter` use SOS filters now
+    * No more version restrictions for scikit-learn 
+    * Speedups for numba jitted functions by enforcing C-contiguous arguments and the efficient use SIMD processor instructions
+    * :class:`~acoular.fbeamform.BeamformerOrth` now reimplements orthogonal deconvolution to be even faster and has a slightly different interface
+    * Simple benchmark suite to compare the performance of Acoular core routines on different computers
+    * Some internal rework in grid and sector classes
+    * Test coverage is improved
+    * Bugfixes:
+        * minor bugfix for convective amplification in :class:`~acoular.tbeamform.BeamformerCleantTraj` and :class:`~acoular.tbeamform.BeamformerCleantTrajSq`
+        * bugfix in some attributes of :class:`~acoular.grids.ImportGrid`
+
 23.6
 ------------
     * Supports Python 3.7, 3.8, 3.9, 3.10, 3.11 on Linux, MacOS, Windows
@@ -17,7 +32,7 @@ What's new
     * Tests are improved
     * Bugfixes:
         * broken numpy.int import 
-        * on off bug in :class:`~acoular.grids.LineGrid` 
+        * one off bug in :class:`~acoular.grids.LineGrid` 
 
 
 22.3
