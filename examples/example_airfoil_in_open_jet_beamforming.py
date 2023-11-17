@@ -17,7 +17,7 @@ import acoular
 from acoular import L_p, Calib, MicGeom, Environment, PowerSpectra, \
 RectGrid, BeamformerBase, BeamformerEig, BeamformerOrth, BeamformerCleansc, \
 MaskedTimeSamples, FiltFiltOctave, BeamformerTimeSq, TimeAverage, \
-TimeCache, BeamformerTime, TimePower, BeamformerCMF, \
+TimeCache, BeamformerTime, TimePower, BeamformerCMF, BeamformerOrth2,\
 BeamformerCapon, BeamformerMusic, BeamformerDamas, BeamformerClean, \
 BeamformerFunctional, BeamformerDamasPlus, BeamformerGIB, SteeringVector, \
 BeamformerCleant,BeamformerCleantSq
@@ -101,6 +101,7 @@ bm = BeamformerMusic(freq_data=f, steer=st, n=6)
 bd = BeamformerDamas(beamformer=bb, n_iter=100)
 bdp = BeamformerDamasPlus(beamformer=bb, n_iter=100)
 bo = BeamformerOrth(beamformer=be, eva_list=list(range(38,54)))
+bo2 = BeamformerOrth2(freq_data=f, steer=st, r_diag=True, eva_list=list(range(38,54)))
 bs = BeamformerCleansc(freq_data=f, steer=st, r_diag=True)
 bcmf = BeamformerCMF(freq_data=f, steer=st, method='LassoLarsBIC')
 bl = BeamformerClean(beamformer=bb, n_iter=100)
@@ -112,7 +113,7 @@ bgib = BeamformerGIB(freq_data=f, steer=st, method= 'LassoLars', n=10)
 #===============================================================================
 figure(1,(10,6))
 i1 = 1 #no of subplot
-for b in (bb, bc, be, bm, bl, bo, bs, bd, bcmf, bf, bdp, bgib):
+for b in (bb, bc, be, bm, bl, bo2, bs, bd, bcmf, bf, bdp, bgib):
     subplot(4,4,i1)
     i1 += 1
     map = b.synthetic(cfreq,1)
