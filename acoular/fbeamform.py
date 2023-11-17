@@ -20,7 +20,6 @@
     BeamformerDamas
     BeamformerDamasPlus
     BeamformerOrth
-    BeamformerOrth2
     BeamformerCleansc
     BeamformerCMF
     BeamformerSODIX
@@ -1461,106 +1460,16 @@ class BeamformerDamasPlus (BeamformerDamas):
                 
                 fr[i] = 1
 
-class BeamformerOrth (BeamformerBase):
-    """
-    Orthogonal beamforming, see :ref:`Sarradj, 2010<Sarradj2010>`.
-    Needs a-priori beamforming with eigenvalue decomposition (:class:`BeamformerEig`).
-    """
 
-    #: :class:`BeamformerEig` object that provides data for deconvolution.
-    beamformer = Trait(BeamformerEig)
-
-    #: :class:`~acoular.spectra.PowerSpectra` object that provides the cross spectral matrix 
-    #: and eigenvalues, is set automatically.    
-    freq_data = Delegate('beamformer')
-
-    #: Flag, if 'True' (default), the main diagonal is removed before beamforming, 
-    #: is set automatically.
-    r_diag =  Delegate('beamformer')
-    
-    #: instance of :class:`~acoular.fbeamform.SteeringVector` or its derived classes,
-    #: that contains information about the steering vector. Is set automatically.
-    steer = Delegate('beamformer')
-
-    #: List of components to consider, use this to directly set the eigenvalues
-    #: used in the beamformer. Alternatively, set :attr:`n`.
-    eva_list = CArray(dtype=int,
-        desc="components")
-        
-    #: Number of components to consider, defaults to 1. If set, 
-    #: :attr:`eva_list` will contain
-    #: the indices of the n largest eigenvalues. Setting :attr:`eva_list` 
-    #: afterwards will override this value.
-    n = Int(1)
-
-    # internal identifier
-    digest = Property( 
-        depends_on = ['beamformer.digest', 'eva_list'], 
-        )
-
-    # internal identifier
-    ext_digest = Property( 
-        depends_on = ['digest', 'beamformer.ext_digest'], 
-        )
-    
-    @cached_property
-    def _get_digest( self ):
-        return digest( self )
-
-    @cached_property
-    def _get_ext_digest( self ):
-        return digest( self, 'ext_digest' )
-    
-    @on_trait_change('n')
-    def set_eva_list(self):
-        """ sets the list of eigenvalues to consider """
-        self.eva_list = arange(-1, -1-self.n, -1)
-
-    def calc(self, ac, fr):
-        """
-        Calculates the Orthogonal Beamforming result for the frequencies 
-        defined by :attr:`freq_data`.
-        
-        This is an internal helper function that is automatically called when 
-        accessing the beamformer's :attr:`~BeamformerBase.result` or calling
-        its :meth:`~BeamformerBase.synthetic` method.        
-        
-        Parameters
-        ----------
-        ac : array of floats
-            This array of dimension ([number of frequencies]x[number of gridpoints])
-            is used as call-by-reference parameter and contains the calculated
-            value after calling this method. 
-        fr : array of booleans
-            The entries of this [number of frequencies]-sized array are either 
-            'True' (if the result for this frequency has already been calculated)
-            or 'False' (for the frequencies where the result has yet to be calculated).
-            After the calculation at a certain frequency the value will be set
-            to 'True'
-        
-        Returns
-        -------
-        This method only returns values through the *ac* and *fr* parameters
-        """
-        # prepare calculation
-        ii = []
-        for i in self.freq_data.indices:        
-            if not fr[i]:
-                ii.append(i)
-        numchannels = self.freq_data.numchannels
-        e = self.beamformer
-        for n in self.eva_list:
-            e.n = n
-            for i in ii:
-                ac[i, e.result[i].argmax()]+=e.freq_data.eva[i, n]/numchannels
-        for i in ii:
-            fr[i] = 1
-
-class BeamformerOrth2( BeamformerBase ):
+class BeamformerOrth( BeamformerBase ):
     """
     Orthogonal deconvolution, see :ref:`Sarradj, 2010<Sarradj2010>`.
     New faster implementation without explicit (:class:`BeamformerEig`).
     """
+    #: (only for backward compatibility) :class:`BeamformerEig` object
+    #: if set, provides :attr:`freq_data`, :attr:`steer`, :attr:`r_diag`
+    #: if not set, these have to be set explicitly
+    beamformer = Trait(BeamformerEig)
 
     #: List of components to consider, use this to directly set the eigenvalues
     #: used in the beamformer. Alternatively, set :attr:`n`.
@@ -1586,7 +1495,13 @@ class BeamformerOrth2( BeamformerBase ):
     @cached_property
     def _get_ext_digest( self ):
         return digest( self, 'ext_digest' )
-    
+
+    @on_trait_change('beamformer.digest')
+    def delegate_beamformer_traits(self):
+        self.freq_data = self.beamformer.freq_data
+        self.r_diag = self.beamformer.r_diag
+        self.steer = self.beamformer.steer
+
     @on_trait_change('n')
     def set_eva_list(self):
         """ sets the list of eigenvalues to consider """
