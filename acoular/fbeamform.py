@@ -1899,7 +1899,7 @@ class BeamformerCMF ( BeamformerBase ):
                 elif self.method == 'OMPCV':
                     model = OrthogonalMatchingPursuitCV(normalize=False)
                 elif self.method == 'NNLS':
-                    model = LinearRegression(normalize=False, positive=True)
+                    model = LinearRegression(positive=True)
 
                 if self.method == 'Split_Bregman' and PYLOPS_TRUE:   
                     Oop = MatrixMult(A) #tranfer operator 
