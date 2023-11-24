@@ -23,6 +23,13 @@ BeamformerCapon, BeamformerMusic, BeamformerDamas, BeamformerClean, \
 BeamformerFunctional, BeamformerDamasPlus, BeamformerGIB, BeamformerGridlessOrth,\
 SteeringVector, Environment
 
+# copy CMF classes as workaround so that reference data name is unique later
+class BeamformerCMFLassoLarsBIC (BeamformerCMF):
+    pass
+
+class BeamformerCMFNNLS (BeamformerCMF):
+    pass
+
 # if this flag is set to True
 WRITE_NEW_REFERENCE_DATA = False
 # new beamformer results are generated for comparison during testing. 
@@ -70,12 +77,13 @@ def fbeamformers():
     bdp = BeamformerDamasPlus(beamformer=bb, n_iter=100, cached = False)
     bo = BeamformerOrth(freq_data=f, steer=st, r_diag=True, eva_list=list(range(38,54)), cached = False)
     bs = BeamformerCleansc(freq_data=f, steer=st, r_diag=True, cached = False)
-    bcmf = BeamformerCMF(freq_data=f, steer=st, method='LassoLarsBIC', cached = False)
+    bcmflassobic = BeamformerCMFLassoLarsBIC(freq_data=f, steer=st, method='LassoLarsBIC', cached = False)
+    bcmfnnls = BeamformerCMFNNLS(freq_data=f, steer=st, method='NNLS', cached = False)
     bl = BeamformerClean(beamformer=bb, n_iter=10, cached = False)
     bf = BeamformerFunctional(freq_data=f, steer=st, r_diag=False, gamma=3, cached = False)
     bgib = BeamformerGIB(freq_data=f, steer=st, method= 'LassoLars', n=2, cached = False)
     bgo = BeamformerGridlessOrth(freq_data=f, steer=st, r_diag=False, n=1,  shgo={'n':16}, cached = False)
-    return (bbase, bc, beig, bm, bl, bo, bs, bd, bcmf, bf, bdp, bgib, bgo)
+    return (bbase, bc, beig, bm, bl, bo, bs, bd, bcmflassobic, bcmfnnls, bf, bdp, bgib, bgo)
 
 class acoular_beamformer_test(unittest.TestCase):
 
