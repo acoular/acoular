@@ -41,7 +41,7 @@ maintainers = [
     {name = "Adam Kujawski", email = "adam.kujawski@tu-berlin.de"},
     {name = "Art Pelling", email = "a.pelling@tu-berlin.de"},
     {name = "Ennes Sarradj", email = "ennes.sarradj@tu-berlin.de"},
-    {name = "Gert Herlod", email = "gert.herold@tu-berlin.de"},
+    {name = "Gert Herold", email = "gert.herold@tu-berlin.de"},
     {name = "Mikolaj Czuchaj", email = "mikolaj.czuchaj@tu-berlin.de"},
     {name = "Simon Jekosch", email = "s.jekosch@tu-berlin.de"},
 ]
