@@ -43,7 +43,7 @@ invert, dot, newaxis, zeros, linalg, \
 searchsorted, pi, sign, diag, arange, sqrt, log10, \
 reshape, hstack, vstack, eye, tril, size, clip, tile, round, delete, \
 absolute, argsort, sum, hsplit, fill_diagonal, zeros_like, \
-einsum, ndarray, isscalar, inf, real, unique
+einsum, ndarray, isscalar, inf, real, unique, atleast_2d
 
 from numpy.linalg import norm
 
@@ -170,7 +170,7 @@ class SteeringVector( HasPrivateTraits ):
 
     @property_depends_on('grid.digest, mics.digest, env.digest')
     def _get_rm ( self ):
-        return self.env._r(self.grid.pos(), self.mics.mpos)
+        return atleast_2d(self.env._r(self.grid.pos(), self.mics.mpos))
  
     @cached_property
     def _get_digest( self ):
