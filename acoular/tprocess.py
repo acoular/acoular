@@ -40,7 +40,7 @@
 from numpy import array, empty, empty_like, pi, sin, sqrt, zeros, newaxis, unique, \
 int16, nan, concatenate, sum, float64, identity, argsort, interp, arange, append, \
 linspace, flatnonzero, argmin, argmax, delete, mean, inf, asarray, stack, sinc, exp, \
-polymul, arange, cumsum, ceil, split
+polymul, arange, cumsum, ceil, split, array_equal
 
 from numpy.linalg import norm
 from numpy.matlib import repmat
@@ -957,7 +957,7 @@ class SpatialInterpolator(TimeInOut):
         # Interpolation for 1D Arrays 
         if self.array_dimension =='1D' or self.array_dimension =='ring':
             #for rotation add phidelay
-            if not phiDelay == []:
+            if not array_equal(phiDelay,[]):
                 xInterpHelp = repmat(virtNewCoord[0, :], nTime, 1) + repmat(phiDelay, virtNewCoord.shape[1], 1).T
                 xInterp = ((xInterpHelp + pi ) % (2 * pi)) - pi #  shifting phi cootrdinate into feasible area [-pi, pi]
             #if no rotation given
@@ -1001,7 +1001,7 @@ class SpatialInterpolator(TimeInOut):
         # Interpolation for arbitrary 2D Arrays
         elif self.array_dimension =='2D':
             #check rotation
-            if not phiDelay == []:
+            if not array_equal(phiDelay,[]):
                 xInterpHelp = repmat(virtNewCoord[0, :], nTime, 1) + repmat(phiDelay, virtNewCoord.shape[1], 1).T
                 xInterp = ((xInterpHelp + pi ) % (2 * pi)) - pi #shifting phi cootrdinate into feasible area [-pi, pi]
             else:
@@ -1081,7 +1081,7 @@ class SpatialInterpolator(TimeInOut):
         # Interpolation for arbitrary 3D Arrays             
         elif self.array_dimension =='3D':
             #check rotation
-            if not phiDelay == []:
+            if not array_equal(phiDelay,[]):
                 xInterpHelp = repmat(virtNewCoord[0, :], nTime, 1) + repmat(phiDelay, virtNewCoord.shape[1], 1).T
                 xInterp = ((xInterpHelp + pi  ) % (2 * pi)) - pi  #shifting phi cootrdinate into feasible area [-pi, pi]
             else:
