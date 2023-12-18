@@ -1547,7 +1547,7 @@ class BeamformerOrth( BeamformerBase ):
                                                 self.r_diag, 
                                                 normFactor, 
                                                 steer_vector(f[i]), 
-                                                (ones(1), eve[:, n:n+1]))[0]
+                                                (ones(1), eve[:, n].reshape((-1,1))))[0]
                     ac[i, beamformerOutput.argmax()]+=eva[n]/numchannels
                 fr[i] = 1
 
