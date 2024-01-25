@@ -43,7 +43,7 @@ invert, dot, newaxis, zeros, linalg, \
 searchsorted, pi, sign, diag, arange, sqrt, log10, \
 reshape, hstack, vstack, eye, tril, size, clip, tile, round, delete, \
 absolute, argsort, sum, hsplit, fill_diagonal, zeros_like, \
-einsum, ndarray, isscalar, inf, real, unique, atleast_2d
+einsum, ndarray, isscalar, inf, real, unique, atleast_2d, einsum_path
 
 from numpy.linalg import norm
 
@@ -2216,16 +2216,22 @@ class BeamformerSODIX( BeamformerBase ):
 
                         '''           
                         #### the sodix function ####
-                        Djm = D.reshape([numpoints,num_mics])                           
-                        csmmod = einsum('jm,jm,jn,jn->mn',h.T,Djm,Djm,h.T.conj() )        
-                        func = sum(absolute((csm - csmmod)))**2 + self.alpha*norm(Djm,self.pnorm)
-                        ####the sodix  derivitaive ####
-                        inner = csm - einsum('jl,jl,jm,jm->lm',h.T,Djm,Djm,h.T.conj() )      
-                        derdrl = -4 *  Djm * real(einsum('rm,rl,lm->rl',h.T,h.T.conj(),inner)) + \
-                            self.alpha * (abs(Djm)/norm(Djm,self.pnorm))**(1-self.pnorm)*sign(Djm)
+                        Djm = D.reshape([numpoints,num_mics])
+                        p = h.T * Djm
+                        csm_mod = dot(p.T, p.conj())
+                        Q = csm - csm_mod
+                        func = sum((absolute(Q))**2)
 
-                        return  func, derdrl[:].flatten()  #func[0]
-                    
+                        # subscripts and operands for numpy einsum and einsum_path
+                        subscripts = 'rl,rm,ml->rl'
+                        operands = (h.T,h.T.conj()*Djm,Q)
+                        es_path = einsum_path(subscripts, *operands, optimize='greedy')[0]
+
+                        #### the sodix derivative ####
+                        derdrl = einsum(subscripts, *operands, optimize=es_path)
+                        derdrl = -4 * real(derdrl)
+                        return func, derdrl.ravel()
+
                     ##### initial guess #### 
                     if all(ac[(i-1)]==0):
                          D0 = ones([numpoints,num_mics])
