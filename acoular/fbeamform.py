@@ -2041,7 +2041,8 @@ class BeamformerSODIX( BeamformerBase ):
                                           group)
             ac = self.h5f.get_data_by_reference('result','/'+nodename)
             fr = self.h5f.get_data_by_reference('freqs','/'+nodename)
-            return (ac,fr)    
+            gpos = None
+            return (ac,fr,gpos) 
     
     @property_depends_on('ext_digest')
     def _get_sodix_result ( self ):
@@ -2059,7 +2060,7 @@ class BeamformerSODIX( BeamformerBase ):
                     config.global_caching == 'none' or 
                     (config.global_caching == 'individual' and self.cached == False)
                 ):
-                (ac,fr) = self._get_filecache() 
+                (ac,fr,gpos) = self._get_filecache() 
                 if ac and fr: 
                     if not fr[f.ind_low:f.ind_high].all():                       
                         if config.global_caching == 'readonly': 
@@ -2248,8 +2249,8 @@ class BeamformerSODIX( BeamformerBase ):
                     qi, yval, dicts =  fmin_l_bfgs_b(function, D0, fprime=None, args=(),  #None  
                                                          approx_grad=0, bounds=boundarys, #approx_grad 0 or True
                                                          factr=100.0, pgtol=1e-09, epsilon=1e-08,
-                                                          iprint=0, maxfun=1500000, maxiter=self.max_iter,
-                                                          disp=None, callback=None, maxls=20)
+                                                          iprint=-1, maxfun=1500000, maxiter=self.max_iter,
+                                                          disp=-1, callback=None, maxls=20)
                     #squared pressure
                     ac[i]=qi**2
                 else:
