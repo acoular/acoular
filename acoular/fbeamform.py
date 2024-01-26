@@ -50,6 +50,13 @@ from numpy.linalg import norm
 from sklearn.linear_model import LassoLars, LassoLarsCV, LassoLarsIC,\
 OrthogonalMatchingPursuitCV, LinearRegression
 
+#check for sklearn version to account for incompatible behavior
+import sklearn
+from packaging.version import parse
+sklearn_ndict = {}
+if parse(sklearn.__version__)<parse('1.4'):
+    sklearn_ndict['normalize'] = False
+
 from scipy.optimize import nnls, linprog, fmin_l_bfgs_b, shgo
 from scipy.linalg import inv, eigh, eigvals, fractional_matrix_power
 from warnings import warn
@@ -1890,14 +1897,14 @@ class BeamformerCMF ( BeamformerBase ):
                 # choose method
                 if self.method == 'LassoLars':
                     model = LassoLars(alpha = self.alpha * unit,
-                                      max_iter = self.max_iter, 
-                                      normalize=False)
+                                      max_iter = self.max_iter,
+                                      **sklearn_ndict)
                 elif self.method == 'LassoLarsBIC':
                     model = LassoLarsIC(criterion = 'bic',
-                                        max_iter = self.max_iter, 
-                                        normalize=False,)
+                                        max_iter = self.max_iter,
+                                        **sklearn_ndict)
                 elif self.method == 'OMPCV':
-                    model = OrthogonalMatchingPursuitCV(normalize=False)
+                    model = OrthogonalMatchingPursuitCV(**sklearn_ndict)
                 elif self.method == 'NNLS':
                     model = LinearRegression(positive=True)
 
