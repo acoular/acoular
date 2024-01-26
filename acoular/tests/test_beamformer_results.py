@@ -21,7 +21,7 @@ RectGrid, BeamformerBase, BeamformerEig, BeamformerOrth, BeamformerCleansc, \
 MaskedTimeSamples, BeamformerCMF, \
 BeamformerCapon, BeamformerMusic, BeamformerDamas, BeamformerClean, \
 BeamformerFunctional, BeamformerDamasPlus, BeamformerGIB, BeamformerGridlessOrth,\
-SteeringVector, Environment
+SteeringVector, Environment, BeamformerSODIX
 
 # copy CMF classes as workaround so that reference data name is unique later
 class BeamformerCMFLassoLarsBIC (BeamformerCMF):
@@ -83,7 +83,8 @@ def fbeamformers():
     bf = BeamformerFunctional(freq_data=f, steer=st, r_diag=False, gamma=3, cached = False)
     bgib = BeamformerGIB(freq_data=f, steer=st, method= 'LassoLars', n=2, cached = False)
     bgo = BeamformerGridlessOrth(freq_data=f, steer=st, r_diag=False, n=1,  shgo={'n':16}, cached = False)
-    return (bbase, bc, beig, bm, bl, bo, bs, bd, bcmflassobic, bcmfnnls, bf, bdp, bgib, bgo)
+    bsodix = BeamformerSODIX(freq_data=f, steer=st,max_iter=10, cached = False)
+    return (bbase, bc, beig, bm, bl, bo, bs, bd, bcmflassobic, bcmfnnls, bf, bdp, bgib, bgo,bsodix)
 
 class acoular_beamformer_test(unittest.TestCase):
 

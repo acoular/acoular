@@ -43,7 +43,7 @@ invert, dot, newaxis, zeros, linalg, \
 searchsorted, pi, sign, diag, arange, sqrt, log10, \
 reshape, hstack, vstack, eye, tril, size, clip, tile, round, delete, \
 absolute, argsort, sum, hsplit, fill_diagonal, zeros_like, \
-einsum, ndarray, isscalar, inf, real, unique, atleast_2d
+einsum, ndarray, isscalar, inf, real, unique, atleast_2d, einsum_path
 
 from numpy.linalg import norm
 
@@ -2048,7 +2048,8 @@ class BeamformerSODIX( BeamformerBase ):
                                           group)
             ac = self.h5f.get_data_by_reference('result','/'+nodename)
             fr = self.h5f.get_data_by_reference('freqs','/'+nodename)
-            return (ac,fr)    
+            gpos = None
+            return (ac,fr,gpos) 
     
     @property_depends_on('ext_digest')
     def _get_sodix_result ( self ):
@@ -2066,7 +2067,7 @@ class BeamformerSODIX( BeamformerBase ):
                     config.global_caching == 'none' or 
                     (config.global_caching == 'individual' and self.cached == False)
                 ):
-                (ac,fr) = self._get_filecache() 
+                (ac,fr,gpos) = self._get_filecache() 
                 if ac and fr: 
                     if not fr[f.ind_low:f.ind_high].all():                       
                         if config.global_caching == 'readonly': 
@@ -2223,16 +2224,22 @@ class BeamformerSODIX( BeamformerBase ):
 
                         '''           
                         #### the sodix function ####
-                        Djm = D.reshape([numpoints,num_mics])                           
-                        csmmod = einsum('jm,jm,jn,jn->mn',h.T,Djm,Djm,h.T.conj() )        
-                        func = sum(absolute((csm - csmmod)))**2 + self.alpha*norm(Djm,self.pnorm)
-                        ####the sodix  derivitaive ####
-                        inner = csm - einsum('jl,jl,jm,jm->lm',h.T,Djm,Djm,h.T.conj() )      
-                        derdrl = -4 *  Djm * real(einsum('rm,rl,lm->rl',h.T,h.T.conj(),inner)) + \
-                            self.alpha * (abs(Djm)/norm(Djm,self.pnorm))**(1-self.pnorm)*sign(Djm)
+                        Djm = D.reshape([numpoints,num_mics])
+                        p = h.T * Djm
+                        csm_mod = dot(p.T, p.conj())
+                        Q = csm - csm_mod
+                        func = sum((absolute(Q))**2)
 
-                        return  func, derdrl[:].flatten()  #func[0]
-                    
+                        # subscripts and operands for numpy einsum and einsum_path
+                        subscripts = 'rl,rm,ml->rl'
+                        operands = (h.T,h.T.conj()*Djm,Q)
+                        es_path = einsum_path(subscripts, *operands, optimize='greedy')[0]
+
+                        #### the sodix derivative ####
+                        derdrl = einsum(subscripts, *operands, optimize=es_path)
+                        derdrl = -4 * real(derdrl)
+                        return func, derdrl.ravel()
+
                     ##### initial guess #### 
                     if all(ac[(i-1)]==0):
                          D0 = ones([numpoints,num_mics])
@@ -2249,8 +2256,8 @@ class BeamformerSODIX( BeamformerBase ):
                     qi, yval, dicts =  fmin_l_bfgs_b(function, D0, fprime=None, args=(),  #None  
                                                          approx_grad=0, bounds=boundarys, #approx_grad 0 or True
                                                          factr=100.0, pgtol=1e-09, epsilon=1e-08,
-                                                          iprint=0, maxfun=1500000, maxiter=self.max_iter,
-                                                          disp=None, callback=None, maxls=20)
+                                                          iprint=-1, maxfun=1500000, maxiter=self.max_iter,
+                                                          disp=-1, callback=None, maxls=20)
                     #squared pressure
                     ac[i]=qi**2
                 else:
