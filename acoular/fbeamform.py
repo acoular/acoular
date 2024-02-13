@@ -43,7 +43,7 @@ invert, dot, newaxis, zeros, linalg, \
 searchsorted, pi, sign, diag, arange, sqrt, log10, \
 reshape, hstack, vstack, eye, tril, size, clip, tile, round, delete, \
 absolute, argsort, sum, hsplit, fill_diagonal, zeros_like, \
-einsum, ndarray, isscalar, inf, real, unique, atleast_2d, einsum_path
+einsum, ndarray, isscalar, inf, real, unique, atleast_2d, einsum_path,trace
 
 from numpy.linalg import norm
 
@@ -2244,7 +2244,8 @@ class BeamformerSODIX( BeamformerBase ):
                     if all(ac[(i-1)]==0):
                          D0 = ones([numpoints,num_mics])
                     else:
-                         D0 = ac[(i-1)]
+                         D0 = sqrt(ac[(i-1)]*
+                             real((trace(csm)/trace(array(self.freq_data.csm[i-1], dtype='complex128',copy=1)))))
                     
                     #boundarys - set to non negative [2*(numpoints*num_mics)]
                     boundarys = tile((0, +inf), (numpoints*num_mics,1))
@@ -2253,9 +2254,9 @@ class BeamformerSODIX( BeamformerBase ):
                     # see https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.fmin_l_bfgs_b.html                    
 
                     qi = ones([numpoints,num_mics])
-                    qi, yval, dicts =  fmin_l_bfgs_b(function, D0, fprime=None, args=(),  #None  
-                                                         approx_grad=0, bounds=boundarys, #approx_grad 0 or True
-                                                         factr=100.0, pgtol=1e-09, epsilon=1e-08,
+                    qi, yval, dicts =  fmin_l_bfgs_b(function, D0, fprime=None, args=(),
+                                                         approx_grad=0, bounds=boundarys, 
+                                                         factr=100.0, pgtol=1e-12, epsilon=1e-08,
                                                           iprint=-1, maxfun=1500000, maxiter=self.max_iter,
                                                           disp=-1, callback=None, maxls=20)
                     #squared pressure
