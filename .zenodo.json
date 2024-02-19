@@ -1,0 +1,47 @@
+{
+  "metadata": {
+    "title": "Acoular – Acoustic testing and source mapping software",
+    "license": "BSD",
+    "keywords": [
+      "acoustics",
+      "beamforming",
+      "microphone array"
+    ],
+    "upload_type": "software",
+    "creators": [
+      {
+        "affiliation": "Department of Engineering Acoustics, TU Berlin",
+        "name": "Sarradj, Ennes",
+        "orcid": "0000-0002-0274-8456"
+      },
+      {
+        "affiliation": "Department of Engineering Acoustics, TU Berlin",
+        "name": "Herold, Gert",
+        "orcid": "0000-0001-5284-051X"
+      },
+      {
+        "affiliation": "Department of Engineering Acoustics, TU Berlin",
+        "name": "Kujawski, Adam",
+        "orcid": "0000-0003-4579-8813"
+      },
+      {
+        "affiliation": "Department of Engineering Acoustics, TU Berlin",
+        "name": "Jekosch, Simon"
+      },
+      {
+        "affiliation": "Department of Engineering Acoustics, TU Berlin",
+        "name": "Pelling, Art J. R.",
+        "orcid": "0000-0003-3228-6069"
+
+      },
+      {
+        "affiliation": "Department of Engineering Acoustics, TU Berlin",
+        "name": "Czuchaj, Mikolaj"
+      },
+      {
+        "affiliation": "Department of Engineering Acoustics, TU Berlin",
+        "name": "Gensch, Tom"
+      }
+    ]
+  }
+}
