@@ -1,7 +1,10 @@
 name: Build docs and deploy
 
-on: [workflow_dispatch, push, pull_request]
-#on: [workflow_dispatch] # only on manual trigger
+on: [workflow_dispatch, pull_request] # only on manual trigger and for pull requests 
+branches:
+  only:
+    - master
+    - docs_workflow
 
 permissions:
   contents: write
@@ -27,7 +30,7 @@ jobs:
           make html
       - name: Deploy docs
         uses: peaceiris/actions-gh-pages@v3
-        if: ${{ github.event_name =='workflow_dispatch' && github.ref == 'refs/heads/master' }}
+        if: ${{ github.event_name =='workflow_dispatch' && github.ref == 'refs/heads/docs_workflow' }}
         with:
           publish_branch: gh-pages
           github_token: ${{ secrets.GITHUB_TOKEN }}
