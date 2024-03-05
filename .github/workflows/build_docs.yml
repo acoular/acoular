@@ -1,7 +1,15 @@
 name: Build docs and deploy
 
 #on: [workflow_dispatch, push, pull_request]
-on: [workflow_dispatch] # only on manual trigger
+
+on:
+  # push:
+  #   branches: [ main ]
+  # pull_request:
+  #   branches: [ main ]
+  workflow_dispatch:
+    branches: [ master ]
+  
 
 permissions:
   contents: write
