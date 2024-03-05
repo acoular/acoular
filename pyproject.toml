@@ -55,6 +55,7 @@ dev = [
     "numpydoc", # docs
     "sounddevice", # docs 
     "graphviz", #docs
+    "pickleshare", #docs
 ]
 full = [
     "matplotlib",
