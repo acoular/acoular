@@ -4,7 +4,7 @@ name: Build docs and deploy
 
 on:
   pull_request:
-    branches: [ main ] # build docs as additional test on PRs to main
+    branches: [ master ] # build docs as additional test on PRs to main
   workflow_dispatch:
     branches: [ '*' ] # allow manual trigger for all branches
   
