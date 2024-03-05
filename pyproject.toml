@@ -49,10 +49,18 @@ maintainers = [
 [project.optional-dependencies]
 dev = [
     "nox",
+    "sphinx", # docs
+    "matplotlib", # docs
+    "ipython", # docs
+    "numpydoc", # docs
+    "sounddevice", # docs 
+    "graphviz", #docs
+    "pickleshare", #docs
 ]
 full = [
     "matplotlib",
-    "pylops"
+    "pylops",
+    "sounddevice"
 ]
 
 [project.urls]

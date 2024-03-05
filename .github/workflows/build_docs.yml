@@ -1,0 +1,41 @@
+name: Build docs and deploy
+
+#DEPLOY NOTE: This workflow will only deploy the docs when a workflow is manually triggered from the main branch via github! 
+
+on:
+  pull_request:
+    branches: [ master ] # build docs as additional test on PRs to main
+  workflow_dispatch:
+    branches: [ '*' ] # allow manual trigger for all branches
+  
+permissions:
+  contents: write
+
+jobs:
+  sphinx:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          sudo apt-get install graphviz  
+          sudo apt-get install libportaudio2
+          python -m pip install --upgrade pip
+          pip install ".[dev]"
+      - name: Build docs 
+        run: |
+          cd docs
+          make html
+      - name: Deploy docs
+        uses: peaceiris/actions-gh-pages@v3
+        if: ${{ github.event_name =='workflow_dispatch' && github.ref == 'refs/heads/master' }}
+        with:
+          publish_branch: gh-pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/build/html/
+          force_orphan: true # This allows you to make your publish branch with only the latest commit.
+          enable_jekyll: false
