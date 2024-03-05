@@ -49,6 +49,7 @@ maintainers = [
 [project.optional-dependencies]
 dev = [
     "nox",
+    "sphinx",
 ]
 full = [
     "matplotlib",
