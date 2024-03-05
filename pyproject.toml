@@ -54,6 +54,7 @@ dev = [
     "ipython", # docs
     "numpydoc", # docs
     "sounddevice", # docs 
+    "graphviz", #docs
 ]
 full = [
     "matplotlib",
