@@ -1,0 +1,34 @@
+name: Build docs and deploy
+
+on: [workflow_dispatch, push, pull_request]
+  
+permissions:
+  contents: write
+
+jobs:
+  sphinx:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          sudo apt-get install pandoc
+          python -m pip install --upgrade pip
+          pip install ".[dev]"
+      - name: Build docs 
+        run: |
+          cd docs
+          make html
+      - name: Deploy docs
+        uses: peaceiris/actions-gh-pages@v3
+        if: ${{ github.event_name =='push' && github.ref == 'refs/heads/master' }}
+        with:
+          publish_branch: gh-pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/build/html/
+          force_orphan: true # This allows you to make your publish branch with only the latest commit.
+          enable_jekyll: false
