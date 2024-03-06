@@ -28,7 +28,7 @@ from traits.api import Bool, CArray, Float, HasPrivateTraits, Instance, Property
 
 from scipy.special import spherical_yn, spherical_jn, sph_harm
 from scipy.spatial.distance import cdist
-
+from copy import copy
 
 class MetricEvaluator(HasPrivateTraits):
     """Evaluate the reconstruction performance of source mapping methods.
@@ -104,8 +104,10 @@ class MetricEvaluator(HasPrivateTraits):
         sectors = []
         for i in range(ns):
             loc = self.target_grid.gpos[:,i]
-            sectors.append(
-                ac.CircSector(r=r[i],x=loc[0],y=loc[1]))
+            self.sector.r = r[i]
+            self.sector.x = loc[0]
+            self.sector.y = loc[1]
+            sectors.append(copy(self.sector))
         return sectors
 
     def _integrate_sectors(self):
