@@ -8,6 +8,7 @@ What's new
         * speedups through the use of `numpy.einsum_path` together with `numpy.einsum`
         * changed start value `pgtol` for the optimization with `scipy.optimize.fmin_l_bfgs_b` solver
     * Bugfixes:
+        * fixes unrecognized sector arguments in :class:`~acoular.tools.MetricEvaluator`
         * handles version-dependent default values for `normalize` attribute in sklearn solvers (relevant for :class:`~acoular.fbeamform.BeamformerCMF` )
         * fixes bug in :class:`~acoular.fbeamform.BeamformerOrth`: assigned strongest source at grid index 0 when instead of `eva_list` the trait `n` was given
         * fixes broken :class:`~acoular.tprocess.SpatialInterpolator` 
@@ -16,7 +17,7 @@ What's new
     * Internal:
         * new GitHub workflow for CI of the documentation 
         * added Zenodo metadata file
-        * changes to `pyproject.toml`
+        * changes to author name in `pyproject.toml`
 
 
 23.11
