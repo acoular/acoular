@@ -24,11 +24,11 @@ from numpy import array, concatenate, newaxis, where,arctan2,sqrt,pi,mod,zeros,\
 from numpy.linalg import norm
 from numpy.ma import masked_where
 from .spectra import synthetic
-from traits.api import Bool, CArray, Float, HasPrivateTraits, Instance, Property, Either
+from traits.api import Bool, CArray, HasPrivateTraits, Instance, Property, Any
 
 from scipy.special import spherical_yn, spherical_jn, sph_harm
 from scipy.spatial.distance import cdist
-
+from copy import copy
 
 class MetricEvaluator(HasPrivateTraits):
     """Evaluate the reconstruction performance of source mapping methods.
@@ -104,8 +104,11 @@ class MetricEvaluator(HasPrivateTraits):
         sectors = []
         for i in range(ns):
             loc = self.target_grid.gpos[:,i]
-            sectors.append(
-                ac.CircSector(r=r[i],x=loc[0],y=loc[1]))
+            sector = copy(self.sector)
+            sector.r = r[i]
+            sector.x = loc[0]
+            sector.y = loc[1]
+            sectors.append(sector)
         return sectors
 
     def _integrate_sectors(self):
@@ -116,11 +119,12 @@ class MetricEvaluator(HasPrivateTraits):
         array (num_freqs,num_sources)
             returns the integrated Pa**2 values for each sector
         """
+        sectors = self.sectors
         results = empty(shape=self.target_data.shape)
         for f in range(self.target_data.shape[0]):
             data = self.data[f]
             for i in range(self.target_data.shape[1]):
-                sector = self.sectors[i]
+                sector = sectors[i]
                 results[f,i] = ac.integrate(data,self.grid,sector)
                 if not self.multi_assignment:
                     indices = self.grid.subdomain(sector)
