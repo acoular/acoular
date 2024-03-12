@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Grid &#8212; Acoular 24.03 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=eafc0fe6" />
+    <script src="../../../_static/documentation_options.js?v=be0753e0"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="RectGrid" href="acoular.grids.RectGrid.html" />
+    <link rel="prev" title="grids" href="../acoular.grids.html" /> 
+  </head><body>
+      <div class="header"><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 24.03 documentation</span></a></h1>
+        <h2 class="heading"><span>Grid</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.grids.html">grids</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.grids.html">grids</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.grids.RectGrid.html">RectGrid</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="grid">
+<h1>Grid<a class="headerlink" href="#grid" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.grids.Grid">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.grids.</span></span><span class="sig-name descname"><span class="pre">Grid</span></span><a class="headerlink" href="#acoular.grids.Grid" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">HasPrivateTraits</span></code></p>
+<p>Virtual base class for grid geometries.</p>
+<p>Defines the common interface for all grid classes and
+provides facilities to query grid properties and related data. This class
+may be used as a base for specialized grid implementaions. It should not
+be used directly as it contains no real functionality.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.grids.Grid.size">
+<span class="sig-name descname"><span class="pre">size</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(desc=&quot;overall</span> <span class="pre">number</span> <span class="pre">of</span> <span class="pre">grid</span> <span class="pre">points&quot;)</span></em><a class="headerlink" href="#acoular.grids.Grid.size" title="Link to this definition">¶</a></dt>
+<dd><p>Overall number of grid points. Readonly; is set automatically when
+other grid defining properties are set</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.grids.Grid.shape">
+<span class="sig-name descname"><span class="pre">shape</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(desc=&quot;grid</span> <span class="pre">shape</span> <span class="pre">as</span> <span class="pre">tuple&quot;)</span></em><a class="headerlink" href="#acoular.grids.Grid.shape" title="Link to this definition">¶</a></dt>
+<dd><p>Shape of grid. Readonly, gives the shape as tuple, useful for cartesian
+grids</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.grids.Grid.gpos">
+<span class="sig-name descname"><span class="pre">gpos</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(desc=&quot;x,</span> <span class="pre">y,</span> <span class="pre">z</span> <span class="pre">positions</span> <span class="pre">of</span> <span class="pre">grid</span> <span class="pre">points&quot;)</span></em><a class="headerlink" href="#acoular.grids.Grid.gpos" title="Link to this definition">¶</a></dt>
+<dd><p>Grid positions as (3, <a class="reference internal" href="#acoular.grids.Grid.size" title="acoular.grids.Grid.size"><code class="xref py py-attr docutils literal notranslate"><span class="pre">size</span></code></a>) array of floats, without invalid
+microphones; readonly.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.grids.Grid.pos">
+<span class="sig-name descname"><span class="pre">pos</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#acoular.grids.Grid.pos" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates grid co-ordinates. 
+Deprecated; use <a class="reference internal" href="#acoular.grids.Grid.gpos" title="acoular.grids.Grid.gpos"><code class="xref py py-attr docutils literal notranslate"><span class="pre">gpos</span></code></a> attribute instead.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>array of floats of shape (3, <a class="reference internal" href="#acoular.grids.Grid.size" title="acoular.grids.Grid.size"><code class="xref py py-attr docutils literal notranslate"><span class="pre">size</span></code></a>)</dt><dd><p>The grid point x, y, z-coordinates in one array.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.grids.Grid.subdomain">
+<span class="sig-name descname"><span class="pre">subdomain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sector</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.grids.Grid.subdomain" title="Link to this definition">¶</a></dt>
+<dd><p>Queries the indices for a subdomain in the grid.</p>
+<p>Allows arbitrary subdomains of type <a class="reference internal" href="acoular.grids.Sector.html#acoular.grids.Sector" title="acoular.grids.Sector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sector</span></code></a></p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>sector</strong><span class="classifier"><a class="reference internal" href="acoular.grids.Sector.html#acoular.grids.Sector" title="acoular.grids.Sector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sector</span></code></a></span></dt><dd><p>Sector describing the subdomain.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>2-tuple of arrays of integers or of numpy slice objects</dt><dd><p>The indices that can be used to mask/select the grid subdomain from 
+an array with the same shape as the grid.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.grids.html">grids</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.grids.html">grids</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.grids.RectGrid.html">RectGrid</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright Acoular Development Team.
+      Last updated on Mar 12, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    </div>
+  </body>
+</html>

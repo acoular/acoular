@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Trajectory &#8212; Acoular 24.03 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=eafc0fe6" />
+    <script src="../../../_static/documentation_options.js?v=be0753e0"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="prev" title="trajectory" href="../acoular.trajectory.html" /> 
+  </head><body>
+      <div class="header"><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 24.03 documentation</span></a></h1>
+        <h2 class="heading"><span>Trajectory</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.trajectory.html">trajectory</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.trajectory.html">trajectory</a>
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="trajectory">
+<h1>Trajectory<a class="headerlink" href="#trajectory" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.trajectory.Trajectory">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.trajectory.</span></span><span class="sig-name descname"><span class="pre">Trajectory</span></span><a class="headerlink" href="#acoular.trajectory.Trajectory" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">HasPrivateTraits</span></code></p>
+<p>Describes a trajectory from sampled points.</p>
+<p>Based on a discrete number of points in space and time, a 
+continuous trajectory is calculated using spline interpolation 
+of positions between samples.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.trajectory.Trajectory.points">
+<span class="sig-name descname"><span class="pre">points</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Dict(key_trait</span> <span class="pre">=</span> <span class="pre">Float,</span> <span class="pre">value_trait</span> <span class="pre">=</span> <span class="pre">Tuple(Float,</span> <span class="pre">Float,</span> <span class="pre">Float),</span>&#160; <span class="pre">…</span></em><a class="headerlink" href="#acoular.trajectory.Trajectory.points" title="Link to this definition">¶</a></dt>
+<dd><p>Dictionary that assigns discrete time instants (keys) to 
+sampled <cite>(x, y, z)</cite> positions along the trajectory (values).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.trajectory.Trajectory.interval">
+<span class="sig-name descname"><span class="pre">interval</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property()</span></em><a class="headerlink" href="#acoular.trajectory.Trajectory.interval" title="Link to this definition">¶</a></dt>
+<dd><p>Tuple of the start and end time, is set automatically 
+(depending on <a class="reference internal" href="#acoular.trajectory.Trajectory.points" title="acoular.trajectory.Trajectory.points"><code class="xref py py-attr docutils literal notranslate"><span class="pre">points</span></code></a>).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.trajectory.Trajectory.tck">
+<span class="sig-name descname"><span class="pre">tck</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property()</span></em><a class="headerlink" href="#acoular.trajectory.Trajectory.tck" title="Link to this definition">¶</a></dt>
+<dd><p>Spline data, internal use.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.trajectory.Trajectory.location">
+<span class="sig-name descname"><span class="pre">location</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">der</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.trajectory.Trajectory.location" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the positions for one or more instants in time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>t</strong><span class="classifier">array of floats</span></dt><dd><p>Instances in time to calculate the positions at.</p>
+</dd>
+<dt><strong>der</strong><span class="classifier">integer</span></dt><dd><p>The order of derivative of the spline to compute, defaults to 0.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>(x, y, z)</strong><span class="classifier">tuple with arrays of floats</span></dt><dd><p>Positions at the given times; <cite>x</cite>, <cite>y</cite> and <cite>z</cite> have the same shape as <cite>t</cite>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.trajectory.Trajectory.traj">
+<span class="sig-name descname"><span class="pre">traj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t_start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_t</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">der</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.trajectory.Trajectory.traj" title="Link to this definition">¶</a></dt>
+<dd><p>Python generator that yields locations along the trajectory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>t_start</strong><span class="classifier">float</span></dt><dd><p>Starting time of the trajectory, defaults to the earliest  
+time in <a class="reference internal" href="#acoular.trajectory.Trajectory.points" title="acoular.trajectory.Trajectory.points"><code class="xref py py-attr docutils literal notranslate"><span class="pre">points</span></code></a>.</p>
+</dd>
+<dt><strong>t_end</strong><span class="classifier">float</span></dt><dd><p>Ending time of the trajectory, defaults to the latest  
+time in <a class="reference internal" href="#acoular.trajectory.Trajectory.points" title="acoular.trajectory.Trajectory.points"><code class="xref py py-attr docutils literal notranslate"><span class="pre">points</span></code></a>.</p>
+</dd>
+<dt><strong>delta_t</strong><span class="classifier">float</span></dt><dd><p>Time interval between yielded trajectory points, defaults to earliest  
+time in <a class="reference internal" href="#acoular.trajectory.Trajectory.points" title="acoular.trajectory.Trajectory.points"><code class="xref py py-attr docutils literal notranslate"><span class="pre">points</span></code></a>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>(x, y, z)</strong><span class="classifier">tuples of floats</span></dt><dd><p>Positions at the desired times are yielded.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<dl class="simple">
+<dt>x.traj(0.1)  </dt><dd><p>Yields the position every 0.1 s within the 
+given <a class="reference internal" href="#acoular.trajectory.Trajectory.interval" title="acoular.trajectory.Trajectory.interval"><code class="xref py py-attr docutils literal notranslate"><span class="pre">interval</span></code></a>.</p>
+</dd>
+<dt>x.traj(2.5, 4.5, 0.1)  </dt><dd><p>Yields the position every 0.1 s between 2.5 s and 4.5 s.</p>
+</dd>
+<dt>x.traj(0.1, der=1)  </dt><dd><p>Yields the 1st derivative of the spline (= velocity vector) every 0.1 s 
+within the given <a class="reference internal" href="#acoular.trajectory.Trajectory.interval" title="acoular.trajectory.Trajectory.interval"><code class="xref py py-attr docutils literal notranslate"><span class="pre">interval</span></code></a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.trajectory.html">trajectory</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.trajectory.html">trajectory</a>
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright Acoular Development Team.
+      Last updated on Mar 12, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    </div>
+  </body>
+</html>

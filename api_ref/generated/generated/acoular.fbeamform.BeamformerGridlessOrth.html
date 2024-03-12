@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>BeamformerGridlessOrth &#8212; Acoular 24.03 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=eafc0fe6" />
+    <script src="../../../_static/documentation_options.js?v=be0753e0"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="PointSpreadFunction" href="acoular.fbeamform.PointSpreadFunction.html" />
+    <link rel="prev" title="BeamformerAdaptiveGrid" href="acoular.fbeamform.BeamformerAdaptiveGrid.html" /> 
+  </head><body>
+      <div class="header"><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 24.03 documentation</span></a></h1>
+        <h2 class="heading"><span>BeamformerGridlessOrth</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.fbeamform.BeamformerAdaptiveGrid.html">BeamformerAdaptiveGrid</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.fbeamform.html">fbeamform</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.fbeamform.PointSpreadFunction.html">PointSpreadFunction</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="beamformergridlessorth">
+<h1>BeamformerGridlessOrth<a class="headerlink" href="#beamformergridlessorth" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerGridlessOrth">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.fbeamform.</span></span><span class="sig-name descname"><span class="pre">BeamformerGridlessOrth</span></span><a class="headerlink" href="#acoular.fbeamform.BeamformerGridlessOrth" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.fbeamform.BeamformerAdaptiveGrid.html#acoular.fbeamform.BeamformerAdaptiveGrid" title="acoular.fbeamform.BeamformerAdaptiveGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerAdaptiveGrid</span></code></a></p>
+<p>Orthogonal beamforming without predefined grid</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerGridlessOrth.eva_list">
+<span class="sig-name descname"><span class="pre">eva_list</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CArray(dtype=int,</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerGridlessOrth.eva_list" title="Link to this definition">¶</a></dt>
+<dd><p>List of components to consider, use this to directly set the eigenvalues
+used in the beamformer. Alternatively, set <a class="reference internal" href="#acoular.fbeamform.BeamformerGridlessOrth.n" title="acoular.fbeamform.BeamformerGridlessOrth.n"><code class="xref py py-attr docutils literal notranslate"><span class="pre">n</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerGridlessOrth.n">
+<span class="sig-name descname"><span class="pre">n</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Int(1)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerGridlessOrth.n" title="Link to this definition">¶</a></dt>
+<dd><p>Number of components to consider, defaults to 1. If set, 
+<a class="reference internal" href="#acoular.fbeamform.BeamformerGridlessOrth.eva_list" title="acoular.fbeamform.BeamformerGridlessOrth.eva_list"><code class="xref py py-attr docutils literal notranslate"><span class="pre">eva_list</span></code></a> will contain
+the indices of the n largest eigenvalues. Setting <a class="reference internal" href="#acoular.fbeamform.BeamformerGridlessOrth.eva_list" title="acoular.fbeamform.BeamformerGridlessOrth.eva_list"><code class="xref py py-attr docutils literal notranslate"><span class="pre">eva_list</span></code></a> 
+afterwards will override this value.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerGridlessOrth.bounds">
+<span class="sig-name descname"><span class="pre">bounds</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">List(</span> <span class="pre">Tuple(Float,Float),</span> <span class="pre">minlen=3,</span> <span class="pre">maxlen=3,</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerGridlessOrth.bounds" title="Link to this definition">¶</a></dt>
+<dd><p>Geometrical bounds of the search domain to consider.
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">bound</span></code> ist a list that contains exactly three tuple of 
+(min,max) for each of the coordinates x, y, z. 
+Defaults to [(-1.,1.),(-1.,1.),(0.01,1.)]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerGridlessOrth.shgo">
+<span class="sig-name descname"><span class="pre">shgo</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Dict</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerGridlessOrth.shgo" title="Link to this definition">¶</a></dt>
+<dd><p>options dictionary for the SHGO solver, see 
+<a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.shgo.html">scipy docs</a>.
+Default is Sobol sampling Nelder-Mead local minimizer, 256 initial sampling points 
+and 1 iteration</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerGridlessOrth.set_eva_list">
+<span class="sig-name descname"><span class="pre">set_eva_list</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#acoular.fbeamform.BeamformerGridlessOrth.set_eva_list" title="Link to this definition">¶</a></dt>
+<dd><p>sets the list of eigenvalues to consider</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerGridlessOrth.set_n">
+<span class="sig-name descname"><span class="pre">set_n</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#acoular.fbeamform.BeamformerGridlessOrth.set_n" title="Link to this definition">¶</a></dt>
+<dd><p>sets the list of eigenvalues to consider</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerGridlessOrth.calc">
+<span class="sig-name descname"><span class="pre">calc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ac</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fr</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.fbeamform.BeamformerGridlessOrth.calc" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the result for the frequencies defined by <code class="xref py py-attr docutils literal notranslate"><span class="pre">freq_data</span></code></p>
+<p>This is an internal helper function that is automatically called when 
+accessing the beamformer’s <a class="reference internal" href="acoular.fbeamform.BeamformerBase.html#acoular.fbeamform.BeamformerBase.result" title="acoular.fbeamform.BeamformerBase.result"><code class="xref py py-attr docutils literal notranslate"><span class="pre">result</span></code></a> or calling
+its <a class="reference internal" href="acoular.fbeamform.BeamformerBase.html#acoular.fbeamform.BeamformerBase.synthetic" title="acoular.fbeamform.BeamformerBase.synthetic"><code class="xref py py-meth docutils literal notranslate"><span class="pre">synthetic()</span></code></a> method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>ac</strong><span class="classifier">array of floats</span></dt><dd><p>This array of dimension ([number of frequencies]x[number of gridpoints])
+is used as call-by-reference parameter and contains the calculated
+value after calling this method.</p>
+</dd>
+<dt><strong>fr</strong><span class="classifier">array of booleans</span></dt><dd><p>The entries of this [number of frequencies]-sized array are either 
+‘True’ (if the result for this frequency has already been calculated)
+or ‘False’ (for the frequencies where the result has yet to be calculated).
+After the calculation at a certain frequency the value will be set
+to ‘True’</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>This method only returns values through the <em>ac</em> and <em>fr</em> parameters</dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.fbeamform.BeamformerAdaptiveGrid.html">BeamformerAdaptiveGrid</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.fbeamform.html">fbeamform</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.fbeamform.PointSpreadFunction.html">PointSpreadFunction</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright Acoular Development Team.
+      Last updated on Mar 12, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    </div>
+  </body>
+</html>

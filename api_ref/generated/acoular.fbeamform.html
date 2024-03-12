@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>fbeamform &#8212; Acoular 24.03 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=eafc0fe6" />
+    <script src="../../_static/documentation_options.js?v=be0753e0"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="SteeringVector" href="generated/acoular.fbeamform.SteeringVector.html" />
+    <link rel="prev" title="SlotJet" href="generated/acoular.environments.SlotJet.html" /> 
+  </head><body>
+      <div class="header"><h1 class="heading"><a href="../../index.html">
+          <span>Acoular 24.03 documentation</span></a></h1>
+        <h2 class="heading"><span>fbeamform</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="generated/acoular.environments.SlotJet.html">SlotJet</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Reference Manual</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="generated/acoular.fbeamform.SteeringVector.html">SteeringVector</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="module-acoular.fbeamform">
+<span id="fbeamform"></span><h1>fbeamform<a class="headerlink" href="#module-acoular.fbeamform" title="Link to this heading">¶</a></h1>
+<p>Implements beamformers in the frequency domain.</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.fbeamform.SteeringVector.html#acoular.fbeamform.SteeringVector" title="acoular.fbeamform.SteeringVector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SteeringVector</span></code></a></p></td>
+<td><p>Basic class for implementing steering vectors with monopole source transfer models</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/acoular.fbeamform.BeamformerBase.html#acoular.fbeamform.BeamformerBase" title="acoular.fbeamform.BeamformerBase"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BeamformerBase</span></code></a></p></td>
+<td><p>Beamforming using the basic delay-and-sum algorithm in the frequency domain.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.fbeamform.BeamformerFunctional.html#acoular.fbeamform.BeamformerFunctional" title="acoular.fbeamform.BeamformerFunctional"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BeamformerFunctional</span></code></a></p></td>
+<td><p>Functional beamforming after <a class="reference internal" href="../../literature/index.html#dougherty2014"><span class="std std-ref">Dougherty, 2014</span></a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/acoular.fbeamform.BeamformerCapon.html#acoular.fbeamform.BeamformerCapon" title="acoular.fbeamform.BeamformerCapon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BeamformerCapon</span></code></a></p></td>
+<td><p>Beamforming using the Capon (Mininimum Variance) algorithm,  see <a class="reference internal" href="../../literature/index.html#capon1969"><span class="std std-ref">Capon, 1969</span></a>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.fbeamform.BeamformerEig.html#acoular.fbeamform.BeamformerEig" title="acoular.fbeamform.BeamformerEig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BeamformerEig</span></code></a></p></td>
+<td><p>Beamforming using eigenvalue and eigenvector techniques, see <a class="reference internal" href="../../literature/index.html#sarradj2005"><span class="std std-ref">Sarradj et al., 2005</span></a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/acoular.fbeamform.BeamformerMusic.html#acoular.fbeamform.BeamformerMusic" title="acoular.fbeamform.BeamformerMusic"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BeamformerMusic</span></code></a></p></td>
+<td><p>Beamforming using the MUSIC algorithm, see <a class="reference internal" href="../../literature/index.html#schmidt1986"><span class="std std-ref">Schmidt, 1986</span></a>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.fbeamform.BeamformerClean.html#acoular.fbeamform.BeamformerClean" title="acoular.fbeamform.BeamformerClean"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BeamformerClean</span></code></a></p></td>
+<td><p>CLEAN deconvolution, see <a class="reference internal" href="../../literature/index.html#hoegbom1974"><span class="std std-ref">Hoegbom, 1974</span></a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/acoular.fbeamform.BeamformerDamas.html#acoular.fbeamform.BeamformerDamas" title="acoular.fbeamform.BeamformerDamas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BeamformerDamas</span></code></a></p></td>
+<td><p>DAMAS deconvolution, see <a class="reference internal" href="../../literature/index.html#brookshumphreys2006"><span class="std std-ref">Brooks and Humphreys, 2006</span></a>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.fbeamform.BeamformerDamasPlus.html#acoular.fbeamform.BeamformerDamasPlus" title="acoular.fbeamform.BeamformerDamasPlus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BeamformerDamasPlus</span></code></a></p></td>
+<td><p>DAMAS deconvolution, see <a class="reference internal" href="../../literature/index.html#brookshumphreys2006"><span class="std std-ref">Brooks and Humphreys, 2006</span></a>, for solving the system of equations, instead of the original Gauss-Seidel  iterations, this class employs the NNLS or linear programming solvers from  scipy.optimize or one  of several optimization algorithms from the scikit-learn module.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/acoular.fbeamform.BeamformerOrth.html#acoular.fbeamform.BeamformerOrth" title="acoular.fbeamform.BeamformerOrth"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BeamformerOrth</span></code></a></p></td>
+<td><p>Orthogonal deconvolution, see <a class="reference internal" href="../../literature/index.html#sarradj2010"><span class="std std-ref">Sarradj, 2010</span></a>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.fbeamform.BeamformerCleansc.html#acoular.fbeamform.BeamformerCleansc" title="acoular.fbeamform.BeamformerCleansc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BeamformerCleansc</span></code></a></p></td>
+<td><p>CLEAN-SC deconvolution, see <a class="reference internal" href="../../literature/index.html#sijtsma2007"><span class="std std-ref">Sijtsma, 2007</span></a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/acoular.fbeamform.BeamformerCMF.html#acoular.fbeamform.BeamformerCMF" title="acoular.fbeamform.BeamformerCMF"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BeamformerCMF</span></code></a></p></td>
+<td><p>Covariance Matrix Fitting, see <a class="reference internal" href="../../literature/index.html#yardibi2008"><span class="std std-ref">Yardibi et al., 2008</span></a>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.fbeamform.BeamformerSODIX.html#acoular.fbeamform.BeamformerSODIX" title="acoular.fbeamform.BeamformerSODIX"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BeamformerSODIX</span></code></a></p></td>
+<td><p>SODIX, see Funke, Ein Mikrofonarray-Verfahren zur Untersuchung der Schallabstrahlung von Turbofantriebwerken, 2017.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/acoular.fbeamform.BeamformerGIB.html#acoular.fbeamform.BeamformerGIB" title="acoular.fbeamform.BeamformerGIB"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BeamformerGIB</span></code></a></p></td>
+<td><p>Beamforming GIB methods with different normalizations,</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.fbeamform.BeamformerAdaptiveGrid.html#acoular.fbeamform.BeamformerAdaptiveGrid" title="acoular.fbeamform.BeamformerAdaptiveGrid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BeamformerAdaptiveGrid</span></code></a></p></td>
+<td><p>Base class for array methods without predefined grid</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/acoular.fbeamform.BeamformerGridlessOrth.html#acoular.fbeamform.BeamformerGridlessOrth" title="acoular.fbeamform.BeamformerGridlessOrth"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BeamformerGridlessOrth</span></code></a></p></td>
+<td><p>Orthogonal beamforming without predefined grid</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.fbeamform.PointSpreadFunction.html#acoular.fbeamform.PointSpreadFunction" title="acoular.fbeamform.PointSpreadFunction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointSpreadFunction</span></code></a></p></td>
+<td><p>The point spread function.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/acoular.fbeamform.L_p.html#acoular.fbeamform.L_p" title="acoular.fbeamform.L_p"><code class="xref py py-obj docutils literal notranslate"><span class="pre">L_p</span></code></a>(x)</p></td>
+<td><p>Calculates the sound pressure level from the squared sound pressure.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.fbeamform.integrate.html#acoular.fbeamform.integrate" title="acoular.fbeamform.integrate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">integrate</span></code></a>(data, grid, sector)</p></td>
+<td><p>Integrates a sound pressure map over a given sector.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="generated/acoular.environments.SlotJet.html">SlotJet</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Reference Manual</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="generated/acoular.fbeamform.SteeringVector.html">SteeringVector</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright Acoular Development Team.
+      Last updated on Mar 12, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    </div>
+  </body>
+</html>

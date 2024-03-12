@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>AngleTracker &#8212; Acoular 24.03 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=eafc0fe6" />
+    <script src="../../../_static/documentation_options.js?v=be0753e0"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="ChannelMixer" href="acoular.tprocess.ChannelMixer.html" />
+    <link rel="prev" title="Trigger" href="acoular.tprocess.Trigger.html" /> 
+  </head><body>
+      <div class="header"><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 24.03 documentation</span></a></h1>
+        <h2 class="heading"><span>AngleTracker</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tprocess.Trigger.html">Trigger</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tprocess.html">tprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tprocess.ChannelMixer.html">ChannelMixer</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="angletracker">
+<h1>AngleTracker<a class="headerlink" href="#angletracker" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.tprocess.AngleTracker">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.tprocess.</span></span><span class="sig-name descname"><span class="pre">AngleTracker</span></span><a class="headerlink" href="#acoular.tprocess.AngleTracker" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.tprocess.MaskedTimeInOut.html#acoular.tprocess.MaskedTimeInOut" title="acoular.tprocess.MaskedTimeInOut"><code class="xref py py-class docutils literal notranslate"><span class="pre">MaskedTimeInOut</span></code></a></p>
+<p>Calculates rotation angle and rpm per sample from a trigger signal 
+using spline interpolation in the time domain.</p>
+<p>Gets samples from <a class="reference internal" href="#acoular.tprocess.AngleTracker.trigger" title="acoular.tprocess.AngleTracker.trigger"><code class="xref py py-attr docutils literal notranslate"><span class="pre">trigger</span></code></a> and stores the angle and rpm samples in <a class="reference internal" href="#acoular.tprocess.AngleTracker.angle" title="acoular.tprocess.AngleTracker.angle"><code class="xref py py-meth docutils literal notranslate"><span class="pre">angle()</span></code></a> and <a class="reference internal" href="#acoular.tprocess.AngleTracker.rpm" title="acoular.tprocess.AngleTracker.rpm"><code class="xref py py-meth docutils literal notranslate"><span class="pre">rpm()</span></code></a>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.AngleTracker.source">
+<span class="sig-name descname"><span class="pre">source</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Instance(SamplesGenerator)</span></em><a class="headerlink" href="#acoular.tprocess.AngleTracker.source" title="Link to this definition">¶</a></dt>
+<dd><p>Data source; <a class="reference internal" href="acoular.tprocess.SamplesGenerator.html#acoular.tprocess.SamplesGenerator" title="acoular.tprocess.SamplesGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplesGenerator</span></code></a> or derived object.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.AngleTracker.trigger">
+<span class="sig-name descname"><span class="pre">trigger</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Instance(Trigger)</span></em><a class="headerlink" href="#acoular.tprocess.AngleTracker.trigger" title="Link to this definition">¶</a></dt>
+<dd><p>Trigger data from <a class="reference internal" href="acoular.tprocess.Trigger.html#acoular.tprocess.Trigger" title="acoular.tprocess.Trigger"><code class="xref py py-class docutils literal notranslate"><span class="pre">acoular.tprocess.Trigger</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.AngleTracker.trigger_per_revo">
+<span class="sig-name descname"><span class="pre">trigger_per_revo</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Int(1,</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.tprocess.AngleTracker.trigger_per_revo" title="Link to this definition">¶</a></dt>
+<dd><p>Trigger signals per revolution,
+defaults to 1.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.AngleTracker.rot_direction">
+<span class="sig-name descname"><span class="pre">rot_direction</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Int(-1,</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.tprocess.AngleTracker.rot_direction" title="Link to this definition">¶</a></dt>
+<dd><p>Flag to set counter-clockwise (1) or clockwise (-1) rotation,
+defaults to -1.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.AngleTracker.interp_points">
+<span class="sig-name descname"><span class="pre">interp_points</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Int(4,</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.tprocess.AngleTracker.interp_points" title="Link to this definition">¶</a></dt>
+<dd><p>Points of interpolation used for spline,
+defaults to 4.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.AngleTracker.start_angle">
+<span class="sig-name descname"><span class="pre">start_angle</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(0,</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.tprocess.AngleTracker.start_angle" title="Link to this definition">¶</a></dt>
+<dd><p>rotation angle in radians for first trigger position</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.AngleTracker.rpm">
+<span class="sig-name descname"><span class="pre">rpm</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(</span> <span class="pre">depends_on</span> <span class="pre">=</span> <span class="pre">'digest',</span> <span class="pre">desc</span> <span class="pre">=&quot;revolutions</span> <span class="pre">per</span> <span class="pre">minute</span> <span class="pre">for</span> <span class="pre">each</span> <span class="pre">sample&quot;)</span></em><a class="headerlink" href="#acoular.tprocess.AngleTracker.rpm" title="Link to this definition">¶</a></dt>
+<dd><p>revolutions per minute for each sample, read-only</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.AngleTracker.average_rpm">
+<span class="sig-name descname"><span class="pre">average_rpm</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(</span> <span class="pre">depends_on</span> <span class="pre">=</span> <span class="pre">'digest',</span> <span class="pre">desc</span> <span class="pre">=&quot;average</span> <span class="pre">revolutions</span> <span class="pre">per</span> <span class="pre">minute&quot;)</span></em><a class="headerlink" href="#acoular.tprocess.AngleTracker.average_rpm" title="Link to this definition">¶</a></dt>
+<dd><p>average revolutions per minute, read-only</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.AngleTracker.angle">
+<span class="sig-name descname"><span class="pre">angle</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(</span> <span class="pre">depends_on</span> <span class="pre">=</span> <span class="pre">'digest',</span> <span class="pre">desc</span> <span class="pre">=&quot;rotation</span> <span class="pre">angle</span> <span class="pre">for</span> <span class="pre">each</span> <span class="pre">sample&quot;)</span></em><a class="headerlink" href="#acoular.tprocess.AngleTracker.angle" title="Link to this definition">¶</a></dt>
+<dd><p>rotation angle in radians for each sample, read-only</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tprocess.Trigger.html">Trigger</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tprocess.html">tprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tprocess.ChannelMixer.html">ChannelMixer</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright Acoular Development Team.
+      Last updated on Mar 12, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>BeamformerFunctional &#8212; Acoular 24.03 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=eafc0fe6" />
+    <script src="../../../_static/documentation_options.js?v=be0753e0"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="BeamformerCapon" href="acoular.fbeamform.BeamformerCapon.html" />
+    <link rel="prev" title="BeamformerBase" href="acoular.fbeamform.BeamformerBase.html" /> 
+  </head><body>
+      <div class="header"><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 24.03 documentation</span></a></h1>
+        <h2 class="heading"><span>BeamformerFunctional</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.fbeamform.BeamformerBase.html">BeamformerBase</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.fbeamform.html">fbeamform</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.fbeamform.BeamformerCapon.html">BeamformerCapon</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="beamformerfunctional">
+<h1>BeamformerFunctional<a class="headerlink" href="#beamformerfunctional" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerFunctional">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.fbeamform.</span></span><span class="sig-name descname"><span class="pre">BeamformerFunctional</span></span><a class="headerlink" href="#acoular.fbeamform.BeamformerFunctional" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.fbeamform.BeamformerBase.html#acoular.fbeamform.BeamformerBase" title="acoular.fbeamform.BeamformerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerBase</span></code></a></p>
+<p>Functional beamforming after <a class="reference internal" href="../../../literature/index.html#dougherty2014"><span class="std std-ref">Dougherty, 2014</span></a>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerFunctional.gamma">
+<span class="sig-name descname"><span class="pre">gamma</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(1,</span>&#160; <span class="pre">…</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerFunctional.gamma" title="Link to this definition">¶</a></dt>
+<dd><p>Functional exponent, defaults to 1 (= Classic Beamforming).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerFunctional.r_diag">
+<span class="sig-name descname"><span class="pre">r_diag</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum(False,</span>&#160; <span class="pre">…</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerFunctional.r_diag" title="Link to this definition">¶</a></dt>
+<dd><p>Functional Beamforming is only well defined for full CSM</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerFunctional.calc">
+<span class="sig-name descname"><span class="pre">calc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ac</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fr</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.fbeamform.BeamformerFunctional.calc" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the Functional Beamformer result for the frequencies defined by <code class="xref py py-attr docutils literal notranslate"><span class="pre">freq_data</span></code></p>
+<p>This is an internal helper function that is automatically called when 
+accessing the beamformer’s <a class="reference internal" href="acoular.fbeamform.BeamformerBase.html#acoular.fbeamform.BeamformerBase.result" title="acoular.fbeamform.BeamformerBase.result"><code class="xref py py-attr docutils literal notranslate"><span class="pre">result</span></code></a> or calling
+its <a class="reference internal" href="acoular.fbeamform.BeamformerBase.html#acoular.fbeamform.BeamformerBase.synthetic" title="acoular.fbeamform.BeamformerBase.synthetic"><code class="xref py py-meth docutils literal notranslate"><span class="pre">synthetic()</span></code></a> method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>ac</strong><span class="classifier">array of floats</span></dt><dd><p>This array of dimension ([number of frequencies]x[number of gridpoints])
+is used as call-by-reference parameter and contains the calculated
+value after calling this method.</p>
+</dd>
+<dt><strong>fr</strong><span class="classifier">array of booleans</span></dt><dd><p>The entries of this [number of frequencies]-sized array are either 
+‘True’ (if the result for this frequency has already been calculated)
+or ‘False’ (for the frequencies where the result has yet to be calculated).
+After the calculation at a certain frequency the value will be set
+to ‘True’</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>This method only returns values through the <em>ac</em> and <em>fr</em> parameters</dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.fbeamform.BeamformerBase.html">BeamformerBase</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.fbeamform.html">fbeamform</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.fbeamform.BeamformerCapon.html">BeamformerCapon</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright Acoular Development Team.
+      Last updated on Mar 12, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    </div>
+  </body>
+</html>

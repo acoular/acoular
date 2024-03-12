@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>OpenJet &#8212; Acoular 24.03 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=eafc0fe6" />
+    <script src="../../../_static/documentation_options.js?v=be0753e0"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="RotatingFlow" href="acoular.environments.RotatingFlow.html" />
+    <link rel="prev" title="FlowField" href="acoular.environments.FlowField.html" /> 
+  </head><body>
+      <div class="header"><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 24.03 documentation</span></a></h1>
+        <h2 class="heading"><span>OpenJet</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.environments.FlowField.html">FlowField</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.environments.html">environments</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.environments.RotatingFlow.html">RotatingFlow</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="openjet">
+<h1>OpenJet<a class="headerlink" href="#openjet" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.environments.OpenJet">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.environments.</span></span><span class="sig-name descname"><span class="pre">OpenJet</span></span><a class="headerlink" href="#acoular.environments.OpenJet" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.environments.FlowField.html#acoular.environments.FlowField" title="acoular.environments.FlowField"><code class="xref py py-class docutils literal notranslate"><span class="pre">FlowField</span></code></a></p>
+<p>Provides an analytical approximation of the flow field of an open jet, 
+see <a class="reference internal" href="../../../literature/index.html#albertson1950"><span class="std std-ref">Albertson et al., 1950</span></a>.</p>
+<p class="rubric">Notes</p>
+<p>This is not a fully generic implementation and is limited to flow in the
+x-direction only. No other directions are possible at the moment and flow
+components in the other direction are zero.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.OpenJet.v0">
+<span class="sig-name descname"><span class="pre">v0</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(0.0,</span>&#160; <span class="pre">…</span></em><a class="headerlink" href="#acoular.environments.OpenJet.v0" title="Link to this definition">¶</a></dt>
+<dd><p>Exit velocity at jet origin, i.e. the nozzle. Defaults to 0.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.OpenJet.origin">
+<span class="sig-name descname"><span class="pre">origin</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CArray(</span> <span class="pre">dtype=float64,</span> <span class="pre">shape=(3,</span> <span class="pre">),</span> <span class="pre">value=array((0.,</span> <span class="pre">0.,</span> <span class="pre">0.)),</span>&#160; <span class="pre">…</span></em><a class="headerlink" href="#acoular.environments.OpenJet.origin" title="Link to this definition">¶</a></dt>
+<dd><p>Location of the nozzle center, defaults to the co-ordinate origin.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.OpenJet.D">
+<span class="sig-name descname"><span class="pre">D</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(0.2,</span>&#160; <span class="pre">…</span></em><a class="headerlink" href="#acoular.environments.OpenJet.D" title="Link to this definition">¶</a></dt>
+<dd><p>Diameter of the nozzle, defaults to 0.2 .</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.environments.OpenJet.v">
+<span class="sig-name descname"><span class="pre">v</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.environments.OpenJet.v" title="Link to this definition">¶</a></dt>
+<dd><p>Provides the flow field as a function of the location. This is
+implemented here only for a jet in <cite>x</cite>-direction and the <cite>y</cite>- and
+<cite>z</cite>-components are set to zero.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>xx</strong><span class="classifier">array of floats of shape (3, )</span></dt><dd><p>Location in the fluid for which to provide the data.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>tuple with two elements</dt><dd><p>The first element in the tuple is the velocity vector and the
+second is the Jacobian of the velocity vector field, both at the
+given location.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.environments.FlowField.html">FlowField</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.environments.html">environments</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.environments.RotatingFlow.html">RotatingFlow</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright Acoular Development Team.
+      Last updated on Mar 12, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>CircSector &#8212; Acoular 24.03 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=eafc0fe6" />
+    <script src="../../../_static/documentation_options.js?v=be0753e0"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="PolySector" href="acoular.grids.PolySector.html" />
+    <link rel="prev" title="RectSector3D" href="acoular.grids.RectSector3D.html" /> 
+  </head><body>
+      <div class="header"><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 24.03 documentation</span></a></h1>
+        <h2 class="heading"><span>CircSector</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.grids.RectSector3D.html">RectSector3D</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.grids.html">grids</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.grids.PolySector.html">PolySector</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="circsector">
+<h1>CircSector<a class="headerlink" href="#circsector" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.grids.CircSector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.grids.</span></span><span class="sig-name descname"><span class="pre">CircSector</span></span><a class="headerlink" href="#acoular.grids.CircSector" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.grids.SingleSector.html#acoular.grids.SingleSector" title="acoular.grids.SingleSector"><code class="xref py py-class docutils literal notranslate"><span class="pre">SingleSector</span></code></a></p>
+<p>Class for defining a circular sector.</p>
+<p>Can be used for 2D Grids for definining a circular sector or
+for 3D grids for a cylindrical sector parallel to the z-axis.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.grids.CircSector.x">
+<span class="sig-name descname"><span class="pre">x</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(0.0,</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.grids.CircSector.x" title="Link to this definition">¶</a></dt>
+<dd><p>x position of the circle center</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.grids.CircSector.y">
+<span class="sig-name descname"><span class="pre">y</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(0.0,</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.grids.CircSector.y" title="Link to this definition">¶</a></dt>
+<dd><p>y position of the circle center</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.grids.CircSector.r">
+<span class="sig-name descname"><span class="pre">r</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(1.0,</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.grids.CircSector.r" title="Link to this definition">¶</a></dt>
+<dd><p>radius of the circle</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.grids.CircSector.contains">
+<span class="sig-name descname"><span class="pre">contains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.grids.CircSector.contains" title="Link to this definition">¶</a></dt>
+<dd><p>Queries whether the coordinates in a given array lie within the 
+circular sector. 
+If no coordinate is inside, the nearest one outside is returned
+if <code class="xref py py-attr docutils literal notranslate"><span class="pre">default_nearest</span></code> is True.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>pos</strong><span class="classifier">array of floats</span></dt><dd><p>Array with the shape 3x[number of gridpoints] containing the
+grid positions</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>array of bools with as many entries as columns in pos</dt><dd><p>Array indicating which of the given positions lie within the
+given sector</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.grids.RectSector3D.html">RectSector3D</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.grids.html">grids</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.grids.PolySector.html">PolySector</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright Acoular Development Team.
+      Last updated on Mar 12, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    </div>
+  </body>
+</html>

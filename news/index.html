@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>What’s new &#8212; Acoular 24.03 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=eafc0fe6" />
+    <script src="../_static/documentation_options.js?v=be0753e0"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Literature" href="../literature/index.html" />
+    <link rel="prev" title="Getting Started" href="../get_started/index.html" /> 
+  </head><body>
+      <div class="header"><h1 class="heading"><a href="../index.html">
+          <span>Acoular 24.03 documentation</span></a></h1>
+        <h2 class="heading"><span>What’s new</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="../get_started/index.html">Getting Started</a>
+        &#160;&#160;::&#160;&#160;       
+        <a class="uplink" href="../index.html">Main Page</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../literature/index.html">Literature</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="what-s-new">
+<h1>What’s new<a class="headerlink" href="#what-s-new" title="Link to this heading">¶</a></h1>
+<section id="id1">
+<h2>24.03<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li><p>Improve test coverage for <a class="reference internal" href="../api_ref/generated/generated/acoular.fbeamform.BeamformerCMF.html#acoular.fbeamform.BeamformerCMF" title="acoular.fbeamform.BeamformerCMF"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerCMF</span></code></a></p></li>
+<li><dl class="simple">
+<dt>Changes to <a class="reference internal" href="../api_ref/generated/generated/acoular.fbeamform.BeamformerSODIX.html#acoular.fbeamform.BeamformerSODIX" title="acoular.fbeamform.BeamformerSODIX"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerSODIX</span></code></a>:</dt><dd><ul>
+<li><p>correction of wrong cost-function</p></li>
+<li><p>speedups through the use of <cite>numpy.einsum_path</cite> together with <cite>numpy.einsum</cite></p></li>
+<li><p>changed start value <cite>pgtol</cite> for the optimization with <cite>scipy.optimize.fmin_l_bfgs_b</cite> solver</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Bugfixes:</dt><dd><ul>
+<li><p>fixes unrecognized sector arguments in <a class="reference internal" href="../api_ref/generated/generated/acoular.tools.MetricEvaluator.html#acoular.tools.MetricEvaluator" title="acoular.tools.MetricEvaluator"><code class="xref py py-class docutils literal notranslate"><span class="pre">MetricEvaluator</span></code></a></p></li>
+<li><p>handles version-dependent default values for <cite>normalize</cite> attribute in sklearn solvers (relevant for <a class="reference internal" href="../api_ref/generated/generated/acoular.fbeamform.BeamformerCMF.html#acoular.fbeamform.BeamformerCMF" title="acoular.fbeamform.BeamformerCMF"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerCMF</span></code></a> )</p></li>
+<li><p>fixes bug in <a class="reference internal" href="../api_ref/generated/generated/acoular.fbeamform.BeamformerOrth.html#acoular.fbeamform.BeamformerOrth" title="acoular.fbeamform.BeamformerOrth"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerOrth</span></code></a>: assigned strongest source at grid index 0 when instead of <cite>eva_list</cite> the trait <cite>n</cite> was given</p></li>
+<li><p>fixes broken <a class="reference internal" href="../api_ref/generated/generated/acoular.tprocess.SpatialInterpolator.html#acoular.tprocess.SpatialInterpolator" title="acoular.tprocess.SpatialInterpolator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpatialInterpolator</span></code></a></p></li>
+<li><p>minor bugfix for single microphone transfer functions calculated with <a class="reference internal" href="../api_ref/generated/generated/acoular.fbeamform.SteeringVector.html#acoular.fbeamform.SteeringVector" title="acoular.fbeamform.SteeringVector"><code class="xref py py-class docutils literal notranslate"><span class="pre">SteeringVector</span></code></a></p></li>
+<li><p>fixes broken <cite>NNLS</cite> method in <a class="reference internal" href="../api_ref/generated/generated/acoular.fbeamform.BeamformerCMF.html#acoular.fbeamform.BeamformerCMF" title="acoular.fbeamform.BeamformerCMF"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerCMF</span></code></a> (wrong keyword argument <cite>normalize</cite>)</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Internal:</dt><dd><ul>
+<li><p>new GitHub workflow for CI of the documentation</p></li>
+<li><p>added Zenodo metadata file</p></li>
+<li><p>changes to author name in <cite>pyproject.toml</cite></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</section>
+<section id="id2">
+<h2>23.11<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li><p>New class <a class="reference internal" href="../api_ref/generated/generated/acoular.tools.MetricEvaluator.html#acoular.tools.MetricEvaluator" title="acoular.tools.MetricEvaluator"><code class="xref py py-class docutils literal notranslate"><span class="pre">MetricEvaluator</span></code></a> to evaluate the performance of source mapping methods according to Herold and Sarradj (2017)</p></li>
+<li><p>New class <a class="reference internal" href="../api_ref/generated/generated/acoular.sources.PointSourceConvolve.html#acoular.sources.PointSourceConvolve" title="acoular.sources.PointSourceConvolve"><code class="xref py py-class docutils literal notranslate"><span class="pre">PointSourceConvolve</span></code></a> to blockwise convolve an arbitrary source signal with a spatial room impulse response</p></li>
+<li><p>All filter classes derived from <a class="reference internal" href="../api_ref/generated/generated/acoular.tprocess.Filter.html#acoular.tprocess.Filter" title="acoular.tprocess.Filter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Filter</span></code></a> use SOS filters now</p></li>
+<li><p>No more version restrictions for scikit-learn</p></li>
+<li><p>Speedups for numba jitted functions by enforcing C-contiguous arguments and the efficient use SIMD processor instructions</p></li>
+<li><p><a class="reference internal" href="../api_ref/generated/generated/acoular.fbeamform.BeamformerOrth.html#acoular.fbeamform.BeamformerOrth" title="acoular.fbeamform.BeamformerOrth"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerOrth</span></code></a> now reimplements orthogonal deconvolution to be even faster and has a slightly different interface</p></li>
+<li><p>Simple benchmark suite to compare the performance of Acoular core routines on different computers</p></li>
+<li><p>Some internal rework in grid and sector classes</p></li>
+<li><p>Test coverage is improved</p></li>
+<li><dl class="simple">
+<dt>Bugfixes:</dt><dd><ul>
+<li><p>minor bugfix for convective amplification in <a class="reference internal" href="../api_ref/generated/generated/acoular.tbeamform.BeamformerCleantTraj.html#acoular.tbeamform.BeamformerCleantTraj" title="acoular.tbeamform.BeamformerCleantTraj"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerCleantTraj</span></code></a> and <code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerCleantTrajSq</span></code></p></li>
+<li><p>bugfix in some attributes of <a class="reference internal" href="../api_ref/generated/generated/acoular.grids.ImportGrid.html#acoular.grids.ImportGrid" title="acoular.grids.ImportGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImportGrid</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</section>
+<section id="id3">
+<h2>23.6<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li><p>Supports Python 3.7, 3.8, 3.9, 3.10, 3.11 on Linux, MacOS, Windows</p></li>
+<li><p>New build system using hatch, purge setuptools</p></li>
+<li><p>New base class <a class="reference internal" href="../api_ref/generated/generated/acoular.fbeamform.BeamformerAdaptiveGrid.html#acoular.fbeamform.BeamformerAdaptiveGrid" title="acoular.fbeamform.BeamformerAdaptiveGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerAdaptiveGrid</span></code></a> for gridless algorithms</p></li>
+<li><p>New class <a class="reference internal" href="../api_ref/generated/generated/acoular.fbeamform.BeamformerGridlessOrth.html#acoular.fbeamform.BeamformerGridlessOrth" title="acoular.fbeamform.BeamformerGridlessOrth"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerGridlessOrth</span></code></a> for gridless orthogonal beamforming</p></li>
+<li><p>New class <a class="reference internal" href="../api_ref/generated/generated/acoular.grids.RectSector3D.html#acoular.grids.RectSector3D" title="acoular.grids.RectSector3D"><code class="xref py py-class docutils literal notranslate"><span class="pre">RectSector3D</span></code></a></p></li>
+<li><p>Improved ray casting implementation for <a class="reference internal" href="../api_ref/generated/generated/acoular.environments.GeneralFlowEnvironment.html#acoular.environments.GeneralFlowEnvironment" title="acoular.environments.GeneralFlowEnvironment"><code class="xref py py-class docutils literal notranslate"><span class="pre">GeneralFlowEnvironment</span></code></a></p></li>
+<li><dl class="simple">
+<dt>Improved handling of spectra calculation:</dt><dd><ul>
+<li><p>New base class <a class="reference internal" href="../api_ref/generated/generated/acoular.spectra.BaseSpectra.html#acoular.spectra.BaseSpectra" title="acoular.spectra.BaseSpectra"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSpectra</span></code></a></p></li>
+<li><p>New class <a class="reference internal" href="../api_ref/generated/generated/acoular.spectra.FFTSpectra.html#acoular.spectra.FFTSpectra" title="acoular.spectra.FFTSpectra"><code class="xref py py-class docutils literal notranslate"><span class="pre">FFTSpectra</span></code></a> for time-frequency analysis</p></li>
+<li><p>New class <a class="reference internal" href="../api_ref/generated/generated/acoular.spectra.PowerSpectraImport.html#acoular.spectra.PowerSpectraImport" title="acoular.spectra.PowerSpectraImport"><code class="xref py py-class docutils literal notranslate"><span class="pre">PowerSpectraImport</span></code></a> for cross spectral matrix import</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p><a class="reference internal" href="../api_ref/generated/generated/acoular.microphones.MicGeom.html#acoular.microphones.MicGeom" title="acoular.microphones.MicGeom"><code class="xref py py-class docutils literal notranslate"><span class="pre">MicGeom</span></code></a> now has an aperture trait</p></li>
+<li><p>Tests are improved</p></li>
+<li><dl class="simple">
+<dt>Bugfixes:</dt><dd><ul>
+<li><p>broken numpy.int import</p></li>
+<li><p>one off bug in <a class="reference internal" href="../api_ref/generated/generated/acoular.grids.LineGrid.html#acoular.grids.LineGrid" title="acoular.grids.LineGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">LineGrid</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</section>
+<section id="id4">
+<h2>22.3<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li><p>New class <code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerSodix</span></code></p></li>
+<li><p>New SplitBregman and FISTA solvers in <a class="reference internal" href="../api_ref/generated/generated/acoular.fbeamform.BeamformerCMF.html#acoular.fbeamform.BeamformerCMF" title="acoular.fbeamform.BeamformerCMF"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerCMF</span></code></a></p></li>
+<li><p>IDW is now available for virtual rotation</p></li>
+<li><p>different steering vector formulations are now available for time beamformers as well</p></li>
+<li><dl class="simple">
+<dt>Speedups:</dt><dd><ul>
+<li><p>time domain beamformers and CleanT deconvolution now share a common core codebase and all do blockwise processing</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Bugfixes:</dt><dd><ul>
+<li><p>broken digest in <a class="reference internal" href="../api_ref/generated/generated/acoular.grids.RectGrid3D.html#acoular.grids.RectGrid3D" title="acoular.grids.RectGrid3D"><code class="xref py py-class docutils literal notranslate"><span class="pre">RectGrid3D</span></code></a> repaired</p></li>
+<li><p><a class="reference internal" href="../api_ref/generated/generated/acoular.tbeamform.BeamformerCleant.html#acoular.tbeamform.BeamformerCleant" title="acoular.tbeamform.BeamformerCleant"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerCleant</span></code></a> and derived classes now never miss samples</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</section>
+<section id="id5">
+<h2>21.05<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li><p>Supports Python 3.6, 3.7, 3.8, 3.9 on Linux, MacOS, Windows</p></li>
+<li><p>New class <a class="reference internal" href="../api_ref/generated/generated/acoular.signals.FiltWNoiseGenerator.html#acoular.signals.FiltWNoiseGenerator" title="acoular.signals.FiltWNoiseGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">FiltWNoiseGenerator</span></code></a></p></li>
+<li><p>New classes <a class="reference internal" href="../api_ref/generated/generated/acoular.sources.SphericalHarmonicSource.html#acoular.sources.SphericalHarmonicSource" title="acoular.sources.SphericalHarmonicSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">SphericalHarmonicSource</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Linesource</span></code>, <a class="reference internal" href="../api_ref/generated/generated/acoular.sources.MovingPointSourceDipole.html#acoular.sources.MovingPointSourceDipole" title="acoular.sources.MovingPointSourceDipole"><code class="xref py py-class docutils literal notranslate"><span class="pre">MovingPointSourceDipole</span></code></a>, <a class="reference internal" href="../api_ref/generated/generated/acoular.sources.MovingLineSource.html#acoular.sources.MovingLineSource" title="acoular.sources.MovingLineSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">MovingLineSource</span></code></a></p></li>
+<li><p>New class <a class="reference internal" href="../api_ref/generated/generated/acoular.tprocess.TimeConvolve.html#acoular.tprocess.TimeConvolve" title="acoular.tprocess.TimeConvolve"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeConvolve</span></code></a></p></li>
+<li><dl class="simple">
+<dt>Speedups:</dt><dd><ul>
+<li><p>CSM works now in parallel and is faster</p></li>
+<li><p>frequency domain beamformers are abaout 30% faster</p></li>
+<li><p>time domain beamformers and CLEAN-T is now about 10 x faster</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>Unittests for all major features, much better coverage</p></li>
+<li><dl class="simple">
+<dt>Bugfixes:</dt><dd><ul>
+<li><p>integration sectors</p></li>
+<li><p>new grid classes from 20.10 are now imported into module namespace</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</section>
+<section id="id6">
+<h2>20.10<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li><p>Supports Python 3.6, 3.7, 3.8</p></li>
+<li><dl class="simple">
+<dt>New base classes for time signal processing: <a class="reference internal" href="../api_ref/generated/generated/acoular.tprocess.Filter.html#acoular.tprocess.Filter" title="acoular.tprocess.Filter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Filter</span></code></a>, <a class="reference internal" href="../api_ref/generated/generated/acoular.tprocess.FilterBank.html#acoular.tprocess.FilterBank" title="acoular.tprocess.FilterBank"><code class="xref py py-class docutils literal notranslate"><span class="pre">FilterBank</span></code></a></dt><dd><ul>
+<li><p>New filter classes: <a class="reference internal" href="../api_ref/generated/generated/acoular.tprocess.TimeExpAverage.html#acoular.tprocess.TimeExpAverage" title="acoular.tprocess.TimeExpAverage"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeExpAverage</span></code></a>, <a class="reference internal" href="../api_ref/generated/generated/acoular.tprocess.FiltFreqWeight.html#acoular.tprocess.FiltFreqWeight" title="acoular.tprocess.FiltFreqWeight"><code class="xref py py-class docutils literal notranslate"><span class="pre">FiltFreqWeight</span></code></a>, <a class="reference internal" href="../api_ref/generated/generated/acoular.tprocess.OctaveFilterBank.html#acoular.tprocess.OctaveFilterBank" title="acoular.tprocess.OctaveFilterBank"><code class="xref py py-class docutils literal notranslate"><span class="pre">OctaveFilterBank</span></code></a></p></li>
+<li><p>Demo script is now part of module (see <a class="reference internal" href="../get_started/index.html"><span class="doc">Getting Started</span></a> for usage)</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>New class for processing sound card input: <a class="reference internal" href="../api_ref/generated/generated/acoular.sdinput.SoundDeviceSamplesGenerator.html#acoular.sdinput.SoundDeviceSamplesGenerator" title="acoular.sdinput.SoundDeviceSamplesGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SoundDeviceSamplesGenerator</span></code></a></p></li>
+<li><p>New class for cumulative averaging: <a class="reference internal" href="../api_ref/generated/generated/acoular.tprocess.TimeCumAverage.html#acoular.tprocess.TimeCumAverage" title="acoular.tprocess.TimeCumAverage"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeCumAverage</span></code></a></p></li>
+<li><p>New grid classes <a class="reference internal" href="../api_ref/generated/generated/acoular.grids.ImportGrid.html#acoular.grids.ImportGrid" title="acoular.grids.ImportGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImportGrid</span></code></a>, <a class="reference internal" href="../api_ref/generated/generated/acoular.grids.LineGrid.html#acoular.grids.LineGrid" title="acoular.grids.LineGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">LineGrid</span></code></a>, <a class="reference internal" href="../api_ref/generated/generated/acoular.grids.MergeGrid.html#acoular.grids.MergeGrid" title="acoular.grids.MergeGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">MergeGrid</span></code></a></p></li>
+<li><p>New versatile integration sector classes <a class="reference internal" href="../api_ref/generated/generated/acoular.grids.RectSector.html#acoular.grids.RectSector" title="acoular.grids.RectSector"><code class="xref py py-class docutils literal notranslate"><span class="pre">RectSector</span></code></a>, <a class="reference internal" href="../api_ref/generated/generated/acoular.grids.CircSector.html#acoular.grids.CircSector" title="acoular.grids.CircSector"><code class="xref py py-class docutils literal notranslate"><span class="pre">CircSector</span></code></a>, <a class="reference internal" href="../api_ref/generated/generated/acoular.grids.PolySector.html#acoular.grids.PolySector" title="acoular.grids.PolySector"><code class="xref py py-class docutils literal notranslate"><span class="pre">PolySector</span></code></a>, <a class="reference internal" href="../api_ref/generated/generated/acoular.grids.ConvexSector.html#acoular.grids.ConvexSector" title="acoular.grids.ConvexSector"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConvexSector</span></code></a>, <a class="reference internal" href="../api_ref/generated/generated/acoular.grids.MultiSector.html#acoular.grids.MultiSector" title="acoular.grids.MultiSector"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiSector</span></code></a></p></li>
+<li><p>New class for mixing multiple channels <a class="reference internal" href="../api_ref/generated/generated/acoular.tprocess.ChannelMixer.html#acoular.tprocess.ChannelMixer" title="acoular.tprocess.ChannelMixer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChannelMixer</span></code></a></p></li>
+<li><p>New class for using arbitrary sources as signal: <a class="reference internal" href="../api_ref/generated/generated/acoular.signals.GenericSignalGenerator.html#acoular.signals.GenericSignalGenerator" title="acoular.signals.GenericSignalGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenericSignalGenerator</span></code></a></p></li>
+<li><p>New time-domain beamforming classes for CLEAN-T method: <a class="reference internal" href="../api_ref/generated/generated/acoular.tbeamform.BeamformerCleant.html#acoular.tbeamform.BeamformerCleant" title="acoular.tbeamform.BeamformerCleant"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerCleant</span></code></a>, <a class="reference internal" href="../api_ref/generated/generated/acoular.tbeamform.BeamformerCleantSq.html#acoular.tbeamform.BeamformerCleantSq" title="acoular.tbeamform.BeamformerCleantSq"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerCleantSq</span></code></a>, <a class="reference internal" href="../api_ref/generated/generated/acoular.tbeamform.BeamformerCleantTraj.html#acoular.tbeamform.BeamformerCleantTraj" title="acoular.tbeamform.BeamformerCleantTraj"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerCleantTraj</span></code></a>, <a class="reference internal" href="../api_ref/generated/generated/acoular.tbeamform.BeamformerCleantSqTraj.html#acoular.tbeamform.BeamformerCleantSqTraj" title="acoular.tbeamform.BeamformerCleantSqTraj"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerCleantSqTraj</span></code></a></p></li>
+<li><p>Adds possibility to store/load metadata to/from HDF files with <a class="reference internal" href="../api_ref/generated/generated/acoular.tprocess.WriteH5.html#acoular.tprocess.WriteH5" title="acoular.tprocess.WriteH5"><code class="xref py py-class docutils literal notranslate"><span class="pre">WriteH5</span></code></a>/<a class="reference internal" href="../api_ref/generated/generated/acoular.sources.TimeSamples.html#acoular.sources.TimeSamples" title="acoular.sources.TimeSamples"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSamples</span></code></a> classes</p></li>
+<li><p>New submodule <a class="reference internal" href="../api_ref/generated/acoular.tools.html#module-acoular.tools" title="acoular.tools"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tools</span></code></a> containing several helper functions, e.g. for data aggregation</p></li>
+<li><p><a class="reference internal" href="../api_ref/generated/generated/acoular.tprocess.WriteWAV.html#acoular.tprocess.WriteWAV" title="acoular.tprocess.WriteWAV"><code class="xref py py-class docutils literal notranslate"><span class="pre">WriteWAV</span></code></a>: user can optionally set name of output wav file</p></li>
+<li><p>Bugfix: PowerSpectra.freq_range / .ind_low / .ind_high are now correctly updated depending on changed attributes</p></li>
+<li><p>Bugfix: <a class="reference internal" href="../api_ref/generated/generated/acoular.signals.SineGenerator.html#acoular.signals.SineGenerator" title="acoular.signals.SineGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SineGenerator</span></code></a> amplitude is now set via <a class="reference internal" href="../api_ref/generated/generated/acoular.signals.SineGenerator.html#acoular.signals.SineGenerator.amplitude" title="acoular.signals.SineGenerator.amplitude"><code class="xref py py-attr docutils literal notranslate"><span class="pre">amplitude</span></code></a> attribute</p></li>
+<li><p>Some minor fixes</p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="id7">
+<h2>20.02<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li><p>Adds gradient-based solver for BeamformerCMF (L_BFGS_B)</p></li>
+<li><p>Adds possibilty to take into account convective amplification of moving sources in BeamformerTimeTraj</p></li>
+<li><p>TraitsUI support of the classes has to be activated via <a class="reference internal" href="../api_ref/generated/generated/acoular.configuration.config.html#acoular.configuration.config" title="acoular.configuration.config"><code class="xref py py-attr docutils literal notranslate"><span class="pre">config</span></code></a></p></li>
+<li><p>Bugfix: use left-orientated coordinate system in rotating flow environment</p></li>
+<li><p>Bugfix: correct wrong angle shift in spline interpolation</p></li>
+<li><p>Removes several Python 2.7-specific implementations</p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="id8">
+<h2>19.11<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li><p>Adds new classes for handling rotating data, including detection of trigger signals and interpolation of sensor data for virtual array emulation (<a class="reference internal" href="../api_ref/generated/generated/acoular.tprocess.Trigger.html#acoular.tprocess.Trigger" title="acoular.tprocess.Trigger"><code class="xref py py-class docutils literal notranslate"><span class="pre">Trigger</span></code></a>, <a class="reference internal" href="../api_ref/generated/generated/acoular.tprocess.AngleTracker.html#acoular.tprocess.AngleTracker" title="acoular.tprocess.AngleTracker"><code class="xref py py-class docutils literal notranslate"><span class="pre">AngleTracker</span></code></a>, <a class="reference internal" href="../api_ref/generated/generated/acoular.tprocess.SpatialInterpolator.html#acoular.tprocess.SpatialInterpolator" title="acoular.tprocess.SpatialInterpolator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpatialInterpolator</span></code></a>, <a class="reference internal" href="../api_ref/generated/generated/acoular.tprocess.SpatialInterpolatorRotation.html#acoular.tprocess.SpatialInterpolatorRotation" title="acoular.tprocess.SpatialInterpolatorRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpatialInterpolatorRotation</span></code></a>, <a class="reference internal" href="../api_ref/generated/generated/acoular.tprocess.SpatialInterpolatorConstantRotation.html#acoular.tprocess.SpatialInterpolatorConstantRotation" title="acoular.tprocess.SpatialInterpolatorConstantRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpatialInterpolatorConstantRotation</span></code></a>)</p></li>
+<li><p>Introduces new <a class="reference internal" href="../api_ref/generated/generated/acoular.tprocess.SampleSplitter.html#acoular.tprocess.SampleSplitter" title="acoular.tprocess.SampleSplitter"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleSplitter</span></code></a> class, which allows distribution of data streams</p></li>
+<li><p>Adds new (global) caching options for more flexible cache file handling (e.g. never cache results, always cache, cache read-only). See <a class="reference internal" href="../api_ref/generated/generated/acoular.configuration.config.html#acoular.configuration.config" title="acoular.configuration.config"><code class="xref py py-class docutils literal notranslate"><span class="pre">config</span></code></a> for information on how to use this.</p></li>
+<li><p>User can choose whether to use h5py or pytables package for handling hdf files. See <a class="reference internal" href="../api_ref/generated/generated/acoular.configuration.config.html#acoular.configuration.config" title="acoular.configuration.config"><code class="xref py py-class docutils literal notranslate"><span class="pre">config</span></code></a> for information on how to use this.</p></li>
+<li><p>Change: BeamformerGIB behaviour (not calculating sources with eigenvalue of zero)</p></li>
+<li><p>Bugfix: BeamformerTime interpolation</p></li>
+<li><p>Bugfix: Integer division in PNoiseGenerator</p></li>
+<li><p>Test suite and CI updates</p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="id9">
+<h2>19.08<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li><p>Supports Python 3.5, 3.6, 3.7</p></li>
+<li><p>This will be the last version to officially support Python 2.7</p></li>
+<li><p>Cache and data directories are now always created in current directory (Linux and Windows)</p></li>
+<li><p>Bugfix: Steering vector backwards compatibility</p></li>
+<li><p>Bugfix: Ambiguous caching (changes in an object’s class name as well as changes in the data file content are now monitored for caching)</p></li>
+<li><p>PowerSpectra: Frequency range to be evaluated can be set directly</p></li>
+<li><p>Some code clean-up</p></li>
+<li><p>Renamed examples</p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="id10">
+<h2>19.02<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li><p>Adds support for Python 3.7</p></li>
+<li><p>Introduces new <a class="reference internal" href="../api_ref/generated/generated/acoular.fbeamform.SteeringVector.html#acoular.fbeamform.SteeringVector" title="acoular.fbeamform.SteeringVector"><code class="xref py py-class docutils literal notranslate"><span class="pre">SteeringVector</span></code></a> class (see <a class="reference internal" href="../get_started/index.html"><span class="doc">Getting Started</span></a> and <a class="reference internal" href="../examples/index.html"><span class="doc">Examples</span></a>  for usage). With this, some of the Beamformer and PointSource traits are deprecated and should no longer be used. While the current version is intended to be fully compatible with older scripts, deprecation warnings will be raised if necessary.</p></li>
+<li><p>Introduces optional use of reference distance for SPL evaluation (current default: reference position at (x,y,z)=(0,0,0) )</p></li>
+<li><p>Introduces some basic Unit tests to evaluate the beamformer results</p></li>
+<li><p>Bugfix: CLEAN algorithm now uses correct PSFs</p></li>
+<li><p>some minor bugfixes</p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="id11">
+<h2>18.01<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li><p>Added new DAMAS solving strategies (BeamformerDamasPlus)</p></li>
+<li><p>Added Generalized Inverse Beamforming</p></li>
+<li><p>Floating point precision of CSM, PSF and beamformer customizable (default: float64) – affects cache file size</p></li>
+<li><p>PowerSpectra class now includes EigSpectra functionality (EigSpectra still callable for backwards compatibility)</p></li>
+<li><p>Inverse methods: unit of sound pressure for internal calculation customizable (default: nPa) for better numeric stability with sklearn solvers. Still returns all values in Pa.</p></li>
+<li><p>Bugfix: BeamformerFunctional works now with steering vector formulation II (inverse) and III (true level) which produced incorrect results in the past.</p></li>
+<li><p>Bugfix: BeamformerFunctional can only be called when the diagonal of the CSM is included</p></li>
+<li><p>Bugfix: Corrected calculation of PSF for steering vector formulation IV</p></li>
+<li><p>Bugfix: Behaviour of normalizing PSF at assumed source location (psf=1) is removed</p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="id12">
+<h2>17.11<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li><p>Added support for Python 3.4, 3.5 and 3.6</p></li>
+<li><p>Implementation of fast/parallelized code now with Numba (instead of C++ and SciPy.weave)</p></li>
+<li><p>cross spectral matrix (CSM) orientation changed (was transposed in earlier versions). Please do not use the cache files from earlier versions in version 17.11!</p></li>
+</ul>
+</div></blockquote>
+</section>
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="../get_started/index.html">Getting Started</a>
+        &#160;&#160;::&#160;&#160;       
+        <a class="uplink" href="../index.html">Main Page</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../literature/index.html">Literature</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright Acoular Development Team.
+      Last updated on Mar 12, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    </div>
+  </body>
+</html>

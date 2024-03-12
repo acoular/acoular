@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Airfoil in open jet – CMF &#8212; Acoular 24.03 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=eafc0fe6" />
+    <script src="../_static/documentation_options.js?v=be0753e0"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Rotating point source" href="example_rotating_point_source.html" />
+    <link rel="prev" title="Airfoil in open jet – Steering vectors" href="example_airfoil_in_open_jet_steering_vectors.html" /> 
+  </head><body>
+      <div class="header"><h1 class="heading"><a href="../index.html">
+          <span>Acoular 24.03 documentation</span></a></h1>
+        <h2 class="heading"><span>Airfoil in open jet – CMF</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="example_airfoil_in_open_jet_steering_vectors.html">Airfoil in open jet – Steering vectors</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Examples</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="example_rotating_point_source.html">Rotating point source</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="airfoil-in-open-jet-cmf">
+<h1>Airfoil in open jet – CMF<a class="headerlink" href="#airfoil-in-open-jet-cmf" title="Link to this heading">¶</a></h1>
+<p>Demonstrates CMF methods same setup as in <a class="reference internal" href="example_airfoil_in_open_jet_beamforming.html"><span class="doc">Airfoil in open jet – Beamforming</span></a>.</p>
+<p>It needs the measured timeseries data in <a class="reference download internal" download="" href="../_downloads/5f811269d447bc94f79434851d544083/example_data.h5"><code class="xref download docutils literal notranslate"><span class="pre">example_data.h5</span></code></a> and calibration in <a class="reference download internal" download="" href="../_downloads/0933bdfcc7700f0c9f92932c513d6f87/example_calib.xml"><code class="xref download docutils literal notranslate"><span class="pre">example_calib.xml</span></code></a>. Both files should reside in the same directory as the <a class="reference download internal" download="" href="../_downloads/fbace85c2a006cde41865672b6c20484/example_airfoil_in_open_jet_cmf.py"><code class="xref download docutils literal notranslate"><span class="pre">example_airfoil_in_open_jet_cmf.py</span></code></a> script.</p>
+<p>The script produces the figure:</p>
+<figure class="align-center" style="width: 70%">
+<a class="reference internal image-reference" href="../_images/example_airfoil_in_open_jet_cmf_1.png"><img alt="../_images/example_airfoil_in_open_jet_cmf_1.png" src="../_images/example_airfoil_in_open_jet_cmf_1.png" style="width: 100%;" /></a>
+</figure>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Example &quot;Airfoil in open jet -- CMF&quot; for Acoular library.</span>
+
+<span class="sd">Demonstrates the inverse CMF method with same setup as in example </span>
+<span class="sd">&quot;Airfoil in open jet -- beamformers&quot;.</span>
+
+<span class="sd">Uses measured data in file example_data.h5,</span>
+<span class="sd">calibration in file example_calib.xml,</span>
+<span class="sd">microphone geometry in array_56.xml (part of Acoular).</span>
+
+<span class="sd">Copyright (c) 2006-2019 Acoular Development Team.</span>
+<span class="sd">All rights reserved.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+
+<span class="c1"># imports from acoular</span>
+<span class="kn">import</span> <span class="nn">acoular</span>
+<span class="kn">from</span> <span class="nn">acoular</span> <span class="kn">import</span> <span class="n">L_p</span><span class="p">,</span> <span class="n">Calib</span><span class="p">,</span> <span class="n">MicGeom</span><span class="p">,</span> <span class="n">PowerSpectra</span><span class="p">,</span> <span class="n">Environment</span><span class="p">,</span> \
+<span class="n">RectGrid</span><span class="p">,</span> <span class="n">TimeSamples</span><span class="p">,</span> <span class="n">BeamformerCMF</span><span class="p">,</span> <span class="n">SteeringVector</span>
+
+<span class="c1"># other imports</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span>
+<span class="kn">from</span> <span class="nn">pylab</span> <span class="kn">import</span> <span class="n">figure</span><span class="p">,</span> <span class="n">subplot</span><span class="p">,</span> <span class="n">imshow</span><span class="p">,</span> <span class="n">show</span><span class="p">,</span> <span class="n">colorbar</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">tight_layout</span>
+
+<span class="c1"># files</span>
+<span class="n">datafile</span> <span class="o">=</span> <span class="s1">&#39;example_data.h5&#39;</span>
+<span class="n">calibfile</span> <span class="o">=</span> <span class="s1">&#39;example_calib.xml&#39;</span>
+<span class="n">micgeofile</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">acoular</span><span class="o">.</span><span class="vm">__file__</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span><span class="s1">&#39;xml&#39;</span><span class="p">,</span><span class="s1">&#39;array_56.xml&#39;</span><span class="p">)</span>
+
+<span class="c1">#octave band of interest</span>
+<span class="n">cfreq</span> <span class="o">=</span> <span class="mi">4000</span>
+
+<span class="c1">#===============================================================================</span>
+<span class="c1"># first, we define the time samples using the MaskedTimeSamples class</span>
+<span class="c1"># alternatively we could use the TimeSamples class that provides no masking</span>
+<span class="c1"># of channels and samples</span>
+<span class="c1">#===============================================================================</span>
+<span class="n">t1</span> <span class="o">=</span> <span class="n">TimeSamples</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">datafile</span><span class="p">)</span>
+
+<span class="c1">#===============================================================================</span>
+<span class="c1"># calibration is usually needed and can be set directly at the TimeSamples </span>
+<span class="c1"># object (preferred) or for frequency domain processing at the PowerSpectra </span>
+<span class="c1"># object (for backwards compatibility)</span>
+<span class="c1">#===============================================================================</span>
+<span class="n">t1</span><span class="o">.</span><span class="n">calib</span> <span class="o">=</span> <span class="n">Calib</span><span class="p">(</span><span class="n">from_file</span><span class="o">=</span><span class="n">calibfile</span><span class="p">)</span>
+
+<span class="c1">#===============================================================================</span>
+<span class="c1"># the microphone geometry must have the same number of valid channels as the</span>
+<span class="c1"># TimeSamples object has</span>
+<span class="c1">#===============================================================================</span>
+<span class="n">m</span> <span class="o">=</span> <span class="n">MicGeom</span><span class="p">(</span><span class="n">from_file</span><span class="o">=</span><span class="n">micgeofile</span><span class="p">)</span>
+
+<span class="c1">#===============================================================================</span>
+<span class="c1"># the grid for the beamforming map; a RectGrid3D class is also available</span>
+<span class="c1"># (the example grid is quite coarse)</span>
+<span class="c1">#===============================================================================</span>
+<span class="n">g</span> <span class="o">=</span> <span class="n">RectGrid</span><span class="p">(</span><span class="n">x_min</span><span class="o">=-</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">x_max</span><span class="o">=-</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">y_min</span><span class="o">=-</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">y_max</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.68</span><span class="p">,</span>
+             <span class="n">increment</span><span class="o">=</span><span class="mf">0.025</span><span class="p">)</span>
+
+<span class="c1">#===============================================================================</span>
+<span class="c1"># the environment, i.e. medium characteristics</span>
+<span class="c1"># (in this case, the speed of sound is set)</span>
+<span class="c1">#===============================================================================</span>
+<span class="n">env</span> <span class="o">=</span> <span class="n">Environment</span><span class="p">(</span><span class="n">c</span> <span class="o">=</span> <span class="mf">346.04</span><span class="p">)</span>
+
+<span class="c1"># =============================================================================</span>
+<span class="c1"># a steering vector instance. SteeringVector provides the standard freefield </span>
+<span class="c1"># sound propagation model in the steering vectors.</span>
+<span class="c1"># =============================================================================</span>
+<span class="n">st</span> <span class="o">=</span> <span class="n">SteeringVector</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="n">g</span><span class="p">,</span> <span class="n">mics</span><span class="o">=</span><span class="n">m</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">)</span>
+
+<span class="c1">#===============================================================================</span>
+<span class="c1"># for frequency domain methods, this provides the cross spectral matrix and its</span>
+<span class="c1"># eigenvalues and eigenvectors, if only the matrix is needed then class </span>
+<span class="c1"># PowerSpectra can be used instead</span>
+<span class="c1">#===============================================================================</span>
+<span class="n">f</span> <span class="o">=</span> <span class="n">PowerSpectra</span><span class="p">(</span><span class="n">time_data</span><span class="o">=</span><span class="n">t1</span><span class="p">,</span> 
+               <span class="n">window</span><span class="o">=</span><span class="s1">&#39;Hanning&#39;</span><span class="p">,</span> <span class="n">overlap</span><span class="o">=</span><span class="s1">&#39;50%&#39;</span><span class="p">,</span> <span class="n">block_size</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span> <span class="c1">#FFT-parameters</span>
+               <span class="n">ind_low</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">ind_high</span><span class="o">=</span><span class="mi">31</span><span class="p">)</span> <span class="c1">#to save computational effort, only</span>
+               <span class="c1"># frequencies with index 15-31 are used</span>
+
+<span class="c1">#===============================================================================</span>
+<span class="c1"># beamformers in frequency domain</span>
+<span class="c1">#===============================================================================</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">BeamformerCMF</span><span class="p">(</span><span class="n">freq_data</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">steer</span><span class="o">=</span><span class="n">st</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">)</span>
+
+<span class="c1">#===============================================================================</span>
+<span class="c1"># plot result maps for different beamformers in frequency domain</span>
+<span class="c1">#===============================================================================</span>
+<span class="n">figure</span><span class="p">(</span><span class="mi">1</span><span class="p">,(</span><span class="mi">7</span><span class="p">,</span><span class="mi">7</span><span class="p">))</span> <span class="c1">#no of figure</span>
+<span class="n">i1</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1">#no of subplot</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
+<span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;LassoLars&#39;</span><span class="p">,</span> <span class="s1">&#39;LassoLarsBIC&#39;</span><span class="p">,</span> <span class="s1">&#39;OMPCV&#39;</span><span class="p">,</span> <span class="s1">&#39;NNLS&#39;</span><span class="p">):</span>
+    <span class="n">b</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="n">method</span>
+    <span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">i1</span><span class="p">)</span>
+    <span class="n">i1</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">ti</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+    <span class="nb">map</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">synthetic</span><span class="p">(</span><span class="n">cfreq</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">ti</span><span class="p">)</span>
+    <span class="n">mx</span> <span class="o">=</span> <span class="n">L_p</span><span class="p">(</span><span class="nb">map</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+    <span class="n">imshow</span><span class="p">(</span><span class="n">L_p</span><span class="p">(</span><span class="nb">map</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">vmax</span><span class="o">=</span><span class="n">mx</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">mx</span><span class="o">-</span><span class="mi">15</span><span class="p">,</span>  <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span>
+           <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">g</span><span class="o">.</span><span class="n">extend</span><span class="p">())</span>
+    <span class="n">colorbar</span><span class="p">()</span>
+    <span class="n">title</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">method</span><span class="p">)</span>
+
+<span class="n">tight_layout</span><span class="p">()</span>
+<span class="c1"># only display result on screen if this script is run directly</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span> <span class="n">show</span><span class="p">()</span>
+
+</pre></div>
+</div>
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="example_airfoil_in_open_jet_steering_vectors.html">Airfoil in open jet – Steering vectors</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Examples</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="example_rotating_point_source.html">Rotating point source</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright Acoular Development Team.
+      Last updated on Mar 12, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    </div>
+  </body>
+</html>

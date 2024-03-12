@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Acoular – Acoustic testing and source mapping software &#8212; Acoular 24.03 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=eafc0fe6" />
+    <script src="_static/documentation_options.js?v=be0753e0"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="install/index.html" /> 
+  </head><body>
+      <div class="header"><h1 class="heading"><a href="#">
+          <span>Acoular 24.03 documentation</span></a></h1>
+        <h2 class="heading"><span>Acoular – Acoustic testing and source mapping software</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>       
+        <a class="uplink" href="#">Main Page</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="install/index.html">Installation</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="acoular-acoustic-testing-and-source-mapping-software">
+<h1>Acoular – Acoustic testing and source mapping software<a class="headerlink" href="#acoular-acoustic-testing-and-source-mapping-software" title="Link to this heading">¶</a></h1>
+<p>Acoular is a framework for acoustic beamforming that is written in the Python programming language. It is aimed at applications in acoustic testing. Multichannel data recorded by a microphone array can be processed and analyzed in order to generate mappings of sound source distributions. The maps (acoustic photographs) can then be used to  locate sources of interest and to characterize them using their spectra.</p>
+<a class="reference internal image-reference" href="_images/three_source_py3_colormap.png"><img alt="Three different point sources" src="_images/three_source_py3_colormap.png" style="width: 33%;" /></a>
+<a class="reference internal image-reference" href="_images/Airfoil_selfnoise_3d.png"><img alt="Airfoil leading edge noise" src="_images/Airfoil_selfnoise_3d.png" style="width: 33%;" /></a>
+<a class="reference internal image-reference" href="_images/pantograph_noise_3d.png"><img alt="Pantograph noise" src="_images/pantograph_noise_3d.png" style="width: 33%;" /></a>
+<p>A few highlights of the framework:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>covers several beamforming algorithms</p></li>
+<li><p>different advanced deconvolution algorithms</p></li>
+<li><p>both time-domain and frequency-domain operation included</p></li>
+<li><p>3D mapping possible</p></li>
+<li><p>application for stationary and for moving targets</p></li>
+<li><p>supports both scripting and graphical user interface</p></li>
+<li><p>efficient: intelligent caching, parallel computing with Numba</p></li>
+<li><p>easily extendible and well documented</p></li>
+</ul>
+</div></blockquote>
+<p>Problems, suggestions and success using Acoular may be reported via the <a class="reference external" href="https://groups.google.com/forum/#!forum/acoular-users">acoular-users</a> discussion forum or to <em>info (at) acoular.org</em>.</p>
+<p>Our blog has detailed <a class="reference external" href="https://acoular.github.io/blog/">tutorials</a> about how to set up and run an analysis and how to provide input data.</p>
+<p>Contents:</p>
+<div class="toctree-wrapper compound">
+</div>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 30.0%" />
+<col style="width: 70.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="install/index.html"><span class="doc">Installation</span></a></p></td>
+<td><p>Description of the different download and installation options to get
+Acoular running on your system.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="get_started/index.html"><span class="doc">Getting Started</span></a></p></td>
+<td><p>The basics for using Acoular explained with a simple example.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="news/index.html"><span class="doc">What’s new</span></a></p></td>
+<td><p>Release notes for the current version of Acoular.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="examples/index.html"><span class="doc">Examples</span></a></p></td>
+<td><p>Example scripts covering different use cases.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api_ref/index.html"><span class="doc">Reference Manual</span></a></p></td>
+<td><p>All modules, classes and methods featured in Acoular are described in detail
+here. They can easily be browsed through an inheritance tree and cross links.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="literature/index.html"><span class="doc">Literature</span></a></p></td>
+<td><p>In here some of the publications used for this program package are
+listed. Further reading to fully understand how the algorithms work is recommended.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+<style>#forkongithub a{background:#dea712;color:#000;text-decoration:none;font-family:arial,sans-serif;text-align:center;font-weight:bold;padding:5px 40px;font-size:1rem;line-height:2rem;position:relative;transition:0.5s;}#forkongithub a:hover{background:#fab700;color:#fff;}#forkongithub a::before,#forkongithub a::after{content:"";width:100%;display:block;position:absolute;top:1px;left:0;height:1px;background:#fff;}#forkongithub a::after{bottom:1px;top:auto;}@media screen and (min-width:800px){#forkongithub{position:absolute;display:block;top:0;left:0;width:200px;overflow:hidden;height:200px;z-index:9999;}#forkongithub a{width:200px;position:absolute;top:60px;left:-60px;transform:rotate(-45deg);-webkit-transform:rotate(-45deg);-ms-transform:rotate(-45deg);-moz-transform:rotate(-45deg);-o-transform:rotate(-45deg);box-shadow:4px 4px 10px rgba(0,0,0,0.8);}}</style><span id="forkongithub"><a href="https://github.com/acoular/acoular">Fork me on GitHub</a></span></section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>       
+        <a class="uplink" href="#">Main Page</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="install/index.html">Installation</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright Acoular Development Team.
+      Last updated on Mar 12, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>SamplesGenerator &#8212; Acoular 24.03 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=eafc0fe6" />
+    <script src="../../../_static/documentation_options.js?v=be0753e0"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="TimeInOut" href="acoular.tprocess.TimeInOut.html" />
+    <link rel="prev" title="tprocess" href="../acoular.tprocess.html" /> 
+  </head><body>
+      <div class="header"><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 24.03 documentation</span></a></h1>
+        <h2 class="heading"><span>SamplesGenerator</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.tprocess.html">tprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tprocess.html">tprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tprocess.TimeInOut.html">TimeInOut</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="samplesgenerator">
+<h1>SamplesGenerator<a class="headerlink" href="#samplesgenerator" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.tprocess.SamplesGenerator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.tprocess.</span></span><span class="sig-name descname"><span class="pre">SamplesGenerator</span></span><a class="headerlink" href="#acoular.tprocess.SamplesGenerator" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">HasPrivateTraits</span></code></p>
+<p>Base class for any generating signal processing block</p>
+<p>It provides a common interface for all SamplesGenerator classes, which
+generate an output via the generator <a class="reference internal" href="#acoular.tprocess.SamplesGenerator.result" title="acoular.tprocess.SamplesGenerator.result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">result()</span></code></a>.
+This class has no real functionality on its own and should not be 
+used directly.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.SamplesGenerator.sample_freq">
+<span class="sig-name descname"><span class="pre">sample_freq</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(1.0,</span>&#160; <span class="pre">…</span></em><a class="headerlink" href="#acoular.tprocess.SamplesGenerator.sample_freq" title="Link to this definition">¶</a></dt>
+<dd><p>Sampling frequency of the signal, defaults to 1.0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.SamplesGenerator.numchannels">
+<span class="sig-name descname"><span class="pre">numchannels</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CLong</span></em><a class="headerlink" href="#acoular.tprocess.SamplesGenerator.numchannels" title="Link to this definition">¶</a></dt>
+<dd><p>Number of channels</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.SamplesGenerator.numsamples">
+<span class="sig-name descname"><span class="pre">numsamples</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CLong</span></em><a class="headerlink" href="#acoular.tprocess.SamplesGenerator.numsamples" title="Link to this definition">¶</a></dt>
+<dd><p>Number of samples</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.tprocess.SamplesGenerator.result">
+<span class="sig-name descname"><span class="pre">result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.tprocess.SamplesGenerator.result" title="Link to this definition">¶</a></dt>
+<dd><p>Python generator that yields the output block-wise.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>num</strong><span class="classifier">integer</span></dt><dd><p>This parameter defines the size of the blocks to be yielded
+(i.e. the number of samples per block)</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>No output since <cite>SamplesGenerator</cite> only represents a base class to derive</dt><dd></dd>
+<dt>other classes from.</dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.tprocess.html">tprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tprocess.html">tprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tprocess.TimeInOut.html">TimeInOut</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright Acoular Development Team.
+      Last updated on Mar 12, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>WriteH5 &#8212; Acoular 24.03 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=eafc0fe6" />
+    <script src="../../../_static/documentation_options.js?v=be0753e0"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="SampleSplitter" href="acoular.tprocess.SampleSplitter.html" />
+    <link rel="prev" title="WriteWAV" href="acoular.tprocess.WriteWAV.html" /> 
+  </head><body>
+      <div class="header"><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 24.03 documentation</span></a></h1>
+        <h2 class="heading"><span>WriteH5</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tprocess.WriteWAV.html">WriteWAV</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tprocess.html">tprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tprocess.SampleSplitter.html">SampleSplitter</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="writeh5">
+<h1>WriteH5<a class="headerlink" href="#writeh5" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.tprocess.WriteH5">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.tprocess.</span></span><span class="sig-name descname"><span class="pre">WriteH5</span></span><a class="headerlink" href="#acoular.tprocess.WriteH5" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.tprocess.TimeInOut.html#acoular.tprocess.TimeInOut" title="acoular.tprocess.TimeInOut"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeInOut</span></code></a></p>
+<p>Saves time signal as <cite>*.h5</cite> file</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.WriteH5.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">File(filter=['*.h5'],</span>&#160; <span class="pre">…</span></em><a class="headerlink" href="#acoular.tprocess.WriteH5.name" title="Link to this definition">¶</a></dt>
+<dd><p>Name of the file to be saved. If none is given, the name will be
+automatically generated from a time stamp.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.WriteH5.numsamples_write">
+<span class="sig-name descname"><span class="pre">numsamples_write</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Int(-1)</span></em><a class="headerlink" href="#acoular.tprocess.WriteH5.numsamples_write" title="Link to this definition">¶</a></dt>
+<dd><p>Number of samples to write to file by <cite>result</cite> method. 
+defaults to -1 (write as long as source yields data).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.WriteH5.precision">
+<span class="sig-name descname"><span class="pre">precision</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Trait('float32',</span> <span class="pre">'float64',</span>&#160; <span class="pre">…</span></em><a class="headerlink" href="#acoular.tprocess.WriteH5.precision" title="Link to this definition">¶</a></dt>
+<dd><p>The floating-number-precision of entries of H5 File corresponding 
+to numpy dtypes. Default is 32 bit.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.WriteH5.metadata">
+<span class="sig-name descname"><span class="pre">metadata</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Dict(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.tprocess.WriteH5.metadata" title="Link to this definition">¶</a></dt>
+<dd><p>Metadata to be stored in HDF5 file object</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.tprocess.WriteH5.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#acoular.tprocess.WriteH5.save" title="Link to this definition">¶</a></dt>
+<dd><p>Saves source output to <cite>*.h5</cite> file</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.tprocess.WriteH5.add_metadata">
+<span class="sig-name descname"><span class="pre">add_metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f5h</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.tprocess.WriteH5.add_metadata" title="Link to this definition">¶</a></dt>
+<dd><p>adds metadata to .h5 file</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.tprocess.WriteH5.result">
+<span class="sig-name descname"><span class="pre">result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.tprocess.WriteH5.result" title="Link to this definition">¶</a></dt>
+<dd><p>Python generator that saves source output to <cite>*.h5</cite> file and
+yields the source output block-wise.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>num</strong><span class="classifier">integer</span></dt><dd><p>This parameter defines the size of the blocks to be yielded
+(i.e. the number of samples per block).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>Samples in blocks of shape (num, numchannels).</dt><dd><p>The last block may be shorter than num.
+Echos the source output, but reads it from cache
+when available and prevents unnecassary recalculation.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tprocess.WriteWAV.html">WriteWAV</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tprocess.html">tprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tprocess.SampleSplitter.html">SampleSplitter</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright Acoular Development Team.
+      Last updated on Mar 12, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    </div>
+  </body>
+</html>

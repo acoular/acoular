@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Calib name="20080506">
+	<pos Name="Point 1" factor="0.79487275"/>
+	<pos Name="Point 2" factor="0.85377702"/>
+	<pos Name="Point 3" factor="0.82883002"/>
+	<pos Name="Point 4" factor="0.82878537"/>
+	<pos Name="Point 5" factor="0.81422284"/>
+	<pos Name="Point 6" factor="0.80823298"/>
+	<pos Name="Point 7" factor="0.79167914"/>
+	<pos Name="Point 8" factor="0.67050374"/>
+	<pos Name="Point 9" factor="0.80004096"/>
+	<pos Name="Point 10" factor="0.81607072"/>
+	<pos Name="Point 11" factor="0.83795536"/>
+	<pos Name="Point 12" factor="0.78581448"/>
+	<pos Name="Point 13" factor="0.82514038"/>
+	<pos Name="Point 14" factor="0.80339612"/>
+	<pos Name="Point 15" factor="0.82456205"/>
+	<pos Name="Point 16" factor="0.83670456"/>
+	<pos Name="Point 17" factor="0.80148049"/>
+	<pos Name="Point 18" factor="0.81031564"/>
+	<pos Name="Point 19" factor="0.83833329"/>
+	<pos Name="Point 20" factor="0.80354847"/>
+	<pos Name="Point 21" factor="0.82988103"/>
+	<pos Name="Point 22" factor="0.81638451"/>
+	<pos Name="Point 23" factor="0.80164048"/>
+	<pos Name="Point 24" factor="0.79055633"/>
+	<pos Name="Point 25" factor="0.82084419"/>
+	<pos Name="Point 26" factor="0.77307234"/>
+	<pos Name="Point 27" factor="0.78574717"/>
+	<pos Name="Point 28" factor="0.83249598"/>
+	<pos Name="Point 29" factor="0.81002224"/>
+	<pos Name="Point 30" factor="0.80415135"/>
+	<pos Name="Point 31" factor="0.81188074"/>
+	<pos Name="Point 32" factor="0.74878659"/>
+	<pos Name="Point 33" factor="0.83020829"/>
+	<pos Name="Point 34" factor="0.79356073"/>
+	<pos Name="Point 35" factor="0.84604301"/>
+	<pos Name="Point 36" factor="0.82471234"/>
+	<pos Name="Point 37" factor="0.78646092"/>
+	<pos Name="Point 38" factor="0.81131953"/>
+	<pos Name="Point 39" factor=" 0.8174162"/>
+	<pos Name="Point 40" factor="0.67419654"/>
+	<pos Name="Point 41" factor="0.67800793"/>
+	<pos Name="Point 42" factor="0.79352421"/>
+	<pos Name="Point 43" factor="0.77627999"/>
+	<pos Name="Point 44" factor="0.82738855"/>
+	<pos Name="Point 45" factor="0.80030668"/>
+	<pos Name="Point 46" factor="0.84255865"/>
+	<pos Name="Point 47" factor="0.80993433"/>
+	<pos Name="Point 48" factor="0.76615965"/>
+	<pos Name="Point 49" factor="0.82523707"/>
+	<pos Name="Point 50" factor="0.80601935"/>
+	<pos Name="Point 51" factor="0.76603464"/>
+	<pos Name="Point 52" factor=" 0.8214443"/>
+	<pos Name="Point 53" factor="0.80454989"/>
+	<pos Name="Point 54" factor="0.84476298"/>
+	<pos Name="Point 55" factor="0.80356009"/>
+	<pos Name="Point 56" factor="0.82279267"/>
+</Calib>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Installation &#8212; Acoular 24.03 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=eafc0fe6" />
+    <script src="../_static/documentation_options.js?v=be0753e0"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Getting Started" href="../get_started/index.html" />
+    <link rel="prev" title="Acoular – Acoustic testing and source mapping software" href="../index.html" /> 
+  </head><body>
+      <div class="header"><h1 class="heading"><a href="../index.html">
+          <span>Acoular 24.03 documentation</span></a></h1>
+        <h2 class="heading"><span>Installation</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="../index.html">Acoular – Acoustic testing and source mapping software</a>
+        &#160;&#160;::&#160;&#160;       
+        <a class="uplink" href="../index.html">Main Page</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../get_started/index.html">Getting Started</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h1>
+<p>Depending on your operating system and python distribution, there are different options (see below) how to install Acoular.</p>
+<section id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Link to this heading">¶</a></h2>
+<p>Acoular runs under 64bit Windows, Linux and MacOS, and needs Python 3.7, 3.8, 3.9, 3.10 or 3.11</p>
+<p>Upon installation using options 1 or 2 below, all necessary dependencies will also be installed.</p>
+<dl class="simple">
+<dt>Optional dependencies are only required in some circumsstances and must be installed seperately when needed:</dt><dd><ol class="arabic simple">
+<li><p>In order to run the demo and examples you will also need  <a class="reference external" href="http://matplotlib.org">matplotlib</a>.</p></li>
+<li><p>If you want to use input from a soundcard hardware, you will also need to install <a class="reference external" href="https://python-sounddevice.readthedocs.io/en/0.3.12/installation.html">sounddevice</a>.</p></li>
+<li><p>Some solvers for the CMF method need <a class="reference external" href="https://pylops.readthedocs.io/en/stable/installation.html">Pylops</a>.</p></li>
+</ol>
+</dd>
+</dl>
+</section>
+<section id="install-option-1-anaconda">
+<h2>Install option 1: Anaconda<a class="headerlink" href="#install-option-1-anaconda" title="Link to this heading">¶</a></h2>
+<p>This option assumes that you have the <a class="reference external" href="https://www.anaconda.com/download/">Anaconda</a> Python-distribution installed on your computer.</p>
+<p>Once Anaconda Python is properly installed and works, start a console, i.e. either “cmd” or the “Anaconda command prompt” on Windows, Terminal on Linux.
+In the command line, type</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>acoular<span class="w"> </span>acoular
+</pre></div>
+</div>
+<p>This will install Acoular in your Anaconda Python enviroment and make the Acoular library available from Python. In addition, this will install all dependencies (those other packages mentioned above) if they are not already present on your system.
+Depending on your type of Anaconda installation (single user or system-wide), you may be asked for admin privileges in order to start the installation process.</p>
+<p>Alternatively, you may choose to install into a dedicated conda environment.</p>
+</section>
+<section id="install-option-2-pip">
+<h2>Install option 2: pip<a class="headerlink" href="#install-option-2-pip" title="Link to this heading">¶</a></h2>
+<p>If you have pip installed on your system, you may type</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>acoular
+</pre></div>
+</div>
+<p>to install acoular.</p>
+</section>
+<section id="install-option-3-source-install">
+<h2>Install option 3: source install<a class="headerlink" href="#install-option-3-source-install" title="Link to this heading">¶</a></h2>
+<p>You may download the <a class="reference external" href="https://pypi.python.org/pypi/acoular">source tarball</a>. Unzip it and change into the “acoular” directory, then type</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>.
+</pre></div>
+</div>
+<p>to install the software.
+Another option to get the source is to clone or fork from <a class="reference external" href="https://github.com/acoular/acoular">Github</a>.</p>
+</section>
+<section id="verify-acoular-installation">
+<h2>Verify Acoular installation<a class="headerlink" href="#verify-acoular-installation" title="Link to this heading">¶</a></h2>
+<p>If the installation has finished, you may try out Acoular by importing the module and running the Acoular demo script in a Python console. The acoular demo script needs <a class="reference external" href="http://matplotlib.org">matplotlib</a> installed to render the graphical output.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">&gt; import acoular</span>
+<span class="go">&gt; acoular.demo.acoular_demo.run()</span>
+</pre></div>
+</div>
+<p>After some seconds, this should produce two pictures (a 64 microphone arrangement and a beamforming map with three sources).</p>
+</section>
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="../index.html">Acoular – Acoustic testing and source mapping software</a>
+        &#160;&#160;::&#160;&#160;       
+        <a class="uplink" href="../index.html">Main Page</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../get_started/index.html">Getting Started</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright Acoular Development Team.
+      Last updated on Mar 12, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    </div>
+  </body>
+</html>
