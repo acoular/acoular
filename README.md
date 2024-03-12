@@ -1,4 +1,4 @@
-![Acoular Logo](./docs/source/_static/Acoular_logo.png)
+![Acoular Logo](https://github.com/acoular/acoular/blob/master/docs/source/_static/Acoular_logo.png?raw=true)
 
 [![PyPI](https://img.shields.io/pypi/pyversions/acoular.svg)](https://pypi.org/project/acoular)
 [![PyPI](https://img.shields.io/pypi/v/acoular.svg)](https://pypi.org/project/acoular)
@@ -105,4 +105,4 @@ interpolation='bicubic')
 colorbar()
 ```
 
-![result](./docs/source/get_started/three_source_py3_colormap.png)
+![result](https://github.com/acoular/acoular/blob/master/docs/source/get_started/three_source_py3_colormap.png)
