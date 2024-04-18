@@ -37,7 +37,7 @@ jobs:
         cd ../acoular/acoular/tests/
         bash run_tests.sh
       if: ${{ matrix.os == 'ubuntu-latest'}} 
-    - name: Test with unittest *nix
+    - name: Test macos with unittest *nix
       run: |
         sysctl -a machdep.cpu
         chmod +x ../acoular/acoular/tests/run_tests.sh
