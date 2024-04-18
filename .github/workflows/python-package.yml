@@ -30,14 +30,23 @@ jobs:
         python -m pip install --upgrade pip
         pip install .
         python -c 'import acoular'
-    - name: Test with unittest *nix
+    - name: Test ubuntu with unittest *nix
       run: |
+        cat /proc/cpuinfo
         chmod +x ../acoular/acoular/tests/run_tests.sh
         cd ../acoular/acoular/tests/
         bash run_tests.sh
-      if: ${{ matrix.os != 'windows-latest'}}
+      if: ${{ matrix.os == 'ubuntu-latest'}} 
+    - name: Test macos with unittest *nix
+      run: |
+        sysctl -a machdep.cpu
+        chmod +x ../acoular/acoular/tests/run_tests.sh
+        cd ../acoular/acoular/tests/
+        bash run_tests.sh
+      if: ${{ matrix.os == 'macos-latest'}}
     - name: Test with unittest Windows
       run: |
+        systeminfo
         cd ..\acoular\acoular\tests
         python -m unittest discover -v -p "test_*.py"
       if: ${{ matrix.os == 'windows-latest'}}
