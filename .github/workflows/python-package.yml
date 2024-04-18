@@ -43,7 +43,7 @@ jobs:
         chmod +x ../acoular/acoular/tests/run_tests.sh
         cd ../acoular/acoular/tests/
         bash run_tests.sh
-      if: ${{ matrix.os == 'macos-latest'}}
+      if: ${{ matrix.os == 'macos-13'}}
     - name: Test with unittest Windows
       run: |
         systeminfo
