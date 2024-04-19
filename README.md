@@ -29,6 +29,15 @@ It is aimed at applications in acoustic testing. Multichannel data recorded by a
 - parallel (multithreaded) implementation with Numba for most algorithms
 - easily extendable with new algorithms
 
+# Announcements
+
+**Acoular Workshop 2024**
+
+Join us on **June 12-13, 2024** for a comprehensive free workshop on Acoular. 
+The workshop will be held at TU Berlin Department of Engineering and is suitable for first time users as well as for experienced Acoular users.
+
+To secure your spot at the workshop and to access additional information, kindly **register here**: [Acoular Workshop Registration](https://www.tu.berlin/en/event-details/events/event/018c1020-419d-70b6-abcf-2220015bd233)
+
 # License
 Acoular is licensed under the BSD 3-clause. See [LICENSE](LICENSE)
 
