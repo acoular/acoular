@@ -26,7 +26,8 @@ A few highlights of the framework:
     * efficient: intelligent caching, parallel computing with Numba
     * easily extendible and well documented
 
-Problems, suggestions and success using Acoular may be reported via the `acoular-users  <https://groups.google.com/forum/#!forum/acoular-users>`_ discussion forum or to *info (at) acoular.org*.
+If you discover problems with the Acoular software, please report them using the `issue tracker <https://github.com/acoular/acoular/issues>`_ on GitHub. 
+Please use the `Acoular Discussions Forum <https://github.com/acoular/acoular/discussions>`_ for practical questions, discussions, and demos.
 
 Our blog has detailed `tutorials <https://acoular.github.io/blog/>`_ about how to set up and run an analysis and how to provide input data.
 

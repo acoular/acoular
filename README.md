@@ -68,7 +68,7 @@ Documentation is available [here](http://acoular.org) with a
 
 The Acoular [blog](https://acoular.github.io/blog/) contains some tutorials.
 
-Problems, suggestions and success using Acoular may be reported via the [acoular-users](https://groups.google.com/forum/#!forum/acoular-users) discussion forum.
+If you discover problems with the Acoular software, please report them using the [issue tracker](https://github.com/acoular/acoular/issues) on GitHub. Please use the [Acoular Discussions forum](https://github.com/acoular/acoular/discussions) for practical questions, discussions, and demos.
 
 # Example
 This reads data from 64 microphone channels and computes a beamforming map for the 8kHz third octave band:
