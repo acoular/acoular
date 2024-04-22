@@ -43,12 +43,19 @@ Acoular is licensed under the BSD 3-clause. See [LICENSE](LICENSE)
 
 # Citing
 
-If you use Acoular for academic work, please consider citing our
+If you use Acoular for academic work, please consider citing both our
 [publication](https://doi.org/10.1016/j.apacoust.2016.09.015):
 
-    Ennes Sarradj, Gert Herold,
-    A Python framework for microphone array data processing,
-    Applied Acoustics, Volume 116, 2017, Pages 50-58
+    Sarradj, E., & Herold, G. (2017). 
+    A Python framework for microphone array data processing.
+    Applied Acoustics, 116, 50–58. 
+    https://doi.org/10.1016/j.apacoust.2016.09
+
+and our [software](https://zenodo.org/doi/10.5281/zenodo.3690794):
+
+    Sarradj, E., Herold, G., Kujawski, A., Jekosch, S., Pelling, A. J. R., Czuchaj, M., Gensch, T., & Oertwig, S..
+    Acoular – Acoustic testing and source mapping software. 
+    Zenodo. https://zenodo.org/doi/10.5281/zenodo.3690794
 
 # Dependencies
 Acoular runs under Linux, Windows and MacOS and needs Numpy, Scipy, Traits, scikit-learn, pytables, Numba packages available. 
