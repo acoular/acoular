@@ -62,4 +62,5 @@ preferred-citation:
     year: "2017"
     journal: "Applied Acoustics"
     volume: "116"
-    pages: "50-58"
+    start: "50"
+    end: "58"
