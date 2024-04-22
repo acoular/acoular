@@ -47,7 +47,7 @@ jobs:
     - name: Test with unittest Windows
       run: |
         systeminfo
-        cd ..\acoular\acoular\tests
+        cd tests
         python -m unittest discover -v -p "test_*.py"
       if: ${{ matrix.os == 'windows-latest'}}
 
