@@ -1,5 +1,6 @@
 cff-version: 1.2.0
-title: acoular
+title: Acoular – Acoustic testing and source mapping software
+abstract: "<p>Acoular is a framework for acoustic beamforming that is written in the Python programming language. It is aimed at applications in acoustic testing. Multichannel data recorded by a microphone array can be processed and analyzed in order to generate mappings of sound source distributions. The maps (acoustic photographs) can then be used to locate sources of interest and to characterize them using their spectra.</p><p>A few highlights of the framework:</p><blockquote><div><ul class=\"simple\"><li><p>covers several beamforming algorithms</p></li><li><p>different advanced deconvolution algorithms</p></li><li><p>both time-domain and frequency-domain operation included</p></li><li><p>3D mapping possible</p></li><li><p>application for stationary and for moving targets</p></li><li><p>supports both scripting and graphical user interface</p></li><li><p>efficient: intelligent caching, parallel computing with Numba</p></li><li><p>easily extendible and well documented</p></li></ul></div></blockquote>"
 message: >-
   If you use this software, please cite both the article and the software
   itself using the metadata from this file.
@@ -34,14 +35,18 @@ authors:
     family-names: Oertwig
     affiliation: Deutsches Zentrum für Luft- und Raumfahrt (DLR)
 identifiers:
-  - type: doi
+  - description: acoular v24.03
+    type: doi
     value: 10.5281/zenodo.10809609
 repository-code: 'https://github.com/acoular/acoular'
 url: 'https://acoular.org'
 license: BSD-3-Clause
 version: '24.03'
 date-released: '2024-03-12'
-preferred-citation:
+contact:
+  - email: info@acoular.org
+    name: "Acoular Development Team"
+reference:
     type: article
     title: "A Python framework for microphone array data processing"
     doi: 10.1016/j.apacoust.2016.09
