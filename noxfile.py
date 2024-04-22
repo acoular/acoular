@@ -9,6 +9,6 @@ def build(session, extra):
     """Checks build for all supported Python versions and extras and optionally runs tests."""
     session.install(f'.{extra}')
     if extra == '[full]':
-        with session.chdir('acoular/tests'):
+        with session.chdir('tests'):
             session.run('pip', 'list')
             session.run('/bin/bash', './run_tests.sh', external=True)

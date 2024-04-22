@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd acoular/tests
+cd tests
 
 echo "run acoular tests..."
 bash run_tests.sh
