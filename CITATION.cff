@@ -6,60 +6,60 @@ message: >-
   itself using the metadata from this file.
 type: software
 authors:
-  - given-names: Ennes
-    family-names: Sarradj
-    affiliation: 'Department of Engineering Acoustics, TU Berlin'
-    orcid: 'https://orcid.org/0000-0002-0274-8456'
-  - given-names: Gert
-    family-names: Herold
-    affiliation: 'Department of Engineering Acoustics, TU Berlin'
-    orcid: 'https://orcid.org/0000-0001-5284-051X'
-  - given-names: Adam
-    family-names: Kujawski
-    affiliation: 'Department of Engineering Acoustics, TU Berlin'
-    orcid: 'https://orcid.org/0000-0003-4579-8813'
-  - given-names: Simon
-    family-names: Jekosch
-    affiliation: 'Department of Engineering Acoustics, TU Berlin'
-  - given-names: Art J. R.
-    family-names: Pelling
-    affiliation: 'Department of Engineering Acoustics, TU Berlin'
-    orcid: 'https://orcid.org/0000-0003-3228-6069'
-  - given-names: Mikolaj
-    family-names: Czuchaj
-    affiliation: 'Department of Engineering Acoustics, TU Berlin'
-  - given-names: Tom
-    family-names: Gensch
-    affiliation: 'Department of Engineering Acoustics, TU Berlin'
-  - given-names: Sebastian
-    family-names: Oertwig
-    affiliation: Deutsches Zentrum für Luft- und Raumfahrt (DLR)
+  - given-names: "Ennes"
+    family-names: "Sarradj"
+    affiliation: "Department of Engineering Acoustics, TU Berlin"
+    orcid: "https://orcid.org/0000-0002-0274-8456"
+  - given-names: "Gert"
+    family-names: "Herold"
+    affiliation: "Department of Engineering Acoustics, TU Berlin"
+    orcid: "https://orcid.org/0000-0001-5284-051X"
+  - given-names: "Adam"
+    family-names: "Kujawski"
+    affiliation: "Department of Engineering Acoustics, TU Berlin"
+    orcid: "https://orcid.org/0000-0003-4579-8813"
+  - given-names: "Simon"
+    family-names: "Jekosch"
+    affiliation: "Department of Engineering Acoustics, TU Berlin"
+  - given-names: "Art J. R."
+    family-names: "Pelling"
+    affiliation: "Department of Engineering Acoustics, TU Berlin"
+    orcid: "https://orcid.org/0000-0003-3228-6069"
+  - given-names: "Mikolaj"
+    family-names: "Czuchaj"
+    affiliation: "Department of Engineering Acoustics, TU Berlin"
+  - given-names: "Tom"
+    family-names: "Gensch"
+    affiliation: "Department of Engineering Acoustics, TU Berlin"
+  - given-names: "Sebastian"
+    family-names: "Oertwig"
+    affiliation: "Deutsches Zentrum für Luft- und Raumfahrt (DLR)"
 identifiers:
-  - description: acoular v24.03
-    type: doi
-    value: 10.5281/zenodo.10809609
-repository-code: 'https://github.com/acoular/acoular'
-url: 'https://acoular.org'
-license: BSD-3-Clause
-version: '24.03'
-date-released: '2024-03-12'
+  - description: "acoular v24.03"
+    type: "doi"
+    value: "10.5281/zenodo.10809609"
+repository-code: "https://github.com/acoular/acoular"
+url: "https://acoular.org"
+license: "BSD-3-Clause"
+version: "24.03"
+date-released: "2024-03-12"
 contact:
-  - email: info@acoular.org
+  - email: "info@acoular.org"
     name: "Acoular Development Team"
 preferred-citation:
-    type: article
+    type: "article"
     title: "A Python framework for microphone array data processing"
-    doi: 10.1016/j.apacoust.2016.09
+    doi: "10.1016/j.apacoust.2016.09"
     authors:
       - family-names: "Sarradj"
         given-names: "Ennes"
-        affiliation: 'Department of Engineering Acoustics, TU Berlin'
+        affiliation: "Department of Engineering Acoustics, TU Berlin"
         orcid: "https://orcid.org/0000-0002-0274-8456"
       - family-names: "Herold"
         given-names: "Gert"
-        affiliation: 'Department of Engineering Acoustics, TU Berlin'
+        affiliation: "Department of Engineering Acoustics, TU Berlin"
         orcid: "https://orcid.org/0000-0001-5284-051X"
-    year: 2017
-    journal: Applied Acoustics
-    volume: 116
-    pages: 50-58
+    year: "2017"
+    journal: "Applied Acoustics"
+    volume: "116"
+    pages: "50-58"
