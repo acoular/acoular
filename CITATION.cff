@@ -5,8 +5,8 @@ message: >-
   itself using the metadata from this file.
 type: software
 authors:
-  - given-names: Sarradj
-    family-names: Ennes
+  - given-names: Ennes
+    family-names: Sarradj
     affiliation: 'Department of Engineering Acoustics, TU Berlin'
     orcid: 'https://orcid.org/0000-0002-0274-8456'
   - given-names: Gert
