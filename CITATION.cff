@@ -46,7 +46,7 @@ date-released: '2024-03-12'
 contact:
   - email: info@acoular.org
     name: "Acoular Development Team"
-reference:
+preferred-citation:
     type: article
     title: "A Python framework for microphone array data processing"
     doi: 10.1016/j.apacoust.2016.09
