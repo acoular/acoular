@@ -1,9 +1,10 @@
 import unittest
-from os.path import join
+from pathlib import Path
 import numpy as np
 from acoular import __file__ as bpath, config, WNoiseGenerator, PointSource, MicGeom
 
 config.global_caching = "none"
+testdir = Path(__file__).parent
 
 # if this flag is set to True, new data will be simulated and
 WRITE_NEW_REFERENCE_DATA = False
@@ -53,7 +54,7 @@ class SourcesTest(unittest.TestCase):
         results from .npy file"""
         for source in self.sources:
             with self.subTest(source.__name__):
-                name = join("reference_data", f"{source.__name__}.npy")
+                name = testdir / "reference_data" /  f"{source.__name__}.npy"
                 actual_data = get_source_result(source)
                 if WRITE_NEW_REFERENCE_DATA:
                     np.save(name, actual_data)

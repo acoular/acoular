@@ -8,7 +8,7 @@
 
 import unittest
 
-from os.path import join
+from pathlib import Path
 
 import numpy as np
 #acoular imports
@@ -24,6 +24,8 @@ WRITE_NEW_REFERENCE_DATA = False
 # results are generated for comparison during testing.
 # Should always be False. Only set to True if it is necessary to
 # recalculate the data due to intended changes of the Beamformers.
+module_path = Path(__file__).parent
+
 
 m = MicGeom()
 m.mpos_tot = ((0.5,0.5,0),(0,0,0),(-0.5,-0.5,0))
@@ -50,7 +52,7 @@ class acoular_env_test(unittest.TestCase):
     def test_flow_results(self):
         for fl in flows:
             with self.subTest(fl.__class__.__name__):
-                name = join('reference_data',f'{fl.__class__.__name__}.npy')
+                name = module_path / 'reference_data' / f'{fl.__class__.__name__}.npy'
                 # stack all results
                 actual_data = np.array([np.vstack(fl.v(x)) for x in gc.T])
                 if WRITE_NEW_REFERENCE_DATA:
@@ -61,7 +63,7 @@ class acoular_env_test(unittest.TestCase):
     def test_env_results(self):
         for env in envs:
             with self.subTest(env.__class__.__name__):
-                name = join('reference_data',f'{env.__class__.__name__}.npy')
+                name = module_path / 'reference_data'/ f'{env.__class__.__name__}.npy'
                 # stack all results
                 actual_data = np.vstack((env._r(gc,mc).T,env._r(gc).T))
                 if WRITE_NEW_REFERENCE_DATA:

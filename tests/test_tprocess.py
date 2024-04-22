@@ -1,5 +1,5 @@
 import unittest
-from os.path import join
+from pathlib import Path
 import re
 import numpy as np
 from acoular import (
@@ -14,9 +14,11 @@ from acoular import (
 from acoular.tprocess import *
 
 WRITE_NEW_REFERENCE_DATA = False
+testdir = Path(__file__).parent
+moduledir = testdir.parent
 
 config.global_caching = "none"
-datafile = join('..','..','examples','example_data.h5')
+datafile = moduledir / 'examples' / 'example_data.h5'
 t1 = MaskedTimeSamples(name=datafile)
 t1.start = 0 # first sample, default
 t1.stop = 500 # last valid sample = 15999
@@ -77,7 +79,7 @@ class TprocessTest(unittest.TestCase):
         for s in test_list:
             b = eval(s)
             with self.subTest(s):
-                name = join('reference_data',f'{fname(s)}.npy')
+                name = testdir / 'reference_data' / f'{fname(s)}.npy'
                 b.source = t1
                 # compute with block size 64 and add some extra 
                 actual_data = tools.return_result(b, nmax=70, num=64)

@@ -5,10 +5,9 @@
 #------------------------------------------------------------------------------
 """Implements testing of frequency beamformers.
 """
+from pathlib import Path
 
 import unittest
-
-from os.path import join
 
 import numpy as np
 
@@ -36,11 +35,12 @@ WRITE_NEW_REFERENCE_DATA = False
 # Should always be False. Only set to True if it is necessary to 
 # recalculate the data due to intended changes of the Beamformers.
 
-
 #load exampledata
-datafile = join('..','..','examples','example_data.h5')
-calibfile = join('..','..','examples','example_calib.xml')
-micgeofile = join( '..','xml','array_56.xml')
+testdir = Path(__file__).parent
+moduledir = testdir.parent
+datafile = moduledir / 'examples' / 'example_data.h5'
+calibfile = moduledir / 'examples' / 'example_calib.xml'
+micgeofile = moduledir / 'acoular' / 'xml' / 'array_56.xml'
 
 #frequencies to test
 cfreqs = 1000,8000
@@ -93,7 +93,7 @@ class acoular_beamformer_test(unittest.TestCase):
         acoular.config.global_caching = 'none'
         for b in fbeamformers():
             with self.subTest(b.__class__.__name__+" global_caching = none"):
-                name = join('reference_data',f'{b.__class__.__name__}.npy')
+                name = testdir / 'reference_data' / f'{b.__class__.__name__}.npy'
                 # stack all frequency band results together
                 actual_data = np.array([b.synthetic(cf,1) for cf in cfreqs],dtype=np.float32)
                 if WRITE_NEW_REFERENCE_DATA:
@@ -105,7 +105,7 @@ class acoular_beamformer_test(unittest.TestCase):
         for b in fbeamformers():
             b.cached = True
             with self.subTest(b.__class__.__name__+" global_caching = individual"):
-                name = join('reference_data',f'{b.__class__.__name__}.npy')
+                name = testdir /'reference_data' / f'{b.__class__.__name__}.npy'
                 actual_data = np.array([b.synthetic(cf,1) for cf in cfreqs],dtype=np.float32)
                 ref_data = np.load(name)
                 np.testing.assert_allclose(actual_data, ref_data, rtol=5e-5, atol=5e-8)
@@ -114,7 +114,7 @@ class acoular_beamformer_test(unittest.TestCase):
         for b in fbeamformers():
             b.cached = True
             with self.subTest(b.__class__.__name__+" global_caching = all"):
-                name = join('reference_data',f'{b.__class__.__name__}.npy')
+                name = testdir / 'reference_data' / f'{b.__class__.__name__}.npy'
                 actual_data = np.array([b.synthetic(cf,1) for cf in cfreqs],dtype=np.float32)
                 ref_data = np.load(name)
                 np.testing.assert_allclose(actual_data, ref_data, rtol=5e-5, atol=5e-8)
@@ -129,7 +129,7 @@ class acoular_beamformer_test(unittest.TestCase):
                     continue                         # nor recalculated   
                 b0.result[:] = 0
                 self.assertFalse(np.any(b0.result))
-                name = join('reference_data',f'{b1.__class__.__name__}.npy')
+                name = testdir / 'reference_data'/ f'{b1.__class__.__name__}.npy'
                 actual_data = np.array([b1.synthetic(cf,1) for cf in cfreqs],dtype=np.float32)
                 ref_data = np.load(name)
                 np.testing.assert_allclose(actual_data, ref_data, rtol=5e-5, atol=5e-8)
@@ -164,7 +164,7 @@ class Test_PowerSpectra(unittest.TestCase):
 
     def test_csm(self):
         """ test that csm result has not changed over different releases"""
-        name = join('reference_data',f'{f.__class__.__name__}_csm.npy')
+        name = testdir / 'reference_data'/ f'{f.__class__.__name__}_csm.npy'
         # test only two frequencies
         actual_data = np.array(f.csm[(16,32),:,:],dtype=np.complex64)
         if WRITE_NEW_REFERENCE_DATA:
@@ -174,7 +174,7 @@ class Test_PowerSpectra(unittest.TestCase):
 
     def test_ev(self):
         """ test that eve and eva result has not changed over different releases"""
-        name = join('reference_data',f'{f.__class__.__name__}_ev.npy')
+        name = testdir / 'reference_data' / f'{f.__class__.__name__}_ev.npy'
         # test only two frequencies
         actual_data = np.array((f.eve*f.eva[:,:,np.newaxis])[(16,32),:,:],dtype=np.complex64)
         if WRITE_NEW_REFERENCE_DATA:
@@ -197,7 +197,7 @@ class TestSteerFormulation(unittest.TestCase):
                 for dr in (True,False):
                     b.r_diag = dr
                     with self.subTest(f"{b.__class__.__name__} r_diag:{dr} steer:{kind}"):
-                        name = join('reference_data',f"{b.__class__.__name__}{dr}{ki+1}.npy")
+                        name = testdir / 'reference_data' / f"{b.__class__.__name__}{dr}{ki+1}.npy"
                         actual_data = np.array([b.synthetic(cf,1) for cf in cfreqs],dtype=np.float32)
                         if WRITE_NEW_REFERENCE_DATA:
                             np.save(name,actual_data)
