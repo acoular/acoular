@@ -1,9 +1,8 @@
 import unittest
 
+from acoular import FiltWNoiseGenerator
 from numpy import array
 from numpy.random import RandomState
-
-from acoular import FiltWNoiseGenerator
 
 #from parameterized import parameterized
 

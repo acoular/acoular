@@ -1,7 +1,5 @@
 from unittest import TestCase
 
-from numpy import array
-
 from acoular import (
     BeamformerCleantSqTraj,
     BeamformerCleantTraj,
@@ -32,6 +30,7 @@ from acoular import (
     UniformFlowEnvironment,
     WriteWAV,
 )
+from numpy import array
 
 # a dictionary containing all classes that should change their digest on
 # changes of the following trait types:

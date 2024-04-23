@@ -6,9 +6,8 @@
 
 import unittest
 
-from traits.api import Bool, Enum, Float, HasTraits, Int, Range, TraitEnum
-
 import acoular as ac
+from traits.api import Bool, Enum, Float, HasTraits, Int, Range, TraitEnum
 
 
 class Test_Instancing(unittest.TestCase):

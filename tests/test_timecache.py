@@ -1,9 +1,8 @@
 import unittest
 from os import path
 
-import numpy as np
-
 import acoular as ac
+import numpy as np
 from acoular import __file__ as bpath
 
 # load some array geometry

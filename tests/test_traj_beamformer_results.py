@@ -3,7 +3,6 @@ import unittest
 from pathlib import Path
 
 import numpy as np
-
 from acoular import config
 config.global_caching = 'none'
 

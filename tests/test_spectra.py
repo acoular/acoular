@@ -1,9 +1,8 @@
 
 import unittest
 
-import numpy as np
-
 import acoular
+import numpy as np
 
 rng = np.random.RandomState(2)
 # test array
