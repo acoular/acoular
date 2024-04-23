@@ -20,8 +20,7 @@ select = [
 ignore = [
     "E722", # bare except -> mainly covered by #211
     "E501", # ignore line length until fixed through issue #214
-    "E741", # allow ambiguous variable names -> TBD
-    "E402", # allow module level import not at top of file -> TBD
+    "E741", # allow ambiguous variable names -> should be fixed by issue #228
     "C901", # do we want to measure code complexity -> TBD
     "N802", # lower case functions (currently camel case) -> TBD
     "N803", # lower case letters in arguments (currently camel case) -> TBD
@@ -100,3 +99,4 @@ docstring-code-line-length = "dynamic"
 "acoular/tests/test_tprocess.py" = ["F403"] # star import 
 "acoular/tests/*" = ["D"] # exclude docstring linting
 "acoular/version.py" = ["D"] # exclude docstring linting
+"acoular/traitsviews.py" = ["E402"]

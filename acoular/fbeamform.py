@@ -35,6 +35,7 @@
 # imports from other packages
 
 import warnings
+from warnings import warn
 
 #check for sklearn version to account for incompatible behavior
 import sklearn
@@ -82,25 +83,9 @@ from numpy import (
 )
 from numpy.linalg import norm
 from packaging.version import parse
-from sklearn.linear_model import LassoLars, LassoLarsCV, LassoLarsIC, LinearRegression, OrthogonalMatchingPursuitCV
-
-sklearn_ndict = {}
-if parse(sklearn.__version__)<parse('1.4'):
-    sklearn_ndict['normalize'] = False
-
-from warnings import warn
-
 from scipy.linalg import eigh, eigvals, fractional_matrix_power, inv
 from scipy.optimize import fmin_l_bfgs_b, linprog, nnls, shgo
-
-#pylops imports for CMF solvers
-try:
-    from pylops import Identity, MatrixMult
-    from pylops.optimization.sparsity import FISTA, SplitBregman
-    PYLOPS_TRUE = True
-except:
-    PYLOPS_TRUE = False
-
+from sklearn.linear_model import LassoLars, LassoLarsCV, LassoLarsIC, LinearRegression, OrthogonalMatchingPursuitCV
 from traits.api import (
     Any,
     Bool,
@@ -132,6 +117,19 @@ from .h5files import H5CacheFileBase
 from .internal import digest
 from .microphones import MicGeom
 from .spectra import PowerSpectra
+
+#pylops imports for CMF solvers
+try:
+    from pylops import Identity, MatrixMult
+    from pylops.optimization.sparsity import FISTA, SplitBregman
+    PYLOPS_TRUE = True
+except:
+    PYLOPS_TRUE = False
+
+sklearn_ndict = {}
+if parse(sklearn.__version__)<parse('1.4'):
+    sklearn_ndict['normalize'] = False
+
 
 
 class SteeringVector( HasPrivateTraits ):

@@ -1,13 +1,11 @@
 import unittest
-
-import acoular as ac
-
-ac.config.global_caching = "none"
 from functools import partial
 
+import acoular as ac
 import numpy as np
 from test_grid import GridTest
 
+ac.config.global_caching = "none"
 
 class TestIntegrate(unittest.TestCase):
 
