@@ -110,7 +110,7 @@ jobs:
 before_install: 
   # test Python version
   - python --version
-  - chmod +x ./acoular/tests/run_tests.sh
+  - chmod +x ./tests/run_tests.sh
   
 install:
   #  pip installer 
@@ -132,7 +132,7 @@ script:
      fi
   
   # run acoular unittests from test dir
-  - cd acoular/tests/
+  - cd tests/
     
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
        bash run_tests_osx.sh;

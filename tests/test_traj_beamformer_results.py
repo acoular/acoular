@@ -1,6 +1,6 @@
 import unittest
 
-from os.path import join
+from pathlib import Path
 
 import numpy as np
 
@@ -16,9 +16,9 @@ from acoular import WNoiseGenerator, MovingPointSource, WriteH5, Trajectory, Mic
 WRITE_NEW_REFERENCE_DATA = False
 # new beamformer results are generated for comparison during testing. Should always be False. Only set to
 # true, if it is necessary to recalculate the data, due to wanted changes of the Beamformers (or MovingPointSource).
-
+testdir = Path(__file__).parent
 # Parameters
-FNAME = join('reference_data','beamformer_traj_time_data.h5')
+FNAME = testdir / 'reference_data' / 'beamformer_traj_time_data.h5'
 SFREQ = 6000
 SPEED = 10  # km/h
 SEED = 1
@@ -140,7 +140,7 @@ class BeamformerTimeTest(unittest.TestCase):
         results from .h5 file"""
         for beamformer in self.traj_beamformers:
             with self.subTest(beamformer.__name__):
-                name = join('reference_data',f'{beamformer.__name__}.npy')
+                name = testdir / 'reference_data' / f'{beamformer.__name__}.npy'
                 actual_data = get_beamformer_traj_result(beamformer)
                 if WRITE_NEW_REFERENCE_DATA:
                     np.save(name,actual_data)
@@ -152,7 +152,7 @@ class BeamformerTimeTest(unittest.TestCase):
         results from .h5 file"""
         for beamformer in self.time_beamformers:
             with self.subTest(beamformer.__name__):
-                name = join('reference_data',f'{beamformer.__name__}.npy')
+                name = testdir / 'reference_data' / f'{beamformer.__name__}.npy'
                 actual_data = get_beamformer_time_result(beamformer)
                 if WRITE_NEW_REFERENCE_DATA:
                     np.save(name,actual_data)

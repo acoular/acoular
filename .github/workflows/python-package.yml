@@ -33,21 +33,21 @@ jobs:
     - name: Test ubuntu with unittest Linux
       run: |
         cat /proc/cpuinfo
-        chmod +x ../acoular/acoular/tests/run_tests.sh
-        cd ../acoular/acoular/tests/
+        chmod +x tests/run_tests.sh
+        cd tests
         bash run_tests.sh
       if: ${{ matrix.os == 'ubuntu-latest'}} 
     - name: Test macos-13 with unittest Unix
       run: |
         sysctl -a machdep.cpu
-        chmod +x ../acoular/acoular/tests/run_tests.sh
-        cd ../acoular/acoular/tests/
+        chmod +x tests/run_tests.sh
+        cd tests
         bash run_tests.sh
       if: ${{ matrix.os == 'macos-13'}}
     - name: Test with unittest Windows
       run: |
         systeminfo
-        cd ..\acoular\acoular\tests
+        cd tests
         python -m unittest discover -v -p "test_*.py"
       if: ${{ matrix.os == 'windows-latest'}}
 

@@ -19,11 +19,15 @@ BeamformerCapon, BeamformerMusic, BeamformerDamas, BeamformerClean, \
 BeamformerFunctional, BeamformerDamasPlus, BeamformerGIB, SteeringVector
 
 from numpy import zeros, empty
-from os import path
 import tables
+from pathlib import Path
+
+testdir = Path(__file__).parent
+moduledir = testdir.parent
 
 #load numerical values from Examples
-h5file_num = tables.open_file('reference_data/Example1_numerical_values_testsum.h5', 'r')
+h5file_num = tables.open_file(
+    testdir / 'reference_data' / 'Example1_numerical_values_testsum.h5', 'r')
 
 mpos_num = h5file_num.get_node('/mpos_values').read()
 grid_pos_num = h5file_num.get_node('/grid_pos_values').read()
@@ -38,9 +42,9 @@ for b in ('bb', 'bc', 'be', 'bm', 'bl', 'bo', 'bs', 'bd', 'bcmf', 'bf', 'bdp', '
 
 
 #load exampledata
-datafile = '../../examples/example_data.h5'
-calibfile = '../../examples/example_calib.xml'
-micgeofile = path.join( path.split(acoular.__file__)[0],'xml','array_56.xml')
+datafile = moduledir / 'examples' / 'example_data.h5'
+calibfile = moduledir / 'examples' / 'example_calib.xml'
+micgeofile = moduledir / 'acoular' / 'xml' / 'array_56.xml'
 
 #calc all values from example 1
 cfreq = 4000
