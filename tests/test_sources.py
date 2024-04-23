@@ -1,7 +1,8 @@
 import unittest
 from pathlib import Path
+
 import numpy as np
-from acoular import __file__ as bpath, config, WNoiseGenerator, PointSource, MicGeom
+from acoular import MicGeom, PointSource, WNoiseGenerator, config
 
 config.global_caching = "none"
 testdir = Path(__file__).parent

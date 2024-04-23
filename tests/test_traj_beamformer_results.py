@@ -1,15 +1,28 @@
 import unittest
-
 from pathlib import Path
 
 import numpy as np
-from acoular import config
-config.global_caching = 'none'
+from acoular import (
+    BeamformerCleant,
+    BeamformerCleantSq,
+    BeamformerCleantSqTraj,
+    BeamformerCleantTraj,
+    BeamformerTime,
+    BeamformerTimeSq,
+    BeamformerTimeSqTraj,
+    BeamformerTimeTraj,
+    MaskedTimeSamples,
+    MicGeom,
+    MovingPointSource,
+    RectGrid,
+    SteeringVector,
+    Trajectory,
+    WNoiseGenerator,
+    WriteH5,
+    config,
+)
 
-from acoular import WNoiseGenerator, MovingPointSource, WriteH5, Trajectory, MicGeom,\
-    RectGrid, MaskedTimeSamples, SteeringVector, TimeAverage, BeamformerTimeSqTraj, BeamformerTimeTraj,\
-    BeamformerCleantTraj, BeamformerCleantSqTraj, BeamformerTime, BeamformerTimeSq,\
-    BeamformerCleant, BeamformerCleantSq
+config.global_caching = 'none'
 
 # if this flag is set to True, new time data will be simulated and
 WRITE_NEW_REFERENCE_DATA = False
@@ -46,7 +59,7 @@ TRAJ.points[t_passby] = (+passby_dist/2, SOURCE_POS[1], SOURCE_POS[2])
 def create_test_time_data(nsamples):
     """
     creates test data for a single moving monopole emitting white noise
-    
+
     Parameters
     ----------
     speed : float
@@ -70,7 +83,7 @@ def create_test_time_data(nsamples):
 def get_beamformer_traj_result(Beamformer, num=32):
     """
     returns the result for a given Beamformer class
-    
+
     Parameters
     ----------
     Beamformer : cls
@@ -97,7 +110,7 @@ def get_beamformer_traj_result(Beamformer, num=32):
 def get_beamformer_time_result(Beamformer, num=32):
     """
     returns the result for a given time Beamformer class
-    
+
     Parameters
     ----------
     Beamformer : cls
@@ -123,7 +136,7 @@ def get_beamformer_time_result(Beamformer, num=32):
 
 class BeamformerTimeTest(unittest.TestCase):
     """
-    A simple test case that varifies that the results of trajectory beamformers 
+    A simple test case that varifies that the results of trajectory beamformers
     and fixed focus beamformers in time domain are not changing across different
     versions of code.
     """
@@ -133,7 +146,7 @@ class BeamformerTimeTest(unittest.TestCase):
 
     time_beamformers = [BeamformerTime, BeamformerTimeSq,
                         BeamformerCleant, BeamformerCleantSq]
-    
+
     def test_beamformer_traj_result(self):
         """compare results of trajectory beamformers against previous
         results from .h5 file"""
@@ -158,6 +171,6 @@ class BeamformerTimeTest(unittest.TestCase):
                 ref_data = np.load(name)
                 np.testing.assert_allclose(actual_data, ref_data, rtol=5e-5, atol=5e-6)
 
-    
+
 if __name__ == '__main__':
     unittest.main()

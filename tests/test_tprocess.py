@@ -1,16 +1,9 @@
+import re
 import unittest
 from pathlib import Path
-import re
+
 import numpy as np
-from acoular import (
-    config,
-    TimeConvolve,
-    WNoiseGenerator,
-    PointSource,
-    MicGeom,
-    MaskedTimeSamples,
-    tools
-)
+from acoular import MaskedTimeSamples, MicGeom, PointSource, TimeConvolve, WNoiseGenerator, config, tools
 from acoular.tprocess import *
 
 WRITE_NEW_REFERENCE_DATA = False
@@ -22,10 +15,10 @@ datafile = moduledir / 'examples' / 'example_data.h5'
 t1 = MaskedTimeSamples(name=datafile)
 t1.start = 0 # first sample, default
 t1.stop = 500 # last valid sample = 15999
-invalid = list(range(4,64)) # list of invalid channels 
+invalid = list(range(4,64)) # list of invalid channels
 t1.invalid_channels = invalid # use four channels
 
-# these are tested 
+# these are tested
 test_list = (
     "TimeInOut()",
     "TimePower()",
@@ -43,7 +36,7 @@ test_list = (
     "FiltFreqWeight(weight = 'A')",
     "FiltFreqWeight(weight = 'C')",
     "FiltFreqWeight(weight = 'Z')",
-    "OctaveFilterBank()"
+    "OctaveFilterBank()",
 )
 
 def fname(s):
@@ -68,7 +61,7 @@ class TprocessTest(unittest.TestCase):
 
         SIG = tools.return_result(P1, num=NSAMPLES)
         RES = tools.return_result(CONV, num=100)
-        
+
         for i in range(P1.numchannels):
             REF = np.convolve(np.squeeze(KERNEL), np.squeeze(SIG[:,i]))
             np.testing.assert_allclose(np.squeeze(RES[:,i]), REF, rtol=1e-5, atol=1e-8)
@@ -81,7 +74,7 @@ class TprocessTest(unittest.TestCase):
             with self.subTest(s):
                 name = testdir / 'reference_data' / f'{fname(s)}.npy'
                 b.source = t1
-                # compute with block size 64 and add some extra 
+                # compute with block size 64 and add some extra
                 actual_data = tools.return_result(b, nmax=70, num=64)
                 if WRITE_NEW_REFERENCE_DATA:
                     np.save(name,actual_data)

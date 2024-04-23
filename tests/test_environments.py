@@ -5,17 +5,23 @@
 """
 
 import unittest
-
 from pathlib import Path
 
-import numpy as np
 #acoular imports
 import acoular
-acoular.config.global_caching = 'none' # to make sure that nothing is cached
+import numpy as np
+from acoular import (
+    Environment,
+    GeneralFlowEnvironment,
+    MicGeom,
+    OpenJet,
+    RectGrid3D,
+    RotatingFlow,
+    SlotJet,
+    UniformFlowEnvironment,
+)
 
-from acoular import MicGeom, RectGrid3D, \
-    SlotJet, OpenJet, RotatingFlow, \
-    Environment, UniformFlowEnvironment, GeneralFlowEnvironment
+acoular.config.global_caching = 'none' # to make sure that nothing is cached
 
 # if this flag is set to True
 WRITE_NEW_REFERENCE_DATA = False
@@ -35,13 +41,13 @@ gc = g.gpos
 flows = [
     SlotJet(v0=70.0, origin=(-0.7,0,0.7)),
     OpenJet(v0=70.0, origin=(-0.7,0,0.7)),
-    RotatingFlow(v0=70.0, rpm=1000.0)
+    RotatingFlow(v0=70.0, rpm=1000.0),
 ]
 
 envs = [
     Environment(),
     UniformFlowEnvironment(ma=0.3),
-    GeneralFlowEnvironment(ff=OpenJet(v0=70.0, origin=(-0.7,0,0.7)))
+    GeneralFlowEnvironment(ff=OpenJet(v0=70.0, origin=(-0.7,0,0.7))),
 ]
 
 

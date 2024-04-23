@@ -1,18 +1,29 @@
 import unittest
+from pathlib import Path
 
 #acoular imports
-import acoular
-
-from acoular import L_p, Calib, MicGeom, PowerSpectra, Environment, \
-RectGrid, BeamformerBase, BeamformerEig, BeamformerOrth, BeamformerCleansc, \
-MaskedTimeSamples, FiltFiltOctave, BeamformerTimeSq, TimeAverage, \
-TimeCache, BeamformerTime, TimePower, BeamformerCMF, \
-BeamformerCapon, BeamformerMusic, BeamformerDamas, BeamformerClean, \
-BeamformerFunctional, BeamformerDamasPlus, BeamformerGIB, SteeringVector
-
-from numpy import zeros, empty
 import tables
-from pathlib import Path
+from acoular import (
+    BeamformerBase,
+    BeamformerCapon,
+    BeamformerClean,
+    BeamformerCleansc,
+    BeamformerCMF,
+    BeamformerDamas,
+    BeamformerDamasPlus,
+    BeamformerEig,
+    BeamformerFunctional,
+    BeamformerGIB,
+    BeamformerMusic,
+    BeamformerOrth,
+    Calib,
+    Environment,
+    MaskedTimeSamples,
+    MicGeom,
+    PowerSpectra,
+    RectGrid,
+    SteeringVector,
+)
 
 testdir = Path(__file__).parent
 moduledir = testdir.parent
@@ -44,7 +55,7 @@ t1 = MaskedTimeSamples(name= datafile)
 t1.start = 0 # first sample, default
 t1.stop = 16000 # last valid sample = 15999
 invalid = [1,7] # list of invalid channels (unwanted microphones etc.)
-t1.invalid_channels = invalid 
+t1.invalid_channels = invalid
 t1.calib = Calib(from_file=calibfile)
 m = MicGeom(from_file=micgeofile)
 m.invalid_channels = invalid
@@ -56,7 +67,7 @@ env=Environment(c=346.04)
 
 st = SteeringVector(grid=g, mics=m, env=env)
 
-f = PowerSpectra(time_data=t1, 
+f = PowerSpectra(time_data=t1,
                window='Hanning', overlap='50%', block_size=128, #FFT-parameters
                cached = False )  #cached = False
 
@@ -74,47 +85,45 @@ bl = BeamformerClean(beamformer=bb, n_iter=100, cached = False)
 bf = BeamformerFunctional(freq_data=f, steer=st, r_diag=False, gamma=4, cached = False)
 bgib = BeamformerGIB(freq_data=f, steer=st, method= 'LassoLars', n=10, cached = False)
 
-class acoular_test(unittest.TestCase):  
-    
+class acoular_test(unittest.TestCase):
+
     #test if microfon positions are correct
     def test_mic_positions(self):
-        self.assertAlmostEqual(m.mpos.sum()/mpos_num.sum(),1,3) 
-    
+        self.assertAlmostEqual(m.mpos.sum()/mpos_num.sum(),1,3)
+
     #test if grid points are correct
     def test_grid_positions(self):
-        self.assertAlmostEqual(g.gpos.sum()/grid_pos_num.sum(),1,3) 
-        
+        self.assertAlmostEqual(g.gpos.sum()/grid_pos_num.sum(),1,3)
+
     #test steering vector calculation
     def test_steering(self):
-        ind=0
         checktrans=0
-        for freq in f.fftfreq()[1:-1]:
+        for ind, freq in enumerate(f.fftfreq()[1:-1]):
             checktrans=checktrans+st.transfer(freq)
             ind+=1
-        self.assertAlmostEqual(checktrans.sum()/transfer_num.sum(),1,3)             
-        
+        self.assertAlmostEqual(checktrans.sum()/transfer_num.sum(),1,3)
+
     #test if csm values are correct
     @unittest.skip
     def test_csm_calculation(self):
-        self.assertAlmostEqual(f.csm[:].sum()/csm_num.sum(),1,3)    
-        
+        self.assertAlmostEqual(f.csm[:].sum()/csm_num.sum(),1,3)
+
     #test eve/eva
-    @unittest.skip    
+    @unittest.skip
     def test_eigenvalue_calculation(self):
         self.assertAlmostEqual(f.eva[:].sum()/eve_num.sum(),1,3)
-        print(f.eve[:].sum(),eva_num)      
-        self.assertAlmostEqual(f.eve[:].sum()/eva_num.sum(),1,3) 
-     
+        print(f.eve[:].sum(),eva_num)
+        self.assertAlmostEqual(f.eve[:].sum()/eva_num.sum(),1,3)
+
     #test beamformer results
-    @unittest.skip  
+    @unittest.skip
     def test_beamformer_calculation(self):
-        for beam,bfname in zip((bb, bc, be, bm, bl, bo, bs, bd, bcmf, bf, bdp, bgib),('bb', 'bc', 'be', 'bm', 'bl', 'bo', 'bs', 'bd', 'bcmf', 'bf', 'bdp', 'bgib')):   
+        for beam,bfname in zip((bb, bc, be, bm, bl, bo, bs, bd, bcmf, bf, bdp, bgib),('bb', 'bc', 'be', 'bm', 'bl', 'bo', 'bs', 'bd', 'bcmf', 'bf', 'bdp', 'bgib')):
             with self.subTest(bfname):
-                self.assertAlmostEqual(beam.synthetic(cfreq,1).sum()/d[bfname+'num'].sum(),1,3)      
-            
-if "__main__" == __name__:
+                self.assertAlmostEqual(beam.synthetic(cfreq,1).sum()/d[bfname+'num'].sum(),1,3)
+
+if __name__ == "__main__":
     unittest.main() #exit=False
 
 
-                            
-        
+

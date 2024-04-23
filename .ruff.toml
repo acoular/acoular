@@ -1,7 +1,7 @@
 # Exclude a variety of commonly ignored directories.
 src = ["acoular"]
-exclude = ["acoular/tests/unsupported"]
-
+exclude = ["tests/unsupported"]
+    
 line-length = 120
 indent-width = 4
 
@@ -91,7 +91,7 @@ docstring-code-line-length = "dynamic"
 "acoular/nidaqimport.py" = ["F841"] # unused variable (really unused?) -> TBD
 "acoular/tbeamform.py" = ["F841"] # unused variable (really unused?) -> TBD
 "acoular/fbeamform.py" = ["W605"] # invalid escape sequence -> TBD
-"acoular/tests/test_tprocess.py" = ["F403"] # star import 
-"acoular/tests/*" = ["D"] # exclude docstring linting
 "acoular/version.py" = ["D"] # exclude docstring linting
 "acoular/traitsviews.py" = ["E402"]
+"tests/test_tprocess.py" = ["F403"] # star import 
+"tests/*" = ["D"] # exclude docstring linting
