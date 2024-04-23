@@ -1,6 +1,6 @@
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 """Implements global configuration of Acoular.
 
 .. autosummary::
@@ -27,6 +27,7 @@ if 'numpy' in sys.modules:
     import io
 
     import numpy as np
+
     orig_stdout = sys.stdout
     temp_stdout = io.StringIO()
     sys.stdout = temp_stdout
@@ -36,16 +37,20 @@ if 'numpy' in sys.modules:
     if 'openblas' in temp_stdout.getvalue().lower():
         # it's OpenBLAS, set numba threads=1 to avoid overcommittment
         import numba
+
         numba.set_num_threads(1)
-        warn("We detected that Numpy is already loaded and uses OpenBLAS. Because "
-             "this conflicts with Numba parallel execution, we disable parallel "
-             "execution for now and processing might be slower. To speed up, "
-             "either import Numpy after Acoular or set environment variable "
-             "OPENBLAS_NUM_THREADS=1 before start of the program.",
-             UserWarning, stacklevel = 2)
+        warn(
+            'We detected that Numpy is already loaded and uses OpenBLAS. Because '
+            'this conflicts with Numba parallel execution, we disable parallel '
+            'execution for now and processing might be slower. To speed up, '
+            'either import Numpy after Acoular or set environment variable '
+            'OPENBLAS_NUM_THREADS=1 before start of the program.',
+            UserWarning,
+            stacklevel=2,
+        )
 else:
     # numpy is not loaded
-    environ['OPENBLAS_NUM_THREADS'] = "1"
+    environ['OPENBLAS_NUM_THREADS'] = '1'
 
 # this loads numpy, so we have to defer loading until OpenBLAS check is done
 from traits.api import Bool, HasStrictTraits, Property, Str, Trait
@@ -84,20 +89,20 @@ class Config(HasStrictTraits):
     #: * 'overwrite': Acoular classes replace existing cachefile content with new data.
     global_caching = Property()
 
-    _global_caching = Trait('individual','all','none','readonly','overwrite')
+    _global_caching = Trait('individual', 'all', 'none', 'readonly', 'overwrite')
 
     #: Flag that globally defines package used to read and write .h5 files
     #: defaults to 'pytables'. If 'pytables' can not be imported, 'h5py' is used
     h5library = Property()
 
-    _h5library = Trait('pytables','h5py')
+    _h5library = Trait('pytables', 'h5py')
 
     #: Defines the path to the directory containing Acoulars cache files.
     #: If the specified :attr:`cache_dir` directory does not exist,
     #: it will be created. attr:`cache_dir` defaults to current session path.
     cache_dir = Property()
 
-    _cache_dir = Str("")
+    _cache_dir = Str('')
 
     #: Defines the working directory containing files that can be loaded by the
     #: fileimport.py module.
@@ -112,17 +117,16 @@ class Config(HasStrictTraits):
 
     _use_traitsui = Bool(False)
 
-
     def _get_global_caching(self):
         return self._global_caching
 
-    def _set_global_caching(self,globalCachingValue):
+    def _set_global_caching(self, globalCachingValue):
         self._global_caching = globalCachingValue
 
     def _get_h5library(self):
         return self._h5library
 
-    def _set_h5library(self,libraryName):
+    def _set_h5library(self, libraryName):
         self._h5library = libraryName
 
     def _get_use_traitsui(self):
@@ -137,24 +141,26 @@ class Config(HasStrictTraits):
     def _assert_h5library(self):
         try:
             import tables
+
             self.h5library = 'pytables'
         except:
             try:
                 import h5py
+
                 self.h5library = 'h5py'
             except:
-                msg = "packages h5py and pytables are missing!"
+                msg = 'packages h5py and pytables are missing!'
                 raise ImportError(msg)
 
     def _get_cache_dir(self):
-        if self._cache_dir == "":
-            cache_dir = path.join(path.curdir,'cache')
+        if self._cache_dir == '':
+            cache_dir = path.join(path.curdir, 'cache')
             if not path.exists(cache_dir):
                 mkdir(cache_dir)
             self._cache_dir = cache_dir
         return self._cache_dir
 
-    def _set_cache_dir(self,cdir):
+    def _set_cache_dir(self, cdir):
         if not path.exists(cdir):
             mkdir(cdir)
         self._cache_dir = cdir
@@ -162,8 +168,9 @@ class Config(HasStrictTraits):
     def _get_td_dir(self):
         return self._td_dir
 
-    def _set_td_dir(self,tddir):
+    def _set_td_dir(self, tddir):
         self._td_dir = tddir
+
 
 config = Config()
 """

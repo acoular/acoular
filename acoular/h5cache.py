@@ -1,6 +1,6 @@
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 # imports from other packages
 import gc
@@ -30,15 +30,15 @@ class H5cache_class(HasPrivateTraits):
         while self.busy:
             pass
 
-    def open_cachefile(self,cacheFileName,mode):
+    def open_cachefile(self, cacheFileName, mode):
         File = _get_cachefile_class()
         return File(path.join(self.cache_dir, cacheFileName), mode)
 
-    def close_cachefile(self,cachefile):
+    def close_cachefile(self, cachefile):
         self.openFileReferenceCount.pop(get_basename(cachefile))
         cachefile.close()
 
-    def get_filename(self,file):
+    def get_filename(self, file):
         File = _get_cachefile_class()
         if isinstance(file, File):
             return get_basename(file)
@@ -53,23 +53,23 @@ class H5cache_class(HasPrivateTraits):
     def close_unreferenced_cachefiles(self):
         for openCacheFile in self.get_open_cachefiles():
             if not self.is_reference_existent(openCacheFile):
-#                print("close unreferenced File:",get_basename(openCacheFile))
+                #                print("close unreferenced File:",get_basename(openCacheFile))
                 self.close_cachefile(openCacheFile)
 
-    def is_reference_existent(self,file):
+    def is_reference_existent(self, file):
         existFlag = False
         # inspect all refererres to the file object
-        gc.collect() #clear garbage before collecting referrers
+        gc.collect()  # clear garbage before collecting referrers
         for ref in gc.get_referrers(file):
             # does the file object have a referrer that has a 'h5f'
             # attribute?
-            if isinstance(ref,dict) and 'h5f' in ref:
+            if isinstance(ref, dict) and 'h5f' in ref:
                 # file is still referred, must not be closed
                 existFlag = True
                 break
         return existFlag
 
-    def is_cachefile_existent(self,cacheFileName):
+    def is_cachefile_existent(self, cacheFileName):
         if cacheFileName in listdir(self.cache_dir):
             return True
         return False
@@ -83,9 +83,9 @@ class H5cache_class(HasPrivateTraits):
     def _print_open_files(self):
         print(list(self.openFileReferenceCount.items()))
 
-    def get_cache_file( self, obj, basename, mode='a' ):
+    def get_cache_file(self, obj, basename, mode='a'):
         """Returns pytables .h5 file to h5f trait of calling object for caching."""
-        self._idle_if_busy() #
+        self._idle_if_busy()  #
         self.busy = True
 
         cacheFileName = basename + '_cache.h5'
@@ -97,18 +97,17 @@ class H5cache_class(HasPrivateTraits):
                 return
             self._decrease_file_reference_counter(objFileName)
 
-        if cacheFileName not in self.open_files: # or tables.file._open_files.filenames
-            if (
-                config.global_caching == 'readonly'
-                and not self.is_cachefile_existent(cacheFileName)
-                ): # condition ensures that cachefile is not created in readonly mode
+        if cacheFileName not in self.open_files:  # or tables.file._open_files.filenames
+            if config.global_caching == 'readonly' and not self.is_cachefile_existent(
+                cacheFileName,
+            ):  # condition ensures that cachefile is not created in readonly mode
                 obj.h5f = None
                 self.busy = False
-#                self._print_open_files()
+                #                self._print_open_files()
                 return
             if config.global_caching == 'readonly':
                 mode = 'r'
-            f = self.open_cachefile(cacheFileName,mode)
+            f = self.open_cachefile(cacheFileName, mode)
             self.open_files[cacheFileName] = f
 
         obj.h5f = self.open_files[cacheFileName]
@@ -120,8 +119,9 @@ class H5cache_class(HasPrivateTraits):
         self.busy = False
         self._print_open_files()
 
+
 H5cache = H5cache_class(config=config)
+
 
 def get_basename(file):
     return path.basename(file.filename)
-

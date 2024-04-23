@@ -1,6 +1,6 @@
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 """Implements the definition of trajectories.
 
 .. autosummary::
@@ -18,7 +18,7 @@ from traits.api import Dict, Float, HasPrivateTraits, Property, Tuple, cached_pr
 from .internal import digest
 
 
-class Trajectory( HasPrivateTraits ):
+class Trajectory(HasPrivateTraits):
     """Describes a trajectory from sampled points.
 
     Based on a discrete number of points in space and time, a
@@ -28,35 +28,38 @@ class Trajectory( HasPrivateTraits ):
 
     #: Dictionary that assigns discrete time instants (keys) to
     #: sampled `(x, y, z)` positions along the trajectory (values).
-    points = Dict(key_trait = Float, value_trait = Tuple(Float, Float, Float),
-        desc = "sampled positions along the trajectory")
+    points = Dict(
+        key_trait=Float,
+        value_trait=Tuple(Float, Float, Float),
+        desc='sampled positions along the trajectory',
+    )
 
     #: Tuple of the start and end time, is set automatically
     #: (depending on :attr:`points`).
     interval = Property()
-    #t_min, t_max tuple
+    # t_min, t_max tuple
 
     #: Spline data, internal use.
     tck = Property()
 
     # internal identifier
     digest = Property(
-        depends_on = ['points[]'],
-        )
+        depends_on=['points[]'],
+    )
 
     @cached_property
-    def _get_digest( self ):
+    def _get_digest(self):
         return digest(self)
 
     @property_depends_on('points[]')
-    def _get_interval( self ):
+    def _get_interval(self):
         return sort(list(self.points.keys()))[r_[0, -1]]
 
     @property_depends_on('points[]')
-    def _get_tck( self ):
+    def _get_tck(self):
         t = sort(list(self.points.keys()))
         xp = array([self.points[i] for i in t]).T
-        k = min(3, len(self.points)-1)
+        k = min(3, len(self.points) - 1)
         tcku = splprep(xp, u=t, s=0, k=k)
         return tcku[0]
 
@@ -118,5 +121,4 @@ class Trajectory( HasPrivateTraits ):
         # all locations are fetched in one go because thats much faster
         # further improvement could be possible if interpolated locations are fetched
         # in blocks
-        yield from zip(*self.location(arange(t_start, t_end, delta_t),der))
-
+        yield from zip(*self.location(arange(t_start, t_end, delta_t), der))

@@ -1,9 +1,8 @@
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
-#------------------------------------------------------------------------------
-"""
-This example shows the different behaviour of SampleSplitter class  
-when the maximum size of a block buffer is reached for one object obtaining 
+# ------------------------------------------------------------------------------
+"""This example shows the different behaviour of SampleSplitter class
+when the maximum size of a block buffer is reached for one object obtaining
 data.
 
 Three different settings can be made by the user:
@@ -12,9 +11,10 @@ Three different settings can be made by the user:
     * error: an error is raised
 """
 
-from acoular import TimePower, MaskedTimeSamples, SampleSplitter
 import threading
 from time import sleep
+
+from acoular import MaskedTimeSamples, SampleSplitter, TimePower
 
 samples = 25000
 
@@ -22,16 +22,14 @@ samples = 25000
 #  set up data source
 # =============================================================================
 h5savefile = 'example_data.h5'
-ts = MaskedTimeSamples(name=h5savefile,
-                       start = 0,
-                       stop = samples)  
+ts = MaskedTimeSamples(name=h5savefile, start=0, stop=samples)
 
 # =============================================================================
 # connect SampleSplitter to data source
 # =============================================================================
 
 # set up Sample Splitter
-ss = SampleSplitter(source = ts)
+ss = SampleSplitter(source=ts)
 
 
 # =============================================================================
@@ -42,15 +40,15 @@ tp1 = TimePower(source=ss)
 tp2 = TimePower(source=ss)
 
 # register these objects at SampleSplitter
-ss.register_object(tp1,tp2) # register objects
+ss.register_object(tp1, tp2)  # register objects
 
 # =============================================================================
-# define functions 
+# define functions
 # =============================================================================
+
 
 def print_number_of_blocks_in_block_buffers():
-    """ 
-    prints the number of data blocks in SampleSplitter-buffers. For each
+    """Prints the number of data blocks in SampleSplitter-buffers. For each
     subsequent object, a buffer exist.
     """
     buffers = list(ss.block_buffer.values())
@@ -58,19 +56,20 @@ def print_number_of_blocks_in_block_buffers():
     print(f"num blocks in buffers: {dict(zip(['tp1','tp2','tp3'], elements))}")
 
 
-def get_data_fast(obj): # not time consuming function
-    """ gets data fast (pause 0.1 seconds)"""
-    for _ in obj.result(2048): # 
-        print("tp1 calls sample splitter")
+def get_data_fast(obj):  # not time consuming function
+    """Gets data fast (pause 0.1 seconds)"""
+    for _ in obj.result(2048):  #
+        print('tp1 calls sample splitter')
         print_number_of_blocks_in_block_buffers()
-        sleep(0.1) 
+        sleep(0.1)
 
-def get_data_slow(obj): # more time consuming function
-    """ gets data slow (pause 0.8 seconds)"""
-    for i in obj.result(2048): # 
-        print("tp3 calls sample splitter")
+
+def get_data_slow(obj):  # more time consuming function
+    """Gets data slow (pause 0.8 seconds)"""
+    for i in obj.result(2048):  #
+        print('tp3 calls sample splitter')
         print_number_of_blocks_in_block_buffers()
-        sleep(0.8) 
+        sleep(0.8)
 
 
 # =============================================================================
@@ -80,8 +79,8 @@ def get_data_slow(obj): # more time consuming function
 
 
 print("buffer overflow behaviour == 'none'")
-print("buffer size is set to a maximum of 5 elements")
-ss.buffer_size=5
+print('buffer size is set to a maximum of 5 elements')
+ss.buffer_size = 5
 
 ss.buffer_overflow_treatment[tp1] = 'none'
 ss.buffer_overflow_treatment[tp2] = 'none'
@@ -89,7 +88,7 @@ ss.buffer_overflow_treatment[tp2] = 'none'
 worker1 = threading.Thread(target=get_data_fast, args=(tp1,))
 worker2 = threading.Thread(target=get_data_slow, args=(tp2,))
 
-print("start threads")
+print('start threads')
 
 worker1.start()
 worker2.start()
@@ -97,7 +96,7 @@ worker2.start()
 worker1.join()
 worker2.join()
 
-print("threads finished")
+print('threads finished')
 
 
 # =============================================================================
@@ -106,8 +105,8 @@ print("threads finished")
 # =============================================================================
 
 print("buffer overflow behaviour == 'warning'")
-print("buffer size is set to a maximum of 5 elements")
-ss.buffer_size=5
+print('buffer size is set to a maximum of 5 elements')
+ss.buffer_size = 5
 
 ss.buffer_overflow_treatment[tp1] = 'warning'
 ss.buffer_overflow_treatment[tp2] = 'warning'
@@ -115,7 +114,7 @@ ss.buffer_overflow_treatment[tp2] = 'warning'
 worker1 = threading.Thread(target=get_data_fast, args=(tp1,))
 worker2 = threading.Thread(target=get_data_slow, args=(tp2,))
 
-print("start threads")
+print('start threads')
 
 worker1.start()
 worker2.start()
@@ -123,7 +122,7 @@ worker2.start()
 worker1.join()
 worker2.join()
 
-print("threads finished")
+print('threads finished')
 
 # =============================================================================
 # prepare and start processing in threads
@@ -131,8 +130,8 @@ print("threads finished")
 # =============================================================================
 
 print("buffer overflow behaviour == 'error'")
-print("buffer size is set to a maximum of 5 elements")
-ss.buffer_size=5
+print('buffer size is set to a maximum of 5 elements')
+ss.buffer_size = 5
 
 ss.buffer_overflow_treatment[tp1] = 'error'
 ss.buffer_overflow_treatment[tp2] = 'error'
@@ -140,7 +139,7 @@ ss.buffer_overflow_treatment[tp2] = 'error'
 worker1 = threading.Thread(target=get_data_fast, args=(tp1,))
 worker2 = threading.Thread(target=get_data_slow, args=(tp2,))
 
-print("start threads")
+print('start threads')
 
 worker1.start()
 worker2.start()
@@ -148,4 +147,4 @@ worker2.start()
 worker1.join()
 worker2.join()
 
-print("threads finished")
+print('threads finished')

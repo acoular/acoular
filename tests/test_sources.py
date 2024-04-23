@@ -4,7 +4,7 @@ from pathlib import Path
 import numpy as np
 from acoular import MicGeom, PointSource, WNoiseGenerator, config
 
-config.global_caching = "none"
+config.global_caching = 'none'
 testdir = Path(__file__).parent
 
 # if this flag is set to True, new data will be simulated and
@@ -17,7 +17,7 @@ SFREQ = 1000
 SEED = 1
 NSAMPLES = 100
 N1 = WNoiseGenerator(sample_freq=SFREQ, numsamples=NSAMPLES, seed=SEED)
-MGEOM = MicGeom(mpos_tot=[[1],[1],[1]])
+MGEOM = MicGeom(mpos_tot=[[1], [1], [1]])
 
 
 def get_source_result(Source, num=32):
@@ -55,7 +55,7 @@ class SourcesTest(unittest.TestCase):
         results from .npy file"""
         for source in self.sources:
             with self.subTest(source.__name__):
-                name = testdir / "reference_data" /  f"{source.__name__}.npy"
+                name = testdir / 'reference_data' / f'{source.__name__}.npy'
                 actual_data = get_source_result(source)
                 if WRITE_NEW_REFERENCE_DATA:
                     np.save(name, actual_data)
@@ -63,5 +63,5 @@ class SourcesTest(unittest.TestCase):
                 np.testing.assert_allclose(actual_data, ref_data, rtol=1e-5, atol=1e-8)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()
