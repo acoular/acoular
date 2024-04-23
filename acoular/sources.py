@@ -822,14 +822,13 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
         rflag = (self.rvec == 0).all() #flag translation vs. rotation
         if rflag:
             return direction
-        else:
-            dx = array(trajg1.T) #direction vector (new x-axis)
-            dy = cross(self.rvec, dx) # new y-axis
-            dz = cross(dx, dy) # new z-axis
-            RM = array((dx, dy, dz)).T # rotation matrix
-            RM /= sqrt((RM*RM).sum(0)) # column normalized
-            newdir = dot(RM, direction)
-            return cross(newdir[:,0].T,self.rvec.T).T
+        dx = array(trajg1.T) #direction vector (new x-axis)
+        dy = cross(self.rvec, dx) # new y-axis
+        dz = cross(dx, dy) # new z-axis
+        RM = array((dx, dy, dz)).T # rotation matrix
+        RM /= sqrt((RM*RM).sum(0)) # column normalized
+        newdir = dot(RM, direction)
+        return cross(newdir[:,0].T,self.rvec.T).T
 
     def result(self, num=128):
         """Python generator that yields the output at microphones block-wise.
@@ -1031,14 +1030,13 @@ class MovingLineSource(LineSource,MovingPointSource):
         rflag = (self.rvec == 0).all() #flag translation vs. rotation
         if rflag:
             return direction
-        else:
-            dx = array(trajg1.T) #direction vector (new x-axis)
-            dy = cross(self.rvec, dx) # new y-axis
-            dz = cross(dx, dy) # new z-axis
-            RM = array((dx, dy, dz)).T # rotation matrix
-            RM /= sqrt((RM*RM).sum(0)) # column normalized
-            newdir = dot(RM, direction)
-            return cross(newdir[:,0].T,self.rvec.T).T
+        dx = array(trajg1.T) #direction vector (new x-axis)
+        dy = cross(self.rvec, dx) # new y-axis
+        dz = cross(dx, dy) # new z-axis
+        RM = array((dx, dy, dz)).T # rotation matrix
+        RM /= sqrt((RM*RM).sum(0)) # column normalized
+        newdir = dot(RM, direction)
+        return cross(newdir[:,0].T,self.rvec.T).T
 
     def get_emission_time(self,t,direction):
         eps = ones(self.mics.num_mics)

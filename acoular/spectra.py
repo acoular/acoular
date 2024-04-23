@@ -123,8 +123,7 @@ class BaseSpectra( HasPrivateTraits ):
         if self.source is not None:
             return abs(fft.fftfreq(self.block_size, 1./self.source.sample_freq)\
                         [:int(self.block_size/2+1)])
-        else:
-            return None
+        return None
 
     #generator that yields the time data blocks for every channel (with optional overlap)
     def get_source_data(self):
@@ -313,8 +312,7 @@ class PowerSpectra( BaseSpectra ):
         if fftfreq is not None:
             if self._ind_high is None:
                 return array([fftfreq[self.ind_low],None])
-            else:
-                return fftfreq[[ self.ind_low, self.ind_high ]]
+            return fftfreq[[ self.ind_low, self.ind_high ]]
         return None
 
     def _set_freq_range( self, freq_range ):# by setting this the user sets _freqlc and _freqhc
@@ -328,8 +326,7 @@ class PowerSpectra( BaseSpectra ):
         if fftfreq is not None:
             if self._index_set_last:
                 return min(self._ind_low, fftfreq.shape[0]-1)
-            else:
-                return searchsorted(fftfreq[:-1], self._freqlc)
+            return searchsorted(fftfreq[:-1], self._freqlc)
         return None
 
     @property_depends_on( '_source.sample_freq, block_size, _ind_high, _freqhc' )
@@ -340,11 +337,9 @@ class PowerSpectra( BaseSpectra ):
                 if self._ind_high is None:
                     return None
                 return min(self._ind_high, fftfreq.shape[0]-1)
-            else:
-                if self._freqhc is None:
-                    return None
-                else:
-                    return searchsorted(fftfreq[:-1], self._freqhc)
+            if self._freqhc is None:
+                return None
+            return searchsorted(fftfreq[:-1], self._freqhc)
         return None
 
     def _set_ind_high(self, ind_high):# by setting this the user sets the lower index
@@ -375,8 +370,7 @@ class PowerSpectra( BaseSpectra ):
                 indices = arange(fftfreq.shape[0],dtype=int)
                 if self.ind_high is None:
                     return indices[ self.ind_low:]
-                else:
-                    return indices[ self.ind_low: self.ind_high ]
+                return indices[ self.ind_low: self.ind_high ]
             except IndexError:
                 return range(0)
         return None
@@ -389,8 +383,7 @@ class PowerSpectra( BaseSpectra ):
     def _get_basename( self ):
         if 'basename' in self._source.all_trait_names():
             return self._source.basename
-        else:
-            return self._source.__class__.__name__ + self._source.digest
+        return self._source.__class__.__name__ + self._source.digest
 
     def calc_csm( self ):
         """Csm calculation."""
@@ -518,8 +511,7 @@ class PowerSpectra( BaseSpectra ):
                 (config.global_caching == 'individual' and self.cached is False)
             ):
             return self.calc_csm()
-        else:
-            return self._get_filecache('csm')
+        return self._get_filecache('csm')
 
     @property_depends_on('digest')
     def _get_eva ( self ):
@@ -531,8 +523,7 @@ class PowerSpectra( BaseSpectra ):
                 (config.global_caching == 'individual' and self.cached is False)
             ):
             return self.calc_eva()
-        else:
-            return self._get_filecache('eva')
+        return self._get_filecache('eva')
 
     @property_depends_on('digest')
     def _get_eve ( self ):
@@ -544,8 +535,7 @@ class PowerSpectra( BaseSpectra ):
                 (config.global_caching == 'individual' and self.cached is False)
             ):
             return self.calc_eve()
-        else:
-            return self._get_filecache('eve')
+        return self._get_filecache('eve')
 
     def synthetic_ev( self, freq, num=0):
         """Return synthesized frequency band values of the eigenvalues.
@@ -578,13 +568,11 @@ class PowerSpectra( BaseSpectra ):
         if num == 0:
             # single frequency line
             return self.eva[searchsorted(f, freq)]
-        else:
-            f1 = searchsorted(f, freq*2.**(-0.5/num))
-            f2 = searchsorted(f, freq*2.**(0.5/num))
-            if f1 == f2:
-                return self.eva[f1]
-            else:
-                return sum(self.eva[f1:f2], 0)
+        f1 = searchsorted(f, freq*2.**(-0.5/num))
+        f2 = searchsorted(f, freq*2.**(0.5/num))
+        if f1 == f2:
+            return self.eva[f1]
+        return sum(self.eva[f1:f2], 0)
 
 
 
@@ -804,10 +792,8 @@ class PowerSpectraImport( PowerSpectra ):
         """
         if isinstance(self.frequencies,float):
             return array([self.frequencies])
-        elif isinstance(self.frequencies,ndarray):
+        if isinstance(self.frequencies,ndarray):
             return self.frequencies
-        elif self.frequencies is None:
+        if self.frequencies is None:
             warn("No frequencies defined for PowerSpectraImport object!", stacklevel=1)
-            return self.frequencies
-        else:
-            return self.frequencies
+        return self.frequencies

@@ -43,8 +43,7 @@ class H5cache_class(HasPrivateTraits):
         File = _get_cachefile_class()
         if isinstance(file, File):
             return get_basename(file)
-        else:
-            return 0
+        return 0
 
     def get_open_cachefiles(self):
         try:
@@ -74,8 +73,7 @@ class H5cache_class(HasPrivateTraits):
     def is_cachefile_existent(self,cacheFileName):
         if cacheFileName in listdir(self.cache_dir):
             return True
-        else:
-            return False
+        return False
 
     def _increase_file_reference_counter(self, cacheFileName):
         self.openFileReferenceCount[cacheFileName] = self.openFileReferenceCount.get(cacheFileName, 0) + 1
@@ -98,8 +96,7 @@ class H5cache_class(HasPrivateTraits):
             if objFileName == cacheFileName:
                 self.busy = False
                 return
-            else: # in case the base name has changed ( different source )
-                self._decrease_file_reference_counter(objFileName)
+            self._decrease_file_reference_counter(objFileName)
 
         if cacheFileName not in self.open_files: # or tables.file._open_files.filenames
             if (

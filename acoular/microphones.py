@@ -88,9 +88,8 @@ class MicGeom( HasPrivateTraits ):
                 return self.mpos_tot
             allr=[i for i in range(self.mpos_tot.shape[-1]) if i not in self.invalid_channels]
             return self.mpos_tot[:, array(allr)]
-        else:
-            raise FileNotFoundError(
-                    errno.ENOENT, strerror(errno.ENOENT), self.from_file)
+        raise FileNotFoundError(
+                errno.ENOENT, strerror(errno.ENOENT), self.from_file)
 
     @cached_property
     def _get_num_mics( self ):

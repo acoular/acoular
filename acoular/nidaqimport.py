@@ -239,7 +239,7 @@ class nidaq_import( time_data_import ):
         except RuntimeError:
             # no valid task
             time_data_import.get_data(self,td)
-            return
+            return None
         #import data
         ac = np.empty((self.numsamples,self.numchannels),np.float32)
         DAQmxGetSampQuantSampPerChan(taskHandle,ctypes.byref(lnum))

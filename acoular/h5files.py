@@ -132,8 +132,7 @@ if is_h5py:
         def _get_in_file_path(self,nodename,group=None):
             if not group:
                 return '/'+nodename
-            else:
-                return group+'/'+nodename
+            return group+'/'+nodename
 
         def create_array(self,where, name, obj):
             self.create_dataset(f'{where}/{name}',data=obj)
@@ -183,8 +182,7 @@ if is_h5py:
                 group = '/'
             if group+nodename in self:
                 return True
-            else:
-                return False
+            return False
 
         def create_compressible_array(self,nodename,shape,precision,group=None):
             in_file_path = self._get_in_file_path(nodename,group)
@@ -197,13 +195,13 @@ if is_h5py:
 def _get_h5file_class():
     if config.h5library == "pytables":
         return H5FileTables
-    elif config.h5library == "h5py":
+    if config.h5library == "h5py":
         return H5FileH5py
     return None
 
 def _get_cachefile_class():
     if config.h5library == "pytables":
         return H5CacheFileTables
-    elif config.h5library == "h5py":
+    if config.h5library == "h5py":
         return H5CacheFileH5py
     return None

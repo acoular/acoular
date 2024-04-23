@@ -483,31 +483,29 @@ class RectGrid( Grid ):
             if not (xis and yis): # if no points in circle, take nearest one
                 return self.index(r[0], r[1])
             return array(xis), array(yis)
-        elif len(r) == 4: # rectangular subdomain - old functionality
+        if len(r) == 4: # rectangular subdomain - old functionality
             xi1, yi1 = self.index(min(r[0], r[2]), min(r[1], r[3]))
             xi2, yi2 = self.index(max(r[0], r[2]), max(r[1], r[3]))
             return s_[xi1:xi2+1], s_[yi1:yi2+1]
-        else: # use enveloping polygon
-            xpos = self.gpos
-            xis = []
-            yis = []
-            #replaced matplotlib Path by numpy
-            #p = Path(array(r).reshape(-1,2))
-            #inds = p.contains_points()
-            #inds = in_poly(xpos[:2,:].T,array(r).reshape(-1,2))
-            poly = Polygon(array(r).reshape(-1,2)[:,0],array(r).reshape(-1,2)[:,1])
-            dists = poly.is_inside(xpos[0,:],xpos[1,:])
-            inds = dists >= 0
-            for np in arange(self.size)[inds]: # np -- points in x2-circle
-                xi, yi = self.index(xpos[0, np], xpos[1, np])
-                xis += [xi]
-                yis += [yi]
-            if not (xis and yis): # if no points inside, take nearest to center
-                center = array(r).reshape(-1,2).mean(0)
-                return self.index(center[0], center[1])
-            else:
-                return array(xis), array(yis)
-                #return arange(self.size)[inds]
+        xpos = self.gpos
+        xis = []
+        yis = []
+        #replaced matplotlib Path by numpy
+        #p = Path(array(r).reshape(-1,2))
+        #inds = p.contains_points()
+        #inds = in_poly(xpos[:2,:].T,array(r).reshape(-1,2))
+        poly = Polygon(array(r).reshape(-1,2)[:,0],array(r).reshape(-1,2)[:,1])
+        dists = poly.is_inside(xpos[0,:],xpos[1,:])
+        inds = dists >= 0
+        for np in arange(self.size)[inds]: # np -- points in x2-circle
+            xi, yi = self.index(xpos[0, np], xpos[1, np])
+            xis += [xi]
+            yis += [yi]
+        if not (xis and yis): # if no points inside, take nearest to center
+            center = array(r).reshape(-1,2).mean(0)
+            return self.index(center[0], center[1])
+        return array(xis), array(yis)
+        #return arange(self.size)[inds]
 
     def extend (self) :
         """The extension of the grid in pylab.imshow compatible form.
@@ -585,8 +583,7 @@ class RectGrid3D( RectGrid):
     def _get_increment3D(self):
         if isscalar(self._increment):
             return array([self._increment,self._increment,self._increment])
-        else:
-            return self._increment
+        return self._increment
 
     def _set_increment3D(self, inc):
         if not isscalar(inc) and len(inc) == 3:

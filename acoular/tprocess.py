@@ -250,8 +250,7 @@ class MaskedTimeInOut ( TimeInOut ):
     def _get_basename( self ):
         if 'basename' in self.source.all_trait_names():
             return self.source.basename
-        else:
-            return self.source.__class__.__name__ + self.source.digest
+        return self.source.__class__.__name__ + self.source.digest
 
     @cached_property
     def _get_channels( self ):
@@ -2267,10 +2266,9 @@ class TimeConvolve(TimeInOut):
             self.kernel = self.kernel.reshape([-1, 1])
             return
         # check dimensionality
-        elif self.kernel.ndim > 2:
+        if self.kernel.ndim > 2:
             msg = "Only one or two dimensional kernels accepted."
             raise ValueError(msg)
-
         # check if number of kernels matches numchannels
         if self.kernel.shape[1] not in (1, self.source.numchannels):
             msg = "Number of kernels must be either `numchannels` or one."

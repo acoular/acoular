@@ -196,8 +196,7 @@ class FiltWNoiseGenerator(WNoiseGenerator):
     def handle_empty_coefficients(self,coefficients):
         if coefficients.size == 0:
             return array([1.0])
-        else:
-            return coefficients
+        return coefficients
 
     def signal(self):
         """Deliver the signal.
@@ -297,8 +296,7 @@ class GenericSignalGenerator( SignalGenerator ):
     def _get_numsamples( self ):
         if self._numsamples:
             return self._numsamples
-        else:
-            return self.source.numsamples
+        return self.source.numsamples
 
     def _set_numsamples( self, numsamples ):
         self._numsamples = numsamples

@@ -451,8 +451,7 @@ class BeamformerTimeTraj( BeamformerTime ):
     def get_r0( self, tpos ):
         if isscalar(self.steer.ref) and self.steer.ref > 0:
             return self.steer.ref#full((self.steer.grid.size,), self.steer.ref)
-        else:
-            return self.env._r(tpos)
+        return self.env._r(tpos)
 
     def increase_buffer( self, num ):
         ar = zeros((num,self.steer.mics.num_mics), dtype=self.buffer.dtype)
