@@ -944,7 +944,7 @@ class SpatialInterpolator(TimeInOut):
         return  mesh, virtNewCoord , newCoord
 
 
-    def _result_core_func(self, p, phiDelay=[], period=None, Q=Q, interp_at_zero = False):
+    def _result_core_func(self, p, phiDelay=None, period=None, Q=Q, interp_at_zero = False):
         """Performs the actual Interpolation.
 
         Parameters
@@ -964,6 +964,8 @@ class SpatialInterpolator(TimeInOut):
             The interpolated time data at the virtual mics
 
         """
+        if phiDelay is None:
+            phiDelay = []
         #number of time samples
         nTime = p.shape[0]
         #number of virtual mixcs
@@ -1963,7 +1965,7 @@ class WriteWAV( TimeInOut ):
             msg = "No channels given for output."
             raise ValueError(msg)
         if nc > 2:
-            warn("More than two channels given for output, exported file will have %i channels" % nc)
+            warn("More than two channels given for output, exported file will have %i channels" % nc, stacklevel=1)
         if self.name == '':
             name = self.basename
             for nr in self.channels:
@@ -2169,7 +2171,7 @@ class SampleSplitter(TimeInOut):
                 elif self.buffer_overflow_treatment[obj] == 'warning':
                     warn(
                         'overfilled buffer for object: %s data will get lost' %obj,
-                        UserWarning)
+                        UserWarning, stacklevel=1)
 
     def _create_source_generator(self,num):
         for obj in self.block_buffer.keys():

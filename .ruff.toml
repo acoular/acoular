@@ -10,7 +10,7 @@ select = [
         "F", # pyflakes
         "C","E","R", "W",  # pylint (including pycodestyle)
         "C90", "I", "N","D", "UP", 
-        "YTT", "ANN", "ASYNC", "TRIO", "S", "BLE", "FBT", "B", "A", "COM", # flake8 plugins
+        "YTT", "ASYNC", "TRIO", "BLE", "B", "A", "COM", # flake8 plugins
         "C4", "DTZ","T10","EM", "FA", "ISC", "ICN", # flake8 plugins
         "LOG", "G", "INP", "PIE", "T20", "PYI", "PT", "RSE", # flake8 plugins
         "RET", "SLF", "SLOT", "SIM", "TID", "TCH", "INT", "ARG", "TD", "FIX", "ERA", # flake8 plugins
@@ -33,22 +33,19 @@ ignore = [
     # D
     "D203", # don't enforce blank line before docstring
     "D401", # first line should be in imperative mood -> TBD
-    "D205", # 1 blank line required between summary line and description -> not a problem in docs
-    "D100", # missing docstring in public module -> TBD
-    "D101", # missing docstring in public class -> TBD
-    "D102", # missing docstring in public method -> TBD
-    "D103", # missing docstring in public function -> TBD
-    "D104", # missing docstring in public package -> TBD
-    "D105", # missing docstring in magic method -> TBD
-    "D107", # missing docstring in __init__ -> TBD
-    "D417", # missing argument descriptions in the docstring -> TBD
-    # UP
+    "D205", # 1 blank line required between summary line and description -> should be fixed by issue #216
+    "D100", # missing docstring in public module -> should be fixed by issue #216
+    "D101", # missing docstring in public class -> should be fixed by issue #216
+    "D102", # missing docstring in public method -> should be fixed by issue #216
+    "D103", # missing docstring in public function -> should be fixed by issue #216
+    "D104", # missing docstring in public package -> should be fixed by issue #216
+    "D105", # missing docstring in magic method -> should be fixed by issue #216
+    "D107", # missing docstring in __init__ -> should be fixed by issue #216
+    "D417", # missing argument descriptions in the docstring -> should be fixed by issue #216
+    # Others
     "UP012", # unnecessary call to 'encode' as UTF-8 -> TBD
-    # ANN 
-    "ANN", # do we want to have type annotations? -> TBD
-    "S", # mainly unncessary rule -> TBD
-    "FBT", 
-    "B", # need to be fixed by hand -> TBD
+    "B904", # also addressed by issue #211
+    "B023", # unbinded loop variables
     "C4", # flake8 plugin -> need to be fixed by hand -> TBD
     "DTZ005", # datetime.datetime.now() called without a tz argument
     "INP", # will be fixed when test are moved

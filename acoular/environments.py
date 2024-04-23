@@ -85,7 +85,7 @@ def dist_mat(gpos,mpos):
     return rm
 
 
-def cartToCyl(x, Q=identity(3)):
+def cartToCyl(x, Q=None):
     """Returns the cylindrical coordinate representation of a input position
     which was before transformed into a modified cartesian coordinate, which
     has flow into positive z direction.
@@ -105,13 +105,14 @@ def cartToCyl(x, Q=identity(3)):
         cylindrical representation of those n points with (phi, r, z)
 
     """
+    Q = identity(3) if Q is None else Q
     if not (Q == identity(3)).all():
         x = matmul(Q, x)  # modified position vector
     cylCoord = array([arctan2(x[1], x[0]), sqrt(x[0]**2 + x[1]**2), x[2]])
     return cylCoord
 
 
-def cylToCart(x, Q=identity(3)):
+def cylToCart(x, Q=None):
         """Returns the cartesian coordinate representation of a input position
         which was before transformed into a cylindrical coordinate, which
         has flow into positive z direction.
@@ -134,6 +135,7 @@ def cylToCart(x, Q=identity(3)):
         cartesian coordinates of n points
 
         """
+        Q = identity(3) if Q is None else Q
         if not (Q == identity(3)).all():
             x = matmul(Q, x)  # modified position vector
         CartCoord = array([x[1]*sin(x[0]),x[1]*cos(x[0]) , x[2]])
@@ -513,11 +515,13 @@ class RotatingFlow( FlowField ):
 
 
 
-def spiral_sphere(N, Om=2*pi, b=array((0, 0, 1))):    #change to 4*pi
+def spiral_sphere(N, Om=None, b=None):    #change to 4*pi
     """Internal helper function for the raycasting that returns an array of
     unit vectors (N, 3) giving equally distributed directions on a part of
     sphere given by the center direction b and the solid angle Om.
     """
+    Om = 2*pi if Om is None else Om
+    b = array((0, 0, 1)) if b is None else b
     # first produce 'equally' distributed directions in spherical coords
     o = 4*pi/Om
     h = -1+ 2*arange(N)/(N*o-1.)

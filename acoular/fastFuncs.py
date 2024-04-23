@@ -645,7 +645,7 @@ def damasSolverGaussSeidel(A, dirtyMap, nIterations, relax, damasSolution):
 #            else:
 #                damasSolution[cntGrid] = 0.0
     nGridPoints = len(dirtyMap)
-    for cntIter in range(nIterations[0]):
+    for _cntIter in range(nIterations[0]):
         for cntGrid in range(nGridPoints):
             solHelp = 0.0
             for cntGridHelp in range(nGridPoints):  # full sum

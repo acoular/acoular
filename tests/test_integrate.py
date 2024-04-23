@@ -39,7 +39,7 @@ class TestIntegrate(unittest.TestCase):
                 bf = self.get_beamformer(grid)
                 with self.subTest(
                     f"Grid: {grid.__class__.__name__} Sector: {sector.__class__.__name__}"):
-                    for i,f in enumerate(self.f):
+                    for f in self.f:
                         bf_res = bf.synthetic(f)
                         bf_max = bf_res.max()
                         integration_res = ac.integrate(
@@ -65,7 +65,7 @@ class TestIntegrate(unittest.TestCase):
             bf = self.get_beamformer(grid)
             with self.subTest(
                 f"Grid: {grid.__class__.__name__}"):
-                for i,f in enumerate(self.f):
+                for f in self.f:
                     sector = self.get_sector_args().get(grid.__class__.__name__)
                     bf_res = bf.synthetic(f)
                     bf_max = bf_res.max()

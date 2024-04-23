@@ -805,7 +805,7 @@ class PowerSpectraImport( PowerSpectra ):
         elif isinstance(self.frequencies,ndarray):
             return self.frequencies
         elif self.frequencies is None:
-            warn("No frequencies defined for PowerSpectraImport object!")
+            warn("No frequencies defined for PowerSpectraImport object!", stacklevel=1)
             return self.frequencies
         else:
             return self.frequencies

@@ -505,7 +505,7 @@ class BeamformerTimeTraj( BeamformerTime ):
         movgspeed = self.trajectory.traj(0.0, delta_t=1/self.source.sample_freq,
               der=1)
         fill_buffer_generator = self._fill_buffer(num)
-        for i in range(2):
+        for _i in range(2):
             next(fill_buffer_generator)
 
         # preliminary implementation of different steering vectors

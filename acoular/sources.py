@@ -208,7 +208,7 @@ class TimeSamples( SamplesGenerator ):
         if self.numsamples == 0:
             msg = "no samples available"
             raise OSError(msg)
-        self._datachecksum # trigger checksum calculation
+        self._datachecksum # trigger checksum calculation # noqa: B018
         i = 0
         if self.calib:
             if self.calib.num_mics == self.numchannels:
@@ -345,7 +345,7 @@ class MaskedTimeSamples( TimeSamples ):
         if i >= stop:
             msg = "no samples available"
             raise OSError(msg)
-        self._datachecksum # trigger checksum calculation
+        self._datachecksum # trigger checksum calculation # noqa: B018
         if self.calib:
             if self.calib.num_mics == self.numchannels_total:
                 cal_factor = self.calib.data[self.channels][newaxis]
@@ -486,7 +486,7 @@ class PointSource( SamplesGenerator ):
             # amend signal for first blocks
             # if signal stops during prepadding, terminate
             if N <= pre:
-                for nb in range(N-1):
+                for _nb in range(N-1):
                     out = _fill_mic_signal_block(out,signal,rm,ind,num,self.numchannels,self.up,True)
                     yield out
 
@@ -495,7 +495,7 @@ class PointSource( SamplesGenerator ):
                 yield out[:blocksize]
                 return
             else:
-                for nb in range(pre):
+                for _nb in range(pre):
                     out = _fill_mic_signal_block(out,signal,rm,ind,num,self.numchannels,self.up,True)
                     yield out
 
@@ -503,7 +503,7 @@ class PointSource( SamplesGenerator ):
             pre = 0
 
         # main generator
-        for nb in range(N-pre-1):
+        for _nb in range(N-pre-1):
             out = _fill_mic_signal_block(out,signal,rm,ind,num,self.numchannels,self.up,False)
             yield out
 

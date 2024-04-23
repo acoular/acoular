@@ -265,7 +265,7 @@ def get_radiation_angles(direction,mpos, sourceposition):
     azi = mod(azi,2*pi)
     return azi, ele
 
-def get_modes(lOrder, direction, mpos , sourceposition = array([0,0,0])):
+def get_modes(lOrder, direction, mpos , sourceposition = None):
     """Returns Spherical Harmonic Radiation Pattern at the Microphones.
 
     Parameters
@@ -285,6 +285,7 @@ def get_modes(lOrder, direction, mpos , sourceposition = array([0,0,0])):
         the radiation values at each microphone for each mode
 
     """
+    sourceposition = sourceposition if sourceposition is not None else array([0,0,0])
     azi, ele = get_radiation_angles(direction,mpos,sourceposition) # angles between source and mics
     modes = zeros((azi.shape[0], (lOrder+1)**2), dtype=complex128)
     i = 0

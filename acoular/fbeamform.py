@@ -1677,7 +1677,7 @@ class BeamformerCleansc( BeamformerBase ):
                     hh = wmax.copy()
                     D1 = dot(csm.T - diag(diag(csm)), wmax)/hmax
                     ww = wmax.conj()*wmax
-                    for m in range(20):
+                    for _m in range(20):
                         H = hh.conj()*hh
                         hh = (D1+H*wmax)/sqrt(1+dot(ww, H))
                     hh = hh[:, newaxis]
@@ -2444,7 +2444,7 @@ class BeamformerGIB(BeamformerEig):  #BeamformerEig #BeamformerBase
                         elif self.method == 'InverseIRLS':
                             weights=eye(numpoints)
                             locpoints=arange(numpoints)
-                            for it in arange(self.max_iter):
+                            for _it in arange(self.max_iter):
                                 if numchannels<=numpoints:
                                     wtwi=inv(dot(weights.T,weights))
                                     aH=A.conj().T
@@ -2658,7 +2658,7 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
                                                 self.r_diag,
                                                 1.0,
                                                 (r0, rm, k),
-                                                (ones(1), eve[:,n:n+1]))[0][0]
+                                                (ones(1), eve[:,n:n+1]))[0][0] # noqa: B023
 
                     # simplical global homotopy optimizer
                     oR = shgo(func,self.bounds,**shgo_opts)
