@@ -56,7 +56,7 @@ dev = [
     "sounddevice", # docs 
     "graphviz", #docs
     "pickleshare", #docs
-    "ruff>=0.3.5",
+    "ruff==0.4.1",
 ]
 full = [
     "matplotlib",
