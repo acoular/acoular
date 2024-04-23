@@ -24,6 +24,7 @@ jobs:
     - name: Lint
       run: |
         ruff check acoular
+        ruff check tests
     
             
     
