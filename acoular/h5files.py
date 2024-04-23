@@ -114,8 +114,7 @@ if is_tables:
                 group = self.root
             if nodename in group:
                 return True
-            else:
-                return False
+            return False
 
         def create_compressible_array(self,nodename,shape,precision,group=None):
             if not group:

@@ -626,8 +626,7 @@ class AngleTracker(MaskedTimeInOut):
     #helperfunction for trigger index detection
     def _find_nearest_idx(self, peakarray, value):
         peakarray = asarray(peakarray)
-        idx = (abs(peakarray - value)).argmin()
-        return idx
+        return (abs(peakarray - value)).argmin()
 
     def _to_rpm_and_angle(self):
         """Internal helper function
@@ -1820,11 +1819,10 @@ class TimeCache( TimeInOut ):
             if 'basename' in obj.all_trait_names(): # at original source?
                 basename = obj.basename # get the name
                 break
-            else:
-                try:
-                    obj = obj.source # traverse down until original data source
-                except AttributeError:
-                    obj = None
+            try:
+                obj = obj.source # traverse down until original data source
+            except AttributeError:
+                obj = None
         return basename
 
     def _pass_data(self,num):
@@ -1950,8 +1948,7 @@ class WriteWAV( TimeInOut ):
                 if 'basename' in obj.all_trait_names(): # at original source?
                     basename = obj.basename # get the name
                     break
-                else:
-                    obj = obj.source # traverse down until original data source
+                obj = obj.source # traverse down until original data source
             else:
                 basename = 'void'
         except AttributeError:
@@ -2020,7 +2017,7 @@ class WriteH5( TimeInOut ):
 
     def create_filename(self):
         if self.name == '':
-            name = datetime.now().isoformat('_').replace(':','-').replace('.','_')
+            name = datetime.now(datetime.timezone.utc).isoformat('_').replace(':','-').replace('.','_')
             self.name = path.join(config.td_dir,name+'.h5')
 
     def get_initialized_file(self):

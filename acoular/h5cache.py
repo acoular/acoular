@@ -110,11 +110,10 @@ class H5cache_class(HasPrivateTraits):
                 self.busy = False
 #                self._print_open_files()
                 return
-            else:
-                if config.global_caching == 'readonly':
-                    mode = 'r'
-                f = self.open_cachefile(cacheFileName,mode)
-                self.open_files[cacheFileName] = f
+            if config.global_caching == 'readonly':
+                mode = 'r'
+            f = self.open_cachefile(cacheFileName,mode)
+            self.open_files[cacheFileName] = f
 
         obj.h5f = self.open_files[cacheFileName]
         self._increase_file_reference_counter(cacheFileName)

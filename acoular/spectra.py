@@ -337,8 +337,7 @@ class PowerSpectra( BaseSpectra ):
             if self._index_set_last:
                 if self._ind_high is None:
                     return None
-                else:
-                    return min(self._ind_high, fftfreq.shape[0]-1)
+                return min(self._ind_high, fftfreq.shape[0]-1)
             else:
                 if self._freqhc is None:
                     return None

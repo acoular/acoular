@@ -87,8 +87,7 @@ def in_hull(p, hull, border= True, tol = 0 ):
 
     if border:
         return hull.find_simplex(p,tol = tol)>=0
-    else:
-        return hull.find_simplex(p,tol = tol)>0
+    return hull.find_simplex(p,tol = tol)>0
 
 
 def _det(xvert, yvert):
@@ -483,8 +482,7 @@ class RectGrid( Grid ):
                 yis += [yi]
             if not (xis and yis): # if no points in circle, take nearest one
                 return self.index(r[0], r[1])
-            else:
-                return array(xis), array(yis)
+            return array(xis), array(yis)
         elif len(r) == 4: # rectangular subdomain - old functionality
             xi1, yi1 = self.index(min(r[0], r[2]), min(r[1], r[3]))
             xi2, yi2 = self.index(max(r[0], r[2]), max(r[1], r[3]))

@@ -108,8 +108,7 @@ def cartToCyl(x, Q=None):
     Q = identity(3) if Q is None else Q
     if not (Q == identity(3)).all():
         x = matmul(Q, x)  # modified position vector
-    cylCoord = array([arctan2(x[1], x[0]), sqrt(x[0]**2 + x[1]**2), x[2]])
-    return cylCoord
+    return array([arctan2(x[1], x[0]), sqrt(x[0]**2 + x[1]**2), x[2]])
 
 
 def cylToCart(x, Q=None):
@@ -138,8 +137,7 @@ def cylToCart(x, Q=None):
         Q = identity(3) if Q is None else Q
         if not (Q == identity(3)).all():
             x = matmul(Q, x)  # modified position vector
-        CartCoord = array([x[1]*sin(x[0]),x[1]*cos(x[0]) , x[2]])
-        return CartCoord
+        return array([x[1]*sin(x[0]),x[1]*cos(x[0]) , x[2]])
 
 
 class Environment( HasPrivateTraits ):

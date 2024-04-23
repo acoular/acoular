@@ -213,10 +213,8 @@ class SteeringVector( HasPrivateTraits ):
         if isscalar(self.ref):
             if self.ref > 0:
                 return full((self.grid.size,), self.ref)
-            else:
-                return self.env._r(self.grid.pos())
-        else:
-            return self.env._r(self.grid.pos(), self.ref[:,newaxis])
+            return self.env._r(self.grid.pos())
+        return self.env._r(self.grid.pos(), self.ref[:,newaxis])
 
     @property_depends_on('grid.digest, mics.digest, env.digest')
     def _get_rm ( self ):
@@ -455,28 +453,26 @@ class BeamformerBase( HasPrivateTraits ):
 #            print("no data existent for nodename:", nodename)
             if config.global_caching == 'readonly':
                 return (None, None, None)
+            numfreq = self.freq_data.fftfreq().shape[0]# block_size/2 + 1steer_obj
+            group = self.h5f.create_new_group(nodename)
+            self.h5f.create_compressible_array('freqs',
+                                    (numfreq, ),
+                                    'int8',#'bool',
+                                    group)
+            if isinstance(self,BeamformerAdaptiveGrid):
+                self.h5f.create_compressible_array('gpos',
+                                    (3, self.size),
+                                    'float64',
+                                    group)
+                self.h5f.create_compressible_array('result',
+                                    (numfreq, self.size),
+                                    self.precision,
+                                    group)
             else:
-#                print("initialize data.")
-                numfreq = self.freq_data.fftfreq().shape[0]# block_size/2 + 1steer_obj
-                group = self.h5f.create_new_group(nodename)
-                self.h5f.create_compressible_array('freqs',
-                                      (numfreq, ),
-                                      'int8',#'bool',
-                                      group)
-                if isinstance(self,BeamformerAdaptiveGrid):
-                    self.h5f.create_compressible_array('gpos',
-                                      (3, self.size),
-                                      'float64',
-                                      group)
-                    self.h5f.create_compressible_array('result',
-                                      (numfreq, self.size),
-                                      self.precision,
-                                      group)
-                else:
-                    self.h5f.create_compressible_array('result',
-                                      (numfreq, self.steer.grid.size),
-                                      self.precision,
-                                      group)
+                self.h5f.create_compressible_array('result',
+                                    (numfreq, self.steer.grid.size),
+                                    self.precision,
+                                    group)
 
         ac = self.h5f.get_data_by_reference('result','/'+nodename)
         fr = self.h5f.get_data_by_reference('freqs','/'+nodename)
@@ -690,8 +686,7 @@ class BeamformerBase( HasPrivateTraits ):
                           Warning, stacklevel = 2)
         if isinstance(self,BeamformerAdaptiveGrid):
             return h
-        else:
-            return h.reshape(self.steer.grid.shape)
+        return h.reshape(self.steer.grid.shape)
 
 
     def integrate(self, sector):
@@ -1162,18 +1157,16 @@ class PointSpreadFunction (HasPrivateTraits):
 #            print("no data existent for nodename:", nodename)
             if config.global_caching == 'readonly':
                 return (None, None)
-            else:
-#                print("initialize data.")
-                gs = self.steer.grid.size
-                group = self.h5f.create_new_group(nodename)
-                self.h5f.create_compressible_array('result',
-                                      (gs, gs),
-                                      self.precision,
-                                      group)
-                self.h5f.create_compressible_array('gridpts',
-                                      (gs,),
-                                      'int8',#'bool',
-                                      group)
+            gs = self.steer.grid.size
+            group = self.h5f.create_new_group(nodename)
+            self.h5f.create_compressible_array('result',
+                                    (gs, gs),
+                                    self.precision,
+                                    group)
+            self.h5f.create_compressible_array('gridpts',
+                                    (gs,),
+                                    'int8',#'bool',
+                                    group)
         ac = self.h5f.get_data_by_reference('result','/'+nodename)
         gp = self.h5f.get_data_by_reference('gridpts','/'+nodename)
         return (ac,gp)
@@ -1200,18 +1193,16 @@ class PointSpreadFunction (HasPrivateTraits):
                         (ac, gp) = (ac[:], gp[:])
                         self.calc_psf(ac,gp)
                         return ac[:,self.grid_indices]
-                    else:
-                        self.calc_psf(ac,gp)
-                        self.h5f.flush()
-                        return ac[:,self.grid_indices]
+                    self.calc_psf(ac,gp)
+                    self.h5f.flush()
+                    return ac[:,self.grid_indices]
 #                else:
 #                    print("cached results are complete! return.")
                 return ac[:,self.grid_indices]
-            else: # no cached data/file
-#                print("no caching, calculate result")
-                ac = zeros((gs, gs), dtype=self.precision)
-                gp = zeros((gs,), dtype='int8')
-                self.calc_psf(ac,gp)
+#           print("no caching, calculate result")
+            ac = zeros((gs, gs), dtype=self.precision)
+            gp = zeros((gs,), dtype='int8')
+            self.calc_psf(ac,gp)
         else: # no caching activated
 #            print("no caching activated, calculate result")
             ac = zeros((gs, gs), dtype=self.precision)
@@ -2060,18 +2051,17 @@ class BeamformerSODIX( BeamformerBase ):
             if not self.h5f.is_cached(nodename):
                 if config.global_caching == 'readonly':
                     return (None, None)
-                else:
-    #                print("initialize data.")
-                    numfreq = self.freq_data.fftfreq().shape[0]# block_size/2 + 1steer_obj
-                    group = self.h5f.create_new_group(nodename)
-                    self.h5f.create_compressible_array('result',
-                                          (numfreq, self.steer.grid.size*self.steer.mics.num_mics),
-                                          self.precision,
-                                          group)
-                    self.h5f.create_compressible_array('freqs',
-                                          (numfreq, ),
-                                          'int8',#'bool',
-                                          group)
+#                print("initialize data.")
+                numfreq = self.freq_data.fftfreq().shape[0]# block_size/2 + 1steer_obj
+                group = self.h5f.create_new_group(nodename)
+                self.h5f.create_compressible_array('result',
+                                        (numfreq, self.steer.grid.size*self.steer.mics.num_mics),
+                                        self.precision,
+                                        group)
+                self.h5f.create_compressible_array('freqs',
+                                        (numfreq, ),
+                                        'int8',#'bool',
+                                        group)
             ac = self.h5f.get_data_by_reference('result','/'+nodename)
             fr = self.h5f.get_data_by_reference('freqs','/'+nodename)
             gpos = None

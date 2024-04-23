@@ -220,8 +220,7 @@ def return_result(source, nmax=-1, num=128):
                       [ res for _, res in
                             zip(range(nblocks),
                                 resulter) ] )[:nmax]
-    else:
-        return concatenate(list(resulter))
+    return concatenate(list(resulter))
 
 
 def spherical_hn1(n,z,derivativearccos=False):
