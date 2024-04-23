@@ -217,9 +217,9 @@ def return_result(source, nmax=-1, num=128):
     if nmax > 0:
         nblocks = (nmax-1) // num + 1
         return concatenate(
-                      list( res for _, res in
+                      [ res for _, res in
                             zip(range(nblocks),
-                                resulter) ) )[:nmax]
+                                resulter) ] )[:nmax]
     else:
         return concatenate(list(resulter))
 

@@ -8,7 +8,7 @@ import gc
 from os import listdir, path
 from weakref import WeakValueDictionary
 
-from traits.api import Bool, Delegate, HasPrivateTraits, Instance
+from traits.api import Bool, Delegate, Dict, HasPrivateTraits, Instance
 
 from .configuration import Config, config
 from .h5files import _get_cachefile_class
@@ -25,7 +25,7 @@ class H5cache_class(HasPrivateTraits):
 
     open_files = WeakValueDictionary()
 
-    openFileReferenceCount = dict()
+    openFileReferenceCount = Dict()
 
     def _idle_if_busy(self):
         while self.busy:

@@ -170,7 +170,7 @@ class Polygon:
         xpoint = asfarray(xpoint)
         ypoint = asfarray(ypoint)
         # Scalar to array
-        if xpoint.shape is tuple():
+        if xpoint.shape == ():
             xpoint = array([xpoint], dtype=float)
             ypoint = array([ypoint], dtype=float)
             scalar = True
@@ -774,7 +774,7 @@ class ImportGrid( Grid ):
         xyz = []
         for el in doc.getElementsByTagName('pos'):
             names.append(el.getAttribute('subgrid'))
-            xyz.append(list(map(lambda a : float(el.getAttribute(a)), 'xyz')))
+            xyz.append([float(el.getAttribute(a)) for a in 'xyz'])
         self.gpos_file = array(xyz, 'd').swapaxes(0, 1)
         self.subgrids = array(names)
 

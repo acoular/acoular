@@ -637,7 +637,7 @@ def synthetic (data, freqs, f, num=3):
         f = (f,)
     if num == 0:
         # single frequency lines
-        res = list()
+        res = []
         for i in f:
             ind = searchsorted(freqs, i)
             if ind >= len(freqs):
@@ -655,7 +655,7 @@ def synthetic (data, freqs, f, num=3):
             res += [h]
     else:
         # fractional octave bands
-        res = list()
+        res = []
         for i in f:
             f1 = i*2.**(-0.5/num)
             f2 = i*2.**(+0.5/num)

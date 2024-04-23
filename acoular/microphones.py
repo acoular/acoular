@@ -126,7 +126,7 @@ class MicGeom( HasPrivateTraits ):
         xyz = []
         for el in doc.getElementsByTagName('pos'):
             names.append(el.getAttribute('Name'))
-            xyz.append(list(map(lambda a : float(el.getAttribute(a)), 'xyz')))
+            xyz.append([float(el.getAttribute(a)) for a in 'xyz'])
         self.mpos_tot = array(xyz, 'd').swapaxes(0, 1)
         self.validate_file = True
 
