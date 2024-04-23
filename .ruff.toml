@@ -95,3 +95,4 @@ docstring-code-line-length = "dynamic"
 "acoular/traitsviews.py" = ["E402"]
 "tests/test_tprocess.py" = ["F403"] # star import 
 "tests/*" = ["D"] # exclude docstring linting
+"examples/*" = ["A001", "B007", "D4", "E4", "E701", "F4", "UP036", "SIM108"]
