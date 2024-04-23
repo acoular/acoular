@@ -1,19 +1,21 @@
 import unittest
-import acoular as ac
-ac.config.global_caching = "none"
-import numpy as np
-from test_grid import GridTest
 from functools import partial
 
+import acoular as ac
+import numpy as np
+from test_grid import GridTest
+
+ac.config.global_caching = "none"
+
 class TestIntegrate(unittest.TestCase):
-    
+
     f = [1000,2000]
 
     @staticmethod
     def get_sector_args():
-        # for later testing condition: sector only includes (0,0,1) point 
+        # for later testing condition: sector only includes (0,0,1) point
         return {'RectGrid': np.array([0,0,0.2]),
-                'RectGrid3D' : np.array([0,0,1,0,0,1]),}
+                'RectGrid3D' : np.array([0,0,1,0,0,1])}
 
     def get_beamformer(self, grid):
         rng1 = np.random.RandomState(1)
@@ -21,7 +23,7 @@ class TestIntegrate(unittest.TestCase):
         mics = ac.MicGeom(mpos_tot=rng1.normal(size=3*5).reshape((3,5)))
         steer = ac.SteeringVector(
                         grid=ac.ImportGrid(
-                            gpos_file=src_pos), 
+                            gpos_file=src_pos),
                         mics=mics)
         H = np.empty((len(self.f),mics.num_mics, 1),dtype=complex)
         for i,_f in enumerate(self.f): # calculate only the indices that are needed
@@ -37,7 +39,7 @@ class TestIntegrate(unittest.TestCase):
                 bf = self.get_beamformer(grid)
                 with self.subTest(
                     f"Grid: {grid.__class__.__name__} Sector: {sector.__class__.__name__}"):
-                    for i,f in enumerate(self.f):
+                    for f in self.f:
                         bf_res = bf.synthetic(f)
                         bf_max = bf_res.max()
                         integration_res = ac.integrate(
@@ -50,7 +52,7 @@ class TestIntegrate(unittest.TestCase):
             for grid in GridTest.get_all_grids():
                 bf = self.get_beamformer(grid)
                 with self.subTest(
-                    f"Grid: {grid.__class__.__name__} Sector:{sector.__class__.__name__}"):                   
+                    f"Grid: {grid.__class__.__name__} Sector:{sector.__class__.__name__}"):
                     for i,f in enumerate(self.f):
                         bf_res = bf.synthetic(f)
                         bf_max = bf_res.max()
@@ -62,8 +64,8 @@ class TestIntegrate(unittest.TestCase):
         for grid in GridTest.get_all_grids():
             bf = self.get_beamformer(grid)
             with self.subTest(
-                f"Grid: {grid.__class__.__name__}"):                   
-                for i,f in enumerate(self.f):
+                f"Grid: {grid.__class__.__name__}"):
+                for f in self.f:
                     sector = self.get_sector_args().get(grid.__class__.__name__)
                     bf_res = bf.synthetic(f)
                     bf_max = bf_res.max()
@@ -82,7 +84,7 @@ class TestIntegrate(unittest.TestCase):
         for grid in GridTest.get_all_grids():
             bf = self.get_beamformer(grid)
             with self.subTest(
-                f"Grid: {grid.__class__.__name__}"):                   
+                f"Grid: {grid.__class__.__name__}"):
                 for i,f in enumerate(self.f):
                     sector = self.get_sector_args().get(grid.__class__.__name__)
                     bf_res = bf.synthetic(f)
@@ -95,7 +97,7 @@ class TestIntegrate(unittest.TestCase):
                     else:
                         integration_res = bf.integrate(sector)
                         self.assertEqual(integration_res.shape, (len(self.f),))
-                        self.assertEqual(integration_res[i], bf_max)  
+                        self.assertEqual(integration_res[i], bf_max)
 
 if __name__ == "__main__":
 

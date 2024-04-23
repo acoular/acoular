@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-This script is a help for checking if the new NUMBA functions are correctly 
+This script is a help for checking if the new NUMBA functions are correctly
 integrated into acoular.
-One has to make a savefile (see 'all_bfWeave.sav') for both, the old acoular 
-version an the new one. In section '#%% Compare Weave vs Numba' both versions 
+One has to make a savefile (see 'all_bfWeave.sav') for both, the old acoular
+version an the new one. In section '#%% Compare Weave vs Numba' both versions
 are  compared.
 
-This script uses essentially 'example3.py', so therefor 'example_data.h5' and 
+This script uses essentially 'example3.py', so therefor 'example_data.h5' and
 'example_calib.xml' are needed.
 
 
@@ -164,10 +164,10 @@ Lbcmf4Full = L_p(bcmf4Full.synthetic(4000,1))
 ## There are various variations to calculate the psf: Need to be checked individually
 ## #psfSingle = PointSpreadFunction(grid=g, mpos=m, calcmode='single')
 ## #LPsfSingle = L_p(psfSingle.psf[:])
-## 
+##
 ## #psfBlock = PointSpreadFunction(grid=g, mpos=m, calcmode='block')
 ## #LPsfBlock = L_p(psfBlock.psf[:])
-## 
+##
 ## #psfFull = PointSpreadFunction(grid=g, mpos=m, calcmode='full')
 ## #LPsfFull = L_p(psfFull.psf[:])
 ##
@@ -225,7 +225,7 @@ all_bf = (Lbb1Rem, Lbb2Rem, Lbb3Rem, Lbb4Rem, Lbb1Full, Lbb2Full, Lbb3Full, Lbb4
           Lbm1Full, Lbm2Full, Lbm3Full, Lbm4Full,
           Lbcsc1Rem, Lbcsc2Rem, Lbcsc3Rem, Lbcsc4Rem, Lbcsc1Full, Lbcsc2Full, Lbcsc3Full, Lbcsc4Full,
           Lbort1Rem, Lbort2Rem, Lbort3Rem, Lbort4Rem, Lbort1Full, Lbort2Full, Lbort3Full, Lbort4Full,
-          Lbcmf1Rem, Lbcmf2Rem, Lbcmf3Rem, Lbcmf4Rem, Lbcmf1Full, Lbcmf2Full, Lbcmf3Full, Lbcmf4Full, 
+          Lbcmf1Rem, Lbcmf2Rem, Lbcmf3Rem, Lbcmf4Rem, Lbcmf1Full, Lbcmf2Full, Lbcmf3Full, Lbcmf4Full,
           Lpsf1, Lpsf2, Lpsf3, Lpsf4,
           Lbcpsf1Rem, Lbcpsf2Rem, Lbcpsf3Rem, Lbcpsf4Rem, Lbcpsf1Full, Lbcpsf2Full, Lbcpsf3Full, Lbcpsf4Full,
           Lbd1Rem, Lbd2Rem, Lbd3Rem, Lbd4Rem, Lbd1Full, Lbd2Full, Lbd3Full, Lbd4Full)

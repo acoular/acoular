@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#pylint: disable-msg=E0611, E1103, C0103, R0901, R0902, R0903, R0904, W0232
 #------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
 #------------------------------------------------------------------------------
@@ -18,15 +16,37 @@
 
 """
 import numba as nb
-from numpy import array, isscalar, float32, float64, newaxis, \
-sqrt, arange, pi, exp, sin, cos, arccos, zeros_like, empty, dot, hstack, \
-vstack, identity, cross, sign, arctan2, matmul, sum, ascontiguousarray
+from numpy import (
+    arange,
+    arccos,
+    arctan2,
+    array,
+    ascontiguousarray,
+    cos,
+    cross,
+    dot,
+    empty,
+    exp,
+    float32,
+    float64,
+    hstack,
+    identity,
+    isscalar,
+    matmul,
+    newaxis,
+    pi,
+    sign,
+    sin,
+    sqrt,
+    sum,
+    vstack,
+    zeros_like,
+)
 from numpy.linalg.linalg import norm
 from scipy.integrate import ode
 from scipy.interpolate import LinearNDInterpolator
 from scipy.spatial import ConvexHull
-from traits.api import HasPrivateTraits, Float, Property, Int, \
-CArray, cached_property, Trait, Dict
+from traits.api import CArray, Dict, Float, HasPrivateTraits, Int, Property, Trait, cached_property
 
 from .internal import digest
 
@@ -36,15 +56,18 @@ f32ro = nb.types.Array(nb.types.float32,2,'C',readonly=True)
 @nb.njit([(f64ro, f64ro), (f64ro, f32ro), (f32ro, f64ro),(f32ro, f32ro)],
                 cache=True, fastmath=True)
 def dist_mat(gpos,mpos):
-    """computes distance matrix, accelerated with numba
+    """Computes distance matrix, accelerated with numba.
 
     Args:
+    ----
         gpos (3,N)
         mpos (3,M)
 
     Returns:
+    -------
         (N,M) distance matrix
-    """    
+
+    """
     _,M = mpos.shape
     _,N = gpos.shape
     rm = empty((N,M),dtype=gpos.dtype)
@@ -61,12 +84,11 @@ def dist_mat(gpos,mpos):
     return rm
 
 
-def cartToCyl(x, Q=identity(3)):
-    """
-    Returns the cylindrical coordinate representation of a input position 
+def cartToCyl(x, Q=None):
+    """Returns the cylindrical coordinate representation of a input position
     which was before transformed into a modified cartesian coordinate, which
     has flow into positive z direction.
-    
+
     Parameters
     ----------
     x : float[3, nPoints]
@@ -75,62 +97,62 @@ def cartToCyl(x, Q=identity(3)):
         Orthogonal transformation matrix. If provided, the pos vectors are
         transformed via posiMod = Q * x, before transforming those modified
         coordinates into cylindrical ones. Default is identity matrix.
-        
-    Returns
+
+    Returns:
     -------
     cylCoord : [3, nPoints]
         cylindrical representation of those n points with (phi, r, z)
+
     """
-    if not (Q == identity(3)).all():
+    Q = identity(3) if Q is None else Q
+    if not (Q == identity(3)).all(): # noqa: SIM300
         x = matmul(Q, x)  # modified position vector
-    cylCoord = array([arctan2(x[1], x[0]), sqrt(x[0]**2 + x[1]**2), x[2]])
-    return cylCoord
+    return array([arctan2(x[1], x[0]), sqrt(x[0]**2 + x[1]**2), x[2]])
 
 
-def cylToCart(x, Q=identity(3)):
-        """
-        Returns the cartesian coordinate representation of a input position 
+def cylToCart(x, Q=None):
+        """Returns the cartesian coordinate representation of a input position
         which was before transformed into a cylindrical coordinate, which
         has flow into positive z direction.
-        
+
         Parameters
         ----------
         x : float[3, nPoints]
             cylindrical representation of those n points with (phi, r, z)
             cartesian coordinates of n points
-    
+
         Q : float[3,3]
         Orthogonal transformation matrix. If provided, the pos vectors are
         transformed via posiMod = Q * x, before transforming those modified
         coordinates into cylindrical ones. Default is identity matrix.
-        
-            
-        Returns
+
+
+        Returns:
         -------
         CartCoord : [3, nPoints]
         cartesian coordinates of n points
-            
+
         """
-        if not (Q == identity(3)).all():
+        Q = identity(3) if Q is None else Q
+        if not (Q == identity(3)).all(): # noqa: SIM300
             x = matmul(Q, x)  # modified position vector
-        CartCoord = array([x[1]*sin(x[0]),x[1]*cos(x[0]) , x[2]])
-        return CartCoord
+        return array([x[1]*sin(x[0]),x[1]*cos(x[0]) , x[2]])
 
 
 class Environment( HasPrivateTraits ):
-    """
-    A simple acoustic environment without flow.
+    """A simple acoustic environment without flow.
 
     This class provides the facilities to calculate the travel time (distances)
     between grid point locations and microphone locations.
     """
+
     # internal identifier
     digest = Property(
-        depends_on=['c'], 
+        depends_on=['c'],
         )
 
     #: The speed of sound, defaults to 343 m/s
-    c = Float(343., 
+    c = Float(343.,
         desc="speed of sound")
 
     #: The region of interest (ROI), not needed for most types of environment
@@ -140,25 +162,25 @@ class Environment( HasPrivateTraits ):
         return digest( self )
 
     def _r( self, gpos, mpos=0.0):
-        """
-        Calculates distances between grid point locations and microphone
+        """Calculates distances between grid point locations and microphone
         locations or the origin. Functionality may change in the future.
 
         Parameters
         ----------
         gpos : array of floats of shape (3, N)
             The locations of points in the beamforming map grid in 3D cartesian
-            co-ordinates. 
+            co-ordinates.
         mpos : array of floats of shape (3, M), optional
             The locations of microphones in 3D cartesian co-ordinates. If not
             given, then only one microphone at the origin (0, 0, 0) is
             considered.
 
-        Returns
+        Returns:
         -------
         r : array of floats
-            The distances in a twodimensional (N, M) array of floats. If M==1, 
+            The distances in a twodimensional (N, M) array of floats. If M==1,
             then only a one-dimensional array is returned.
+
         """
         if isscalar(mpos):
             mpos = array((0, 0, 0), dtype = float64)[:, newaxis]
@@ -171,25 +193,25 @@ class Environment( HasPrivateTraits ):
         return rm
 
 class UniformFlowEnvironment( Environment):
-    """
-    An acoustic environment with uniform flow.
+    """An acoustic environment with uniform flow.
 
     This class provides the facilities to calculate the travel time (distances)
     between grid point locations and microphone locations in a uniform flow
     field.
     """
+
     #: The Mach number, defaults to 0.
-    ma = Float(0.0, 
+    ma = Float(0.0,
         desc="flow mach number")
 
     #: The unit vector that gives the direction of the flow, defaults to
     #: flow in x-direction.
-    fdv = CArray( dtype=float64, shape=(3, ), value=array((1.0, 0, 0)), 
+    fdv = CArray( dtype=float64, shape=(3, ), value=array((1.0, 0, 0)),
         desc="flow direction")
 
     # internal identifier
     digest = Property(
-        depends_on=['c', 'ma', 'fdv'], 
+        depends_on=['c', 'ma', 'fdv'],
         )
 
     @cached_property
@@ -197,8 +219,7 @@ class UniformFlowEnvironment( Environment):
         return digest( self )
 
     def _r( self, gpos, mpos=0.0):
-        """
-        Calculates the virtual distances between grid point locations and
+        """Calculates the virtual distances between grid point locations and
         microphone locations or the origin. These virtual distances correspond
         to travel times of the sound. Functionality may change in the future.
 
@@ -212,11 +233,12 @@ class UniformFlowEnvironment( Environment):
             given, then only one microphone at the origin (0, 0, 0) is
             considered.
 
-        Returns
+        Returns:
         -------
         array of floats
-            The distances in a twodimensional (N, M) array of floats. If M==1, 
+            The distances in a twodimensional (N, M) array of floats. If M==1,
             then only a one-dimensional array is returned.
+
         """
         if isscalar(mpos):
             mpos = array((0, 0, 0), dtype = float32)[:, newaxis]
@@ -230,20 +252,18 @@ class UniformFlowEnvironment( Environment):
         if rm.shape[1] == 1:
             rm = rm[:, 0]
         return rm
-    
+
 
 class FlowField( HasPrivateTraits ):
-    """
-    An abstract base class for a spatial flow field.
-    """
+    """An abstract base class for a spatial flow field."""
+
     digest = Property
 
     def _get_digest( self ):
         return ''
 
-    def v( self, xx):
-        """
-        Provides the flow field as a function of the location. This is
+    def v( self, xx): # noqa: ARG002
+        """Provides the flow field as a function of the location. This is
         implemented here for the possibly most simple case: a quiescent fluid.
 
         Parameters
@@ -251,46 +271,47 @@ class FlowField( HasPrivateTraits ):
         xx : array of floats of shape (3, )
             Location in the fluid for which to provide the data.
 
-        Returns
+        Returns:
         -------
         tuple with two elements
             The first element in the tuple is the velocity vector and the
             second is the Jacobian of the velocity vector field, both at the
             given location.
+
         """
         v = array((0., 0., 0.))
         dv = array(((0., 0., 0.), (0., 0., 0.), (0., 0., 0.)))
         return -v, -dv
 
 class SlotJet( FlowField ):
-    """
-    Provides an analytical approximation of the flow field of a slot jet, 
+    """Provides an analytical approximation of the flow field of a slot jet,
     see :ref:`Albertson et al., 1950<Albertson1950>`.
     """
+
     #: Exit velocity at jet origin, i.e. the nozzle. Defaults to 0.
-    v0 = Float(0.0, 
+    v0 = Float(0.0,
         desc="exit velocity")
 
-    #: Location of a point at the slot center line, 
+    #: Location of a point at the slot center line,
     #: defaults to the co-ordinate origin.
-    origin = CArray( dtype=float64, shape=(3, ), value=array((0., 0., 0.)), 
+    origin = CArray( dtype=float64, shape=(3, ), value=array((0., 0., 0.)),
         desc="center of nozzle")
 
     #: Unit flow direction of the slot jet, defaults to (1,0,0).
-    flow = CArray( dtype=float64, shape=(3, ), value=array((1., 0., 0.)), 
+    flow = CArray( dtype=float64, shape=(3, ), value=array((1., 0., 0.)),
         desc="flow direction")
 
     #: Unit vector parallel to slot center plane, defaults to (0,1,0).
-    plane = CArray( dtype=float64, shape=(3, ), value=array((0., 1., 0.)), 
+    plane = CArray( dtype=float64, shape=(3, ), value=array((0., 1., 0.)),
         desc="slot center line direction")
-        
+
     #: Width of the slot, defaults to 0.2 .
-    B = Float(0.2, 
+    B = Float(0.2,
         desc="nozzle diameter")
 
     # internal identifier
     digest = Property(
-        depends_on=['v0', 'origin', 'flow', 'plane', 'B'], 
+        depends_on=['v0', 'origin', 'flow', 'plane', 'B'],
         )
 
     @cached_property
@@ -298,8 +319,7 @@ class SlotJet( FlowField ):
         return digest( self )
 
     def v( self, xx):
-        """
-        Provides the flow field as a function of the location. This is
+        """Provides the flow field as a function of the location. This is
         implemented here only for the component in the direction of :attr:`flow`;
         entrainment components are set to zero.
 
@@ -308,12 +328,13 @@ class SlotJet( FlowField ):
         xx : array of floats of shape (3, )
             Location in the fluid for which to provide the data.
 
-        Returns
+        Returns:
         -------
         tuple with two elements
             The first element in the tuple is the velocity vector and the
             second is the Jacobian of the velocity vector field, both at the
             given location.
+
         """
         # TODO: better to make sure that self.flow and self.plane are indeed unit vectors before
         # normalize
@@ -324,7 +345,7 @@ class SlotJet( FlowField ):
         zz = cross(flow,yy)
         # distance from slot exit plane
         xx1 = xx-self.origin
-        # local co-ordinate system 
+        # local co-ordinate system
         x = dot(flow,xx1)
         y = dot(yy,xx1)
         x1 = 0.109*x
@@ -346,31 +367,32 @@ class SlotJet( FlowField ):
         return dot(R,array((Ux,0,0))), dot(dot(R,dU),R.T)
 
 class OpenJet( FlowField ):
-    """
-    Provides an analytical approximation of the flow field of an open jet, 
+    """Provides an analytical approximation of the flow field of an open jet,
     see :ref:`Albertson et al., 1950<Albertson1950>`.
 
-    Notes
+    Notes:
     -----
     This is not a fully generic implementation and is limited to flow in the
     x-direction only. No other directions are possible at the moment and flow
     components in the other direction are zero.
+
     """
+
     #: Exit velocity at jet origin, i.e. the nozzle. Defaults to 0.
-    v0 = Float(0.0, 
+    v0 = Float(0.0,
         desc="exit velocity")
 
     #: Location of the nozzle center, defaults to the co-ordinate origin.
-    origin = CArray( dtype=float64, shape=(3, ), value=array((0., 0., 0.)), 
+    origin = CArray( dtype=float64, shape=(3, ), value=array((0., 0., 0.)),
         desc="center of nozzle")
 
     #: Diameter of the nozzle, defaults to 0.2 .
-    D = Float(0.2, 
+    D = Float(0.2,
         desc="nozzle diameter")
 
     # internal identifier
     digest = Property(
-        depends_on=['v0', 'origin', 'D'], 
+        depends_on=['v0', 'origin', 'D'],
         )
 
     @cached_property
@@ -378,8 +400,7 @@ class OpenJet( FlowField ):
         return digest( self )
 
     def v( self, xx):
-        """
-        Provides the flow field as a function of the location. This is
+        """Provides the flow field as a function of the location. This is
         implemented here only for a jet in `x`-direction and the `y`- and
         `z`-components are set to zero.
 
@@ -388,12 +409,13 @@ class OpenJet( FlowField ):
         xx : array of floats of shape (3, )
             Location in the fluid for which to provide the data.
 
-        Returns
+        Returns:
         -------
         tuple with two elements
             The first element in the tuple is the velocity vector and the
             second is the Jacobian of the velocity vector field, both at the
             given location.
+
         """
         x, y, z = xx-self.origin
         r = sqrt(y*y+z*z)
@@ -424,30 +446,27 @@ class OpenJet( FlowField ):
 
 
 class RotatingFlow( FlowField ):
-    """
-    Provides an analytical approximation of the flow field of a rotating fluid with constant flow. 
+    """Provides an analytical approximation of the flow field of a rotating fluid with constant flow."""
 
-
-    """
     #: Exit velocity at jet origin, i.e. the nozzle. Defaults to 0.
     rpm = Float(0.0,
         desc="revolutions per minute of the virtual array; negative values for clockwise rotation")
 
-    v0 = Float(0.0, 
+    v0 = Float(0.0,
         desc="flow velocity")
 
     #: Location of the nozzle center, defaults to the co-ordinate origin.
-    origin = CArray( dtype=float64, shape=(3, ), value=array((0., 0., 0.)), 
+    origin = CArray( dtype=float64, shape=(3, ), value=array((0., 0., 0.)),
         desc="center of nozzle")
 
     # internal identifier
     digest = Property(
-        depends_on=['v0', 'origin', 'rpm'], 
+        depends_on=['v0', 'origin', 'rpm'],
         )
 
     # internal identifier
     omega = Property(
-        depends_on=['rpm'], 
+        depends_on=['rpm'],
         )
 
     @cached_property
@@ -459,20 +478,20 @@ class RotatingFlow( FlowField ):
         return digest( self )
 
     def v( self, xx):
-        """
-        Provides the rotating flow field around the z-Axis as a function of the location.
+        """Provides the rotating flow field around the z-Axis as a function of the location.
 
         Parameters
         ----------
         xx : array of floats of shape (3, )
             Location in the fluid for which to provide the data.
 
-        Returns
+        Returns:
         -------
         tuple with two elements
             The first element in the tuple is the velocity vector and the
             second is the Jacobian of the velocity vector field, both at the
             given location.
+
         """
         x, y, z = xx-self.origin
 
@@ -482,8 +501,8 @@ class RotatingFlow( FlowField ):
         #velocity vector
         U = omega * y
         V = -omega * x
-        W = self.v0 
-        
+        W = self.v0
+
         # flow field
         v = array( (U, V, W) )
         # Jacobi matrix
@@ -493,14 +512,15 @@ class RotatingFlow( FlowField ):
 
 
 
-def spiral_sphere(N, Om=2*pi, b=array((0, 0, 1))):    #change to 4*pi
-    """
-    Internal helper function for the raycasting that returns an array of
+def spiral_sphere(N, Om=None, b=None):    #change to 4*pi
+    """Internal helper function for the raycasting that returns an array of
     unit vectors (N, 3) giving equally distributed directions on a part of
     sphere given by the center direction b and the solid angle Om.
     """
+    Om = 2*pi if Om is None else Om
+    b = array((0, 0, 1)) if b is None else b
     # first produce 'equally' distributed directions in spherical coords
-    o = 4*pi/Om 
+    o = 4*pi/Om
     h = -1+ 2*arange(N)/(N*o-1.)
     theta = arccos(h)
     phi = zeros_like(theta)
@@ -520,8 +540,7 @@ def spiral_sphere(N, Om=2*pi, b=array((0, 0, 1))):    #change to 4*pi
     return dot(H, xyz)
 
 class GeneralFlowEnvironment(Environment):
-    """
-    An acoustic environment with a generic flow field.
+    """An acoustic environment with a generic flow field.
 
     This class provides the facilities to calculate the travel time (distances)
     between grid point locations and microphone locations in a generic flow
@@ -531,21 +550,22 @@ class GeneralFlowEnvironment(Environment):
     backwards in time. The result is interpolated within a tetrahedal grid
     spanned between these rays.
     """
+
     #: The flow field, must be of type :class:`~acoular.environments.FlowField`.
-    ff = Trait(FlowField, 
+    ff = Trait(FlowField,
         desc="flow field")
 
     #: Number of rays used per solid angle :math:`\Omega`, defaults to 200.
-    N = Int(200, 
+    N = Int(200,
         desc="number of rays per Om")
 
     #: The maximum solid angle used in the algorithm, defaults to :math:`\pi`.
-    Om = Float(pi, 
+    Om = Float(pi,
         desc="maximum solid angle")
 
     # internal identifier
     digest = Property(
-        depends_on=['c', 'ff.digest', 'N', 'Om'], 
+        depends_on=['c', 'ff.digest', 'N', 'Om'],
         )
 
     # internal dictionary of interpolators
@@ -556,8 +576,7 @@ class GeneralFlowEnvironment(Environment):
         return digest( self )
 
     def _r( self, gpos, mpos=0.0):
-        """
-        Calculates the virtual distances between grid point locations and
+        """Calculates the virtual distances between grid point locations and
         microphone locations or the origin. These virtual distances correspond
         to travel times of the sound along a ray that is traced through the
         medium. Functionality may change in the future.
@@ -572,21 +591,22 @@ class GeneralFlowEnvironment(Environment):
             given, then only one microphone at the origin (0, 0, 0) is
             considered.
 
-        Returns
+        Returns:
         -------
         array of floats
-            The distances in a twodimensional (N, M) array of floats. If M==1, 
+            The distances in a twodimensional (N, M) array of floats. If M==1,
             then only a one-dimensional array is returned.
+
         """
         c = self.c
-        
+
         if isscalar(mpos):
             mpos = array((0, 0, 0), dtype = float32)[:, newaxis]
 
         gt = empty((gpos.shape[-1], mpos.shape[-1]))
         for micnum, x0 in enumerate(mpos.T):
             key = x0.tobytes() # make array hashable
-            #todo: the interpolator also depends the roi, so idict keys should also depend on roi
+            #TODO: the interpolator also depends the roi, so idict keys should also depend on roi
             # OR the idict should be cleaned if roi changes
             try:
                 li = self.idict[key] # fetch stored interpolator
@@ -604,8 +624,7 @@ class GeneralFlowEnvironment(Environment):
         return c*gt #return distance along ray
 
     def get_interpolator( self, roi, x0 ):
-        """
-        gets an LinearNDInterpolator object
+        """Gets an LinearNDInterpolator object.
 
         Parameters
         ----------
@@ -614,16 +633,17 @@ class GeneralFlowEnvironment(Environment):
             co-ordinates. Used to estimate the maximum distance and ROI
             extension and center.
         x0 : array of floats of shape (3)
-            The location of the microphone in 3D cartesian co-ordinates. 
+            The location of the microphone in 3D cartesian co-ordinates.
 
-        Returns
+        Returns:
         -------
         LinearNDInterpolator object
+
         """
         c = self.c
 
         # the DE system
-        def f1(t, y, v):
+        def f1(t, y, v): # noqa: ARG001
             x = y[0:3]
             s = y[3:6]
             vv, dv = v(x)
@@ -639,7 +659,7 @@ class GeneralFlowEnvironment(Environment):
             y0 = hstack((x0, s0))
             oo = ode(f1)
             oo.set_f_params(v)
-            oo.set_integrator('vode', 
+            oo.set_integrator('vode',
                               rtol=1e-4, # accuracy !
                               max_step=1e-4*rmax) # for thin shear layer
             oo.set_initial_value(y0, 0)

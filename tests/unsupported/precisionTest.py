@@ -3,7 +3,7 @@
 Example 6 for acoular library
 
 demonstrates different steering vectors in acoular,
-and CSM diagonal removal 
+and CSM diagonal removal
 with same setup as in example 1
 
 uses measured data in file example_data.h5
@@ -43,11 +43,11 @@ t1 = MaskedTimeSamples(name=datafile)
 t1.start = 0 # first sample, default
 t1.stop = 16000 # last valid sample = 15999
 invalid = [1,7] # list of invalid channels (unwanted microphones etc.)
-t1.invalid_channels = invalid 
+t1.invalid_channels = invalid
 
 #===============================================================================
-# calibration is usually needed and can be set directly at the TimeSamples 
-# object (preferred) or for frequency domain processing at the PowerSpectra 
+# calibration is usually needed and can be set directly at the TimeSamples
+# object (preferred) or for frequency domain processing at the PowerSpectra
 # object (for backwards compatibility)
 #===============================================================================
 t1.calib = Calib(from_file=calibfile)
@@ -68,17 +68,17 @@ g = RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=0.68,
 
 #===============================================================================
 # for frequency domain methods, this provides the cross spectral matrix and its
-# eigenvalues and eigenvectors, if only the matrix is needed then class 
+# eigenvalues and eigenvectors, if only the matrix is needed then class
 # PowerSpectra can be used instead
 #===============================================================================
-f = EigSpectra(time_data=t1, 
+f = EigSpectra(time_data=t1,
                window='Hanning', overlap='50%', block_size=128, #FFT-parameters
                ind_low=7, ind_high=15, precision='complex128') #to save computational effort, only
                # frequencies with index 1-30 are used
 csm = f.csm[:]
 eva = f.eva[:]
 
-f32 = EigSpectra(time_data=t1, 
+f32 = EigSpectra(time_data=t1,
                window='Hanning', overlap='50%', block_size=128, #FFT-parameters
                ind_low=7, ind_high=15, precision='complex64') #to save computational effort, only
 csm32 = f32.csm[:]
@@ -143,7 +143,7 @@ for b in (bb32, bd3232, bc3232, bdp3232, bd3264, bc3264, bdp3264,
     i1 += 1
     res = b.synthetic(cfreq,1)
     mx = L_p(res.max())
-    imshow(L_p(res.T), vmax=mx, vmin=mx-15, 
+    imshow(L_p(res.T), vmax=mx, vmin=mx-15,
            interpolation='nearest', extent=g.extend())
     print(b.steer)
     colorbar()

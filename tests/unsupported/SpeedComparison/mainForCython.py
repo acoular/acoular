@@ -20,7 +20,7 @@ for cntFreqs in range(nFreqs):
     csm[cntFreqs, :, :] += csm[cntFreqs, :, :].T.conj()  # zu Hermitischer Matrix machen
 r0 = np.random.rand(nGridPoints) #abstand aufpunkte-arraymittelpunkt
 rm = np.random.rand(nGridPoints, nMics) #abstand aufpunkte-arraymikrofone
-kj = np.zeros(nFreqs) + 1j*np.random.rand(nFreqs) # 
+kj = np.zeros(nFreqs) + 1j*np.random.rand(nFreqs) #
 
 
 #csm = np.ones((nFreqs, nMics, nMics), 'D')
@@ -64,7 +64,7 @@ for cntFreqs in xrange(nFreqs):  # laeuft z.Z. nur einmal durch
     for cntGrid in xrange(nGridPoints):
         rs = 0
         r01 = r0[cntGrid]
-        
+
         # Erzeugen der Steering-Vectoren
         for cntMics in xrange(nMics):
             rm1 = rm[cntGrid, cntMics]
@@ -72,7 +72,7 @@ for cntFreqs in xrange(nFreqs):  # laeuft z.Z. nur einmal durch
             temp3 = (kjj * (rm1 - r01))  # der Float bewirkt die Abweichung vom Originalergebnis um ca 10^-8
             e1[cntMics] = (np.cos(temp3) - 1j * np.sin(temp3)) * rm1
         rs = r01 ** 2
-        
+
         # Berechnen der Matrix multiplikation
         temp1 = 0.0
         for cntMics in xrange(nMics):
@@ -81,9 +81,9 @@ for cntFreqs in xrange(nFreqs):  # laeuft z.Z. nur einmal durch
                 temp2 += csm[cntFreqs, cntMics2, cntMics] * e1[cntMics2]  # nicht ganz sicher ob richtig
             temp1 += 2 * (temp2 * e1[cntMics].conjugate()).real
             temp1 += (csm[cntFreqs, cntMics, cntMics] * np.conjugate(e1[cntMics]) * e1[cntMics]).real
-        
+
         beamformOutput[cntFreqs, cntGrid] = (temp1 / rs).real
-    
+
 
 #diffE1MitOpenMP = max(abs(e1 - e1Mit))
 #diffE1OhneOpenMP = max(abs(e1 - e1Ohne))

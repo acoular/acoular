@@ -25,8 +25,8 @@ def csmBeamformer(csm, r0, rm, kj):
             steeringVector = np.exp(-1j * np.float32(kj[cntFreqs].imag * (rm[cntGrid, :] - r0[cntGrid])))
             # correct
             result = np.dot(steeringVector, csm[cntFreqs, :, :])
-            beamformOutput[cntFreqs, cntGrid] = np.vdot(steeringVector, result)  
-            
+            beamformOutput[cntFreqs, cntGrid] = np.vdot(steeringVector, result)
+
             # incorrect
 #            result = np.dot(csm[cntFreqs, :, :], steeringVector)
 #            beamformOutput[cntFreqs, cntGrid] = np.vdot(steeringVector, result)
@@ -57,9 +57,9 @@ def loops_NumbaGuvectorizeOverGrid(r0, rm, kj, eigVal, eigVec):
         beamformOutput[cntFreqs, :] = result
     return beamformOutput
 
-@guvectorize([(float64[:], complex128[:,:], float64[:], float64[:], float64[:], float64[:], float64[:])], 
+@guvectorize([(float64[:], complex128[:,:], float64[:], float64[:], float64[:], float64[:], float64[:])],
               '(e),(m,e),(),(m),(),()->()', nopython=True, target='parallel')
-def loops_Core(eigVal, eigVec, distGridToArrayCenter, distGridToAllMics, 
+def loops_Core(eigVal, eigVec, distGridToArrayCenter, distGridToAllMics,
                                                              waveNumber, nMicsForNormalization, result):
     # init
     nMics = distGridToAllMics.shape[0]
@@ -69,7 +69,7 @@ def loops_Core(eigVal, eigVec, distGridToArrayCenter, distGridToAllMics,
     for cntMics in xrange(nMics):
         temp = np.float32(waveNumber[0] * (distGridToAllMics[cntMics] - distGridToArrayCenter[0]))
         steerVec[cntMics] = (np.cos(temp) - 1j * np.sin(temp))
-    
+
     # performing matrix-vector-multiplication via spectral decomposition of the hermitian CSM-Matrix
     temp1 = 0.0
     for cntEigVal in range(len(eigVal)):
@@ -89,9 +89,9 @@ def loopsCascade_NumbaGuvectorizeOverGrid(r0, rm, kj, eigVal, eigVec):
         beamformOutput[cntFreqs, :] = result
     return beamformOutput
 
-@guvectorize([(float64[:], complex128[:,:], float64[:], float64[:], float64[:], float64[:], float64[:])], 
+@guvectorize([(float64[:], complex128[:,:], float64[:], float64[:], float64[:], float64[:], float64[:])],
               '(e),(m,e),(),(m),(),()->()', nopython=True, target='parallel')
-def loopsCascade_Core(eigVal, eigVec, distGridToArrayCenter, distGridToAllMics, 
+def loopsCascade_Core(eigVal, eigVec, distGridToArrayCenter, distGridToAllMics,
                                                              waveNumber, nMicsForNormalization, result):
     # init
     nMics = distGridToAllMics.shape[0]
@@ -101,7 +101,7 @@ def loopsCascade_Core(eigVal, eigVec, distGridToArrayCenter, distGridToAllMics,
     for cntMics in xrange(nMics):
         temp = np.float32(waveNumber[0] * (distGridToAllMics[cntMics] - distGridToArrayCenter[0]))
         steerVec[cntMics] = (np.cos(temp) - 1j * np.sin(temp))
-    
+
     # performing matrix-vector-multiplication via spectral decomposition of the hermitian CSM-Matrix
     temp1 = 0.0
     for cntEigVal in range(len(eigVal)):
@@ -115,16 +115,16 @@ nTrials = 10
 listOfNFreqs = [10000]
 
 #==============================================================================
-# The benchmark function 'r_beamfull_inverse' and also other implementations of 
-# the beamformer create a lot of overhead, which influences the computational 
+# The benchmark function 'r_beamfull_inverse' and also other implementations of
+# the beamformer create a lot of overhead, which influences the computational
 # effort of the succeding function. This is mostly the case, if concurrent
-# calculations are done (multiple cores). So often the first trial of a new 
+# calculations are done (multiple cores). So often the first trial of a new
 # function takes some time longer than the other trials.
 #==============================================================================
 
 #funcsToTrial = [csmBeamformer, correctResult, r_beamfull_os_classic]  # full csm
 #funcsToTrial = [csmBeamformer, correctResult, r_beamdiag_os_classic]  # removed diagonal of csm
-funcsToTrial = [loopsCascade_NumbaGuvectorizeOverGrid, loops_NumbaGuvectorizeOverGrid, r_beamfull_os_classic] 
+funcsToTrial = [loopsCascade_NumbaGuvectorizeOverGrid, loops_NumbaGuvectorizeOverGrid, r_beamfull_os_classic]
 removeDiagOfCSM = False
 
 for nMics in listOfMics:
@@ -133,9 +133,9 @@ for nMics in listOfMics:
             # Init
             print(10*'-' + 'New Test configuration: nMics=%s, nGridpoints=%s, nFreqs=%s' %(nMics, nGridPoints, nFreqs) + 10*'-')
             print(10*'-' + 'Creation of inputInputs' + 10*'-')
-            
+
             # Inputs for the beamformer methods:
-            # At the moment the beamformer-methods are called once per 
+            # At the moment the beamformer-methods are called once per
             # frequency (CSM is a Matrix, no 3rd-order-tensor)
             # For easier camparability we build the CSM as a 3rd-order-tensor) instead
             csm = np.random.rand(nFreqs, nMics, nMics) + 1j*np.random.rand(nFreqs, nMics, nMics)  # cross spectral matrix
@@ -145,11 +145,11 @@ for nMics in listOfMics:
             h = np.zeros((nFreqs, nGridPoints))  # results are stored here, if function has no return value
             r0 = np.random.rand(nGridPoints)  # distance between gridpoints and middle of array
             rm = np.random.rand(nGridPoints, nMics)  # distance between gridpoints and all mics in the array
-            kj = np.zeros(nFreqs) + 1j*np.random.rand(nFreqs) # complex wavenumber 
+            kj = np.zeros(nFreqs) + 1j*np.random.rand(nFreqs) # complex wavenumber
             eigVal, eigVec = np.linalg.eigh(csm)
             indLow = 5  # 5
             indHigh = 10# 10
-            
+
             # remove diagonal of csm
             if removeDiagOfCSM:
                 for cntMics in range(nMics):
@@ -160,14 +160,14 @@ for nMics in listOfMics:
             else:
                 refFunc = 'r_beamfull_os_classic'
                 resultReference = correctResult(r0, rm, kj, eigVal[:, indLow : indHigh], eigVec[:, :, indLow : indHigh])  # For relative/absolute error
-            
+
             nameOfFuncsToTrial = map(lambda x: x.__name__, funcsToTrial)
             nameOfFuncsForError = [funcName for funcName in nameOfFuncsToTrial if funcName != refFunc]
             maxRelativeDeviation = np.zeros((len(funcsToTrial), nTrials))
             maxAbsoluteDeviation = np.zeros((len(funcsToTrial), nTrials))
             timeConsumption = [[] for _ in range(len(funcsToTrial))]
             indOfBaselineFnc = nameOfFuncsToTrial.index(refFunc)
-            
+
             # Testing
             print(10*'-' + 'Testing of functions' + 10*'-')
             cntFunc = 0
@@ -202,15 +202,15 @@ for nMics in listOfMics:
                 cntFunc += 1
             factorTimeConsump = [np.mean(timeConsumption[cnt]) for cnt in range(0, len(funcsToTrial))] \
                                 / np.mean(timeConsumption[indOfBaselineFnc])
-            
+
             # Save the current test-config as .sav
             helpString = 'The order of the variables is: \n nameOfFuncsToTrial \n maxRelativeDeviation'\
                 '\n timeConsumption [nFuncs, nTrials] \n nMics \n nGridPoints \n nFreqs '\
                 '\n Factor of time consumption (in relation to the original .cpp) \n maxAbsoluteDeviation \n nThreadsGlobal'
-            saveTupel = (helpString, nameOfFuncsToTrial, maxRelativeDeviation, timeConsumption, 
-                         nMics, nGridPoints, nFreqs, factorTimeConsump, maxAbsoluteDeviation, 0)  
+            saveTupel = (helpString, nameOfFuncsToTrial, maxRelativeDeviation, timeConsumption,
+                         nMics, nGridPoints, nFreqs, factorTimeConsump, maxAbsoluteDeviation, 0)
             stringParameters = 'OvernightTestcasesBeamformer_nMics%s_nGridPoints%s_nFreqs%s_nTrials%s' %(nMics, nGridPoints, nFreqs, nTrials)
-            
+
 #            stringSaveName = 'Peter'
             stringSaveName = 'Sicherung_DurchgelaufeneTests/Beamformer/cascadingSums/' + stringParameters
 #            stringSaveName = 'Sicherung_DurchgelaufeneTests/Beamformer/AllImportantMethods/' + stringParameters
@@ -219,11 +219,11 @@ for nMics in listOfMics:
 #            stringSaveName = 'Sicherung_DurchgelaufeneTests/Beamformer/Multithreading_02Threads/' + stringParameters
 
             shFncs.savingTimeConsumption(stringSaveName, saveTupel)  # saving as "stringSaveName.sav"
-            
+
 #            shFncs.plottingOfOvernightTestcasesBeamformer(stringSaveName + '.sav')  # plot of the current test-config
 
 #==============================================================================
-#The Following use of the numba decorators could lead to less code (as a function 
+#The Following use of the numba decorators could lead to less code (as a function
 #body could be used more often) but is also slower, which is why it wasn't used
 #in this comparison.
 # signature = complex128[:,:](complex128[:,:,:], float64[:], float64[:,:])

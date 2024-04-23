@@ -12,8 +12,8 @@ import glob
 
 
 def savingTimeConsumption(fileName, saveTuple):
-    """ Saves all data in 'saveTuple' into 'fileName.sav'. 
-    The First entry of the tuple has to be a String, explaining the structure of 
+    """ Saves all data in 'saveTuple' into 'fileName.sav'.
+    The First entry of the tuple has to be a String, explaining the structure of
     the tuple."""
     fi = open(fileName + '.sav', 'w')
     dump(saveTuple, fi, -1)
@@ -60,21 +60,21 @@ def plottingTimeConsumptions(titleString, trialedFuncs, timesToPlot):
 
 def plottingOfOvernightTestcasesBeamformer(fileName):
     helpText, daten = readingInSAVES(fileName)
-    
+
     stringForLegend = []
     hFig = plt.figure()
     hAxesRelErr = hFig.add_subplot(3,2,5)
     hAxesRelErr.set_ylabel('relative Error - infNorm')
     hAxesRelErr.set_xlabel('trials [1]')
-    
+
     hAxesAbsErr = hFig.add_subplot(3,2,6)
     hAxesAbsErr.set_ylabel('absolute Error - infNorm')
     hAxesAbsErr.set_xlabel('trials [1]')
-    
+
     numberMethods = len(daten[0])
     numberTrials = len(daten[1][0, :])
     trials = np.arange(numberTrials)
-    
+
     # For barplot
     withPerTrial = 0.75
     widthBar = withPerTrial / numberMethods
@@ -88,10 +88,10 @@ def plottingOfOvernightTestcasesBeamformer(fileName):
     hAxesAbsErr.legend()
     hAxesAbsErr.set_yscale('log')
     hAxesAbsErr.set_xticks(trials)
-    
+
     hAxesRelErr.set_yscale('log')
     hAxesRelErr.set_xticks(trials)
-    
+
     # plotting time consumption
     titelString = 'Performance Comparison, nMics = %s, nGridPoints = %s, nFreqs = %s.'\
                 '\n With time consumption factor in relation to the \noriginal r_beamfull_inverse'\
@@ -123,7 +123,7 @@ def plottingTimeConsumptionOverSpecificOrdinate(dirName, ordinate='nMics'):
     plt.ylabel('Mean of Time per Trial [s] (normalized to faverage)')
     plt.title('Mean of TimeConsumption over ' + ordinate + '\n asd')
     plt.xticks(arrayOrdinate)
-        
+
 
 def plottingOfOvernightTestcasesOnFAVERAGE(fileName):
     helpText, daten = readingInSAVES(fileName)

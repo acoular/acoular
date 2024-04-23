@@ -1,26 +1,39 @@
-# -*- coding: utf-8 -*-
-#pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
 #------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
 #------------------------------------------------------------------------------
 """Implements testing of frequency beamformers.
 """
-from pathlib import Path
-
 import unittest
-
-import numpy as np
+from pathlib import Path
 
 #acoular imports
 import acoular
-acoular.config.global_caching = 'none' # to make sure that nothing is cached
+import numpy as np
+from acoular import (
+    BeamformerBase,
+    BeamformerCapon,
+    BeamformerClean,
+    BeamformerCleansc,
+    BeamformerCMF,
+    BeamformerDamas,
+    BeamformerDamasPlus,
+    BeamformerEig,
+    BeamformerFunctional,
+    BeamformerGIB,
+    BeamformerGridlessOrth,
+    BeamformerMusic,
+    BeamformerOrth,
+    BeamformerSODIX,
+    Calib,
+    Environment,
+    MaskedTimeSamples,
+    MicGeom,
+    PowerSpectra,
+    RectGrid,
+    SteeringVector,
+)
 
-from acoular import Calib, MicGeom, PowerSpectra, \
-RectGrid, BeamformerBase, BeamformerEig, BeamformerOrth, BeamformerCleansc, \
-MaskedTimeSamples, BeamformerCMF, \
-BeamformerCapon, BeamformerMusic, BeamformerDamas, BeamformerClean, \
-BeamformerFunctional, BeamformerDamasPlus, BeamformerGIB, BeamformerGridlessOrth,\
-SteeringVector, Environment, BeamformerSODIX
+acoular.config.global_caching = 'none' # to make sure that nothing is cached
 
 # copy CMF classes as workaround so that reference data name is unique later
 class BeamformerCMFLassoLarsBIC (BeamformerCMF):
@@ -31,8 +44,8 @@ class BeamformerCMFNNLS (BeamformerCMF):
 
 # if this flag is set to True
 WRITE_NEW_REFERENCE_DATA = False
-# new beamformer results are generated for comparison during testing. 
-# Should always be False. Only set to True if it is necessary to 
+# new beamformer results are generated for comparison during testing.
+# Should always be False. Only set to True if it is necessary to
 # recalculate the data due to intended changes of the Beamformers.
 
 #load exampledata
@@ -50,7 +63,7 @@ t1 = MaskedTimeSamples(name=datafile)
 t1.start = 0 # first sample, default
 t1.stop = 16000 # last valid sample = 15999
 invalid = [1,7] # list of invalid channels (unwanted microphones etc.)
-t1.invalid_channels = invalid 
+t1.invalid_channels = invalid
 t1.calib = Calib(from_file=calibfile)
 m = MicGeom(from_file=micgeofile)
 m.invalid_channels = invalid
@@ -58,15 +71,14 @@ g = RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=0.68,
              increment=0.05 )
 env=Environment(c=346.04)
 st = SteeringVector(grid=g, mics=m, env=env)
-f = PowerSpectra(time_data=t1, 
+f = PowerSpectra(time_data=t1,
                window='Hanning', overlap='50%', block_size=128, #FFT-parameters
-               cached = False )  
+               cached = False )
 
 # produces a tuple of beamformer objects to test
 # because we need new objects for each test we have to call this more than once
 def fbeamformers():
     bb = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached = False)
-    be = BeamformerEig(freq_data=f, steer=st, r_diag=True, n=54, cached = False)
 
     #frequency beamformers to test
     bbase = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached = False)
@@ -124,9 +136,9 @@ class acoular_beamformer_test(unittest.TestCase):
             b0.cached = True
             b1.cached = True
             with self.subTest(b0.__class__.__name__+" global_caching = overwrite"):
-                if hasattr(b0,'beamformer'): # BeamformerClean, BeamformerDamas, BeamformerDamasplus 
+                if hasattr(b0,'beamformer'): # BeamformerClean, BeamformerDamas, BeamformerDamasplus
                                             # do not pass because the .beamformer result is not take from cache
-                    continue                         # nor recalculated   
+                    continue                         # nor recalculated
                 b0.result[:] = 0
                 self.assertFalse(np.any(b0.result))
                 name = testdir / 'reference_data'/ f'{b1.__class__.__name__}.npy'
