@@ -39,8 +39,8 @@ from scipy.spatial.distance import cdist
 from scipy.special import sph_harm, spherical_jn, spherical_yn
 from traits.api import Bool, CArray, HasPrivateTraits, Instance, Property
 
-import acoular as ac
-
+from .fbeamform import L_p, integrate
+from .grids import CircSector, Grid
 from .spectra import synthetic
 
 
@@ -66,16 +66,16 @@ class MetricEvaluator(HasPrivateTraits):
 
     #: :class:`~acoular.grids.Grid`-derived object that provides the grid locations
     #: for the calculated source mapping data.
-    grid = Instance(ac.Grid,
+    grid = Instance(Grid,
         desc="Grid instance that belongs to the calculated data")
 
     #: :class:`~acoular.grids.Grid`-derived object that provides the grid locations
     #: for the ground-truth data.
-    target_grid = Instance(ac.Grid,
+    target_grid = Instance(Grid,
         desc="Grid instance that belongs to the ground-truth data")
 
     #: sector type. Currently only circular sectors are supported.
-    sector = Instance(ac.CircSector, default=ac.CircSector())
+    sector = Instance(CircSector, default=CircSector())
 
     #: if set True: use shrink integration area if two sources are closer
     #: than 2*r. The radius of the integration area is then set to half the
@@ -143,7 +143,7 @@ class MetricEvaluator(HasPrivateTraits):
             data = self.data[f]
             for i in range(self.target_data.shape[1]):
                 sector = sectors[i]
-                results[f,i] = ac.integrate(data,self.grid,sector)
+                results[f,i] = integrate(data,self.grid,sector)
                 if not self.multi_assignment:
                     indices = self.grid.subdomain(sector)
                     data[indices] = 0 # set values to zero (can not be assigned again)
@@ -159,7 +159,7 @@ class MetricEvaluator(HasPrivateTraits):
 
         """
         self._validate_shapes()
-        return ac.L_p(self.data.sum(axis=1)) - ac.L_p(self.target_data.sum(axis=1))
+        return L_p(self.data.sum(axis=1)) - L_p(self.target_data.sum(axis=1))
 
     def get_specific_level_error(self):
         """Returns the specific level error (Herold and Sarradj, 2017).
@@ -172,7 +172,7 @@ class MetricEvaluator(HasPrivateTraits):
         """
         self._validate_shapes()
         sector_result = self._integrate_sectors()
-        return ac.L_p(sector_result) - ac.L_p(self.target_data)
+        return L_p(sector_result) - L_p(self.target_data)
 
     def get_inverse_level_error(self):
         """Returns the inverse level error (Herold and Sarradj, 2017).
@@ -185,7 +185,7 @@ class MetricEvaluator(HasPrivateTraits):
         """
         self._validate_shapes()
         sector_result = self._integrate_sectors()
-        return ac.L_p(sector_result.sum(axis=1)) - ac.L_p(self.data.sum(axis=1))
+        return L_p(sector_result.sum(axis=1)) - L_p(self.data.sum(axis=1))
 
 
 
