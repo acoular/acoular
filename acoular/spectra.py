@@ -421,8 +421,10 @@ class PowerSpectra( BaseSpectra ):
 
     def calc_ev ( self ):
         """Eigenvalues / eigenvectors calculation."""
-        if self.precision == 'complex128': eva_dtype = 'float64'
-        elif self.precision == 'complex64': eva_dtype = 'float32'
+        if self.precision == 'complex128':
+            eva_dtype = 'float64'
+        elif self.precision == 'complex64':
+            eva_dtype = 'float32'
 #        csm = self.csm #trigger calculation
         csm_shape = self.csm.shape
         eva = empty(csm_shape[0:2], dtype=eva_dtype)
@@ -471,8 +473,10 @@ class PowerSpectra( BaseSpectra ):
         elif traitname == 'eva':
             func = self.calc_eva
             shape = self.csm.shape[0:2]
-            if self.precision == 'complex128': precision = 'float64'
-            elif self.precision == 'complex64': precision = 'float32'
+            if self.precision == 'complex128':
+                precision = 'float64'
+            elif self.precision == 'complex64':
+                precision = 'float32'
         elif traitname == 'eve':
             func = self.calc_eve
             shape = self.csm.shape

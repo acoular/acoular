@@ -19,7 +19,6 @@ select = [
 
 ignore = [
     "E722", # bare except -> mainly covered by #211
-    "E701", # multiple statements on one line -> TBD
     "E501", # ignore line length until fixed through issue #214
     "E741", # allow ambiguous variable names -> TBD
     "E402", # allow module level import not at top of file -> TBD

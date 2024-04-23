@@ -111,7 +111,8 @@ class H5cache_class(HasPrivateTraits):
 #                self._print_open_files()
                 return
             else:
-                if config.global_caching == 'readonly': mode = 'r'
+                if config.global_caching == 'readonly':
+                    mode = 'r'
                 f = self.open_cachefile(cacheFileName,mode)
                 self.open_files[cacheFileName] = f
 

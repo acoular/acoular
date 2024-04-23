@@ -141,7 +141,8 @@ def beamformerFreq(steerVecType, boolRemovedDiagOfCSM, normFactor, inputTupleSte
         nGridPoints = steerVec.shape[0]
     else:  # predefined beamformers (Formulation I - IV)
         distGridToArrayCenter, distGridToAllMics, waveNumber = inputTupleSteer
-        if not isinstance(waveNumber, np.ndarray): waveNumber = np.array([waveNumber]) #for backward compatibility
+        if not isinstance(waveNumber, np.ndarray):
+            waveNumber = np.array([waveNumber]) #for backward compatibility
         nGridPoints = distGridToAllMics.shape[0]
     if boolIsEigValProb:
         eigVal, eigVec = inputTupleCsm#[0], inputTupleCsm[1]
@@ -503,7 +504,8 @@ def calcPointSpreadFunction(steerVecType, distGridToArrayCenter, distGridToAllMi
     # prepare input
     nGridPoints = distGridToAllMics.shape[0]
     nSources = len(indSource)
-    if not isinstance(waveNumber, np.ndarray): waveNumber = np.array([waveNumber])
+    if not isinstance(waveNumber, np.ndarray):
+        waveNumber = np.array([waveNumber])
 
     # psf routine: parallelized over Gridpoints
     psfOutput = np.zeros((nGridPoints, nSources), dtype=dtype)

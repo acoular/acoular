@@ -348,10 +348,12 @@ class GenericSignalGenerator( SignalGenerator ):
 
             # fill up empty track with as many full source signals as possible
             nloops = nums // stop
-            if nloops>1: track[stop:stop*nloops] = tile(track[:stop], nloops-1)
+            if nloops>1:
+                track[stop:stop*nloops] = tile(track[:stop], nloops-1)
             # fill up remaining empty track
             res = nums % stop # last part of unfinished loop
-            if res > 0: track[stop*nloops:] = track[:res]
+            if res > 0:
+                track[stop*nloops:] = track[:res]
 
         # The rms value is just an amplification here
         return self.rms*track

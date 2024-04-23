@@ -74,12 +74,14 @@ if is_tables:
     class H5FileTables(H5FileBase,tables.File):
 
         def create_extendable_array(self,nodename,shape,precision,group=None):
-            if not group: group = self.root
+            if not group:
+                group = self.root
             atom = precision_to_atom[precision]
             self.create_earray(group, nodename, atom, shape)
 
         def get_data_by_reference(self, nodename,group=None):
-            if not group: group = self.root
+            if not group:
+                group = self.root
             return self.get_node(group, nodename)
 
         def set_node_attribute(self,node,attrname,value):
@@ -95,7 +97,8 @@ if is_tables:
             self.remove_node('/',nodename,recursive=True)
 
         def create_new_group(self,name,group=None):
-            if not group: group = self.root
+            if not group:
+                group = self.root
             return self.create_group(group,name)
 
         def get_child_nodes(self, nodename):
@@ -108,14 +111,16 @@ if is_tables:
         compressionFilter = tables.Filters(complevel=5, complib='blosc')
 
         def is_cached(self,nodename,group=None):
-            if not group: group = self.root
+            if not group:
+                group = self.root
             if nodename in group:
                 return True
             else:
                 return False
 
         def create_compressible_array(self,nodename,shape,precision,group=None):
-            if not group: group = self.root
+            if not group:
+                group = self.root
             atom = precision_to_atom[precision]
             self.create_carray(group, nodename, atom, shape,
                                         filters=self.compressionFilter)
@@ -127,8 +132,10 @@ if is_h5py:
     class H5FileH5py(H5FileBase,h5py.File):
 
         def _get_in_file_path(self,nodename,group=None):
-            if not group: return '/'+nodename
-            else: return group+'/'+nodename
+            if not group:
+                return '/'+nodename
+            else:
+                return group+'/'+nodename
 
         def create_array(self,where, name, obj):
             self.create_dataset(f'{where}/{name}',data=obj)
@@ -174,7 +181,8 @@ if is_h5py:
 #        compressionFilter = 'blosc' # unavailable...
 
         def is_cached(self,nodename,group=None):
-            if not group: group = '/'
+            if not group:
+                group = '/'
             if group+nodename in self:
                 return True
             else:
@@ -189,9 +197,13 @@ if is_h5py:
 
 
 def _get_h5file_class():
-    if config.h5library == "pytables": return H5FileTables
-    elif config.h5library == "h5py": return H5FileH5py
+    if config.h5library == "pytables":
+        return H5FileTables
+    elif config.h5library == "h5py":
+        return H5FileH5py
 
 def _get_cachefile_class():
-    if config.h5library == "pytables": return H5CacheFileTables
-    elif config.h5library == "h5py": return H5CacheFileH5py
+    if config.h5library == "pytables":
+        return H5CacheFileTables
+    elif config.h5library == "h5py":
+        return H5CacheFileH5py

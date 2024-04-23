@@ -296,7 +296,8 @@ class MaskedTimeInOut ( TimeInOut ):
 
         if start != 0 or stop != self.numsamples_total:
             offset = -start % num
-            if offset == 0: offset = num
+            if offset == 0:
+                offset = num
             buf = empty((num + offset , self.numchannels), dtype=float)
             bsize = 0
             i = 0
@@ -2172,7 +2173,8 @@ class SampleSplitter(TimeInOut):
                         UserWarning)
 
     def _create_source_generator(self,num):
-        for obj in self.block_buffer.keys(): self._clear_block_buffer(obj)
+        for obj in self.block_buffer.keys():
+            self._clear_block_buffer(obj)
         self._buffer_overflow = False # reset overflow bool
         self._source_generator = LockedGenerator(self.source.result(num))
         self._source_generator_exist = True # indicates full generator

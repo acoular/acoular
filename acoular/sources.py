@@ -664,7 +664,8 @@ class MovingPointSource( PointSource ):
             t += 1./self.sample_freq
             # emission time relative to start time
             ind = (te-self.start_t+self.start)*self.sample_freq
-            if self.conv_amp: rm *= (1-Mr)**2
+            if self.conv_amp:
+                rm *= (1-Mr)**2
             try:
                 out[i] = signal[array(0.5+ind*self.up, dtype=int64)]/rm
                 i += 1
