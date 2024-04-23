@@ -15,6 +15,7 @@ from acoular import (
     MicGeom,
     Mixer,
     OpenJet,
+    PointSource,  # noqa: F401
     RectGrid,
     RotatingFlow,
     SamplesGenerator,
