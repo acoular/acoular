@@ -40,9 +40,6 @@ class H5FileBase:
     def create_new_group(self,name,group=None):
         pass
 
-    def get_node_children(self, group):
-        yield
-
 
 class H5CacheFileBase:
     """Base class for File objects that handle writing and reading of .h5 cache files."""

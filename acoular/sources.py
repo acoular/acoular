@@ -1282,7 +1282,7 @@ class SourceMixer( SamplesGenerator ):
     sdigest = Str()
 
     @observe('sources.items.digest')
-    def _set_sources_digest( self, event ):
+    def _set_sources_digest( self, event ): # noqa ARG002
         self.sdigest = ldigest(self.sources)
 
     # internal identifier

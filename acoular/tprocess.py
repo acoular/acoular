@@ -790,7 +790,7 @@ class SpatialInterpolator(TimeInOut):
         """Modified Sinc function for Radial Basis function approximation."""
         return sinc((r*self.mics_virtual.mpos.shape[1])/(pi))
 
-    def _virtNewCoord_func(self, mic, micVirt, method ,array_dimension, interp_at_zero = False):
+    def _virtNewCoord_func(self, mic, micVirt, method ,array_dimension):
         """Core functionality for getting the  interpolation .
 
         Parameters
@@ -1275,7 +1275,7 @@ class Mixer( TimeInOut ):
     sdigest = Str()
 
     @observe('sources.items.digest')
-    def _set_sources_digest( self, event ):
+    def _set_sources_digest( self, event ): # noqa ARG002
         self.sdigest = ldigest(self.sources)
 
     # internal identifier

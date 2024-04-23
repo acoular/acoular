@@ -83,7 +83,7 @@ def _delayandsum5(data, offsets, ifactor2, steeramp, out, autopower):
 @nb.njit([(nb.float32[:,:,:], nb.float32[:,:], nb.float32[:,:,:]),
             (nb.float64[:,:,:], nb.float64[:,:], nb.float64[:,:,:])],
                 cache=True, parallel=True, fastmath=True)
-def _steer_I(rm, r0, amp):
+def _steer_I(rm, r0, amp): # noqa: ARG001
     num, gridsize, numchannels = rm.shape
     amp[0,0,0] = 1.0/numchannels# to get the same type for rm2 as for rm
     Nr = amp[0,0,0]
@@ -124,7 +124,7 @@ def _steer_III(rm, r0, amp):
 @nb.njit([(nb.float32[:,:,:], nb.float32[:,:], nb.float32[:,:,:]),
             (nb.float64[:,:,:], nb.float64[:,:], nb.float64[:,:,:])],
                 cache=True, parallel=True, fastmath=True)
-def _steer_IV(rm, r0, amp):
+def _steer_IV(rm, r0, amp): # noqa: ARG001
     num, gridsize, numchannels = rm.shape
     amp[0,0,0] = np.sqrt(1.0/numchannels)# to get the same type for rm2 as for rm
     Nr = amp[0,0,0]

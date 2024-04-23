@@ -63,7 +63,7 @@ class SoundDeviceSamplesGenerator(SamplesGenerator):
 
     # checks that numchannels are not more than device can provide
     @observe('device,numchannels')
-    def _get_numchannels( self, change ):
+    def _get_numchannels( self, event ): # noqa ARG002
         self.numchannels = min(self.numchannels,sd.query_devices(self.device)['max_input_channels'])
 
     def _get_sample_freq( self ):

@@ -522,7 +522,7 @@ def calcPointSpreadFunction(steerVecType, distGridToArrayCenter, distGridToAllMi
 @nb.guvectorize([(nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float64[:]),
                  (nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float32[:])],
                  '(),(m),(s),(s,m),()->(s)', nopython=True, target=parallelOption, cache=cachedOption, fastmath=fastOption)
-def _psf_Formulation1AkaClassic(distGridToArrayCenter, distGridToAllMics, distSourcesToArrayCenter, distSourcesToAllMics, waveNumber, result):
+def _psf_Formulation1AkaClassic(distGridToArrayCenter, distGridToAllMics, distSourcesToArrayCenter, distSourcesToAllMics, waveNumber, result): # noqa ARG001
     nMics = distGridToAllMics.shape[0]
     for cntSources in range(len(distSourcesToArrayCenter)):
         # see bottom of information header of 'calcPointSpreadFunction' for infos on the PSF calculation and speed improvements.
@@ -572,7 +572,7 @@ def _psf_Formulation3AkaTrueLevel(distGridToArrayCenter, distGridToAllMics, dist
 @nb.guvectorize([(nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float64[:]),
                  (nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float32[:])],
                  '(),(m),(s),(s,m),()->(s)', nopython=True, target=parallelOption, cache=cachedOption, fastmath=fastOption)
-def _psf_Formulation4AkaTrueLocation(distGridToArrayCenter, distGridToAllMics, distSourcesToArrayCenter, distSourcesToAllMics, waveNumber, result):
+def _psf_Formulation4AkaTrueLocation(distGridToArrayCenter, distGridToAllMics, distSourcesToArrayCenter, distSourcesToAllMics, waveNumber, result): # noqa ARG001
     nMics = distGridToAllMics.shape[0]
     for cntSources in range(len(distSourcesToArrayCenter)):
         # see bottom of information header of 'calcPointSpreadFunction' for infos on the PSF calculation and speed improvements.
