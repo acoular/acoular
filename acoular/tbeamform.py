@@ -214,11 +214,7 @@ class BeamformerTime( TimeInOut ):
         return digest(self)
 
     def _get_weights(self):
-        if self.weights_:
-            w = self.weights_(self)[newaxis]
-        else:
-            w = 1.0
-        return w
+        return self.weights_(self)[newaxis] if self.weights_ else 1.0
 
     def _fill_buffer(self,num):
         """Generator that fills the signal buffer."""
@@ -303,12 +299,9 @@ class BeamformerTime( TimeInOut ):
                 Gamma_autopow = zeros(Phi.shape)
                 J = 0
                 # deconvolution
-                while (J < self.n_iter):
+                while (self.n_iter > J):
                     # print(f"start clean iteration {J+1} of max {self.n_iter}")
-                    if self.r_diag:
-                        powPhi = (Phi[:num]**2-autopow).sum(0).clip(min=0)
-                    else:
-                        powPhi = (Phi[:num]**2).sum(0)
+                    powPhi = (Phi[:num] ** 2 - autopow).sum(0).clip(min=0) if self.r_diag else (Phi[:num] ** 2).sum(0)
                     imax = argmax(powPhi)
                     t_float = d_interp2[imax] + d_index[imax] + n_index
                     t_ind = t_float.astype(int64)
@@ -558,16 +551,13 @@ class BeamformerTimeTraj( BeamformerTime ):
                     yield Phi[:num]**2
             else:
                 # choose correct distance
-                if self.conv_amp:
-                    blockrm1 = blockrmconv
-                else:
-                    blockrm1 = blockrm
+                blockrm1 = blockrmconv if self.conv_amp else blockrm
                 Gamma = zeros(Phi.shape,dtype=fdtype)
                 Gamma_autopow = zeros(Phi.shape,dtype=fdtype)
                 J = 0
                 t_ind = arange(p_res.shape[0],dtype=idtype)
                 # deconvolution
-                while (J < self.n_iter):
+                while (self.n_iter > J):
                     # print(f"start clean iteration {J+1} of max {self.n_iter}")
                     if self.r_diag:
                         powPhi = (Phi[:num]*Phi[:num]-autopow).sum(0).clip(min=0)
@@ -621,10 +611,7 @@ class BeamformerTimeTraj( BeamformerTime ):
 
     def delay_and_sum(self,num,p_res,d_interp2,d_index,amp):
         """Standard delay-and-sum method."""
-        if self.precision==64:
-            fdtype = float64
-        else:
-            fdtype = float32
+        fdtype = float64 if self.precision == 64 else float32
         result = empty((num, self.grid.size), dtype=fdtype) # output array
         autopow = empty((num, self.grid.size), dtype=fdtype) # output array
         _delayandsum5(p_res, d_index, d_interp2, amp, result, autopow)
@@ -806,8 +793,7 @@ class IntegratorSectorTime( TimeInOut ):
             rmax = r.max()
             rmin = rmax * 10**(self.clip/10.0)
             r = where(r>rmin, r, 0.0)
-            i = 0
-            for ind in inds:
+            for i, ind in enumerate(inds):
                 h = r[:].reshape(mapshape)[ (s_[:],) + ind ]
                 o[:ns, i] = h.reshape(h.shape[0], -1).sum(axis=1)
                 i += 1

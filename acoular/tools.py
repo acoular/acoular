@@ -355,15 +355,9 @@ def barspectrum(data, fftfreqs, num = 3, bar = True, xoffset = 0.0):
     f_low = fftfreqs[1]*2**ep
     f_high = fftfreqs[-1]*2**-ep
     # get possible index range
-    if fc[0] >= f_low:
-        i_low = 0
-    else:
-        i_low = where(fc < f_low)[0][-1]
+    i_low = 0 if fc[0] >= f_low else where(fc < f_low)[0][-1]
 
-    if fc[-1] <= f_high:
-        i_high = fc.shape[0]
-    else:
-        i_high = where(fc > f_high)[0][0]
+    i_high = fc.shape[0] if fc[-1] <= f_high else where(fc > f_high)[0][0]
 
     # synthesize sound pressure values
     p = array([ synthetic(data, fftfreqs, list(fc[i_low:i_high]), num) ])

@@ -485,7 +485,7 @@ class PointSource( SamplesGenerator ):
             pre = -int(npmin(ind[0])//(self.up*num))
             # amend signal for first blocks
             # if signal stops during prepadding, terminate
-            if N <= pre:
+            if pre >= N:
                 for _nb in range(N-1):
                     out = _fill_mic_signal_block(out,signal,rm,ind,num,self.numchannels,self.up,True)
                     yield out
@@ -1294,27 +1294,15 @@ class SourceMixer( SamplesGenerator ):
 
     @cached_property
     def _get_sample_freq( self ):
-        if self.sources:
-            sample_freq = self.sources[0].sample_freq
-        else:
-            sample_freq = 0
-        return sample_freq
+        return self.sources[0].sample_freq if self.sources else 0
 
     @cached_property
     def _get_numchannels( self ):
-        if self.sources:
-            numchannels = self.sources[0].numchannels
-        else:
-            numchannels = 0
-        return numchannels
+        return self.sources[0].numchannels if self.sources else 0
 
     @cached_property
     def _get_numsamples( self ):
-        if self.sources:
-            numsamples = self.sources[0].numsamples
-        else:
-            numsamples = 0
-        return numsamples
+        return self.sources[0].numsamples if self.sources else 0
 
     def validate_sources( self ):
         """Validates if sources fit together."""

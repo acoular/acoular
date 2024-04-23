@@ -1179,7 +1179,7 @@ class PointSpreadFunction (HasPrivateTraits):
         if not self.grid_indices.size:
             self.grid_indices = arange(gs)
 
-        if not config.global_caching == 'none':
+        if config.global_caching != 'none':
 #            print("get filecache..")
             (ac,gp) = self._get_filecache()
             if ac and gp:
@@ -1215,10 +1215,7 @@ class PointSpreadFunction (HasPrivateTraits):
         if self.calcmode != 'full':
             # calc_ind has the form [True, True, False, True], except
             # when it has only 1 entry (value True/1 would be ambiguous)
-            if self.grid_indices.size == 1:
-                calc_ind = [0]
-            else:
-                calc_ind = invert(gp[:][self.grid_indices])
+            calc_ind = [0] if self.grid_indices.size == 1 else invert(gp[:][self.grid_indices])
 
         # get indices which have the value True = not yet calculated
             g_ind_calc = self.grid_indices[calc_ind]
@@ -1232,8 +1229,7 @@ class PointSpreadFunction (HasPrivateTraits):
             ac[:] = self._psfCall(arange(self.steer.grid.size))
         else: # 'block' # calculate selected psfs in one go
             hh = self._psfCall(g_ind_calc)
-            indh = 0
-            for ind in g_ind_calc:
+            for indh, ind in enumerate(g_ind_calc):
                 gp[ind] = 1
                 ac[:,ind] = hh[:,indh]
                 indh += 1
@@ -1639,10 +1635,7 @@ class BeamformerCleansc( BeamformerBase ):
         f = self.freq_data.fftfreq()
         result = zeros((self.steer.grid.size), 'f')
         normFac = self.sig_loss_norm()
-        if not self.n:
-            J = numchannels*2
-        else:
-            J = self.n
+        J = numchannels * 2 if not self.n else self.n
         powers = zeros(J, 'd')
 
         param_steer_type, steer_vector = self._beamformer_params()

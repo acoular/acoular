@@ -31,7 +31,7 @@ class Test_Instancing(unittest.TestCase):
             # HasTraits derived class ?
             if isinstance(j,type) \
                 and issubclass(j,HasTraits) \
-                and ('digest' in j.class_traits().keys()):
+                and ('digest' in j.class_traits()):
                 do = j.class_traits()['digest'].depends_on
                 if do:
                     obj = j()

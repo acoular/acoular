@@ -106,7 +106,7 @@ def cartToCyl(x, Q=None):
 
     """
     Q = identity(3) if Q is None else Q
-    if not (Q == identity(3)).all():
+    if not (Q == identity(3)).all(): # noqa: SIM300
         x = matmul(Q, x)  # modified position vector
     return array([arctan2(x[1], x[0]), sqrt(x[0]**2 + x[1]**2), x[2]])
 
@@ -135,7 +135,7 @@ def cylToCart(x, Q=None):
 
         """
         Q = identity(3) if Q is None else Q
-        if not (Q == identity(3)).all():
+        if not (Q == identity(3)).all(): # noqa: SIM300
             x = matmul(Q, x)  # modified position vector
         return array([x[1]*sin(x[0]),x[1]*cos(x[0]) , x[2]])
 

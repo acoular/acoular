@@ -471,7 +471,7 @@ class Trigger(TimeInOut):
         dSamples = 0
         for triggerSignal in self.source.result(nSamples):
             localTrigger = flatnonzero(triggerFunc(x0, triggerSignal, threshold))
-            if not len(localTrigger) == 0:
+            if len(localTrigger) != 0:
                 peakLoc = append(peakLoc, localTrigger + dSamples)
                 triggerData = append(triggerData, triggerSignal[localTrigger])
             dSamples += nSamples
@@ -520,11 +520,7 @@ class Trigger(TimeInOut):
         return self._trigger_value_comp(xNew[1:] - xNew[:-1], threshold)
 
     def _trigger_value_comp(self, triggerData, threshold):
-        if threshold > 0.0:
-            indPeaks= triggerData > threshold
-        else:
-            indPeaks = triggerData < threshold
-        return indPeaks
+        return triggerData > threshold if threshold > 0.0 else triggerData < threshold
 
     def _threshold(self, nSamples):
         if self.threshold is None:  # take a guessed threshold
@@ -2074,7 +2070,7 @@ class WriteH5( TimeInOut ):
         source_gen = self.source.result(num)
         while self.writeflag:
             sleft = stotal-scount
-            if not stotal == -1 and sleft > 0:
+            if stotal != -1 and sleft > 0:
                 anz = min(num,sleft)
             elif stotal == -1:
                 anz = num
@@ -2153,12 +2149,12 @@ class SampleSplitter(TimeInOut):
         del self.buffer_overflow_treatment[obj]
 
     def _assert_obj_registered(self,obj):
-        if obj not in self.block_buffer.keys():
+        if obj not in self.block_buffer:
             raise OSError("calling object %s is not registered." %obj)
 
     def _get_objs_to_inspect(self):
-        return [obj for obj in self.buffer_overflow_treatment.keys()
-                            if not self.buffer_overflow_treatment[obj] == 'none']
+        return [obj for obj in self.buffer_overflow_treatment
+                            if self.buffer_overflow_treatment[obj] != "none"]
 
     def _inspect_buffer_levels(self,inspect_objs):
         for obj in inspect_objs:
@@ -2171,7 +2167,7 @@ class SampleSplitter(TimeInOut):
                         UserWarning, stacklevel=1)
 
     def _create_source_generator(self,num):
-        for obj in self.block_buffer.keys():
+        for obj in self.block_buffer:
             self._clear_block_buffer(obj)
         self._buffer_overflow = False # reset overflow bool
         self._source_generator = LockedGenerator(self.source.result(num))
@@ -2179,18 +2175,18 @@ class SampleSplitter(TimeInOut):
 
     def _fill_block_buffers(self):
         next_block = next(self._source_generator)
-        [self.block_buffer[obj].appendleft(next_block) for obj in self.block_buffer.keys()]
+        [self.block_buffer[obj].appendleft(next_block) for obj in self.block_buffer]
 
     @on_trait_change('buffer_size')
     def _change_buffer_size(self): #
-        for obj in self.block_buffer.keys():
+        for obj in self.block_buffer:
             self._remove_block_buffer(obj)
             self._create_block_buffer(obj)
 
     def register_object(self,*objects_to_register):
         """Function that can be used to register objects that receive blocks from this class."""
         for obj in objects_to_register:
-            if obj not in self.block_buffer.keys():
+            if obj not in self.block_buffer:
                 self._create_block_buffer(obj)
                 self._create_buffer_overflow_treatment(obj)
 

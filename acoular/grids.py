@@ -210,7 +210,7 @@ class Polygon:
             # infinite line
             t = -(x1p * x21 + y1p * y21) / (x21 ** 2 + y21 ** 2)
             tlt0 = t < 0
-            tle1 = (0 <= t) & (t <= 1)
+            tle1 = (t >= 0) & (t <= 1)
             # Normal intersects side
             d[tle1] = ((x1p[tle1] + t[tle1] * x21) ** 2 +
                        (y1p[tle1] + t[tle1] * y21) ** 2)
@@ -1114,10 +1114,7 @@ class CircSector( SingleSector ):
         """
         dr2 = (pos[0, :]-self.x)**2 + (pos[1, :]-self.y)**2
         # which points are in the circle?
-        if self.include_border:
-            inds = (dr2 - self.r**2) < self.abs_tol
-        else:
-            inds = (dr2 - self.r**2) < -self.abs_tol
+        inds = dr2 - self.r ** 2 < self.abs_tol if self.include_border else dr2 - self.r ** 2 < -self.abs_tol
 
 
         # if there's no poit inside
@@ -1158,10 +1155,7 @@ class PolySector( SingleSector ):
         """
         poly = Polygon(array(self.edges).reshape(-1,2)[:,0],array(self.edges).reshape(-1,2)[:,1])
         dists = poly.is_inside(pos[0,:],pos[1,:])
-        if  self.include_border:
-            inds = dists >= -self.abs_tol
-        else:
-            inds = dists > 0
+        inds = dists >= -self.abs_tol if self.include_border else dists > 0
 
 
         # if none inside, take nearest

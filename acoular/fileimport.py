@@ -69,38 +69,38 @@ class csv_import( time_data_import ):
         #import data
         c = self.header_length
         d = self.dummy_columns
-        f = open(self.from_file)
-        #read header
-        for line in f:
-            c -= 1
-            h = line.split(':')
-            if h[0] == 'Scan rate':
-                sample_freq = int(1./float(h[1].split(' ')[1]))
-            if c == 0:
-                break
-        line = next(f)
-        data = fromstring(line, dtype = float32, sep = ', ')[d:]
-        numchannels = len(data)
-        name = td.name
-        if name == "":
-            name = path.join(config.td_dir, \
-                path.splitext(path.basename(self.from_file))[0]+'.h5')
-        else:
-            if td.h5f is not None:
-                td.h5f.close()
-        # TODO problems with already open h5 files from other instances
-        file = _get_h5file_class()
-        f5h = file(name, mode = 'w')
-        f5h.create_extendable_array(
-                'time_data', (0, numchannels), "float32")
-        ac = f5h.get_data_by_reference('time_data')
-        f5h.set_node_attribute(ac,'sample_freq',sample_freq)
-        f5h.append_data(ac,data[newaxis, :])
-        for line in f:
-            f5h.append_data(ac,fromstring(line, dtype=float32, sep=', ')[newaxis, d:])
-        f5h.close()
-        td.name = name
-        td.load_data()
+        with open(self.from_file) as f:
+            #read header
+            for line in f:
+                c -= 1
+                h = line.split(':')
+                if h[0] == 'Scan rate':
+                    sample_freq = int(1./float(h[1].split(' ')[1]))
+                if c == 0:
+                    break
+            line = next(f)
+            data = fromstring(line, dtype = float32, sep = ', ')[d:]
+            numchannels = len(data)
+            name = td.name
+            if name == "":
+                name = path.join(config.td_dir, \
+                    path.splitext(path.basename(self.from_file))[0]+'.h5')
+            else:
+                if td.h5f is not None:
+                    td.h5f.close()
+            # TODO problems with already open h5 files from other instances
+            file = _get_h5file_class()
+            f5h = file(name, mode = 'w')
+            f5h.create_extendable_array(
+                    'time_data', (0, numchannels), "float32")
+            ac = f5h.get_data_by_reference('time_data')
+            f5h.set_node_attribute(ac,'sample_freq',sample_freq)
+            f5h.append_data(ac,data[newaxis, :])
+            for line in f:
+                f5h.append_data(ac,fromstring(line, dtype=float32, sep=', ')[newaxis, d:])
+            f5h.close()
+            td.name = name
+            td.load_data()
 
 class td_import( time_data_import ):
     """Import of `*.td` data as saved by earlier versions."""
@@ -118,9 +118,8 @@ class td_import( time_data_import ):
             # no file there
             time_data_import.get_data(self, td)
             return
-        f = open(self.from_file, 'rb')
-        h = pickle.load(f)
-        f.close()
+        with open(self.from_file, 'rb') as f:
+            h = pickle.load(f)
         sample_freq = h['sample_freq']
         data = h['data']
         numchannels = data.shape[1]
@@ -233,7 +232,7 @@ class datx_d_file(HasPrivateTraits):
 
     def __init__(self, name, blocks = 128):
         self.name = name
-        self.f = open(self.name, 'rb')
+        self.f = open(self.name, 'rb') # noqa: SIM115
         s = self.f.read(32)
         # header
         s0 = struct.unpack('IIIIIIHHf', s)
@@ -312,53 +311,52 @@ class datx_import(time_data_import):
             time_data_import.get_data(self, td)
             return
         #browse datx information
-        f0 = open(self.from_file)
-        config = configparser.ConfigParser()
-        config.readfp(f0)
-        sample_rate = float(config.get('keywords', 'sample_rate'))
-        # reading sample-rate from index-file
-        channels = []
-        d_files = {}
-        # Loop over all channels assigned in index-file
-        for channel in sort(config.options('channels')):
-            ch = datx_channel(config, channel)
-            if ch.label.find('Mic') >= 0:
-                channels.append(ch)
-                if not d_files.has_key(ch.d_file):
-                    d_files[ch.d_file] = \
-                        datx_d_file(path.join(path.dirname(self.from_file), \
-                            config.get(ch.d_file, 'fn')), 32)
-        numchannels = len(channels)
-        # prepare hdf5
-        name = td.name
-        if name == "":
-            name = path.join(config.td_dir, \
-                path.splitext(path.basename(self.from_file))[0]+'.h5')
-        else:
-            if td.h5f is not None:
-                td.h5f.close()
-        # TODO problems with already open h5 files from other instances
-        file = _get_h5file_class()
-        f5h = file(name, mode = 'w')
-        f5h.create_extendable_array(
-                'time_data', (0, numchannels), "float32")
-        ac = f5h.get_data_by_reference('time_data')
-        f5h.set_node_attribute(ac,'sample_freq',sample_rate)
-        block_data = \
-            zeros((128*d_files[channels[0].d_file].num_samples_per_block, \
-                numchannels), 'Float32')
-        flag = 0
-        while(not flag):
-            for i in d_files.values():
-                flag = i.get_next_blocks()
-            if flag:
-                continue
-            for i in range(numchannels):
-                data = d_files[channels[i].d_file].data[channels[i].ch_no]
-                block_data[:data.size, i] = channels[i].scale(data)
-            f5h.append_data(ac,block_data[:data.size])
-        f5h.close()
-        f0.close()
+        with open(self.from_file) as f0:
+            config = configparser.ConfigParser()
+            config.readfp(f0)
+            sample_rate = float(config.get('keywords', 'sample_rate'))
+            # reading sample-rate from index-file
+            channels = []
+            d_files = {}
+            # Loop over all channels assigned in index-file
+            for channel in sort(config.options('channels')):
+                ch = datx_channel(config, channel)
+                if ch.label.find('Mic') >= 0:
+                    channels.append(ch)
+                    if not d_files.has_key(ch.d_file):
+                        d_files[ch.d_file] = \
+                            datx_d_file(path.join(path.dirname(self.from_file), \
+                                config.get(ch.d_file, 'fn')), 32)
+            numchannels = len(channels)
+            # prepare hdf5
+            name = td.name
+            if name == "":
+                name = path.join(config.td_dir, \
+                    path.splitext(path.basename(self.from_file))[0]+'.h5')
+            else:
+                if td.h5f is not None:
+                    td.h5f.close()
+            # TODO problems with already open h5 files from other instances
+            file = _get_h5file_class()
+            f5h = file(name, mode = 'w')
+            f5h.create_extendable_array(
+                    'time_data', (0, numchannels), "float32")
+            ac = f5h.get_data_by_reference('time_data')
+            f5h.set_node_attribute(ac,'sample_freq',sample_rate)
+            block_data = \
+                zeros((128*d_files[channels[0].d_file].num_samples_per_block, \
+                    numchannels), 'Float32')
+            flag = 0
+            while(not flag):
+                for i in d_files.values():
+                    flag = i.get_next_blocks()
+                if flag:
+                    continue
+                for i in range(numchannels):
+                    data = d_files[channels[i].d_file].data[channels[i].ch_no]
+                    block_data[:data.size, i] = channels[i].scale(data)
+                f5h.append_data(ac,block_data[:data.size])
+            f5h.close()
         for i in d_files.values():
             i.f.close()
         td.name = name
