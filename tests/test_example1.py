@@ -1,11 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Jan 24 09:58:04 2019
-
-@author: newuser
-"""
-#standard testing suite from python
 import unittest
 
 #acoular imports

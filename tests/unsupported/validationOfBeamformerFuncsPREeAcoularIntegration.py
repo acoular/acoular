@@ -4,10 +4,10 @@
 This script is used for Validation of the new numba version of the old 'beamformer.cpp'.
 This is the pre-acoular integration check.
 
-Essentially the NUMBA versions are checked againts the old WEAVE versions AND 
+Essentially the NUMBA versions are checked againts the old WEAVE versions AND
 against NUMPY code (which is much clearer to varify with the bare eye).
 
-This script needs the 'fastFuncs.py' with all the NUMBA optimized code and the 
+This script needs the 'fastFuncs.py' with all the NUMBA optimized code and the
 'beamformer.so' with all the WEAVE code in its directory.
 --> Only runs under python=2
 
@@ -82,12 +82,12 @@ for cntFreqs in xrange(nFreqs):
         steerFormulation2[cntFreqs, cntGrid, :] = np.exp(-1j * kj[cntFreqs].imag * (rm[cntGrid, :] - r0[cntGrid])) * rm[cntGrid, :] / r0[cntGrid] / nMics
         steerFormulation3[cntFreqs, cntGrid, :] = np.exp(-1j * kj[cntFreqs].imag * (rm[cntGrid, :] - r0[cntGrid])) / rm[cntGrid, :] / r0[cntGrid] / np.sum(1.0 / rm[cntGrid, :]**2)
         steerFormulation4[cntFreqs, cntGrid, :] = np.exp(-1j * kj[cntFreqs].imag * (rm[cntGrid, :] - r0[cntGrid])) / rm[cntGrid, :] / np.sqrt(nMics * np.sum(1.0 / rm[cntGrid, :]**2))
-        
+
         steerFormulation1normalized[cntFreqs, cntGrid, :] = steerFormulation1[cntFreqs, cntGrid, :] / np.sqrt(np.vdot(steerFormulation1[cntFreqs, cntGrid, :], steerFormulation1[cntFreqs, cntGrid, :]))
         steerFormulation2normalized[cntFreqs, cntGrid, :] = steerFormulation2[cntFreqs, cntGrid, :] / np.sqrt(np.vdot(steerFormulation2[cntFreqs, cntGrid, :], steerFormulation2[cntFreqs, cntGrid, :]))
         steerFormulation3normalized[cntFreqs, cntGrid, :] = steerFormulation3[cntFreqs, cntGrid, :] / np.sqrt(np.vdot(steerFormulation3[cntFreqs, cntGrid, :], steerFormulation3[cntFreqs, cntGrid, :]))
         steerFormulation4normalized[cntFreqs, cntGrid, :] = steerFormulation4[cntFreqs, cntGrid, :] / np.sqrt(np.vdot(steerFormulation4[cntFreqs, cntGrid, :], steerFormulation4[cntFreqs, cntGrid, :]))
-        
+
         transfer[cntFreqs, cntGrid, :] = np.exp(-1j * kj[cntFreqs].imag * (rm[cntGrid, :] - r0[cntGrid])) * r0[cntGrid] / rm[cntGrid, :]
     csmPsf[cntFreqs, :] = np.outer(transfer[cntFreqs, indSource[indSourceCalcWithNumpy], :], transfer[cntFreqs, indSource[indSourceCalcWithNumpy], :].conj())
 
@@ -394,7 +394,7 @@ normFullWeave = np.float64(nMics ** 2)
 normDiagWeave = np.float64(nMics * (nMics - 1))
 
 #==============================================================================
-# # see below why the csm can't be transposed as the input of weave 
+# # see below why the csm can't be transposed as the input of weave
 # # (but must be transposed as input of numpy and new beamformer)
 #==============================================================================
 comp1Voll, steerNorm = beamNew.beamformerFreq(False, 1, False, normFull, (r0, rm, kj, csm.transpose(0,2,1)))
@@ -510,13 +510,13 @@ relDiff = np.amax(np.amax((erg64 - erg32) / (erg64 + erg32), 0), 0)
 
 #%% weave reacts strange
 #==============================================================================
-# There is a difference when giving weave the transpose of the csm (and 'correct'-algo gets the normal csm), 
+# There is a difference when giving weave the transpose of the csm (and 'correct'-algo gets the normal csm),
 # or giving the 'correct' algorithm the csm-transpose and the weave gets the untransposed csm.
 # Theoretically this should produce the same results. Maybe the problem is the ffast03 compiling option in weave?
 #==============================================================================
 normalizationFull = np.float64(nMics ** 2)
 
-numpyResult = vectorized(csm.transpose(0,2,1), e, h, r0, rm, kj, normalizationFull)  
+numpyResult = vectorized(csm.transpose(0,2,1), e, h, r0, rm, kj, normalizationFull)
 neu, steerNorm = beamNew.beamformerFreq(False, 1, False, normFull, (r0, rm, kj, csm.transpose(0,2,1)))
 beamformer.r_beamfull_classic(csm, e, h, r0, rm, kj)
 weave = h / normalizationFull

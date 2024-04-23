@@ -1,0 +1,130 @@
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    "acoular/tests/unsupported",
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+]
+
+line-length = 120
+indent-width = 4
+
+[lint]
+select = [
+        "F", # pyflakes
+        "C","E","R", "W",  # pylint (including pycodestyle)
+        "C90", "I", "N","D", "UP", 
+        "YTT", "ANN", "ASYNC", "TRIO", "S", "BLE", "FBT", "B", "A", "COM", # flake8 plugins
+        "C4", "DTZ","T10","EM", "FA", "ISC", "ICN", # flake8 plugins
+        "LOG", "G", "INP", "PIE", "T20", "PYI", "PT", "RSE", # flake8 plugins
+        "RET", "SLF", "SLOT", "SIM", "TID", "TCH", "INT", "ARG", "TD", "FIX", "ERA", # flake8 plugins
+        "C901" # others
+        ]
+
+ignore = [
+    "E722", # bare except -> mainly covered by #211
+    "E701", # multiple statements on one line -> TBD
+    "E501", # ignore line length until fixed through issue #214
+    "E741", # allow ambiguous variable names -> TBD
+    "E402", # allow module level import not at top of file -> TBD
+    "C901", # do we want to measure code complexity -> TBD
+    "N802", # lower case functions (currently camel case) -> TBD
+    "N803", # lower case letters in arguments (currently camel case) -> TBD
+    "N806", # lower case variable names -> TBD
+    "N816", # mixed case -> TBD
+    "N815", # mixed case -> TBD
+    "N801", # underscores in class names -> TBD
+    "N999", # invalid module name -> TBD
+    # D
+    "D203", # don't enforce blank line before docstring
+    "D401", # first line should be in imperative mood -> TBD
+    "D205", # 1 blank line required between summary line and description -> not a problem in docs
+    "D100", # missing docstring in public module -> TBD
+    "D101", # missing docstring in public class -> TBD
+    "D102", # missing docstring in public method -> TBD
+    "D103", # missing docstring in public function -> TBD
+    "D104", # missing docstring in public package -> TBD
+    "D105", # missing docstring in magic method -> TBD
+    "D107", # missing docstring in __init__ -> TBD
+    "D417", # missing argument descriptions in the docstring -> TBD
+    # UP
+    "UP012", # unnecessary call to 'encode' as UTF-8 -> TBD
+    # ANN 
+    "ANN", # do we want to have type annotations? -> TBD
+    "S", # mainly unncessary rule -> TBD
+    "FBT", 
+    "B", # need to be fixed by hand -> TBD
+    "C4", # flake8 plugin -> need to be fixed by hand -> TBD
+    "DTZ005", # datetime.datetime.now() called without a tz argument
+    "INP", # will be fixed when test are moved
+    "T20", # will be fixed when logging is implemented
+    "PT", # will be solved when test infrastructure is refactored
+    "RET", # need to be handled manually -> TBD (separate issue)
+    "SLF", # need to be handled manually -> TBD (separate issue: #225 )
+    "SIM", # simplifications need to be done manually -> TBD 
+    "ARG", # need to be handled manually -> #226
+    "TD", # todos should be formulated as issues -> do we allow todos in the code? -> #227
+    "FIX", # same as with TD
+    "ERA", # plenty of outcommented code -> TBD
+]
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+[lint.pydocstyle]
+convention = "google"  # Accepts: "google", "numpy", or "pep257".
+
+[format]
+quote-style = "single"
+indent-style = "space"
+skip-magic-trailing-comma = false
+
+# Enable auto-formatting of code examples in docstrings. Markdown,
+# reStructuredText code/literal blocks and doctests are all supported.
+#
+# This is currently disabled by default, but it is planned for this
+# to be opt-out in the future.
+docstring-code-format = true
+
+# Set the line length limit used when formatting code snippets in
+# docstrings.
+#
+# This only has an effect when the `docstring-code-format` setting is
+# enabled.
+docstring-code-line-length = "dynamic"
+
+
+[lint.per-file-ignores]
+"acoular/__init__.py" = ["F401"] # unused import -> TBD
+"acoular/demo/__init__.py" = ["F401"] # unused import -> TBD
+"acoular/configuration.py" = ["F401"] # unused import (will be solved by issue #212)
+"acoular/nidaqimport.py" = ["F841"] # unused variable (really unused?) -> TBD
+"acoular/tbeamform.py" = ["F841"] # unused variable (really unused?) -> TBD
+"acoular/fbeamform.py" = ["W605"] # invalid escape sequence -> TBD
+"acoular/tests/test_tprocess.py" = ["F403"] # star import 
+"acoular/tests/*" = ["D"] # exclude docstring linting
+"acoular/version.py" = ["D"] # exclude docstring linting

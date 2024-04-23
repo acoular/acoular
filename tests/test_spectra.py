@@ -1,8 +1,9 @@
 
-from os import path
-import numpy as np
-import acoular
 import unittest
+
+import numpy as np
+
+import acoular
 
 rng = np.random.RandomState(2)
 # test array
@@ -19,14 +20,14 @@ fft = acoular.FFTSpectra(source=p,window='Hanning',block_size=128)
 class Test_PowerSpectra(unittest.TestCase):
 
     def test_calc_csm(self):
-        """ test that csm result has not changed over different releases"""
+        """ test that csm result has not changed over different releases."""
         test_csm_sum = np.abs(np.imag(ps.csm)).sum() + np.real(ps.csm).sum()
         self.assertAlmostEqual(test_csm_sum,csm_sum)
 
 class Test_FFTSpectra(unittest.TestCase):
 
     def test_calc_fft(self):
-        """ test that fft result has not changed over different releases"""
+        """ test that fft result has not changed over different releases."""
         test_fft_sum = 0
         for temp in fft.result():
             test_fft_sum += temp.sum()

@@ -1,7 +1,10 @@
 import unittest
-from acoular import FiltWNoiseGenerator
-from numpy.random import RandomState
+
 from numpy import array
+from numpy.random import RandomState
+
+from acoular import FiltWNoiseGenerator
+
 #from parameterized import parameterized
 
 # some FIR/MA filter coefficients of a low pass
@@ -34,23 +37,23 @@ AR_COEFF = array([1, -0.20514344, -0.00257561,  0.04522058,  0.01972377, -0.0408
 class Test_FiltWNoiseGenerator(unittest.TestCase):
 
     def setUp(self):
-        self.fwn = FiltWNoiseGenerator(sample_freq=100,numsamples=400,seed=1) 
+        self.fwn = FiltWNoiseGenerator(sample_freq=100,numsamples=400,seed=1)
 
     def test_no_coefficients(self):
         """test that white noise and filtered white noise is equal when no coefficients are
-        specified"""
+        specified."""
         wn_signal = RandomState(seed=1).standard_normal(400)
         signal = self.fwn.signal()
         self.assertEqual(wn_signal.sum(),signal.sum())
 
-    # @parameterized.expand([ 
+    # @parameterized.expand([
     #     [MA_COEFF,array([]),400],
     #     [array([]),AR_COEFF,400]
     # ])
     def test_correct_signal_length(self):
-        """test that signal retains correct length after filtering"""
-        parameters = [(MA_COEFF,array([]),400),(array([]),AR_COEFF,400)]     
-        for ma,ar,expected_length in parameters: 
+        """test that signal retains correct length after filtering."""
+        parameters = [(MA_COEFF,array([]),400),(array([]),AR_COEFF,400)]
+        for ma,ar,expected_length in parameters:
             self.fwn.ar=ar
             self.fwn.ma=ma
             self.assertEqual(self.fwn.signal().shape[0],expected_length)

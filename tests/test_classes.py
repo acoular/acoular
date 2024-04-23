@@ -1,14 +1,15 @@
-# -*- coding: utf-8 -*-
 #pylint: disable-msg=E0611, E1101, C0103, R0901, R0902, R0903, R0904, W0232
 #------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
 #------------------------------------------------------------------------------
-"""Implements testing of frequency beamformers.
-"""
+"""Implements testing of frequency beamformers."""
 
 import unittest
+
+from traits.api import Bool, Enum, Float, HasTraits, Int, Range, TraitEnum
+
 import acoular as ac
-from traits.api import HasTraits, Int, Float, Bool, Range, TraitEnum, Enum
+
 
 class Test_Instancing(unittest.TestCase):
     """Test that ensures that digest of Acoular classes changes correctly on
@@ -16,7 +17,7 @@ class Test_Instancing(unittest.TestCase):
     """
 
     def test_instancing(self):
-        """ test that all Acoular classes can be instatiated """
+        """ test that all Acoular classes can be instatiated. """
         # iterate over all Acoular definitions labels
         for i in dir(ac):
             with self.subTest(i):
@@ -25,7 +26,7 @@ class Test_Instancing(unittest.TestCase):
                     j() # this is an instance of the class
 
     def test_set_traits(self):
-        """ test that important traits can be set"""
+        """ test that important traits can be set."""
         # iterate over all Acoular definitions labels
         for i in dir(ac):
             j = getattr(ac,i) # class, function or variable
@@ -41,7 +42,7 @@ class Test_Instancing(unittest.TestCase):
                             if k in j.class_trait_names():
                                 tr = j.class_traits()[k]
                                 # handling different Trait types
-                                # todo: use hypothesis based setattr
+                                # TODO: use hypothesis based setattr
                                 if tr.is_trait_type(Int):
                                     setattr(obj,k,1)
                                 elif tr.is_trait_type(Float):

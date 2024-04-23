@@ -52,10 +52,10 @@ setup(
 #               libraries=["m"],
 #               extra_compile_args = ["-O3", "-ffast-math", "-march=native", "-fopenmp" ],
 #               extra_link_args=['-fopenmp']
-#               ) 
+#               )
 # ]
-# 
-# setup( 
+#
+# setup(
 #   name = "cythonBeamformer",
 #   cmdclass = {"build_ext": build_ext},
 #   ext_modules = ext_modules

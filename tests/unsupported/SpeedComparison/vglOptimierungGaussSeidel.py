@@ -106,29 +106,29 @@ for nMics in listOfMics:
             # Init
             print(10*'-' + 'New Test configuration: nMics=%s, nGridPoints=%s, nFreqs=%s' %(nMics, nGridPoints, nFreqs) + 10*'-')
             print(10*'-' + 'Creation of inputInputs' + 10*'-')
-            
+
             A = np.float32(np.random.rand(1, nGridPoints, nGridPoints))  #A = np.float32(np.ones((1, nGridPoints, nGridPoints)))
 #            for cntFreqs in range(nFreqs):
 #                A[cntFreqs, :, :] += A[cntFreqs, :, :].T.conj()
             dirtyMap = np.float32(np.random.rand(1, nGridPoints))  #dirtyMap = np.float32(np.ones((1, nGridPoints)))
             damasSolution = np.zeros((nGridPoints), np.float32)
-            
+
             # create nFreqs times the same matrix for comparing reasons
             A = np.tile(A, [nFreqs, 1, 1])
             dirtyMap = np.tile(dirtyMap, [nFreqs, 1])
-            
+
             nameOfFuncsToTrial = map(lambda x: x.__name__, funcsToTrial)
             nameOfFuncsForError = [funcName for funcName in nameOfFuncsToTrial if funcName != 'gseidel1']
             maxRelativeDeviation = np.zeros((len(funcsToTrial), nTrials))
             maxAbsoluteDeviation = np.zeros((len(funcsToTrial), nTrials))
             timeConsumption = [[] for _ in range(len(funcsToTrial))]
             indOfBaselineFnc = nameOfFuncsToTrial.index('gseidel1')
-            
+
             print(10*'-' + 'Onetime calculation of error reference' + 10*'-')
             gseidel1(A[0,:,:], dirtyMap[0,:], damasSolution, nIterations)
             resultReference = damasSolution  # For relative/absolute error
             gc.collect()
-            
+
             # Testing
             print(10*'-' + 'Testing of functions' + 10*'-')
             cntFunc = 0
@@ -161,15 +161,15 @@ for nMics in listOfMics:
                 cntFunc += 1
             factorTimeConsump = [np.mean(timeConsumption[cnt]) for cnt in range(0, len(funcsToTrial))] \
                                 / np.mean(timeConsumption[indOfBaselineFnc])
-            
+
             # Save the current test-config as .sav
             helpString = 'The order of the variables is: \n nameOfFuncsToTrial \n maxRelativeDeviation'\
                 '\n timeConsumption [nFuncs, nTrials] \n nMics \n nGridPoints \n nFreqs '\
                 '\n Factor of time consumption (in relation to the original .cpp) \n maxAbsoluteDeviation \n nThreadsGlobal'
-            saveTupel = (helpString, nameOfFuncsToTrial, maxRelativeDeviation, timeConsumption, 
+            saveTupel = (helpString, nameOfFuncsToTrial, maxRelativeDeviation, timeConsumption,
                          nMics, nGridPoints, nFreqs, factorTimeConsump, maxAbsoluteDeviation, 0)
             stringParameters = 'OvernightTestcasesBeamformer_nMics%s_nGridPoints%s_nFreqs%s_nTrials%s' %(nMics, nGridPoints, nFreqs, nTrials)
-            
+
 #            stringSaveName = 'Peter'
             stringSaveName = 'Sicherung_DurchgelaufeneTests/damasSolver/' + stringParameters
 #            stringSaveName = 'Sicherung_DurchgelaufeneTests/Beamformer/AllImportantMethods/' + stringParameters
@@ -178,5 +178,5 @@ for nMics in listOfMics:
 #            stringSaveName = 'Sicherung_DurchgelaufeneTests/Beamformer/Multithreading_02Threads/' + stringParameters
 
             shFncs.savingTimeConsumption(stringSaveName, saveTupel)  # saving as "stringSaveName.sav"
-            
+
 #            shFncs.plottingOfOvernightTestcasesBeamformer(stringSaveName + '.sav')  # plot of the current test-config

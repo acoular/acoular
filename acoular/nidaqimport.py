@@ -3,24 +3,23 @@
 # Copyright (c) Acoular Development Team.
 #------------------------------------------------------------------------------
 
-"""
-nidaqimport.py: interface to nidaq mx
-"""
-from __future__ import print_function
-from .sources import TimeSamples
-from .h5cache import td_dir
-from .fileimport import time_data_import
+"""nidaqimport.py: interface to nidaq mx."""
 import ctypes
-import numpy
-import tables
-from traits.api import Float, List, Str, Long
 from datetime import datetime
 from os import path
 
+import numpy as np
+import tables
+from traits.api import Float, List, Long, Str
+
+from .fileimport import time_data_import
+from .h5cache import td_dir
+from .sources import TimeSamples
+
 try:
-	nidaq = ctypes.windll.nicaiu # load the DLL
+    nidaq = ctypes.windll.nicaiu # load the DLL
 except:
-	raise ImportError
+    raise ImportError
 # type definitions
 int32 = ctypes.c_long
 uInt32 = ctypes.c_ulong
@@ -73,8 +72,7 @@ DAQmxGetSampClkRate = ECFactory(nidaq.DAQmxGetSampClkRate)
 DAQmxSetSampClkRate = ECFactory(nidaq.DAQmxSetSampClkRate)
 
 class nidaq_import( time_data_import ):
-    """
-    This class provides an interface to import of measurement data 
+    """Provides an interface to import of measurement data
     using NI-DAQmx.
     """
 
@@ -178,9 +176,8 @@ class nidaq_import( time_data_import ):
 
 
     def get_data (self, td):
-        """
-        Main work is done here: loads data from buffer into
-        :class:`~acoular.sources.TimeSamples` object `td` and saves also a 
+        """Main work is done here: loads data from buffer into
+        :class:`~acoular.sources.TimeSamples` object `td` and saves also a
         '*.h5' file.
         """
         taskHandle = TaskHandle(0)
@@ -208,7 +205,7 @@ class nidaq_import( time_data_import ):
         DAQmxGetSampQuantSampPerChan(taskHandle,ctypes.byref(lnum))
         max_num_samples = lnum.value
         print("Puffergroesse: %i" % max_num_samples)
-        data = numpy.empty((max_num_samples,self.numchannels),dtype=numpy.float64)
+        data = np.empty((max_num_samples,self.numchannels),dtype=np.float64)
         DAQmxStartTask(taskHandle)
         count = 0
         numsamples = self.numsamples
@@ -219,7 +216,7 @@ class nidaq_import( time_data_import ):
             DAQmxReadAnalogF64(taskHandle,1024,float64(10.0),
                                      DAQmx_Val_GroupByScanNumber,data.ctypes.data,
                                      data.size,ctypes.byref(read),None)
-            ac.append(numpy.array(data[:min(read.value,numsamples-count)],dtype=numpy.float32))
+            ac.append(np.array(data[:min(read.value,numsamples-count)],dtype=np.float32))
             count+=read.value
             #~ if read.value>200:
                 #~ print count, read.value
@@ -228,11 +225,9 @@ class nidaq_import( time_data_import ):
         f5h.close()
         td.name = name
         td.load_data()
-        
+
     def get_single (self):
-        """
-        Gets one block of data
-        """
+        """Gets one block of data."""
         taskHandle = TaskHandle(0)
         read = uInt32()
         fnum = float64()
@@ -246,10 +241,10 @@ class nidaq_import( time_data_import ):
             time_data_import.get_data(self,td)
             return
         #import data
-        ac = numpy.empty((self.numsamples,self.numchannels),numpy.float32)
+        ac = np.empty((self.numsamples,self.numchannels),np.float32)
         DAQmxGetSampQuantSampPerChan(taskHandle,ctypes.byref(lnum))
         max_num_samples = lnum.value
-        data = numpy.empty((max_num_samples,self.numchannels),dtype=numpy.float64)
+        data = np.empty((max_num_samples,self.numchannels),dtype=np.float64)
         DAQmxStartTask(taskHandle)
         count = 0
         numsamples = self.numsamples
@@ -258,12 +253,12 @@ class nidaq_import( time_data_import ):
                                      DAQmx_Val_GroupByScanNumber,data.ctypes.data,
                                      data.size,ctypes.byref(read),None)
             anz = min(read.value,numsamples-count)
-            ac[count:count+anz]=numpy.array(data[:anz],dtype=numpy.float32)
+            ac[count:count+anz]=np.array(data[:anz],dtype=np.float32)
             count+=read.value
         DAQmxStopTask(taskHandle)
         DAQmxClearTask(taskHandle)
         return ac
-        
+
 
 if __name__=='__main__':
     x=nidaq_import()
