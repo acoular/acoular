@@ -1,6 +1,6 @@
 # Exclude a variety of commonly ignored directories.
 src = ["acoular"]
-exclude = ["tests/unsupported"]
+exclude = ["tests/unsupported", "docs/source"]
     
 line-length = 120
 indent-width = 4
