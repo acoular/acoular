@@ -103,11 +103,13 @@ class MicGeom( HasPrivateTraits ):
             # set very small values to zero
             center[abs(center) < 1e-16] = 0.
             return center
+        return None
 
     @cached_property
     def _get_aperture( self ):
         if self.mpos.any():
             return cdist(self.mpos.T,self.mpos.T).max()
+        return None
 
     @on_trait_change('basename')
     def import_mpos( self ):

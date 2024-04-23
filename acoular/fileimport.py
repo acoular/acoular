@@ -229,6 +229,7 @@ class datx_d_file(HasPrivateTraits):
         self.data = fromstring(s, dtype = 'Int16').reshape((bl_no, \
             self.channel_count, self.num_samples_per_block)).swapaxes(0, \
             1).reshape((self.channel_count, bl_no*self.num_samples_per_block))
+        return None
 
     def __init__(self, name, blocks = 128):
         self.name = name

@@ -315,6 +315,7 @@ class PowerSpectra( BaseSpectra ):
                 return array([fftfreq[self.ind_low],None])
             else:
                 return fftfreq[[ self.ind_low, self.ind_high ]]
+        return None
 
     def _set_freq_range( self, freq_range ):# by setting this the user sets _freqlc and _freqhc
         self._index_set_last = False
@@ -329,6 +330,7 @@ class PowerSpectra( BaseSpectra ):
                 return min(self._ind_low, fftfreq.shape[0]-1)
             else:
                 return searchsorted(fftfreq[:-1], self._freqlc)
+        return None
 
     @property_depends_on( '_source.sample_freq, block_size, _ind_high, _freqhc' )
     def _get_ind_high( self ):
@@ -343,6 +345,7 @@ class PowerSpectra( BaseSpectra ):
                     return None
                 else:
                     return searchsorted(fftfreq[:-1], self._freqhc)
+        return None
 
     def _set_ind_high(self, ind_high):# by setting this the user sets the lower index
         self._index_set_last = True
@@ -376,6 +379,7 @@ class PowerSpectra( BaseSpectra ):
                     return indices[ self.ind_low: self.ind_high ]
             except IndexError:
                 return range(0)
+        return None
 
     @cached_property
     def _get_digest( self ):
@@ -415,8 +419,7 @@ class PowerSpectra( BaseSpectra ):
         [fill_diagonal(csmLower[cntFreq, :, :], 0) for cntFreq in range(csmLower.shape[0])]
         csm = csmLower + csmUpper
         # onesided spectrum: multiplication by 2.0=sqrt(2)^2
-        csm = csm*(2.0/self.block_size/weight/self.num_blocks)
-        return csm
+        return csm*(2.0/self.block_size/weight/self.num_blocks)
 
     def calc_ev ( self ):
         """Eigenvalues / eigenvectors calculation."""

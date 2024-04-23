@@ -46,11 +46,10 @@ ignore = [
     "UP012", # unnecessary call to 'encode' as UTF-8 -> TBD
     "B904", # also addressed by issue #211
     "B023", # unbinded loop variables -> should be fixed with issue #231
-    "DTZ005", # datetime.datetime.now() called without a tz argument
     "INP", # will be fixed when test are moved
     "T20", # will be fixed when logging is implemented
     "PT", # will be solved when test infrastructure is refactored
-    "RET", # need to be handled manually -> TBD (separate issue)
+    #"RET", # need to be handled manually -> TBD (separate issue)
     "SLF", # need to be handled manually -> TBD (separate issue: #225 )
     "SIM", # simplifications need to be done manually -> TBD 
     "ARG", # need to be handled manually -> #226

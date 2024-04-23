@@ -38,7 +38,7 @@
 import threading
 import wave
 from collections import deque
-from datetime import datetime
+from datetime import datetime, timezone
 from inspect import currentframe
 from os import path
 from warnings import warn
@@ -518,8 +518,7 @@ class Trigger(TimeInOut):
         # x0 stores the last value of the the last generator cycle
         xNew = append(x0, x)
        #indPeakHunk = abs(xNew[1:] - xNew[:-1]) > abs(threshold)  # with this line: every edge would be located
-        indPeakHunk = self._trigger_value_comp(xNew[1:] - xNew[:-1], threshold)
-        return indPeakHunk
+        return self._trigger_value_comp(xNew[1:] - xNew[:-1], threshold)
 
     def _trigger_value_comp(self, triggerData, threshold):
         if threshold > 0.0:
@@ -1382,11 +1381,13 @@ class TimeAverage( TimeInOut ) :
     def _get_sample_freq ( self ):
         if self.source:
             return 1.0 * self.source.sample_freq / self.naverage
+        return None
 
     @cached_property
     def _get_numsamples ( self ):
         if self.source:
             return self.source.numsamples / self.naverage
+        return None
 
     def result(self, num):
         """Python generator that yields the output block-wise.
@@ -2017,7 +2018,7 @@ class WriteH5( TimeInOut ):
 
     def create_filename(self):
         if self.name == '':
-            name = datetime.now(datetime.timezone.utc).isoformat('_').replace(':','-').replace('.','_')
+            name = datetime.now(tz=timezone.utc).isoformat('_').replace(':','-').replace('.','_')
             self.name = path.join(config.td_dir,name+'.h5')
 
     def get_initialized_file(self):

@@ -5,7 +5,7 @@
 
 """nidaqimport.py: interface to nidaq mx."""
 import ctypes
-from datetime import datetime
+from datetime import datetime, timezone
 from os import path
 
 import numpy as np
@@ -196,7 +196,7 @@ class nidaq_import( time_data_import ):
         #import data
         name = td.name
         if name=='':
-            name = datetime.now().isoformat('_').replace(':','-').replace('.','_')
+            name = datetime.now(tz=timezone.utc).isoformat('_').replace(':','-').replace('.','_')
             name = path.join(td_dir,name+'.h5')
         f5h = tables.open_file(name,mode='w')
         ac = f5h.create_earray(f5h.root,'time_data',tables.atom.Float32Atom(),(0,self.numchannels))

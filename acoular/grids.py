@@ -883,8 +883,7 @@ class MergeGrid( Grid ):
         for grid in self.grids:
             bpos = append(bpos,grid.gpos, axis = 1)
             #subgrids = append(subgrids,str(grid))
-        bpos = unique(bpos,axis=1)
-        return bpos
+        return unique(bpos,axis=1)
 
 class Sector( HasPrivateTraits ):
     """Base class for all sector types.

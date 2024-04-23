@@ -199,9 +199,11 @@ def _get_h5file_class():
         return H5FileTables
     elif config.h5library == "h5py":
         return H5FileH5py
+    return None
 
 def _get_cachefile_class():
     if config.h5library == "pytables":
         return H5CacheFileTables
     elif config.h5library == "h5py":
         return H5CacheFileH5py
+    return None
