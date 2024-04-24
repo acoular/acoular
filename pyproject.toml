@@ -82,14 +82,21 @@ dependencies = [
 [tool.hatch.envs.docs.scripts]
 build = ["cd docs && make html"]
 
-[[tool.hatch.envs.test.matrix]]
+[tool.hatch.envs.tests]
+dependencies = [
+    "pytest",
+    "pytest-cov"
+]
+
+[[tool.hatch.envs.tests.matrix]]
 python = ["3.7", "3.8", "3.9", "3.10", "3.11"]
 
-[tool.hatch.envs.test.scripts]
+[tool.hatch.envs.tests.scripts]
 import = ["python -c \"import acoular\""]
-test = ["cd tests && python -m unittest -v"]
+test = ["python -m pytest -v tests"]
+coverage = ["test --cov=acoular"]
 
-[tool.hatch.envs.test.overrides]
+[tool.hatch.envs.tests.overrides]
 platform.linux.pre-install-commands = ['cat /proc/cpuinfo']
 platform.macos.scripts = ['pre-install-commands=sysctl -a machdep.cpu']
 platform.windows.scripts = ['pre-install-commands=systeminfo']

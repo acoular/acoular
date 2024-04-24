@@ -26,14 +26,25 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Check import
-        run: hatch -v run +py=${{ matrix.python-version }} test:import
+        run: hatch -v run +py=${{ matrix.python-version }} tests:import
       - name: Run unittests
-        run: hatch -v run +py=${{ matrix.python-version }} test:test
+        run: hatch -v run +py=${{ matrix.python-version }} tests:test
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out a copy of the repository
+        uses: actions/checkout@v4
+      - name: Set up hatch
+        uses: ./.github/actions/setup-hatch
+      - name: Generate coverage report
+        run: hatch -v run tests:coverage
 
   alls-green:
     if: always()
     needs:
       - tests
+      - coverage
     runs-on: ubuntu-latest
     steps:
       - id: workaround
