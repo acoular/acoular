@@ -180,11 +180,13 @@ class TimeSamples( SamplesGenerator ):
             self._initialize_timedata()
             self._load_metadata()
         else:
+            self.metadata = {}
             self.numsamples = 0
             self.numchannels = 0
             self.sample_freq = 1.0
-            msg = f"No such file: {self.name}"
-            raise OSError(msg)
+            if self.name != '':
+                msg = f"No such file: {self.name}"
+                raise OSError(msg)
 
     def _initialize_timedata( self ):
         """Initializes the attributes `numchannels`, `numsamples` and `sample_freq` (Only for internal use)."""
@@ -203,12 +205,8 @@ class TimeSamples( SamplesGenerator ):
                 for nodename, nodedata in file.get_child_nodes('/metadata'):
                     self.metadata[nodename] = nodedata
 
-    def _reset_file_attributes(self):
-        self.name = ''
-        self.metadata = {}
-
     def _set_data(self, value):
-        self._reset_file_attributes()
+        self.name = ''
         self._data = value
         self._initialize_timedata()
 
