@@ -21,7 +21,7 @@ Source Location        Level
 ====== =============== ======
 """
 
-from os import path
+from pathlib import Path
 from acoular import __file__ as bpath, MicGeom, WNoiseGenerator, PointSource,\
  Mixer, WriteH5, TimeSamples, PowerSpectra, RectGrid, SteeringVector,\
  BeamformerBase, L_p
@@ -31,7 +31,7 @@ from pylab import figure, plot, axis, imshow, colorbar, show
 sfreq = 51200 
 duration = 1
 nsamples = duration*sfreq
-micgeofile = path.join(path.split(bpath)[0],'xml','array_64.xml')
+micgeofile = Path(bpath).parent / 'xml' / 'array_64.xml'
 h5savefile = 'three_sources.h5'
 
 # generate test data, in real life this would come from an array measurement
