@@ -211,7 +211,7 @@ class TimeSamples( SamplesGenerator ):
         self._initialize_timedata()
 
     def _get_data_by_reference(self, file):
-        """Return the data array by reference"""
+        """Return the data array by reference."""
         if file is not None:
             return file.get_data_by_reference('time_data')
         return self._data
