@@ -22,7 +22,9 @@
 
 # imports from other packages
 
+from contextlib import contextmanager
 from os import path
+from pathlib import Path
 from warnings import warn
 
 import numba as nb
@@ -74,7 +76,7 @@ from traits.api import (
 # acoular imports
 from .calib import Calib
 from .environments import Environment
-from .h5files import H5FileBase, _get_h5file_class
+from .h5files import _get_h5file_class
 from .internal import digest, ldigest
 from .microphones import MicGeom
 from .signals import SignalGenerator
@@ -131,11 +133,12 @@ class TimeSamples( SamplesGenerator ):
         desc="number of samples")
 
     #: The time data as array of floats with dimension (numsamples, numchannels).
-    data = Any( transient = True,
-        desc="the actual time data array")
+    data = Property(desc="the actual time data array")
+
+    _data = Any( transient = True ) # TODO: why transient?
 
     #: HDF5 file object
-    h5f = Instance(H5FileBase, transient = True)
+    h5f = Property()
 
     #: Provides metadata stored in HDF5 file object
     metadata = Dict(
@@ -147,6 +150,18 @@ class TimeSamples( SamplesGenerator ):
     # internal identifier
     digest = Property( depends_on = ['basename', 'calib.digest', '_datachecksum'])
 
+    @contextmanager
+    def _get_h5f(self):
+        if self.name:
+            file = _get_h5file_class()
+            h5f = file(self.name, 'r')
+            try:
+                yield h5f
+            finally:
+                h5f.close()
+        else:
+            yield None
+
     def _get__datachecksum( self ):
         return self.data[0,:].sum()
 
@@ -156,39 +171,66 @@ class TimeSamples( SamplesGenerator ):
 
     @cached_property
     def _get_basename( self ):
-        return path.splitext(path.basename(self.name))[0]
+        return Path(self.name).stem
 
     @on_trait_change('basename')
-    def load_data( self ):
+    def _load_data( self ):
         """Open the .h5 file and set attributes."""
-        if not path.isfile(self.name):
-            # no file there
+        if Path(self.name).is_file():
+            self._initialize_timedata()
+            self._load_metadata()
+        else:
             self.numsamples = 0
             self.numchannels = 0
-            self.sample_freq = 0
-            raise OSError("No such file: %s" % self.name)
-        if self.h5f is not None:
-            try:
-                self.h5f.close()
-            except OSError:
-                pass
-        file = _get_h5file_class()
-        self.h5f = file(self.name)
-        self.load_timedata()
-        self.load_metadata()
+            self.sample_freq = 1.0
+            msg = f"No such file: {self.name}"
+            raise OSError(msg)
 
-    def load_timedata( self ):
-        """Loads timedata from .h5 file. Only for internal use."""
-        self.data = self.h5f.get_data_by_reference('time_data')
-        self.sample_freq = self.h5f.get_node_attribute(self.data,'sample_freq')
-        (self.numsamples, self.numchannels) = self.data.shape
+    def _initialize_timedata( self ):
+        """Initializes the attributes `numchannels`, `numsamples` and `sample_freq` (Only for internal use)."""
+        with self.h5f as file:
+            data = self._get_data_by_reference(file)
+            self.numsamples, self.numchannels = data.shape
+            if file is not None:
+                self.sample_freq = file.get_node_attribute(data,'sample_freq')
+        self._datachecksum # trigger checksum calculation # noqa: B018
 
-    def load_metadata( self ):
+    def _load_metadata( self ):
         """Loads metadata from .h5 file. Only for internal use."""
         self.metadata = {}
-        if '/metadata' in self.h5f:
-            for nodename, nodedata in self.h5f.get_child_nodes('/metadata'):
-                self.metadata[nodename] = nodedata
+        with self.h5f as file:
+            if '/metadata' in file:
+                for nodename, nodedata in file.get_child_nodes('/metadata'):
+                    self.metadata[nodename] = nodedata
+
+    def _reset_file_attributes(self):
+        self.name = ''
+        self.metadata = {}
+
+    def _set_data(self, value):
+        self._reset_file_attributes()
+        self._data = value
+        self._initialize_timedata()
+
+    def _get_data_by_reference(self, file):
+        """Return the data array by reference"""
+        if file is not None:
+            return file.get_data_by_reference('time_data')
+        return self._data
+
+    def _get_data(self):
+        """Return a copy of the data array."""
+        with self.h5f as file:
+            return self._get_data_by_reference(file)[:,:]
+
+    def _validate_result(self):
+        if self.numsamples == 0:
+            msg = "no samples available"
+            raise OSError(msg)
+        if self.calib and self.calib.num_mics != self.numchannels:
+            msg = f"calibration data not compatible: {self.calib.num_mics}, {self.numchannels}"
+            raise ValueError(
+                msg)
 
     def result(self, num=128):
         """Python generator that yields the output block-wise.
@@ -205,24 +247,22 @@ class TimeSamples( SamplesGenerator ):
             The last block may be shorter than num.
 
         """
-        if self.numsamples == 0:
-            msg = "no samples available"
-            raise OSError(msg)
-        self._datachecksum # trigger checksum calculation # noqa: B018
-        i = 0
-        if self.calib:
-            if self.calib.num_mics == self.numchannels:
+        self._initialize_timedata()
+        self._validate_result()
+
+        with self.h5f as file:
+            data = self._get_data_by_reference(file)
+            i = 0
+            if self.calib:
                 cal_factor = self.calib.data[newaxis]
+                while i < self.numsamples:
+                    yield data[i:i+num]*cal_factor
+                    i += num
             else:
-                raise ValueError("calibration data not compatible: %i, %i" % \
-                            (self.calib.num_mics, self.numchannels))
-            while i < self.numsamples:
-                yield self.data[i:i+num]*cal_factor
-                i += num
-        else:
-            while i < self.numsamples:
-                yield self.data[i:i+num]
-                i += num
+                while i < self.numsamples:
+                    yield data[i:i+num]
+                    i += num
+
 
 class MaskedTimeSamples( TimeSamples ):
     """Container for time data in `*.h5` format.
