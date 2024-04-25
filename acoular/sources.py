@@ -207,9 +207,9 @@ class TimeSamples( SamplesGenerator ):
                 for nodename, nodedata in file.get_child_nodes('/metadata'):
                     self.metadata[nodename] = nodedata
 
-    def _set_data(self, value):
+    def _set_data(self, data):
         self.name = ''
-        self._data = value
+        self._data = data
         self._initialize_timedata()
 
     def _get_data_by_reference(self, file):
