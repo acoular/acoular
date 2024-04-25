@@ -163,7 +163,9 @@ class TimeSamples( SamplesGenerator ):
             yield None
 
     def _get__datachecksum( self ):
-        return self.data[0,:].sum()
+        with self.h5f as file:
+            data = self._get_data_by_reference(file)
+            return data[0,:].sum()
 
     @cached_property
     def _get_digest( self ):
