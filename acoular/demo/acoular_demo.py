@@ -73,7 +73,6 @@ def run():
     Lm = L_p(pm)
 
     if config.matplotlib_exists:
-
         from pylab import axis, colorbar, figure, imshow, plot, show
 
         # show map
