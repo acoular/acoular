@@ -27,7 +27,8 @@ jobs:
         uses: ./.github/actions/setup-hatch
       - name: Run sphinx
         run: hatch -v run docs:build
-      - uses: actions/upload-artifact@v4
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
         with:
           name: build-docs
           path: ./docs/build/html
@@ -37,7 +38,8 @@ jobs:
     if: ${{ github.event_name =='workflow_dispatch' && github.ref == 'refs/heads/master' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
         with:
           name: build-docs
       - name: Upload docs to GitHub Pages
