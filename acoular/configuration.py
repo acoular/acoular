@@ -93,10 +93,11 @@ class Config(HasStrictTraits):
     _global_caching = Trait('individual', 'all', 'none', 'readonly', 'overwrite')
 
     #: Flag that globally defines package used to read and write .h5 files
-    #: defaults to 'pytables'. If 'pytables' can not be imported, 'h5py' is used
+    #: defaults to 'pytables'. It is also possible to set it to 'tables', which is an alias for 'pytables'.
+    #: If 'pytables' can not be imported, 'h5py' is used.
     h5library = Property()
 
-    _h5library = Either('pytables', 'h5py', default='pytables')
+    _h5library = Either('pytables', 'tables', 'h5py', default='pytables')
 
     #: Defines the path to the directory containing Acoulars cache files.
     #: If the specified :attr:`cache_dir` directory does not exist,
@@ -156,7 +157,7 @@ class Config(HasStrictTraits):
 
     def _assert_h5library(self):
         if not self.tables_exists and not self.h5py_exists:
-            msg = ('Packages h5py and pytables are missing!'
+            msg = ('Packages H5py and PyTables are missing!'
                 'At least one of them is required for Acoular to work.')
             raise ImportError(msg)
         if not self.tables_exists:
@@ -218,8 +219,8 @@ General caching behaviour can be controlled by the :attr:`global_caching` attrib
 
 The package used to read and write .h5 files can be specified
 by :attr:`h5library`:
-* 'pytables': Use 'tables' (or 'pytables', depending on python distribution).
-* 'h5py': Use 'h5py'.
+* 'PyTables': Use 'tables' (or 'pytables', depending on python distribution).
+* 'H5py': Use 'h5py'.
 
 Some Acoular classes support GUI elements for usage with tools from the TraitsUI package.
 If desired, this package has to be installed manually, as it is not a prerequisite for

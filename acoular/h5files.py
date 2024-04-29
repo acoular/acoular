@@ -173,7 +173,7 @@ if config.h5py_exists:
 
 
 def _get_h5file_class():
-    if config.h5library == 'pytables':
+    if config.h5library in ['pytables','tables']:
         return H5FileTables
     if config.h5library == 'h5py':
         return H5FileH5py
@@ -181,7 +181,7 @@ def _get_h5file_class():
 
 
 def _get_cachefile_class():
-    if config.h5library == 'pytables':
+    if config.h5library in ['pytables','tables']:
         return H5CacheFileTables
     if config.h5library == 'h5py':
         return H5CacheFileH5py
