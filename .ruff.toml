@@ -1,6 +1,6 @@
 # Exclude a variety of commonly ignored directories.
 src = ["acoular"]
-exclude = ["tests/unsupported"]
+exclude = ["tests/unsupported", "docs/source"]
     
 line-length = 120
 indent-width = 4
@@ -43,7 +43,6 @@ ignore = [
     "D107", # missing docstring in __init__ -> should be fixed by issue #216
     "D417", # missing argument descriptions in the docstring -> should be fixed by issue #216
     # Others
-    "UP012", # unnecessary call to 'encode' as UTF-8 -> TBD
     "B904", # also addressed by issue #211
     "B023", # unbinded loop variables -> should be fixed with issue #231
     "INP", # will be fixed when test are moved
@@ -95,3 +94,4 @@ docstring-code-line-length = "dynamic"
 "acoular/traitsviews.py" = ["E402"]
 "tests/test_tprocess.py" = ["F403"] # star import 
 "tests/*" = ["D"] # exclude docstring linting
+"examples/*" = ["A001", "B007", "D4", "E4", "E701", "F4", "UP036", "SIM108"]

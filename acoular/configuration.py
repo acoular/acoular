@@ -1,6 +1,6 @@
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 """Implements global configuration of Acoular.
 
 .. autosummary::
@@ -10,6 +10,7 @@
     config
 """
 
+import importlib.util
 import sys
 from os import environ, mkdir, path
 from warnings import warn
@@ -27,6 +28,7 @@ if 'numpy' in sys.modules:
     import io
 
     import numpy as np
+
     orig_stdout = sys.stdout
     temp_stdout = io.StringIO()
     sys.stdout = temp_stdout
@@ -36,19 +38,23 @@ if 'numpy' in sys.modules:
     if 'openblas' in temp_stdout.getvalue().lower():
         # it's OpenBLAS, set numba threads=1 to avoid overcommittment
         import numba
+
         numba.set_num_threads(1)
-        warn("We detected that Numpy is already loaded and uses OpenBLAS. Because "
-             "this conflicts with Numba parallel execution, we disable parallel "
-             "execution for now and processing might be slower. To speed up, "
-             "either import Numpy after Acoular or set environment variable "
-             "OPENBLAS_NUM_THREADS=1 before start of the program.",
-             UserWarning, stacklevel = 2)
+        warn(
+            'We detected that Numpy is already loaded and uses OpenBLAS. Because '
+            'this conflicts with Numba parallel execution, we disable parallel '
+            'execution for now and processing might be slower. To speed up, '
+            'either import Numpy after Acoular or set environment variable '
+            'OPENBLAS_NUM_THREADS=1 before start of the program.',
+            UserWarning,
+            stacklevel=2,
+        )
 else:
     # numpy is not loaded
-    environ['OPENBLAS_NUM_THREADS'] = "1"
+    environ['OPENBLAS_NUM_THREADS'] = '1'
 
 # this loads numpy, so we have to defer loading until OpenBLAS check is done
-from traits.api import Bool, HasStrictTraits, Property, Str, Trait
+from traits.api import Bool, Either, HasStrictTraits, Property, Str, Trait, cached_property
 
 
 class Config(HasStrictTraits):
@@ -84,20 +90,21 @@ class Config(HasStrictTraits):
     #: * 'overwrite': Acoular classes replace existing cachefile content with new data.
     global_caching = Property()
 
-    _global_caching = Trait('individual','all','none','readonly','overwrite')
+    _global_caching = Trait('individual', 'all', 'none', 'readonly', 'overwrite')
 
     #: Flag that globally defines package used to read and write .h5 files
-    #: defaults to 'pytables'. If 'pytables' can not be imported, 'h5py' is used
+    #: defaults to 'pytables'. It is also possible to set it to 'tables', which is an alias for 'pytables'.
+    #: If 'pytables' can not be imported, 'h5py' is used.
     h5library = Property()
 
-    _h5library = Trait('pytables','h5py')
+    _h5library = Either('pytables', 'tables', 'h5py', default='pytables')
 
     #: Defines the path to the directory containing Acoulars cache files.
     #: If the specified :attr:`cache_dir` directory does not exist,
     #: it will be created. attr:`cache_dir` defaults to current session path.
     cache_dir = Property()
 
-    _cache_dir = Str("")
+    _cache_dir = Str('')
 
     #: Defines the working directory containing files that can be loaded by the
     #: fileimport.py module.
@@ -112,17 +119,31 @@ class Config(HasStrictTraits):
 
     _use_traitsui = Bool(False)
 
+    #: Boolean Flag that determines whether tables is installed.
+    have_tables = Property()
+
+    #: Boolean Flag that determines whether h5py is installed.
+    have_h5py = Property()
+
+    #: Boolean Flag that determines whether matplotlib is installed.
+    have_matplotlib = Property()
+
+    #: Boolean Flag that determines whether pylops is installed.
+    have_pylops = Property()
+
+    #: Boolean Flag that determines whether sounddevice is installed.
+    have_sounddevice = Property()
 
     def _get_global_caching(self):
         return self._global_caching
 
-    def _set_global_caching(self,globalCachingValue):
+    def _set_global_caching(self, globalCachingValue):
         self._global_caching = globalCachingValue
 
     def _get_h5library(self):
         return self._h5library
 
-    def _set_h5library(self,libraryName):
+    def _set_h5library(self, libraryName):
         self._h5library = libraryName
 
     def _get_use_traitsui(self):
@@ -135,26 +156,21 @@ class Config(HasStrictTraits):
         self._use_traitsui = use_tui
 
     def _assert_h5library(self):
-        try:
-            import tables
-            self.h5library = 'pytables'
-        except:
-            try:
-                import h5py
-                self.h5library = 'h5py'
-            except:
-                msg = "packages h5py and pytables are missing!"
-                raise ImportError(msg)
+        if not self.have_tables and not self.have_h5py:
+            msg = 'Packages H5py and PyTables are missing! At least one of them is required for Acoular to work.'
+            raise ImportError(msg)
+        if not self.have_tables:
+            self.h5library = 'h5py'
 
     def _get_cache_dir(self):
-        if self._cache_dir == "":
-            cache_dir = path.join(path.curdir,'cache')
+        if self._cache_dir == '':
+            cache_dir = path.join(path.curdir, 'cache')
             if not path.exists(cache_dir):
                 mkdir(cache_dir)
             self._cache_dir = cache_dir
         return self._cache_dir
 
-    def _set_cache_dir(self,cdir):
+    def _set_cache_dir(self, cdir):
         if not path.exists(cdir):
             mkdir(cdir)
         self._cache_dir = cdir
@@ -162,8 +178,33 @@ class Config(HasStrictTraits):
     def _get_td_dir(self):
         return self._td_dir
 
-    def _set_td_dir(self,tddir):
+    def _set_td_dir(self, tddir):
         self._td_dir = tddir
+
+    def _have_module(self, module_name):
+        spec = importlib.util.find_spec(module_name)
+        return spec is not None
+
+    @cached_property
+    def _get_have_matplotlib(self):
+        return self._have_module('matplotlib')
+
+    @cached_property
+    def _get_have_pylops(self):
+        return self._have_module('pylops')
+
+    @cached_property
+    def _get_have_sounddevice(self):
+        return self._have_module('sounddevice')
+
+    @cached_property
+    def _get_have_tables(self):
+        return self._have_module('tables')
+
+    @cached_property
+    def _get_have_h5py(self):
+        return self._have_module('h5py')
+
 
 config = Config()
 """
@@ -178,8 +219,8 @@ General caching behaviour can be controlled by the :attr:`global_caching` attrib
 
 The package used to read and write .h5 files can be specified
 by :attr:`h5library`:
-* 'pytables': Use 'tables' (or 'pytables', depending on python distribution).
-* 'h5py': Use 'h5py'.
+* 'PyTables': Use 'tables' (or 'pytables', depending on python distribution).
+* 'H5py': Use 'h5py'.
 
 Some Acoular classes support GUI elements for usage with tools from the TraitsUI package.
 If desired, this package has to be installed manually, as it is not a prerequisite for

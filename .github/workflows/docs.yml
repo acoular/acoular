@@ -1,0 +1,75 @@
+name: Docs
+
+#DEPLOY NOTE: This workflow will only deploy the docs when a workflow is manually triggered from the main branch via github! 
+
+on:
+  pull_request:
+    branches: [ master ] # build docs as additional test on PRs to main
+  workflow_dispatch:
+    branches: [ '*' ] # allow manual trigger for all branches
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+  
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out a copy of the repository
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        run: sudo apt install graphviz libportaudio2
+      - name: Set up hatch
+        uses: ./.github/actions/setup-hatch
+      - name: Run sphinx
+        run: hatch -v run docs:build
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-docs
+          path: ./docs/build/html
+
+  deploy:
+    needs: build
+    if: ${{ github.event_name =='workflow_dispatch' && github.ref == 'refs/heads/master' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-docs
+      - name: Upload docs to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          publish_branch: gh-pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/build/html/
+          cname: www.acoular.org
+          force_orphan: true # This allows you to make your publish branch with only the latest commit.
+          enable_jekyll: false
+
+  alls-green:
+    if: always()
+    needs:
+      - build
+      - deploy
+    runs-on: ubuntu-latest
+    steps:
+      - id: workaround
+        uses: actions/github-script@v7
+        with:
+          # Workaround for https://github.com/re-actors/alls-green/issues/29
+          # we strip outputs from the needs object to avoid nested JSON
+          result-encoding: string
+          script: |
+            return JSON.stringify(Object.fromEntries(Object.entries(${{ toJSON(needs) }})
+              .map(([name, { result }]) => [name, { result, outputs: {} }])));
+      - name: All checks passed?
+        uses: re-actors/alls-green@v1.2.2
+        with:
+          jobs: ${{ steps.workaround.outputs.result }}
+          allowed-failures: deploy

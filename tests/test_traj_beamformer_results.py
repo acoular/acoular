@@ -34,26 +34,26 @@ FNAME = testdir / 'reference_data' / 'beamformer_traj_time_data.h5'
 SFREQ = 6000
 SPEED = 10  # km/h
 SEED = 1
-D = .5
+D = 0.5
 SOURCE_POS = (0.0, 0.0, D)
-passby_dist = .5  # distance that the source is passing in front of array
+passby_dist = 0.5  # distance that the source is passing in front of array
 CONV_AMP = True
 
 # create linear mic geom
 MGEOM = MicGeom()
 N = 5
-L = .5
+L = 0.5
 MGEOM.mpos_tot = np.zeros((3, N), dtype=np.float64)
-win = np.sin(np.arange(N)*np.pi/(N-1))
+win = np.sin(np.arange(N) * np.pi / (N - 1))
 b = 0.4
-MGEOM.mpos_tot[0] = np.linspace(-L, L, N)*(1-b)/(win*b+1-b)
+MGEOM.mpos_tot[0] = np.linspace(-L, L, N) * (1 - b) / (win * b + 1 - b)
 
 # Monopole Trajectory
-t_passby = passby_dist/SPEED/3.6
-nsamples = int(t_passby*SFREQ)
+t_passby = passby_dist / SPEED / 3.6
+nsamples = int(t_passby * SFREQ)
 TRAJ = Trajectory()  # source center
-TRAJ.points[0] = (-passby_dist/2 + SOURCE_POS[0], SOURCE_POS[1], SOURCE_POS[2])
-TRAJ.points[t_passby] = (+passby_dist/2, SOURCE_POS[1], SOURCE_POS[2])
+TRAJ.points[0] = (-passby_dist / 2 + SOURCE_POS[0], SOURCE_POS[1], SOURCE_POS[2])
+TRAJ.points[t_passby] = (+passby_dist / 2, SOURCE_POS[1], SOURCE_POS[2])
 
 
 def create_test_time_data(nsamples):
@@ -71,14 +71,14 @@ def create_test_time_data(nsamples):
 
     """
     n1 = WNoiseGenerator(sample_freq=SFREQ, numsamples=nsamples, seed=SEED)
-    p1 = MovingPointSource(signal=n1, mics=MGEOM,
-                           trajectory=TRAJ, conv_amp=CONV_AMP)
+    p1 = MovingPointSource(signal=n1, mics=MGEOM, trajectory=TRAJ, conv_amp=CONV_AMP)
     wh5 = WriteH5(source=p1, name=FNAME)
-    print(50*"#")
-    print(f"create {FNAME} ...")
-    print(f"num samples: {nsamples}, pass-by time: {t_passby}s")
-    print(50*"#")
+    print(50 * '#')
+    print(f'create {FNAME} ...')
+    print(f'num samples: {nsamples}, pass-by time: {t_passby}s')
+    print(50 * '#')
     wh5.save()
+
 
 def get_beamformer_traj_result(Beamformer, num=32):
     """
@@ -99,13 +99,13 @@ def get_beamformer_traj_result(Beamformer, num=32):
     """
     ## with moving grid
     ts = MaskedTimeSamples(name=FNAME)
-    gMoving = RectGrid(x_min=-.1, x_max=.1, y_min=0, y_max=0, z=0,
-                       increment=.1)
+    gMoving = RectGrid(x_min=-0.1, x_max=0.1, y_min=0, y_max=0, z=0, increment=0.1)
     stMoving = SteeringVector(grid=gMoving, mics=MGEOM)
     bt = Beamformer(source=ts, trajectory=TRAJ, steer=stMoving)
-    if hasattr(bt,'n_iter'):
+    if hasattr(bt, 'n_iter'):
         bt.n_iter = 2
     return next(bt.result(num)).astype(np.float32)
+
 
 def get_beamformer_time_result(Beamformer, num=32):
     """
@@ -126,13 +126,13 @@ def get_beamformer_time_result(Beamformer, num=32):
     """
     ## with moving grid
     ts = MaskedTimeSamples(name=FNAME)
-    gfixed = RectGrid(x_min=-.1, x_max=.1, y_min=0, y_max=0, z=D,
-                       increment=.1)
+    gfixed = RectGrid(x_min=-0.1, x_max=0.1, y_min=0, y_max=0, z=D, increment=0.1)
     stfixed = SteeringVector(grid=gfixed, mics=MGEOM)
-    bt = Beamformer(source=ts,steer=stfixed)
-    if hasattr(bt,'n_iter'):
+    bt = Beamformer(source=ts, steer=stfixed)
+    if hasattr(bt, 'n_iter'):
         bt.n_iter = 2
     return next(bt.result(num)).astype(np.float32)
+
 
 class BeamformerTimeTest(unittest.TestCase):
     """
@@ -141,11 +141,9 @@ class BeamformerTimeTest(unittest.TestCase):
     versions of code.
     """
 
-    traj_beamformers = [BeamformerTimeTraj, BeamformerTimeSqTraj,
-                        BeamformerCleantTraj, BeamformerCleantSqTraj]
+    traj_beamformers = [BeamformerTimeTraj, BeamformerTimeSqTraj, BeamformerCleantTraj, BeamformerCleantSqTraj]
 
-    time_beamformers = [BeamformerTime, BeamformerTimeSq,
-                        BeamformerCleant, BeamformerCleantSq]
+    time_beamformers = [BeamformerTime, BeamformerTimeSq, BeamformerCleant, BeamformerCleantSq]
 
     def test_beamformer_traj_result(self):
         """compare results of trajectory beamformers against previous
@@ -155,7 +153,7 @@ class BeamformerTimeTest(unittest.TestCase):
                 name = testdir / 'reference_data' / f'{beamformer.__name__}.npy'
                 actual_data = get_beamformer_traj_result(beamformer)
                 if WRITE_NEW_REFERENCE_DATA:
-                    np.save(name,actual_data)
+                    np.save(name, actual_data)
                 ref_data = np.load(name)
                 np.testing.assert_allclose(actual_data, ref_data, rtol=5e-5, atol=5e-6)
 
@@ -167,7 +165,7 @@ class BeamformerTimeTest(unittest.TestCase):
                 name = testdir / 'reference_data' / f'{beamformer.__name__}.npy'
                 actual_data = get_beamformer_time_result(beamformer)
                 if WRITE_NEW_REFERENCE_DATA:
-                    np.save(name,actual_data)
+                    np.save(name, actual_data)
                 ref_data = np.load(name)
                 np.testing.assert_allclose(actual_data, ref_data, rtol=5e-5, atol=5e-6)
 

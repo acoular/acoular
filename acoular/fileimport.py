@@ -1,6 +1,6 @@
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 """Contains classes for importing time data in several file formats.
 Standard HDF (`*.h5`) import can be done using
 :class:`~acoular.sources.TimeSamples` objects.
@@ -29,10 +29,10 @@ from .configuration import config
 from .h5files import _get_h5file_class
 
 
-class time_data_import( HasPrivateTraits ):
+class time_data_import(HasPrivateTraits):
     """Base class for import of time data."""
 
-    def get_data (self, td):
+    def get_data(self, td):
         """Imports the data into an arbitrary time_data object td.
         This is a dummy function and should not be used directly.
         """
@@ -41,22 +41,20 @@ class time_data_import( HasPrivateTraits ):
         td.numchannels = 0
         td.sample_freq = 0
 
-class csv_import( time_data_import ):
+
+class csv_import(time_data_import):
     """Class that supports the import of CSV data as saved by NI VI Logger."""
 
     #: Name of the comma delimited file to import.
-    from_file = File(filter = ['*.txt'],
-        desc = "name of the comma delimited file to import")
+    from_file = File(filter=['*.txt'], desc='name of the comma delimited file to import')
 
     #: Header length, defaults to 6.
-    header_length =  Int(6,
-        desc = "length of the header to ignore during import")
+    header_length = Int(6, desc='length of the header to ignore during import')
 
     #: Number of leading columns (will be ignored during import), defaults to 1.
-    dummy_columns = Int(1,
-        desc = "number of leading columns to ignore during import")
+    dummy_columns = Int(1, desc='number of leading columns to ignore during import')
 
-    def get_data (self, td):
+    def get_data(self, td):
         """Imports the data from CSV file into a
         :class:`~acoular.sources.TimeSamples` object `td`.
         Also, a `*.h5` file will be written, so this import
@@ -66,50 +64,48 @@ class csv_import( time_data_import ):
             # no file there
             time_data_import.get_data(self, td)
             return
-        #import data
+        # import data
         c = self.header_length
         d = self.dummy_columns
         with open(self.from_file) as f:
-            #read header
+            # read header
             for line in f:
                 c -= 1
                 h = line.split(':')
                 if h[0] == 'Scan rate':
-                    sample_freq = int(1./float(h[1].split(' ')[1]))
+                    sample_freq = int(1.0 / float(h[1].split(' ')[1]))
                 if c == 0:
                     break
             line = next(f)
-            data = fromstring(line, dtype = float32, sep = ', ')[d:]
+            data = fromstring(line, dtype=float32, sep=', ')[d:]
             numchannels = len(data)
             name = td.name
-            if name == "":
-                name = path.join(config.td_dir, \
-                    path.splitext(path.basename(self.from_file))[0]+'.h5')
+            if name == '':
+                name = path.join(config.td_dir, path.splitext(path.basename(self.from_file))[0] + '.h5')
             else:
                 if td.h5f is not None:
                     td.h5f.close()
             # TODO problems with already open h5 files from other instances
             file = _get_h5file_class()
-            f5h = file(name, mode = 'w')
-            f5h.create_extendable_array(
-                    'time_data', (0, numchannels), "float32")
+            f5h = file(name, mode='w')
+            f5h.create_extendable_array('time_data', (0, numchannels), 'float32')
             ac = f5h.get_data_by_reference('time_data')
-            f5h.set_node_attribute(ac,'sample_freq',sample_freq)
-            f5h.append_data(ac,data[newaxis, :])
+            f5h.set_node_attribute(ac, 'sample_freq', sample_freq)
+            f5h.append_data(ac, data[newaxis, :])
             for line in f:
-                f5h.append_data(ac,fromstring(line, dtype=float32, sep=', ')[newaxis, d:])
+                f5h.append_data(ac, fromstring(line, dtype=float32, sep=', ')[newaxis, d:])
             f5h.close()
             td.name = name
             td.load_data()
 
-class td_import( time_data_import ):
+
+class td_import(time_data_import):
     """Import of `*.td` data as saved by earlier versions."""
 
     #: Name of the comma delimited file to import.
-    from_file = File(filter = ['*.td'],
-        desc = "name of the *.td file to import")
+    from_file = File(filter=['*.td'], desc='name of the *.td file to import')
 
-    def get_data (self, td):
+    def get_data(self, td):
         """Main work is done here: imports the data from `*.td` file into
         TimeSamples object `td` and saves also a `*.h5` file so this import
         need not be performed only once.
@@ -124,33 +120,30 @@ class td_import( time_data_import ):
         data = h['data']
         numchannels = data.shape[1]
         name = td.name
-        if name == "":
-            name = path.join(config.td_dir, \
-                        path.splitext(path.basename(self.from_file))[0]+'.h5')
+        if name == '':
+            name = path.join(config.td_dir, path.splitext(path.basename(self.from_file))[0] + '.h5')
         else:
             if td.h5f is not None:
                 td.h5f.close()
         # TODO problems with already open h5 files from other instances
         file = _get_h5file_class()
-        f5h = file(name, mode = 'w')
-        f5h.create_extendable_array(
-                'time_data', (0, numchannels), "float32")
+        f5h = file(name, mode='w')
+        f5h.create_extendable_array('time_data', (0, numchannels), 'float32')
         ac = f5h.get_data_by_reference('time_data')
-        f5h.set_node_attribute(ac,'sample_freq',sample_freq)
-        f5h.append_data(ac,data)
+        f5h.set_node_attribute(ac, 'sample_freq', sample_freq)
+        f5h.append_data(ac, data)
         f5h.close()
         td.name = name
         td.load_data()
 
 
-class bk_mat_import( time_data_import ):
+class bk_mat_import(time_data_import):
     """Import of BK pulse matlab data."""
 
     #: Name of the mat file to import
-    from_file = File(filter = ['*.mat'],
-        desc = "name of the BK pulse mat file to import")
+    from_file = File(filter=['*.mat'], desc='name of the BK pulse mat file to import')
 
-    def get_data (self, td):
+    def get_data(self, td):
         """Main work is done here: imports the data from pulse .mat file into
         time_data object 'td' and saves also a `*.h5` file so this import
         need not be performed every time the data is needed.
@@ -159,8 +152,9 @@ class bk_mat_import( time_data_import ):
             # no file there
             time_data_import.get_data(self, td)
             return
-        #import data
+        # import data
         from scipy.io import loadmat
+
         m = loadmat(self.from_file)
         fh = m['File_Header']
         numchannels = int(fh.NumberOfChannels)
@@ -169,26 +163,25 @@ class bk_mat_import( time_data_import ):
         data = empty((l, numchannels), 'f')
         for i in range(numchannels):
             # map SignalName "Point xx" to channel xx-1
-            ii = int(m["Channel_%i_Header" % (i+1)].SignalName[-2:])-1
-            data[:, ii] = m["Channel_%i_Data" % (i+1)]
+            ii = int(m['Channel_%i_Header' % (i + 1)].SignalName[-2:]) - 1
+            data[:, ii] = m['Channel_%i_Data' % (i + 1)]
         name = td.name
-        if name == "":
-            name = path.join(config.td_dir, \
-                path.splitext(path.basename(self.from_file))[0]+'.h5')
+        if name == '':
+            name = path.join(config.td_dir, path.splitext(path.basename(self.from_file))[0] + '.h5')
         else:
             if td.h5f is not None:
                 td.h5f.close()
         # TODO problems with already open h5 files from other instances
         file = _get_h5file_class()
-        f5h = file(name, mode = 'w')
-        f5h.create_extendable_array(
-                'time_data', (0, numchannels), "float32")
+        f5h = file(name, mode='w')
+        f5h.create_extendable_array('time_data', (0, numchannels), 'float32')
         ac = f5h.get_data_by_reference('time_data')
-        f5h.set_node_attribute(ac,'sample_freq',sample_freq)
-        f5h.append_data(ac,data)
+        f5h.set_node_attribute(ac, 'sample_freq', sample_freq)
+        f5h.append_data(ac, data)
         f5h.close()
         td.name = name
         td.load_data()
+
 
 class datx_d_file(HasPrivateTraits):
     """Helper class for import of `*.datx` data, represents
@@ -196,8 +189,7 @@ class datx_d_file(HasPrivateTraits):
     """
 
     # File name
-    name = File(filter = ['*.datx'],
-        desc = "name of datx data file")
+    name = File(filter=['*.datx'], desc='name of datx data file')
 
     # File object
     f = Any()
@@ -214,25 +206,27 @@ class datx_d_file(HasPrivateTraits):
     # The actual block data
     data = CArray()
 
-    def _get_block_size( self ):
-        return self.channel_count*self.num_samples_per_block*\
-                self.bytes_per_sample
+    def _get_block_size(self):
+        return self.channel_count * self.num_samples_per_block * self.bytes_per_sample
 
-    def get_next_blocks( self ):
+    def get_next_blocks(self):
         """Pulls next blocks."""
-        s = self.f.read(self.blocks*self.block_size)
+        s = self.f.read(self.blocks * self.block_size)
         ls = len(s)
         if ls == 0:
             return -1
-        bl_no = ls/self.block_size
-        self.data = fromstring(s, dtype = 'Int16').reshape((bl_no, \
-            self.channel_count, self.num_samples_per_block)).swapaxes(0, \
-            1).reshape((self.channel_count, bl_no*self.num_samples_per_block))
+        bl_no = ls / self.block_size
+        self.data = (
+            fromstring(s, dtype='Int16')
+            .reshape((bl_no, self.channel_count, self.num_samples_per_block))
+            .swapaxes(0, 1)
+            .reshape((self.channel_count, bl_no * self.num_samples_per_block))
+        )
         return None
 
-    def __init__(self, name, blocks = 128):
+    def __init__(self, name, blocks=128):
         self.name = name
-        self.f = open(self.name, 'rb') # noqa: SIM115
+        self.f = open(self.name, 'rb')  # noqa: SIM115
         s = self.f.read(32)
         # header
         s0 = struct.unpack('IIIIIIHHf', s)
@@ -245,6 +239,7 @@ class datx_d_file(HasPrivateTraits):
         self.bytes_per_sample = s0[6]
         self.blocks = blocks
         self.f.seek(self.data_offset)
+
 
 class datx_channel(HasPrivateTraits):
     """Helper class for import of .datx data, represents
@@ -266,7 +261,6 @@ class datx_channel(HasPrivateTraits):
     tare_eu = Float()
     z0 = Float()
 
-
     def __init__(self, config, channel):
         d_file, ch_no, ch_K = config.get('channels', channel).split(', ')
         # Extraction and Splitting of Channel information
@@ -286,22 +280,22 @@ class datx_channel(HasPrivateTraits):
         self.cal_coeff_2 = float(config.get(ch_K, 'cal_coeff_2'))
         self.cal_coeff_1 = float(config.get(ch_K, 'cal_coeff_1'))
         self.tare_eu = float(config.get(ch_K, 'tare_eu'))
-        self.z0 = (self.volts_per_count * self.msl_ccf * self.cal_corr_factor) \
-                    / (self.internal_gain * self.external_gain)
+        self.z0 = (self.volts_per_count * self.msl_ccf * self.cal_corr_factor) / (
+            self.internal_gain * self.external_gain
+        )
 
     def scale(self, x):
         """Scale function to produce output in engineering units."""
-        return (x * self.z0 - self.tare_volts) * self.cal_coeff_2 + \
-                self.cal_coeff_1 - self.tare_eu
+        return (x * self.z0 - self.tare_volts) * self.cal_coeff_2 + self.cal_coeff_1 - self.tare_eu
+
 
 class datx_import(time_data_import):
     """Import of .datx data."""
 
     #: Name of the datx index file to import.
-    from_file = File(filter = ['*.datx_index'],
-        desc = "name of the datx index file to import")
+    from_file = File(filter=['*.datx_index'], desc='name of the datx index file to import')
 
-    def get_data (self, td):
+    def get_data(self, td):
         """Main work is done here: imports the data from datx files into
         time_data object td and saves also a `*.h5` file so this import
         need not be performed every time the data is needed.
@@ -310,7 +304,7 @@ class datx_import(time_data_import):
             # no file there
             time_data_import.get_data(self, td)
             return
-        #browse datx information
+        # browse datx information
         with open(self.from_file) as f0:
             config = configparser.ConfigParser()
             config.readfp(f0)
@@ -324,38 +318,35 @@ class datx_import(time_data_import):
                 if ch.label.find('Mic') >= 0:
                     channels.append(ch)
                     if not d_files.has_key(ch.d_file):
-                        d_files[ch.d_file] = \
-                            datx_d_file(path.join(path.dirname(self.from_file), \
-                                config.get(ch.d_file, 'fn')), 32)
+                        d_files[ch.d_file] = datx_d_file(
+                            path.join(path.dirname(self.from_file), config.get(ch.d_file, 'fn')),
+                            32,
+                        )
             numchannels = len(channels)
             # prepare hdf5
             name = td.name
-            if name == "":
-                name = path.join(config.td_dir, \
-                    path.splitext(path.basename(self.from_file))[0]+'.h5')
+            if name == '':
+                name = path.join(config.td_dir, path.splitext(path.basename(self.from_file))[0] + '.h5')
             else:
                 if td.h5f is not None:
                     td.h5f.close()
             # TODO problems with already open h5 files from other instances
             file = _get_h5file_class()
-            f5h = file(name, mode = 'w')
-            f5h.create_extendable_array(
-                    'time_data', (0, numchannels), "float32")
+            f5h = file(name, mode='w')
+            f5h.create_extendable_array('time_data', (0, numchannels), 'float32')
             ac = f5h.get_data_by_reference('time_data')
-            f5h.set_node_attribute(ac,'sample_freq',sample_rate)
-            block_data = \
-                zeros((128*d_files[channels[0].d_file].num_samples_per_block, \
-                    numchannels), 'Float32')
+            f5h.set_node_attribute(ac, 'sample_freq', sample_rate)
+            block_data = zeros((128 * d_files[channels[0].d_file].num_samples_per_block, numchannels), 'Float32')
             flag = 0
-            while(not flag):
+            while not flag:
                 for i in d_files.values():
                     flag = i.get_next_blocks()
                 if flag:
                     continue
                 for i in range(numchannels):
                     data = d_files[channels[i].d_file].data[channels[i].ch_no]
-                    block_data[:data.size, i] = channels[i].scale(data)
-                f5h.append_data(ac,block_data[:data.size])
+                    block_data[: data.size, i] = channels[i].scale(data)
+                f5h.append_data(ac, block_data[: data.size])
             f5h.close()
         for i in d_files.values():
             i.f.close()

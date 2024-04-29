@@ -1,13 +1,12 @@
-# -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
 
-from numpy import empty, float32, int32
-import numpy.random as random
 import acoular
-from numba import set_num_threads
-#set_num_threads(1)
+import numpy.random as random
+from numpy import empty, float32, int32
+
+# set_num_threads(1)
 
 # set up test case
 nMics = 64
@@ -31,7 +30,12 @@ def test_delayandsum4():
 
 def test_delayandsum5():
     acoular.tfastfuncs._delayandsum5(
-        data, offsets5, ifactor25, steeramp5, out, autopower
+        data,
+        offsets5,
+        ifactor25,
+        steeramp5,
+        out,
+        autopower,
     )
 
 
@@ -45,46 +49,74 @@ autopower32 = autopower.astype(float32)
 
 def test_delayandsum532():
     acoular.tfastfuncs._delayandsum5(
-        data32, offsets532, ifactor2532, steeramp532, out32, autopower32
+        data32,
+        offsets532,
+        ifactor2532,
+        steeramp532,
+        out32,
+        autopower32,
     )
+
 
 rm = ifactor25.copy()
 delays = ifactor25.copy()
 interp = ifactor25.copy()
 index = offsets5.copy()
 
+
 def test_delays():
     acoular.tfastfuncs._delays(
-        rm, 343., interp, index
+        rm,
+        343.0,
+        interp,
+        index,
     )
+
 
 rm32 = rm.astype(float32)
 interp32 = interp.astype(float32)
 index32 = index.astype(int32)
 
+
 def test_delays32():
     acoular.tfastfuncs._delays(
-        rm32, float32(343.), interp32, index32
+        rm32,
+        float32(343.0),
+        interp32,
+        index32,
     )
+
 
 r0 = random.uniform(low=0, high=1.0, size=(num, gridSize))
 
+
 def test_steer_I():
     acoular.tfastfuncs._steer_I(
-        rm, r0, steeramp5
+        rm,
+        r0,
+        steeramp5,
     )
+
 
 def test_steer_II():
     acoular.tfastfuncs._steer_II(
-        rm, r0, steeramp5
+        rm,
+        r0,
+        steeramp5,
     )
+
 
 def test_steer_III():
     acoular.tfastfuncs._steer_III(
-        rm, r0, steeramp5
+        rm,
+        r0,
+        steeramp5,
     )
+
 
 def test_steer_IV():
     acoular.tfastfuncs._steer_IV(
-        rm, r0, steeramp5
+        rm,
+        r0,
+        steeramp5,
     )

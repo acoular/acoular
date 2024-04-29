@@ -1,6 +1,6 @@
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 """Implements testing of frequency beamformers."""
 
 import unittest
@@ -15,45 +15,44 @@ class Test_Instancing(unittest.TestCase):
     """
 
     def test_instancing(self):
-        """ test that all Acoular classes can be instatiated. """
+        """test that all Acoular classes can be instatiated."""
         # iterate over all Acoular definitions labels
         for i in dir(ac):
             with self.subTest(i):
-                j = getattr(ac,i) # class, function or variable
-                if isinstance(j,type): # is this a class ?
-                    j() # this is an instance of the class
+                j = getattr(ac, i)  # class, function or variable
+                if isinstance(j, type):  # is this a class ?
+                    j()  # this is an instance of the class
 
     def test_set_traits(self):
-        """ test that important traits can be set."""
+        """test that important traits can be set."""
         # iterate over all Acoular definitions labels
         for i in dir(ac):
-            j = getattr(ac,i) # class, function or variable
+            j = getattr(ac, i)  # class, function or variable
             # HasTraits derived class ?
-            if isinstance(j,type) \
-                and issubclass(j,HasTraits) \
-                and ('digest' in j.class_traits()):
+            if isinstance(j, type) and issubclass(j, HasTraits) and ('digest' in j.class_traits()):
                 do = j.class_traits()['digest'].depends_on
                 if do:
                     obj = j()
                     for k in do:
-                        with self.subTest(i+'.'+k):
+                        with self.subTest(i + '.' + k):
                             if k in j.class_trait_names():
                                 tr = j.class_traits()[k]
                                 # handling different Trait types
                                 # TODO: use hypothesis based setattr
                                 if tr.is_trait_type(Int):
-                                    setattr(obj,k,1)
+                                    setattr(obj, k, 1)
                                 elif tr.is_trait_type(Float):
-                                    setattr(obj,k,0.1)
+                                    setattr(obj, k, 0.1)
                                 elif tr.is_trait_type(Bool):
-                                    setattr(obj,k,False)
+                                    setattr(obj, k, False)
                                 elif tr.is_trait_type(Range):
                                     low = tr.handler._low
                                     high = tr.handler._high
-                                    setattr(obj,k,(high+low)/2)
+                                    setattr(obj, k, (high + low) / 2)
                                 elif tr.is_trait_type(TraitEnum) or tr.is_trait_type(Enum):
                                     v = tr.handler.values
-                                    setattr(obj,k,v[len(v)//2])
+                                    setattr(obj, k, v[len(v) // 2])
+
 
 if __name__ == '__main__':
     unittest.main()

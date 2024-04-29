@@ -47,17 +47,6 @@ maintainers = [
 ]
 
 [project.optional-dependencies]
-dev = [
-    "nox",
-    "sphinx", # docs
-    "matplotlib", # docs
-    "ipython", # docs
-    "numpydoc", # docs
-    "sounddevice", # docs 
-    "graphviz", #docs
-    "pickleshare", #docs
-    "ruff==0.4.1",
-]
 full = [
     "matplotlib",
     "pylops",
@@ -72,3 +61,43 @@ repository = "https://github.com/acoular/acoular"
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.envs.hatch-static-analysis]
+dependencies = ["ruff==0.4.1"]
+config-path = [".ruff.toml"]
+
+[tool.hatch.envs.docs]
+platforms = ["linux"]
+python = "3.11"
+dependencies = [
+    "ipython",
+    "graphviz",
+    "matplotlib",
+    "numpydoc",
+    "pickleshare",
+    "sounddevice",
+    "sphinx",
+]
+
+[tool.hatch.envs.docs.scripts]
+build = ["cd docs && make html"]
+
+[tool.hatch.envs.tests]
+dependencies = [
+    "pytest",
+    "pytest-cov"
+]
+
+[[tool.hatch.envs.tests.matrix]]
+python = ["3.7", "3.8", "3.9", "3.10", "3.11"]
+
+[tool.hatch.envs.tests.scripts]
+import = ["python -c \"import acoular\""]
+test = ["python -m pytest -v tests"]
+demo = ["python -c \"import acoular; acoular.demo.acoular_demo.run()\""]
+coverage = ["test --cov=acoular"]
+
+[tool.hatch.envs.tests.overrides]
+platform.linux.pre-install-commands = ['cat /proc/cpuinfo']
+platform.macos.scripts = ['pre-install-commands=sysctl -a machdep.cpu']
+platform.windows.scripts = ['pre-install-commands=systeminfo']

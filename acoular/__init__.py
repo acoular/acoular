@@ -1,7 +1,6 @@
-# coding=UTF-8
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 """The Acoular library: several classes for the implemetation of acoustic beamforming."""
 
@@ -16,10 +15,8 @@ try:
 except:
     pass
 
-try:
+if config.have_sounddevice:
     from .sdinput import SoundDeviceSamplesGenerator
-except:
-    pass
 
 from . import demo, tools
 from .calib import Calib

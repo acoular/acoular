@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # acoular documentation build configuration file
 #

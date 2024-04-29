@@ -1,0 +1,25 @@
+docs:
+- changed-files:
+  - any-glob-to-any-file:
+    - docs/**
+    - README.md
+    - AUTHORS.rst
+    - CITATION.cff
+tests:
+- changed-files:
+  - any-glob-to-any-file:
+    - tests/**
+ci:
+- changed-files:
+  - any-glob-to-any-file: .github/**
+maintenance:
+- changed-files:
+  - any-glob-to-any-file:
+    - pyproject.toml
+    - CONTRIBUTING.md
+    - CODE_OF_CONDUCT.md
+    - LICENSE
+new feature:
+ - head-branch: ['^feature', 'feature']
+sinus:
+ - head-branch: ['^sinus', 'sinus']

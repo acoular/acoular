@@ -2,7 +2,7 @@
 
 [![PyPI](https://img.shields.io/pypi/pyversions/acoular.svg)](https://pypi.org/project/acoular)
 [![PyPI](https://img.shields.io/pypi/v/acoular.svg)](https://pypi.org/project/acoular)
-[![Github](https://github.com/acoular/acoular/actions/workflows/python-package.yml/badge.svg)](https://github.com/acoular/acoular/actions/workflows/python-package.yml)
+[![Actions status](https://github.com/acoular/acoular/actions/workflows/tests.yml/badge.svg)](https://github.com/acoular/acoular/actions)
 
 # Acoular
 Acoular is a Python module for acoustic beamforming that is distributed under the new BSD license. 
@@ -75,12 +75,12 @@ A second option is to install Acoular via [pip](https://pip.pypa.io/en/stable/).
 
     pip install acoular
 
-For more detailed install instructions see the [documentation](http://acoular.org/install/index.html).
+For more detailed install instructions see the [documentation](https://acoular.org/install/index.html).
 
 # Documentation and help
-Documentation is available [here](http://acoular.org) with a
-[getting started](http://acoular.org/get_started/index.html) section and
-[examples](http://acoular.org/examples/index.html).
+Documentation is available [here](https://acoular.org) with a
+[getting started](https://acoular.org/get_started/index.html) section and
+[examples](https://acoular.org/examples/index.html).
 
 The Acoular [blog](https://acoular.github.io/blog/) contains some tutorials.
 
