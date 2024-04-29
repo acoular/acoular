@@ -15,10 +15,8 @@ try:
 except:
     pass
 
-try:
+if config.sounddevice_exists:
     from .sdinput import SoundDeviceSamplesGenerator
-except:
-    pass
 
 from . import demo, tools
 from .calib import Calib

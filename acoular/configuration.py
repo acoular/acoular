@@ -10,6 +10,7 @@
     config
 """
 
+import importlib.util
 import sys
 from os import environ, mkdir, path
 from warnings import warn
@@ -117,6 +118,15 @@ class Config(HasStrictTraits):
 
     _use_traitsui = Bool(False)
 
+    #: Boolean Flag that determines whether matplotlib is installed.
+    matplotlib_exists = Property()
+
+    #: Boolean Flag that determines whether pylops is installed.
+    pylops_exists = Property()
+
+    #: Boolean Flag that determines whether sounddevice is installed.
+    sounddevice_exists = Property()
+
     def _get_global_caching(self):
         return self._global_caching
 
@@ -139,18 +149,14 @@ class Config(HasStrictTraits):
         self._use_traitsui = use_tui
 
     def _assert_h5library(self):
-        try:
-            import tables
-
+        if self._module_exists('tables'):
             self.h5library = 'pytables'
-        except:
-            try:
-                import h5py
-
-                self.h5library = 'h5py'
-            except:
-                msg = 'packages h5py and pytables are missing!'
-                raise ImportError(msg)
+        elif self._module_exists('h5py'):
+            self.h5library = 'h5py'
+        else:
+            msg = ('Packages h5py and pytables are missing!'
+                'At least one of them is required for Acoular to work.')
+            raise ImportError(msg)
 
     def _get_cache_dir(self):
         if self._cache_dir == '':
@@ -171,6 +177,18 @@ class Config(HasStrictTraits):
     def _set_td_dir(self, tddir):
         self._td_dir = tddir
 
+    def _module_exists(self, module_name):
+        spec = importlib.util.find_spec(module_name)
+        return spec is not None
+
+    def _get_matplotlib_exists(self):
+        return self._module_exists('matplotlib')
+
+    def _get_pylops_exists(self):
+        return self._module_exists('pylops')
+
+    def _get_sounddevice_exists(self):
+        return self._module_exists('sounddevice')
 
 config = Config()
 """
