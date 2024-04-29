@@ -43,7 +43,6 @@ ignore = [
     "D107", # missing docstring in __init__ -> should be fixed by issue #216
     "D417", # missing argument descriptions in the docstring -> should be fixed by issue #216
     # Others
-    "UP012", # unnecessary call to 'encode' as UTF-8 -> TBD
     "B904", # also addressed by issue #211
     "B023", # unbinded loop variables -> should be fixed with issue #231
     "INP", # will be fixed when test are moved
