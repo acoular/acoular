@@ -72,7 +72,7 @@ def run():
     pm = bb.synthetic(8000, 3)
     Lm = L_p(pm)
 
-    if config.matplotlib_exists:
+    if config.have_matplotlib:
         from pylab import axis, colorbar, figure, imshow, plot, show
 
         # show map

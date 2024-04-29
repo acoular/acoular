@@ -15,7 +15,7 @@ try:
 except:
     pass
 
-if config.sounddevice_exists:
+if config.have_sounddevice:
     from .sdinput import SoundDeviceSamplesGenerator
 
 from . import demo, tools

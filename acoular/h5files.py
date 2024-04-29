@@ -42,7 +42,7 @@ class H5CacheFileBase:
         pass
 
 
-if config.tables_exists:
+if config.have_tables:
     import tables
     precision_to_atom = {
         'float32': tables.Float32Atom(),
@@ -105,7 +105,7 @@ if config.tables_exists:
             self.create_carray(group, nodename, atom, shape, filters=self.compressionFilter)
 
 
-if config.h5py_exists:
+if config.have_h5py:
     import h5py
 
     class H5FileH5py(H5FileBase, h5py.File):

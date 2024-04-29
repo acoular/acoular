@@ -120,19 +120,19 @@ class Config(HasStrictTraits):
     _use_traitsui = Bool(False)
 
     #: Boolean Flag that determines whether tables is installed.
-    tables_exists = Property()
+    have_tables = Property()
 
     #: Boolean Flag that determines whether h5py is installed.
-    h5py_exists = Property()
+    have_h5py = Property()
 
     #: Boolean Flag that determines whether matplotlib is installed.
-    matplotlib_exists = Property()
+    have_matplotlib = Property()
 
     #: Boolean Flag that determines whether pylops is installed.
-    pylops_exists = Property()
+    have_pylops = Property()
 
     #: Boolean Flag that determines whether sounddevice is installed.
-    sounddevice_exists = Property()
+    have_sounddevice = Property()
 
     def _get_global_caching(self):
         return self._global_caching
@@ -156,11 +156,11 @@ class Config(HasStrictTraits):
         self._use_traitsui = use_tui
 
     def _assert_h5library(self):
-        if not self.tables_exists and not self.h5py_exists:
+        if not self.have_tables and not self.have_h5py:
             msg = ('Packages H5py and PyTables are missing!'
                 'At least one of them is required for Acoular to work.')
             raise ImportError(msg)
-        if not self.tables_exists:
+        if not self.have_tables:
             self.h5library = 'h5py'
 
     def _get_cache_dir(self):
@@ -182,29 +182,29 @@ class Config(HasStrictTraits):
     def _set_td_dir(self, tddir):
         self._td_dir = tddir
 
-    def _module_exists(self, module_name):
+    def _have_module(self, module_name):
         spec = importlib.util.find_spec(module_name)
         return spec is not None
 
     @cached_property
-    def _get_matplotlib_exists(self):
-        return self._module_exists('matplotlib')
+    def _get_have_matplotlib(self):
+        return self._have_module('matplotlib')
 
     @cached_property
-    def _get_pylops_exists(self):
-        return self._module_exists('pylops')
+    def _get_have_pylops(self):
+        return self._have_module('pylops')
 
     @cached_property
-    def _get_sounddevice_exists(self):
-        return self._module_exists('sounddevice')
+    def _get_have_sounddevice(self):
+        return self._have_module('sounddevice')
 
     @cached_property
-    def _get_tables_exists(self):
-        return self._module_exists('tables')
+    def _get_have_tables(self):
+        return self._have_module('tables')
 
     @cached_property
-    def _get_h5py_exists(self):
-        return self._module_exists('h5py')
+    def _get_have_h5py(self):
+        return self._have_module('h5py')
 
 config = Config()
 """
