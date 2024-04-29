@@ -89,5 +89,6 @@ def run():
     else:
         print('Matplotlib not found! Please install matplotlib if you want to plot the results.')
 
+
 if __name__ == '__main__':
     run()

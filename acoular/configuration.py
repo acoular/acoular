@@ -157,8 +157,7 @@ class Config(HasStrictTraits):
 
     def _assert_h5library(self):
         if not self.have_tables and not self.have_h5py:
-            msg = ('Packages H5py and PyTables are missing!'
-                'At least one of them is required for Acoular to work.')
+            msg = 'Packages H5py and PyTables are missing! At least one of them is required for Acoular to work.'
             raise ImportError(msg)
         if not self.have_tables:
             self.h5library = 'h5py'
@@ -205,6 +204,7 @@ class Config(HasStrictTraits):
     @cached_property
     def _get_have_h5py(self):
         return self._have_module('h5py')
+
 
 config = Config()
 """

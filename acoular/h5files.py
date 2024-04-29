@@ -44,6 +44,7 @@ class H5CacheFileBase:
 
 if config.have_tables:
     import tables
+
     precision_to_atom = {
         'float32': tables.Float32Atom(),
         'complex64': tables.ComplexAtom(8),
@@ -173,7 +174,7 @@ if config.have_h5py:
 
 
 def _get_h5file_class():
-    if config.h5library in ['pytables','tables']:
+    if config.h5library in ['pytables', 'tables']:
         return H5FileTables
     if config.h5library == 'h5py':
         return H5FileH5py
@@ -181,7 +182,7 @@ def _get_h5file_class():
 
 
 def _get_cachefile_class():
-    if config.h5library in ['pytables','tables']:
+    if config.h5library in ['pytables', 'tables']:
         return H5CacheFileTables
     if config.h5library == 'h5py':
         return H5CacheFileH5py

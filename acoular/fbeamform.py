@@ -1816,8 +1816,10 @@ class BeamformerCMF(BeamformerBase):
     @on_trait_change('method')
     def _validate(self):
         if self.method in ['FISTA', 'Split_Bregman'] and not config.have_pylops:
-            msg = ('Cannot import Pylops package. No Pylops installed.'
-                   f'Solver for {self.method} in BeamformerCMF not available.')
+            msg = (
+                'Cannot import Pylops package. No Pylops installed.'
+                f'Solver for {self.method} in BeamformerCMF not available.'
+            )
             raise ImportError(msg)
 
     def calc(self, ac, fr):
@@ -1894,6 +1896,7 @@ class BeamformerCMF(BeamformerBase):
 
                 if self.method == 'Split_Bregman' and config.have_pylops:
                     from pylops import Identity, MatrixMult, SplitBregman
+
                     Oop = MatrixMult(A)  # tranfer operator
                     Iop = self.alpha * Identity(numpoints)  # regularisation
                     ac[i], iterations = SplitBregman(
@@ -1914,6 +1917,7 @@ class BeamformerCMF(BeamformerBase):
 
                 elif self.method == 'FISTA' and config.have_pylops:
                     from pylops import FISTA, MatrixMult
+
                     Oop = MatrixMult(A)  # tranfer operator
                     ac[i], iterations = FISTA(
                         Op=Oop,
