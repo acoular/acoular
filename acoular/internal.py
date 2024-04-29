@@ -15,11 +15,11 @@ def digest(obj, name='digest'):
             str_.append(str(vobj).encode('UTF-8'))
         except:
             pass
-    return '_' + md5(''.encode('UTF-8').join(str_)).hexdigest()
+    return '_' + md5(b''.join(str_)).hexdigest()
 
 
 def ldigest(l):
     str_ = []
     for i in l:
         str_.append(str(i.digest).encode('UTF-8'))
-    return '_' + md5(''.encode('UTF-8').join(str_)).hexdigest()
+    return '_' + md5(b''.join(str_)).hexdigest()
