@@ -18,8 +18,7 @@ except:
 if config.have_sounddevice:
     from .sdinput import SoundDeviceSamplesGenerator
 
-from . import demo
-from . import tools
+from . import demo, tools
 from .calib import Calib
 from .environments import (
     Environment,
