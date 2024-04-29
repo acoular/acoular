@@ -54,7 +54,7 @@ else:
     environ['OPENBLAS_NUM_THREADS'] = '1'
 
 # this loads numpy, so we have to defer loading until OpenBLAS check is done
-from traits.api import Bool, HasStrictTraits, Property, Str, Trait
+from traits.api import Bool, Either, HasStrictTraits, Property, Str, Trait, cached_property
 
 
 class Config(HasStrictTraits):
@@ -96,7 +96,7 @@ class Config(HasStrictTraits):
     #: defaults to 'pytables'. If 'pytables' can not be imported, 'h5py' is used
     h5library = Property()
 
-    _h5library = Trait('pytables', 'h5py')
+    _h5library = Either('pytables', 'h5py', default='pytables')
 
     #: Defines the path to the directory containing Acoulars cache files.
     #: If the specified :attr:`cache_dir` directory does not exist,
@@ -117,6 +117,12 @@ class Config(HasStrictTraits):
     use_traitsui = Property()
 
     _use_traitsui = Bool(False)
+
+    #: Boolean Flag that determines whether tables is installed.
+    tables_exists = Property()
+
+    #: Boolean Flag that determines whether h5py is installed.
+    h5py_exists = Property()
 
     #: Boolean Flag that determines whether matplotlib is installed.
     matplotlib_exists = Property()
@@ -149,14 +155,12 @@ class Config(HasStrictTraits):
         self._use_traitsui = use_tui
 
     def _assert_h5library(self):
-        if self._module_exists('tables'):
-            self.h5library = 'pytables'
-        elif self._module_exists('h5py'):
-            self.h5library = 'h5py'
-        else:
+        if not self.tables_exists and not self.h5py_exists:
             msg = ('Packages h5py and pytables are missing!'
                 'At least one of them is required for Acoular to work.')
             raise ImportError(msg)
+        if not self.tables_exists:
+            self.h5library = 'h5py'
 
     def _get_cache_dir(self):
         if self._cache_dir == '':
@@ -181,14 +185,25 @@ class Config(HasStrictTraits):
         spec = importlib.util.find_spec(module_name)
         return spec is not None
 
+    @cached_property
     def _get_matplotlib_exists(self):
         return self._module_exists('matplotlib')
 
+    @cached_property
     def _get_pylops_exists(self):
         return self._module_exists('pylops')
 
+    @cached_property
     def _get_sounddevice_exists(self):
         return self._module_exists('sounddevice')
+
+    @cached_property
+    def _get_tables_exists(self):
+        return self._module_exists('tables')
+
+    @cached_property
+    def _get_h5py_exists(self):
+        return self._module_exists('h5py')
 
 config = Config()
 """
