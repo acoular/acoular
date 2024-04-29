@@ -10,6 +10,7 @@
     config
 """
 
+import importlib.util
 import sys
 from os import environ, mkdir, path
 from warnings import warn
@@ -53,7 +54,7 @@ else:
     environ['OPENBLAS_NUM_THREADS'] = '1'
 
 # this loads numpy, so we have to defer loading until OpenBLAS check is done
-from traits.api import Bool, HasStrictTraits, Property, Str, Trait
+from traits.api import Bool, Either, HasStrictTraits, Property, Str, Trait, cached_property
 
 
 class Config(HasStrictTraits):
@@ -92,10 +93,11 @@ class Config(HasStrictTraits):
     _global_caching = Trait('individual', 'all', 'none', 'readonly', 'overwrite')
 
     #: Flag that globally defines package used to read and write .h5 files
-    #: defaults to 'pytables'. If 'pytables' can not be imported, 'h5py' is used
+    #: defaults to 'pytables'. It is also possible to set it to 'tables', which is an alias for 'pytables'.
+    #: If 'pytables' can not be imported, 'h5py' is used.
     h5library = Property()
 
-    _h5library = Trait('pytables', 'h5py')
+    _h5library = Either('pytables', 'tables', 'h5py', default='pytables')
 
     #: Defines the path to the directory containing Acoulars cache files.
     #: If the specified :attr:`cache_dir` directory does not exist,
@@ -116,6 +118,21 @@ class Config(HasStrictTraits):
     use_traitsui = Property()
 
     _use_traitsui = Bool(False)
+
+    #: Boolean Flag that determines whether tables is installed.
+    have_tables = Property()
+
+    #: Boolean Flag that determines whether h5py is installed.
+    have_h5py = Property()
+
+    #: Boolean Flag that determines whether matplotlib is installed.
+    have_matplotlib = Property()
+
+    #: Boolean Flag that determines whether pylops is installed.
+    have_pylops = Property()
+
+    #: Boolean Flag that determines whether sounddevice is installed.
+    have_sounddevice = Property()
 
     def _get_global_caching(self):
         return self._global_caching
@@ -139,18 +156,12 @@ class Config(HasStrictTraits):
         self._use_traitsui = use_tui
 
     def _assert_h5library(self):
-        try:
-            import tables
-
-            self.h5library = 'pytables'
-        except:
-            try:
-                import h5py
-
-                self.h5library = 'h5py'
-            except:
-                msg = 'packages h5py and pytables are missing!'
-                raise ImportError(msg)
+        if not self.have_tables and not self.have_h5py:
+            msg = ('Packages H5py and PyTables are missing!'
+                'At least one of them is required for Acoular to work.')
+            raise ImportError(msg)
+        if not self.have_tables:
+            self.h5library = 'h5py'
 
     def _get_cache_dir(self):
         if self._cache_dir == '':
@@ -171,6 +182,29 @@ class Config(HasStrictTraits):
     def _set_td_dir(self, tddir):
         self._td_dir = tddir
 
+    def _have_module(self, module_name):
+        spec = importlib.util.find_spec(module_name)
+        return spec is not None
+
+    @cached_property
+    def _get_have_matplotlib(self):
+        return self._have_module('matplotlib')
+
+    @cached_property
+    def _get_have_pylops(self):
+        return self._have_module('pylops')
+
+    @cached_property
+    def _get_have_sounddevice(self):
+        return self._have_module('sounddevice')
+
+    @cached_property
+    def _get_have_tables(self):
+        return self._have_module('tables')
+
+    @cached_property
+    def _get_have_h5py(self):
+        return self._have_module('h5py')
 
 config = Config()
 """
@@ -185,8 +219,8 @@ General caching behaviour can be controlled by the :attr:`global_caching` attrib
 
 The package used to read and write .h5 files can be specified
 by :attr:`h5library`:
-* 'pytables': Use 'tables' (or 'pytables', depending on python distribution).
-* 'h5py': Use 'h5py'.
+* 'PyTables': Use 'tables' (or 'pytables', depending on python distribution).
+* 'H5py': Use 'h5py'.
 
 Some Acoular classes support GUI elements for usage with tools from the TraitsUI package.
 If desired, this package has to be installed manually, as it is not a prerequisite for

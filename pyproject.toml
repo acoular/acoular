@@ -94,6 +94,7 @@ python = ["3.7", "3.8", "3.9", "3.10", "3.11"]
 [tool.hatch.envs.tests.scripts]
 import = ["python -c \"import acoular\""]
 test = ["python -m pytest -v tests"]
+demo = ["python -c \"import acoular; acoular.demo.acoular_demo.run()\""]
 coverage = ["test --cov=acoular"]
 
 [tool.hatch.envs.tests.overrides]

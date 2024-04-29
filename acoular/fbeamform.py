@@ -117,15 +117,6 @@ from .internal import digest
 from .microphones import MicGeom
 from .spectra import PowerSpectra
 
-# pylops imports for CMF solvers
-try:
-    from pylops import Identity, MatrixMult
-    from pylops.optimization.sparsity import FISTA, SplitBregman
-
-    PYLOPS_TRUE = True
-except:
-    PYLOPS_TRUE = False
-
 sklearn_ndict = {}
 if parse(sklearn.__version__) < parse('1.4'):
     sklearn_ndict['normalize'] = False
@@ -1822,6 +1813,13 @@ class BeamformerCMF(BeamformerBase):
     def _get_digest(self):
         return digest(self)
 
+    @on_trait_change('method')
+    def _validate(self):
+        if self.method in ['FISTA', 'Split_Bregman'] and not config.have_pylops:
+            msg = ('Cannot import Pylops package. No Pylops installed.'
+                   f'Solver for {self.method} in BeamformerCMF not available.')
+            raise ImportError(msg)
+
     def calc(self, ac, fr):
         """Calculates the CMF result for the frequencies defined by :attr:`freq_data`.
 
@@ -1894,7 +1892,8 @@ class BeamformerCMF(BeamformerBase):
                 elif self.method == 'NNLS':
                     model = LinearRegression(positive=True)
 
-                if self.method == 'Split_Bregman' and PYLOPS_TRUE:
+                if self.method == 'Split_Bregman' and config.have_pylops:
+                    from pylops import Identity, MatrixMult, SplitBregman
                     Oop = MatrixMult(A)  # tranfer operator
                     Iop = self.alpha * Identity(numpoints)  # regularisation
                     ac[i], iterations = SplitBregman(
@@ -1913,7 +1912,8 @@ class BeamformerCMF(BeamformerBase):
                     )
                     ac[i] /= unit
 
-                elif self.method == 'FISTA' and PYLOPS_TRUE:
+                elif self.method == 'FISTA' and config.have_pylops:
+                    from pylops import FISTA, MatrixMult
                     Oop = MatrixMult(A)  # tranfer operator
                     ac[i], iterations = FISTA(
                         Op=Oop,
@@ -1927,9 +1927,6 @@ class BeamformerCMF(BeamformerBase):
                         show=self.show,
                     )
                     ac[i] /= unit
-                elif self.method == 'FISTA' or self.method == 'Split_Bregman' and not PYLOPS_TRUE:
-                    msg = f'No Pylops installed. Solver for {self.method} in BeamformerCMF not available.'
-                    raise Exception(msg)
                 elif self.method == 'fmin_l_bfgs_b':
                     # function to minimize
                     def function(x):

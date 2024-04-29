@@ -2,19 +2,6 @@
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
 
-try:
-    import tables
-
-    is_tables = True
-except:
-    is_tables = False
-try:
-    import h5py
-
-    is_h5py = True
-except:
-    is_h5py = False
-
 from .configuration import config
 
 
@@ -55,7 +42,8 @@ class H5CacheFileBase:
         pass
 
 
-if is_tables:
+if config.have_tables:
+    import tables
     precision_to_atom = {
         'float32': tables.Float32Atom(),
         'complex64': tables.ComplexAtom(8),
@@ -117,7 +105,8 @@ if is_tables:
             self.create_carray(group, nodename, atom, shape, filters=self.compressionFilter)
 
 
-if is_h5py:
+if config.have_h5py:
+    import h5py
 
     class H5FileH5py(H5FileBase, h5py.File):
         def _get_in_file_path(self, nodename, group=None):
@@ -184,7 +173,7 @@ if is_h5py:
 
 
 def _get_h5file_class():
-    if config.h5library == 'pytables':
+    if config.h5library in ['pytables','tables']:
         return H5FileTables
     if config.h5library == 'h5py':
         return H5FileH5py
@@ -192,7 +181,7 @@ def _get_h5file_class():
 
 
 def _get_cachefile_class():
-    if config.h5library == 'pytables':
+    if config.h5library in ['pytables','tables']:
         return H5CacheFileTables
     if config.h5library == 'h5py':
         return H5CacheFileH5py

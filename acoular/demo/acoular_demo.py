@@ -23,9 +23,7 @@ Source Location        Level
 
 
 def run():
-    from os import path
-
-    from pylab import axis, colorbar, figure, imshow, plot, show
+    from pathlib import Path
 
     from acoular import (
         BeamformerBase,
@@ -39,6 +37,7 @@ def run():
         TimeSamples,
         WNoiseGenerator,
         WriteH5,
+        config,
     )
     from acoular import __file__ as bpath
 
@@ -46,7 +45,7 @@ def run():
     sfreq = 51200
     duration = 1
     nsamples = duration * sfreq
-    micgeofile = path.join(path.split(bpath)[0], 'xml', 'array_64.xml')
+    micgeofile = Path(bpath).parent / 'xml' / 'array_64.xml'
     h5savefile = 'three_sources.h5'
 
     # generate test data, in real life this would come from an array measurement
@@ -73,17 +72,22 @@ def run():
     pm = bb.synthetic(8000, 3)
     Lm = L_p(pm)
 
-    # show map
-    imshow(Lm.T, origin='lower', vmin=Lm.max() - 10, extent=rg.extend(), interpolation='bicubic')
-    colorbar()
+    if config.have_matplotlib:
+        from pylab import axis, colorbar, figure, imshow, plot, show
 
-    # plot microphone geometry
-    figure(2)
-    plot(mg.mpos[0], mg.mpos[1], 'o')
-    axis('equal')
+        # show map
+        imshow(Lm.T, origin='lower', vmin=Lm.max() - 10, extent=rg.extend(), interpolation='bicubic')
+        colorbar()
 
-    show()
+        # plot microphone geometry
+        figure(2)
+        plot(mg.mpos[0], mg.mpos[1], 'o')
+        axis('equal')
 
+        show()
+
+    else:
+        print('Matplotlib not found! Please install matplotlib if you want to plot the results.')
 
 if __name__ == '__main__':
     run()
