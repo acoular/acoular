@@ -99,5 +99,5 @@ coverage = ["test --cov=acoular"]
 
 [tool.hatch.envs.tests.overrides]
 platform.linux.pre-install-commands = ['cat /proc/cpuinfo']
-platform.macos.scripts = ['pre-install-commands=sysctl -a machdep.cpu']
-platform.windows.scripts = ['pre-install-commands=systeminfo']
+platform.macos.pre-install-commands = ['sysctl -a machdep.cpu']
+platform.windows.pre-install-commands = ['systeminfo']
