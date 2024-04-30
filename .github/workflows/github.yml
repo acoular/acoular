@@ -40,6 +40,7 @@ jobs:
         uses: olivernybroe/action-conflict-finder@v4.0
 
   alls-green:
+    name: GitHubs green?
     if: always()
     needs:
       - labeler

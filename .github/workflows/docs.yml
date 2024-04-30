@@ -53,6 +53,7 @@ jobs:
           enable_jekyll: false
 
   alls-green:
+    name: Docs green?
     if: always()
     needs:
       - build

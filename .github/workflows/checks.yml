@@ -40,6 +40,7 @@ jobs:
         uses: gaurav-nelson/github-action-markdown-link-check@v1
 
   alls-green:
+    name: Checks green?
     if: always()
     needs:
       - linting
