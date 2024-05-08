@@ -26,6 +26,7 @@ jobs:
     steps:
       - uses: yogevbd/enforce-label-action@2.2.2
         with:
+          REQUIRED_LABELS_ANY: "caching,ci,docs,enhancement,linting,maintenance,new feature,sinus,tests"
           REQUIRED_LABELS_ANY_DESCRIPTION: Assign at least one label with to this pull request
           BANNED_LABELS: bug
           BANNED_LABELS_DESCRIPTION: The 'bug' label should only be used on issues
