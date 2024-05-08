@@ -540,26 +540,3 @@ BeamformerGIB.class_trait_view(
         buttons=OKCancelButtons,
     ),
 )
-
-# Windows only
-try:
-    from .nidaqimport import nidaq_import
-
-    nidaq_import.class_trait_view(
-        'traits_view',
-        View(
-            [
-                Item('taskname{Task name}', editor=EnumEditor(name='tasknames')),
-                ['sample_freq', 'numsamples', '-'],
-                [
-                    ['numdevices~{count}', Item('namedevices~{names}', height=3), '-[Devices]'],
-                    ['numchannels~{count}', Item('namechannels~{names}', height=3), '-[Channels]'],
-                ],
-                '|[Task]',
-            ],
-            title='NI-DAQmx data aquisition',
-            buttons=OKCancelButtons,
-        ),
-    )
-except:
-    pass
