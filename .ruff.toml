@@ -87,7 +87,6 @@ docstring-code-line-length = "dynamic"
 "acoular/__init__.py" = ["F401"] # unused import -> TBD
 "acoular/demo/__init__.py" = ["F401"] # unused import -> TBD
 "acoular/configuration.py" = ["F401"] # unused import (will be solved by issue #212)
-"acoular/nidaqimport.py" = ["F841"] # unused variable (really unused?) -> TBD
 "acoular/tbeamform.py" = ["F841"] # unused variable (really unused?) -> TBD
 "acoular/fbeamform.py" = ["W605"] # invalid escape sequence -> TBD
 "acoular/version.py" = ["D"] # exclude docstring linting
