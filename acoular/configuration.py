@@ -103,10 +103,10 @@ class Config(HasStrictTraits):
     #: If the specified :attr:`cache_dir` directory does not exist,
     #: it will be created. :attr:`cache_dir` defaults to current session path.
     cache_dir = Property()
- 
+
     _cache_dir = Str('')
 
-    #: Defines the working directory containing data files. Used only by 
+    #: Defines the working directory containing data files. Used only by
     #: :class:`~acoular.tprocess.WriteH5` class.
     #: Defaults to current session path.
     td_dir = Property()

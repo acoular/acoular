@@ -6,7 +6,7 @@ classes to lift the traitsui requirement for the Acoular package.
 """
 
 # imports from other packages
-from traitsui.api import EnumEditor, Item, View
+from traitsui.api import Item, View
 from traitsui.menu import OKCancelButtons
 
 from .microphones import MicGeom
