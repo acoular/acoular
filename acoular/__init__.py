@@ -7,13 +7,7 @@
 import os
 
 from .configuration import config
-from .fileimport import bk_mat_import, csv_import, datx_import, td_import, time_data_import
 from .version import __author__, __date__, __version__
-
-try:
-    from .nidaqimport import nidaq_import
-except:
-    pass
 
 if config.have_sounddevice:
     from .sdinput import SoundDeviceSamplesGenerator
