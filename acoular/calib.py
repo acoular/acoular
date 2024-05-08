@@ -23,7 +23,7 @@ class Calib(HasPrivateTraits):
     """Container for calibration data in `*.xml` format.
 
     This class serves as interface to load calibration data for the used
-    microphone array.
+    microphone array. The calibration factors are stored as [Pa/unit].
     """
 
     #: Name of the .xml file to be imported.
