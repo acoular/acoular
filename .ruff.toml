@@ -90,7 +90,6 @@ docstring-code-line-length = "dynamic"
 "acoular/tbeamform.py" = ["F841"] # unused variable (really unused?) -> TBD
 "acoular/fbeamform.py" = ["W605"] # invalid escape sequence -> TBD
 "acoular/version.py" = ["D"] # exclude docstring linting
-"acoular/traitsviews.py" = ["E402"]
 "tests/test_tprocess.py" = ["F403"] # star import 
 "tests/*" = ["D"] # exclude docstring linting
 "examples/*" = ["A001", "B007", "D4", "E4", "E701", "F4", "UP036", "SIM108"]

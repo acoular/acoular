@@ -9,7 +9,29 @@ classes to lift the traitsui requirement for the Acoular package.
 from traitsui.api import Item, View
 from traitsui.menu import OKCancelButtons
 
+from .calib import Calib
+from .environments import GeneralFlowEnvironment, OpenJet, RotatingFlow, SlotJet, UniformFlowEnvironment
+from .fbeamform import (
+    BeamformerBase,
+    BeamformerCapon,
+    BeamformerClean,
+    BeamformerCleansc,
+    BeamformerCMF,
+    BeamformerDamas,
+    BeamformerDamasPlus,
+    BeamformerEig,
+    BeamformerFunctional,
+    BeamformerGIB,
+    BeamformerMusic,
+    BeamformerOrth,
+)
+from .grids import RectGrid, RectGrid3D
 from .microphones import MicGeom
+from .sources import MaskedTimeSamples, SourceMixer, TimeSamples
+from .spectra import PowerSpectra
+from .tbeamform import BeamformerTime, BeamformerTimeSq, BeamformerTimeSqTraj, BeamformerTimeTraj, IntegratorSectorTime
+from .tprocess import FiltFiltOctave, TimeAverage, TimeInOut, WriteH5, WriteWAV
+from .trajectory import Trajectory
 
 MicGeom.class_trait_view(
     'traits_view',
@@ -22,8 +44,6 @@ MicGeom.class_trait_view(
         buttons=OKCancelButtons,
     ),
 )
-
-from .spectra import PowerSpectra
 
 PowerSpectra.class_trait_view(
     'traits_view',
@@ -44,8 +64,6 @@ PowerSpectra.class_trait_view(
     ),
 )
 
-from .calib import Calib
-
 Calib.class_trait_view(
     'traits_view',
     View(
@@ -61,8 +79,6 @@ Calib.class_trait_view(
     ),
 )
 
-from .trajectory import Trajectory
-
 Trajectory.class_trait_view(
     'traits_view',
     View(
@@ -73,8 +89,6 @@ Trajectory.class_trait_view(
         buttons=OKCancelButtons,
     ),
 )
-
-from .grids import RectGrid, RectGrid3D
 
 RectGrid.class_trait_view(
     'traits_view',
@@ -98,8 +112,6 @@ RectGrid3D.class_trait_view(
         ],
     ),
 )
-
-from .tbeamform import BeamformerTime, BeamformerTimeSq, BeamformerTimeSqTraj, BeamformerTimeTraj, IntegratorSectorTime
 
 BeamformerTime.class_trait_view(
     'traits_view',
@@ -174,8 +186,6 @@ IntegratorSectorTime.class_trait_view(
     ),
 )
 
-from .environments import GeneralFlowEnvironment, OpenJet, RotatingFlow, SlotJet, UniformFlowEnvironment
-
 UniformFlowEnvironment.class_trait_view(
     'traits_view',
     View(
@@ -225,9 +235,6 @@ RotatingFlow.class_trait_view(
         ],
     ),
 )
-
-
-from .tprocess import FiltFiltOctave, TimeAverage, TimeInOut, WriteH5, WriteWAV
 
 TimeInOut.class_trait_view(
     'traits_view',
@@ -291,8 +298,6 @@ WriteH5.class_trait_view(
     ),
 )
 
-from .sources import MaskedTimeSamples, SourceMixer, TimeSamples
-
 TimeSamples.class_trait_view(
     'traits_view',
     View(
@@ -338,20 +343,6 @@ SourceMixer.class_trait_view(
     ),
 )
 
-from .fbeamform import (
-    BeamformerBase,
-    BeamformerCapon,
-    BeamformerClean,
-    BeamformerCleansc,
-    BeamformerCMF,
-    BeamformerDamas,
-    BeamformerDamasPlus,
-    BeamformerEig,
-    BeamformerFunctional,
-    BeamformerGIB,
-    BeamformerMusic,
-    BeamformerOrth,
-)
 
 BeamformerBase.class_trait_view(
     'traits_view',
