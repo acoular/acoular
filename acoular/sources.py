@@ -261,8 +261,7 @@ class TimeSamples(SamplesGenerator):
         """Loads metadata from .h5 file. Only for internal use."""
         self.metadata = {}
         if '/metadata' in self.h5f:
-            for nodename, nodedata in self.h5f.get_child_nodes('/metadata'):
-                self.metadata[nodename] = nodedata
+            self.metadata = self.h5f.node_to_dict('/metadata')
 
     def result(self, num=128):
         """Python generator that yields the output block-wise.
