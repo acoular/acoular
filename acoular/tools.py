@@ -24,10 +24,8 @@ from numpy import (
     ones,
     where
 )
-from numpy.linalg import norm
 from numpy.ma import masked_where
 from scipy.spatial.distance import cdist
-from scipy.special import sph_harm, spherical_jn, spherical_yn
 from traits.api import Bool, CArray, HasPrivateTraits, Instance, Property
 
 from .fbeamform import L_p, integrate
