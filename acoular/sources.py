@@ -81,7 +81,6 @@ from .h5files import H5FileBase, _get_h5file_class
 from .internal import digest, ldigest
 from .microphones import MicGeom
 from .signals import SignalGenerator
-from .tools import get_modes
 from .tprocess import SamplesGenerator, TimeConvolve
 from .trajectory import Trajectory
 
@@ -107,7 +106,6 @@ def _fill_mic_signal_block(out, signal, rm, ind, blocksize, numchannels, up, pre
 def spherical_hn1(n, z, derivativearccos=False):
     """Spherical Hankel Function of the First Kind."""
     return spherical_jn(n, z, derivative=False) + 1j * spherical_yn(n, z, derivative=False)
-
 
 
 def get_radiation_angles(direction, mpos, sourceposition):
@@ -178,7 +176,6 @@ def get_modes(lOrder, direction, mpos, sourceposition=None):
                 modes[:, i] = modes[:, i].conj() * 1j
             i += 1
     return modes
-
 
 
 class TimeSamples(SamplesGenerator):
