@@ -72,7 +72,7 @@ if config.have_tables:
             node.set_attr(attrname, value)
 
         def get_node_attribute(self, node, attrname):
-            return node.get_attr(attrname)
+            return node._v_attrs[attrname]
 
         def append_data(self, node, data):
             node.append(data)
