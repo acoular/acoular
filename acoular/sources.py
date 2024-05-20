@@ -29,12 +29,15 @@ import numba as nb
 from numpy import any as npany
 from numpy import (
     arange,
+    arctan2,
     array,
     ceil,
+    complex128,
     cross,
     dot,
     empty,
     int64,
+    mod,
     newaxis,
     ones,
     pi,
@@ -48,6 +51,7 @@ from numpy import (
 from numpy import min as npmin
 from numpy.fft import fft, ifft
 from numpy.linalg import norm
+from scipy.special import sph_harm, spherical_jn, spherical_yn
 from traits.api import (
     Any,
     Bool,
@@ -78,7 +82,6 @@ from .h5files import H5FileBase, _get_h5file_class
 from .internal import digest, ldigest
 from .microphones import MicGeom
 from .signals import SignalGenerator
-from .tools import get_modes
 from .tprocess import SamplesGenerator, TimeConvolve
 from .trajectory import Trajectory
 
@@ -99,6 +102,81 @@ def _fill_mic_signal_block(out, signal, rm, ind, blocksize, numchannels, up, pre
                 out[b, m] = signal[int(0.5 + ind[0, m])] / rm[0, m]
             ind += up
     return out
+
+
+def spherical_hn1(n, z, derivativearccos=False):
+    """Spherical Hankel Function of the First Kind."""
+    return spherical_jn(n, z, derivative=False) + 1j * spherical_yn(n, z, derivative=False)
+
+
+def get_radiation_angles(direction, mpos, sourceposition):
+    """Returns azimuthal and elevation angles between the mics and the source.
+
+    Parameters
+    ----------
+    direction : array of floats
+        Spherical Harmonic orientation
+    mpos : array of floats
+        x, y, z position of microphones
+    sourceposition : array of floats
+        position of the source
+
+    Returns:
+    -------
+    azi, ele : array of floats
+        the angle between the mics and the source
+
+    """
+    # direction of the Spherical Harmonics
+    direc = array(direction, dtype=float)
+    direc = direc / norm(direc)
+    # distances
+    source_to_mic_vecs = mpos - array(sourceposition).reshape((3, 1))
+    source_to_mic_vecs[2] *= -1  # invert z-axis (acoular)    #-1
+    # z-axis (acoular) -> y-axis (spherical)
+    # y-axis (acoular) -> z-axis (spherical)
+    # theta
+    ele = arctan2(sqrt(source_to_mic_vecs[0] ** 2 + source_to_mic_vecs[2] ** 2), source_to_mic_vecs[1])
+    ele += arctan2(sqrt(direc[0] ** 2 + direc[2] ** 2), direc[1])
+    ele += pi * 0.5  # convert from [-pi/2, pi/2] to [0,pi] range
+    # phi
+    azi = arctan2(source_to_mic_vecs[2], source_to_mic_vecs[0])
+    azi += arctan2(direc[2], direc[0])
+    azi = mod(azi, 2 * pi)
+    return azi, ele
+
+
+def get_modes(lOrder, direction, mpos, sourceposition=None):
+    """Returns Spherical Harmonic Radiation Pattern at the Microphones.
+
+    Parameters
+    ----------
+    lOrder : int
+        Maximal order of spherical harmonic
+    direction : array of floats
+        Spherical Harmonic orientation
+    mpos : array of floats
+        x, y, z position of microphones
+    sourceposition : array of floats
+        position of the source
+
+    Returns:
+    -------
+    modes : array of floats
+        the radiation values at each microphone for each mode
+
+    """
+    sourceposition = sourceposition if sourceposition is not None else array([0, 0, 0])
+    azi, ele = get_radiation_angles(direction, mpos, sourceposition)  # angles between source and mics
+    modes = zeros((azi.shape[0], (lOrder + 1) ** 2), dtype=complex128)
+    i = 0
+    for l in range(lOrder + 1):
+        for m in range(-l, l + 1):
+            modes[:, i] = sph_harm(m, l, azi, ele)
+            if m < 0:
+                modes[:, i] = modes[:, i].conj() * 1j
+            i += 1
+    return modes
 
 
 class TimeSamples(SamplesGenerator):
@@ -183,8 +261,7 @@ class TimeSamples(SamplesGenerator):
         """Loads metadata from .h5 file. Only for internal use."""
         self.metadata = {}
         if '/metadata' in self.h5f:
-            for nodename, nodedata in self.h5f.get_child_nodes('/metadata'):
-                self.metadata[nodename] = nodedata
+            self.metadata = self.h5f.node_to_dict('/metadata')
 
     def result(self, num=128):
         """Python generator that yields the output block-wise.
