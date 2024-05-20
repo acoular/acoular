@@ -1,0 +1,20 @@
+<?xml version="1.1" encoding="utf-8"?><MicArray name="minidsp_uma16">
+   <!-- Contains the sensor positions for the UMA-16 MEMS microphone array from miniDSP. -->
+   <!-- Sensor positions were corrected in x-direction after Acoular version 23.04 due to GitHub Issue #63 -->
+  <pos Name="Point 1" x="0.021" y="-0.063" z="0.0"/>
+  <pos Name="Point 2" x="0.063" y="-0.063" z="0.0"/>
+  <pos Name="Point 3" x="0.021" y="-0.021" z="0.0"/>
+  <pos Name="Point 4" x="0.063" y="-0.021" z="0.0"/>
+  <pos Name="Point 5" x="0.021" y="0.021" z="0.0"/>
+  <pos Name="Point 6" x="0.063" y="0.021" z="0.0"/>
+  <pos Name="Point 7" x="0.021" y="0.063" z="0.0"/>
+  <pos Name="Point 8" x="0.063" y="0.063" z="0.0"/>
+  <pos Name="Point 9" x="-0.063" y="0.063" z="0.0"/>
+  <pos Name="Point 10" x="-0.021" y="0.063" z="0.0"/>
+  <pos Name="Point 11" x="-0.063" y="0.021" z="0.0"/>
+  <pos Name="Point 12" x="-0.021" y="0.021" z="0.0"/>
+  <pos Name="Point 13" x="-0.063" y="-0.021" z="0.0"/>
+  <pos Name="Point 14" x="-0.021" y="-0.021" z="0.0"/>
+  <pos Name="Point 15" x="-0.063" y="-0.063" z="0.0"/>
+  <pos Name="Point 16" x="-0.021" y="-0.063" z="0.0"/>
+</MicArray>

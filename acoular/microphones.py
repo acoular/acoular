@@ -131,7 +131,7 @@ class MicGeom(HasPrivateTraits):
         """
         basename = path.splitext(path.basename(filename))[0]
         with open(filename, 'w') as f:
-            f.write(f'<?xml encoding="UTF-8"?><MicArray name="{basename}">\n')
+            f.write(f'<?xml version="1.1" encoding="utf-8"?><MicArray name="{basename}">\n')
             for i in range(self.mpos.shape[-1]):
                 f.write(f'  <pos Name="Point {i+1}" x="{self.mpos[0, i]}" y="{self.mpos[1, i]}" z="{self.mpos[2, i]}"/>\n')
             f.write('</MicArray>')  
