@@ -120,3 +120,19 @@ class MicGeom(HasPrivateTraits):
             xyz.append([float(el.getAttribute(a)) for a in 'xyz'])
         self.mpos_tot = array(xyz, 'd').swapaxes(0, 1)
         self.validate_file = True
+
+    def export_mpos(self, filename):
+        """Export the microphone positions to .xml file.
+        
+        Parameters
+        ----------
+        filename : str
+            Name of the file to which the microphone positions are written.
+        """
+        basename = path.splitext(path.basename(filename))[0]
+        with open(filename, 'w') as f:
+            f.write(f'<?xml version="1.0" encoding="utf-8"?><MicArray name="{basename}">\n')
+            for i in range(self.mpos.shape[-1]):
+                f.write(f'  <pos Name="Point {i+1}" x="{self.mpos[0, i]}" y="{self.mpos[1, i]}" z="{self.mpos[2, i]}"/>\n')
+            f.write('</MicArray>')  
+
