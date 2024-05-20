@@ -72,7 +72,7 @@ if config.have_tables:
             node.set_attr(attrname, value)
 
         def get_node_attribute(self, node, attrname):
-            return node.get_attr(attrname)
+            return node._v_attrs[attrname]
 
         def append_data(self, node, data):
             node.append(data)
@@ -88,6 +88,22 @@ if config.have_tables:
         def get_child_nodes(self, nodename):
             for childnode in self.list_nodes(nodename):
                 yield (childnode.name, childnode)
+
+        def node_to_dict(self, nodename):
+            """Recursively convert an HDF5 node to a dictionary."""
+            node = self.get_node(nodename)
+            # initialize node-dict with node's own attributes
+            result = {attr: node._v_attrs[attr] for attr in node._v_attrs._f_list()}
+            if isinstance(node, tables.Group):
+                # if node is a group, recursively add its children
+                for childname in node._v_children:
+                    result[childname] = self.node_to_dict(f'{nodename}/{childname}')
+            elif isinstance(node, tables.Leaf):
+                # if node contains only data, add it
+                return node
+            else:
+                return None
+            return result
 
     class H5CacheFileTables(H5FileTables, H5CacheFileBase):
         compressionFilter = tables.Filters(complevel=5, complib='blosc')
@@ -150,6 +166,22 @@ if config.have_h5py:
         def get_child_nodes(self, nodename):
             for childnode in self[nodename]:
                 yield (childnode, self[f'{nodename}/{childnode}'])
+
+        def node_to_dict(self, nodename):
+            """Recursively convert an HDF5 node to a dictionary."""
+            node = self[nodename]
+            # initialize node-dict with node's own attributes
+            result = {attr: node.attrs[attr] for attr in node.attrs}
+            if isinstance(node, h5py.Group):
+                # if node is a group, recursively add its children
+                for childname in node:
+                    result[childname] = self.node_to_dict(f'{nodename}/{childname}')
+            elif isinstance(node, h5py.Dataset):
+                # if node contains only data, add it
+                return node
+            else:
+                return None
+            return result
 
     class H5CacheFileH5py(H5CacheFileBase, H5FileH5py):
         compressionFilter = 'lzf'

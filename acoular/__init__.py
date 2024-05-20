@@ -2,7 +2,7 @@
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
 
-"""The Acoular library: several classes for the implemetation of acoustic beamforming."""
+"""The Acoular library: several classes for the implementation of acoustic beamforming."""
 
 import os
 
