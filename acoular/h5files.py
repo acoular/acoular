@@ -90,7 +90,7 @@ if config.have_tables:
                 yield (childnode.name, childnode)
 
         def node_to_dict(self, nodename):
-            """Recursively convert an HDF5 node to a dictionary"""
+            """Recursively convert an HDF5 node to a dictionary."""
             node = self.get_node(nodename)
             # initialize node-dict with node's own attributes
             result = {attr:node._v_attrs[attr] for attr in node._v_attrs._f_list()}
@@ -168,7 +168,7 @@ if config.have_h5py:
                 yield (childnode, self[f'{nodename}/{childnode}'])
 
         def node_to_dict(self, nodename):
-            """Recursively convert an HDF5 node to a dictionary"""
+            """Recursively convert an HDF5 node to a dictionary."""
             node = self[nodename]
             # initialize node-dict with node's own attributes
             result = {attr: node.attrs[attr] for attr in node.attrs}

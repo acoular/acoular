@@ -5,7 +5,7 @@
 from . import aiaa
 These classes allow importing data from HDF5 files following the specifications of
 the AIAA microphone array methods benchmarking effort:
-https://www-docs.b-tu.de/fg-akustik/public/veroeffentlichungen/ArrayMethodsFileFormatsR2P4Release.pdf
+https://www-docs.b-tu.de/fg-akustik/public/veroeffentlichungen/ArrayMethodsFileFormatsR2P4Release.pdf .
 
 The classes are derived from according Acoular classes so that they can be used directly within
 the framework.
@@ -36,11 +36,11 @@ from traits.api import (
     property_depends_on,
 )
 
-from ..h5files import H5FileBase, _get_h5file_class
-from ..internal import digest
-from ..microphones import MicGeom
-from ..sources import TimeSamples
-from ..spectra import PowerSpectraImport
+from acoular.h5files import H5FileBase, _get_h5file_class
+from acoular.internal import digest
+from acoular.microphones import MicGeom
+from acoular.sources import TimeSamples
+from acoular.spectra import PowerSpectraImport
 
 
 class TimeSamplesAIAABenchmark(TimeSamples):
@@ -82,8 +82,7 @@ class TriggerAIAABenchmark(TimeSamplesAIAABenchmark):
 
 
 class CsmAIAABenchmark(PowerSpectraImport):
-    """Class to load the CSM that is stored in AIAA Benchmark HDF5 file
-    """
+    """Class to load the CSM that is stored in AIAA Benchmark HDF5 file."""
 
     #: Full name of the .h5 file with data
     name = File(filter=['*.h5'], desc='name of data file')
@@ -113,11 +112,11 @@ class CsmAIAABenchmark(PowerSpectraImport):
 
     @on_trait_change('basename')
     def load_data( self ):
-        """Open the .h5 file and set attributes"""
+        """Open the .h5 file and set attributes."""
         if not path.isfile(self.name):
             # no file there
             raise OSError("No such file: %s" % self.name)
-        if self.h5f != None:
+        if self.h5f is not None:
             try:
                 self.h5f.close()
             except OSError:
@@ -142,8 +141,7 @@ class CsmAIAABenchmark(PowerSpectraImport):
 
     @property_depends_on('digest')
     def _get_csm ( self ):
-        """Loads cross spectral matrix from file.
-        """
+        """Loads cross spectral matrix from file."""
         csmre = self.h5f.get_data_by_reference('/CsmData/csmReal')[:].transpose((2,0,1))
         csmim = self.h5f.get_data_by_reference('/CsmData/csmImaginary')[:].transpose((2,0,1))
         csmdatagroup = self.h5f.get_data_by_reference('/CsmData')
@@ -152,7 +150,7 @@ class CsmAIAABenchmark(PowerSpectraImport):
 
     def fftfreq ( self ):
         """Return the Discrete Fourier Transform sample frequencies.
-        
+
         Returns:
         -------
         ndarray
@@ -164,8 +162,8 @@ class CsmAIAABenchmark(PowerSpectraImport):
 class MicAIAABenchmark(MicGeom):
     """Provides the geometric arrangement of microphones in the array.
 
-    In contrast to standard Acoular microphone geometries, the AIAA 
-    benchmark format includes the array geometry as metadata in the 
+    In contrast to standard Acoular microphone geometries, the AIAA
+    benchmark format includes the array geometry as metadata in the
     file containing the measurement data.
     """
 

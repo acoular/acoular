@@ -19,7 +19,7 @@ from numpy import (
 )
 from numpy.ma import masked_where
 
-from ..spectra import synthetic
+from acoular.spectra import synthetic
 
 
 def return_result(source, nmax=-1, num=128):

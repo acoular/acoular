@@ -20,8 +20,8 @@ from numpy import (
 from scipy.spatial.distance import cdist
 from traits.api import Bool, CArray, HasPrivateTraits, Instance, Property
 
-from ..fbeamform import L_p, integrate
-from ..grids import CircSector, Grid
+from acoular.fbeamform import L_p, integrate
+from acoular.grids import CircSector, Grid
 
 
 class MetricEvaluator(HasPrivateTraits):
