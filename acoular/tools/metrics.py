@@ -163,4 +163,3 @@ class MetricEvaluator(HasPrivateTraits):
         self._validate_shapes()
         sector_result = self._integrate_sectors()
         return L_p(sector_result.sum(axis=1)) - L_p(self.data.sum(axis=1))
-

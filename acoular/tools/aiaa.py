@@ -11,8 +11,8 @@ The classes are derived from according Acoular classes so that they can be used 
 the framework.
 
 Examples:
->>> micgeom = MicAIAABenchmark( name = 'some_benchmarkdata.h5' )
->>> timedata = TimeSamplesAIAABenchmark( name = 'some_benchmarkdata.h5' )
+>>> micgeom = MicAIAABenchmark(name='some_benchmarkdata.h5')
+>>> timedata = TimeSamplesAIAABenchmark(name='some_benchmarkdata.h5')
 
 
 .. autosummary::
@@ -115,7 +115,7 @@ class CsmAIAABenchmark(PowerSpectraImport):
         """Open the .h5 file and set attributes."""
         if not path.isfile(self.name):
             # no file there
-            raise OSError("No such file: %s" % self.name)
+            raise OSError('No such file: %s' % self.name)
         if self.h5f is not None:
             try:
                 self.h5f.close()
@@ -125,14 +125,14 @@ class CsmAIAABenchmark(PowerSpectraImport):
         self.h5f = file(self.name)
 
     # @property_depends_on( 'block_size, ind_low, ind_high' )
-    def _get_indices (self):
+    def _get_indices(self):
         try:
-            return range(self.fftfreq().shape[0])#[ self.ind_low: self.ind_high ]
+            return range(self.fftfreq().shape[0])  # [ self.ind_low: self.ind_high ]
         except IndexError:
             return range(0)
 
     @property_depends_on('digest')
-    def _get_numchannels (self):
+    def _get_numchannels(self):
         try:
             attrs = self.h5f.get_data_by_reference('MetaData/ArrayAttributes')
             return self.h5f.get_node_attribute(attrs, 'microphoneCount')
@@ -140,7 +140,7 @@ class CsmAIAABenchmark(PowerSpectraImport):
             return 0
 
     @property_depends_on('digest')
-    def _get_csm (self):
+    def _get_csm(self):
         """Loads cross spectral matrix from file."""
         csmre = self.h5f.get_data_by_reference('/CsmData/csmReal')[:].transpose((2, 0, 1))
         csmim = self.h5f.get_data_by_reference('/CsmData/csmImaginary')[:].transpose((2, 0, 1))
@@ -148,7 +148,7 @@ class CsmAIAABenchmark(PowerSpectraImport):
         sign = self.h5f.get_node_attribute(csmdatagroup, 'fftSign')
         return csmre + sign * 1j * csmim
 
-    def fftfreq (self):
+    def fftfreq(self):
         """Return the Discrete Fourier Transform sample frequencies.
 
         Returns:
@@ -168,7 +168,7 @@ class MicAIAABenchmark(MicGeom):
     """
 
     #: Name of the .h5-file from wich to read the data.
-    from_file = File(filter=['*.h5'], desc="name of the h5 file containing the microphone geometry")
+    from_file = File(filter=['*.h5'], desc='name of the h5 file containing the microphone geometry')
 
     @on_trait_change('basename')
     def import_mpos(self):
