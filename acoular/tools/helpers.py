@@ -15,9 +15,10 @@ from numpy import (
     array,
     concatenate,
     newaxis,
-    where
+    where,
 )
 from numpy.ma import masked_where
+
 from ..spectra import synthetic
 
 

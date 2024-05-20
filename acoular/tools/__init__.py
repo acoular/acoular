@@ -3,15 +3,15 @@
 # ------------------------------------------------------------------------------
 """Useful tools for Acoular."""
 
-from .aiaa import(
+from .aiaa import (
     CsmAIAABenchmark,
     MicAIAABenchmark,
     TimeSamplesAIAABenchmark,
-    TriggerAIAABenchmark
-    )
+    TriggerAIAABenchmark,
+)
 from .helpers import (
     bardata,
     barspectrum,
-    return_result  
+    return_result,
 )
 from .metrics import MetricEvaluator

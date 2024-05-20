@@ -88,7 +88,7 @@ if config.have_tables:
         def get_child_nodes(self, nodename):
             for childnode in self.list_nodes(nodename):
                 yield (childnode.name, childnode)
-        
+
         def node_to_dict(self, nodename):
             """Recursively convert an HDF5 node to a dictionary"""
             node = self.get_node(nodename)
@@ -166,7 +166,7 @@ if config.have_h5py:
         def get_child_nodes(self, nodename):
             for childnode in self[nodename]:
                 yield (childnode, self[f'{nodename}/{childnode}'])
-        
+
         def node_to_dict(self, nodename):
             """Recursively convert an HDF5 node to a dictionary"""
             node = self[nodename]

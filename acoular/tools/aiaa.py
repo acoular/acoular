@@ -24,25 +24,23 @@ Examples:
     MicAIAABenchmark
 """
 
-from ..spectra import PowerSpectraImport
-from ..microphones import MicGeom
-from ..sources import TimeSamples
-from ..internal import digest
-from ..h5files import H5FileBase, _get_h5file_class
+from os import path
 
+from numpy import array
 from traits.api import (
     File,
     Instance,
     Property,
     cached_property,
     on_trait_change,
-    property_depends_on
+    property_depends_on,
 )
 
-from os import path
-from warnings import warn
-from numpy import array
-
+from ..h5files import H5FileBase, _get_h5file_class
+from ..internal import digest
+from ..microphones import MicGeom
+from ..sources import TimeSamples
+from ..spectra import PowerSpectraImport
 
 
 class TimeSamplesAIAABenchmark(TimeSamples):
@@ -53,10 +51,10 @@ class TimeSamplesAIAABenchmark(TimeSamples):
     Objects of this class behave similar to :class:`~acoular.sources.TimeSamples`
     objects.
     """
-    
+
     def load_timedata(self):
         """Loads timedata from .h5 file. Only for internal use."""
-        self.data = self.h5f.get_data_by_reference('MicrophoneData/microphoneDataPa') 
+        self.data = self.h5f.get_data_by_reference('MicrophoneData/microphoneDataPa')
         self.sample_freq = self.h5f.get_node_attribute(self.data,'sampleRateHz')
         (self.numsamples, self.numchannels) = self.data.shape
 
@@ -82,10 +80,9 @@ class TriggerAIAABenchmark(TimeSamplesAIAABenchmark):
         self.sample_freq = self.h5f.get_node_attribute(self.data,'sampleRateHz')
         (self.numsamples, self.numchannels) = self.data.shape
 
-        
+
 class CsmAIAABenchmark(PowerSpectraImport):
-    """
-    Class to load the CSM that is stored in AIAA Benchmark HDF5 file
+    """Class to load the CSM that is stored in AIAA Benchmark HDF5 file
     """
 
     #: Full name of the .h5 file with data
@@ -93,37 +90,37 @@ class CsmAIAABenchmark(PowerSpectraImport):
 
     #: Basename of the .h5 file with data, is set automatically.
     basename = Property(
-        depends_on='name',  
+        depends_on='name',
         desc='basename of data file',
     )
-        
+
     #: number of channels
     numchannels = Property()
 
     #: HDF5 file object
     h5f = Instance(H5FileBase, transient = True)
-    
+
     # internal identifier
     digest = Property(depends_on=['basename', '_csmsum'])
 
     @cached_property
     def _get_digest( self ):
         return digest(self)
-    
+
     @cached_property
     def _get_basename( self ):
         return path.splitext(path.basename(self.name))[0]
-    
+
     @on_trait_change('basename')
     def load_data( self ):
-        """ open the .h5 file and set attributes"""
+        """Open the .h5 file and set attributes"""
         if not path.isfile(self.name):
             # no file there
-            raise IOError("No such file: %s" % self.name)
+            raise OSError("No such file: %s" % self.name)
         if self.h5f != None:
             try:
                 self.h5f.close()
-            except IOError:
+            except OSError:
                 pass
         file = _get_h5file_class()
         self.h5f = file(self.name)
@@ -145,11 +142,10 @@ class CsmAIAABenchmark(PowerSpectraImport):
 
     @property_depends_on('digest')
     def _get_csm ( self ):
-        """
-        Loads cross spectral matrix from file.
+        """Loads cross spectral matrix from file.
         """
         csmre = self.h5f.get_data_by_reference('/CsmData/csmReal')[:].transpose((2,0,1))
-        csmim = self.h5f.get_data_by_reference('/CsmData/csmImaginary')[:].transpose((2,0,1)) 
+        csmim = self.h5f.get_data_by_reference('/CsmData/csmImaginary')[:].transpose((2,0,1))
         csmdatagroup = self.h5f.get_data_by_reference('/CsmData')
         sign = self.h5f.get_node_attribute(csmdatagroup, 'fftSign')
         return csmre + sign * 1j * csmim
@@ -157,7 +153,7 @@ class CsmAIAABenchmark(PowerSpectraImport):
     def fftfreq ( self ):
         """Return the Discrete Fourier Transform sample frequencies.
         
-        Returns
+        Returns:
         -------
         ndarray
             Array of length *block_size/2+1* containing the sample frequencies.
@@ -179,15 +175,14 @@ class MicAIAABenchmark(MicGeom):
 
     @on_trait_change('basename')
     def import_mpos( self ):
-        """
-        Import the microphone positions from .h5 file.
+        """Import the microphone positions from .h5 file.
         Called when :attr:`basename` changes.
         """
         if not path.isfile(self.from_file):
             # no file there
-            raise IOError("No such file: %s" % self.from_file)
+            raise OSError("No such file: %s" % self.from_file)
 
         file = _get_h5file_class()
         h5f = file(self.from_file, mode='r')
-        self.mpos_tot = h5f.get_data_by_reference('MetaData/ArrayAttributes/microphonePositionsM')[:].swapaxes(0,1) 
+        self.mpos_tot = h5f.get_data_by_reference('MetaData/ArrayAttributes/microphonePositionsM')[:].swapaxes(0,1)
         h5f.close()
