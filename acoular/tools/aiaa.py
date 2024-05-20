@@ -55,7 +55,7 @@ class TimeSamplesAIAABenchmark(TimeSamples):
     def load_timedata(self):
         """Loads timedata from .h5 file. Only for internal use."""
         self.data = self.h5f.get_data_by_reference('MicrophoneData/microphoneDataPa')
-        self.sample_freq = self.h5f.get_node_attribute(self.data,'sampleRateHz')
+        self.sample_freq = self.h5f.get_node_attribute(self.data, 'sampleRateHz')
         (self.numsamples, self.numchannels) = self.data.shape
 
     def load_metadata(self):
@@ -77,7 +77,7 @@ class TriggerAIAABenchmark(TimeSamplesAIAABenchmark):
     def load_timedata(self):
         """Loads timedata from .h5 file. Only for internal use."""
         self.data = self.h5f.get_data_by_reference('TachoData/tachoDataV')
-        self.sample_freq = self.h5f.get_node_attribute(self.data,'sampleRateHz')
+        self.sample_freq = self.h5f.get_node_attribute(self.data, 'sampleRateHz')
         (self.numsamples, self.numchannels) = self.data.shape
 
 
@@ -97,21 +97,21 @@ class CsmAIAABenchmark(PowerSpectraImport):
     numchannels = Property()
 
     #: HDF5 file object
-    h5f = Instance(H5FileBase, transient = True)
+    h5f = Instance(H5FileBase, transient=True)
 
     # internal identifier
     digest = Property(depends_on=['basename', '_csmsum'])
 
     @cached_property
-    def _get_digest( self ):
+    def _get_digest(self):
         return digest(self)
 
     @cached_property
-    def _get_basename( self ):
+    def _get_basename(self):
         return path.splitext(path.basename(self.name))[0]
 
     @on_trait_change('basename')
-    def load_data( self ):
+    def load_data(self):
         """Open the .h5 file and set attributes."""
         if not path.isfile(self.name):
             # no file there
@@ -124,15 +124,15 @@ class CsmAIAABenchmark(PowerSpectraImport):
         file = _get_h5file_class()
         self.h5f = file(self.name)
 
-    #@property_depends_on( 'block_size, ind_low, ind_high' )
-    def _get_indices ( self ):
+    # @property_depends_on( 'block_size, ind_low, ind_high' )
+    def _get_indices (self):
         try:
             return range(self.fftfreq().shape[0])#[ self.ind_low: self.ind_high ]
         except IndexError:
             return range(0)
 
     @property_depends_on('digest')
-    def _get_numchannels ( self ):
+    def _get_numchannels (self):
         try:
             attrs = self.h5f.get_data_by_reference('MetaData/ArrayAttributes')
             return self.h5f.get_node_attribute(attrs, 'microphoneCount')
@@ -140,15 +140,15 @@ class CsmAIAABenchmark(PowerSpectraImport):
             return 0
 
     @property_depends_on('digest')
-    def _get_csm ( self ):
+    def _get_csm (self):
         """Loads cross spectral matrix from file."""
-        csmre = self.h5f.get_data_by_reference('/CsmData/csmReal')[:].transpose((2,0,1))
-        csmim = self.h5f.get_data_by_reference('/CsmData/csmImaginary')[:].transpose((2,0,1))
+        csmre = self.h5f.get_data_by_reference('/CsmData/csmReal')[:].transpose((2, 0, 1))
+        csmim = self.h5f.get_data_by_reference('/CsmData/csmImaginary')[:].transpose((2, 0, 1))
         csmdatagroup = self.h5f.get_data_by_reference('/CsmData')
         sign = self.h5f.get_node_attribute(csmdatagroup, 'fftSign')
         return csmre + sign * 1j * csmim
 
-    def fftfreq ( self ):
+    def fftfreq (self):
         """Return the Discrete Fourier Transform sample frequencies.
 
         Returns:
@@ -168,19 +168,18 @@ class MicAIAABenchmark(MicGeom):
     """
 
     #: Name of the .h5-file from wich to read the data.
-    from_file = File(filter=['*.h5'],
-        desc="name of the h5 file containing the microphone geometry")
+    from_file = File(filter=['*.h5'], desc="name of the h5 file containing the microphone geometry")
 
     @on_trait_change('basename')
-    def import_mpos( self ):
+    def import_mpos(self):
         """Import the microphone positions from .h5 file.
         Called when :attr:`basename` changes.
         """
         if not path.isfile(self.from_file):
             # no file there
-            raise OSError("No such file: %s" % self.from_file)
+            raise OSError('No such file: %s' % self.from_file)
 
         file = _get_h5file_class()
         h5f = file(self.from_file, mode='r')
-        self.mpos_tot = h5f.get_data_by_reference('MetaData/ArrayAttributes/microphonePositionsM')[:].swapaxes(0,1)
+        self.mpos_tot = h5f.get_data_by_reference('MetaData/ArrayAttributes/microphonePositionsM')[:].swapaxes(0, 1)
         h5f.close()

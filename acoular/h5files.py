@@ -93,7 +93,7 @@ if config.have_tables:
             """Recursively convert an HDF5 node to a dictionary."""
             node = self.get_node(nodename)
             # initialize node-dict with node's own attributes
-            result = {attr:node._v_attrs[attr] for attr in node._v_attrs._f_list()}
+            result = {attr: node._v_attrs[attr] for attr in node._v_attrs._f_list()}
             if isinstance(node, tables.Group):
                 # if node is a group, recursively add its children
                 for childname in node._v_children:
@@ -182,7 +182,6 @@ if config.have_h5py:
             else:
                 return None
             return result
-
 
     class H5CacheFileH5py(H5CacheFileBase, H5FileH5py):
         compressionFilter = 'lzf'
