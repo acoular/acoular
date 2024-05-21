@@ -3,6 +3,7 @@
 [![PyPI](https://img.shields.io/pypi/pyversions/acoular.svg)](https://pypi.org/project/acoular)
 [![PyPI](https://img.shields.io/pypi/v/acoular.svg)](https://pypi.org/project/acoular)
 [![Actions status](https://github.com/acoular/acoular/actions/workflows/tests.yml/badge.svg)](https://github.com/acoular/acoular/actions)
+[![DOI](https://zenodo.org/badge/29729101.svg)](https://zenodo.org/doi/10.5281/zenodo.3690794)
 
 # Acoular
 Acoular is a Python module for acoustic beamforming that is distributed under the new BSD license. 

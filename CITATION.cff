@@ -62,8 +62,8 @@ identifiers:
 repository-code: "https://github.com/acoular/acoular"
 url: "https://acoular.org"
 license: "BSD-3-Clause"
-version: "24.03"
-date-released: "2024-03-12"
+version: "24.05"
+date-released: "2024-05-21"
 contact:
   - email: "info@acoular.org"
     name: "Acoular Development Team"
