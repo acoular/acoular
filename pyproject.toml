@@ -28,6 +28,7 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
     "numba",
@@ -89,7 +90,7 @@ dependencies = [
 ]
 
 [[tool.hatch.envs.tests.matrix]]
-python = ["3.7", "3.8", "3.9", "3.10", "3.11"]
+python = ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12"]
 
 [tool.hatch.envs.tests.scripts]
 import = ["python -c \"import acoular\""]
