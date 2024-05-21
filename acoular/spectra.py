@@ -119,8 +119,8 @@ class BaseSpectra(HasPrivateTraits):
     def fftfreq(self):
         """Return the Discrete Fourier Transform sample frequencies.
 
-        Returns:
-        --------
+        Returns
+        -------
         f : ndarray
             Array of length *block_size/2+1* containing the sample frequencies.
 
@@ -169,8 +169,8 @@ class FFTSpectra(BaseSpectra, TimeInOut):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block).
 
-        Returns:
-        --------
+        Returns
+        -------
         Samples in blocks of shape (numfreq, :attr:`numchannels`).
             The last block may be shorter than num.
 
@@ -533,8 +533,8 @@ class PowerSpectra(BaseSpectra):
             n    1/n-octave band
             ===  =====================
 
-        Returns:
-        --------
+        Returns
+        -------
         float
             Synthesized frequency band value of the eigenvalues (the sum of
             all values that are contained in the band).
@@ -587,8 +587,8 @@ def synthetic(data, freqs, f, num=3):
         n    1/n-octave band
         ===  =====================
 
-    Returns:
-    --------
+    Returns
+    -------
     array of floats
         Synthesized frequency band values of the beamforming result at
         each grid point (the sum of all values that are contained in the band).
@@ -753,8 +753,8 @@ class PowerSpectraImport(PowerSpectra):
     def fftfreq(self):
         """Return the Discrete Fourier Transform sample frequencies.
 
-        Returns:
-        --------
+        Returns
+        -------
         f : ndarray
             Array containing the frequencies.
 

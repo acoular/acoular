@@ -39,7 +39,7 @@ def _delayandsum4(data, offsets, ifactor2, steeramp, out, autopower):
     steeramp: float64[gridSize, nMics]
         Amplitude factor from steering vector.
 
-    Returns:
+    Returns
     -------
     None : as the inputs out and autopower get overwritten.
 
@@ -97,7 +97,7 @@ def _delayandsum5(data, offsets, ifactor2, steeramp, out, autopower):
     steeramp: float64[nBlockSamples,gridSize, nMics]
         Amplitude factor from steering vector.
 
-    Returns:
+    Returns
     -------
     None : as the inputs out and autopower get overwritten.
 

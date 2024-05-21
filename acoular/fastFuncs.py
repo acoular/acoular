@@ -38,7 +38,7 @@ def calcCSM(csm, SpecAllMics):
     SpecAllMics : complex128[nFreqs, nMics]
         Spectrum of the added ensemble at all Mics.
 
-    Returns:
+    Returns
     -------
     None : as the input csm gets overwritten.
 
@@ -94,7 +94,7 @@ def beamformerFreq(steerVecType, boolRemovedDiagOfCSM, normFactor, inputTupleSte
                 eigVectors : complex128[nMics, nEV]
                     Eigen vectors corresponding to eigValues. All passed eigenvector slices will be evaluated.
 
-    Returns:
+    Returns
     -------
     *Autopower spectrum beamforming map [nGridPoints]
 
@@ -538,7 +538,7 @@ def calcPointSpreadFunction(steerVecType, distGridToArrayCenter, distGridToAllMi
     dtype : either 'float64' or 'float32'
         Determines the precision of the result. For big maps this could be worth downgrading.
 
-    Returns:
+    Returns
     -------
     Autopower spectrum PSF map : [nFreqs, nGridPoints, nSources]
 
@@ -786,7 +786,7 @@ def damasSolverGaussSeidel(A, dirtyMap, nIterations, relax, damasSolution):
     damasSolution : float32/float64[nFreqs, nGridpoints] (or float64[...])
         starting solution
 
-    Returns:
+    Returns
     -------
     None : as damasSolution is overwritten with end result of the damas iterative solver.
 
@@ -831,7 +831,7 @@ def calcTransfer(distGridToArrayCenter, distGridToAllMics, waveNumber):
     waveNumber : complex128
         The wave number should be stored in the imag-part
 
-    Returns:
+    Returns
     -------
     The Transferfunctions in format complex128[nGridPoints, nMics].
 
