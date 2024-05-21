@@ -43,7 +43,7 @@ jobs:
         with:
           publish_branch: gh-pages
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs/build/html/
+          publish_dir: ./docs/build/html
           #cname: www.acoular.org
           force_orphan: true # This allows you to make your publish branch with only the latest commit.
           enable_jekyll: false
