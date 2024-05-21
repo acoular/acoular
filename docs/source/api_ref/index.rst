@@ -13,6 +13,7 @@ The following modules are part of Acoular:
 
     calib
     configuration
+    demo
     environments
     fbeamform
     grids
