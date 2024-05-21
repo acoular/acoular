@@ -67,7 +67,7 @@ class Config(HasStrictTraits):
     by :attr:`h5library`.
 
     Example:
-    -------
+    --------
         For using Acoular with h5py package and overwrite existing cache:
 
         >>>    import acoular

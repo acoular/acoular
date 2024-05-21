@@ -67,7 +67,7 @@ class SignalGenerator(HasPrivateTraits):
             larger than :attr:`sample_freq`.
 
         Returns:
-        -------
+        --------
         array of floats
             The resulting signal of length `factor` * :attr:`numsamples`.
 
@@ -96,7 +96,7 @@ class WNoiseGenerator(SignalGenerator):
         """Deliver the signal.
 
         Returns:
-        -------
+        --------
         Array of floats
             The resulting signal as an array of length :attr:`~SignalGenerator.numsamples`.
 
@@ -199,7 +199,7 @@ class FiltWNoiseGenerator(WNoiseGenerator):
         """Deliver the signal.
 
         Returns:
-        -------
+        --------
         Array of floats
             The resulting signal as an array of length :attr:`~SignalGenerator.numsamples`.
 
@@ -269,7 +269,7 @@ class SineGenerator(SignalGenerator):
         """Deliver the signal.
 
         Returns:
-        -------
+        --------
         array of floats
             The resulting signal as an array of length :attr:`~SignalGenerator.numsamples`.
 
@@ -317,7 +317,7 @@ class GenericSignalGenerator(SignalGenerator):
         """Deliver the signal.
 
         Returns:
-        -------
+        --------
         array of floats
             The resulting signal as an array of length :attr:`~GenericSignalGenerator.numsamples`.
 

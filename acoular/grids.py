@@ -298,7 +298,7 @@ class Grid(HasPrivateTraits):
         Deprecated; use :attr:`gpos` attribute instead.
 
         Returns:
-        -------
+        --------
         array of floats of shape (3, :attr:`size`)
             The grid point x, y, z-coordinates in one array.
 
@@ -316,7 +316,7 @@ class Grid(HasPrivateTraits):
             Sector describing the subdomain.
 
         Returns:
-        -------
+        --------
         2-tuple of arrays of integers or of numpy slice objects
             The indices that can be used to mask/select the grid subdomain from
             an array with the same shape as the grid.
@@ -397,7 +397,7 @@ class RectGrid(Grid):
         """Calculates grid co-ordinates.
 
         Returns:
-        -------
+        --------
         array of floats of shape (3, :attr:`~Grid.size`)
             The grid point x, y, z-coordinates in one array.
 
@@ -422,7 +422,7 @@ class RectGrid(Grid):
             The co-ordinates for which the indices are queried.
 
         Returns:
-        -------
+        --------
         2-tuple of integers
             The indices that give the grid point nearest to the given x, y
             co-ordinates from an array with the same shape as the grid.
@@ -456,7 +456,7 @@ class RectGrid(Grid):
             polygonial shape with corners at (x_n, y_n).
 
         Returns:
-        -------
+        --------
         2-tuple of arrays of integers or of numpy slice objects
             The indices that can be used to mask/select the grid subdomain from
             an array with the same shape as the grid.
@@ -504,7 +504,7 @@ class RectGrid(Grid):
         """The extension of the grid in pylab.imshow compatible form.
 
         Returns:
-        -------
+        --------
         4-tuple of floats
             The extent of the grid as a tuple of x_min, x_max, y_min, y_max)
 
@@ -611,7 +611,7 @@ class RectGrid3D(RectGrid):
         """Calculates grid co-ordinates.
 
         Returns:
-        -------
+        --------
         array of floats of shape (3, :attr:`~Grid.size`)
             The grid point x, y, z-coordinates in one array.
 
@@ -640,7 +640,7 @@ class RectGrid3D(RectGrid):
             The co-ordinates for which the indices is queried.
 
         Returns:
-        -------
+        --------
         3-tuple of integers
             The indices that give the grid point nearest to the given x, y, z
             co-ordinates from an array with the same shape as the grid.
@@ -673,7 +673,7 @@ class RectGrid3D(RectGrid):
             (x1,y1,z1) and (x2,y2,z2).
 
         Returns:
-        -------
+        --------
         3-tuple of numpy slice objects
             The indices that can be used to mask/select the grid subdomain from
             an array with the same shape as the grid.
@@ -875,7 +875,7 @@ class Sector(HasPrivateTraits):
             grid positions
 
         Returns:
-        -------
+        --------
         array of bools with as many entries as columns in pos
             Array indicating which of the given positions lie within the
             given sector
@@ -934,7 +934,7 @@ class RectSector(SingleSector):
             grid positions
 
         Returns:
-        -------
+        --------
         array of bools with as many entries as columns in pos
             Array indicating which of the given positions lie within the
             given sector
@@ -998,7 +998,7 @@ class RectSector3D(RectSector):
             grid positions
 
         Returns:
-        -------
+        --------
         array of bools with as many entries as columns in pos
             Array indicating which of the given positions lie within the
             given sector
@@ -1072,7 +1072,7 @@ class CircSector(SingleSector):
             grid positions
 
         Returns:
-        -------
+        --------
         array of bools with as many entries as columns in pos
             Array indicating which of the given positions lie within the
             given sector
@@ -1111,7 +1111,7 @@ class PolySector(SingleSector):
             grid positions
 
         Returns:
-        -------
+        --------
         array of bools with as many entries as columns in pos
             Array indicating which of the given positions lie within the
             given sector
@@ -1151,7 +1151,7 @@ class ConvexSector(SingleSector):
             grid positions
 
         Returns:
-        -------
+        --------
         array of bools with as many entries as columns in pos
             Array indicating which of the given positions lie within the
             given sector

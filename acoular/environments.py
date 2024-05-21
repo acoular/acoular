@@ -366,7 +366,7 @@ class OpenJet(FlowField):
     see :ref:`Albertson et al., 1950<Albertson1950>`.
 
     Notes:
-    -----
+    ------
     This is not a fully generic implementation and is limited to flow in the
     x-direction only. No other directions are possible at the moment and flow
     components in the other direction are zero.
