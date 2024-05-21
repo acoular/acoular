@@ -1,8 +1,7 @@
 name: Label-Bot
 
 on:
-  pull_request_target:
-    branches: master
+  pull_request_target
 
 jobs:
   labeler:
