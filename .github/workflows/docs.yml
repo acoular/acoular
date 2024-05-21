@@ -7,11 +7,7 @@ on:
     branches: [ master ] # build docs as additional test on PRs to main
   workflow_dispatch:
     branches: [ '*' ] # allow manual trigger for all branches
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
-  
+ 
 permissions:
   contents: write
 
@@ -35,7 +31,7 @@ jobs:
 
   deploy:
     needs: build
-    if: ${{ github.event_name =='workflow_dispatch' && github.ref == 'refs/heads/master' }}
+    if: ${{ github.event_name =='workflow_dispatch'}}
     runs-on: ubuntu-latest
     steps:
       - name: Download artifacts
@@ -48,7 +44,7 @@ jobs:
           publish_branch: gh-pages
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs/build/html/
-          cname: www.acoular.org
+          #cname: www.acoular.org
           force_orphan: true # This allows you to make your publish branch with only the latest commit.
           enable_jekyll: false
 
