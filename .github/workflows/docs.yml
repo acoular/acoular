@@ -29,9 +29,9 @@ jobs:
           name: build-docs
           path: ./docs/build/html
 
-  # deploy:
-  #   needs: build
-  #   if: ${{ github.event_name =='workflow_dispatch'}}
+  deploy:
+    needs: build
+    if: ${{ github.event_name =='workflow_dispatch'}}
     runs-on: ubuntu-latest
     steps:
       - name: Download artifacts
