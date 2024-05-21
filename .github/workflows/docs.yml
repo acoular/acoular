@@ -27,21 +27,19 @@ jobs:
         uses: ./.github/actions/setup-hatch
       - name: Run sphinx
         run: hatch -v run docs:build
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-docs
-          path: ./docs/build/html
 
   deploy:
-    needs: build
     if: ${{ github.event_name =='workflow_dispatch' && github.ref == 'refs/heads/master' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-docs
+      - name: Check out a copy of the repository
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        run: sudo apt install graphviz libportaudio2
+      - name: Set up hatch
+        uses: ./.github/actions/setup-hatch
+      - name: Run sphinx
+        run: hatch -v run docs:build
       - name: Upload docs to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
