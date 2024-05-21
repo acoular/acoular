@@ -6,7 +6,7 @@
 name = "acoular"
 version = "24.03"
 description = "Python library for acoustic beamforming"
-requires-python = ">=3.7,<=11"
+requires-python = ">=3.7,<=12"
 authors = [
     {name = "Acoular Development Team", email = "info@acoular.org"},
 ]
