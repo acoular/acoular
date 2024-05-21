@@ -1,5 +1,31 @@
 What's new
 ============
+24.05
+------------
+    * adds support for Python version 3.12 on Linux, MacOS, Windows
+    * drops official support for Python version 3.7
+    * provides new tools to import  data in AIAA array benchmark format
+
+    Bugfixes:
+    * changes to UMA-16 microphone array arrangement
+
+    Internal:
+    * formatting and linting with ruff 
+    * introduce hatch 
+    * measure test coverage
+    * replace `zenodo.json`by `CITATION.cff` 
+    * bugfixes CI 
+    * update LICENSE 
+    * adds code of conduct 
+    * allow workflow dispatch for testing on different branches using GitHub
+    * refine package structure
+        * move test directory outside of the source directory
+        * remove outdated submodules `fileimport` and `nidaqimport`
+        * introduce new submodule `acoular/tools` 
+    * improve documentation 
+
+
+
 24.03
 ------------
     * Improve test coverage for :class:`~acoular.fbeamform.BeamformerCMF`
