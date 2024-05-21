@@ -8,6 +8,7 @@ To run the demo, execute the following commands:
 .. code-block:: python
 
     import acoular
+
     acoular.demo.acoular_demo.run()
 
 
