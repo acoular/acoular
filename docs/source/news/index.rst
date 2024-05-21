@@ -13,7 +13,7 @@ What's new
         * formatting and linting with ruff 
         * introduce hatch 
         * measure test coverage
-        * replace `zenodo.json`by `CITATION.cff` 
+        * replace `zenodo.json` by `CITATION.cff` 
         * bugfixes CI 
         * update LICENSE 
         * adds code of conduct 
