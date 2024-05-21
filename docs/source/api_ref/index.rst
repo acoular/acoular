@@ -9,6 +9,7 @@ The following modules are part of Acoular:
 
 .. autosummary::
     :toctree: generated/
+    :recursive:
 
     calib
     configuration
@@ -60,4 +61,5 @@ Classes in Acoular and their inheritance
     :members:
     :undoc-members:
     :show-inheritance:
+
 
