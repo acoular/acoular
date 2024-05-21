@@ -1,0 +1,15 @@
+name: Label-Bot
+
+on:
+  pull_request_target
+
+jobs:
+  labeler:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Check out a copy of the repository
+        uses: actions/checkout@v4
+      - uses: actions/labeler@v5

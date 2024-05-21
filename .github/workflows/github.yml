@@ -3,24 +3,14 @@ name: GitHub
 on:
   pull_request:
     branches: master
+    types: [labeled, unlabeled, opened, synchronize, reopened]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
-  labeler:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
-    steps:
-      - name: Check out a copy of the repository
-        uses: actions/checkout@v4
-      - uses: actions/labeler@v5
-
   enforce-label:
-    needs: labeler
     if: github.event_name != 'merge_group'
     runs-on: ubuntu-latest
     steps:
@@ -44,7 +34,6 @@ jobs:
     name: GitHubs green?
     if: always()
     needs:
-      - labeler
       - enforce-label
       - check-conflicts
     runs-on: ubuntu-latest
