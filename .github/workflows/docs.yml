@@ -38,6 +38,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-docs
+          path: ./docs/build/html
       - name: Upload docs to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
