@@ -11,7 +11,6 @@ concurrency:
 
 jobs:
   enforce-label:
-    needs: labeler
     if: github.event_name != 'merge_group'
     runs-on: ubuntu-latest
     steps:
@@ -35,7 +34,6 @@ jobs:
     name: GitHubs green?
     if: always()
     needs:
-      - labeler
       - enforce-label
       - check-conflicts
     runs-on: ubuntu-latest
