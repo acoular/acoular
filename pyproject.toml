@@ -69,7 +69,7 @@ config-path = [".ruff.toml"]
 
 [tool.hatch.envs.docs]
 platforms = ["linux"]
-python = "3.11"
+python = "3.12"
 dependencies = [
     "ipython",
     "graphviz",

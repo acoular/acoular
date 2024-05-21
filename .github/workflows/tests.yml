@@ -42,7 +42,7 @@ jobs:
       - name: Set up hatch
         uses: ./.github/actions/setup-hatch
       - name: Generate coverage report
-        run: hatch -v run +py=3.11 tests:coverage
+        run: hatch -v run +py=3.12 tests:coverage
 
   alls-green:
     name: Tests green?
