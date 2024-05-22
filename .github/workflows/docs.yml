@@ -7,8 +7,12 @@ on:
     branches: [ master ] # build docs as additional test on PRs to main
   workflow_dispatch:
     branches: [ '*' ] # allow manual trigger for all branches
- 
-permissions:
+
+    concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true 
+
+  permissions:
   contents: write
 
 jobs:
