@@ -8,6 +8,10 @@ on:
   workflow_dispatch:
     branches: [ '*' ] # allow manual trigger for all branches
  
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+  
 permissions:
   contents: write
 
