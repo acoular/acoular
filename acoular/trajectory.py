@@ -73,7 +73,7 @@ class Trajectory(HasPrivateTraits):
         der : integer
             The order of derivative of the spline to compute, defaults to 0.
 
-        Returns:
+        Returns
         -------
         (x, y, z) : tuple with arrays of floats
             Positions at the given times; `x`, `y` and `z` have the same shape as `t`.
@@ -96,12 +96,12 @@ class Trajectory(HasPrivateTraits):
             Time interval between yielded trajectory points, defaults to earliest
             time in :attr:`points`.
 
-        Returns:
+        Returns
         -------
         (x, y, z) : tuples of floats
             Positions at the desired times are yielded.
 
-        Examples:
+        Examples
         --------
         x.traj(0.1)
             Yields the position every 0.1 s within the

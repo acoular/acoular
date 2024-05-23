@@ -81,7 +81,7 @@ class SoundDeviceSamplesGenerator(SamplesGenerator):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block).
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, :attr:`numchannels`).
             The last block may be shorter than num.

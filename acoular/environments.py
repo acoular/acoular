@@ -64,7 +64,7 @@ def dist_mat(gpos, mpos):
         gpos (3,N)
         mpos (3,M)
 
-    Returns:
+    Returns
     -------
         (N,M) distance matrix
 
@@ -99,7 +99,7 @@ def cartToCyl(x, Q=None):
         transformed via posiMod = Q * x, before transforming those modified
         coordinates into cylindrical ones. Default is identity matrix.
 
-    Returns:
+    Returns
     -------
     cylCoord : [3, nPoints]
         cylindrical representation of those n points with (phi, r, z)
@@ -128,7 +128,7 @@ def cylToCart(x, Q=None):
     coordinates into cylindrical ones. Default is identity matrix.
 
 
-    Returns:
+    Returns
     -------
     CartCoord : [3, nPoints]
     cartesian coordinates of n points
@@ -175,7 +175,7 @@ class Environment(HasPrivateTraits):
             given, then only one microphone at the origin (0, 0, 0) is
             considered.
 
-        Returns:
+        Returns
         -------
         r : array of floats
             The distances in a twodimensional (N, M) array of floats. If M==1,
@@ -232,7 +232,7 @@ class UniformFlowEnvironment(Environment):
             given, then only one microphone at the origin (0, 0, 0) is
             considered.
 
-        Returns:
+        Returns
         -------
         array of floats
             The distances in a twodimensional (N, M) array of floats. If M==1,
@@ -269,7 +269,7 @@ class FlowField(HasPrivateTraits):
         xx : array of floats of shape (3, )
             Location in the fluid for which to provide the data.
 
-        Returns:
+        Returns
         -------
         tuple with two elements
             The first element in the tuple is the velocity vector and the
@@ -322,7 +322,7 @@ class SlotJet(FlowField):
         xx : array of floats of shape (3, )
             Location in the fluid for which to provide the data.
 
-        Returns:
+        Returns
         -------
         tuple with two elements
             The first element in the tuple is the velocity vector and the
@@ -365,7 +365,7 @@ class OpenJet(FlowField):
     """Provides an analytical approximation of the flow field of an open jet,
     see :ref:`Albertson et al., 1950<Albertson1950>`.
 
-    Notes:
+    Notes
     -----
     This is not a fully generic implementation and is limited to flow in the
     x-direction only. No other directions are possible at the moment and flow
@@ -401,7 +401,7 @@ class OpenJet(FlowField):
         xx : array of floats of shape (3, )
             Location in the fluid for which to provide the data.
 
-        Returns:
+        Returns
         -------
         tuple with two elements
             The first element in the tuple is the velocity vector and the
@@ -472,7 +472,7 @@ class RotatingFlow(FlowField):
         xx : array of floats of shape (3, )
             Location in the fluid for which to provide the data.
 
-        Returns:
+        Returns
         -------
         tuple with two elements
             The first element in the tuple is the velocity vector and the
@@ -574,7 +574,7 @@ class GeneralFlowEnvironment(Environment):
             given, then only one microphone at the origin (0, 0, 0) is
             considered.
 
-        Returns:
+        Returns
         -------
         array of floats
             The distances in a twodimensional (N, M) array of floats. If M==1,
@@ -618,7 +618,7 @@ class GeneralFlowEnvironment(Environment):
         x0 : array of floats of shape (3)
             The location of the microphone in 3D cartesian co-ordinates.
 
-        Returns:
+        Returns
         -------
         LinearNDInterpolator object
 

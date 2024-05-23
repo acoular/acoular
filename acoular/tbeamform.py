@@ -70,7 +70,7 @@ def const_power_weight(bf):
     bf: :class:`BeamformerTime` object
 
 
-    Returns:
+    Returns
     -------
     array of floats
         The weight factors.
@@ -237,7 +237,7 @@ class BeamformerTime(TimeInOut):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block).
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape  \
         (num, :attr:`~BeamformerTime.numchannels`).
@@ -458,7 +458,7 @@ class BeamformerTimeTraj(BeamformerTime):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block).
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape  \
         (num, :attr:`~BeamformerTime.numchannels`).
@@ -790,7 +790,7 @@ class IntegratorSectorTime(TimeInOut):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block).
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, :attr:`numchannels`).
         :attr:`numchannels` is the number of sectors.

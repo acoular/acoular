@@ -6,23 +6,23 @@ What's new
     * drops official support for Python version 3.7
     * provides new tools to import  data in AIAA array benchmark format
 
-    Bugfixes:
-    * changes to UMA-16 microphone array arrangement
+    * Bugfixes:
+        * changes to UMA-16 microphone array arrangement
 
-    Internal:
-    * formatting and linting with ruff 
-    * introduce hatch 
-    * measure test coverage
-    * replace `zenodo.json`by `CITATION.cff` 
-    * bugfixes CI 
-    * update LICENSE 
-    * adds code of conduct 
-    * allow workflow dispatch for testing on different branches using GitHub
-    * refine package structure
-        * move test directory outside of the source directory
-        * remove outdated submodules `fileimport` and `nidaqimport`
-        * introduce new submodule `acoular/tools` 
-    * improve documentation 
+    * Internal:
+        * formatting and linting with ruff 
+        * introduce hatch 
+        * measure test coverage
+        * replace `zenodo.json` by `CITATION.cff` 
+        * bugfixes CI 
+        * update LICENSE 
+        * adds code of conduct 
+        * allow workflow dispatch for testing on different branches using GitHub
+        * improve documentation 
+        * refine package structure
+            * move test directory outside of the source directory
+            * remove outdated submodules `fileimport` and `nidaqimport`
+            * introduce new submodule `acoular/tools` 
 
 
 
@@ -111,24 +111,24 @@ What's new
 
 20.10
 ------------
-	
-	* Supports Python 3.6, 3.7, 3.8
-	* New base classes for time signal processing: :class:`~acoular.tprocess.Filter`, :class:`~acoular.tprocess.FilterBank`
-		* New filter classes: :class:`~acoular.tprocess.TimeExpAverage`, :class:`~acoular.tprocess.FiltFreqWeight`, :class:`~acoular.tprocess.OctaveFilterBank`
-		* Demo script is now part of module (see :doc:`../get_started/index` for usage)
-	* New class for processing sound card input: :class:`~acoular.sdinput.SoundDeviceSamplesGenerator`
-	* New class for cumulative averaging: :class:`~acoular.tprocess.TimeCumAverage`
-	* New grid classes :class:`~acoular.grids.ImportGrid`, :class:`~acoular.grids.LineGrid`, :class:`~acoular.grids.MergeGrid`
-	* New versatile integration sector classes :class:`~acoular.grids.RectSector`, :class:`~acoular.grids.CircSector`, :class:`~acoular.grids.PolySector`, :class:`~acoular.grids.ConvexSector`, :class:`~acoular.grids.MultiSector`
-	* New class for mixing multiple channels :class:`~acoular.tprocess.ChannelMixer`
-	* New class for using arbitrary sources as signal: :class:`~acoular.signals.GenericSignalGenerator`
-	* New time-domain beamforming classes for CLEAN-T method: :class:`~acoular.tbeamform.BeamformerCleant`, :class:`~acoular.tbeamform.BeamformerCleantSq`, :class:`~acoular.tbeamform.BeamformerCleantTraj`, :class:`~acoular.tbeamform.BeamformerCleantSqTraj`
-	* Adds possibility to store/load metadata to/from HDF files with :class:`~acoular.tprocess.WriteH5`/:class:`~acoular.sources.TimeSamples` classes
-	* New submodule :mod:`~acoular.tools` containing several helper functions, e.g. for data aggregation
-	* :class:`~acoular.tprocess.WriteWAV`: user can optionally set name of output wav file
-	* Bugfix: PowerSpectra.freq_range / .ind_low / .ind_high are now correctly updated depending on changed attributes
-	* Bugfix: :class:`~acoular.signals.SineGenerator` amplitude is now set via :attr:`~acoular.signals.SineGenerator.amplitude` attribute
-	* Some minor fixes
+    
+    * Supports Python 3.6, 3.7, 3.8
+    * New base classes for time signal processing: :class:`~acoular.tprocess.Filter`, :class:`~acoular.tprocess.FilterBank`
+        * New filter classes: :class:`~acoular.tprocess.TimeExpAverage`, :class:`~acoular.tprocess.FiltFreqWeight`, :class:`~acoular.tprocess.OctaveFilterBank`
+        * Demo script is now part of module (see :doc:`../get_started/index` for usage)
+    * New class for processing sound card input: :class:`~acoular.sdinput.SoundDeviceSamplesGenerator`
+    * New class for cumulative averaging: :class:`~acoular.tprocess.TimeCumAverage`
+    * New grid classes :class:`~acoular.grids.ImportGrid`, :class:`~acoular.grids.LineGrid`, :class:`~acoular.grids.MergeGrid`
+    * New versatile integration sector classes :class:`~acoular.grids.RectSector`, :class:`~acoular.grids.CircSector`, :class:`~acoular.grids.PolySector`, :class:`~acoular.grids.ConvexSector`, :class:`~acoular.grids.MultiSector`
+    * New class for mixing multiple channels :class:`~acoular.tprocess.ChannelMixer`
+    * New class for using arbitrary sources as signal: :class:`~acoular.signals.GenericSignalGenerator`
+    * New time-domain beamforming classes for CLEAN-T method: :class:`~acoular.tbeamform.BeamformerCleant`, :class:`~acoular.tbeamform.BeamformerCleantSq`, :class:`~acoular.tbeamform.BeamformerCleantTraj`, :class:`~acoular.tbeamform.BeamformerCleantSqTraj`
+    * Adds possibility to store/load metadata to/from HDF files with :class:`~acoular.tprocess.WriteH5`/:class:`~acoular.sources.TimeSamples` classes
+    * New submodule :mod:`~acoular.tools` containing several helper functions, e.g. for data aggregation
+    * :class:`~acoular.tprocess.WriteWAV`: user can optionally set name of output wav file
+    * Bugfix: PowerSpectra.freq_range / .ind_low / .ind_high are now correctly updated depending on changed attributes
+    * Bugfix: :class:`~acoular.signals.SineGenerator` amplitude is now set via :attr:`~acoular.signals.SineGenerator.amplitude` attribute
+    * Some minor fixes
 
 
 20.02
@@ -192,7 +192,7 @@ What's new
     * Bugfix: BeamformerFunctional can only be called when the diagonal of the CSM is included
     * Bugfix: Corrected calculation of PSF for steering vector formulation IV
     * Bugfix: Behaviour of normalizing PSF at assumed source location (psf=1) is removed
-	
+    
 
 
 
@@ -203,7 +203,7 @@ What's new
     * Added support for Python 3.4, 3.5 and 3.6 
     * Implementation of fast/parallelized code now with Numba (instead of C++ and SciPy.weave)
     * cross spectral matrix (CSM) orientation changed (was transposed in earlier versions). Please do not use the cache files from earlier versions in version 17.11!
-    	
+        
 
 
 

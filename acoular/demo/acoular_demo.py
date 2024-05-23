@@ -3,6 +3,15 @@
 # ------------------------------------------------------------------------------
 """Demo for Acoular.
 
+To run the demo, execute the following commands:
+
+.. code-block:: python
+
+    import acoular
+
+    acoular.demo.acoular_demo.run()
+
+
 Generates a test data set for three sources, analyzes them and generates a
 map of the three sources.
 
@@ -19,10 +28,12 @@ Source Location        Level
 2      (0.15,0,0.3)    0.7 Pa
 3      (0,0.1,0.3)     0.5 Pa
 ====== =============== ======
+
 """
 
 
 def run():
+    """Run the Acoular demo."""
     from pathlib import Path
 
     from acoular import (

@@ -39,7 +39,7 @@ def return_result(source, nmax=-1, num=128):
         This parameter defines the size of the blocks that are fetched.
         Defaults to 128.
 
-    Returns:
+    Returns
     -------
     array of floats (number of samples, source.numchannels)
         Array that holds all the data.
@@ -82,7 +82,7 @@ def barspectrum(data, fftfreqs, num=3, bar=True, xoffset=0.0):
         3    third-octave band
         ===  =====================
 
-    Returns:
+    Returns
     -------
     (flulist, plist, fc)
     flulist : array of floats
@@ -162,7 +162,7 @@ def bardata(data, fc, num=3, bar=True, xoffset=0.0, masked=-360):
         3    third-octave band
         ===  =====================
 
-    Returns:
+    Returns
     -------
     (flulist, plist)
     flulist : array of floats

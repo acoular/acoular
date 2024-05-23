@@ -217,7 +217,7 @@ class SteeringVector(HasPrivateTraits):
             the given indices will be calculated. Useful for algorithms like CLEAN-SC,
             where not the full transfer matrix is needed
 
-        Returns:
+        Returns
         -------
         array of complex128
             array of shape (ngridpts, nmics) containing the transfer matrix for the given frequency
@@ -248,7 +248,7 @@ class SteeringVector(HasPrivateTraits):
             the given indices will be calculated. Useful for algorithms like CLEAN-SC,
             where not the full transfer matrix is needed
 
-        Returns:
+        Returns
         -------
         array of complex128
             array of shape (ngridpts, nmics) containing the steering vectors for the given frequency
@@ -512,7 +512,7 @@ class BeamformerBase(HasPrivateTraits):
         This is a workaround to allow faster calculation and may change in the
         future.
 
-        Returns:
+        Returns
         -------
             - String containing the steering vector type
             - Function for frequency-dependent steering vector calculation
@@ -549,7 +549,7 @@ class BeamformerBase(HasPrivateTraits):
             After the calculation at a certain frequency the value will be set
             to 'True'
 
-        Returns:
+        Returns
         -------
         This method only returns values through the *ac* and *fr* parameters
 
@@ -592,7 +592,7 @@ class BeamformerBase(HasPrivateTraits):
             n    1/n-octave band
             ===  =====================
 
-        Returns:
+        Returns
         -------
         array of floats
             The synthesized frequency band values of the beamforming result at
@@ -684,7 +684,7 @@ class BeamformerBase(HasPrivateTraits):
               Possible sectors would be *array([xmin, ymin, xmax, ymax])*
               or *array([x, y, radius])*.
 
-        Returns:
+        Returns
         -------
         array of floats
             The spectrum (all calculated frequency bands) for the integrated sector.
@@ -756,7 +756,7 @@ class BeamformerFunctional(BeamformerBase):
             After the calculation at a certain frequency the value will be set
             to 'True'
 
-        Returns:
+        Returns
         -------
         This method only returns values through the *ac* and *fr* parameters
 
@@ -837,7 +837,7 @@ class BeamformerCapon(BeamformerBase):
             After the calculation at a certain frequency the value will be set
             to 'True'
 
-        Returns:
+        Returns
         -------
         This method only returns values through the *ac* and *fr* parameters
 
@@ -902,7 +902,7 @@ class BeamformerEig(BeamformerBase):
             After the calculation at a certain frequency the value will be set
             to 'True'
 
-        Returns:
+        Returns
         -------
         This method only returns values through the *ac* and *fr* parameters
 
@@ -960,7 +960,7 @@ class BeamformerMusic(BeamformerEig):
             After the calculation at a certain frequency the value will be set
             to 'True'
 
-        Returns:
+        Returns
         -------
         This method only returns values through the *ac* and *fr* parameters
 
@@ -1227,7 +1227,7 @@ class PointSpreadFunction(HasPrivateTraits):
             Indices of gridpoints which are assumed to be sources.
             Normalization factor for the beamforming result (e.g. removal of diag is compensated with this.)
 
-        Returns:
+        Returns
         -------
         The psf [1, nGridPoints, len(ind)]
 
@@ -1323,7 +1323,7 @@ class BeamformerDamas(BeamformerBase):
             After the calculation at a certain frequency the value will be set
             to 'True'
 
-        Returns:
+        Returns
         -------
         This method only returns values through the *ac* and *fr* parameters
 
@@ -1410,7 +1410,7 @@ class BeamformerDamasPlus(BeamformerDamas):
             After the calculation at a certain frequency the value will be set
             to 'True'
 
-        Returns:
+        Returns
         -------
         This method only returns values through the *ac* and *fr* parameters
 
@@ -1529,7 +1529,7 @@ class BeamformerOrth(BeamformerBase):
             After the calculation at a certain frequency the value will be set
             to 'True'
 
-        Returns:
+        Returns
         -------
         This method only returns values through the *ac* and *fr* parameters
 
@@ -1600,7 +1600,7 @@ class BeamformerCleansc(BeamformerBase):
             After the calculation at a certain frequency the value will be set
             to 'True'
 
-        Returns:
+        Returns
         -------
         This method only returns values through the *ac* and *fr* parameters
 
@@ -1725,7 +1725,7 @@ class BeamformerClean(BeamformerBase):
             After the calculation at a certain frequency the value will be set
             to 'True'
 
-        Returns:
+        Returns
         -------
         This method only returns values through the *ac* and *fr* parameters
 
@@ -1842,7 +1842,7 @@ class BeamformerCMF(BeamformerBase):
             After the calculation at a certain frequency the value will be set
             to 'True'
 
-        Returns:
+        Returns
         -------
         This method only returns values through the *ac* and *fr* parameters
 
@@ -2116,7 +2116,7 @@ class BeamformerSODIX(BeamformerBase):
             n    1/n-octave band
             ===  =====================
 
-        Returns:
+        Returns
         -------
         array of floats
             The synthesized frequency band values of the beamforming result at
@@ -2209,7 +2209,7 @@ class BeamformerSODIX(BeamformerBase):
             After the calculation at a certain frequency the value will be set
             to 'True'
 
-        Returns:
+        Returns
         -------
         This method only returns values through the *ac* and *fr* parameters
 
@@ -2236,7 +2236,7 @@ class BeamformerSODIX(BeamformerBase):
                         D
                         [numpoints*num_mics]
 
-                        Returns:
+                        Returns
                         -------
                         func - Sodix function to optimize
                              [1]
@@ -2401,7 +2401,7 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
             After the calculation at a certain frequency the value will be set
             to 'True'
 
-        Returns:
+        Returns
         -------
         This method only returns values through the *ac* and *fr* parameters
 
@@ -2553,7 +2553,7 @@ class BeamformerAdaptiveGrid(BeamformerBase, Grid):
         sector: :class:`~acoular.grids.Sector` or derived
             Gives the sector over which to integrate
 
-        Returns:
+        Returns
         -------
         array of floats
             The spectrum (all calculated frequency bands) for the integrated sector.
@@ -2644,7 +2644,7 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
             After the calculation at a certain frequency the value will be set
             to 'True'
 
-        Returns:
+        Returns
         -------
         This method only returns values through the *ac* and *fr* parameters
 
@@ -2714,7 +2714,7 @@ def L_p(x):
     x: array of floats
         The squared sound pressure values
 
-    Returns:
+    Returns
     -------
     array of floats
         The corresponding sound pressure levels in dB.
@@ -2762,7 +2762,7 @@ def integrate(data, grid, sector):
         Alternatively, a :class:`~acoular.grids.Sector`-derived object
         can be used.
 
-    Returns:
+    Returns
     -------
     array of floats
         The spectrum (all calculated frequency bands) for the integrated sector.

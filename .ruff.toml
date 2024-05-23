@@ -61,7 +61,7 @@ fixable = ["ALL"]
 unfixable = []
 
 [lint.pydocstyle]
-convention = "google"  # Accepts: "google", "numpy", or "pep257".
+convention = "numpy"  # Accepts: "google", "numpy", or "pep257".
 
 [format]
 quote-style = "single"

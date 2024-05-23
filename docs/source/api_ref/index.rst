@@ -9,9 +9,11 @@ The following modules are part of Acoular:
 
 .. autosummary::
     :toctree: generated/
+    :recursive:
 
     calib
     configuration
+    demo
     environments
     fbeamform
     grids
@@ -60,4 +62,5 @@ Classes in Acoular and their inheritance
     :members:
     :undoc-members:
     :show-inheritance:
+
 

@@ -121,7 +121,7 @@ def get_radiation_angles(direction, mpos, sourceposition):
     sourceposition : array of floats
         position of the source
 
-    Returns:
+    Returns
     -------
     azi, ele : array of floats
         the angle between the mics and the source
@@ -160,7 +160,7 @@ def get_modes(lOrder, direction, mpos, sourceposition=None):
     sourceposition : array of floats
         position of the source
 
-    Returns:
+    Returns
     -------
     modes : array of floats
         the radiation values at each microphone for each mode
@@ -272,7 +272,7 @@ class TimeSamples(SamplesGenerator):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block) .
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, numchannels).
             The last block may be shorter than num.
@@ -396,7 +396,7 @@ class MaskedTimeSamples(TimeSamples):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block).
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, numchannels).
             The last block may be shorter than num.
@@ -532,7 +532,7 @@ class PointSource(SamplesGenerator):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block) .
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, numchannels).
             The last block may be shorter than num.
@@ -636,7 +636,7 @@ class SphericalHarmonicSource(PointSource):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block) .
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, numchannels).
             The last block may be shorter than num.
@@ -714,7 +714,7 @@ class MovingPointSource(PointSource):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block).
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, numchannels).
             The last block may be shorter than num.
@@ -813,7 +813,7 @@ class PointSourceDipole(PointSource):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block) .
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, numchannels).
             The last block may be shorter than num.
@@ -948,7 +948,7 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block) .
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, numchannels).
             The last block may be shorter than num.
@@ -1067,7 +1067,7 @@ class LineSource(PointSource):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block) .
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, numchannels).
             The last block may be shorter than num.
@@ -1194,7 +1194,7 @@ class MovingLineSource(LineSource, MovingPointSource):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block) .
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, numchannels).
             The last block may be shorter than num.
@@ -1351,7 +1351,7 @@ class UncorrelatedNoiseSource(SamplesGenerator):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block) .
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, numchannels).
             The last block may be shorter than num.
@@ -1458,7 +1458,7 @@ class SourceMixer(SamplesGenerator):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block).
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, numchannels).
             The last block may be shorter than num.
@@ -1529,7 +1529,7 @@ class PointSourceConvolve(PointSource):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block) .
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, numchannels).
             The last block may be shorter than num.

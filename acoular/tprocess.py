@@ -152,7 +152,7 @@ class SamplesGenerator(HasPrivateTraits):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block)
 
-        Returns:
+        Returns
         -------
         No output since `SamplesGenerator` only represents a base class to derive
         other classes from.
@@ -270,7 +270,7 @@ class MaskedTimeInOut(TimeInOut):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block).
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, :attr:`numchannels`).
             The last block may be shorter than num.
@@ -350,7 +350,7 @@ class ChannelMixer(TimeInOut):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block).
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, 1).
             The last block may be shorter than num.
@@ -709,7 +709,7 @@ class AngleTracker(MaskedTimeInOut):
     def _get_average_rpm(self):
         """Returns average revolutions per minute (rpm) over the source samples.
 
-        Returns:
+        Returns
         -------
         rpm : float
             rpm in 1/min.
@@ -839,7 +839,7 @@ class SpatialInterpolator(TimeInOut):
         array_dimension : string
             The Array Dimensions in cylinder coordinates
 
-        Returns:
+        Returns
         -------
         mesh : List[]
             The items of these lists are dependent of the reduced interpolation dimension of each subarray.
@@ -980,7 +980,7 @@ class SpatialInterpolator(TimeInOut):
             If periodicity can be assumed (rotational case)
             this parameter contains the periodicity length
 
-        Returns:
+        Returns
         -------
         pInterp : float[nSamples, nMicsVirtual]
             The interpolated time data at the virtual mics
@@ -1244,7 +1244,7 @@ class SpatialInterpolatorRotation(SpatialInterpolator):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block).
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, :attr:`numchannels`).
             The last block may be shorter than num.
@@ -1300,7 +1300,7 @@ class SpatialInterpolatorConstantRotation(SpatialInterpolator):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block).
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, :attr:`numchannels`).
             The last block may be shorter than num.
@@ -1370,7 +1370,7 @@ class Mixer(TimeInOut):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block).
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, numchannels).
             The last block may be shorter than num.
@@ -1407,7 +1407,7 @@ class TimePower(TimeInOut):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block).
 
-        Returns:
+        Returns
         -------
         Squared output of source.
             Yields samples in blocks of shape (num, numchannels).
@@ -1458,7 +1458,7 @@ class TimeAverage(TimeInOut):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block).
 
-        Returns:
+        Returns
         -------
         Average of the output of source.
             Yields samples in blocks of shape (num, numchannels).
@@ -1485,7 +1485,7 @@ class TimeCumAverage(TimeInOut):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block).
 
-        Returns:
+        Returns
         -------
         Cumulative average of the output of source.
             Yields samples in blocks of shape (num, numchannels).
@@ -1515,7 +1515,7 @@ class TimeReverse(TimeInOut):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block).
 
-        Returns:
+        Returns
         -------
         Yields samples in blocks of shape (num, numchannels).
             Time-reversed output of source.
@@ -1558,7 +1558,7 @@ class Filter(TimeInOut):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block).
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, numchannels).
             Delivers the bandpass filtered output of source.
@@ -1662,7 +1662,7 @@ class FiltFiltOctave(FiltOctave):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block).
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, numchannels).
             Delivers the zero-phase bandpass filtered output of source.
@@ -1791,7 +1791,7 @@ class FilterBank(TimeInOut):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block).
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, numchannels).
             Delivers the bandpass filtered output of source.
@@ -1938,7 +1938,7 @@ class TimeCache(TimeInOut):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block).
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, numchannels).
             The last block may be shorter than num.
@@ -2118,7 +2118,7 @@ class WriteH5(TimeInOut):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block).
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, numchannels).
             The last block may be shorter than num.
@@ -2270,7 +2270,7 @@ class SampleSplitter(TimeInOut):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block).
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, numchannels).
             Delivers a block of samples to the calling object.
@@ -2364,7 +2364,7 @@ class TimeConvolve(TimeInOut):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block).
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, numchannels).
             The last block may be shorter than num.

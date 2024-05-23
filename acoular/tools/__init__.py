@@ -1,7 +1,15 @@
 # ------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
-"""Useful tools for Acoular."""
+"""Useful tools for Acoular.
+
+.. autosummary::
+    :toctree: generated/
+
+    aiaa
+    helpers
+    metrics
+"""
 
 from .aiaa import (
     CsmAIAABenchmark,
