@@ -1,19 +1,9 @@
-name: Build and deploy conda package
+name: Build conda package
 
 on:
-
-  # Triggers the workflow on push or pull request events but only for the main branch
-  push:
-    branches: [ "*" ]
-  pull_request:
-    branches: [ master ]
   workflow_dispatch:
     branches: [ master ] 
   
-
-  # Allows you to run this workflow manually from the Actions tab
-#   workflow_dispatch:
-
 jobs:
   conda_build_and_install:
     name: Test conda deployment of package with Python 3.12
@@ -30,52 +20,4 @@ jobs:
         with:
           name: conda-package
           path: ./conda_package
-
-
-  conda_deploy:
-    needs : conda_build_and_install
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out a copy of the repository
-        uses: actions/checkout@v4
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: conda-package
-          path: ./conda_package
-      - name: Conda environment creation and activation
-        uses: ./.github/actions/setup-conda
-      - name: Install anaconda-client
-        run: conda install anaconda-client
-      - name: Upload package to Anaconda
-        shell: bash
-        env:
-          ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
-          ANACONDA_USER: ${{ secrets.ANACONDA_USER }}
-        run: anaconda -t "$ANACONDA_TOKEN" upload --user "$ANACONDA_USER" ./conda_package/noarch/acoular-*.tar.bz2
-
-
-  alls-green:
-    name: Conda green?
-    if: always()
-    needs:
-      - conda_build_and_install
-      - conda_deploy
-    runs-on: ubuntu-latest
-    steps:
-      - id: workaround
-        uses: actions/github-script@v7
-        with:
-          # Workaround for https://github.com/re-actors/alls-green/issues/29
-          # we strip outputs from the needs object to avoid nested JSON
-          result-encoding: string
-          script: |
-            return JSON.stringify(Object.fromEntries(Object.entries(${{ toJSON(needs) }})
-              .map(([name, { result }]) => [name, { result, outputs: {} }])));
-      - name: All checks passed?
-        uses: re-actors/alls-green@v1.2.2
-        with:
-          jobs: ${{ steps.workaround.outputs.result }}
-          allowed-failures: conda_deploy
-              
 
