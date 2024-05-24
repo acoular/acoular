@@ -55,7 +55,7 @@ def run():
     duration = 1
     nsamples = duration * sfreq
     micgeofile = Path(bpath).parent / 'xml' / 'array_64.xml'
-    
+
     # generate test data, in real life this would come from an array measurement
     mg = MicGeom(from_file=micgeofile)
     n1 = WNoiseGenerator(sample_freq=sfreq, numsamples=nsamples, seed=1)
@@ -94,11 +94,11 @@ def run():
     else:
         print('Matplotlib not found! Please install matplotlib if you want to plot the results.')
         print('For consolation we do an ASCII map plot of the results here.')
-        grayscale = "@%#*+=-:. "[::-1]
-        ind = ((Lm.T-Lm.max()+9).clip(0,9)).astype(int)[::-1]
-        print(78*'-')
-        print('|\n'.join([' '.join(['|']+[grayscale[i] for i in row[2:-1]]) for row in ind])+'|')
-        print(7*'-',''.join([f'{grayscale[i]}={int(Lm.max())-9+i}dB ' for i in range(1,10)]),6*'-')
+        grayscale = '@%#*+=-:. '[::-1]
+        ind = ((Lm.T - Lm.max() + 9).clip(0, 9)).astype(int)[::-1]
+        print(78 * '-')
+        print('|\n'.join([' '.join(['|'] + [grayscale[i] for i in row[2:-1]]) for row in ind]) + '|')
+        print(7 * '-', ''.join([f'{grayscale[i]}={int(Lm.max())-9+i}dB ' for i in range(1, 10)]), 6 * '-')
 
 
 if __name__ == '__main__':
