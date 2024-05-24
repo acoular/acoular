@@ -54,8 +54,8 @@ full = [
 ]
 
 [project.urls]
-homepage = "http://acoular.org"
-documentation = "http://acoular.org"
+homepage = "https://acoular.org"
+documentation = "https://acoular.org"
 repository = "https://github.com/acoular/acoular"
 
 [build-system]
@@ -104,9 +104,8 @@ platform.windows.pre-install-commands = ['systeminfo']
 
 
 [tool.hatch.build.targets.sdist]
-exclude = [
-  "/.github",
-  "/docs",
+include = [
+  "/acoular",
 ]
 
 [tool.hatch.build.targets.wheel]
