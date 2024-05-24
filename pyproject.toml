@@ -4,7 +4,7 @@
 
 [project]
 name = "acoular"
-version = "24.05"
+version = "0.4"
 description = "Python library for acoustic beamforming"
 requires-python = ">=3.8,<=12"
 authors = [
@@ -54,8 +54,8 @@ full = [
 ]
 
 [project.urls]
-homepage = "https://acoular.org"
-documentation = "https://acoular.org"
+homepage = "www.acoular.org"
+documentation = "www.acoular.org"
 repository = "https://github.com/acoular/acoular"
 
 [build-system]
