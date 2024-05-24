@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Rotating point source &#8212; Acoular 24.05 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=fd3f3429" />
+    <script src="../_static/documentation_options.js?v=3fd6b439"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="3D beamforming" href="example_3D_beamforming.html" />
+    <link rel="prev" title="Airfoil in open jet – CMF" href="example_airfoil_in_open_jet_cmf.html" /> 
+  </head><body>
+      <div class="header"><h1 class="heading"><a href="../index.html">
+          <span>Acoular 24.05 documentation</span></a></h1>
+        <h2 class="heading"><span>Rotating point source</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="example_airfoil_in_open_jet_cmf.html">Airfoil in open jet – CMF</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Examples</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="example_3D_beamforming.html">3D beamforming</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="rotating-point-source">
+<h1>Rotating point source<a class="headerlink" href="#rotating-point-source" title="Link to this heading">¶</a></h1>
+<p>This example demonstrates a simple approach to beamforming on a rotating source.</p>
+<p>Download: <a class="reference download internal" download="" href="../_downloads/f59073fb91be41fede2bba6017934d67/example_rotating_point_source.py"><code class="xref download docutils literal notranslate"><span class="pre">example_rotating_point_source.py</span></code></a></p>
+<p>The script produces three figures:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 50.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><figure class="align-center" id="id1" style="width: 80%">
+<a class="reference internal image-reference" href="../_images/example_rotating_point_source_1.png"><img alt="../_images/example_rotating_point_source_1.png" src="../_images/example_rotating_point_source_1.png" style="width: 100%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Results for a time domain beamformer with fixed focus</span><a class="headerlink" href="#id1" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+</td>
+<td><figure class="align-center" id="id2" style="width: 80%">
+<a class="reference internal image-reference" href="../_images/example_rotating_point_source_2.png"><img alt="../_images/example_rotating_point_source_2.png" src="../_images/example_rotating_point_source_2.png" style="width: 100%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Results for a time domain beamformer with focus moving along a circle trajectory</span><a class="headerlink" href="#id2" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+</td>
+<td><figure class="align-center" id="id3" style="width: 80%">
+<a class="reference internal image-reference" href="../_images/example_rotating_point_source_3.png"><img alt="../_images/example_rotating_point_source_3.png" src="../_images/example_rotating_point_source_3.png" style="width: 100%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Time-averaged results for different beamformers</span><a class="headerlink" href="#id3" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Example &quot;Rotating point source&quot; for Acoular library.</span>
+
+<span class="sd">Demonstrates the use of acoular for a point source</span>
+<span class="sd">moving on a circle trajectory.</span>
+
+<span class="sd">Uses synthesized data.</span>
+
+<span class="sd">Copyright (c) 2006-2019 Acoular Development Team.</span>
+<span class="sd">All rights reserved.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">acoular</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">acoular</span><span class="o">.</span><span class="vm">__file__</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">from</span> <span class="nn">acoular</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">BeamformerBase</span><span class="p">,</span>
+    <span class="n">BeamformerCleantSqTraj</span><span class="p">,</span>
+    <span class="n">BeamformerTimeSq</span><span class="p">,</span>
+    <span class="n">BeamformerTimeSqTraj</span><span class="p">,</span>
+    <span class="n">FiltFiltOctave</span><span class="p">,</span>
+    <span class="n">L_p</span><span class="p">,</span>
+    <span class="n">MicGeom</span><span class="p">,</span>
+    <span class="n">Mixer</span><span class="p">,</span>
+    <span class="n">MovingPointSource</span><span class="p">,</span>
+    <span class="n">PointSource</span><span class="p">,</span>
+    <span class="n">PowerSpectra</span><span class="p">,</span>
+    <span class="n">RectGrid</span><span class="p">,</span>
+    <span class="n">SineGenerator</span><span class="p">,</span>
+    <span class="n">SteeringVector</span><span class="p">,</span>
+    <span class="n">TimeAverage</span><span class="p">,</span>
+    <span class="n">TimeCache</span><span class="p">,</span>
+    <span class="n">Trajectory</span><span class="p">,</span>
+    <span class="n">WNoiseGenerator</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">arange</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">linspace</span><span class="p">,</span> <span class="n">pi</span><span class="p">,</span> <span class="n">sin</span><span class="p">,</span> <span class="n">zeros</span>
+<span class="kn">from</span> <span class="nn">pylab</span> <span class="kn">import</span> <span class="n">axis</span><span class="p">,</span> <span class="n">colorbar</span><span class="p">,</span> <span class="n">figure</span><span class="p">,</span> <span class="n">imshow</span><span class="p">,</span> <span class="n">show</span><span class="p">,</span> <span class="n">subplot</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">tight_layout</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">transpose</span>
+
+<span class="c1"># ===============================================================================</span>
+<span class="c1"># some important definitions</span>
+<span class="c1"># ===============================================================================</span>
+
+<span class="n">freq</span> <span class="o">=</span> <span class="mf">6144.0</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">/</span> <span class="mf">128.0</span>  <span class="c1"># frequency of interest (114 Hz)</span>
+<span class="n">sfreq</span> <span class="o">=</span> <span class="mf">6144.0</span> <span class="o">/</span> <span class="mi">2</span>  <span class="c1"># sampling frequency (3072 Hz)</span>
+<span class="n">r</span> <span class="o">=</span> <span class="mf">3.0</span>  <span class="c1"># array radius</span>
+<span class="n">R</span> <span class="o">=</span> <span class="mf">2.5</span>  <span class="c1"># radius of source trajectory</span>
+<span class="n">Z</span> <span class="o">=</span> <span class="mi">4</span>  <span class="c1"># distance of source trajectory from</span>
+<span class="n">rps</span> <span class="o">=</span> <span class="mf">15.0</span> <span class="o">/</span> <span class="mf">60.0</span>  <span class="c1"># revolutions per second</span>
+<span class="n">U</span> <span class="o">=</span> <span class="mf">3.0</span>  <span class="c1"># total number of revolutions</span>
+
+<span class="c1"># ===============================================================================</span>
+<span class="c1"># construct the trajectory for the source</span>
+<span class="c1"># ===============================================================================</span>
+
+<span class="n">tr</span> <span class="o">=</span> <span class="n">Trajectory</span><span class="p">()</span>
+<span class="n">tr1</span> <span class="o">=</span> <span class="n">Trajectory</span><span class="p">()</span>
+<span class="n">tmax</span> <span class="o">=</span> <span class="n">U</span> <span class="o">/</span> <span class="n">rps</span>
+<span class="n">delta_t</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">rps</span> <span class="o">/</span> <span class="mf">16.0</span>  <span class="c1"># 16 steps per revolution</span>
+<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">tmax</span> <span class="o">*</span> <span class="mf">1.001</span><span class="p">,</span> <span class="n">delta_t</span><span class="p">):</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="n">t</span> <span class="o">*</span> <span class="n">rps</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span>  <span class="c1"># angle</span>
+    <span class="c1"># define points for trajectory spline</span>
+    <span class="n">tr</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">R</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">R</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">Z</span><span class="p">)</span>  <span class="c1"># anti-clockwise rotation</span>
+    <span class="n">tr1</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">R</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">R</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">Z</span><span class="p">)</span>  <span class="c1"># anti-clockwise rotation</span>
+
+<span class="c1"># ===============================================================================</span>
+<span class="c1"># define circular microphone array</span>
+<span class="c1"># ===============================================================================</span>
+
+<span class="n">m</span> <span class="o">=</span> <span class="n">MicGeom</span><span class="p">()</span>
+<span class="c1"># set 28 microphone positions</span>
+<span class="n">m</span><span class="o">.</span><span class="n">mpos_tot</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span>
+    <span class="p">[(</span><span class="n">r</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">i</span> <span class="o">+</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">4</span><span class="p">),</span> <span class="n">r</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">i</span> <span class="o">+</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">4</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="kc">False</span><span class="p">)],</span>
+<span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+<span class="c1"># ===============================================================================</span>
+<span class="c1"># define the different source signals</span>
+<span class="c1"># ===============================================================================</span>
+<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&gt;</span> <span class="p">(</span><span class="mi">3</span><span class="p">,):</span>
+    <span class="n">long</span> <span class="o">=</span> <span class="nb">int</span>
+<span class="n">nsamples</span> <span class="o">=</span> <span class="n">long</span><span class="p">(</span><span class="n">sfreq</span> <span class="o">*</span> <span class="n">tmax</span><span class="p">)</span>
+<span class="n">n1</span> <span class="o">=</span> <span class="n">WNoiseGenerator</span><span class="p">(</span><span class="n">sample_freq</span><span class="o">=</span><span class="n">sfreq</span><span class="p">,</span> <span class="n">numsamples</span><span class="o">=</span><span class="n">nsamples</span><span class="p">)</span>
+<span class="n">s1</span> <span class="o">=</span> <span class="n">SineGenerator</span><span class="p">(</span><span class="n">sample_freq</span><span class="o">=</span><span class="n">sfreq</span><span class="p">,</span> <span class="n">numsamples</span><span class="o">=</span><span class="n">nsamples</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="n">freq</span><span class="p">)</span>
+<span class="n">s2</span> <span class="o">=</span> <span class="n">SineGenerator</span><span class="p">(</span><span class="n">sample_freq</span><span class="o">=</span><span class="n">sfreq</span><span class="p">,</span> <span class="n">numsamples</span><span class="o">=</span><span class="n">nsamples</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="n">freq</span><span class="p">,</span> <span class="n">phase</span><span class="o">=</span><span class="n">pi</span><span class="p">)</span>
+
+<span class="c1"># ===============================================================================</span>
+<span class="c1"># define the moving source and one fixed source</span>
+<span class="c1"># ===============================================================================</span>
+
+<span class="n">p0</span> <span class="o">=</span> <span class="n">MovingPointSource</span><span class="p">(</span><span class="n">signal</span><span class="o">=</span><span class="n">s1</span><span class="p">,</span> <span class="n">mics</span><span class="o">=</span><span class="n">m</span><span class="p">,</span> <span class="n">trajectory</span><span class="o">=</span><span class="n">tr1</span><span class="p">)</span>
+<span class="c1"># t = p0 # use only moving source</span>
+<span class="n">p1</span> <span class="o">=</span> <span class="n">PointSource</span><span class="p">(</span><span class="n">signal</span><span class="o">=</span><span class="n">n1</span><span class="p">,</span> <span class="n">mics</span><span class="o">=</span><span class="n">m</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">Z</span><span class="p">))</span>
+<span class="n">t</span> <span class="o">=</span> <span class="n">Mixer</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">p0</span><span class="p">,</span> <span class="n">sources</span><span class="o">=</span><span class="p">[</span><span class="n">p1</span><span class="p">])</span>  <span class="c1"># mix both signals</span>
+<span class="c1"># t = p1 # use only fix source</span>
+
+<span class="c1"># uncomment to save the signal to a wave file</span>
+<span class="c1"># ww = WriteWAV(source = t)</span>
+<span class="c1"># ww.channels = [0,14]</span>
+<span class="c1"># ww.save()</span>
+
+<span class="c1"># ===============================================================================</span>
+<span class="c1"># fixed focus frequency domain beamforming</span>
+<span class="c1"># ===============================================================================</span>
+
+<span class="n">f</span> <span class="o">=</span> <span class="n">PowerSpectra</span><span class="p">(</span>
+    <span class="n">time_data</span><span class="o">=</span><span class="n">t</span><span class="p">,</span>
+    <span class="n">window</span><span class="o">=</span><span class="s1">&#39;Hanning&#39;</span><span class="p">,</span>
+    <span class="n">overlap</span><span class="o">=</span><span class="s1">&#39;50%&#39;</span><span class="p">,</span>
+    <span class="n">block_size</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
+    <span class="n">ind_low</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">ind_high</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+<span class="p">)</span>  <span class="c1"># CSM calculation</span>
+<span class="n">g</span> <span class="o">=</span> <span class="n">RectGrid</span><span class="p">(</span><span class="n">x_min</span><span class="o">=-</span><span class="mf">3.0</span><span class="p">,</span> <span class="n">x_max</span><span class="o">=+</span><span class="mf">3.0</span><span class="p">,</span> <span class="n">y_min</span><span class="o">=-</span><span class="mf">3.0</span><span class="p">,</span> <span class="n">y_max</span><span class="o">=+</span><span class="mf">3.0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="n">Z</span><span class="p">,</span> <span class="n">increment</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+
+<span class="n">st</span> <span class="o">=</span> <span class="n">SteeringVector</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="n">g</span><span class="p">,</span> <span class="n">mics</span><span class="o">=</span><span class="n">m</span><span class="p">)</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">BeamformerBase</span><span class="p">(</span><span class="n">freq_data</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">steer</span><span class="o">=</span><span class="n">st</span><span class="p">,</span> <span class="n">r_diag</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">map1</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">synthetic</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+
+<span class="c1"># ===============================================================================</span>
+<span class="c1"># fixed focus time domain beamforming</span>
+<span class="c1"># ===============================================================================</span>
+<span class="n">fi</span> <span class="o">=</span> <span class="n">FiltFiltOctave</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">t</span><span class="p">,</span> <span class="n">band</span><span class="o">=</span><span class="n">freq</span><span class="p">,</span> <span class="n">fraction</span><span class="o">=</span><span class="s1">&#39;Third octave&#39;</span><span class="p">)</span>
+<span class="n">bt</span> <span class="o">=</span> <span class="n">BeamformerTimeSq</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">fi</span><span class="p">,</span> <span class="n">steer</span><span class="o">=</span><span class="n">st</span><span class="p">,</span> <span class="n">r_diag</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">avgt</span> <span class="o">=</span> <span class="n">TimeAverage</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">bt</span><span class="p">,</span> <span class="n">naverage</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">sfreq</span> <span class="o">*</span> <span class="n">tmax</span> <span class="o">/</span> <span class="mi">16</span><span class="p">))</span>  <span class="c1"># 16 single images</span>
+<span class="n">cacht</span> <span class="o">=</span> <span class="n">TimeCache</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">avgt</span><span class="p">)</span>  <span class="c1"># cache to prevent recalculation</span>
+<span class="n">map2</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>  <span class="c1"># accumulator for average</span>
+<span class="c1"># plot single frames</span>
+<span class="n">figure</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+<span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">cacht</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="mi">1</span><span class="p">):</span>
+    <span class="n">res0</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">map2</span> <span class="o">+=</span> <span class="n">res0</span>  <span class="c1"># average</span>
+    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">subplot</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+    <span class="n">mx</span> <span class="o">=</span> <span class="n">L_p</span><span class="p">(</span><span class="n">res0</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+    <span class="n">imshow</span><span class="p">(</span><span class="n">L_p</span><span class="p">(</span><span class="n">transpose</span><span class="p">(</span><span class="n">res0</span><span class="p">)),</span> <span class="n">vmax</span><span class="o">=</span><span class="n">mx</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">mx</span> <span class="o">-</span> <span class="mi">10</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">g</span><span class="o">.</span><span class="n">extend</span><span class="p">(),</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">)</span>
+    <span class="n">colorbar</span><span class="p">()</span>
+<span class="n">map2</span> <span class="o">/=</span> <span class="n">i</span>
+
+<span class="n">subplot</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">text</span><span class="p">(</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="s1">&#39;fixed</span><span class="se">\n</span><span class="s1">focus&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">)</span>
+<span class="n">axis</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
+<span class="n">tight_layout</span><span class="p">()</span>
+
+
+<span class="c1"># ===============================================================================</span>
+<span class="c1"># moving focus time domain beamforming</span>
+<span class="c1"># ===============================================================================</span>
+
+<span class="c1"># new grid needed, the trajectory starts at origin and is oriented towards +x</span>
+<span class="c1"># thus, with the circular movement assumed, the center of rotation is at (0,2.5)</span>
+<span class="n">g1</span> <span class="o">=</span> <span class="n">RectGrid</span><span class="p">(</span>
+    <span class="n">x_min</span><span class="o">=-</span><span class="mf">3.0</span><span class="p">,</span>
+    <span class="n">x_max</span><span class="o">=+</span><span class="mf">3.0</span><span class="p">,</span>
+    <span class="n">y_min</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">y_max</span><span class="o">=+</span><span class="mf">5.0</span><span class="p">,</span>
+    <span class="n">z</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">increment</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+<span class="p">)</span>  <span class="c1"># grid point of origin is at trajectory (thus z=0)</span>
+<span class="n">st1</span> <span class="o">=</span> <span class="n">SteeringVector</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="n">g1</span><span class="p">,</span> <span class="n">mics</span><span class="o">=</span><span class="n">m</span><span class="p">)</span>
+<span class="c1"># beamforming with trajectory (rvec axis perpendicular to trajectory)</span>
+<span class="n">bts</span> <span class="o">=</span> <span class="n">BeamformerTimeSqTraj</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">fi</span><span class="p">,</span> <span class="n">steer</span><span class="o">=</span><span class="n">st1</span><span class="p">,</span> <span class="n">trajectory</span><span class="o">=</span><span class="n">tr</span><span class="p">,</span> <span class="n">rvec</span><span class="o">=</span><span class="n">array</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)))</span>
+<span class="n">avgts</span> <span class="o">=</span> <span class="n">TimeAverage</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">bts</span><span class="p">,</span> <span class="n">naverage</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">sfreq</span> <span class="o">*</span> <span class="n">tmax</span> <span class="o">/</span> <span class="mi">16</span><span class="p">))</span>  <span class="c1"># 16 single images</span>
+<span class="n">cachts</span> <span class="o">=</span> <span class="n">TimeCache</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">avgts</span><span class="p">)</span>  <span class="c1"># cache to prevent recalculation</span>
+<span class="n">map3</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">g1</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>  <span class="c1"># accumulator for average</span>
+<span class="c1"># plot single frames</span>
+<span class="n">figure</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+<span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">cachts</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="mi">1</span><span class="p">):</span>
+    <span class="n">res0</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">g1</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">map3</span> <span class="o">+=</span> <span class="n">res0</span>  <span class="c1"># average</span>
+    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">subplot</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+    <span class="n">mx</span> <span class="o">=</span> <span class="n">L_p</span><span class="p">(</span><span class="n">res0</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+    <span class="n">imshow</span><span class="p">(</span><span class="n">L_p</span><span class="p">(</span><span class="n">transpose</span><span class="p">(</span><span class="n">res0</span><span class="p">)),</span> <span class="n">vmax</span><span class="o">=</span><span class="n">mx</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">mx</span> <span class="o">-</span> <span class="mi">10</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">g1</span><span class="o">.</span><span class="n">extend</span><span class="p">(),</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">)</span>
+    <span class="n">colorbar</span><span class="p">()</span>
+<span class="n">map3</span> <span class="o">/=</span> <span class="n">i</span>
+
+<span class="n">subplot</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">text</span><span class="p">(</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="s1">&#39;moving</span><span class="se">\n</span><span class="s1">focus&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">)</span>
+<span class="n">axis</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
+<span class="n">tight_layout</span><span class="p">()</span>
+
+<span class="c1"># ===============================================================================</span>
+<span class="c1"># moving focus time domain deconvolution</span>
+<span class="c1"># ===============================================================================</span>
+<span class="c1"># beamforming with trajectory (rvec axis perpendicular to trajectory)</span>
+<span class="n">bct</span> <span class="o">=</span> <span class="n">BeamformerCleantSqTraj</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">fi</span><span class="p">,</span> <span class="n">steer</span><span class="o">=</span><span class="n">st1</span><span class="p">,</span> <span class="n">trajectory</span><span class="o">=</span><span class="n">tr</span><span class="p">,</span> <span class="n">rvec</span><span class="o">=</span><span class="n">array</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)),</span> <span class="n">n_iter</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">avgct</span> <span class="o">=</span> <span class="n">TimeAverage</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">bct</span><span class="p">,</span> <span class="n">naverage</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">sfreq</span> <span class="o">*</span> <span class="n">tmax</span> <span class="o">/</span> <span class="mi">16</span><span class="p">))</span>  <span class="c1"># 16 single images</span>
+<span class="n">cachct</span> <span class="o">=</span> <span class="n">TimeCache</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">avgct</span><span class="p">)</span>  <span class="c1"># cache to prevent recalculation</span>
+<span class="n">map4</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">g1</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>  <span class="c1"># accumulator for average</span>
+<span class="c1"># plot single frames</span>
+
+<span class="n">figure</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+<span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">cachct</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="mi">1</span><span class="p">):</span>
+    <span class="n">res0</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">g1</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">map4</span> <span class="o">+=</span> <span class="n">res0</span>  <span class="c1"># average</span>
+    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">subplot</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+    <span class="n">mx</span> <span class="o">=</span> <span class="n">L_p</span><span class="p">(</span><span class="n">res0</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+    <span class="n">imshow</span><span class="p">(</span><span class="n">L_p</span><span class="p">(</span><span class="n">transpose</span><span class="p">(</span><span class="n">res0</span><span class="p">)),</span> <span class="n">vmax</span><span class="o">=</span><span class="n">mx</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">mx</span> <span class="o">-</span> <span class="mi">10</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">g1</span><span class="o">.</span><span class="n">extend</span><span class="p">(),</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">)</span>
+    <span class="n">colorbar</span><span class="p">()</span>
+<span class="n">map4</span> <span class="o">/=</span> <span class="n">i</span>
+
+<span class="n">subplot</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">text</span><span class="p">(</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="s1">&#39;moving</span><span class="se">\n</span><span class="s1">focus</span><span class="se">\n</span><span class="s1">deconvolution&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">)</span>
+<span class="n">axis</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
+<span class="n">tight_layout</span><span class="p">()</span>
+
+<span class="c1"># ===============================================================================</span>
+<span class="c1"># compare all three results</span>
+<span class="c1"># ===============================================================================</span>
+
+<span class="n">figure</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">mx</span> <span class="o">=</span> <span class="n">L_p</span><span class="p">(</span><span class="n">map1</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+<span class="n">imshow</span><span class="p">(</span><span class="n">L_p</span><span class="p">(</span><span class="n">transpose</span><span class="p">(</span><span class="n">map1</span><span class="p">)),</span> <span class="n">vmax</span><span class="o">=</span><span class="n">mx</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">mx</span> <span class="o">-</span> <span class="mi">10</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">g</span><span class="o">.</span><span class="n">extend</span><span class="p">(),</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">)</span>
+<span class="n">colorbar</span><span class="p">()</span>
+<span class="n">title</span><span class="p">(</span><span class="s1">&#39;frequency domain</span><span class="se">\n</span><span class="s1"> fixed focus&#39;</span><span class="p">)</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">mx</span> <span class="o">=</span> <span class="n">L_p</span><span class="p">(</span><span class="n">map2</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+<span class="n">imshow</span><span class="p">(</span><span class="n">L_p</span><span class="p">(</span><span class="n">transpose</span><span class="p">(</span><span class="n">map2</span><span class="p">)),</span> <span class="n">vmax</span><span class="o">=</span><span class="n">mx</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">mx</span> <span class="o">-</span> <span class="mi">10</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">g</span><span class="o">.</span><span class="n">extend</span><span class="p">(),</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">)</span>
+<span class="n">colorbar</span><span class="p">()</span>
+<span class="n">title</span><span class="p">(</span><span class="s1">&#39;time domain</span><span class="se">\n</span><span class="s1"> fixed focus&#39;</span><span class="p">)</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">mx</span> <span class="o">=</span> <span class="n">L_p</span><span class="p">(</span><span class="n">map3</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+<span class="n">imshow</span><span class="p">(</span><span class="n">L_p</span><span class="p">(</span><span class="n">transpose</span><span class="p">(</span><span class="n">map3</span><span class="p">)),</span> <span class="n">vmax</span><span class="o">=</span><span class="n">mx</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">mx</span> <span class="o">-</span> <span class="mi">10</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">g</span><span class="o">.</span><span class="n">extend</span><span class="p">(),</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">)</span>
+<span class="n">colorbar</span><span class="p">()</span>
+<span class="n">title</span><span class="p">(</span><span class="s1">&#39;time domain</span><span class="se">\n</span><span class="s1"> moving focus&#39;</span><span class="p">)</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="n">mx</span> <span class="o">=</span> <span class="n">L_p</span><span class="p">(</span><span class="n">map4</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+<span class="n">imshow</span><span class="p">(</span><span class="n">L_p</span><span class="p">(</span><span class="n">transpose</span><span class="p">(</span><span class="n">map4</span><span class="p">)),</span> <span class="n">vmax</span><span class="o">=</span><span class="n">mx</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">mx</span> <span class="o">-</span> <span class="mi">10</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">g</span><span class="o">.</span><span class="n">extend</span><span class="p">(),</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">)</span>
+<span class="n">colorbar</span><span class="p">()</span>
+<span class="n">title</span><span class="p">(</span><span class="s1">&#39;time domain</span><span class="se">\n</span><span class="s1"> deconvolution (moving focus)&#39;</span><span class="p">)</span>
+
+<span class="n">tight_layout</span><span class="p">()</span>
+
+<span class="c1"># only display result on screen if this script is run directly</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="example_airfoil_in_open_jet_cmf.html">Airfoil in open jet – CMF</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Examples</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="example_3D_beamforming.html">3D beamforming</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright Acoular Development Team.
+      Last updated on May 24, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
+    </div>
+  </body>
+</html>

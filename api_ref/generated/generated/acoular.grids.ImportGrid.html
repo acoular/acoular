@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>ImportGrid &#8212; Acoular 24.05 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
+    <script src="../../../_static/documentation_options.js?v=3fd6b439"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="LineGrid" href="acoular.grids.LineGrid.html" />
+    <link rel="prev" title="RectGrid3D" href="acoular.grids.RectGrid3D.html" /> 
+  </head><body>
+      <div class="header"><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 24.05 documentation</span></a></h1>
+        <h2 class="heading"><span>ImportGrid</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.grids.RectGrid3D.html">RectGrid3D</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.grids.html">grids</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.grids.LineGrid.html">LineGrid</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="importgrid">
+<h1>ImportGrid<a class="headerlink" href="#importgrid" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.grids.ImportGrid">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.grids.</span></span><span class="sig-name descname"><span class="pre">ImportGrid</span></span><a class="headerlink" href="#acoular.grids.ImportGrid" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.grids.Grid.html#acoular.grids.Grid" title="acoular.grids.Grid"><code class="xref py py-class docutils literal notranslate"><span class="pre">Grid</span></code></a></p>
+<p>Loads a 3D grid from xml file.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.grids.ImportGrid.from_file">
+<span class="sig-name descname"><span class="pre">from_file</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">File(filter=['*.xml'],</span> <span class="pre">desc='name</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">xml</span> <span class="pre">file</span> <span class="pre">to</span> <span class="pre">import')</span></em><a class="headerlink" href="#acoular.grids.ImportGrid.from_file" title="Link to this definition">¶</a></dt>
+<dd><p>Name of the .xml-file from wich to read the data.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.grids.ImportGrid.basename">
+<span class="sig-name descname"><span class="pre">basename</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on='from_file',</span> <span class="pre">desc='basename</span> <span class="pre">of</span> <span class="pre">xml</span> <span class="pre">file')</span></em><a class="headerlink" href="#acoular.grids.ImportGrid.basename" title="Link to this definition">¶</a></dt>
+<dd><p>Basename of the .xml-file, without the extension; is set automatically / readonly.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.grids.ImportGrid.import_gpos">
+<span class="sig-name descname"><span class="pre">import_gpos</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#acoular.grids.ImportGrid.import_gpos" title="Link to this definition">¶</a></dt>
+<dd><p>Import the the grid point locations from .xml file.
+Called when <a class="reference internal" href="#acoular.grids.ImportGrid.basename" title="acoular.grids.ImportGrid.basename"><code class="xref py py-attr docutils literal notranslate"><span class="pre">basename</span></code></a> changes.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.grids.RectGrid3D.html">RectGrid3D</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.grids.html">grids</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.grids.LineGrid.html">LineGrid</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright Acoular Development Team.
+      Last updated on May 24, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
+    </div>
+  </body>
+</html>

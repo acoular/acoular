@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>BeamformerCMF &#8212; Acoular 24.05 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
+    <script src="../../../_static/documentation_options.js?v=3fd6b439"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="BeamformerSODIX" href="acoular.fbeamform.BeamformerSODIX.html" />
+    <link rel="prev" title="BeamformerCleansc" href="acoular.fbeamform.BeamformerCleansc.html" /> 
+  </head><body>
+      <div class="header"><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 24.05 documentation</span></a></h1>
+        <h2 class="heading"><span>BeamformerCMF</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.fbeamform.BeamformerCleansc.html">BeamformerCleansc</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.fbeamform.html">fbeamform</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.fbeamform.BeamformerSODIX.html">BeamformerSODIX</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="beamformercmf">
+<h1>BeamformerCMF<a class="headerlink" href="#beamformercmf" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerCMF">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.fbeamform.</span></span><span class="sig-name descname"><span class="pre">BeamformerCMF</span></span><a class="headerlink" href="#acoular.fbeamform.BeamformerCMF" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.fbeamform.BeamformerBase.html#acoular.fbeamform.BeamformerBase" title="acoular.fbeamform.BeamformerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerBase</span></code></a></p>
+<p>Covariance Matrix Fitting, see <a class="reference internal" href="../../../literature/index.html#yardibi2008"><span class="std std-ref">Yardibi et al., 2008</span></a>.
+This is not really a beamformer, but an inverse method.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerCMF.method">
+<span class="sig-name descname"><span class="pre">method</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Trait(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerCMF.method" title="Link to this definition">¶</a></dt>
+<dd><p>Type of fit method to be used (‘LassoLars’, ‘LassoLarsBIC’,
+‘OMPCV’ or ‘NNLS’, defaults to ‘LassoLars’).
+These methods are implemented in
+the <a class="reference external" href="http://scikit-learn.org/stable/user_guide.html">scikit-learn</a>
+module.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerCMF.alpha">
+<span class="sig-name descname"><span class="pre">alpha</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Range(0.0,</span> <span class="pre">1.0,</span> <span class="pre">0.0,</span> <span class="pre">desc='Lasso</span> <span class="pre">weight</span> <span class="pre">factor')</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerCMF.alpha" title="Link to this definition">¶</a></dt>
+<dd><p>Weight factor for LassoLars method,
+defaults to 0.0.
+(Use values in the order of 10^⁻9 for good results.)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerCMF.max_iter">
+<span class="sig-name descname"><span class="pre">max_iter</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Int(500,</span> <span class="pre">desc='maximum</span> <span class="pre">number</span> <span class="pre">of</span> <span class="pre">iterations')</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerCMF.max_iter" title="Link to this definition">¶</a></dt>
+<dd><p>Maximum number of iterations,
+tradeoff between speed and precision;
+defaults to 500</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerCMF.unit_mult">
+<span class="sig-name descname"><span class="pre">unit_mult</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(1e9,</span> <span class="pre">desc='unit</span> <span class="pre">multiplier')</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerCMF.unit_mult" title="Link to this definition">¶</a></dt>
+<dd><p>Unit multiplier for evaluating, e.g., nPa instead of Pa.
+Values are converted back before returning.
+Temporary conversion may be necessary to not reach machine epsilon
+within fitting method algorithms. Defaults to 1e9.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerCMF.show">
+<span class="sig-name descname"><span class="pre">show</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Bool(False,</span> <span class="pre">desc='show</span> <span class="pre">output</span> <span class="pre">of</span> <span class="pre">PyLops</span> <span class="pre">solvers')</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerCMF.show" title="Link to this definition">¶</a></dt>
+<dd><p>If True, shows the status of the PyLops solver. Only relevant in case of FISTA or Split_Bregman</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerCMF.calc">
+<span class="sig-name descname"><span class="pre">calc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ac</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fr</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.fbeamform.BeamformerCMF.calc" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the CMF result for the frequencies defined by <code class="xref py py-attr docutils literal notranslate"><span class="pre">freq_data</span></code>.</p>
+<p>This is an internal helper function that is automatically called when
+accessing the beamformer’s <a class="reference internal" href="acoular.fbeamform.BeamformerBase.html#acoular.fbeamform.BeamformerBase.result" title="acoular.fbeamform.BeamformerBase.result"><code class="xref py py-attr docutils literal notranslate"><span class="pre">result</span></code></a> or calling
+its <a class="reference internal" href="acoular.fbeamform.BeamformerBase.html#acoular.fbeamform.BeamformerBase.synthetic" title="acoular.fbeamform.BeamformerBase.synthetic"><code class="xref py py-meth docutils literal notranslate"><span class="pre">synthetic()</span></code></a> method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>ac</strong><span class="classifier">array of floats</span></dt><dd><p>This array of dimension ([number of frequencies]x[number of gridpoints])
+is used as call-by-reference parameter and contains the calculated
+value after calling this method.</p>
+</dd>
+<dt><strong>fr</strong><span class="classifier">array of booleans</span></dt><dd><p>The entries of this [number of frequencies]-sized array are either
+‘True’ (if the result for this frequency has already been calculated)
+or ‘False’ (for the frequencies where the result has yet to be calculated).
+After the calculation at a certain frequency the value will be set
+to ‘True’</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>This method only returns values through the <em>ac</em> and <em>fr</em> parameters</dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.fbeamform.BeamformerCleansc.html">BeamformerCleansc</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.fbeamform.html">fbeamform</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.fbeamform.BeamformerSODIX.html">BeamformerSODIX</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright Acoular Development Team.
+      Last updated on May 24, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
+    </div>
+  </body>
+</html>

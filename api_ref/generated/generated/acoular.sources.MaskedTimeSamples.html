@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>MaskedTimeSamples &#8212; Acoular 24.05 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
+    <script src="../../../_static/documentation_options.js?v=3fd6b439"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="PointSource" href="acoular.sources.PointSource.html" />
+    <link rel="prev" title="TimeSamples" href="acoular.sources.TimeSamples.html" /> 
+  </head><body>
+      <div class="header"><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 24.05 documentation</span></a></h1>
+        <h2 class="heading"><span>MaskedTimeSamples</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.sources.TimeSamples.html">TimeSamples</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.sources.html">sources</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.sources.PointSource.html">PointSource</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="maskedtimesamples">
+<h1>MaskedTimeSamples<a class="headerlink" href="#maskedtimesamples" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.sources.MaskedTimeSamples">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.sources.</span></span><span class="sig-name descname"><span class="pre">MaskedTimeSamples</span></span><a class="headerlink" href="#acoular.sources.MaskedTimeSamples" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.sources.TimeSamples.html#acoular.sources.TimeSamples" title="acoular.sources.TimeSamples"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSamples</span></code></a></p>
+<p>Container for time data in <cite>*.h5</cite> format.</p>
+<p>This class loads measured data from h5 files
+and provides information about this data.
+It supports storing information about (in)valid samples and (in)valid channels
+It also serves as an interface where the data can be accessed
+(e.g. for use in a block chain) via the <a class="reference internal" href="#acoular.sources.MaskedTimeSamples.result" title="acoular.sources.MaskedTimeSamples.result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">result()</span></code></a> generator.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.MaskedTimeSamples.start">
+<span class="sig-name descname"><span class="pre">start</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CLong(0,</span> <span class="pre">desc='start</span> <span class="pre">of</span> <span class="pre">valid</span> <span class="pre">samples')</span></em><a class="headerlink" href="#acoular.sources.MaskedTimeSamples.start" title="Link to this definition">¶</a></dt>
+<dd><p>Index of the first sample to be considered valid.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.MaskedTimeSamples.stop">
+<span class="sig-name descname"><span class="pre">stop</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Trait(None,</span> <span class="pre">None,</span> <span class="pre">CLong,</span> <span class="pre">desc='stop</span> <span class="pre">of</span> <span class="pre">valid</span> <span class="pre">samples')</span></em><a class="headerlink" href="#acoular.sources.MaskedTimeSamples.stop" title="Link to this definition">¶</a></dt>
+<dd><p>Index of the last sample to be considered valid.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.MaskedTimeSamples.invalid_channels">
+<span class="sig-name descname"><span class="pre">invalid_channels</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">ListInt(desc='list</span> <span class="pre">of</span> <span class="pre">invalid</span> <span class="pre">channels')</span></em><a class="headerlink" href="#acoular.sources.MaskedTimeSamples.invalid_channels" title="Link to this definition">¶</a></dt>
+<dd><p>Channels that are to be treated as invalid.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.MaskedTimeSamples.channels">
+<span class="sig-name descname"><span class="pre">channels</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['invalid_channels',</span> <span class="pre">'numchannels_total'],</span> <span class="pre">desc='channel</span> <span class="pre">mask')</span></em><a class="headerlink" href="#acoular.sources.MaskedTimeSamples.channels" title="Link to this definition">¶</a></dt>
+<dd><p>Channel mask to serve as an index for all valid channels, is set automatically.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.MaskedTimeSamples.numchannels_total">
+<span class="sig-name descname"><span class="pre">numchannels_total</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CLong(0,</span> <span class="pre">desc='total</span> <span class="pre">number</span> <span class="pre">of</span> <span class="pre">input</span> <span class="pre">channels')</span></em><a class="headerlink" href="#acoular.sources.MaskedTimeSamples.numchannels_total" title="Link to this definition">¶</a></dt>
+<dd><p>Number of channels (including invalid channels), is set automatically.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.MaskedTimeSamples.numsamples_total">
+<span class="sig-name descname"><span class="pre">numsamples_total</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CLong(0,</span> <span class="pre">desc='total</span> <span class="pre">number</span> <span class="pre">of</span> <span class="pre">samples</span> <span class="pre">per</span> <span class="pre">channel')</span></em><a class="headerlink" href="#acoular.sources.MaskedTimeSamples.numsamples_total" title="Link to this definition">¶</a></dt>
+<dd><p>Number of time data samples (including invalid samples), is set automatically.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.MaskedTimeSamples.numchannels">
+<span class="sig-name descname"><span class="pre">numchannels</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['invalid_channels',</span> <span class="pre">'numchannels_total'],</span> <span class="pre">desc='number</span> <span class="pre">of</span> <span class="pre">valid</span> <span class="pre">input</span> <span class="pre">channels')</span></em><a class="headerlink" href="#acoular.sources.MaskedTimeSamples.numchannels" title="Link to this definition">¶</a></dt>
+<dd><p>Number of valid channels, is set automatically.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.MaskedTimeSamples.numsamples">
+<span class="sig-name descname"><span class="pre">numsamples</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['start',</span> <span class="pre">'stop',</span> <span class="pre">'numsamples_total'],</span> <span class="pre">desc='number</span> <span class="pre">of</span> <span class="pre">valid</span> <span class="pre">samples</span> <span class="pre">per</span> <span class="pre">channel')</span></em><a class="headerlink" href="#acoular.sources.MaskedTimeSamples.numsamples" title="Link to this definition">¶</a></dt>
+<dd><p>Number of valid time data samples, is set automatically.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.sources.MaskedTimeSamples.load_data">
+<span class="sig-name descname"><span class="pre">load_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#acoular.sources.MaskedTimeSamples.load_data" title="Link to this definition">¶</a></dt>
+<dd><p>Open the .h5 file and set attributes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.sources.MaskedTimeSamples.load_timedata">
+<span class="sig-name descname"><span class="pre">load_timedata</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#acoular.sources.MaskedTimeSamples.load_timedata" title="Link to this definition">¶</a></dt>
+<dd><p>Loads timedata from .h5 file. Only for internal use.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.sources.MaskedTimeSamples.result">
+<span class="sig-name descname"><span class="pre">result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">128</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.sources.MaskedTimeSamples.result" title="Link to this definition">¶</a></dt>
+<dd><p>Python generator that yields the output block-wise.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>num</strong><span class="classifier">integer, defaults to 128</span></dt><dd><p>This parameter defines the size of the blocks to be yielded
+(i.e. the number of samples per block).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>Samples in blocks of shape (num, numchannels).</dt><dd><p>The last block may be shorter than num.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.sources.TimeSamples.html">TimeSamples</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.sources.html">sources</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.sources.PointSource.html">PointSource</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright Acoular Development Team.
+      Last updated on May 24, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
+    </div>
+  </body>
+</html>

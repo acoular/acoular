@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>CsmAIAABenchmark &#8212; Acoular 24.05 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=fd3f3429" />
+    <script src="../../../../_static/documentation_options.js?v=3fd6b439"></script>
+    <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="MicAIAABenchmark" href="acoular.tools.aiaa.MicAIAABenchmark.html" />
+    <link rel="prev" title="TriggerAIAABenchmark" href="acoular.tools.aiaa.TriggerAIAABenchmark.html" /> 
+  </head><body>
+      <div class="header"><h1 class="heading"><a href="../../../../index.html">
+          <span>Acoular 24.05 documentation</span></a></h1>
+        <h2 class="heading"><span>CsmAIAABenchmark</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tools.aiaa.TriggerAIAABenchmark.html">TriggerAIAABenchmark</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tools.aiaa.html">aiaa</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tools.aiaa.MicAIAABenchmark.html">MicAIAABenchmark</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="csmaiaabenchmark">
+<h1>CsmAIAABenchmark<a class="headerlink" href="#csmaiaabenchmark" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.tools.aiaa.CsmAIAABenchmark">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.tools.aiaa.</span></span><span class="sig-name descname"><span class="pre">CsmAIAABenchmark</span></span><a class="headerlink" href="#acoular.tools.aiaa.CsmAIAABenchmark" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../acoular.spectra.PowerSpectraImport.html#acoular.spectra.PowerSpectraImport" title="acoular.spectra.PowerSpectraImport"><code class="xref py py-class docutils literal notranslate"><span class="pre">PowerSpectraImport</span></code></a></p>
+<p>Class to load the CSM that is stored in AIAA Benchmark HDF5 file.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tools.aiaa.CsmAIAABenchmark.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">File(filter=['*.h5'],</span> <span class="pre">desc='name</span> <span class="pre">of</span> <span class="pre">data</span> <span class="pre">file')</span></em><a class="headerlink" href="#acoular.tools.aiaa.CsmAIAABenchmark.name" title="Link to this definition">¶</a></dt>
+<dd><p>Full name of the .h5 file with data</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tools.aiaa.CsmAIAABenchmark.basename">
+<span class="sig-name descname"><span class="pre">basename</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.tools.aiaa.CsmAIAABenchmark.basename" title="Link to this definition">¶</a></dt>
+<dd><p>Basename of the .h5 file with data, is set automatically.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tools.aiaa.CsmAIAABenchmark.numchannels">
+<span class="sig-name descname"><span class="pre">numchannels</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property()</span></em><a class="headerlink" href="#acoular.tools.aiaa.CsmAIAABenchmark.numchannels" title="Link to this definition">¶</a></dt>
+<dd><p>number of channels</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tools.aiaa.CsmAIAABenchmark.h5f">
+<span class="sig-name descname"><span class="pre">h5f</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Instance(H5FileBase,</span> <span class="pre">transient=True)</span></em><a class="headerlink" href="#acoular.tools.aiaa.CsmAIAABenchmark.h5f" title="Link to this definition">¶</a></dt>
+<dd><p>HDF5 file object</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.tools.aiaa.CsmAIAABenchmark.load_data">
+<span class="sig-name descname"><span class="pre">load_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#acoular.tools.aiaa.CsmAIAABenchmark.load_data" title="Link to this definition">¶</a></dt>
+<dd><p>Open the .h5 file and set attributes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.tools.aiaa.CsmAIAABenchmark.fftfreq">
+<span class="sig-name descname"><span class="pre">fftfreq</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#acoular.tools.aiaa.CsmAIAABenchmark.fftfreq" title="Link to this definition">¶</a></dt>
+<dd><p>Return the Discrete Fourier Transform sample frequencies.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ndarray</dt><dd><p>Array of length <em>block_size/2+1</em> containing the sample frequencies.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tools.aiaa.TriggerAIAABenchmark.html">TriggerAIAABenchmark</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tools.aiaa.html">aiaa</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tools.aiaa.MicAIAABenchmark.html">MicAIAABenchmark</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright Acoular Development Team.
+      Last updated on May 24, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
+    </div>
+  </body>
+</html>

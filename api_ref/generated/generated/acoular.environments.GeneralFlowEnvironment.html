@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>GeneralFlowEnvironment &#8212; Acoular 24.05 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
+    <script src="../../../_static/documentation_options.js?v=3fd6b439"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="FlowField" href="acoular.environments.FlowField.html" />
+    <link rel="prev" title="UniformFlowEnvironment" href="acoular.environments.UniformFlowEnvironment.html" /> 
+  </head><body>
+      <div class="header"><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 24.05 documentation</span></a></h1>
+        <h2 class="heading"><span>GeneralFlowEnvironment</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.environments.UniformFlowEnvironment.html">UniformFlowEnvironment</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.environments.html">environments</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.environments.FlowField.html">FlowField</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="generalflowenvironment">
+<h1>GeneralFlowEnvironment<a class="headerlink" href="#generalflowenvironment" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.environments.GeneralFlowEnvironment">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.environments.</span></span><span class="sig-name descname"><span class="pre">GeneralFlowEnvironment</span></span><a class="headerlink" href="#acoular.environments.GeneralFlowEnvironment" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.environments.Environment.html#acoular.environments.Environment" title="acoular.environments.Environment"><code class="xref py py-class docutils literal notranslate"><span class="pre">Environment</span></code></a></p>
+<p>An acoustic environment with a generic flow field.</p>
+<p>This class provides the facilities to calculate the travel time (distances)
+between grid point locations and microphone locations in a generic flow
+field with non-uniform velocities that depend on the location. The
+algorithm for the calculation uses a ray-tracing approach that bases on
+rays cast from every microphone position in multiple directions and traced
+backwards in time. The result is interpolated within a tetrahedal grid
+spanned between these rays.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.GeneralFlowEnvironment.ff">
+<span class="sig-name descname"><span class="pre">ff</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Trait(FlowField,</span> <span class="pre">desc='flow</span> <span class="pre">field')</span></em><a class="headerlink" href="#acoular.environments.GeneralFlowEnvironment.ff" title="Link to this definition">¶</a></dt>
+<dd><p>The flow field, must be of type <a class="reference internal" href="acoular.environments.FlowField.html#acoular.environments.FlowField" title="acoular.environments.FlowField"><code class="xref py py-class docutils literal notranslate"><span class="pre">FlowField</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.GeneralFlowEnvironment.N">
+<span class="sig-name descname"><span class="pre">N</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Int(200,</span> <span class="pre">desc='number</span> <span class="pre">of</span> <span class="pre">rays</span> <span class="pre">per</span> <span class="pre">Om')</span></em><a class="headerlink" href="#acoular.environments.GeneralFlowEnvironment.N" title="Link to this definition">¶</a></dt>
+<dd><p>Number of rays used per solid angle <span class="math notranslate nohighlight">\(\Omega\)</span>, defaults to 200.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.GeneralFlowEnvironment.Om">
+<span class="sig-name descname"><span class="pre">Om</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(pi,</span> <span class="pre">desc='maximum</span> <span class="pre">solid</span> <span class="pre">angle')</span></em><a class="headerlink" href="#acoular.environments.GeneralFlowEnvironment.Om" title="Link to this definition">¶</a></dt>
+<dd><p>The maximum solid angle used in the algorithm, defaults to <span class="math notranslate nohighlight">\(\pi\)</span>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.environments.GeneralFlowEnvironment.get_interpolator">
+<span class="sig-name descname"><span class="pre">get_interpolator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">roi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.environments.GeneralFlowEnvironment.get_interpolator" title="Link to this definition">¶</a></dt>
+<dd><p>Gets an LinearNDInterpolator object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>roi</strong><span class="classifier">array of floats of shape (3, N)</span></dt><dd><p>The locations of points in the region of interest in 3D cartesian
+co-ordinates. Used to estimate the maximum distance and ROI
+extension and center.</p>
+</dd>
+<dt><strong>x0</strong><span class="classifier">array of floats of shape (3)</span></dt><dd><p>The location of the microphone in 3D cartesian co-ordinates.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>LinearNDInterpolator object</dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.environments.UniformFlowEnvironment.html">UniformFlowEnvironment</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.environments.html">environments</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.environments.FlowField.html">FlowField</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright Acoular Development Team.
+      Last updated on May 24, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
+    </div>
+  </body>
+</html>

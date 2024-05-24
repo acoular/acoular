@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>BeamformerMusic &#8212; Acoular 24.05 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
+    <script src="../../../_static/documentation_options.js?v=3fd6b439"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="BeamformerClean" href="acoular.fbeamform.BeamformerClean.html" />
+    <link rel="prev" title="BeamformerEig" href="acoular.fbeamform.BeamformerEig.html" /> 
+  </head><body>
+      <div class="header"><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 24.05 documentation</span></a></h1>
+        <h2 class="heading"><span>BeamformerMusic</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.fbeamform.BeamformerEig.html">BeamformerEig</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.fbeamform.html">fbeamform</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.fbeamform.BeamformerClean.html">BeamformerClean</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="beamformermusic">
+<h1>BeamformerMusic<a class="headerlink" href="#beamformermusic" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerMusic">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.fbeamform.</span></span><span class="sig-name descname"><span class="pre">BeamformerMusic</span></span><a class="headerlink" href="#acoular.fbeamform.BeamformerMusic" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.fbeamform.BeamformerEig.html#acoular.fbeamform.BeamformerEig" title="acoular.fbeamform.BeamformerEig"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerEig</span></code></a></p>
+<p>Beamforming using the MUSIC algorithm, see <a class="reference internal" href="../../../literature/index.html#schmidt1986"><span class="std std-ref">Schmidt, 1986</span></a>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerMusic.calc">
+<span class="sig-name descname"><span class="pre">calc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ac</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fr</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.fbeamform.BeamformerMusic.calc" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the MUSIC result for the frequencies defined by <code class="xref py py-attr docutils literal notranslate"><span class="pre">freq_data</span></code>.</p>
+<p>This is an internal helper function that is automatically called when
+accessing the beamformer’s <a class="reference internal" href="acoular.fbeamform.BeamformerBase.html#acoular.fbeamform.BeamformerBase.result" title="acoular.fbeamform.BeamformerBase.result"><code class="xref py py-attr docutils literal notranslate"><span class="pre">result</span></code></a> or calling
+its <a class="reference internal" href="acoular.fbeamform.BeamformerBase.html#acoular.fbeamform.BeamformerBase.synthetic" title="acoular.fbeamform.BeamformerBase.synthetic"><code class="xref py py-meth docutils literal notranslate"><span class="pre">synthetic()</span></code></a> method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>ac</strong><span class="classifier">array of floats</span></dt><dd><p>This array of dimension ([number of frequencies]x[number of gridpoints])
+is used as call-by-reference parameter and contains the calculated
+value after calling this method.</p>
+</dd>
+<dt><strong>fr</strong><span class="classifier">array of booleans</span></dt><dd><p>The entries of this [number of frequencies]-sized array are either
+‘True’ (if the result for this frequency has already been calculated)
+or ‘False’ (for the frequencies where the result has yet to be calculated).
+After the calculation at a certain frequency the value will be set
+to ‘True’</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>This method only returns values through the <em>ac</em> and <em>fr</em> parameters</dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.fbeamform.BeamformerEig.html">BeamformerEig</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.fbeamform.html">fbeamform</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.fbeamform.BeamformerClean.html">BeamformerClean</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright Acoular Development Team.
+      Last updated on May 24, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
+    </div>
+  </body>
+</html>

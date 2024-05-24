@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>TimeInOut &#8212; Acoular 24.05 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
+    <script src="../../../_static/documentation_options.js?v=3fd6b439"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="MaskedTimeInOut" href="acoular.tprocess.MaskedTimeInOut.html" />
+    <link rel="prev" title="SamplesGenerator" href="acoular.tprocess.SamplesGenerator.html" /> 
+  </head><body>
+      <div class="header"><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 24.05 documentation</span></a></h1>
+        <h2 class="heading"><span>TimeInOut</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tprocess.SamplesGenerator.html">SamplesGenerator</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tprocess.html">tprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tprocess.MaskedTimeInOut.html">MaskedTimeInOut</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="timeinout">
+<h1>TimeInOut<a class="headerlink" href="#timeinout" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.tprocess.TimeInOut">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.tprocess.</span></span><span class="sig-name descname"><span class="pre">TimeInOut</span></span><a class="headerlink" href="#acoular.tprocess.TimeInOut" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.tprocess.SamplesGenerator.html#acoular.tprocess.SamplesGenerator" title="acoular.tprocess.SamplesGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplesGenerator</span></code></a></p>
+<p>Base class for any time domain signal processing block,
+gets samples from <a class="reference internal" href="#acoular.tprocess.TimeInOut.source" title="acoular.tprocess.TimeInOut.source"><code class="xref py py-attr docutils literal notranslate"><span class="pre">source</span></code></a> and generates output via the
+generator <a class="reference internal" href="#acoular.tprocess.TimeInOut.result" title="acoular.tprocess.TimeInOut.result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">result()</span></code></a>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.TimeInOut.source">
+<span class="sig-name descname"><span class="pre">source</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Trait(SamplesGenerator)</span></em><a class="headerlink" href="#acoular.tprocess.TimeInOut.source" title="Link to this definition">¶</a></dt>
+<dd><p>Data source; <code class="xref py py-class docutils literal notranslate"><span class="pre">SamplesGenerator</span></code> or derived object.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.TimeInOut.sample_freq">
+<span class="sig-name descname"><span class="pre">sample_freq</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Delegate('source')</span></em><a class="headerlink" href="#acoular.tprocess.TimeInOut.sample_freq" title="Link to this definition">¶</a></dt>
+<dd><p>Sampling frequency of output signal, as given by <a class="reference internal" href="#acoular.tprocess.TimeInOut.source" title="acoular.tprocess.TimeInOut.source"><code class="xref py py-attr docutils literal notranslate"><span class="pre">source</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.TimeInOut.numchannels">
+<span class="sig-name descname"><span class="pre">numchannels</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Delegate('source')</span></em><a class="headerlink" href="#acoular.tprocess.TimeInOut.numchannels" title="Link to this definition">¶</a></dt>
+<dd><p>Number of channels in output, as given by <a class="reference internal" href="#acoular.tprocess.TimeInOut.source" title="acoular.tprocess.TimeInOut.source"><code class="xref py py-attr docutils literal notranslate"><span class="pre">source</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.TimeInOut.numsamples">
+<span class="sig-name descname"><span class="pre">numsamples</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Delegate('source')</span></em><a class="headerlink" href="#acoular.tprocess.TimeInOut.numsamples" title="Link to this definition">¶</a></dt>
+<dd><p>Number of samples in output, as given by <a class="reference internal" href="#acoular.tprocess.TimeInOut.source" title="acoular.tprocess.TimeInOut.source"><code class="xref py py-attr docutils literal notranslate"><span class="pre">source</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.tprocess.TimeInOut.result">
+<span class="sig-name descname"><span class="pre">result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.tprocess.TimeInOut.result" title="Link to this definition">¶</a></dt>
+<dd><p>Python generator: dummy function, just echoes the output of source,
+yields samples in blocks of shape (num, <a class="reference internal" href="#acoular.tprocess.TimeInOut.numchannels" title="acoular.tprocess.TimeInOut.numchannels"><code class="xref py py-attr docutils literal notranslate"><span class="pre">numchannels</span></code></a>), the last block
+may be shorter than num.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tprocess.SamplesGenerator.html">SamplesGenerator</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tprocess.html">tprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tprocess.MaskedTimeInOut.html">MaskedTimeInOut</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright Acoular Development Team.
+      Last updated on May 24, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
+    </div>
+  </body>
+</html>

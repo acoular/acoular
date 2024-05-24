@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>MovingPointSource &#8212; Acoular 24.05 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
+    <script src="../../../_static/documentation_options.js?v=3fd6b439"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="MovingPointSourceDipole" href="acoular.sources.MovingPointSourceDipole.html" />
+    <link rel="prev" title="LineSource" href="acoular.sources.LineSource.html" /> 
+  </head><body>
+      <div class="header"><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 24.05 documentation</span></a></h1>
+        <h2 class="heading"><span>MovingPointSource</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.sources.LineSource.html">LineSource</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.sources.html">sources</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.sources.MovingPointSourceDipole.html">MovingPointSourceDipole</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="movingpointsource">
+<h1>MovingPointSource<a class="headerlink" href="#movingpointsource" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.sources.MovingPointSource">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.sources.</span></span><span class="sig-name descname"><span class="pre">MovingPointSource</span></span><a class="headerlink" href="#acoular.sources.MovingPointSource" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.sources.PointSource.html#acoular.sources.PointSource" title="acoular.sources.PointSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">PointSource</span></code></a></p>
+<p>Class to define a point source with an arbitrary
+signal moving along a given trajectory.
+This can be used in simulations.</p>
+<p>The output is being generated via the <a class="reference internal" href="#acoular.sources.MovingPointSource.result" title="acoular.sources.MovingPointSource.result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">result()</span></code></a> generator.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.MovingPointSource.conv_amp">
+<span class="sig-name descname"><span class="pre">conv_amp</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Bool(False,</span> <span class="pre">desc='determines</span> <span class="pre">if</span> <span class="pre">convective</span> <span class="pre">amplification</span> <span class="pre">is</span> <span class="pre">considered')</span></em><a class="headerlink" href="#acoular.sources.MovingPointSource.conv_amp" title="Link to this definition">¶</a></dt>
+<dd><p>Considering of convective amplification</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.MovingPointSource.trajectory">
+<span class="sig-name descname"><span class="pre">trajectory</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Trait(Trajectory,</span> <span class="pre">desc='trajectory</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">source')</span></em><a class="headerlink" href="#acoular.sources.MovingPointSource.trajectory" title="Link to this definition">¶</a></dt>
+<dd><p>Trajectory of the source,
+instance of the <a class="reference internal" href="acoular.trajectory.Trajectory.html#acoular.trajectory.Trajectory" title="acoular.trajectory.Trajectory"><code class="xref py py-class docutils literal notranslate"><span class="pre">Trajectory</span></code></a> class.
+The start time is assumed to be the same as for the samples.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.sources.MovingPointSource.result">
+<span class="sig-name descname"><span class="pre">result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">128</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.sources.MovingPointSource.result" title="Link to this definition">¶</a></dt>
+<dd><p>Python generator that yields the output at microphones block-wise.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>num</strong><span class="classifier">integer, defaults to 128</span></dt><dd><p>This parameter defines the size of the blocks to be yielded
+(i.e. the number of samples per block).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>Samples in blocks of shape (num, numchannels).</dt><dd><p>The last block may be shorter than num.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.sources.LineSource.html">LineSource</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.sources.html">sources</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.sources.MovingPointSourceDipole.html">MovingPointSourceDipole</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright Acoular Development Team.
+      Last updated on May 24, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
+    </div>
+  </body>
+</html>

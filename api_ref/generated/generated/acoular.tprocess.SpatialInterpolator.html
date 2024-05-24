@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>SpatialInterpolator &#8212; Acoular 24.05 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
+    <script src="../../../_static/documentation_options.js?v=3fd6b439"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="SpatialInterpolatorRotation" href="acoular.tprocess.SpatialInterpolatorRotation.html" />
+    <link rel="prev" title="ChannelMixer" href="acoular.tprocess.ChannelMixer.html" /> 
+  </head><body>
+      <div class="header"><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 24.05 documentation</span></a></h1>
+        <h2 class="heading"><span>SpatialInterpolator</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tprocess.ChannelMixer.html">ChannelMixer</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tprocess.html">tprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tprocess.SpatialInterpolatorRotation.html">SpatialInterpolatorRotation</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="spatialinterpolator">
+<h1>SpatialInterpolator<a class="headerlink" href="#spatialinterpolator" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.tprocess.SpatialInterpolator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.tprocess.</span></span><span class="sig-name descname"><span class="pre">SpatialInterpolator</span></span><a class="headerlink" href="#acoular.tprocess.SpatialInterpolator" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.tprocess.TimeInOut.html#acoular.tprocess.TimeInOut" title="acoular.tprocess.TimeInOut"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeInOut</span></code></a></p>
+<p>Base class for spatial interpolation of microphone data.
+Gets samples from <a class="reference internal" href="#acoular.tprocess.SpatialInterpolator.source" title="acoular.tprocess.SpatialInterpolator.source"><code class="xref py py-attr docutils literal notranslate"><span class="pre">source</span></code></a> and generates output via the
+generator <code class="xref py py-meth docutils literal notranslate"><span class="pre">result()</span></code>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.SpatialInterpolator.mics">
+<span class="sig-name descname"><span class="pre">mics</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Instance(MicGeom(),</span> <span class="pre">desc='microphone</span> <span class="pre">geometry')</span></em><a class="headerlink" href="#acoular.tprocess.SpatialInterpolator.mics" title="Link to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="acoular.microphones.MicGeom.html#acoular.microphones.MicGeom" title="acoular.microphones.MicGeom"><code class="xref py py-class docutils literal notranslate"><span class="pre">MicGeom</span></code></a> object that provides the real microphone locations.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.SpatialInterpolator.mics_virtual">
+<span class="sig-name descname"><span class="pre">mics_virtual</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(desc='microphone</span> <span class="pre">geometry')</span></em><a class="headerlink" href="#acoular.tprocess.SpatialInterpolator.mics_virtual" title="Link to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="acoular.microphones.MicGeom.html#acoular.microphones.MicGeom" title="acoular.microphones.MicGeom"><code class="xref py py-class docutils literal notranslate"><span class="pre">MicGeom</span></code></a> object that provides the virtual microphone locations.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.SpatialInterpolator.source">
+<span class="sig-name descname"><span class="pre">source</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Instance(SamplesGenerator)</span></em><a class="headerlink" href="#acoular.tprocess.SpatialInterpolator.source" title="Link to this definition">¶</a></dt>
+<dd><p>Data source; <a class="reference internal" href="acoular.tprocess.SamplesGenerator.html#acoular.tprocess.SamplesGenerator" title="acoular.tprocess.SamplesGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplesGenerator</span></code></a> or derived object.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.SpatialInterpolator.method">
+<span class="sig-name descname"><span class="pre">method</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Trait(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.tprocess.SpatialInterpolator.method" title="Link to this definition">¶</a></dt>
+<dd><p>Interpolation method in spacial domain, defaults to linear
+linear uses numpy linear interpolation
+spline uses scipy CloughTocher algorithm
+rbf is scipy radial basis function with multiquadric, cubic and sinc functions
+idw refers to the inverse distance weighting algorithm</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.SpatialInterpolator.array_dimension">
+<span class="sig-name descname"><span class="pre">array_dimension</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Trait('1D',</span> <span class="pre">'2D',</span> <span class="pre">'ring',</span> <span class="pre">'3D',</span> <span class="pre">'custom',</span> <span class="pre">desc='spacial</span> <span class="pre">dimensionality</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">array</span> <span class="pre">geometry')</span></em><a class="headerlink" href="#acoular.tprocess.SpatialInterpolator.array_dimension" title="Link to this definition">¶</a></dt>
+<dd><p>spacial dimensionality of the array geometry</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.SpatialInterpolator.sample_freq">
+<span class="sig-name descname"><span class="pre">sample_freq</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Delegate('source',</span> <span class="pre">'sample_freq')</span></em><a class="headerlink" href="#acoular.tprocess.SpatialInterpolator.sample_freq" title="Link to this definition">¶</a></dt>
+<dd><p>Sampling frequency of output signal, as given by <a class="reference internal" href="#acoular.tprocess.SpatialInterpolator.source" title="acoular.tprocess.SpatialInterpolator.source"><code class="xref py py-attr docutils literal notranslate"><span class="pre">source</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.SpatialInterpolator.numchannels">
+<span class="sig-name descname"><span class="pre">numchannels</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property()</span></em><a class="headerlink" href="#acoular.tprocess.SpatialInterpolator.numchannels" title="Link to this definition">¶</a></dt>
+<dd><p>Number of channels in output.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.SpatialInterpolator.numsamples">
+<span class="sig-name descname"><span class="pre">numsamples</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Delegate('source',</span> <span class="pre">'numsamples')</span></em><a class="headerlink" href="#acoular.tprocess.SpatialInterpolator.numsamples" title="Link to this definition">¶</a></dt>
+<dd><p>Number of samples in output, as given by <a class="reference internal" href="#acoular.tprocess.SpatialInterpolator.source" title="acoular.tprocess.SpatialInterpolator.source"><code class="xref py py-attr docutils literal notranslate"><span class="pre">source</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.SpatialInterpolator.interp_at_zero">
+<span class="sig-name descname"><span class="pre">interp_at_zero</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Bool(False)</span></em><a class="headerlink" href="#acoular.tprocess.SpatialInterpolator.interp_at_zero" title="Link to this definition">¶</a></dt>
+<dd><p>Interpolate a point at the origin of the Array geometry</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.SpatialInterpolator.Q">
+<span class="sig-name descname"><span class="pre">Q</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CArray(dtype=float64,</span> <span class="pre">shape=(3,</span> <span class="pre">3),</span> <span class="pre">value=identity(3))</span></em><a class="headerlink" href="#acoular.tprocess.SpatialInterpolator.Q" title="Link to this definition">¶</a></dt>
+<dd><p>The rotation must be around the z-axis, which means from x to y axis.
+If the coordinates are not build like that, than this 3x3 orthogonal
+transformation matrix Q can be used to modify the coordinates.
+It is assumed that with the modified coordinates the rotation is around the z-axis.
+The transformation is done via [x,y,z]_mod = Q * [x,y,z]. (default is Identity).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.SpatialInterpolator.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.tprocess.SpatialInterpolator.digest" title="Link to this definition">¶</a></dt>
+<dd><p>internal identifier</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.tprocess.SpatialInterpolator.sinc_mic">
+<span class="sig-name descname"><span class="pre">sinc_mic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.tprocess.SpatialInterpolator.sinc_mic" title="Link to this definition">¶</a></dt>
+<dd><p>Modified Sinc function for Radial Basis function approximation.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tprocess.ChannelMixer.html">ChannelMixer</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tprocess.html">tprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tprocess.SpatialInterpolatorRotation.html">SpatialInterpolatorRotation</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright Acoular Development Team.
+      Last updated on May 24, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
+    </div>
+  </body>
+</html>

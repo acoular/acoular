@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>BeamformerTime &#8212; Acoular 24.05 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
+    <script src="../../../_static/documentation_options.js?v=3fd6b439"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="BeamformerTimeTraj" href="acoular.tbeamform.BeamformerTimeTraj.html" />
+    <link rel="prev" title="tbeamform" href="../acoular.tbeamform.html" /> 
+  </head><body>
+      <div class="header"><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 24.05 documentation</span></a></h1>
+        <h2 class="heading"><span>BeamformerTime</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.tbeamform.html">tbeamform</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tbeamform.html">tbeamform</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tbeamform.BeamformerTimeTraj.html">BeamformerTimeTraj</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="beamformertime">
+<h1>BeamformerTime<a class="headerlink" href="#beamformertime" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.tbeamform.BeamformerTime">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.tbeamform.</span></span><span class="sig-name descname"><span class="pre">BeamformerTime</span></span><a class="headerlink" href="#acoular.tbeamform.BeamformerTime" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.tprocess.TimeInOut.html#acoular.tprocess.TimeInOut" title="acoular.tprocess.TimeInOut"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeInOut</span></code></a></p>
+<p>Provides a basic time domain beamformer with time signal output
+for a spatially fixed grid.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tbeamform.BeamformerTime.steer">
+<span class="sig-name descname"><span class="pre">steer</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(desc='steering</span> <span class="pre">vector</span> <span class="pre">object')</span></em><a class="headerlink" href="#acoular.tbeamform.BeamformerTime.steer" title="Link to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="acoular.fbeamform.SteeringVector.html#acoular.fbeamform.SteeringVector" title="acoular.fbeamform.SteeringVector"><code class="xref py py-class docutils literal notranslate"><span class="pre">SteeringVector</span></code></a> or derived object.
+Defaults to <a class="reference internal" href="acoular.fbeamform.SteeringVector.html#acoular.fbeamform.SteeringVector" title="acoular.fbeamform.SteeringVector"><code class="xref py py-class docutils literal notranslate"><span class="pre">SteeringVector</span></code></a> object.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tbeamform.BeamformerTime.numchannels">
+<span class="sig-name descname"><span class="pre">numchannels</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Delegate('grid',</span> <span class="pre">'size')</span></em><a class="headerlink" href="#acoular.tbeamform.BeamformerTime.numchannels" title="Link to this definition">¶</a></dt>
+<dd><p>Number of channels in output (=number of grid points).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tbeamform.BeamformerTime.weights">
+<span class="sig-name descname"><span class="pre">weights</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Trait('none',</span> <span class="pre">possible_weights,</span> <span class="pre">desc='spatial</span> <span class="pre">weighting</span> <span class="pre">function')</span></em><a class="headerlink" href="#acoular.tbeamform.BeamformerTime.weights" title="Link to this definition">¶</a></dt>
+<dd><p>Spatial weighting function.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.tbeamform.BeamformerTime.result">
+<span class="sig-name descname"><span class="pre">result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2048</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.tbeamform.BeamformerTime.result" title="Link to this definition">¶</a></dt>
+<dd><p>Python generator that yields the <em>squared</em> deconvolved beamformer
+output with optional removal of autocorrelation block-wise.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>num</strong><span class="classifier">integer, defaults to 2048</span></dt><dd><p>This parameter defines the size of the blocks to be yielded
+(i.e. the number of samples per block).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>Samples in blocks of shape          (num, <a class="reference internal" href="#acoular.tbeamform.BeamformerTime.numchannels" title="acoular.tbeamform.BeamformerTime.numchannels"><code class="xref py py-attr docutils literal notranslate"><span class="pre">numchannels</span></code></a>).</dt><dd><p><a class="reference internal" href="#acoular.tbeamform.BeamformerTime.numchannels" title="acoular.tbeamform.BeamformerTime.numchannels"><code class="xref py py-attr docutils literal notranslate"><span class="pre">numchannels</span></code></a> is usually very             large (number of grid points).
+The last block may be shorter than num.             The output starts for signals that were emitted
+from the grid at <cite>t=0</cite>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.tbeamform.BeamformerTime.delay_and_sum">
+<span class="sig-name descname"><span class="pre">delay_and_sum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_res</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d_interp2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amp</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.tbeamform.BeamformerTime.delay_and_sum" title="Link to this definition">¶</a></dt>
+<dd><p>Standard delay-and-sum method.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.tbeamform.html">tbeamform</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tbeamform.html">tbeamform</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tbeamform.BeamformerTimeTraj.html">BeamformerTimeTraj</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright Acoular Development Team.
+      Last updated on May 24, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
+    </div>
+  </body>
+</html>

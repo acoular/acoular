@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>TimeSamples &#8212; Acoular 24.05 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
+    <script src="../../../_static/documentation_options.js?v=3fd6b439"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="MaskedTimeSamples" href="acoular.sources.MaskedTimeSamples.html" />
+    <link rel="prev" title="sources" href="../acoular.sources.html" /> 
+  </head><body>
+      <div class="header"><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 24.05 documentation</span></a></h1>
+        <h2 class="heading"><span>TimeSamples</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.sources.html">sources</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.sources.html">sources</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.sources.MaskedTimeSamples.html">MaskedTimeSamples</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="timesamples">
+<h1>TimeSamples<a class="headerlink" href="#timesamples" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.sources.TimeSamples">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.sources.</span></span><span class="sig-name descname"><span class="pre">TimeSamples</span></span><a class="headerlink" href="#acoular.sources.TimeSamples" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.tprocess.SamplesGenerator.html#acoular.tprocess.SamplesGenerator" title="acoular.tprocess.SamplesGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplesGenerator</span></code></a></p>
+<p>Container for time data in <cite>*.h5</cite> format.</p>
+<p>This class loads measured data from h5 files and
+and provides information about this data.
+It also serves as an interface where the data can be accessed
+(e.g. for use in a block chain) via the <a class="reference internal" href="#acoular.sources.TimeSamples.result" title="acoular.sources.TimeSamples.result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">result()</span></code></a> generator.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.TimeSamples.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">File(filter=['*.h5'],</span> <span class="pre">desc='name</span> <span class="pre">of</span> <span class="pre">data</span> <span class="pre">file')</span></em><a class="headerlink" href="#acoular.sources.TimeSamples.name" title="Link to this definition">¶</a></dt>
+<dd><p>Full name of the .h5 file with data.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.TimeSamples.basename">
+<span class="sig-name descname"><span class="pre">basename</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.sources.TimeSamples.basename" title="Link to this definition">¶</a></dt>
+<dd><p>Basename of the .h5 file with data, is set automatically.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.TimeSamples.calib">
+<span class="sig-name descname"><span class="pre">calib</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Trait(Calib,</span> <span class="pre">desc='Calibration</span> <span class="pre">data')</span></em><a class="headerlink" href="#acoular.sources.TimeSamples.calib" title="Link to this definition">¶</a></dt>
+<dd><p>Calibration data, instance of <a class="reference internal" href="acoular.calib.Calib.html#acoular.calib.Calib" title="acoular.calib.Calib"><code class="xref py py-class docutils literal notranslate"><span class="pre">Calib</span></code></a> class, optional .</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.TimeSamples.numchannels">
+<span class="sig-name descname"><span class="pre">numchannels</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CLong(0,</span> <span class="pre">desc='number</span> <span class="pre">of</span> <span class="pre">input</span> <span class="pre">channels')</span></em><a class="headerlink" href="#acoular.sources.TimeSamples.numchannels" title="Link to this definition">¶</a></dt>
+<dd><p>Number of channels, is set automatically / read from file.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.TimeSamples.numsamples">
+<span class="sig-name descname"><span class="pre">numsamples</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CLong(0,</span> <span class="pre">desc='number</span> <span class="pre">of</span> <span class="pre">samples')</span></em><a class="headerlink" href="#acoular.sources.TimeSamples.numsamples" title="Link to this definition">¶</a></dt>
+<dd><p>Number of time data samples, is set automatically / read from file.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.TimeSamples.data">
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Any(transient=True,</span> <span class="pre">desc='the</span> <span class="pre">actual</span> <span class="pre">time</span> <span class="pre">data</span> <span class="pre">array')</span></em><a class="headerlink" href="#acoular.sources.TimeSamples.data" title="Link to this definition">¶</a></dt>
+<dd><p>The time data as array of floats with dimension (numsamples, numchannels).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.TimeSamples.h5f">
+<span class="sig-name descname"><span class="pre">h5f</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Instance(H5FileBase,</span> <span class="pre">transient=True)</span></em><a class="headerlink" href="#acoular.sources.TimeSamples.h5f" title="Link to this definition">¶</a></dt>
+<dd><p>HDF5 file object</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.TimeSamples.metadata">
+<span class="sig-name descname"><span class="pre">metadata</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Dict(desc='metadata</span> <span class="pre">contained</span> <span class="pre">in</span> <span class="pre">.h5</span> <span class="pre">file')</span></em><a class="headerlink" href="#acoular.sources.TimeSamples.metadata" title="Link to this definition">¶</a></dt>
+<dd><p>Provides metadata stored in HDF5 file object</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.sources.TimeSamples.load_data">
+<span class="sig-name descname"><span class="pre">load_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#acoular.sources.TimeSamples.load_data" title="Link to this definition">¶</a></dt>
+<dd><p>Open the .h5 file and set attributes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.sources.TimeSamples.load_timedata">
+<span class="sig-name descname"><span class="pre">load_timedata</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#acoular.sources.TimeSamples.load_timedata" title="Link to this definition">¶</a></dt>
+<dd><p>Loads timedata from .h5 file. Only for internal use.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.sources.TimeSamples.load_metadata">
+<span class="sig-name descname"><span class="pre">load_metadata</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#acoular.sources.TimeSamples.load_metadata" title="Link to this definition">¶</a></dt>
+<dd><p>Loads metadata from .h5 file. Only for internal use.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.sources.TimeSamples.result">
+<span class="sig-name descname"><span class="pre">result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">128</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.sources.TimeSamples.result" title="Link to this definition">¶</a></dt>
+<dd><p>Python generator that yields the output block-wise.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>num</strong><span class="classifier">integer, defaults to 128</span></dt><dd><p>This parameter defines the size of the blocks to be yielded
+(i.e. the number of samples per block) .</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>Samples in blocks of shape (num, numchannels).</dt><dd><p>The last block may be shorter than num.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.sources.html">sources</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.sources.html">sources</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.sources.MaskedTimeSamples.html">MaskedTimeSamples</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright Acoular Development Team.
+      Last updated on May 24, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
+    </div>
+  </body>
+</html>

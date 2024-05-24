@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Config &#8212; Acoular 24.05 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
+    <script src="../../../_static/documentation_options.js?v=3fd6b439"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="acoular.configuration.config" href="acoular.configuration.config.html" />
+    <link rel="prev" title="configuration" href="../acoular.configuration.html" /> 
+  </head><body>
+      <div class="header"><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 24.05 documentation</span></a></h1>
+        <h2 class="heading"><span>Config</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.configuration.html">configuration</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.configuration.html">configuration</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.configuration.config.html">acoular.configuration.config</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="config">
+<h1>Config<a class="headerlink" href="#config" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.configuration.Config">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.configuration.</span></span><span class="sig-name descname"><span class="pre">Config</span></span><a class="headerlink" href="#acoular.configuration.Config" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">HasStrictTraits</span></code></p>
+<p>Implements the global configuration of the Acoular package.</p>
+<p>An instance of this class can be accessed for adjustment of the following
+properties.
+General caching behaviour can be controlled by <a class="reference internal" href="#acoular.configuration.Config.global_caching" title="acoular.configuration.Config.global_caching"><code class="xref py py-attr docutils literal notranslate"><span class="pre">global_caching</span></code></a>.
+The package used to read and write .h5 files can be specified
+by <a class="reference internal" href="#acoular.configuration.Config.h5library" title="acoular.configuration.Config.h5library"><code class="xref py py-attr docutils literal notranslate"><span class="pre">h5library</span></code></a>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.configuration.Config.global_caching">
+<span class="sig-name descname"><span class="pre">global_caching</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property()</span></em><a class="headerlink" href="#acoular.configuration.Config.global_caching" title="Link to this definition">¶</a></dt>
+<dd><p>Flag that globally defines caching behaviour of Acoular classes
+defaults to ‘individual’.</p>
+<ul class="simple">
+<li><p>‘individual’: Acoular classes handle caching behavior individually.</p></li>
+<li><p>‘all’: Acoular classes cache everything and read from cache if possible.</p></li>
+<li><p>‘none’: Acoular classes do not cache results. Cachefiles are not created.</p></li>
+<li><p>‘readonly’: Acoular classes do not actively cache, but read from cache if existing.</p></li>
+<li><p>‘overwrite’: Acoular classes replace existing cachefile content with new data.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.configuration.Config.h5library">
+<span class="sig-name descname"><span class="pre">h5library</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property()</span></em><a class="headerlink" href="#acoular.configuration.Config.h5library" title="Link to this definition">¶</a></dt>
+<dd><p>Flag that globally defines package used to read and write .h5 files
+defaults to ‘pytables’. It is also possible to set it to ‘tables’, which is an alias for ‘pytables’.
+If ‘pytables’ can not be imported, ‘h5py’ is used.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.configuration.Config.cache_dir">
+<span class="sig-name descname"><span class="pre">cache_dir</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property()</span></em><a class="headerlink" href="#acoular.configuration.Config.cache_dir" title="Link to this definition">¶</a></dt>
+<dd><p>Defines the path to the directory containing Acoulars cache files.
+If the specified <a class="reference internal" href="#acoular.configuration.Config.cache_dir" title="acoular.configuration.Config.cache_dir"><code class="xref py py-attr docutils literal notranslate"><span class="pre">cache_dir</span></code></a> directory does not exist,
+it will be created. <a class="reference internal" href="#acoular.configuration.Config.cache_dir" title="acoular.configuration.Config.cache_dir"><code class="xref py py-attr docutils literal notranslate"><span class="pre">cache_dir</span></code></a> defaults to current session path.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.configuration.Config.td_dir">
+<span class="sig-name descname"><span class="pre">td_dir</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property()</span></em><a class="headerlink" href="#acoular.configuration.Config.td_dir" title="Link to this definition">¶</a></dt>
+<dd><p>Defines the working directory containing data files. Used only by
+<a class="reference internal" href="acoular.tprocess.WriteH5.html#acoular.tprocess.WriteH5" title="acoular.tprocess.WriteH5"><code class="xref py py-class docutils literal notranslate"><span class="pre">WriteH5</span></code></a> class.
+Defaults to current session path.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.configuration.Config.use_traitsui">
+<span class="sig-name descname"><span class="pre">use_traitsui</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property()</span></em><a class="headerlink" href="#acoular.configuration.Config.use_traitsui" title="Link to this definition">¶</a></dt>
+<dd><p>Boolean Flag that determines whether user has access to traitsui features.
+Defaults to False.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.configuration.Config.have_tables">
+<span class="sig-name descname"><span class="pre">have_tables</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property()</span></em><a class="headerlink" href="#acoular.configuration.Config.have_tables" title="Link to this definition">¶</a></dt>
+<dd><p>Boolean Flag that determines whether tables is installed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.configuration.Config.have_h5py">
+<span class="sig-name descname"><span class="pre">have_h5py</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property()</span></em><a class="headerlink" href="#acoular.configuration.Config.have_h5py" title="Link to this definition">¶</a></dt>
+<dd><p>Boolean Flag that determines whether h5py is installed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.configuration.Config.have_matplotlib">
+<span class="sig-name descname"><span class="pre">have_matplotlib</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property()</span></em><a class="headerlink" href="#acoular.configuration.Config.have_matplotlib" title="Link to this definition">¶</a></dt>
+<dd><p>Boolean Flag that determines whether matplotlib is installed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.configuration.Config.have_pylops">
+<span class="sig-name descname"><span class="pre">have_pylops</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property()</span></em><a class="headerlink" href="#acoular.configuration.Config.have_pylops" title="Link to this definition">¶</a></dt>
+<dd><p>Boolean Flag that determines whether pylops is installed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.configuration.Config.have_sounddevice">
+<span class="sig-name descname"><span class="pre">have_sounddevice</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property()</span></em><a class="headerlink" href="#acoular.configuration.Config.have_sounddevice" title="Link to this definition">¶</a></dt>
+<dd><p>Boolean Flag that determines whether sounddevice is installed.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.configuration.html">configuration</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.configuration.html">configuration</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.configuration.config.html">acoular.configuration.config</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright Acoular Development Team.
+      Last updated on May 24, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
+    </div>
+  </body>
+</html>
