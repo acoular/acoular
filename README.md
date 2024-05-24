@@ -113,4 +113,5 @@ interpolation='bicubic')
 colorbar()
 ```
 
+
 ![result](https://github.com/acoular/acoular/blob/master/docs/source/get_started/three_source_py3_colormap.png)
