@@ -106,7 +106,7 @@ platform.windows.pre-install-commands = ['systeminfo']
 [tool.hatch.build.targets.sdist]
 exclude = [
   "/.github",
-  "/docs",
+  "/docs/build",
 ]
 
 [tool.hatch.build.targets.wheel]
