@@ -3,9 +3,6 @@ name: Publish Python 🐍 distribution 📦 TestPyPI
 on: 
   workflow_dispatch:
     branches: [ master ]
-  push:
-    branches: [ "*" ]
-
 
 jobs:
   build:
