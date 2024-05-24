@@ -4,44 +4,44 @@ on:
   workflow_dispatch:
     branches: [ "*" ] 
 
-  jobs:
-    build:
-      name: Build distribution 📦
-      runs-on: ubuntu-latest
-    
-      steps:
-      - name: Check out a copy of the repository
-        uses: actions/checkout@v4
-      - name: Set up hatch
-        uses: ./.github/actions/setup-hatch
-      - name: Build a binary wheel and a source tarball
-        run: hatch build
-      - name: Store the distribution packages
-        uses: actions/upload-artifact@v4
-        with:
-          name: python-package-distributions
-          path: dist/        
+jobs:
+  build:
+    name: Build distribution 📦
+    runs-on: ubuntu-latest
+  
+    steps:
+    - name: Check out a copy of the repository
+      uses: actions/checkout@v4
+    - name: Set up hatch
+      uses: ./.github/actions/setup-hatch
+    - name: Build a binary wheel and a source tarball
+      run: hatch build
+    - name: Store the distribution packages
+      uses: actions/upload-artifact@v4
+      with:
+        name: python-package-distributions
+        path: dist/        
 
-    publish-to-testpypi:
-      name: Publish Python 🐍 distribution 📦 to TestPyPI
-      needs:
-      - build
-      runs-on: ubuntu-latest
+  publish-to-testpypi:
+    name: Publish Python 🐍 distribution 📦 to TestPyPI
+    needs:
+    - build
+    runs-on: ubuntu-latest
 
-      environment:
-        name: testpypi
-        url: https://test.pypi.org/p/acoular
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/acoular
 
-      permissions:
-        id-token: write  # IMPORTANT: mandatory for trusted publishing
+    permissions:
+      id-token: write  # IMPORTANT: mandatory for trusted publishing
 
-      steps:
-      - name: Download all the dists
-        uses: actions/download-artifact@v4
-        with:
-          name: python-package-distributions
-          path: dist/
-      - name: Publish distribution 📦 to TestPyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/          
+    steps:
+    - name: Download all the dists
+      uses: actions/download-artifact@v4
+      with:
+        name: python-package-distributions
+        path: dist/
+    - name: Publish distribution 📦 to TestPyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        repository-url: https://test.pypi.org/legacy/          
