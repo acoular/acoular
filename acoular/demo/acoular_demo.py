@@ -46,6 +46,7 @@ def run():
         RectGrid,
         SteeringVector,
         WNoiseGenerator,
+        WriteH5,
         config,
     )
     from acoular import __file__ as bpath
@@ -55,6 +56,7 @@ def run():
     duration = 1
     nsamples = duration * sfreq
     micgeofile = Path(bpath).parent / 'xml' / 'array_64.xml'
+    h5savefile = 'three_sources.h5'
 
     # generate test data, in real life this would come from an array measurement
     mg = MicGeom(from_file=micgeofile)
@@ -65,6 +67,8 @@ def run():
     p2 = PointSource(signal=n2, mics=mg, loc=(0.15, 0, 0.3))
     p3 = PointSource(signal=n3, mics=mg, loc=(0, 0.1, 0.3))
     pa = Mixer(source=p1, sources=[p2, p3])
+    wh5 = WriteH5(source=pa, name=h5savefile)
+    wh5.save()
 
     # analyze the data and generate map
 
