@@ -54,8 +54,8 @@ full = [
 ]
 
 [project.urls]
-homepage = "www.acoular.org"
-documentation = "www.acoular.org"
+homepage = "http://acoular.org"
+documentation = "http://acoular.org"
 repository = "https://github.com/acoular/acoular"
 
 [build-system]
