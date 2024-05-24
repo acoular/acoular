@@ -55,8 +55,7 @@ def run():
     duration = 1
     nsamples = duration * sfreq
     micgeofile = Path(bpath).parent / 'xml' / 'array_64.xml'
-    h5savefile = 'three_sources.h5'
-
+    
     # generate test data, in real life this would come from an array measurement
     mg = MicGeom(from_file=micgeofile)
     n1 = WNoiseGenerator(sample_freq=sfreq, numsamples=nsamples, seed=1)
@@ -77,7 +76,7 @@ def run():
     bb = BeamformerBase(freq_data=ps, steer=st)
     pm = bb.synthetic(8000, 3)
     Lm = L_p(pm)
-    
+
     if config.have_matplotlib:
         from pylab import axis, colorbar, figure, imshow, plot, show
 
