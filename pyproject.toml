@@ -4,7 +4,7 @@
 
 [project]
 name = "acoular"
-version = "24.05"
+version = "0.3"
 description = "Python library for acoustic beamforming"
 requires-python = ">=3.8,<=12"
 authors = [
@@ -110,4 +110,4 @@ exclude = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["acoular/acoular"]
+packages = ["acoular"]
