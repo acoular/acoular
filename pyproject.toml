@@ -101,3 +101,13 @@ coverage = ["test --cov=acoular"]
 platform.linux.pre-install-commands = ['cat /proc/cpuinfo']
 platform.macos.pre-install-commands = ['sysctl -a machdep.cpu']
 platform.windows.pre-install-commands = ['systeminfo']
+
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+  "/.github",
+  "/docs",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["acoular/acoular"]
