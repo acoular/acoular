@@ -15,7 +15,7 @@ It is aimed at applications in acoustic testing. Multichannel data recorded by a
 - frequency domain deconvolution algorithms: DAMAS, DAMAS+, Clean, CleanSC, orthogonal deconvolution
 - frequency domain inverse methods: CMF (covariance matrix fitting), general inverse beamforming, SODIX
 - time domain methods: delay & sum beamforming, CleanT deconvolution
-- time domain methods applicable for moving source with arbitrary trajectory (linear, circular, arbitrarily 3D curved), 
+- time domain methods applicable for moving sources with arbitrary trajectory (linear, circular, arbitrarily 3D curved), 
 - frequency domain methods for rotating sources via virtual array rotation for arbitrary arrays and with different interpolation techniques
 - 1D, 2D and 3D mapping grids for all methods
 - gridless option for orthogonal deconvolution
@@ -29,15 +29,6 @@ It is aimed at applications in acoustic testing. Multichannel data recorded by a
 - intelligent and transparent caching: computed results are automatically saved and loaded on the next run to avoid unnecessary re-computation
 - parallel (multithreaded) implementation with Numba for most algorithms
 - easily extendable with new algorithms
-
-# Announcements
-
-**Acoular Workshop 2024**
-
-Join us on **June 12-13, 2024** for a comprehensive free workshop on Acoular. 
-The workshop will be held at TU Berlin Department of Engineering and is suitable for first time users as well as for experienced Acoular users.
-
-To secure your spot at the workshop and to access additional information, kindly **register here**: [Acoular Workshop Registration](https://www.tu.berlin/en/event-details/events/event/018c1020-419d-70b6-abcf-2220015bd233)
 
 # License
 Acoular is licensed under the BSD 3-clause. See [LICENSE](LICENSE)
@@ -62,7 +53,7 @@ and our [software](https://zenodo.org/doi/10.5281/zenodo.3690794):
 Acoular runs under Linux, Windows and MacOS and needs Numpy, Scipy, Traits, scikit-learn, pytables, Numba packages available. 
 Matplotlib is needed for some of the examples.
 
-If you want to use input from a soundcard hardware, you will also need to install the [sounddevice](https://python-sounddevice.readthedocs.io/en/0.3.12/installation.html) package. Some solvers for the CMF method need [Pylops](https://pylops.readthedocs.io/en/stable/installation.html).
+If you want to use input from a soundcard, you will also need to install the [sounddevice](https://python-sounddevice.readthedocs.io/en/0.3.12/installation.html) package. Some solvers for the CMF method need [Pylops](https://pylops.readthedocs.io/en/stable/installation.html).
 
 # Installation
 
@@ -70,13 +61,13 @@ Acoular can be installed via [conda](https://docs.conda.io/en/latest/), which is
 
     conda install -c acoular acoular
 
-This will install Acoular in your Anaconda Python enviroment and make the Acoular library available from Python. In addition, this will install all dependencies (those other packages mentioned above) if they are not already present on your system. 
+This will install Acoular in your Anaconda Python environment and make the Acoular library available from Python. In addition, this will install all dependencies (those other packages mentioned above) if they are not already present on your system. 
 
 A second option is to install Acoular via [pip](https://pip.pypa.io/en/stable/). It is recommended to use a dedicated [virtual environment](https://virtualenv.pypa.io/en/latest/) and then run
 
     pip install acoular
 
-For more detailed install instructions see the [documentation](https://acoular.org/install/index.html).
+For more detailed installation instructions, see the [documentation](https://acoular.org/install/index.html).
 
 # Documentation and help
 Documentation is available [here](https://acoular.org) with a
@@ -122,4 +113,5 @@ interpolation='bicubic')
 colorbar()
 ```
 
-![result](https://github.com/acoular/acoular/blob/master/docs/source/get_started/three_source_py3_colormap.png)
+
+![result](https://github.com/acoular/acoular/blob/master/docs/source/get_started/three_source_py3_colormap.png?raw=true)

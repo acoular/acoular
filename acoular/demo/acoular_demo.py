@@ -19,10 +19,10 @@ The simulation generates the sound pressure at 64 microphones that are
 arrangend in the 'array64' geometry, which is part of the package. The sound
 pressure signals are sampled at 51200 Hz for a duration of 1 second.
 
-Source location (relative to array center) and levels:
+Source location (relative to array center) and RMS in 1 m distance:
 
 ====== =============== ======
-Source Location        Level
+Source Location        RMS
 ====== =============== ======
 1      (-0.1,-0.1,0.3) 1.0 Pa
 2      (0.15,0,0.3)    0.7 Pa
@@ -45,7 +45,6 @@ def run():
         PowerSpectra,
         RectGrid,
         SteeringVector,
-        TimeSamples,
         WNoiseGenerator,
         WriteH5,
         config,
@@ -73,8 +72,7 @@ def run():
 
     # analyze the data and generate map
 
-    ts = TimeSamples(name=h5savefile)
-    ps = PowerSpectra(time_data=ts, block_size=128, window='Hanning')
+    ps = PowerSpectra(time_data=pa, block_size=128, window='Hanning')
 
     rg = RectGrid(x_min=-0.2, x_max=0.2, y_min=-0.2, y_max=0.2, z=0.3, increment=0.01)
     st = SteeringVector(grid=rg, mics=mg)
@@ -99,6 +97,12 @@ def run():
 
     else:
         print('Matplotlib not found! Please install matplotlib if you want to plot the results.')
+        print('For consolation we do an ASCII map plot of the results here.')
+        grayscale = '@%#*+=-:. '[::-1]
+        ind = ((Lm.T - Lm.max() + 9).clip(0, 9)).astype(int)[::-1]
+        print(78 * '-')
+        print('|\n'.join([' '.join(['|'] + [grayscale[i] for i in row[2:-1]]) for row in ind]) + '|')
+        print(7 * '-', ''.join([f'{grayscale[i]}={int(Lm.max())-9+i}dB ' for i in range(1, 10)]), 6 * '-')
 
 
 if __name__ == '__main__':

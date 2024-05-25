@@ -1,0 +1,45 @@
+name: Publish Python 🐍 distribution 📦 PyPI
+
+on: 
+  workflow_dispatch:
+    branches: [ master ]
+
+jobs:
+  build:
+    name: Build distribution 📦
+    runs-on: ubuntu-latest
+  
+    steps:
+    - name: Check out a copy of the repository
+      uses: actions/checkout@v4
+    - name: Set up hatch
+      uses: ./.github/actions/setup-hatch
+    - name: Build a binary wheel and a source tarball
+      run: hatch build
+    - name: Store the distribution packages
+      uses: actions/upload-artifact@v4
+      with:
+        name: python-package-distributions
+        path: dist/        
+
+  publish-to-testpypi:
+    name: Publish Python 🐍 distribution 📦 to PyPI
+    needs:
+    - build
+    runs-on: ubuntu-latest
+
+    environment:
+      name: pypi
+      url: https://pypi.org/p/acoular
+
+    permissions:
+      id-token: write  # IMPORTANT: mandatory for trusted publishing
+
+    steps:
+    - name: Download all the dists
+      uses: actions/download-artifact@v4
+      with:
+        name: python-package-distributions
+        path: dist/
+    - name: Publish distribution 📦 to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
