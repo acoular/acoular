@@ -1,0 +1,23 @@
+name: Build conda package
+
+on:
+  workflow_dispatch:
+    branches: [ master ] 
+  
+jobs:
+  conda_build_and_install:
+    name: Test conda deployment of package with Python 3.12
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out a copy of the repository
+        uses: actions/checkout@v4
+      - name: Conda environment creation and activation
+        uses: ./.github/actions/setup-conda
+      - name: Build package
+        run: conda build --no-anaconda-upload --no-copy-test-source-files recipe.local --output-folder ./conda_package
+      - name: Upload conda package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: conda-package
+          path: ./conda_package
+

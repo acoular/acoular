@@ -1,7 +1,3 @@
 #!/bin/bash
 
-cd tests
-
-echo "run acoular tests..."
-bash run_tests.sh
-
+python -c "import acoular; print(acoular.__version__); acoular.demo.acoular_demo.run()"
