@@ -303,9 +303,12 @@ class SlotJet(FlowField):
     #: Width of the slot, defaults to 0.2 .
     B = Float(0.2, desc='nozzle diameter')
 
+    #: Nondimensional length of zone of flow establishment (jet core length), defaults to 5.2
+    l = Float(5.2, desc='flow establishment length')
+
     # internal identifier
     digest = Property(
-        depends_on=['v0', 'origin', 'flow', 'plane', 'B'],
+        depends_on=['v0', 'origin', 'flow', 'plane', 'B', 'l'],
     )
 
     @cached_property
@@ -342,7 +345,7 @@ class SlotJet(FlowField):
         # local co-ordinate system
         x = dot(flow, xx1)
         y = dot(yy, xx1)
-        x1 = 0.109 * x
+        x1 = 0.5668 / self.l * x  # C1 in Albertson1950
         h1 = abs(y) + sqrt(pi) * 0.5 * x1 - 0.5 * self.B
         if h1 < 0.0:
             # core jet
@@ -382,9 +385,12 @@ class OpenJet(FlowField):
     #: Diameter of the nozzle, defaults to 0.2 .
     D = Float(0.2, desc='nozzle diameter')
 
+    #: Nondimensional length of zone of flow establishment (jet core length), defaults to 6.2
+    l = Float(6.2, desc='flow establishment length')
+
     # internal identifier
     digest = Property(
-        depends_on=['v0', 'origin', 'D'],
+        depends_on=['v0', 'origin', 'D', 'l'],
     )
 
     @cached_property
@@ -411,7 +417,7 @@ class OpenJet(FlowField):
         """
         x, y, z = xx - self.origin
         r = sqrt(y * y + z * z)
-        x1 = 0.081 * x
+        x1 = 0.5022 / self.l * x  # C2 in Albertson1950
         h1 = r + x1 - 0.5 * self.D
         U = self.v0 * exp(-h1 * h1 / (2 * x1 * x1))
         if h1 < 0.0:
