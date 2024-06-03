@@ -5,8 +5,8 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
-    name: Build distribution 📦
+  build_and_publish_distribution:
+    name: Build and publish distribution 📦
     runs-on: ubuntu-latest
   
     steps:
@@ -21,27 +21,5 @@ jobs:
       with:
         name: python-package-distributions
         path: dist/        
-
-  publish-to-testpypi:
-    name: Publish Python 🐍 distribution 📦 to TestPyPI
-    needs:
-    - build
-    runs-on: ubuntu-latest
-
-    environment:
-      name: testpypi
-      url: https://test.pypi.org/p/acoular
-
-    permissions:
-      id-token: write  # IMPORTANT: mandatory for trusted publishing
-
-    steps:
-    - name: Download all the dists
-      uses: actions/download-artifact@v4
-      with:
-        name: python-package-distributions
-        path: dist/
     - name: Publish distribution 📦 to TestPyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        repository-url: https://test.pypi.org/legacy/          
+      run: hatch publish -r test -u __token__ -a ${{ secrets.HATCH_PUBLISH_TESTPYPI_API_TOKEN }}

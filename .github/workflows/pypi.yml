@@ -21,25 +21,6 @@ jobs:
       with:
         name: python-package-distributions
         path: dist/        
-
-  publish-to-testpypi:
-    name: Publish Python 🐍 distribution 📦 to PyPI
-    needs:
-    - build
-    runs-on: ubuntu-latest
-
-    environment:
-      name: pypi
-      url: https://pypi.org/p/acoular
-
-    permissions:
-      id-token: write  # IMPORTANT: mandatory for trusted publishing
-
-    steps:
-    - name: Download all the dists
-      uses: actions/download-artifact@v4
-      with:
-        name: python-package-distributions
-        path: dist/
     - name: Publish distribution 📦 to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
+      run: hatch publish -u __token__ -a ${{ secrets.HATCH_PUBLISH_PYPI_API_TOKEN }}
+  
