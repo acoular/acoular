@@ -333,7 +333,6 @@ class SlotJet(FlowField):
             given location.
 
         """
-        # TODO: better to make sure that self.flow and self.plane are indeed unit vectors before
         # normalize
         flow = self.flow / norm(self.flow)
         plane = self.plane / norm(self.plane)
