@@ -89,7 +89,6 @@ from traits.api import (
     Any,
     Bool,
     CArray,
-    Delegate,
     Dict,
     Enum,
     Float,
@@ -1249,27 +1248,12 @@ class PointSpreadFunction(HasPrivateTraits):
 
 
 class BeamformerDamas(BeamformerBase):
-    """DAMAS deconvolution, see :ref:`Brooks and Humphreys, 2006<BrooksHumphreys2006>`.
-    Needs a-priori delay-and-sum beamforming (:class:`BeamformerBase`).
-    """
+    """DAMAS deconvolution, see :ref:`Brooks and Humphreys, 2006<BrooksHumphreys2006>`."""
 
-    #: :class:`BeamformerBase` object that provides data for deconvolution.
+    #: (only for backward compatibility) :class:`BeamformerBase` object
+    #: if set, provides :attr:`freq_data`, :attr:`steer`, :attr:`r_diag`
+    #: if not set, these have to be set explicitly
     beamformer = Trait(BeamformerBase)
-
-    #: :class:`~acoular.spectra.PowerSpectra` object that provides the cross spectral matrix;
-    #: is set automatically.
-    freq_data = Delegate('beamformer')
-
-    #: Boolean flag, if 'True' (default), the main diagonal is removed before beamforming;
-    #: is set automatically.
-    r_diag = Delegate('beamformer')
-
-    #: instance of :class:`~acoular.fbeamform.SteeringVector` or its derived classes,
-    #: that contains information about the steering vector. Is set automatically.
-    steer = Delegate('beamformer')
-
-    #: Floating point precision of result, is set automatically.
-    precision = Delegate('beamformer')
 
     #: The floating-number-precision of the PSFs. Default is 64 bit.
     psf_precision = Trait('float64', 'float32', desc='precision of PSF')
@@ -1286,21 +1270,12 @@ class BeamformerDamas(BeamformerBase):
 
     # internal identifier
     digest = Property(
-        depends_on=['beamformer.digest', 'n_iter', 'damp', 'psf_precision'],
-    )
-
-    # internal identifier
-    ext_digest = Property(
-        depends_on=['digest', 'beamformer.ext_digest'],
+        depends_on=['freq_data.digest', '_steer_obj.digest', 'r_diag', 'n_iter', 'damp', 'psf_precision'],
     )
 
     @cached_property
     def _get_digest(self):
         return digest(self)
-
-    @cached_property
-    def _get_ext_digest(self):
-        return digest(self, 'ext_digest')
 
     def calc(self, ac, fr):
         """Calculates the DAMAS result for the frequencies defined by :attr:`freq_data`.
@@ -1329,10 +1304,23 @@ class BeamformerDamas(BeamformerBase):
 
         """
         f = self.freq_data.fftfreq()
+        normFactor = self.sig_loss_norm()
+
         p = PointSpreadFunction(steer=self.steer, calcmode=self.calcmode, precision=self.psf_precision)
+        param_steer_type, steer_vector = self._beamformer_params()
         for i in self.freq_data.indices:
             if not fr[i]:
-                y = array(self.beamformer.result[i])
+                csm = array(self.freq_data.csm[i], dtype='complex128')
+                y = beamformerFreq(
+                    param_steer_type,
+                    self.r_diag,
+                    normFactor,
+                    steer_vector(f[i]),
+                    csm,
+                )[0]
+                if self.r_diag:  # set (unphysical) negative output values to 0
+                    indNegSign = sign(y) < 0
+                    y[indNegSign] = 0.0
                 x = y.copy()
                 p.freq = f[i]
                 psf = p.psf[:]
@@ -1374,21 +1362,12 @@ class BeamformerDamasPlus(BeamformerDamas):
 
     # internal identifier
     digest = Property(
-        depends_on=['beamformer.digest', 'alpha', 'method', 'max_iter', 'unit_mult'],
-    )
-
-    # internal identifier
-    ext_digest = Property(
-        depends_on=['digest', 'beamformer.ext_digest'],
+        depends_on=['freq_data.digest', '_steer_obj.digest', 'r_diag', 'alpha', 'method', 'max_iter', 'unit_mult'],
     )
 
     @cached_property
     def _get_digest(self):
         return digest(self)
-
-    @cached_property
-    def _get_ext_digest(self):
-        return digest(self, 'ext_digest')
 
     def calc(self, ac, fr):
         """Calculates the DAMAS result for the frequencies defined by :attr:`freq_data`.
@@ -1418,9 +1397,23 @@ class BeamformerDamasPlus(BeamformerDamas):
         f = self.freq_data.fftfreq()
         p = PointSpreadFunction(steer=self.steer, calcmode=self.calcmode, precision=self.psf_precision)
         unit = self.unit_mult
+        normFactor = self.sig_loss_norm()
+        param_steer_type, steer_vector = self._beamformer_params()
+
         for i in self.freq_data.indices:
             if not fr[i]:
-                y = self.beamformer.result[i] * unit
+                csm = array(self.freq_data.csm[i], dtype='complex128')
+                y = beamformerFreq(
+                    param_steer_type,
+                    self.r_diag,
+                    normFactor,
+                    steer_vector(f[i]),
+                    csm,
+                )[0]
+                if self.r_diag:  # set (unphysical) negative output values to 0
+                    indNegSign = sign(y) < 0
+                    y[indNegSign] = 0.0
+                y *= unit
                 p.freq = f[i]
                 psf = p.psf[:]
 
@@ -1492,10 +1485,6 @@ class BeamformerOrth(BeamformerBase):
     @cached_property
     def _get_digest(self):
         return digest(self)
-
-    @cached_property
-    def _get_ext_digest(self):
-        return digest(self, 'ext_digest')
 
     @on_trait_change('beamformer.digest')
     def delegate_beamformer_traits(self):
@@ -1654,25 +1643,12 @@ class BeamformerCleansc(BeamformerBase):
 
 
 class BeamformerClean(BeamformerBase):
-    """CLEAN deconvolution, see :ref:`Hoegbom, 1974<Hoegbom1974>`.
-    Needs a-priori delay-and-sum beamforming (:class:`BeamformerBase`).
-    """
+    """CLEAN deconvolution, see :ref:`Hoegbom, 1974<Hoegbom1974>`."""
 
-    # BeamformerBase object that provides data for deconvolution
+    #: (only for backward compatibility) :class:`BeamformerBase` object
+    #: if set, provides :attr:`freq_data`, :attr:`steer`, :attr:`r_diag`
+    #: if not set, these have to be set explicitly
     beamformer = Trait(BeamformerBase)
-
-    # PowerSpectra object that provides the cross spectral matrix
-    freq_data = Delegate('beamformer')
-
-    # flag, if true (default), the main diagonal is removed before beamforming
-    # r_diag =  Delegate('beamformer')
-
-    #: instance of :class:`~acoular.fbeamform.SteeringVector` or its derived classes,
-    #: that contains information about the steering vector. Is set automatically.
-    steer = Delegate('beamformer')
-
-    #: Floating point precision of result, is set automatically.
-    precision = Delegate('beamformer')
 
     #: The floating-number-precision of the PSFs. Default is 64 bit.
     psf_precision = Trait('float64', 'float32', desc='precision of PSF.')
@@ -1689,21 +1665,18 @@ class BeamformerClean(BeamformerBase):
 
     # internal identifier
     digest = Property(
-        depends_on=['beamformer.digest', 'n_iter', 'damp', 'psf_precision'],
-    )
-
-    # internal identifier
-    ext_digest = Property(
-        depends_on=['digest', 'beamformer.ext_digest'],
+        depends_on=['freq_data.digest', '_steer_obj.digest', 'r_diag', 'n_iter', 'damp', 'psf_precision'],
     )
 
     @cached_property
     def _get_digest(self):
         return digest(self)
 
-    @cached_property
-    def _get_ext_digest(self):
-        return digest(self, 'ext_digest')
+    @on_trait_change('beamformer.digest')
+    def delegate_beamformer_traits(self):
+        self.freq_data = self.beamformer.freq_data
+        self.r_diag = self.beamformer.r_diag
+        self.steer = self.beamformer.steer
 
     def calc(self, ac, fr):
         """Calculates the CLEAN result for the frequencies defined by :attr:`freq_data`.
@@ -1732,6 +1705,7 @@ class BeamformerClean(BeamformerBase):
         """
         f = self.freq_data.fftfreq()
         gs = self.steer.grid.size
+        normFactor = self.sig_loss_norm()
 
         if self.calcmode == 'full':
             warn(
@@ -1740,12 +1714,23 @@ class BeamformerClean(BeamformerBase):
                 stacklevel=2,
             )
         p = PointSpreadFunction(steer=self.steer, calcmode=self.calcmode, precision=self.psf_precision)
+        param_steer_type, steer_vector = self._beamformer_params()
         for i in self.freq_data.indices:
             if not fr[i]:
                 p.freq = f[i]
-                dirty = self.beamformer.result[i].copy()
-                clean = zeros(gs, dtype=dirty.dtype)
+                csm = array(self.freq_data.csm[i], dtype='complex128')
+                dirty = beamformerFreq(
+                    param_steer_type,
+                    self.r_diag,
+                    normFactor,
+                    steer_vector(f[i]),
+                    csm,
+                )[0]
+                if self.r_diag:  # set (unphysical) negative output values to 0
+                    indNegSign = sign(dirty) < 0
+                    dirty[indNegSign] = 0.0
 
+                clean = zeros(gs, dtype=dirty.dtype)
                 i_iter = 0
                 flag = True
                 while flag:
