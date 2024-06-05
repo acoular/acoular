@@ -2731,7 +2731,7 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
                         r0 = env._r(xy[:, newaxis])
                         rm = env._r(xy[:, newaxis], mpos)
                         return -beamformerFreq(
-                            steer_type, self.r_diag, normfactor, (r0, rm, k), (ones(1), eve[:, n : n + 1])
+                            steer_type, self.r_diag, normfactor, (r0, rm, k), (ones(1), eve[:, n : n + 1]),
                         )[0][0]  # noqa: B023
 
                     # simplical global homotopy optimizer
