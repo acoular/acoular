@@ -737,6 +737,13 @@ class BeamformerFunctional(BeamformerBase):
         desc='No normalization needed. Functional Beamforming is only well defined for full CSM.',
     )
 
+    # internal identifier
+    digest = Property(depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['gamma'])
+
+    @cached_property
+    def _get_digest(self):
+        return digest(self)
+
     def calc(self, ac, fr):
         """Calculates the Functional Beamformer result for the frequencies defined by :attr:`freq_data`.
 
