@@ -22,6 +22,8 @@ ignore = [
     "E501", # ignore line length until fixed through issue #214
     "E741", # allow ambiguous variable names -> should be fixed by issue #228
     "C901", # do we want to measure code complexity -> TBD
+    "COM812", # conflict with ruff formatter 
+    "ISC001", # conflict with ruff formatter
     # N
     "N802", # lower case functions (currently camel case) -> should be fixed by issue #228
     "N803", # lower case letters in arguments (currently camel case) -> should be fixed by issue #228
