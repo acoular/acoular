@@ -2384,7 +2384,7 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
         desc='Energy normalization in case of diagonal removal not implemented for inverse methods',
     )
 
-    # internal identifier++++++++++++++++++++++++++++++++++++++++++++++++++
+    # internal identifier
     digest = Property(
         depends_on=[
             'steer.inv_digest',
