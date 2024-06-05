@@ -1277,6 +1277,12 @@ class BeamformerDamas(BeamformerBase):
     def _get_digest(self):
         return digest(self)
 
+    @on_trait_change('beamformer.digest')
+    def delegate_beamformer_traits(self):
+        self.freq_data = self.beamformer.freq_data
+        self.r_diag = self.beamformer.r_diag
+        self.steer = self.beamformer.steer
+
     def calc(self, ac, fr):
         """Calculates the DAMAS result for the frequencies defined by :attr:`freq_data`.
 
@@ -1568,6 +1574,12 @@ class BeamformerCleansc(BeamformerBase):
     @cached_property
     def _get_digest(self):
         return digest(self)
+
+    @on_trait_change('beamformer.digest')
+    def delegate_beamformer_traits(self):
+        self.freq_data = self.beamformer.freq_data
+        self.r_diag = self.beamformer.r_diag
+        self.steer = self.beamformer.steer
 
     def calc(self, ac, fr):
         """Calculates the CLEAN-SC result for the frequencies defined by :attr:`freq_data`.
