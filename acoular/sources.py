@@ -18,6 +18,7 @@
     UncorrelatedNoiseSource
     SourceMixer
     PointSourceConvolve
+    WavTimeSamples
 """
 
 # imports from other packages
@@ -181,6 +182,7 @@ def get_modes(lOrder, direction, mpos, sourceposition=None):
 
 
 class TimeSamples(SamplesGenerator):
+
     """Container for time data in `*.h5` format.
 
     This class loads measured data from h5 files and
@@ -297,13 +299,45 @@ class TimeSamples(SamplesGenerator):
                 yield self.data[i : i + num]
                 i += num
 
-class WavTimeSamples(SamplesGenerator):
-    """Container for time data in `*.h5` format.
 
-    This class loads measured data from h5 files and
-    and provides information about this data.
+class WavSamples(SamplesGenerator):
+    """Container for time data in `*.wav` format.
+
+    This class loads measured data from wave files and
+    provides information about this data.
     It also serves as an interface where the data can be accessed
     (e.g. for use in a block chain) via the :meth:`result` generator.
+
+    Attributes
+    ----------
+    name : str
+        Full name of the .wav file with data.
+    basename : str
+        Basename of the .wav file with data, is set automatically.
+    calib : Calib, optional
+        Calibration data, instance of :class:`~acoular.calib.Calib` class.
+    numchannels : int
+        Number of channels, is set automatically / read from file.
+    numsamples : int
+        Number of time data samples, is set automatically / read from file.
+    sample_freq : int
+        Sample frequency of the signal, is set automatically / read from file.
+    data : ndarray
+        The time data as array of floats with dimension (numsamples, numchannels).
+    metadata : dict
+        Provides metadata stored in HDF5 file object.
+
+    Methods
+    -------
+    load_data()
+        Open the .wav file and set attributes.
+    load_timedata()
+        Loads timedata from .wav file. Only for internal use.
+    load_metadata()
+        Loads metadata from .wav file. Only for internal use.
+    result(num=128)
+        Python generator that yields the output block-wise.
+
     """
 
     #: Full name of the .h5 file with data.
@@ -371,7 +405,8 @@ class WavTimeSamples(SamplesGenerator):
     def load_timedata(self):
         """Loads timedata from .h5 file. Only for internal use."""
         # self.data = self.h5f.get_data_by_reference('time_data')
-        _,self.data = wavfile.read(self.name)
+        print(self.name)
+        self.sample_freq,self.data = wavfile.read(self.name)
         # self.sample_freq = self.h5f.get_node_attribute(self.data, 'sample_freq')
         (self.numsamples, self.numchannels) = self.data.shape
 

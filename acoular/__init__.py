@@ -82,8 +82,8 @@ from .sources import (
     SourceMixer,
     SphericalHarmonicSource,
     TimeSamples,
-    WavTimeSamples,
     UncorrelatedNoiseSource,
+    WavSamples,
 )
 from .spectra import BaseSpectra, FFTSpectra, PowerSpectra, PowerSpectraImport, synthetic
 from .spectra import PowerSpectra as EigSpectra
