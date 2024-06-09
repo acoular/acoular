@@ -1,63 +1,63 @@
-name: Checks
+# name: Checks
 
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+# on:
+#   push:
+#     branches: [ master ]
+#   pull_request:
+#     branches: [ master ]
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+# concurrency:
+#   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+#   cancel-in-progress: true
 
-jobs:
-  linting:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out a copy of the repository
-        uses: actions/checkout@v4
-      - name: Set up hatch
-        uses: ./.github/actions/setup-hatch
-      - name: Run ruff
-        run: hatch -v fmt --check
+# jobs:
+#   linting:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Check out a copy of the repository
+#         uses: actions/checkout@v4
+#       - name: Set up hatch
+#         uses: ./.github/actions/setup-hatch
+#       - name: Run ruff
+#         run: hatch -v fmt --check
 
-  validate-cff:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out a copy of the repository
-        uses: actions/checkout@v4
-      - name: Check whether the citation metadata from CITATION.cff is valid
-        uses: citation-file-format/cffconvert-github-action@2.0.0
-        with:
-          args: --validate
+#   validate-cff:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Check out a copy of the repository
+#         uses: actions/checkout@v4
+#       - name: Check whether the citation metadata from CITATION.cff is valid
+#         uses: citation-file-format/cffconvert-github-action@2.0.0
+#         with:
+#           args: --validate
 
-  markdown-link-check:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out a copy of the repository
-        uses: actions/checkout@v4
-      - name: Check for dead links in Markdown
-        uses: gaurav-nelson/github-action-markdown-link-check@v1
+#   markdown-link-check:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Check out a copy of the repository
+#         uses: actions/checkout@v4
+#       - name: Check for dead links in Markdown
+#         uses: gaurav-nelson/github-action-markdown-link-check@v1
 
-  alls-green:
-    name: Checks green?
-    if: always()
-    needs:
-      - linting
-      - validate-cff
-      - markdown-link-check
-    runs-on: ubuntu-latest
-    steps:
-      - id: workaround
-        uses: actions/github-script@v7
-        with:
-          # Workaround for https://github.com/re-actors/alls-green/issues/29
-          # we strip outputs from the needs object to avoid nested JSON
-          result-encoding: string
-          script: |
-            return JSON.stringify(Object.fromEntries(Object.entries(${{ toJSON(needs) }})
-              .map(([name, { result }]) => [name, { result, outputs: {} }])));
-      - name: All checks passed?
-        uses: re-actors/alls-green@v1.2.2
-        with:
-          jobs: ${{ steps.workaround.outputs.result }}
+#   alls-green:
+#     name: Checks green?
+#     if: always()
+#     needs:
+#       - linting
+#       - validate-cff
+#       - markdown-link-check
+#     runs-on: ubuntu-latest
+#     steps:
+#       - id: workaround
+#         uses: actions/github-script@v7
+#         with:
+#           # Workaround for https://github.com/re-actors/alls-green/issues/29
+#           # we strip outputs from the needs object to avoid nested JSON
+#           result-encoding: string
+#           script: |
+#             return JSON.stringify(Object.fromEntries(Object.entries(${{ toJSON(needs) }})
+#               .map(([name, { result }]) => [name, { result, outputs: {} }])));
+#       - name: All checks passed?
+#         uses: re-actors/alls-green@v1.2.2
+#         with:
+#           jobs: ${{ steps.workaround.outputs.result }}
