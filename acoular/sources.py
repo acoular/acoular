@@ -340,12 +340,12 @@ class WavSamples(SamplesGenerator):
 
     """
 
-    #: Full name of the .h5 file with data.
+    #: Full name of the .wav file with data.
     name = File(filter=['*.wav'], desc='name of data file')
 
-    #: Basename of the .h5 file with data, is set automatically.
+    #: Basename of the .wav file with data, is set automatically.
     basename = Property(
-        depends_on='name',  # filter=['*.h5'],
+        depends_on='name',  # filter=['*.wav'],
         desc='basename of data file',
     )
 
@@ -403,18 +403,15 @@ class WavSamples(SamplesGenerator):
         self.load_metadata()
 
     def load_timedata(self):
-        """Loads timedata from .h5 file. Only for internal use."""
-        # self.data = self.h5f.get_data_by_reference('time_data')
-        print(self.name)
+        """Loads timedata from .wav file. Only for internal use."""
         self.sample_freq,self.data = wavfile.read(self.name)
-        # self.sample_freq = self.h5f.get_node_attribute(self.data, 'sample_freq')
         (self.numsamples, self.numchannels) = self.data.shape
 
     def load_metadata(self):
-        """Loads metadata from .h5 file. Only for internal use."""
+        """Loads metadata from .wav file. Only for internal use.
+        No usage at the moment.
+        """
         self.metadata = {}
-        # if '/metadata' in self.h5f:
-        #     self.metadata = self.h5f.node_to_dict('/metadata')
 
     def result(self, num=128):
         """Python generator that yields the output block-wise.
