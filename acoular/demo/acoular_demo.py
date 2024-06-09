@@ -71,7 +71,7 @@ def run():
     wh5.save()
 
     # analyze the data and generate map
-
+    print('Processing data, this may take some time ...')
     ps = PowerSpectra(time_data=pa, block_size=128, window='Hanning')
 
     rg = RectGrid(x_min=-0.2, x_max=0.2, y_min=-0.2, y_max=0.2, z=0.3, increment=0.01)
