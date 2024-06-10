@@ -467,20 +467,20 @@ class Trigger(TimeInOut):
     def _get_trigger_data(self):
         self._check_trigger_existence()
         triggerFunc = {'dirac': self._trigger_dirac, 'rect': self._trigger_rect}[self.trigger_type]
-        nSamples = 2048  # number samples for result-method of source
-        threshold = self._threshold(nSamples)
+        num = 2048  # number samples for result-method of source
+        threshold = self._threshold(num)
 
         # get all samples which surpasse the threshold
         peakLoc = array([], dtype='int')  # all indices which surpasse the threshold
-        triggerData = array([])
+        trigger_data = array([])
         x0 = []
         dSamples = 0
-        for triggerSignal in self.source.result(nSamples):
+        for triggerSignal in self.source.result(num):
             localTrigger = flatnonzero(triggerFunc(x0, triggerSignal, threshold))
             if len(localTrigger) != 0:
                 peakLoc = append(peakLoc, localTrigger + dSamples)
-                triggerData = append(triggerData, triggerSignal[localTrigger])
-            dSamples += nSamples
+                trigger_data = append(trigger_data, triggerSignal[localTrigger])
+            dSamples += num
             x0 = triggerSignal[-1]
         if len(peakLoc) <= 1:
             msg = 'Not enough trigger info. Check *threshold* sign and value!'
@@ -498,12 +498,12 @@ class Trigger(TimeInOut):
             peakLocHelp = multiplePeaksWithinHunk[0]
             indHelp = [peakLocHelp, peakLocHelp + 1]
             if self.multiple_peaks_in_hunk == 'extremum':
-                values = triggerData[indHelp]
+                values = trigger_data[indHelp]
                 deleteInd = indHelp[argmin(abs(values))]
             elif self.multiple_peaks_in_hunk == 'first':
                 deleteInd = indHelp[1]
             peakLoc = delete(peakLoc, deleteInd)
-            triggerData = delete(triggerData, deleteInd)
+            trigger_data = delete(trigger_data, deleteInd)
             peakDist = peakLoc[1:] - peakLoc[:-1]
             multiplePeaksWithinHunk = flatnonzero(peakDist < self.hunk_length * maxPeakDist)
 
@@ -530,20 +530,20 @@ class Trigger(TimeInOut):
         # indPeakHunk = abs(xNew[1:] - xNew[:-1]) > abs(threshold)  # with this line: every edge would be located
         return self._trigger_value_comp(xNew[1:] - xNew[:-1], threshold)
 
-    def _trigger_value_comp(self, triggerData, threshold):
-        return triggerData > threshold if threshold > 0.0 else triggerData < threshold
+    def _trigger_value_comp(self, trigger_data, threshold):
+        return trigger_data > threshold if threshold > 0.0 else trigger_data < threshold
 
-    def _threshold(self, nSamples):
+    def _threshold(self, num):
         if self.threshold is None:  # take a guessed threshold
             # get max and min values of whole trigger signal
             maxVal = -inf
             minVal = inf
             meanVal = 0
             cntMean = 0
-            for triggerData in self.source.result(nSamples):
-                maxVal = max(maxVal, triggerData.max())
-                minVal = min(minVal, triggerData.min())
-                meanVal += triggerData.mean()
+            for trigger_data in self.source.result(num):
+                maxVal = max(maxVal, trigger_data.max())
+                minVal = min(minVal, trigger_data.min())
+                meanVal += trigger_data.mean()
                 cntMean += 1
             meanVal /= cntMean
 
@@ -645,15 +645,15 @@ class AngleTracker(MaskedTimeInOut):
         peakloc, maxdist, mindist = self.trigger._get_trigger_data()
         TriggerPerRevo = self.trigger_per_revo
         rotDirection = self.rot_direction
-        nSamples = self.source.numsamples
+        num = self.source.numsamples
         samplerate = self.source.sample_freq
-        self._rpm = zeros(nSamples)
-        self._angle = zeros(nSamples)
+        self._rpm = zeros(num)
+        self._angle = zeros(num)
         # number of spline points
         InterpPoints = self.interp_points
 
         # loop over alle timesamples
-        while ind < nSamples:
+        while ind < num:
             # when starting spline forward
             if ind < peakloc[InterpPoints]:
                 peakdist = (
@@ -784,7 +784,7 @@ class SpatialInterpolator(TimeInOut):
     #: The transformation is done via [x,y,z]_mod = Q * [x,y,z]. (default is Identity).
     Q = CArray(dtype=float64, shape=(3, 3), value=identity(3))
 
-    num_IDW = Trait(3, dtype=int, desc='number of neighboring microphones, DEFAULT=3')
+    num_IDW = Trait(3, dtype=int, desc='number of neighboring microphones, DEFAULT=3') # noqa: N815
 
     p_weight = Trait(
         2,
@@ -793,7 +793,7 @@ class SpatialInterpolator(TimeInOut):
     )
 
     #: Stores the output of :meth:`_virtNewCoord_func`; Read-Only
-    _virtNewCoord_func = Property(
+    _virtNewCoord_func = Property( # noqa: N815
         depends_on=['mics.digest', 'mics_virtual.digest', 'method', 'array_dimension', 'interp_at_zero'],
     )
 
@@ -818,21 +818,21 @@ class SpatialInterpolator(TimeInOut):
         return digest(self)
 
     @cached_property
-    def _get_virtNewCoord(self):
+    def _get_virtNewCoord(self): # noqa N802
         return self._virtNewCoord_func(self.mics.mpos, self.mics_virtual.mpos, self.method, self.array_dimension)
 
     def sinc_mic(self, r):
         """Modified Sinc function for Radial Basis function approximation."""
         return sinc((r * self.mics_virtual.mpos.shape[1]) / (pi))
 
-    def _virtNewCoord_func(self, mic, micVirt, method, array_dimension):
-        """Core functionality for getting the  interpolation .
+    def _virtNewCoord_func(self, mpos, mpos_virt, method, array_dimension): # noqa N802
+        """Core functionality for getting the interpolation.
 
         Parameters
         ----------
-        mic : float[3, nPhysicalMics]
+        mpos : float[3, nPhysicalMics]
             The mic positions of the physical (really existing) mics
-        micVirt : float[3, nVirtualMics]
+        mpos_virt : float[3, nVirtualMics]
             The mic positions of the virtual mics
         method : string
             The Interpolation method to use
@@ -864,11 +864,11 @@ class SpatialInterpolator(TimeInOut):
 
         """
         # init positions of virtual mics in cyl coordinates
-        nVirtMics = micVirt.shape[1]
+        nVirtMics = mpos_virt.shape[1]
         virtNewCoord = zeros((3, nVirtMics))
         virtNewCoord.fill(nan)
         # init real positions in cyl coordinates
-        nMics = mic.shape[1]
+        nMics = mpos.shape[1]
         newCoord = zeros((3, nMics))
         newCoord.fill(nan)
         # empty mesh object
@@ -876,24 +876,24 @@ class SpatialInterpolator(TimeInOut):
 
         if self.array_dimension == '1D' or self.array_dimension == 'ring':
             # get projections onto new coordinate, for real mics
-            projectionOnNewAxis = cartToCyl(mic, self.Q)[0]
+            projectionOnNewAxis = cartToCyl(mpos, self.Q)[0]
             indReorderHelp = argsort(projectionOnNewAxis)
             mesh.append([projectionOnNewAxis[indReorderHelp], indReorderHelp])
 
             # new coordinates of real mics
-            indReorderHelp = argsort(cartToCyl(mic, self.Q)[0])
-            newCoord = (cartToCyl(mic, self.Q).T)[indReorderHelp].T
+            indReorderHelp = argsort(cartToCyl(mpos, self.Q)[0])
+            newCoord = (cartToCyl(mpos, self.Q).T)[indReorderHelp].T
 
             # and for virtual mics
-            virtNewCoord = cartToCyl(micVirt)
+            virtNewCoord = cartToCyl(mpos_virt)
 
         elif self.array_dimension == '2D':  # 2d case0
             # get virtual mic projections on new coord system
-            virtNewCoord = cartToCyl(micVirt, self.Q)
+            virtNewCoord = cartToCyl(mpos_virt, self.Q)
 
             # new coordinates of real mics
-            indReorderHelp = argsort(cartToCyl(mic, self.Q)[0])
-            newCoord = cartToCyl(mic, self.Q)
+            indReorderHelp = argsort(cartToCyl(mpos, self.Q)[0])
+            newCoord = cartToCyl(mpos, self.Q)
 
             # scipy delauney triangulation
             # Delaunay
@@ -929,10 +929,10 @@ class SpatialInterpolator(TimeInOut):
 
         elif self.array_dimension == '3D':  # 3d case
             # get virtual mic projections on new coord system
-            virtNewCoord = cartToCyl(micVirt, self.Q)
+            virtNewCoord = cartToCyl(mpos_virt, self.Q)
             # get real mic projections on new coord system
-            indReorderHelp = argsort(cartToCyl(mic, self.Q)[0])
-            newCoord = cartToCyl(mic, self.Q)
+            indReorderHelp = argsort(cartToCyl(mpos, self.Q)[0])
+            newCoord = cartToCyl(mpos, self.Q)
             # Delaunay
             tri = Delaunay(newCoord.T, incremental=True)  # , incremental=True,qhull_options =  "Qc QJ Q12"
 
@@ -966,14 +966,14 @@ class SpatialInterpolator(TimeInOut):
 
         return mesh, virtNewCoord, newCoord
 
-    def _result_core_func(self, p, phiDelay=None, period=None, Q=Q, interp_at_zero=False):
+    def _result_core_func(self, p, phi_delay=None, period=None, Q=Q, interp_at_zero=False): # noqa: N803 (see #226)
         """Performs the actual Interpolation.
 
         Parameters
         ----------
-        p : float[nSamples, nMicsReal]
+        p : float[num, nMicsReal]
             The pressure field of the yielded sample at real mics.
-        phiDelay : empty list (default) or float[nSamples]
+        phi_delay : empty list (default) or float[num]
             If passed (rotational case), this list contains the angular delay
             of each sample in rad.
         period : None (default) or float
@@ -982,12 +982,12 @@ class SpatialInterpolator(TimeInOut):
 
         Returns
         -------
-        pInterp : float[nSamples, nMicsVirtual]
+        pInterp : float[num, nMicsVirtual]
             The interpolated time data at the virtual mics
 
         """
-        if phiDelay is None:
-            phiDelay = []
+        if phi_delay is None:
+            phi_delay = []
         # number of time samples
         nTime = p.shape[0]
         # number of virtual mixcs
@@ -1015,9 +1015,9 @@ class SpatialInterpolator(TimeInOut):
 
         # Interpolation for 1D Arrays
         if self.array_dimension == '1D' or self.array_dimension == 'ring':
-            # for rotation add phidelay
-            if not array_equal(phiDelay, []):
-                xInterpHelp = repmat(virtNewCoord[0, :], nTime, 1) + repmat(phiDelay, virtNewCoord.shape[1], 1).T
+            # for rotation add phi_delay
+            if not array_equal(phi_delay, []):
+                xInterpHelp = repmat(virtNewCoord[0, :], nTime, 1) + repmat(phi_delay, virtNewCoord.shape[1], 1).T
                 xInterp = ((xInterpHelp + pi) % (2 * pi)) - pi  #  shifting phi cootrdinate into feasible area [-pi, pi]
             # if no rotation given
             else:
@@ -1074,8 +1074,8 @@ class SpatialInterpolator(TimeInOut):
         # Interpolation for arbitrary 2D Arrays
         elif self.array_dimension == '2D':
             # check rotation
-            if not array_equal(phiDelay, []):
-                xInterpHelp = repmat(virtNewCoord[0, :], nTime, 1) + repmat(phiDelay, virtNewCoord.shape[1], 1).T
+            if not array_equal(phi_delay, []):
+                xInterpHelp = repmat(virtNewCoord[0, :], nTime, 1) + repmat(phi_delay, virtNewCoord.shape[1], 1).T
                 xInterp = ((xInterpHelp + pi) % (2 * pi)) - pi  # shifting phi cootrdinate into feasible area [-pi, pi]
             else:
                 xInterp = repmat(virtNewCoord[0, :], nTime, 1)
@@ -1153,8 +1153,8 @@ class SpatialInterpolator(TimeInOut):
         # Interpolation for arbitrary 3D Arrays
         elif self.array_dimension == '3D':
             # check rotation
-            if not array_equal(phiDelay, []):
-                xInterpHelp = repmat(virtNewCoord[0, :], nTime, 1) + repmat(phiDelay, virtNewCoord.shape[1], 1).T
+            if not array_equal(phi_delay, []):
+                xInterpHelp = repmat(virtNewCoord[0, :], nTime, 1) + repmat(phi_delay, virtNewCoord.shape[1], 1).T
                 xInterp = ((xInterpHelp + pi) % (2 * pi)) - pi  # shifting phi cootrdinate into feasible area [-pi, pi]
             else:
                 xInterp = repmat(virtNewCoord[0, :], nTime, 1)
@@ -1257,8 +1257,8 @@ class SpatialInterpolatorRotation(SpatialInterpolator):
         # counter to track angle position in time for each block
         count = 0
         for timeData in self.source.result(num):
-            phiDelay = angle[count : count + num]
-            interpVal = self._result_core_func(timeData, phiDelay, period, self.Q, interp_at_zero=False)
+            phi_delay = angle[count : count + num]
+            interpVal = self._result_core_func(timeData, phi_delay, period, self.Q, interp_at_zero=False)
             yield interpVal
             count += num
 
@@ -1311,9 +1311,9 @@ class SpatialInterpolatorConstantRotation(SpatialInterpolator):
         phiOffset = 0.0
         for timeData in self.source.result(num):
             nTime = timeData.shape[0]
-            phiDelay = phiOffset + linspace(0, nTime / self.sample_freq * omega, nTime, endpoint=False)
-            interpVal = self._result_core_func(timeData, phiDelay, period, self.Q, interp_at_zero=False)
-            phiOffset = phiDelay[-1] + omega / self.sample_freq
+            phi_delay = phiOffset + linspace(0, nTime / self.sample_freq * omega, nTime, endpoint=False)
+            interpVal = self._result_core_func(timeData, phi_delay, period, self.Q, interp_at_zero=False)
+            phiOffset = phi_delay[-1] + omega / self.sample_freq
             yield interpVal
 
 
@@ -1522,13 +1522,13 @@ class TimeReverse(TimeInOut):
             The last block may be shorter than num.
 
         """
-        l = []
-        l.extend(self.source.result(num))
-        temp = empty_like(l[0])
-        h = l.pop()
+        result_list = []
+        result_list.extend(self.source.result(num))
+        temp = empty_like(result_list[0])
+        h = result_list.pop()
         nsh = h.shape[0]
         temp[:nsh] = h[::-1]
-        for h in l[::-1]:
+        for h in result_list[::-1]:
             temp[nsh:] = h[: nsh - 1 : -1]
             yield temp
             temp[:nsh] = h[nsh - 1 :: -1]
@@ -2142,7 +2142,7 @@ class WriteH5(TimeInOut):
                 break
             try:
                 data = next(source_gen)
-            except:
+            except StopIteration:
                 break
             f5h.append_data(ac, data[:anz])
             yield data
@@ -2376,13 +2376,13 @@ class TimeConvolve(TimeInOut):
         L = self.kernel.shape[0]
         N = self.source.numchannels
         M = self.source.numsamples
-        P = int(ceil(L / num))  # number of kernel blocks
+        numblocks_kernel = int(ceil(L / num))  # number of kernel blocks
         Q = int(ceil(M / num))  # number of signal blocks
         R = int(ceil((L + M - 1) / num))  # number of output blocks
         last_size = (L + M - 1) % num  # size of final block
 
         idx = 0
-        FDL = zeros([P, num + 1, N], dtype='complex128')
+        fdl = zeros([numblocks_kernel, num + 1, N], dtype='complex128')
         buff = zeros([2 * num, N])  # time-domain input buffer
         spec_sum = zeros([num + 1, N], dtype='complex128')
 
@@ -2392,16 +2392,16 @@ class TimeConvolve(TimeInOut):
 
         # for very short signals, we are already done
         if R == 1:
-            _append_to_FDL(FDL, idx, P, rfft(buff, axis=0))
-            spec_sum = _spectral_sum(spec_sum, FDL, self._kernel_blocks)
+            _append_to_fdl(fdl, idx, numblocks_kernel, rfft(buff, axis=0))
+            spec_sum = _spectral_sum(spec_sum, fdl, self._kernel_blocks)
             # truncate s.t. total length is L+M-1 (like numpy convolve w/ mode="full")
             yield irfft(spec_sum, axis=0)[num : last_size + num]
             return
 
         # stream processing of source signal
         for temp in signal_blocks:
-            _append_to_FDL(FDL, idx, P, rfft(buff, axis=0))
-            spec_sum = _spectral_sum(spec_sum, FDL, self._kernel_blocks)
+            _append_to_fdl(fdl, idx, numblocks_kernel, rfft(buff, axis=0))
+            spec_sum = _spectral_sum(spec_sum, fdl, self._kernel_blocks)
             yield irfft(spec_sum, axis=0)[num:]
             buff = concatenate(
                 [buff[num:], zeros([num, N])],
@@ -2410,33 +2410,33 @@ class TimeConvolve(TimeInOut):
             buff[num : num + temp.shape[0]] = temp  # append new time-data
 
         for _ in range(R - Q):
-            _append_to_FDL(FDL, idx, P, rfft(buff, axis=0))
-            spec_sum = _spectral_sum(spec_sum, FDL, self._kernel_blocks)
+            _append_to_fdl(fdl, idx, numblocks_kernel, rfft(buff, axis=0))
+            spec_sum = _spectral_sum(spec_sum, fdl, self._kernel_blocks)
             yield irfft(spec_sum, axis=0)[num:]
             buff = concatenate(
                 [buff[num:], zeros([num, N])],
                 axis=0,
             )  # shift input buffer to the left
 
-        _append_to_FDL(FDL, idx, P, rfft(buff, axis=0))
-        spec_sum = _spectral_sum(spec_sum, FDL, self._kernel_blocks)
+        _append_to_fdl(fdl, idx, numblocks_kernel, rfft(buff, axis=0))
+        spec_sum = _spectral_sum(spec_sum, fdl, self._kernel_blocks)
         # truncate s.t. total length is L+M-1 (like numpy convolve w/ mode="full")
         yield irfft(spec_sum, axis=0)[num : last_size + num]
 
 
 @nb.jit(nopython=True, cache=True)
-def _append_to_FDL(FDL, idx, P, buff):
-    FDL[idx] = buff
-    idx = int(idx + 1 % P)
+def _append_to_fdl(fdl, idx, numblocks_kernel, buff):
+    fdl[idx] = buff
+    idx = int(idx + 1 % numblocks_kernel)
 
 
 @nb.jit(nopython=True, cache=True)
-def _spectral_sum(out, FDL, KB):
-    P, B, N = KB.shape
+def _spectral_sum(out, fdl, kb):
+    P, B, N = kb.shape
     for n in range(N):
         for b in range(B):
             out[b, n] = 0
             for i in range(P):
-                out[b, n] += FDL[i, b, n] * KB[i, b, n]
+                out[b, n] += fdl[i, b, n] * kb[i, b, n]
 
     return out
