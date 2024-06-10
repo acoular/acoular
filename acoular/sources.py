@@ -146,7 +146,7 @@ def get_radiation_angles(direction, mpos, sourceposition):
     return azi, ele
 
 
-def get_modes(lOrder, direction, mpos, sourceposition=None):
+def get_modes(lOrder, direction, mpos, sourceposition=None): # noqa: N803
     """Returns Spherical Harmonic Radiation Pattern at the Microphones.
 
     Parameters
@@ -170,9 +170,9 @@ def get_modes(lOrder, direction, mpos, sourceposition=None):
     azi, ele = get_radiation_angles(direction, mpos, sourceposition)  # angles between source and mics
     modes = zeros((azi.shape[0], (lOrder + 1) ** 2), dtype=complex128)
     i = 0
-    for l in range(lOrder + 1):
-        for m in range(-l, l + 1):
-            modes[:, i] = sph_harm(m, l, azi, ele)
+    for lidx in range(lOrder + 1):
+        for m in range(-lidx, lidx + 1):
+            modes[:, i] = sph_harm(m, lidx, azi, ele)
             if m < 0:
                 modes[:, i] = modes[:, i].conj() * 1j
             i += 1
@@ -588,7 +588,7 @@ class SphericalHarmonicSource(PointSource):
     """
 
     #: Order of spherical harmonic source
-    lOrder = Int(0, desc='Order of spherical harmonic')
+    lOrder = Int(0, desc='Order of spherical harmonic') # noqa: N815
 
     alpha = CArray(desc='coefficients of the (lOrder,) spherical harmonic mode')
 

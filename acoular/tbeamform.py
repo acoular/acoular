@@ -201,7 +201,7 @@ class BeamformerTime(TimeInOut):
     buffer = CArray(desc='buffer containing microphone signals')
 
     # index indicating position of current processing sample. Internal use.
-    bufferIndex = Int(desc='index indicating position in buffer')
+    bufferIndex = Int(desc='index indicating position in buffer') # noqa: N815
 
     # internal identifier
     digest = Property(
@@ -333,7 +333,7 @@ class BeamformerTime(TimeInOut):
             self.bufferIndex += num
             try:
                 next(fill_buffer_generator)
-            except:
+            except StopIteration:
                 pass
 
     def delay_and_sum(self, num, p_res, d_interp2, d_index, amp):
@@ -529,7 +529,7 @@ class BeamformerTimeTraj(BeamformerTime):
                 self.increase_buffer(num)
                 try:
                     next(fill_buffer_generator)
-                except:
+                except StopIteration:
                     dflag = False
             samplesleft = self.buffer.shape[0] - self.bufferIndex
             # last block may be shorter
@@ -602,7 +602,7 @@ class BeamformerTimeTraj(BeamformerTime):
             self.bufferIndex += num
             try:
                 next(fill_buffer_generator)
-            except:
+            except StopIteration:
                 dflag = False
 
     def delay_and_sum(self, num, p_res, d_interp2, d_index, amp):
