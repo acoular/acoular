@@ -84,6 +84,7 @@ from .sources import (
     TimeSamples,
     UncorrelatedNoiseSource,
     WavSamples,
+    CsvSamples,
 )
 from .spectra import BaseSpectra, FFTSpectra, PowerSpectra, PowerSpectraImport, synthetic
 from .spectra import PowerSpectra as EigSpectra
