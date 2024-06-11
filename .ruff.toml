@@ -35,13 +35,10 @@ ignore = [
     "D107", # missing docstring in __init__ -> should be fixed by issue #216
     "D417", # missing argument descriptions in the docstring -> should be fixed by issue #216
     # Others
-    "B904", # also addressed by issue #211
-    "B023", # unbinded loop variables -> should be fixed with issue #231
     "INP", # will be fixed when test are moved
     "T20", # will be fixed when logging is implemented
     "PT", # will be solved when test infrastructure is refactored
     "SLF", # need to be handled manually -> should be fixed with issue: #225 
-    "SIM105", # try.. except -> should be fixed with issue #233
     "ARG", # need to be handled manually -> #226
     "TD", # todos should be formulated as issues -> do we allow todos in the code? -> #227
     "FIX", # same as with TD
@@ -84,7 +81,7 @@ docstring-code-line-length = "dynamic"
 "acoular/sources.py" = ["N806"] 
 "acoular/tbeamform.py" = ["F841","N806"] # unused variable (really unused?) -> TBD
 "acoular/tprocess.py" = ["N806"] #
-"acoular/fbeamform.py" = ["N806"] # invalid escape sequence -> TBD
+"acoular/fbeamform.py" = ["N806","B023"] 
 "tests/test_tprocess.py" = ["F403"] 
 "tests/*" = ["D", "N"] # exclude docstring and naming conventions linting -> must be handled when tests are refactored
 "examples/*" = ["A001", "B007", "D4", "E4", "E701", "F4", "UP036", "SIM108"]
