@@ -78,4 +78,4 @@ docstring-code-line-length = "dynamic"
 "acoular/fbeamform.py" = ["N806","B023"] 
 "tests/test_tprocess.py" = ["F403"] 
 "tests/*" = ["D", "N", "SLF001", "TD002", "TD003", "FIX002"] # exclude docstring and naming conventions linting -> must be handled when tests are refactored
-"examples/*" = ["A001", "B007", "E4", "E701", "F4", "UP036", "SIM108","SLF001"]
+"examples/*" = ["A001", "B007", "D4", "E4", "E701", "F4", "UP036", "SIM108","SLF001"]
