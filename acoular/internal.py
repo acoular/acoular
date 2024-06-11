@@ -13,7 +13,7 @@ def digest(obj, name='digest'):
             for i in do_.split('.'):
                 vobj = list(vobj.trait_get(i.rstrip('[]')).values())[0]
             str_.append(str(vobj).encode('UTF-8'))
-        except: # noqa: E722
+        except:  # noqa: E722
             pass
     return '_' + md5(b''.join(str_)).hexdigest()
 

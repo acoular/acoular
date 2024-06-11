@@ -91,7 +91,7 @@ def test_delays32():
 r0 = random.uniform(low=0, high=1.0, size=(NUM, GRIDSIZE))
 
 
-def test_steer_I(): # noqa: N802
+def test_steer_I():  # noqa: N802
     acoular.tfastfuncs._steer_I(
         rm,
         r0,
@@ -99,7 +99,7 @@ def test_steer_I(): # noqa: N802
     )
 
 
-def test_steer_II(): # noqa: N802
+def test_steer_II():  # noqa: N802
     acoular.tfastfuncs._steer_II(
         rm,
         r0,
@@ -107,7 +107,7 @@ def test_steer_II(): # noqa: N802
     )
 
 
-def test_steer_III(): # noqa: N802
+def test_steer_III():  # noqa: N802
     acoular.tfastfuncs._steer_III(
         rm,
         r0,
@@ -115,7 +115,7 @@ def test_steer_III(): # noqa: N802
     )
 
 
-def test_steer_IV(): # noqa: N802
+def test_steer_IV():  # noqa: N802
     acoular.tfastfuncs._steer_IV(
         rm,
         r0,

@@ -43,8 +43,10 @@ eve = b.freq_data.eve[20]
 def test_beamformer_freq():
     acoular.fastFuncs.beamformerFreq(param_steer_type, False, sln, svt, csm)
 
+
 def test_beamformer_freq_eig():
     acoular.fastFuncs.beamformerFreq(param_steer_type, False, sln, svt, (eva[30:], eve[:, 30:]))
+
 
 def test_csm():
     t1.stop = -1

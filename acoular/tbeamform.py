@@ -202,7 +202,7 @@ class BeamformerTime(TimeInOut):
     buffer = CArray(desc='buffer containing microphone signals')
 
     # index indicating position of current processing sample. Internal use.
-    bufferIndex = Int(desc='index indicating position in buffer') # noqa: N815
+    bufferIndex = Int(desc='index indicating position in buffer')  # noqa: N815
 
     # internal identifier
     digest = Property(
