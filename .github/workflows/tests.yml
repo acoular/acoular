@@ -44,6 +44,8 @@ jobs:
         uses: actions/checkout@v4
       - name: Set up hatch
         uses: ./.github/actions/setup-hatch
+      - name: Install portaudio
+        run: sudo apt-get install libportaudio2
       - name: Generate coverage report
         run: hatch -v run +py=3.12 tests:coverage
 
