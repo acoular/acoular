@@ -9,7 +9,7 @@
     SoundDeviceSamplesGenerator
 """
 
-from traits.api import Any, Bool, HasPrivateTraits, Int, Long, Property, cached_property, observe
+from traits.api import Any, Bool, Int, Long, Property, cached_property, observe
 
 from .configuration import config
 from .internal import digest
