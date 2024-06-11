@@ -18,6 +18,7 @@
 """
 
 # imports from other packages
+import contextlib
 from warnings import warn
 
 from numpy import (
@@ -331,10 +332,8 @@ class BeamformerTime(TimeInOut):
                 else:
                     yield Gamma[:num] ** 2
             self.bufferIndex += num
-            try:
+            with contextlib.suppress(StopIteration):
                 next(fill_buffer_generator)
-            except StopIteration:
-                pass
 
     def delay_and_sum(self, num, p_res, d_interp2, d_index, amp):
         """Standard delay-and-sum method."""

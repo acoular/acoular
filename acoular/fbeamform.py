@@ -169,7 +169,7 @@ class SteeringVector(HasPrivateTraits):
         if isscalar(ref):
             try:
                 self._ref = absolute(float(ref))
-            except: #noqa E722
+            except: #noqa: E722
                 raise TraitError(args=self, name='ref', info='Float or CArray(3,)', value=ref)
         elif len(ref) == 3:
             self._ref = array(ref, dtype=float)

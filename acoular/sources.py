@@ -22,6 +22,7 @@
 
 # imports from other packages
 
+import contextlib
 from os import path
 from warnings import warn
 
@@ -242,10 +243,8 @@ class TimeSamples(SamplesGenerator):
             self.sample_freq = 0
             raise OSError('No such file: %s' % self.name)
         if self.h5f is not None:
-            try:
+            with contextlib.suppress(OSError):
                 self.h5f.close()
-            except OSError:
-                pass
         file = _get_h5file_class()
         self.h5f = file(self.name)
         self.load_timedata()
@@ -372,10 +371,8 @@ class MaskedTimeSamples(TimeSamples):
             self.sample_freq = 0
             raise OSError('No such file: %s' % self.name)
         if self.h5f is not None:
-            try:
+            with contextlib.suppress(OSError):
                 self.h5f.close()
-            except OSError:
-                pass
         file = _get_h5file_class()
         self.h5f = file(self.name)
         self.load_timedata()
