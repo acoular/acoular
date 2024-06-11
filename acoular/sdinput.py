@@ -18,6 +18,7 @@ from .tprocess import SamplesGenerator
 if config.have_sounddevice:
     import sounddevice as sd
 
+
 class SoundDeviceSamplesGenerator(SamplesGenerator):
     """Controller for sound card hardware using sounddevice library.
 
