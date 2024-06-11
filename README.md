@@ -67,12 +67,12 @@ A second option is to install Acoular via [pip](https://pip.pypa.io/en/stable/).
 
     pip install acoular
 
-For more detailed installation instructions, see the [documentation](https://acoular.org/install/index.html).
+For more detailed installation instructions, see the [documentation](https://www.acoular.org/install/index.html).
 
 # Documentation and help
-Documentation is available [here](https://acoular.org) with a
-[getting started](https://acoular.org/get_started/index.html) section and
-[examples](https://acoular.org/examples/index.html).
+Documentation is available [here](https://www.acoular.org) with a
+[getting started](https://www.acoular.org/get_started/index.html) section and
+[examples](https://www.acoular.org/examples/index.html).
 
 The Acoular [blog](https://acoular.github.io/blog/) contains some tutorials.
 
