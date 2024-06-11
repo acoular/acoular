@@ -105,7 +105,7 @@ def _fill_mic_signal_block(out, signal, rm, ind, blocksize, numchannels, up, pre
     return out
 
 
-def spherical_hn1(n, z, derivativearccos=False):
+def spherical_hn1(n, z):
     """Spherical Hankel Function of the First Kind."""
     return spherical_jn(n, z, derivative=False) + 1j * spherical_yn(n, z, derivative=False)
 
@@ -147,7 +147,7 @@ def get_radiation_angles(direction, mpos, sourceposition):
     return azi, ele
 
 
-def get_modes(lOrder, direction, mpos, sourceposition=None): # noqa: N803
+def get_modes(lOrder, direction, mpos, sourceposition=None):  # noqa: N803
     """Returns Spherical Harmonic Radiation Pattern at the Microphones.
 
     Parameters
@@ -585,7 +585,7 @@ class SphericalHarmonicSource(PointSource):
     """
 
     #: Order of spherical harmonic source
-    lOrder = Int(0, desc='Order of spherical harmonic') # noqa: N815
+    lOrder = Int(0, desc='Order of spherical harmonic')  # noqa: N815
 
     alpha = CArray(desc='coefficients of the (lOrder,) spherical harmonic mode')
 

@@ -109,7 +109,9 @@ def _delayandsum5(data, offsets, ifactor2, steeramp, out, autopower):
             autopower[n, gi] = 0
             for mi in range(numchannels):
                 ind = offsets[n, gi, mi] + n
-                r = (data[ind, mi] * (one_constant - ifactor2[n, gi, mi]) + data[ind + 1, mi] * ifactor2[n, gi, mi]) * steeramp[
+                r = (
+                    data[ind, mi] * (one_constant - ifactor2[n, gi, mi]) + data[ind + 1, mi] * ifactor2[n, gi, mi]
+                ) * steeramp[
                     n,
                     gi,
                     mi,
@@ -146,7 +148,7 @@ def _steer_I(rm, r0, amp):  # noqa: ARG001, N802
     parallel=True,
     fastmath=True,
 )
-def _steer_II(rm, r0, amp): # noqa: N802
+def _steer_II(rm, r0, amp):  # noqa: N802
     num, gridsize, numchannels = rm.shape
     amp[0, 0, 0] = 1.0 / numchannels  # to get the same type for rm2 as for rm
     nr = amp[0, 0, 0]
@@ -166,7 +168,7 @@ def _steer_II(rm, r0, amp): # noqa: N802
     parallel=True,
     fastmath=True,
 )
-def _steer_III(rm, r0, amp): # noqa: N802
+def _steer_III(rm, r0, amp):  # noqa: N802
     num, gridsize, numchannels = rm.shape
     rm20 = rm[0, 0, 0] - rm[0, 0, 0]  # to get the same type for rm2 as for rm
     rm1 = rm[0, 0, 0] / rm[0, 0, 0]

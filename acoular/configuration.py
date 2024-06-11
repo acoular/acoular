@@ -212,6 +212,7 @@ class Config(HasStrictTraits):
     def _get_have_traitsui(self):
         return self._have_module('traitsui')
 
+
 config = Config()
 """
 This instance implements the global configuration of the Acoular package.

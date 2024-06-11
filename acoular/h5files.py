@@ -72,7 +72,7 @@ if config.have_tables:
             node.set_attr(attrname, value)
 
         def get_node_attribute(self, node, attrname):
-            return node._v_attrs[attrname]
+            return node._v_attrs[attrname]  # noqa: SLF001
 
         def append_data(self, node, data):
             node.append(data)
@@ -93,10 +93,10 @@ if config.have_tables:
             """Recursively convert an HDF5 node to a dictionary."""
             node = self.get_node(nodename)
             # initialize node-dict with node's own attributes
-            result = {attr: node._v_attrs[attr] for attr in node._v_attrs._f_list()}
+            result = {attr: node._v_attrs[attr] for attr in node._v_attrs._f_list()}  # noqa: SLF001
             if isinstance(node, tables.Group):
                 # if node is a group, recursively add its children
-                for childname in node._v_children:
+                for childname in node._v_children:  # noqa: SLF001
                     result[childname] = self.node_to_dict(f'{nodename}/{childname}')
             elif isinstance(node, tables.Leaf):
                 # if node contains only data, add it

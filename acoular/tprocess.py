@@ -520,7 +520,7 @@ class Trigger(TimeInOut):
             )
         return peakLoc, max(peakDist), min(peakDist)
 
-    def _trigger_dirac(self, x0, x, threshold):
+    def _trigger_dirac(self, x0, x, threshold):  # noqa: ARG002
         # x0 not needed here, but needed in _trigger_rect
         return self._trigger_value_comp(x, threshold)
 
@@ -642,7 +642,7 @@ class AngleTracker(MaskedTimeInOut):
         # init
         ind = 0
         # trigger data
-        peakloc, maxdist, mindist = self.trigger._get_trigger_data()
+        peakloc, maxdist, mindist = self.trigger.trigger_data()
         TriggerPerRevo = self.trigger_per_revo
         rotDirection = self.rot_direction
         num = self.source.numsamples
@@ -716,7 +716,7 @@ class AngleTracker(MaskedTimeInOut):
 
         """
         # trigger indices data
-        peakloc = self.trigger._get_trigger_data()[0]
+        peakloc = self.trigger.trigger_data()[0]
         # calculation of average rpm in 1/min
         return (len(peakloc) - 1) / (peakloc[-1] - peakloc[0]) / self.trigger_per_revo * self.source.sample_freq * 60
 
@@ -784,7 +784,7 @@ class SpatialInterpolator(TimeInOut):
     #: The transformation is done via [x,y,z]_mod = Q * [x,y,z]. (default is Identity).
     Q = CArray(dtype=float64, shape=(3, 3), value=identity(3))
 
-    num_IDW = Trait(3, dtype=int, desc='number of neighboring microphones, DEFAULT=3') # noqa: N815
+    num_IDW = Trait(3, dtype=int, desc='number of neighboring microphones, DEFAULT=3')  # noqa: N815
 
     p_weight = Trait(
         2,
@@ -793,7 +793,7 @@ class SpatialInterpolator(TimeInOut):
     )
 
     #: Stores the output of :meth:`_virtNewCoord_func`; Read-Only
-    _virtNewCoord_func = Property( # noqa: N815
+    _virtNewCoord_func = Property(  # noqa: N815
         depends_on=['mics.digest', 'mics_virtual.digest', 'method', 'array_dimension', 'interp_at_zero'],
     )
 
@@ -818,14 +818,14 @@ class SpatialInterpolator(TimeInOut):
         return digest(self)
 
     @cached_property
-    def _get_virtNewCoord(self): # noqa N802
+    def _get_virtNewCoord(self):  # noqa N802
         return self._virtNewCoord_func(self.mics.mpos, self.mics_virtual.mpos, self.method, self.array_dimension)
 
     def sinc_mic(self, r):
         """Modified Sinc function for Radial Basis function approximation."""
         return sinc((r * self.mics_virtual.mpos.shape[1]) / (pi))
 
-    def _virtNewCoord_func(self, mpos, mpos_virt, method, array_dimension): # noqa N802
+    def _virtNewCoord_func(self, mpos, mpos_virt, method, array_dimension):  # noqa N802
         """Core functionality for getting the interpolation.
 
         Parameters
@@ -966,7 +966,7 @@ class SpatialInterpolator(TimeInOut):
 
         return mesh, virtNewCoord, newCoord
 
-    def _result_core_func(self, p, phi_delay=None, period=None, Q=Q, interp_at_zero=False): # noqa: N803 (see #226)
+    def _result_core_func(self, p, phi_delay=None, period=None, Q=Q, interp_at_zero=False):  # noqa: N803, ARG002 (see #226)
         """Performs the actual Interpolation.
 
         Parameters
@@ -1253,7 +1253,7 @@ class SpatialInterpolatorRotation(SpatialInterpolator):
         # period for rotation
         period = 2 * pi
         # get angle
-        angle = self.angle_source._get_angle()
+        angle = self.angle_source.angle()
         # counter to track angle position in time for each block
         count = 0
         for timeData in self.source.result(num):

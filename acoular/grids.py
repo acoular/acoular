@@ -550,8 +550,8 @@ class RectGrid3D(RectGrid):
         if isscalar(increment):
             try:
                 self._increment = absolute(float(increment))
-            except: # noqa E722
-                raise TraitError(args=self, name='increment', info='Float or CArray(3,)', value=increment)
+            except ValueError as ve:
+                raise TraitError(args=self, name='increment', info='Float or CArray(3,)', value=increment) from ve
         elif len(increment) == 3:
             self._increment = array(increment, dtype=float)
         else:
@@ -559,14 +559,14 @@ class RectGrid3D(RectGrid):
 
     # Respective increments in x,y, and z-direction (in m).
     # Deprecated: Use :attr:`~RectGrid.increment` for this functionality
-    increment3D = Property(desc='3D step sizes') # noqa N815
+    increment3D = Property(desc='3D step sizes')  # noqa N815
 
-    def _get_increment3D(self): # noqa N802
+    def _get_increment3D(self):  # noqa N802
         if isscalar(self._increment):
             return array([self._increment, self._increment, self._increment])
         return self._increment
 
-    def _set_increment3D(self, inc): # noqa N802
+    def _set_increment3D(self, inc):  # noqa N802
         if not isscalar(inc) and len(inc) == 3:
             self._increment = array(inc, dtype=float)
         else:

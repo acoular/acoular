@@ -85,7 +85,7 @@ def dist_mat(gpos, mpos):
     return rm
 
 
-def cartToCyl(x, Q=None): # noqa: N802, N803
+def cartToCyl(x, Q=None):  # noqa: N802, N803
     """Returns the cylindrical coordinate representation of a input position
     which was before transformed into a modified cartesian coordinate, which
     has flow into positive z direction.
@@ -111,7 +111,7 @@ def cartToCyl(x, Q=None): # noqa: N802, N803
     return array([arctan2(x[1], x[0]), sqrt(x[0] ** 2 + x[1] ** 2), x[2]])
 
 
-def cylToCart(x, Q=None): # noqa: N802, N803
+def cylToCart(x, Q=None):  # noqa: N802, N803
     """Returns the cartesian coordinate representation of a input position
     which was before transformed into a cylindrical coordinate, which
     has flow into positive z direction.
@@ -304,7 +304,7 @@ class SlotJet(FlowField):
     B = Float(0.2, desc='nozzle diameter')
 
     #: Nondimensional length of zone of flow establishment (jet core length), defaults to 5.2
-    l = Float(5.2, desc='flow establishment length') # noqa: E741
+    l = Float(5.2, desc='flow establishment length')  # noqa: E741
 
     # internal identifier
     digest = Property(
@@ -385,7 +385,7 @@ class OpenJet(FlowField):
     D = Float(0.2, desc='nozzle diameter')
 
     #: Nondimensional length of zone of flow establishment (jet core length), defaults to 6.2
-    l = Float(6.2, desc='flow establishment length') # noqa: E741
+    l = Float(6.2, desc='flow establishment length')  # noqa: E741
 
     # internal identifier
     digest = Property(
@@ -594,8 +594,6 @@ class GeneralFlowEnvironment(Environment):
         gt = empty((gpos.shape[-1], mpos.shape[-1]))
         for micnum, x0 in enumerate(mpos.T):
             key = x0.tobytes()  # make array hashable
-            # TODO: the interpolator also depends the roi, so idict keys should also depend on roi
-            # OR the idict should be cleaned if roi changes
             try:
                 li = self.idict[key]  # fetch stored interpolator
             except KeyError:
