@@ -1,6 +1,6 @@
 name: Bug report
 title: "BUG: <Fill in a descriptive title of the encountered problem>"
-description: Report a bug
+description: "Report a bug"
 labels: [bug]
 body:
   - type: markdown
@@ -14,46 +14,60 @@ body:
   - type: textarea
     attributes:
       label: "Version Dependencies"
-      placeholder: >
+      placeholder: |
         Please specify your:
         - Python version
         - Acoular version
         - OS 
+
+        You can do so by running the following commands in your Python environment:
+        
+        ```python
+        import sys
+        import acoular
+        import platform
+
+        print(sys.version_info)
+        print(acoular.__version__)
+        print(platform.system())
+        print(platform.version())
+        ```
+
     validations:
       required: true
 
   - type: textarea
     attributes:
       label: "Bug Description"
-      placeholder: >
+      placeholder: |
         Please describe the bug in detail. 
 
         1. In which context did you encounter the bug?
-        2. What is the expected behavior
+        2. What is the expected behavior?
         3. What actually happened?
     validations:
       required: true
 
-- type: textarea
-  attributes:
-    label: "Reproducible Code"
-    description: >
-      Please provide a minimal code example that reproduces the bug.
-    placeholder: |
-      import acoular
-      << your code here >>
-    render: python
-  validations:
-    required: false
-  
-- type: textarea
-  attributes:
-    label: "Error message:"
-    description: >
-      If applicable, please provide the error message you received.
-    placeholder: |
-      << Full traceback starting from `Traceback: ...` >>
-    render: shell
+  - type: textarea
+    attributes:
+      label: "Reproducible Code"
+      description: |
+        Please provide a minimal code example that reproduces the bug.
+      placeholder: |
+        import acoular
+        << your code here >>
+      render: python
+    validations:
+      required: false
+    
+  - type: textarea
+    attributes:
+      label: "Error message:"
+      description: |
+        If applicable, please provide the error message you received.
+      placeholder: |
+        << `Traceback: ...` >>
+      render: shell
     validations:
         required: false
 
