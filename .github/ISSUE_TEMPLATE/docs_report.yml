@@ -1,0 +1,45 @@
+name: Documentation
+title: "DOCS: <Fill in a descriptive title for the encountered problem>"
+description: "Report issues with the documentation"
+labels: [docs]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping to improve the Acoular documentation. 
+        Before you fill out the form, please make sure that no duplicates exist in the [issues](https://github.com/acoular/acoular/issues)
+
+  - type: dropdown
+    attributes:
+      label: Type of Problem
+      description: |
+        "Please select the type of problem you are experiencing with the documentation."
+      multiple: false
+      options:
+          - "Wrong Information: The documentation contains incorrect information."
+          - "Unclear Information: The documentation is unclear."
+          - "Missing Information: The documentation lacks information."
+    validations:
+        required: true
+
+  - type: textarea
+    attributes:
+      label: "Documentation Issue"
+      description: |
+        "Please describe the issue with the documentation in detail. If possible, 
+        include a reference to the specific section of the documentation."
+      placeholder: |
+        Enter a detailed description of the issue with the documentation here.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: "Proposal for Change"
+      description: |
+        "Please provide some suggestions for changes to the documentation."
+      placeholder: |
+        Enter your suggestions for changes to the documentation here.
+    validations:
+      required: true
