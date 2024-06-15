@@ -85,20 +85,18 @@ f = PowerSpectra(
 # produces a tuple of beamformer objects to test
 # because we need new objects for each test we have to call this more than once
 def fbeamformers():
-    bb = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached=False)
-
     # frequency beamformers to test
     bbase = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached=False)
     bc = BeamformerCapon(freq_data=f, steer=st, cached=False)
     beig = BeamformerEig(freq_data=f, steer=st, r_diag=True, n=54, cached=False)
     bm = BeamformerMusic(freq_data=f, steer=st, n=6, cached=False)
-    bd = BeamformerDamas(beamformer=bb, n_iter=10, cached=False)
-    bdp = BeamformerDamasPlus(beamformer=bb, n_iter=100, cached=False)
+    bd = BeamformerDamas(freq_data=f, steer=st, r_diag=True, n_iter=10, cached=False)
+    bdp = BeamformerDamasPlus(freq_data=f, steer=st, r_diag=True, n_iter=100, cached=False)
     bo = BeamformerOrth(freq_data=f, steer=st, r_diag=True, eva_list=list(range(38, 54)), cached=False)
     bs = BeamformerCleansc(freq_data=f, steer=st, r_diag=True, cached=False)
     bcmflassobic = BeamformerCMFLassoLarsBIC(freq_data=f, steer=st, method='LassoLarsBIC', cached=False)
     bcmfnnls = BeamformerCMFNNLS(freq_data=f, steer=st, method='NNLS', cached=False)
-    bl = BeamformerClean(beamformer=bb, n_iter=10, cached=False)
+    bl = BeamformerClean(freq_data=f, steer=st, r_diag=True, n_iter=10, cached=False)
     bf = BeamformerFunctional(freq_data=f, steer=st, r_diag=False, gamma=3, cached=False)
     bgib = BeamformerGIB(freq_data=f, steer=st, method='LassoLars', n=2, cached=False)
     bgo = BeamformerGridlessOrth(freq_data=f, steer=st, r_diag=False, n=1, shgo={'n': 16}, cached=False)
