@@ -1,0 +1,44 @@
+name: Feature Request
+description: Suggest a new feature or enhancement for Acoular.
+title: "FEATURE REQUEST: <Fill in a descriptive title for the feature request>"
+labels: [enhancement, new feature]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a new feature or enhancement for Acoular. 
+        Before you fill out the form, please make sure that no duplicates exist in the [issues](https://github.com/acoular/acoular/issues).
+
+  - type: textarea
+    attributes:
+      label: "Feature Description"
+      description: |
+        "Please describe the feature or enhancement you would like to see in Acoular."
+      placeholder: |
+        Enter a description of the feature or enhancement here.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: "Use Case"
+      description: |
+        "Please provide a potential use case for the feature or enhancement."
+      placeholder: |
+        Enter a use case here.
+    validations:
+      required: true
+
+  - type: dropdown
+    attributes:
+      label: Importance
+      description: |
+        "Please rate the importance of the feature or enhancement for the Acoular community. 
+        This helps us to prioritize potential implementations."
+      multiple: false
+      options:
+          - "Low: Nice to have, but not critical."
+          - "Medium: Would be beneficial for some users."
+          - "High: Essential for the majority of users."
+    validations:
+        required: true

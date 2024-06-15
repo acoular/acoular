@@ -85,7 +85,8 @@ build = ["cd docs && make html"]
 [tool.hatch.envs.tests]
 dependencies = [
     "pytest",
-    "pytest-cov"
+    "pytest-cov",
+    "sounddevice",
 ]
 
 [[tool.hatch.envs.tests.matrix]]
