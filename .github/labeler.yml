@@ -12,6 +12,9 @@ tests:
 ci:
 - changed-files:
   - any-glob-to-any-file: .github/**
+linting:
+- changed-files:
+  - any-glob-to-any-file: .ruff.toml
 maintenance:
 - changed-files:
   - any-glob-to-any-file:
