@@ -140,14 +140,6 @@ class SteeringVector(HasPrivateTraits):
     #: Defaults to standard :class:`~acoular.environments.Environment` object.
     env = Instance(Environment(), Environment)
 
-    # TODO: add caching capability for transfer function
-    # Flag, if "True" (not default), the transfer function is
-    # cached in h5 files and does not have to be recomputed during subsequent
-    # program runs.
-    # Be aware that setting this to "True" may result in high memory usage.
-    # cached = Bool(False,
-    #              desc="cache flag for transfer function")
-
     # Sound travel distances from microphone array center to grid
     # points or reference position (readonly). Feature may change.
     r0 = Property(desc='array center to grid distances')
@@ -170,8 +162,8 @@ class SteeringVector(HasPrivateTraits):
         if isscalar(ref):
             try:
                 self._ref = absolute(float(ref))
-            except:
-                raise TraitError(args=self, name='ref', info='Float or CArray(3,)', value=ref)
+            except ValueError as ve:
+                raise TraitError(args=self, name='ref', info='Float or CArray(3,)', value=ref) from ve
         elif len(ref) == 3:
             self._ref = array(ref, dtype=float)
         else:
@@ -1222,19 +1214,19 @@ class PointSpreadFunction(HasPrivateTraits):
 
         if self.calcmode == 'single':  # calculate selected psfs one-by-one
             for ind in g_ind_calc:
-                ac[:, ind] = self._psfCall([ind])[:, 0]
+                ac[:, ind] = self._psf_call([ind])[:, 0]
                 gp[ind] = 1
         elif self.calcmode == 'full':  # calculate all psfs in one go
             gp[:] = 1
-            ac[:] = self._psfCall(arange(self.steer.grid.size))
+            ac[:] = self._psf_call(arange(self.steer.grid.size))
         else:  # 'block' # calculate selected psfs in one go
-            hh = self._psfCall(g_ind_calc)
+            hh = self._psf_call(g_ind_calc)
             for indh, ind in enumerate(g_ind_calc):
                 gp[ind] = 1
                 ac[:, ind] = hh[:, indh]
                 indh += 1
 
-    def _psfCall(self, ind):
+    def _psf_call(self, ind):
         """Manages the calling of the core psf functionality.
 
         Parameters
@@ -1756,7 +1748,6 @@ class BeamformerClean(BeamformerBase):
                 i_iter = 0
                 flag = True
                 while flag:
-                    # TODO: negative werte!!!
                     dirty_sum = abs(dirty).sum(0)
                     next_max = dirty.argmax(0)
                     p.grid_indices = array([next_max])
@@ -1871,8 +1862,8 @@ class BeamformerCMF(BeamformerBase):
         """
 
         # function to repack complex matrices to deal with them in real number space
-        def realify(M):
-            return vstack([M.real, M.imag])
+        def realify(matrix):
+            return vstack([matrix.real, matrix.imag])
 
         # prepare calculation
         i = self.freq_data.indices
@@ -2263,10 +2254,10 @@ class BeamformerSODIX(BeamformerBase):
 
                 if self.method == 'fmin_l_bfgs_b':
                     # function to minimize
-                    def function(D):
+                    def function(directions):
                         """Parameters
                         ----------
-                        D
+                        directions
                         [numpoints*num_mics]
 
                         Returns
@@ -2278,7 +2269,7 @@ class BeamformerSODIX(BeamformerBase):
 
                         """
                         #### the sodix function ####
-                        Djm = D.reshape([numpoints, num_mics])
+                        Djm = directions.reshape([numpoints, num_mics])
                         p = h.T * Djm
                         csm_mod = dot(p.T, p.conj())
                         Q = csm - csm_mod
@@ -2757,7 +2748,7 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
                 fr[i] = 1
 
 
-def L_p(x):
+def L_p(x):  # noqa: N802
     r"""Calculates the sound pressure level from the squared sound pressure.
 
     :math:`L_p = 10 \lg ( x / 4\cdot 10^{-10})`
