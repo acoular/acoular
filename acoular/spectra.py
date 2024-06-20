@@ -383,7 +383,7 @@ class PowerSpectra(BaseSpectra):
         wind = wind[newaxis, :].swapaxes(0, 1)
         numfreq = int(self.block_size / 2 + 1)
         csm_shape = (numfreq, t.numchannels, t.numchannels)
-        csmUpper = zeros(csm_shape, dtype=self.precision)
+        csm_upper = zeros(csm_shape, dtype=self.precision)
         # print "num blocks", self.num_blocks
         # for backward compatibility
         if self.calib and self.calib.num_mics > 0:
@@ -394,11 +394,11 @@ class PowerSpectra(BaseSpectra):
         # get time data blockwise
         for data in self.get_source_data():
             ft = fft.rfft(data * wind, None, 0).astype(self.precision)
-            calcCSM(csmUpper, ft)  # only upper triangular part of matrix is calculated (for speed reasons)
+            calcCSM(csm_upper, ft)  # only upper triangular part of matrix is calculated (for speed reasons)
         # create the full csm matrix via transposing and complex conj.
-        csmLower = csmUpper.conj().transpose(0, 2, 1)
-        [fill_diagonal(csmLower[cntFreq, :, :], 0) for cntFreq in range(csmLower.shape[0])]
-        csm = csmLower + csmUpper
+        csm_lower = csm_upper.conj().transpose(0, 2, 1)
+        [fill_diagonal(csm_lower[cntFreq, :, :], 0) for cntFreq in range(csm_lower.shape[0])]
+        csm = csm_lower + csm_upper
         # onesided spectrum: multiplication by 2.0=sqrt(2)^2
         return csm * (2.0 / self.block_size / weight / self.num_blocks)
 

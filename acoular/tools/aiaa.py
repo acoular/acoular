@@ -25,6 +25,7 @@ Examples
     MicAIAABenchmark
 """
 
+import contextlib
 from os import path
 
 from numpy import array
@@ -118,10 +119,8 @@ class CsmAIAABenchmark(PowerSpectraImport):
             # no file there
             raise OSError('No such file: %s' % self.name)
         if self.h5f is not None:
-            try:
+            with contextlib.suppress(OSError):
                 self.h5f.close()
-            except OSError:
-                pass
         file = _get_h5file_class()
         self.h5f = file(self.name)
 

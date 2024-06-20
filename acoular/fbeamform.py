@@ -89,7 +89,6 @@ from traits.api import (
     Any,
     Bool,
     CArray,
-    Delegate,
     Dict,
     Enum,
     Float,
@@ -121,6 +120,8 @@ sklearn_ndict = {}
 if parse(sklearn.__version__) < parse('1.4'):
     sklearn_ndict['normalize'] = False
 
+BEAMFORMER_BASE_DIGEST_DEPENDENCIES = ['freq_data.digest', 'r_diag', 'r_diag_norm', 'precision', '_steer_obj.digest']
+
 
 class SteeringVector(HasPrivateTraits):
     """Basic class for implementing steering vectors with monopole source transfer models."""
@@ -138,14 +139,6 @@ class SteeringVector(HasPrivateTraits):
     #: which provides information about the sound propagation in the medium.
     #: Defaults to standard :class:`~acoular.environments.Environment` object.
     env = Instance(Environment(), Environment)
-
-    # TODO: add caching capability for transfer function
-    # Flag, if "True" (not default), the transfer function is
-    # cached in h5 files and does not have to be recomputed during subsequent
-    # program runs.
-    # Be aware that setting this to "True" may result in high memory usage.
-    # cached = Bool(False,
-    #              desc="cache flag for transfer function")
 
     # Sound travel distances from microphone array center to grid
     # points or reference position (readonly). Feature may change.
@@ -169,8 +162,8 @@ class SteeringVector(HasPrivateTraits):
         if isscalar(ref):
             try:
                 self._ref = absolute(float(ref))
-            except:
-                raise TraitError(args=self, name='ref', info='Float or CArray(3,)', value=ref)
+            except ValueError as ve:
+                raise TraitError(args=self, name='ref', info='Float or CArray(3,)', value=ref) from ve
         elif len(ref) == 3:
             self._ref = array(ref, dtype=float)
         else:
@@ -391,7 +384,7 @@ class BeamformerBase(HasPrivateTraits):
     result = Property(desc='beamforming result')
 
     # internal identifier
-    digest = Property(depends_on=['freq_data.digest', 'r_diag', 'r_diag_norm', 'precision', '_steer_obj.digest'])
+    digest = Property(depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES)
 
     # internal identifier
     ext_digest = Property(
@@ -499,13 +492,13 @@ class BeamformerBase(HasPrivateTraits):
         of signal energy --> Done via a normalization factor.
         """
         if not self.r_diag:  # Full CSM --> no normalization needed
-            normFactor = 1.0
+            normfactor = 1.0
         elif self.r_diag_norm == 0.0:  # Removed diag: standard normalization factor
             nMics = float(self.freq_data.numchannels)
-            normFactor = nMics / (nMics - 1)
+            normfactor = nMics / (nMics - 1)
         elif self.r_diag_norm != 0.0:  # Removed diag: user defined normalization factor
-            normFactor = self.r_diag_norm
-        return normFactor
+            normfactor = self.r_diag_norm
+        return normfactor
 
     def _beamformer_params(self):
         """Manages the parameters for calling of the core beamformer functionality.
@@ -555,6 +548,7 @@ class BeamformerBase(HasPrivateTraits):
 
         """
         f = self.freq_data.fftfreq()  # [inds]
+        normfactor = self.sig_loss_norm()
         param_steer_type, steer_vector = self._beamformer_params()
         for i in self.freq_data.indices:
             if not fr[i]:
@@ -562,7 +556,7 @@ class BeamformerBase(HasPrivateTraits):
                 beamformerOutput = beamformerFreq(
                     param_steer_type,
                     self.r_diag,
-                    self.sig_loss_norm(),
+                    normfactor,
                     steer_vector(f[i]),
                     csm,
                 )[0]
@@ -726,11 +720,17 @@ class BeamformerFunctional(BeamformerBase):
     #: Functional exponent, defaults to 1 (= Classic Beamforming).
     gamma = Float(1, desc='functional exponent')
 
-    # internal identifier
-    digest = Property(depends_on=['freq_data.digest', '_steer_obj.digest', 'r_diag', 'gamma'])
-
     #: Functional Beamforming is only well defined for full CSM
     r_diag = Enum(False, desc='False, as Functional Beamformer is only well defined for the full CSM')
+
+    #: Normalization factor in case of CSM diagonal removal. Defaults to 1.0 since Functional Beamforming is only well defined for full CSM.
+    r_diag_norm = Enum(
+        1.0,
+        desc='No normalization needed. Functional Beamforming is only well defined for full CSM.',
+    )
+
+    # internal identifier
+    digest = Property(depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['gamma'])
 
     @cached_property
     def _get_digest(self):
@@ -762,7 +762,7 @@ class BeamformerFunctional(BeamformerBase):
 
         """
         f = self.freq_data.fftfreq()
-        normFactor = self.sig_loss_norm()
+        normfactor = self.sig_loss_norm()
         param_steer_type, steer_vector = self._beamformer_params()
         for i in self.freq_data.indices:
             if not fr[i]:
@@ -782,7 +782,7 @@ class BeamformerFunctional(BeamformerBase):
                     beamformerOutput, steerNorm = beamformerFreq(
                         param_steer_type,
                         self.r_diag,
-                        1.0,
+                        normfactor,
                         steer_vector(f[i]),
                         csmRoot,
                     )
@@ -803,19 +803,23 @@ class BeamformerFunctional(BeamformerBase):
                     )
                     beamformerOutput /= steerNorm  # take normalized steering vec
                 ac[i] = (
-                    (beamformerOutput**self.gamma) * steerNorm * normFactor
+                    (beamformerOutput**self.gamma) * steerNorm * normfactor
                 )  # the normalization must be done outside the beamformer
                 fr[i] = 1
 
 
 class BeamformerCapon(BeamformerBase):
-    """Beamforming using the Capon (Mininimum Variance) algorithm,
-    see :ref:`Capon, 1969<Capon1969>`.
-    """
+    """Beamforming using the Capon (Mininimum Variance) algorithm, see :ref:`Capon, 1969<Capon1969>`."""
 
     # Boolean flag, if 'True', the main diagonal is removed before beamforming;
     # for Capon beamforming r_diag is set to 'False'.
     r_diag = Enum(False, desc='removal of diagonal')
+
+    #: Normalization factor in case of CSM diagonal removal. Defaults to 1.0 since Beamformer Capon is only well defined for full CSM.
+    r_diag_norm = Enum(
+        1.0,
+        desc='No normalization. BeamformerCapon is only well defined for full CSM.',
+    )
 
     def calc(self, ac, fr):
         """Calculates the Capon result for the frequencies defined by :attr:`freq_data`.
@@ -844,20 +848,18 @@ class BeamformerCapon(BeamformerBase):
         """
         f = self.freq_data.fftfreq()
         nMics = self.freq_data.numchannels
-        normFactor = self.sig_loss_norm() * nMics**2
+        normfactor = self.sig_loss_norm() * nMics**2
         param_steer_type, steer_vector = self._beamformer_params()
         for i in self.freq_data.indices:
             if not fr[i]:
                 csm = array(linalg.inv(array(self.freq_data.csm[i], dtype='complex128')), order='C')
-                beamformerOutput = beamformerFreq(param_steer_type, self.r_diag, normFactor, steer_vector(f[i]), csm)[0]
+                beamformerOutput = beamformerFreq(param_steer_type, self.r_diag, normfactor, steer_vector(f[i]), csm)[0]
                 ac[i] = 1.0 / beamformerOutput
                 fr[i] = 1
 
 
 class BeamformerEig(BeamformerBase):
-    """Beamforming using eigenvalue and eigenvector techniques,
-    see :ref:`Sarradj et al., 2005<Sarradj2005>`.
-    """
+    """Beamforming using eigenvalue and eigenvector techniques, see :ref:`Sarradj et al., 2005<Sarradj2005>`."""
 
     #: Number of component to calculate:
     #: 0 (smallest) ... :attr:`~acoular.tprocess.SamplesGenerator.numchannels`-1;
@@ -868,7 +870,7 @@ class BeamformerEig(BeamformerBase):
     na = Property(desc='No. of eigenvalue')
 
     # internal identifier
-    digest = Property(depends_on=['freq_data.digest', '_steer_obj.digest', 'r_diag', 'n'])
+    digest = Property(depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['n'])
 
     @cached_property
     def _get_digest(self):
@@ -909,7 +911,7 @@ class BeamformerEig(BeamformerBase):
         """
         f = self.freq_data.fftfreq()
         na = int(self.na)  # eigenvalue taken into account
-        normFactor = self.sig_loss_norm()
+        normfactor = self.sig_loss_norm()
         param_steer_type, steer_vector = self._beamformer_params()
         for i in self.freq_data.indices:
             if not fr[i]:
@@ -918,7 +920,7 @@ class BeamformerEig(BeamformerBase):
                 beamformerOutput = beamformerFreq(
                     param_steer_type,
                     self.r_diag,
-                    normFactor,
+                    normfactor,
                     steer_vector(f[i]),
                     (eva[na : na + 1], eve[:, na : na + 1]),
                 )[0]
@@ -935,6 +937,12 @@ class BeamformerMusic(BeamformerEig):
     # Boolean flag, if 'True', the main diagonal is removed before beamforming;
     # for MUSIC beamforming r_diag is set to 'False'.
     r_diag = Enum(False, desc='removal of diagonal')
+
+    #: Normalization factor in case of CSM diagonal removal. Defaults to 1.0 since BeamformerMusic is only well defined for full CSM.
+    r_diag_norm = Enum(
+        1.0,
+        desc='No normalization. BeamformerMusic is only well defined for full CSM.',
+    )
 
     # assumed number of sources, should be set to a value not too small
     # defaults to 1
@@ -968,7 +976,7 @@ class BeamformerMusic(BeamformerEig):
         f = self.freq_data.fftfreq()
         nMics = self.freq_data.numchannels
         n = int(self.steer.mics.num_mics - self.na)
-        normFactor = self.sig_loss_norm() * nMics**2
+        normfactor = self.sig_loss_norm() * nMics**2
         param_steer_type, steer_vector = self._beamformer_params()
         for i in self.freq_data.indices:
             if not fr[i]:
@@ -977,7 +985,7 @@ class BeamformerMusic(BeamformerEig):
                 beamformerOutput = beamformerFreq(
                     param_steer_type,
                     self.r_diag,
-                    normFactor,
+                    normfactor,
                     steer_vector(f[i]),
                     (eva[:n], eve[:, :n]),
                 )[0]
@@ -1206,19 +1214,19 @@ class PointSpreadFunction(HasPrivateTraits):
 
         if self.calcmode == 'single':  # calculate selected psfs one-by-one
             for ind in g_ind_calc:
-                ac[:, ind] = self._psfCall([ind])[:, 0]
+                ac[:, ind] = self._psf_call([ind])[:, 0]
                 gp[ind] = 1
         elif self.calcmode == 'full':  # calculate all psfs in one go
             gp[:] = 1
-            ac[:] = self._psfCall(arange(self.steer.grid.size))
+            ac[:] = self._psf_call(arange(self.steer.grid.size))
         else:  # 'block' # calculate selected psfs in one go
-            hh = self._psfCall(g_ind_calc)
+            hh = self._psf_call(g_ind_calc)
             for indh, ind in enumerate(g_ind_calc):
                 gp[ind] = 1
                 ac[:, ind] = hh[:, indh]
                 indh += 1
 
-    def _psfCall(self, ind):
+    def _psf_call(self, ind):
         """Manages the calling of the core psf functionality.
 
         Parameters
@@ -1249,27 +1257,12 @@ class PointSpreadFunction(HasPrivateTraits):
 
 
 class BeamformerDamas(BeamformerBase):
-    """DAMAS deconvolution, see :ref:`Brooks and Humphreys, 2006<BrooksHumphreys2006>`.
-    Needs a-priori delay-and-sum beamforming (:class:`BeamformerBase`).
-    """
+    """DAMAS deconvolution, see :ref:`Brooks and Humphreys, 2006<BrooksHumphreys2006>`."""
 
-    #: :class:`BeamformerBase` object that provides data for deconvolution.
+    #: (only for backward compatibility) :class:`BeamformerBase` object
+    #: if set, provides :attr:`freq_data`, :attr:`steer`, :attr:`r_diag`
+    #: if not set, these have to be set explicitly
     beamformer = Trait(BeamformerBase)
-
-    #: :class:`~acoular.spectra.PowerSpectra` object that provides the cross spectral matrix;
-    #: is set automatically.
-    freq_data = Delegate('beamformer')
-
-    #: Boolean flag, if 'True' (default), the main diagonal is removed before beamforming;
-    #: is set automatically.
-    r_diag = Delegate('beamformer')
-
-    #: instance of :class:`~acoular.fbeamform.SteeringVector` or its derived classes,
-    #: that contains information about the steering vector. Is set automatically.
-    steer = Delegate('beamformer')
-
-    #: Floating point precision of result, is set automatically.
-    precision = Delegate('beamformer')
 
     #: The floating-number-precision of the PSFs. Default is 64 bit.
     psf_precision = Trait('float64', 'float32', desc='precision of PSF')
@@ -1286,21 +1279,18 @@ class BeamformerDamas(BeamformerBase):
 
     # internal identifier
     digest = Property(
-        depends_on=['beamformer.digest', 'n_iter', 'damp', 'psf_precision'],
-    )
-
-    # internal identifier
-    ext_digest = Property(
-        depends_on=['digest', 'beamformer.ext_digest'],
+        depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['n_iter', 'damp', 'psf_precision'],
     )
 
     @cached_property
     def _get_digest(self):
         return digest(self)
 
-    @cached_property
-    def _get_ext_digest(self):
-        return digest(self, 'ext_digest')
+    @on_trait_change('beamformer.digest')
+    def delegate_beamformer_traits(self):
+        self.freq_data = self.beamformer.freq_data
+        self.r_diag = self.beamformer.r_diag
+        self.steer = self.beamformer.steer
 
     def calc(self, ac, fr):
         """Calculates the DAMAS result for the frequencies defined by :attr:`freq_data`.
@@ -1329,10 +1319,23 @@ class BeamformerDamas(BeamformerBase):
 
         """
         f = self.freq_data.fftfreq()
+        normfactor = self.sig_loss_norm()
+
         p = PointSpreadFunction(steer=self.steer, calcmode=self.calcmode, precision=self.psf_precision)
+        param_steer_type, steer_vector = self._beamformer_params()
         for i in self.freq_data.indices:
             if not fr[i]:
-                y = array(self.beamformer.result[i])
+                csm = array(self.freq_data.csm[i], dtype='complex128')
+                y = beamformerFreq(
+                    param_steer_type,
+                    self.r_diag,
+                    normfactor,
+                    steer_vector(f[i]),
+                    csm,
+                )[0]
+                if self.r_diag:  # set (unphysical) negative output values to 0
+                    indNegSign = sign(y) < 0
+                    y[indNegSign] = 0.0
                 x = y.copy()
                 p.freq = f[i]
                 psf = p.psf[:]
@@ -1374,21 +1377,12 @@ class BeamformerDamasPlus(BeamformerDamas):
 
     # internal identifier
     digest = Property(
-        depends_on=['beamformer.digest', 'alpha', 'method', 'max_iter', 'unit_mult'],
-    )
-
-    # internal identifier
-    ext_digest = Property(
-        depends_on=['digest', 'beamformer.ext_digest'],
+        depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['alpha', 'method', 'max_iter', 'unit_mult'],
     )
 
     @cached_property
     def _get_digest(self):
         return digest(self)
-
-    @cached_property
-    def _get_ext_digest(self):
-        return digest(self, 'ext_digest')
 
     def calc(self, ac, fr):
         """Calculates the DAMAS result for the frequencies defined by :attr:`freq_data`.
@@ -1418,9 +1412,23 @@ class BeamformerDamasPlus(BeamformerDamas):
         f = self.freq_data.fftfreq()
         p = PointSpreadFunction(steer=self.steer, calcmode=self.calcmode, precision=self.psf_precision)
         unit = self.unit_mult
+        normfactor = self.sig_loss_norm()
+        param_steer_type, steer_vector = self._beamformer_params()
+
         for i in self.freq_data.indices:
             if not fr[i]:
-                y = self.beamformer.result[i] * unit
+                csm = array(self.freq_data.csm[i], dtype='complex128')
+                y = beamformerFreq(
+                    param_steer_type,
+                    self.r_diag,
+                    normfactor,
+                    steer_vector(f[i]),
+                    csm,
+                )[0]
+                if self.r_diag:  # set (unphysical) negative output values to 0
+                    indNegSign = sign(y) < 0
+                    y[indNegSign] = 0.0
+                y *= unit
                 p.freq = f[i]
                 psf = p.psf[:]
 
@@ -1486,16 +1494,12 @@ class BeamformerOrth(BeamformerBase):
 
     # internal identifier
     digest = Property(
-        depends_on=['freq_data.digest', '_steer_obj.digest', 'r_diag', 'eva_list'],
+        depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['eva_list'],
     )
 
     @cached_property
     def _get_digest(self):
         return digest(self)
-
-    @cached_property
-    def _get_ext_digest(self):
-        return digest(self, 'ext_digest')
 
     @on_trait_change('beamformer.digest')
     def delegate_beamformer_traits(self):
@@ -1537,7 +1541,7 @@ class BeamformerOrth(BeamformerBase):
         # prepare calculation
         f = self.freq_data.fftfreq()
         numchannels = self.freq_data.numchannels
-        normFactor = self.sig_loss_norm()
+        normfactor = self.sig_loss_norm()
         param_steer_type, steer_vector = self._beamformer_params()
         for i in self.freq_data.indices:
             if not fr[i]:
@@ -1547,7 +1551,7 @@ class BeamformerOrth(BeamformerBase):
                     beamformerOutput = beamformerFreq(
                         param_steer_type,
                         self.r_diag,
-                        normFactor,
+                        normfactor,
                         steer_vector(f[i]),
                         (ones(1), eve[:, n].reshape((-1, 1))),
                     )[0]
@@ -1574,7 +1578,7 @@ class BeamformerCleansc(BeamformerBase):
     stopn = Int(3, desc='stop criterion index')
 
     # internal identifier
-    digest = Property(depends_on=['freq_data.digest', '_steer_obj.digest', 'r_diag', 'n', 'damp', 'stopn'])
+    digest = Property(depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['n', 'damp', 'stopn'])
 
     @cached_property
     def _get_digest(self):
@@ -1606,11 +1610,10 @@ class BeamformerCleansc(BeamformerBase):
 
         """
         # prepare calculation
-        normFactor = self.sig_loss_norm()
+        normfactor = self.sig_loss_norm()
         numchannels = self.freq_data.numchannels
         f = self.freq_data.fftfreq()
         result = zeros((self.steer.grid.size), 'f')
-        normFac = self.sig_loss_norm()
         J = numchannels * 2 if not self.n else self.n
         powers = zeros(J, 'd')
 
@@ -1618,8 +1621,8 @@ class BeamformerCleansc(BeamformerBase):
         for i in self.freq_data.indices:
             if not fr[i]:
                 csm = array(self.freq_data.csm[i], dtype='complex128', copy=1)
-                # h = self.steer._beamformerCall(f[i], self.r_diag, normFactor, (csm,))[0]
-                h = beamformerFreq(param_steer_type, self.r_diag, normFactor, steer_vector(f[i]), csm)[0]
+                # h = self.steer._beamformerCall(f[i], self.r_diag, normfactor, (csm,))[0]
+                h = beamformerFreq(param_steer_type, self.r_diag, normfactor, steer_vector(f[i]), csm)[0]
                 # CLEANSC Iteration
                 result *= 0.0
                 for j in range(J):
@@ -1628,7 +1631,7 @@ class BeamformerCleansc(BeamformerBase):
                     result[xi_max] += self.damp * hmax
                     if j > self.stopn and hmax > powers[j - self.stopn]:
                         break
-                    wmax = self.steer.steer_vector(f[i], xi_max) * sqrt(normFac)
+                    wmax = self.steer.steer_vector(f[i], xi_max) * sqrt(normfactor)
                     wmax = wmax[0].conj()  # as old code worked with conjugated csm..should be updated
                     hh = wmax.copy()
                     D1 = dot(csm.T - diag(diag(csm)), wmax) / hmax
@@ -1639,11 +1642,11 @@ class BeamformerCleansc(BeamformerBase):
                     hh = hh[:, newaxis]
                     csm1 = hmax * (hh * hh.conj().T)
 
-                    # h1 = self.steer._beamformerCall(f[i], self.r_diag, normFactor, (array((hmax, ))[newaxis, :], hh[newaxis, :].conjugate()))[0]
+                    # h1 = self.steer._beamformerCall(f[i], self.r_diag, normfactor, (array((hmax, ))[newaxis, :], hh[newaxis, :].conjugate()))[0]
                     h1 = beamformerFreq(
                         param_steer_type,
                         self.r_diag,
-                        normFactor,
+                        normfactor,
                         steer_vector(f[i]),
                         (array((hmax,)), hh.conj()),
                     )[0]
@@ -1654,25 +1657,12 @@ class BeamformerCleansc(BeamformerBase):
 
 
 class BeamformerClean(BeamformerBase):
-    """CLEAN deconvolution, see :ref:`Hoegbom, 1974<Hoegbom1974>`.
-    Needs a-priori delay-and-sum beamforming (:class:`BeamformerBase`).
-    """
+    """CLEAN deconvolution, see :ref:`Hoegbom, 1974<Hoegbom1974>`."""
 
-    # BeamformerBase object that provides data for deconvolution
+    #: (only for backward compatibility) :class:`BeamformerBase` object
+    #: if set, provides :attr:`freq_data`, :attr:`steer`, :attr:`r_diag`
+    #: if not set, these have to be set explicitly
     beamformer = Trait(BeamformerBase)
-
-    # PowerSpectra object that provides the cross spectral matrix
-    freq_data = Delegate('beamformer')
-
-    # flag, if true (default), the main diagonal is removed before beamforming
-    # r_diag =  Delegate('beamformer')
-
-    #: instance of :class:`~acoular.fbeamform.SteeringVector` or its derived classes,
-    #: that contains information about the steering vector. Is set automatically.
-    steer = Delegate('beamformer')
-
-    #: Floating point precision of result, is set automatically.
-    precision = Delegate('beamformer')
 
     #: The floating-number-precision of the PSFs. Default is 64 bit.
     psf_precision = Trait('float64', 'float32', desc='precision of PSF.')
@@ -1689,21 +1679,18 @@ class BeamformerClean(BeamformerBase):
 
     # internal identifier
     digest = Property(
-        depends_on=['beamformer.digest', 'n_iter', 'damp', 'psf_precision'],
-    )
-
-    # internal identifier
-    ext_digest = Property(
-        depends_on=['digest', 'beamformer.ext_digest'],
+        depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['n_iter', 'damp', 'psf_precision'],
     )
 
     @cached_property
     def _get_digest(self):
         return digest(self)
 
-    @cached_property
-    def _get_ext_digest(self):
-        return digest(self, 'ext_digest')
+    @on_trait_change('beamformer.digest')
+    def delegate_beamformer_traits(self):
+        self.freq_data = self.beamformer.freq_data
+        self.r_diag = self.beamformer.r_diag
+        self.steer = self.beamformer.steer
 
     def calc(self, ac, fr):
         """Calculates the CLEAN result for the frequencies defined by :attr:`freq_data`.
@@ -1732,6 +1719,7 @@ class BeamformerClean(BeamformerBase):
         """
         f = self.freq_data.fftfreq()
         gs = self.steer.grid.size
+        normfactor = self.sig_loss_norm()
 
         if self.calcmode == 'full':
             warn(
@@ -1740,16 +1728,26 @@ class BeamformerClean(BeamformerBase):
                 stacklevel=2,
             )
         p = PointSpreadFunction(steer=self.steer, calcmode=self.calcmode, precision=self.psf_precision)
+        param_steer_type, steer_vector = self._beamformer_params()
         for i in self.freq_data.indices:
             if not fr[i]:
                 p.freq = f[i]
-                dirty = self.beamformer.result[i].copy()
-                clean = zeros(gs, dtype=dirty.dtype)
+                csm = array(self.freq_data.csm[i], dtype='complex128')
+                dirty = beamformerFreq(
+                    param_steer_type,
+                    self.r_diag,
+                    normfactor,
+                    steer_vector(f[i]),
+                    csm,
+                )[0]
+                if self.r_diag:  # set (unphysical) negative output values to 0
+                    indNegSign = sign(dirty) < 0
+                    dirty[indNegSign] = 0.0
 
+                clean = zeros(gs, dtype=dirty.dtype)
                 i_iter = 0
                 flag = True
                 while flag:
-                    # TODO: negative werte!!!
                     dirty_sum = abs(dirty).sum(0)
                     next_max = dirty.argmax(0)
                     p.grid_indices = array([next_max])
@@ -1804,9 +1802,24 @@ class BeamformerCMF(BeamformerBase):
     #: If True, shows the status of the PyLops solver. Only relevant in case of FISTA or Split_Bregman
     show = Bool(False, desc='show output of PyLops solvers')
 
+    #: Energy normalization in case of diagonal removal not implemented for inverse methods.
+    r_diag_norm = Enum(
+        None,
+        desc='Energy normalization in case of diagonal removal not implemented for inverse methods',
+    )
+
     # internal identifier
     digest = Property(
-        depends_on=['freq_data.digest', 'alpha', 'method', 'max_iter', 'unit_mult', 'r_diag', 'steer.inv_digest'],
+        depends_on=[
+            'freq_data.digest',
+            'alpha',
+            'method',
+            'max_iter',
+            'unit_mult',
+            'r_diag',
+            'precision',
+            'steer.inv_digest',
+        ],
     )
 
     @cached_property
@@ -1849,8 +1862,8 @@ class BeamformerCMF(BeamformerBase):
         """
 
         # function to repack complex matrices to deal with them in real number space
-        def realify(M):
-            return vstack([M.real, M.imag])
+        def realify(matrix):
+            return vstack([matrix.real, matrix.imag])
 
         # prepare calculation
         i = self.freq_data.indices
@@ -2000,10 +2013,6 @@ class BeamformerSODIX(BeamformerBase):
     #: defaults to 200
     max_iter = Int(200, desc='maximum number of iterations')
 
-    #: Norm to consider for the regularization
-    #: defaults to L-1 Norm
-    pnorm = Float(1, desc='Norm for regularization')
-
     #: Weight factor for regularization,
     #: defaults to 0.0.
     alpha = Range(0.0, 1.0, 0.0, desc='regularization factor')
@@ -2019,9 +2028,24 @@ class BeamformerSODIX(BeamformerBase):
     #: Returns a (number of frequencies, number of gridpoints) array of floats.
     sodix_result = Property(desc='beamforming result')
 
+    #: Energy normalization in case of diagonal removal not implemented for inverse methods.
+    r_diag_norm = Enum(
+        None,
+        desc='Energy normalization in case of diagonal removal not implemented for inverse methods',
+    )
+
     # internal identifier
     digest = Property(
-        depends_on=['freq_data.digest', 'alpha', 'method', 'max_iter', 'unit_mult', 'r_diag', 'steer.inv_digest'],
+        depends_on=[
+            'freq_data.digest',
+            'alpha',
+            'method',
+            'max_iter',
+            'unit_mult',
+            'r_diag',
+            'precision',
+            'steer.inv_digest',
+        ],
     )
 
     @cached_property
@@ -2230,10 +2254,10 @@ class BeamformerSODIX(BeamformerBase):
 
                 if self.method == 'fmin_l_bfgs_b':
                     # function to minimize
-                    def function(D):
+                    def function(directions):
                         """Parameters
                         ----------
-                        D
+                        directions
                         [numpoints*num_mics]
 
                         Returns
@@ -2245,7 +2269,7 @@ class BeamformerSODIX(BeamformerBase):
 
                         """
                         #### the sodix function ####
-                        Djm = D.reshape([numpoints, num_mics])
+                        Djm = directions.reshape([numpoints, num_mics])
                         p = h.T * Djm
                         csm_mod = dot(p.T, p.conj())
                         Q = csm - csm_mod
@@ -2352,11 +2376,18 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
     # First eigenvalue to consider. Defaults to 0.
     m = Int(0, desc='First eigenvalue to consider')
 
-    # internal identifier++++++++++++++++++++++++++++++++++++++++++++++++++
+    #: Energy normalization in case of diagonal removal not implemented for inverse methods.
+    r_diag_norm = Enum(
+        None,
+        desc='Energy normalization in case of diagonal removal not implemented for inverse methods',
+    )
+
+    # internal identifier
     digest = Property(
         depends_on=[
             'steer.inv_digest',
             'freq_data.digest',
+            'precision',
             'alpha',
             'method',
             'max_iter',
@@ -2601,9 +2632,17 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
     #: and 1 iteration
     shgo = Dict
 
+    #: No normalization implemented. Defaults to 1.0.
+    r_diag_norm = Enum(
+        1.0,
+        desc='If diagonal of the csm is removed, some signal energy is lost.'
+        'This is handled via this normalization factor.'
+        'For this class, normalization is not implemented. Defaults to 1.0.',
+    )
+
     # internal identifier
     digest = Property(
-        depends_on=['freq_data.digest', '_steer_obj.digest', 'r_diag', 'eva_list', 'bounds', 'shgo'],
+        depends_on=['freq_data.digest', '_steer_obj.digest', 'precision', 'r_diag', 'eva_list', 'bounds', 'shgo'],
     )
 
     @cached_property
@@ -2650,6 +2689,7 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
 
         """
         f = self.freq_data.fftfreq()
+        normfactor = self.sig_loss_norm()
         numchannels = self.freq_data.numchannels
         # eigenvalue number list in standard form from largest to smallest
         eva_list = unique(self.eva_list % self.steer.mics.num_mics)[::-1]
@@ -2688,9 +2728,13 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
                         xy = clip(xy, bmin, bmax)
                         r0 = env._r(xy[:, newaxis])
                         rm = env._r(xy[:, newaxis], mpos)
-                        return -beamformerFreq(steer_type, self.r_diag, 1.0, (r0, rm, k), (ones(1), eve[:, n : n + 1]))[
-                            0
-                        ][0]  # noqa: B023
+                        return -beamformerFreq(
+                            steer_type,
+                            self.r_diag,
+                            normfactor,
+                            (r0, rm, k),
+                            (ones(1), eve[:, n : n + 1]),
+                        )[0][0]  # noqa: B023
 
                     # simplical global homotopy optimizer
                     oR = shgo(func, self.bounds, **shgo_opts)
@@ -2704,7 +2748,7 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
                 fr[i] = 1
 
 
-def L_p(x):
+def L_p(x):  # noqa: N802
     r"""Calculates the sound pressure level from the squared sound pressure.
 
     :math:`L_p = 10 \lg ( x / 4\cdot 10^{-10})`

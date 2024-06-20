@@ -31,7 +31,7 @@ for ex in glob('example*.py'):
             print('Exporting %s ...' % figname)
             savefig(figname, bbox_inches='tight')
         close('all')
-    except:
+    except:  # noqa: E722
         print('---------------------------------------------')
         print('        Error importing %s !' % ex)
         print('---------------------------------------------')
