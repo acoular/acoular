@@ -79,13 +79,13 @@ def run():
 
     bb = BeamformerBase(freq_data=ps, steer=st)
     pm = bb.synthetic(8000, 3)
-    Lm = L_p(pm)
+    spl = L_p(pm)
 
     if config.have_matplotlib:
         from pylab import axis, colorbar, figure, imshow, plot, show
 
         # show map
-        imshow(Lm.T, origin='lower', vmin=Lm.max() - 10, extent=rg.extend(), interpolation='bicubic')
+        imshow(spl.T, origin='lower', vmin=spl.max() - 10, extent=rg.extend(), interpolation='bicubic')
         colorbar()
 
         # plot microphone geometry
@@ -99,10 +99,10 @@ def run():
         print('Matplotlib not found! Please install matplotlib if you want to plot the results.')
         print('For consolation we do an ASCII map plot of the results here.')
         grayscale = '@%#*+=-:. '[::-1]
-        ind = ((Lm.T - Lm.max() + 9).clip(0, 9)).astype(int)[::-1]
+        ind = ((spl.T - spl.max() + 9).clip(0, 9)).astype(int)[::-1]
         print(78 * '-')
         print('|\n'.join([' '.join(['|'] + [grayscale[i] for i in row[2:-1]]) for row in ind]) + '|')
-        print(7 * '-', ''.join([f'{grayscale[i]}={int(Lm.max())-9+i}dB ' for i in range(1, 10)]), 6 * '-')
+        print(7 * '-', ''.join([f'{grayscale[i]}={int(spl.max())-9+i}dB ' for i in range(1, 10)]), 6 * '-')
 
 
 if __name__ == '__main__':

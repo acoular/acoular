@@ -33,7 +33,7 @@ class H5FileBase:
 class H5CacheFileBase:
     """Base class for File objects that handle writing and reading of .h5 cache files."""
 
-    compressionFilter = None
+    compression_filter = None
 
     def is_cached(self, nodename, group=None):
         pass
@@ -72,7 +72,7 @@ if config.have_tables:
             node.set_attr(attrname, value)
 
         def get_node_attribute(self, node, attrname):
-            return node._v_attrs[attrname]
+            return node._v_attrs[attrname]  # noqa: SLF001
 
         def append_data(self, node, data):
             node.append(data)
@@ -93,10 +93,10 @@ if config.have_tables:
             """Recursively convert an HDF5 node to a dictionary."""
             node = self.get_node(nodename)
             # initialize node-dict with node's own attributes
-            result = {attr: node._v_attrs[attr] for attr in node._v_attrs._f_list()}
+            result = {attr: node._v_attrs[attr] for attr in node._v_attrs._f_list()}  # noqa: SLF001
             if isinstance(node, tables.Group):
                 # if node is a group, recursively add its children
-                for childname in node._v_children:
+                for childname in node._v_children:  # noqa: SLF001
                     result[childname] = self.node_to_dict(f'{nodename}/{childname}')
             elif isinstance(node, tables.Leaf):
                 # if node contains only data, add it
@@ -106,7 +106,7 @@ if config.have_tables:
             return result
 
     class H5CacheFileTables(H5FileTables, H5CacheFileBase):
-        compressionFilter = tables.Filters(complevel=5, complib='blosc')
+        compression_filter = tables.Filters(complevel=5, complib='blosc')
 
         def is_cached(self, nodename, group=None):
             if not group:
@@ -119,7 +119,7 @@ if config.have_tables:
             if not group:
                 group = self.root
             atom = precision_to_atom[precision]
-            self.create_carray(group, nodename, atom, shape, filters=self.compressionFilter)
+            self.create_carray(group, nodename, atom, shape, filters=self.compression_filter)
 
 
 if config.have_h5py:
@@ -149,10 +149,10 @@ if config.have_h5py:
             return node.attrs[attrname]
 
         def append_data(self, node, data):
-            oldShape = node.shape
-            newShape = (oldShape[0] + data.shape[0], data.shape[1])
-            node.resize(newShape)
-            node[oldShape[0] : newShape[0], :] = data
+            old_shape = node.shape
+            new_shape = (old_shape[0] + data.shape[0], data.shape[1])
+            node.resize(new_shape)
+            node[old_shape[0] : new_shape[0], :] = data
 
         def remove_data(self, nodename, group=None):
             in_file_path = self._get_in_file_path(nodename, group)
@@ -184,8 +184,8 @@ if config.have_h5py:
             return result
 
     class H5CacheFileH5py(H5CacheFileBase, H5FileH5py):
-        compressionFilter = 'lzf'
-        #        compressionFilter = 'blosc' # unavailable...
+        compression_filter = 'lzf'
+        #        compression_filter = 'blosc' # unavailable...
 
         def is_cached(self, nodename, group=None):
             if not group:
@@ -200,7 +200,7 @@ if config.have_h5py:
                 in_file_path,
                 dtype=precision,
                 shape=shape,
-                compression=self.compressionFilter,
+                compression=self.compression_filter,
                 chunks=True,
             )
 

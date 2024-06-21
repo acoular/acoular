@@ -6,14 +6,9 @@
 
 import os
 
-from .configuration import config
-from .version import __author__, __date__, __version__
-
-if config.have_sounddevice:
-    from .sdinput import SoundDeviceSamplesGenerator
-
 from . import demo, tools
 from .calib import Calib
+from .configuration import config
 from .environments import (
     Environment,
     FlowField,
@@ -62,6 +57,7 @@ from .grids import (
     Sector,
 )
 from .microphones import MicGeom
+from .sdinput import SoundDeviceSamplesGenerator
 from .signals import (
     FiltWNoiseGenerator,
     GenericSignalGenerator,
@@ -127,3 +123,4 @@ from .tprocess import (
     WriteWAV,
 )
 from .trajectory import Trajectory
+from .version import __author__, __date__, __version__

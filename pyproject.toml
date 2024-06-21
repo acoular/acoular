@@ -31,7 +31,7 @@ classifiers = [
 ]
 dependencies = [
     "numba",
-    "numpy",
+    "numpy<2.0",
     "scipy>=1.1.0",
     "scikit-learn",
     "tables>=3.4.4",
@@ -85,7 +85,8 @@ build = ["cd docs && make html"]
 [tool.hatch.envs.tests]
 dependencies = [
     "pytest",
-    "pytest-cov"
+    "pytest-cov",
+    "sounddevice",
 ]
 
 [[tool.hatch.envs.tests.matrix]]
