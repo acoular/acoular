@@ -446,12 +446,12 @@ class WavSamples(SamplesGenerator):
             while i < self.numsamples:
                 yield self.wavf.read(num) * cal_factor
                 i += num
-                self.wavf.seek(num)
+                self.wavf.seek(i)
         else:
             while i < self.numsamples:
                 yield self.wavf.read(num)
                 i += num
-                self.wavf.seek(num)
+                self.wavf.seek(i)
 
 
 # class WavSamples(SamplesGenerator):
