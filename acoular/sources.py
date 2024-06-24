@@ -376,7 +376,7 @@ class WavSamples(SamplesGenerator):
     digest = Property(depends_on=['basename', 'calib.digest', '_datachecksum'])
 
     def _get__datachecksum(self):
-        return self.data[0, :].sum()
+        return array(self.wavf.read(1)).sum()
 
     @cached_property
     def _get_digest(self):
