@@ -23,6 +23,7 @@
 
 # imports from other packages
 
+import contextlib
 from os import path
 from warnings import warn
 
@@ -106,7 +107,7 @@ def _fill_mic_signal_block(out, signal, rm, ind, blocksize, numchannels, up, pre
     return out
 
 
-def spherical_hn1(n, z, derivativearccos=False):
+def spherical_hn1(n, z):
     """Spherical Hankel Function of the First Kind."""
     return spherical_jn(n, z, derivative=False) + 1j * spherical_yn(n, z, derivative=False)
 
@@ -148,7 +149,7 @@ def get_radiation_angles(direction, mpos, sourceposition):
     return azi, ele
 
 
-def get_modes(lOrder, direction, mpos, sourceposition=None):
+def get_modes(lOrder, direction, mpos, sourceposition=None):  # noqa: N803
     """Returns Spherical Harmonic Radiation Pattern at the Microphones.
 
     Parameters
@@ -172,9 +173,9 @@ def get_modes(lOrder, direction, mpos, sourceposition=None):
     azi, ele = get_radiation_angles(direction, mpos, sourceposition)  # angles between source and mics
     modes = zeros((azi.shape[0], (lOrder + 1) ** 2), dtype=complex128)
     i = 0
-    for l in range(lOrder + 1):
-        for m in range(-l, l + 1):
-            modes[:, i] = sph_harm(m, l, azi, ele)
+    for lidx in range(lOrder + 1):
+        for m in range(-lidx, lidx + 1):
+            modes[:, i] = sph_harm(m, lidx, azi, ele)
             if m < 0:
                 modes[:, i] = modes[:, i].conj() * 1j
             i += 1
@@ -245,10 +246,8 @@ class TimeSamples(SamplesGenerator):
             self.sample_freq = 0
             raise OSError('No such file: %s' % self.name)
         if self.h5f is not None:
-            try:
+            with contextlib.suppress(OSError):
                 self.h5f.close()
-            except OSError:
-                pass
         file = _get_h5file_class()
         self.h5f = file(self.name)
         self.load_timedata()
@@ -447,12 +446,12 @@ class WavSamples(SamplesGenerator):
             while i < self.numsamples:
                 yield self.wavf.read(num) * cal_factor
                 i += num
-                self.wavf.seek(num)
+                self.wavf.seek(i)
         else:
             while i < self.numsamples:
                 yield self.wavf.read(num)
                 i += num
-                self.wavf.seek(num)
+                self.wavf.seek(i)
 
 
 # class WavSamples(SamplesGenerator):
@@ -677,10 +676,8 @@ class MaskedTimeSamples(TimeSamples):
             self.sample_freq = 0
             raise OSError('No such file: %s' % self.name)
         if self.h5f is not None:
-            try:
+            with contextlib.suppress(OSError):
                 self.h5f.close()
-            except OSError:
-                pass
         file = _get_h5file_class()
         self.h5f = file(self.name)
         self.load_timedata()
@@ -893,7 +890,7 @@ class SphericalHarmonicSource(PointSource):
     """
 
     #: Order of spherical harmonic source
-    lOrder = Int(0, desc='Order of spherical harmonic')
+    lOrder = Int(0, desc='Order of spherical harmonic')  # noqa: N815
 
     alpha = CArray(desc='coefficients of the (lOrder,) spherical harmonic mode')
 

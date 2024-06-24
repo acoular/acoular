@@ -8,9 +8,9 @@ computational costs. All functionalities are optimized via NUMBA.
 import numba as nb
 import numpy as np
 
-cachedOption = True  # if True: saves the numba func as compiled func in sub directory
-parallelOption = 'parallel'  # if numba.guvectorize is used: 'CPU' for single threading; 'parallel' for multithreading; 'cuda' for calculating on GPU
-fastOption = True  # fastmath options
+CACHED_OPTION = True  # if True: saves the numba func as compiled func in sub directory
+PARALLEL_OPTION = 'parallel'  # if numba.guvectorize is used: 'CPU' for single threading; 'parallel' for multithreading; 'cuda' for calculating on GPU
+FAST_OPTION = True  # fastmath options
 
 
 # Formerly known as 'faverage'
@@ -19,9 +19,9 @@ fastOption = True  # fastmath options
         nb.complex128[:, :, ::1](nb.complex128[:, :, ::1], nb.complex128[:, ::1]),
         nb.complex64[:, :, ::1](nb.complex64[:, :, ::1], nb.complex64[:, ::1]),
     ],
-    cache=cachedOption,
+    cache=CACHED_OPTION,
     parallel=True,
-    fastmath=fastOption,
+    fastmath=FAST_OPTION,
 )
 def calcCSM(csm, SpecAllMics):
     """Adds a given spectrum to the Cross-Spectral-Matrix (CSM).
@@ -216,7 +216,7 @@ def beamformerFreq(steerVecType, boolRemovedDiagOfCSM, normFactor, inputTupleSte
             nb.float64[::1],
         ),
     ],
-    cache=cachedOption,
+    cache=CACHED_OPTION,
     parallel=True,
     error_model='numpy',
 )
@@ -306,7 +306,7 @@ def _freqBeamformer_FullCSM(
             nb.float64[::1],
         ),
     ],
-    cache=cachedOption,
+    cache=CACHED_OPTION,
     parallel=True,
     error_model='numpy',
 )
@@ -389,9 +389,9 @@ def _freqBeamformer_EigValues(
     [(nb.complex128[:, :], nb.complex128[:], nb.float64[:], nb.float64[:], nb.float64[:])],
     '(m,m),(m),()->(),()',
     nopython=True,
-    target=parallelOption,
-    cache=cachedOption,
-    fastmath=fastOption,
+    target=PARALLEL_OPTION,
+    cache=CACHED_OPTION,
+    fastmath=FAST_OPTION,
 )
 def _freqBeamformer_SpecificSteerVec_FullCSM(csm, steerVec, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
@@ -419,9 +419,9 @@ def _freqBeamformer_SpecificSteerVec_FullCSM(csm, steerVec, signalLossNormalizat
     [(nb.complex128[:, :], nb.complex128[:], nb.float64[:], nb.float64[:], nb.float64[:])],
     '(m,m),(m),()->(),()',
     nopython=True,
-    target=parallelOption,
-    cache=cachedOption,
-    fastmath=fastOption,
+    target=PARALLEL_OPTION,
+    cache=CACHED_OPTION,
+    fastmath=FAST_OPTION,
 )
 def _freqBeamformer_SpecificSteerVec_CsmRemovedDiag(csm, steerVec, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
@@ -446,9 +446,9 @@ def _freqBeamformer_SpecificSteerVec_CsmRemovedDiag(csm, steerVec, signalLossNor
     [(nb.float64[:], nb.complex128[:, :], nb.complex128[:], nb.float64[:], nb.float64[:], nb.float64[:])],
     '(e),(m,e),(m),()->(),()',
     nopython=True,
-    target=parallelOption,
-    cache=cachedOption,
-    fastmath=fastOption,
+    target=PARALLEL_OPTION,
+    cache=CACHED_OPTION,
+    fastmath=FAST_OPTION,
 )
 def _freqBeamformer_EigValProb_SpecificSteerVec_FullCSM(
     eigVal,
@@ -482,9 +482,9 @@ def _freqBeamformer_EigValProb_SpecificSteerVec_FullCSM(
     [(nb.float64[:], nb.complex128[:, :], nb.complex128[:], nb.float64[:], nb.float64[:], nb.float64[:])],
     '(e),(m,e),(m),()->(),()',
     nopython=True,
-    target=parallelOption,
-    cache=cachedOption,
-    fastmath=fastOption,
+    target=PARALLEL_OPTION,
+    cache=CACHED_OPTION,
+    fastmath=FAST_OPTION,
 )
 def _freqBeamformer_EigValProb_SpecificSteerVec_CsmRemovedDiag(
     eigVal,
@@ -599,12 +599,12 @@ def calcPointSpreadFunction(steerVecType, distGridToArrayCenter, distGridToAllMi
     ],
     '(),(m),(s),(s,m),()->(s)',
     nopython=True,
-    target=parallelOption,
-    cache=cachedOption,
-    fastmath=fastOption,
+    target=PARALLEL_OPTION,
+    cache=CACHED_OPTION,
+    fastmath=FAST_OPTION,
 )
 def _psf_Formulation1AkaClassic(
-    distGridToArrayCenter,
+    distGridToArrayCenter,  # noqa ARG001
     distGridToAllMics,
     distSourcesToArrayCenter,
     distSourcesToAllMics,
@@ -632,9 +632,9 @@ def _psf_Formulation1AkaClassic(
     ],
     '(),(m),(s),(s,m),()->(s)',
     nopython=True,
-    target=parallelOption,
-    cache=cachedOption,
-    fastmath=fastOption,
+    target=PARALLEL_OPTION,
+    cache=CACHED_OPTION,
+    fastmath=FAST_OPTION,
 )
 def _psf_Formulation2AkaInverse(
     distGridToArrayCenter,
@@ -669,9 +669,9 @@ def _psf_Formulation2AkaInverse(
     ],
     '(),(m),(s),(s,m),()->(s)',
     nopython=True,
-    target=parallelOption,
-    cache=cachedOption,
-    fastmath=fastOption,
+    target=PARALLEL_OPTION,
+    cache=CACHED_OPTION,
+    fastmath=FAST_OPTION,
 )
 def _psf_Formulation3AkaTrueLevel(
     distGridToArrayCenter,
@@ -708,12 +708,12 @@ def _psf_Formulation3AkaTrueLevel(
     ],
     '(),(m),(s),(s,m),()->(s)',
     nopython=True,
-    target=parallelOption,
-    cache=cachedOption,
-    fastmath=fastOption,
+    target=PARALLEL_OPTION,
+    cache=CACHED_OPTION,
+    fastmath=FAST_OPTION,
 )
 def _psf_Formulation4AkaTrueLocation(
-    distGridToArrayCenter,
+    distGridToArrayCenter,  # noqa ARG001
     distGridToAllMics,
     distSourcesToArrayCenter,
     distSourcesToAllMics,
@@ -743,7 +743,7 @@ def _psf_Formulation4AkaTrueLocation(
 # CURRENTLY NOT NEEDED, AS CUSTOM PSF WILL BE CALCULATED IN fbeamform.SteeringVector WITH THE USE OF Trait transfer
 # @nb.guvectorize([(nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float64[:]),
 #                 (nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float32[:])],
-#                 '(),(m),(s),(s,m),()->(s)', nopython=True, target=parallelOption, cache=cachedOption)
+#                 '(),(m),(s),(s,m),()->(s)', nopython=True, target=PARALLEL_OPTION, cache=CACHED_OPTION)
 # def _psf_SpecificSteerVec(steerVec, steerVecSources, result):
 #    nMics = len(steerVec)
 #    for cntSources in range(steerVecSources.shape[0]):
@@ -765,9 +765,9 @@ def _psf_Formulation4AkaTrueLocation(
     ],
     '(g,g),(g),(),()->(g)',
     nopython=True,
-    target=parallelOption,
-    cache=cachedOption,
-    fastmath=fastOption,
+    target=PARALLEL_OPTION,
+    cache=CACHED_OPTION,
+    fastmath=FAST_OPTION,
 )
 def damasSolverGaussSeidel(A, dirtyMap, nIterations, relax, damasSolution):
     """Solves the DAMAS inverse problem via modified gauss seidel.
@@ -847,9 +847,9 @@ def calcTransfer(distGridToArrayCenter, distGridToAllMics, waveNumber):
     [(nb.float64[:], nb.float64[:], nb.float64[:], nb.complex128[:])],
     '(),(m),()->(m)',
     nopython=True,
-    target=parallelOption,
-    cache=cachedOption,
-    fastmath=fastOption,
+    target=PARALLEL_OPTION,
+    cache=CACHED_OPTION,
+    fastmath=FAST_OPTION,
 )
 def _transferCoreFunc(distGridToArrayCenter, distGridToAllMics, waveNumber, result):
     nMics = distGridToAllMics.shape[0]
