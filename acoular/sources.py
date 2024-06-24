@@ -443,12 +443,12 @@ class WavSamples(SamplesGenerator):
                 cal_factor = self.calib.data[newaxis]
             else:
                 raise ValueError('calibration data not compatible: %i, %i' % (self.calib.num_mics, self.numchannels))
-            while i < self.numsamples:
+            while i < self.numsamples-num:
                 yield self.wavf.read(num) * cal_factor
                 i += num
                 self.wavf.seek(i)
         else:
-            while i < self.numsamples:
+            while i < self.numsamples-num:
                 yield self.wavf.read(num)
                 i += num
                 self.wavf.seek(i)
