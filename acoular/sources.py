@@ -453,7 +453,69 @@ class WavSamples(SamplesGenerator):
                 i += num
                 self.wavf.seek(i)
 
+class CsvSamples(SamplesGenerator):
+    """Container for time data in `*.csv` format.
 
+    This class loads measured data from csv files and
+    provides information about this data.
+    It also serves as an interface where the data can be accessed
+    (e.g. for use in a block chain) via the :meth:`result` generator.
+    """
+
+    #: Full name of the .csv file with data.
+    name = File(filter=['*.csv'], desc='name of data file')
+
+    #: Basename of the .csv file with data, is set automatically.
+    basename = Property(
+        depends_on='name',  # filter=['*.csv'],
+        desc='basename of data file',
+    )
+
+    #: Calibration data, instance of :class:`~acoular.calib.Calib` class, optional .
+    calib = Trait(Calib, desc='Calibration data')
+
+    #: Number of channels, is set automatically / read from file.
+    numchannels = CLong(0, desc='number of input channels')
+
+    #: Number of time data samples, is set automatically / read from file.
+    numsamples = CLong(0, desc='number of samples')
+
+    #: The time data as array of floats with dimension (numsamples, numchannels).
+    data = Any(transient=True, desc='the actual time data array')
+
+    #: CSV file object
+    csvf = Instance(SoundFile, transient=True) # anzupassen
+
+    #: Provides metadata stored in CSV file object
+    metadata = Dict(desc='metadata contained in .csv file')
+
+    # Checksum over first data entries of all channels
+    _datachecksum = Property()
+
+    # internal identifier
+    digest = Property(depends_on=['basename', 'calib.digest', '_datachecksum'])
+
+    def _get__datachecksum(self):
+        return self.data[0, :].sum()
+
+    @cached_property
+    def _get_digest(self):
+        return digest(self)
+
+    @cached_property
+    def _get_basename(self):
+        return path.splitext(path.basename(self.name))[0]
+
+    @on_trait_change('basename')
+    def load_data(self):
+        """Open the .csv file and set attributes."""
+        if not path.isfile(self.name):
+            # no file there
+            self.numsamples = 0
+            self.numchannels = 0
+            self.sample_freq = 0
+            raise OSError('No such file: %s' % self.name)
+        
 # class WavSamples(SamplesGenerator):
 #     """Container for time data in `*.wav` format.
 
