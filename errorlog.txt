@@ -1,0 +1,67 @@
+def open_cachefile(self, cacheFileName, mode):
+        File = _get_cachefile_class()
+        return File(path.join(self.cache_dir, cacheFileName), mode)
+
+
+Exception has occurred: HDF5ExtError
+HDF5 error back trace
+
+  File "C:\b\abs_e4nt8ttmb0\croot\hdf5_1686163951797\work\src\H5F.c", line 620, in H5Fopen
+    unable to open file
+  File "C:\b\abs_e4nt8ttmb0\croot\hdf5_1686163951797\work\src\H5VLcallback.c", line 3502, in H5VL_file_open
+    failed to iterate over available VOL connector plugins
+  File "C:\b\abs_e4nt8ttmb0\croot\hdf5_1686163951797\work\src\H5PLpath.c", line 579, in H5PL__path_table_iterate
+    can't iterate over plugins in plugin path '(null)'
+  File "C:\b\abs_e4nt8ttmb0\croot\hdf5_1686163951797\work\src\H5PLpath.c", line 712, in H5PL__path_table_iterate_process_path
+    can't open directory
+  File "C:\b\abs_e4nt8ttmb0\croot\hdf5_1686163951797\work\src\H5VLcallback.c", line 3351, in H5VL__file_open
+    open failed
+  File "C:\b\abs_e4nt8ttmb0\croot\hdf5_1686163951797\work\src\H5VLnative_file.c", line 97, in H5VL__native_file_open
+    unable to open file
+  File "C:\b\abs_e4nt8ttmb0\croot\hdf5_1686163951797\work\src\H5Fint.c", line 1990, in H5F_open
+    unable to read superblock
+  File "C:\b\abs_e4nt8ttmb0\croot\hdf5_1686163951797\work\src\H5Fsuper.c", line 617, in H5F__super_read
+    truncated file: eof = 96, sblock->base_addr = 0, stored_eof = 2048
+
+End of HDF5 error back trace
+
+Unable to open/create file '.\cache\_cache.h5'
+  File "E:\OneDrive - Technische Universität Berlin\__Master\Python_Akustik\Code\GitHub\acoular\acoular\h5cache.py", line 35, in open_cachefile
+    return File(path.join(self.cache_dir, cacheFileName), mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\OneDrive - Technische Universität Berlin\__Master\Python_Akustik\Code\GitHub\acoular\acoular\h5cache.py", line 110, in get_cache_file
+    f = self.open_cachefile(cacheFileName, mode)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\OneDrive - Technische Universität Berlin\__Master\Python_Akustik\Code\GitHub\acoular\acoular\fbeamform.py", line 415, in _get_filecache
+    H5cache.get_cache_file(self, self.freq_data.basename)
+  File "E:\OneDrive - Technische Universität Berlin\__Master\Python_Akustik\Code\GitHub\acoular\acoular\fbeamform.py", line 473, in _get_result
+    (ac, fr, gpos) = self._get_filecache()
+                     ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\OneDrive - Technische Universität Berlin\__Master\Python_Akustik\Code\GitHub\acoular\acoular\fbeamform.py", line 606, in synthetic
+    res = self.result  # trigger calculation
+          ^^^^^^^^^^^
+  File "E:\OneDrive - Technische Universität Berlin\__Master\Python_Akustik\Code\GitHub\OldDemo.py", line 66, in <module>
+    pm = bb.synthetic(8000, 3)
+         ^^^^^^^^^^^^^^^^^^^^^
+tables.exceptions.HDF5ExtError: HDF5 error back trace
+
+  File "C:\b\abs_e4nt8ttmb0\croot\hdf5_1686163951797\work\src\H5F.c", line 620, in H5Fopen
+    unable to open file
+  File "C:\b\abs_e4nt8ttmb0\croot\hdf5_1686163951797\work\src\H5VLcallback.c", line 3502, in H5VL_file_open
+    failed to iterate over available VOL connector plugins
+  File "C:\b\abs_e4nt8ttmb0\croot\hdf5_1686163951797\work\src\H5PLpath.c", line 579, in H5PL__path_table_iterate
+    can't iterate over plugins in plugin path '(null)'
+  File "C:\b\abs_e4nt8ttmb0\croot\hdf5_1686163951797\work\src\H5PLpath.c", line 712, in H5PL__path_table_iterate_process_path
+    can't open directory
+  File "C:\b\abs_e4nt8ttmb0\croot\hdf5_1686163951797\work\src\H5VLcallback.c", line 3351, in H5VL__file_open
+    open failed
+  File "C:\b\abs_e4nt8ttmb0\croot\hdf5_1686163951797\work\src\H5VLnative_file.c", line 97, in H5VL__native_file_open
+    unable to open file
+  File "C:\b\abs_e4nt8ttmb0\croot\hdf5_1686163951797\work\src\H5Fint.c", line 1990, in H5F_open
+    unable to read superblock
+  File "C:\b\abs_e4nt8ttmb0\croot\hdf5_1686163951797\work\src\H5Fsuper.c", line 617, in H5F__super_read
+    truncated file: eof = 96, sblock->base_addr = 0, stored_eof = 2048
+
+End of HDF5 error back trace
+
+Unable to open/create file '.\cache\_cache.h5'
