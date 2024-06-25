@@ -55,6 +55,7 @@ from numpy import (
     full,
     hsplit,
     hstack,
+    index_exp,
     inf,
     invert,
     isscalar,
@@ -256,6 +257,27 @@ class SteeringVector(HasPrivateTraits):
         return func(self.transfer(f, ind))
 
 
+class LazyBfResult:
+    """Manages lazy per-frequency evaluation."""
+
+    def __init__(self, bf):
+        self.bf = bf
+
+    def __getitem__(self, key):
+        # 'intelligent' [] operator checks if results are available and triggers calculation
+        sl = index_exp[key][0]
+        if isinstance(sl, int):
+            sl = slice(sl, sl + 1)
+        # indices which are missing
+        missingind = arange(*sl.indices(self.bf._numfreq))[self.bf._fr[sl] == 0]
+        # calc if needed
+        if missingind.size:
+            self.bf._calc(missingind)
+            if self.bf.h5f:
+                self.bf.h5f.flush()
+        return self.bf._ac.__getitem__(key)
+
+
 class BeamformerBase(HasPrivateTraits):
     """Beamforming using the basic delay-and-sum algorithm in the frequency domain."""
 
@@ -447,45 +469,36 @@ class BeamformerBase(HasPrivateTraits):
         if numchannels != self.steer.mics.num_mics or numchannels == 0:
             raise ValueError('%i channels do not fit %i mics' % (numchannels, self.steer.mics.num_mics))
 
-    @property_depends_on('ext_digest')
+    @property_depends_on('digest')
     def _get_result(self):
         """Implements the :attr:`result` getter routine.
         The beamforming result is either loaded or calculated.
         """
-        f = self.freq_data
-        numfreq = f.fftfreq().shape[0]  # block_size/2 + 1steer_obj
-        _digest = ''
-        while self.digest != _digest:
-            _digest = self.digest
-            self._assert_equal_channels()
-            ac, fr = (None, None)
-            if not (  # if result caching is active
-                config.global_caching == 'none' or (config.global_caching == 'individual' and not self.cached)
-            ):
-                #                print("get filecache..")
-                (ac, fr, gpos) = self._get_filecache()
-                if gpos:
-                    self._gpos = gpos
-            if ac and fr:
-                #                    print("cached data existent")
-                if not fr[f.ind_low : f.ind_high].all():
-                    #                        print("calculate missing results")
-                    if config.global_caching == 'readonly':
-                        (ac, fr) = (ac[:], fr[:])
-                    self.calc(ac, fr)
-                    self.h5f.flush()
-            #                    else:
-            #                        print("cached results are complete! return.")
+        # store locally for performance
+        self._f = self.freq_data.fftfreq()
+        self._numfreq = self._f.shape[0]
+        self._assert_equal_channels()
+        ac, fr = (None, None)
+        if not (  # if result caching is active
+            config.global_caching == 'none' or (config.global_caching == 'individual' and not self.cached)
+        ):
+            (ac, fr, gpos) = self._get_filecache()  # can also be (None, None, None)
+            if gpos:  # we have an adaptive grid
+                self._gpos = gpos
+        if ac and fr:  # cached data is available
+            if config.global_caching == 'readonly':
+                (ac, fr) = (ac[:], fr[:])  # so never write back to disk
+        else:
+            # no caching or not activated, init numpy arrays
+            if isinstance(self, BeamformerAdaptiveGrid):
+                self._gpos = zeros((3, self.size), dtype=self.precision)
+                ac = zeros((self._numfreq, self.size), dtype=self.precision)
             else:
-                #                print("no caching or not activated, calculate result")
-                if isinstance(self, BeamformerAdaptiveGrid):
-                    self._gpos = zeros((3, self.size), dtype=self.precision)
-                    ac = zeros((numfreq, self.size), dtype=self.precision)
-                else:
-                    ac = zeros((numfreq, self.steer.grid.size), dtype=self.precision)
-                fr = zeros(numfreq, dtype='int8')
-                self.calc(ac, fr)
-        return ac
+                ac = zeros((self._numfreq, self.steer.grid.size), dtype=self.precision)
+            fr = zeros(self._numfreq, dtype='int8')
+        self._ac = ac
+        self._fr = fr
+        return LazyBfResult(self)
 
     def sig_loss_norm(self):
         """If the diagonal of the CSM is removed one has to handle the loss
@@ -521,7 +534,7 @@ class BeamformerBase(HasPrivateTraits):
             param_steer_func = self.steer.steer_vector
         return param_type, param_steer_func
 
-    def calc(self, ac, fr):
+    def _calc(self, ind):
         """Calculates the delay-and-sum beamforming result for the frequencies
         defined by :attr:`freq_data`.
 
@@ -531,40 +544,33 @@ class BeamformerBase(HasPrivateTraits):
 
         Parameters
         ----------
-        ac : array of floats
-            This array of dimension ([number of frequencies]x[number of gridpoints])
-            is used as call-by-reference parameter and contains the calculated
-            value after calling this method.
-        fr : array of booleans
-            The entries of this [number of frequencies]-sized array are either
-            'True' (if the result for this frequency has already been calculated)
-            or 'False' (for the frequencies where the result has yet to be calculated).
-            After the calculation at a certain frequency the value will be set
-            to 'True'
+        ind : array of int
+            This array contains all frequency indices for which (re)calculation is
+            neccessary
 
         Returns
         -------
-        This method only returns values through the *ac* and *fr* parameters
+        This method only returns values through :attr:`_ac` and :attr:`_fr`
 
         """
-        f = self.freq_data.fftfreq()  # [inds]
+        f = self._f
         normfactor = self.sig_loss_norm()
         param_steer_type, steer_vector = self._beamformer_params()
-        for i in self.freq_data.indices:
-            if not fr[i]:
-                csm = array(self.freq_data.csm[i], dtype='complex128')
-                beamformerOutput = beamformerFreq(
-                    param_steer_type,
-                    self.r_diag,
-                    normfactor,
-                    steer_vector(f[i]),
-                    csm,
-                )[0]
-                if self.r_diag:  # set (unphysical) negative output values to 0
-                    indNegSign = sign(beamformerOutput) < 0
-                    beamformerOutput[indNegSign] = 0.0
-                ac[i] = beamformerOutput
-                fr[i] = 1
+        for i in ind:
+            print(f'compute{i}')
+            csm = array(self.freq_data.csm[i], dtype='complex128')
+            beamformerOutput = beamformerFreq(
+                param_steer_type,
+                self.r_diag,
+                normfactor,
+                steer_vector(f[i]),
+                csm,
+            )[0]
+            if self.r_diag:  # set (unphysical) negative output values to 0
+                indNegSign = sign(beamformerOutput) < 0
+                beamformerOutput[indNegSign] = 0.0
+            self._ac[i] = beamformerOutput
+            self._fr[i] = 1
 
     def synthetic(self, f, num=0):
         """Evaluates the beamforming result for an arbitrary frequency band.
@@ -665,34 +671,50 @@ class BeamformerBase(HasPrivateTraits):
             return h
         return h.reshape(self.steer.grid.shape)
 
-    def integrate(self, sector):
+    def integrate(self, sector, frange=None, num=0):
         """Integrates result map over a given sector.
 
         Parameters
         ----------
-        sector: array of floats
-              Tuple with arguments for the 'indices' method
-              of a :class:`~acoular.grids.Grid`-derived class
-              (e.g. :meth:`RectGrid.indices<acoular.grids.RectGrid.indices>`
-              or :meth:`RectGrid3D.indices<acoular.grids.RectGrid3D.indices>`).
-              Possible sectors would be *array([xmin, ymin, xmax, ymax])*
-              or *array([x, y, radius])*.
+        sector: aray of floats or :class:`~acoular.grids.Sector`
+            either an array, tuple or list with arguments for the 'indices'
+            method of a :class:`~acoular.grids.Grid`-derived class
+            (e.g. :meth:`RectGrid.indices<acoular.grids.RectGrid.indices>`
+            or :meth:`RectGrid3D.indices<acoular.grids.RectGrid3D.indices>`).
+            Possible sectors would be *array([xmin, ymin, xmax, ymax])*
+            or *array([x, y, radius])* or an instance of a
+            :class:`~acoular.grids.Sector`-derived class
+
+        frange: tuple or None
+            a tuple of (fmin,fmax) frequencies to include in the result if *num*==0,
+            or band center frequency/frequencies for which to return the results
+            if *num*>0; if None, then the frequency range is determined from
+            the settings of the :attr:`<acoular.spectra.PowerSpectra.ind_low>` and
+            :attr:`<acoular.spectra.PowerSpectra.ind_high>` of :attr:`freq_data`
+
+        num : integer
+            Controls the width of the frequency bands considered; defaults to
+            0 (single frequency line). Only considered if *frange*!=None.
+
+            ===  =====================
+            num  frequency band width
+            ===  =====================
+            0    single frequency line
+            1    octave band
+            3    third-octave band
+            n    1/n-octave band
+            ===  =====================
+
 
         Returns
         -------
-        array of floats
-            The spectrum (all calculated frequency bands) for the integrated sector.
-
+        res or (f, res): array of floats or tuple(array of floats, array of floats)
+            If *frange*==None or *num*>0, the spectrum (all calculated frequency bands)
+            for the integrated sector is returned as *res*. The dimension of this array is the
+            number of frequencies given by :attr:`freq_data` and entries not computed are zero.
+            If *frange*!=None and *num*==0, then (f, res) is return where *f* are the (band) frequencies
+            and the dimension of both arrays is determined from *frange*
         """
-        # resp. array([rmin, phimin, rmax, phimax]), array([r, phi, radius]).
-
-        #        ind = self.grid.indices(*sector)
-        #        gshape = self.grid.shape
-        #        r = self.result
-        #        rshape = r.shape
-        #        mapshape = (rshape[0], ) + gshape
-        #        h = r[:].reshape(mapshape)[ (s_[:], ) + ind ]
-        #        return h.reshape(h.shape[0], prod(h.shape[1:])).sum(axis=1)
         if isinstance(sector, Sector):
             ind = self.steer.grid.subdomain(sector)
         elif hasattr(self.steer.grid, 'indices'):
@@ -707,10 +729,30 @@ class BeamformerBase(HasPrivateTraits):
                 msg,
             )
         gshape = self.steer.grid.shape
-        r = self.result
-        h = zeros(r.shape[0])
-        for i in range(r.shape[0]):
-            h[i] = r[i].reshape(gshape)[ind].sum()
+        if num == 0 or frange is None:
+            if frange is None:
+                irange = (self.freq_data.ind_low, self.freq_data.ind_high)
+                num = 0
+            elif len(frange) == 2:
+                irange = (searchsorted(self._f, frange[0]), searchsorted(self._f, frange[1]))
+            else:
+                msg = 'Only a tuple of length 2 is allowed for frange if num==0'
+                raise TypeError(
+                    msg,
+                )
+            h = zeros(self._numfreq, dtype=float)
+            sl = slice(*irange)
+            r = self.result[sl]
+            for i in range(*irange):
+                # we do this per frequency because r might not have fancy indexing
+                h[i] = r[i - sl.start].reshape(gshape)[ind].sum()
+            if frange is None:
+                return h
+            return self._f[sl], h[sl]
+
+        h = zeros(len(frange), dtype=float)
+        for i, f in enumerate(frange):
+            h[i] = self.synthetic(f, num).reshape(gshape)[ind].sum()
         return h
 
 
