@@ -279,6 +279,9 @@ class LazyBfResult:
         # calc if needed
         if missingind.size:
             self.bf._calc(missingind)
+            if self.bf.h5f:
+                self.h5f.flush()
+
         return self.bf._ac.__getitem__(key)
 
 
@@ -575,8 +578,6 @@ class BeamformerBase(HasPrivateTraits):
                 beamformerOutput[indNegSign] = 0.0
             self._ac[i] = beamformerOutput
             self._fr[i] = 1
-        if self.h5f:
-            self.h5f.flush()
 
     def synthetic(self, f, num=0):
         """Evaluates the beamforming result for an arbitrary frequency band.
@@ -784,76 +785,68 @@ class BeamformerFunctional(BeamformerBase):
     def _get_digest(self):
         return digest(self)
 
-    def calc(self, ac, fr):
-        """Calculates the Functional Beamformer result for the frequencies defined by :attr:`freq_data`.
+    def _calc(self, ind):
+        """Calculates the result for the frequencies defined by :attr:`freq_data`.
 
         This is an internal helper function that is automatically called when
-        accessing the beamformer's :attr:`~BeamformerBase.result` or calling
-        its :meth:`~BeamformerBase.synthetic` method.
+        accessing the beamformer's :attr:`result` or calling
+        its :meth:`synthetic` method.
 
         Parameters
         ----------
-        ac : array of floats
-            This array of dimension ([number of frequencies]x[number of gridpoints])
-            is used as call-by-reference parameter and contains the calculated
-            value after calling this method.
-        fr : array of booleans
-            The entries of this [number of frequencies]-sized array are either
-            'True' (if the result for this frequency has already been calculated)
-            or 'False' (for the frequencies where the result has yet to be calculated).
-            After the calculation at a certain frequency the value will be set
-            to 'True'
+        ind : array of int
+            This array contains all frequency indices for which (re)calculation is
+            to be performed
 
         Returns
         -------
-        This method only returns values through the *ac* and *fr* parameters
+        This method only returns values through :attr:`_ac` and :attr:`_fr`
 
         """
-        f = self.freq_data.fftfreq()
+        f = self._f
         normfactor = self.sig_loss_norm()
         param_steer_type, steer_vector = self._beamformer_params()
-        for i in self.freq_data.indices:
-            if not fr[i]:
-                if self.r_diag:
-                    # This case is not used at the moment (see Trait r_diag)
-                    # It would need some testing as structural changes were not tested...
-                    # ==============================================================================
-                    #                     One cannot use spectral decomposition when diagonal of csm is removed,
-                    #                     as the resulting modified eigenvectors are not orthogonal to each other anymore.
-                    #                     Therefor potentiating cannot be applied only to the eigenvalues.
-                    #                     --> To avoid this the root of the csm (removed diag) is calculated directly.
-                    #                     WATCH OUT: This doesn't really produce good results.
-                    # ==============================================================================
-                    csm = self.freq_data.csm[i]
-                    fill_diagonal(csm, 0)
-                    csmRoot = fractional_matrix_power(csm, 1.0 / self.gamma)
-                    beamformerOutput, steerNorm = beamformerFreq(
-                        param_steer_type,
-                        self.r_diag,
-                        normfactor,
-                        steer_vector(f[i]),
-                        csmRoot,
-                    )
-                    beamformerOutput /= steerNorm  # take normalized steering vec
+        for i in ind:
+            if self.r_diag:
+                # This case is not used at the moment (see Trait r_diag)
+                # It would need some testing as structural changes were not tested...
+                # ==============================================================================
+                #                     One cannot use spectral decomposition when diagonal of csm is removed,
+                #                     as the resulting modified eigenvectors are not orthogonal to each other anymore.
+                #                     Therefor potentiating cannot be applied only to the eigenvalues.
+                #                     --> To avoid this the root of the csm (removed diag) is calculated directly.
+                #                     WATCH OUT: This doesn't really produce good results.
+                # ==============================================================================
+                csm = self.freq_data.csm[i]
+                fill_diagonal(csm, 0)
+                csmRoot = fractional_matrix_power(csm, 1.0 / self.gamma)
+                beamformerOutput, steerNorm = beamformerFreq(
+                    param_steer_type,
+                    self.r_diag,
+                    normfactor,
+                    steer_vector(f[i]),
+                    csmRoot,
+                )
+                beamformerOutput /= steerNorm  # take normalized steering vec
 
-                    # set (unphysical) negative output values to 0
-                    indNegSign = sign(beamformerOutput) < 0
-                    beamformerOutput[indNegSign] = 0.0
-                else:
-                    eva = array(self.freq_data.eva[i], dtype='float64') ** (1.0 / self.gamma)
-                    eve = array(self.freq_data.eve[i], dtype='complex128')
-                    beamformerOutput, steerNorm = beamformerFreq(
-                        param_steer_type,
-                        self.r_diag,
-                        1.0,
-                        steer_vector(f[i]),
-                        (eva, eve),
-                    )
-                    beamformerOutput /= steerNorm  # take normalized steering vec
-                ac[i] = (
-                    (beamformerOutput**self.gamma) * steerNorm * normfactor
-                )  # the normalization must be done outside the beamformer
-                fr[i] = 1
+                # set (unphysical) negative output values to 0
+                indNegSign = sign(beamformerOutput) < 0
+                beamformerOutput[indNegSign] = 0.0
+            else:
+                eva = array(self.freq_data.eva[i], dtype='float64') ** (1.0 / self.gamma)
+                eve = array(self.freq_data.eve[i], dtype='complex128')
+                beamformerOutput, steerNorm = beamformerFreq(
+                    param_steer_type,
+                    self.r_diag,
+                    1.0,
+                    steer_vector(f[i]),
+                    (eva, eve),
+                )
+                beamformerOutput /= steerNorm  # take normalized steering vec
+            self._ac[i] = (
+                (beamformerOutput**self.gamma) * steerNorm * normfactor
+            )  # the normalization must be done outside the beamformer
+            self._fr[i] = 1
 
 
 class BeamformerCapon(BeamformerBase):
@@ -869,41 +862,33 @@ class BeamformerCapon(BeamformerBase):
         desc='No normalization. BeamformerCapon is only well defined for full CSM.',
     )
 
-    def calc(self, ac, fr):
-        """Calculates the Capon result for the frequencies defined by :attr:`freq_data`.
+    def _calc(self, ind):
+        """Calculates the result for the frequencies defined by :attr:`freq_data`.
 
         This is an internal helper function that is automatically called when
-        accessing the beamformer's :attr:`~BeamformerBase.result` or calling
-        its :meth:`~BeamformerBase.synthetic` method.
+        accessing the beamformer's :attr:`result` or calling
+        its :meth:`synthetic` method.
 
         Parameters
         ----------
-        ac : array of floats
-            This array of dimension ([number of frequencies]x[number of gridpoints])
-            is used as call-by-reference parameter and contains the calculated
-            value after calling this method.
-        fr : array of booleans
-            The entries of this [number of frequencies]-sized array are either
-            'True' (if the result for this frequency has already been calculated)
-            or 'False' (for the frequencies where the result has yet to be calculated).
-            After the calculation at a certain frequency the value will be set
-            to 'True'
+        ind : array of int
+            This array contains all frequency indices for which (re)calculation is
+            to be performed
 
         Returns
         -------
-        This method only returns values through the *ac* and *fr* parameters
+        This method only returns values through :attr:`_ac` and :attr:`_fr`
 
         """
-        f = self.freq_data.fftfreq()
+        f = self._f
         nMics = self.freq_data.numchannels
         normfactor = self.sig_loss_norm() * nMics**2
         param_steer_type, steer_vector = self._beamformer_params()
-        for i in self.freq_data.indices:
-            if not fr[i]:
-                csm = array(linalg.inv(array(self.freq_data.csm[i], dtype='complex128')), order='C')
-                beamformerOutput = beamformerFreq(param_steer_type, self.r_diag, normfactor, steer_vector(f[i]), csm)[0]
-                ac[i] = 1.0 / beamformerOutput
-                fr[i] = 1
+        for i in ind:
+            csm = array(linalg.inv(array(self.freq_data.csm[i], dtype='complex128')), order='C')
+            beamformerOutput = beamformerFreq(param_steer_type, self.r_diag, normfactor, steer_vector(f[i]), csm)[0]
+            self._ac[i] = 1.0 / beamformerOutput
+            self._fr[i] = 1
 
 
 class BeamformerEig(BeamformerBase):
@@ -932,51 +917,43 @@ class BeamformerEig(BeamformerBase):
             na = max(nm + na, 0)
         return min(nm - 1, na)
 
-    def calc(self, ac, fr):
+    def _calc(self, ind):
         """Calculates the result for the frequencies defined by :attr:`freq_data`.
 
         This is an internal helper function that is automatically called when
-        accessing the beamformer's :attr:`~BeamformerBase.result` or calling
-        its :meth:`~BeamformerBase.synthetic` method.
+        accessing the beamformer's :attr:`result` or calling
+        its :meth:`synthetic` method.
 
         Parameters
         ----------
-        ac : array of floats
-            This array of dimension ([number of frequencies]x[number of gridpoints])
-            is used as call-by-reference parameter and contains the calculated
-            value after calling this method.
-        fr : array of booleans
-            The entries of this [number of frequencies]-sized array are either
-            'True' (if the result for this frequency has already been calculated)
-            or 'False' (for the frequencies where the result has yet to be calculated).
-            After the calculation at a certain frequency the value will be set
-            to 'True'
+        ind : array of int
+            This array contains all frequency indices for which (re)calculation is
+            to be performed
 
         Returns
         -------
-        This method only returns values through the *ac* and *fr* parameters
+        This method only returns values through :attr:`_ac` and :attr:`_fr`
 
         """
-        f = self.freq_data.fftfreq()
+        f = self._f
         na = int(self.na)  # eigenvalue taken into account
         normfactor = self.sig_loss_norm()
         param_steer_type, steer_vector = self._beamformer_params()
-        for i in self.freq_data.indices:
-            if not fr[i]:
-                eva = array(self.freq_data.eva[i], dtype='float64')
-                eve = array(self.freq_data.eve[i], dtype='complex128')
-                beamformerOutput = beamformerFreq(
-                    param_steer_type,
-                    self.r_diag,
-                    normfactor,
-                    steer_vector(f[i]),
-                    (eva[na : na + 1], eve[:, na : na + 1]),
-                )[0]
-                if self.r_diag:  # set (unphysical) negative output values to 0
-                    indNegSign = sign(beamformerOutput) < 0
-                    beamformerOutput[indNegSign] = 0
-                ac[i] = beamformerOutput
-                fr[i] = 1
+        for i in ind:
+            eva = array(self.freq_data.eva[i], dtype='float64')
+            eve = array(self.freq_data.eve[i], dtype='complex128')
+            beamformerOutput = beamformerFreq(
+                param_steer_type,
+                self.r_diag,
+                normfactor,
+                steer_vector(f[i]),
+                (eva[na : na + 1], eve[:, na : na + 1]),
+            )[0]
+            if self.r_diag:  # set (unphysical) negative output values to 0
+                indNegSign = sign(beamformerOutput) < 0
+                beamformerOutput[indNegSign] = 0
+            self._ac[i] = beamformerOutput
+            self._fr[i] = 1
 
 
 class BeamformerMusic(BeamformerEig):
@@ -996,49 +973,41 @@ class BeamformerMusic(BeamformerEig):
     # defaults to 1
     n = Int(1, desc='assumed number of sources')
 
-    def calc(self, ac, fr):
-        """Calculates the MUSIC result for the frequencies defined by :attr:`freq_data`.
+    def _calc(self, ind):
+        """Calculates the result for the frequencies defined by :attr:`freq_data`.
 
         This is an internal helper function that is automatically called when
-        accessing the beamformer's :attr:`~BeamformerBase.result` or calling
-        its :meth:`~BeamformerBase.synthetic` method.
+        accessing the beamformer's :attr:`result` or calling
+        its :meth:`synthetic` method.
 
         Parameters
         ----------
-        ac : array of floats
-            This array of dimension ([number of frequencies]x[number of gridpoints])
-            is used as call-by-reference parameter and contains the calculated
-            value after calling this method.
-        fr : array of booleans
-            The entries of this [number of frequencies]-sized array are either
-            'True' (if the result for this frequency has already been calculated)
-            or 'False' (for the frequencies where the result has yet to be calculated).
-            After the calculation at a certain frequency the value will be set
-            to 'True'
+        ind : array of int
+            This array contains all frequency indices for which (re)calculation is
+            to be performed
 
         Returns
         -------
-        This method only returns values through the *ac* and *fr* parameters
+        This method only returns values through :attr:`_ac` and :attr:`_fr`
 
         """
-        f = self.freq_data.fftfreq()
+        f = self._f
         nMics = self.freq_data.numchannels
         n = int(self.steer.mics.num_mics - self.na)
         normfactor = self.sig_loss_norm() * nMics**2
         param_steer_type, steer_vector = self._beamformer_params()
-        for i in self.freq_data.indices:
-            if not fr[i]:
-                eva = array(self.freq_data.eva[i], dtype='float64')
-                eve = array(self.freq_data.eve[i], dtype='complex128')
-                beamformerOutput = beamformerFreq(
-                    param_steer_type,
-                    self.r_diag,
-                    normfactor,
-                    steer_vector(f[i]),
-                    (eva[:n], eve[:, :n]),
-                )[0]
-                ac[i] = 4e-10 * beamformerOutput.min() / beamformerOutput
-                fr[i] = 1
+        for i in ind:
+            eva = array(self.freq_data.eva[i], dtype='float64')
+            eve = array(self.freq_data.eve[i], dtype='complex128')
+            beamformerOutput = beamformerFreq(
+                param_steer_type,
+                self.r_diag,
+                normfactor,
+                steer_vector(f[i]),
+                (eva[:n], eve[:, :n]),
+            )[0]
+            self._ac[i] = 4e-10 * beamformerOutput.min() / beamformerOutput
+            self._fr[i] = 1
 
 
 class PointSpreadFunction(HasPrivateTraits):
