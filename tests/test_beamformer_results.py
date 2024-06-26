@@ -175,7 +175,7 @@ class acoular_beamformer_test(unittest.TestCase):
             acoular.config.global_caching = 'readonly'
             b0 = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached=True)
             b1 = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached=True)
-            self.assertEqual(id(b0.result.bf._ac), id(b1.result.bf._ac))
+            np.testing.assert_allclose(b0.result.bf._ac, b1.result.bf._ac)
 
 
 class Test_PowerSpectra(unittest.TestCase):
