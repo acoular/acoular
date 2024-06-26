@@ -280,7 +280,7 @@ class LazyBfResult:
         if missingind.size:
             self.bf._calc(missingind)
             if self.bf.h5f:
-                self.h5f.flush()
+                self.bf.h5f.flush()
 
         return self.bf._ac.__getitem__(key)
 
