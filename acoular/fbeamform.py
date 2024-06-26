@@ -2373,33 +2373,25 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
             na = max(nm + na, 0)
         return min(nm - 1, na)
 
-    def calc(self, ac, fr):
+    def _calc(self, ind):
         """Calculates the result for the frequencies defined by :attr:`freq_data`.
 
         This is an internal helper function that is automatically called when
-        accessing the beamformer's :attr:`~BeamformerBase.result` or calling
-        its :meth:`~BeamformerBase.synthetic` method.
+        accessing the beamformer's :attr:`result` or calling
+        its :meth:`synthetic` method.
 
         Parameters
         ----------
-        ac : array of floats
-            This array of dimension ([number of frequencies]x[number of gridpoints])
-            is used as call-by-reference parameter and contains the calculated
-            value after calling this method.
-        fr : array of booleans
-            The entries of this [number of frequencies]-sized array are either
-            'True' (if the result for this frequency has already been calculated)
-            or 'False' (for the frequencies where the result has yet to be calculated).
-            After the calculation at a certain frequency the value will be set
-            to 'True'
+        ind : array of int
+            This array contains all frequency indices for which (re)calculation is
+            to be performed
 
         Returns
         -------
-        This method only returns values through the *ac* and *fr* parameters
+        This method only returns values through :attr:`_ac` and :attr:`_fr`
 
         """
-        # prepare calculation
-        f = self.freq_data.fftfreq()
+        f = self._f
         n = int(self.na)  # number of eigenvalues
         m = int(self.m)  # number of first eigenvalue
         numchannels = self.freq_data.numchannels  # number of channels
@@ -2407,122 +2399,121 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
         hh = zeros((1, numpoints, numchannels), dtype='D')
 
         # Generate a cross spectral matrix, and perform the eigenvalue decomposition
-        for i in self.freq_data.indices:
-            if not fr[i]:
-                # for monopole and source strenght Q needs to define density
-                # calculate a transfer matrix A
-                hh = self.steer.transfer(f[i])
-                A = hh.T
-                # eigenvalues and vectors
-                csm = array(self.freq_data.csm[i], dtype='complex128', copy=1)
-                eva, eve = eigh(csm)
-                eva = eva[::-1]
-                eve = eve[:, ::-1]
-                eva[eva < max(eva) / 1e12] = 0  # set small values zo 0, lowers numerical errors in simulated data
-                # init sources
-                qi = zeros([n + m, numpoints], dtype='complex128')
-                # Select the number of coherent modes to be processed referring to the eigenvalue distribution.
-                # for s in arange(n):
-                for s in list(range(m, n + m)):
-                    if eva[s] > 0:
-                        # Generate the corresponding eigenmodes
-                        emode = array(sqrt(eva[s]) * eve[:, s], dtype='complex128')
-                        # choose method for computation
-                        if self.method == 'Suzuki':
-                            leftpoints = numpoints
-                            locpoints = arange(numpoints)
-                            weights = diag(ones(numpoints))
-                            epsilon = arange(self.max_iter)
-                            for it in arange(self.max_iter):
-                                if numchannels <= leftpoints:
-                                    AWA = dot(dot(A[:, locpoints], weights), A[:, locpoints].conj().T)
-                                    epsilon[it] = max(absolute(eigvals(AWA))) * self.eps_perc
-                                    qi[s, locpoints] = dot(
-                                        dot(
-                                            dot(weights, A[:, locpoints].conj().T),
-                                            inv(AWA + eye(numchannels) * epsilon[it]),
-                                        ),
-                                        emode,
-                                    )
-                                elif numchannels > leftpoints:
-                                    AA = dot(A[:, locpoints].conj().T, A[:, locpoints])
-                                    epsilon[it] = max(absolute(eigvals(AA))) * self.eps_perc
-                                    qi[s, locpoints] = dot(
-                                        dot(inv(AA + inv(weights) * epsilon[it]), A[:, locpoints].conj().T),
-                                        emode,
-                                    )
-                                if self.beta < 1 and it > 1:
-                                    # Reorder from the greatest to smallest magnitude to define a reduced-point source distribution , and reform a reduced transfer matrix
-                                    leftpoints = int(round(numpoints * self.beta ** (it + 1)))
-                                    idx = argsort(abs(qi[s, locpoints]))[::-1]
-                                    # print(it, leftpoints, locpoints, idx )
-                                    locpoints = delete(locpoints, [idx[leftpoints::]])
-                                    qix = zeros([n + m, leftpoints], dtype='complex128')
-                                    qix[s, :] = qi[s, locpoints]
-                                    # calc weights for next iteration
-                                    weights = diag(absolute(qix[s, :]) ** (2 - self.pnorm))
-                                else:
-                                    weights = diag(absolute(qi[s, :]) ** (2 - self.pnorm))
+        for i in ind:
+            # for monopole and source strenght Q needs to define density
+            # calculate a transfer matrix A
+            hh = self.steer.transfer(f[i])
+            A = hh.T
+            # eigenvalues and vectors
+            csm = array(self.freq_data.csm[i], dtype='complex128', copy=1)
+            eva, eve = eigh(csm)
+            eva = eva[::-1]
+            eve = eve[:, ::-1]
+            eva[eva < max(eva) / 1e12] = 0  # set small values zo 0, lowers numerical errors in simulated data
+            # init sources
+            qi = zeros([n + m, numpoints], dtype='complex128')
+            # Select the number of coherent modes to be processed referring to the eigenvalue distribution.
+            # for s in arange(n):
+            for s in list(range(m, n + m)):
+                if eva[s] > 0:
+                    # Generate the corresponding eigenmodes
+                    emode = array(sqrt(eva[s]) * eve[:, s], dtype='complex128')
+                    # choose method for computation
+                    if self.method == 'Suzuki':
+                        leftpoints = numpoints
+                        locpoints = arange(numpoints)
+                        weights = diag(ones(numpoints))
+                        epsilon = arange(self.max_iter)
+                        for it in arange(self.max_iter):
+                            if numchannels <= leftpoints:
+                                AWA = dot(dot(A[:, locpoints], weights), A[:, locpoints].conj().T)
+                                epsilon[it] = max(absolute(eigvals(AWA))) * self.eps_perc
+                                qi[s, locpoints] = dot(
+                                    dot(
+                                        dot(weights, A[:, locpoints].conj().T),
+                                        inv(AWA + eye(numchannels) * epsilon[it]),
+                                    ),
+                                    emode,
+                                )
+                            elif numchannels > leftpoints:
+                                AA = dot(A[:, locpoints].conj().T, A[:, locpoints])
+                                epsilon[it] = max(absolute(eigvals(AA))) * self.eps_perc
+                                qi[s, locpoints] = dot(
+                                    dot(inv(AA + inv(weights) * epsilon[it]), A[:, locpoints].conj().T),
+                                    emode,
+                                )
+                            if self.beta < 1 and it > 1:
+                                # Reorder from the greatest to smallest magnitude to define a reduced-point source distribution , and reform a reduced transfer matrix
+                                leftpoints = int(round(numpoints * self.beta ** (it + 1)))
+                                idx = argsort(abs(qi[s, locpoints]))[::-1]
+                                # print(it, leftpoints, locpoints, idx )
+                                locpoints = delete(locpoints, [idx[leftpoints::]])
+                                qix = zeros([n + m, leftpoints], dtype='complex128')
+                                qix[s, :] = qi[s, locpoints]
+                                # calc weights for next iteration
+                                weights = diag(absolute(qix[s, :]) ** (2 - self.pnorm))
+                            else:
+                                weights = diag(absolute(qi[s, :]) ** (2 - self.pnorm))
 
-                        elif self.method == 'InverseIRLS':
-                            weights = eye(numpoints)
-                            locpoints = arange(numpoints)
-                            for _it in arange(self.max_iter):
-                                if numchannels <= numpoints:
-                                    wtwi = inv(dot(weights.T, weights))
-                                    aH = A.conj().T
-                                    qi[s, :] = dot(dot(wtwi, aH), dot(inv(dot(A, dot(wtwi, aH))), emode))
-                                    weights = diag(absolute(qi[s, :]) ** ((2 - self.pnorm) / 2))
-                                    weights = weights / sum(absolute(weights))
-                                elif numchannels > numpoints:
-                                    wtw = dot(weights.T, weights)
-                                    qi[s, :] = dot(dot(inv(dot(dot(A.conj.T, wtw), A)), dot(A.conj().T, wtw)), emode)
-                                    weights = diag(absolute(qi[s, :]) ** ((2 - self.pnorm) / 2))
-                                    weights = weights / sum(absolute(weights))
-                        else:
-                            locpoints = arange(numpoints)
-                            unit = self.unit_mult
-                            AB = vstack([hstack([A.real, -A.imag]), hstack([A.imag, A.real])])
-                            R = hstack([emode.real.T, emode.imag.T]) * unit
-                            if self.method == 'LassoLars':
-                                model = LassoLars(alpha=self.alpha * unit, max_iter=self.max_iter)
-                            elif self.method == 'LassoLarsBIC':
-                                model = LassoLarsIC(criterion='bic', max_iter=self.max_iter)
-                            elif self.method == 'OMPCV':
-                                model = OrthogonalMatchingPursuitCV()
-                            elif self.method == 'LassoLarsCV':
-                                model = LassoLarsCV()
-                            elif self.method == 'NNLS':
-                                model = LinearRegression(positive=True)
-                            model.normalize = False
-                            # from sklearn 1.2, normalize=True does not work
-                            # the same way anymore and the pipeline approach
-                            # with StandardScaler does scale in a different
-                            # way, thus we monkeypatch the code and normalize
-                            # ourselves to make results the same over different
-                            # sklearn versions
-                            norms = norm(AB, axis=0)
-                            # get rid of annoying sklearn warnings that appear
-                            # for sklearn<1.2 despite any settings
-                            with warnings.catch_warnings():
-                                warnings.simplefilter('ignore', category=FutureWarning)
-                                # normalized A
-                                model.fit(AB / norms, R)
-                            # recover normalization in the coef's
-                            qi_real, qi_imag = hsplit(model.coef_[:] / norms / unit, 2)
-                            # print(s,qi.size)
-                            qi[s, locpoints] = qi_real + qi_imag * 1j
+                    elif self.method == 'InverseIRLS':
+                        weights = eye(numpoints)
+                        locpoints = arange(numpoints)
+                        for _it in arange(self.max_iter):
+                            if numchannels <= numpoints:
+                                wtwi = inv(dot(weights.T, weights))
+                                aH = A.conj().T
+                                qi[s, :] = dot(dot(wtwi, aH), dot(inv(dot(A, dot(wtwi, aH))), emode))
+                                weights = diag(absolute(qi[s, :]) ** ((2 - self.pnorm) / 2))
+                                weights = weights / sum(absolute(weights))
+                            elif numchannels > numpoints:
+                                wtw = dot(weights.T, weights)
+                                qi[s, :] = dot(dot(inv(dot(dot(A.conj.T, wtw), A)), dot(A.conj().T, wtw)), emode)
+                                weights = diag(absolute(qi[s, :]) ** ((2 - self.pnorm) / 2))
+                                weights = weights / sum(absolute(weights))
                     else:
-                        warn(
-                            f'Eigenvalue {s:g} <= 0 for frequency index {i:g}. Will not be calculated!',
-                            Warning,
-                            stacklevel=2,
-                        )
-                    # Generate source maps of all selected eigenmodes, and superpose source intensity for each source type.
-                temp = zeros(numpoints)
-                temp[locpoints] = sum(absolute(qi[:, locpoints]) ** 2, axis=0)
-                ac[i] = temp
-                fr[i] = 1
+                        locpoints = arange(numpoints)
+                        unit = self.unit_mult
+                        AB = vstack([hstack([A.real, -A.imag]), hstack([A.imag, A.real])])
+                        R = hstack([emode.real.T, emode.imag.T]) * unit
+                        if self.method == 'LassoLars':
+                            model = LassoLars(alpha=self.alpha * unit, max_iter=self.max_iter)
+                        elif self.method == 'LassoLarsBIC':
+                            model = LassoLarsIC(criterion='bic', max_iter=self.max_iter)
+                        elif self.method == 'OMPCV':
+                            model = OrthogonalMatchingPursuitCV()
+                        elif self.method == 'LassoLarsCV':
+                            model = LassoLarsCV()
+                        elif self.method == 'NNLS':
+                            model = LinearRegression(positive=True)
+                        model.normalize = False
+                        # from sklearn 1.2, normalize=True does not work
+                        # the same way anymore and the pipeline approach
+                        # with StandardScaler does scale in a different
+                        # way, thus we monkeypatch the code and normalize
+                        # ourselves to make results the same over different
+                        # sklearn versions
+                        norms = norm(AB, axis=0)
+                        # get rid of annoying sklearn warnings that appear
+                        # for sklearn<1.2 despite any settings
+                        with warnings.catch_warnings():
+                            warnings.simplefilter('ignore', category=FutureWarning)
+                            # normalized A
+                            model.fit(AB / norms, R)
+                        # recover normalization in the coef's
+                        qi_real, qi_imag = hsplit(model.coef_[:] / norms / unit, 2)
+                        # print(s,qi.size)
+                        qi[s, locpoints] = qi_real + qi_imag * 1j
+                else:
+                    warn(
+                        f'Eigenvalue {s:g} <= 0 for frequency index {i:g}. Will not be calculated!',
+                        Warning,
+                        stacklevel=2,
+                    )
+                # Generate source maps of all selected eigenmodes, and superpose source intensity for each source type.
+            temp = zeros(numpoints)
+            temp[locpoints] = sum(absolute(qi[:, locpoints]) ** 2, axis=0)
+            self._ac[i] = temp
+            self._fr[i] = 1
 
 
 class BeamformerAdaptiveGrid(BeamformerBase, Grid):
@@ -2624,32 +2615,25 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
     def _get_size(self):
         return self.n * self.freq_data.fftfreq().shape[0]
 
-    def calc(self, ac, fr):
+    def _calc(self, ind):
         """Calculates the result for the frequencies defined by :attr:`freq_data`.
 
         This is an internal helper function that is automatically called when
-        accessing the beamformer's :attr:`~BeamformerBase.result` or calling
-        its :meth:`~BeamformerBase.synthetic` method.
+        accessing the beamformer's :attr:`result` or calling
+        its :meth:`synthetic` method.
 
         Parameters
         ----------
-        ac : array of floats
-            This array of dimension ([number of frequencies]x[number of gridpoints])
-            is used as call-by-reference parameter and contains the calculated
-            value after calling this method.
-        fr : array of booleans
-            The entries of this [number of frequencies]-sized array are either
-            'True' (if the result for this frequency has already been calculated)
-            or 'False' (for the frequencies where the result has yet to be calculated).
-            After the calculation at a certain frequency the value will be set
-            to 'True'
+        ind : array of int
+            This array contains all frequency indices for which (re)calculation is
+            to be performed
 
         Returns
         -------
-        This method only returns values through the *ac* and *fr* parameters
+        This method only returns values through :attr:`_ac` and :attr:`_fr`
 
         """
-        f = self.freq_data.fftfreq()
+        f = self._f
         normfactor = self.sig_loss_norm()
         numchannels = self.freq_data.numchannels
         # eigenvalue number list in standard form from largest to smallest
@@ -2676,37 +2660,36 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
         self.steer.env.roi = array(roi).T
         bmin = array(tuple(map(min, self.bounds)))
         bmax = array(tuple(map(max, self.bounds)))
-        for i in self.freq_data.indices:
-            if not fr[i]:
-                eva = array(self.freq_data.eva[i], dtype='float64')
-                eve = array(self.freq_data.eve[i], dtype='complex128')
-                k = 2 * pi * f[i] / env.c
-                for j, n in enumerate(eva_list):
-                    # print(f[i],n)
+        for i in ind:
+            eva = array(self.freq_data.eva[i], dtype='float64')
+            eve = array(self.freq_data.eve[i], dtype='complex128')
+            k = 2 * pi * f[i] / env.c
+            for j, n in enumerate(eva_list):
+                # print(f[i],n)
 
-                    def func(xy):
-                        # function to minimize globally
-                        xy = clip(xy, bmin, bmax)
-                        r0 = env._r(xy[:, newaxis])
-                        rm = env._r(xy[:, newaxis], mpos)
-                        return -beamformerFreq(
-                            steer_type,
-                            self.r_diag,
-                            normfactor,
-                            (r0, rm, k),
-                            (ones(1), eve[:, n : n + 1]),
-                        )[0][0]  # noqa: B023
+                def func(xy):
+                    # function to minimize globally
+                    xy = clip(xy, bmin, bmax)
+                    r0 = env._r(xy[:, newaxis])
+                    rm = env._r(xy[:, newaxis], mpos)
+                    return -beamformerFreq(
+                        steer_type,
+                        self.r_diag,
+                        normfactor,
+                        (r0, rm, k),
+                        (ones(1), eve[:, n : n + 1]),
+                    )[0][0]  # noqa: B023
 
-                    # simplical global homotopy optimizer
-                    oR = shgo(func, self.bounds, **shgo_opts)
-                    # index in grid
-                    ind = i * self.n + j
-                    # store result for position
-                    self._gpos[:, ind] = oR['x']
-                    # store result for level
-                    ac[i, ind] = eva[n] / numchannels
-                    # print(oR['x'],eva[n]/numchannels,oR)
-                fr[i] = 1
+                # simplical global homotopy optimizer
+                oR = shgo(func, self.bounds, **shgo_opts)
+                # index in grid
+                i1 = i * self.n + j
+                # store result for position
+                self._gpos[:, i1] = oR['x']
+                # store result for level
+                self._ac[i, i1] = eva[n] / numchannels
+                # print(oR['x'],eva[n]/numchannels,oR)
+            self._fr[i] = 1
 
 
 def L_p(x):  # noqa: N802
