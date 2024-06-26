@@ -260,6 +260,12 @@ class SteeringVector(HasPrivateTraits):
 class LazyBfResult:
     """Manages lazy per-frequency evaluation."""
 
+    # Internal helper class which works togther with BeamformerBase to provide
+    # calculation on demand; provides an 'intelligent' [] operator. This is
+    # implemented as an extra class instead of as a method of BeamformerBase to
+    # properly control the BeamformerBase.result attribute. Might be migrated to
+    # be a method of BeamformerBase in the future.
+
     def __init__(self, bf):
         self.bf = bf
 
@@ -273,8 +279,6 @@ class LazyBfResult:
         # calc if needed
         if missingind.size:
             self.bf._calc(missingind)
-            if self.bf.h5f:
-                self.bf.h5f.flush()
         return self.bf._ac.__getitem__(key)
 
 
@@ -402,7 +406,8 @@ class BeamformerBase(HasPrivateTraits):
 
     #: The beamforming result as squared sound pressure values
     #: at all grid point locations (readonly).
-    #: Returns a (number of frequencies, number of gridpoints) array of floats.
+    #: Returns a (number of frequencies, number of gridpoints) array-like
+    #: of floats. Values can only be accessed via the index operator [].
     result = Property(desc='beamforming result')
 
     # internal identifier
@@ -535,8 +540,7 @@ class BeamformerBase(HasPrivateTraits):
         return param_type, param_steer_func
 
     def _calc(self, ind):
-        """Calculates the delay-and-sum beamforming result for the frequencies
-        defined by :attr:`freq_data`.
+        """Calculates the result for the frequencies defined by :attr:`freq_data`.
 
         This is an internal helper function that is automatically called when
         accessing the beamformer's :attr:`result` or calling
@@ -546,7 +550,7 @@ class BeamformerBase(HasPrivateTraits):
         ----------
         ind : array of int
             This array contains all frequency indices for which (re)calculation is
-            neccessary
+            to be performed
 
         Returns
         -------
@@ -557,7 +561,7 @@ class BeamformerBase(HasPrivateTraits):
         normfactor = self.sig_loss_norm()
         param_steer_type, steer_vector = self._beamformer_params()
         for i in ind:
-            print(f'compute{i}')
+            # print(f'compute{i}')
             csm = array(self.freq_data.csm[i], dtype='complex128')
             beamformerOutput = beamformerFreq(
                 param_steer_type,
@@ -571,6 +575,8 @@ class BeamformerBase(HasPrivateTraits):
                 beamformerOutput[indNegSign] = 0.0
             self._ac[i] = beamformerOutput
             self._fr[i] = 1
+        if self.h5f:
+            self.h5f.flush()
 
     def synthetic(self, f, num=0):
         """Evaluates the beamforming result for an arbitrary frequency band.
@@ -689,12 +695,12 @@ class BeamformerBase(HasPrivateTraits):
             a tuple of (fmin,fmax) frequencies to include in the result if *num*==0,
             or band center frequency/frequencies for which to return the results
             if *num*>0; if None, then the frequency range is determined from
-            the settings of the :attr:`<acoular.spectra.PowerSpectra.ind_low>` and
-            :attr:`<acoular.spectra.PowerSpectra.ind_high>` of :attr:`freq_data`
+            the settings of the :attr:`PowerSpectra.ind_low` and
+            :attr:`PowerSpectra.ind_high` of :attr:`freq_data`
 
         num : integer
             Controls the width of the frequency bands considered; defaults to
-            0 (single frequency line). Only considered if *frange*!=None.
+            0 (single frequency line). Only considered if *frange* is not None.
 
             ===  =====================
             num  frequency band width
@@ -712,8 +718,8 @@ class BeamformerBase(HasPrivateTraits):
             If *frange*==None or *num*>0, the spectrum (all calculated frequency bands)
             for the integrated sector is returned as *res*. The dimension of this array is the
             number of frequencies given by :attr:`freq_data` and entries not computed are zero.
-            If *frange*!=None and *num*==0, then (f, res) is return where *f* are the (band) frequencies
-            and the dimension of both arrays is determined from *frange*
+            If *frange*!=None and *num*==0, then (f, res) is returned where *f* are the (band)
+            frequencies and the dimension of both arrays is determined from *frange*
         """
         if isinstance(sector, Sector):
             ind = self.steer.grid.subdomain(sector)
