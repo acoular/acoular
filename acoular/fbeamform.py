@@ -2047,7 +2047,7 @@ class BeamformerSODIX(BeamformerBase):
         # computation. Instead of just solving for only the frequencies in ind, we
         # start with index 1 (minimum frequency) and also check if the result is
         # already computed
-        for i in range(1,ind.max()+1):
+        for i in range(1, ind.max() + 1):
             if not self._fr[i]:
                 # measured csm
                 csm = array(self.freq_data.csm[i], dtype='complex128', copy=1)
