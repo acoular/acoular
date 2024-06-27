@@ -57,6 +57,7 @@ from numpy import (
     hstack,
     index_exp,
     inf,
+    integer,
     invert,
     isscalar,
     linalg,
@@ -272,7 +273,7 @@ class LazyBfResult:
     def __getitem__(self, key):
         # 'intelligent' [] operator checks if results are available and triggers calculation
         sl = index_exp[key][0]
-        if isinstance(sl, int):
+        if isinstance(sl, (int, integer)):
             sl = slice(sl, sl + 1)
         # indices which are missing
         missingind = arange(*sl.indices(self.bf._numfreq))[self.bf._fr[sl] == 0]
@@ -740,7 +741,13 @@ class BeamformerBase(HasPrivateTraits):
         gshape = self.steer.grid.shape
         if num == 0 or frange is None:
             if frange is None:
-                irange = (self.freq_data.ind_low, self.freq_data.ind_high)
+                ind_low = self.freq_data.ind_low
+                ind_high = self.freq_data.ind_high
+                if ind_low is None:
+                    ind_low = 0
+                if ind_high is None:
+                    ind_high = self._numfreq
+                irange = (ind_low, ind_high)
                 num = 0
             elif len(frange) == 2:
                 irange = (searchsorted(self._f, frange[0]), searchsorted(self._f, frange[1]))
@@ -749,6 +756,7 @@ class BeamformerBase(HasPrivateTraits):
                 raise TypeError(
                     msg,
                 )
+            print(frange, irange, self.freq_data._ind_high)
             h = zeros(self._numfreq, dtype=float)
             sl = slice(*irange)
             r = self.result[sl]
