@@ -144,8 +144,8 @@ class acoular_beamformer_test(unittest.TestCase):
                 if hasattr(b0, 'beamformer'):  # BeamformerClean, BeamformerDamas, BeamformerDamasplus
                     # do not pass because the .beamformer result is not take from cache
                     continue  # nor recalculated
-                b0.result[:] = 0
-                self.assertFalse(np.any(b0.result))
+                b0.result.bf._ac[:] = 0
+                self.assertFalse(np.any(b0.result.bf._ac))
                 name = testdir / 'reference_data' / f'{b1.__class__.__name__}.npy'
                 actual_data = np.array([b1.synthetic(cf, 1) for cf in cfreqs], dtype=np.float32)
                 ref_data = np.load(name)
@@ -158,24 +158,24 @@ class acoular_beamformer_test(unittest.TestCase):
             acoular.config.global_caching = 'none'
             b0 = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached=True)
             b1 = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached=True)
-            self.assertNotEqual(id(b0.result), id(b1.result))
+            self.assertNotEqual(id(b0.result.bf._ac), id(b1.result.bf._ac))
         with self.subTest("global_caching = 'individual'"):
             acoular.config.global_caching = 'individual'
             b0 = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached=True)
             b1 = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached=True)
-            self.assertEqual(id(b0.result), id(b1.result))
+            self.assertEqual(id(b0.result.bf._ac), id(b1.result.bf._ac))
             b1 = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached=False)
-            self.assertNotEqual(id(b0.result), id(b1.result))
+            self.assertNotEqual(id(b0.result.bf._ac), id(b1.result.bf._ac))
         with self.subTest("global_caching = 'all'"):
             acoular.config.global_caching = 'all'
             b0 = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached=True)
             b1 = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached=False)
-            self.assertEqual(id(b0.result), id(b1.result))
+            self.assertEqual(id(b0.result.bf._ac), id(b1.result.bf._ac))
         with self.subTest("global_caching = 'readonly'"):
             acoular.config.global_caching = 'readonly'
             b0 = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached=True)
             b1 = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached=True)
-            self.assertEqual(id(b0.result), id(b1.result))
+            np.testing.assert_allclose(b0.result.bf._ac, b1.result.bf._ac)
 
 
 class Test_PowerSpectra(unittest.TestCase):
