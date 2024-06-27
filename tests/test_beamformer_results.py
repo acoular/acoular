@@ -85,20 +85,18 @@ f = PowerSpectra(
 # produces a tuple of beamformer objects to test
 # because we need new objects for each test we have to call this more than once
 def fbeamformers():
-    bb = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached=False)
-
     # frequency beamformers to test
     bbase = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached=False)
     bc = BeamformerCapon(freq_data=f, steer=st, cached=False)
     beig = BeamformerEig(freq_data=f, steer=st, r_diag=True, n=54, cached=False)
     bm = BeamformerMusic(freq_data=f, steer=st, n=6, cached=False)
-    bd = BeamformerDamas(beamformer=bb, n_iter=10, cached=False)
-    bdp = BeamformerDamasPlus(beamformer=bb, n_iter=100, cached=False)
+    bd = BeamformerDamas(freq_data=f, steer=st, r_diag=True, n_iter=10, cached=False)
+    bdp = BeamformerDamasPlus(freq_data=f, steer=st, r_diag=True, n_iter=100, cached=False)
     bo = BeamformerOrth(freq_data=f, steer=st, r_diag=True, eva_list=list(range(38, 54)), cached=False)
     bs = BeamformerCleansc(freq_data=f, steer=st, r_diag=True, cached=False)
     bcmflassobic = BeamformerCMFLassoLarsBIC(freq_data=f, steer=st, method='LassoLarsBIC', cached=False)
     bcmfnnls = BeamformerCMFNNLS(freq_data=f, steer=st, method='NNLS', cached=False)
-    bl = BeamformerClean(beamformer=bb, n_iter=10, cached=False)
+    bl = BeamformerClean(freq_data=f, steer=st, r_diag=True, n_iter=10, cached=False)
     bf = BeamformerFunctional(freq_data=f, steer=st, r_diag=False, gamma=3, cached=False)
     bgib = BeamformerGIB(freq_data=f, steer=st, method='LassoLars', n=2, cached=False)
     bgo = BeamformerGridlessOrth(freq_data=f, steer=st, r_diag=False, n=1, shgo={'n': 16}, cached=False)
@@ -146,8 +144,8 @@ class acoular_beamformer_test(unittest.TestCase):
                 if hasattr(b0, 'beamformer'):  # BeamformerClean, BeamformerDamas, BeamformerDamasplus
                     # do not pass because the .beamformer result is not take from cache
                     continue  # nor recalculated
-                b0.result[:] = 0
-                self.assertFalse(np.any(b0.result))
+                b0.result.bf._ac[:] = 0
+                self.assertFalse(np.any(b0.result.bf._ac))
                 name = testdir / 'reference_data' / f'{b1.__class__.__name__}.npy'
                 actual_data = np.array([b1.synthetic(cf, 1) for cf in cfreqs], dtype=np.float32)
                 ref_data = np.load(name)
@@ -160,24 +158,24 @@ class acoular_beamformer_test(unittest.TestCase):
             acoular.config.global_caching = 'none'
             b0 = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached=True)
             b1 = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached=True)
-            self.assertNotEqual(id(b0.result), id(b1.result))
+            self.assertNotEqual(id(b0.result.bf._ac), id(b1.result.bf._ac))
         with self.subTest("global_caching = 'individual'"):
             acoular.config.global_caching = 'individual'
             b0 = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached=True)
             b1 = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached=True)
-            self.assertEqual(id(b0.result), id(b1.result))
+            self.assertEqual(id(b0.result.bf._ac), id(b1.result.bf._ac))
             b1 = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached=False)
-            self.assertNotEqual(id(b0.result), id(b1.result))
+            self.assertNotEqual(id(b0.result.bf._ac), id(b1.result.bf._ac))
         with self.subTest("global_caching = 'all'"):
             acoular.config.global_caching = 'all'
             b0 = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached=True)
             b1 = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached=False)
-            self.assertEqual(id(b0.result), id(b1.result))
+            self.assertEqual(id(b0.result.bf._ac), id(b1.result.bf._ac))
         with self.subTest("global_caching = 'readonly'"):
             acoular.config.global_caching = 'readonly'
             b0 = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached=True)
             b1 = BeamformerBase(freq_data=f, steer=st, r_diag=True, cached=True)
-            self.assertEqual(id(b0.result), id(b1.result))
+            np.testing.assert_allclose(b0.result.bf._ac, b1.result.bf._ac)
 
 
 class Test_PowerSpectra(unittest.TestCase):

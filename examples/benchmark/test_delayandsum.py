@@ -9,19 +9,20 @@ from numpy import empty, float32, int32
 # set_num_threads(1)
 
 # set up test case
-nMics = 64
-nSamples = 2048
-gridSize = 2048
-num = 512
-data = random.normal(size=(nSamples, nMics))
-offsets = random.randint(low=0, high=nSamples / 2, size=(gridSize, nMics))
-ifactor2 = random.uniform(low=0, high=1.0, size=(gridSize, nMics))
-steeramp = random.uniform(low=0, high=1.0, size=(gridSize, nMics))
-offsets5 = random.randint(low=0, high=nSamples / 2, size=(num, gridSize, nMics))
-ifactor25 = random.uniform(low=0, high=1.0, size=(num, gridSize, nMics))
-steeramp5 = random.uniform(low=0, high=1.0, size=(num, gridSize, nMics))
-out = empty((num, gridSize))
-autopower = empty((num, gridSize))
+NUMMICS = 64
+NUMSAMPLES = 2048
+GRIDSIZE = 2048
+NUM = 512
+
+data = random.normal(size=(NUMSAMPLES, NUMMICS))
+offsets = random.randint(low=0, high=NUMSAMPLES / 2, size=(GRIDSIZE, NUMMICS))
+ifactor2 = random.uniform(low=0, high=1.0, size=(GRIDSIZE, NUMMICS))
+steeramp = random.uniform(low=0, high=1.0, size=(GRIDSIZE, NUMMICS))
+offsets5 = random.randint(low=0, high=NUMSAMPLES / 2, size=(NUM, GRIDSIZE, NUMMICS))
+ifactor25 = random.uniform(low=0, high=1.0, size=(NUM, GRIDSIZE, NUMMICS))
+steeramp5 = random.uniform(low=0, high=1.0, size=(NUM, GRIDSIZE, NUMMICS))
+out = empty((NUM, GRIDSIZE))
+autopower = empty((NUM, GRIDSIZE))
 
 
 def test_delayandsum4():
@@ -87,10 +88,10 @@ def test_delays32():
     )
 
 
-r0 = random.uniform(low=0, high=1.0, size=(num, gridSize))
+r0 = random.uniform(low=0, high=1.0, size=(NUM, GRIDSIZE))
 
 
-def test_steer_I():
+def test_steer_I():  # noqa: N802
     acoular.tfastfuncs._steer_I(
         rm,
         r0,
@@ -98,7 +99,7 @@ def test_steer_I():
     )
 
 
-def test_steer_II():
+def test_steer_II():  # noqa: N802
     acoular.tfastfuncs._steer_II(
         rm,
         r0,
@@ -106,7 +107,7 @@ def test_steer_II():
     )
 
 
-def test_steer_III():
+def test_steer_III():  # noqa: N802
     acoular.tfastfuncs._steer_III(
         rm,
         r0,
@@ -114,7 +115,7 @@ def test_steer_III():
     )
 
 
-def test_steer_IV():
+def test_steer_IV():  # noqa: N802
     acoular.tfastfuncs._steer_IV(
         rm,
         r0,
