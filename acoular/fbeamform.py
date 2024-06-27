@@ -261,7 +261,7 @@ class SteeringVector(HasPrivateTraits):
 class LazyBfResult:
     """Manages lazy per-frequency evaluation."""
 
-    # Internal helper class which works togther with BeamformerBase to provide
+    # Internal helper class which works together with BeamformerBase to provide
     # calculation on demand; provides an 'intelligent' [] operator. This is
     # implemented as an extra class instead of as a method of BeamformerBase to
     # properly control the BeamformerBase.result attribute. Might be migrated to
@@ -616,8 +616,6 @@ class BeamformerBase(HasPrivateTraits):
         if len(freq) == 0:
             return None
 
-        indices = self.freq_data.indices
-
         if num == 0:
             # single frequency line
             ind = searchsorted(freq, f)
@@ -634,14 +632,6 @@ class BeamformerBase(HasPrivateTraits):
                         f'Queried frequency ({f:g} Hz) not in set of '
                         'discrete FFT sample frequencies. '
                         f'Using frequency {freq[ind]:g} Hz instead.',
-                        Warning,
-                        stacklevel=2,
-                    )
-                if ind not in indices:
-                    warn(
-                        'Beamforming result may not have been calculated '
-                        'for queried frequency. Check '
-                        'freq_data.ind_low and freq_data.ind_high!',
                         Warning,
                         stacklevel=2,
                     )
@@ -667,14 +657,6 @@ class BeamformerBase(HasPrivateTraits):
                 h = zeros_like(res[0])
             else:
                 h = sum(res[ind1:ind2], 0)
-                if not ((ind1 in indices) and (ind2 in indices)):
-                    warn(
-                        'Beamforming result may not have been calculated '
-                        'for all queried frequencies. Check '
-                        'freq_data.ind_low and freq_data.ind_high!',
-                        Warning,
-                        stacklevel=2,
-                    )
         if isinstance(self, BeamformerAdaptiveGrid):
             return h
         if isinstance(self, BeamformerSODIX):
@@ -686,7 +668,7 @@ class BeamformerBase(HasPrivateTraits):
 
         Parameters
         ----------
-        sector: aray of floats or :class:`~acoular.grids.Sector`
+        sector: array of floats or :class:`~acoular.grids.Sector`
             either an array, tuple or list with arguments for the 'indices'
             method of a :class:`~acoular.grids.Grid`-derived class
             (e.g. :meth:`RectGrid.indices<acoular.grids.RectGrid.indices>`
@@ -756,7 +738,6 @@ class BeamformerBase(HasPrivateTraits):
                 raise TypeError(
                     msg,
                 )
-            print(frange, irange, self.freq_data._ind_high)
             h = zeros(self._numfreq, dtype=float)
             sl = slice(*irange)
             r = self.result[sl]
