@@ -416,18 +416,9 @@ class BeamformerBase(HasPrivateTraits):
     # internal identifier
     digest = Property(depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES)
 
-    # internal identifier
-    ext_digest = Property(
-        depends_on=['digest', 'freq_data.ind_low', 'freq_data.ind_high'],
-    )
-
     @cached_property
     def _get_digest(self):
         return digest(self)
-
-    @cached_property
-    def _get_ext_digest(self):
-        return digest(self, 'ext_digest')
 
     def _get_filecache(self):
         """Function collects cached results from file depending on
