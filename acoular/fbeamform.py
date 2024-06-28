@@ -1472,7 +1472,7 @@ class BeamformerOrth(BeamformerBase):
 
     #: List of components to consider, use this to directly set the eigenvalues
     #: used in the beamformer. Alternatively, set :attr:`n`.
-    eva_list = CArray(dtype=int, desc='components')
+    eva_list = CArray(dtype=int, value=array([-1]), desc='components')
 
     #: Number of components to consider, defaults to 1. If set,
     #: :attr:`eva_list` will contain
@@ -2385,7 +2385,7 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
 
     #: List of components to consider, use this to directly set the eigenvalues
     #: used in the beamformer. Alternatively, set :attr:`n`.
-    eva_list = CArray(dtype=int, desc='components')
+    eva_list = CArray(dtype=int, value=array([-1]), desc='components')
 
     #: Number of components to consider, defaults to 1. If set,
     #: :attr:`eva_list` will contain
@@ -2427,10 +2427,6 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
         """Sets the list of eigenvalues to consider."""
         self.eva_list = arange(-1, -1 - self.n, -1)
 
-    @on_trait_change('eva_list')
-    def set_n(self):
-        """Sets the list of eigenvalues to consider."""
-        self.n = self.eva_list.shape[0]
 
     @property_depends_on('n')
     def _get_size(self):
@@ -2469,7 +2465,6 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
             'n': 256,
             'iters': 1,
             'sampling_method': 'sobol',
-            'options': {'local_iter': 1},
             'minimizer_kwargs': {'method': 'Nelder-Mead'},
         }
         shgo_opts.update(self.shgo)
