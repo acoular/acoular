@@ -465,6 +465,8 @@ class CsvSamples(SamplesGenerator):
         desc='basename of data file',
     )
 
+    delimiter = Str(',', desc='delimiter of the csv file')
+
     #: Calibration data, instance of :class:`~acoular.calib.Calib` class, optional .
     calib = Trait(Calib, desc='Calibration data')
 
@@ -520,12 +522,12 @@ class CsvSamples(SamplesGenerator):
 
 
         
-        self.load_timedata()
+        self.load_timedata(delimiter=self.delimiter)
         self.load_metadata()
 
-    def load_timedata(self):
+    def load_timedata(self,delimiter):
         """Loads timedata from .csv file. Only for internal use."""
-        self.data = np.loadtxt(self.name, delimiter=',')
+        self.data = np.loadtxt(self.name, delimiter=delimiter)
         self.numsamples, self.numchannels = self.data.shape
 
     def load_metadata(self):
