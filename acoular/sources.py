@@ -505,16 +505,16 @@ class CsvSamples(SamplesGenerator):
 
     @on_trait_change('basename')
     def load_data(self):
-        """Open the .wav file and set attributes."""
+        """Open the .csv file and set attributes."""
         if not path.isfile(self.name):
             # no file there
             self.numsamples = 0
             self.numchannels = 0
             self.sample_freq = 0
             raise OSError('No such file: %s' % self.name)
-        if self.wavf is not None:
+        if self.csvf is not None:
             try:
-                self.wavf.close()
+                self.csvf.close()
             except OSError:
                 pass
 
@@ -524,15 +524,15 @@ class CsvSamples(SamplesGenerator):
         self.load_metadata()
 
     def load_timedata(self):
-        """Loads timedata from .wav file. Only for internal use."""
-        self.data = np.loadtxt(self.basename, delimiter=',')
+        """Loads timedata from .csv file. Only for internal use."""
+        self.data = np.loadtxt(self.name, delimiter=',')
         self.numsamples, self.numchannels = self.data.shape
 
     def load_metadata(self):
-        """Loads metadata from .wav file. Only for internal use.
+        """Loads metadata from .csv file. Only for internal use.
         No usage at the moment.
         """
-        # self.metadata = self.wavf.copy_metadata()
+        # self.metadata = self.csvf.copy_metadata()
 
     def result(self, num=128):
         """Python generator that yields the output block-wise.
