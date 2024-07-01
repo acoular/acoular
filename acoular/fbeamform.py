@@ -2427,7 +2427,6 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
         """Sets the list of eigenvalues to consider."""
         self.eva_list = arange(-1, -1 - self.n, -1)
 
-
     @property_depends_on('n')
     def _get_size(self):
         return self.n * self.freq_data.fftfreq().shape[0]
