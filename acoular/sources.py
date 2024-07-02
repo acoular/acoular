@@ -639,6 +639,18 @@ class CsvSamples2(SamplesGenerator):
         #     except OSError:
         #         pass
 
+        '''Count the number of samples in the file if not provided by the user'''
+        if self.numsamples == 0:
+            with open(self.name) as file:
+                for (count, _) in enumerate(file, 1):
+                    pass
+                self.numsamples = count
+        '''Count the number of channels in the file if not provided by the user'''
+        if self.numchannels == 0:
+            with open(self.name) as file:
+                first_line = file.readline()
+                self.numchannels = first_line.count(self.delimiter) + 1
+
 
         self.load_timedata(delimiter=self.delimiter)
         self.load_metadata()
