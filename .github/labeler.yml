@@ -26,3 +26,5 @@ new feature:
  - head-branch: ['^feature', 'feature']
 sinus:
  - head-branch: ['^sinus', 'sinus']
+fix:
+ - head-branch: ['^fix', 'fix']
