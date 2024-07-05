@@ -10,7 +10,8 @@ https://www-docs.b-tu.de/fg-akustik/public/veroeffentlichungen/ArrayMethodsFileF
 The classes are derived from according Acoular classes so that they can be used directly within
 the framework.
 
-Examples:
+Examples
+--------
 >>> micgeom = MicAIAABenchmark(name='some_benchmarkdata.h5')
 >>> timedata = TimeSamplesAIAABenchmark(name='some_benchmarkdata.h5')
 
@@ -24,6 +25,7 @@ Examples:
     MicAIAABenchmark
 """
 
+import contextlib
 from os import path
 
 from numpy import array
@@ -117,10 +119,8 @@ class CsmAIAABenchmark(PowerSpectraImport):
             # no file there
             raise OSError('No such file: %s' % self.name)
         if self.h5f is not None:
-            try:
+            with contextlib.suppress(OSError):
                 self.h5f.close()
-            except OSError:
-                pass
         file = _get_h5file_class()
         self.h5f = file(self.name)
 
@@ -151,7 +151,7 @@ class CsmAIAABenchmark(PowerSpectraImport):
     def fftfreq(self):
         """Return the Discrete Fourier Transform sample frequencies.
 
-        Returns:
+        Returns
         -------
         ndarray
             Array of length *block_size/2+1* containing the sample frequencies.

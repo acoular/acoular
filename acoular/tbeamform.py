@@ -18,6 +18,7 @@
 """
 
 # imports from other packages
+import contextlib
 from warnings import warn
 
 from numpy import (
@@ -70,7 +71,7 @@ def const_power_weight(bf):
     bf: :class:`BeamformerTime` object
 
 
-    Returns:
+    Returns
     -------
     array of floats
         The weight factors.
@@ -201,7 +202,7 @@ class BeamformerTime(TimeInOut):
     buffer = CArray(desc='buffer containing microphone signals')
 
     # index indicating position of current processing sample. Internal use.
-    bufferIndex = Int(desc='index indicating position in buffer')
+    bufferIndex = Int(desc='index indicating position in buffer')  # noqa: N815
 
     # internal identifier
     digest = Property(
@@ -237,7 +238,7 @@ class BeamformerTime(TimeInOut):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block).
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape  \
         (num, :attr:`~BeamformerTime.numchannels`).
@@ -331,10 +332,8 @@ class BeamformerTime(TimeInOut):
                 else:
                     yield Gamma[:num] ** 2
             self.bufferIndex += num
-            try:
+            with contextlib.suppress(StopIteration):
                 next(fill_buffer_generator)
-            except:
-                pass
 
     def delay_and_sum(self, num, p_res, d_interp2, d_index, amp):
         """Standard delay-and-sum method."""
@@ -458,7 +457,7 @@ class BeamformerTimeTraj(BeamformerTime):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block).
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape  \
         (num, :attr:`~BeamformerTime.numchannels`).
@@ -529,7 +528,7 @@ class BeamformerTimeTraj(BeamformerTime):
                 self.increase_buffer(num)
                 try:
                     next(fill_buffer_generator)
-                except:
+                except StopIteration:
                     dflag = False
             samplesleft = self.buffer.shape[0] - self.bufferIndex
             # last block may be shorter
@@ -602,7 +601,7 @@ class BeamformerTimeTraj(BeamformerTime):
             self.bufferIndex += num
             try:
                 next(fill_buffer_generator)
-            except:
+            except StopIteration:
                 dflag = False
 
     def delay_and_sum(self, num, p_res, d_interp2, d_index, amp):
@@ -790,7 +789,7 @@ class IntegratorSectorTime(TimeInOut):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block).
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, :attr:`numchannels`).
         :attr:`numchannels` is the number of sectors.

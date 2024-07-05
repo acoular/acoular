@@ -1,0 +1,25 @@
+name: Publish Python 🐍 distribution 📦 TestPyPI
+
+on: 
+  workflow_dispatch:
+    branches: [ master ]
+
+jobs:
+  build_and_publish_distribution:
+    name: Build and publish distribution 📦
+    runs-on: ubuntu-latest
+  
+    steps:
+    - name: Check out a copy of the repository
+      uses: actions/checkout@v4
+    - name: Set up hatch
+      uses: ./.github/actions/setup-hatch
+    - name: Build a binary wheel and a source tarball
+      run: hatch build 
+    - name: Store the distribution packages
+      uses: actions/upload-artifact@v4
+      with:
+        name: python-package-distributions
+        path: dist/        
+    - name: Publish distribution 📦 to TestPyPI
+      run: hatch publish -r test -u __token__ -a ${{ secrets.HATCH_PUBLISH_TESTPYPI_API_TOKEN }}

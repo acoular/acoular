@@ -108,7 +108,7 @@ class MetricEvaluator(HasPrivateTraits):
     def _integrate_sectors(self):
         """Integrates over target sectors.
 
-        Returns:
+        Returns
         -------
         array (num_freqs,num_sources)
             returns the integrated Pa**2 values for each sector
@@ -129,7 +129,7 @@ class MetricEvaluator(HasPrivateTraits):
     def get_overall_level_error(self):
         """Returns the overall level error (Herold and Sarradj, 2017).
 
-        Returns:
+        Returns
         -------
         numpy.array
             overall level error of shape=(nf,)
@@ -141,7 +141,7 @@ class MetricEvaluator(HasPrivateTraits):
     def get_specific_level_error(self):
         """Returns the specific level error (Herold and Sarradj, 2017).
 
-        Returns:
+        Returns
         -------
         numpy.array
             specific level error of shape=(nf,ns). nf: number of frequencies, ns: number of sources
@@ -154,7 +154,7 @@ class MetricEvaluator(HasPrivateTraits):
     def get_inverse_level_error(self):
         """Returns the inverse level error (Herold and Sarradj, 2017).
 
-        Returns:
+        Returns
         -------
         numpy.array
             inverse level error of shape=(nf,1)

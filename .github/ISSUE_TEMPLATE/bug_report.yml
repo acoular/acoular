@@ -1,0 +1,85 @@
+name: Bug report
+title: "BUG: <Fill in a descriptive title of the encountered problem>"
+description: "Report a bug"
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to report potential bugs in Acoular. 
+        Before you fill out the form, please make sure that the following requirements are met:
+        - [ ] I have searched the [issues](https://github.com/acoular/acoular/issues) for potential duplicates.
+        - [ ] The issue is reproducible with the latest version of Acoular.
+
+  - type: textarea
+    attributes:
+      label: "Version Dependencies"
+      placeholder: |
+        Please specify your:
+        - Python version
+        - Acoular version
+        - OS 
+
+        You can do so by running the following commands in your Python environment:
+        
+        ```python
+        import sys
+        import acoular
+        import platform
+
+        print(sys.version_info)
+        print(acoular.__version__)
+        print(platform.system())
+        print(platform.version())
+        ```
+
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: "Bug Description"
+      placeholder: |
+        Please describe the bug in detail. 
+
+        1. In which context did you encounter the bug?
+        2. What is the expected behavior?
+        3. What actually happened?
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: "Reproducible Code"
+      description: |
+        Please provide a minimal code example that reproduces the bug.
+      placeholder: |
+        import acoular
+        << your code here >>
+      render: python
+    validations:
+      required: false
+    
+  - type: textarea
+    attributes:
+      label: "Error message:"
+      description: |
+        If applicable, please provide the error message you received.
+      placeholder: |
+        << `Traceback: ...` >>
+      render: shell
+    validations:
+        required: false
+
+  - type: dropdown
+    attributes:
+      label: Issue Severity
+      description: |
+        How does this issue affect your Acoular experience?
+      multiple: false
+      options:
+          - "Low: It is a minor inconvenience but does not affect my work."
+          - "Medium: It affects my work, but I can find a workaround."
+          - "High: It significantly affects my work, and I cannot find a workaround."
+    validations:
+        required: false

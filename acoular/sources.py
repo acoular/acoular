@@ -22,6 +22,7 @@
 
 # imports from other packages
 
+import contextlib
 from os import path
 from warnings import warn
 
@@ -104,7 +105,7 @@ def _fill_mic_signal_block(out, signal, rm, ind, blocksize, numchannels, up, pre
     return out
 
 
-def spherical_hn1(n, z, derivativearccos=False):
+def spherical_hn1(n, z):
     """Spherical Hankel Function of the First Kind."""
     return spherical_jn(n, z, derivative=False) + 1j * spherical_yn(n, z, derivative=False)
 
@@ -121,7 +122,7 @@ def get_radiation_angles(direction, mpos, sourceposition):
     sourceposition : array of floats
         position of the source
 
-    Returns:
+    Returns
     -------
     azi, ele : array of floats
         the angle between the mics and the source
@@ -146,7 +147,7 @@ def get_radiation_angles(direction, mpos, sourceposition):
     return azi, ele
 
 
-def get_modes(lOrder, direction, mpos, sourceposition=None):
+def get_modes(lOrder, direction, mpos, sourceposition=None):  # noqa: N803
     """Returns Spherical Harmonic Radiation Pattern at the Microphones.
 
     Parameters
@@ -160,7 +161,7 @@ def get_modes(lOrder, direction, mpos, sourceposition=None):
     sourceposition : array of floats
         position of the source
 
-    Returns:
+    Returns
     -------
     modes : array of floats
         the radiation values at each microphone for each mode
@@ -170,9 +171,9 @@ def get_modes(lOrder, direction, mpos, sourceposition=None):
     azi, ele = get_radiation_angles(direction, mpos, sourceposition)  # angles between source and mics
     modes = zeros((azi.shape[0], (lOrder + 1) ** 2), dtype=complex128)
     i = 0
-    for l in range(lOrder + 1):
-        for m in range(-l, l + 1):
-            modes[:, i] = sph_harm(m, l, azi, ele)
+    for lidx in range(lOrder + 1):
+        for m in range(-lidx, lidx + 1):
+            modes[:, i] = sph_harm(m, lidx, azi, ele)
             if m < 0:
                 modes[:, i] = modes[:, i].conj() * 1j
             i += 1
@@ -242,10 +243,8 @@ class TimeSamples(SamplesGenerator):
             self.sample_freq = 0
             raise OSError('No such file: %s' % self.name)
         if self.h5f is not None:
-            try:
+            with contextlib.suppress(OSError):
                 self.h5f.close()
-            except OSError:
-                pass
         file = _get_h5file_class()
         self.h5f = file(self.name)
         self.load_timedata()
@@ -272,7 +271,7 @@ class TimeSamples(SamplesGenerator):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block) .
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, numchannels).
             The last block may be shorter than num.
@@ -372,10 +371,8 @@ class MaskedTimeSamples(TimeSamples):
             self.sample_freq = 0
             raise OSError('No such file: %s' % self.name)
         if self.h5f is not None:
-            try:
+            with contextlib.suppress(OSError):
                 self.h5f.close()
-            except OSError:
-                pass
         file = _get_h5file_class()
         self.h5f = file(self.name)
         self.load_timedata()
@@ -396,7 +393,7 @@ class MaskedTimeSamples(TimeSamples):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block).
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, numchannels).
             The last block may be shorter than num.
@@ -532,7 +529,7 @@ class PointSource(SamplesGenerator):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block) .
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, numchannels).
             The last block may be shorter than num.
@@ -588,7 +585,7 @@ class SphericalHarmonicSource(PointSource):
     """
 
     #: Order of spherical harmonic source
-    lOrder = Int(0, desc='Order of spherical harmonic')
+    lOrder = Int(0, desc='Order of spherical harmonic')  # noqa: N815
 
     alpha = CArray(desc='coefficients of the (lOrder,) spherical harmonic mode')
 
@@ -636,7 +633,7 @@ class SphericalHarmonicSource(PointSource):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block) .
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, numchannels).
             The last block may be shorter than num.
@@ -714,7 +711,7 @@ class MovingPointSource(PointSource):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block).
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, numchannels).
             The last block may be shorter than num.
@@ -813,7 +810,7 @@ class PointSourceDipole(PointSource):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block) .
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, numchannels).
             The last block may be shorter than num.
@@ -948,7 +945,7 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block) .
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, numchannels).
             The last block may be shorter than num.
@@ -1067,7 +1064,7 @@ class LineSource(PointSource):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block) .
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, numchannels).
             The last block may be shorter than num.
@@ -1194,7 +1191,7 @@ class MovingLineSource(LineSource, MovingPointSource):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block) .
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, numchannels).
             The last block may be shorter than num.
@@ -1351,7 +1348,7 @@ class UncorrelatedNoiseSource(SamplesGenerator):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block) .
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, numchannels).
             The last block may be shorter than num.
@@ -1458,7 +1455,7 @@ class SourceMixer(SamplesGenerator):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block).
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, numchannels).
             The last block may be shorter than num.
@@ -1529,7 +1526,7 @@ class PointSourceConvolve(PointSource):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block) .
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, numchannels).
             The last block may be shorter than num.

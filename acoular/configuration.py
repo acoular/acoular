@@ -67,7 +67,7 @@ class Config(HasStrictTraits):
     by :attr:`h5library`.
 
     Example:
-    -------
+    --------
         For using Acoular with h5py package and overwrite existing cache:
 
         >>>    import acoular
@@ -134,25 +134,28 @@ class Config(HasStrictTraits):
     #: Boolean Flag that determines whether sounddevice is installed.
     have_sounddevice = Property()
 
+    #: Boolean Flag that determines whether the package is installed.
+    have_traitsui = Property()
+
     def _get_global_caching(self):
         return self._global_caching
 
-    def _set_global_caching(self, globalCachingValue):
-        self._global_caching = globalCachingValue
+    def _set_global_caching(self, value):
+        self._global_caching = value
 
     def _get_h5library(self):
         return self._h5library
 
-    def _set_h5library(self, libraryName):
-        self._h5library = libraryName
+    def _set_h5library(self, name):
+        self._h5library = name
 
     def _get_use_traitsui(self):
         return self._use_traitsui
 
     def _set_use_traitsui(self, use_tui):
-        if use_tui:
-            from . import traitsviews
-            # If user tries to use traitsuis and it's not installed, this will throw an error.
+        if use_tui and not self.have_traitsui:
+            error_msg = 'TraitsUI package is not installed!'
+            raise ImportError(error_msg)
         self._use_traitsui = use_tui
 
     def _assert_h5library(self):
@@ -204,6 +207,10 @@ class Config(HasStrictTraits):
     @cached_property
     def _get_have_h5py(self):
         return self._have_module('h5py')
+
+    @cached_property
+    def _get_have_traitsui(self):
+        return self._have_module('traitsui')
 
 
 config = Config()

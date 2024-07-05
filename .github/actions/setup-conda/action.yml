@@ -1,0 +1,28 @@
+name: 'Set up conda'
+description: 'Set up conda environment with build'
+inputs:
+  python-version:
+    description: 'The Python version'
+    required: false
+    default: '3.12'
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  
+    - name: Conda environment creation and activation
+      uses: conda-incubator/setup-miniconda@v3
+      with:
+        python-version: ${{ inputs.python-version }}
+        auto-update-conda: false
+    - name: Conda info
+      shell: bash
+      run: conda info
+    - name: Install conda build
+      shell: bash
+      run: conda install -n base conda-build # Install conda-build in the base env
+    - name: Install conda-verify
+      shell: bash
+      run: conda install conda-verify
+

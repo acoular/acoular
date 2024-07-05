@@ -9,11 +9,14 @@
     SoundDeviceSamplesGenerator
 """
 
-import sounddevice as sd
 from traits.api import Any, Bool, Int, Long, Property, cached_property, observe
 
+from .configuration import config
 from .internal import digest
 from .tprocess import SamplesGenerator
+
+if config.have_sounddevice:
+    import sounddevice as sd
 
 
 class SoundDeviceSamplesGenerator(SamplesGenerator):
@@ -23,6 +26,12 @@ class SoundDeviceSamplesGenerator(SamplesGenerator):
     from input stream, generates output stream via the generator
     :meth:`result`.
     """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if config.have_sounddevice is False:
+            msg = 'SoundDevice library not found but is required for using the SoundDeviceSamplesGenerator class.'
+            raise ImportError(msg)
 
     #: input device index, refers to sounddevice list
     device = Int(0, desc='input device index')
@@ -81,7 +90,7 @@ class SoundDeviceSamplesGenerator(SamplesGenerator):
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block).
 
-        Returns:
+        Returns
         -------
         Samples in blocks of shape (num, :attr:`numchannels`).
             The last block may be shorter than num.

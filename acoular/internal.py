@@ -13,13 +13,13 @@ def digest(obj, name='digest'):
             for i in do_.split('.'):
                 vobj = list(vobj.trait_get(i.rstrip('[]')).values())[0]
             str_.append(str(vobj).encode('UTF-8'))
-        except:
+        except:  # noqa: E722
             pass
     return '_' + md5(b''.join(str_)).hexdigest()
 
 
-def ldigest(l):
+def ldigest(obj_list):
     str_ = []
-    for i in l:
+    for i in obj_list:
         str_.append(str(i.digest).encode('UTF-8'))
     return '_' + md5(b''.join(str_)).hexdigest()

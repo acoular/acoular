@@ -1,6 +1,6 @@
 # Exclude a variety of commonly ignored directories.
 src = ["acoular"]
-exclude = ["tests/unsupported", "docs/source"]
+exclude = ["tests/unsupported", "docs/source", ".git/"]
     
 line-length = 120
 indent-width = 4
@@ -13,23 +13,15 @@ select = [
         "YTT", "ASYNC", "TRIO", "BLE", "B", "A", "COM", # flake8 plugins
         "C4", "DTZ","T10","EM", "FA", "ISC", "ICN", # flake8 plugins
         "LOG", "G", "INP", "PIE", "T20", "PYI", "PT", "RSE", # flake8 plugins
-        "RET", "SLF", "SLOT", "SIM", "TID", "TCH", "INT", "ARG", "TD", "FIX", "ERA", # flake8 plugins
+        "RET", "SLF", "SLOT", "SIM", "TID", "TCH", "INT", "ARG", "TD", "FIX", # flake8 plugins
         "C901" # others
         ]
 
 ignore = [
-    "E722", # bare except -> mainly covered by #211
     "E501", # ignore line length until fixed through issue #214
-    "E741", # allow ambiguous variable names -> should be fixed by issue #228
     "C901", # do we want to measure code complexity -> TBD
-    # N
-    "N802", # lower case functions (currently camel case) -> should be fixed by issue #228
-    "N803", # lower case letters in arguments (currently camel case) -> should be fixed by issue #228
-    "N806", # lower case variable names -> should be fixed by issue #228
-    "N816", # mixed case -> should be fixed by issue #228
-    "N815", # mixed case -> should be fixed by issue #228
-    "N801", # underscores in class names -> should be fixed by issue #228
-    "N999", # invalid module name -> should be fixed by issue #228
+    "COM812", # conflict with ruff formatter 
+    "ISC001", # conflict with ruff formatter
     # D
     "D203", # don't enforce blank line before docstring
     "D401", # first line should be in imperative mood -> TBD
@@ -43,17 +35,10 @@ ignore = [
     "D107", # missing docstring in __init__ -> should be fixed by issue #216
     "D417", # missing argument descriptions in the docstring -> should be fixed by issue #216
     # Others
-    "B904", # also addressed by issue #211
-    "B023", # unbinded loop variables -> should be fixed with issue #231
     "INP", # will be fixed when test are moved
     "T20", # will be fixed when logging is implemented
     "PT", # will be solved when test infrastructure is refactored
-    "SLF", # need to be handled manually -> should be fixed with issue: #225 
-    "SIM105", # try.. except -> should be fixed with issue #233
-    "ARG", # need to be handled manually -> #226
-    "TD", # todos should be formulated as issues -> do we allow todos in the code? -> #227
-    "FIX", # same as with TD
-    "ERA", # plenty of outcommented code -> TBD
+    "SLF001", # should be fixed with issue: #225 
 ]
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
@@ -61,7 +46,7 @@ fixable = ["ALL"]
 unfixable = []
 
 [lint.pydocstyle]
-convention = "google"  # Accepts: "google", "numpy", or "pep257".
+convention = "numpy"  # Accepts: "google", "numpy", or "pep257".
 
 [format]
 quote-style = "single"
@@ -84,13 +69,15 @@ docstring-code-line-length = "dynamic"
 
 
 [lint.per-file-ignores]
-"acoular/__init__.py" = ["F401"] # unused import -> TBD
-"acoular/demo/__init__.py" = ["F401"] # unused import -> TBD
-"acoular/tools/__init__.py" = ["F401"] # unused import -> TBD
-"acoular/configuration.py" = ["F401"] # unused import (will be solved by issue #212)
-"acoular/tbeamform.py" = ["F841"] # unused variable (really unused?) -> TBD
-"acoular/fbeamform.py" = ["W605"] # invalid escape sequence -> TBD
-"acoular/version.py" = ["D"] # exclude docstring linting
-"tests/test_tprocess.py" = ["F403"] # star import 
-"tests/*" = ["D"] # exclude docstring linting
-"examples/*" = ["A001", "B007", "D4", "E4", "E701", "F4", "UP036", "SIM108"]
+"acoular/__init__.py" = ["F401"] 
+"acoular/demo/__init__.py" = ["F401"] 
+"acoular/tools/__init__.py" = ["F401"] 
+"acoular/fastFuncs.py" = ["N802", "N803","N806","N999"] # allow different naming convention
+"acoular/environments.py" = ["N806"] 
+"acoular/sources.py" = ["N806"] 
+"acoular/tbeamform.py" = ["F841","N806"] 
+"acoular/tprocess.py" = ["N806"] #
+"acoular/fbeamform.py" = ["N806","B023"] 
+"tests/test_tprocess.py" = ["F403"] 
+"tests/*" = ["D", "N", "SLF001", "TD002", "TD003", "FIX002"] # exclude docstring and naming conventions linting -> must be handled when tests are refactored
+"examples/*" = ["A001", "B007", "D4", "E4", "E701", "F4", "UP036", "SIM108","SLF001"]
