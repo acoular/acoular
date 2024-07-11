@@ -736,7 +736,7 @@ class CsvSamples(SamplesGenerator):
             raise OSError('No such file: %s' % self.name)
 
 
-        
+        self.load_metadata()
         self.load_timedata(delimiter=self.delimiter)
 
     def load_timedata(self,delimiter):
@@ -991,7 +991,7 @@ class CsvSamples2(SamplesGenerator):
                 first_line = file.readline()
                 self.numchannels = first_line.count(self.delimiter) + 1
 
-
+        self.load_metadata()
         self.load_timedata(delimiter=self.delimiter)
 
     def load_timedata(self, delimiter):
@@ -1003,6 +1003,12 @@ class CsvSamples2(SamplesGenerator):
         """Loads metadata from .csv file. Only for internal use.
         No usage at the moment. Kept in case other acoular classes use it but serves no purpose here.
         """
+        if self.sample_freq == 0:
+            print("No sample frequency given. Provide a sample frequency when calling the class.")
+            try:
+                self.sample_freq = int(input("Please provide the sample frequency of the data: "))
+            except ValueError:
+                print("Please provide a valid integer value.")
         raise Warning("sources.CsvSamples2.load_metadata() used. Acoular functionality may be affected.")
 
 
@@ -1128,7 +1134,7 @@ class MaskedCsvSamples2(CsvSamples2):
                 first_line = file.readline()
                 self.numchannels_total = first_line.count(self.delimiter) + 1
 
-
+        self.load_metadata()
         self.load_timedata(delimiter=self.delimiter)
 
     def load_timedata(self, delimiter):
