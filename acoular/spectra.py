@@ -253,12 +253,6 @@ class PowerSpectra(BaseSpectra):
     #: (set from block_size and overlap).
     num_blocks = Property(desc='overall number of FFT blocks')
 
-    # Is set to a user value if the given SamplesGenerator streams non-finite data
-    _num_blocks = Int(0)
-
-    # csm should be yielded instead of returned because the device streams unlimited data
-    _should_yield = Trait(False, Bool)
-
     #: 2-element array with the lowest and highest frequency. If set,
     #: will overwrite :attr:`_freqlc` and :attr:`_freqhc` according to
     #: the range.
@@ -300,16 +294,7 @@ class PowerSpectra(BaseSpectra):
 
     @property_depends_on('_source.numsamples, block_size, overlap')
     def _get_num_blocks(self):
-        if self._num_blocks != 0: # The source is a real time stream
-            return self._num_blocks 
         return self.overlap_ * self._source.numsamples / self.block_size - self.overlap_ + 1
-
-    def _set_num_blocks(self, value):
-        if self._source.numsamples == -1:
-            self._num_blocks = value
-            self._should_yield = True
-        else:
-            raise ValueError("num_blocks can only be set for streaming data.")
 
     @property_depends_on('_source.sample_freq, block_size, ind_low, ind_high')
     def _get_freq_range(self):
@@ -399,7 +384,7 @@ class PowerSpectra(BaseSpectra):
         numfreq = int(self.block_size / 2 + 1)
         csm_shape = (numfreq, t.numchannels, t.numchannels)
         csm_upper = zeros(csm_shape, dtype=self.precision)
-        # print( "num blocks", self.num_blocks)
+        # print "num blocks", self.num_blocks
         # for backward compatibility
         if self.calib and self.calib.num_mics > 0:
             if self.calib.num_mics == t.numchannels:
@@ -407,20 +392,9 @@ class PowerSpectra(BaseSpectra):
             else:
                 raise ValueError('Calibration data not compatible: %i, %i' % (self.calib.num_mics, t.numchannels))
         # get time data blockwise
-        i = 0
         for data in self.get_source_data():
-            i+=1
             ft = fft.rfft(data * wind, None, 0).astype(self.precision)
             calcCSM(csm_upper, ft)  # only upper triangular part of matrix is calculated (for speed reasons)
-            if i == self.num_blocks and self._should_yield:
-                i = 0
-                return self._yield_csm(csm_upper, weight)
-        return self._full_csm(csm_upper, weight)
-    
-    def _yield_csm(self, csm_upper, weight):
-        yield self._full_csm(csm_upper, weight)
-
-    def _full_csm(self, csm_upper, weight):
         # create the full csm matrix via transposing and complex conj.
         csm_lower = csm_upper.conj().transpose(0, 2, 1)
         [fill_diagonal(csm_lower[cntFreq, :, :], 0) for cntFreq in range(csm_lower.shape[0])]
