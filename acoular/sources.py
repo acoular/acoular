@@ -699,8 +699,8 @@ class CsvSamples(SamplesGenerator):
     #: Number of time data samples, is set automatically / read from file.
     numsamples = CLong(0, desc='number of samples')
 
-    #: Sample frequency of the signal, is set automatically / read from file.
-    sample_freq = CLong(0, desc='sample frequency of the signal')
+    #: Sample frequency of the signal, has to be provided by the user.
+    sample_freq = CLong(desc='sample frequency of the signal')
 
     #: The time data as array of floats with dimension (numsamples, numchannels).
     data = Any(transient=True, desc='the actual time data array')
@@ -755,7 +755,7 @@ class CsvSamples(SamplesGenerator):
             except ValueError:
                 print("Please provide a valid integer value.")
 
-        raise Warning("sources.CsvSamples.load_metadata() used. Csv-Files do not provide inherently metadata. Acoular functionality may be affected.")
+        
 
     def result(self, num=128):
         """Python generator that yields the output block-wise.
@@ -940,8 +940,8 @@ class CsvSamples2(SamplesGenerator):
     #: Number of time data samples, is set automatically / read from file.
     numsamples = CLong(0, desc='number of samples')
 
-    #: Sample frequency of the signal, is set automatically / read from file.
-    sample_freq = CLong(0, desc='sample frequency of the signal')
+    #: Sample frequency of the signal, has to be provided by the user.
+    sample_freq = CLong(desc='sample frequency of the signal')
 
     #: CSV TextFileReader object / Generator of data chunks
     csvf = Instance(TextFileReader, transient=True) # Anyclass for now
@@ -991,8 +991,9 @@ class CsvSamples2(SamplesGenerator):
                 first_line = file.readline()
                 self.numchannels = first_line.count(self.delimiter) + 1
 
-        self.load_metadata()
         self.load_timedata(delimiter=self.delimiter)
+        self.load_metadata()
+
 
     def load_timedata(self, delimiter):
         """Loads timedata from .csv file. Only for internal use."""
@@ -1003,13 +1004,13 @@ class CsvSamples2(SamplesGenerator):
         """Loads metadata from .csv file. Only for internal use.
         No usage at the moment. Kept in case other acoular classes use it but serves no purpose here.
         """
+
         if self.sample_freq == 0:
             print("No sample frequency given. Provide a sample frequency when calling the class.")
             try:
                 self.sample_freq = int(input("Please provide the sample frequency of the data: "))
             except ValueError:
                 print("Please provide a valid integer value.")
-        raise Warning("sources.CsvSamples2.load_metadata() used. Acoular functionality may be affected.")
 
 
     def result(self, num=128):
@@ -1134,8 +1135,9 @@ class MaskedCsvSamples2(CsvSamples2):
                 first_line = file.readline()
                 self.numchannels_total = first_line.count(self.delimiter) + 1
 
-        self.load_metadata()
         self.load_timedata(delimiter=self.delimiter)
+        self.load_metadata()
+
 
     def load_timedata(self, delimiter):
         """Loads timedata from .csv file. Only for internal use."""
@@ -1145,7 +1147,12 @@ class MaskedCsvSamples2(CsvSamples2):
         """Loads metadata from .csv file. Only for internal use.
         No usage at the moment. Kept in case other acoular classes use it but serves no purpose here.
         """
-        raise Warning("sources.CsvSamples2.load_metadata() used. Acoular functionality may be affected.")
+        if self.sample_freq == 0:
+            print("No sample frequency given. Provide a sample frequency when calling the class.")
+            try:
+                self.sample_freq = int(input("Please provide the sample frequency of the data: "))
+            except ValueError:
+                print("Please provide a valid integer value.")
 
 
     def result(self, num=128):
