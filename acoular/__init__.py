@@ -68,6 +68,8 @@ from .signals import (
 )
 from .sources import (
     LineSource,
+    MaskedCsvSamples,
+    MaskedCsvSamples2,
     MaskedTimeSamples,
     MaskedWavSamples,
     MovingLineSource,
