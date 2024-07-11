@@ -69,6 +69,7 @@ from .signals import (
 from .sources import (
     LineSource,
     MaskedTimeSamples,
+    MaskedWavSamples,
     MovingLineSource,
     MovingPointSource,
     MovingPointSourceDipole,

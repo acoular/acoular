@@ -54,7 +54,7 @@ from numpy import (
 from numpy import min as npmin
 from numpy.fft import fft, ifft
 from numpy.linalg import norm
-from pandas import read_csv, DataFrame
+from pandas import read_csv
 from pandas.io.parsers import TextFileReader
 from scipy.special import sph_harm, spherical_jn, spherical_yn
 from soundfile import SoundFile
@@ -186,7 +186,6 @@ def get_modes(lOrder, direction, mpos, sourceposition=None):  # noqa: N803
 
 
 class TimeSamples(SamplesGenerator):
-
     """Container for time data in `*.h5` format.
 
     This class loads measured data from h5 files and
@@ -303,43 +302,12 @@ class TimeSamples(SamplesGenerator):
 
 
 class WavSamples(SamplesGenerator):
-    """Container for time data in `*.wav` format.
+    """"Container for time data in `*.wav` format.
 
-    This class loads measured data from wave files and
-    provides information about this data.
+    This class loads measured data from WAVE files and
+    and provides information about this data.
     It also serves as an interface where the data can be accessed
     (e.g. for use in a block chain) via the :meth:`result` generator.
-
-    Attributes
-    ----------
-    name : str
-        Full name of the .wav file with data.
-    basename : str
-        Basename of the .wav file with data, is set automatically.
-    calib : Calib, optional
-        Calibration data, instance of :class:`~acoular.calib.Calib` class.
-    numchannels : int
-        Number of channels, is set automatically / read from file.
-    numsamples : int
-        Number of time data samples, is set automatically / read from file.
-    sample_freq : int
-        Sample frequency of the signal, is set automatically / read from file.
-    data : ndarray
-        The time data as array of floats with dimension (numsamples, numchannels).
-    metadata : dict
-        Provides metadata stored in HDF5 file object.
-
-    Methods
-    -------
-    load_data()
-        Open the .wav file and set attributes.
-    load_timedata()
-        Loads timedata from .wav file. Only for internal use.
-    load_metadata()
-        Loads metadata from .wav file. Only for internal use.
-    result(num=128)
-        Python generator that yields the output block-wise.
-
     """
 
     #: Full name of the .wav file with data.
@@ -362,9 +330,6 @@ class WavSamples(SamplesGenerator):
 
     #: Sample frequency of the signal, is set automatically / read from file.
     sample_freq = CLong(0, desc='sample frequency of the signal')
-
-    #: The time data as array of floats with dimension (numsamples, numchannels).
-    data = Any(transient=True, desc='the actual time data array')
 
     #: WAV file object / renmant of TimeSamples
     wavf = Instance(SoundFile, transient=True) # anzupassen
@@ -404,14 +369,12 @@ class WavSamples(SamplesGenerator):
             except OSError:
                 pass
 
-        # file = _get_h5file_class()
         self.wavf = SoundFile(self.name)
         self.load_timedata()
         self.load_metadata()
 
     def load_timedata(self):
         """Loads timedata from .wav file. Only for internal use."""
-        self.data = self.wavf.read()
         self.sample_freq, self.numsamples, self.numchannels = self.wavf.samplerate, self.wavf.frames, self.wavf.channels
 
     def load_metadata(self):
@@ -446,18 +409,148 @@ class WavSamples(SamplesGenerator):
                 cal_factor = self.calib.data[newaxis]
             else:
                 raise ValueError('calibration data not compatible: %i, %i' % (self.calib.num_mics, self.numchannels))
-            while i < self.numsamples-num:
+            while i < self.numsamples:
                 yield self.wavf.read(num) * cal_factor
                 i += num
                 self.wavf.seek(i)
         else:
-            while i < self.numsamples-num:
+            while i < self.numsamples:
                 yield self.wavf.read(num)
                 i += num
                 self.wavf.seek(i)
 
 
+class MaskedWavSamples(WavSamples):
+    """Container for time data in `*.h5` format.
+
+    This class loads measured data from h5 files
+    and provides information about this data.
+    It supports storing information about (in)valid samples and (in)valid channels
+    It also serves as an interface where the data can be accessed
+    (e.g. for use in a block chain) via the :meth:`result` generator.
+
+    """
+
+    #: Index of the first sample to be considered valid.
+    start = CLong(0, desc='start of valid samples')
+
+    #: Index of the last sample to be considered valid.
+    stop = Trait(None, None, CLong, desc='stop of valid samples')
+
+    #: Channels that are to be treated as invalid.
+    invalid_channels = ListInt(desc='list of invalid channels')
+
+    #: Channel mask to serve as an index for all valid channels, is set automatically.
+    channels = Property(depends_on=['invalid_channels', 'numchannels_total'], desc='channel mask')
+
+    #: Number of channels (including invalid channels), is set automatically.
+    numchannels_total = CLong(0, desc='total number of input channels')
+
+    #: Number of time data samples (including invalid samples), is set automatically.
+    numsamples_total = CLong(0, desc='total number of samples per channel')
+
+    #: Number of valid channels, is set automatically.
+    numchannels = Property(depends_on=['invalid_channels', 'numchannels_total'], desc='number of valid input channels')
+
+    #: Number of valid time data samples, is set automatically.
+    numsamples = Property(depends_on=['start', 'stop', 'numsamples_total'], desc='number of valid samples per channel')
+
+    # internal identifier
+    digest = Property(depends_on=['basename', 'start', 'stop', 'calib.digest', 'invalid_channels', '_datachecksum'])
+
+    @cached_property
+    def _get_digest(self):
+        return digest(self)
+
+    @cached_property
+    def _get_basename(self):
+        return path.splitext(path.basename(self.name))[0]
+
+    @cached_property
+    def _get_channels(self):
+        if len(self.invalid_channels) == 0:
+            return slice(0, None, None)
+        allr = [i for i in range(self.numchannels_total) if i not in self.invalid_channels]
+        return array(allr)
+
+    @cached_property
+    def _get_numchannels(self):
+        if len(self.invalid_channels) == 0:
+            return self.numchannels_total
+        return len(self.channels)
+
+    @cached_property
+    def _get_numsamples(self):
+        sli = slice(self.start, self.stop).indices(self.numsamples_total)
+        return sli[1] - sli[0]
+
+    @on_trait_change('basename')
+    def load_data(self):
+        # """ open the .wav file and set attributes
+        # """
+        if not path.isfile(self.name):
+            # no file there
+            self.numsamples_total = 0
+            self.numchannels_total = 0
+            self.sample_freq = 0
+            raise OSError('No such file: %s' % self.name)
+        if self.wavf is not None:
+            with contextlib.suppress(OSError):
+                self.wavf.close()
+        self.wavf = SoundFile(self.name)
+        self.load_timedata()
+        self.load_metadata()
+
+    def load_timedata(self):
+        """Loads timedata from .wav file. Only for internal use."""
+        self.sample_freq, self.numsamples_total, self.numchannels_total = self.wavf.samplerate, self.wavf.frames, self.wavf.channels
+
+    def result(self, num=128):
+        """Python generator that yields the output block-wise.
+
+        Parameters
+        ----------
+        num : integer, defaults to 128
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block).
+
+        Returns
+        -------
+        Samples in blocks of shape (num, numchannels).
+            The last block may be shorter than num.
+
+        """
+        sli = slice(self.start, self.stop).indices(self.numsamples_total)
+        i = sli[0]
+        stop = sli[1]
+        cal_factor = 1.0
+        if i >= stop:
+            msg = 'no samples available'
+            raise OSError(msg)
+        self._datachecksum  # trigger checksum calculation # noqa: B018
+        if self.calib:
+            if self.calib.num_mics == self.numchannels_total:
+                cal_factor = self.calib.data[self.channels][newaxis]
+            elif self.calib.num_mics == self.numchannels:
+                cal_factor = self.calib.data[newaxis]
+            elif self.calib.num_mics == 0:
+                warn('No calibration data used.', Warning, stacklevel=2)
+            else:
+                raise ValueError('calibration data not compatible: %i, %i' % (self.calib.num_mics, self.numchannels))
+        while i < stop:
+            yield self.wavf.read(min(num, stop - i))[:, self.channels] * cal_factor
+            i += num
+            self.wavf.seek(i)
+
+
 class CsvSamples(SamplesGenerator):
+    """Container for time data in `*.csv` format.
+
+    This class loads measured data from csv files and
+    and provides information about this data.
+    It also serves as an interface where the data can be accessed
+    (e.g. for use in a block chain) via the :meth:`result` generator.
+    """
 
     #: Full name of the .csv file with data.
     name = File(filter=['*.csv'], desc='name of data file')
@@ -488,7 +581,7 @@ class CsvSamples(SamplesGenerator):
     #: WAV file object / renmant of TimeSamples
     csvf = Instance(Any, transient=True) # Anyclass for now
 
-    #: Provides metadata stored in WAVE file object
+    #: Provides metadata of CSV file content. Not used at the moment. KEpt in case other acoular classes use it.
     metadata = Dict(desc='metadata contained in .wav file')
 
     # Checksum over all data entries of one channel
@@ -526,7 +619,6 @@ class CsvSamples(SamplesGenerator):
 
         
         self.load_timedata(delimiter=self.delimiter)
-        self.load_metadata()
 
     def load_timedata(self,delimiter):
         """Loads timedata from .csv file. Only for internal use."""
@@ -535,9 +627,9 @@ class CsvSamples(SamplesGenerator):
 
     def load_metadata(self):
         """Loads metadata from .csv file. Only for internal use.
-        No usage at the moment.
+        No usage at the moment. Kept in case other acoular classes use it but serves no purpose here.
         """
-        # self.metadata = self.csvf.copy_metadata()
+        raise Warning("sources.CsvSamples2.load_metadata() used. Acoular functionality may be affected.")
 
     def result(self, num=128):
         """Python generator that yields the output block-wise.
@@ -574,6 +666,13 @@ class CsvSamples(SamplesGenerator):
 
 
 class CsvSamples2(SamplesGenerator):
+    """Container for time data in `*.csv` format.
+
+    This class loads measured data from csv files and
+    and provides information about this data.
+    It also serves as an interface where the data can be accessed
+    (e.g. for use in a block chain) via the :meth:`result` generator.
+    """
 
     #: Full name of the .csv file with data.
     name = File(filter=['*.csv'], desc='name of data file')
@@ -598,10 +697,7 @@ class CsvSamples2(SamplesGenerator):
     #: Sample frequency of the signal, is set automatically / read from file.
     sample_freq = CLong(0, desc='sample frequency of the signal')
 
-    #: The time data as array of floats with dimension (numsamples, numchannels).
-    data = Any(transient=True, desc='the actual time data array')
-
-    #: WAV file object / renmant of TimeSamples
+    #: CSV TextFileReader object / Generator of data chunks
     csvf = Instance(TextFileReader, transient=True) # Anyclass for now
 
     #: Provides metadata stored in WAVE file object
@@ -614,7 +710,9 @@ class CsvSamples2(SamplesGenerator):
     digest = Property(depends_on=['basename', 'calib.digest', '_datachecksum'])
 
     def _get__datachecksum(self):
-        return 0 # array(self.wavf.read(1)).sum()
+        with open(self.name) as file:
+                first_line = file.readline()
+                return array(first_line).sum()
 
     @cached_property
     def _get_digest(self):
@@ -633,11 +731,6 @@ class CsvSamples2(SamplesGenerator):
             self.numchannels = 0
             self.sample_freq = 0
             raise OSError('No such file: %s' % self.name)
-        # if self.csvf is not None:
-        #     try:
-        #         self.csvf.close()
-        #     except OSError:
-        #         pass
 
         '''Count the number of samples in the file if not provided by the user'''
         if self.numsamples == 0:
@@ -645,6 +738,7 @@ class CsvSamples2(SamplesGenerator):
                 for (count, _) in enumerate(file, 1):
                     pass
                 self.numsamples = count
+
         '''Count the number of channels in the file if not provided by the user'''
         if self.numchannels == 0:
             with open(self.name) as file:
@@ -653,18 +747,18 @@ class CsvSamples2(SamplesGenerator):
 
 
         self.load_timedata(delimiter=self.delimiter)
-        self.load_metadata()
 
-    def load_timedata(self,delimiter):
+    def load_timedata(self, delimiter):
         """Loads timedata from .csv file. Only for internal use."""
-        self.csvf = read_csv(self.name, delimiter=delimiter,chunksize=128, iterator=True, encoding='utf-8', low_memory=False)
+        self.csvf = read_csv(self.name, delimiter=delimiter,chunksize=128, iterator=True)
         # self.numsamples, self.numchannels = self.data.shape
 
     def load_metadata(self):
         """Loads metadata from .csv file. Only for internal use.
-        No usage at the moment.
+        No usage at the moment. Kept in case other acoular classes use it but serves no purpose here.
         """
-        # self.metadata = self.csvf.copy_metadata()
+        raise Warning("sources.CsvSamples2.load_metadata() used. Acoular functionality may be affected.")
+
 
     def result(self, num=128):
         """Python generator that yields the output block-wise.
@@ -686,8 +780,8 @@ class CsvSamples2(SamplesGenerator):
             raise OSError(msg)
         self._datachecksum  # trigger checksum calculation # noqa: B018
         if self.csvf.chunksize != num:
-            self.csvf = read_csv(self.name, delimiter=self.delimiter,chunksize=num, iterator=True, encoding='utf-8', low_memory=False)
-        # i = 0
+            self.csvf = read_csv(self.name, delimiter=self.delimiter,chunksize=num, iterator=True, encoding='utf-8')
+
         if self.calib:
             if self.calib.num_mics == self.numchannels:
                 cal_factor = self.calib.data[newaxis]
@@ -695,14 +789,11 @@ class CsvSamples2(SamplesGenerator):
                 raise ValueError('calibration data not compatible: %i, %i' % (self.calib.num_mics, self.numchannels))
             for block in self.csvf:
                 yield block.to_numpy() * cal_factor
-                # i += num
+            
+
         else:
             for block in self.csvf:
-                print(type(block.to_numpy()))
-                print(block.to_numpy())
                 yield block.to_numpy()
-                # i += num
-
 
 class MaskedTimeSamples(TimeSamples):
     """Container for time data in `*.h5` format.
