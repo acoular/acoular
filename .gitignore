@@ -27,3 +27,5 @@ docs/source/api_ref/generated/
 .vscode/
 
 acoular/demo/three_sources.h5
+
+.venv*
