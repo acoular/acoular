@@ -27,7 +27,7 @@ num = 3
 # only process the first 16000 samples of the time signals.
 # Alternatively, we could use the :class:`acoular.sources.TimeSamples` class that provides no masking at all.
 
-t1 = ac.MaskedTimeSamples(name='example_data.h5')
+t1 = ac.MaskedTimeSamples(name='../data/example_data.h5')
 t1.start = 0
 t1.stop = 16000
 invalid = [1, 7]
@@ -38,7 +38,7 @@ t1.invalid_channels = invalid
 # object (preferred) or for frequency domain processing at the :class:`acoular.spectra.PowerSpectra`
 # object (for backwards compatibility)
 
-t1.calib = ac.Calib(from_file='example_calib.xml')
+t1.calib = ac.Calib(from_file='../data/example_calib.xml')
 
 # %%
 # The microphone geometry must have the same number of valid channels as the :class:`acoular.sources.MaskedTimeSamples` object has.

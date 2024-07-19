@@ -349,7 +349,7 @@ class MaskedTimeSamples(TimeSamples):
     Data can be loaded from a HDF5 file and invalid channels can be specified as follows:
 
     >>> from acoular import MaskedTimeSamples
-    >>> name = 'acoular/examples/example_data.h5'  # doctest: +SKIP
+    >>> name = <some_h5_file.h5>  # doctest: +SKIP
     >>> ts = MaskedTimeSamples(name=name, invalid_channels=[0, 1])  # doctest: +SKIP
     >>> print(f'number of valid channels: {ts.numchannels}')  # doctest: +SKIP
     number of valid channels: 54 # doctest: +SKIP

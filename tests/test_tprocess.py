@@ -11,7 +11,7 @@ testdir = Path(__file__).parent
 moduledir = testdir.parent
 
 config.global_caching = 'none'
-datafile = moduledir / 'examples' / 'example_data.h5'
+datafile = moduledir / 'examples' / 'data' / 'example_data.h5'
 t1 = MaskedTimeSamples(name=datafile)
 t1.start = 0  # first sample, default
 t1.stop = 500  # last valid sample = 15999

@@ -30,7 +30,7 @@ num = 3
 #    environment and steering vector is given in the example :doc:`example_airfoil_in_open_jet_steering_vectors`.
 
 ts = ac.MaskedTimeSamples(
-    name='example_data.h5', invalid_channels=[1, 7], start=0, stop=16000, calib=ac.Calib(from_file='example_calib.xml')
+    name='../data/example_data.h5', invalid_channels=[1, 7], start=0, stop=16000, calib=ac.Calib(from_file='../data/example_calib.xml')
 )
 mics = ac.MicGeom(from_file=Path(ac.__file__).parent / 'xml' / 'array_56.xml', invalid_channels=[1, 7])
 grid = ac.RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=0.68, increment=0.05)

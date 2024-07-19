@@ -20,7 +20,7 @@ from matplotlib.patches import Polygon, Rectangle
 # %%
 # Define the necessary objects
 micgeofile = Path(ac.__file__).parent / 'xml' / 'array_56.xml'
-datafile = Path.cwd() / 'example_data.h5'
+datafile = Path.cwd().parent / 'data' / 'example_data.h5'
 
 mg = ac.MicGeom(from_file=micgeofile)
 ts = ac.TimeSamples(name=datafile)
