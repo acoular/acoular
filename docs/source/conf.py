@@ -25,6 +25,8 @@ sys.path.insert(0,os.path.abspath('../..')) # in order to document the source in
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 #extensions = ['sphinx.ext.autodoc', 'traitsdoc','sphinx.ext.pngmath','sphinx.ext.inheritance_diagram']
 extensions = [
+    'sphinx_gallery.gen_gallery',
+    'sphinx.ext.duration',
     'sphinx.ext.autodoc', 
 #    'trait_documenter',
 #    'matplotlib.sphinxext.only_directives',
@@ -40,6 +42,34 @@ extensions = [
 #    'numpydoc.traitsdoc'
 #    'gen_rst',
     ]
+
+from sphinx_gallery.sorting import ExplicitOrder
+
+# sphinx_gallery.gen_gallery extension configuration
+sphinx_gallery_conf = {
+    'gallery_dirs': 'auto_examples',  # path to where to save gallery generated output
+    'example_extensions': {'.py'},
+    'filename_pattern': '/example_',
+    'default_thumb_file': 'source/_static/Acoular_logo',
+    'thumbnail_size': (250, 250),
+    'run_stale_examples': True,
+    'examples_dirs': [
+        '../../examples',
+        ],   # path to your example scripts
+    'subsection_order' : ExplicitOrder([
+        #'../examples/introductory_examples/example_three_sources.py',
+        #'../examples/introductory_examples/example_basic_beamforming.py',
+        "../../examples/introductory_examples",
+        "../../examples/wind_tunnel_examples",
+        "../../examples/moving_sources_examples"
+    ]),
+}
+
+html_static_path = ['_static']
+# Custom CSS paths should either relative to html_static_path
+# or fully qualified paths (eg. https://...)
+html_css_files = ['sphinx_gallery.css']
+
 
 # matplotlib.sphinxext.plot_directive:
 # defines what formats are saved

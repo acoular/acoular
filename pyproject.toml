@@ -65,7 +65,8 @@ dev = [
     "graphviz",
     "numpydoc",
     "pickleshare",
-    "sphinx",    
+    "sphinx",
+    "sphinx_gallery",    
 ]
 
 [project.urls]
@@ -92,6 +93,7 @@ dependencies = [
     "pickleshare",
     "sounddevice",
     "sphinx",
+    "sphinx_gallery",
 ]
 
 [tool.hatch.envs.docs.scripts]

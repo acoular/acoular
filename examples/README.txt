@@ -1,6 +1,6 @@
-.. _general_examples:
+.. _examples:
 
-General examples
-----------------
+Examples
+========
 
-General-purpose and introductory examples.
+A gallery of showcase examples suitable for first-time and advanced users.

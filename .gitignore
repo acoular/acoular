@@ -27,3 +27,4 @@ docs/source/api_ref/generated/
 .vscode/
 
 acoular/demo/three_sources.h5
+docs/source/sg_execution_times.rst
