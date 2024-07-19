@@ -1,34 +1,50 @@
 Rotating point source
 =====================
+
+.. plot:: ../../examples/example_rotating_point_source.py
+    :nofigs:
+    :show-source-link: False
+
 This example demonstrates a simple approach to beamforming on a rotating source. 
 
 Download: :download:`example_rotating_point_source.py <../../../examples/example_rotating_point_source.py>`
 
-The script produces three figures:
+The script produces four figures:
 
 .. list-table::
-    :widths: 25 25 50
+    :widths: 33 33 33
     
-    * - .. figure:: example_rotating_point_source_1.png
+    * - .. figure:: ../../examples/example_rotating_point_source_00.png
             :align: center
 	    :width: 100%
 	    :figwidth: 80%
 
             Results for a time domain beamformer with fixed focus
   
-      - .. figure:: example_rotating_point_source_2.png
+      - .. figure:: ../../examples/example_rotating_point_source_01.png
             :align: center
 	    :width: 100%
 	    :figwidth: 80%
 
             Results for a time domain beamformer with focus moving along a circle trajectory
 
-      - .. figure:: example_rotating_point_source_3.png
+      - .. figure:: ../../examples/example_rotating_point_source_02.png
             :align: center
 	    :width: 100%
 	    :figwidth: 80%
 
-            Time-averaged results for different beamformers
+            Results for time domain deconvolution with focus moving along a circle trajectory
+
+
+.. list-table::
+   :widths: 100
+
+   * - .. figure:: ../../examples/example_rotating_point_source_03.png
+        :align: center
+        :width: 100%
+        :figwidth: 80%
+
+        Time-averaged results for different beamformers
 
 
 .. literalinclude:: ../../../examples/example_rotating_point_source.py

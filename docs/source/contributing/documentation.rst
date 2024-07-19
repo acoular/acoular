@@ -2,7 +2,7 @@ Documentation
 =============
 
 If you spot any errors or have suggestions for improvements, please feel free to submit a pull request.
-The package documentation is provided under ``acoular/docs/source``. See :ref:`Compile Documentation` for instructions on how to build the documentation.
+The package documentation is provided under ``acoular/docs/source``. See :ref:`Documentation Compilation` for instructions on how to build the documentation.
 
 The full documentation is built from different sources, which are combined in the final documentation using the `Sphinx <https://www.sphinx-doc.org/en/master/>`_ package.
 

@@ -10,6 +10,7 @@
 # serve to show the default value.
 
 import sys, os
+from pathlib import Path
 
 # If your extensions are in another directory, add it here. If the directory
 # is relative to the documentation root, use os.path.abspath to make it
@@ -39,6 +40,11 @@ extensions = [
 #    'numpydoc.traitsdoc'
 #    'gen_rst',
     ]
+
+# matplotlib.sphinxext.plot_directive:
+# defines what formats are saved
+plot_formats = ['png']
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
