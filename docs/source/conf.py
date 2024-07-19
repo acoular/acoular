@@ -45,7 +45,7 @@ extensions = [
 
 from sphinx_gallery.sorting import ExplicitOrder
 
-def reset_cache_dir(gallery_conf, fname, when):
+def reset_cache_dir(gallery_conf, fname):
     """
     Sphinx keeps the acoular module loaded during the whole documentation build.
     This can cause problems when the examples are located in subdirectories of the
@@ -53,9 +53,8 @@ def reset_cache_dir(gallery_conf, fname, when):
     directory. To make examples accross different directories reuse the cache, we
     reset the cache directory before every example run. 
     """
-    if when == 'before':
-        from acoular import config
-        config._cache_dir = str(Path(__file__).parent / 'auto_examples' / 'cache')
+    from acoular import config
+    config.cache_dir = str(Path(__file__).parent / 'auto_examples' / 'cache')
 
 # sphinx_gallery.gen_gallery extension configuration
 sphinx_gallery_conf = {
