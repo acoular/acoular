@@ -79,7 +79,6 @@ def get_data_slow(obj):  # more time consuming function
 # (no warning or error when block buffer is full)
 
 print("buffer overflow behaviour == 'none'")
-print('buffer size is set to a maximum of 5 elements')
 
 ss.buffer_overflow_treatment[tp1] = 'none'
 ss.buffer_overflow_treatment[tp2] = 'none'
@@ -103,8 +102,6 @@ print('threads finished')
 # (only warning when block buffer is full)
 
 print("buffer overflow behaviour == 'warning'")
-print('buffer size is set to a maximum of 5 elements')
-ss.buffer_size = 5
 
 ss.buffer_overflow_treatment[tp1] = 'warning'
 ss.buffer_overflow_treatment[tp2] = 'warning'
@@ -127,8 +124,6 @@ print('threads finished')
 # (raise error when block buffer is full)
 
 print("buffer overflow behaviour == 'error'")
-print('buffer size is set to a maximum of 5 elements')
-ss.buffer_size = 5
 
 ss.buffer_overflow_treatment[tp1] = 'error'
 ss.buffer_overflow_treatment[tp2] = 'error'
@@ -145,3 +140,5 @@ worker1.join()
 worker2.join()
 
 print('threads finished')
+
+# %%
