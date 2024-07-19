@@ -1,59 +1,59 @@
-from os import path
+# ------------------------------------------------------------------------------
+# Copyright (c) Acoular Development Team.
+# ------------------------------------------------------------------------------
+# %%
+"""
+Evaluate source characterization performance.
+=============================================
 
+This example demonstrates how to evaluate the performance of a beamforming algorithm using
+the :class:`acoular.tools.metrics.MetricEvaluator` class.
+"""
+
+from pathlib import Path
+
+import acoular as ac
 import matplotlib.pyplot as plt
-from acoular import (
-    BeamformerCleansc,
-    CircSector,
-    ImportGrid,
-    L_p,
-    MicGeom,
-    Mixer,
-    PointSource,
-    PowerSpectra,
-    RectGrid,
-    SteeringVector,
-    TimeSamples,
-    WNoiseGenerator,
-    WriteH5,
-)
-from acoular import __file__ as bpath
+import numpy as np
 from acoular.tools import MetricEvaluator
-from numpy import array, round
 
-# set up the parameters
+# %%
+# Set up the parameters
+
 sfreq = 51200
 duration = 1
 nsamples = duration * sfreq
-micgeofile = path.join(path.split(bpath)[0], 'xml', 'array_64.xml')
-h5savefile = 'three_sources.h5'
+micgeofile = Path(ac.__file__).parent / 'xml' / 'array_64.xml'
 
-# generate test data, in real life this would come from an array measurement
-mg = MicGeom(from_file=micgeofile)
-n1 = WNoiseGenerator(sample_freq=sfreq, numsamples=nsamples, seed=1)
-n2 = WNoiseGenerator(sample_freq=sfreq, numsamples=nsamples, seed=2, rms=0.7)
-n3 = WNoiseGenerator(sample_freq=sfreq, numsamples=nsamples, seed=3, rms=0.5)
-p1 = PointSource(signal=n1, mics=mg, loc=(-0.1, -0.1, 0.3))
-p2 = PointSource(signal=n2, mics=mg, loc=(0.15, 0, 0.3))
-p3 = PointSource(signal=n3, mics=mg, loc=(0, 0.1, 0.3))
-pa = Mixer(source=p1, sources=[p2, p3])
-wh5 = WriteH5(source=pa, name=h5savefile)
-wh5.save()
+# %%
+# Generate test data, in real life this would come from an array measurement
 
-# analyze the data and generate map
+mg = ac.MicGeom(from_file=micgeofile)
+n1 = ac.WNoiseGenerator(sample_freq=sfreq, numsamples=nsamples, seed=1)
+n2 = ac.WNoiseGenerator(sample_freq=sfreq, numsamples=nsamples, seed=2, rms=0.7)
+n3 = ac.WNoiseGenerator(sample_freq=sfreq, numsamples=nsamples, seed=3, rms=0.5)
+p1 = ac.PointSource(signal=n1, mics=mg, loc=(-0.1, -0.1, 0.3))
+p2 = ac.PointSource(signal=n2, mics=mg, loc=(0.15, 0, 0.3))
+p3 = ac.PointSource(signal=n3, mics=mg, loc=(0, 0.1, 0.3))
+pa = ac.Mixer(source=p1, sources=[p2, p3])
 
-ts = TimeSamples(name=h5savefile)
-ps = PowerSpectra(time_data=ts, block_size=128, window='Hanning')
+# %%
+# Analyze the data and generate a deconvolved source map with CLEAN-SC
 
-rg = RectGrid(x_min=-0.2, x_max=0.2, y_min=-0.2, y_max=0.2, z=0.3, increment=0.01)
-st = SteeringVector(grid=rg, mics=mg, ref=1.0)
-
-bb = BeamformerCleansc(freq_data=ps, steer=st)
+ps = ac.PowerSpectra(time_data=pa, block_size=128, window='Hanning')
+rg = ac.RectGrid(x_min=-0.2, x_max=0.2, y_min=-0.2, y_max=0.2, z=0.3, increment=0.01)
+st = ac.SteeringVector(grid=rg, mics=mg, ref=1.0)
+bb = ac.BeamformerCleansc(freq_data=ps, steer=st)
 pm = bb.synthetic(8000, 0)
-Lm = L_p(pm)
+Lm = ac.L_p(pm)
 
-# evaluate the results
-target_grid = ImportGrid(
-    gpos_file=array(
+
+# %%
+# Evaluate the results:
+# Therefore, we define a custom grid containing the source locations.
+
+target_grid = ac.ImportGrid(
+    gpos_file=np.array(
         [
             list(p1.loc),
             list(p2.loc),
@@ -62,19 +62,27 @@ target_grid = ImportGrid(
     ).T,
 )
 
+# %%
+# Next, we define the target squared sound pressure values for each source.
 nfft = ps.fftfreq().shape[0]
+target_data = np.array([[n1.rms**2 / nfft], [n2.rms**2 / nfft], [n3.rms**2 / nfft]]).T
 
-target_data = array([[n1.rms**2 / nfft], [n2.rms**2 / nfft], [n3.rms**2 / nfft]]).T
+
+# %%
+# Finally, we use the :class:`acoular.tools.metrics.MetricEvaluator` class to evaluate the
+# reconstruction accuracy of the beamforming algorithm with three different metrics.
+# A circular sector with a radius of 5% of the aperture is used to define the sectors for the evaluation.
 
 mv = MetricEvaluator(
-    sector=CircSector(r=0.05 * mg.aperture),
+    sector=ac.CircSector(r=0.05 * mg.aperture),
     grid=rg,
     data=pm.reshape((1, -1)),
     target_grid=target_grid,
     target_data=target_data,
 )
 
-# plot the data
+# %%
+# Plot the data
 
 plt.figure()
 # show map

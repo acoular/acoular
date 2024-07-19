@@ -1,7 +1,12 @@
 # ------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
-"""This Examples shows how to use the SampleSplitter class in a multithreading
+# %%
+"""
+Parallel processing chains -- Multithreading with the SampleSplitter.
+=====================================================================
+
+This Examples shows how to use the SampleSplitter class in a multithreading
 (3 threads) scenario.
 
 Three different objects (tp1, tp2 and tp3) obtain and process time data
@@ -12,38 +17,35 @@ is used to split the data stream for parallel processing.
 import threading
 from time import sleep
 
-from acoular import MaskedTimeSamples, SampleSplitter, TimePower
+import acoular as ac
+import numpy as np
 
-samples = 25000
+# %%
+# Set up data source. For convenience, we use a synthetic white noise with length of 1 s.
 
-# =============================================================================
-#  set up data source
-# =============================================================================
-h5savefile = 'example_data.h5'
-ts = MaskedTimeSamples(name=h5savefile, start=0, stop=samples)
+fs = 8192
+ts = ac.TimeSamples(data=np.random.randn(fs * 1)[:, np.newaxis], sample_freq=fs)
 
-# =============================================================================
-# connect SampleSplitter to data source
-# =============================================================================
+# %%
+# Connect SampleSplitter to data source
 
-# set up Sample Splitter
-ss = SampleSplitter(source=ts)
+ss = ac.SampleSplitter(source=ts)
 
 
-# =============================================================================
-# create three objects to process the data
-# =============================================================================
+# %%
+# Create three objects to process the data
 
-tp1 = TimePower(source=ss)
-tp2 = TimePower(source=ss)
-tp3 = TimePower(source=ss)
+tp1 = ac.TimePower(source=ss)
+tp2 = ac.TimePower(source=ss)
+tp3 = ac.TimePower(source=ss)
 
 # register these objects at SampleSplitter
 ss.register_object(tp1, tp2, tp3)  # register objects
 
-# =============================================================================
-# define functions
-# =============================================================================
+# %%
+# Define some useful functions for inspecting and for reading data from
+# the SampleSplitter buffers. Three different functions are defined to
+# simulate different processing speeds (fast, mid, slow).
 
 
 def print_number_of_blocks_in_block_buffers():
@@ -79,9 +81,8 @@ def get_data_slow(obj):  # more time consuming function
         sleep(0.7)
 
 
-# =============================================================================
-# prepare and start processing in threads
-# =============================================================================
+# %%
+# Prepare and start processing in threads
 
 worker1 = threading.Thread(target=get_data_fast, args=(tp1,))
 worker2 = threading.Thread(target=get_data_mid, args=(tp2,))

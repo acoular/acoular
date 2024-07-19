@@ -1,7 +1,12 @@
 # ------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
-"""This example shows the different behaviour of SampleSplitter class
+# %%
+"""
+Parallel processing chains -- SampleSplitter buffer handling.
+=============================================================
+
+This example shows the different behaviour of SampleSplitter class
 when the maximum size of a block buffer is reached for one object obtaining
 data.
 
@@ -14,37 +19,34 @@ Three different settings can be made by the user:
 import threading
 from time import sleep
 
-from acoular import MaskedTimeSamples, SampleSplitter, TimePower
+import acoular as ac
+import numpy as np
 
-samples = 25000
+# %%
+# Set up data source. For convenience, we use a synthetic white noise with length of 1 s.
 
-# =============================================================================
-#  set up data source
-# =============================================================================
-h5savefile = 'example_data.h5'
-ts = MaskedTimeSamples(name=h5savefile, start=0, stop=samples)
+fs = 16000
+ts = ac.TimeSamples(data=np.random.randn(fs * 1)[:, np.newaxis], sample_freq=fs)
 
-# =============================================================================
-# connect SampleSplitter to data source
-# =============================================================================
+# %%
+# Connect SampleSplitter to data source. We limit the buffer size to 5 blocks.
 
-# set up Sample Splitter
-ss = SampleSplitter(source=ts)
+ss = ac.SampleSplitter(source=ts, buffer_size=5)
 
 
-# =============================================================================
-# create two objects to process the data
-# =============================================================================
+# %%
+# Create three objects to process the data
 
-tp1 = TimePower(source=ss)
-tp2 = TimePower(source=ss)
+tp1 = ac.TimePower(source=ss)
+tp2 = ac.TimePower(source=ss)
 
 # register these objects at SampleSplitter
 ss.register_object(tp1, tp2)  # register objects
 
-# =============================================================================
-# define functions
-# =============================================================================
+# %%
+# Define some useful functions for inspecting and for reading data from
+# the SampleSplitter buffers. Three different functions are defined to
+# simulate different processing speeds (fast, slow).
 
 
 def print_number_of_blocks_in_block_buffers():
@@ -53,7 +55,7 @@ def print_number_of_blocks_in_block_buffers():
     """
     buffers = list(ss.block_buffer.values())
     elements = [len(buf) for buf in buffers]
-    print(f"num blocks in buffers: {dict(zip(['tp1','tp2','tp3'], elements))}")
+    print(f"num blocks in buffers: {dict(zip(['tp1','tp2'], elements))}")
 
 
 def get_data_fast(obj):  # not time consuming function
@@ -67,20 +69,17 @@ def get_data_fast(obj):  # not time consuming function
 def get_data_slow(obj):  # more time consuming function
     """Gets data slow (pause 0.8 seconds)"""
     for i in obj.result(2048):  #
-        print('tp3 calls sample splitter')
+        print('tp2 calls sample splitter')
         print_number_of_blocks_in_block_buffers()
         sleep(0.8)
 
 
-# =============================================================================
-# prepare and start processing in threads
+# %%
+# Prepare and start processing in threads
 # (no warning or error when block buffer is full)
-# =============================================================================
-
 
 print("buffer overflow behaviour == 'none'")
 print('buffer size is set to a maximum of 5 elements')
-ss.buffer_size = 5
 
 ss.buffer_overflow_treatment[tp1] = 'none'
 ss.buffer_overflow_treatment[tp2] = 'none'
@@ -99,10 +98,9 @@ worker2.join()
 print('threads finished')
 
 
-# =============================================================================
-# prepare and start processing in threads
+# %%
+# Prepare and start processing in threads
 # (only warning when block buffer is full)
-# =============================================================================
 
 print("buffer overflow behaviour == 'warning'")
 print('buffer size is set to a maximum of 5 elements')
@@ -124,10 +122,9 @@ worker2.join()
 
 print('threads finished')
 
-# =============================================================================
-# prepare and start processing in threads
+# %%
+# Prepare and start processing in threads
 # (raise error when block buffer is full)
-# =============================================================================
 
 print("buffer overflow behaviour == 'error'")
 print('buffer size is set to a maximum of 5 elements')
