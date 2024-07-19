@@ -45,6 +45,18 @@ extensions = [
 
 from sphinx_gallery.sorting import ExplicitOrder
 
+def reset_cache_dir(gallery_conf, fname, when):
+    """
+    Sphinx keeps the acoular module loaded during the whole documentation build.
+    This can cause problems when the examples are located in subdirectories of the
+    example directory. Sphinx changes the current working directory to the example
+    directory. To make examples accross different directories reuse the cache, we
+    reset the cache directory before every example run. 
+    """
+    if when == 'before':
+        from acoular import config
+        config._cache_dir = str(Path(__file__).parent / 'auto_examples' / 'cache')
+
 # sphinx_gallery.gen_gallery extension configuration
 sphinx_gallery_conf = {
     'gallery_dirs': 'auto_examples',  # path to where to save gallery generated output
@@ -53,6 +65,7 @@ sphinx_gallery_conf = {
     'default_thumb_file': 'source/_static/Acoular_logo',
     'thumbnail_size': (250, 250),
     'run_stale_examples': True,
+    'reset_modules': (reset_cache_dir, 'matplotlib', 'seaborn'),
     'examples_dirs': [
         '../../examples',
         ],   # path to your example scripts
