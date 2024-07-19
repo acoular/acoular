@@ -58,11 +58,7 @@ g = ac.RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=0.68, increment
 # For frequency domain methods, :class:`acoular.spectra.PowerSpectra` provides the cross spectral matrix (and its
 # eigenvalues and eigenvectors). Here, we use the Welch's method with a block size of 128 samples, Hanning window and 50% overlap.
 
-f = ac.PowerSpectra(
-    time_data=t1,
-    window='Hanning',
-    overlap='50%',
-    block_size=128)
+f = ac.PowerSpectra(time_data=t1, window='Hanning', overlap='50%', block_size=128)
 
 # %%
 # To define the measurement environment, i.e. medium characteristics, the :class:`acoular.environment.Environment` class is used.
@@ -77,12 +73,10 @@ env = ac.Environment(c=346.04)
 st = ac.SteeringVector(grid=g, mics=m, env=env)
 
 # %%
-# Finally, we define the different beamformers and subsequently calculate the maps for different steering vector formulations.
+# Finally, we define two different beamformers and subsequently calculate the maps for different steering vector formulations.
 # Diagonal removal for the CSM can be performed via the :attr:`r_diag` parameter.
 
 bb = ac.BeamformerBase(freq_data=f, steer=st, r_diag=True)
-bd = ac.BeamformerDamas(freq_data=f, steer=st, r_diag=True, n_iter=100)
-bo = ac.BeamformerOrth(freq_data=f, steer=st, r_diag=True, eva_list=list(range(38, 54)))
 bs = ac.BeamformerCleansc(freq_data=f, steer=st, r_diag=True)
 
 # %%
@@ -92,13 +86,13 @@ from pylab import colorbar, figure, imshow, show, subplot, tight_layout, title
 
 fi = 1  # no of figure
 for r_diag in (True, False):
-    figure(fi, (10, 6))
+    figure(fi, (5, 6))
     fi += 1
     i1 = 1  # no of subplot
     for steer in ('true level', 'true location', 'classic', 'inverse'):
         st.steer_type = steer
-        for b in (bb, bd, bo, bs):
-            subplot(4, 4, i1)
+        for b in (bb, bs):
+            subplot(4, 2, i1)
             i1 += 1
             b.r_diag = r_diag
             map = b.synthetic(cfreq, num)
@@ -109,3 +103,7 @@ for r_diag in (True, False):
 
     tight_layout()
     show()
+
+# %%
+# .. seealso::
+#    :doc:`example_airfoil_in_open_jet_freq_domain_methods` for an application of further frequency domain methods on the same data.
