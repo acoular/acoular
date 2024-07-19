@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
-"""Measured multichannel data managment and simulation of acoustic sources.
+"""Measured multichannel data management and simulation of acoustic sources.
 
 .. autosummary::
     :toctree: generated/

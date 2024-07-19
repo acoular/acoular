@@ -53,6 +53,20 @@ full = [
     "sounddevice"
 ]
 
+dev = [
+    "matplotlib",
+    "pylops",
+    "sounddevice",
+    "hatch",
+    "ruff==0.4.1",
+    "pytest",
+    "ipython",
+    "graphviz",
+    "numpydoc",
+    "pickleshare",
+    "sphinx",    
+]
+
 [project.urls]
 homepage = "https://acoular.org"
 documentation = "https://acoular.org"
