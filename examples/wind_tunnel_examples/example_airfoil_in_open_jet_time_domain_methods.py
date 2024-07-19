@@ -78,18 +78,13 @@ cachcts = ac.TimeCache(source=avgcts)  # cache to prevent recalculation
 
 from pylab import colorbar, figure, imshow, show, subplot, tight_layout, title
 
-ftitles = [
-    'BeamformerTime',
-    'BeamformerTimeSq',
-    'BeamformerCleant',
-    'BeamformerCleantSq'
-]
+ftitles = ['BeamformerTime', 'BeamformerTimeSq', 'BeamformerCleant', 'BeamformerCleantSq']
 i2 = 1  # no of figure
 i1 = 1  # no of subplot
 for b in (cacht, cachts, cachct, cachcts):
     # first, plot time-dependent result (block-wise)
     fig = figure(i2, (7, 7))
-    fig.suptitle(f"{ftitles[i2 - 1]}: block-wise source maps (f={cfreq} Hz)")
+    fig.suptitle(f'{ftitles[i2 - 1]}: block-wise source maps (f={cfreq} Hz)')
     i2 += 1
     res = np.zeros(grid.size)  # init accumulator for average
     i3 = 1  # no of subplot
@@ -105,8 +100,8 @@ for b in (cacht, cachts, cachct, cachcts):
     tight_layout()
 
     # second, plot overall result (average over all blocks)
-    fig = figure(10, (8,2))
-    fig.suptitle(f"Averaged source maps (f={cfreq} Hz)")
+    fig = figure(10, (8, 2))
+    fig.suptitle(f'Averaged source maps (f={cfreq} Hz)')
     subplot(1, 4, i1)
     i1 += 1
     map = res.reshape(grid.shape)
@@ -116,4 +111,3 @@ for b in (cacht, cachts, cachct, cachcts):
     title(('BeamformerTime', 'BeamformerTimeSq', 'BeamformerCleant', 'BeamformerCleantSq')[i2 - 2])
 tight_layout()
 show()
-
