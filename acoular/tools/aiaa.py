@@ -12,8 +12,8 @@ the framework.
 
 Examples
 --------
->>> micgeom = MicAIAABenchmark(name='some_benchmarkdata.h5')
->>> timedata = TimeSamplesAIAABenchmark(name='some_benchmarkdata.h5')
+>>> micgeom = MicAIAABenchmark(name='some_benchmarkdata.h5')  # doctest: +SKIP
+>>> timedata = TimeSamplesAIAABenchmark(name='some_benchmarkdata.h5')  # doctest: +SKIP
 
 
 .. autosummary::

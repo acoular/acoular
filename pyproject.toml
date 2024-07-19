@@ -50,13 +50,14 @@ maintainers = [
 full = [
     "matplotlib",
     "pylops",
-    "sounddevice"
+    "sounddevice",
 ]
 
 dev = [
     "matplotlib",
     "pylops",
     "sounddevice",
+    "traitsui",
     "hatch",
     "ruff==0.4.1",
     "pytest",
@@ -101,6 +102,7 @@ dependencies = [
     "pytest",
     "pytest-cov",
     "sounddevice",
+    "traitsui",
 ]
 
 [[tool.hatch.envs.tests.matrix]]
@@ -111,6 +113,7 @@ import = ["python -c \"import acoular\""]
 test = ["python -m pytest -v tests"]
 demo = ["python -c \"import acoular; acoular.demo.acoular_demo.run()\""]
 coverage = ["test --cov=acoular"]
+doctest = ["python -m pytest --doctest-modules acoular"]
 
 [tool.hatch.envs.tests.overrides]
 platform.linux.pre-install-commands = ['cat /proc/cpuinfo']

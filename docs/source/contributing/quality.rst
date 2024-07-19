@@ -5,14 +5,26 @@ Code Quality Standards
 
 Acoular requires a high standard of code quality, and we test if these requirements are met via Continuous Integration (CI) with `GitHub Actions <https://github.com/acoular/acoular/actions>`_. 
 
+Currently, three main checks are performed on the code:
 
-Code Style
-~~~~~~~~~~
+1.  `Linting and Formatting`_: The code must be correctly formatted and free of linting errors.
+2. `Documentation Compilation`_: The documentation must be correctly compiled without errors.
+3. `Testing`_: The tests must pass without errors.
 
-Acoular follows the coding style of `PEP8 <https://www.python.org/dev/peps/pep-0008/>`_.
+We recommend running these checks before submitting a pull request. This can be done locally or on a GitHub runner. 
+The latter is possible by using the `workflow_dispatch`` event from the desired branch holding the changes. 
+To do this, go to the `Actions` tab in the forked GitHub repository, select the `Tests` workflow and press the `Run workflow` button.
+
+
+.. _Linting and Formatting:
+
+Linting and Formatting
+~~~~~~~~~~~~~~~~~~~~~~
+
+Acoular primarily follows the coding style of `PEP8 <https://www.python.org/dev/peps/pep-0008/>`_.
 To verify that the code meets the PEP8 standard, we use the `ruff <https://pypi.org/project/ruff/>`_ code linter and formatter. Configurations for the `ruff <https://pypi.org/project/ruff/>`_ code checker are contained in ``.ruff.toml`` file. 
 
-The source code must be free of linting errors. You can check your code on linting errors locally by running the following command:
+The source code must be correctly formatted and free of linting errors. You can check your code on linting errors locally by running the following command:
 
 .. code-block:: bash
 
@@ -25,10 +37,10 @@ which should return:
     All checks passed!
 
 
-.. _Compile Documentation:
+.. _Documentation Compilation:
 
-Compile Documentation
-~~~~~~~~~~~~~~~~~~~~~
+Documentation Compilation
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The package documentation is provided under ``acoular/docs/source``. This directory contains the ``index.rst`` file, which is the root document embedding several other subdocuments (sub-pages).
 
@@ -44,6 +56,7 @@ which should end with the following message:
 
     Build finished. The HTML pages are in build/html.
 
+.. _Testing:
 
 Testing
 ~~~~~~~

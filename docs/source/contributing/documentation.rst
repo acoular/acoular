@@ -27,20 +27,46 @@ If you have added a new class, method, or function, it is required to add a docs
 Style Guide
 ~~~~~~~~~~~
 
-Acoular documentation relies on the `NumPy docstring format <https://numpydoc.readthedocs.io/en/latest/format.html>`_.
+Acoular documentation relies on the `NumPy format <https://numpydoc.readthedocs.io/en/latest/format.html>`_.
 
 An example of a class documentation is given below by a shortened version of the `acoular.sources.TimeSamples` class for reading time-data from HDF5 files.
 
 .. code-block:: python
 
-
     class TimeSamples(SamplesGenerator):
-        """Container for time data in `*.h5` format.
+        """Container for processing time data in `*.h5` or NumPy array format.
 
-        This class loads measured data from h5 files and
-        and provides information about this data.
-        It also serves as an interface where the data can be accessed
-        (e.g. for use in a block chain) via the :meth:`result` generator.
+        This class loads measured data from HDF5 files and provides information about this data.
+        It also serves as an interface where the data can be accessed (e.g. for use in a block chain) via the
+        :meth:`result` generator.
+
+        Examples
+        --------
+        Data can be loaded from a HDF5 file as follows:
+
+        >>> from acoular import TimeSamples
+        >>> ts = TimeSamples(name='path/filename.h5')
+
+        Alternatively, the time data can be specified directly as a numpy array.
+        In this case, the :attr:`data` and :attr:`sample_freq` attributes must be set manually.
+
+        >>> from acoular import TimeSamples
+        >>> import numpy as np
+        >>> data = np.random.rand(1000, 4)
+        >>> ts = TimeSamples(data=data, sample_freq=51200)
+
+        Chunks of the time data can be accessed iteratively via the :meth:`result` generator:
+
+        >>> blocksize = 256
+        >>> generator = ts.result(num=blocksize)
+        >>> for block in generator:
+        ...     print(block.shape)
+
+        See Also
+        --------
+        acoular.sources.MaskedTimeSamples :
+            Extends the functionality of class :class:`TimeSamples` by enabling the definition of start and stop samples
+            as well as the specification of invalid channels.
         """
 
         #: Full name of the .h5 file with data.
@@ -49,15 +75,20 @@ An example of a class documentation is given below by a shortened version of the
         def result(self, num=128):
             """Python generator that yields the output block-wise.
 
+            Reads the time data either from a HDF5 file or from a numpy array given
+            by :attr:`data` and iteratively returns a block of size `num` samples.
+            Calibrated data is returned if a calibration object is given by :attr:`calib`.
+
             Parameters
             ----------
             num : integer, defaults to 128
                 This parameter defines the size of the blocks to be yielded
-                (i.e. the number of samples per block) .
+                (i.e. the number of samples per block).
 
-            Returns
-            -------
-            Samples in blocks of shape (num, numchannels).
+            Yields
+            ------
+            numpy.ndarray
+                Samples in blocks of shape (num, numchannels).
                 The last block may be shorter than num.
 
             """
@@ -83,8 +114,9 @@ An example of a class documentation is given below by a shortened version of the
 * The class docstring contains a short summary in the first line, followed by an extended summary. An extended summary is not always necessary, but it is recommended for complex classes. Ideally, one includes a short code snippet in the extended summary
 * The `name` attribute is documented using a comment line above the attribute definition starting with `#:`.
 * The public `result` method includes a short summary line and the parameters and the return values are documented along with their types and shapes.
+* Additional information can be included in the `See Also` section, which lists related classes or functions.
 
-More information on the NumPy docstring format can be found in the `NumPy docstring guide <https://numpydoc.readthedocs.io/en/latest/format.html>`_.
+More information on the NumPy docstring format can be found in the `NumPy style guide <https://numpydoc.readthedocs.io/en/latest/format.html>`_.
 
 
 

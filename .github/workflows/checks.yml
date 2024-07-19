@@ -1,11 +1,13 @@
-name: Checks
+name: Linting and Formatting
 
 on:
   push:
     branches: [ master ]
   pull_request:
     branches: [ master ]
-
+  workflow_dispatch:
+    branches: [ '*' ] # allow manual trigger for all branches
+    
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true

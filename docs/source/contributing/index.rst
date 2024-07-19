@@ -1,7 +1,7 @@
 Contributing 
 ============
 
-First of all, thank you for considering contributing to Acoular! We are happy to welcome new contributors.
+Thank you for considering contributing to Acoular! We are always happy to welcome new contributors.
 There are many ways to contribute to Acoular, and we appreciate all of them. 
 Here are a few ideas of what you can do:
 
@@ -15,7 +15,7 @@ Here are a few ideas of what you can do:
 Release Policy
 --------------
 
-From Acoular version 24.05 onwards, we plan a new release every four months. An upcoming release has a corresponding `Milestone <https://github.com/acoular/acoular/milestones?state=open>`_ to which the Acoular Development Team assigns issues and pull requests that are planned to be included. The Milestone is created at the beginning of the development cycle and is closed when the release is published. A pull request must be fully merged into the master branch before the Milestone is closed in order to be included in the upcoming release. Note that source code can only be merged if it meets the :ref:`Code Quality Standards`.
+From Acoular version 24.05 onwards, we plan a new release every four months. An upcoming release has a corresponding `Milestone <https://github.com/acoular/acoular/milestones?state=open>`_ to which the Acoular Development Team assigns issues and pull requests that are planned to be included. The Milestone is created at the beginning of the development cycle and is closed when the release is published. A pull request must be fully merged into the master branch before the Milestone is closed to be included in the upcoming release. Note that source code can only be merged if it meets the :ref:`Code Quality Standards`.
 
 
 
