@@ -24,8 +24,10 @@ num = 3
 
 # %%
 # Setting up the processing chain for the time domain methods.
-# .. hint:: An in-depth explanation for setting up the time data, microphone geometry,
-# environment and steering vector is given in the example :doc:`example_airfoil_in_open_jet_steering_vectors`.
+#
+# .. hint::
+#    An in-depth explanation for setting up the time data, microphone geometry,
+#    environment and steering vector is given in the example :doc:`example_airfoil_in_open_jet_steering_vectors`.
 
 ts = ac.MaskedTimeSamples(
     name='example_data.h5', invalid_channels=[1, 7], start=0, stop=16000, calib=ac.Calib(from_file='example_calib.xml')
@@ -59,7 +61,7 @@ avgts = ac.TimeAverage(source=bts, naverage=1024)
 cachts = ac.TimeCache(source=avgts)  # cache to prevent recalculation
 
 # %%
-# Third, CLEAN in time domain (CLEAN-T) is used :class:`acoular.tbeamform.BeamformerCleant` class.
+# Third, CLEAN deconvolution in the time domain (CLEAN-T) is applied, using the :class:`acoular.tbeamform.BeamformerCleant` class.
 fct = ac.FiltFiltOctave(source=ts, band=cfreq)
 bct = ac.BeamformerCleant(source=fct, steer=st, n_iter=20, damp=0.7)
 ptct = ac.TimePower(source=bct)

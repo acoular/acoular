@@ -10,7 +10,7 @@ This example shows the different behaviour of SampleSplitter class
 when the maximum size of a block buffer is reached for one object obtaining
 data.
 
-Three different settings can be made by the user:
+Three different settings are available for the buffer overflow behaviour:
     * none: no warning, no error
     * warning: a warning appears
     * error: an error is raised

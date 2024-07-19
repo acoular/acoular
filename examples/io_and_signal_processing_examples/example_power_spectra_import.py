@@ -53,8 +53,9 @@ Lm = ac.L_p(pm)
 
 # %%
 # Show the source map
-from pylab import colorbar, figure, imshow
+from pylab import colorbar, figure, imshow, show
 
 figure()
 imshow(Lm.T, origin='lower', vmin=Lm.max() - 10, extent=rg.extend(), interpolation='bicubic')
 colorbar()
+show()

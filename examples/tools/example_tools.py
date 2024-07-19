@@ -3,7 +3,7 @@
 # ------------------------------------------------------------------------------
 # %%
 """
-Tools -- Demonstrates barspectrum tool of Acoular.
+Tools -- Demonstrates barspectrum tool of Acoular
 =================================================
 
 A noise source emitting white noise is simulated. Its spectrum at a single

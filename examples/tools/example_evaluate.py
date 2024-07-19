@@ -90,7 +90,7 @@ plt.imshow(Lm.T, origin='lower', vmin=Lm.max() - 10, extent=rg.extend(), interpo
 # plot sectors
 ax = plt.gca()
 for j, sector in enumerate(mv.sectors):
-    ax.add_patch(plt.Circle((sector.x, sector.y), sector.r, color='black', fill=False))
+    ax.add_patch(plt.Circle((sector.x, sector.y), sector.r, color='red', fill=False))
     # annotate specific level error below circles
     plt.annotate(
         r'$\Delta L_{p,e,s}$=' + str(round(mv.get_specific_level_error()[0, j], 2)) + ' dB',
@@ -111,3 +111,4 @@ plt.annotate(
     color='white',
 )
 plt.colorbar()
+plt.show()

@@ -61,7 +61,9 @@ sphinx_gallery_conf = {
         #'../examples/introductory_examples/example_basic_beamforming.py',
         "../../examples/introductory_examples",
         "../../examples/wind_tunnel_examples",
-        "../../examples/moving_sources_examples"
+        "../../examples/moving_sources_examples",
+        "../../examples/io_and_signal_processing_examples",
+        "../../examples/tools",
     ]),
 }
 

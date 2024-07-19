@@ -24,7 +24,9 @@ num = 3
 
 # %%
 # Setting up the processing chain for the frequency domain methods.
-# .. hint:: An in-depth explanation for setting up the processing chain is given in the example :doc:`example_airfoil_in_open_jet_steering_vectors`.
+#
+# .. hint::
+#    An in-depth explanation for setting up the processing chain is given in the example :doc:`example_airfoil_in_open_jet_steering_vectors`.
 
 
 ts = ac.MaskedTimeSamples(
@@ -38,7 +40,7 @@ f = ac.PowerSpectra(time_data=ts, window='Hanning', overlap='50%', block_size=12
 
 
 # %%
-# Here, different frequency domain beamformers defined in the module :module:`acoular.fbeamform` are used and the corresponding result maps are calculated by
+# Here, different frequency domain beamformers defined in the module :mod:`acoular.fbeamform` are used and the corresponding result maps are calculated by
 # evaluating the :meth:`acoular.fbeamform.BeamformerBase.synthetic` method with the desired frequency and bandwidth.
 
 bb = ac.BeamformerBase(freq_data=f, steer=st, r_diag=True)

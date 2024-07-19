@@ -727,8 +727,12 @@ class BeamformerBase(HasPrivateTraits):
                 ind_high = self.freq_data.ind_high
                 if ind_low is None:
                     ind_low = 0
+                if ind_low < 0:
+                    ind_low += self._numfreq
                 if ind_high is None:
                     ind_high = self._numfreq
+                if ind_high < 0:
+                    ind_high += self._numfreq
                 irange = (ind_low, ind_high)
                 num = 0
             elif len(frange) == 2:

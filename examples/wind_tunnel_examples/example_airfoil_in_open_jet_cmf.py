@@ -22,9 +22,10 @@ cfreq = 4000
 num = 3
 
 # %%
-# Setting up the processing chain for the frequency domain methods.
-# .. hint:: An in-depth explanation for setting up the processing chain is given in the example :doc:`example_airfoil_in_open_jet_steering_vectors`.
-
+# Setting up the processing chain for :class:`acoular.fbeamform.BeamformerCMF` methods.
+#
+# .. hint::
+#    A step-by-step explanation for setting up the processing chain is given in the example :doc:`example_airfoil_in_open_jet_steering_vectors`.
 
 ts = ac.MaskedTimeSamples(
     name='example_data.h5', invalid_channels=[1, 7], start=0, stop=16000, calib=ac.Calib(from_file='example_calib.xml')
@@ -37,7 +38,8 @@ f = ac.PowerSpectra(time_data=ts, window='Hanning', overlap='50%', block_size=12
 b = ac.BeamformerCMF(freq_data=f, steer=st, alpha=1e-8)
 
 # %%
-# Plot result maps for CMF with different solvers from the scipy and sklearn, including:
+# Plot result maps for CMF with different solvers from `SciPy <https://scipy.org/>`_ and
+# `scikit-learn <https://scikit-learn.org/stable/>`_, including:
 #
 # * LassoLars
 # * LassoLarsBIC
@@ -49,13 +51,11 @@ from pylab import colorbar, figure, imshow, show, subplot, tight_layout, title
 
 figure(1, (10, 7))  # no of figure
 i1 = 1  # no of subplot
-from time import time
 
 for method in ('LassoLars', 'LassoLarsBIC', 'OMPCV', 'NNLS', 'fmin_l_bfgs_b'):
     b.method = method
     subplot(2, 3, i1)
     i1 += 1
-    ti = time()
     map = b.synthetic(cfreq, 1)
     mx = ac.L_p(map.max())
     imshow(ac.L_p(map.T), vmax=mx, vmin=mx - 15, origin='lower', interpolation='nearest', extent=grid.extend())
