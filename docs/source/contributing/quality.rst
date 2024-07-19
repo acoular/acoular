@@ -12,7 +12,7 @@ Currently, three main checks are performed on the code:
 3. `Testing`_: The tests must pass without errors.
 
 We recommend running these checks before submitting a pull request. This can be done locally or on a GitHub runner. 
-The latter is possible by using the `workflow_dispatch`` event from the desired branch holding the changes. 
+The latter is possible by using the `workflow_dispatch` event from the desired branch holding the changes. 
 To do this, go to the `Actions` tab in the forked GitHub repository, select the `Tests` workflow and press the `Run workflow` button.
 
 
@@ -24,7 +24,7 @@ Linting and Formatting
 Acoular primarily follows the coding style of `PEP8 <https://www.python.org/dev/peps/pep-0008/>`_.
 To verify that the code meets the PEP8 standard, we use the `ruff <https://pypi.org/project/ruff/>`_ code linter and formatter. Configurations for the `ruff <https://pypi.org/project/ruff/>`_ code checker are contained in ``.ruff.toml`` file. 
 
-The source code must be correctly formatted and free of linting errors. You can check your code on linting errors locally by running the following command:
+The source code must be correctly formatted and free of linting errors. You can check your code locally by running the following command:
 
 .. code-block:: bash
 

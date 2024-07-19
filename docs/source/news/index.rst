@@ -1,5 +1,13 @@
 What's new
 ============
+
+Upcoming Release 
+----------------
+    
+    * New features:
+    * Bugfixes:
+    * Internal:
+
 24.05
 ------------
     * adds support for Python version 3.12 on Linux, MacOS, Windows

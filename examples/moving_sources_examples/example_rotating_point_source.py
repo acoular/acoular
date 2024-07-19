@@ -94,7 +94,7 @@ cached_mix = ac.TimeCache(source=t)
 # ww.channels = [0,14]
 # ww.save()
 
-#%%
+# %%
 # Define the evaluation grid and the steering vector.
 
 g = ac.RectGrid(x_min=-3.0, x_max=+3.0, y_min=-3.0, y_max=+3.0, z=Z, increment=0.3)

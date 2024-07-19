@@ -56,6 +56,13 @@ def reset_cache_dir(gallery_conf, fname):
     from acoular import config
     config.cache_dir = str(Path(__file__).parent / 'auto_examples' / 'cache')
 
+suppress_warnings = [
+    #   Sphinx 7.3.0: Suppressing the warning:
+    # WARNING: cannot cache unpickable configuration value: 'sphinx_gallery_conf' 
+    # (because it contains a function, class, or module object) -> warning through function reset_cache_dir
+    "config.cache", # 
+]
+
 # sphinx_gallery.gen_gallery extension configuration
 sphinx_gallery_conf = {
     'gallery_dirs': 'auto_examples',  # path to where to save gallery generated output
@@ -63,7 +70,7 @@ sphinx_gallery_conf = {
     'filename_pattern': '/example_',
     'default_thumb_file': 'source/_static/Acoular_logo',
     'thumbnail_size': (250, 250),
-    'run_stale_examples': True,
+    #'run_stale_examples': True, 
     'reset_modules': (reset_cache_dir, 'matplotlib', 'seaborn'),
     'examples_dirs': [
         '../../examples',

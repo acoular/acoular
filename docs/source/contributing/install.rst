@@ -49,8 +49,8 @@ Equally, you can create a new environment with virtualenv:
 
 
 
-Install Acoular dependencies
-----------------------------
+Install dependencies
+--------------------
 
 Then, make an editable installation of Acoular with:
 

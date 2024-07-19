@@ -30,7 +30,7 @@ for i in np.arange(2.1, 3.0, 0.3):
     res = (ac.tools.return_result(f1) ** 2).sum()
     res0 += res
     ps = ac.PowerSpectra(time_data=f1, block_size=8192)
-    #print(res / numsamples, ps.csm[:, 0, 0].real.sum())
+    # print(res / numsamples, ps.csm[:, 0, 0].real.sum())
     x = ps.fftfreq()
     y = 10 * np.log10(ps.csm[:, 0, 0].real)
     plt.semilogx(x, y)

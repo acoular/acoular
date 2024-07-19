@@ -192,7 +192,7 @@ class TimeSamples(SamplesGenerator):
     Data can be loaded from a HDF5 file as follows:
 
     >>> from acoular import TimeSamples
-    >>> name = 'acoular/examples/example_data.h5'  # doctest: +SKIP
+    >>> name = <some_h5_file.h5>  # doctest: +SKIP
     >>> ts = TimeSamples(name=name)  # doctest: +SKIP
     >>> print(f'number of channels: {ts.numchannels}')  # doctest: +SKIP
     number of channels: 56 # doctest: +SKIP
@@ -200,7 +200,6 @@ class TimeSamples(SamplesGenerator):
     Alternatively, the time data can be specified directly as a numpy array.
     In this case, the :attr:`data` and :attr:`sample_freq` attributes must be set manually.
 
-    >>> from acoular import TimeSamples
     >>> import numpy as np
     >>> data = np.random.rand(1000, 4)
     >>> ts = TimeSamples(data=data, sample_freq=51200)
