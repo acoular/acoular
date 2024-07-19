@@ -1,14 +1,7 @@
 # files and file types to ignore
 *.pyc
-*.pyd
 *.so
 *~
-examples/three_sources.h5
-examples/all_bf.sav
-examples/benchmark/results/
-MANIFEST
-
-# ignore the build directories
 *.egg-info/
 .eggs/
 build/
@@ -23,8 +16,12 @@ __pycache__/
 *.nbc
 *.nbi
 *.pyd
-docs/source/api_ref/generated/
 .vscode/
 
-acoular/demo/three_sources.h5
+MANIFEST
+
+examples/all_bf.sav
+examples/benchmark/results/
+**/three_sources.h5
 docs/source/sg_execution_times.rst
+docs/source/api_ref/generated/

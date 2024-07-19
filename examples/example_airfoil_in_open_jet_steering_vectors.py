@@ -1,140 +1,111 @@
-"""Example "Airfoil in open jet -- steering vectors" for Acoular library.
+# ------------------------------------------------------------------------------
+# Copyright (c) Acoular Development Team.
+# ------------------------------------------------------------------------------
+# %%
+"""
+Airfoil in open jet -- steering vectors.
+========================================
 
-Demonstrates different steering vectors in Acoular
-and CSM diagonal removal with same setup as in example
-"Airfoil in open jet -- beamformers".
-
-Uses measured data in file example_data.h5,
-calibration in file example_calib.xml,
+Demonstrates different steering vectors in Acoular and CSM diagonal removal.
+Uses measured data in file example_data.h5, calibration in file example_calib.xml,
 microphone geometry in array_56.xml (part of Acoular).
-
-
-Copyright (c) 2006-2019 Acoular Development Team.
-All rights reserved.
 """
 
-# imports from acoular
-# other imports
-from os import path
+from pathlib import Path
 
-import acoular
-from acoular import (
-    BeamformerBase,
-    BeamformerCleansc,
-    BeamformerDamas,
-    BeamformerEig,
-    BeamformerOrth,
-    Calib,
-    Environment,
-    L_p,
-    MaskedTimeSamples,
-    MicGeom,
-    PowerSpectra,
-    RectGrid,
-    SteeringVector,
-)
-from pylab import colorbar, figure, imshow, show, subplot, tight_layout, title
+import acoular as ac
 
-# files
-datafile = 'example_data.h5'
-calibfile = 'example_calib.xml'
-micgeofile = path.join(path.split(acoular.__file__)[0], 'xml', 'array_56.xml')
+# %%
+# The 4 kHz third-octave band is used for the example.
 
-# octave band of interest
 cfreq = 4000
+num = 3
 
-# ===============================================================================
-# first, we define the time samples using the MaskedTimeSamples class
-# alternatively we could use the TimeSamples class that provides no masking
-# of channels and samples
-# ===============================================================================
-t1 = MaskedTimeSamples(name=datafile)
-t1.start = 0  # first sample, default
-t1.stop = 16000  # last valid sample = 15999
-invalid = [1, 7]  # list of invalid channels (unwanted microphones etc.)
+# %%
+# First, we define the time samples using the :class:`acoular.sources.MaskedTimeSamples` class
+# that provides masking of channels and samples. Here, we exclude the channels with index 1 and 7 and
+# only process the first 16000 samples of the time signals.
+# Alternatively, we could use the :class:`acoular.sources.TimeSamples` class that provides no masking at all.
+
+t1 = ac.MaskedTimeSamples(name='example_data.h5')
+t1.start = 0
+t1.stop = 16000
+invalid = [1, 7]
 t1.invalid_channels = invalid
 
-# ===============================================================================
-# calibration is usually needed and can be set directly at the TimeSamples
-# object (preferred) or for frequency domain processing at the PowerSpectra
+# %%
+# Calibration is usually needed and can be set directly at the :class:`acoular.sources.MaskedTimeSamples`
+# object (preferred) or for frequency domain processing at the :class:`acoular.spectra.PowerSpectra`
 # object (for backwards compatibility)
-# ===============================================================================
-t1.calib = Calib(from_file=calibfile)
 
-# ===============================================================================
-# the microphone geometry must have the same number of valid channels as the
-# TimeSamples object has
-# ===============================================================================
-m = MicGeom(from_file=micgeofile)
+t1.calib = ac.Calib(from_file='example_calib.xml')
+
+# %%
+# The microphone geometry must have the same number of valid channels as the :class:`acoular.sources.MaskedTimeSamples` object has.
+# It also must be defined, which channels are invalid.
+
+micgeofile = Path(ac.__file__).parent / 'xml' / 'array_56.xml'
+m = ac.MicGeom(from_file=micgeofile)
 m.invalid_channels = invalid
 
-# ===============================================================================
-# the grid for the beamforming map; a RectGrid3D class is also available
-# (the example grid is very coarse)
-# ===============================================================================
-g = RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=0.68, increment=0.05)
+# %%
+# Next, we define a planar rectangular grid for calculating the beamforming map (the example grid is very coarse for computational efficiency).
+# A 3D grid is also available via the :class:`acoular.grids.RectGrid3D` class.
 
-# ===============================================================================
-# for frequency domain methods, this provides the cross spectral matrix and its
-# eigenvalues and eigenvectors, if only the matrix is needed then class
-# PowerSpectra can be used instead
-# ===============================================================================
-f = PowerSpectra(
+g = ac.RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=0.68, increment=0.05)
+
+# %%
+# For frequency domain methods, :class:`acoular.spectra.PowerSpectra` provides the cross spectral matrix (and its
+# eigenvalues and eigenvectors). Here, we use the Welch's method with a block size of 128 samples, Hanning window and 50% overlap.
+
+f = ac.PowerSpectra(
     time_data=t1,
     window='Hanning',
     overlap='50%',
-    block_size=128,  # FFT-parameters
-    ind_low=8,
-    ind_high=16,
-)  # to save computational effort, only
-# frequencies with index 1-30 are used
+    block_size=128)
 
-# ===============================================================================
-# the environment, i.e. medium characteristics
-# (in this case, the speed of sound is set)
-# ===============================================================================
-env = Environment(c=346.04)
+# %%
+# To define the measurement environment, i.e. medium characteristics, the :class:`acoular.environment.Environment` class is used.
+# (in this case, only the speed of sound is set)
 
-# =============================================================================
-# a steering vector instance. SteeringVector provides the standard freefield
+env = ac.Environment(c=346.04)
+
+# %%
+# The :class:`acoular.fbeamform.SteeringVector` class provides the standard freefield
 # sound propagation model in the steering vectors.
-# =============================================================================
-st = SteeringVector(grid=g, mics=m, env=env)
 
-# ===============================================================================
-# beamformers in frequency domain
-# ===============================================================================
-bb = BeamformerBase(freq_data=f, steer=st, r_diag=True)
-bd = BeamformerDamas(beamformer=bb, n_iter=100)
-be = BeamformerEig(freq_data=f, steer=st, r_diag=True, n=54)
-bo = BeamformerOrth(beamformer=be, eva_list=list(range(38, 54)))
-bs = BeamformerCleansc(freq_data=f, steer=st, r_diag=True)
+st = ac.SteeringVector(grid=g, mics=m, env=env)
 
-# ===============================================================================
-# plot result maps for different beamformers in frequency domain
-# ===============================================================================
+# %%
+# Finally, we define the different beamformers and subsequently calculate the maps for different steering vector formulations.
+# Diagonal removal for the CSM can be performed via the :attr:`r_diag` parameter.
+
+bb = ac.BeamformerBase(freq_data=f, steer=st, r_diag=True)
+bd = ac.BeamformerDamas(freq_data=f, steer=st, r_diag=True, n_iter=100)
+bo = ac.BeamformerOrth(freq_data=f, steer=st, r_diag=True, eva_list=list(range(38, 54)))
+bs = ac.BeamformerCleansc(freq_data=f, steer=st, r_diag=True)
+
+# %%
+# Plot result maps for different beamformers in frequency domain (left: with diagonal removal, right: without diagonal removal).
+
+from pylab import colorbar, figure, imshow, show, subplot, tight_layout, title
+
 fi = 1  # no of figure
 for r_diag in (True, False):
     figure(fi, (10, 6))
     fi += 1
-    bb.r_diag = r_diag
-    be.r_diag = r_diag
-    bs.r_diag = r_diag
     i1 = 1  # no of subplot
     for steer in ('true level', 'true location', 'classic', 'inverse'):
         st.steer_type = steer
         for b in (bb, bd, bo, bs):
             subplot(4, 4, i1)
             i1 += 1
-            map = b.synthetic(cfreq, 1)
-            mx = L_p(map.max())
-            imshow(L_p(map.T), vmax=mx, vmin=mx - 15, origin='lower', interpolation='nearest', extent=g.extend())
-            print(b.steer.steer_type)
+            b.r_diag = r_diag
+            map = b.synthetic(cfreq, num)
+            mx = ac.L_p(map.max())
+            imshow(ac.L_p(map.T), vmax=mx, vmin=mx - 15, origin='lower', interpolation='nearest', extent=g.extend())
             colorbar()
             title(b.__class__.__name__, fontsize='small')
 
     tight_layout()
-
-# only display result on screen if this script is run directly
-if __name__ == '__main__':
     show()
