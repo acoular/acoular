@@ -38,7 +38,7 @@ identifiers:
   - description: "acoular: all versions"
     type: "doi"
     value: "10.5281/zenodo.3690794"
-  - description:
+  - description: "acoular: v24.07"
     type: "doi"
     value: 10.5281/zenodo.12794155
   - description: "acoular: v24.05"
