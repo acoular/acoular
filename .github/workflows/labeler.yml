@@ -2,8 +2,6 @@ name: Label-Bot
 
 on:
   pull_request_target
-  workflow_dispatch:
-    branches: [ "*" ]
 
 jobs:
   labeler:
