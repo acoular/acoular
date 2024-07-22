@@ -763,7 +763,9 @@ class BeamformerBase(HasPrivateTraits):
 
 
 class BeamformerFunctional(BeamformerBase):
-    """Functional beamforming after :cite:`Dougherty2014`."""
+    """Functional beamforming algorithm.
+    
+    See :cite:`Dougherty2014` for details."""
 
     #: Functional exponent, defaults to 1 (= Classic Beamforming).
     gamma = Float(1, desc='functional exponent')
