@@ -21,6 +21,10 @@ jobs:
         with:
           name: conda-package
           path: ./conda_package
+      - name: echo anaconda-client version
+        run: |
+          echo $PATH
+          anaconda -V
       - name: Upload conda package to Anaconda Cloud
         if: ${{ github.event_name =='workflow_dispatch' && github.ref == 'refs/heads/master' }}
         run: |
