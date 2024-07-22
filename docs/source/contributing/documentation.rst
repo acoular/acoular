@@ -53,7 +53,7 @@ One can use the following command with hatch to run the doctests locally:
 
 .. code-block:: bash
 
-    hatch run tests:docstest
+    hatch run tests:doctest
 
 
 Cross-references can be included in the `See Also` section, which lists related classes or functions:
