@@ -8,6 +8,30 @@ Upcoming Release
     * Bugfixes:
     * Internal:
 
+24.07
+------------
+
+    New features:
+        * Implement a lazy result array for :class:`acoular.fbeamform.BeamformerBase` derived classes
+        * Adds flow establishment length traits
+        * Updates acoular demo with ASCII map and gets rid of writing file
+    
+    Bugfixes:
+        * temporary fix to PyTables - NumPy 2.0 incompatibility problem
+        * Fixes :class:`acoular.fbeamform.BeamformerGridlessOrth` `shgo` params and `eva_list` initial value bug
+        * makes :class:`acoular.sdinput.SoundDeviceSamplesGenerator` always importable
+
+    Internal:
+        * use hatch for publishing the Acoular package
+        * add issue templates
+        * adds Conda CI
+        * CI for TestPyPI and PyPI
+        * remove `plot_example.py` 
+        * add autolabel rule for `fix` and `linting`
+        * fix linting rules
+        * add zenodo release to `CITAITON.cff`
+
+
 24.05
 ------------
     * adds support for Python version 3.12 on Linux, MacOS, Windows
