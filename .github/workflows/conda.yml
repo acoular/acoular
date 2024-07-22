@@ -2,7 +2,7 @@ name: Build conda package
 
 on:
     workflow_dispatch:
-      branches: [ '*' ] # allow manual trigger for all branches
+      branches: [ '*' ] # allow manual trigger for all branches (only master will upload to Anaconda Cloud)
   
     
 jobs:
