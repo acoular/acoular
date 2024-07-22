@@ -67,6 +67,7 @@ dev = [
     "pickleshare",
     "sphinx",
     "sphinx_gallery",    
+    "sphinxcontrib-bibtex",
 ]
 
 [project.urls]
@@ -94,6 +95,7 @@ dependencies = [
     "sounddevice",
     "sphinx",
     "sphinx_gallery",
+    "sphinxcontrib-bibtex",
 ]
 
 [tool.hatch.envs.docs.scripts]

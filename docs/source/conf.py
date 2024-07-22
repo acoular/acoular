@@ -23,24 +23,29 @@ sys.path.insert(0,os.path.abspath('../..')) # in order to document the source in
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-#extensions = ['sphinx.ext.autodoc', 'traitsdoc','sphinx.ext.pngmath','sphinx.ext.inheritance_diagram']
 extensions = [
-    'sphinx_gallery.gen_gallery',
-    'sphinx.ext.duration',
-    'sphinx.ext.autodoc', 
 #    'trait_documenter',
 #    'matplotlib.sphinxext.only_directives',
     'IPython.sphinxext.ipython_directive',
     'IPython.sphinxext.ipython_console_highlighting',
 #    'refactordoc',
     'traits.util.trait_documenter',
+    'sphinx_gallery.gen_gallery',
+    'sphinx.ext.duration',
+    'sphinx.ext.autodoc', 
     'sphinx.ext.mathjax',
     'sphinx.ext.inheritance_diagram',
     'sphinx.ext.autosummary',
+    'sphinxcontrib.bibtex',
     'numpydoc',
 #    'numpydoc.traitsdoc'
 #    'gen_rst',
     ]
+
+# the bibfle for the sphinxcontrib.bibtex extension
+bibtex_bibfiles = ["literature/literature.bib"]
+
+
 
 from sphinx_gallery.sorting import ExplicitOrder
 
