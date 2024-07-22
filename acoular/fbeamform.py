@@ -127,7 +127,7 @@ BEAMFORMER_BASE_DIGEST_DEPENDENCIES = ['freq_data.digest', 'r_diag', 'r_diag_nor
 
 class SteeringVector(HasPrivateTraits):
     """Basic class for implementing steering vectors with monopole source transfer models.
-    
+
     Handles four different steering vector formulations. See :cite:`Sarradj2012` for details.
     """
 
@@ -764,8 +764,9 @@ class BeamformerBase(HasPrivateTraits):
 
 class BeamformerFunctional(BeamformerBase):
     """Functional beamforming algorithm.
-    
-    See :cite:`Dougherty2014` for details."""
+
+    See :cite:`Dougherty2014` for details.
+    """
 
     #: Functional exponent, defaults to 1 (= Classic Beamforming).
     gamma = Float(1, desc='functional exponent')
@@ -1977,12 +1978,9 @@ class BeamformerCMF(BeamformerBase):
 
 
 class BeamformerSODIX(BeamformerBase):
-    """SODIX, see Funke, Ein Mikrofonarray-Verfahren zur Untersuchung der
-    Schallabstrahlung von Turbofantriebwerken, 2017. and
-    Oertwig, Advancements in the source localization method SODIX and
-    application to short cowl engine data, 2019.
+    """Source directivity modeling in the cross-spectral matrix (SODIX) algorithm.
 
-    Source directivity modeling in the cross-spectral matrix
+    See :cite:`Funke2017` and :cite:`Oertwig2019` for details.
     """
 
     #: Type of fit method to be used ('fmin_l_bfgs_b').
@@ -2138,7 +2136,10 @@ class BeamformerSODIX(BeamformerBase):
 
 
 class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
-    """Beamforming GIB methods with different normalizations,."""
+    """Beamforming GIB methods with different normalizations.
+
+    See :cite:`Suzuki2011` for details.
+    """
 
     #: Unit multiplier for evaluating, e.g., nPa instead of Pa.
     #: Values are converted back before returning.
@@ -2411,7 +2412,10 @@ class BeamformerAdaptiveGrid(BeamformerBase, Grid):
 
 
 class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
-    """Orthogonal beamforming without predefined grid."""
+    """Orthogonal beamforming without predefined grid.
+
+    See :cite:`Sarradj2022` for details.
+    """
 
     #: List of components to consider, use this to directly set the eigenvalues
     #: used in the beamformer. Alternatively, set :attr:`n`.

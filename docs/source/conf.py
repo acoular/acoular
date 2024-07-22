@@ -44,7 +44,7 @@ extensions = [
 
 # the bibfle for the sphinxcontrib.bibtex extension
 bibtex_bibfiles = ["literature/literature.bib"]
-
+bibtex_default_style = 'unsrt'
 
 
 from sphinx_gallery.sorting import ExplicitOrder
