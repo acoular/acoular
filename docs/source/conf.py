@@ -10,6 +10,7 @@
 # serve to show the default value.
 
 import sys, os
+from pathlib import Path
 
 # If your extensions are in another directory, add it here. If the directory
 # is relative to the documentation root, use os.path.abspath to make it
@@ -24,10 +25,11 @@ sys.path.insert(0,os.path.abspath('../..')) # in order to document the source in
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 #extensions = ['sphinx.ext.autodoc', 'traitsdoc','sphinx.ext.pngmath','sphinx.ext.inheritance_diagram']
 extensions = [
+    'sphinx_gallery.gen_gallery',
+    'sphinx.ext.duration',
     'sphinx.ext.autodoc', 
 #    'trait_documenter',
 #    'matplotlib.sphinxext.only_directives',
-    'matplotlib.sphinxext.plot_directive',
     'IPython.sphinxext.ipython_directive',
     'IPython.sphinxext.ipython_console_highlighting',
 #    'refactordoc',
@@ -39,6 +41,54 @@ extensions = [
 #    'numpydoc.traitsdoc'
 #    'gen_rst',
     ]
+
+from sphinx_gallery.sorting import ExplicitOrder
+
+def reset_cache_dir(gallery_conf, fname):
+    """
+    Sphinx keeps the acoular module loaded during the whole documentation build.
+    This can cause problems when the examples are located in subdirectories of the
+    example directory. Sphinx changes the current working directory to the example
+    directory. To make examples accross different directories reuse the cache, we
+    reset the cache directory before every example run. 
+    """
+    from acoular import config
+    config.cache_dir = str(Path(__file__).parent / 'auto_examples' / 'cache')
+
+suppress_warnings = [
+    #   Sphinx 7.3.0: Suppressing the warning:
+    # WARNING: cannot cache unpickable configuration value: 'sphinx_gallery_conf' 
+    # (because it contains a function, class, or module object) -> warning through function reset_cache_dir
+    "config.cache", # 
+]
+
+# sphinx_gallery.gen_gallery extension configuration
+sphinx_gallery_conf = {
+    'gallery_dirs': 'auto_examples',  # path to where to save gallery generated output
+    'example_extensions': {'.py'},
+    'filename_pattern': '/example_',
+    'default_thumb_file': 'source/_static/Acoular_logo',
+    'thumbnail_size': (250, 250),
+    #'run_stale_examples': True, 
+    'reset_modules': (reset_cache_dir, 'matplotlib', 'seaborn'),
+    'examples_dirs': [
+        '../../examples',
+        ],   # path to your example scripts
+    'subsection_order' : ExplicitOrder([
+        #'../examples/introductory_examples/example_three_sources.py',
+        #'../examples/introductory_examples/example_basic_beamforming.py',
+        "../../examples/introductory_examples",
+        "../../examples/wind_tunnel_examples",
+        "../../examples/moving_sources_examples",
+        "../../examples/io_and_signal_processing_examples",
+        "../../examples/tools",
+    ]),
+}
+
+html_static_path = ['_static']
+# Custom CSS paths should either relative to html_static_path
+# or fully qualified paths (eg. https://...)
+html_css_files = ['sphinx_gallery.css']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

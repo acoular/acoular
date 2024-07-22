@@ -159,10 +159,10 @@ Source Location        Level
 
 as would be expected from the values given in the table above.
 
-To play around with this simple example, download :download:`basic_beamformer_example.py <../../../examples/basic_beamformer_example.py>` change something and run it as a Python script.
+To play around with this simple example, download :download:`example_basic_beamforming.py <../../../examples/introductory_examples/example_basic_beamforming.py>` change something and run it as a Python script.
 
-.. literalinclude:: ../../../examples/basic_beamformer_example.py
+.. literalinclude:: ../../../examples/introductory_examples/example_basic_beamforming.py
 
-To see how the simulated data is generated, read :download:`three_sources.py <../../../examples/three_sources.py>`. 
+To see how the simulated data is generated, read :download:`example_three_sources.py <../../../examples/introductory_examples/example_three_sources.py>`. 
 
-.. literalinclude:: ../../../examples/three_sources.py
+.. literalinclude:: ../../../examples/introductory_examples/example_three_sources.py

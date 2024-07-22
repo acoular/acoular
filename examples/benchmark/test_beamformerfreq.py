@@ -12,7 +12,7 @@ acoular.config.global_caching = 'none'  # to make sure that nothing is cached
 from acoular import BeamformerBase, Environment, MaskedTimeSamples, MicGeom, PowerSpectra, RectGrid, SteeringVector
 
 # load exampledata
-datafile = join('..', 'example_data.h5')
+datafile = join('..', 'data', 'example_data.h5')
 micgeofile = join('..', '..', 'acoular', 'xml', 'array_56.xml')
 
 # values from example 1

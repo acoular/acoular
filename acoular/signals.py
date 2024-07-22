@@ -279,7 +279,21 @@ class SineGenerator(SignalGenerator):
 
 
 class GenericSignalGenerator(SignalGenerator):
-    """Generate signal from output of :class:`~acoular.tprocess.SamplesGenerator` object."""
+    """Generate signal from output of :class:`~acoular.tprocess.SamplesGenerator` object.
+
+    This class can be used to inject arbitrary signals into Acoular processing
+    chains. For example, it can be used to read signals from a HDF5 file or create any signal
+    by using the :class:`acoular.sources.TimeSamples` class.
+
+    Example
+    -------
+    >>> import numpy as np
+    >>> from acoular import TimeSamples, GenericSignalGenerator
+    >>> data = np.random.rand(1000, 1)
+    >>> ts = TimeSamples(data=data, sample_freq=51200)
+    >>> sig = GenericSignalGenerator(source=ts)
+
+    """
 
     #: Data source; :class:`~acoular.tprocess.SamplesGenerator` or derived object.
     source = Trait(SamplesGenerator)

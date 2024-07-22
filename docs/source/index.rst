@@ -38,9 +38,10 @@ Contents:
     
     How to Get <install/index>
     Getting Started <get_started/index>
+    Examples <auto_examples/index>
     What's new <news/index>
+    Contributing <contributing/index>
     Literature <literature/index>
-    Examples <examples/index>
     API Reference <api_ref/index>
 
 
@@ -54,15 +55,19 @@ Contents:
 
     * - :doc:`get_started/index` 
 
-      - The basics for using Acoular explained with a simple example.
+      - The basics for using Acoular, explained with a simple example.
+
+    * - :doc:`auto_examples/index` 
+
+      - Example scripts covering different use cases.
 
     * - :doc:`news/index` 
 
       - Release notes for the current version of Acoular.
 
-    * - :doc:`examples/index` 
+    * - :doc:`contributing/index`
 
-      - Example scripts covering different use cases.
+      - Information on how to contribute to the development of Acoular.
 
     * - :doc:`api_ref/index` 
 

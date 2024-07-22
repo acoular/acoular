@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
-"""Measured multichannel data managment and simulation of acoustic sources.
+"""Measured multichannel data management and simulation of acoustic sources.
 
 .. autosummary::
     :toctree: generated/
@@ -181,12 +181,44 @@ def get_modes(lOrder, direction, mpos, sourceposition=None):  # noqa: N803
 
 
 class TimeSamples(SamplesGenerator):
-    """Container for time data in `*.h5` format.
+    """Container for processing time data in `*.h5` or NumPy array format.
 
-    This class loads measured data from h5 files and
-    and provides information about this data.
-    It also serves as an interface where the data can be accessed
-    (e.g. for use in a block chain) via the :meth:`result` generator.
+    This class loads measured data from HDF5 files and provides information about this data.
+    It also serves as an interface where the data can be accessed (e.g. for use in a block chain) via the
+    :meth:`result` generator.
+
+    Examples
+    --------
+    Data can be loaded from a HDF5 file as follows:
+
+    >>> from acoular import TimeSamples
+    >>> name = <some_h5_file.h5>  # doctest: +SKIP
+    >>> ts = TimeSamples(name=name)  # doctest: +SKIP
+    >>> print(f'number of channels: {ts.numchannels}')  # doctest: +SKIP
+    number of channels: 56 # doctest: +SKIP
+
+    Alternatively, the time data can be specified directly as a numpy array.
+    In this case, the :attr:`data` and :attr:`sample_freq` attributes must be set manually.
+
+    >>> import numpy as np
+    >>> data = np.random.rand(1000, 4)
+    >>> ts = TimeSamples(data=data, sample_freq=51200)
+
+    Chunks of the time data can be accessed iteratively via the :meth:`result` generator.
+    The last block will be shorter than the block size if the number of samples is not a multiple of the block size.
+
+    >>> blocksize = 512
+    >>> generator = ts.result(num=blocksize)
+    >>> for block in generator:
+    ...     print(block.shape)
+    (512, 4)
+    (488, 4)
+
+    See Also
+    --------
+    acoular.sources.MaskedTimeSamples :
+        Extends the functionality of class :class:`TimeSamples` by enabling the definition of start and stop samples
+        as well as the specification of invalid channels.
     """
 
     #: Full name of the .h5 file with data.
@@ -234,12 +266,9 @@ class TimeSamples(SamplesGenerator):
         return path.splitext(path.basename(self.name))[0]
 
     @on_trait_change('basename')
-    def load_data(self):
+    def _load_data(self):
         """Open the .h5 file and set attributes."""
         if not path.isfile(self.name):
-            # no file there
-            self.numsamples = 0
-            self.numchannels = 0
             self.sample_freq = 0
             raise OSError('No such file: %s' % self.name)
         if self.h5f is not None:
@@ -247,16 +276,21 @@ class TimeSamples(SamplesGenerator):
                 self.h5f.close()
         file = _get_h5file_class()
         self.h5f = file(self.name)
-        self.load_timedata()
-        self.load_metadata()
+        self._load_timedata()
+        self._load_metadata()
 
-    def load_timedata(self):
+    @on_trait_change('data')
+    def _load_shapes(self):
+        """Set numchannels and numsamples from data."""
+        if self.data is not None:
+            self.numsamples, self.numchannels = self.data.shape
+
+    def _load_timedata(self):
         """Loads timedata from .h5 file. Only for internal use."""
         self.data = self.h5f.get_data_by_reference('time_data')
         self.sample_freq = self.h5f.get_node_attribute(self.data, 'sample_freq')
-        (self.numsamples, self.numchannels) = self.data.shape
 
-    def load_metadata(self):
+    def _load_metadata(self):
         """Loads metadata from .h5 file. Only for internal use."""
         self.metadata = {}
         if '/metadata' in self.h5f:
@@ -265,15 +299,20 @@ class TimeSamples(SamplesGenerator):
     def result(self, num=128):
         """Python generator that yields the output block-wise.
 
+        Reads the time data either from a HDF5 file or from a numpy array given
+        by :attr:`data` and iteratively returns a block of size `num` samples.
+        Calibrated data is returned if a calibration object is given by :attr:`calib`.
+
         Parameters
         ----------
         num : integer, defaults to 128
             This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block) .
+            (i.e. the number of samples per block).
 
-        Returns
-        -------
-        Samples in blocks of shape (num, numchannels).
+        Yields
+        ------
+        numpy.ndarray
+            Samples in blocks of shape (num, numchannels).
             The last block may be shorter than num.
 
         """
@@ -297,14 +336,40 @@ class TimeSamples(SamplesGenerator):
 
 
 class MaskedTimeSamples(TimeSamples):
-    """Container for time data in `*.h5` format.
+    """Container for processing time data in `*.h5` or NumPy array format.
 
-    This class loads measured data from h5 files
-    and provides information about this data.
-    It supports storing information about (in)valid samples and (in)valid channels
-    It also serves as an interface where the data can be accessed
-    (e.g. for use in a block chain) via the :meth:`result` generator.
+    This class loads measured data from HDF5 files and provides information about this data.
+    It supports storing information about (in)valid samples and (in)valid channels and allows
+    to specify a start and stop index for the valid samples.
+    It also serves as an interface where the data can be accessed (e.g. for use in a block chain) via the
+    :meth:`result` generator.
 
+    Examples
+    --------
+    Data can be loaded from a HDF5 file and invalid channels can be specified as follows:
+
+    >>> from acoular import MaskedTimeSamples
+    >>> name = <some_h5_file.h5>  # doctest: +SKIP
+    >>> ts = MaskedTimeSamples(name=name, invalid_channels=[0, 1])  # doctest: +SKIP
+    >>> print(f'number of valid channels: {ts.numchannels}')  # doctest: +SKIP
+    number of valid channels: 54 # doctest: +SKIP
+
+    Alternatively, the time data can be specified directly as a numpy array.
+    In this case, the :attr:`data` and :attr:`sample_freq` attributes must be set manually.
+
+    >>> from acoular import MaskedTimeSamples
+    >>> import numpy as np
+    >>> data = np.random.rand(1000, 4)
+    >>> ts = MaskedTimeSamples(data=data, sample_freq=51200)
+
+    Chunks of the time data can be accessed iteratively via the :meth:`result` generator:
+
+    >>> blocksize = 512
+    >>> generator = ts.result(num=blocksize)
+    >>> for block in generator:
+    ...     print(block.shape)
+    (512, 4)
+    (488, 4)
     """
 
     #: Index of the first sample to be considered valid.
@@ -361,13 +426,11 @@ class MaskedTimeSamples(TimeSamples):
         return sli[1] - sli[0]
 
     @on_trait_change('basename')
-    def load_data(self):
+    def _load_data(self):
         # """ open the .h5 file and set attributes
         # """
         if not path.isfile(self.name):
             # no file there
-            self.numsamples_total = 0
-            self.numchannels_total = 0
             self.sample_freq = 0
             raise OSError('No such file: %s' % self.name)
         if self.h5f is not None:
@@ -375,10 +438,16 @@ class MaskedTimeSamples(TimeSamples):
                 self.h5f.close()
         file = _get_h5file_class()
         self.h5f = file(self.name)
-        self.load_timedata()
-        self.load_metadata()
+        self._load_timedata()
+        self._load_metadata()
 
-    def load_timedata(self):
+    @on_trait_change('data')
+    def _load_shapes(self):
+        """Set numchannels and numsamples from data."""
+        if self.data is not None:
+            self.numsamples_total, self.numchannels_total = self.data.shape
+
+    def _load_timedata(self):
         """Loads timedata from .h5 file. Only for internal use."""
         self.data = self.h5f.get_data_by_reference('time_data')
         self.sample_freq = self.h5f.get_node_attribute(self.data, 'sample_freq')
@@ -387,15 +456,20 @@ class MaskedTimeSamples(TimeSamples):
     def result(self, num=128):
         """Python generator that yields the output block-wise.
 
+        Reads the time data either from a HDF5 file or from a numpy array given
+        by :attr:`data` and iteratively returns a block of size `num` samples.
+        Calibrated data is returned if a calibration object is given by :attr:`calib`.
+
         Parameters
         ----------
         num : integer, defaults to 128
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block).
 
-        Returns
-        -------
-        Samples in blocks of shape (num, numchannels).
+        Yields
+        ------
+        numpy.ndarray
+            Samples in blocks of shape (num, numchannels).
             The last block may be shorter than num.
 
         """
