@@ -132,3 +132,10 @@ If the latter is the case, make sure to add the new subdirectory in the `acoular
     }  
 
 All examples are executed during the documentation build process to ensure that they are working correctly. Therefore, it is important to keep an eye on the execution time of your example. We will only accept examples that run in a reasonable time frame (ideally within a few seconds). 
+
+Citing literature
+-----------------
+
+If you are adding a new feature or method that is based on scientific literature, please make sure to include the corresponding references as a bibtex entry in the `acoular/docs/source/literature/literature.bib` file. Details on the bibtex format can be found `here <https://ctan.org/pkg/bibtex>`_.
+
+You can then cite the reference using the directive ``:cite:`<BIBTEX_KEY>``` directive in the documentation. Your citation will be automatically included in the bibliography section of the documentation. 
