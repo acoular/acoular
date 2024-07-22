@@ -8,7 +8,6 @@ Upcoming Release
     * Bugfixes:
     * Internal:
 
-
 24.07
 ------------
 
