@@ -1,11 +1,12 @@
 name: Build conda package
 
 on:
-  workflow_dispatch:
-    branches: [ master ] 
+    workflow_dispatch:
+      branches: [ '*' ] # allow manual trigger for all branches (only master will upload to Anaconda Cloud)
   
+    
 jobs:
-  conda_build_and_install:
+  conda_build_install_upload:
     name: Test conda deployment of package with Python 3.12
     runs-on: ubuntu-latest
     steps:
@@ -20,4 +21,9 @@ jobs:
         with:
           name: conda-package
           path: ./conda_package
+      - name: Upload conda package to Anaconda Cloud
+        if: ${{ github.event_name =='workflow_dispatch' && github.ref == 'refs/heads/master' }}
+        run: |
+          anaconda login --username ${{ secrets.ANACONDA_USERNAME }} --password ${{ secrets.ANACONDA_PASSWORD }}
+          anaconda upload ./conda_package/noarch/*.tar.bz2
 

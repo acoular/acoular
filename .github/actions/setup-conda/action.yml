@@ -25,4 +25,7 @@ runs:
     - name: Install conda-verify
       shell: bash
       run: conda install conda-verify
+    - name: Install anaconda-client
+      shell: bash
+      run: conda install anaconda-client
 
