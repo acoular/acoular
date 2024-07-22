@@ -640,10 +640,10 @@ class BeamformerTimeSqTraj(BeamformerTimeSq, BeamformerTimeTraj):
 
 
 class BeamformerCleant(BeamformerTime):
-    """CLEANT deconvolution method, see :ref:`Cousson et al., 2019<Cousson2019>`.
+    """CLEANT deconvolution method.
 
     An implementation of the CLEAN method in time domain. This class can only
-    be used for static sources.
+    be used for static sources. See :cite:`Cousson2019` for details.
     """
 
     #: Boolean flag, always False
@@ -667,11 +667,11 @@ class BeamformerCleant(BeamformerTime):
 
 
 class BeamformerCleantSq(BeamformerCleant):
-    """CLEANT deconvolution method, see :ref:`Cousson et al., 2019<Cousson2019>`
-    with optional removal of autocorrelation.
+    """CLEANT deconvolution method with optional removal of autocorrelation.
 
     An implementation of the CLEAN method in time domain. This class can only
-    be used for static sources.
+    be used for static sources. See :cite:`Cousson2019` for details on the method
+    and :cite:`Kujawski2020` for details on the autocorrelation removal.
     """
 
     #: Boolean flag, if 'True' (default), the main diagonal is removed before beamforming.
@@ -688,10 +688,10 @@ class BeamformerCleantSq(BeamformerCleant):
 
 
 class BeamformerCleantTraj(BeamformerCleant, BeamformerTimeTraj):
-    """CLEANT deconvolution method, see :ref:`Cousson et al., 2019<Cousson2019>`.
+    """CLEANT deconvolution method.
 
     An implementation of the CLEAN method in time domain for moving sources
-    with known trajectory.
+    with known trajectory. See :cite:`Cousson2019` for details.
     """
 
     #: Floating point and integer precision
@@ -719,11 +719,11 @@ class BeamformerCleantTraj(BeamformerCleant, BeamformerTimeTraj):
 
 
 class BeamformerCleantSqTraj(BeamformerCleantTraj, BeamformerTimeSq):
-    """CLEANT deconvolution method, see :ref:`Cousson et al., 2019<Cousson2019>`
-    with optional removal of autocorrelation.
+    """CLEANT deconvolution method with optional removal of autocorrelation.
 
     An implementation of the CLEAN method in time domain for moving sources
-    with known trajectory.
+    with known trajectory. See :cite:`Cousson2019` for details on the method and
+    :cite:`Kujawski2020` for details on the autocorrelation removal.
     """
 
     #: Boolean flag, if 'True' (default), the main diagonal is removed before beamforming.

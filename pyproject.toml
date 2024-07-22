@@ -96,6 +96,7 @@ dependencies = [
     "sphinx",
     "sphinx_gallery",
     "sphinxcontrib-bibtex",
+    "setuptools", # unfortunately still needed for sphinxcontrib-bibtex (https://github.com/mcmtroffaes/sphinxcontrib-bibtex/issues/345)
 ]
 
 [tool.hatch.envs.docs.scripts]

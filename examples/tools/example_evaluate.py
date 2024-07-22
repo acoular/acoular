@@ -7,7 +7,8 @@ Evaluate source characterization performance.
 =============================================
 
 This example demonstrates how to evaluate the performance of a beamforming algorithm using
-the :class:`acoular.tools.metrics.MetricEvaluator` class.
+the :class:`acoular.tools.metrics.MetricEvaluator` class to calculate the metrics introduced in
+:cite:`Herold2017`.
 """
 
 from pathlib import Path
