@@ -68,6 +68,7 @@ dev = [
     "sphinx",
     "sphinx_gallery",    
     "sphinxcontrib-bibtex",
+    "setuptools",
 ]
 
 [project.urls]
