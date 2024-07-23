@@ -7,6 +7,8 @@ on:
     branches: [ master ]
   workflow_dispatch:
     branches: [ '*' ] # allow manual trigger for all branches
+  schedule:
+    - cron: "00 18 * * *"
     
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -14,6 +16,7 @@ concurrency:
 
 jobs:
   linting:
+    if: ${{ github.event_name !='schedule'}}
     runs-on: ubuntu-latest
     steps:
       - name: Check out a copy of the repository
@@ -24,6 +27,7 @@ jobs:
         run: hatch -v fmt --check
 
   validate-cff:
+    if: ${{ github.event_name !='schedule'}}
     runs-on: ubuntu-latest
     steps:
       - name: Check out a copy of the repository
@@ -33,13 +37,37 @@ jobs:
         with:
           args: --validate
 
-  markdown-link-check:
+  link-check:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out a copy of the repository
-        uses: actions/checkout@v4
-      - name: Check for dead links in Markdown
-        uses: gaurav-nelson/github-action-markdown-link-check@v1
+      - uses: actions/checkout@v4
+      - name: check links
+        id: lychee
+        uses: lycheeverse/lychee-action@v1
+        with:
+          # Check all markdown, html and reStructuredText files in repo (default)
+          args: --base . --verbose --no-progress './**/*.md' './**/*.html' './**/*.rst' --exclude file:///home/runner/work/acoular/acoular/docs/source/_themes/*
+          fail: true
+
+  cron-link-check:
+    if: ${{ github.event_name == 'schedule' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: check links
+        id: lychee
+        uses: lycheeverse/lychee-action@v1
+        with:
+          # Check all markdown, html and reStructuredText files in repo (default)
+          args: --base . --verbose --no-progress './**/*.md' './**/*.html' './**/*.rst' --exclude file:///home/runner/work/acoular/acoular/docs/source/_themes/*
+          fail: true
+      - name: Create Issue From File
+        if: ${{ env.lychee_exit_code != 0 }}
+        uses: peter-evans/create-issue-from-file@v4
+        with:
+          title: Link Checker Report
+          content-filepath: ./lychee/out.md
+          labels: bug, automated issue  
 
   alls-green:
     name: Checks green?
@@ -47,7 +75,7 @@ jobs:
     needs:
       - linting
       - validate-cff
-      - markdown-link-check
+      - link-check
     runs-on: ubuntu-latest
     steps:
       - id: workaround

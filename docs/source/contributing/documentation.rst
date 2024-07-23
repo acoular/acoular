@@ -101,7 +101,7 @@ Modules should be documented with a module docstring at the beginning of the fil
 Writing Python examples
 -----------------------
 
-Acoular provides a set of `examples <https://acoular.org/examples/index.html>`_ that demonstrate how to use the package. These examples are located in the ``acoular/examples`` subdirectory. 
+Acoular provides a set of :doc:`examples <../auto_examples/index>` that demonstrate how to use the package. These examples are located in the ``acoular/examples`` subdirectory. 
 
 We are always looking for new examples that demonstrate the functionality of Acoular. If you have a good example that you would like to share, please consider contributing it to the Acoular package.
 
