@@ -4,11 +4,19 @@ What's new
 Upcoming Release 
 ----------------
     
-    * New features:
-    * Bugfixes:
-    * Internal:
-        * updates literature and adds `sphinxcontrib-bibtex` extension to support bibtex citation in the documentation.
+    **New features:**
+    
+    **Bugfixes**
 
+    **Documentation**
+        * updates literature and adds `sphinxcontrib-bibtex` extension to support bibtex citation in the documentation.
+        * cleans-up and structures the conf.py file and fixes missing acoular logo in documentation
+
+    **Internal**
+        * replaces the markdown-link-check by lychee
+            * faster CI (written in RUST)
+            * allows more files to be checked, including the .rst files in the documentation
+            * adds a cron job that runs daily
 
 24.07
 ------------
