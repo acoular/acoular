@@ -61,7 +61,7 @@ jobs:
     needs:
       - linting
       - validate-cff
-      - markdown-link-check
+      - link-check
     runs-on: ubuntu-latest
     steps:
       - id: workaround
