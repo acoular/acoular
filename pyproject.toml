@@ -53,22 +53,30 @@ full = [
     "sounddevice",
 ]
 
-dev = [
-    "matplotlib",
-    "pylops",
-    "sounddevice",
-    "traitsui",
-    "hatch",
-    "ruff==0.4.1",
-    "pytest",
+docs = [
     "ipython",
     "graphviz",
+    "matplotlib",
     "numpydoc",
     "pickleshare",
+    "sounddevice",
     "sphinx",
-    "sphinx_gallery",    
+    "sphinx_gallery",
     "sphinxcontrib-bibtex",
-    "setuptools",
+    "setuptools", # unfortunately still needed for sphinxcontrib-bibtex (https://github.com/mcmtroffaes/sphinxcontrib-bibtex/issues/345)
+]
+
+tests = [
+    "pytest",
+    "pytest-cov",
+    "sounddevice",
+    "traitsui",
+]
+
+dev = [
+    "acoular[docs,full,tests]"
+    "hatch",
+    "ruff==0.4.1",
 ]
 
 [project.urls]
@@ -88,16 +96,7 @@ config-path = [".ruff.toml"]
 platforms = ["linux"]
 python = "3.12"
 dependencies = [
-    "ipython",
-    "graphviz",
-    "matplotlib",
-    "numpydoc",
-    "pickleshare",
-    "sounddevice",
-    "sphinx",
-    "sphinx_gallery",
-    "sphinxcontrib-bibtex",
-    "setuptools", # unfortunately still needed for sphinxcontrib-bibtex (https://github.com/mcmtroffaes/sphinxcontrib-bibtex/issues/345)
+    "acoular[docs]"
 ]
 
 [tool.hatch.envs.docs.scripts]
@@ -105,10 +104,7 @@ build = ["cd docs && make html"]
 
 [tool.hatch.envs.tests]
 dependencies = [
-    "pytest",
-    "pytest-cov",
-    "sounddevice",
-    "traitsui",
+   "acoular[tests]"
 ]
 
 [[tool.hatch.envs.tests.matrix]]
