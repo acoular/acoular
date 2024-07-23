@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>BeamformerFunctional &#8212; Acoular 24.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=f63d8bfa" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=f64914b1"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="BeamformerCapon" href="acoular.fbeamform.BeamformerCapon.html" />
+    <link rel="prev" title="BeamformerBase" href="acoular.fbeamform.BeamformerBase.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 24.07 documentation</span></a></h1>
+        <h2 class="heading"><span>BeamformerFunctional</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.fbeamform.BeamformerBase.html">BeamformerBase</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.fbeamform.html">fbeamform</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.fbeamform.BeamformerCapon.html">BeamformerCapon</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="beamformerfunctional">
+<h1>BeamformerFunctional<a class="headerlink" href="#beamformerfunctional" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerFunctional">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.fbeamform.</span></span><span class="sig-name descname"><span class="pre">BeamformerFunctional</span></span><a class="headerlink" href="#acoular.fbeamform.BeamformerFunctional" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.fbeamform.BeamformerBase.html#acoular.fbeamform.BeamformerBase" title="acoular.fbeamform.BeamformerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerBase</span></code></a></p>
+<p>Functional beamforming algorithm.</p>
+<p>See <span id="id1">[<a class="reference internal" href="../../../literature/index.html#id11" title="R. P. Dougherty. Functional beamforming. In Proceedings on CD of the 5th Berlin Beamforming Conference. Berlin, 2014. Gesellschaft zur Förderung angewandter Informatik (GFaI).">5</a>]</span> for details.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerFunctional.gamma">
+<span class="sig-name descname"><span class="pre">gamma</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(1,</span> <span class="pre">desc='functional</span> <span class="pre">exponent')</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerFunctional.gamma" title="Link to this definition">¶</a></dt>
+<dd><p>Functional exponent, defaults to 1 (= Classic Beamforming).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerFunctional.r_diag">
+<span class="sig-name descname"><span class="pre">r_diag</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum(False,</span> <span class="pre">desc='False,</span> <span class="pre">as</span> <span class="pre">Functional</span> <span class="pre">Beamformer</span> <span class="pre">is</span> <span class="pre">only</span> <span class="pre">well</span> <span class="pre">defined</span> <span class="pre">for</span> <span class="pre">the</span> <span class="pre">full</span> <span class="pre">CSM')</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerFunctional.r_diag" title="Link to this definition">¶</a></dt>
+<dd><p>Functional Beamforming is only well defined for full CSM</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerFunctional.r_diag_norm">
+<span class="sig-name descname"><span class="pre">r_diag_norm</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerFunctional.r_diag_norm" title="Link to this definition">¶</a></dt>
+<dd><p>Normalization factor in case of CSM diagonal removal. Defaults to 1.0 since Functional Beamforming is only well defined for full CSM.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.fbeamform.BeamformerBase.html">BeamformerBase</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.fbeamform.html">fbeamform</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.fbeamform.BeamformerCapon.html">BeamformerCapon</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, Acoular Development Team.
+      Last updated on Jul 23, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    </div>
+  </body>
+</html>

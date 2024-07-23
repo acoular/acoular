@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>MicAIAABenchmark &#8212; Acoular 24.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=f63d8bfa" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../../_static/documentation_options.js?v=f64914b1"></script>
+    <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="helpers" href="../acoular.tools.helpers.html" />
+    <link rel="prev" title="CsmAIAABenchmark" href="acoular.tools.aiaa.CsmAIAABenchmark.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../../index.html">
+          <span>Acoular 24.07 documentation</span></a></h1>
+        <h2 class="heading"><span>MicAIAABenchmark</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tools.aiaa.CsmAIAABenchmark.html">CsmAIAABenchmark</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tools.aiaa.html">aiaa</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../acoular.tools.helpers.html">helpers</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="micaiaabenchmark">
+<h1>MicAIAABenchmark<a class="headerlink" href="#micaiaabenchmark" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.tools.aiaa.MicAIAABenchmark">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.tools.aiaa.</span></span><span class="sig-name descname"><span class="pre">MicAIAABenchmark</span></span><a class="headerlink" href="#acoular.tools.aiaa.MicAIAABenchmark" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../acoular.microphones.MicGeom.html#acoular.microphones.MicGeom" title="acoular.microphones.MicGeom"><code class="xref py py-class docutils literal notranslate"><span class="pre">MicGeom</span></code></a></p>
+<p>Provides the geometric arrangement of microphones in the array.</p>
+<p>In contrast to standard Acoular microphone geometries, the AIAA
+benchmark format includes the array geometry as metadata in the
+file containing the measurement data.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tools.aiaa.MicAIAABenchmark.from_file">
+<span class="sig-name descname"><span class="pre">from_file</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">File(filter=['*.h5'],</span> <span class="pre">desc='name</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">h5</span> <span class="pre">file</span> <span class="pre">containing</span> <span class="pre">the</span> <span class="pre">microphone</span> <span class="pre">geometry')</span></em><a class="headerlink" href="#acoular.tools.aiaa.MicAIAABenchmark.from_file" title="Link to this definition">¶</a></dt>
+<dd><p>Name of the .h5-file from wich to read the data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.tools.aiaa.MicAIAABenchmark.import_mpos">
+<span class="sig-name descname"><span class="pre">import_mpos</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#acoular.tools.aiaa.MicAIAABenchmark.import_mpos" title="Link to this definition">¶</a></dt>
+<dd><p>Import the microphone positions from .h5 file.
+Called when <code class="xref py py-attr docutils literal notranslate"><span class="pre">basename</span></code> changes.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tools.aiaa.CsmAIAABenchmark.html">CsmAIAABenchmark</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tools.aiaa.html">aiaa</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../acoular.tools.helpers.html">helpers</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, Acoular Development Team.
+      Last updated on Jul 23, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    </div>
+  </body>
+</html>

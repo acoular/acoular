@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>SourceMixer &#8212; Acoular 24.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=f63d8bfa" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=f64914b1"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="PointSourceConvolve" href="acoular.sources.PointSourceConvolve.html" />
+    <link rel="prev" title="UncorrelatedNoiseSource" href="acoular.sources.UncorrelatedNoiseSource.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 24.07 documentation</span></a></h1>
+        <h2 class="heading"><span>SourceMixer</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.sources.UncorrelatedNoiseSource.html">UncorrelatedNoiseSource</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.sources.html">sources</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.sources.PointSourceConvolve.html">PointSourceConvolve</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="sourcemixer">
+<h1>SourceMixer<a class="headerlink" href="#sourcemixer" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.sources.SourceMixer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.sources.</span></span><span class="sig-name descname"><span class="pre">SourceMixer</span></span><a class="headerlink" href="#acoular.sources.SourceMixer" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.tprocess.SamplesGenerator.html#acoular.tprocess.SamplesGenerator" title="acoular.tprocess.SamplesGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplesGenerator</span></code></a></p>
+<p>Mixes the signals from several sources.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.SourceMixer.sources">
+<span class="sig-name descname"><span class="pre">sources</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">List(Instance(SamplesGenerator,</span> <span class="pre">()))</span></em><a class="headerlink" href="#acoular.sources.SourceMixer.sources" title="Link to this definition">¶</a></dt>
+<dd><p>List of <a class="reference internal" href="acoular.tprocess.SamplesGenerator.html#acoular.tprocess.SamplesGenerator" title="acoular.tprocess.SamplesGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplesGenerator</span></code></a> objects
+to be mixed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.SourceMixer.sample_freq">
+<span class="sig-name descname"><span class="pre">sample_freq</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['sdigest'])</span></em><a class="headerlink" href="#acoular.sources.SourceMixer.sample_freq" title="Link to this definition">¶</a></dt>
+<dd><p>Sampling frequency of the signal.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.SourceMixer.numchannels">
+<span class="sig-name descname"><span class="pre">numchannels</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['sdigest'])</span></em><a class="headerlink" href="#acoular.sources.SourceMixer.numchannels" title="Link to this definition">¶</a></dt>
+<dd><p>Number of channels.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.SourceMixer.numsamples">
+<span class="sig-name descname"><span class="pre">numsamples</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['sdigest'])</span></em><a class="headerlink" href="#acoular.sources.SourceMixer.numsamples" title="Link to this definition">¶</a></dt>
+<dd><p>Number of samples.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.SourceMixer.weights">
+<span class="sig-name descname"><span class="pre">weights</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CArray(desc='channel</span> <span class="pre">weights')</span></em><a class="headerlink" href="#acoular.sources.SourceMixer.weights" title="Link to this definition">¶</a></dt>
+<dd><p>Amplitude weight(s) for the sources as array. If not set,
+all source signals are equally weighted.
+Must match the number of sources in <a class="reference internal" href="#acoular.sources.SourceMixer.sources" title="acoular.sources.SourceMixer.sources"><code class="xref py py-attr docutils literal notranslate"><span class="pre">sources</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.sources.SourceMixer.validate_sources">
+<span class="sig-name descname"><span class="pre">validate_sources</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#acoular.sources.SourceMixer.validate_sources" title="Link to this definition">¶</a></dt>
+<dd><p>Validates if sources fit together.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.sources.SourceMixer.result">
+<span class="sig-name descname"><span class="pre">result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.sources.SourceMixer.result" title="Link to this definition">¶</a></dt>
+<dd><p>Python generator that yields the output block-wise.
+The outputs from the sources in the list are being added.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>num</strong><span class="classifier">integer</span></dt><dd><p>This parameter defines the size of the blocks to be yielded
+(i.e. the number of samples per block).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>Samples in blocks of shape (num, numchannels).</dt><dd><p>The last block may be shorter than num.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.sources.UncorrelatedNoiseSource.html">UncorrelatedNoiseSource</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.sources.html">sources</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.sources.PointSourceConvolve.html">PointSourceConvolve</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, Acoular Development Team.
+      Last updated on Jul 23, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Airfoil in open jet – Frequency domain beamforming methods. &#8212; Acoular 24.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=f63d8bfa" />
+    <link rel="stylesheet" type="text/css" href="../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../_static/documentation_options.js?v=f64914b1"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Airfoil in open jet – Time domain beamforming methods." href="example_airfoil_in_open_jet_time_domain_methods.html" />
+    <link rel="prev" title="Airfoil in open jet – steering vectors." href="example_airfoil_in_open_jet_steering_vectors.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../index.html">
+          <span>Acoular 24.07 documentation</span></a></h1>
+        <h2 class="heading"><span>Airfoil in open jet – Frequency domain beamforming methods.</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="example_airfoil_in_open_jet_steering_vectors.html">Airfoil in open jet – steering vectors.</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Wind tunnel examples</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="example_airfoil_in_open_jet_time_domain_methods.html">Airfoil in open jet – Time domain beamforming methods.</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-wind-tunnel-examples-example-airfoil-in-open-jet-freq-domain-methods-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code.</p>
+</div>
+<section class="sphx-glr-example-title" id="airfoil-in-open-jet-frequency-domain-beamforming-methods">
+<span id="sphx-glr-auto-examples-wind-tunnel-examples-example-airfoil-in-open-jet-freq-domain-methods-py"></span><h1>Airfoil in open jet – Frequency domain beamforming methods.<a class="headerlink" href="#airfoil-in-open-jet-frequency-domain-beamforming-methods" title="Link to this heading">¶</a></h1>
+<p>Demonstrates different microphone array methods operating in the frequency domain.
+Uses measured data in file example_data.h5, calibration in file example_calib.xml,
+microphone geometry in array_56.xml (part of Acoular).</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span> <span class="nn">acoular</span> <span class="k">as</span> <span class="nn">ac</span>
+</pre></div>
+</div>
+<p>The 4 kHz third-octave band is used for the example.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">cfreq</span> <span class="o">=</span> <span class="mi">4000</span>
+<span class="n">num</span> <span class="o">=</span> <span class="mi">3</span>
+</pre></div>
+</div>
+<p>Setting up the processing chain for the frequency domain methods.</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>An in-depth explanation for setting up the processing chain is given in the example <a class="reference internal" href="example_airfoil_in_open_jet_steering_vectors.html"><span class="doc">Airfoil in open jet – steering vectors.</span></a>.</p>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">ts</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">MaskedTimeSamples</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;../data/example_data.h5&#39;</span><span class="p">,</span>
+    <span class="n">invalid_channels</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
+    <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">stop</span><span class="o">=</span><span class="mi">16000</span><span class="p">,</span>
+    <span class="n">calib</span><span class="o">=</span><span class="n">ac</span><span class="o">.</span><span class="n">Calib</span><span class="p">(</span><span class="n">from_file</span><span class="o">=</span><span class="s1">&#39;../data/example_calib.xml&#39;</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">mics</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">MicGeom</span><span class="p">(</span><span class="n">from_file</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="n">ac</span><span class="o">.</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s1">&#39;xml&#39;</span> <span class="o">/</span> <span class="s1">&#39;array_56.xml&#39;</span><span class="p">,</span> <span class="n">invalid_channels</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">])</span>
+<span class="n">grid</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">RectGrid</span><span class="p">(</span><span class="n">x_min</span><span class="o">=-</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">x_max</span><span class="o">=-</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">y_min</span><span class="o">=-</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">y_max</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.68</span><span class="p">,</span> <span class="n">increment</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+<span class="n">env</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">Environment</span><span class="p">(</span><span class="n">c</span><span class="o">=</span><span class="mf">346.04</span><span class="p">)</span>
+<span class="n">st</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">SteeringVector</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span> <span class="n">mics</span><span class="o">=</span><span class="n">mics</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">)</span>
+<span class="n">f</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">PowerSpectra</span><span class="p">(</span><span class="n">time_data</span><span class="o">=</span><span class="n">ts</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="s1">&#39;Hanning&#39;</span><span class="p">,</span> <span class="n">overlap</span><span class="o">=</span><span class="s1">&#39;50%&#39;</span><span class="p">,</span> <span class="n">block_size</span><span class="o">=</span><span class="mi">128</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here, different frequency domain beamformers defined in the module <a class="reference internal" href="../../api_ref/generated/acoular.fbeamform.html#module-acoular.fbeamform" title="acoular.fbeamform"><code class="xref py py-mod docutils literal notranslate"><span class="pre">acoular.fbeamform</span></code></a> are used and the corresponding result maps are calculated by
+evaluating the <a class="reference internal" href="../../api_ref/generated/generated/acoular.fbeamform.BeamformerBase.html#acoular.fbeamform.BeamformerBase.synthetic" title="acoular.fbeamform.BeamformerBase.synthetic"><code class="xref py py-meth docutils literal notranslate"><span class="pre">acoular.fbeamform.BeamformerBase.synthetic()</span></code></a> method with the desired frequency and bandwidth.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">bb</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">BeamformerBase</span><span class="p">(</span><span class="n">freq_data</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">steer</span><span class="o">=</span><span class="n">st</span><span class="p">,</span> <span class="n">r_diag</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">bc</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">BeamformerCapon</span><span class="p">(</span><span class="n">freq_data</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">steer</span><span class="o">=</span><span class="n">st</span><span class="p">,</span> <span class="n">cached</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">be</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">BeamformerEig</span><span class="p">(</span><span class="n">freq_data</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">steer</span><span class="o">=</span><span class="n">st</span><span class="p">,</span> <span class="n">r_diag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">54</span><span class="p">)</span>
+<span class="n">bm</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">BeamformerMusic</span><span class="p">(</span><span class="n">freq_data</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">steer</span><span class="o">=</span><span class="n">st</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+<span class="n">bd</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">BeamformerDamas</span><span class="p">(</span><span class="n">freq_data</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">steer</span><span class="o">=</span><span class="n">st</span><span class="p">,</span> <span class="n">r_diag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">bdp</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">BeamformerDamasPlus</span><span class="p">(</span><span class="n">freq_data</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">steer</span><span class="o">=</span><span class="n">st</span><span class="p">,</span> <span class="n">r_diag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">bo</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">BeamformerOrth</span><span class="p">(</span><span class="n">freq_data</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">steer</span><span class="o">=</span><span class="n">st</span><span class="p">,</span> <span class="n">r_diag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eva_list</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">38</span><span class="p">,</span> <span class="mi">54</span><span class="p">)))</span>
+<span class="n">bs</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">BeamformerCleansc</span><span class="p">(</span><span class="n">freq_data</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">steer</span><span class="o">=</span><span class="n">st</span><span class="p">,</span> <span class="n">r_diag</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">bcmf</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">BeamformerCMF</span><span class="p">(</span><span class="n">freq_data</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">steer</span><span class="o">=</span><span class="n">st</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;LassoLarsBIC&#39;</span><span class="p">)</span>
+<span class="n">bl</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">BeamformerClean</span><span class="p">(</span><span class="n">freq_data</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">steer</span><span class="o">=</span><span class="n">st</span><span class="p">,</span> <span class="n">r_diag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">bf</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">BeamformerFunctional</span><span class="p">(</span><span class="n">freq_data</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">steer</span><span class="o">=</span><span class="n">st</span><span class="p">,</span> <span class="n">r_diag</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">bgib</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">BeamformerGIB</span><span class="p">(</span><span class="n">freq_data</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">steer</span><span class="o">=</span><span class="n">st</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;LassoLars&#39;</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Plot result maps for different beamformers in frequency domain</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pylab</span> <span class="kn">import</span> <span class="n">colorbar</span><span class="p">,</span> <span class="n">figure</span><span class="p">,</span> <span class="n">imshow</span><span class="p">,</span> <span class="n">show</span><span class="p">,</span> <span class="n">subplot</span><span class="p">,</span> <span class="n">tight_layout</span><span class="p">,</span> <span class="n">title</span>
+
+<span class="n">figure</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">i1</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># no of subplot</span>
+<span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="p">(</span><span class="n">bb</span><span class="p">,</span> <span class="n">bc</span><span class="p">,</span> <span class="n">be</span><span class="p">,</span> <span class="n">bm</span><span class="p">,</span> <span class="n">bl</span><span class="p">,</span> <span class="n">bo</span><span class="p">,</span> <span class="n">bs</span><span class="p">,</span> <span class="n">bd</span><span class="p">,</span> <span class="n">bcmf</span><span class="p">,</span> <span class="n">bf</span><span class="p">,</span> <span class="n">bdp</span><span class="p">,</span> <span class="n">bgib</span><span class="p">):</span>
+    <span class="n">subplot</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">i1</span><span class="p">)</span>
+    <span class="n">i1</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="nb">map</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">synthetic</span><span class="p">(</span><span class="n">cfreq</span><span class="p">,</span> <span class="n">num</span><span class="p">)</span>
+    <span class="n">mx</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">L_p</span><span class="p">(</span><span class="nb">map</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+    <span class="n">imshow</span><span class="p">(</span><span class="n">ac</span><span class="o">.</span><span class="n">L_p</span><span class="p">(</span><span class="nb">map</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">mx</span> <span class="o">-</span> <span class="mi">15</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">grid</span><span class="o">.</span><span class="n">extend</span><span class="p">())</span>
+    <span class="n">colorbar</span><span class="p">()</span>
+    <span class="n">title</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+    <span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_example_airfoil_in_open_jet_freq_domain_methods_001.png" srcset="../../_images/sphx_glr_example_airfoil_in_open_jet_freq_domain_methods_001.png" alt="BeamformerBase, BeamformerCapon, BeamformerEig, BeamformerMusic, BeamformerClean, BeamformerOrth, BeamformerCleansc, BeamformerDamas, BeamformerCMF, BeamformerFunctional, BeamformerDamasPlus, BeamformerGIB" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[(&#39;example_data_cache.h5&#39;, 6)]
+[(&#39;example_data_cache.h5&#39;, 7)]
+[(&#39;example_data_cache.h5&#39;, 8)]
+[(&#39;example_data_cache.h5&#39;, 9)]
+[(&#39;example_data_cache.h5&#39;, 10)]
+[(&#39;example_data_cache.h5&#39;, 10), (&#39;psf_8b8411267ea325364427a1259e52d4be_cache.h5&#39;, 1)]
+[(&#39;example_data_cache.h5&#39;, 11)]
+[(&#39;example_data_cache.h5&#39;, 12)]
+[(&#39;example_data_cache.h5&#39;, 13)]
+[(&#39;example_data_cache.h5&#39;, 13), (&#39;psf_8b8411267ea325364427a1259e52d4be_cache.h5&#39;, 1)]
+[(&#39;example_data_cache.h5&#39;, 14)]
+[(&#39;example_data_cache.h5&#39;, 15)]
+[(&#39;example_data_cache.h5&#39;, 16)]
+[(&#39;example_data_cache.h5&#39;, 16), (&#39;psf_8b8411267ea325364427a1259e52d4be_cache.h5&#39;, 1)]
+[(&#39;example_data_cache.h5&#39;, 17)]
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 6.338 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-wind-tunnel-examples-example-airfoil-in-open-jet-freq-domain-methods-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/e7dbf5b83be9d57ca3b6feb4e360f53b/example_airfoil_in_open_jet_freq_domain_methods.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">example_airfoil_in_open_jet_freq_domain_methods.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/493ae9f6764b18e38c1aa4a92f10e36d/example_airfoil_in_open_jet_freq_domain_methods.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">example_airfoil_in_open_jet_freq_domain_methods.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/73705665c8e619a78b2b08580ca555f9/example_airfoil_in_open_jet_freq_domain_methods.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">example_airfoil_in_open_jet_freq_domain_methods.zip</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="example_airfoil_in_open_jet_steering_vectors.html">Airfoil in open jet – steering vectors.</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Wind tunnel examples</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="example_airfoil_in_open_jet_time_domain_methods.html">Airfoil in open jet – Time domain beamforming methods.</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, Acoular Development Team.
+      Last updated on Jul 23, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    </div>
+  </body>
+</html>

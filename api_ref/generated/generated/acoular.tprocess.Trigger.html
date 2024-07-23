@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Trigger &#8212; Acoular 24.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=f63d8bfa" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=f64914b1"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="AngleTracker" href="acoular.tprocess.AngleTracker.html" />
+    <link rel="prev" title="MaskedTimeInOut" href="acoular.tprocess.MaskedTimeInOut.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 24.07 documentation</span></a></h1>
+        <h2 class="heading"><span>Trigger</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tprocess.MaskedTimeInOut.html">MaskedTimeInOut</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tprocess.html">tprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tprocess.AngleTracker.html">AngleTracker</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="trigger">
+<h1>Trigger<a class="headerlink" href="#trigger" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.tprocess.Trigger">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.tprocess.</span></span><span class="sig-name descname"><span class="pre">Trigger</span></span><a class="headerlink" href="#acoular.tprocess.Trigger" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.tprocess.TimeInOut.html#acoular.tprocess.TimeInOut" title="acoular.tprocess.TimeInOut"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeInOut</span></code></a></p>
+<p>Class for identifying trigger signals.
+Gets samples from <a class="reference internal" href="#acoular.tprocess.Trigger.source" title="acoular.tprocess.Trigger.source"><code class="xref py py-attr docutils literal notranslate"><span class="pre">source</span></code></a> and stores the trigger samples in <a class="reference internal" href="#acoular.tprocess.Trigger.trigger_data" title="acoular.tprocess.Trigger.trigger_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">trigger_data()</span></code></a>.</p>
+<p>The algorithm searches for peaks which are above/below a signed threshold.
+A estimate for approximative length of one revolution is found via the greatest
+number of samples between the adjacent peaks.
+The algorithm then defines hunks as percentages of the estimated length of one revolution.
+If there are multiple peaks within one hunk, the algorithm just takes one of them
+into account (e.g. the first peak, the peak with extremum value, …).
+In the end, the algorithm checks if the found peak locations result in rpm that don’t
+vary too much.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.Trigger.source">
+<span class="sig-name descname"><span class="pre">source</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Instance(SamplesGenerator)</span></em><a class="headerlink" href="#acoular.tprocess.Trigger.source" title="Link to this definition">¶</a></dt>
+<dd><p>Data source; <a class="reference internal" href="acoular.tprocess.SamplesGenerator.html#acoular.tprocess.SamplesGenerator" title="acoular.tprocess.SamplesGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplesGenerator</span></code></a> or derived object.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.Trigger.threshold">
+<span class="sig-name descname"><span class="pre">threshold</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(None)</span></em><a class="headerlink" href="#acoular.tprocess.Trigger.threshold" title="Link to this definition">¶</a></dt>
+<dd><p>Threshold of trigger. Has different meanings for different
+<a class="reference internal" href="#acoular.tprocess.Trigger.trigger_type" title="acoular.tprocess.Trigger.trigger_type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">trigger_type</span></code></a>. The sign is relevant.
+If a sample of the signal is above/below the positive/negative threshold,
+it is assumed to be a peak.
+Default is None, in which case a first estimate is used: The threshold
+is assumed to be 75% of the max/min difference between all extremums and the
+mean value of the trigger signal. E.g: the mean value is 0 and there are positive
+extremums at 400 and negative extremums at -800. Then the estimated threshold would be
+0.75 * -800 = -600.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.Trigger.max_variation_of_duration">
+<span class="sig-name descname"><span class="pre">max_variation_of_duration</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(0.02)</span></em><a class="headerlink" href="#acoular.tprocess.Trigger.max_variation_of_duration" title="Link to this definition">¶</a></dt>
+<dd><p>Maximum allowable variation of length of each revolution duration. Default is
+2%. A warning is thrown, if any revolution length surpasses this value:
+abs(durationEachRev - meanDuration) &gt; 0.02 * meanDuration</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.Trigger.hunk_length">
+<span class="sig-name descname"><span class="pre">hunk_length</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(0.1)</span></em><a class="headerlink" href="#acoular.tprocess.Trigger.hunk_length" title="Link to this definition">¶</a></dt>
+<dd><p>Defines the length of hunks via lenHunk = hunk_length * maxOncePerRevDuration.
+If there are multiple peaks within lenHunk, then the algorithm will
+cancel all but one out (see <a class="reference internal" href="#acoular.tprocess.Trigger.multiple_peaks_in_hunk" title="acoular.tprocess.Trigger.multiple_peaks_in_hunk"><code class="xref py py-attr docutils literal notranslate"><span class="pre">multiple_peaks_in_hunk</span></code></a>).
+Default is to 0.1.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.Trigger.trigger_type">
+<span class="sig-name descname"><span class="pre">trigger_type</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Trait('dirac',</span> <span class="pre">'rect')</span></em><a class="headerlink" href="#acoular.tprocess.Trigger.trigger_type" title="Link to this definition">¶</a></dt>
+<dd><p>Type of trigger.</p>
+<p>‘dirac’: a single puls is assumed (sign of
+<a class="reference internal" href="#acoular.tprocess.Trigger.trigger_type" title="acoular.tprocess.Trigger.trigger_type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">trigger_type</span></code></a> is important).
+Sample will trigger if its value is above/below the pos/neg threshold.</p>
+<p>‘rect’ : repeating rectangular functions. Only every second
+edge is assumed to be a trigger. The sign of
+<a class="reference internal" href="#acoular.tprocess.Trigger.trigger_type" title="acoular.tprocess.Trigger.trigger_type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">trigger_type</span></code></a> gives information
+on which edge should be used (+ for rising edge, - for falling edge).
+Sample will trigger if the difference between its value and its predecessors value
+is above/below the pos/neg threshold.</p>
+<p>Default is ‘dirac’.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.Trigger.multiple_peaks_in_hunk">
+<span class="sig-name descname"><span class="pre">multiple_peaks_in_hunk</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Trait('extremum',</span> <span class="pre">'first')</span></em><a class="headerlink" href="#acoular.tprocess.Trigger.multiple_peaks_in_hunk" title="Link to this definition">¶</a></dt>
+<dd><p>Identifier which peak to consider, if there are multiple peaks in one hunk
+(see <a class="reference internal" href="#acoular.tprocess.Trigger.hunk_length" title="acoular.tprocess.Trigger.hunk_length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">hunk_length</span></code></a>). Default is to ‘extremum’,
+in which case the extremal peak (maximum if threshold &gt; 0, minimum if threshold &lt; 0) is considered.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.Trigger.trigger_data">
+<span class="sig-name descname"><span class="pre">trigger_data</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.tprocess.Trigger.trigger_data" title="Link to this definition">¶</a></dt>
+<dd><p>Tuple consisting of 3 entries:</p>
+<p>1.: -Vector with the sample indices of the 1/Rev trigger samples</p>
+<p>2.: -maximum of number of samples between adjacent trigger samples</p>
+<p>3.: -minimum of number of samples between adjacent trigger samples</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tprocess.MaskedTimeInOut.html">MaskedTimeInOut</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tprocess.html">tprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tprocess.AngleTracker.html">AngleTracker</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, Acoular Development Team.
+      Last updated on Jul 23, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>BaseSpectra &#8212; Acoular 24.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=f63d8bfa" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=f64914b1"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="FFTSpectra" href="acoular.spectra.FFTSpectra.html" />
+    <link rel="prev" title="spectra" href="../acoular.spectra.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 24.07 documentation</span></a></h1>
+        <h2 class="heading"><span>BaseSpectra</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.spectra.html">spectra</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.spectra.html">spectra</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.spectra.FFTSpectra.html">FFTSpectra</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="basespectra">
+<h1>BaseSpectra<a class="headerlink" href="#basespectra" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.spectra.BaseSpectra">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.spectra.</span></span><span class="sig-name descname"><span class="pre">BaseSpectra</span></span><a class="headerlink" href="#acoular.spectra.BaseSpectra" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">HasPrivateTraits</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.spectra.BaseSpectra.source">
+<span class="sig-name descname"><span class="pre">source</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Trait(SamplesGenerator)</span></em><a class="headerlink" href="#acoular.spectra.BaseSpectra.source" title="Link to this definition">¶</a></dt>
+<dd><p>Data source; <code class="xref py py-class docutils literal notranslate"><span class="pre">SamplesGenerator</span></code> or derived object.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.spectra.BaseSpectra.sample_freq">
+<span class="sig-name descname"><span class="pre">sample_freq</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Delegate('source')</span></em><a class="headerlink" href="#acoular.spectra.BaseSpectra.sample_freq" title="Link to this definition">¶</a></dt>
+<dd><p>Sampling frequency of output signal, as given by <a class="reference internal" href="#acoular.spectra.BaseSpectra.source" title="acoular.spectra.BaseSpectra.source"><code class="xref py py-attr docutils literal notranslate"><span class="pre">source</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.spectra.BaseSpectra.numchannels">
+<span class="sig-name descname"><span class="pre">numchannels</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Delegate('source')</span></em><a class="headerlink" href="#acoular.spectra.BaseSpectra.numchannels" title="Link to this definition">¶</a></dt>
+<dd><p>Number of time data channels</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.spectra.BaseSpectra.window">
+<span class="sig-name descname"><span class="pre">window</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Trait(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.spectra.BaseSpectra.window" title="Link to this definition">¶</a></dt>
+<dd><p>Window function for FFT, one of:
+* ‘Rectangular’ (default)
+* ‘Hanning’
+* ‘Hamming’
+* ‘Bartlett’
+* ‘Blackman’</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.spectra.BaseSpectra.overlap">
+<span class="sig-name descname"><span class="pre">overlap</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Trait('None',</span> <span class="pre">{'None':</span> <span class="pre">1,</span> <span class="pre">'50%':</span> <span class="pre">2,</span> <span class="pre">'75%':</span> <span class="pre">4,</span> <span class="pre">'87.5%':</span> <span class="pre">8},</span> <span class="pre">desc='overlap</span> <span class="pre">of</span> <span class="pre">FFT</span> <span class="pre">blocks')</span></em><a class="headerlink" href="#acoular.spectra.BaseSpectra.overlap" title="Link to this definition">¶</a></dt>
+<dd><p>Overlap factor for averaging: ‘None’(default), ‘50%’, ‘75%’, ‘87.5%’.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.spectra.BaseSpectra.block_size">
+<span class="sig-name descname"><span class="pre">block_size</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Trait(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.spectra.BaseSpectra.block_size" title="Link to this definition">¶</a></dt>
+<dd><p>FFT block size, one of: 128, 256, 512, 1024, 2048 … 65536,
+defaults to 1024.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.spectra.BaseSpectra.precision">
+<span class="sig-name descname"><span class="pre">precision</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Trait('complex128',</span> <span class="pre">'complex64',</span> <span class="pre">desc='precision</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">fft')</span></em><a class="headerlink" href="#acoular.spectra.BaseSpectra.precision" title="Link to this definition">¶</a></dt>
+<dd><p>The floating-number-precision of entries of csm, eigenvalues and
+eigenvectors, corresponding to numpy dtypes. Default is 64 bit.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.spectra.BaseSpectra.fftfreq">
+<span class="sig-name descname"><span class="pre">fftfreq</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#acoular.spectra.BaseSpectra.fftfreq" title="Link to this definition">¶</a></dt>
+<dd><p>Return the Discrete Fourier Transform sample frequencies.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>f</strong><span class="classifier">ndarray</span></dt><dd><p>Array of length <em>block_size/2+1</em> containing the sample frequencies.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.spectra.html">spectra</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.spectra.html">spectra</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.spectra.FFTSpectra.html">FFTSpectra</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, Acoular Development Team.
+      Last updated on Jul 23, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    </div>
+  </body>
+</html>

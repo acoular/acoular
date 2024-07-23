@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>acoular_demo &#8212; Acoular 24.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=f63d8bfa" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=f64914b1"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="environments" href="../acoular.environments.html" />
+    <link rel="prev" title="demo" href="../acoular.demo.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 24.07 documentation</span></a></h1>
+        <h2 class="heading"><span>acoular_demo</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.demo.html">demo</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.demo.html">demo</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../acoular.environments.html">environments</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="module-acoular.demo.acoular_demo">
+<span id="acoular-demo"></span><h1>acoular_demo<a class="headerlink" href="#module-acoular.demo.acoular_demo" title="Link to this heading">¶</a></h1>
+<p>Demo for Acoular.</p>
+<p>To run the demo, execute the following commands:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">acoular</span>
+
+<span class="n">acoular</span><span class="o">.</span><span class="n">demo</span><span class="o">.</span><span class="n">acoular_demo</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Generates a test data set for three sources, analyzes them and generates a
+map of the three sources.</p>
+<p>The simulation generates the sound pressure at 64 microphones that are
+arrangend in the ‘array64’ geometry, which is part of the package. The sound
+pressure signals are sampled at 51200 Hz for a duration of 1 second.</p>
+<p>Source location (relative to array center) and RMS in 1 m distance:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Source</p></th>
+<th class="head"><p>Location</p></th>
+<th class="head"><p>RMS</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>(-0.1,-0.1,0.3)</p></td>
+<td><p>1.0 Pa</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>(0.15,0,0.3)</p></td>
+<td><p>0.7 Pa</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>(0,0.1,0.3)</p></td>
+<td><p>0.5 Pa</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.demo.html">demo</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.demo.html">demo</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../acoular.environments.html">environments</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, Acoular Development Team.
+      Last updated on Jul 23, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    </div>
+  </body>
+</html>

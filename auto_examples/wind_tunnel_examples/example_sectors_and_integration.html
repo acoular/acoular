@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Sector Integration Example &#8212; Acoular 24.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=f63d8bfa" />
+    <link rel="stylesheet" type="text/css" href="../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../_static/documentation_options.js?v=f64914b1"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Moving sources examples" href="../moving_sources_examples/index.html" />
+    <link rel="prev" title="Airfoil in open jet – Time domain beamforming methods." href="example_airfoil_in_open_jet_time_domain_methods.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../index.html">
+          <span>Acoular 24.07 documentation</span></a></h1>
+        <h2 class="heading"><span>Sector Integration Example</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="example_airfoil_in_open_jet_time_domain_methods.html">Airfoil in open jet – Time domain beamforming methods.</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Wind tunnel examples</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../moving_sources_examples/index.html">Moving sources examples</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-wind-tunnel-examples-example-sectors-and-integration-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code.</p>
+</div>
+<section class="sphx-glr-example-title" id="sector-integration-example">
+<span id="sphx-glr-auto-examples-wind-tunnel-examples-example-sectors-and-integration-py"></span><h1>Sector Integration Example<a class="headerlink" href="#sector-integration-example" title="Link to this heading">¶</a></h1>
+<p>Loads the example data set, sets diffrent Sectors for intergration.
+Shows Acoular’s Sector und Sound Pressure level Integration functionality.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span> <span class="nn">acoular</span> <span class="k">as</span> <span class="nn">ac</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">matplotlib.patches</span> <span class="kn">import</span> <span class="n">Polygon</span><span class="p">,</span> <span class="n">Rectangle</span>
+</pre></div>
+</div>
+<p>Define the necessary objects</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">micgeofile</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">ac</span><span class="o">.</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s1">&#39;xml&#39;</span> <span class="o">/</span> <span class="s1">&#39;array_56.xml&#39;</span>
+<span class="n">datafile</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s1">&#39;data&#39;</span> <span class="o">/</span> <span class="s1">&#39;example_data.h5&#39;</span>
+
+<span class="n">mg</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">MicGeom</span><span class="p">(</span><span class="n">from_file</span><span class="o">=</span><span class="n">micgeofile</span><span class="p">)</span>
+<span class="n">ts</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">TimeSamples</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">datafile</span><span class="p">)</span>
+<span class="n">ps</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">PowerSpectra</span><span class="p">(</span><span class="n">time_data</span><span class="o">=</span><span class="n">ts</span><span class="p">,</span> <span class="n">block_size</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="s1">&#39;Hanning&#39;</span><span class="p">)</span>
+<span class="n">rg</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">RectGrid</span><span class="p">(</span><span class="n">x_min</span><span class="o">=-</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">x_max</span><span class="o">=-</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">y_min</span><span class="o">=-</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">y_max</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.68</span><span class="p">,</span> <span class="n">increment</span><span class="o">=</span><span class="mf">0.02</span><span class="p">)</span>
+<span class="n">st</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">SteeringVector</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="n">rg</span><span class="p">,</span> <span class="n">mics</span><span class="o">=</span><span class="n">mg</span><span class="p">)</span>
+<span class="n">f</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">PowerSpectra</span><span class="p">(</span><span class="n">time_data</span><span class="o">=</span><span class="n">ts</span><span class="p">,</span> <span class="n">block_size</span><span class="o">=</span><span class="mi">128</span><span class="p">)</span>
+<span class="n">bf</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">BeamformerBase</span><span class="p">(</span><span class="n">freq_data</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">steer</span><span class="o">=</span><span class="n">st</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Integrate function can deal with multiple methods for integration:</p>
+<ol class="arabic simple">
+<li><p>a circle containing of three values: x-center, y-center and radius</p></li>
+</ol>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">circle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">])</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>a rectangle containing of 4 values: lower corner(x1, y1) and upper corner(x2, y2).</p></li>
+</ol>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">rect</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.15</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">])</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>a polygon containing of vector tuples: x1,y1,x2,y2,…,xi,yi</p></li>
+</ol>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">poly</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">0.25</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.2</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.2</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.25</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.2</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>4th alternative: define those sectors as Classes</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">circle_sector</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">CircSector</span><span class="p">(</span><span class="n">x</span><span class="o">=-</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">y</span><span class="o">=-</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+<span class="n">rect_sector</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">RectSector</span><span class="p">(</span><span class="n">x_min</span><span class="o">=-</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">x_max</span><span class="o">=-</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">y_min</span><span class="o">=-</span><span class="mf">0.15</span><span class="p">,</span> <span class="n">y_max</span><span class="o">=</span><span class="mf">0.15</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><a class="reference internal" href="../../api_ref/generated/generated/acoular.grids.PolySector.html#acoular.grids.PolySector" title="acoular.grids.PolySector"><code class="xref py py-class docutils literal notranslate"><span class="pre">acoular.grids.PolySector</span></code></a> is a class that takes a list of points as input
+list of points containing x1,y1,x2,y2,…,xi,yi</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">poly_sector</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">PolySector</span><span class="p">(</span><span class="n">edges</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">0.25</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.2</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.2</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.25</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.2</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>The <a class="reference internal" href="../../api_ref/generated/generated/acoular.grids.MultiSector.html#acoular.grids.MultiSector" title="acoular.grids.MultiSector"><code class="xref py py-class docutils literal notranslate"><span class="pre">acoular.grids.MultiSector</span></code></a> class allows to sum over multiple different sectors</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">multi_sector</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">MultiSector</span><span class="p">(</span><span class="n">sectors</span><span class="o">=</span><span class="p">[</span><span class="n">circle_sector</span><span class="p">,</span> <span class="n">rect_sector</span><span class="p">,</span> <span class="n">poly_sector</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Two integration variants exist (with same outcome):
+1. use Acoular’s integrate function.
+Integrate SPL values from beamforming results using the shapes</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">levels_circ</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">integrate</span><span class="p">(</span><span class="n">bf</span><span class="o">.</span><span class="n">result</span><span class="p">[:],</span> <span class="n">rg</span><span class="p">,</span> <span class="n">circle</span><span class="p">)</span>
+<span class="n">levels_rect</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">integrate</span><span class="p">(</span><span class="n">bf</span><span class="o">.</span><span class="n">result</span><span class="p">[:],</span> <span class="n">rg</span><span class="p">,</span> <span class="n">rect</span><span class="p">)</span>
+<span class="n">levels_poly</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">integrate</span><span class="p">(</span><span class="n">bf</span><span class="o">.</span><span class="n">result</span><span class="p">[:],</span> <span class="n">rg</span><span class="p">,</span> <span class="n">poly</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[(&#39;example_data_cache.h5&#39;, 22)]
+[(&#39;example_data_cache.h5&#39;, 23)]
+</pre></div>
+</div>
+<p>integrate SPL values from beamforming results using sector classes</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">levels_circ_sector</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">integrate</span><span class="p">(</span><span class="n">bf</span><span class="o">.</span><span class="n">result</span><span class="p">[:],</span> <span class="n">rg</span><span class="p">,</span> <span class="n">circle_sector</span><span class="p">)</span>
+<span class="n">levels_rect_sector</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">integrate</span><span class="p">(</span><span class="n">bf</span><span class="o">.</span><span class="n">result</span><span class="p">[:],</span> <span class="n">rg</span><span class="p">,</span> <span class="n">rect_sector</span><span class="p">)</span>
+<span class="n">levels_poly_sector</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">integrate</span><span class="p">(</span><span class="n">bf</span><span class="o">.</span><span class="n">result</span><span class="p">[:],</span> <span class="n">rg</span><span class="p">,</span> <span class="n">poly_sector</span><span class="p">)</span>
+<span class="n">levels_multi_sector</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">integrate</span><span class="p">(</span><span class="n">bf</span><span class="o">.</span><span class="n">result</span><span class="p">[:],</span> <span class="n">rg</span><span class="p">,</span> <span class="n">multi_sector</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>2. use beamformers integrate function (does not require explicit assignment
+of grid object).
+Integrate SPL values from beamforming results using the shapes</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">levels_circ</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">integrate</span><span class="p">(</span><span class="n">circle</span><span class="p">)</span>
+<span class="n">levels_rect</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">integrate</span><span class="p">(</span><span class="n">rect</span><span class="p">)</span>
+<span class="n">levels_poly</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">integrate</span><span class="p">(</span><span class="n">poly</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>integrate SPL values from beamforming results using sector classes</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">levels_circ_sector</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">integrate</span><span class="p">(</span><span class="n">circle_sector</span><span class="p">)</span>
+<span class="n">levels_rect_sector</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">integrate</span><span class="p">(</span><span class="n">rect_sector</span><span class="p">)</span>
+<span class="n">levels_poly_sector</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">integrate</span><span class="p">(</span><span class="n">poly_sector</span><span class="p">)</span>
+<span class="n">levels_multi_sector</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">integrate</span><span class="p">(</span><span class="n">multi_sector</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Plot map and sectors</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pylab</span> <span class="kn">import</span> <span class="n">cm</span><span class="p">,</span> <span class="n">colorbar</span><span class="p">,</span> <span class="n">figure</span><span class="p">,</span> <span class="n">imshow</span><span class="p">,</span> <span class="n">legend</span><span class="p">,</span> <span class="n">plot</span><span class="p">,</span> <span class="n">show</span><span class="p">,</span> <span class="n">xlim</span><span class="p">,</span> <span class="n">ylim</span>
+
+<span class="n">figure</span><span class="p">()</span>
+<span class="nb">map</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">synthetic</span><span class="p">(</span><span class="mi">2000</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">mx</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">L_p</span><span class="p">(</span><span class="nb">map</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+<span class="n">imshow</span><span class="p">(</span><span class="n">ac</span><span class="o">.</span><span class="n">L_p</span><span class="p">(</span><span class="nb">map</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">mx</span> <span class="o">-</span> <span class="mi">15</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">rg</span><span class="o">.</span><span class="n">extend</span><span class="p">(),</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cm</span><span class="o">.</span><span class="n">hot_r</span><span class="p">)</span>
+<span class="n">colorbar</span><span class="p">()</span>
+<span class="n">circle1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">Circle</span><span class="p">((</span><span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">),</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">gcf</span><span class="p">()</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">add_artist</span><span class="p">(</span><span class="n">circle1</span><span class="p">)</span>
+<span class="n">polygon</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">(</span><span class="n">poly</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">gcf</span><span class="p">()</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">add_artist</span><span class="p">(</span><span class="n">polygon</span><span class="p">)</span>
+<span class="n">rect</span> <span class="o">=</span> <span class="n">Rectangle</span><span class="p">((</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.15</span><span class="p">),</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">gcf</span><span class="p">()</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">add_artist</span><span class="p">(</span><span class="n">rect</span><span class="p">)</span>
+
+<span class="c1"># calculate the discrete frequencies for the integration</span>
+<span class="n">fftfreqs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">128</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">51200</span> <span class="o">/</span> <span class="mi">128</span><span class="p">)</span>
+
+<span class="c1"># plot from shapes</span>
+<span class="n">figure</span><span class="p">()</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">fftfreqs</span><span class="p">,</span> <span class="n">ac</span><span class="o">.</span><span class="n">L_p</span><span class="p">(</span><span class="n">levels_circ</span><span class="p">))</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">fftfreqs</span><span class="p">,</span> <span class="n">ac</span><span class="o">.</span><span class="n">L_p</span><span class="p">(</span><span class="n">levels_rect</span><span class="p">))</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">fftfreqs</span><span class="p">,</span> <span class="n">ac</span><span class="o">.</span><span class="n">L_p</span><span class="p">(</span><span class="n">levels_poly</span><span class="p">))</span>
+<span class="n">xlim</span><span class="p">([</span><span class="mi">2000</span><span class="p">,</span> <span class="mi">20000</span><span class="p">])</span>
+<span class="n">ylim</span><span class="p">([</span><span class="mi">10</span><span class="p">,</span> <span class="mi">80</span><span class="p">])</span>
+<span class="n">legend</span><span class="p">([</span><span class="s1">&#39;Circle&#39;</span><span class="p">,</span> <span class="s1">&#39;Rectangle&#39;</span><span class="p">,</span> <span class="s1">&#39;Polygon&#39;</span><span class="p">])</span>
+
+<span class="c1"># plot from sector classes</span>
+<span class="n">figure</span><span class="p">()</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">fftfreqs</span><span class="p">,</span> <span class="n">ac</span><span class="o">.</span><span class="n">L_p</span><span class="p">(</span><span class="n">levels_circ_sector</span><span class="p">))</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">fftfreqs</span><span class="p">,</span> <span class="n">ac</span><span class="o">.</span><span class="n">L_p</span><span class="p">(</span><span class="n">levels_rect_sector</span><span class="p">))</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">fftfreqs</span><span class="p">,</span> <span class="n">ac</span><span class="o">.</span><span class="n">L_p</span><span class="p">(</span><span class="n">levels_poly_sector</span><span class="p">))</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">fftfreqs</span><span class="p">,</span> <span class="n">ac</span><span class="o">.</span><span class="n">L_p</span><span class="p">(</span><span class="n">levels_multi_sector</span><span class="p">))</span>
+<span class="n">xlim</span><span class="p">([</span><span class="mi">2000</span><span class="p">,</span> <span class="mi">20000</span><span class="p">])</span>
+<span class="n">ylim</span><span class="p">([</span><span class="mi">10</span><span class="p">,</span> <span class="mi">80</span><span class="p">])</span>
+<span class="n">legend</span><span class="p">([</span><span class="s1">&#39;Circle Sector&#39;</span><span class="p">,</span> <span class="s1">&#39;Rectangle Sector&#39;</span><span class="p">,</span> <span class="s1">&#39;Polygon Sector&#39;</span><span class="p">,</span> <span class="s1">&#39;Multisector&#39;</span><span class="p">])</span>
+
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<ul class="sphx-glr-horizontal">
+<li><img src="../../_images/sphx_glr_example_sectors_and_integration_001.png" srcset="../../_images/sphx_glr_example_sectors_and_integration_001.png" alt="example sectors and integration" class = "sphx-glr-multi-img"/></li>
+<li><img src="../../_images/sphx_glr_example_sectors_and_integration_002.png" srcset="../../_images/sphx_glr_example_sectors_and_integration_002.png" alt="example sectors and integration" class = "sphx-glr-multi-img"/></li>
+<li><img src="../../_images/sphx_glr_example_sectors_and_integration_003.png" srcset="../../_images/sphx_glr_example_sectors_and_integration_003.png" alt="example sectors and integration" class = "sphx-glr-multi-img"/></li>
+</ul>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 0.740 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-wind-tunnel-examples-example-sectors-and-integration-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/adef0afbd1cee72fe9d101bf8f95a30c/example_sectors_and_integration.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">example_sectors_and_integration.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/1d9b19b45bb033764b0014b8860f7bd1/example_sectors_and_integration.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">example_sectors_and_integration.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/806739112cc973d17401ad59898f6b77/example_sectors_and_integration.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">example_sectors_and_integration.zip</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="example_airfoil_in_open_jet_time_domain_methods.html">Airfoil in open jet – Time domain beamforming methods.</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Wind tunnel examples</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../moving_sources_examples/index.html">Moving sources examples</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, Acoular Development Team.
+      Last updated on Jul 23, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    </div>
+  </body>
+</html>

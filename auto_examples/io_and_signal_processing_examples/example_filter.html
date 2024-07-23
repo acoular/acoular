@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Show basic filtering capabilities. &#8212; Acoular 24.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=f63d8bfa" />
+    <link rel="stylesheet" type="text/css" href="../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../_static/documentation_options.js?v=f64914b1"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Cross-spectral matrix import" href="example_power_spectra_import.html" />
+    <link rel="prev" title="IO and signal processing examples" href="index.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../index.html">
+          <span>Acoular 24.07 documentation</span></a></h1>
+        <h2 class="heading"><span>Show basic filtering capabilities.</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="index.html">IO and signal processing examples</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">IO and signal processing examples</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="example_power_spectra_import.html">Cross-spectral matrix import</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-io-and-signal-processing-examples-example-filter-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code.</p>
+</div>
+<section class="sphx-glr-example-title" id="show-basic-filtering-capabilities">
+<span id="sphx-glr-auto-examples-io-and-signal-processing-examples-example-filter-py"></span><h1>Show basic filtering capabilities.<a class="headerlink" href="#show-basic-filtering-capabilities" title="Link to this heading">¶</a></h1>
+<p>Demonstrates band pass filter characteristics and shows</p>
+<ul class="simple">
+<li><p>unfiltered power spectrum</p></li>
+<li><p>three adjacent octave bands filtered spectra</p></li>
+<li><p>sum of all octave band spectra</p></li>
+</ul>
+<img src="../../_images/sphx_glr_example_filter_001.png" srcset="../../_images/sphx_glr_example_filter_001.png" alt="example filter" class = "sphx-glr-single-img"/><div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">acoular</span> <span class="k">as</span> <span class="nn">ac</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">ac</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">global_caching</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+<span class="n">numsamples</span> <span class="o">=</span> <span class="mi">51200</span> <span class="o">*</span> <span class="mi">10</span>
+<span class="n">n1</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">WNoiseGenerator</span><span class="p">(</span><span class="n">sample_freq</span><span class="o">=</span><span class="mi">51200</span><span class="p">,</span> <span class="n">numsamples</span><span class="o">=</span><span class="n">numsamples</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">m1</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">MicGeom</span><span class="p">(</span><span class="n">mpos_tot</span><span class="o">=</span><span class="p">[[</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
+<span class="n">p1</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">PointSource</span><span class="p">(</span><span class="n">signal</span><span class="o">=</span><span class="n">n1</span><span class="p">,</span> <span class="n">mics</span><span class="o">=</span><span class="n">m1</span><span class="p">)</span>
+<span class="n">f1</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">FiltFiltOctave</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">p1</span><span class="p">,</span> <span class="n">band</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">fraction</span><span class="o">=</span><span class="s1">&#39;Octave&#39;</span><span class="p">)</span>
+<span class="n">hs</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="n">res0</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">2.1</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">):</span>
+    <span class="c1"># f1.order = 2</span>
+    <span class="n">f1</span><span class="o">.</span><span class="n">band</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**</span><span class="n">i</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="p">(</span><span class="n">ac</span><span class="o">.</span><span class="n">tools</span><span class="o">.</span><span class="n">return_result</span><span class="p">(</span><span class="n">f1</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">res0</span> <span class="o">+=</span> <span class="n">res</span>
+    <span class="n">ps</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">PowerSpectra</span><span class="p">(</span><span class="n">time_data</span><span class="o">=</span><span class="n">f1</span><span class="p">,</span> <span class="n">block_size</span><span class="o">=</span><span class="mi">8192</span><span class="p">)</span>
+    <span class="c1"># print(res / numsamples, ps.csm[:, 0, 0].real.sum())</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="n">fftfreq</span><span class="p">()</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">ps</span><span class="o">.</span><span class="n">csm</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">semilogx</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+    <span class="n">hs</span> <span class="o">=</span> <span class="n">hs</span> <span class="o">+</span> <span class="n">ps</span><span class="o">.</span><span class="n">csm</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">real</span>
+<span class="n">y</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">hs</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">semilogx</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="n">ps</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">PowerSpectra</span><span class="p">(</span><span class="n">time_data</span><span class="o">=</span><span class="n">p1</span><span class="p">,</span> <span class="n">block_size</span><span class="o">=</span><span class="mi">8192</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="n">fftfreq</span><span class="p">()</span>
+<span class="n">y</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">ps</span><span class="o">.</span><span class="n">csm</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">semilogx</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="o">-</span><span class="mi">45</span><span class="p">,</span> <span class="o">-</span><span class="mi">35</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="mi">70</span><span class="p">,</span> <span class="mi">1400</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 1.232 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-io-and-signal-processing-examples-example-filter-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/95757c6cd7a0c2d7d11a35ed0e689257/example_filter.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">example_filter.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/30f36cdf46c2c30c1a4cccbfff3f3cb7/example_filter.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">example_filter.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/a4968d48d82f6e1b0b711a26a13dca7a/example_filter.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">example_filter.zip</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="index.html">IO and signal processing examples</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">IO and signal processing examples</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="example_power_spectra_import.html">Cross-spectral matrix import</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, Acoular Development Team.
+      Last updated on Jul 23, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    </div>
+  </body>
+</html>

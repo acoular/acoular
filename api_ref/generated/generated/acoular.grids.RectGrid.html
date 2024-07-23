@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>RectGrid &#8212; Acoular 24.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=f63d8bfa" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=f64914b1"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="RectGrid3D" href="acoular.grids.RectGrid3D.html" />
+    <link rel="prev" title="Grid" href="acoular.grids.Grid.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 24.07 documentation</span></a></h1>
+        <h2 class="heading"><span>RectGrid</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.grids.Grid.html">Grid</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.grids.html">grids</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.grids.RectGrid3D.html">RectGrid3D</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="rectgrid">
+<h1>RectGrid<a class="headerlink" href="#rectgrid" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.grids.RectGrid">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.grids.</span></span><span class="sig-name descname"><span class="pre">RectGrid</span></span><a class="headerlink" href="#acoular.grids.RectGrid" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.grids.Grid.html#acoular.grids.Grid" title="acoular.grids.Grid"><code class="xref py py-class docutils literal notranslate"><span class="pre">Grid</span></code></a></p>
+<p>Provides a cartesian 2D grid for the beamforming results.</p>
+<p>The grid has square or nearly square cells and is on a plane perpendicular
+to the z-axis. It is defined by lower and upper x- and  y-limits and the
+z co-ordinate.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.grids.RectGrid.x_min">
+<span class="sig-name descname"><span class="pre">x_min</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(-1.0,</span> <span class="pre">desc='minimum</span>&#160; <span class="pre">x-value')</span></em><a class="headerlink" href="#acoular.grids.RectGrid.x_min" title="Link to this definition">¶</a></dt>
+<dd><p>The lower x-limit that defines the grid, defaults to -1.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.grids.RectGrid.x_max">
+<span class="sig-name descname"><span class="pre">x_max</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(1.0,</span> <span class="pre">desc='maximum</span>&#160; <span class="pre">x-value')</span></em><a class="headerlink" href="#acoular.grids.RectGrid.x_max" title="Link to this definition">¶</a></dt>
+<dd><p>The upper x-limit that defines the grid, defaults to 1.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.grids.RectGrid.y_min">
+<span class="sig-name descname"><span class="pre">y_min</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(-1.0,</span> <span class="pre">desc='minimum</span>&#160; <span class="pre">y-value')</span></em><a class="headerlink" href="#acoular.grids.RectGrid.y_min" title="Link to this definition">¶</a></dt>
+<dd><p>The lower y-limit that defines the grid, defaults to -1.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.grids.RectGrid.y_max">
+<span class="sig-name descname"><span class="pre">y_max</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(1.0,</span> <span class="pre">desc='maximum</span>&#160; <span class="pre">y-value')</span></em><a class="headerlink" href="#acoular.grids.RectGrid.y_max" title="Link to this definition">¶</a></dt>
+<dd><p>The upper y-limit that defines the grid, defaults to 1.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.grids.RectGrid.z">
+<span class="sig-name descname"><span class="pre">z</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(1.0,</span> <span class="pre">desc='position</span> <span class="pre">on</span> <span class="pre">z-axis')</span></em><a class="headerlink" href="#acoular.grids.RectGrid.z" title="Link to this definition">¶</a></dt>
+<dd><p>The z co-ordinate that defines the grid, defaults to 1.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.grids.RectGrid.increment">
+<span class="sig-name descname"><span class="pre">increment</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(0.1,</span> <span class="pre">desc='step</span> <span class="pre">size')</span></em><a class="headerlink" href="#acoular.grids.RectGrid.increment" title="Link to this definition">¶</a></dt>
+<dd><p>The cell side length for the grid, defaults to 0.1.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.grids.RectGrid.nxsteps">
+<span class="sig-name descname"><span class="pre">nxsteps</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(desc='number</span> <span class="pre">of</span> <span class="pre">grid</span> <span class="pre">points</span> <span class="pre">along</span> <span class="pre">x-axis')</span></em><a class="headerlink" href="#acoular.grids.RectGrid.nxsteps" title="Link to this definition">¶</a></dt>
+<dd><p>Number of grid points along x-axis, readonly.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.grids.RectGrid.nysteps">
+<span class="sig-name descname"><span class="pre">nysteps</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(desc='number</span> <span class="pre">of</span> <span class="pre">grid</span> <span class="pre">points</span> <span class="pre">along</span> <span class="pre">y-axis')</span></em><a class="headerlink" href="#acoular.grids.RectGrid.nysteps" title="Link to this definition">¶</a></dt>
+<dd><p>Number of grid points along y-axis, readonly.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.grids.RectGrid.index">
+<span class="sig-name descname"><span class="pre">index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.grids.RectGrid.index" title="Link to this definition">¶</a></dt>
+<dd><p>Queries the indices for a grid point near a certain co-ordinate.</p>
+<p>This can be used to query results or co-ordinates at/near a certain
+co-ordinate.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x, y</strong><span class="classifier">float</span></dt><dd><p>The co-ordinates for which the indices are queried.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>2-tuple of integers</dt><dd><p>The indices that give the grid point nearest to the given x, y
+co-ordinates from an array with the same shape as the grid.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.grids.RectGrid.indices">
+<span class="sig-name descname"><span class="pre">indices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">r</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.grids.RectGrid.indices" title="Link to this definition">¶</a></dt>
+<dd><p>Queries the indices for a subdomain in the grid.</p>
+<p>Allows either rectangular, circular or polygonial subdomains.
+This can be used to mask or to query results from a certain
+sector or subdomain.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x1, y1, x2, y2, …</strong><span class="classifier">float</span></dt><dd><p>If three parameters are given, then a circular sector is assumed
+that is given by its center (x1, y1) and the radius x2.
+If four paramters are given, then a rectangular sector is
+assumed that is given by two corners (x1, y1) and (x2, y2).
+If more parameters are given, the subdomain is assumed to have
+polygonial shape with corners at (x_n, y_n).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>2-tuple of arrays of integers or of numpy slice objects</dt><dd><p>The indices that can be used to mask/select the grid subdomain from
+an array with the same shape as the grid.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.grids.RectGrid.extend">
+<span class="sig-name descname"><span class="pre">extend</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#acoular.grids.RectGrid.extend" title="Link to this definition">¶</a></dt>
+<dd><p>The extension of the grid in pylab.imshow compatible form.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>4-tuple of floats</dt><dd><p>The extent of the grid as a tuple of x_min, x_max, y_min, y_max)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.grids.Grid.html">Grid</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.grids.html">grids</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.grids.RectGrid3D.html">RectGrid3D</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, Acoular Development Team.
+      Last updated on Jul 23, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    </div>
+  </body>
+</html>

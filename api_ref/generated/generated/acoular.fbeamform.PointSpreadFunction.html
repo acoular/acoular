@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>PointSpreadFunction &#8212; Acoular 24.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=f63d8bfa" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=f64914b1"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="acoular.fbeamform.L_p" href="acoular.fbeamform.L_p.html" />
+    <link rel="prev" title="BeamformerGridlessOrth" href="acoular.fbeamform.BeamformerGridlessOrth.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 24.07 documentation</span></a></h1>
+        <h2 class="heading"><span>PointSpreadFunction</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.fbeamform.BeamformerGridlessOrth.html">BeamformerGridlessOrth</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.fbeamform.html">fbeamform</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.fbeamform.L_p.html">acoular.fbeamform.L_p</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="pointspreadfunction">
+<h1>PointSpreadFunction<a class="headerlink" href="#pointspreadfunction" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.fbeamform.PointSpreadFunction">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.fbeamform.</span></span><span class="sig-name descname"><span class="pre">PointSpreadFunction</span></span><a class="headerlink" href="#acoular.fbeamform.PointSpreadFunction" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">HasPrivateTraits</span></code></p>
+<p>The point spread function.</p>
+<p>This class provides tools to calculate the PSF depending on the used
+microphone geometry, focus grid, flow environment, etc.
+The PSF is needed by several deconvolution algorithms to correct
+the aberrations when using simple delay-and-sum beamforming.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.PointSpreadFunction.steer">
+<span class="sig-name descname"><span class="pre">steer</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(desc='steering</span> <span class="pre">vector</span> <span class="pre">object')</span></em><a class="headerlink" href="#acoular.fbeamform.PointSpreadFunction.steer" title="Link to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="acoular.fbeamform.SteeringVector.html#acoular.fbeamform.SteeringVector" title="acoular.fbeamform.SteeringVector"><code class="xref py py-class docutils literal notranslate"><span class="pre">SteeringVector</span></code></a> or derived object.
+Defaults to <a class="reference internal" href="acoular.fbeamform.SteeringVector.html#acoular.fbeamform.SteeringVector" title="acoular.fbeamform.SteeringVector"><code class="xref py py-class docutils literal notranslate"><span class="pre">SteeringVector</span></code></a> object.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.PointSpreadFunction.grid_indices">
+<span class="sig-name descname"><span class="pre">grid_indices</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CArray(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.fbeamform.PointSpreadFunction.grid_indices" title="Link to this definition">¶</a></dt>
+<dd><p>Indices of grid points to calculate the PSF for.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.PointSpreadFunction.calcmode">
+<span class="sig-name descname"><span class="pre">calcmode</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Trait('single',</span> <span class="pre">'block',</span> <span class="pre">'full',</span> <span class="pre">'readonly',</span> <span class="pre">desc='mode</span> <span class="pre">of</span> <span class="pre">calculation</span> <span class="pre">/</span> <span class="pre">storage')</span></em><a class="headerlink" href="#acoular.fbeamform.PointSpreadFunction.calcmode" title="Link to this definition">¶</a></dt>
+<dd><p>Flag that defines how to calculate and store the point spread function
+defaults to ‘single’.</p>
+<ul class="simple">
+<li><p>‘full’: Calculate the full PSF (for all grid points) in one go (should be used if the PSF at all grid points is needed, as with <a class="reference internal" href="acoular.fbeamform.BeamformerDamas.html#acoular.fbeamform.BeamformerDamas" title="acoular.fbeamform.BeamformerDamas"><code class="xref py py-class docutils literal notranslate"><span class="pre">DAMAS</span></code></a>)</p></li>
+<li><p>‘single’: Calculate the PSF for the grid points defined by <a class="reference internal" href="#acoular.fbeamform.PointSpreadFunction.grid_indices" title="acoular.fbeamform.PointSpreadFunction.grid_indices"><code class="xref py py-attr docutils literal notranslate"><span class="pre">grid_indices</span></code></a>, one by one (useful if not all PSFs are needed, as with <a class="reference internal" href="acoular.fbeamform.BeamformerClean.html#acoular.fbeamform.BeamformerClean" title="acoular.fbeamform.BeamformerClean"><code class="xref py py-class docutils literal notranslate"><span class="pre">CLEAN</span></code></a>)</p></li>
+<li><p>‘block’: Calculate the PSF for the grid points defined by <a class="reference internal" href="#acoular.fbeamform.PointSpreadFunction.grid_indices" title="acoular.fbeamform.PointSpreadFunction.grid_indices"><code class="xref py py-attr docutils literal notranslate"><span class="pre">grid_indices</span></code></a>, in one go (useful if not all PSFs are needed, as with <a class="reference internal" href="acoular.fbeamform.BeamformerClean.html#acoular.fbeamform.BeamformerClean" title="acoular.fbeamform.BeamformerClean"><code class="xref py py-class docutils literal notranslate"><span class="pre">CLEAN</span></code></a>)</p></li>
+<li><p>‘readonly’: Do not attempt to calculate the PSF since it should already be cached (useful if multiple processes have to access the cache file)</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.PointSpreadFunction.precision">
+<span class="sig-name descname"><span class="pre">precision</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Trait('float64',</span> <span class="pre">'float32',</span> <span class="pre">desc='precision</span> <span class="pre">(32/64</span> <span class="pre">Bit)</span> <span class="pre">of</span> <span class="pre">result,</span> <span class="pre">corresponding</span> <span class="pre">to</span> <span class="pre">numpy</span> <span class="pre">dtypes')</span></em><a class="headerlink" href="#acoular.fbeamform.PointSpreadFunction.precision" title="Link to this definition">¶</a></dt>
+<dd><p>Floating point precision of property psf. Corresponding to numpy dtypes. Default = 64 Bit.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.PointSpreadFunction.psf">
+<span class="sig-name descname"><span class="pre">psf</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(desc='point</span> <span class="pre">spread</span> <span class="pre">function')</span></em><a class="headerlink" href="#acoular.fbeamform.PointSpreadFunction.psf" title="Link to this definition">¶</a></dt>
+<dd><p>The actual point spread function.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.PointSpreadFunction.freq">
+<span class="sig-name descname"><span class="pre">freq</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(1.0,</span> <span class="pre">desc='frequency')</span></em><a class="headerlink" href="#acoular.fbeamform.PointSpreadFunction.freq" title="Link to this definition">¶</a></dt>
+<dd><p>Frequency to evaluate the PSF for; defaults to 1.0.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.fbeamform.PointSpreadFunction.calc_psf">
+<span class="sig-name descname"><span class="pre">calc_psf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ac</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gp</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.fbeamform.PointSpreadFunction.calc_psf" title="Link to this definition">¶</a></dt>
+<dd><p>point-spread function calculation.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.fbeamform.BeamformerGridlessOrth.html">BeamformerGridlessOrth</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.fbeamform.html">fbeamform</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.fbeamform.L_p.html">acoular.fbeamform.L_p</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, Acoular Development Team.
+      Last updated on Jul 23, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>LineGrid &#8212; Acoular 24.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=f63d8bfa" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=f64914b1"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="MergeGrid" href="acoular.grids.MergeGrid.html" />
+    <link rel="prev" title="ImportGrid" href="acoular.grids.ImportGrid.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 24.07 documentation</span></a></h1>
+        <h2 class="heading"><span>LineGrid</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.grids.ImportGrid.html">ImportGrid</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.grids.html">grids</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.grids.MergeGrid.html">MergeGrid</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="linegrid">
+<h1>LineGrid<a class="headerlink" href="#linegrid" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.grids.LineGrid">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.grids.</span></span><span class="sig-name descname"><span class="pre">LineGrid</span></span><a class="headerlink" href="#acoular.grids.LineGrid" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.grids.Grid.html#acoular.grids.Grid" title="acoular.grids.Grid"><code class="xref py py-class docutils literal notranslate"><span class="pre">Grid</span></code></a></p>
+<p>Class for Line grid geometries.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.grids.LineGrid.loc">
+<span class="sig-name descname"><span class="pre">loc</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Tuple((0.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0))</span></em><a class="headerlink" href="#acoular.grids.LineGrid.loc" title="Link to this definition">¶</a></dt>
+<dd><p>Staring point of the Grid</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.grids.LineGrid.direction">
+<span class="sig-name descname"><span class="pre">direction</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Tuple((1.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0),</span> <span class="pre">desc='Line</span> <span class="pre">orientation</span> <span class="pre">')</span></em><a class="headerlink" href="#acoular.grids.LineGrid.direction" title="Link to this definition">¶</a></dt>
+<dd><p>Vector to define the orientation of the line source</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.grids.LineGrid.length">
+<span class="sig-name descname"><span class="pre">length</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(1,</span> <span class="pre">desc='length</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">line</span> <span class="pre">source')</span></em><a class="headerlink" href="#acoular.grids.LineGrid.length" title="Link to this definition">¶</a></dt>
+<dd><p>Vector to define the length of the line source in meter</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.grids.LineGrid.numpoints">
+<span class="sig-name descname"><span class="pre">numpoints</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Int(1,</span> <span class="pre">desc='length</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">line</span> <span class="pre">source')</span></em><a class="headerlink" href="#acoular.grids.LineGrid.numpoints" title="Link to this definition">¶</a></dt>
+<dd><p>number of grid points.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.grids.LineGrid.size">
+<span class="sig-name descname"><span class="pre">size</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(desc='overall</span> <span class="pre">number</span> <span class="pre">of</span> <span class="pre">grid</span> <span class="pre">points')</span></em><a class="headerlink" href="#acoular.grids.LineGrid.size" title="Link to this definition">¶</a></dt>
+<dd><p>Overall number of grid points. Readonly; is set automatically when
+other grid defining properties are set</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.grids.LineGrid.gpos">
+<span class="sig-name descname"><span class="pre">gpos</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(desc='x,</span> <span class="pre">y,</span> <span class="pre">z</span> <span class="pre">positions</span> <span class="pre">of</span> <span class="pre">grid</span> <span class="pre">points')</span></em><a class="headerlink" href="#acoular.grids.LineGrid.gpos" title="Link to this definition">¶</a></dt>
+<dd><p>Grid positions as (3, <a class="reference internal" href="#acoular.grids.LineGrid.size" title="acoular.grids.LineGrid.size"><code class="xref py py-attr docutils literal notranslate"><span class="pre">size</span></code></a>) array of floats, without invalid
+microphones; readonly.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.grids.ImportGrid.html">ImportGrid</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.grids.html">grids</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.grids.MergeGrid.html">MergeGrid</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, Acoular Development Team.
+      Last updated on Jul 23, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Documentation &#8212; Acoular 24.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=f63d8bfa" />
+    <link rel="stylesheet" type="text/css" href="../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../_static/documentation_options.js?v=f64914b1"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Release Policy" href="release.html" />
+    <link rel="prev" title="Code Quality Standards" href="quality.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../index.html">
+          <span>Acoular 24.07 documentation</span></a></h1>
+        <h2 class="heading"><span>Documentation</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="quality.html">Code Quality Standards</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contributing</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="release.html">Release Policy</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="documentation">
+<h1>Documentation<a class="headerlink" href="#documentation" title="Link to this heading">¶</a></h1>
+<p>The package documentation is provided under <code class="docutils literal notranslate"><span class="pre">acoular/docs/source</span></code>. This directory contains the <code class="docutils literal notranslate"><span class="pre">index.rst</span></code> file which serves as the root document (landing page) embedding several other subdocuments (sub-pages) written in  <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html">reStructuredText</a> format.
+The full documentation is built using the <a class="reference external" href="https://www.sphinx-doc.org/en/master/">Sphinx</a> package. See <a class="reference internal" href="quality.html#documentation-compilation"><span class="std std-ref">Documentation Compilation</span></a> for instructions on how to build the documentation.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Some of the subdirectories (sub-pages) are created automatically during the documentation build process. Therefore, it is recommended to avoid editing the generated files directly.
+This concerns the <code class="docutils literal notranslate"><span class="pre">docs/source/api_ref/generated</span></code> directory, which contains the API documentation generated from the source code, and the <code class="docutils literal notranslate"><span class="pre">docs/source/auto_examples</span></code> directory, which contains the auto-generated examples.</p>
+</div>
+<section id="user-documentation">
+<span id="id1"></span><h2>User Documentation<a class="headerlink" href="#user-documentation" title="Link to this heading">¶</a></h2>
+<p>This is the easiest way to contribute to the documentation. You can simply edit the corresponding <code class="docutils literal notranslate"><span class="pre">.rst</span></code> files in the <code class="docutils literal notranslate"><span class="pre">acoular/docs/source</span></code> directory which are not generated automatically. Make sure you are using the <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html">reStructuredText</a> format. If you want to add a new document, it should be referenced in the <code class="docutils literal notranslate"><span class="pre">index.rst</span></code> or any related file. We are happy about every fixed spelling mistake or improved explanation.</p>
+</section>
+<section id="documenting-the-api">
+<span id="api-documentation"></span><h2>Documenting the API<a class="headerlink" href="#documenting-the-api" title="Link to this heading">¶</a></h2>
+<p>There are several situations in which you want to change the API documentation. For example, when you add a new class, method, or function, or when you change the signature of an existing method. In some cases, you might also want to improve the existing documentation.</p>
+<p>The API documentation is generated from the documentation strings of the source code using the Sphinx <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/extensions/autosummary.html">autosummary</a> extension. The API documentation follows the <a class="reference external" href="https://numpydoc.readthedocs.io/en/latest/format.html">NumPy style</a>.
+The generated API documentation can be found in the <code class="docutils literal notranslate"><span class="pre">source/api_ref</span></code> subdirectory of the documentation after compilation.</p>
+<section id="documenting-classes-methods-and-functions">
+<h3>Documenting Classes, Methods and Functions<a class="headerlink" href="#documenting-classes-methods-and-functions" title="Link to this heading">¶</a></h3>
+<p>A class documentation that is suitable as a how-to example is given by the <a class="reference internal" href="../api_ref/generated/generated/acoular.sources.TimeSamples.html#acoular.sources.TimeSamples" title="acoular.sources.TimeSamples"><code class="xref py py-class docutils literal notranslate"><span class="pre">acoular.sources.TimeSamples</span></code></a> class.</p>
+<p><strong>Writing docstrings</strong>:</p>
+<p>Docstrings should first contain a short summary line, followed by an extended summary using <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html">reStructuredText</a> syntax. An extended summary is not always necessary, but it is recommended not only for complex implementations. Ideally, the extended summary provides a detailed explanation of the method’s purpose, behavior, and usage.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">TimeSamples</span><span class="p">(</span><span class="n">SamplesGenerator</span><span class="p">):</span>
+    <span class="s2">&quot;&quot;&quot;Container for processing time data in `*.h5` or NumPy array format.</span>
+
+<span class="s2">    This class loads measured data from HDF5 files and provides information about this data.</span>
+<span class="s2">    It also serves as an interface where the data can be accessed (e.g. for use in a block chain) via the</span>
+<span class="s2">    :meth:`result` generator.</span>
+</pre></div>
+</div>
+<p>We welcome the addition of code examples to the docstrings of classes (and functions). The <a class="reference internal" href="../api_ref/generated/generated/acoular.sources.TimeSamples.html#acoular.sources.TimeSamples" title="acoular.sources.TimeSamples"><code class="xref py py-class docutils literal notranslate"><span class="pre">acoular.sources.TimeSamples</span></code></a> class provides a short snippet with explanation in the docstring:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    Examples
+    --------
+    Data can be loaded from a HDF5 file as follows:
+
+    &gt;&gt;&gt; from acoular import TimeSamples
+    &gt;&gt;&gt; name = &lt;some_h5_file.h5&gt;  # doctest: +SKIP
+    &gt;&gt;&gt; ts = TimeSamples(name=name)  # doctest: +SKIP
+    &gt;&gt;&gt; print(f&#39;number of channels: {ts.numchannels}&#39;)  # doctest: +SKIP
+    number of channels: 56 # doctest: +SKIP
+
+    Alternatively, the time data can be specified directly as a numpy array.
+    In this case, the :attr:`data` and :attr:`sample_freq` attributes must be set manually.
+
+    &gt;&gt;&gt; import numpy as np
+    &gt;&gt;&gt; data = np.random.rand(1000, 4)
+    &gt;&gt;&gt; ts = TimeSamples(data=data, sample_freq=51200)
+
+    Chunks of the time data can be accessed iteratively via the :meth:`result` generator.
+    The last block will be shorter than the block size if the number of samples is not a multiple of the block size.
+
+    &gt;&gt;&gt; blocksize = 512
+    &gt;&gt;&gt; generator = ts.result(num=blocksize)
+    &gt;&gt;&gt; for block in generator:
+    ...     print(block.shape)
+    (512, 4)
+    (488, 4)
+
+</pre></div>
+</div>
+<p>To ensure that these snippets stay up-to-date, they are tested automatically within Acoular’s CI workflow using <a class="reference external" href="https://docs.pytest.org/">pytest</a> with the python standard <a class="reference external" href="https://docs.python.org/3/library/doctest.html">doctest</a> module. This requires that the <strong>code examples are written in a way that they can be executed as standalone code snippets</strong>. In very rare cases, it is not possible to write an executable standalone code snippet. In such cases, the code snippet can be marked with the <cite># doctest: +SKIP</cite> directive to be excluded from the doctests.</p>
+<p>One can use the following command with hatch to run the doctests locally:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>hatch<span class="w"> </span>run<span class="w"> </span>tests:doctest
+</pre></div>
+</div>
+<p>Cross-references can be included in the <cite>See Also</cite> section, which lists related classes or functions:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    See Also
+    --------
+    acoular.sources.MaskedTimeSamples :
+        Extends the functionality of class :class:`TimeSamples` by enabling the definition of start and stop samples
+        as well as the specification of invalid channels.
+    &quot;&quot;&quot;
+</pre></div>
+</div>
+<p><strong>Documenting class attributes</strong>:</p>
+<p>Acoular makes use of the <a class="reference external" href="https://docs.enthought.com/traits/traits_user_manual/intro.html">Traits API</a>, which allows for the definition of class attributes with type checking and default values. Most of the Acoular classes will directly define their attributes, and the corresponding __init__ method will not be explicitly defined. It is recommended to document public class attributes using a comment line above the attribute definition starting with <cite>#:</cite>. Sphinx will automatically detect these comments and include them in the API documentation.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    <span class="c1">#: Calibration data, instance of :class:`~acoular.calib.Calib` class, optional .</span>
+    <span class="n">calib</span> <span class="o">=</span> <span class="n">Trait</span><span class="p">(</span><span class="n">Calib</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Calibration data&#39;</span><span class="p">)</span>
+
+    <span class="c1">#: Number of channels, is set automatically / read from file.</span>
+    <span class="n">numchannels</span> <span class="o">=</span> <span class="n">CLong</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;number of input channels&#39;</span><span class="p">)</span>
+
+    <span class="c1">#: Number of time data samples, is set automatically / read from file.</span>
+    <span class="n">numsamples</span> <span class="o">=</span> <span class="n">CLong</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;number of samples&#39;</span><span class="p">)</span>
+
+</pre></div>
+</div>
+<p><strong>Documenting public methods and functions</strong>:</p>
+<p>Similar to classes, public methods and functions need to have a docstring. In addition to the summary line, the arguments and return values should be documented in <a class="reference external" href="https://numpydoc.readthedocs.io/en/latest/format.html">NumPy style</a>.
+See the <a class="reference internal" href="../api_ref/generated/generated/acoular.sources.TimeSamples.html#acoular.sources.TimeSamples.result" title="acoular.sources.TimeSamples.result"><code class="xref py py-func docutils literal notranslate"><span class="pre">acoular.sources.TimeSamples.result()</span></code></a> method as an example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    <span class="k">def</span> <span class="nf">result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">128</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Python generator that yields the output block-wise.</span>
+
+<span class="sd">        Reads the time data either from a HDF5 file or from a numpy array given</span>
+<span class="sd">        by :attr:`data` and iteratively returns a block of size `num` samples.</span>
+<span class="sd">        Calibrated data is returned if a calibration object is given by :attr:`calib`.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        num : integer, defaults to 128</span>
+<span class="sd">            This parameter defines the size of the blocks to be yielded</span>
+<span class="sd">            (i.e. the number of samples per block).</span>
+
+<span class="sd">        Yields</span>
+<span class="sd">        ------</span>
+<span class="sd">        numpy.ndarray</span>
+<span class="sd">            Samples in blocks of shape (num, numchannels).</span>
+<span class="sd">            The last block may be shorter than num.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p><strong>Autosummary</strong>:</p>
+<p>To ensure that a new class, or function is included in the generated API documentation, it needs to be added to the <cite>autosummary</cite> section at the top of the respective Python module file so that it can be recognized by Sphinx. The <cite>autosummary</cite> section is a block with a list of the classes, functions, and constants defined in the module.</p>
+<p>For the <a class="reference internal" href="../api_ref/generated/acoular.sources.html#module-acoular.sources" title="acoular.sources"><code class="xref py py-mod docutils literal notranslate"><span class="pre">acoular.sources</span></code></a> module, the <cite>autosummary</cite> section looks like this:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ------------------------------------------------------------------------------</span>
+<span class="c1"># Copyright (c) Acoular Development Team.</span>
+<span class="c1"># ------------------------------------------------------------------------------</span>
+<span class="sd">&quot;&quot;&quot;Measured multichannel data management and simulation of acoustic sources.</span>
+
+<span class="sd">.. autosummary::</span>
+<span class="sd">    :toctree: generated/</span>
+
+<span class="sd">    TimeSamples</span>
+<span class="sd">    MaskedTimeSamples</span>
+<span class="sd">    PointSource</span>
+<span class="sd">    PointSourceDipole</span>
+<span class="sd">    SphericalHarmonicSource</span>
+<span class="sd">    LineSource</span>
+<span class="sd">    MovingPointSource</span>
+<span class="sd">    MovingPointSourceDipole</span>
+<span class="sd">    MovingLineSource</span>
+<span class="sd">    UncorrelatedNoiseSource</span>
+<span class="sd">    SourceMixer</span>
+<span class="sd">    PointSourceConvolve</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+</pre></div>
+</div>
+</section>
+<section id="documenting-modules">
+<h3>Documenting Modules<a class="headerlink" href="#documenting-modules" title="Link to this heading">¶</a></h3>
+<p>Modules should be documented with a module docstring at the beginning of the file. The docstring should contain a summary of the module’s purpose. The docstring should be enclosed in triple quotes and should be placed at the beginning of the file, before any other code.</p>
+</section>
+</section>
+<section id="writing-python-examples">
+<h2>Writing Python examples<a class="headerlink" href="#writing-python-examples" title="Link to this heading">¶</a></h2>
+<p>Acoular provides a set of <a class="reference internal" href="../auto_examples/index.html"><span class="doc">examples</span></a> that demonstrate how to use the package. These examples are located in the <code class="docutils literal notranslate"><span class="pre">acoular/examples</span></code> subdirectory.</p>
+<p>We are always looking for new examples that demonstrate the functionality of Acoular. If you have a good example that you would like to share, please consider contributing it to the Acoular package.</p>
+<p>We also encourage you to enhance the existing examples by adding more detailed explanations, improving the code, or adding new features.</p>
+<p>We use the <a class="reference external" href="https://sphinx-gallery.github.io/stable/index.html">Sphinx-Gallery</a> extension to automatically generate <cite>.rst</cite> files and downloadable <cite>.ipynb</cite> files from the Python examples, located in the <cite>docs/source/auto_examples</cite> directory.</p>
+<section id="adding-new-examples">
+<h3>Adding new examples<a class="headerlink" href="#adding-new-examples" title="Link to this heading">¶</a></h3>
+<p>To add a new example, create a new Python script in one of the subdirectories of the <cite>examples</cite> directory.
+If no subdirectory is suitable, you can create a new one.
+The name of the script should start with <cite>example_</cite> followed by a short descriptive name.
+If the latter is the case, make sure to add the new subdirectory in the <cite>acoular/docs/source/conf.py</cite> file in the <cite>sphinx_gallery_conf</cite> dictionary:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sphinx_gallery_conf</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;subsection_order&#39;</span> <span class="p">:</span> <span class="n">ExplicitOrder</span><span class="p">([</span>
+        <span class="s2">&quot;../../examples/introductory_examples&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;../../examples/wind_tunnel_examples&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;../../examples/moving_sources_examples&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;../../examples/io_and_signal_processing_examples&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;../../examples/tools&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;&lt;ADD YOUR NEW SUBDIRECTORY HERE&gt;&quot;</span>
+    <span class="p">]),</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>All examples are executed during the documentation build process to ensure that they are working correctly. Therefore, it is important to keep an eye on the execution time of your example. We will only accept examples that run in a reasonable time frame (ideally within a few seconds).</p>
+</section>
+</section>
+<section id="citing-literature">
+<h2>Citing literature<a class="headerlink" href="#citing-literature" title="Link to this heading">¶</a></h2>
+<p>If you are adding a new feature or method that is based on scientific literature, please make sure to include the corresponding references as a bibtex entry in the <cite>acoular/docs/source/literature/literature.bib</cite> file. Details on the bibtex format can be found <a class="reference external" href="https://ctan.org/pkg/bibtex">here</a>.</p>
+<p>You can then cite the reference using the directive <code class="docutils literal notranslate"><span class="pre">:cite:`&lt;BIBTEX_KEY&gt;`</span></code> directive in the documentation. Your citation will be automatically included in the bibliography section of the documentation.</p>
+</section>
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="quality.html">Code Quality Standards</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contributing</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="release.html">Release Policy</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, Acoular Development Team.
+      Last updated on Jul 23, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    </div>
+  </body>
+</html>

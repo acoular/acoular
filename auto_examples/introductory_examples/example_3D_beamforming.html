@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>3D Beamforming with CLEAN-SC deconvolution. &#8212; Acoular 24.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=f63d8bfa" />
+    <link rel="stylesheet" type="text/css" href="../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../_static/documentation_options.js?v=f64914b1"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Wind tunnel examples" href="../wind_tunnel_examples/index.html" />
+    <link rel="prev" title="Basic Beamforming – Generate a map of three sources." href="example_basic_beamforming.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../index.html">
+          <span>Acoular 24.07 documentation</span></a></h1>
+        <h2 class="heading"><span>3D Beamforming with CLEAN-SC deconvolution.</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="example_basic_beamforming.html">Basic Beamforming – Generate a map of three sources.</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Introductory examples</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../wind_tunnel_examples/index.html">Wind tunnel examples</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-introductory-examples-example-3d-beamforming-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code.</p>
+</div>
+<section class="sphx-glr-example-title" id="d-beamforming-with-clean-sc-deconvolution">
+<span id="sphx-glr-auto-examples-introductory-examples-example-3d-beamforming-py"></span><h1>3D Beamforming with CLEAN-SC deconvolution.<a class="headerlink" href="#d-beamforming-with-clean-sc-deconvolution" title="Link to this heading">¶</a></h1>
+<p>Demonstrates a 3D beamforming setup with simulated point sources.
+Simulates data on 64 channel array, subsequent beamforming with CLEAN-SC on 3D grid.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span> <span class="nn">acoular</span> <span class="k">as</span> <span class="nn">ac</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+</pre></div>
+</div>
+<p>First, we define the microphone geometry.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">micgeofile</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">ac</span><span class="o">.</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s1">&#39;xml&#39;</span> <span class="o">/</span> <span class="s1">&#39;array_64.xml&#39;</span>
+<span class="n">m</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">MicGeom</span><span class="p">(</span><span class="n">from_file</span><span class="o">=</span><span class="n">micgeofile</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now, the sources (signals and types/positions) are defined.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">sfreq</span> <span class="o">=</span> <span class="mi">51200</span>
+<span class="n">duration</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">nsamples</span> <span class="o">=</span> <span class="n">duration</span> <span class="o">*</span> <span class="n">sfreq</span>
+
+<span class="n">n1</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">WNoiseGenerator</span><span class="p">(</span><span class="n">sample_freq</span><span class="o">=</span><span class="n">sfreq</span><span class="p">,</span> <span class="n">numsamples</span><span class="o">=</span><span class="n">nsamples</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">n2</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">WNoiseGenerator</span><span class="p">(</span><span class="n">sample_freq</span><span class="o">=</span><span class="n">sfreq</span><span class="p">,</span> <span class="n">numsamples</span><span class="o">=</span><span class="n">nsamples</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">rms</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">n3</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">WNoiseGenerator</span><span class="p">(</span><span class="n">sample_freq</span><span class="o">=</span><span class="n">sfreq</span><span class="p">,</span> <span class="n">numsamples</span><span class="o">=</span><span class="n">nsamples</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">rms</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
+<span class="n">p1</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">PointSource</span><span class="p">(</span><span class="n">signal</span><span class="o">=</span><span class="n">n1</span><span class="p">,</span> <span class="n">mics</span><span class="o">=</span><span class="n">m</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">))</span>
+<span class="n">p2</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">PointSource</span><span class="p">(</span><span class="n">signal</span><span class="o">=</span><span class="n">n2</span><span class="p">,</span> <span class="n">mics</span><span class="o">=</span><span class="n">m</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="p">(</span><span class="mf">0.15</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.17</span><span class="p">))</span>
+<span class="n">p3</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">PointSource</span><span class="p">(</span><span class="n">signal</span><span class="o">=</span><span class="n">n3</span><span class="p">,</span> <span class="n">mics</span><span class="o">=</span><span class="n">m</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">))</span>
+<span class="n">pa</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">SourceMixer</span><span class="p">(</span><span class="n">sources</span><span class="o">=</span><span class="p">[</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p3</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Next, the 3D grid defining the source region is set up (very coarse to enable fast computation for this example)</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">g</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">RectGrid3D</span><span class="p">(</span><span class="n">x_min</span><span class="o">=-</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">x_max</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">y_min</span><span class="o">=-</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">y_max</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">z_min</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">z_max</span><span class="o">=</span><span class="mf">0.36</span><span class="p">,</span> <span class="n">increment</span><span class="o">=</span><span class="mf">0.02</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The following provides the cross spectral matrix and defines the CLEAN-SC beamformer.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">PowerSpectra</span><span class="p">(</span><span class="n">time_data</span><span class="o">=</span><span class="n">pa</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="s1">&#39;Hanning&#39;</span><span class="p">,</span> <span class="n">overlap</span><span class="o">=</span><span class="s1">&#39;50%&#39;</span><span class="p">,</span> <span class="n">block_size</span><span class="o">=</span><span class="mi">128</span><span class="p">)</span>
+<span class="n">st</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">SteeringVector</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="n">g</span><span class="p">,</span> <span class="n">mics</span><span class="o">=</span><span class="n">m</span><span class="p">,</span> <span class="n">steer_type</span><span class="o">=</span><span class="s1">&#39;true location&#39;</span><span class="p">)</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">BeamformerCleansc</span><span class="p">(</span><span class="n">freq_data</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">steer</span><span class="o">=</span><span class="n">st</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Calculate the result for 4 kHz octave band. The result will automatically be cached to disk.
+By default, the corresponding cache file is located in the cache directory of the current working directory.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">map</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">synthetic</span><span class="p">(</span><span class="mi">4000</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[(&#39;SourceMixer_cb28d0e0dbe64601367654af95dd5e33_cache.h5&#39;, 1)]
+[(&#39;SourceMixer_cb28d0e0dbe64601367654af95dd5e33_cache.h5&#39;, 2)]
+</pre></div>
+</div>
+<p>Display views of setup and result.
+For each view, the values along the repsective axis are summed.
+Note that, while Acoular uses a left-oriented coordinate system,
+for display purposes, the z-axis is inverted, plotting the data in
+a right-oriented coordinate system.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pylab</span> <span class="kn">import</span> <span class="n">colorbar</span><span class="p">,</span> <span class="n">figure</span><span class="p">,</span> <span class="n">imshow</span><span class="p">,</span> <span class="n">show</span><span class="p">,</span> <span class="n">subplot</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">xlabel</span><span class="p">,</span> <span class="n">ylabel</span>
+
+<span class="n">fig</span> <span class="o">=</span> <span class="n">figure</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+
+<span class="c1"># plot the results</span>
+
+<span class="n">subplot</span><span class="p">(</span><span class="mi">221</span><span class="p">)</span>
+<span class="n">map_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="nb">map</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">mx</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">L_p</span><span class="p">(</span><span class="n">map_z</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+<span class="n">imshow</span><span class="p">(</span>
+    <span class="n">ac</span><span class="o">.</span><span class="n">L_p</span><span class="p">(</span><span class="n">map_z</span><span class="o">.</span><span class="n">T</span><span class="p">),</span>
+    <span class="n">vmax</span><span class="o">=</span><span class="n">mx</span><span class="p">,</span>
+    <span class="n">vmin</span><span class="o">=</span><span class="n">mx</span> <span class="o">-</span> <span class="mi">20</span><span class="p">,</span>
+    <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span>
+    <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">,</span>
+    <span class="n">extent</span><span class="o">=</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">x_min</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">x_max</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">y_min</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">y_max</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+<span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">)</span>
+<span class="n">title</span><span class="p">(</span><span class="s1">&#39;Top view (xy)&#39;</span><span class="p">)</span>
+
+<span class="n">subplot</span><span class="p">(</span><span class="mi">223</span><span class="p">)</span>
+<span class="n">map_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="nb">map</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">imshow</span><span class="p">(</span>
+    <span class="n">ac</span><span class="o">.</span><span class="n">L_p</span><span class="p">(</span><span class="n">map_y</span><span class="o">.</span><span class="n">T</span><span class="p">),</span>
+    <span class="n">vmax</span><span class="o">=</span><span class="n">mx</span><span class="p">,</span>
+    <span class="n">vmin</span><span class="o">=</span><span class="n">mx</span> <span class="o">-</span> <span class="mi">20</span><span class="p">,</span>
+    <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;upper&#39;</span><span class="p">,</span>
+    <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">,</span>
+    <span class="n">extent</span><span class="o">=</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">x_min</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">x_max</span><span class="p">,</span> <span class="o">-</span><span class="n">g</span><span class="o">.</span><span class="n">z_max</span><span class="p">,</span> <span class="o">-</span><span class="n">g</span><span class="o">.</span><span class="n">z_min</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+<span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;z&#39;</span><span class="p">)</span>
+<span class="n">title</span><span class="p">(</span><span class="s1">&#39;Side view (xz)&#39;</span><span class="p">)</span>
+
+<span class="n">subplot</span><span class="p">(</span><span class="mi">222</span><span class="p">)</span>
+<span class="n">map_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="nb">map</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">imshow</span><span class="p">(</span>
+    <span class="n">ac</span><span class="o">.</span><span class="n">L_p</span><span class="p">(</span><span class="n">map_x</span><span class="p">),</span>
+    <span class="n">vmax</span><span class="o">=</span><span class="n">mx</span><span class="p">,</span>
+    <span class="n">vmin</span><span class="o">=</span><span class="n">mx</span> <span class="o">-</span> <span class="mi">20</span><span class="p">,</span>
+    <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span>
+    <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">,</span>
+    <span class="n">extent</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="n">g</span><span class="o">.</span><span class="n">z_min</span><span class="p">,</span> <span class="o">-</span><span class="n">g</span><span class="o">.</span><span class="n">z_max</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">y_min</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">y_max</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;z&#39;</span><span class="p">)</span>
+<span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">)</span>
+<span class="n">title</span><span class="p">(</span><span class="s1">&#39;Side view (zy)&#39;</span><span class="p">)</span>
+<span class="n">colorbar</span><span class="p">()</span>
+
+<span class="n">ax0</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">((</span><span class="mi">224</span><span class="p">),</span> <span class="n">projection</span><span class="o">=</span><span class="s1">&#39;3d&#39;</span><span class="p">)</span>
+<span class="n">ax0</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">mpos</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">m</span><span class="o">.</span><span class="n">mpos</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="n">m</span><span class="o">.</span><span class="n">mpos</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+<span class="n">source_locs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">p1</span><span class="o">.</span><span class="n">loc</span><span class="p">,</span> <span class="n">p2</span><span class="o">.</span><span class="n">loc</span><span class="p">,</span> <span class="n">p3</span><span class="o">.</span><span class="n">loc</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
+<span class="n">ax0</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">source_locs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">source_locs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="n">source_locs</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+<span class="n">ax0</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+<span class="n">ax0</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">)</span>
+<span class="n">ax0</span><span class="o">.</span><span class="n">set_zlabel</span><span class="p">(</span><span class="s1">&#39;z&#39;</span><span class="p">)</span>
+<span class="n">ax0</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Setup (mic and source positions)&#39;</span><span class="p">)</span>
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_example_3D_beamforming_001.png" srcset="../../_images/sphx_glr_example_3D_beamforming_001.png" alt="Top view (xy), Side view (xz), Side view (zy), Setup (mic and source positions)" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 7.060 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-introductory-examples-example-3d-beamforming-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/6e21bc9ab91493f80fc2c96d080323aa/example_3D_beamforming.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">example_3D_beamforming.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/6421aa3919282b9607441710623a66c0/example_3D_beamforming.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">example_3D_beamforming.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/470f2881e077e58e2f37bfef0c4aa4c8/example_3D_beamforming.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">example_3D_beamforming.zip</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="example_basic_beamforming.html">Basic Beamforming – Generate a map of three sources.</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Introductory examples</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../wind_tunnel_examples/index.html">Wind tunnel examples</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, Acoular Development Team.
+      Last updated on Jul 23, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>signals &#8212; Acoular 24.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=f63d8bfa" />
+    <link rel="stylesheet" type="text/css" href="../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../_static/documentation_options.js?v=f64914b1"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="SignalGenerator" href="generated/acoular.signals.SignalGenerator.html" />
+    <link rel="prev" title="SoundDeviceSamplesGenerator" href="generated/acoular.sdinput.SoundDeviceSamplesGenerator.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../index.html">
+          <span>Acoular 24.07 documentation</span></a></h1>
+        <h2 class="heading"><span>signals</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="generated/acoular.sdinput.SoundDeviceSamplesGenerator.html">SoundDeviceSamplesGenerator</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Reference Manual</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="generated/acoular.signals.SignalGenerator.html">SignalGenerator</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="module-acoular.signals">
+<span id="signals"></span><h1>signals<a class="headerlink" href="#module-acoular.signals" title="Link to this heading">¶</a></h1>
+<p>Implements signal generators for the simulation of acoustic sources.</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.signals.SignalGenerator.html#acoular.signals.SignalGenerator" title="acoular.signals.SignalGenerator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SignalGenerator</span></code></a></p></td>
+<td><p>Virtual base class for a simple one-channel signal generator.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/acoular.signals.WNoiseGenerator.html#acoular.signals.WNoiseGenerator" title="acoular.signals.WNoiseGenerator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">WNoiseGenerator</span></code></a></p></td>
+<td><p>White noise signal generator.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.signals.PNoiseGenerator.html#acoular.signals.PNoiseGenerator" title="acoular.signals.PNoiseGenerator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PNoiseGenerator</span></code></a></p></td>
+<td><p>Pink noise signal generator.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/acoular.signals.FiltWNoiseGenerator.html#acoular.signals.FiltWNoiseGenerator" title="acoular.signals.FiltWNoiseGenerator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FiltWNoiseGenerator</span></code></a></p></td>
+<td><p>Filtered white noise signal following an autoregressive (AR), moving-average (MA) or autoregressive moving-average (ARMA) process.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.signals.SineGenerator.html#acoular.signals.SineGenerator" title="acoular.signals.SineGenerator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SineGenerator</span></code></a></p></td>
+<td><p>Sine signal generator with adjustable frequency and phase.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/acoular.signals.GenericSignalGenerator.html#acoular.signals.GenericSignalGenerator" title="acoular.signals.GenericSignalGenerator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GenericSignalGenerator</span></code></a></p></td>
+<td><p>Generate signal from output of <a class="reference internal" href="generated/acoular.tprocess.SamplesGenerator.html#acoular.tprocess.SamplesGenerator" title="acoular.tprocess.SamplesGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplesGenerator</span></code></a> object.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="generated/acoular.sdinput.SoundDeviceSamplesGenerator.html">SoundDeviceSamplesGenerator</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Reference Manual</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="generated/acoular.signals.SignalGenerator.html">SignalGenerator</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, Acoular Development Team.
+      Last updated on Jul 23, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    </div>
+  </body>
+</html>

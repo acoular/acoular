@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>FiltOctave &#8212; Acoular 24.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=f63d8bfa" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=f64914b1"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="TimeExpAverage" href="acoular.tprocess.TimeExpAverage.html" />
+    <link rel="prev" title="FiltFiltOctave" href="acoular.tprocess.FiltFiltOctave.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 24.07 documentation</span></a></h1>
+        <h2 class="heading"><span>FiltOctave</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tprocess.FiltFiltOctave.html">FiltFiltOctave</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tprocess.html">tprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tprocess.TimeExpAverage.html">TimeExpAverage</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="filtoctave">
+<h1>FiltOctave<a class="headerlink" href="#filtoctave" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.tprocess.FiltOctave">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.tprocess.</span></span><span class="sig-name descname"><span class="pre">FiltOctave</span></span><a class="headerlink" href="#acoular.tprocess.FiltOctave" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.tprocess.Filter.html#acoular.tprocess.Filter" title="acoular.tprocess.Filter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Filter</span></code></a></p>
+<p>Octave or third-octave filter (causal, non-zero phase delay).</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.FiltOctave.band">
+<span class="sig-name descname"><span class="pre">band</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(1000.0,</span> <span class="pre">desc='band</span> <span class="pre">center</span> <span class="pre">frequency')</span></em><a class="headerlink" href="#acoular.tprocess.FiltOctave.band" title="Link to this definition">¶</a></dt>
+<dd><p>Band center frequency; defaults to 1000.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.FiltOctave.fraction">
+<span class="sig-name descname"><span class="pre">fraction</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Trait('Octave',</span> <span class="pre">{'Octave':</span> <span class="pre">1,</span> <span class="pre">'Third</span> <span class="pre">octave':</span> <span class="pre">3},</span> <span class="pre">desc='fraction</span> <span class="pre">of</span> <span class="pre">octave')</span></em><a class="headerlink" href="#acoular.tprocess.FiltOctave.fraction" title="Link to this definition">¶</a></dt>
+<dd><p>Octave fraction: ‘Octave’ or ‘Third octave’; defaults to ‘Octave’.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.FiltOctave.order">
+<span class="sig-name descname"><span class="pre">order</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Int(3,</span> <span class="pre">desc='IIR</span> <span class="pre">filter</span> <span class="pre">order')</span></em><a class="headerlink" href="#acoular.tprocess.FiltOctave.order" title="Link to this definition">¶</a></dt>
+<dd><p>Filter order</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tprocess.FiltFiltOctave.html">FiltFiltOctave</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tprocess.html">tprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tprocess.TimeExpAverage.html">TimeExpAverage</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, Acoular Development Team.
+      Last updated on Jul 23, 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    </div>
+  </body>
+</html>
