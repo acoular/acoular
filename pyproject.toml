@@ -104,7 +104,7 @@ build = ["cd docs && make html"]
 
 [tool.hatch.envs.tests]
 dependencies = [
-   "acoular[tests]"
+    "acoular[tests]"
 ]
 
 [[tool.hatch.envs.tests.matrix]]
