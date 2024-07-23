@@ -47,6 +47,7 @@ jobs:
         with:
           # Check all markdown, html and reStructuredText files in repo (default)
           args: --base . --verbose --no-progress './**/*.md' './**/*.html' './**/*.rst'        
+          fail: true
 
   cron-link-check:
     if: ${{ github.event_name == 'schedule' }}
@@ -58,7 +59,8 @@ jobs:
         uses: lycheeverse/lychee-action@v1
         with:
           # Check all markdown, html and reStructuredText files in repo (default)
-          args: --base . --verbose --no-progress './**/*.md' './**/*.html' './**/*.rst'        
+          args: --base . --verbose --no-progress './**/*.md' './**/*.html' './**/*.rst'
+          fail: true
       - name: Create Issue From File
         if: ${{ env.lychee_exit_code != 0 }}
         uses: peter-evans/create-issue-from-file@v4
