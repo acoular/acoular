@@ -126,7 +126,10 @@ BEAMFORMER_BASE_DIGEST_DEPENDENCIES = ['freq_data.digest', 'r_diag', 'r_diag_nor
 
 
 class SteeringVector(HasPrivateTraits):
-    """Basic class for implementing steering vectors with monopole source transfer models."""
+    """Basic class for implementing steering vectors with monopole source transfer models.
+
+    Handles four different steering vector formulations. See :cite:`Sarradj2012` for details.
+    """
 
     #: :class:`~acoular.grids.Grid`-derived object that provides the grid locations.
     grid = Trait(Grid, desc='beamforming grid')
@@ -134,7 +137,7 @@ class SteeringVector(HasPrivateTraits):
     #: :class:`~acoular.microphones.MicGeom` object that provides the microphone locations.
     mics = Trait(MicGeom, desc='microphone geometry')
 
-    #: Type of steering vectors, see also :ref:`Sarradj, 2012<Sarradj2012>`. Defaults to 'true level'.
+    #: Type of steering vectors, see also :cite:`Sarradj2012`. Defaults to 'true level'.
     steer_type = Trait('true level', 'true location', 'classic', 'inverse', desc='type of steering vectors used')
 
     #: :class:`~acoular.environments.Environment` or derived object,
@@ -231,8 +234,9 @@ class SteeringVector(HasPrivateTraits):
         return trans
 
     def steer_vector(self, f, ind=None):
-        """Calculates the steering vectors based on the transfer function
-        See also :ref:`Sarradj, 2012<Sarradj2012>`.
+        """Calculates the steering vectors based on the transfer function.
+
+        See also :cite:`Sarradj2012`.
 
         Parameters
         ----------
@@ -305,7 +309,7 @@ class BeamformerBase(HasPrivateTraits):
         if isinstance(steer, SteeringVector):
             self._steer_obj = steer
         elif steer in ('true level', 'true location', 'classic', 'inverse'):
-            # Type of steering vectors, see also :ref:`Sarradj, 2012<Sarradj2012>`.
+            # Type of steering vectors, see also :cite:`Sarradj2012`.
             warn(
                 "Deprecated use of 'steer' trait. Please use object of class 'SteeringVector' in the future.",
                 Warning,
@@ -759,7 +763,10 @@ class BeamformerBase(HasPrivateTraits):
 
 
 class BeamformerFunctional(BeamformerBase):
-    """Functional beamforming after :ref:`Dougherty, 2014<Dougherty2014>`."""
+    """Functional beamforming algorithm.
+
+    See :cite:`Dougherty2014` for details.
+    """
 
     #: Functional exponent, defaults to 1 (= Classic Beamforming).
     gamma = Float(1, desc='functional exponent')
@@ -845,7 +852,10 @@ class BeamformerFunctional(BeamformerBase):
 
 
 class BeamformerCapon(BeamformerBase):
-    """Beamforming using the Capon (Mininimum Variance) algorithm, see :ref:`Capon, 1969<Capon1969>`."""
+    """Beamforming using the Capon (Mininimum Variance) algorithm.
+
+    See :cite:`Capon1969` for details.
+    """
 
     # Boolean flag, if 'True', the main diagonal is removed before beamforming;
     # for Capon beamforming r_diag is set to 'False'.
@@ -887,7 +897,10 @@ class BeamformerCapon(BeamformerBase):
 
 
 class BeamformerEig(BeamformerBase):
-    """Beamforming using eigenvalue and eigenvector techniques, see :ref:`Sarradj et al., 2005<Sarradj2005>`."""
+    """Beamforming using eigenvalue and eigenvector techniques.
+
+    See :cite:`Sarradj2005` for details.
+    """
 
     #: Number of component to calculate:
     #: 0 (smallest) ... :attr:`~acoular.tprocess.SamplesGenerator.numchannels`-1;
@@ -952,7 +965,10 @@ class BeamformerEig(BeamformerBase):
 
 
 class BeamformerMusic(BeamformerEig):
-    """Beamforming using the MUSIC algorithm, see :ref:`Schmidt, 1986<Schmidt1986>`."""
+    """Beamforming using the MUSIC algorithm.
+
+    See :cite:`Schmidt1986` for details.
+    """
 
     # Boolean flag, if 'True', the main diagonal is removed before beamforming;
     # for MUSIC beamforming r_diag is set to 'False'.
@@ -1030,7 +1046,7 @@ class PointSpreadFunction(HasPrivateTraits):
         if isinstance(steer, SteeringVector):
             self._steer_obj = steer
         elif steer in ('true level', 'true location', 'classic', 'inverse'):
-            # Type of steering vectors, see also :ref:`Sarradj, 2012<Sarradj2012>`.
+            # Type of steering vectors, see also :cite:`Sarradj2012`.
             warn(
                 "Deprecated use of 'steer' trait. Please use object of class 'SteeringVector' in the future.",
                 Warning,
@@ -1269,7 +1285,10 @@ class PointSpreadFunction(HasPrivateTraits):
 
 
 class BeamformerDamas(BeamformerBase):
-    """DAMAS deconvolution, see :ref:`Brooks and Humphreys, 2006<BrooksHumphreys2006>`."""
+    """DAMAS deconvolution algorithm.
+
+    See :cite:`Brooks2006` for details.
+    """
 
     #: (only for backward compatibility) :class:`BeamformerBase` object
     #: if set, provides :attr:`freq_data`, :attr:`steer`, :attr:`r_diag`
@@ -1347,8 +1366,7 @@ class BeamformerDamas(BeamformerBase):
 
 
 class BeamformerDamasPlus(BeamformerDamas):
-    """DAMAS deconvolution, see :ref:`Brooks and Humphreys, 2006<BrooksHumphreys2006>`,
-    for solving the system of equations, instead of the original Gauss-Seidel
+    """DAMAS deconvolution :cite:`Brooks2006` for solving the system of equations, instead of the original Gauss-Seidel
     iterations, this class employs the NNLS or linear programming solvers from
     scipy.optimize or one  of several optimization algorithms from the scikit-learn module.
     Needs a-priori delay-and-sum beamforming (:class:`BeamformerBase`).
@@ -1465,7 +1483,9 @@ class BeamformerDamasPlus(BeamformerDamas):
 
 
 class BeamformerOrth(BeamformerBase):
-    """Orthogonal deconvolution, see :ref:`Sarradj, 2010<Sarradj2010>`.
+    """Orthogonal deconvolution algorithm.
+
+    See :cite:`Sarradj2010` for details.
     New faster implementation without explicit (:class:`BeamformerEig`).
     """
 
@@ -1542,7 +1562,9 @@ class BeamformerOrth(BeamformerBase):
 
 
 class BeamformerCleansc(BeamformerBase):
-    """CLEAN-SC deconvolution, see :ref:`Sijtsma, 2007<Sijtsma2007>`.
+    """CLEAN-SC deconvolution algorithm.
+
+    See :cite:`Sijtsma2007` for details.
     Classic delay-and-sum beamforming is already included.
     """
 
@@ -1630,7 +1652,10 @@ class BeamformerCleansc(BeamformerBase):
 
 
 class BeamformerClean(BeamformerBase):
-    """CLEAN deconvolution, see :ref:`Hoegbom, 1974<Hoegbom1974>`."""
+    """CLEAN deconvolution algorithm.
+
+    See :cite:`Hoegbom1974` for details.
+    """
 
     #: (only for backward compatibility) :class:`BeamformerBase` object
     #: if set, provides :attr:`freq_data`, :attr:`steer`, :attr:`r_diag`
@@ -1728,8 +1753,10 @@ class BeamformerClean(BeamformerBase):
 
 
 class BeamformerCMF(BeamformerBase):
-    """Covariance Matrix Fitting, see :ref:`Yardibi et al., 2008<Yardibi2008>`.
+    """Covariance Matrix Fitting algorithm.
+
     This is not really a beamformer, but an inverse method.
+    See :cite:`Yardibi2008` for details.
     """
 
     #: Type of fit method to be used ('LassoLars', 'LassoLarsBIC',
@@ -1951,12 +1978,9 @@ class BeamformerCMF(BeamformerBase):
 
 
 class BeamformerSODIX(BeamformerBase):
-    """SODIX, see Funke, Ein Mikrofonarray-Verfahren zur Untersuchung der
-    Schallabstrahlung von Turbofantriebwerken, 2017. and
-    Oertwig, Advancements in the source localization method SODIX and
-    application to short cowl engine data, 2019.
+    """Source directivity modeling in the cross-spectral matrix (SODIX) algorithm.
 
-    Source directivity modeling in the cross-spectral matrix
+    See :cite:`Funke2017` and :cite:`Oertwig2019` for details.
     """
 
     #: Type of fit method to be used ('fmin_l_bfgs_b').
@@ -2112,7 +2136,10 @@ class BeamformerSODIX(BeamformerBase):
 
 
 class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
-    """Beamforming GIB methods with different normalizations,."""
+    """Beamforming GIB methods with different normalizations.
+
+    See :cite:`Suzuki2011` for details.
+    """
 
     #: Unit multiplier for evaluating, e.g., nPa instead of Pa.
     #: Values are converted back before returning.
@@ -2385,7 +2412,10 @@ class BeamformerAdaptiveGrid(BeamformerBase, Grid):
 
 
 class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
-    """Orthogonal beamforming without predefined grid."""
+    """Orthogonal beamforming without predefined grid.
+
+    See :cite:`Sarradj2022` for details.
+    """
 
     #: List of components to consider, use this to directly set the eigenvalues
     #: used in the beamformer. Alternatively, set :attr:`n`.

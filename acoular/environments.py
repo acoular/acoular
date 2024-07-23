@@ -283,8 +283,9 @@ class FlowField(HasPrivateTraits):
 
 
 class SlotJet(FlowField):
-    """Provides an analytical approximation of the flow field of a slot jet,
-    see :ref:`Albertson et al., 1950<Albertson1950>`.
+    """Provides an analytical approximation of the flow field of a slot jet.
+
+    See :cite:`Albertson1950` for details.
     """
 
     #: Exit velocity at jet origin, i.e. the nozzle. Defaults to 0.
@@ -364,8 +365,9 @@ class SlotJet(FlowField):
 
 
 class OpenJet(FlowField):
-    """Provides an analytical approximation of the flow field of an open jet,
-    see :ref:`Albertson et al., 1950<Albertson1950>`.
+    """Provides an analytical approximation of the flow field of an open jet.
+
+    See :cite:`Albertson1950` for details.
 
     Notes
     -----

@@ -7,6 +7,8 @@ Upcoming Release
     * New features:
     * Bugfixes:
     * Internal:
+        * updates literature and adds `sphinxcontrib-bibtex` extension to support bibtex citation in the documentation.
+
 
 24.07
 ------------

@@ -187,7 +187,7 @@ class PowerSpectra(BaseSpectra):
      and its eigen-decomposition.
 
     This class includes the efficient calculation of the full cross spectral
-    matrix using the Welch method with windows and overlap. It also contains
+    matrix using the Welch method with windows and overlap (:cite:`Welch1967`). It also contains
     the CSM's eigenvalues and eigenvectors and additional properties.
 
     The result is computed only when needed, that is when the :attr:`csm`,
