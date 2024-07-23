@@ -154,3 +154,10 @@ sphinx_gallery_conf = {
         "../../examples/tools",
     ]),
 }
+
+#%% 
+# sphinxcontrib-bibtex extension settings
+# ---------------------------------------
+
+bibtex_bibfiles = ["literature/literature.bib"]
+bibtex_default_style = 'unsrt'
