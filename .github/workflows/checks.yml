@@ -46,7 +46,7 @@ jobs:
         uses: lycheeverse/lychee-action@v1
         with:
           # Check all markdown, html and reStructuredText files in repo (default)
-          args: --base . --verbose --no-progress --exclude file:///home/runner/work/acoular/acoular/docs/source/_themes/*
+          args: --base . --verbose --no-progress './**/*.md' './**/*.html' './**/*.rst' --exclude file:///home/runner/work/acoular/acoular/docs/source/_themes/*
           fail: true
 
   cron-link-check:
@@ -59,7 +59,7 @@ jobs:
         uses: lycheeverse/lychee-action@v1
         with:
           # Check all markdown, html and reStructuredText files in repo (default)
-          args: --base . --verbose --no-progress --exclude file:///home/runner/work/acoular/acoular/docs/source/_themes/*
+          args: --base . --verbose --no-progress './**/*.md' './**/*.html' './**/*.rst' --exclude file:///home/runner/work/acoular/acoular/docs/source/_themes/*
           fail: true
       - name: Create Issue From File
         if: ${{ env.lychee_exit_code != 0 }}
