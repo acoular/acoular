@@ -24,7 +24,6 @@ jobs:
         run: hatch -v fmt --check
 
   validate-cff:
-    if: ${{ github.event_name !='schedule'}}
     runs-on: ubuntu-latest
     steps:
       - name: Check out a copy of the repository
