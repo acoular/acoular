@@ -93,7 +93,7 @@ class FreqInOut(FreqGenerator):
         if isinstance(receiver, (FreqInOut)):
             receiver.source = self
             return receiver
-        msg = f"Receiving object {receiver.__class__} must be derived from TimeInOut or FreqInOut."
+        msg = f'Receiving object {receiver.__class__} must be derived from TimeInOut or FreqInOut.'
         raise TypeError(msg)
 
     def __lt__(self, source):
