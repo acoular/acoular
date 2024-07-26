@@ -18,8 +18,8 @@ import multiprocessing
 from scipy import fft
 from traits.api import CLong, Delegate, Float, HasPrivateTraits, Int, Property, Trait, cached_property
 
-from acoular.internal import digest
-from acoular.tprocess import SamplesGenerator, TimeInOut
+from .internal import digest
+from .tprocess import SamplesGenerator, TimeInOut
 
 CPU_COUNT = multiprocessing.cpu_count()
 
@@ -88,6 +88,17 @@ class FreqInOut(FreqGenerator):
     @cached_property
     def _get_digest(self):
         return digest(self)
+
+    def __gt__(self, receiver):
+        if isinstance(receiver, (FreqInOut)):
+            receiver.source = self
+            return receiver
+        msg = f"Receiving object {receiver.__class__} must be derived from TimeInOut or FreqInOut."
+        raise TypeError(msg)
+
+    def __lt__(self, source):
+        self.source = source
+        return self
 
     def result(self, num):
         """Python generator: dummy function, just echoes the output of source.
