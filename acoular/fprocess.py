@@ -6,9 +6,13 @@
 .. autosummary::
     :toctree: generated/
 
+    FreqGenerator
     FreqInOut
-    FFT
-    IFFT
+    RFFT
+    IRFFT
+    Power
+    Average
+
 """
 import multiprocessing
 
@@ -225,7 +229,7 @@ class Power(FreqInOut, TimeInOut):
             yield from self._tresult(num)
 
 
-class FreqAverage(FreqInOut):
+class Average(FreqInOut):
     """Averages frequency data over a number of blocks.
 
     The class can be used to average frequency data over a number of blocks.
@@ -254,7 +258,7 @@ class FreqAverage(FreqInOut):
         Yields
         ------
         numpy.ndarray
-            Yields blocks of shape (num, numchannels). 
+            Yields blocks of shape (num, numchannels).
         """
         i = 0
         data_avg = None
