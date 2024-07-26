@@ -6,6 +6,8 @@
 
 import os
 
+from process import BlockAverage, Power
+
 from . import demo, tools
 from .calib import Calib
 from .configuration import config
@@ -41,7 +43,7 @@ from .fbeamform import (
     SteeringVector,
     integrate,
 )
-from .fprocess import IRFFT, RFFT, FreqAverage, FreqGenerator, FreqInOut, Power
+from .fprocess import IRFFT, RFFT, FreqGenerator, FreqInOut
 from .grids import (
     CircSector,
     ConvexSector,
