@@ -20,6 +20,7 @@ from numpy import (
     array,
     bartlett,
     blackman,
+    ceil,
     dot,
     empty,
     fill_diagonal,
@@ -406,7 +407,8 @@ class PowerSpectra(BaseSpectra):
             else:
                 raise ValueError('Calibration data not compatible: %i, %i' % (self.calib.num_mics, t.numchannels))
         # get time data blockwise
-        for data in self.get_source_data():
+        full_blocks = int(ceil(self.num_blocks))
+        for _, data in zip(range(full_blocks), self.get_source_data()):
             ft = fft.rfft(data * wind, None, 0).astype(self.precision)
             calcCSM(csm_upper, ft)  # only upper triangular part of matrix is calculated (for speed reasons)
         # create the full csm matrix via transposing and complex conj.
