@@ -292,7 +292,7 @@ class MaskedTimeInOut(TimeInOut):
             i = 0
             fblock = True
             for block in self.source.result(num):
-                if i == 0: # validate first block
+                if i == 0:  # validate first block
                     self._validate_result_block(block, time_data=True, freq_data=False)
                 bs = block.shape[0]
                 i += bs

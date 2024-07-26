@@ -14,6 +14,7 @@
     Average
 
 """
+
 import multiprocessing
 
 from scipy import fft
@@ -126,7 +127,7 @@ class RFFT(FreqInOut):
 
         """
         blocksize = self.get_blocksize(numfreq)
-        return abs(fft.fftfreq(blocksize, 1.0 / self.sample_freq)[:int(blocksize / 2 + 1)])
+        return abs(fft.fftfreq(blocksize, 1.0 / self.sample_freq)[: int(blocksize / 2 + 1)])
 
     @cached_property
     def _get_digest(self):
@@ -155,8 +156,8 @@ class RFFT(FreqInOut):
             # should use additional "out" parameter in the future to avoid reallocation (numpy > 2.0)
             yield fft.rfft(data, n=blocksize, axis=0, workers=self.workers)
 
-class IRFFT(TimeInOut):
 
+class IRFFT(TimeInOut):
     source = Trait(FreqInOut)
 
     #: Number of workers to use for the IFFT calculation
@@ -198,11 +199,11 @@ class Power(FreqInOut, TimeInOut):
     # :class:`acoular.tprocess.TimeInOut` derived object.
     source = Either(Instance(FreqInOut), Instance(TimeInOut), desc='data source')
 
-    def _fresult(self,num):
+    def _fresult(self, num):
         for temp in self.source.result(num):
             yield (temp * temp.conjugate()).real
 
-    def _tresult(self,num):
+    def _tresult(self, num):
         for temp in self.source.result(num):
             yield temp * temp
 
