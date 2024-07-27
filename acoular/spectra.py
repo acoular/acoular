@@ -21,6 +21,7 @@ from numpy import (
     bartlett,
     blackman,
     ceil,
+    concatenate,
     dot,
     empty,
     fill_diagonal,
@@ -408,13 +409,22 @@ class PowerSpectra(BaseSpectra):
                 raise ValueError('Calibration data not compatible: %i, %i' % (self.calib.num_mics, t.numchannels))
         # get time data blockwise
         full_blocks = int(ceil(self.num_blocks))
-        for _, data in zip(range(full_blocks), self.get_source_data()):
-            ft = fft.rfft(data * wind, None, 0).astype(self.precision)
-            calcCSM(csm_upper, ft)  # only upper triangular part of matrix is calculated (for speed reasons)
-        # create the full csm matrix via transposing and complex conj.
-        csm_lower = csm_upper.conj().transpose(0, 2, 1)
-        [fill_diagonal(csm_lower[cntFreq, :, :], 0) for cntFreq in range(csm_lower.shape[0])]
-        csm = csm_lower + csm_upper
+        iters = int(ceil(self.source.numsamples / self.block_size))
+        csm = zeros(shape=csm_shape)
+        csm = csm[:, newaxis, :, :]
+        for _ in range(iters // full_blocks):
+            for __, data in zip(range(full_blocks), self.get_source_data()):
+                ft = fft.rfft(data * wind, None, 0).astype(self.precision)
+                calcCSM(csm_upper, ft)  # only upper triangular part of matrix is calculated (for speed reasons)
+            # create the full csm matrix via transposing and complex conj.
+            csm_lower = csm_upper.conj().transpose(0, 2, 1)
+            [fill_diagonal(csm_lower[cntFreq, :, :], 0) for cntFreq in range(csm_lower.shape[0])]
+            csm_block = csm_lower + csm_upper
+            if iters // full_blocks > 1:
+                csm_block = csm_block[:, newaxis, :, :]
+                csm = concatenate([csm, csm_block], axis=1)
+            else:
+                csm = csm_block
         # onesided spectrum: multiplication by 2.0=sqrt(2)^2
         return csm * (2.0 / self.block_size / weight / self.num_blocks)
 
