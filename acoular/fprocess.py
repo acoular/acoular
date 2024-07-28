@@ -169,7 +169,7 @@ class RFFT(FreqInOut):
         for data in self.source.result(blocksize):
             # should use additional "out" parameter in the future to avoid reallocation (numpy > 2.0)
             rfft = fft.rfft(data, n=blocksize, axis=0, workers=self.workers, norm='backward')
-            rfft[1:-1] *= np.sqrt(2) # one-sided spectrum correction
+            rfft[1:-1] *= np.sqrt(2)  # one-sided spectrum correction
             yield rfft
 
 
@@ -203,8 +203,8 @@ class IRFFT(TimeInOut):
         for temp in self.source.result(numfreq):
             yield fft.irfft(temp, n=num, axis=0, workers=self.workers)
 
-class CrossPowerSpectra(FreqInOut):
 
+class CrossPowerSpectra(FreqInOut):
     source = Trait(FreqInOut)
 
     #: The floating-number-precision of entries of csm, eigenvalues and
@@ -212,7 +212,7 @@ class CrossPowerSpectra(FreqInOut):
     precision = Trait('complex128', 'complex64', desc='precision of the fft')
 
     #: Calculation mode, either 'full' or 'upper'.
-    #: 'full' calculates the full cross-spectral matrix, 'upper' calculates 
+    #: 'full' calculates the full cross-spectral matrix, 'upper' calculates
     # only the upper triangle. Default is 'full'.
     calc_mode = Trait('full', 'upper', desc='calculation mode')
 
@@ -246,13 +246,13 @@ class CrossPowerSpectra(FreqInOut):
             Yields blocks of shape (num, numchannels).
         """
         numspec = self.numchannels
-        blocksize = ((num - 1) *2)**2
+        blocksize = ((num - 1) * 2) ** 2
         for data in self.source.result(num):
             csm_upper = np.zeros((num, self.source.numchannels, self.source.numchannels), dtype=self.precision)
-            calcCSM(csm_upper, data) # TODO: requires new method (only temporary solution) # noqa: TD002, TD003, FIX002
+            calcCSM(csm_upper, data)  # TODO: requires new method (only temporary solution) # noqa: TD002, TD003, FIX002
             if self.calc_mode == 'full':
                 csm_lower = csm_upper.conj().transpose(0, 2, 1)
                 [np.fill_diagonal(csm_lower[cntFreq, :, :], 0) for cntFreq in range(csm_lower.shape[0])]
                 yield (csm_lower + csm_upper).reshape(num, -1) / blocksize
             else:
-                yield csm_upper.reshape(num, -1)[:,:numspec] / blocksize
+                yield csm_upper.reshape(num, -1)[:, :numspec] / blocksize
