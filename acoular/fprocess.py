@@ -17,7 +17,7 @@ import multiprocessing
 
 import numpy as np
 from scipy import fft
-from traits.api import CLong, Delegate, Float, HasPrivateTraits, Int, Property, Trait, cached_property
+from traits.api import CLong, Delegate, Either, Float, HasPrivateTraits, Int, Property, Trait, cached_property
 
 from .fastFuncs import calcCSM
 from .internal import digest
@@ -126,7 +126,7 @@ class RFFT(FreqInOut):
     workers = Int(CPU_COUNT, desc='number of workers to use')
 
     #: TODO: should implement different normalization methods
-    norm = Trait('none')
+    norm = Either(None, 'amplitude')
 
     def get_blocksize(self, numfreq):
         return (numfreq - 1) * 2 if numfreq % 2 != 0 else numfreq * 2 - 1
@@ -166,9 +166,10 @@ class RFFT(FreqInOut):
             whereby num is the number of frequencies.
         """
         blocksize = self.get_blocksize(num)
+        weight = 1 / blocksize if self.norm == 'amplitude' else 1.0
         for data in self.source.result(blocksize):
             # should use additional "out" parameter in the future to avoid reallocation (numpy > 2.0)
-            rfft = fft.rfft(data, n=blocksize, axis=0, workers=self.workers, norm='backward')
+            rfft = fft.rfft(data, n=blocksize, axis=0, workers=self.workers) * weight
             rfft[1:-1] *= np.sqrt(2)  # one-sided spectrum correction
             yield rfft
 
@@ -205,6 +206,7 @@ class IRFFT(TimeInOut):
 
 
 class CrossPowerSpectra(FreqInOut):
+    #: Data source; :class:`~acoular.fprocess.FreqInOut` or derived object.
     source = Trait(FreqInOut)
 
     #: The floating-number-precision of entries of csm, eigenvalues and
@@ -219,8 +221,11 @@ class CrossPowerSpectra(FreqInOut):
     #: Number of channels in output, as given by :attr:`source`.
     numchannels = Property(depends_on='source.numchannels')
 
+    #: Normalization method, either None or 'psd' (Power Spectral Density).
+    norm = Either(None, 'psd')
+
     # internal identifier
-    digest = Property(depends_on=['source.digest', 'calc_mode'])
+    digest = Property(depends_on=['source.digest', 'calc_mode', 'norm'])
 
     @cached_property
     def _get_numchannels(self):
@@ -247,12 +252,15 @@ class CrossPowerSpectra(FreqInOut):
         """
         numspec = self.numchannels
         blocksize = ((num - 1) * 2) ** 2
+        weight = 1.0 / blocksize
+        if self.norm == 'psd':
+            weight *= blocksize / self.sample_freq
         for data in self.source.result(num):
             csm_upper = np.zeros((num, self.source.numchannels, self.source.numchannels), dtype=self.precision)
             calcCSM(csm_upper, data)  # TODO: requires new method (only temporary solution) # noqa: TD002, TD003, FIX002
             if self.calc_mode == 'full':
                 csm_lower = csm_upper.conj().transpose(0, 2, 1)
                 [np.fill_diagonal(csm_lower[cntFreq, :, :], 0) for cntFreq in range(csm_lower.shape[0])]
-                yield (csm_lower + csm_upper).reshape(num, -1) / blocksize
+                yield (csm_lower + csm_upper).reshape(num, -1) * weight
             else:
-                yield csm_upper.reshape(num, -1)[:, :numspec] / blocksize
+                yield csm_upper.reshape(num, -1)[:, :numspec] * weight

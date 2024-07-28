@@ -33,10 +33,17 @@ class Power(FreqInOut, TimeInOut):
     # :class:`acoular.tprocess.TimeInOut` derived object.
     source = Either(Instance(FreqInOut), Instance(TimeInOut), desc='data source')
 
+    #: Normalization method, either None or 'psd' (Power Spectral Density).
+    #: Only relevant if the source is a :class:`~acoular.fprocess.FreqInOut` object.
+    norm = Either(None, 'psd')
+
     def _fresult(self, num):
         blocksize = (num - 1) * 2
+        weight = 1.0 / blocksize**2
+        if self.norm == 'psd':
+            weight *= self.blocksize * self.source.sample_freq
         for temp in self.source.result(num):
-            yield (temp * temp.conjugate()).real / blocksize
+            yield (temp * temp.conjugate()).real * weight
 
     def _tresult(self, num):
         for temp in self.source.result(num):
