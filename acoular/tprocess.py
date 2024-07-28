@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
-"""Implements processing in the time domain.
+"""Implements blockwise processing in the time domain.
 
 .. autosummary::
     :toctree: generated/
@@ -184,6 +184,17 @@ class TimeInOut(SamplesGenerator):
     @cached_property
     def _get_digest(self):
         return digest(self)
+
+    def __gt__(self, receiver):
+        if isinstance(receiver, (TimeInOut)):
+            receiver.source = self
+            return receiver
+        msg = f'Receiving object {receiver.__class__} must be derived from TimeInOut or FreqInOut.'
+        raise TypeError(msg)
+
+    def __lt__(self, source):
+        self.source = source
+        return self
 
     def result(self, num):
         """Python generator: dummy function, just echoes the output of source,

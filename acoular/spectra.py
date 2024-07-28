@@ -130,7 +130,7 @@ class BaseSpectra(HasPrivateTraits):
         return None
 
     # generator that yields the time data blocks for every channel (with optional overlap)
-    def get_source_data(self):
+    def _get_source_data(self):
         bs = self.block_size
         temp = empty((2 * bs, self.numchannels))
         pos = bs
@@ -177,7 +177,7 @@ class FFTSpectra(BaseSpectra, TimeInOut):
         """
         wind = self.window_(self.block_size)
         weight = sqrt(2) / self.block_size * sqrt(self.block_size / dot(wind, wind)) * wind[:, newaxis]
-        for data in self.get_source_data():
+        for data in self._get_source_data():
             ft = fft.rfft(data * weight, None, 0).astype(self.precision)
             yield ft
 
@@ -392,7 +392,7 @@ class PowerSpectra(BaseSpectra):
             else:
                 raise ValueError('Calibration data not compatible: %i, %i' % (self.calib.num_mics, t.numchannels))
         # get time data blockwise
-        for data in self.get_source_data():
+        for data in self._get_source_data():
             ft = fft.rfft(data * wind, None, 0).astype(self.precision)
             calcCSM(csm_upper, ft)  # only upper triangular part of matrix is calculated (for speed reasons)
         # create the full csm matrix via transposing and complex conj.

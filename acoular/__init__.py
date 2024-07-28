@@ -41,6 +41,7 @@ from .fbeamform import (
     SteeringVector,
     integrate,
 )
+from .fprocess import IRFFT, RFFT, CrossPowerSpectra, FreqGenerator, FreqInOut
 from .grids import (
     CircSector,
     ConvexSector,
@@ -57,6 +58,7 @@ from .grids import (
     Sector,
 )
 from .microphones import MicGeom
+from .process import BlockAverage, Power
 from .sdinput import SoundDeviceSamplesGenerator
 from .signals import (
     FiltWNoiseGenerator,
