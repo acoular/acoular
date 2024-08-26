@@ -36,52 +36,41 @@ def run():
     """Run the Acoular demo."""
     from pathlib import Path
 
-    from acoular import (
-        BeamformerBase,
-        L_p,
-        MicGeom,
-        Mixer,
-        PointSource,
-        PowerSpectra,
-        RectGrid,
-        SteeringVector,
-        WNoiseGenerator,
-        WriteH5,
-        config,
-    )
-    from acoular import __file__ as bpath
+    import acoular as ac
+
+    ac.config.global_caching = 'none'
 
     # set up the parameters
     sfreq = 51200
     duration = 1
     nsamples = duration * sfreq
-    micgeofile = Path(bpath).parent / 'xml' / 'array_64.xml'
+    micgeofile = Path(ac.__file__).parent / 'xml' / 'array_64.xml'
     h5savefile = 'three_sources.h5'
 
     # generate test data, in real life this would come from an array measurement
-    mg = MicGeom(from_file=micgeofile)
-    n1 = WNoiseGenerator(sample_freq=sfreq, numsamples=nsamples, seed=1)
-    n2 = WNoiseGenerator(sample_freq=sfreq, numsamples=nsamples, seed=2, rms=0.7)
-    n3 = WNoiseGenerator(sample_freq=sfreq, numsamples=nsamples, seed=3, rms=0.5)
-    p1 = PointSource(signal=n1, mics=mg, loc=(-0.1, -0.1, 0.3))
-    p2 = PointSource(signal=n2, mics=mg, loc=(0.15, 0, 0.3))
-    p3 = PointSource(signal=n3, mics=mg, loc=(0, 0.1, 0.3))
-    pa = Mixer(source=p1, sources=[p2, p3])
-    wh5 = WriteH5(source=pa, name=h5savefile)
+    mg = ac.MicGeom(from_file=micgeofile)
+    n1 = ac.WNoiseGenerator(sample_freq=sfreq, numsamples=nsamples, seed=1)
+    n2 = ac.WNoiseGenerator(sample_freq=sfreq, numsamples=nsamples, seed=2, rms=0.7)
+    n3 = ac.WNoiseGenerator(sample_freq=sfreq, numsamples=nsamples, seed=3, rms=0.5)
+    p1 = ac.PointSource(signal=n1, mics=mg, loc=(-0.1, -0.1, 0.3))
+    p2 = ac.PointSource(signal=n2, mics=mg, loc=(0.15, 0, 0.3))
+    p3 = ac.PointSource(signal=n3, mics=mg, loc=(0, 0.1, 0.3))
+    pa = ac.Mixer(source=p1, sources=[p2, p3])
+    wh5 = ac.WriteH5(source=pa, name=h5savefile)
     wh5.save()
 
     # analyze the data and generate map
 
-    ps = PowerSpectra(time_data=pa, block_size=128, window='Hanning')
+    ps = ac.PowerSpectra(time_data=pa, block_size=128, window='Hanning')
 
-    rg = RectGrid(x_min=-0.2, x_max=0.2, y_min=-0.2, y_max=0.2, z=0.3, increment=0.01)
-    st = SteeringVector(grid=rg, mics=mg)
+    rg = ac.RectGrid(x_min=-0.2, x_max=0.2, y_min=-0.2, y_max=0.2, z=0.3, increment=0.01)
+    st = ac.SteeringVector(grid=rg, mics=mg)
 
-    bb = BeamformerBase(freq_data=ps, steer=st)
+    bb = ac.BeamformerBase(freq_data=ps, steer=st)
     pm = bb.synthetic(8000, 3)
-    spl = L_p(pm)
+    spl = ac.L_p(pm)
 
-    if config.have_matplotlib:
+    if ac.config.have_matplotlib:
         from pylab import axis, colorbar, figure, imshow, plot, show
 
         # show map

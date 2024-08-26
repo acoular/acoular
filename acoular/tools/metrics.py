@@ -28,7 +28,7 @@ class MetricEvaluator(HasPrivateTraits):
     """Evaluate the reconstruction performance of source mapping methods.
 
     This class can be used to calculate the following performance metrics
-    according to Herold and Sarradj (2017):
+    according :cite:`Herold2017`:
     * Specific level error
     * Overall level error
     * Inverse level error
