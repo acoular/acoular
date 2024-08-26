@@ -253,9 +253,6 @@ class PowerSpectra(BaseSpectra):
     #: (set from block_size and overlap).
     num_blocks = Property(desc='overall number of FFT blocks')
 
-    # Is set to a user value if the given SamplesGenerator streams non-finite data
-    _num_blocks = Int(0)
-
     #: 2-element array with the lowest and highest frequency. If set,
     #: will overwrite :attr:`_freqlc` and :attr:`_freqhc` according to
     #: the range.
@@ -297,18 +294,7 @@ class PowerSpectra(BaseSpectra):
 
     @property_depends_on('_source.numsamples, block_size, overlap')
     def _get_num_blocks(self):
-        if self._num_blocks != 0:
-            return self._num_blocks
         return self.overlap_ * self._source.numsamples / self.block_size - self.overlap_ + 1
-
-    @property_depends_on('_source.numsamples, block_size, overlap')
-    def _set_num_blocks(self, b):
-        max_nb = self.overlap_ * self._source.numsamples / self.block_size - self.overlap_ + 1
-        if b <= max_nb:
-            self._num_blocks = b
-        else:
-            e = f'num_blocks cannot be larger than {max_nb}!'
-            raise ValueError(e)
 
     @property_depends_on('_source.sample_freq, block_size, ind_low, ind_high')
     def _get_freq_range(self):
