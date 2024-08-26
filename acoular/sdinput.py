@@ -50,7 +50,7 @@ class SoundDeviceSamplesGenerator(SamplesGenerator):
     #: Sampling frequency of the signal, changes with sinusdevices
     sample_freq = Property(desc='sampling frequency')
 
-    _sample_freq = Float(0)
+    _sample_freq = Float(default_value=None)
 
     #: Datatype (resolution) of the signal, used as `dtype` in a sd `Stream` object
     data_type = Enum([float32, float16, int32, int16, int8, uint8], desc='data type (resolution) of signal')
