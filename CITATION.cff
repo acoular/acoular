@@ -34,6 +34,9 @@ authors:
   - given-names: "Sebastian"
     family-names: "Oertwig"
     affiliation: "Deutsches Zentrum für Luft- und Raumfahrt (DLR)"
+  - given-names: "Jakob"
+    family-names: "Tschavoll"
+    affiliation: "Audio Communication Group, TU Berlin"
 identifiers:
   - description: "acoular: all versions"
     type: "doi"

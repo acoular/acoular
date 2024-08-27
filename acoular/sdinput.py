@@ -9,7 +9,7 @@
     SoundDeviceSamplesGenerator
 """
 
-from traits.api import Any, Bool, Int, Long, Property, cached_property, observe
+from traits.api import Any, Bool, Float, Int, Long, Property, Trait, cached_property, observe
 
 from .configuration import config
 from .internal import digest
@@ -49,6 +49,11 @@ class SoundDeviceSamplesGenerator(SamplesGenerator):
     #: Sampling frequency of the signal, changes with sinusdevices
     sample_freq = Property(desc='sampling frequency')
 
+    _sample_freq = Float(default_value=None)
+
+    #: Datatype (resolution) of the signal, used as `dtype` in a sd `Stream` object
+    precision = Trait('float32', 'float16', 'int32', 'int16', 'int8', 'uint8', desc='precision (resolution) of signal')
+
     #: Indicates that the sounddevice buffer has overflown
     overflow = Bool(False, desc='Indicates if sounddevice buffer overflow')
 
@@ -71,7 +76,12 @@ class SoundDeviceSamplesGenerator(SamplesGenerator):
         self.numchannels = min(self.numchannels, sd.query_devices(self.device)['max_input_channels'])
 
     def _get_sample_freq(self):
+        if self.sample_freq is not None:
+            return self._sample_freq
         return sd.query_devices(self.device)['default_samplerate']
+
+    def _set_sample_freq(self, f):
+        self._sample_freq = f
 
     def device_properties(self):
         """Returns
@@ -102,6 +112,7 @@ class SoundDeviceSamplesGenerator(SamplesGenerator):
             channels=self.numchannels,
             clip_off=True,
             samplerate=self.sample_freq,
+            dtype=self.precision,
         )
 
         with stream_obj as stream:

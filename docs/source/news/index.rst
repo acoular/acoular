@@ -5,6 +5,7 @@ Upcoming Release
 ----------------
     
     **New features:**
+    Sounddevice inputs now allow for user-settable sample rates and precision types
     
     **Bugfixes**
 
