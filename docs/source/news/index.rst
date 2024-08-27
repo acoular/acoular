@@ -47,7 +47,6 @@ Upcoming Release
     * adds support for Python version 3.12 on Linux, MacOS, Windows
     * drops official support for Python version 3.7
     * provides new tools to import  data in AIAA array benchmark format
-    * Sounddevice inputs now allow user-settable sample rates and precision formats
 
     * Bugfixes:
         * changes to UMA-16 microphone array arrangement
