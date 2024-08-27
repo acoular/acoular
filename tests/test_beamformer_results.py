@@ -54,8 +54,8 @@ WRITE_NEW_REFERENCE_DATA = False
 # load exampledata
 testdir = Path(__file__).parent
 moduledir = testdir.parent
-datafile = moduledir / 'examples' / 'example_data.h5'
-calibfile = moduledir / 'examples' / 'example_calib.xml'
+datafile = moduledir / 'examples' / 'data' / 'example_data.h5'
+calibfile = moduledir / 'examples' / 'data' / 'example_calib.xml'
 micgeofile = moduledir / 'acoular' / 'xml' / 'array_56.xml'
 
 # frequencies to test

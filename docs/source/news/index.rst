@@ -1,5 +1,47 @@
 What's new
 ============
+
+Upcoming Release 
+----------------
+    
+    **New features:**
+    
+    **Bugfixes**
+
+    **Documentation**
+        * updates literature and adds `sphinxcontrib-bibtex` extension to support bibtex citation in the documentation.
+        * cleans-up and structures the conf.py file and fixes missing acoular logo in documentation
+
+    **Internal**
+        * replaces the markdown-link-check by lychee
+            * faster CI (written in RUST)
+            * allows more files to be checked, including the .rst files in the documentation
+            * adds a cron job that runs daily
+
+24.07
+------------
+
+    New features:
+        * Implement a lazy result array for :class:`acoular.fbeamform.BeamformerBase` derived classes
+        * Adds flow establishment length traits
+        * Updates acoular demo with ASCII map and gets rid of writing file
+    
+    Bugfixes:
+        * temporary fix to PyTables - NumPy 2.0 incompatibility problem
+        * Fixes :class:`acoular.fbeamform.BeamformerGridlessOrth` `shgo` params and `eva_list` initial value bug
+        * makes :class:`acoular.sdinput.SoundDeviceSamplesGenerator` always importable
+
+    Internal:
+        * use hatch for publishing the Acoular package
+        * add issue templates
+        * adds Conda CI
+        * CI for TestPyPI and PyPI
+        * remove `plot_example.py` 
+        * add autolabel rule for `fix` and `linting`
+        * fix linting rules
+        * add zenodo release to `CITAITON.cff`
+
+
 24.05
 ------------
     * adds support for Python version 3.12 on Linux, MacOS, Windows
@@ -173,7 +215,7 @@ What's new
 ------------
     
     * Adds support for Python 3.7
-    * Introduces new :class:`~acoular.fbeamform.SteeringVector` class (see :doc:`../get_started/index` and :doc:`../examples/index`  for usage). With this, some of the Beamformer and PointSource traits are deprecated and should no longer be used. While the current version is intended to be fully compatible with older scripts, deprecation warnings will be raised if necessary.
+    * Introduces new :class:`~acoular.fbeamform.SteeringVector` class (see :doc:`../get_started/index` and `../examples/index` for usage). With this, some of the Beamformer and PointSource traits are deprecated and should no longer be used. While the current version is intended to be fully compatible with older scripts, deprecation warnings will be raised if necessary.
     * Introduces optional use of reference distance for SPL evaluation (current default: reference position at (x,y,z)=(0,0,0) )
     * Introduces some basic Unit tests to evaluate the beamformer results 
     * Bugfix: CLEAN algorithm now uses correct PSFs

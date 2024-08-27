@@ -70,9 +70,9 @@ class Config(HasStrictTraits):
     --------
         For using Acoular with h5py package and overwrite existing cache:
 
-        >>>    import acoular
-        >>>    acoular.config.h5library = "h5py"
-        >>>    acoular.config.global_caching = "overwrite"
+        >>> import acoular
+        >>> acoular.config.h5library = 'h5py'
+        >>> acoular.config.global_caching = 'overwrite'
 
     """
 
@@ -239,7 +239,7 @@ Note: this is independent from the GUI tools implemented in the spectAcoular pac
 Example:
     For using Acoular with h5py package and overwrite existing cache:
 
-    >>>    import acoular
-    >>>    acoular.config.h5library = "h5py"
-    >>>    acoular.config.global_caching = "overwrite"
+    >>> import acoular
+    >>> acoular.config.h5library = "h5py"
+    >>> acoular.config.global_caching = "overwrite"
 """

@@ -36,6 +36,8 @@ jobs:
         run: hatch -v run +py=${{ matrix.python-version }} tests:demo
       - name: Run unittests
         run: hatch -v run +py=${{ matrix.python-version }} tests:test
+      - name: Run doctests
+        run: hatch -v run +py=${{ matrix.python-version }} tests:doctest
 
   coverage:
     runs-on: ubuntu-latest

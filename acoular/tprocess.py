@@ -2300,7 +2300,10 @@ class SampleSplitter(TimeInOut):
 
 
 class TimeConvolve(TimeInOut):
-    """Uniformly partitioned overlap-save method (UPOLS) for fast convolution in the frequency domain, see :ref:`Wefers, 2015<Wefers2015>`."""
+    """Uniformly partitioned overlap-save method (UPOLS) for fast convolution in the frequency domain.
+
+    See :cite:`Wefers2015` for details.
+    """
 
     #: Convolution kernel in the time domain.
     #: The second dimension of the kernel array has to be either 1 or match :attr:`~SamplesGenerator.numchannels`.

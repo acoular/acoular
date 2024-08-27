@@ -72,11 +72,16 @@ For more detailed installation instructions, see the [documentation](https://aco
 # Documentation and help
 Documentation is available [here](https://acoular.org) with a
 [getting started](https://acoular.org/get_started/index.html) section and
-[examples](https://acoular.org/examples/index.html).
+[examples](https://acoular.org/auto_examples/index.html).
 
 The Acoular [blog](https://acoular.github.io/blog/) contains some tutorials.
 
 If you discover problems with the Acoular software, please report them using the [issue tracker](https://github.com/acoular/acoular/issues) on GitHub. Please use the [Acoular discussions forum](https://github.com/acoular/acoular/discussions) for practical questions, discussions, and demos.
+
+# Contributing
+
+We are always happy to welcome new contributors to the project. 
+If you are interested in contributing, have a look at the [CONTRIBUTING.md](CONTRIBUTING.md) file.
 
 # Example
 This reads data from 64 microphone channels and computes a beamforming map for the 8kHz third octave band:
@@ -113,5 +118,6 @@ interpolation='bicubic')
 colorbar()
 ```
 
-
 ![result](https://github.com/acoular/acoular/blob/master/docs/source/get_started/three_source_py3_colormap.png?raw=true)
+
+

@@ -24,5 +24,12 @@ runs:
       run: conda install -n base conda-build # Install conda-build in the base env
     - name: Install conda-verify
       shell: bash
-      run: conda install conda-verify
+      run: conda install -n base conda-verify
+    - name: Install anaconda-client
+      shell: bash
+      run: |
+        conda install -n base anaconda-client
+        eval "$(conda shell.bash hook)"
+        anaconda -V
+
 
