@@ -74,7 +74,7 @@ g = RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=0.68, increment=0.
 env = Environment(c=346.04)
 st = SteeringVector(grid=g, mics=m, env=env)
 f = PowerSpectra(
-    time_data=t1,
+    source=t1,
     window='Hanning',
     overlap='50%',
     block_size=128,  # FFT-parameters

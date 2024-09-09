@@ -98,7 +98,7 @@ mg = acoular.MicGeom( from_file=micgeofile )
 # set up object managing the microphone array data (usually from measurement)
 ts = acoular.TimeSamples( name='three_sources.h5' )
 # set up object managing the cross spectral matrix computation
-ps = acoular.PowerSpectra( time_data=ts, block_size=128, window='Hanning' )
+ps = acoular.PowerSpectra( source=ts, block_size=128, window='Hanning' )
 # set up object managing the mapping grid
 rg = acoular.RectGrid( x_min=-0.2, x_max=0.2, y_min=-0.2, y_max=0.2, z=0.3, \
 increment=0.01 )

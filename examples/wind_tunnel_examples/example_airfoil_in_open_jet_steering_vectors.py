@@ -58,7 +58,7 @@ g = ac.RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=0.68, increment
 # For frequency domain methods, :class:`acoular.spectra.PowerSpectra` provides the cross spectral matrix (and its
 # eigenvalues and eigenvectors). Here, we use the Welch's method with a block size of 128 samples, Hanning window and 50% overlap.
 
-f = ac.PowerSpectra(time_data=t1, window='Hanning', overlap='50%', block_size=128)
+f = ac.PowerSpectra(source=t1, window='Hanning', overlap='50%', block_size=128)
 
 # %%
 # To define the measurement environment, i.e. medium characteristics, the :class:`acoular.environment.Environment` class is used.
