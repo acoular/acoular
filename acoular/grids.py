@@ -25,6 +25,7 @@
 
 # imports from other packages
 from os import path
+from warnings import warn
 
 from numpy import (
     absolute,
@@ -296,6 +297,7 @@ class Grid(HasPrivateTraits):
     def pos(self):
         """Calculates grid co-ordinates.
         Deprecated; use :attr:`gpos` attribute instead.
+        The :meth:`pos` method will be removed in version 25.01.
 
         Returns
         -------
@@ -303,6 +305,10 @@ class Grid(HasPrivateTraits):
             The grid point x, y, z-coordinates in one array.
 
         """
+        msg = (
+            "The 'pos' method is deprecated and will be removed in version 25.01. " "Use the 'gpos' attribute instead."
+        )
+        warn(msg, DeprecationWarning, stacklevel=2)
         return self.gpos  # array([[0.], [0.], [0.]])
 
     def subdomain(self, sector):
@@ -562,11 +568,15 @@ class RectGrid3D(RectGrid):
     increment3D = Property(desc='3D step sizes')  # noqa N815
 
     def _get_increment3D(self):  # noqa N802
+        msg = "Using 'increment3D' is deprecated and will be removed in version 25.01." "Use 'increment' instead."
+        warn(msg, DeprecationWarning, stacklevel=2)
         if isscalar(self._increment):
             return array([self._increment, self._increment, self._increment])
         return self._increment
 
     def _set_increment3D(self, inc):  # noqa N802
+        msg = "Using 'increment3D' is deprecated and will be removed in version 25.01." "Use 'increment' instead."
+        warn(msg, DeprecationWarning, stacklevel=2)
         if not isscalar(inc) and len(inc) == 3:
             self._increment = array(inc, dtype=float)
         else:

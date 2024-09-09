@@ -238,10 +238,11 @@ class SineGenerator(SignalGenerator):
 
     def _set_rms(self, rms):
         warn(
+            'Using rms to set amplitude is deprecated and will be removed in version 25.01. '
             'Up to Acoular 20.02, rms is interpreted as sine amplitude. '
             'This has since been corrected (rms now is 1/sqrt(2) of amplitude). '
             "Use 'amplitude' trait to directly set the ampltiude.",
-            Warning,
+            DeprecationWarning,
             stacklevel=2,
         )
         self._amp = rms * 2**0.5
