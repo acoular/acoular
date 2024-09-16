@@ -18,7 +18,6 @@
 """
 
 # imports from other packages
-import contextlib
 from warnings import warn
 
 from numpy import (
@@ -26,7 +25,6 @@ from numpy import (
     argmax,
     array,
     ceil,
-    concatenate,
     dot,
     empty,
     float32,
@@ -55,6 +53,7 @@ from .grids import RectGrid
 # acoular imports
 from .internal import digest
 from .tfastfuncs import _delayandsum4, _delayandsum5, _delays, _steer_I, _steer_II, _steer_III, _steer_IV
+from .tools.utils import SamplesBuffer
 from .tprocess import TimeInOut
 from .trajectory import Trajectory
 
@@ -229,12 +228,6 @@ class BeamformerTime(TimeInOut):
     weights = Trait('none', possible_weights, desc='spatial weighting function')
     # (from timedomain.possible_weights)
 
-    # buffer with microphone time signals used for processing. Internal use
-    buffer = CArray(desc='buffer containing microphone signals')
-
-    # index indicating position of current processing sample. Internal use.
-    bufferIndex = Int(desc='index indicating position in buffer')  # noqa: N815
-
     # internal identifier
     digest = Property(
         depends_on=['_steer_obj.digest', 'source.digest', 'weights', '__class__'],
@@ -246,18 +239,6 @@ class BeamformerTime(TimeInOut):
 
     def _get_weights(self):
         return self.weights_(self)[newaxis] if self.weights_ else 1.0
-
-    def _fill_buffer(self, num):
-        """Generator that fills the signal buffer."""
-        weights = self._get_weights()
-        for block in self.source.result(num):
-            block *= weights
-            ns = block.shape[0]
-            bufferSize = self.buffer.shape[0]
-            self.buffer[0 : (bufferSize - ns)] = self.buffer[-(bufferSize - ns) :]
-            self.buffer[-ns:, :] = block
-            self.bufferIndex -= ns
-            yield
 
     def result(self, num=2048):
         """Python generator that yields the *squared* deconvolved beamformer
@@ -296,26 +277,21 @@ class BeamformerTime(TimeInOut):
         # delays.shape = delays.shape[1:]
         d_index.shape = d_index.shape[1:]
         d_interp2.shape = d_interp2.shape[1:]
-        maxdelay = int((self.rm / c).max()) + 2 + num  # +2 because of interpolation
-        initialNumberOfBlocks = int(ceil(maxdelay / num))
-        bufferSize = initialNumberOfBlocks * num
-        self.buffer = zeros((bufferSize, numMics), dtype=float)
-        self.bufferIndex = bufferSize  # indexing current time sample in buffer
-        fill_buffer_generator = self._fill_buffer(num)
-        for _ in range(initialNumberOfBlocks):
-            next(fill_buffer_generator)
+        max_sample_delay = int((self.rm / c).max()) + 2
 
-        # start processing
-        flag = True
-        while flag:
-            samplesleft = self.buffer.shape[0] - self.bufferIndex
-            if samplesleft - maxdelay <= 0:
-                num += samplesleft - maxdelay
-                maxdelay += samplesleft - maxdelay
+        buffer = SamplesBuffer(
+            source=self.source,
+            size=int(ceil((num + max_sample_delay) / num)) * num,
+            result_num=num + max_sample_delay,
+            shift_index_by='num',
+            dtype=fdtype,
+        )
+
+        for p_res in buffer.result(num):
+            if p_res.shape[0] < buffer.result_num:  # last block shorter
+                num = p_res.shape[0] - max_sample_delay
                 n_index = arange(0, num + 1)[:, newaxis]
-                flag = False
             # init step
-            p_res = array(self.buffer[self.bufferIndex : self.bufferIndex + maxdelay, :])
             Phi, autopow = self.delay_and_sum(num, p_res, d_interp2, d_index, amp)
             if 'Cleant' not in self.__class__.__name__:
                 if 'Sq' not in self.__class__.__name__:
@@ -362,9 +338,6 @@ class BeamformerTime(TimeInOut):
                     yield Gamma[:num] ** 2 - (self.damp**2) * Gamma_autopow[:num]
                 else:
                     yield Gamma[:num] ** 2
-            self.bufferIndex += num
-            with contextlib.suppress(StopIteration):
-                next(fill_buffer_generator)
 
     def delay_and_sum(self, num, p_res, d_interp2, d_index, amp):
         """Standard delay-and-sum method."""
@@ -474,11 +447,6 @@ class BeamformerTimeTraj(BeamformerTime):
             return self.steer.ref  # full((self.steer.grid.size,), self.steer.ref)
         return self.env._r(tpos)
 
-    def increase_buffer(self, num):
-        ar = zeros((num, self.steer.mics.num_mics), dtype=self.buffer.dtype)
-        self.buffer = concatenate((ar, self.buffer), axis=0)
-        self.bufferIndex += num
-
     def result(self, num=2048):
         """Python generator that yields the deconvolved output block-wise.
 
@@ -519,13 +487,8 @@ class BeamformerTimeTraj(BeamformerTime):
         d_index = empty((num, self.grid.size, numMics), dtype=idtype)
         d_interp2 = empty((num, self.grid.size, numMics), dtype=fdtype)
         blockr0 = empty((num, self.grid.size), dtype=fdtype)
-        self.buffer = zeros((2 * num, numMics), dtype=fdtype)
-        self.bufferIndex = self.buffer.shape[0]
         movgpos = self.get_moving_gpos()  # create moving grid pos generator
         movgspeed = self.trajectory.traj(0.0, delta_t=1 / self.source.sample_freq, der=1)
-        fill_buffer_generator = self._fill_buffer(num)
-        for _i in range(2):
-            next(fill_buffer_generator)
 
         # preliminary implementation of different steering vectors
         steer_func = {
@@ -537,7 +500,8 @@ class BeamformerTimeTraj(BeamformerTime):
 
         # start processing
         flag = True
-        dflag = True  # data is available
+        buffer = SamplesBuffer(source=self.source, size=num * 2, shift_index_by='num', dtype=fdtype)
+        buffered_result = buffer.result(num)
         while flag:
             for i in range(num):
                 tpos = next(movgpos).astype(fdtype)
@@ -552,23 +516,19 @@ class BeamformerTimeTraj(BeamformerTime):
             else:
                 steer_func(blockrm, blockr0, amp)
             _delays(blockrm, c, d_interp2, d_index)
-            # _modf(delays, d_interp2, d_index)
-            maxdelay = (d_index.max((1, 2)) + arange(0, num)).max() + 2  # + because of interpolation
-            # increase buffer size because of greater delays
-            while maxdelay > self.buffer.shape[0] and dflag:
-                self.increase_buffer(num)
-                try:
-                    next(fill_buffer_generator)
-                except StopIteration:
-                    dflag = False
-            samplesleft = self.buffer.shape[0] - self.bufferIndex
-            # last block may be shorter
-            if samplesleft - maxdelay <= 0:
-                num = sum((d_index.max((1, 2)) + 1 + arange(0, num)) < samplesleft)
+            max_sample_delay = (d_index.max((1, 2)) + 2).max()  # + because of interpolation
+            buffer.result_num = num + max_sample_delay
+
+            try:
+                time_block = next(buffered_result)
+            except StopIteration:
+                break
+            if time_block.shape[0] < buffer.result_num:  # last block shorter
+                num = sum((d_index.max((1, 2)) + 1 + arange(0, num)) < time_block.shape[0])
                 n_index = arange(num, dtype=idtype)[:, newaxis]
                 flag = False
             # init step
-            p_res = self.buffer[self.bufferIndex : self.bufferIndex + maxdelay, :].copy()
+            p_res = time_block.copy()
             Phi, autopow = self.delay_and_sum(num, p_res, d_interp2, d_index, amp)
             if 'Cleant' not in self.__class__.__name__:
                 if 'Sq' not in self.__class__.__name__:
@@ -629,11 +589,6 @@ class BeamformerTimeTraj(BeamformerTime):
                     yield Gamma[:num] ** 2 - (self.damp**2) * Gamma_autopow[:num]
                 else:
                     yield Gamma[:num] ** 2
-            self.bufferIndex += num
-            try:
-                next(fill_buffer_generator)
-            except StopIteration:
-                dflag = False
 
     def delay_and_sum(self, num, p_res, d_interp2, d_index, amp):
         """Standard delay-and-sum method."""
