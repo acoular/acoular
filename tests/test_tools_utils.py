@@ -18,7 +18,7 @@ class TestSamplesBuffer:
         buffer_size = 512
         source = self.create_time_data(numsamples=512 + 10)
         for snum in [128, None]:
-            buffer = ac.tools.utils.SamplesBuffer(source=source, size=buffer_size, source_num=snum)
+            buffer = ac.tools.utils.SamplesBuffer(source=source, length=buffer_size, source_num=snum)
             data = ac.tools.return_result(source, num=num)
             data_comp = ac.tools.return_result(buffer, num=num)
             np.testing.assert_array_equal(data, data_comp)
@@ -28,7 +28,7 @@ class TestSamplesBuffer:
         source = self.create_time_data(numsamples=512 + 10)
         data = ac.tools.return_result(source, num=256)
         # test buffer
-        buffer = ac.tools.utils.SamplesBuffer(source=source, size=buffer_size, source_num=25)
+        buffer = ac.tools.utils.SamplesBuffer(source=source, length=buffer_size, source_num=25)
         gen = buffer.result(num=25)
         collected_data = np.zeros_like(data)
         i = 0

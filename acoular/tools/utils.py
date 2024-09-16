@@ -58,11 +58,13 @@ class SamplesBuffer(TimeInOut):
 
     >>> buffer = ac.tools.SamplesBuffer(source=source, size=32, result_num=20, shift_index_by='num')
     >>> block_sizes = []
-    >>> block_sizes.append(next(
-    ...    buffer.result(num=16)).shape[0]) # this time, the buffer will return 20 samples, but the buffer will only forget the first 16 samples
+    >>> block_sizes.append(
+    ...     next(buffer.result(num=16)).shape[0]
+    ... )  # this time, the buffer will return 20 samples, but the buffer will only forget the first 16 samples
     >>> buffer.result_num = 24
-    >>> block_sizes.append(next(
-    ...    buffer.result(num=16)).shape[0]) # this time, the buffer will return 24 samples, but the buffer will only forget the first 16 samples
+    >>> block_sizes.append(
+    ...     next(buffer.result(num=16)).shape[0]
+    ... )  # this time, the buffer will return 24 samples, but the buffer will only forget the first 16 samples
     >>> np.testing.assert_array_equal(block_sizes, [20, 24])
     """
 

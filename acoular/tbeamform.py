@@ -281,12 +281,11 @@ class BeamformerTime(TimeInOut):
 
         buffer = SamplesBuffer(
             source=self.source,
-            size=int(ceil((num + max_sample_delay) / num)) * num,
+            length=int(ceil((num + max_sample_delay) / num)) * num,
             result_num=num + max_sample_delay,
             shift_index_by='num',
             dtype=fdtype,
         )
-
         for p_res in buffer.result(num):
             if p_res.shape[0] < buffer.result_num:  # last block shorter
                 num = p_res.shape[0] - max_sample_delay
@@ -301,6 +300,7 @@ class BeamformerTime(TimeInOut):
                 else:
                     yield Phi[:num] ** 2
             else:
+                p_res_copy = p_res.copy()
                 Gamma = zeros(Phi.shape)
                 Gamma_autopow = zeros(Phi.shape)
                 J = 0
@@ -312,12 +312,12 @@ class BeamformerTime(TimeInOut):
                     t_float = d_interp2[imax] + d_index[imax] + n_index
                     t_ind = t_float.astype(int64)
                     for m in range(numMics):
-                        p_res[t_ind[: num + 1, m], m] -= self.damp * interp(
+                        p_res_copy[t_ind[: num + 1, m], m] -= self.damp * interp(
                             t_ind[: num + 1, m],
                             t_float[:num, m],
                             Phi[:num, imax] * self.r0[imax] / self.rm[imax, m],
                         )
-                    nextPhi, nextAutopow = self.delay_and_sum(num, p_res, d_interp2, d_index, amp)
+                    nextPhi, nextAutopow = self.delay_and_sum(num, p_res_copy, d_interp2, d_index, amp)
                     if self.r_diag:
                         pownextPhi = (nextPhi[:num] ** 2 - nextAutopow).sum(0).clip(min=0)
                     else:
@@ -500,7 +500,7 @@ class BeamformerTimeTraj(BeamformerTime):
 
         # start processing
         flag = True
-        buffer = SamplesBuffer(source=self.source, size=num * 2, shift_index_by='num', dtype=fdtype)
+        buffer = SamplesBuffer(source=self.source, length=num * 2, shift_index_by='num', dtype=fdtype)
         buffered_result = buffer.result(num)
         while flag:
             for i in range(num):
