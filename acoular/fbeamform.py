@@ -310,9 +310,14 @@ class BeamformerBase(HasPrivateTraits):
             self._steer_obj = steer
         elif steer in ('true level', 'true location', 'classic', 'inverse'):
             # Type of steering vectors, see also :cite:`Sarradj2012`.
+            msg = (
+                "Deprecated use of 'steer' trait. Please use the 'steer' with an object of class "
+                "'SteeringVector'. Using a string to specify the steer type will be removed in "
+                'version 25.01.'
+            )
             warn(
-                "Deprecated use of 'steer' trait. Please use object of class 'SteeringVector' in the future.",
-                Warning,
+                msg,
+                DeprecationWarning,
                 stacklevel=2,
             )
             self._steer_obj.steer_type = steer
@@ -330,7 +335,11 @@ class BeamformerBase(HasPrivateTraits):
         return self._steer_obj.env
 
     def _set_env(self, env):
-        warn("Deprecated use of 'env' trait. ", Warning, stacklevel=2)
+        msg = (
+            "Deprecated use of 'env' trait. Please use the 'steer' trait with an object of class"
+            "'SteeringVector'. The 'env' trait will be removed in version 25.01."
+        )
+        warn(msg, DeprecationWarning, stacklevel=2)
         self._steer_obj.env = env
 
     # The speed of sound.
@@ -342,7 +351,12 @@ class BeamformerBase(HasPrivateTraits):
         return self._steer_obj.env.c
 
     def _set_c(self, c):
-        warn("Deprecated use of 'c' trait. ", Warning, stacklevel=2)
+        msg = (
+            "Deprecated use of 'c' trait. Please use the 'steer' trait with an object of class"
+            "'SteeringVector' that holds an 'Environment' instance."
+            "The 'c' trait will be removed in version 25.01."
+        )
+        warn(msg, DeprecationWarning, stacklevel=2)
         self._steer_obj.env.c = c
 
     # :class:`~acoular.grids.Grid`-derived object that provides the grid locations.
@@ -354,7 +368,11 @@ class BeamformerBase(HasPrivateTraits):
         return self._steer_obj.grid
 
     def _set_grid(self, grid):
-        warn("Deprecated use of 'grid' trait. ", Warning, stacklevel=2)
+        msg = (
+            "Deprecated use of 'grid' trait. Please use the 'steer' trait with an object of class"
+            "'SteeringVector'. The 'grid' trait will be removed in version 25.01."
+        )
+        warn(msg, DeprecationWarning, stacklevel=2)
         self._steer_obj.grid = grid
 
     # :class:`~acoular.microphones.MicGeom` object that provides the microphone locations.
@@ -366,7 +384,11 @@ class BeamformerBase(HasPrivateTraits):
         return self._steer_obj.mics
 
     def _set_mpos(self, mpos):
-        warn("Deprecated use of 'mpos' trait. ", Warning, stacklevel=2)
+        msg = (
+            "Deprecated use of 'mpos' trait. Please use the 'steer' trait with an object of class"
+            "'SteeringVector'. The 'mpos' trait will be removed in version 25.01."
+        )
+        warn(msg, DeprecationWarning, stacklevel=2)
         self._steer_obj.mics = mpos
 
     # Sound travel distances from microphone array center to grid points (r0)
@@ -376,11 +398,21 @@ class BeamformerBase(HasPrivateTraits):
     r0 = Property()
 
     def _get_r0(self):
+        msg = (
+            "Deprecated use of 'r0' trait. Please use the 'steer' trait with an object of class"
+            "'SteeringVector'. The 'r0' trait will be removed in version 25.01."
+        )
+        warn(msg, DeprecationWarning, stacklevel=2)
         return self._steer_obj.r0
 
     rm = Property()
 
     def _get_rm(self):
+        msg = (
+            "Deprecated use of 'rm' trait. Please use the 'steer' trait with an object of class"
+            "'SteeringVector'. The 'rm' trait will be removed in version 25.01."
+        )
+        warn(msg, DeprecationWarning, stacklevel=2)
         return self._steer_obj.rm
 
     # --- End of backwards compatibility traits --------------------------------------
@@ -1046,9 +1078,13 @@ class PointSpreadFunction(HasPrivateTraits):
         if isinstance(steer, SteeringVector):
             self._steer_obj = steer
         elif steer in ('true level', 'true location', 'classic', 'inverse'):
+            msg = (
+                "Deprecated use of 'steer' trait. Please use object of class 'SteeringVector'."
+                "The functionality of using string values for 'steer' will be removed in version 25.01."
+            )
             # Type of steering vectors, see also :cite:`Sarradj2012`.
             warn(
-                "Deprecated use of 'steer' trait. Please use object of class 'SteeringVector' in the future.",
+                msg,
                 Warning,
                 stacklevel=2,
             )
@@ -1067,7 +1103,11 @@ class PointSpreadFunction(HasPrivateTraits):
         return self._steer_obj.env
 
     def _set_env(self, env):
-        warn("Deprecated use of 'env' trait. ", Warning, stacklevel=2)
+        msg = (
+            "Deprecated use of 'env' trait. Please use the 'steer' trait with an object of class"
+            "'SteeringVector'. The 'env' trait will be removed in version 25.01."
+        )
+        warn(msg, DeprecationWarning, stacklevel=2)
         self._steer_obj.env = env
 
     # The speed of sound.
@@ -1079,7 +1119,11 @@ class PointSpreadFunction(HasPrivateTraits):
         return self._steer_obj.env.c
 
     def _set_c(self, c):
-        warn("Deprecated use of 'c' trait. ", Warning, stacklevel=2)
+        msg = (
+            "Deprecated use of 'c' trait. Please use the 'steer' trait with an object of class"
+            "'SteeringVector'. The 'c' trait will be removed in version 25.01."
+        )
+        warn(msg, DeprecationWarning, stacklevel=2)
         self._steer_obj.env.c = c
 
     # :class:`~acoular.grids.Grid`-derived object that provides the grid locations.
@@ -1091,7 +1135,11 @@ class PointSpreadFunction(HasPrivateTraits):
         return self._steer_obj.grid
 
     def _set_grid(self, grid):
-        warn("Deprecated use of 'grid' trait. ", Warning, stacklevel=2)
+        msg = (
+            "Deprecated use of 'grid' trait. Please use the 'steer' trait with an object of class"
+            "'SteeringVector'. The 'grid' trait will be removed in version 25.01."
+        )
+        warn(msg, DeprecationWarning, stacklevel=2)
         self._steer_obj.grid = grid
 
     # :class:`~acoular.microphones.MicGeom` object that provides the microphone locations.
@@ -1103,7 +1151,11 @@ class PointSpreadFunction(HasPrivateTraits):
         return self._steer_obj.mics
 
     def _set_mpos(self, mpos):
-        warn("Deprecated use of 'mpos' trait. ", Warning, stacklevel=2)
+        msg = (
+            "Deprecated use of 'mpos' trait. Please use the 'steer' trait with an object of class"
+            "'SteeringVector'. The 'mpos' trait will be removed in version 25.01."
+        )
+        warn(msg, DeprecationWarning, stacklevel=2)
         self._steer_obj.mics = mpos
 
     # Sound travel distances from microphone array center to grid points (r0)
@@ -1113,11 +1165,21 @@ class PointSpreadFunction(HasPrivateTraits):
     r0 = Property()
 
     def _get_r0(self):
+        msg = (
+            "Deprecated use of 'r0' trait. Please use the 'steer' trait with an object of class"
+            "'SteeringVector'. The 'r0' trait will be removed in version 25.01."
+        )
+        warn(msg, DeprecationWarning, stacklevel=2)
         return self._steer_obj.r0
 
     rm = Property()
 
     def _get_rm(self):
+        msg = (
+            "Deprecated use of 'rm' trait. Please use the 'steer' trait with an object of class"
+            "'SteeringVector'. The 'rm' trait will be removed in version 25.01."
+        )
+        warn(msg, DeprecationWarning, stacklevel=2)
         return self._steer_obj.rm
 
     # --- End of backwards compatibility traits --------------------------------------

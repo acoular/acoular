@@ -24,7 +24,7 @@ n1 = ac.WNoiseGenerator(sample_freq=sample_freq, numsamples=10 * sample_freq, se
 t = ac.PointSource(signal=n1, mics=m, loc=(1, 0, 1))
 
 # create power spectrum
-f = ac.PowerSpectra(time_data=t, window='Hanning', overlap='50%', block_size=4096, cached=False)
+f = ac.PowerSpectra(source=t, window='Hanning', overlap='50%', block_size=4096, cached=False)
 
 # get spectrum data
 spectrum_data = np.real(f.csm[:, 0, 0])  # get power spectrum from cross-spectral matrix

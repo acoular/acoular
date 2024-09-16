@@ -61,7 +61,7 @@ def run():
 
     # analyze the data and generate map
 
-    ps = ac.PowerSpectra(time_data=pa, block_size=128, window='Hanning')
+    ps = ac.PowerSpectra(source=pa, block_size=128, window='Hanning')
 
     rg = ac.RectGrid(x_min=-0.2, x_max=0.2, y_min=-0.2, y_max=0.2, z=0.3, increment=0.01)
     st = ac.SteeringVector(grid=rg, mics=mg)

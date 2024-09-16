@@ -5,7 +5,7 @@ Upcoming Release
 ----------------
     
     **New features:**
-    Sounddevice inputs now allow for user-settable sample rates and precision types
+        * Sounddevice inputs now allow for user-settable sample rates and precision types
     
     **Bugfixes**
 
@@ -18,6 +18,7 @@ Upcoming Release
             * faster CI (written in RUST)
             * allows more files to be checked, including the .rst files in the documentation
             * adds a cron job that runs daily
+        * sets final version for several deprecated traits. (Will be removed in version 25.01)
 
 24.07
 ------------

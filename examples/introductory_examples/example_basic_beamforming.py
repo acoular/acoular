@@ -22,7 +22,7 @@ assert datafile.exists(), 'Data file not found, run example_three_sources.py fir
 
 mg = ac.MicGeom(from_file=micgeofile)
 ts = ac.TimeSamples(name=datafile)
-ps = ac.PowerSpectra(time_data=ts, block_size=128, window='Hanning')
+ps = ac.PowerSpectra(source=ts, block_size=128, window='Hanning')
 rg = ac.RectGrid(x_min=-0.2, x_max=0.2, y_min=-0.2, y_max=0.2, z=0.3, increment=0.01)
 st = ac.SteeringVector(grid=rg, mics=mg)
 bb = ac.BeamformerBase(freq_data=ps, steer=st)

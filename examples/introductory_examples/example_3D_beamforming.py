@@ -44,7 +44,7 @@ g = ac.RectGrid3D(x_min=-0.2, x_max=0.2, y_min=-0.2, y_max=0.2, z_min=0.1, z_max
 # %%
 # The following provides the cross spectral matrix and defines the CLEAN-SC beamformer.
 
-f = ac.PowerSpectra(time_data=pa, window='Hanning', overlap='50%', block_size=128)
+f = ac.PowerSpectra(source=pa, window='Hanning', overlap='50%', block_size=128)
 st = ac.SteeringVector(grid=g, mics=m, steer_type='true location')
 b = ac.BeamformerCleansc(freq_data=f, steer=st)
 

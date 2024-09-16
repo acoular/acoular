@@ -534,7 +534,11 @@ class PointSource(SamplesGenerator):
         return self.mics
 
     def _set_mpos(self, mpos):
-        warn("Deprecated use of 'mpos' trait. ", Warning, stacklevel=2)
+        msg = (
+            "Deprecated use of 'mpos' trait. Use 'mics' trait instead."
+            "The 'mpos' trait will be removed in version 25.01."
+        )
+        warn(msg, DeprecationWarning, stacklevel=2)
         self.mics = mpos
 
     # The speed of sound.
@@ -546,7 +550,8 @@ class PointSource(SamplesGenerator):
         return self.env.c
 
     def _set_c(self, c):
-        warn("Deprecated use of 'c' trait. ", Warning, stacklevel=2)
+        msg = "Deprecated use of 'c' trait. Use 'env' trait instead." "The 'c' trait will be removed in version 25.01."
+        warn(msg, DeprecationWarning, stacklevel=2)
         self.env.c = c
 
     # --- End of backwards compatibility traits --------------------------------------
@@ -1373,7 +1378,11 @@ class UncorrelatedNoiseSource(SamplesGenerator):
         return self.mics
 
     def _set_mpos(self, mpos):
-        warn("Deprecated use of 'mpos' trait. ", Warning, stacklevel=2)
+        msg = (
+            "Deprecated use of 'mpos' trait. Use 'mics' trait instead."
+            "The 'mpos' trait will be removed in version 25.01."
+        )
+        warn(msg, DeprecationWarning, stacklevel=2)
         self.mics = mpos
 
     # --- End of backwards compatibility traits --------------------------------------

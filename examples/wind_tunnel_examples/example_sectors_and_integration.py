@@ -24,10 +24,10 @@ datafile = Path.cwd().parent / 'data' / 'example_data.h5'
 
 mg = ac.MicGeom(from_file=micgeofile)
 ts = ac.TimeSamples(name=datafile)
-ps = ac.PowerSpectra(time_data=ts, block_size=128, window='Hanning')
+ps = ac.PowerSpectra(source=ts, block_size=128, window='Hanning')
 rg = ac.RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=0.68, increment=0.02)
 st = ac.SteeringVector(grid=rg, mics=mg)
-f = ac.PowerSpectra(time_data=ts, block_size=128)
+f = ac.PowerSpectra(source=ts, block_size=128)
 bf = ac.BeamformerBase(freq_data=f, steer=st)
 
 # %%

@@ -210,7 +210,7 @@ tight_layout()
 # ----------------------------------------
 
 f = ac.PowerSpectra(
-    time_data=cached_mix,
+    source=cached_mix,
     window='Hanning',
     overlap='50%',
     block_size=128,
