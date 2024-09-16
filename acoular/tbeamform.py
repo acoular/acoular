@@ -384,7 +384,7 @@ class BeamformerTimeSq(BeamformerTime):
                 large (number of grid points).
                 The last block returned by the generator may be shorter than num.
         """
-        super().result(num)
+        return super().result(num)
 
 
 class BeamformerTimeTraj(BeamformerTime):
@@ -463,7 +463,7 @@ class BeamformerTimeTraj(BeamformerTime):
         rmv = tpos[:, :, newaxis] - mpos
         return (ma * sum(rmv.reshape((3, -1)) * fdv, 0) / rm.reshape(-1)).reshape(rm.shape)
 
-    def _get_r0(self, tpos):
+    def get_r0(self, tpos):
         if isscalar(self.steer.ref) and self.steer.ref > 0:
             return self.steer.ref  # full((self.steer.grid.size,), self.steer.ref)
         return self.env._r(tpos)
@@ -527,7 +527,7 @@ class BeamformerTimeTraj(BeamformerTime):
             for i in range(num):
                 tpos = next(movgpos).astype(fdtype)
                 rm = self.steer.env._r(tpos, mpos)  # .astype(fdtype)
-                blockr0[i, :] = self._get_r0(tpos)
+                blockr0[i, :] = self.get_r0(tpos)
                 blockrm[i, :, :] = rm
                 if self.conv_amp:
                     ht = next(movgspeed)
@@ -665,7 +665,7 @@ class BeamformerTimeSqTraj(BeamformerTimeSq, BeamformerTimeTraj):
                 large (number of grid points).
                 The last block returned by the generator may be shorter than num.
         """
-        super().result(num)
+        return super().result(num)
 
 
 class BeamformerCleant(BeamformerTime):
@@ -713,7 +713,7 @@ class BeamformerCleant(BeamformerTime):
                 large (number of grid points).
                 The last block returned by the generator may be shorter than num.
         """
-        super().result(num)
+        return super().result(num)
 
 
 class BeamformerCleantSq(BeamformerCleant):
@@ -757,7 +757,7 @@ class BeamformerCleantSq(BeamformerCleant):
                 large (number of grid points).
                 The last block returned by the generator may be shorter than num.
         """
-        super().result(num)
+        return super().result(num)
 
 
 class BeamformerCleantTraj(BeamformerCleant, BeamformerTimeTraj):
@@ -809,7 +809,7 @@ class BeamformerCleantTraj(BeamformerCleant, BeamformerTimeTraj):
                 large (number of grid points).
                 The last block returned by the generator may be shorter than num.
         """
-        super().result(num)
+        return super().result(num)
 
 
 class BeamformerCleantSqTraj(BeamformerCleantTraj, BeamformerTimeSq):
@@ -865,7 +865,7 @@ class BeamformerCleantSqTraj(BeamformerCleantTraj, BeamformerTimeSq):
                 large (number of grid points).
                 The last block returned by the generator may be shorter than num.
         """
-        super().result(num)
+        return super().result(num)
 
 
 class IntegratorSectorTime(TimeInOut):
