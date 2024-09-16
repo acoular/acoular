@@ -19,11 +19,8 @@ class SamplesBuffer(TimeInOut):
     of a specified size. There are several usecases for this class, as demonstrated in
     the following.
 
-    Example
-    -------
-
-    1. Buffering samples from a source and providing them in blocks of a specified size.
-
+    Examples
+    --------
     Let us assume we want to draw blocks of 16 samples from our source, but we want to make sure
     that we always have twice the number of samples in the buffer. We can achieve this simple behaviour
     by using the following code:
@@ -39,7 +36,7 @@ class SamplesBuffer(TimeInOut):
     ...     sample_freq=64,
     ... )
     >>> # create a buffer with a size of 32 samples
-    >>> buffer = ac.tools.SamplesBuffer(source=source, size=32)
+    >>> buffer = ac.tools.SamplesBuffer(source=source, length=32)
     >>> # get the first block of 16 samples
     >>> block = next(buffer.result(num=16))
     >>> np.testing.assert_array_equal(block, source.data[:16])
@@ -47,6 +44,7 @@ class SamplesBuffer(TimeInOut):
     Here, on the first call to the result method, the buffer will fill up by collecting blocks with same size
     from the source. The buffer will then return the first block of 16 samples. On the next call to the result
     method, the buffer will be filled again and returns the next block of 16 samples.
+    
     In some cases, we might want to draw a different number of samples from the source than we want to return.
     This can be achieved by setting the `source_num` trait of the buffer. A special case is the return of a variable
     number of samples. This is the case, for example, in the class :class:`~acoular.tbeamform.BeamformerTimeTraj`,
@@ -54,9 +52,9 @@ class SamplesBuffer(TimeInOut):
     depending on the expected delay, which can be vary for moving sources. At the same time, however, only 'num'
     samples should be written to and removed from the buffer. This behavior can be achieved by setting the
     `shift_index_by` trait to 'num' and by setting the `result_num` trait to the number of samples that should be
-    returned by the result function. Here is an example:
+    returned by the result function.
 
-    >>> buffer = ac.tools.SamplesBuffer(source=source, size=32, result_num=20, shift_index_by='num')
+    >>> buffer = ac.tools.SamplesBuffer(source=source, length=32, result_num=20, shift_index_by='num')
     >>> block_sizes = []
     >>> block_sizes.append(
     ...     next(buffer.result(num=16)).shape[0]
@@ -146,7 +144,7 @@ class SamplesBuffer(TimeInOut):
 
         Returns
         -------
-        ndarray
+        numpy.ndarray
             block of samples from the buffer
 
         """
@@ -194,7 +192,7 @@ class SamplesBuffer(TimeInOut):
 
         Yields
         ------
-        ndarray
+        numpy.ndarray
             block of samples from the buffer
         """
         self._create_new_buffer()

@@ -9,6 +9,7 @@
     aiaa
     helpers
     metrics
+    utils
 """
 
 from .aiaa import (
