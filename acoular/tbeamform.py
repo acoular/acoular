@@ -241,25 +241,24 @@ class BeamformerTime(TimeInOut):
         return self.weights_(self)[newaxis] if self.weights_ else 1.0
 
     def result(self, num=2048):
-        """Python generator that yields the *squared* deconvolved beamformer
-        output with optional removal of autocorrelation block-wise.
+        """Python generator that yields the time-domain beamformer output.
+
+        The output time signal starts for source signals that were emitted from
+        the :class:`~acoular.grids.Grid` at `t=0`.
 
         Parameters
         ----------
-        num : integer, defaults to 2048
+        num : int
             This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block).
+            (i.e. the number of samples per block). Defaults to 2048.
 
-        Returns
-        -------
-        Samples in blocks of shape  \
-        (num, :attr:`~BeamformerTime.numchannels`).
-            :attr:`~BeamformerTime.numchannels` is usually very \
-            large (number of grid points).
-            The last block may be shorter than num. \
-            The output starts for signals that were emitted
-            from the grid at `t=0`.
-
+        Yields
+        ------
+        numpy.ndarray
+            Samples in blocks of shape (num, :attr:`~BeamformerTime.numchannels`).
+                :attr:`~BeamformerTime.numchannels` is usually very \
+                large (number of grid points).
+                The last block returned by the generator may be shorter than num.
         """
         # initialize values
         fdtype = float64
@@ -291,7 +290,7 @@ class BeamformerTime(TimeInOut):
                 num = p_res.shape[0] - max_sample_delay
                 n_index = arange(0, num + 1)[:, newaxis]
             # init step
-            Phi, autopow = self.delay_and_sum(num, p_res, d_interp2, d_index, amp)
+            Phi, autopow = self._delay_and_sum(num, p_res, d_interp2, d_index, amp)
             if 'Cleant' not in self.__class__.__name__:
                 if 'Sq' not in self.__class__.__name__:
                     yield Phi[:num]
@@ -317,7 +316,7 @@ class BeamformerTime(TimeInOut):
                             t_float[:num, m],
                             Phi[:num, imax] * self.r0[imax] / self.rm[imax, m],
                         )
-                    nextPhi, nextAutopow = self.delay_and_sum(num, p_res_copy, d_interp2, d_index, amp)
+                    nextPhi, nextAutopow = self._delay_and_sum(num, p_res_copy, d_interp2, d_index, amp)
                     if self.r_diag:
                         pownextPhi = (nextPhi[:num] ** 2 - nextAutopow).sum(0).clip(min=0)
                     else:
@@ -339,7 +338,7 @@ class BeamformerTime(TimeInOut):
                 else:
                     yield Gamma[:num] ** 2
 
-    def delay_and_sum(self, num, p_res, d_interp2, d_index, amp):
+    def _delay_and_sum(self, num, p_res, d_interp2, d_index, amp):
         """Standard delay-and-sum method."""
         result = empty((num, self.grid.size), dtype=float)  # output array
         autopow = empty((num, self.grid.size), dtype=float)  # output array
@@ -364,6 +363,28 @@ class BeamformerTimeSq(BeamformerTime):
     @cached_property
     def _get_digest(self):
         return digest(self)
+
+    def result(self, num=2048):
+        """Python generator that yields the **squared** time-domain beamformer output.
+
+        The squared output time signal starts for source signals that were emitted from
+        the :class:`~acoular.grids.Grid` at `t=0`.
+
+        Parameters
+        ----------
+        num : int
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block). Defaults to 2048.
+
+        Yields
+        ------
+        numpy.ndarray
+            Samples in blocks of shape (num, :attr:`~BeamformerTime.numchannels`).
+                :attr:`~BeamformerTime.numchannels` is usually very \
+                large (number of grid points).
+                The last block returned by the generator may be shorter than num.
+        """
+        super().result(num)
 
 
 class BeamformerTimeTraj(BeamformerTime):
@@ -402,7 +423,7 @@ class BeamformerTimeTraj(BeamformerTime):
     def _get_digest(self):
         return digest(self)
 
-    def get_moving_gpos(self):
+    def _get_moving_gpos(self):
         """Python generator that yields the moving grid coordinates samplewise."""
 
         def cross(a, b):
@@ -434,7 +455,7 @@ class BeamformerTimeTraj(BeamformerTime):
                 #                print(loc[:])
                 yield tpos
 
-    def get_macostheta(self, g1, tpos, rm):
+    def _get_macostheta(self, g1, tpos, rm):
         vvec = array(g1)  # velocity vector
         ma = norm(vvec) / self.steer.env.c  # machnumber
         fdv = (vvec / sqrt((vvec * vvec).sum()))[:, newaxis]  # unit vecor velocity
@@ -442,30 +463,30 @@ class BeamformerTimeTraj(BeamformerTime):
         rmv = tpos[:, :, newaxis] - mpos
         return (ma * sum(rmv.reshape((3, -1)) * fdv, 0) / rm.reshape(-1)).reshape(rm.shape)
 
-    def get_r0(self, tpos):
+    def _get_r0(self, tpos):
         if isscalar(self.steer.ref) and self.steer.ref > 0:
             return self.steer.ref  # full((self.steer.grid.size,), self.steer.ref)
         return self.env._r(tpos)
 
     def result(self, num=2048):
-        """Python generator that yields the deconvolved output block-wise.
+        """Python generator that yields the time-domain beamformer output.
+
+        The output time signal starts for source signals that were emitted from
+        the :class:`~acoular.grids.Grid` at `t=0`.
 
         Parameters
         ----------
-        num : integer, defaults to 2048
+        num : int
             This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block).
+            (i.e. the number of samples per block). Defaults to 2048.
 
-        Returns
-        -------
-        Samples in blocks of shape  \
-        (num, :attr:`~BeamformerTime.numchannels`).
-            :attr:`~BeamformerTime.numchannels` is usually very \
-            large (number of grid points).
-            The last block may be shorter than num. \
-            The output starts for signals that were emitted
-            from the grid at `t=0`.
-
+        Yields
+        ------
+        numpy.ndarray
+            Samples in blocks of shape (num, :attr:`~BeamformerTime.numchannels`).
+                :attr:`~BeamformerTime.numchannels` is usually very \
+                large (number of grid points).
+                The last block returned by the generator may be shorter than num.
         """
         # initialize values
         if self.precision == 64:
@@ -487,7 +508,7 @@ class BeamformerTimeTraj(BeamformerTime):
         d_index = empty((num, self.grid.size, numMics), dtype=idtype)
         d_interp2 = empty((num, self.grid.size, numMics), dtype=fdtype)
         blockr0 = empty((num, self.grid.size), dtype=fdtype)
-        movgpos = self.get_moving_gpos()  # create moving grid pos generator
+        movgpos = self._get_moving_gpos()  # create moving grid pos generator
         movgspeed = self.trajectory.traj(0.0, delta_t=1 / self.source.sample_freq, der=1)
 
         # preliminary implementation of different steering vectors
@@ -506,11 +527,11 @@ class BeamformerTimeTraj(BeamformerTime):
             for i in range(num):
                 tpos = next(movgpos).astype(fdtype)
                 rm = self.steer.env._r(tpos, mpos)  # .astype(fdtype)
-                blockr0[i, :] = self.get_r0(tpos)
+                blockr0[i, :] = self._get_r0(tpos)
                 blockrm[i, :, :] = rm
                 if self.conv_amp:
                     ht = next(movgspeed)
-                    blockrmconv[i, :, :] = rm * (1 - self.get_macostheta(ht, tpos, rm)) ** 2
+                    blockrmconv[i, :, :] = rm * (1 - self._get_macostheta(ht, tpos, rm)) ** 2
             if self.conv_amp:
                 steer_func(blockrmconv, blockr0, amp)
             else:
@@ -529,7 +550,7 @@ class BeamformerTimeTraj(BeamformerTime):
                 flag = False
             # init step
             p_res = time_block.copy()
-            Phi, autopow = self.delay_and_sum(num, p_res, d_interp2, d_index, amp)
+            Phi, autopow = self._delay_and_sum(num, p_res, d_interp2, d_index, amp)
             if 'Cleant' not in self.__class__.__name__:
                 if 'Sq' not in self.__class__.__name__:
                     yield Phi[:num]
@@ -568,7 +589,7 @@ class BeamformerTimeTraj(BeamformerTime):
                             t_float[:num, m],
                             h / blockrm1[:num, imax, m],
                         )
-                    nextPhi, nextAutopow = self.delay_and_sum(num, p_res, d_interp2, d_index, amp)
+                    nextPhi, nextAutopow = self._delay_and_sum(num, p_res, d_interp2, d_index, amp)
                     if self.r_diag:
                         pownextPhi = (nextPhi[:num] * nextPhi[:num] - nextAutopow).sum(0).clip(min=0)
                     else:
@@ -590,7 +611,7 @@ class BeamformerTimeTraj(BeamformerTime):
                 else:
                     yield Gamma[:num] ** 2
 
-    def delay_and_sum(self, num, p_res, d_interp2, d_index, amp):
+    def _delay_and_sum(self, num, p_res, d_interp2, d_index, amp):
         """Standard delay-and-sum method."""
         fdtype = float64 if self.precision == 64 else float32
         result = empty((num, self.grid.size), dtype=fdtype)  # output array
@@ -624,6 +645,28 @@ class BeamformerTimeSqTraj(BeamformerTimeSq, BeamformerTimeTraj):
     def _get_digest(self):
         return digest(self)
 
+    def result(self, num=2048):
+        """Python generator that yields the **squared** time-domain beamformer output.
+
+        The squared output time signal starts for source signals that were emitted from
+        the :class:`~acoular.grids.Grid` at `t=0`.
+
+        Parameters
+        ----------
+        num : int
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block). Defaults to 2048.
+
+        Yields
+        ------
+        numpy.ndarray
+            Samples in blocks of shape (num, :attr:`~BeamformerTime.numchannels`).
+                :attr:`~BeamformerTime.numchannels` is usually very \
+                large (number of grid points).
+                The last block returned by the generator may be shorter than num.
+        """
+        super().result(num)
+
 
 class BeamformerCleant(BeamformerTime):
     """CLEANT deconvolution method.
@@ -651,6 +694,27 @@ class BeamformerCleant(BeamformerTime):
     def _get_digest(self):
         return digest(self)
 
+    def result(self, num=2048):
+        """Python generator that yields the deconvolved time-domain beamformer output.
+
+        The output starts for signals that were emitted from the :class:`~acoular.grids.Grid` at `t=0`.
+
+        Parameters
+        ----------
+        num : int
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block). Defaults to 2048.
+
+        Yields
+        ------
+        numpy.ndarray
+            Samples in blocks of shape (num, :attr:`~BeamformerTime.numchannels`).
+                :attr:`~BeamformerTime.numchannels` is usually very \
+                large (number of grid points).
+                The last block returned by the generator may be shorter than num.
+        """
+        super().result(num)
+
 
 class BeamformerCleantSq(BeamformerCleant):
     """CLEANT deconvolution method with optional removal of autocorrelation.
@@ -671,6 +735,29 @@ class BeamformerCleantSq(BeamformerCleant):
     @cached_property
     def _get_digest(self):
         return digest(self)
+
+    def result(self, num=2048):
+        """Python generator that yields the *squared* deconvolved time-domain beamformer output.
+
+        The output starts for signals that were emitted from the :class:`~acoular.grids.Grid` at `t=0`.
+        Per default, block-wise removal of autocorrelation is performed, which can be turned of by setting
+        :attr:`r_diag` to `False`.
+
+        Parameters
+        ----------
+        num : int
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block). Defaults to 2048.
+
+        Yields
+        ------
+        numpy.ndarray
+            Samples in blocks of shape (num, :attr:`~BeamformerTime.numchannels`).
+                :attr:`~BeamformerTime.numchannels` is usually very \
+                large (number of grid points).
+                The last block returned by the generator may be shorter than num.
+        """
+        super().result(num)
 
 
 class BeamformerCleantTraj(BeamformerCleant, BeamformerTimeTraj):
@@ -702,6 +789,27 @@ class BeamformerCleantTraj(BeamformerCleant, BeamformerTimeTraj):
     @cached_property
     def _get_digest(self):
         return digest(self)
+
+    def result(self, num=2048):
+        """Python generator that yields the deconvolved time-domain beamformer output.
+
+        The output starts for signals that were emitted from the :class:`~acoular.grids.Grid` at `t=0`.
+
+        Parameters
+        ----------
+        num : int
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block). Defaults to 2048.
+
+        Yields
+        ------
+        numpy.ndarray
+            Samples in blocks of shape (num, :attr:`~BeamformerTime.numchannels`).
+                :attr:`~BeamformerTime.numchannels` is usually very \
+                large (number of grid points).
+                The last block returned by the generator may be shorter than num.
+        """
+        super().result(num)
 
 
 class BeamformerCleantSqTraj(BeamformerCleantTraj, BeamformerTimeSq):
@@ -735,6 +843,29 @@ class BeamformerCleantSqTraj(BeamformerCleantTraj, BeamformerTimeSq):
     @cached_property
     def _get_digest(self):
         return digest(self)
+
+    def result(self, num=2048):
+        """Python generator that yields the *squared* deconvolved time-domain beamformer output.
+
+        The output starts for signals that were emitted from the :class:`~acoular.grids.Grid` at `t=0`.
+        Per default, block-wise removal of autocorrelation is performed, which can be turned of by setting
+        :attr:`r_diag` to `False`.
+
+        Parameters
+        ----------
+        num : int
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block). Defaults to 2048.
+
+        Yields
+        ------
+        numpy.ndarray
+            Samples in blocks of shape (num, :attr:`~BeamformerTime.numchannels`).
+                :attr:`~BeamformerTime.numchannels` is usually very \
+                large (number of grid points).
+                The last block returned by the generator may be shorter than num.
+        """
+        super().result(num)
 
 
 class IntegratorSectorTime(TimeInOut):

@@ -44,7 +44,7 @@ class SamplesBuffer(TimeInOut):
     Here, on the first call to the result method, the buffer will fill up by collecting blocks with same size
     from the source. The buffer will then return the first block of 16 samples. On the next call to the result
     method, the buffer will be filled again and returns the next block of 16 samples.
-    
+
     In some cases, we might want to draw a different number of samples from the source than we want to return.
     This can be achieved by setting the `source_num` trait of the buffer. A special case is the return of a variable
     number of samples. This is the case, for example, in the class :class:`~acoular.tbeamform.BeamformerTimeTraj`,
