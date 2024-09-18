@@ -99,7 +99,6 @@ def get_beamformer_traj_result(Beamformer, num=32):
     """
     ## with moving grid
     ts = MaskedTimeSamples(name=FNAME, stop=48)
-    print(ts.numsamples_total)
     gMoving = RectGrid(x_min=-0.1, x_max=0.1, y_min=0, y_max=0, z=0, increment=0.1)
     stMoving = SteeringVector(grid=gMoving, mics=MGEOM)
     bt = Beamformer(source=ts, trajectory=TRAJ, steer=stMoving)
@@ -128,7 +127,6 @@ def get_beamformer_time_result(Beamformer, num=32):
     """
     ## with moving grid
     ts = MaskedTimeSamples(name=FNAME, stop=48)
-    print(ts.numsamples_total)
     gfixed = RectGrid(x_min=-0.1, x_max=0.1, y_min=0, y_max=0, z=D, increment=0.1)
     stfixed = SteeringVector(grid=gfixed, mics=MGEOM)
     bt = Beamformer(source=ts, steer=stfixed)

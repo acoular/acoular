@@ -277,6 +277,7 @@ class BeamformerTime(TimeInOut):
         d_index.shape = d_index.shape[1:]
         d_interp2.shape = d_interp2.shape[1:]
         max_sample_delay = int((self.rm / c).max()) + 2
+        weights = self._get_weights()
 
         buffer = SamplesBuffer(
             source=self.source,
@@ -286,6 +287,7 @@ class BeamformerTime(TimeInOut):
             dtype=fdtype,
         )
         for p_res in buffer.result(num):
+            p_res *= weights
             if p_res.shape[0] < buffer.result_num:  # last block shorter
                 num = p_res.shape[0] - max_sample_delay
                 n_index = arange(0, num + 1)[:, newaxis]
@@ -510,6 +512,7 @@ class BeamformerTimeTraj(BeamformerTime):
         blockr0 = empty((num, self.grid.size), dtype=fdtype)
         movgpos = self._get_moving_gpos()  # create moving grid pos generator
         movgspeed = self.trajectory.traj(0.0, delta_t=1 / self.source.sample_freq, der=1)
+        weights = self._get_weights()
 
         # preliminary implementation of different steering vectors
         steer_func = {
@@ -542,6 +545,7 @@ class BeamformerTimeTraj(BeamformerTime):
 
             try:
                 time_block = next(buffered_result)
+                time_block *= weights
             except StopIteration:
                 break
             if time_block.shape[0] < buffer.result_num:  # last block shorter
