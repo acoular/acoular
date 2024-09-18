@@ -12,8 +12,11 @@ Upcoming Release
     **Documentation**
         * updates literature and adds `sphinxcontrib-bibtex` extension to support bibtex citation in the documentation.
         * cleans-up and structures the conf.py file and fixes missing acoular logo in documentation
+        * fixes missing and wrong docstrings for `result` methods in :mod:`acoular.tbeamform`
 
     **Internal**
+        * refactoring of classes in :mod:`acoular.tbeamform` (moves buffer logic away from Beamformer classes)
+            * adds new :class:`~acoular.tools.utils.SamplesBuffer` class located in :mod:`~acoular.tools.utils` 
         * replaces the markdown-link-check by lychee
             * faster CI (written in RUST)
             * allows more files to be checked, including the .rst files in the documentation

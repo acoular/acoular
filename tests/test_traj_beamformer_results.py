@@ -1,7 +1,7 @@
-import unittest
 from pathlib import Path
 
 import numpy as np
+import pytest
 from acoular import (
     BeamformerCleant,
     BeamformerCleantSq,
@@ -98,13 +98,14 @@ def get_beamformer_traj_result(Beamformer, num=32):
 
     """
     ## with moving grid
-    ts = MaskedTimeSamples(name=FNAME)
+    ts = MaskedTimeSamples(name=FNAME, stop=48)
     gMoving = RectGrid(x_min=-0.1, x_max=0.1, y_min=0, y_max=0, z=0, increment=0.1)
     stMoving = SteeringVector(grid=gMoving, mics=MGEOM)
     bt = Beamformer(source=ts, trajectory=TRAJ, steer=stMoving)
     if hasattr(bt, 'n_iter'):
         bt.n_iter = 2
-    return next(bt.result(num)).astype(np.float32)
+    for data in bt.result(num):
+        yield data.astype(np.float32)
 
 
 def get_beamformer_time_result(Beamformer, num=32):
@@ -125,50 +126,39 @@ def get_beamformer_time_result(Beamformer, num=32):
 
     """
     ## with moving grid
-    ts = MaskedTimeSamples(name=FNAME)
+    ts = MaskedTimeSamples(name=FNAME, stop=48)
     gfixed = RectGrid(x_min=-0.1, x_max=0.1, y_min=0, y_max=0, z=D, increment=0.1)
     stfixed = SteeringVector(grid=gfixed, mics=MGEOM)
     bt = Beamformer(source=ts, steer=stfixed)
     if hasattr(bt, 'n_iter'):
         bt.n_iter = 2
-    return next(bt.result(num)).astype(np.float32)
+    for data in bt.result(num):
+        yield data.astype(np.float32)
 
 
-class BeamformerTimeTest(unittest.TestCase):
-    """
-    A simple test case that varifies that the results of trajectory beamformers
-    and fixed focus beamformers in time domain are not changing across different
-    versions of code.
-    """
-
-    traj_beamformers = [BeamformerTimeTraj, BeamformerTimeSqTraj, BeamformerCleantTraj, BeamformerCleantSqTraj]
-
-    time_beamformers = [BeamformerTime, BeamformerTimeSq, BeamformerCleant, BeamformerCleantSq]
-
-    def test_beamformer_traj_result(self):
-        """compare results of trajectory beamformers against previous
-        results from .h5 file"""
-        for beamformer in self.traj_beamformers:
-            with self.subTest(beamformer.__name__):
-                name = testdir / 'reference_data' / f'{beamformer.__name__}.npy'
-                actual_data = get_beamformer_traj_result(beamformer)
-                if WRITE_NEW_REFERENCE_DATA:
-                    np.save(name, actual_data)
-                ref_data = np.load(name)
-                np.testing.assert_allclose(actual_data, ref_data, rtol=5e-5, atol=5e-6)
-
-    def test_beamformer_time_result(self):
-        """compare results of time beamformers with fixed focus against previous
-        results from .h5 file"""
-        for beamformer in self.time_beamformers:
-            with self.subTest(beamformer.__name__):
-                name = testdir / 'reference_data' / f'{beamformer.__name__}.npy'
-                actual_data = get_beamformer_time_result(beamformer)
-                if WRITE_NEW_REFERENCE_DATA:
-                    np.save(name, actual_data)
-                ref_data = np.load(name)
-                np.testing.assert_allclose(actual_data, ref_data, rtol=5e-5, atol=5e-6)
+@pytest.mark.parametrize(
+    'beamformer', [BeamformerTimeTraj, BeamformerTimeSqTraj, BeamformerCleantTraj, BeamformerCleantSqTraj]
+)
+def test_beamformer_traj_result(beamformer):
+    """compare results of trajectory beamformers against previous
+    results from .h5 file"""
+    gen = get_beamformer_traj_result(beamformer)
+    for i, actual_data in enumerate(gen):
+        name = testdir / 'reference_data' / f'{beamformer.__name__}{i}.npy'
+        if WRITE_NEW_REFERENCE_DATA:
+            np.save(name, actual_data)
+        ref_data = np.load(name)
+        np.testing.assert_allclose(actual_data, ref_data, rtol=5e-5, atol=5e-6)
 
 
-if __name__ == '__main__':
-    unittest.main()
+@pytest.mark.parametrize('beamformer', [BeamformerTime, BeamformerTimeSq, BeamformerCleant, BeamformerCleantSq])
+def test_beamformer_time_result(beamformer):
+    """compare results of time beamformers with fixed focus against previous
+    results from .h5 file"""
+    gen = get_beamformer_time_result(beamformer)
+    for i, actual_data in enumerate(gen):
+        name = testdir / 'reference_data' / f'{beamformer.__name__}{i}.npy'
+        if WRITE_NEW_REFERENCE_DATA:
+            np.save(name, actual_data)
+        ref_data = np.load(name)
+        np.testing.assert_allclose(actual_data, ref_data, rtol=5e-5, atol=5e-6)
