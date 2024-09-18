@@ -54,13 +54,13 @@ class TimeSamplesAIAABenchmark(TimeSamples):
     objects.
     """
 
-    def load_timedata(self):
+    def _load_timedata(self):
         """Loads timedata from .h5 file. Only for internal use."""
         self.data = self.h5f.get_data_by_reference('MicrophoneData/microphoneDataPa')
         self.sample_freq = self.h5f.get_node_attribute(self.data, 'sampleRateHz')
         (self.numsamples, self.numchannels) = self.data.shape
 
-    def load_metadata(self):
+    def _load_metadata(self):
         """Loads metadata from .h5 file. Only for internal use."""
         self.metadata = {}
         if '/MetaData' in self.h5f:
@@ -76,7 +76,7 @@ class TriggerAIAABenchmark(TimeSamplesAIAABenchmark):
     and and provides information about this data.
     """
 
-    def load_timedata(self):
+    def _load_timedata(self):
         """Loads timedata from .h5 file. Only for internal use."""
         self.data = self.h5f.get_data_by_reference('TachoData/tachoDataV')
         self.sample_freq = self.h5f.get_node_attribute(self.data, 'sampleRateHz')
