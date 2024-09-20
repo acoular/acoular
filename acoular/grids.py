@@ -33,7 +33,6 @@ from numpy import (
     arange,
     argmin,
     array,
-    asfarray,
     concatenate,
     copysign,
     fabs,
@@ -111,8 +110,8 @@ def _det(xvert, yvert):
         all points are collinear.
 
     """
-    xvert = asfarray(xvert)
-    yvert = asfarray(yvert)
+    xvert = xvert.astype(float)
+    yvert = yvert.astype(float)
     x_prev = concatenate(([xvert[-1]], xvert[:-1]))
     y_prev = concatenate(([yvert[-1]], yvert[:-1]))
     return sum(yvert * x_prev - xvert * y_prev, axis=0)
@@ -129,8 +128,8 @@ class Polygon:
         if len(x) != len(y):
             msg = 'x and y must be equally sized.'
             raise IndexError(msg)
-        self.x = asfarray(x)
-        self.y = asfarray(y)
+        self.x = x.astype(float)
+        self.y = y.astype(float)
         # Closes the polygon if were open
         x1, y1 = x[0], y[0]
         xn, yn = x[-1], y[-1]
@@ -167,8 +166,8 @@ class Polygon:
              Software, Vol 7, No. 1, pp 45-47.
 
         """
-        xpoint = asfarray(xpoint)
-        ypoint = asfarray(ypoint)
+        xpoint = xpoint.astype(float)
+        ypoint = ypoint.astype(float)
         # Scalar to array
         if xpoint.shape == ():
             xpoint = array([xpoint], dtype=float)
