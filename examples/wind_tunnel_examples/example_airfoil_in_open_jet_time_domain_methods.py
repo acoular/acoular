@@ -11,6 +11,7 @@ Uses measured data in file example_data.h5, calibration in file example_calib.xm
 microphone geometry in array_56.xml (part of Acoular).
 """
 
+import urllib
 from pathlib import Path
 
 import acoular as ac
@@ -22,6 +23,28 @@ import numpy as np
 cfreq = 4000
 num = 3
 
+
+#%% Obtain necessary data
+
+calib_file = Path('../data/example_calib.xml')
+if not calib_file.exists():
+    calib_file = Path().cwd() / 'example_calib.xml'
+    if not calib_file.exists():
+        print("Cannot find calibration file. Downloading...")
+        url = 'https://github.com/acoular/acoular/tree/master/examples/data/example_calib.xml'
+        urllib.request.urlretrieve(url, calib_file)
+    print(f"Calibration file location: {calib_file}")
+
+time_data_file = Path('../data/example_data.h5')
+if not time_data_file.exists():
+    time_data_file = Path().cwd() / 'example_data.h5'
+    if not time_data_file.exists():
+        print("Cannot find example_data.h5 file. Downloading...")
+        url = 'https://github.com/acoular/acoular/tree/master/examples/data/example_data.h5'
+        time_data_file, _ = urllib.request.urlretrieve(url, time_data_file)
+    print(f"Time data file location: {time_data_file}")
+
+
 # %%
 # Setting up the processing chain for the time domain methods.
 #
@@ -30,11 +53,11 @@ num = 3
 #    environment and steering vector is given in the example :doc:`example_airfoil_in_open_jet_steering_vectors`.
 
 ts = ac.MaskedTimeSamples(
-    name='../data/example_data.h5',
+    name=time_data_file,
     invalid_channels=[1, 7],
     start=0,
     stop=16000,
-    calib=ac.Calib(from_file='../data/example_calib.xml'),
+    calib=ac.Calib(from_file=calib_file),
 )
 mics = ac.MicGeom(from_file=Path(ac.__file__).parent / 'xml' / 'array_56.xml', invalid_channels=[1, 7])
 grid = ac.RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=0.68, increment=0.05)

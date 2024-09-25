@@ -10,6 +10,7 @@ Loads the example data set, sets diffrent Sectors for intergration.
 Shows Acoular's Sector und Sound Pressure level Integration functionality.
 """
 
+import urllib
 from pathlib import Path
 
 import acoular as ac
@@ -17,13 +18,22 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.patches import Polygon, Rectangle
 
+time_data_file = Path('../data/example_data.h5')
+if not time_data_file.exists():
+    time_data_file = Path().cwd() / 'example_data.h5'
+    if not time_data_file.exists():
+        print("Cannot find example_data.h5 file. Downloading...")
+        url = 'https://github.com/acoular/acoular/tree/master/examples/data/example_data.h5'
+        time_data_file, _ = urllib.request.urlretrieve(url, time_data_file)
+    print(f"Time data file location: {time_data_file}")
+
+
 # %%
 # Define the necessary objects
 micgeofile = Path(ac.__file__).parent / 'xml' / 'array_56.xml'
-datafile = Path.cwd().parent / 'data' / 'example_data.h5'
 
 mg = ac.MicGeom(from_file=micgeofile)
-ts = ac.TimeSamples(name=datafile)
+ts = ac.TimeSamples(name=time_data_file)
 ps = ac.PowerSpectra(source=ts, block_size=128, window='Hanning')
 rg = ac.RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=0.68, increment=0.02)
 st = ac.SteeringVector(grid=rg, mics=mg)

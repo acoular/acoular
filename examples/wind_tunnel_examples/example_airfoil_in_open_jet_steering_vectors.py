@@ -11,6 +11,7 @@ Uses measured data in file example_data.h5, calibration in file example_calib.xm
 microphone geometry in array_56.xml (part of Acoular).
 """
 
+import urllib
 from pathlib import Path
 
 import acoular as ac
@@ -21,13 +22,33 @@ import acoular as ac
 cfreq = 4000
 num = 3
 
+#%% Obtain necessary data
+
+calib_file = Path('../data/example_calib.xml')
+if not calib_file.exists():
+    calib_file = Path().cwd() / 'example_calib.xml'
+    if not calib_file.exists():
+        print("Cannot find calibration file. Downloading...")
+        url = 'https://github.com/acoular/acoular/tree/master/examples/data/example_calib.xml'
+        urllib.request.urlretrieve(url, calib_file)
+    print(f"Calibration file location: {calib_file}")
+
+time_data_file = Path('../data/example_data.h5')
+if not time_data_file.exists():
+    time_data_file = Path().cwd() / 'example_data.h5'
+    if not time_data_file.exists():
+        print("Cannot find example_data.h5 file. Downloading...")
+        url = 'https://github.com/acoular/acoular/tree/master/examples/data/example_data.h5'
+        time_data_file, _ = urllib.request.urlretrieve(url, time_data_file)
+    print(f"Time data file location: {time_data_file}")
+
 # %%
 # First, we define the time samples using the :class:`acoular.sources.MaskedTimeSamples` class
 # that provides masking of channels and samples. Here, we exclude the channels with index 1 and 7 and
 # only process the first 16000 samples of the time signals.
 # Alternatively, we could use the :class:`acoular.sources.TimeSamples` class that provides no masking at all.
 
-t1 = ac.MaskedTimeSamples(name='../data/example_data.h5')
+t1 = ac.MaskedTimeSamples(name=time_data_file)
 t1.start = 0
 t1.stop = 16000
 invalid = [1, 7]
@@ -38,7 +59,7 @@ t1.invalid_channels = invalid
 # object (preferred) or for frequency domain processing at the :class:`acoular.spectra.PowerSpectra`
 # object (for backwards compatibility)
 
-t1.calib = ac.Calib(from_file='../data/example_calib.xml')
+t1.calib = ac.Calib(from_file=calib_file)
 
 # %%
 # The microphone geometry must have the same number of valid channels as the :class:`acoular.sources.MaskedTimeSamples` object has.
