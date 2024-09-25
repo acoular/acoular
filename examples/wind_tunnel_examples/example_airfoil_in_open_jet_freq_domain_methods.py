@@ -17,25 +17,25 @@ from pathlib import Path
 
 import acoular as ac
 
-#%% Obtain necessary data
+# %% Obtain necessary data
 
 calib_file = Path('../data/example_calib.xml')
 if not calib_file.exists():
     calib_file = Path().cwd() / 'example_calib.xml'
     if not calib_file.exists():
-        print("Cannot find calibration file. Downloading...")
+        print('Cannot find calibration file. Downloading...')
         url = 'https://github.com/acoular/acoular/tree/master/examples/data/example_calib.xml'
         urllib.request.urlretrieve(url, calib_file)
-    print(f"Calibration file location: {calib_file}")
+    print(f'Calibration file location: {calib_file}')
 
 time_data_file = Path('../data/example_data.h5')
 if not time_data_file.exists():
     time_data_file = Path().cwd() / 'example_data.h5'
     if not time_data_file.exists():
-        print("Cannot find example_data.h5 file. Downloading...")
+        print('Cannot find example_data.h5 file. Downloading...')
         url = 'https://github.com/acoular/acoular/tree/master/examples/data/example_data.h5'
         time_data_file, _ = urllib.request.urlretrieve(url, time_data_file)
-    print(f"Time data file location: {time_data_file}")
+    print(f'Time data file location: {time_data_file}')
 
 # %%
 # The 4 kHz third-octave band is used for the example.
