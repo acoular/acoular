@@ -8,7 +8,7 @@ Upcoming Release
         * Sounddevice inputs now allow for user-settable sample rates and precision types
     
     **Bugfixes**
-        * add missing file flush in :class:`~acoular.tprocess.TimeCache`
+        * flush file in :class:`~acoular.tprocess.TimeCache` to prevent data loss / corruption
 
     **Documentation**
         * updates literature and adds `sphinxcontrib-bibtex` extension to support bibtex citation in the documentation.
