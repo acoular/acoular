@@ -1897,6 +1897,7 @@ class TimeCache(TimeInOut):
         self.h5f.set_node_attribute(ac, 'complete', False)
         for data in self.source.result(num):
             self.h5f.append_data(ac, data)
+            self.h5f.flush()
             yield data
         self.h5f.set_node_attribute(ac, 'complete', True)
 
@@ -1925,6 +1926,7 @@ class TimeCache(TimeInOut):
         for j, data in enumerate(self.source.result(num)):
             self.h5f.append_data(ac, data)
             if j >= nblocks:
+                self.h5f.flush()
                 yield data
         self.h5f.set_node_attribute(ac, 'complete', True)
 
@@ -2145,8 +2147,8 @@ class WriteH5(TimeInOut):
             except StopIteration:
                 break
             f5h.append_data(ac, data[:anz])
-            yield data
             f5h.flush()
+            yield data
             scount += anz
         f5h.close()
 
