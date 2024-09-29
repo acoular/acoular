@@ -19,5 +19,6 @@ Contribution Guidelines
     quality.rst
     documentation.rst
     release.rst
+    pull_request.rst
     checklist.rst
 
