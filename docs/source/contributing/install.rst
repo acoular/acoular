@@ -56,10 +56,21 @@ Then, make an editable installation of Acoular with:
 
 .. code-block:: bash
 
-    pip install -e .[dev]
+    pip install -e ".[dev]"
 
 The editable installation allows you to make changes to the source code and see the effects immediately without having to reinstall the package.
 
+The ``".[dev]"`` argument is responsible for installing the right dependencies as defined in ``pyproject.toml``:
+
+.. code-clock:: toml
+
+    dev = [
+        "acoular[docs,full,tests]",
+        "hatch",
+        "ruff==0.4.1",
+    ]
+
+If not included, the dependencies have to be installed manually.
 
 System dependencies
 -------------------

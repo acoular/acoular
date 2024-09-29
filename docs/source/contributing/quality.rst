@@ -69,4 +69,12 @@ To run the tests locally, execute the following command:
 
     hatch run tests:test
 
-Note that the tests are executed on different Python versions and take several minutes to complete. 
+Note that the tests are executed on different Python versions and take several minutes to complete.
+
+To check a specific Python version only, the command can be modified to:
+
+.. code-block:: bash
+
+    hatch -v run +py=3.11 tests:test
+
+Here the tests will be executed for the Python version 3.11 only. The ``-v`` flag increases verbosity.
