@@ -158,7 +158,7 @@ def test_beamformer_traj_result(beamformer, steer_type):
     else:
         gen = get_beamformer_time_result(beamformer, steer_type=steer_type)
     for i, actual_data in enumerate(gen):
-        name = testdir / 'reference_data' / f'{beamformer.__name__}{steer_type.strip(" ")}{i}.npy'
+        name = testdir / 'reference_data' / f'{beamformer.__name__}_{steer_type.replace(" ", "")}_{i}.npy'
         if WRITE_NEW_REFERENCE_DATA:
             np.save(name, actual_data)
         ref_data = np.load(name)
