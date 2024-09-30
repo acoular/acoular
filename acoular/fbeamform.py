@@ -117,6 +117,7 @@ from .h5files import H5CacheFileBase
 from .internal import digest
 from .microphones import MicGeom
 from .spectra import PowerSpectra
+from .tfastfuncs import _steer_I, _steer_II, _steer_III, _steer_IV
 
 sklearn_ndict = {}
 if parse(sklearn.__version__) < parse('1.4'):
@@ -162,6 +163,26 @@ class SteeringVector(HasPrivateTraits):
     #: If set to a vector, this is interpreted as x,y,z coordinates of the reference position.
     #: Defaults to [0.,0.,0.].
     ref = Property(desc='reference position or distance')
+
+    _steer_funcs_freq = Dict(
+        {
+            'classic': lambda x: x / absolute(x) / x.shape[-1],
+            'inverse': lambda x: 1.0 / x.conj() / x.shape[-1],
+            'true level': lambda x: x / einsum('ij,ij->i', x, x.conj())[:, newaxis],
+            'true location': lambda x: x / sqrt(einsum('ij,ij->i', x, x.conj()) * x.shape[-1])[:, newaxis],
+        },
+        desc='dictionary of frequency domain steering vector functions',
+    )
+
+    _steer_funcs_time = Dict(
+        {
+            'classic': _steer_I,
+            'inverse': _steer_II,
+            'true level': _steer_III,
+            'true location': _steer_IV,
+        },
+        desc='dictionary of time domain steering vector functions',
+    )
 
     def _set_ref(self, ref):
         if isscalar(ref):
@@ -253,12 +274,7 @@ class SteeringVector(HasPrivateTraits):
             array of shape (ngridpts, nmics) containing the steering vectors for the given frequency
 
         """
-        func = {
-            'classic': lambda x: x / absolute(x) / x.shape[-1],
-            'inverse': lambda x: 1.0 / x.conj() / x.shape[-1],
-            'true level': lambda x: x / einsum('ij,ij->i', x, x.conj())[:, newaxis],
-            'true location': lambda x: x / sqrt(einsum('ij,ij->i', x, x.conj()) * x.shape[-1])[:, newaxis],
-        }[self.steer_type]
+        func = self._steer_funcs_freq[self.steer_type]
         return func(self.transfer(f, ind))
 
 
