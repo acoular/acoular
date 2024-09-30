@@ -25,7 +25,7 @@ from acoular import (
 config.global_caching = 'none'
 
 # if this flag is set to True, new time data will be simulated and
-WRITE_NEW_REFERENCE_DATA = True
+WRITE_NEW_REFERENCE_DATA = False
 # new beamformer results are generated for comparison during testing. Should always be False. Only set to
 # true, if it is necessary to recalculate the data, due to wanted changes of the Beamformers (or MovingPointSource).
 testdir = Path(__file__).parent
