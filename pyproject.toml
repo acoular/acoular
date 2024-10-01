@@ -93,7 +93,6 @@ dependencies = ["ruff==0.4.1"]
 config-path = [".ruff.toml"]
 
 [tool.hatch.envs.docs]
-platforms = ["linux"]
 python = "3.12"
 dependencies = [
     "acoular[docs]"

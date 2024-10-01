@@ -37,6 +37,9 @@ authors:
   - given-names: "Jakob"
     family-names: "Tschavoll"
     affiliation: "Audio Communication Group, TU Berlin"
+  - given-names: "Jan"
+    family-names: "Ostendorf"
+    affiliation: "Department of Engineering Acoustics, TU Berlin"
 identifiers:
   - description: "acoular: all versions"
     type: "doi"
