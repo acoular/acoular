@@ -3,7 +3,7 @@ name: GitHub
 on:
   pull_request:
     branches: master
-    types: [labeled, unlabeled, opened, synchronize, reopened]
+    types: [labeled, unlabeled, opened, synchronize, reopened, edited]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
