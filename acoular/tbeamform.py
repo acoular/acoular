@@ -52,7 +52,7 @@ from .grids import RectGrid
 
 # acoular imports
 from .internal import digest
-from .tfastfuncs import _delayandsum4, _delayandsum5, _delays, _steer_I, _steer_II, _steer_III, _steer_IV
+from .tfastfuncs import _delayandsum4, _delayandsum5, _delays
 from .tools.utils import SamplesBuffer
 from .tprocess import TimeInOut
 from .trajectory import Trajectory
@@ -261,6 +261,7 @@ class BeamformerTime(TimeInOut):
                 The last block returned by the generator may be shorter than num.
         """
         # initialize values
+        steer_func = self.steer._steer_funcs_time[self.steer.steer_type]
         fdtype = float64
         idtype = int64
         numMics = self.steer.mics.num_mics
@@ -270,7 +271,7 @@ class BeamformerTime(TimeInOut):
         # delays = empty((1,self.grid.size,numMics),dtype=fdtype)
         d_index = empty((1, self.grid.size, numMics), dtype=idtype)
         d_interp2 = empty((1, self.grid.size, numMics), dtype=fdtype)
-        _steer_III(self.rm[newaxis, :, :], self.r0[newaxis, :], amp)
+        steer_func(self.rm[newaxis, :, :], self.r0[newaxis, :], amp)
         _delays(self.rm[newaxis, :, :], c, d_interp2, d_index)
         amp.shape = amp.shape[1:]
         # delays.shape = delays.shape[1:]
@@ -515,12 +516,7 @@ class BeamformerTimeTraj(BeamformerTime):
         weights = self._get_weights()
 
         # preliminary implementation of different steering vectors
-        steer_func = {
-            'classic': _steer_I,
-            'inverse': _steer_II,
-            'true level': _steer_III,
-            'true location': _steer_IV,
-        }[self.steer.steer_type]
+        steer_func = self.steer._steer_funcs_time[self.steer.steer_type]
 
         # start processing
         flag = True
