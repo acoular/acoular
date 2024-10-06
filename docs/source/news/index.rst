@@ -7,6 +7,7 @@ Upcoming Release
     **New features:**
         * Sounddevice inputs now allow for user-settable sample rates and precision types
         * allow more platforms to build the docs files including Linux, MacOS, and Windows 
+        * adds a pull request template
     
     **Bugfixes**
         * flush file in :class:`~acoular.tprocess.TimeCache` to prevent data loss / corruption
