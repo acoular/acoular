@@ -163,9 +163,12 @@ class Cache(InOut):
     The caching behaviour can be controlled by the :class:`~acoular.configuration.Config` instance
     via the :attr:`~acoular.configuration.Config.global_caching` attribute.
     To turn off caching, set :attr:`~acoular.configuration.Config.global_caching` to 'none' before
-    running the code.
+    running the code. The cache file directory can be obtained (and set) via the 
+    :attr:`~acoular.configuration.Config.cache_dir`
 
     >>> ac.config.global_caching = 'none'
+    >>> print(ac.config.cache_dir)
+    ./cache
 
     """
 

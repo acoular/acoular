@@ -6,19 +6,26 @@ import numpy as np
 import pytest
 
 src = ac.TimeSamples(data=np.random.random((10, 2)))
+CACHE_DIR = Path(ac.config.cache_dir).absolute()
 
-
-def remove_cache():
-    cache_file = Path(ac.config.cache_dir).absolute() / '_cache.h5'
+def remove_cache(cache_dir):
+    cache_file = Path(cache_dir) /'_cache.h5'
     if cache_file.exists():
         os.remove(cache_file)
 
 
 class TestCache:
+    """Test the block-wise caching mechanism.
+    
+    To allow concurrent testing without writing interference, the cache_dir is set to a different directories.
+    """
+
     @pytest.mark.parametrize('lib, sample_freq', [('pytables', 1), ('h5py', 2)])
     def test_cache_time(self, lib, sample_freq):
-        remove_cache()
         ac.config.h5library = lib
+        ac.config.cache_dir = str(CACHE_DIR / (lib+str(sample_freq)))
+        remove_cache(ac.config.cache_dir)
+        
         src.sample_freq = sample_freq
         tc = ac.Cache(source=src)
         ac.tools.return_result(tc, num=1)  # here, the result is cached
@@ -26,10 +33,12 @@ class TestCache:
         nocache_result = ac.tools.return_result(src, num=1)
         assert np.allclose(nocache_result, cached_result)
 
-    @pytest.mark.parametrize('lib, sample_freq', [('pytables', 1), ('h5py', 2)])
+    @pytest.mark.parametrize('lib, sample_freq', [('pytables', 3), ('h5py', 4)])
     def test_cache_spectra(self, lib, sample_freq):
-        remove_cache()
         ac.config.h5library = lib
+        ac.config.cache_dir = str(CACHE_DIR / (lib+str(sample_freq)))
+        remove_cache(ac.config.cache_dir)
+
         src.sample_freq = sample_freq
         fft = ac.RFFT(source=src, block_size=2)
         tc = ac.Cache(source=fft)
