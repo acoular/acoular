@@ -2203,4 +2203,3 @@ class MaskedTimeInOut(MaskedTimeOut):
             DeprecationWarning,
             stacklevel=2,
         )
-

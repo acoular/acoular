@@ -6,7 +6,15 @@ Upcoming Release
     
     **New features:**
         * Sounddevice inputs now allow for user-settable sample rates and precision types
-        * allow more platforms to build the docs files including Linux, MacOS, and Windows 
+        * Block-wise frequency domain processing
+            * Introduces new `acoular.base` module with abstract base classes :class:`~acoular.base.Generator`, :class:`~acoular.base.SpectraGenerator`, :class:`~acoular.base.InOut`, :class:`~acoular.base.TimeOut`
+            * Introduces new module `acoular.fprocess` including new frequency domain processing classes :class:`~acoular.fprocess.RFFT`, :class:`~acoular.fprocess.IRFFT`, :class:`~acoular.fprocess.AutoPowerSpectra` and :class:`~acoular.fprocess.CrossPowerSpectra`
+            * Introduces new module `acoular.process` including the following classes for general purpose (domain invariant) processing: :class:`~acoular.process.Cache`, :class:`~acoular.process.Average`, :class:`~acoular.process.SampleSplitter`
+            * Rename :class:`~acoular.tprocess.MaskedTimeInOut` to :class:`~acoular.tprocess.MaskedTimeOut`
+            * Deprecates: :class:`~acoular.base.TimeInOut`, :class:`~acoular.fprocess.FFTSpectra`, :class:`~acoular.process.TimeAverage`, :class:`~acoular.tprocess.MaskedTimeInOut`, :class:`~acoular.process.TimeCache`
+            * adds unittests `test_process.py`, `test_fprocess.py`
+            * adds documentation example `example_fft.py`
+                * allow more platforms to build the docs files including Linux, MacOS, and Windows 
     
     **Bugfixes**
         * flush file in :class:`~acoular.tprocess.TimeCache` to prevent data loss / corruption
