@@ -16,13 +16,6 @@ ps = ac.PowerSpectra(source=p, block_size=128, window='Hanning', cached=False)
 fft = ac.FFTSpectra(source=p, window='Hanning', block_size=128)
 
 
-class Test_PowerSpectra(unittest.TestCase):
-    def test_calc_csm(self):
-        """test that csm result has not changed over different releases."""
-        test_csm_sum = np.abs(np.imag(ps.csm)).sum() + np.real(ps.csm).sum()
-        self.assertAlmostEqual(test_csm_sum, csm_sum)
-
-
 def create_source(numsamples, sample_freq=64):
     data = ac.WNoiseGenerator(
         sample_freq=sample_freq,
@@ -33,6 +26,13 @@ def create_source(numsamples, sample_freq=64):
         data=data,
         sample_freq=sample_freq,
     )
+
+
+class TestPowerSpectra(unittest.TestCase):
+    def test_calc_csm(self):
+        """test that csm result has not changed over different releases."""
+        test_csm_sum = np.abs(np.imag(ps.csm)).sum() + np.real(ps.csm).sum()
+        self.assertAlmostEqual(test_csm_sum, csm_sum)
 
 
 class TestRFFT:
