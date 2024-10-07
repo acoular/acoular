@@ -6,7 +6,7 @@
 .. autosummary::
     :toctree: generated/
 
-    MaskedTimeInOut
+    MaskedTimeOut
     Trigger
     AngleTracker
     ChannelMixer
@@ -27,6 +27,7 @@
     WriteWAV
     WriteH5
     TimeConvolve
+    MaskedTimeInOut
 """
 
 # imports from other packages
@@ -109,7 +110,7 @@ from .internal import digest, ldigest
 from .microphones import MicGeom
 
 
-class MaskedTimeInOut(TimeOut):
+class MaskedTimeOut(TimeOut):
     """Signal processing block for channel and sample selection.
 
     This class serves as intermediary to define (in)valid
@@ -485,7 +486,7 @@ class Trigger(TimeOut):
         return 0
 
 
-class AngleTracker(MaskedTimeInOut):
+class AngleTracker(MaskedTimeOut):
     """Calculates rotation angle and rpm per sample from a trigger signal
     using spline interpolation in the time domain.
 
@@ -2185,3 +2186,21 @@ def _spectral_sum(out, fdl, kb):
                 out[b, n] += fdl[i, b, n] * kb[i, b, n]
 
     return out
+
+
+class MaskedTimeInOut(MaskedTimeOut):
+    """Signal processing block for channel and sample selection (alias for :class:`~acoular.tprocess.MaskedTimeOut`.).
+
+    .. deprecated:: 24.10
+        Using :class:`~acoular.tprocess.MaskedTimeInOut` is deprecated and will be removed in Acoular
+        version 25.01. Use :class:`~acoular.tprocess.MaskedTimeOut` instead.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        warn(
+            'Using MaskedTimeInOut is deprecated and will be removed in Acoular version 25.01. Use class MaskedTimeOut instead.',
+            DeprecationWarning,
+            stacklevel=2,
+        )
+

@@ -113,6 +113,7 @@ from .tprocess import (
     FiltFreqWeight,
     FiltOctave,
     MaskedTimeInOut,
+    MaskedTimeOut,
     Mixer,
     OctaveFilterBank,
     SpatialInterpolator,
