@@ -292,8 +292,6 @@ class MaskedTimeInOut(TimeInOut):
             i = 0
             fblock = True
             for block in self.source.result(num):
-                if i == 0:  # validate first block
-                    self._validate_result_block(block, time_data=True, freq_data=False)
                 bs = block.shape[0]
                 i += bs
                 if fblock and i >= start:  # first block in the chosen interval
@@ -367,9 +365,7 @@ class ChannelMixer(TimeInOut):
         else:
             weights = 1
 
-        for i, block in enumerate(self.source.result(num)):
-            if i == 0:
-                self._validate_result_block(block, time_data=True, freq_data=True)
+        for block in self.source.result(num):
             yield sum(weights * block, 1, keepdims=True)
 
 
