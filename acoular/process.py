@@ -43,17 +43,17 @@ class LockedGenerator:
 
 
 class Average(InOut):
-    """Calculates the average across time samples or frequency snapshots.
+    """Calculates the average across consecutive time samples or frequency snapshots.
 
-    Depending on the source type, the average is performed differently:
+    The average operation is performed differently depending on the source type.
     If the source is a time domain source (e.g. derived from :class:`~acoular.base.SamplesGenerator`),
     the average is calculated over a certain number of time samples given by :attr:`naverage`.
     If the source is a frequency domain source (e.g. derived from :class:`~acoular.base.SpectraGenerator`),
     the average is calculated over a certain number of snapshots given by :attr:`naverage`.
 
-    Example:
+    Examples
     --------
-        For estimate the RMS of a time signal, the average of the squared signal is calculated:
+        For estimate the RMS of a white noise (time-domain) signal, the average of the squared signal can be calculated:
 
         >>> import acoular as ac
         >>> import numpy as np
@@ -61,11 +61,27 @@ class Average(InOut):
         >>> signal = ac.WNoiseGenerator(sample_freq=51200, numsamples=51200, rms=2.0).signal()
         >>> ts = ac.TimeSamples(data=signal[:, np.newaxis], sample_freq=51200)
         >>> tp = ac.TimePower(source=ts)
-        >>> avg = ac.Average(source=tp, naverage=51200)
+        >>> avg = ac.Average(source=tp, naverage=512)
         >>> mean_squared_value = next(avg.result(num=1))
         >>> rms = np.sqrt(mean_squared_value)[0, 0]
         >>> print(rms)
-        1.9931319970556145
+        1.9985200025816718
+
+        Here, each evaluation of the generator created by the :meth:`result` method of the :class:`Average` object
+        via the :meth:`next` function returns :code:`num=1` average across a snapshot of 512 samples.
+
+        If the source is a frequency domain source, the average is calculated over a certain number of
+        snapshots, defined by :attr:`naverage`.
+
+        >>> fft = ac.RFFT(source=ts, block_size=64)
+        >>> ps = ac.AutoPowerSpectra(source=fft)
+        >>> avg = ac.Average(source=ps, naverage=16)
+        >>> mean_power = next(avg.result(num=1))
+        >>> print(np.sqrt(mean_power.sum()))
+        2.0024960894399295
+
+        Here, the generator created by the :meth:`result` method of the :class:`Average` object
+        returns the average across 16 snapshots in the frequency domain.
 
     """
 
@@ -123,7 +139,35 @@ class Average(InOut):
 
 
 class Cache(InOut):
-    """Caches source signals in cache file."""
+    """Caches source output in cache file.
+
+    This class is used to cache the output of a :class:`acoular.base.Generator` derived source
+    object in a cache file to circumvent time-consuming re-calculation.
+    The cache file is created in the Acoular cache directory.
+
+    Examples
+    --------
+    >>> import acoular as ac
+    >>> import numpy as np
+    >>>
+    >>> ac.config.h5library = 'tables'
+    >>> data = np.random.rand(1024, 1)
+    >>> ts = ac.TimeSamples(data=data, sample_freq=51200)
+    >>> fft = ac.RFFT(source=ts, block_size=1024)
+    >>> cache = ac.Cache(source=fft)  # cache the output of the FFT in cache file
+    >>> for block in cache.result(num=1):  # read the cached data block-wise
+    ...     print(block.shape)
+    [('_cache.h5', 1)]
+    (1, 513)
+
+    The caching behaviour can be controlled by the :class:`~acoular.configuration.Config` instance
+    via the :attr:`~acoular.configuration.Config.global_caching` attribute.
+    To turn off caching, set :attr:`~acoular.configuration.Config.global_caching` to 'none' before
+    running the code.
+
+    >>> ac.config.global_caching = 'none'
+
+    """
 
     # basename for cache
     basename = Property(depends_on='digest')
@@ -157,11 +201,12 @@ class Cache(InOut):
 
     def _write_data_to_cache(self, num):
         nodename = 'tc_' + self.digest
-        self.h5f.create_extendable_array(nodename, (0, self.numchannels), 'float32')
-        ac = self.h5f.get_data_by_reference(nodename)
-        self.h5f.set_node_attribute(ac, 'sample_freq', self.sample_freq)
-        self.h5f.set_node_attribute(ac, 'complete', False)
-        for data in self.source.result(num):
+        for i, data in enumerate(self.source.result(num)):
+            if i == 0:
+                self.h5f.create_extendable_array(nodename, (0, data.shape[1]), data.dtype.name)
+                ac = self.h5f.get_data_by_reference(nodename)
+                self.h5f.set_node_attribute(ac, 'sample_freq', self.sample_freq)
+                self.h5f.set_node_attribute(ac, 'complete', False)
             self.h5f.append_data(ac, data)
             yield data
         self.h5f.set_node_attribute(ac, 'complete', True)
@@ -184,11 +229,12 @@ class Cache(InOut):
             nblocks += 1
             i += num
         self.h5f.remove_data(nodename)
-        self.h5f.create_extendable_array(nodename, (0, self.numchannels), 'float32')
-        ac = self.h5f.get_data_by_reference(nodename)
-        self.h5f.set_node_attribute(ac, 'sample_freq', self.sample_freq)
-        self.h5f.set_node_attribute(ac, 'complete', False)
         for j, data in enumerate(self.source.result(num)):
+            if j == 0:
+                self.h5f.create_extendable_array(nodename, (0, data.shape[1]), data.dtype.name)
+                ac = self.h5f.get_data_by_reference(nodename)
+                self.h5f.set_node_attribute(ac, 'sample_freq', self.sample_freq)
+                self.h5f.set_node_attribute(ac, 'complete', False)
             self.h5f.append_data(ac, data)
             if j >= nblocks:
                 yield data
