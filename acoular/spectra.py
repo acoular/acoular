@@ -130,7 +130,7 @@ class BaseSpectra(HasPrivateTraits):
         return None
 
     # generator that yields the time data blocks for every channel (with optional overlap)
-    def get_source_data(self):
+    def _get_source_data(self):
         bs = self.block_size
         temp = empty((2 * bs, self.numchannels))
         pos = bs
@@ -147,10 +147,7 @@ class BaseSpectra(HasPrivateTraits):
 
 
 class FFTSpectra(BaseSpectra, TimeInOut):
-    """Provides the spectra of multichannel time data.
-
-    Returns Spectra per block over a Generator.
-    """
+    """Provides the Fast Fourier Transform (FFT) of multichannel time data."""
 
     # internal identifier
     digest = Property(depends_on=['source.digest', 'precision', 'block_size', 'window', 'overlap'])
@@ -159,27 +156,33 @@ class FFTSpectra(BaseSpectra, TimeInOut):
     def _get_digest(self):
         return digest(self)
 
-    # generator that yields the fft for every channel
-    def result(self):
-        """Python generator that yields the output block-wise.
+    def result(self, num=1):
+        """Python generator that yields the FFT spectra block-wise.
 
         Parameters
         ----------
         num : integer
-            This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block).
+            This parameter defines the number of the blocks to be yielded
+            per generator call (i.e. the number of FFT spectra given per iteration).
 
         Returns
         -------
-        Samples in blocks of shape (numfreq, :attr:`numchannels`).
+        FFT spectra of shape (num, :attr:`numchannels`, numfreq).
             The last block may be shorter than num.
 
         """
+        numfreq = self.fftfreq().shape[0]
         wind = self.window_(self.block_size)
         weight = sqrt(2) / self.block_size * sqrt(self.block_size / dot(wind, wind)) * wind[:, newaxis]
-        for data in self.get_source_data():
-            ft = fft.rfft(data * weight, None, 0).astype(self.precision)
-            yield ft
+        fftdata = zeros((num, self.numchannels, numfreq), dtype=self.precision)
+        j = 0
+        for i, data in enumerate(self._get_source_data()): # yields one block of time data
+            j = i % num
+            fftdata[j] = fft.rfft(data * weight, None, 0).astype(self.precision).transpose()
+            if j == num - 1:
+                yield fftdata
+        if j < num - 1: # yield remaining fft spectra
+            yield fftdata[: j + 1]
 
 
 class PowerSpectra(BaseSpectra):
@@ -411,7 +414,7 @@ class PowerSpectra(BaseSpectra):
             else:
                 raise ValueError('Calibration data not compatible: %i, %i' % (self.calib.num_mics, t.numchannels))
         # get time data blockwise
-        for data in self.get_source_data():
+        for data in self._get_source_data():
             ft = fft.rfft(data * wind, None, 0).astype(self.precision)
             calcCSM(csm_upper, ft)  # only upper triangular part of matrix is calculated (for speed reasons)
         # create the full csm matrix via transposing and complex conj.
