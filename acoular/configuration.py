@@ -54,7 +54,7 @@ else:
     environ['OPENBLAS_NUM_THREADS'] = '1'
 
 # this loads numpy, so we have to defer loading until OpenBLAS check is done
-from traits.api import Bool, Either, HasStrictTraits, Property, Str, Trait, cached_property
+from traits.api import Bool, Enum, HasStrictTraits, Property, Str, Trait, cached_property
 
 
 class Config(HasStrictTraits):
@@ -97,7 +97,7 @@ class Config(HasStrictTraits):
     #: If 'pytables' can not be imported, 'h5py' is used.
     h5library = Property()
 
-    _h5library = Either('pytables', 'tables', 'h5py', default='pytables')
+    _h5library = Enum('pytables', 'tables', 'h5py')
 
     #: Defines the path to the directory containing Acoulars cache files.
     #: If the specified :attr:`cache_dir` directory does not exist,

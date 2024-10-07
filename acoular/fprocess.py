@@ -17,7 +17,7 @@ from warnings import warn
 
 import numpy as np
 from scipy import fft
-from traits.api import Bool, CArray, Either, Instance, Int, Property, Trait, cached_property
+from traits.api import Bool, CArray, Enum, Instance, Int, Property, Trait, cached_property
 
 from .base import SamplesGenerator, SpectraGenerator, SpectraOut, TimeOut
 from .fastFuncs import calcCSM
@@ -47,7 +47,7 @@ class RFFT(BaseSpectra, SpectraOut):
     #: one-sided spectrum is multiplied by 2.0, except for the DC and Nyquist frequency.
     #: 'amplitude': scales the one-sided spectrum so that the amplitude of discrete tones does not depend
     #: on the block size.
-    scaling = Either('none', 'energy', 'amplitude', default='none')
+    scaling = Enum('none', 'energy', 'amplitude')
 
     #: block size of the FFT. Default is 1024.
     block_size = Property()
@@ -227,9 +227,9 @@ class AutoPowerSpectra(SpectraOut):
     #: Data source; :class:`~acoular.base.SpectraGenerator` or derived object.
     source = Instance(SpectraGenerator)
 
-    #: Scaling method, either None or 'psd' (Power Spectral Density).
+    #: Scaling method, either 'power' or 'psd' (Power Spectral Density).
     #: Only relevant if the source is a :class:`~acoular.fprocess.FreqInOut` object.
-    scaling = Either('power', 'psd', default='power')
+    scaling = Enum('power', 'psd')
 
     #: Determines if the spectra yielded by the source are single-sided spectra.
     single_sided = Bool(True, desc='single sided spectrum')

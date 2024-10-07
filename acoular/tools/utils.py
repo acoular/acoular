@@ -7,7 +7,7 @@
 """
 
 import numpy as np
-from traits.api import Any, Array, Bool, Either, Enum, Int, Property
+from traits.api import Any, Array, Bool, Enum, Int, Property, Union
 
 from acoular.process import InOut
 
@@ -70,16 +70,16 @@ class SamplesBuffer(InOut):
     length = Int(desc='number of samples that fit in the buffer')
 
     #: number of samples per block to obtain from the source. If 'None', use 'num' argument of result method
-    source_num = Either(
+    source_num = Union(
         (None, Int),
-        default=None,
+        default_value=None,
         desc='number of samples to return from the source. If "None", use "num" argument of result method',
     )
 
     #: number of samples to return from the buffer. If 'None', use 'num' argument of result method
-    result_num = Either(
+    result_num = Union(
         (None, Int),
-        default=None,
+        default_value=None,
         desc="number of samples to return from the buffer. If 'None', use 'num' argument of result method",
     )
 
