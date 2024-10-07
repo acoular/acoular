@@ -23,7 +23,7 @@ sine1 = ac.SineGenerator(sample_freq=sample_freq, numsamples=numsamples, freq=10
 sine2 = ac.SineGenerator(sample_freq=sample_freq, numsamples=numsamples, freq=4000, amplitude=0.5)
 noise = ac.WNoiseGenerator(sample_freq=sample_freq, numsamples=numsamples, rms=0.5)
 mixed_signal = (sine1.signal() + sine2.signal() + noise.signal())[:, np.newaxis]
-#mixed_signal = sine1.signal()[:, np.newaxis].copy()
+# mixed_signal = sine1.signal()[:, np.newaxis].copy()
 
 # %%
 # The mixed signal is then used to create a TimeSamples object.
@@ -43,8 +43,8 @@ spec = next(fft.result(num=nfreqs))
 blocksize = fft.get_blocksize(nfreqs)
 time_block = next(ts.result(num=blocksize))
 print("Parseval's theorem:")
-print("signal energy in time domain", np.sum(time_block**2))
-print("signal energy in frequency domain", (1/blocksize*np.sum(spec*spec.conjugate())).real)
+print('signal energy in time domain', np.sum(time_block**2))
+print('signal energy in frequency domain', (1 / blocksize * np.sum(spec * spec.conjugate())).real)
 
 tp = ac.Power(source=fft)  # results in the power spectrum
 spectrogram = ac.tools.return_result(tp, num=nfreqs, concat=False)[:, :, 0]  # power spectra for the first channel
@@ -95,11 +95,10 @@ plt.show()
 # --------------------------------------------------------
 # To calculate the cross-spectral matrix of the signal, we use the :class:`acoular.fprocess.CrossPowerSpectra` class.
 # First, we create a TimeSamples object with two channels.
-#numsamples=sample_freq*5
-#noise = ac.WNoiseGenerator(sample_freq=sample_freq, numsamples=numsamples, rms=1.0).signal()[:, np.newaxis]
+# numsamples=sample_freq*5
+# noise = ac.WNoiseGenerator(sample_freq=sample_freq, numsamples=numsamples, rms=1.0).signal()[:, np.newaxis]
 
-ts = ac.TimeSamples(data=np.concatenate([mixed_signal, 0.5*mixed_signal], axis=1),
-                    sample_freq=sample_freq)
+ts = ac.TimeSamples(data=np.concatenate([mixed_signal, 0.5 * mixed_signal], axis=1), sample_freq=sample_freq)
 
 avg_csm = ts > fft > ac.CrossPowerSpectra() > ac.BlockAverage()
 csm = next(avg_csm.result(num=nfreqs))
@@ -108,10 +107,10 @@ csm = next(avg_csm.result(num=nfreqs))
 csm = csm.reshape(nfreqs, ts.numchannels, ts.numchannels)
 
 # compare with PowerSpectra
-csm_comp = ac.PowerSpectra(source=ts, block_size=(nfreqs-1)*2, cached=False).csm[:,:,:]
+csm_comp = ac.PowerSpectra(source=ts, block_size=(nfreqs - 1) * 2, cached=False).csm[:, :, :]
 
 
-#%%
+# %%
 # compare with PowerSpectra
 plt.figure()
 for i in range(ts.numchannels):
@@ -125,7 +124,6 @@ plt.grid()
 plt.legend()
 plt.semilogx()
 plt.show()
-
 
 
 # %%

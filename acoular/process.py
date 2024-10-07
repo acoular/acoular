@@ -34,7 +34,7 @@ class Power(FreqInOut, TimeInOut):
     source = Either(Instance(FreqInOut), Instance(TimeInOut), desc='data source')
 
     def _fresult(self, num):
-        blocksize = (num -1) * 2
+        blocksize = (num - 1) * 2
         for temp in self.source.result(num):
             yield (temp * temp.conjugate()).real / blocksize
 
