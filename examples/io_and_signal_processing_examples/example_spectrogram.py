@@ -23,7 +23,6 @@ sine1 = ac.SineGenerator(sample_freq=sample_freq, numsamples=numsamples, freq=10
 sine2 = ac.SineGenerator(sample_freq=sample_freq, numsamples=numsamples, freq=4000, amplitude=0.5)
 noise = ac.WNoiseGenerator(sample_freq=sample_freq, numsamples=numsamples, rms=0.5)
 mixed_signal = (sine1.signal() + sine2.signal() + noise.signal())[:, np.newaxis]
-# mixed_signal = sine1.signal()[:, np.newaxis].copy()
 
 # %%
 # The mixed signal is then used to create a TimeSamples object.
@@ -38,7 +37,8 @@ print(ts.numsamples, ts.numchannels)
 # Therefore we want to process the FFT spectra of the signal blockwise.
 # To do so, we use the :class:`acoular.fprocess.FFT` class, which calculates the FFT spectra of the signal blockwise.
 
-fft = ac.RFFT(source=ts)
+fft = ac.RFFT(source=ts)  # results in the amplitude spectra
+
 spec = next(fft.result(num=nfreqs))
 blocksize = fft.get_blocksize(nfreqs)
 time_block = next(ts.result(num=blocksize))
@@ -46,18 +46,19 @@ print("Parseval's theorem:")
 print('signal energy in time domain', np.sum(time_block**2))
 print('signal energy in frequency domain', (1 / blocksize * np.sum(spec * spec.conjugate())).real)
 
-tp = ac.Power(source=fft)  # results in the power spectrum
-spectrogram = ac.tools.return_result(tp, num=nfreqs, concat=False)[:, :, 0]  # power spectra for the first channel
 
 # %%
 # Plot the spectrogram of the signal for different number of averages.
 # Here, we plot the amplitude spectra for each time block.
 import matplotlib.pyplot as plt
 
+fft.norm = 'amplitude'
+spectrogram = ac.tools.return_result(fft, num=nfreqs, concat=False)[:, :, 0]
+
 # plot the power spectrogram
 plt.figure()
 plt.imshow(
-    np.abs(spectrogram.T) / blocksize,
+    np.abs(spectrogram.T),
     origin='lower',
     aspect='auto',
     extent=(0, t_in_s, 0, sample_freq / 2),
@@ -72,6 +73,8 @@ plt.show()
 # ------------------------------------------------
 # To calculate the time averaged power spectrum of the signal, we use the :class:`acoular.process.BlockAverage` class.
 
+fft.norm = None
+tp = ac.Power(source=fft)  # results in the power spectrum
 tavg = ac.BlockAverage(source=tp)  # results in the time averaged power spectrum
 
 # %%
@@ -95,12 +98,14 @@ plt.show()
 # --------------------------------------------------------
 # To calculate the cross-spectral matrix of the signal, we use the :class:`acoular.fprocess.CrossPowerSpectra` class.
 # First, we create a TimeSamples object with two channels.
-# numsamples=sample_freq*5
-# noise = ac.WNoiseGenerator(sample_freq=sample_freq, numsamples=numsamples, rms=1.0).signal()[:, np.newaxis]
+# Then, we calculate the cross-spectral matrix of the signal blockwise. We choose
+# a normalization method of 'psd' (Power Spectral Density) for the cross-spectral matrix.
+
+norm = 'psd'
 
 ts = ac.TimeSamples(data=np.concatenate([mixed_signal, 0.5 * mixed_signal], axis=1), sample_freq=sample_freq)
 
-avg_csm = ts > fft > ac.CrossPowerSpectra() > ac.BlockAverage()
+avg_csm = ts > fft > ac.CrossPowerSpectra(norm=norm) > ac.BlockAverage()
 csm = next(avg_csm.result(num=nfreqs))
 
 # reshape the cross-spectral matrix to a 3D array of shape (numfreq, numchannels, numchannels)
@@ -114,12 +119,12 @@ csm_comp = ac.PowerSpectra(source=ts, block_size=(nfreqs - 1) * 2, cached=False)
 # compare with PowerSpectra
 plt.figure()
 for i in range(ts.numchannels):
-    auto_pow_spectrum = csm_comp[:, i, i].real
+    auto_pow_spectrum = ac.L_p(csm_comp[:, i, i].real)
     plt.plot(fft.fftfreq(numfreq=nfreqs), auto_pow_spectrum, label=f'PowerSpectra Channel {i}')
-    auto_pow_spectrum = csm[:, i, i].real
+    auto_pow_spectrum = ac.L_p(csm[:, i, i].real)
     plt.plot(fft.fftfreq(numfreq=nfreqs), auto_pow_spectrum, label=f'Channel {i}')
 plt.xlabel('Frequency / Hz')
-plt.ylabel('Power Spectrum')
+plt.ylabel('Power Spectrum / dB')
 plt.grid()
 plt.legend()
 plt.semilogx()
