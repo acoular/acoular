@@ -9,7 +9,7 @@ from acoular import (
     ChannelMixer,
     FiltWNoiseGenerator,
     IntegratorSectorTime,
-    MaskedTimeInOut,
+    MaskedTimeOut,
     MaskedTimeSamples,
     MergeGrid,
     MicGeom,
@@ -116,11 +116,11 @@ UNEQUAL_DIGEST_TEST_DICT = {
         'obj.sectors = [Sector()]',
     ),
     # tprocess.py
-    'MaskedTimeInOut.invalid_channels item assignment': (
-        MaskedTimeInOut(invalid_channels=[1]),
+    'MaskedTimeOut.invalid_channels item assignment': (
+        MaskedTimeOut(invalid_channels=[1]),
         'obj.invalid_channels[0] = 0',
     ),
-    'MaskedTimeInOut.invalid_channels list assignment': (MaskedTimeInOut(), 'obj.invalid_channels = [0]'),
+    'MaskedTimeOut.invalid_channels list assignment': (MaskedTimeOut(), 'obj.invalid_channels = [0]'),
     #    "ChannelMixer.weights item assignment" : (ChannelMixer(weights=[[1.,2.,3.]]), "obj.weights[0] = 0."),
     'ChannelMixer.weights new array assignment': (ChannelMixer(weights=[[1.0, 2.0, 3.0]]), 'obj.weights = array([0.])'),
     #    "SpatialInterpolator.Q item assignment": (SpatialInterpolator(), "obj.Q[0] = 0."),

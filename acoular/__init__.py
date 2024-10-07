@@ -7,6 +7,15 @@
 import os
 
 from . import demo, tools
+from .base import (
+    Generator,
+    InOut,
+    SamplesGenerator,
+    SpectraGenerator,
+    SpectraOut,
+    TimeInOut,
+    TimeOut,
+)
 from .calib import Calib
 from .configuration import config
 from .environments import (
@@ -41,6 +50,7 @@ from .fbeamform import (
     SteeringVector,
     integrate,
 )
+from .fprocess import IRFFT, RFFT, AutoPowerSpectra, CrossPowerSpectra, FFTSpectra
 from .grids import (
     CircSector,
     ConvexSector,
@@ -57,6 +67,7 @@ from .grids import (
     Sector,
 )
 from .microphones import MicGeom
+from .process import Average, Cache, SampleSplitter, TimeAverage, TimeCache
 from .sdinput import SoundDeviceSamplesGenerator
 from .signals import (
     FiltWNoiseGenerator,
@@ -80,7 +91,7 @@ from .sources import (
     TimeSamples,
     UncorrelatedNoiseSource,
 )
-from .spectra import BaseSpectra, FFTSpectra, PowerSpectra, PowerSpectraImport, synthetic
+from .spectra import BaseSpectra, PowerSpectra, PowerSpectraImport, synthetic
 from .spectra import PowerSpectra as EigSpectra
 from .tbeamform import (
     BeamformerCleant,
@@ -102,19 +113,15 @@ from .tprocess import (
     FiltFreqWeight,
     FiltOctave,
     MaskedTimeInOut,
+    MaskedTimeOut,
     Mixer,
     OctaveFilterBank,
-    SamplesGenerator,
-    SampleSplitter,
     SpatialInterpolator,
     SpatialInterpolatorConstantRotation,
     SpatialInterpolatorRotation,
-    TimeAverage,
-    TimeCache,
     TimeConvolve,
     TimeCumAverage,
     TimeExpAverage,
-    TimeInOut,
     TimePower,
     TimeReverse,
     Trigger,

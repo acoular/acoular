@@ -4,6 +4,8 @@ from pathlib import Path
 
 import numpy as np
 from acoular import MaskedTimeSamples, MicGeom, PointSource, TimeConvolve, WNoiseGenerator, config, tools
+from acoular.base import *
+from acoular.process import *
 from acoular.tprocess import *
 
 WRITE_NEW_REFERENCE_DATA = False
@@ -20,9 +22,9 @@ t1.invalid_channels = invalid  # use four channels
 
 # these are tested
 test_list = (
-    'TimeInOut()',
+    'TimeOut()',
     'TimePower()',
-    'TimeAverage()',
+    'Average()',
     'TimeCumAverage()',
     'TimeReverse()',
     'Filter()',

@@ -1,14 +1,12 @@
 # ------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
-"""Implements processing in the time domain.
+"""Implements blockwise processing in the time domain.
 
 .. autosummary::
     :toctree: generated/
 
-    SamplesGenerator
-    TimeInOut
-    MaskedTimeInOut
+    MaskedTimeOut
     Trigger
     AngleTracker
     ChannelMixer
@@ -17,7 +15,7 @@
     SpatialInterpolatorConstantRotation
     Mixer
     TimePower
-    TimeAverage
+    TimeCumAverage
     TimeReverse
     Filter
     FilterBank
@@ -26,20 +24,15 @@
     TimeExpAverage
     FiltFreqWeight
     OctaveFilterBank
-    TimeCache
-    TimeCumAverage
     WriteWAV
     WriteH5
-    SampleSplitter
     TimeConvolve
+    MaskedTimeInOut
 """
 
 # imports from other packages
-import threading
 import wave
-from collections import deque
 from datetime import datetime, timezone
-from inspect import currentframe
 from os import path
 from warnings import warn
 
@@ -96,7 +89,6 @@ from traits.api import (
     Dict,
     File,
     Float,
-    HasPrivateTraits,
     Instance,
     Int,
     List,
@@ -109,99 +101,27 @@ from traits.api import (
     on_trait_change,
 )
 
+# acoular imports
+from .base import SamplesGenerator, TimeOut
 from .configuration import config
 from .environments import cartToCyl, cylToCart
-from .h5cache import H5cache
-from .h5files import H5CacheFileBase, _get_h5file_class
-
-# acoular imports
+from .h5files import _get_h5file_class
 from .internal import digest, ldigest
 from .microphones import MicGeom
 
 
-class SamplesGenerator(HasPrivateTraits):
-    """Base class for any generating signal processing block.
-
-    It provides a common interface for all SamplesGenerator classes, which
-    generate an output via the generator :meth:`result`.
-    This class has no real functionality on its own and should not be
-    used directly.
-    """
-
-    #: Sampling frequency of the signal, defaults to 1.0
-    sample_freq = Float(1.0, desc='sampling frequency')
-
-    #: Number of channels
-    numchannels = CLong
-
-    #: Number of samples
-    numsamples = CLong
-
-    # internal identifier
-    digest = Property(depends_on=['sample_freq', 'numchannels', 'numsamples'])
-
-    def _get_digest(self):
-        return digest(self)
-
-    def result(self, num):
-        """Python generator that yields the output block-wise.
-
-        Parameters
-        ----------
-        num : integer
-            This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block)
-
-        Returns
-        -------
-        No output since `SamplesGenerator` only represents a base class to derive
-        other classes from.
-
-        """
-
-
-class TimeInOut(SamplesGenerator):
-    """Base class for any time domain signal processing block,
-    gets samples from :attr:`source` and generates output via the
-    generator :meth:`result`.
-    """
-
-    #: Data source; :class:`~acoular.sources.SamplesGenerator` or derived object.
-    source = Trait(SamplesGenerator)
-
-    #: Sampling frequency of output signal, as given by :attr:`source`.
-    sample_freq = Delegate('source')
-
-    #: Number of channels in output, as given by :attr:`source`.
-    numchannels = Delegate('source')
-
-    #: Number of samples in output, as given by :attr:`source`.
-    numsamples = Delegate('source')
-
-    # internal identifier
-    digest = Property(depends_on=['source.digest'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
-
-    def result(self, num):
-        """Python generator: dummy function, just echoes the output of source,
-        yields samples in blocks of shape (num, :attr:`numchannels`), the last block
-        may be shorter than num.
-        """
-        yield from self.source.result(num)
-
-
-class MaskedTimeInOut(TimeInOut):
+class MaskedTimeOut(TimeOut):
     """Signal processing block for channel and sample selection.
 
     This class serves as intermediary to define (in)valid
     channels and samples for any
     :class:`~acoular.sources.SamplesGenerator` (or derived) object.
-    It gets samples from :attr:`~acoular.tprocess.TimeInOut.source`
+    It gets samples from :attr:`~acoular.base.TimeOut.source`
     and generates output via the generator :meth:`result`.
     """
+
+    #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
+    source = Instance(SamplesGenerator)
 
     #: Index of the first sample to be considered valid.
     start = CLong(0, desc='start of valid samples')
@@ -215,10 +135,10 @@ class MaskedTimeInOut(TimeInOut):
     #: Channel mask to serve as an index for all valid channels, is set automatically.
     channels = Property(depends_on=['invalid_channels', 'source.numchannels'], desc='channel mask')
 
-    #: Number of channels in input, as given by :attr:`~acoular.tprocess.TimeInOut.source`.
+    #: Number of channels in input, as given by :attr:`~acoular.base.TimeOut.source`.
     numchannels_total = Delegate('source', 'numchannels')
 
-    #: Number of samples in input, as given by :attr:`~acoular.tprocess.TimeInOut.source`.
+    #: Number of samples in input, as given by :attr:`~acoular.base.TimeOut.source`.
     numsamples_total = Delegate('source', 'numsamples')
 
     #: Number of valid channels, is set automatically.
@@ -323,10 +243,13 @@ class MaskedTimeInOut(TimeInOut):
                 yield block[:, self.channels]
 
 
-class ChannelMixer(TimeInOut):
+class ChannelMixer(TimeOut):
     """Class for directly mixing the channels of a multi-channel source.
     Outputs a single channel.
     """
+
+    #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
+    source = Instance(SamplesGenerator)
 
     #: Amplitude weight(s) for the channels as array. If not set, all channels are equally weighted.
     weights = CArray(desc='channel weights')
@@ -369,7 +292,7 @@ class ChannelMixer(TimeInOut):
             yield sum(weights * block, 1, keepdims=True)
 
 
-class Trigger(TimeInOut):
+class Trigger(TimeOut):
     """Class for identifying trigger signals.
     Gets samples from :attr:`source` and stores the trigger samples in :meth:`trigger_data`.
 
@@ -383,7 +306,7 @@ class Trigger(TimeInOut):
     vary too much.
     """
 
-    #: Data source; :class:`~acoular.tprocess.SamplesGenerator` or derived object.
+    #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
     source = Instance(SamplesGenerator)
 
     #: Threshold of trigger. Has different meanings for different
@@ -563,16 +486,13 @@ class Trigger(TimeInOut):
         return 0
 
 
-class AngleTracker(MaskedTimeInOut):
+class AngleTracker(MaskedTimeOut):
     """Calculates rotation angle and rpm per sample from a trigger signal
     using spline interpolation in the time domain.
 
     Gets samples from :attr:`trigger` and stores the angle and rpm samples in :meth:`angle` and :meth:`rpm`.
 
     """
-
-    #: Data source; :class:`~acoular.tprocess.SamplesGenerator` or derived object.
-    source = Instance(SamplesGenerator)
 
     #: Trigger data from :class:`acoular.tprocess.Trigger`.
     trigger = Instance(Trigger)
@@ -721,11 +641,14 @@ class AngleTracker(MaskedTimeInOut):
         return (len(peakloc) - 1) / (peakloc[-1] - peakloc[0]) / self.trigger_per_revo * self.source.sample_freq * 60
 
 
-class SpatialInterpolator(TimeInOut):
+class SpatialInterpolator(TimeOut):
     """Base class for spatial interpolation of microphone data.
     Gets samples from :attr:`source` and generates output via the
     generator :meth:`result`.
     """
+
+    #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
+    source = Instance(SamplesGenerator)
 
     #: :class:`~acoular.microphones.MicGeom` object that provides the real microphone locations.
     mics = Instance(MicGeom(), desc='microphone geometry')
@@ -742,9 +665,6 @@ class SpatialInterpolator(TimeInOut):
 
     def _set_mics_virtual(self, mics_virtual):
         self._mics_virtual = mics_virtual
-
-    #: Data source; :class:`~acoular.tprocess.SamplesGenerator` or derived object.
-    source = Instance(SamplesGenerator)
 
     #: Interpolation method in spacial domain, defaults to linear
     #: linear uses numpy linear interpolation
@@ -1317,13 +1237,13 @@ class SpatialInterpolatorConstantRotation(SpatialInterpolator):
             yield interpVal
 
 
-class Mixer(TimeInOut):
+class Mixer(TimeOut):
     """Mixes the signals from several sources."""
 
-    #: Data source; :class:`~acoular.tprocess.SamplesGenerator` object.
+    #: Data source; :class:`~acoular.base.SamplesGenerator` object.
     source = Trait(SamplesGenerator)
 
-    #: List of additional :class:`~acoular.tprocess.SamplesGenerator` objects
+    #: List of additional :class:`~acoular.base.SamplesGenerator` objects
     #: to be mixed.
     sources = List(Instance(SamplesGenerator, ()))
 
@@ -1340,7 +1260,7 @@ class Mixer(TimeInOut):
     sdigest = Str()
 
     @observe('sources.items.digest')
-    def _set_sources_digest(self, event):  # noqa ARG002
+    def _set_sourcesdigest(self, event):  # noqa ARG002
         self.sdigest = ldigest(self.sources)
 
     # internal identifier
@@ -1395,8 +1315,11 @@ class Mixer(TimeInOut):
                 break
 
 
-class TimePower(TimeInOut):
+class TimePower(TimeOut):
     """Calculates time-depended power of the signal."""
+
+    #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
+    source = Instance(SamplesGenerator)
 
     def result(self, num):
         """Python generator that yields the output block-wise.
@@ -1418,63 +1341,11 @@ class TimePower(TimeInOut):
             yield temp * temp
 
 
-class TimeAverage(TimeInOut):
-    """Calculates time-dependent average of the signal."""
-
-    #: Number of samples to average over, defaults to 64.
-    naverage = Int(64, desc='number of samples to average over')
-
-    #: Sampling frequency of the output signal, is set automatically.
-    sample_freq = Property(depends_on='source.sample_freq, naverage')
-
-    #: Number of samples of the output signal, is set automatically.
-    numsamples = Property(depends_on='source.numsamples, naverage')
-
-    # internal identifier
-    digest = Property(depends_on=['source.digest', '__class__', 'naverage'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
-
-    @cached_property
-    def _get_sample_freq(self):
-        if self.source:
-            return 1.0 * self.source.sample_freq / self.naverage
-        return None
-
-    @cached_property
-    def _get_numsamples(self):
-        if self.source:
-            return self.source.numsamples / self.naverage
-        return None
-
-    def result(self, num):
-        """Python generator that yields the output block-wise.
-
-        Parameters
-        ----------
-        num : integer
-            This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block).
-
-        Returns
-        -------
-        Average of the output of source.
-            Yields samples in blocks of shape (num, numchannels).
-            The last block may be shorter than num.
-
-        """
-        nav = self.naverage
-        for temp in self.source.result(num * nav):
-            ns, nc = temp.shape
-            nso = int(ns / nav)
-            if nso > 0:
-                yield temp[: nso * nav].reshape((nso, -1, nc)).mean(axis=1)
-
-
-class TimeCumAverage(TimeInOut):
+class TimeCumAverage(TimeOut):
     """Calculates cumulative average of the signal, useful for Leq."""
+
+    #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
+    source = Instance(SamplesGenerator)
 
     def result(self, num):
         """Python generator that yields the output block-wise.
@@ -1503,8 +1374,11 @@ class TimeCumAverage(TimeInOut):
             yield temp
 
 
-class TimeReverse(TimeInOut):
+class TimeReverse(TimeOut):
     """Calculates the time-reversed signal of a source."""
+
+    #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
+    source = Instance(SamplesGenerator)
 
     def result(self, num):
         """Python generator that yields the output block-wise.
@@ -1535,13 +1409,16 @@ class TimeReverse(TimeInOut):
         yield temp[:nsh]
 
 
-class Filter(TimeInOut):
+class Filter(TimeOut):
     """Abstract base class for IIR filters based on scipy lfilter
     implements a filter with coefficients that may be changed
     during processing.
 
     Should not be instanciated by itself
     """
+
+    #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
+    source = Instance(SamplesGenerator)
 
     #: Filter coefficients
     sos = Property()
@@ -1751,12 +1628,15 @@ class FiltFreqWeight(Filter):
         return tf2sos(b, a)
 
 
-class FilterBank(TimeInOut):
+class FilterBank(TimeOut):
     """Abstract base class for IIR filter banks based on scipy lfilter
     implements a bank of parallel filters.
 
     Should not be instanciated by itself
     """
+
+    #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
+    source = Instance(SamplesGenerator)
 
     #: List of filter coefficients for all filters
     sos = Property()
@@ -1856,137 +1736,13 @@ class OctaveFilterBank(FilterBank):
         return sos
 
 
-class TimeCache(TimeInOut):
-    """Caches time signal in cache file."""
-
-    # basename for cache
-    basename = Property(depends_on='digest')
-
-    # hdf5 cache file
-    h5f = Instance(H5CacheFileBase, transient=True)
-
-    # internal identifier
-    digest = Property(depends_on=['source.digest', '__class__'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
-
-    @cached_property
-    def _get_basename(self):
-        obj = self.source  # start with source
-        basename = 'void'  # if no file source is found
-        while obj:
-            if 'basename' in obj.all_trait_names():  # at original source?
-                basename = obj.basename  # get the name
-                break
-            try:
-                obj = obj.source  # traverse down until original data source
-            except AttributeError:
-                obj = None
-        return basename
-
-    def _pass_data(self, num):
-        yield from self.source.result(num)
-
-    def _write_data_to_cache(self, num):
-        nodename = 'tc_' + self.digest
-        self.h5f.create_extendable_array(nodename, (0, self.numchannels), 'float32')
-        ac = self.h5f.get_data_by_reference(nodename)
-        self.h5f.set_node_attribute(ac, 'sample_freq', self.sample_freq)
-        self.h5f.set_node_attribute(ac, 'complete', False)
-        for data in self.source.result(num):
-            self.h5f.append_data(ac, data)
-            self.h5f.flush()
-            yield data
-        self.h5f.set_node_attribute(ac, 'complete', True)
-
-    def _get_data_from_cache(self, num):
-        nodename = 'tc_' + self.digest
-        ac = self.h5f.get_data_by_reference(nodename)
-        i = 0
-        while i < ac.shape[0]:
-            yield ac[i : i + num]
-            i += num
-
-    def _get_data_from_incomplete_cache(self, num):
-        nodename = 'tc_' + self.digest
-        ac = self.h5f.get_data_by_reference(nodename)
-        i = 0
-        nblocks = 0
-        while i + num <= ac.shape[0]:
-            yield ac[i : i + num]
-            nblocks += 1
-            i += num
-        self.h5f.remove_data(nodename)
-        self.h5f.create_extendable_array(nodename, (0, self.numchannels), 'float32')
-        ac = self.h5f.get_data_by_reference(nodename)
-        self.h5f.set_node_attribute(ac, 'sample_freq', self.sample_freq)
-        self.h5f.set_node_attribute(ac, 'complete', False)
-        for j, data in enumerate(self.source.result(num)):
-            self.h5f.append_data(ac, data)
-            if j >= nblocks:
-                self.h5f.flush()
-                yield data
-        self.h5f.set_node_attribute(ac, 'complete', True)
-
-    # result generator: delivers input, possibly from cache
-    def result(self, num):
-        """Python generator that yields the output from cache block-wise.
-
-        Parameters
-        ----------
-        num : integer
-            This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block).
-
-        Returns
-        -------
-        Samples in blocks of shape (num, numchannels).
-            The last block may be shorter than num.
-            Echos the source output, but reads it from cache
-            when available and prevents unnecassary recalculation.
-
-        """
-        if config.global_caching == 'none':
-            generator = self._pass_data
-        else:
-            nodename = 'tc_' + self.digest
-            H5cache.get_cache_file(self, self.basename)
-            if not self.h5f:
-                generator = self._pass_data
-            elif self.h5f.is_cached(nodename):
-                generator = self._get_data_from_cache
-                if config.global_caching == 'overwrite':
-                    self.h5f.remove_data(nodename)
-                    generator = self._write_data_to_cache
-                elif not self.h5f.get_data_by_reference(nodename).attrs.__contains__('complete'):
-                    if config.global_caching == 'readonly':
-                        generator = self._pass_data
-                    else:
-                        generator = self._get_data_from_incomplete_cache
-                elif not self.h5f.get_data_by_reference(nodename).attrs['complete']:
-                    if config.global_caching == 'readonly':
-                        warn(
-                            "Cache file is incomplete for nodename %s. With config.global_caching='readonly', the cache file will not be used!"
-                            % str(nodename),
-                            Warning,
-                            stacklevel=1,
-                        )
-                        generator = self._pass_data
-                    else:
-                        generator = self._get_data_from_incomplete_cache
-            elif not self.h5f.is_cached(nodename):
-                generator = self._write_data_to_cache
-                if config.global_caching == 'readonly':
-                    generator = self._pass_data
-        yield from generator(num)
-
-
-class WriteWAV(TimeInOut):
+class WriteWAV(TimeOut):
     """Saves time signal from one or more channels as mono/stereo/multi-channel
     `*.wav` file.
     """
+
+    #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
+    source = Instance(SamplesGenerator)
 
     #: Name of the file to be saved. If none is given, the name will be
     #: automatically generated from the sources.
@@ -2050,8 +1806,11 @@ class WriteWAV(TimeInOut):
         wf.close()
 
 
-class WriteH5(TimeInOut):
+class WriteH5(TimeOut):
     """Saves time signal as `*.h5` file."""
+
+    #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
+    source = Instance(SamplesGenerator)
 
     #: Name of the file to be saved. If none is given, the name will be
     #: automatically generated from a time stamp.
@@ -2153,159 +1912,14 @@ class WriteH5(TimeInOut):
         f5h.close()
 
 
-class LockedGenerator:
-    """Creates a Thread Safe Iterator.
-    Takes an iterator/generator and makes it thread-safe by
-    serializing call to the `next` method of given iterator/generator.
-    """
-
-    def __init__(self, it):
-        self.it = it
-        self.lock = threading.Lock()
-
-    def __next__(self):  # this function implementation is not python 2 compatible!
-        with self.lock:
-            return self.it.__next__()
-
-
-class SampleSplitter(TimeInOut):
-    """Distributes data blocks from source to several following objects.
-    A separate block buffer is created for each registered object in
-    (:attr:`block_buffer`) .
-    """
-
-    #: dictionary with block buffers (dict values) of registered objects (dict
-    #: keys).
-    block_buffer = Dict(key_trait=Instance(SamplesGenerator))
-
-    #: max elements/blocks in block buffers.
-    buffer_size = Int(100)
-
-    #: defines behaviour in case of block_buffer overflow. Can be set individually
-    #: for each registered object.
-    #:
-    #: * 'error': an IOError is thrown by the class
-    #: * 'warning': a warning is displayed. Possibly leads to lost blocks of data
-    #: * 'none': nothing happens. Possibly leads to lost blocks of data
-    buffer_overflow_treatment = Dict(
-        key_trait=Instance(SamplesGenerator),
-        value_trait=Trait('error', 'warning', 'none'),
-        desc='defines buffer overflow behaviour.',
-    )
-
-    # shadow trait to monitor if source deliver samples or is empty
-    _source_generator_exist = Bool(False)
-
-    # shadow trait to monitor if buffer of objects with overflow treatment = 'error'
-    # or warning is overfilled. Error will be raised in all threads.
-    _buffer_overflow = Bool(False)
-
-    # Helper Trait holds source generator
-    _source_generator = Trait()
-
-    def _create_block_buffer(self, obj):
-        self.block_buffer[obj] = deque([], maxlen=self.buffer_size)
-
-    def _create_buffer_overflow_treatment(self, obj):
-        self.buffer_overflow_treatment[obj] = 'error'
-
-    def _clear_block_buffer(self, obj):
-        self.block_buffer[obj].clear()
-
-    def _remove_block_buffer(self, obj):
-        del self.block_buffer[obj]
-
-    def _remove_buffer_overflow_treatment(self, obj):
-        del self.buffer_overflow_treatment[obj]
-
-    def _assert_obj_registered(self, obj):
-        if obj not in self.block_buffer:
-            raise OSError('calling object %s is not registered.' % obj)
-
-    def _get_objs_to_inspect(self):
-        return [obj for obj in self.buffer_overflow_treatment if self.buffer_overflow_treatment[obj] != 'none']
-
-    def _inspect_buffer_levels(self, inspect_objs):
-        for obj in inspect_objs:
-            if len(self.block_buffer[obj]) == self.buffer_size:
-                if self.buffer_overflow_treatment[obj] == 'error':
-                    self._buffer_overflow = True
-                elif self.buffer_overflow_treatment[obj] == 'warning':
-                    warn('overfilled buffer for object: %s data will get lost' % obj, UserWarning, stacklevel=1)
-
-    def _create_source_generator(self, num):
-        for obj in self.block_buffer:
-            self._clear_block_buffer(obj)
-        self._buffer_overflow = False  # reset overflow bool
-        self._source_generator = LockedGenerator(self.source.result(num))
-        self._source_generator_exist = True  # indicates full generator
-
-    def _fill_block_buffers(self):
-        next_block = next(self._source_generator)
-        [self.block_buffer[obj].appendleft(next_block) for obj in self.block_buffer]
-
-    @on_trait_change('buffer_size')
-    def _change_buffer_size(self):  #
-        for obj in self.block_buffer:
-            self._remove_block_buffer(obj)
-            self._create_block_buffer(obj)
-
-    def register_object(self, *objects_to_register):
-        """Function that can be used to register objects that receive blocks from this class."""
-        for obj in objects_to_register:
-            if obj not in self.block_buffer:
-                self._create_block_buffer(obj)
-                self._create_buffer_overflow_treatment(obj)
-
-    def remove_object(self, *objects_to_remove):
-        """Function that can be used to remove registered objects."""
-        for obj in objects_to_remove:
-            self._remove_block_buffer(obj)
-            self._remove_buffer_overflow_treatment(obj)
-
-    def result(self, num):
-        """Python generator that yields the output block-wise from block-buffer.
-
-        Parameters
-        ----------
-        num : integer
-            This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block).
-
-        Returns
-        -------
-        Samples in blocks of shape (num, numchannels).
-            Delivers a block of samples to the calling object.
-            The last block may be shorter than num.
-
-        """
-        calling_obj = currentframe().f_back.f_locals['self']
-        self._assert_obj_registered(calling_obj)
-        objs_to_inspect = self._get_objs_to_inspect()
-
-        if not self._source_generator_exist:
-            self._create_source_generator(num)
-
-        while not self._buffer_overflow:
-            if self.block_buffer[calling_obj]:
-                yield self.block_buffer[calling_obj].pop()
-            else:
-                self._inspect_buffer_levels(objs_to_inspect)
-                try:
-                    self._fill_block_buffers()
-                except StopIteration:
-                    self._source_generator_exist = False
-                    return
-        else:
-            msg = 'Maximum size of block buffer is reached!'
-            raise OSError(msg)
-
-
-class TimeConvolve(TimeInOut):
+class TimeConvolve(TimeOut):
     """Uniformly partitioned overlap-save method (UPOLS) for fast convolution in the frequency domain.
 
     See :cite:`Wefers2015` for details.
     """
+
+    #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
+    source = Instance(SamplesGenerator)
 
     #: Convolution kernel in the time domain.
     #: The second dimension of the kernel array has to be either 1 or match :attr:`~SamplesGenerator.numchannels`.
@@ -2445,3 +2059,20 @@ def _spectral_sum(out, fdl, kb):
                 out[b, n] += fdl[i, b, n] * kb[i, b, n]
 
     return out
+
+
+class MaskedTimeInOut(MaskedTimeOut):
+    """Signal processing block for channel and sample selection (alias for :class:`~acoular.tprocess.MaskedTimeOut`.).
+
+    .. deprecated:: 24.10
+        Using :class:`~acoular.tprocess.MaskedTimeInOut` is deprecated and will be removed in Acoular
+        version 25.01. Use :class:`~acoular.tprocess.MaskedTimeOut` instead.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        warn(
+            'Using MaskedTimeInOut is deprecated and will be removed in Acoular version 25.01. Use class MaskedTimeOut instead.',
+            DeprecationWarning,
+            stacklevel=2,
+        )

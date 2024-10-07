@@ -7,12 +7,12 @@
 """
 
 import numpy as np
-from traits.api import Any, Array, Bool, Either, Enum, Int, Property
+from traits.api import Any, Array, Bool, Enum, Int, Property, Union
 
-from acoular.tprocess import TimeInOut
+from acoular.process import InOut
 
 
-class SamplesBuffer(TimeInOut):
+class SamplesBuffer(InOut):
     """Handles buffering of samples from a source.
 
     This class is used to buffer samples from a source and provide them in blocks
@@ -70,16 +70,18 @@ class SamplesBuffer(TimeInOut):
     length = Int(desc='number of samples that fit in the buffer')
 
     #: number of samples per block to obtain from the source. If 'None', use 'num' argument of result method
-    source_num = Either(
-        (None, Int),
-        default=None,
+    source_num = Union(
+        None,
+        Int(),
+        default_value=None,
         desc='number of samples to return from the source. If "None", use "num" argument of result method',
     )
 
     #: number of samples to return from the buffer. If 'None', use 'num' argument of result method
-    result_num = Either(
-        (None, Int),
-        default=None,
+    result_num = Union(
+        None,
+        Int(),
+        default_value=None,
         desc="number of samples to return from the buffer. If 'None', use 'num' argument of result method",
     )
 

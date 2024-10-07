@@ -76,6 +76,8 @@ from traits.api import (
     on_trait_change,
 )
 
+from .base import SamplesGenerator
+
 # acoular imports
 from .calib import Calib
 from .environments import Environment
@@ -83,7 +85,7 @@ from .h5files import H5FileBase, _get_h5file_class
 from .internal import digest, ldigest
 from .microphones import MicGeom
 from .signals import SignalGenerator
-from .tprocess import SamplesGenerator, TimeConvolve
+from .tprocess import TimeConvolve
 from .trajectory import Trajectory
 
 
@@ -252,7 +254,9 @@ class TimeSamples(SamplesGenerator):
     _datachecksum = Property()
 
     # internal identifier
-    digest = Property(depends_on=['basename', 'calib.digest', '_datachecksum'])
+    digest = Property(
+        depends_on=['basename', 'calib.digest', '_datachecksum', 'sample_freq', 'numchannels', 'numsamples']
+    )
 
     def _get__datachecksum(self):
         return self.data[0, :].sum()
@@ -1471,7 +1475,7 @@ class UncorrelatedNoiseSource(SamplesGenerator):
 class SourceMixer(SamplesGenerator):
     """Mixes the signals from several sources."""
 
-    #: List of :class:`~acoular.tprocess.SamplesGenerator` objects
+    #: List of :class:`~acoular.base.SamplesGenerator` objects
     #: to be mixed.
     sources = List(Instance(SamplesGenerator, ()))
 

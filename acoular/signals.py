@@ -23,10 +23,9 @@ from numpy.random import RandomState
 from scipy.signal import resample, sosfilt, tf2sos
 from traits.api import Bool, CArray, CLong, Delegate, Float, HasPrivateTraits, Int, Property, Trait, cached_property
 
-from .internal import digest
-
 # acoular imports
-from .tprocess import SamplesGenerator
+from .base import SamplesGenerator
+from .internal import digest
 
 
 class SignalGenerator(HasPrivateTraits):
@@ -280,7 +279,7 @@ class SineGenerator(SignalGenerator):
 
 
 class GenericSignalGenerator(SignalGenerator):
-    """Generate signal from output of :class:`~acoular.tprocess.SamplesGenerator` object.
+    """Generate signal from output of :class:`~acoular.base.SamplesGenerator` object.
 
     This class can be used to inject arbitrary signals into Acoular processing
     chains. For example, it can be used to read signals from a HDF5 file or create any signal
@@ -296,7 +295,7 @@ class GenericSignalGenerator(SignalGenerator):
 
     """
 
-    #: Data source; :class:`~acoular.tprocess.SamplesGenerator` or derived object.
+    #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
     source = Trait(SamplesGenerator)
 
     #: Sampling frequency of output signal, as given by :attr:`source`.

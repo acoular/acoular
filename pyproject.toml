@@ -71,6 +71,7 @@ tests = [
     "pytest-cov",
     "sounddevice",
     "traitsui",
+    "h5py",
 ]
 
 dev = [
