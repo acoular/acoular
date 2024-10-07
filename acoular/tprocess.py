@@ -185,6 +185,17 @@ class TimeInOut(SamplesGenerator):
     def _get_digest(self):
         return digest(self)
 
+    def __gt__(self, receiver):
+        if isinstance(receiver, (TimeInOut)):
+            receiver.source = self
+            return receiver
+        msg = f"Receiving object {receiver.__class__} must be derived from TimeInOut or FreqInOut."
+        raise TypeError(msg)
+
+    def __lt__(self, source):
+        self.source = source
+        return self
+
     def result(self, num):
         """Python generator: dummy function, just echoes the output of source,
         yields samples in blocks of shape (num, :attr:`numchannels`), the last block
