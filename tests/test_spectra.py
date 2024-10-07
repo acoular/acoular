@@ -4,17 +4,6 @@ import acoular as ac
 import numpy as np
 import pytest
 
-rng = np.random.RandomState(2)
-# test array
-# np.abs(np.imag(ps.csm)).sum() + np.real(ps.csm).sum()
-csm_sum = 0.5613882842200368
-
-mg = ac.MicGeom(mpos_tot=rng.normal(0, 1, 3 * 2).reshape(3, 2))
-sig = ac.WNoiseGenerator(seed=1, numsamples=1010, sample_freq=1000)
-p = ac.PointSource(signal=sig, loc=(0, 0, 0), mics=mg)
-ps = ac.PowerSpectra(source=p, block_size=128, window='Hanning', cached=False)
-fft = ac.FFTSpectra(source=p, window='Hanning', block_size=128)
-
 
 def create_source(numsamples, sample_freq=64):
     data = ac.WNoiseGenerator(
@@ -31,6 +20,9 @@ def create_source(numsamples, sample_freq=64):
 class TestPowerSpectra(unittest.TestCase):
     def test_calc_csm(self):
         """test that csm result has not changed over different releases."""
+        csm_sum = 0.8815407250342017
+        source = create_source(numsamples=128)
+        ps = ac.PowerSpectra(source=source, block_size=128, window='Hanning', cached=False)
         test_csm_sum = np.abs(np.imag(ps.csm)).sum() + np.real(ps.csm).sum()
         self.assertAlmostEqual(test_csm_sum, csm_sum)
 
