@@ -17,7 +17,7 @@ from warnings import warn
 
 import numpy as np
 from scipy import fft
-from traits.api import Bool, CArray, Enum, Instance, Int, Property, Trait, cached_property, Union
+from traits.api import Bool, CArray, Enum, Instance, Int, Property, Trait, Union, cached_property
 
 from .base import SamplesGenerator, SpectraGenerator, SpectraOut, TimeOut
 from .fastFuncs import calcCSM
@@ -40,10 +40,7 @@ class RFFT(BaseSpectra, SpectraOut):
     #: Number of workers to use for the FFT calculation. If negative values are used,
     #: all available logical CPUs will be considered (``scipy.fft.rfft`` implementation wraps around from ``os.cpu_count()``).
     #: Default is `None` (handled by scipy)
-    workers = Union(
-        Int(), None,
-        default_value=None,
-        desc='number of workers to use')
+    workers = Union(Int(), None, default_value=None, desc='number of workers to use')
 
     #: Scaling method, either 'amplitude', 'energy' or :code:`none`.
     #: Default is :code:`none`.
@@ -158,10 +155,7 @@ class IRFFT(TimeOut):
     #: Number of workers to use for the FFT calculation. If negative values are used,
     #: all available logical CPUs will be considered (``scipy.fft.rfft`` implementation wraps around from ``os.cpu_count()``).
     #: Default is `None` (handled by scipy)
-    workers = Union(
-        Int(), None,
-        default_value=None,
-        desc='number of workers to use')
+    workers = Union(Int(), None, default_value=None, desc='number of workers to use')
 
     #: The floating-number-precision of the resulting time signals, corresponding to numpy dtypes.
     #: Default is 64 bit.

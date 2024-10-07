@@ -71,14 +71,16 @@ class SamplesBuffer(InOut):
 
     #: number of samples per block to obtain from the source. If 'None', use 'num' argument of result method
     source_num = Union(
-        None, Int(),
+        None,
+        Int(),
         default_value=None,
         desc='number of samples to return from the source. If "None", use "num" argument of result method',
     )
 
     #: number of samples to return from the buffer. If 'None', use 'num' argument of result method
     result_num = Union(
-        None, Int(),
+        None,
+        Int(),
         default_value=None,
         desc="number of samples to return from the buffer. If 'None', use 'num' argument of result method",
     )
