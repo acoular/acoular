@@ -22,7 +22,7 @@ from numpy.ma import masked_where
 from acoular.spectra import synthetic
 
 
-def return_result(source, nmax=-1, num=128):
+def return_result(source, nmax=-1, num=128, concat=True):
     """Collects the output from a
     :meth:`SamplesGenerator.result()<acoular.tprocess.SamplesGenerator.result>`
     generator and returns an assembled array with all the data.
@@ -41,16 +41,22 @@ def return_result(source, nmax=-1, num=128):
 
     Returns
     -------
-    array of floats (number of samples, source.numchannels)
-        Array that holds all the data.
-
+    numpy.ndarray
+        Array of floats that hold the data. If :code:`concat` is :code:`True`
+        the resulting blocks are concatenated along the zero axis and the resulting
+        shape is (number of samples, source.numchannels). If :code:`concat` is :code:`False`,
+        the shape is (number of blocks, num, source.numchannels).
     """
     resulter = (_.copy() for _ in source.result(num))
 
     if nmax > 0:
         nblocks = (nmax - 1) // num + 1
-        return concatenate([res for _, res in zip(range(nblocks), resulter)])[:nmax]
-    return concatenate(list(resulter))
+        if concat:
+            return concatenate([res for _, res in zip(range(nblocks), resulter)])[:nmax]
+        return array([res for _, res in zip(range(nblocks), resulter)])
+    if concat:
+        return concatenate(list(resulter))
+    return array(list(resulter))
 
 
 def barspectrum(data, fftfreqs, num=3, bar=True, xoffset=0.0):

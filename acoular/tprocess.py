@@ -181,32 +181,6 @@ class TimeInOut(SamplesGenerator):
     # internal identifier
     digest = Property(depends_on=['source.digest'])
 
-    def _validate_result_block(self, block, time_data=True, freq_data=False):
-        """Internal helper function to validate the source result block.
-
-        Frequency domain data blocks are of shape (num, numchannels, numfreqs), while time domain
-        data blocks are of shape (num, numchannels). The number of dimensions indicates
-        the type of data.
-        This method handles the validation of a `data` block yielded by the result
-        :meth:`result` method. It checks the dimensions of the block and raises
-        an error if the block has the wrong dimensions / comes from the wrong domain.
-        """
-        if not time_data and block.ndim == 2:  # probably source yields time domain data
-            msg = (f'{self.source.__class__.__name__} yields data with 2 dimensions. '
-                f'{self.__class__.__name__} does not support time domain data to be processed.'
-                )
-            raise NotImplementedError(msg)
-        if not freq_data and block.ndim == 3:  # probably source yields frequency domain data
-            msg = (f'{self.source.__class__.__name__} yields data with 3 dimensions. '
-                f'{self.__class__.__name__} does not support frequency domain data to be processed.'
-                )
-            raise NotImplementedError(msg)
-        expected_dims = [2,3]
-        if block.ndim not in expected_dims:
-            msg = (f'{self.source.__class__.__name__} yields data with {block.ndim} dimensions, '
-                f'but {self.__class__.__name__} expects on of {expected_dims}.')
-            raise ValueError(msg)
-
     @cached_property
     def _get_digest(self):
         return digest(self)
@@ -1445,7 +1419,7 @@ class TimePower(TimeInOut):
 
         """
         for temp in self.source.result(num):
-            yield temp * temp.conjugate()
+            yield temp * temp
 
 
 class TimeAverage(TimeInOut):
@@ -1497,15 +1471,10 @@ class TimeAverage(TimeInOut):
         """
         nav = self.naverage
         for temp in self.source.result(num * nav):
-            ns, nc = temp.shape[:2]
+            ns, nc = temp.shape
             nso = int(ns / nav)
-            if temp.ndim ==3:
-                nf = temp.shape[2]
-                oshape = (nso, -1, nc, nf)
-            else:
-                oshape = (nso, -1, nc)
             if nso > 0:
-                yield temp[: nso * nav].reshape(oshape).mean(axis=1)
+                yield temp[: nso * nav].reshape((nso, -1, nc)).mean(axis=1)
 
 
 class TimeCumAverage(TimeInOut):
