@@ -5,7 +5,6 @@ import acoular as ac
 import numpy as np
 import pytest
 
-src = ac.TimeSamples(data=np.random.random((10, 2)))
 CACHE_DIR = Path(ac.config.cache_dir).absolute()
 
 
@@ -21,12 +20,15 @@ class TestCache:
     To allow concurrent testing without writing interference, the cache_dir is set to a different directories.
     """
 
+    def create_source(self):
+        return ac.TimeSamples(data=np.random.random((10, 2)))
+
     @pytest.mark.parametrize('lib, sample_freq', [('pytables', 1), ('h5py', 2)])
     def test_cache_time(self, lib, sample_freq):
         ac.config.h5library = lib
         ac.config.cache_dir = str(CACHE_DIR / (lib + str(sample_freq)))
         remove_cache(ac.config.cache_dir)
-
+        src = self.create_source()
         src.sample_freq = sample_freq
         tc = ac.Cache(source=src)
         ac.tools.return_result(tc, num=1)  # here, the result is cached
@@ -39,7 +41,7 @@ class TestCache:
         ac.config.h5library = lib
         ac.config.cache_dir = str(CACHE_DIR / (lib + str(sample_freq)))
         remove_cache(ac.config.cache_dir)
-
+        src = self.create_source()
         src.sample_freq = sample_freq
         fft = ac.RFFT(source=src, block_size=2)
         tc = ac.Cache(source=fft)
