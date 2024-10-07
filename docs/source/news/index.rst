@@ -122,7 +122,7 @@ Upcoming Release
     * Improved ray casting implementation for :class:`~acoular.environments.GeneralFlowEnvironment`
     * Improved handling of spectra calculation:
         * New base class :class:`~acoular.spectra.BaseSpectra`
-        * New class :class:`~acoular.spectra.FFTSpectra` for time-frequency analysis
+        * New class :class:`~acoular.fprocess.FFTSpectra` for time-frequency analysis
         * New class :class:`~acoular.spectra.PowerSpectraImport` for cross spectral matrix import
     * :class:`~acoular.microphones.MicGeom` now has an aperture trait
     * Tests are improved

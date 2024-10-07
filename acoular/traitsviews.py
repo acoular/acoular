@@ -30,7 +30,7 @@ from .microphones import MicGeom
 from .sources import MaskedTimeSamples, SourceMixer, TimeSamples
 from .spectra import PowerSpectra
 from .tbeamform import BeamformerTime, BeamformerTimeSq, BeamformerTimeSqTraj, BeamformerTimeTraj, IntegratorSectorTime
-from .tprocess import FiltFiltOctave, TimeAverage, TimeInOut, WriteH5, WriteWAV
+from .tprocess import FiltFiltOctave, InTimeOut, TimeAverage, WriteH5, WriteWAV
 from .trajectory import Trajectory
 
 MicGeom.class_trait_view(
@@ -236,7 +236,7 @@ RotatingFlow.class_trait_view(
     ),
 )
 
-TimeInOut.class_trait_view(
+InTimeOut.class_trait_view(
     'traits_view',
     View(
         Item('source', style='custom'),

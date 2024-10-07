@@ -11,11 +11,13 @@ The following modules are part of Acoular:
     :toctree: generated/
     :recursive:
 
+    base
     calib
     configuration
     demo
     environments
     fbeamform
+    fprocess
     grids
     microphones
     sdinput

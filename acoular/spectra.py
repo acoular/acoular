@@ -7,7 +7,6 @@
     :toctree: generated/
 
     BaseSpectra
-    FFTSpectra
     PowerSpectra
     synthetic
     PowerSpectraImport
@@ -33,7 +32,6 @@ from numpy import (
     ones,
     real,
     searchsorted,
-    sqrt,
     sum,
     zeros,
     zeros_like,
@@ -54,13 +52,13 @@ from traits.api import (
     property_depends_on,
 )
 
+from .base import SamplesGenerator
 from .calib import Calib
 from .configuration import config
 from .fastFuncs import calcCSM
 from .h5cache import H5cache
 from .h5files import H5CacheFileBase
 from .internal import digest
-from .tprocess import SamplesGenerator, TimeInOut
 
 
 class BaseSpectra(HasPrivateTraits):
@@ -105,8 +103,8 @@ class BaseSpectra(HasPrivateTraits):
         desc='number of samples per FFT block',
     )
 
-    #: The floating-number-precision of entries of csm, eigenvalues and
-    #: eigenvectors, corresponding to numpy dtypes. Default is 64 bit.
+    #: The floating-number-precision of the resulting spectra, corresponding to numpy dtypes.
+    #: Default is 'complex128'.
     precision = Trait('complex128', 'complex64', desc='precision of the fft')
 
     # internal identifier
@@ -146,42 +144,6 @@ class BaseSpectra(HasPrivateTraits):
                 pos -= bs
 
 
-class FFTSpectra(BaseSpectra, TimeInOut):
-    """Provides the spectra of multichannel time data.
-
-    Returns Spectra per block over a Generator.
-    """
-
-    # internal identifier
-    digest = Property(depends_on=['source.digest', 'precision', 'block_size', 'window', 'overlap'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
-
-    # generator that yields the fft for every channel
-    def result(self):
-        """Python generator that yields the output block-wise.
-
-        Parameters
-        ----------
-        num : integer
-            This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block).
-
-        Returns
-        -------
-        Samples in blocks of shape (numfreq, :attr:`numchannels`).
-            The last block may be shorter than num.
-
-        """
-        wind = self.window_(self.block_size)
-        weight = sqrt(2) / self.block_size * sqrt(self.block_size / dot(wind, wind)) * wind[:, newaxis]
-        for data in self._get_source_data():
-            ft = fft.rfft(data * weight, None, 0).astype(self.precision)
-            yield ft
-
-
 class PowerSpectra(BaseSpectra):
     """Provides the cross spectral matrix of multichannel time data
      and its eigen-decomposition.
@@ -206,7 +168,7 @@ class PowerSpectra(BaseSpectra):
     #: Data source; :class:`~acoular.sources.SamplesGenerator` or derived object.
     source = Property(_source, desc='time data object')
 
-    #: The :class:`~acoular.tprocess.SamplesGenerator` object that provides the data.
+    #: The :class:`~acoular.base.SamplesGenerator` object that provides the data.
     time_data = Property(
         _source,
         desc='deprecated attribute holding the time data object. Use PowerSpectra.source instead!',
@@ -613,7 +575,7 @@ def synthetic(data, freqs, f, num=3):
         each grid point (the sum of all values that are contained in the band).
         Note that the frequency resolution and therefore the bandwidth
         represented by a single frequency line depends on
-        the :attr:`sampling frequency<acoular.tprocess.SamplesGenerator.sample_freq>`
+        the :attr:`sampling frequency<acoular.base.SamplesGenerator.sample_freq>`
         and used :attr:`FFT block size<acoular.spectra.PowerSpectra.block_size>`.
 
     """

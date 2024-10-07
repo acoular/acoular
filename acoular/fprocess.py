@@ -6,184 +6,192 @@
 .. autosummary::
     :toctree: generated/
 
-    FreqGenerator
-    FreqInOut
+    FFTSpectra
     RFFT
     IRFFT
-
+    AutoPowerSpectra
+    CrossPowerSpectra
 """
 
+import contextlib
 import multiprocessing
 
 import numpy as np
 from scipy import fft
-from traits.api import CLong, Delegate, Either, Float, HasPrivateTraits, Int, Property, Trait, cached_property
+from traits.api import Bool, CArray, Either, Instance, Int, Property, Trait, cached_property
 
+from .base import SpectraGenerator, SpectraInSpectraOut, SpectraInTimeOut, TimeInSpectraOut
 from .fastFuncs import calcCSM
 from .internal import digest
-from .tprocess import SamplesGenerator, TimeInOut
+from .spectra import BaseSpectra
 
 CPU_COUNT = multiprocessing.cpu_count()
 
 
-class FreqGenerator(HasPrivateTraits):
-    """Base class for any generating signal processing block in frequency domain.
-
-    It provides a common interface for all FreqGenerator classes, which
-    generate an output via the generator :meth:`result`.
-    This class has no real functionality on its own and should not be
-    used directly.
-    """
-
-    #: Sampling frequency of the signal, defaults to 1.0
-    sample_freq = Float(1.0, desc='sampling frequency')
-
-    #: Number of channels
-    numchannels = CLong
-
-    #: Number of samples
-    numsamples = CLong
-
-    # internal identifier
-    digest = Property(depends_on=['sample_freq', 'numchannels', 'numsamples'])
-
-    def _get_digest(self):
-        return digest(self)
-
-    def result(self, num):
-        """Python generator that yields the output block-wise.
-
-        Parameters
-        ----------
-        num : integer
-            This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block)
-
-        Yields
-        ------
-        No output since `SamplesGenerator` only represents a base class to derive
-        other classes from.
-        """
-
-
-class FreqInOut(FreqGenerator):
-    """Base class for any frequency domain signal processing block,
-    gets a number pf frequencies from :attr:`source` and generates output via the
-    generator :meth:`result`.
-    """
-
-    #: Data source; :class:`~acoular.sources.SamplesGenerator` or derived object.
-    source = Trait(FreqGenerator)
-
-    #: Sampling frequency of output signal, as given by :attr:`source`.
-    sample_freq = Delegate('source')
-
-    #: Number of channels in output, as given by :attr:`source`.
-    numchannels = Delegate('source')
-
-    #: Number of samples in output, as given by :attr:`source`.
-    numsamples = Delegate('source')
-
-    # internal identifier
-    digest = Property(depends_on=['source.digest'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
-
-    def __gt__(self, receiver):
-        if isinstance(receiver, (FreqInOut)):
-            receiver.source = self
-            return receiver
-        msg = f'Receiving object {receiver.__class__} must be derived from TimeInOut or FreqInOut.'
-        raise TypeError(msg)
-
-    def __lt__(self, source):
-        self.source = source
-        return self
-
-    def result(self, num):
-        """Python generator: dummy function, just echoes the output of source.
-
-        Yields
-        ------
-        numpy.ndarray
-            blocks of shape (num, :attr:`numchannels`),
-            whereby num is the number of frequencies.
-        """
-        yield from self.source.result(num)
-
-
-class RFFT(FreqInOut):
-    """Provides the Fast Fourier Transform (FFT) of multichannel time data."""
-
-    source = Trait(SamplesGenerator)
-
-    # internal identifier
-    digest = Property(depends_on=['source.digest'])
+class FFTSpectra(BaseSpectra, TimeInSpectraOut):
+    """Provides the one-sided Fast Fourier Transform (FFT) for real-valued multichannel time data."""
 
     #: Number of workers to use for the FFT calculation
     workers = Int(CPU_COUNT, desc='number of workers to use')
 
-    #: TODO: should implement different normalization methods
-    norm = Either(None, 'amplitude')
+    #: Scaling method, either 'amplitude', 'energy' or :code:`none`.
+    #: Default is :code:`none`.
+    #: 'energy': compensates for the energy loss due to truncation of the FFT result. The resulting
+    #: one-sided spectrum is multiplied by 2.0, except for the DC and Nyquist frequency.
+    #: 'amplitude': scales the one-sided spectrum so that the amplitude of discrete tones does not depend
+    #: on the block size.
+    scaling = Either('none', 'energy', 'amplitude', default='none')
 
-    def get_blocksize(self, numfreq):
-        return (numfreq - 1) * 2 if numfreq % 2 != 0 else numfreq * 2 - 1
+    #: block size of the FFT. Default is 1024.
+    block_size = Property()
 
-    def fftfreq(self, numfreq):
-        """Return the Discrete Fourier Transform sample frequencies.
+    #: Number of frequencies in the output.
+    numfreqs = Property(depends_on='_block_size')
 
-        Returns
-        -------
-        f : numpy.ndarray
-            Array of length :code:`numfreq` containing the sample frequencies.
+    #: 1-D array of FFT sample frequencies.
+    freqs = Property()
 
-        """
-        blocksize = self.get_blocksize(numfreq)
-        return abs(fft.fftfreq(blocksize, 1.0 / self.sample_freq)[: int(blocksize / 2 + 1)])
+    _block_size = Int(1024, desc='block size of the FFT')
+
+    # internal identifier
+    digest = Property(depends_on=['source.digest', 'scaling', 'precision', '_block_size', 'window', 'overlap'])
 
     @cached_property
     def _get_digest(self):
         return digest(self)
 
-    def result(self, num):
-        """Python generator that yields the FFT spectra block-wise.
+    def _get_numfreqs(self):
+        return int(self.block_size / 2 + 1)
 
-        Applies zero padding to the input data if the last returned block
-        is shorter than the requested block size.
+    def _get_block_size(self):
+        return self._block_size
+
+    def _set_block_size(self, value):
+        if value % 2 != 0:
+            msg = 'Block size must be even'
+            raise ValueError(msg)
+        self._block_size = value
+
+    def _scale(self, data, scaling_value):
+        """Corrects the energy of the one-sided FFT data."""
+        if self.scaling == 'amplitude' or self.scaling == 'energy':
+            data[1:-1] *= 2.0
+        data *= scaling_value
+        return data
+
+    def _get_freqs(self):
+        """Return the Discrete Fourier Transform sample frequencies.
+
+        Returns
+        -------
+        f : ndarray
+            1-D Array of length *block_size/2+1* containing the sample frequencies.
+
+        """
+        if self.source is not None:
+            return abs(fft.fftfreq(self.block_size, 1.0 / self.source.sample_freq)[: int(self.block_size / 2 + 1)])
+        return np.array([])
+
+    def result(self, num=1):
+        """Python generator that yields the output block-wise.
 
         Parameters
         ----------
         num : integer
-            This parameter defines the number of frequencies to be yielded
-            per generator call.
+            This parameter defines the number of multi-channel spectra (i.e. snapshots) per block
+            returned by the generator.
 
-        Yields
-        ------
-        numpy.ndarray
-            FFT spectra of shape (num, :attr:`numchannels`),
-            whereby num is the number of frequencies.
+        Returns
+        -------
+        Spectra block of shape (num, :attr:`numchannels`*:attr:`numfreqs`).
+            The last block may be shorter than num.
+
         """
-        blocksize = self.get_blocksize(num)
-        weight = 1 / blocksize if self.norm == 'amplitude' else 1.0
-        for data in self.source.result(blocksize):
-            # should use additional "out" parameter in the future to avoid reallocation (numpy > 2.0)
-            rfft = fft.rfft(data, n=blocksize, axis=0, workers=self.workers) * weight
-            rfft[1:-1] *= np.sqrt(2)  # one-sided spectrum correction
-            yield rfft
+        wind = self.window_(self.block_size)
+        if self.scaling == 'none' or self.scaling == 'energy':  # only compensate for the window
+            svalue = 1 / np.sqrt(np.dot(wind, wind) / self.block_size)
+        elif self.scaling == 'amplitude':  # compensates for the window and the energy loss
+            svalue = 1 / wind.sum()
+        wind = wind[:, np.newaxis]
+        fftdata = np.zeros((num, self.numchannels * self.numfreqs), dtype=self.precision)
+        j = 0
+        for i, data in enumerate(self._get_source_data()):  # yields one block of time data
+            j = i % num
+            fftdata[j] = self._scale(
+                fft.rfft(data * wind, n=self.block_size, axis=0, workers=self.workers).astype(self.precision),
+                scaling_value=svalue,
+            ).reshape(-1)
+            if j == num - 1:
+                yield fftdata
+        if j < num - 1:  # yield remaining fft spectra
+            yield fftdata[: j + 1]
 
 
-class IRFFT(TimeInOut):
-    source = Trait(FreqInOut)
+# alias for FFTSpectra
+RFFT = FFTSpectra
+RFFT.__name__ = 'RFFT'
+RFFT.__doc__ = """Alias for :class:`~acoular.fprocess.FFTSpectra`."""
+
+
+class IRFFT(SpectraInTimeOut):
+    source = Instance(SpectraGenerator)
 
     #: Number of workers to use for the IFFT calculation
     workers = Int(CPU_COUNT, desc='number of workers to use')
 
-    def _validate_num(self, num):
-        if num % 2 != 0:
-            msg = 'Number of samples must be even'
-            raise ValueError(msg)
+    #: The floating-number-precision of the resulting time signals, corresponding to numpy dtypes.
+    #: Default is 64 bit.
+    precision = Trait('float64', 'float32', desc='precision of the time signal after the ifft')
+
+    # internal time signal buffer to handle arbitrary output block sizes
+    _buffer = CArray(desc='signal buffer')
+
+    # internal identifier
+    digest = Property(depends_on=['source.digest', 'scaling', 'precision', '_block_size', 'window', 'overlap'])
+
+    def _fill_buffer(self, size):
+        """Generator that fills the signal buffer."""
+        # irfft should use additional "out" parameter in the future to avoid reallocation (numpy > 2.0)
+        self._buffer = np.zeros((size, self.numchannels), dtype=self.precision)
+        nf = self.source.numfreqs
+        nc = self.numchannels
+        ns = self.source.block_size
+        buffer_index = np.array([size])
+        for spectra in self.source.result(1):
+            self._buffer[0 : (size - ns)] = self._buffer[-(size - ns) :]  # copy to left
+            self._buffer[-ns:, :] = fft.irfft(spectra.reshape(nf, nc), n=ns, axis=0, workers=self.workers)
+            buffer_index[0] -= ns
+            yield buffer_index
+
+    @cached_property
+    def _get_digest(self):
+        return digest(self)
+
+    def _buffered_result(self, num):
+        block_size = self.source.block_size
+        numblocks_init = int(np.ceil(num / block_size)) + 1
+        buffer_size = numblocks_init * block_size
+        block_into_buffer = self._fill_buffer(buffer_size)
+        for _ in range(numblocks_init):
+            with contextlib.suppress(StopIteration):
+                buffer_index = next(block_into_buffer)
+        source_empty = buffer_index[0] != 0
+        while True:
+            bi = buffer_index[0]
+            samplesleft = buffer_size - bi
+            if source_empty and samplesleft == 0:
+                return
+            if samplesleft < num:
+                yield self._buffer[bi : bi + samplesleft]
+                break
+            yield self._buffer[bi : bi + num]
+            buffer_index[0] += num
+            while buffer_index[0] >= block_size and not source_empty:
+                try:
+                    buffer_index = next(block_into_buffer)
+                except StopIteration:
+                    source_empty = True
+                    break
 
     def result(self, num):
         """Python generator that yields the output block-wise.
@@ -192,22 +200,69 @@ class IRFFT(TimeInOut):
         ----------
         num : integer
             This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block). Allows only even numbers.
+            (i.e. the number of samples per block). The last block may be shorter than num.
 
         Yields
         ------
         numpy.ndarray
             Yields blocks of shape (num, numchannels).
         """
-        # should use additional "out" parameter in the future to avoid reallocation (numpy > 2.0)
-        numfreq = int(num / 2 + 1)
-        for temp in self.source.result(numfreq):
-            yield fft.irfft(temp, n=num, axis=0, workers=self.workers)
+        if num != self.source.block_size:
+            yield from self._buffered_result(num)
+        else:
+            for spectra in self.source.result(1):
+                yield fft.irfft(
+                    spectra.reshape(self.source.numfreqs, self.numchannels), n=num, axis=0, workers=self.workers
+                )
 
 
-class CrossPowerSpectra(FreqInOut):
-    #: Data source; :class:`~acoular.fprocess.FreqInOut` or derived object.
-    source = Trait(FreqInOut)
+class AutoPowerSpectra(SpectraInSpectraOut):
+    """Calculates the real-valued auto-power spectra."""
+
+    #: Data source; either of :class:`~acoular.base.SpectraGenerator`
+    source = Instance(SpectraGenerator)
+
+    #: Scaling method, either None or 'psd' (Power Spectral Density).
+    #: Only relevant if the source is a :class:`~acoular.fprocess.FreqInOut` object.
+    scaling = Either('power', 'psd', default='power')
+
+    #: Determines if the spectra yielded by the source are single-sided spectra.
+    single_sided = Bool(True, desc='single sided spectrum')
+
+    #: The floating-number-precision of entries, corresponding to numpy dtypes. Default is 64 bit.
+    precision = Trait('float64', 'float32', desc='floating-number-precision')
+
+    def _get_scaling_value(self):
+        scale = 1 / self.block_size**2
+        if self.single_sided:
+            scale *= 2
+        if self.scaling == 'psd':
+            scale *= self.block_size * self.source.sample_freq
+        return scale
+
+    def result(self, num=1):
+        """Python generator that yields the real-valued auto-power spectra.
+
+        Parameters
+        ----------
+        num : integer
+            This parameter defines the number of snapshots within each output data block.
+
+        Yields
+        ------
+        numpy.ndarray
+            Yields blocks of shape (num, numchannels*numfreqs).
+            The last block may be shorter than num.
+
+        """
+        scale = self._get_scaling_value()
+        for temp in self.source.result(num):
+            yield ((temp * temp.conjugate()).real * scale).astype(self.precision)
+
+
+class CrossPowerSpectra(AutoPowerSpectra):
+    #: Data source; :class:`~acoular.base.SpectraGenerator` or derived object.
+    source = Trait(SpectraGenerator)
 
     #: The floating-number-precision of entries of csm, eigenvalues and
     #: eigenvectors, corresponding to numpy dtypes. Default is 64 bit.
@@ -216,27 +271,27 @@ class CrossPowerSpectra(FreqInOut):
     #: Calculation mode, either 'full' or 'upper'.
     #: 'full' calculates the full cross-spectral matrix, 'upper' calculates
     # only the upper triangle. Default is 'full'.
-    calc_mode = Trait('full', 'upper', desc='calculation mode')
+    calc_mode = Trait('full', 'upper', 'lower', desc='calculation mode')
 
-    #: Number of channels in output, as given by :attr:`source`.
+    #: Number of channels in output. If :attr:`calc_mode` is 'full', then
+    #: :attr:`numchannels` is :math:`n^2`, where :math:`n` is the number of
+    #: channels in the input. If :attr:`calc_mode` is 'upper', then
+    #: :attr:`numchannels` is :math:`n + n(n-1)/2`.
     numchannels = Property(depends_on='source.numchannels')
 
-    #: Normalization method, either None or 'psd' (Power Spectral Density).
-    norm = Either(None, 'psd')
-
     # internal identifier
-    digest = Property(depends_on=['source.digest', 'calc_mode', 'norm'])
+    digest = Property(depends_on=['source.digest', 'precision', 'calc_mode', 'scaling'])
 
     @cached_property
     def _get_numchannels(self):
         n = self.source.numchannels
-        return n**2 if self.calc_mode == 'full' else n + n * (n - 1) / 2
+        return n**2 if self.calc_mode == 'full' else int(n + n * (n - 1) / 2)
 
     @cached_property
     def _get_digest(self):
         return digest(self)
 
-    def result(self, num):
+    def result(self, num=1):
         """Python generator that yields the output block-wise.
 
         Parameters
@@ -248,19 +303,26 @@ class CrossPowerSpectra(FreqInOut):
         Yields
         ------
         numpy.ndarray
-            Yields blocks of shape (num, numchannels).
+            Yields blocks of shape (num, numchannels*numfreq).
         """
-        numspec = self.numchannels
-        blocksize = ((num - 1) * 2) ** 2
-        weight = 1.0 / blocksize
-        if self.norm == 'psd':
-            weight *= blocksize / self.sample_freq
+        nc_src = self.source.numchannels
+        nc = self.numchannels
+        nf = self.numfreqs
+        scale = self._get_scaling_value()
+
+        csm_flat = np.zeros((num, nc * nf), dtype=self.precision)
+        csm_upper = np.zeros((nf, nc_src, nc_src), dtype=self.precision)
         for data in self.source.result(num):
-            csm_upper = np.zeros((num, self.source.numchannels, self.source.numchannels), dtype=self.precision)
-            calcCSM(csm_upper, data)  # TODO: requires new method (only temporary solution) # noqa: TD002, TD003, FIX002
-            if self.calc_mode == 'full':
-                csm_lower = csm_upper.conj().transpose(0, 2, 1)
-                [np.fill_diagonal(csm_lower[cntFreq, :, :], 0) for cntFreq in range(csm_lower.shape[0])]
-                yield (csm_lower + csm_upper).reshape(num, -1) * weight
-            else:
-                yield csm_upper.reshape(num, -1)[:, :numspec] * weight
+            for i in range(data.shape[0]):
+                calcCSM(csm_upper, data[i].astype(self.precision).reshape(nf, nc_src))
+                if self.calc_mode == 'full':
+                    csm_lower = csm_upper.conj().transpose(0, 2, 1)
+                    [np.fill_diagonal(csm_lower[cntFreq, :, :], 0) for cntFreq in range(csm_lower.shape[0])]
+                    csm_flat[i] = (csm_lower + csm_upper).reshape(-1)
+                elif self.calc_mode == 'upper':
+                    csm_flat[i] = csm_upper[:, :nc].reshape(-1)
+                else:  # lower
+                    csm_lower = csm_upper.conj().transpose(0, 2, 1)
+                    csm_flat[i] = csm_lower[:, :nc].reshape(-1)
+                csm_upper[...] = 0  # calcCSM adds cummulative
+            yield csm_flat * scale

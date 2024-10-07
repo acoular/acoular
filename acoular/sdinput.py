@@ -11,9 +11,9 @@
 
 from traits.api import Any, Bool, Float, Int, Long, Property, Trait, cached_property, observe
 
+from .base import SamplesGenerator
 from .configuration import config
 from .internal import digest
-from .tprocess import SamplesGenerator
 
 if config.have_sounddevice:
     import sounddevice as sd

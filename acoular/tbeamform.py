@@ -47,6 +47,7 @@ from numpy.linalg import norm
 from traits.api import Bool, CArray, Delegate, Enum, Float, Instance, Int, List, Property, Range, Trait, cached_property
 from traits.trait_errors import TraitError
 
+from .base import TimeInTimeOut
 from .fbeamform import SteeringVector
 from .grids import RectGrid
 
@@ -54,7 +55,6 @@ from .grids import RectGrid
 from .internal import digest
 from .tfastfuncs import _delayandsum4, _delayandsum5, _delays
 from .tools.utils import SamplesBuffer
-from .tprocess import TimeInOut
 from .trajectory import Trajectory
 
 
@@ -92,7 +92,7 @@ def const_power_weight(bf):
 possible_weights = {'none': None, 'power': const_power_weight}
 
 
-class BeamformerTime(TimeInOut):
+class BeamformerTime(TimeInTimeOut):
     """Provides a basic time domain beamformer with time signal output
     for a spatially fixed grid.
     """
@@ -844,31 +844,8 @@ class BeamformerCleantSqTraj(BeamformerCleantTraj, BeamformerTimeSq):
     def _get_digest(self):
         return digest(self)
 
-    def result(self, num=2048):
-        """Python generator that yields the *squared* deconvolved time-domain beamformer output.
 
-        The output starts for signals that were emitted from the :class:`~acoular.grids.Grid` at `t=0`.
-        Per default, block-wise removal of autocorrelation is performed, which can be turned of by setting
-        :attr:`r_diag` to `False`.
-
-        Parameters
-        ----------
-        num : int
-            This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block). Defaults to 2048.
-
-        Yields
-        ------
-        numpy.ndarray
-            Samples in blocks of shape (num, :attr:`~BeamformerTime.numchannels`).
-                :attr:`~BeamformerTime.numchannels` is usually very \
-                large (number of grid points).
-                The last block returned by the generator may be shorter than num.
-        """
-        return super().result(num)
-
-
-class IntegratorSectorTime(TimeInOut):
+class IntegratorSectorTime(TimeInTimeOut):
     """Provides an Integrator in the time domain."""
 
     #: :class:`~acoular.grids.RectGrid` object that provides the grid locations.

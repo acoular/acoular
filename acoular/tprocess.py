@@ -7,7 +7,6 @@
     :toctree: generated/
 
     SamplesGenerator
-    TimeInOut
     MaskedTimeInOut
     Trigger
     AngleTracker
@@ -96,7 +95,6 @@ from traits.api import (
     Dict,
     File,
     Float,
-    HasPrivateTraits,
     Instance,
     Int,
     List,
@@ -109,108 +107,23 @@ from traits.api import (
     on_trait_change,
 )
 
+# acoular imports
+from .base import InOut, SamplesGenerator, TimeInTimeOut
 from .configuration import config
 from .environments import cartToCyl, cylToCart
 from .h5cache import H5cache
 from .h5files import H5CacheFileBase, _get_h5file_class
-
-# acoular imports
 from .internal import digest, ldigest
 from .microphones import MicGeom
 
 
-class SamplesGenerator(HasPrivateTraits):
-    """Base class for any generating signal processing block.
-
-    It provides a common interface for all SamplesGenerator classes, which
-    generate an output via the generator :meth:`result`.
-    This class has no real functionality on its own and should not be
-    used directly.
-    """
-
-    #: Sampling frequency of the signal, defaults to 1.0
-    sample_freq = Float(1.0, desc='sampling frequency')
-
-    #: Number of channels
-    numchannels = CLong
-
-    #: Number of samples
-    numsamples = CLong
-
-    # internal identifier
-    digest = Property(depends_on=['sample_freq', 'numchannels', 'numsamples'])
-
-    def _get_digest(self):
-        return digest(self)
-
-    def result(self, num):
-        """Python generator that yields the output block-wise.
-
-        Parameters
-        ----------
-        num : integer
-            This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block)
-
-        Returns
-        -------
-        No output since `SamplesGenerator` only represents a base class to derive
-        other classes from.
-
-        """
-
-
-class TimeInOut(SamplesGenerator):
-    """Base class for any time domain signal processing block,
-    gets samples from :attr:`source` and generates output via the
-    generator :meth:`result`.
-    """
-
-    #: Data source; :class:`~acoular.sources.SamplesGenerator` or derived object.
-    source = Trait(SamplesGenerator)
-
-    #: Sampling frequency of output signal, as given by :attr:`source`.
-    sample_freq = Delegate('source')
-
-    #: Number of channels in output, as given by :attr:`source`.
-    numchannels = Delegate('source')
-
-    #: Number of samples in output, as given by :attr:`source`.
-    numsamples = Delegate('source')
-
-    # internal identifier
-    digest = Property(depends_on=['source.digest'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
-
-    def __gt__(self, receiver):
-        if isinstance(receiver, (TimeInOut)):
-            receiver.source = self
-            return receiver
-        msg = f'Receiving object {receiver.__class__} must be derived from TimeInOut or FreqInOut.'
-        raise TypeError(msg)
-
-    def __lt__(self, source):
-        self.source = source
-        return self
-
-    def result(self, num):
-        """Python generator: dummy function, just echoes the output of source,
-        yields samples in blocks of shape (num, :attr:`numchannels`), the last block
-        may be shorter than num.
-        """
-        yield from self.source.result(num)
-
-
-class MaskedTimeInOut(TimeInOut):
+class MaskedTimeInOut(TimeInTimeOut):
     """Signal processing block for channel and sample selection.
 
     This class serves as intermediary to define (in)valid
     channels and samples for any
     :class:`~acoular.sources.SamplesGenerator` (or derived) object.
-    It gets samples from :attr:`~acoular.tprocess.TimeInOut.source`
+    It gets samples from :attr:`~acoular.base.InTimeOut.source`
     and generates output via the generator :meth:`result`.
     """
 
@@ -226,10 +139,10 @@ class MaskedTimeInOut(TimeInOut):
     #: Channel mask to serve as an index for all valid channels, is set automatically.
     channels = Property(depends_on=['invalid_channels', 'source.numchannels'], desc='channel mask')
 
-    #: Number of channels in input, as given by :attr:`~acoular.tprocess.TimeInOut.source`.
+    #: Number of channels in input, as given by :attr:`~acoular.base.TimeInTimeOut.source`.
     numchannels_total = Delegate('source', 'numchannels')
 
-    #: Number of samples in input, as given by :attr:`~acoular.tprocess.TimeInOut.source`.
+    #: Number of samples in input, as given by :attr:`~acoular.base.TimeInTimeOut.source`.
     numsamples_total = Delegate('source', 'numsamples')
 
     #: Number of valid channels, is set automatically.
@@ -334,7 +247,7 @@ class MaskedTimeInOut(TimeInOut):
                 yield block[:, self.channels]
 
 
-class ChannelMixer(TimeInOut):
+class ChannelMixer(TimeInTimeOut):
     """Class for directly mixing the channels of a multi-channel source.
     Outputs a single channel.
     """
@@ -380,7 +293,7 @@ class ChannelMixer(TimeInOut):
             yield sum(weights * block, 1, keepdims=True)
 
 
-class Trigger(TimeInOut):
+class Trigger(TimeInTimeOut):
     """Class for identifying trigger signals.
     Gets samples from :attr:`source` and stores the trigger samples in :meth:`trigger_data`.
 
@@ -394,7 +307,7 @@ class Trigger(TimeInOut):
     vary too much.
     """
 
-    #: Data source; :class:`~acoular.tprocess.SamplesGenerator` or derived object.
+    #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
     source = Instance(SamplesGenerator)
 
     #: Threshold of trigger. Has different meanings for different
@@ -582,7 +495,7 @@ class AngleTracker(MaskedTimeInOut):
 
     """
 
-    #: Data source; :class:`~acoular.tprocess.SamplesGenerator` or derived object.
+    #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
     source = Instance(SamplesGenerator)
 
     #: Trigger data from :class:`acoular.tprocess.Trigger`.
@@ -732,7 +645,7 @@ class AngleTracker(MaskedTimeInOut):
         return (len(peakloc) - 1) / (peakloc[-1] - peakloc[0]) / self.trigger_per_revo * self.source.sample_freq * 60
 
 
-class SpatialInterpolator(TimeInOut):
+class SpatialInterpolator(TimeInTimeOut):
     """Base class for spatial interpolation of microphone data.
     Gets samples from :attr:`source` and generates output via the
     generator :meth:`result`.
@@ -754,7 +667,7 @@ class SpatialInterpolator(TimeInOut):
     def _set_mics_virtual(self, mics_virtual):
         self._mics_virtual = mics_virtual
 
-    #: Data source; :class:`~acoular.tprocess.SamplesGenerator` or derived object.
+    #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
     source = Instance(SamplesGenerator)
 
     #: Interpolation method in spacial domain, defaults to linear
@@ -1328,13 +1241,13 @@ class SpatialInterpolatorConstantRotation(SpatialInterpolator):
             yield interpVal
 
 
-class Mixer(TimeInOut):
+class Mixer(TimeInTimeOut):
     """Mixes the signals from several sources."""
 
-    #: Data source; :class:`~acoular.tprocess.SamplesGenerator` object.
+    #: Data source; :class:`~acoular.base.SamplesGenerator` object.
     source = Trait(SamplesGenerator)
 
-    #: List of additional :class:`~acoular.tprocess.SamplesGenerator` objects
+    #: List of additional :class:`~acoular.base.SamplesGenerator` objects
     #: to be mixed.
     sources = List(Instance(SamplesGenerator, ()))
 
@@ -1351,7 +1264,7 @@ class Mixer(TimeInOut):
     sdigest = Str()
 
     @observe('sources.items.digest')
-    def _set_sources_digest(self, event):  # noqa ARG002
+    def _set_sourcesdigest(self, event):  # noqa ARG002
         self.sdigest = ldigest(self.sources)
 
     # internal identifier
@@ -1406,7 +1319,7 @@ class Mixer(TimeInOut):
                 break
 
 
-class TimePower(TimeInOut):
+class TimePower(TimeInTimeOut):
     """Calculates time-depended power of the signal."""
 
     def result(self, num):
@@ -1429,7 +1342,7 @@ class TimePower(TimeInOut):
             yield temp * temp
 
 
-class TimeAverage(TimeInOut):
+class TimeAverage(InOut):
     """Calculates time-dependent average of the signal."""
 
     #: Number of samples to average over, defaults to 64.
@@ -1484,7 +1397,12 @@ class TimeAverage(TimeInOut):
                 yield temp[: nso * nav].reshape((nso, -1, nc)).mean(axis=1)
 
 
-class TimeCumAverage(TimeInOut):
+Average = TimeAverage
+Average.__doc__ = """Alias for :class:`acoular.tprocess.TimeAverage`."""
+Average.__name__ = 'Average'
+
+
+class TimeCumAverage(InOut):
     """Calculates cumulative average of the signal, useful for Leq."""
 
     def result(self, num):
@@ -1514,7 +1432,12 @@ class TimeCumAverage(TimeInOut):
             yield temp
 
 
-class TimeReverse(TimeInOut):
+CumAverage = TimeCumAverage
+CumAverage.__doc__ = """Alias for :class:`acoular.tprocess.TimeCumAverage`."""
+CumAverage.__name__ = 'CumAverage'
+
+
+class TimeReverse(TimeInTimeOut):
     """Calculates the time-reversed signal of a source."""
 
     def result(self, num):
@@ -1546,7 +1469,7 @@ class TimeReverse(TimeInOut):
         yield temp[:nsh]
 
 
-class Filter(TimeInOut):
+class Filter(TimeInTimeOut):
     """Abstract base class for IIR filters based on scipy lfilter
     implements a filter with coefficients that may be changed
     during processing.
@@ -1762,7 +1685,7 @@ class FiltFreqWeight(Filter):
         return tf2sos(b, a)
 
 
-class FilterBank(TimeInOut):
+class FilterBank(TimeInTimeOut):
     """Abstract base class for IIR filter banks based on scipy lfilter
     implements a bank of parallel filters.
 
@@ -1867,7 +1790,7 @@ class OctaveFilterBank(FilterBank):
         return sos
 
 
-class TimeCache(TimeInOut):
+class TimeCache(InOut):
     """Caches time signal in cache file."""
 
     # basename for cache
@@ -1994,7 +1917,7 @@ class TimeCache(TimeInOut):
         yield from generator(num)
 
 
-class WriteWAV(TimeInOut):
+class WriteWAV(TimeInTimeOut):
     """Saves time signal from one or more channels as mono/stereo/multi-channel
     `*.wav` file.
     """
@@ -2061,7 +1984,7 @@ class WriteWAV(TimeInOut):
         wf.close()
 
 
-class WriteH5(TimeInOut):
+class WriteH5(TimeInTimeOut):
     """Saves time signal as `*.h5` file."""
 
     #: Name of the file to be saved. If none is given, the name will be
@@ -2179,7 +2102,7 @@ class LockedGenerator:
             return self.it.__next__()
 
 
-class SampleSplitter(TimeInOut):
+class SampleSplitter(InOut):
     """Distributes data blocks from source to several following objects.
     A separate block buffer is created for each registered object in
     (:attr:`block_buffer`) .
@@ -2312,7 +2235,7 @@ class SampleSplitter(TimeInOut):
             raise OSError(msg)
 
 
-class TimeConvolve(TimeInOut):
+class TimeConvolve(TimeInTimeOut):
     """Uniformly partitioned overlap-save method (UPOLS) for fast convolution in the frequency domain.
 
     See :cite:`Wefers2015` for details.

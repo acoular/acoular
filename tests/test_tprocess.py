@@ -4,6 +4,7 @@ from pathlib import Path
 
 import numpy as np
 from acoular import MaskedTimeSamples, MicGeom, PointSource, TimeConvolve, WNoiseGenerator, config, tools
+from acoular.base import *
 from acoular.tprocess import *
 
 WRITE_NEW_REFERENCE_DATA = False
