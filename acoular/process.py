@@ -210,6 +210,7 @@ class Cache(InOut):
                 self.h5f.set_node_attribute(ac, 'sample_freq', self.sample_freq)
                 self.h5f.set_node_attribute(ac, 'complete', False)
             self.h5f.append_data(ac, data)
+            self.h5f.flush()
             yield data
         self.h5f.set_node_attribute(ac, 'complete', True)
 
@@ -239,6 +240,7 @@ class Cache(InOut):
                 self.h5f.set_node_attribute(ac, 'complete', False)
             self.h5f.append_data(ac, data)
             if j >= nblocks:
+                self.h5f.flush()
                 yield data
         self.h5f.set_node_attribute(ac, 'complete', True)
 
