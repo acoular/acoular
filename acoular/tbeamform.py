@@ -847,6 +847,29 @@ class BeamformerCleantSqTraj(BeamformerCleantTraj, BeamformerTimeSq):
     def _get_digest(self):
         return digest(self)
 
+    def result(self, num=2048):
+        """Python generator that yields the *squared* deconvolved time-domain beamformer output.
+
+        The output starts for signals that were emitted from the :class:`~acoular.grids.Grid` at `t=0`.
+        Per default, block-wise removal of autocorrelation is performed, which can be turned of by setting
+        :attr:`r_diag` to `False`.
+
+        Parameters
+        ----------
+        num : int
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block). Defaults to 2048.
+
+        Yields
+        ------
+        numpy.ndarray
+            Samples in blocks of shape (num, :attr:`~BeamformerTime.numchannels`).
+                :attr:`~BeamformerTime.numchannels` is usually very \
+                large (number of grid points).
+                The last block returned by the generator may be shorter than num.
+        """
+        return super().result(num)
+
 
 class IntegratorSectorTime(TimeOut):
     """Provides an Integrator in the time domain."""
