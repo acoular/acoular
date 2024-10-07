@@ -7,7 +7,7 @@ Upcoming Release
     **New features:**
         * Sounddevice inputs now allow for user-settable sample rates and precision types
         * Block-wise frequency domain processing
-            * Introduces new `acoular.base` module with abstract base classes :class:`~acoular.base.Generator`, :class:`~acoular.base.SpectraGenerator`, :class:`~acoular.base.InOut`, :class:`~acoular.base.TimeOut`
+            * Introduces new `acoular.base` module with abstract base classes :class:`~acoular.base.Generator`, :class:`~acoular.base.SpectraGenerator`, :class:`~acoular.base.InOut`, :class:`~acoular.base.TimeOut`, :class:`~acoular.base.SpectraOut`
             * Introduces new module `acoular.fprocess` including new frequency domain processing classes :class:`~acoular.fprocess.RFFT`, :class:`~acoular.fprocess.IRFFT`, :class:`~acoular.fprocess.AutoPowerSpectra` and :class:`~acoular.fprocess.CrossPowerSpectra`
             * Introduces new module `acoular.process` including the following classes for general purpose (domain invariant) processing: :class:`~acoular.process.Cache`, :class:`~acoular.process.Average`, :class:`~acoular.process.SampleSplitter`
             * Rename :class:`~acoular.tprocess.MaskedTimeInOut` to :class:`~acoular.tprocess.MaskedTimeOut`
