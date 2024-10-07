@@ -26,7 +26,7 @@ class TestCache:
         nocache_result = ac.tools.return_result(src, num=1)
         assert np.allclose(nocache_result, cached_result)
 
-    @pytest.mark.parametrize('lib, sample_freq', [('pytables', 3), ('h5py', 4)])
+    @pytest.mark.parametrize('lib, sample_freq', [('pytables', 1), ('h5py', 2)])
     def test_cache_spectra(self, lib, sample_freq):
         remove_cache()
         ac.config.h5library = lib
