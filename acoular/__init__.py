@@ -6,8 +6,6 @@
 
 import os
 
-from process import BlockAverage, Power
-
 from . import demo, tools
 from .calib import Calib
 from .configuration import config
@@ -60,6 +58,7 @@ from .grids import (
     Sector,
 )
 from .microphones import MicGeom
+from .process import BlockAverage, Power
 from .sdinput import SoundDeviceSamplesGenerator
 from .signals import (
     FiltWNoiseGenerator,
