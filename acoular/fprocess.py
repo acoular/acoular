@@ -21,7 +21,7 @@ import numpy as np
 from scipy import fft
 from traits.api import Bool, CArray, Either, Instance, Int, Property, Trait, cached_property
 
-from .base import SpectraGenerator, SpectraOut, TimeOut, SamplesGenerator
+from .base import SamplesGenerator, SpectraGenerator, SpectraOut, TimeOut
 from .fastFuncs import calcCSM
 from .internal import digest
 from .spectra import BaseSpectra
@@ -224,14 +224,16 @@ class IRFFT(TimeOut):
                 f'Source of class {self.__class__.__name__} has an unknown blocksize: {self.source.block_size}.'
                 'This is likely due to incomplete spectral data from which the inverse FFT cannot be calculated.'
             )
-        elif (self.source.numfreqs - 1) * 2 != self.source.block_size:
+            raise ValueError(msg)
+        if (self.source.numfreqs - 1) * 2 != self.source.block_size:
             msg = (
                 f'Block size must be 2*(numfreqs-1) but is {self.source.block_size}.'
                 'This is likely due to incomplete spectral data from which the inverse FFT cannot be calculated.'
             )
-        elif self.source.block_size % 2 != 0:
+            raise ValueError(msg)
+        if self.source.block_size % 2 != 0:
             msg = f'Block size must be even but is {self.source.block_size}.'
-        raise ValueError(msg)
+            raise ValueError(msg)
 
     def result(self, num):
         """Python generator that yields the output block-wise.
