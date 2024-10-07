@@ -9,10 +9,10 @@
 import numpy as np
 from traits.api import Any, Array, Bool, Either, Enum, Int, Property
 
-from acoular.tprocess import TimeInOut
+from acoular.process import InOut
 
 
-class SamplesBuffer(TimeInOut):
+class SamplesBuffer(InOut):
     """Handles buffering of samples from a source.
 
     This class is used to buffer samples from a source and provide them in blocks

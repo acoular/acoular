@@ -13,7 +13,6 @@
     FFTSpectra
 """
 
-import contextlib
 import multiprocessing
 from warnings import warn
 
@@ -25,6 +24,7 @@ from .base import SamplesGenerator, SpectraGenerator, SpectraOut, TimeOut
 from .fastFuncs import calcCSM
 from .internal import digest
 from .spectra import BaseSpectra
+from .tools.utils import SamplesBuffer
 
 CPU_COUNT = multiprocessing.cpu_count()
 
@@ -174,49 +174,9 @@ class IRFFT(TimeOut):
             return int(self.source.numsamples * self.source.block_size)
         return -1
 
-    def _fill_buffer(self, size):
-        """Generator that fills the signal buffer."""
-        # irfft should use additional "out" parameter in the future to avoid reallocation (numpy > 2.0)
-        self._buffer = np.zeros((size, self.numchannels), dtype=self.precision)
-        nf = self.source.numfreqs
-        nc = self.numchannels
-        ns = self.source.block_size
-        buffer_index = np.array([size])
-        for spectra in self.source.result(1):
-            self._buffer[0 : (size - ns)] = self._buffer[-(size - ns) :]  # copy to left
-            self._buffer[-ns:, :] = fft.irfft(spectra.reshape(nf, nc), n=ns, axis=0, workers=self.workers)
-            buffer_index[0] -= ns
-            yield buffer_index
-
     @cached_property
     def _get_digest(self):
         return digest(self)
-
-    def _buffered_result(self, num):
-        block_size = self.source.block_size
-        numblocks_init = int(np.ceil(num / block_size)) + 1
-        buffer_size = numblocks_init * block_size
-        block_into_buffer = self._fill_buffer(buffer_size)
-        for _ in range(numblocks_init):
-            with contextlib.suppress(StopIteration):
-                buffer_index = next(block_into_buffer)
-        source_empty = buffer_index[0] != 0
-        while True:
-            bi = buffer_index[0]
-            samplesleft = buffer_size - bi
-            if source_empty and samplesleft == 0:
-                return
-            if samplesleft < num:
-                yield self._buffer[bi : bi + samplesleft]
-                break
-            yield self._buffer[bi : bi + num]
-            buffer_index[0] += num
-            while buffer_index[0] >= block_size and not source_empty:
-                try:
-                    buffer_index = next(block_into_buffer)
-                except StopIteration:
-                    source_empty = True
-                    break
 
     def _validate(self):
         if not self.source.block_size or self.source.block_size < 0:
@@ -250,8 +210,11 @@ class IRFFT(TimeOut):
             Yields blocks of shape (num, numchannels).
         """
         self._validate()
-        if num != self.source.block_size:
-            yield from self._buffered_result(num)
+        bs = self.source.block_size
+        if num != bs:
+            buffer_length = (int(np.ceil(num / bs)) + 1) * bs
+            buffer = SamplesBuffer(source=self, source_num=bs, length=buffer_length, dtype=self.precision)
+            yield from buffer.result(num)
         else:
             for spectra in self.source.result(1):
                 yield fft.irfft(
