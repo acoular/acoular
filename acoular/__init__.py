@@ -41,7 +41,7 @@ from .fbeamform import (
     SteeringVector,
     integrate,
 )
-from .fprocess import IRFFT, RFFT, FreqGenerator, FreqInOut
+from .fprocess import IRFFT, RFFT, CrossPowerSpectra, FreqGenerator, FreqInOut
 from .grids import (
     CircSector,
     ConvexSector,

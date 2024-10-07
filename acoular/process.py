@@ -34,8 +34,9 @@ class Power(FreqInOut, TimeInOut):
     source = Either(Instance(FreqInOut), Instance(TimeInOut), desc='data source')
 
     def _fresult(self, num):
+        blocksize = (num -1) * 2
         for temp in self.source.result(num):
-            yield (temp * temp.conjugate()).real
+            yield (temp * temp.conjugate()).real / blocksize
 
     def _tresult(self, num):
         for temp in self.source.result(num):
@@ -65,9 +66,9 @@ class Power(FreqInOut, TimeInOut):
 
 
 class BlockAverage(TimeInOut, FreqInOut):
-    """Averages frequency data over a number of blocks.
+    """Averages data over a number of blocks.
 
-    The class can be used to average frequency data over a number of blocks.
+    The class can be used to average blocks of data.
     """
 
     #: Data source; either of :class:`~acoular.fprocess.FreqInOut` or
@@ -85,6 +86,36 @@ class BlockAverage(TimeInOut, FreqInOut):
     def _get_digest(self):
         return digest(self)
 
+    def _result_noaverage(self, num):
+        yield from self.source.result(num)
+
+    def _result_fullaverage(self, num):
+        """Averages the data over all blocks the source yields."""
+        for i, data in enumerate(self.source.result(num)):
+            if i == 0:
+                data_avg = data.copy()
+            else:
+                n = data.shape[0]
+                data_avg[:n] += data
+            i += 1
+        yield data_avg / i
+
+    def _result_numaverage(self, num):
+        """Averages the data over a fixed number of blocks."""
+        i = 0
+        for data in self.source.result(num):
+            if i == 0:
+                data_avg = data.copy()
+            else:
+                n = data.shape[0]
+                data_avg[:n] += data
+            if i == self.numaverage:
+                yield data_avg / i
+                i = 0
+                continue
+            i += 1
+        yield data_avg / i
+
     def result(self, num):
         """Python generator that yields the output block-wise.
 
@@ -99,17 +130,9 @@ class BlockAverage(TimeInOut, FreqInOut):
         numpy.ndarray
             Yields blocks of shape (num, numchannels).
         """
-        i = 0
-        data_avg = None
-        for data in self.source.result(num):
-            data_avg = data.copy() if i == 0 else (i - 1) / i * data_avg + 1 / i * data
-            if self.numaverage == 0:
-                yield data_avg
-                continue
-            i += 1
-            if (self.numaverage is not None) and (i % self.numaverage == 0):
-                yield data_avg
-                data_avg = None
-                i = 0
         if self.numaverage is None:
-            yield data_avg
+            yield from self._result_fullaverage(num)
+        elif self.numaverage == 0:
+            yield from self._result_noaverage(num)
+        else:
+            yield from self._result_numaverage(num)

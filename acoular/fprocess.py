@@ -15,9 +15,11 @@
 
 import multiprocessing
 
+import numpy as np
 from scipy import fft
 from traits.api import CLong, Delegate, Float, HasPrivateTraits, Int, Property, Trait, cached_property
 
+from .fastFuncs import calcCSM
 from .internal import digest
 from .tprocess import SamplesGenerator, TimeInOut
 
@@ -123,6 +125,9 @@ class RFFT(FreqInOut):
     #: Number of workers to use for the FFT calculation
     workers = Int(CPU_COUNT, desc='number of workers to use')
 
+    #: TODO: should implement different normalization methods
+    norm = Trait('none')
+
     def get_blocksize(self, numfreq):
         return (numfreq - 1) * 2 if numfreq % 2 != 0 else numfreq * 2 - 1
 
@@ -163,7 +168,9 @@ class RFFT(FreqInOut):
         blocksize = self.get_blocksize(num)
         for data in self.source.result(blocksize):
             # should use additional "out" parameter in the future to avoid reallocation (numpy > 2.0)
-            yield fft.rfft(data, n=blocksize, axis=0, workers=self.workers)
+            rfft = fft.rfft(data, n=blocksize, axis=0, workers=self.workers, norm='backward')
+            rfft[1:-1] *= np.sqrt(2) # one-sided spectrum correction
+            yield rfft
 
 
 class IRFFT(TimeInOut):
@@ -195,3 +202,57 @@ class IRFFT(TimeInOut):
         numfreq = int(num / 2 + 1)
         for temp in self.source.result(numfreq):
             yield fft.irfft(temp, n=num, axis=0, workers=self.workers)
+
+class CrossPowerSpectra(FreqInOut):
+
+    source = Trait(FreqInOut)
+
+    #: The floating-number-precision of entries of csm, eigenvalues and
+    #: eigenvectors, corresponding to numpy dtypes. Default is 64 bit.
+    precision = Trait('complex128', 'complex64', desc='precision of the fft')
+
+    #: Calculation mode, either 'full' or 'upper'.
+    #: 'full' calculates the full cross-spectral matrix, 'upper' calculates 
+    # only the upper triangle. Default is 'full'.
+    calc_mode = Trait('full', 'upper', desc='calculation mode')
+
+    #: Number of channels in output, as given by :attr:`source`.
+    numchannels = Property(depends_on='source.numchannels')
+
+    # internal identifier
+    digest = Property(depends_on=['source.digest', 'calc_mode'])
+
+    @cached_property
+    def _get_numchannels(self):
+        n = self.source.numchannels
+        return n**2 if self.calc_mode == 'full' else n + n * (n - 1) / 2
+
+    @cached_property
+    def _get_digest(self):
+        return digest(self)
+
+    def result(self, num):
+        """Python generator that yields the output block-wise.
+
+        Parameters
+        ----------
+        num : integer
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block).
+
+        Yields
+        ------
+        numpy.ndarray
+            Yields blocks of shape (num, numchannels).
+        """
+        numspec = self.numchannels
+        blocksize = ((num - 1) *2)**2
+        for data in self.source.result(num):
+            csm_upper = np.zeros((num, self.source.numchannels, self.source.numchannels), dtype=self.precision)
+            calcCSM(csm_upper, data) # TODO: requires new method (only temporary solution) # noqa: TD002, TD003, FIX002
+            if self.calc_mode == 'full':
+                csm_lower = csm_upper.conj().transpose(0, 2, 1)
+                [np.fill_diagonal(csm_lower[cntFreq, :, :], 0) for cntFreq in range(csm_lower.shape[0])]
+                yield (csm_lower + csm_upper).reshape(num, -1) / blocksize
+            else:
+                yield csm_upper.reshape(num, -1)[:,:numspec] / blocksize
