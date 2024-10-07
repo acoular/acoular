@@ -65,9 +65,9 @@ plt.show()
 # %%
 # Create an averaged power spectrum of the signal
 # ------------------------------------------------
-# To calculate the time averaged power spectrum of the signal, we use the :class:`acoular.fprocess.Average` class.
+# To calculate the time averaged power spectrum of the signal, we use the :class:`acoular.process.BlockAverage` class.
 
-tavg = ac.Average(source=tp)  # results in the time averaged power spectrum
+tavg = ac.BlockAverage(source=tp)  # results in the time averaged power spectrum
 
 # %%
 # Plot the resulting power spectrum for different number of averages.
