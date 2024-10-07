@@ -14,12 +14,8 @@ subclassed by classes that implement the actual signal processing.
     SamplesGenerator
     SpectraGenerator
     InOut
-    InTimeOut
-    TimeInTimeOut
-    SpectraInTimeOut
-    InSpectraOut
-    SpectraInSpectraOut
-    TimeInSpectraOut
+    TimeOut
+    SpectraOut
     TimeInOut
 """
 
@@ -149,7 +145,7 @@ class SpectraGenerator(Generator):
         """
 
 
-class InTimeOut(SamplesGenerator):
+class TimeOut(SamplesGenerator):
     """Abstract base class for any signal processing block that receives data from any :attr:`source` domain and returns
     time domain signals.
 
@@ -195,67 +191,7 @@ class InTimeOut(SamplesGenerator):
         yield from self.source.result(num)
 
 
-class TimeInTimeOut(InTimeOut):
-    """Abstract base class for any signal processing block that receives time domain data from a :attr:`source` and
-    returns time domain signals.
-
-    It provides a base class that can be used to create signal processing blocks that receive time domain data from any
-    generating :attr:`source` and generates a time signal output via the generator :meth:`result` in block-wise manner.
-    """
-
-    #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
-    source = Instance(SamplesGenerator)
-
-    def result(self, num):
-        """Python generator that processes the source data and yields the time-signal block-wise.
-
-        This method needs to be implemented by the derived classes.
-
-        Parameters
-        ----------
-        num : int
-            This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block)
-
-        Yields
-        ------
-        numpy.ndarray
-            Two-dimensional output data block of shape (num, numchannels)
-        """
-        yield from self.source.result(num)
-
-
-class SpectraInTimeOut(InTimeOut):
-    """Abstract base class for any signal processing block that receives frequency domain data from a :attr:`source` and
-    returns time domain signals.
-
-    It provides a base class that can be used to create signal processing blocks that receive frequency domain data from any
-    generating :attr:`source` and generates a time signal output via the generator :meth:`result` in block-wise manner.
-    """
-
-    #: Data source; :class:`~acoular.base.SpectraGenerator` or derived object.
-    source = Instance(SpectraGenerator)
-
-    def result(self, num):
-        """Python generator that processes the source data and yields the time-signal block-wise.
-
-        This method needs to be implemented by the derived classes.
-
-        Parameters
-        ----------
-        num : int
-            This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block)
-
-        Yields
-        ------
-        numpy.ndarray
-            Two-dimensional output data block of shape (num, numchannels)
-        """
-        yield from self.source.result(num)
-
-
-class InSpectraOut(SpectraGenerator):
+class SpectraOut(SpectraGenerator):
     """Abstract base class for any signal processing block that receives data from any :attr:`source` domain and
     returns frequency domain signals.
 
@@ -276,14 +212,14 @@ class InSpectraOut(SpectraGenerator):
     #: Number of snapshots in output, as given by :attr:`source`.
     numsamples = Delegate('source')
 
-    #: Number of frequencies in output
-    numfreqs = CLong
+    #: Number of frequencies in output, as given by :attr:`source`.
+    numfreqs = Delegate('source')
 
-    #: 1-D array of frequencies
-    freqs = CArray
+    #: 1-D array of frequencies, as given by :attr:`source`.
+    freqs = Delegate('source')
 
     #: The size of the block used to calculate the spectra
-    block_size = CLong
+    block_size = Delegate('source')
 
     # internal identifier
     digest = Property(depends_on=['source.digest'])
@@ -309,72 +245,9 @@ class InSpectraOut(SpectraGenerator):
         yield from self.source.result(num)
 
 
-class SpectraInSpectraOut(InSpectraOut):
-    """Abstract base class for any signal processing block that receives frequency domain data from a :attr:`source` and
-    returns frequency domain signals.
-
-    It provides a base class that can be used to create signal processing blocks that receive frequency domain data from a
-    generating :attr:`source` and generates a frequency domain output via the generator :meth:`result`
-    in block-wise manner.
-    """
-
-    #: Data source; :class:`~acoular.base.SpectraGenerator` or derived object.
-    source = Instance(SpectraGenerator)
-
-    #: Number of frequencies in output, as given by :attr:`source`.
-    numfreqs = Delegate('source')
-
-    #: 1-D array of frequencies, as given by :attr:`source`.
-    freqs = Delegate('source')
-
-    #: The size of the block used to calculate the spectra
-    block_size = Delegate('source')
-
-    def result(self, num=1):
-        """Python generator that processes the source data and yields the output block-wise.
-
-        num : integer
-            This parameter defines the number of snapshots to be yielded.
-            Defaults to 1.
-
-        Yields
-        ------
-        numpy.ndarray
-            A two-dimensional block of shape (num, numchannels*numfreqs).
-        """
-        yield from self.source.result(num)
-
-
-class TimeInSpectraOut(InSpectraOut):
-    """Abstract base class for any signal processing block that receives time domain data from a :attr:`source` and
-    returns frequency domain signals.
-
-    It provides a base class that can be used to create signal processing blocks that receive time domain data from a
-    generating :attr:`source` and generates a frequency domain output via the generator :meth:`result`
-    in block-wise manner.
-    """
-
-    #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
-    source = Instance(SamplesGenerator)
-
-    def result(self, num=1):
-        """Python generator that processes the source data and yields the output block-wise.
-
-        num : integer
-            This parameter defines the number of snapshots to be yielded.
-            Defaults to 1.
-
-        Yields
-        ------
-        numpy.ndarray
-            A two-dimensional block of shape (num, numchannels*numfreqs).
-        """
-        yield from self.source.result(num)
-
-
 class InOut(SamplesGenerator, SpectraGenerator):
     """Abstract base class for any signal processing block that receives data from any :attr:`source` domain and returns
-    signals of any domain.
+    signals in the same domain.
 
     It provides a base class that can be used to create signal processing blocks that receive data from any
     generating :attr:`source` and generates an output via the generator :meth:`result` in block-wise manner.
@@ -417,20 +290,23 @@ class InOut(SamplesGenerator, SpectraGenerator):
         yield from self.source.result(num)
 
 
-class TimeInOut(TimeInTimeOut):
-    """Deprecated alias for :class:`~acoular.base.TimeInTimeOut`.
+class TimeInOut(TimeOut):
+    """Deprecated alias for :class:`~acoular.base.TimeOut`.
 
     .. deprecated:: 24.10
         Using :class:`~acoular.base.TimeInOut` is deprecated and will be removed in Acoular 25.01.
-        Use :class:`~acoular.base.TimeInTimeOut` instead.
+        Use :class:`~acoular.base.TimeOut` instead.
     """
+
+    #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
+    source = Instance(SamplesGenerator)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         import warnings
 
         warnings.warn(
-            'TimeInOut is deprecated and will be removed in Acoular 25.01. Use TimeInTimeOut instead.',
+            'TimeInOut is deprecated and will be removed in Acoular 25.01. Use TimeOut instead.',
             DeprecationWarning,
             stacklevel=2,
         )

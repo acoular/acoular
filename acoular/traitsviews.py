@@ -9,7 +9,7 @@ classes to lift the traitsui requirement for the Acoular package.
 from traitsui.api import Item, View
 from traitsui.menu import OKCancelButtons
 
-from .base import TimeInTimeOut
+from .base import TimeOut
 from .calib import Calib
 from .environments import GeneralFlowEnvironment, OpenJet, RotatingFlow, SlotJet, UniformFlowEnvironment
 from .fbeamform import (
@@ -238,7 +238,7 @@ RotatingFlow.class_trait_view(
     ),
 )
 
-TimeInTimeOut.class_trait_view(
+TimeOut.class_trait_view(
     'traits_view',
     View(
         Item('source', style='custom'),

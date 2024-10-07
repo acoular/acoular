@@ -10,15 +10,11 @@ from . import demo, tools
 from .base import (
     Generator,
     InOut,
-    InSpectraOut,
-    InTimeOut,
     SamplesGenerator,
     SpectraGenerator,
-    SpectraInSpectraOut,
-    SpectraInTimeOut,
+    SpectraOut,
     TimeInOut,
-    TimeInSpectraOut,
-    TimeInTimeOut,
+    TimeOut,
 )
 from .calib import Calib
 from .configuration import config

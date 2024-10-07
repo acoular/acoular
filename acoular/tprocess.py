@@ -6,7 +6,6 @@
 .. autosummary::
     :toctree: generated/
 
-    SamplesGenerator
     MaskedTimeInOut
     Trigger
     AngleTracker
@@ -102,7 +101,7 @@ from traits.api import (
 )
 
 # acoular imports
-from .base import SamplesGenerator, TimeInTimeOut
+from .base import SamplesGenerator, TimeOut
 from .configuration import config
 from .environments import cartToCyl, cylToCart
 from .h5files import _get_h5file_class
@@ -110,15 +109,18 @@ from .internal import digest, ldigest
 from .microphones import MicGeom
 
 
-class MaskedTimeInOut(TimeInTimeOut):
+class MaskedTimeInOut(TimeOut):
     """Signal processing block for channel and sample selection.
 
     This class serves as intermediary to define (in)valid
     channels and samples for any
     :class:`~acoular.sources.SamplesGenerator` (or derived) object.
-    It gets samples from :attr:`~acoular.base.TimeInTimeOut.source`
+    It gets samples from :attr:`~acoular.base.TimeOut.source`
     and generates output via the generator :meth:`result`.
     """
+
+    #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
+    source = Instance(SamplesGenerator)
 
     #: Index of the first sample to be considered valid.
     start = CLong(0, desc='start of valid samples')
@@ -132,10 +134,10 @@ class MaskedTimeInOut(TimeInTimeOut):
     #: Channel mask to serve as an index for all valid channels, is set automatically.
     channels = Property(depends_on=['invalid_channels', 'source.numchannels'], desc='channel mask')
 
-    #: Number of channels in input, as given by :attr:`~acoular.base.TimeInTimeOut.source`.
+    #: Number of channels in input, as given by :attr:`~acoular.base.TimeOut.source`.
     numchannels_total = Delegate('source', 'numchannels')
 
-    #: Number of samples in input, as given by :attr:`~acoular.base.TimeInTimeOut.source`.
+    #: Number of samples in input, as given by :attr:`~acoular.base.TimeOut.source`.
     numsamples_total = Delegate('source', 'numsamples')
 
     #: Number of valid channels, is set automatically.
@@ -240,10 +242,13 @@ class MaskedTimeInOut(TimeInTimeOut):
                 yield block[:, self.channels]
 
 
-class ChannelMixer(TimeInTimeOut):
+class ChannelMixer(TimeOut):
     """Class for directly mixing the channels of a multi-channel source.
     Outputs a single channel.
     """
+
+    #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
+    source = Instance(SamplesGenerator)
 
     #: Amplitude weight(s) for the channels as array. If not set, all channels are equally weighted.
     weights = CArray(desc='channel weights')
@@ -286,7 +291,7 @@ class ChannelMixer(TimeInTimeOut):
             yield sum(weights * block, 1, keepdims=True)
 
 
-class Trigger(TimeInTimeOut):
+class Trigger(TimeOut):
     """Class for identifying trigger signals.
     Gets samples from :attr:`source` and stores the trigger samples in :meth:`trigger_data`.
 
@@ -488,9 +493,6 @@ class AngleTracker(MaskedTimeInOut):
 
     """
 
-    #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
-    source = Instance(SamplesGenerator)
-
     #: Trigger data from :class:`acoular.tprocess.Trigger`.
     trigger = Instance(Trigger)
 
@@ -638,11 +640,14 @@ class AngleTracker(MaskedTimeInOut):
         return (len(peakloc) - 1) / (peakloc[-1] - peakloc[0]) / self.trigger_per_revo * self.source.sample_freq * 60
 
 
-class SpatialInterpolator(TimeInTimeOut):
+class SpatialInterpolator(TimeOut):
     """Base class for spatial interpolation of microphone data.
     Gets samples from :attr:`source` and generates output via the
     generator :meth:`result`.
     """
+
+    #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
+    source = Instance(SamplesGenerator)
 
     #: :class:`~acoular.microphones.MicGeom` object that provides the real microphone locations.
     mics = Instance(MicGeom(), desc='microphone geometry')
@@ -659,9 +664,6 @@ class SpatialInterpolator(TimeInTimeOut):
 
     def _set_mics_virtual(self, mics_virtual):
         self._mics_virtual = mics_virtual
-
-    #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
-    source = Instance(SamplesGenerator)
 
     #: Interpolation method in spacial domain, defaults to linear
     #: linear uses numpy linear interpolation
@@ -1234,7 +1236,7 @@ class SpatialInterpolatorConstantRotation(SpatialInterpolator):
             yield interpVal
 
 
-class Mixer(TimeInTimeOut):
+class Mixer(TimeOut):
     """Mixes the signals from several sources."""
 
     #: Data source; :class:`~acoular.base.SamplesGenerator` object.
@@ -1312,8 +1314,11 @@ class Mixer(TimeInTimeOut):
                 break
 
 
-class TimePower(TimeInTimeOut):
+class TimePower(TimeOut):
     """Calculates time-depended power of the signal."""
+
+    #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
+    source = Instance(SamplesGenerator)
 
     def result(self, num):
         """Python generator that yields the output block-wise.
@@ -1335,8 +1340,11 @@ class TimePower(TimeInTimeOut):
             yield temp * temp
 
 
-class TimeCumAverage(TimeInTimeOut):
+class TimeCumAverage(TimeOut):
     """Calculates cumulative average of the signal, useful for Leq."""
+
+    #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
+    source = Instance(SamplesGenerator)
 
     def result(self, num):
         """Python generator that yields the output block-wise.
@@ -1365,8 +1373,11 @@ class TimeCumAverage(TimeInTimeOut):
             yield temp
 
 
-class TimeReverse(TimeInTimeOut):
+class TimeReverse(TimeOut):
     """Calculates the time-reversed signal of a source."""
+
+    #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
+    source = Instance(SamplesGenerator)
 
     def result(self, num):
         """Python generator that yields the output block-wise.
@@ -1397,13 +1408,16 @@ class TimeReverse(TimeInTimeOut):
         yield temp[:nsh]
 
 
-class Filter(TimeInTimeOut):
+class Filter(TimeOut):
     """Abstract base class for IIR filters based on scipy lfilter
     implements a filter with coefficients that may be changed
     during processing.
 
     Should not be instanciated by itself
     """
+
+    #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
+    source = Instance(SamplesGenerator)
 
     #: Filter coefficients
     sos = Property()
@@ -1613,12 +1627,15 @@ class FiltFreqWeight(Filter):
         return tf2sos(b, a)
 
 
-class FilterBank(TimeInTimeOut):
+class FilterBank(TimeOut):
     """Abstract base class for IIR filter banks based on scipy lfilter
     implements a bank of parallel filters.
 
     Should not be instanciated by itself
     """
+
+    #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
+    source = Instance(SamplesGenerator)
 
     #: List of filter coefficients for all filters
     sos = Property()
@@ -1850,6 +1867,9 @@ class WriteWAV(TimeInTimeOut):
     `*.wav` file.
     """
 
+    #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
+    source = Instance(SamplesGenerator)
+
     #: Name of the file to be saved. If none is given, the name will be
     #: automatically generated from the sources.
     name = File(filter=['*.wav'], desc='name of wave file')
@@ -1912,8 +1932,11 @@ class WriteWAV(TimeInTimeOut):
         wf.close()
 
 
-class WriteH5(TimeInTimeOut):
+class WriteH5(TimeOut):
     """Saves time signal as `*.h5` file."""
+
+    #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
+    source = Instance(SamplesGenerator)
 
     #: Name of the file to be saved. If none is given, the name will be
     #: automatically generated from a time stamp.
@@ -2015,11 +2038,14 @@ class WriteH5(TimeInTimeOut):
         f5h.close()
 
 
-class TimeConvolve(TimeInTimeOut):
+class TimeConvolve(TimeOut):
     """Uniformly partitioned overlap-save method (UPOLS) for fast convolution in the frequency domain.
 
     See :cite:`Wefers2015` for details.
     """
+
+    #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
+    source = Instance(SamplesGenerator)
 
     #: Convolution kernel in the time domain.
     #: The second dimension of the kernel array has to be either 1 or match :attr:`~SamplesGenerator.numchannels`.

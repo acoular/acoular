@@ -21,7 +21,7 @@ import numpy as np
 from scipy import fft
 from traits.api import Bool, CArray, Either, Instance, Int, Property, Trait, cached_property
 
-from .base import SpectraGenerator, SpectraInSpectraOut, SpectraInTimeOut, TimeInSpectraOut
+from .base import SpectraGenerator, SpectraOut, TimeOut, SamplesGenerator
 from .fastFuncs import calcCSM
 from .internal import digest
 from .spectra import BaseSpectra
@@ -29,13 +29,16 @@ from .spectra import BaseSpectra
 CPU_COUNT = multiprocessing.cpu_count()
 
 
-class RFFT(BaseSpectra, TimeInSpectraOut):
+class RFFT(BaseSpectra, SpectraOut):
     """Provides the one-sided Fast Fourier Transform (FFT) for real-valued multichannel time data.
 
     The FFT is calculated block-wise, i.e. the input data is divided into blocks of length
     :attr:`block_size` and the FFT is calculated for each block. Optionally, a window function
     can be applied to the data before the FFT calculation via the :attr:`window` attribute.
     """
+
+    #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
+    source = Instance(SamplesGenerator)
 
     #: Number of workers to use for the FFT calculation
     workers = Int(CPU_COUNT, desc='number of workers to use')
@@ -144,9 +147,10 @@ class RFFT(BaseSpectra, TimeInSpectraOut):
             yield fftdata[: j + 1]
 
 
-class IRFFT(SpectraInTimeOut):
+class IRFFT(TimeOut):
     """Calculates the inverse Fast Fourier Transform (IFFT) for one-sided multi-channel spectra."""
 
+    #: Data source; :class:`~acoular.base.SpectraGenerator` or derived object.
     source = Instance(SpectraGenerator)
 
     #: Number of workers to use for the IFFT calculation
@@ -253,10 +257,10 @@ class IRFFT(SpectraInTimeOut):
                 )
 
 
-class AutoPowerSpectra(SpectraInSpectraOut):
+class AutoPowerSpectra(SpectraOut):
     """Calculates the real-valued auto-power spectra."""
 
-    #: Data source; either of :class:`~acoular.base.SpectraGenerator`
+    #: Data source; :class:`~acoular.base.SpectraGenerator` or derived object.
     source = Instance(SpectraGenerator)
 
     #: Scaling method, either None or 'psd' (Power Spectral Density).

@@ -47,7 +47,7 @@ from numpy.linalg import norm
 from traits.api import Bool, CArray, Delegate, Enum, Float, Instance, Int, List, Property, Range, Trait, cached_property
 from traits.trait_errors import TraitError
 
-from .base import TimeInTimeOut
+from .base import SamplesGenerator, TimeOut
 from .fbeamform import SteeringVector
 from .grids import RectGrid
 
@@ -92,10 +92,13 @@ def const_power_weight(bf):
 possible_weights = {'none': None, 'power': const_power_weight}
 
 
-class BeamformerTime(TimeInTimeOut):
+class BeamformerTime(TimeOut):
     """Provides a basic time domain beamformer with time signal output
     for a spatially fixed grid.
     """
+
+    #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
+    source = Instance(SamplesGenerator)
 
     # Instance of :class:`~acoular.fbeamform.SteeringVector` or its derived classes
     # that contains information about the steering vector. This is a private trait.
@@ -845,8 +848,11 @@ class BeamformerCleantSqTraj(BeamformerCleantTraj, BeamformerTimeSq):
         return digest(self)
 
 
-class IntegratorSectorTime(TimeInTimeOut):
+class IntegratorSectorTime(TimeOut):
     """Provides an Integrator in the time domain."""
+
+    #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
+    source = Instance(SamplesGenerator)
 
     #: :class:`~acoular.grids.RectGrid` object that provides the grid locations.
     grid = Trait(RectGrid, desc='beamforming grid')
