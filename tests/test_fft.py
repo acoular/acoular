@@ -4,17 +4,19 @@ import pytest
 
 
 def create_source(numsamples, sample_freq=64):
-    data = ac.WNoiseGenerator(sample_freq = sample_freq, numsamples = numsamples,
-        ).signal()[:,np.newaxis]
+    data = ac.WNoiseGenerator(
+        sample_freq=sample_freq,
+        numsamples=numsamples,
+    ).signal()[:, np.newaxis]
 
     return ac.TimeSamples(
-        data = data,
-        sample_freq = sample_freq,
-        )
+        data=data,
+        sample_freq=sample_freq,
+    )
+
 
 class TestFFT:
-
-    @pytest.mark.parametrize("num", [8, 16])
+    @pytest.mark.parametrize('num', [8, 16])
     def test_equal_in_out(self, num):
         source = create_source(numsamples=num)
         data = next(source.result(num))
