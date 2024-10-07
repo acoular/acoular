@@ -92,7 +92,8 @@ class Average(InOut):
     #: Sampling frequency of the output signal, is set automatically.
     sample_freq = Property(depends_on='source.sample_freq, naverage')
 
-    #: Number of samples of the output signal, is set automatically.
+    #: Number of samples (time domain) or snapshots (frequency domain) of the output signal.
+    #: Is set automatically.
     numsamples = Property(depends_on='source.numsamples, naverage')
 
     # internal identifier

@@ -273,7 +273,7 @@ class InSpectraOut(SpectraGenerator):
     #: Number of channels in output, as given by :attr:`source`.
     numchannels = Delegate('source')
 
-    #: Number of samples in output, as given by :attr:`source`.
+    #: Number of snapshots in output, as given by :attr:`source`.
     numsamples = Delegate('source')
 
     #: Number of frequencies in output
@@ -389,7 +389,7 @@ class InOut(SamplesGenerator, SpectraGenerator):
     #: Number of channels in output, as given by :attr:`source`.
     numchannels = Delegate('source')
 
-    #: Number of samples in output, as given by :attr:`source`.
+    #: Number of samples / snapshots in output, as given by :attr:`source`.
     numsamples = Delegate('source')
 
     # internal identifier

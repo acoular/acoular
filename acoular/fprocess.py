@@ -30,7 +30,12 @@ CPU_COUNT = multiprocessing.cpu_count()
 
 
 class RFFT(BaseSpectra, TimeInSpectraOut):
-    """Provides the one-sided Fast Fourier Transform (FFT) for real-valued multichannel time data."""
+    """Provides the one-sided Fast Fourier Transform (FFT) for real-valued multichannel time data.
+
+    The FFT is calculated block-wise, i.e. the input data is divided into blocks of length
+    :attr:`block_size` and the FFT is calculated for each block. Optionally, a window function
+    can be applied to the data before the FFT calculation via the :attr:`window` attribute.
+    """
 
     #: Number of workers to use for the FFT calculation
     workers = Int(CPU_COUNT, desc='number of workers to use')
@@ -49,9 +54,13 @@ class RFFT(BaseSpectra, TimeInSpectraOut):
     #: Number of frequencies in the output.
     numfreqs = Property(depends_on='_block_size')
 
+    #: Number of snapshots in the output.
+    numsamples = Property(depends_on='source.numsamples, _block_size')
+
     #: 1-D array of FFT sample frequencies.
     freqs = Property()
 
+    # internal block size variable
     _block_size = Int(1024, desc='block size of the FFT')
 
     # internal identifier
@@ -61,8 +70,15 @@ class RFFT(BaseSpectra, TimeInSpectraOut):
     def _get_digest(self):
         return digest(self)
 
+    @cached_property
     def _get_numfreqs(self):
         return int(self.block_size / 2 + 1)
+
+    @cached_property
+    def _get_numsamples(self):
+        if self.source.numsamples >= 0:
+            return int(np.floor(self.source.numsamples / self.block_size))
+        return -1
 
     def _get_block_size(self):
         return self._block_size
@@ -129,6 +145,8 @@ class RFFT(BaseSpectra, TimeInSpectraOut):
 
 
 class IRFFT(SpectraInTimeOut):
+    """Calculates the inverse Fast Fourier Transform (IFFT) for one-sided multi-channel spectra."""
+
     source = Instance(SpectraGenerator)
 
     #: Number of workers to use for the IFFT calculation
@@ -138,11 +156,19 @@ class IRFFT(SpectraInTimeOut):
     #: Default is 64 bit.
     precision = Trait('float64', 'float32', desc='precision of the time signal after the ifft')
 
+    #: Number of time samples in the output.
+    numsamples = Property(depends_on='source.numsamples, source._block_size')
+
     # internal time signal buffer to handle arbitrary output block sizes
     _buffer = CArray(desc='signal buffer')
 
     # internal identifier
     digest = Property(depends_on=['source.digest', 'scaling', 'precision', '_block_size', 'window', 'overlap'])
+
+    def _get_numsamples(self):
+        if self.source.numsamples >= 0:
+            return int(self.source.numsamples * self.source.block_size)
+        return -1
 
     def _fill_buffer(self, size):
         """Generator that fills the signal buffer."""
@@ -188,6 +214,21 @@ class IRFFT(SpectraInTimeOut):
                     source_empty = True
                     break
 
+    def _validate(self):
+        if not self.source.block_size or self.source.block_size < 0:
+            msg = (
+                f'Source of class {self.__class__.__name__} has an unknown blocksize: {self.source.block_size}.'
+                'This is likely due to incomplete spectral data from which the inverse FFT cannot be calculated.'
+            )
+        elif (self.source.numfreqs - 1) * 2 != self.source.block_size:
+            msg = (
+                f'Block size must be 2*(numfreqs-1) but is {self.source.block_size}.'
+                'This is likely due to incomplete spectral data from which the inverse FFT cannot be calculated.'
+            )
+        elif self.source.block_size % 2 != 0:
+            msg = f'Block size must be even but is {self.source.block_size}.'
+        raise ValueError(msg)
+
     def result(self, num):
         """Python generator that yields the output block-wise.
 
@@ -202,6 +243,7 @@ class IRFFT(SpectraInTimeOut):
         numpy.ndarray
             Yields blocks of shape (num, numchannels).
         """
+        self._validate()
         if num != self.source.block_size:
             yield from self._buffered_result(num)
         else:
@@ -226,6 +268,13 @@ class AutoPowerSpectra(SpectraInSpectraOut):
 
     #: The floating-number-precision of entries, corresponding to numpy dtypes. Default is 64 bit.
     precision = Trait('float64', 'float32', desc='floating-number-precision')
+
+    # internal identifier
+    digest = Property(depends_on=['source.digest', 'precision', 'scaling', 'single_sided'])
+
+    @cached_property
+    def _get_digest(self):
+        return digest(self)
 
     def _get_scaling_value(self):
         scale = 1 / self.block_size**2
@@ -256,6 +305,13 @@ class AutoPowerSpectra(SpectraInSpectraOut):
 
 
 class CrossPowerSpectra(AutoPowerSpectra):
+    """Calculates the complex-valued auto- and cross-power spectra.
+
+    Receives the complex-valued spectra from the source and returns the cross-spectral matrix (CSM) in a flattened
+    representation (i.e. the auto- and cross-power spectra are concatenated along the last axis).
+    If :attr:`calc_mode` is 'full', the full CSM is calculated, if 'upper', only the upper triangle is calculated.
+    """
+
     #: Data source; :class:`~acoular.base.SpectraGenerator` or derived object.
     source = Trait(SpectraGenerator)
 
@@ -275,7 +331,7 @@ class CrossPowerSpectra(AutoPowerSpectra):
     numchannels = Property(depends_on='source.numchannels')
 
     # internal identifier
-    digest = Property(depends_on=['source.digest', 'precision', 'calc_mode', 'scaling'])
+    digest = Property(depends_on=['source.digest', 'precision', 'scaling', 'single_sided', 'calc_mode'])
 
     @cached_property
     def _get_numchannels(self):
@@ -320,7 +376,7 @@ class CrossPowerSpectra(AutoPowerSpectra):
                     csm_lower = csm_upper.conj().transpose(0, 2, 1)
                     csm_flat[i] = csm_lower[:, :nc].reshape(-1)
                 csm_upper[...] = 0  # calcCSM adds cummulative
-            yield csm_flat * scale
+            yield csm_flat[: i + 1] * scale
 
 
 class FFTSpectra(RFFT):
