@@ -17,7 +17,7 @@ from warnings import warn
 
 import numpy as np
 from scipy import fft
-from traits.api import Bool, CArray, Enum, Instance, Int, Property, Trait, cached_property
+from traits.api import Bool, CArray, Enum, Instance, Int, Property, Trait, cached_property, Union
 
 from .base import SamplesGenerator, SpectraGenerator, SpectraOut, TimeOut
 from .fastFuncs import calcCSM
@@ -37,9 +37,13 @@ class RFFT(BaseSpectra, SpectraOut):
     #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
     source = Instance(SamplesGenerator)
 
-    #: Number of workers to use for the FFT calculation. Default is -1, which means
-    #: all available logical CPUs (``numpy.fft.rfft`` implementation wraps around from ``os.cpu_count()``).
-    workers = Int(-1, desc='number of workers to use')
+    #: Number of workers to use for the FFT calculation. If negative values are used,
+    #: all available logical CPUs will be considered (``scipy.fft.rfft`` implementation wraps around from ``os.cpu_count()``).
+    #: Default is `None` (handled by scipy)
+    workers = Union(
+        Int(), None,
+        default_value=None,
+        desc='number of workers to use')
 
     #: Scaling method, either 'amplitude', 'energy' or :code:`none`.
     #: Default is :code:`none`.
@@ -151,9 +155,13 @@ class IRFFT(TimeOut):
     #: Data source; :class:`~acoular.base.SpectraGenerator` or derived object.
     source = Instance(SpectraGenerator)
 
-    #: Number of workers to use for the FFT calculation. Default is -1, which means
-    #: all available logical CPUs (``numpy.fft.irfft`` implementation wraps around from ``os.cpu_count()``).
-    workers = Int(-1, desc='number of workers to use')
+    #: Number of workers to use for the FFT calculation. If negative values are used,
+    #: all available logical CPUs will be considered (``scipy.fft.rfft`` implementation wraps around from ``os.cpu_count()``).
+    #: Default is `None` (handled by scipy)
+    workers = Union(
+        Int(), None,
+        default_value=None,
+        desc='number of workers to use')
 
     #: The floating-number-precision of the resulting time signals, corresponding to numpy dtypes.
     #: Default is 64 bit.
