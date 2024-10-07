@@ -6,15 +6,16 @@
 .. autosummary::
     :toctree: generated/
 
-    FFTSpectra
     RFFT
     IRFFT
     AutoPowerSpectra
     CrossPowerSpectra
+    FFTSpectra
 """
 
 import contextlib
 import multiprocessing
+from warnings import warn
 
 import numpy as np
 from scipy import fft
@@ -28,7 +29,7 @@ from .spectra import BaseSpectra
 CPU_COUNT = multiprocessing.cpu_count()
 
 
-class FFTSpectra(BaseSpectra, TimeInSpectraOut):
+class RFFT(BaseSpectra, TimeInSpectraOut):
     """Provides the one-sided Fast Fourier Transform (FFT) for real-valued multichannel time data."""
 
     #: Number of workers to use for the FFT calculation
@@ -125,12 +126,6 @@ class FFTSpectra(BaseSpectra, TimeInSpectraOut):
                 yield fftdata
         if j < num - 1:  # yield remaining fft spectra
             yield fftdata[: j + 1]
-
-
-# alias for FFTSpectra
-RFFT = FFTSpectra
-RFFT.__name__ = 'RFFT'
-RFFT.__doc__ = """Alias for :class:`~acoular.fprocess.FFTSpectra`."""
 
 
 class IRFFT(SpectraInTimeOut):
@@ -326,3 +321,22 @@ class CrossPowerSpectra(AutoPowerSpectra):
                     csm_flat[i] = csm_lower[:, :nc].reshape(-1)
                 csm_upper[...] = 0  # calcCSM adds cummulative
             yield csm_flat * scale
+
+
+class FFTSpectra(RFFT):
+    """Provides the one-sided Fast Fourier Transform (FFT) for multichannel time data.
+
+    Alias for :class:`~acoular.fprocess.RFFT`.
+
+    .. deprecated:: 24.10
+        Using :class:`~acoular.fprocess.FFTSpectra` is deprecated and will be removed in Acoular
+        version 25.01. Use :class:`~acoular.fprocess.RFFT` instead.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        warn(
+            'Using FFTSpectra is deprecated and will be removed in Acoular version 25.01. Use class RFFT instead.',
+            DeprecationWarning,
+            stacklevel=2,
+        )
