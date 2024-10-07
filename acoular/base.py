@@ -417,7 +417,20 @@ class InOut(SamplesGenerator, SpectraGenerator):
         yield from self.source.result(num)
 
 
-# alias for the previously existing class TimeInOut
-TimeInOut = TimeInTimeOut
-TimeInOut.__doc__ = """Alias for :class:`~acoular.base.TimeInTimeOut`."""
-TimeInOut.__name__ = 'TimeInOut'
+class TimeInOut(TimeInTimeOut):
+    """Deprecated alias for :class:`~acoular.base.TimeInTimeOut`.
+
+    .. deprecated:: 24.10
+        Using :class:`~acoular.base.TimeInOut` is deprecated and will be removed in Acoular 25.01.
+        Use :class:`~acoular.base.TimeInTimeOut` instead.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        import warnings
+
+        warnings.warn(
+            'TimeInOut is deprecated and will be removed in Acoular 25.01. Use TimeInTimeOut instead.',
+            DeprecationWarning,
+            stacklevel=2,
+        )

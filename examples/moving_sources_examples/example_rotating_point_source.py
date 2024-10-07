@@ -77,13 +77,13 @@ s1 = ac.SineGenerator(sample_freq=sfreq, numsamples=nsamples, freq=freq)
 
 # %%
 # Define the moving source and one fixed source and mix their signals.
-# The simulation output is cached by the :class:`~acoular.process.TimeCache` class.
+# The simulation output is cached by the :class:`~acoular.process.Cache` class.
 
 p0 = ac.MovingPointSource(signal=s1, mics=m, trajectory=tr1)
 # t = p0 # use only moving source
 p1 = ac.PointSource(signal=n1, mics=m, loc=(0, R, Z))
 t = ac.Mixer(source=p0, sources=[p1])
-cached_mix = ac.TimeCache(source=t)
+cached_mix = ac.Cache(source=t)
 
 # t = p1 # use only fix source
 
@@ -107,8 +107,8 @@ st = ac.SteeringVector(grid=g, mics=m)
 
 fi = ac.FiltFiltOctave(source=cached_mix, band=freq, fraction='Third octave')
 bt = ac.BeamformerTimeSq(source=fi, steer=st, r_diag=True)
-avgt = ac.TimeAverage(source=bt, naverage=int(sfreq * tmax / 16))  # 16 single images
-cacht = ac.TimeCache(source=avgt)  # cache to prevent recalculation
+avgt = ac.Average(source=bt, naverage=int(sfreq * tmax / 16))  # 16 single images
+cacht = ac.Cache(source=avgt)  # cache to prevent recalculation
 
 # %%
 # Plot single frames
@@ -151,8 +151,8 @@ g1 = ac.RectGrid(
 st1 = ac.SteeringVector(grid=g1, mics=m)
 # beamforming with trajectory (rvec axis perpendicular to trajectory)
 bts = ac.BeamformerTimeSqTraj(source=fi, steer=st1, trajectory=tr, rvec=np.array((0, 0, 1.0)))
-avgts = ac.TimeAverage(source=bts, naverage=int(sfreq * tmax / 16))  # 16 single images
-cachts = ac.TimeCache(source=avgts)  # cache to prevent recalculation
+avgts = ac.Average(source=bts, naverage=int(sfreq * tmax / 16))  # 16 single images
+cachts = ac.Cache(source=avgts)  # cache to prevent recalculation
 
 # %%
 # Plot single frames
@@ -181,8 +181,8 @@ tight_layout()
 # beamforming with trajectory (rvec axis perpendicular to trajectory)
 
 bct = ac.BeamformerCleantSqTraj(source=fi, steer=st1, trajectory=tr, rvec=np.array((0, 0, 1.0)), n_iter=5)
-avgct = ac.TimeAverage(source=bct, naverage=int(sfreq * tmax / 16))  # 16 single images
-cachct = ac.TimeCache(source=avgct)  # cache to prevent recalculation
+avgct = ac.Average(source=bct, naverage=int(sfreq * tmax / 16))  # 16 single images
+cachct = ac.Cache(source=avgct)  # cache to prevent recalculation
 
 # %%
 # Plot single frames

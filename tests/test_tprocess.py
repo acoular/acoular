@@ -23,7 +23,7 @@ t1.invalid_channels = invalid  # use four channels
 test_list = (
     'TimeInOut()',
     'TimePower()',
-    'TimeAverage()',
+    'Average()',
     'TimeCumAverage()',
     'TimeReverse()',
     'Filter()',

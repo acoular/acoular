@@ -9,6 +9,7 @@ classes to lift the traitsui requirement for the Acoular package.
 from traitsui.api import Item, View
 from traitsui.menu import OKCancelButtons
 
+from .base import TimeInTimeOut
 from .calib import Calib
 from .environments import GeneralFlowEnvironment, OpenJet, RotatingFlow, SlotJet, UniformFlowEnvironment
 from .fbeamform import (
@@ -27,10 +28,11 @@ from .fbeamform import (
 )
 from .grids import RectGrid, RectGrid3D
 from .microphones import MicGeom
+from .process import Average
 from .sources import MaskedTimeSamples, SourceMixer, TimeSamples
 from .spectra import PowerSpectra
 from .tbeamform import BeamformerTime, BeamformerTimeSq, BeamformerTimeSqTraj, BeamformerTimeTraj, IntegratorSectorTime
-from .tprocess import FiltFiltOctave, InTimeOut, TimeAverage, WriteH5, WriteWAV
+from .tprocess import FiltFiltOctave, WriteH5, WriteWAV
 from .trajectory import Trajectory
 
 MicGeom.class_trait_view(
@@ -236,14 +238,14 @@ RotatingFlow.class_trait_view(
     ),
 )
 
-InTimeOut.class_trait_view(
+TimeInTimeOut.class_trait_view(
     'traits_view',
     View(
         Item('source', style='custom'),
     ),
 )
 
-TimeAverage.class_trait_view(
+Average.class_trait_view(
     'traits_view',
     View(
         [

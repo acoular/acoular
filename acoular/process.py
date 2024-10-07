@@ -1,17 +1,16 @@
 # ------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
-"""Implements general purpose blockwise processing methods.
+"""Implements general purpose blockwise processing methods independent of the domain (time or frequency).
 
 .. autosummary::
     :toctree: generated/
 
-    TimeAverage
     Average
-    TimeCumAverage
-    CumAverage
-    TimeCache
+    Cache
     SampleSplitter
+    TimeAverage
+    TimeCache
 """
 
 import threading
@@ -19,7 +18,6 @@ from collections import deque
 from inspect import currentframe
 from warnings import warn
 
-import numpy as np
 from traits.api import Bool, Dict, Instance, Int, Property, Trait, cached_property, on_trait_change
 
 from .base import Generator, InOut
@@ -39,15 +37,40 @@ class LockedGenerator:
         self.it = it
         self.lock = threading.Lock()
 
-    def __next__(self):  # this function implementation is not python 2 compatible!
+    def __next__(self):
         with self.lock:
             return self.it.__next__()
 
 
-class TimeAverage(InOut):
-    """Calculates time-dependent average of the signal."""
+class Average(InOut):
+    """Calculates the average across time samples or frequency snapshots.
 
-    #: Number of samples to average over, defaults to 64.
+    Depending on the source type, the average is performed differently:
+    If the source is a time domain source (e.g. derived from :class:`~acoular.base.SamplesGenerator`),
+    the average is calculated over a certain number of time samples given by :attr:`naverage`.
+    If the source is a frequency domain source (e.g. derived from :class:`~acoular.base.SpectraGenerator`),
+    the average is calculated over a certain number of snapshots given by :attr:`naverage`.
+
+    Example:
+    --------
+        For estimate the RMS of a time signal, the average of the squared signal is calculated:
+
+        >>> import acoular as ac
+        >>> import numpy as np
+        >>>
+        >>> signal = ac.WNoiseGenerator(sample_freq=51200, numsamples=51200, rms=2.0).signal()
+        >>> ts = ac.TimeSamples(data=signal[:, np.newaxis], sample_freq=51200)
+        >>> tp = ac.TimePower(source=ts)
+        >>> avg = ac.Average(source=tp, naverage=51200)
+        >>> mean_squared_value = next(avg.result(num=1))
+        >>> rms = np.sqrt(mean_squared_value)[0, 0]
+        >>> print(rms)
+        1.9931319970556145
+
+    """
+
+    #: Number of samples (time domain source) or snapshots (frequency domain source)
+    #: to average over, defaults to 64.
     naverage = Int(64, desc='number of samples to average over')
 
     #: Sampling frequency of the output signal, is set automatically.
@@ -99,48 +122,8 @@ class TimeAverage(InOut):
                 yield temp[: nso * nav].reshape((nso, -1, nc)).mean(axis=1)
 
 
-Average = TimeAverage
-Average.__doc__ = """Alias for :class:`acoular.process.TimeAverage`."""
-Average.__name__ = 'Average'
-
-
-class TimeCumAverage(InOut):
-    """Calculates cumulative average of the signal, useful for Leq."""
-
-    def result(self, num):
-        """Python generator that yields the output block-wise.
-
-        Parameters
-        ----------
-        num : integer
-            This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block).
-
-        Returns
-        -------
-        Cumulative average of the output of source.
-            Yields samples in blocks of shape (num, numchannels).
-            The last block may be shorter than num.
-
-        """
-        count = (np.arange(num) + 1)[:, np.newaxis]
-        for i, temp in enumerate(self.source.result(num)):
-            ns, nc = temp.shape
-            if not i:
-                accu = np.zeros((1, nc))
-            temp = (accu * (count[0] - 1) + np.cumsum(temp, axis=0)) / count[:ns]
-            accu = temp[-1]
-            count += ns
-            yield temp
-
-
-CumAverage = TimeCumAverage
-CumAverage.__doc__ = """Alias for :class:`acoular.process.TimeCumAverage`."""
-CumAverage.__name__ = 'CumAverage'
-
-
-class TimeCache(InOut):
-    """Caches time signal in cache file."""
+class Cache(InOut):
+    """Caches source signals in cache file."""
 
     # basename for cache
     basename = Property(depends_on='digest')
@@ -395,3 +378,37 @@ class SampleSplitter(InOut):
         else:
             msg = 'Maximum size of block buffer is reached!'
             raise OSError(msg)
+
+
+class TimeAverage(Average):
+    """Calculates average of the signal (Alias for :class:`acoular.process.Average`).
+
+    .. deprecated:: 24.10
+        Using :class:`~acoular.process.TimeAverage` is deprecated and will be removed in Acoular
+        version 25.01. Use :class:`~acoular.process.Average` instead.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        warn(
+            'Using TimeAverage is deprecated and will be removed in Acoular version 25.01. Use Average instead.',
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
+
+class TimeCache(Cache):
+    """Caches source signals in cache file (Alias for :class:`acoular.process.Cache`).
+
+    .. deprecated:: 24.10
+        Using :class:`~acoular.process.TimeCache` is deprecated and will be removed in Acoular
+        version 25.01. Use :class:`~acoular.process.Cache` instead.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        warn(
+            'Using TimeCache is deprecated and will be removed in Acoular version 25.01. Use Cache instead.',
+            DeprecationWarning,
+            stacklevel=2,
+        )

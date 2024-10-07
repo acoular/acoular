@@ -16,6 +16,7 @@
     SpatialInterpolatorConstantRotation
     Mixer
     TimePower
+    TimeCumAverage
     TimeReverse
     Filter
     FilterBank
@@ -47,6 +48,7 @@ from numpy import (
     asarray,
     ceil,
     concatenate,
+    cumsum,
     delete,
     empty,
     empty_like,
@@ -114,7 +116,7 @@ class MaskedTimeInOut(TimeInTimeOut):
     This class serves as intermediary to define (in)valid
     channels and samples for any
     :class:`~acoular.sources.SamplesGenerator` (or derived) object.
-    It gets samples from :attr:`~acoular.base.InTimeOut.source`
+    It gets samples from :attr:`~acoular.base.TimeInTimeOut.source`
     and generates output via the generator :meth:`result`.
     """
 
@@ -1331,6 +1333,36 @@ class TimePower(TimeInTimeOut):
         """
         for temp in self.source.result(num):
             yield temp * temp
+
+
+class TimeCumAverage(TimeInTimeOut):
+    """Calculates cumulative average of the signal, useful for Leq."""
+
+    def result(self, num):
+        """Python generator that yields the output block-wise.
+
+        Parameters
+        ----------
+        num : integer
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block).
+
+        Returns
+        -------
+        Cumulative average of the output of source.
+            Yields samples in blocks of shape (num, numchannels).
+            The last block may be shorter than num.
+
+        """
+        count = (arange(num) + 1)[:, newaxis]
+        for i, temp in enumerate(self.source.result(num)):
+            ns, nc = temp.shape
+            if not i:
+                accu = zeros((1, nc))
+            temp = (accu * (count[0] - 1) + cumsum(temp, axis=0)) / count[:ns]
+            accu = temp[-1]
+            count += ns
+            yield temp
 
 
 class TimeReverse(TimeInTimeOut):

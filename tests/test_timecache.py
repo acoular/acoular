@@ -13,7 +13,7 @@ num_samples = 7
 block_size = 5
 
 
-class TimeCacheTest(unittest.TestCase):
+class CacheTest(unittest.TestCase):
     global_caching_configs = ['individual', 'all', 'none', 'readonly', 'overwrite']
 
     def test_valid_cache_result(self):
@@ -23,7 +23,7 @@ class TimeCacheTest(unittest.TestCase):
             with self.subTest(conf):
                 sig = ac.WNoiseGenerator(numsamples=num_samples)
                 ps = ac.PointSource(signal=sig, mics=micgeom)
-                tc = ac.TimeCache(source=ps)
+                tc = ac.Cache(source=ps)
                 for i, (block_c, block_nc) in enumerate(zip(tc.result(block_size), ps.result(block_size))):
                     np.testing.assert_array_almost_equal(block_c, block_nc)
                     if i == 0:

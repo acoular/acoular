@@ -71,7 +71,7 @@ from .grids import (
     Sector,
 )
 from .microphones import MicGeom
-from .process import Average, CumAverage, SampleSplitter, TimeAverage, TimeCache, TimeCumAverage
+from .process import Average, Cache, SampleSplitter, TimeAverage, TimeCache
 from .sdinput import SoundDeviceSamplesGenerator
 from .signals import (
     FiltWNoiseGenerator,
@@ -123,6 +123,7 @@ from .tprocess import (
     SpatialInterpolatorConstantRotation,
     SpatialInterpolatorRotation,
     TimeConvolve,
+    TimeCumAverage,
     TimeExpAverage,
     TimePower,
     TimeReverse,

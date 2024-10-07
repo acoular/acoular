@@ -168,7 +168,7 @@ Upcoming Release
         * New filter classes: :class:`~acoular.tprocess.TimeExpAverage`, :class:`~acoular.tprocess.FiltFreqWeight`, :class:`~acoular.tprocess.OctaveFilterBank`
         * Demo script is now part of module (see :doc:`../get_started/index` for usage)
     * New class for processing sound card input: :class:`~acoular.sdinput.SoundDeviceSamplesGenerator`
-    * New class for cumulative averaging: :class:`~acoular.process.TimeCumAverage`
+    * New class for cumulative averaging: :class:`~acoular.tprocess.TimeCumAverage`
     * New grid classes :class:`~acoular.grids.ImportGrid`, :class:`~acoular.grids.LineGrid`, :class:`~acoular.grids.MergeGrid`
     * New versatile integration sector classes :class:`~acoular.grids.RectSector`, :class:`~acoular.grids.CircSector`, :class:`~acoular.grids.PolySector`, :class:`~acoular.grids.ConvexSector`, :class:`~acoular.grids.MultiSector`
     * New class for mixing multiple channels :class:`~acoular.tprocess.ChannelMixer`

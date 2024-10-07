@@ -20,6 +20,7 @@ The following modules are part of Acoular:
     fprocess
     grids
     microphones
+    process
     sdinput
     signals
     sources
