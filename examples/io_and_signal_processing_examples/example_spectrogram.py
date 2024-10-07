@@ -59,12 +59,12 @@ plt.show()
 # %%
 # Create an averaged power spectrum of the signal
 #------------------------------------------------
-# To calculate the time averaged power spectrum of the signal, we use the :class:`acoular.fprocess.FreqAverage` class.
+# To calculate the time averaged power spectrum of the signal, we use the :class:`acoular.fprocess.Average` class.
 
-tavg = ac.FreqAverage(source = tp) # results in the time averaged power spectrum
+tavg = ac.Average(source = tp) # results in the time averaged power spectrum
 
 #%%
-# Plot the resulting power spectrum for different number of averages. 
+# Plot the resulting power spectrum for different number of averages.
 
 plt.figure()
 for navg in [0,10, 100, None]:
