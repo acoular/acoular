@@ -16,7 +16,6 @@
     SpatialInterpolatorConstantRotation
     Mixer
     TimePower
-    TimeAverage
     TimeReverse
     Filter
     FilterBank
@@ -25,20 +24,14 @@
     TimeExpAverage
     FiltFreqWeight
     OctaveFilterBank
-    TimeCache
-    TimeCumAverage
     WriteWAV
     WriteH5
-    SampleSplitter
     TimeConvolve
 """
 
 # imports from other packages
-import threading
 import wave
-from collections import deque
 from datetime import datetime, timezone
-from inspect import currentframe
 from os import path
 from warnings import warn
 
@@ -54,7 +47,6 @@ from numpy import (
     asarray,
     ceil,
     concatenate,
-    cumsum,
     delete,
     empty,
     empty_like,
@@ -108,11 +100,10 @@ from traits.api import (
 )
 
 # acoular imports
-from .base import InOut, SamplesGenerator, TimeInTimeOut
+from .base import SamplesGenerator, TimeInTimeOut
 from .configuration import config
 from .environments import cartToCyl, cylToCart
-from .h5cache import H5cache
-from .h5files import H5CacheFileBase, _get_h5file_class
+from .h5files import _get_h5file_class
 from .internal import digest, ldigest
 from .microphones import MicGeom
 
@@ -1342,101 +1333,6 @@ class TimePower(TimeInTimeOut):
             yield temp * temp
 
 
-class TimeAverage(InOut):
-    """Calculates time-dependent average of the signal."""
-
-    #: Number of samples to average over, defaults to 64.
-    naverage = Int(64, desc='number of samples to average over')
-
-    #: Sampling frequency of the output signal, is set automatically.
-    sample_freq = Property(depends_on='source.sample_freq, naverage')
-
-    #: Number of samples of the output signal, is set automatically.
-    numsamples = Property(depends_on='source.numsamples, naverage')
-
-    # internal identifier
-    digest = Property(depends_on=['source.digest', '__class__', 'naverage'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
-
-    @cached_property
-    def _get_sample_freq(self):
-        if self.source:
-            return 1.0 * self.source.sample_freq / self.naverage
-        return None
-
-    @cached_property
-    def _get_numsamples(self):
-        if self.source:
-            return self.source.numsamples / self.naverage
-        return None
-
-    def result(self, num):
-        """Python generator that yields the output block-wise.
-
-        Parameters
-        ----------
-        num : integer
-            This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block).
-
-        Returns
-        -------
-        Average of the output of source.
-            Yields samples in blocks of shape (num, numchannels).
-            The last block may be shorter than num.
-
-        """
-        nav = self.naverage
-        for temp in self.source.result(num * nav):
-            ns, nc = temp.shape
-            nso = int(ns / nav)
-            if nso > 0:
-                yield temp[: nso * nav].reshape((nso, -1, nc)).mean(axis=1)
-
-
-Average = TimeAverage
-Average.__doc__ = """Alias for :class:`acoular.tprocess.TimeAverage`."""
-Average.__name__ = 'Average'
-
-
-class TimeCumAverage(InOut):
-    """Calculates cumulative average of the signal, useful for Leq."""
-
-    def result(self, num):
-        """Python generator that yields the output block-wise.
-
-        Parameters
-        ----------
-        num : integer
-            This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block).
-
-        Returns
-        -------
-        Cumulative average of the output of source.
-            Yields samples in blocks of shape (num, numchannels).
-            The last block may be shorter than num.
-
-        """
-        count = (arange(num) + 1)[:, newaxis]
-        for i, temp in enumerate(self.source.result(num)):
-            ns, nc = temp.shape
-            if not i:
-                accu = zeros((1, nc))
-            temp = (accu * (count[0] - 1) + cumsum(temp, axis=0)) / count[:ns]
-            accu = temp[-1]
-            count += ns
-            yield temp
-
-
-CumAverage = TimeCumAverage
-CumAverage.__doc__ = """Alias for :class:`acoular.tprocess.TimeCumAverage`."""
-CumAverage.__name__ = 'CumAverage'
-
-
 class TimeReverse(TimeInTimeOut):
     """Calculates the time-reversed signal of a source."""
 
@@ -2085,154 +1981,6 @@ class WriteH5(TimeInTimeOut):
             yield data
             scount += anz
         f5h.close()
-
-
-class LockedGenerator:
-    """Creates a Thread Safe Iterator.
-    Takes an iterator/generator and makes it thread-safe by
-    serializing call to the `next` method of given iterator/generator.
-    """
-
-    def __init__(self, it):
-        self.it = it
-        self.lock = threading.Lock()
-
-    def __next__(self):  # this function implementation is not python 2 compatible!
-        with self.lock:
-            return self.it.__next__()
-
-
-class SampleSplitter(InOut):
-    """Distributes data blocks from source to several following objects.
-    A separate block buffer is created for each registered object in
-    (:attr:`block_buffer`) .
-    """
-
-    #: dictionary with block buffers (dict values) of registered objects (dict
-    #: keys).
-    block_buffer = Dict(key_trait=Instance(SamplesGenerator))
-
-    #: max elements/blocks in block buffers.
-    buffer_size = Int(100)
-
-    #: defines behaviour in case of block_buffer overflow. Can be set individually
-    #: for each registered object.
-    #:
-    #: * 'error': an IOError is thrown by the class
-    #: * 'warning': a warning is displayed. Possibly leads to lost blocks of data
-    #: * 'none': nothing happens. Possibly leads to lost blocks of data
-    buffer_overflow_treatment = Dict(
-        key_trait=Instance(SamplesGenerator),
-        value_trait=Trait('error', 'warning', 'none'),
-        desc='defines buffer overflow behaviour.',
-    )
-
-    # shadow trait to monitor if source deliver samples or is empty
-    _source_generator_exist = Bool(False)
-
-    # shadow trait to monitor if buffer of objects with overflow treatment = 'error'
-    # or warning is overfilled. Error will be raised in all threads.
-    _buffer_overflow = Bool(False)
-
-    # Helper Trait holds source generator
-    _source_generator = Trait()
-
-    def _create_block_buffer(self, obj):
-        self.block_buffer[obj] = deque([], maxlen=self.buffer_size)
-
-    def _create_buffer_overflow_treatment(self, obj):
-        self.buffer_overflow_treatment[obj] = 'error'
-
-    def _clear_block_buffer(self, obj):
-        self.block_buffer[obj].clear()
-
-    def _remove_block_buffer(self, obj):
-        del self.block_buffer[obj]
-
-    def _remove_buffer_overflow_treatment(self, obj):
-        del self.buffer_overflow_treatment[obj]
-
-    def _assert_obj_registered(self, obj):
-        if obj not in self.block_buffer:
-            raise OSError('calling object %s is not registered.' % obj)
-
-    def _get_objs_to_inspect(self):
-        return [obj for obj in self.buffer_overflow_treatment if self.buffer_overflow_treatment[obj] != 'none']
-
-    def _inspect_buffer_levels(self, inspect_objs):
-        for obj in inspect_objs:
-            if len(self.block_buffer[obj]) == self.buffer_size:
-                if self.buffer_overflow_treatment[obj] == 'error':
-                    self._buffer_overflow = True
-                elif self.buffer_overflow_treatment[obj] == 'warning':
-                    warn('overfilled buffer for object: %s data will get lost' % obj, UserWarning, stacklevel=1)
-
-    def _create_source_generator(self, num):
-        for obj in self.block_buffer:
-            self._clear_block_buffer(obj)
-        self._buffer_overflow = False  # reset overflow bool
-        self._source_generator = LockedGenerator(self.source.result(num))
-        self._source_generator_exist = True  # indicates full generator
-
-    def _fill_block_buffers(self):
-        next_block = next(self._source_generator)
-        [self.block_buffer[obj].appendleft(next_block) for obj in self.block_buffer]
-
-    @on_trait_change('buffer_size')
-    def _change_buffer_size(self):  #
-        for obj in self.block_buffer:
-            self._remove_block_buffer(obj)
-            self._create_block_buffer(obj)
-
-    def register_object(self, *objects_to_register):
-        """Function that can be used to register objects that receive blocks from this class."""
-        for obj in objects_to_register:
-            if obj not in self.block_buffer:
-                self._create_block_buffer(obj)
-                self._create_buffer_overflow_treatment(obj)
-
-    def remove_object(self, *objects_to_remove):
-        """Function that can be used to remove registered objects."""
-        for obj in objects_to_remove:
-            self._remove_block_buffer(obj)
-            self._remove_buffer_overflow_treatment(obj)
-
-    def result(self, num):
-        """Python generator that yields the output block-wise from block-buffer.
-
-        Parameters
-        ----------
-        num : integer
-            This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block).
-
-        Returns
-        -------
-        Samples in blocks of shape (num, numchannels).
-            Delivers a block of samples to the calling object.
-            The last block may be shorter than num.
-
-        """
-        calling_obj = currentframe().f_back.f_locals['self']
-        self._assert_obj_registered(calling_obj)
-        objs_to_inspect = self._get_objs_to_inspect()
-
-        if not self._source_generator_exist:
-            self._create_source_generator(num)
-
-        while not self._buffer_overflow:
-            if self.block_buffer[calling_obj]:
-                yield self.block_buffer[calling_obj].pop()
-            else:
-                self._inspect_buffer_levels(objs_to_inspect)
-                try:
-                    self._fill_block_buffers()
-                except StopIteration:
-                    self._source_generator_exist = False
-                    return
-        else:
-            msg = 'Maximum size of block buffer is reached!'
-            raise OSError(msg)
 
 
 class TimeConvolve(TimeInTimeOut):

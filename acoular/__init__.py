@@ -71,6 +71,7 @@ from .grids import (
     Sector,
 )
 from .microphones import MicGeom
+from .process import Average, CumAverage, SampleSplitter, TimeAverage, TimeCache, TimeCumAverage
 from .sdinput import SoundDeviceSamplesGenerator
 from .signals import (
     FiltWNoiseGenerator,
@@ -109,7 +110,6 @@ from .tbeamform import (
 )
 from .tprocess import (
     AngleTracker,
-    Average,
     ChannelMixer,
     Filter,
     FilterBank,
@@ -119,14 +119,10 @@ from .tprocess import (
     MaskedTimeInOut,
     Mixer,
     OctaveFilterBank,
-    SampleSplitter,
     SpatialInterpolator,
     SpatialInterpolatorConstantRotation,
     SpatialInterpolatorRotation,
-    TimeAverage,
-    TimeCache,
     TimeConvolve,
-    TimeCumAverage,
     TimeExpAverage,
     TimePower,
     TimeReverse,

@@ -77,7 +77,7 @@ s1 = ac.SineGenerator(sample_freq=sfreq, numsamples=nsamples, freq=freq)
 
 # %%
 # Define the moving source and one fixed source and mix their signals.
-# The simulation output is cached by the :class:`~acoular.tprocess.TimeCache` class.
+# The simulation output is cached by the :class:`~acoular.process.TimeCache` class.
 
 p0 = ac.MovingPointSource(signal=s1, mics=m, trajectory=tr1)
 # t = p0 # use only moving source

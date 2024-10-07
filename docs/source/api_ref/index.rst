@@ -46,7 +46,8 @@ Classes in Acoular and their inheritance
                 acoular.fbeamform 
                 acoular.fprocess 
                 acoular.grids 
-                acoular.microphones 
+                acoular.microphones
+                acoular.process 
                 acoular.sdinput 
                 acoular.signals 
                 acoular.sources 
