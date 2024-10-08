@@ -56,7 +56,6 @@ from numpy.linalg import norm
 # from matplotlib.path import Path
 from scipy.spatial import Delaunay
 from traits.api import (
-    Any,
     Bool,
     CArray,
     File,
@@ -67,6 +66,7 @@ from traits.api import (
     List,
     Property,
     Tuple,
+    Union,
     cached_property,
     on_trait_change,
     property_depends_on,
@@ -541,7 +541,7 @@ class RectGrid3D(RectGrid):
     nzsteps = Property(desc='number of grid points along x-axis')
 
     # Private trait for increment handling
-    _increment = Any(0.1)
+    _increment = Union(Float(), CArray(shape=(3,), dtype=float), default_value=0.1, desc='step size')
 
     #: The cell side length for the grid. This can either be a scalar (same
     #: increments in all 3 dimensions) or a (3,) array of floats with
@@ -597,21 +597,21 @@ class RectGrid3D(RectGrid):
 
     @property_depends_on('x_min, x_max, _increment')
     def _get_nxsteps(self):
-        i = abs(self.increment3D[0])
+        i = abs(self.increment) if isscalar(self.increment) else abs(self.increment[0])
         if i != 0:
             return int(round((abs(self.x_max - self.x_min) + i) / i))
         return 1
 
     @property_depends_on('y_min, y_max, _increment')
     def _get_nysteps(self):
-        i = abs(self.increment3D[1])
+        i = abs(self.increment) if isscalar(self.increment) else abs(self.increment[1])
         if i != 0:
             return int(round((abs(self.y_max - self.y_min) + i) / i))
         return 1
 
     @property_depends_on('z_min, z_max, _increment')
     def _get_nzsteps(self):
-        i = abs(self.increment3D[2])
+        i = abs(self.increment) if isscalar(self.increment) else abs(self.increment[2])
         if i != 0:
             return int(round((abs(self.z_max - self.z_min) + i) / i))
         return 1
@@ -665,9 +665,13 @@ class RectGrid3D(RectGrid):
         if z < self.z_min or z > self.z_max:
             msg = f'z-value out of range {z:f} ({self.z_min:f}, {self.z_max:f})'
             raise ValueError(msg)
-        xi = int(round((x - self.x_min) / self.increment3D[0]))
-        yi = int(round((y - self.y_min) / self.increment3D[1]))
-        zi = int(round((z - self.z_min) / self.increment3D[2]))
+        if isscalar(self.increment):
+            incx = incy = incz = self.increment
+        else:
+            incx, incy, incz = self.increment
+        xi = int(round((x - self.x_min) / incx))
+        yi = int(round((y - self.y_min) / incy))
+        zi = int(round((z - self.z_min) / incz))
         return xi, yi, zi
 
     def indices(self, x1, y1, z1, x2, y2, z2):
