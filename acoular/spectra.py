@@ -7,6 +7,7 @@
     :toctree: generated/
 
     BaseSpectra
+    FFTSpectra
     PowerSpectra
     synthetic
     PowerSpectraImport
@@ -32,6 +33,7 @@ from numpy import (
     ones,
     real,
     searchsorted,
+    sqrt,
     sum,
     zeros,
     zeros_like,
@@ -52,13 +54,13 @@ from traits.api import (
     property_depends_on,
 )
 
-from .base import SamplesGenerator
 from .calib import Calib
 from .configuration import config
 from .fastFuncs import calcCSM
 from .h5cache import H5cache
 from .h5files import H5CacheFileBase
 from .internal import digest
+from .tprocess import SamplesGenerator, TimeInOut
 
 
 class BaseSpectra(HasPrivateTraits):
@@ -103,8 +105,8 @@ class BaseSpectra(HasPrivateTraits):
         desc='number of samples per FFT block',
     )
 
-    #: The floating-number-precision of the resulting spectra, corresponding to numpy dtypes.
-    #: Default is 'complex128'.
+    #: The floating-number-precision of entries of csm, eigenvalues and
+    #: eigenvectors, corresponding to numpy dtypes. Default is 64 bit.
     precision = Trait('complex128', 'complex64', desc='precision of the fft')
 
     # internal identifier
@@ -128,7 +130,7 @@ class BaseSpectra(HasPrivateTraits):
         return None
 
     # generator that yields the time data blocks for every channel (with optional overlap)
-    def _get_source_data(self):
+    def get_source_data(self):
         bs = self.block_size
         temp = empty((2 * bs, self.numchannels))
         pos = bs
@@ -168,7 +170,7 @@ class PowerSpectra(BaseSpectra):
     #: Data source; :class:`~acoular.sources.SamplesGenerator` or derived object.
     source = Property(_source, desc='time data object')
 
-    #: The :class:`~acoular.base.SamplesGenerator` object that provides the data.
+    #: The :class:`~acoular.tprocess.SamplesGenerator` object that provides the data.
     time_data = Property(
         _source,
         desc='deprecated attribute holding the time data object. Use PowerSpectra.source instead!',
@@ -373,7 +375,7 @@ class PowerSpectra(BaseSpectra):
             else:
                 raise ValueError('Calibration data not compatible: %i, %i' % (self.calib.num_mics, t.numchannels))
         # get time data blockwise
-        for data in self._get_source_data():
+        for data in self.get_source_data():
             ft = fft.rfft(data * wind, None, 0).astype(self.precision)
             calcCSM(csm_upper, ft)  # only upper triangular part of matrix is calculated (for speed reasons)
         # create the full csm matrix via transposing and complex conj.
@@ -575,7 +577,7 @@ def synthetic(data, freqs, f, num=3):
         each grid point (the sum of all values that are contained in the band).
         Note that the frequency resolution and therefore the bandwidth
         represented by a single frequency line depends on
-        the :attr:`sampling frequency<acoular.base.SamplesGenerator.sample_freq>`
+        the :attr:`sampling frequency<acoular.tprocess.SamplesGenerator.sample_freq>`
         and used :attr:`FFT block size<acoular.spectra.PowerSpectra.block_size>`.
 
     """
