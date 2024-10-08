@@ -274,8 +274,8 @@ class BeamformerTime(TimeOut):
         # delays = empty((1,self.grid.size,numMics),dtype=fdtype)
         d_index = empty((1, self.grid.size, numMics), dtype=idtype)
         d_interp2 = empty((1, self.grid.size, numMics), dtype=fdtype)
-        steer_func(self.rm[newaxis, :, :], self.r0[newaxis, :], amp)
-        _delays(self.rm[newaxis, :, :], c, d_interp2, d_index)
+        steer_func(self.steer.rm[newaxis, :, :], self.steer.r0[newaxis, :], amp)
+        _delays(self.steer.rm[newaxis, :, :], c, d_interp2, d_index)
         amp.shape = amp.shape[1:]
         # delays.shape = delays.shape[1:]
         d_index.shape = d_index.shape[1:]
