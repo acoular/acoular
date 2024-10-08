@@ -294,7 +294,7 @@ class TimeInOut(TimeOut):
     """Deprecated alias for :class:`~acoular.base.TimeOut`.
 
     .. deprecated:: 24.10
-        Using :class:`~acoular.base.TimeInOut` is deprecated and will be removed in Acoular 25.01.
+        Using :class:`~acoular.base.TimeInOut` is deprecated and will be removed in Acoular 25.07.
         Use :class:`~acoular.base.TimeOut` instead.
     """
 
@@ -306,7 +306,7 @@ class TimeInOut(TimeOut):
         import warnings
 
         warnings.warn(
-            'TimeInOut is deprecated and will be removed in Acoular 25.01. Use TimeOut instead.',
+            'TimeInOut is deprecated and will be removed in Acoular 25.07. Use TimeOut instead.',
             DeprecationWarning,
             stacklevel=2,
         )

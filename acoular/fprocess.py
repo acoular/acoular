@@ -362,7 +362,7 @@ class FFTSpectra(RFFT):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         warn(
-            'Using FFTSpectra is deprecated and will be removed in Acoular version 25.01. Use class RFFT instead.',
+            'Using FFTSpectra is deprecated and will be removed in Acoular version 25.07. Use class RFFT instead.',
             DeprecationWarning,
             stacklevel=2,
         )

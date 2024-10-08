@@ -7,7 +7,6 @@
     :toctree: generated/
 
     BaseSpectra
-    FFTSpectra
     PowerSpectra
     synthetic
     PowerSpectraImport
@@ -33,7 +32,6 @@ from numpy import (
     ones,
     real,
     searchsorted,
-    sqrt,
     sum,
     zeros,
     zeros_like,
@@ -60,7 +58,7 @@ from .fastFuncs import calcCSM
 from .h5cache import H5cache
 from .h5files import H5CacheFileBase
 from .internal import digest
-from .tprocess import SamplesGenerator, TimeInOut
+from .tprocess import SamplesGenerator
 
 
 class BaseSpectra(HasPrivateTraits):

@@ -2066,13 +2066,13 @@ class MaskedTimeInOut(MaskedTimeOut):
 
     .. deprecated:: 24.10
         Using :class:`~acoular.tprocess.MaskedTimeInOut` is deprecated and will be removed in Acoular
-        version 25.01. Use :class:`~acoular.tprocess.MaskedTimeOut` instead.
+        version 25.07. Use :class:`~acoular.tprocess.MaskedTimeOut` instead.
     """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         warn(
-            'Using MaskedTimeInOut is deprecated and will be removed in Acoular version 25.01. Use class MaskedTimeOut instead.',
+            'Using MaskedTimeInOut is deprecated and will be removed in Acoular version 25.07. Use class MaskedTimeOut instead.',
             DeprecationWarning,
             stacklevel=2,
         )
