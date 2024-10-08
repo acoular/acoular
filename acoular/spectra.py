@@ -52,13 +52,13 @@ from traits.api import (
     property_depends_on,
 )
 
+from .base import SamplesGenerator
 from .calib import Calib
 from .configuration import config
 from .fastFuncs import calcCSM
 from .h5cache import H5cache
 from .h5files import H5CacheFileBase
 from .internal import digest
-from .tprocess import SamplesGenerator
 
 
 class BaseSpectra(HasPrivateTraits):
