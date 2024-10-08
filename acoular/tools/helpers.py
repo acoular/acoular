@@ -24,13 +24,13 @@ from acoular.spectra import synthetic
 
 def return_result(source, nmax=-1, num=128):
     """Collects the output from a
-    :meth:`SamplesGenerator.result()<acoular.tprocess.SamplesGenerator.result>`
+    :meth:`SamplesGenerator.result()<acoular.base.SamplesGenerator.result>`
     generator and returns an assembled array with all the data.
 
     Parameters
     ----------
     source: SamplesGenerator or derived object.
-        This is the  :class:`SamplesGenerator<acoular.tprocess.SamplesGenerator>` data source.
+        This is the  :class:`SamplesGenerator<acoular.base.SamplesGenerator>` data source.
     nmax: integer
         With this parameter, a maximum number of output samples can be set
         (first dimension of array). If set to -1 (default), samples are

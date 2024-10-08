@@ -659,7 +659,7 @@ class BeamformerBase(HasPrivateTraits):
             each grid point .
             Note that the frequency resolution and therefore the bandwidth
             represented by a single frequency line depends on
-            the :attr:`sampling frequency<acoular.tprocess.SamplesGenerator.sample_freq>` and
+            the :attr:`sampling frequency<acoular.base.SamplesGenerator.sample_freq>` and
             used :attr:`FFT block size<acoular.spectra.PowerSpectra.block_size>`.
 
         """
@@ -951,7 +951,7 @@ class BeamformerEig(BeamformerBase):
     """
 
     #: Number of component to calculate:
-    #: 0 (smallest) ... :attr:`~acoular.tprocess.SamplesGenerator.numchannels`-1;
+    #: 0 (smallest) ... :attr:`~acoular.base.SamplesGenerator.numchannels`-1;
     #: defaults to -1, i.e. numchannels-1
     n = Int(-1, desc='No. of eigenvalue')
 
