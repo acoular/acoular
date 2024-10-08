@@ -72,6 +72,7 @@ tests = [
     "sounddevice",
     "traitsui",
     "h5py",
+    "PyYAML",
 ]
 
 dev = [

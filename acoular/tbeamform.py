@@ -274,13 +274,13 @@ class BeamformerTime(TimeOut):
         # delays = empty((1,self.grid.size,numMics),dtype=fdtype)
         d_index = empty((1, self.grid.size, numMics), dtype=idtype)
         d_interp2 = empty((1, self.grid.size, numMics), dtype=fdtype)
-        steer_func(self.rm[newaxis, :, :], self.r0[newaxis, :], amp)
-        _delays(self.rm[newaxis, :, :], c, d_interp2, d_index)
+        steer_func(self.steer.rm[newaxis, :, :], self.steer.r0[newaxis, :], amp)
+        _delays(self.steer.rm[newaxis, :, :], c, d_interp2, d_index)
         amp.shape = amp.shape[1:]
         # delays.shape = delays.shape[1:]
         d_index.shape = d_index.shape[1:]
         d_interp2.shape = d_interp2.shape[1:]
-        max_sample_delay = int((self.rm / c).max()) + 2
+        max_sample_delay = int((self.steer.rm / c).max()) + 2
         weights = self._get_weights()
 
         buffer = SamplesBuffer(
@@ -320,7 +320,7 @@ class BeamformerTime(TimeOut):
                         p_res_copy[t_ind[: num + 1, m], m] -= self.damp * interp(
                             t_ind[: num + 1, m],
                             t_float[:num, m],
-                            Phi[:num, imax] * self.r0[imax] / self.rm[imax, m],
+                            Phi[:num, imax] * self.steer.r0[imax] / self.steer.rm[imax, m],
                         )
                     nextPhi, nextAutopow = self._delay_and_sum(num, p_res_copy, d_interp2, d_index, amp)
                     if self.r_diag:
@@ -439,7 +439,7 @@ class BeamformerTimeTraj(BeamformerTime):
             return array([a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]])
 
         start_t = 0.0
-        gpos = self.grid.pos()
+        gpos = self.grid.gpos
         trajg = self.trajectory.traj(start_t, delta_t=1 / self.source.sample_freq)
         trajg1 = self.trajectory.traj(start_t, delta_t=1 / self.source.sample_freq, der=1)
         rflag = (self.rvec == 0).all()  # flag translation vs. rotation

@@ -210,11 +210,11 @@ class SteeringVector(HasPrivateTraits):
             if self.ref > 0:
                 return full((self.grid.size,), self.ref)
             return self.env._r(self.grid.pos())
-        return self.env._r(self.grid.pos(), self.ref[:, newaxis])
+        return self.env._r(self.grid.gpos, self.ref[:, newaxis])
 
     @property_depends_on('grid.digest, mics.digest, env.digest')
     def _get_rm(self):
-        return atleast_2d(self.env._r(self.grid.pos(), self.mics.mpos))
+        return atleast_2d(self.env._r(self.grid.gpos, self.mics.mpos))
 
     @cached_property
     def _get_digest(self):
