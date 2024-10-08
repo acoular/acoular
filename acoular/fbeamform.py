@@ -1399,7 +1399,8 @@ class BeamformerDamas(BeamformerBase):
 
     def _set_beamformer(self, beamformer):
         msg = (
-            "Deprecated use of 'beamformer' trait. Please set :attr:`freq_data`, :attr:`steer`, :attr:`r_diag` directly."
+            f"Deprecated use of 'beamformer' trait in class {self.__class__.__name__}. "
+            'Please set :attr:`freq_data`, :attr:`steer`, :attr:`r_diag` directly. '
             "Using the 'beamformer' trait will be removed in version 25.07."
         )
         warn(
@@ -1613,7 +1614,8 @@ class BeamformerOrth(BeamformerBase):
 
     def _set_beamformer(self, beamformer):
         msg = (
-            "Deprecated use of 'beamformer' trait. Please set :attr:`freq_data`, :attr:`steer`, :attr:`r_diag` directly."
+            f"Deprecated use of 'beamformer' trait in class {self.__class__.__name__}. "
+            'Please set :attr:`freq_data`, :attr:`steer`, :attr:`r_diag` directly. '
             "Using the 'beamformer' trait will be removed in version 25.07."
         )
         warn(
@@ -1806,7 +1808,8 @@ class BeamformerClean(BeamformerBase):
 
     def _set_beamformer(self, beamformer):
         msg = (
-            "Deprecated use of 'beamformer' trait. Please set :attr:`freq_data`, :attr:`steer`, :attr:`r_diag` directly."
+            f"Deprecated use of 'beamformer' trait in class {self.__class__.__name__}. "
+            'Please set :attr:`freq_data`, :attr:`steer`, :attr:`r_diag` directly. '
             "Using the 'beamformer' trait will be removed in version 25.07."
         )
         warn(
