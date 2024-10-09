@@ -35,7 +35,7 @@ if 'numpy' in sys.modules:
     np.show_config()
     sys.stdout = orig_stdout
     # check if it uses OpenBLAS or another library
-    if 'openblas' in temp_stdout.getvalue().lower():
+    if 'openblas' in temp_stdout.getvalue().lower() and environ.get('OPENBLAS_NUM_THREADS') != '1':
         # it's OpenBLAS, set numba threads=1 to avoid overcommittment
         import numba
 

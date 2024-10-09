@@ -4,7 +4,10 @@
 
 """The Acoular library: several classes for the implementation of acoustic beamforming."""
 
-import os
+import os  # noqa: I001
+
+# config must be imported before any submodules containing numpy, see #322.
+from .configuration import config
 
 from . import demo, tools
 from .base import (
@@ -17,7 +20,6 @@ from .base import (
     TimeOut,
 )
 from .calib import Calib
-from .configuration import config
 from .environments import (
     Environment,
     FlowField,
