@@ -76,9 +76,9 @@ class SoundDeviceSamplesGenerator(SamplesGenerator):
         self.numchannels = min(self.numchannels, sd.query_devices(self.device)['max_input_channels'])
 
     def _get_sample_freq(self):
-        if self.sample_freq is not None:
-            return self._sample_freq
-        return sd.query_devices(self.device)['default_samplerate']
+        if self._sample_freq is None:
+            self._sample_freq = sd.query_devices(self.device)['default_samplerate']
+        return self._sample_freq
 
     def _set_sample_freq(self, f):
         self._sample_freq = f
