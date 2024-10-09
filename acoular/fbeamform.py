@@ -659,7 +659,7 @@ class BeamformerBase(HasPrivateTraits):
             each grid point .
             Note that the frequency resolution and therefore the bandwidth
             represented by a single frequency line depends on
-            the :attr:`sampling frequency<acoular.tprocess.SamplesGenerator.sample_freq>` and
+            the :attr:`sampling frequency<acoular.base.SamplesGenerator.sample_freq>` and
             used :attr:`FFT block size<acoular.spectra.PowerSpectra.block_size>`.
 
         """
@@ -951,7 +951,7 @@ class BeamformerEig(BeamformerBase):
     """
 
     #: Number of component to calculate:
-    #: 0 (smallest) ... :attr:`~acoular.tprocess.SamplesGenerator.numchannels`-1;
+    #: 0 (smallest) ... :attr:`~acoular.base.SamplesGenerator.numchannels`-1;
     #: defaults to -1, i.e. numchannels-1
     n = Int(-1, desc='No. of eigenvalue')
 
@@ -1370,8 +1370,11 @@ class BeamformerDamas(BeamformerBase):
 
     #: (only for backward compatibility) :class:`BeamformerBase` object
     #: if set, provides :attr:`freq_data`, :attr:`steer`, :attr:`r_diag`
-    #: if not set, these have to be set explicitly
-    beamformer = Trait(BeamformerBase)
+    #: if not set, these have to be set explicitly.
+    beamformer = Property()
+
+    # private storage of beamformer instance
+    _beamformer = Trait(BeamformerBase)
 
     #: The floating-number-precision of the PSFs. Default is 64 bit.
     psf_precision = Trait('float64', 'float32', desc='precision of PSF')
@@ -1391,11 +1394,27 @@ class BeamformerDamas(BeamformerBase):
         depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['n_iter', 'damp', 'psf_precision'],
     )
 
+    def _get_beamformer(self):
+        return self._beamformer
+
+    def _set_beamformer(self, beamformer):
+        msg = (
+            f"Deprecated use of 'beamformer' trait in class {self.__class__.__name__}. "
+            'Please set :attr:`freq_data`, :attr:`steer`, :attr:`r_diag` directly. '
+            "Using the 'beamformer' trait will be removed in version 25.07."
+        )
+        warn(
+            msg,
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        self._beamformer = beamformer
+
     @cached_property
     def _get_digest(self):
         return digest(self)
 
-    @on_trait_change('beamformer.digest')
+    @on_trait_change('_beamformer.digest')
     def delegate_beamformer_traits(self):
         self.freq_data = self.beamformer.freq_data
         self.r_diag = self.beamformer.r_diag
@@ -1569,8 +1588,11 @@ class BeamformerOrth(BeamformerBase):
 
     #: (only for backward compatibility) :class:`BeamformerEig` object
     #: if set, provides :attr:`freq_data`, :attr:`steer`, :attr:`r_diag`
-    #: if not set, these have to be set explicitly
-    beamformer = Trait(BeamformerEig)
+    #: if not set, these have to be set explicitly.
+    beamformer = Property()
+
+    # private storage of beamformer instance
+    _beamformer = Trait(BeamformerEig)
 
     #: List of components to consider, use this to directly set the eigenvalues
     #: used in the beamformer. Alternatively, set :attr:`n`.
@@ -1587,11 +1609,27 @@ class BeamformerOrth(BeamformerBase):
         depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['eva_list'],
     )
 
+    def _get_beamformer(self):
+        return self._beamformer
+
+    def _set_beamformer(self, beamformer):
+        msg = (
+            f"Deprecated use of 'beamformer' trait in class {self.__class__.__name__}. "
+            'Please set :attr:`freq_data`, :attr:`steer`, :attr:`r_diag` directly. '
+            "Using the 'beamformer' trait will be removed in version 25.07."
+        )
+        warn(
+            msg,
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        self._beamformer = beamformer
+
     @cached_property
     def _get_digest(self):
         return digest(self)
 
-    @on_trait_change('beamformer.digest')
+    @on_trait_change('_beamformer.digest')
     def delegate_beamformer_traits(self):
         self.freq_data = self.beamformer.freq_data
         self.r_diag = self.beamformer.r_diag
@@ -1737,8 +1775,11 @@ class BeamformerClean(BeamformerBase):
 
     #: (only for backward compatibility) :class:`BeamformerBase` object
     #: if set, provides :attr:`freq_data`, :attr:`steer`, :attr:`r_diag`
-    #: if not set, these have to be set explicitly
-    beamformer = Trait(BeamformerBase)
+    #: if not set, these have to be set explicitly.
+    beamformer = Property()
+
+    # private storage of beamformer instance
+    _beamformer = Trait(BeamformerBase)
 
     #: The floating-number-precision of the PSFs. Default is 64 bit.
     psf_precision = Trait('float64', 'float32', desc='precision of PSF.')
@@ -1762,7 +1803,23 @@ class BeamformerClean(BeamformerBase):
     def _get_digest(self):
         return digest(self)
 
-    @on_trait_change('beamformer.digest')
+    def _get_beamformer(self):
+        return self._beamformer
+
+    def _set_beamformer(self, beamformer):
+        msg = (
+            f"Deprecated use of 'beamformer' trait in class {self.__class__.__name__}. "
+            'Please set :attr:`freq_data`, :attr:`steer`, :attr:`r_diag` directly. '
+            "Using the 'beamformer' trait will be removed in version 25.07."
+        )
+        warn(
+            msg,
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        self._beamformer = beamformer
+
+    @on_trait_change('_beamformer.digest')
     def delegate_beamformer_traits(self):
         self.freq_data = self.beamformer.freq_data
         self.r_diag = self.beamformer.r_diag

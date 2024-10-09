@@ -435,13 +435,13 @@ class TimeAverage(Average):
 
     .. deprecated:: 24.10
         Using :class:`~acoular.process.TimeAverage` is deprecated and will be removed in Acoular
-        version 25.01. Use :class:`~acoular.process.Average` instead.
+        version 25.07. Use :class:`~acoular.process.Average` instead.
     """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         warn(
-            'Using TimeAverage is deprecated and will be removed in Acoular version 25.01. Use Average instead.',
+            'Using TimeAverage is deprecated and will be removed in Acoular version 25.07. Use Average instead.',
             DeprecationWarning,
             stacklevel=2,
         )
@@ -452,13 +452,13 @@ class TimeCache(Cache):
 
     .. deprecated:: 24.10
         Using :class:`~acoular.process.TimeCache` is deprecated and will be removed in Acoular
-        version 25.01. Use :class:`~acoular.process.Cache` instead.
+        version 25.07. Use :class:`~acoular.process.Cache` instead.
     """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         warn(
-            'Using TimeCache is deprecated and will be removed in Acoular version 25.01. Use Cache instead.',
+            'Using TimeCache is deprecated and will be removed in Acoular version 25.07. Use Cache instead.',
             DeprecationWarning,
             stacklevel=2,
         )

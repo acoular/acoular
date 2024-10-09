@@ -356,13 +356,13 @@ class FFTSpectra(RFFT):
 
     .. deprecated:: 24.10
         Using :class:`~acoular.fprocess.FFTSpectra` is deprecated and will be removed in Acoular
-        version 25.01. Use :class:`~acoular.fprocess.RFFT` instead.
+        version 25.07. Use :class:`~acoular.fprocess.RFFT` instead.
     """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         warn(
-            'Using FFTSpectra is deprecated and will be removed in Acoular version 25.01. Use class RFFT instead.',
+            'Using FFTSpectra is deprecated and will be removed in Acoular version 25.07. Use class RFFT instead.',
             DeprecationWarning,
             stacklevel=2,
         )
