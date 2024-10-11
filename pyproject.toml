@@ -68,6 +68,7 @@ docs = [
 
 tests = [
     "pytest",
+    "pytest-mock",
     "pytest-cov",
     "sounddevice",
     "traitsui",
