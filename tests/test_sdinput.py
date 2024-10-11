@@ -47,8 +47,8 @@ def test_result_finite(sounddevice_samples_generator):
     assert not sdev.running
 
 
-def test_set_sample_freq():
-    sdev = ac.SoundDeviceSamplesGenerator()
+def test_set_sample_freq(sounddevice_properties): # noqa ARG001 (uses fixture from conftest.py)
+    sdev = ac.SoundDeviceSamplesGenerator(device=0)
     default_sample_freq = sdev.sample_freq
     new_sample_freq = default_sample_freq * 2
     sdev.sample_freq = new_sample_freq
