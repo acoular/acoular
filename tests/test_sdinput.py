@@ -2,6 +2,13 @@ import acoular as ac
 import pytest
 
 
+@pytest.fixture
+def sounddevice_samples_generator(sounddevice_properties):
+    _, max_input_channels, device_index, num = sounddevice_properties
+    sdev = ac.SoundDeviceSamplesGenerator(device=device_index, numchannels=min(2, max_input_channels))
+    return sdev, num
+
+
 def test_default_sounddevice_properties(sounddevice_properties):
     """Test that the default samplerate and input channels from sounddevice are
     correctly transferred to ac.SoundDeviceSamplesGenerator class."""
@@ -13,14 +20,39 @@ def test_default_sounddevice_properties(sounddevice_properties):
     assert sdev.device_properties()['max_input_channels'] == max_input_channels
 
 
-def test_result(sounddevice_properties):
+def test_result_infinite(sounddevice_samples_generator):
     """Test that one signal block of samples is collected with correct shape."""
-    _, max_input_channels, device_index, num = sounddevice_properties
-    sdev = ac.SoundDeviceSamplesGenerator(device=device_index, numchannels=min(2, max_input_channels))
-    sdev.numchannels = min(2, max_input_channels)  # Ensure numchannels is <= max_input_channels
-    block = next(sdev.result(num))
-    assert sdev.running
-    assert block.shape == (num, sdev.numchannels), f'Expected shape {(num, sdev.numchannels)}, but got {block.shape}'
+    sdev, num = sounddevice_samples_generator
+    sdev.numsamples = -1
+    for i, block in enumerate(sdev.result(num)):
+        assert sdev.running
+        assert block.shape == (
+            num,
+            sdev.numchannels,
+        ), f'Expected shape {(num, sdev.numchannels)}, but got {block.shape}'
+        if i > 1:
+            break
+
+
+def test_result_finite(sounddevice_samples_generator):
+    """Test that one signal block of samples is collected with correct shape."""
+    sdev, num = sounddevice_samples_generator
+    sdev.numsamples = num * 2
+    for block in sdev.result(num):
+        assert sdev.running
+        assert block.shape == (
+            num,
+            sdev.numchannels,
+        ), f'Expected shape {(num, sdev.numchannels)}, but got {block.shape}'
+    assert not sdev.running
+
+
+def test_set_sample_freq():
+    sdev = ac.SoundDeviceSamplesGenerator()
+    default_sample_freq = sdev.sample_freq
+    new_sample_freq = default_sample_freq * 2
+    sdev.sample_freq = new_sample_freq
+    assert sdev.sample_freq == new_sample_freq
 
 
 def test_import_error(mock_have_no_lib):  # noqa ARG001 (uses fixture from conftest.py)

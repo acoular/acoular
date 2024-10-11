@@ -5,7 +5,7 @@ import sounddevice as sd
 
 @pytest.fixture
 def mock_have_no_lib(mocker):
-    """Mock sounddevice module to raise ImportError."""
+    """Mock library does not exist."""
     mocker.patch('importlib.util.find_spec').return_value = None
 
 
