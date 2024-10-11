@@ -115,7 +115,7 @@ python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
 import = ["python -c \"import acoular\""]
 test = ["python -m pytest -v tests"]
 demo = ["python -c \"import acoular; acoular.demo.acoular_demo.run()\""]
-coverage = ["test --cov=acoular"]
+coverage = ["test --cov=acoular --cov-report html --cov-report term-missing"]
 doctest = ["python -m pytest --doctest-modules acoular"]
 
 [tool.hatch.envs.tests.overrides]
