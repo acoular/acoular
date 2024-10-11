@@ -54,6 +54,8 @@ def test_set_traits(acoular_cls):
             do = acoular_cls.class_traits()['digest'].depends_on
             if do:
                 obj = create_instance(acoular_cls)
+                digest = obj.digest
+                assert digest is not None and digest != ''
                 for k in do:
                     if k in acoular_cls.class_trait_names():
                         tr = acoular_cls.class_traits()[k]
