@@ -1,0 +1,15 @@
+name: 'Set up PortAudio'
+description: 'Set up portaudio'
+inputs:
+  os:
+    description: 'The platform'
+    required: false
+    default: 'ubuntu-latest'
+runs:
+  steps:
+    - name: Install portaudio (on Ubuntu)
+      if: os == 'ubuntu-latest'
+      run: sudo apt install libportaudio2
+    - name: Install portaudio (on MacOs)
+      if: os == 'macos-latest'
+      run: brew install portaudio
