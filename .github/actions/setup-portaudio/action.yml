@@ -6,6 +6,7 @@ inputs:
     required: false
     default: 'ubuntu-latest'
 runs:
+  using: composite
   steps:
     - name: Install portaudio (on Ubuntu)
       if: ${{ inputs.os }} == 'ubuntu-latest'
