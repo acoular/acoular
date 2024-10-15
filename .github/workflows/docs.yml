@@ -22,7 +22,7 @@ jobs:
       - name: Check out a copy of the repository
         uses: actions/checkout@v4
       - name: Install dependencies
-        run: sudo apt install graphviz libportaudio2
+        run: brew install graphviz portaudio
       - name: Set up hatch
         uses: ./.github/actions/setup-hatch
       - name: Run sphinx
