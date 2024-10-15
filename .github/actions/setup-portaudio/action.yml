@@ -9,10 +9,10 @@ runs:
   using: composite
   steps:
     - name: Install portaudio (on Ubuntu)
-      if: ${{ inputs.os }} == 'ubuntu-latest'
+      if: inputs.os == 'ubuntu-latest'
       run: sudo apt install libportaudio2
       shell: bash
     - name: Install portaudio (on MacOs)
-      if: ${{ inputs.os }} == 'macos-latest'
+      if: inputs.os == 'macos-latest'
       run: brew install portaudio
       shell: bash
