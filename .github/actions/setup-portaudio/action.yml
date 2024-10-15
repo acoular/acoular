@@ -8,8 +8,10 @@ inputs:
 runs:
   steps:
     - name: Install portaudio (on Ubuntu)
-      if: os == 'ubuntu-latest'
+      if: ${{ inputs.os }} == 'ubuntu-latest'
       run: sudo apt install libportaudio2
+      shell: bash
     - name: Install portaudio (on MacOs)
-      if: os == 'macos-latest'
+      if: ${{ inputs.os }} == 'macos-latest'
       run: brew install portaudio
+      shell: bash
