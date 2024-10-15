@@ -26,10 +26,12 @@ jobs:
     steps:
       - name: Check out a copy of the repository
         uses: actions/checkout@v4
-      - name: Install dependencies
-        run: brew install graphviz portaudio
       - name: Set up hatch
         uses: ./.github/actions/setup-hatch
+      - name: Set up PortAudio
+        uses: ./.github/actions/setup-portaudio
+        with:
+          os: ${{ matrix.os }}
       - name: Run sphinx
         run: hatch -v run docs:build
       - name: Upload artifacts
