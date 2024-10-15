@@ -35,6 +35,7 @@ jobs:
       - name: Run sphinx
         run: hatch -v run docs:build
       - name: Upload artifacts
+        runs-on: ubuntu-latest
         uses: actions/upload-artifact@v4
         with:
           name: build-docs
