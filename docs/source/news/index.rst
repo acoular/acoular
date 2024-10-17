@@ -27,6 +27,7 @@ Upcoming Release
         * fixes missing and wrong docstrings for `result` methods in :mod:`acoular.tbeamform`
         * improves the explanation of the installation of dependencies
         * add explanation on how to test specific Python version only
+        * adds guide on how to submit a pull request
 
     **Internal**
         * refactoring of classes in :mod:`acoular.tbeamform` (moves buffer logic away from Beamformer classes)
