@@ -71,11 +71,11 @@ from numpy import (
     sqrt,
     stack,
     sum,
+    tile,
     unique,
     zeros,
 )
 from numpy.linalg import norm
-from numpy.matlib import repmat
 from scipy.fft import irfft, rfft
 from scipy.interpolate import CloughTocher2DInterpolator, CubicSpline, LinearNDInterpolator, Rbf, splev, splrep
 from scipy.signal import bilinear, butter, sosfilt, sosfiltfilt, tf2sos
@@ -937,11 +937,11 @@ class SpatialInterpolator(TimeOut):
         if self.array_dimension == '1D' or self.array_dimension == 'ring':
             # for rotation add phi_delay
             if not array_equal(phi_delay, []):
-                xInterpHelp = repmat(virtNewCoord[0, :], nTime, 1) + repmat(phi_delay, virtNewCoord.shape[1], 1).T
+                xInterpHelp = tile(virtNewCoord[0, :], (nTime, 1)) + tile(phi_delay, (virtNewCoord.shape[1], 1)).T
                 xInterp = ((xInterpHelp + pi) % (2 * pi)) - pi  #  shifting phi cootrdinate into feasible area [-pi, pi]
             # if no rotation given
             else:
-                xInterp = repmat(virtNewCoord[0, :], nTime, 1)
+                xInterp = tile(virtNewCoord[0, :], (nTime, 1))
             # get ordered microphone posions in radiant
             x = newCoord[0]
             for cntTime in range(nTime):
@@ -995,10 +995,10 @@ class SpatialInterpolator(TimeOut):
         elif self.array_dimension == '2D':
             # check rotation
             if not array_equal(phi_delay, []):
-                xInterpHelp = repmat(virtNewCoord[0, :], nTime, 1) + repmat(phi_delay, virtNewCoord.shape[1], 1).T
+                xInterpHelp = tile(virtNewCoord[0, :], (nTime, 1)) + tile(phi_delay, (virtNewCoord.shape[1], 1)).T
                 xInterp = ((xInterpHelp + pi) % (2 * pi)) - pi  # shifting phi cootrdinate into feasible area [-pi, pi]
             else:
-                xInterp = repmat(virtNewCoord[0, :], nTime, 1)
+                xInterp = tile(virtNewCoord[0, :], (nTime, 1))
 
             mesh = meshList[0][0]
             for cntTime in range(nTime):
@@ -1057,7 +1057,7 @@ class SpatialInterpolator(TimeOut):
                     newPoint3_M = append(newPoint2_M, zeros([1, self.numchannels]), axis=0)
                     newPointCart = cylToCart(newPoint3_M)
                     for ind in arange(len(newPoint[:, 0])):
-                        newPoint_Rep = repmat(newPointCart[:, ind], len(newPoint[:, 0]), 1).T
+                        newPoint_Rep = tile(newPointCart[:, ind], (len(newPoint[:, 0]), 1)).T
                         subtract = newPoint_Rep - newCoordCart
                         normDistance = norm(subtract, axis=0)
                         index_norm = argsort(normDistance)[: self.num_IDW]
@@ -1074,10 +1074,10 @@ class SpatialInterpolator(TimeOut):
         elif self.array_dimension == '3D':
             # check rotation
             if not array_equal(phi_delay, []):
-                xInterpHelp = repmat(virtNewCoord[0, :], nTime, 1) + repmat(phi_delay, virtNewCoord.shape[1], 1).T
+                xInterpHelp = tile(virtNewCoord[0, :], (nTime, 1)) + tile(phi_delay, (virtNewCoord.shape[1], 1)).T
                 xInterp = ((xInterpHelp + pi) % (2 * pi)) - pi  # shifting phi cootrdinate into feasible area [-pi, pi]
             else:
-                xInterp = repmat(virtNewCoord[0, :], nTime, 1)
+                xInterp = tile(virtNewCoord[0, :], (nTime, 1))
 
             mesh = meshList[0][0]
             for cntTime in range(nTime):
