@@ -6,7 +6,7 @@
 name = "acoular"
 version = "24.07"
 description = "Python library for acoustic beamforming"
-requires-python = ">=3.8,<=12"
+requires-python = ">=3.9,<=13"
 authors = [
     {name = "Acoular Development Team", email = "info@acoular.org"},
 ]
@@ -23,11 +23,11 @@ classifiers = [
     "Intended Audience :: Science/Research",
     "Topic :: Scientific/Engineering :: Physics",
     "License :: OSI Approved :: BSD License",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
     "numba",
@@ -95,7 +95,7 @@ dependencies = ["ruff==0.4.1"]
 config-path = [".ruff.toml"]
 
 [tool.hatch.envs.docs]
-python = "3.12"
+python = "3.13"
 dependencies = [
     "acoular[docs]"
 ]
@@ -109,7 +109,7 @@ dependencies = [
 ]
 
 [[tool.hatch.envs.tests.matrix]]
-python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
+python = ["3.9", "3.10", "3.11", "3.12", "3.13"]
 
 [tool.hatch.envs.tests.scripts]
 import = ["python -c \"import acoular\""]

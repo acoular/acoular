@@ -7,7 +7,7 @@ on:
     
 jobs:
   conda_build_install_upload:
-    name: Test conda deployment of package with Python 3.12
+    name: Test conda deployment of package with the latest supported Python
     runs-on: ubuntu-latest
     steps:
       - name: Check out a copy of the repository
