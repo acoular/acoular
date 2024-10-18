@@ -17,17 +17,25 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ['3.12']
     steps:
       - name: Check out a copy of the repository
         uses: actions/checkout@v4
-      - name: Install dependencies
-        run: sudo apt install graphviz libportaudio2
       - name: Set up hatch
         uses: ./.github/actions/setup-hatch
+      - name: Set up PortAudio
+        uses: ./.github/actions/setup-portaudio
+        with:
+          os: ${{ matrix.os }}
       - name: Run sphinx
         run: hatch -v run docs:build
       - name: Upload artifacts
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         uses: actions/upload-artifact@v4
         with:
           name: build-docs
