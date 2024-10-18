@@ -43,9 +43,9 @@ from numpy import (
     vstack,
     zeros_like,
 )
-from numpy.linalg.linalg import norm
 from scipy.integrate import ode
 from scipy.interpolate import LinearNDInterpolator
+from scipy.linalg import norm
 from scipy.spatial import ConvexHull
 from traits.api import CArray, Dict, Float, HasPrivateTraits, Int, Property, Trait, cached_property
 

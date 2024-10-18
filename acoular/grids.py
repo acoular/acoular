@@ -51,7 +51,7 @@ from numpy import (
     where,
     zeros,
 )
-from numpy.linalg import norm
+from scipy.linalg import norm
 
 # from matplotlib.path import Path
 from scipy.spatial import Delaunay
