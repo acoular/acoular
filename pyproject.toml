@@ -29,7 +29,7 @@ classifiers = [
 ]
 dependencies = [
     "numba",
-    "numpy<2.0",
+    "numpy",
     "scipy>=1.1.0",
     "scikit-learn",
     "tables>=3.4.4",
