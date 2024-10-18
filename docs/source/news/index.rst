@@ -37,6 +37,9 @@ Upcoming Release
             * allows more files to be checked, including the .rst files in the documentation
             * adds a cron job that runs daily
         * sets final version for several deprecated traits. (Will be removed in version 25.01)
+        * use scipy.linalg consistently over numpy.linalg
+        * drops support for Python 3.8 and 3.9
+        * enable Numpy version > 2.0
 
 24.07
 ------------
