@@ -806,7 +806,7 @@ class LineGrid(Grid):
     def _get_gpos(self):
         dist = self.length / (self.numpoints - 1)
         loc = array(self.loc, dtype=float).reshape((3, 1))
-        direc_n = self.direction / norm(self.direction)
+        direc_n = array(self.direction) / norm(self.direction)
         pos = zeros((self.numpoints, 3))
         for s in range(self.numpoints):
             pos[s] = loc.T + direc_n * dist * s
