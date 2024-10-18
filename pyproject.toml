@@ -32,7 +32,7 @@ dependencies = [
     "numpy",
     "scipy>=1.1.0",
     "scikit-learn",
-    "tables>=3.4.4",
+    "tables>=3.10",
     "traits>=6.0",
 ]
 maintainers = [
