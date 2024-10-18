@@ -51,7 +51,7 @@ from numpy import (
 )
 from numpy import min as npmin
 from numpy.fft import fft, ifft
-from numpy.linalg import norm
+from scipy.linalg import norm
 from scipy.special import sph_harm, spherical_jn, spherical_yn
 from traits.api import (
     Any,

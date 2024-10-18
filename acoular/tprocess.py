@@ -75,9 +75,9 @@ from numpy import (
     unique,
     zeros,
 )
-from numpy.linalg import norm
 from scipy.fft import irfft, rfft
 from scipy.interpolate import CloughTocher2DInterpolator, CubicSpline, LinearNDInterpolator, Rbf, splev, splrep
+from scipy.linalg import norm
 from scipy.signal import bilinear, butter, sosfilt, sosfiltfilt, tf2sos
 from scipy.spatial import Delaunay
 from traits.api import (

@@ -60,7 +60,6 @@ from numpy import (
     integer,
     invert,
     isscalar,
-    linalg,
     log10,
     ndarray,
     newaxis,
@@ -82,9 +81,8 @@ from numpy import (
     zeros,
     zeros_like,
 )
-from numpy.linalg import norm
 from packaging.version import parse
-from scipy.linalg import eigh, eigvals, fractional_matrix_power, inv
+from scipy.linalg import eigh, eigvals, fractional_matrix_power, inv, norm
 from scipy.optimize import fmin_l_bfgs_b, linprog, nnls, shgo
 from sklearn.linear_model import LassoLars, LassoLarsCV, LassoLarsIC, LinearRegression, OrthogonalMatchingPursuitCV
 from traits.api import (
@@ -938,7 +936,7 @@ class BeamformerCapon(BeamformerBase):
         normfactor = self.sig_loss_norm() * nMics**2
         param_steer_type, steer_vector = self._beamformer_params()
         for i in ind:
-            csm = array(linalg.inv(array(self.freq_data.csm[i], dtype='complex128')), order='C')
+            csm = array(inv(array(self.freq_data.csm[i], dtype='complex128')), order='C')
             beamformerOutput = beamformerFreq(param_steer_type, self.r_diag, normfactor, steer_vector(f[i]), csm)[0]
             self._ac[i] = 1.0 / beamformerOutput
             self._fr[i] = 1

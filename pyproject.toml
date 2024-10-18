@@ -28,11 +28,11 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
+    "numpy",
     "numba",
-    "numpy<2.0",
     "scipy>=1.1.0",
     "scikit-learn",
-    "tables>=3.4.4",
+    "tables",
     "traits>=6.0",
 ]
 maintainers = [

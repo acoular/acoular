@@ -43,7 +43,7 @@ from numpy import (
     where,
     zeros,
 )
-from numpy.linalg import norm
+from scipy.linalg import norm
 from traits.api import Bool, CArray, Delegate, Enum, Float, Instance, Int, List, Property, Range, Trait, cached_property
 from traits.trait_errors import TraitError
 
