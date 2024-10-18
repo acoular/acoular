@@ -28,6 +28,7 @@ Upcoming Release
         * fixes missing and wrong docstrings for `result` methods in :mod:`acoular.tbeamform`
         * improves the explanation of the installation of dependencies
         * add explanation on how to test specific Python version only
+        * test documentation build on all latest platforms
 
     **Internal**
         * refactoring of classes in :mod:`acoular.tbeamform` (moves buffer logic away from Beamformer classes)
@@ -40,6 +41,7 @@ Upcoming Release
         * use scipy.linalg consistently over numpy.linalg
         * drops support for Python 3.8 and 3.9
         * enable Numpy version > 2.0
+        * run unittests on the latest MacOS
 
 24.07
 ------------
