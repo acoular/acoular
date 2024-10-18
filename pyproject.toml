@@ -26,7 +26,6 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
     "numpy",
@@ -94,7 +93,7 @@ dependencies = ["ruff==0.4.1"]
 config-path = [".ruff.toml"]
 
 [tool.hatch.envs.docs]
-python = "3.13"
+python = "3.12"
 dependencies = [
     "acoular[docs]"
 ]
