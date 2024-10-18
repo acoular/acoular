@@ -20,6 +20,7 @@ Upcoming Release
         * flush file in :class:`~acoular.tprocess.TimeCache` to prevent data loss / corruption
         * fixes use of already deprecated traits
         * fixes import order to avoid the deactivation of parallelization of numba
+        * fixes numpy.matlib deprecation warning
 
     **Documentation**
         * updates literature and adds `sphinxcontrib-bibtex` extension to support bibtex citation in the documentation.
