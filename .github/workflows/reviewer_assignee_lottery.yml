@@ -13,8 +13,6 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const { github, context } = require('@actions/github'); // Ensure github and context are imported
-
             const people = [
               { username: 'adku1173', weight: 1 },
               { username: 'artpelling', weight: 1 },
@@ -43,6 +41,8 @@ jobs:
 
             console.log(`${randomReviewer} was chosen as reviewer.`);
             console.log(`${randomAssignee} was chosen as assignee.`);
+
+            console.log(github.pulls.requestReviewers)
 
             await github.pulls.requestReviewers({
               owner: context.repo.owner,
