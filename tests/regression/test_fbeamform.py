@@ -54,7 +54,12 @@ def test_beamformer(snapshot, beamformer, f, num):
         # Requires number of samples (eigenvalues) to be greater than number of features (gird points).
         # Otherwise noise variance estimate is needed.
         pytest.xfail(
-            'ValueError: You are using LassoLarsIC in the case where the number of samples is smaller than the number of features.'
+            ' '.join(
+                [
+                    'ValueError: You are using LassoLarsIC in the case',
+                    'where the number of samples is smaller than the number of features.',
+                ]
+            )
         )
 
     beamformer.cached = False

@@ -282,8 +282,12 @@ class Cache(InOut):
                 elif not self.h5f.get_data_by_reference(nodename).attrs['complete']:
                     if config.global_caching == 'readonly':
                         warn(
-                            "Cache file is incomplete for nodename %s. With config.global_caching='readonly', the cache file will not be used!"
-                            % str(nodename),
+                            ' '.join(
+                                [
+                                    f'Cache file is incomplete for nodename {str(nodename)}.',
+                                    "With config.global_caching='readonly', the cache file will not be used!",
+                                ]
+                            ),
                             Warning,
                             stacklevel=1,
                         )

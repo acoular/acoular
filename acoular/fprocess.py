@@ -37,8 +37,8 @@ class RFFT(BaseSpectra, SpectraOut):
     #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
     source = Instance(SamplesGenerator)
 
-    #: Number of workers to use for the FFT calculation. If negative values are used,
-    #: all available logical CPUs will be considered (``scipy.fft.rfft`` implementation wraps around from ``os.cpu_count()``).
+    #: Number of workers to use for the FFT calculation. If negative values are used, all available logical CPUs will be
+    #: considered (``scipy.fft.rfft`` implementation wraps around from ``os.cpu_count()``).
     #: Default is `None` (handled by scipy)
     workers = Union(Int(), None, default_value=None, desc='number of workers to use')
 
@@ -152,8 +152,8 @@ class IRFFT(TimeOut):
     #: Data source; :class:`~acoular.base.SpectraGenerator` or derived object.
     source = Instance(SpectraGenerator)
 
-    #: Number of workers to use for the FFT calculation. If negative values are used,
-    #: all available logical CPUs will be considered (``scipy.fft.rfft`` implementation wraps around from ``os.cpu_count()``).
+    #: Number of workers to use for the FFT calculation. If negative values are used, all available logical CPUs will be
+    #: considered (``scipy.fft.rfft`` implementation wraps around from ``os.cpu_count()``).
     #: Default is `None` (handled by scipy)
     workers = Union(Int(), None, default_value=None, desc='number of workers to use')
 
