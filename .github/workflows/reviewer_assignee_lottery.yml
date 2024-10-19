@@ -1,4 +1,4 @@
-name: Reviewer Lottery
+name: Reviewer and assignee lottery
 
 on:
   pull_request:
@@ -41,7 +41,8 @@ jobs:
 
             const randomAssignee = getWeightedRandomPerson(filteredPeople);
 
-            console.log(github.pulls);
+            console.log(github);
+            console.log(context);
 
             await github.pulls.requestReviewers({
               owner: context.repo.owner,
