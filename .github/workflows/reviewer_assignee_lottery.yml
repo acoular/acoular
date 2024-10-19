@@ -41,13 +41,7 @@ jobs:
 
             const randomAssignee = getWeightedRandomPerson(filteredPeople);
 
-            console.log(github);
-            console.log(context);
-
-            // Ensure github.pulls is defined
-            if (!github.pulls) {
-              throw new Error('github.pulls is not defined');
-            }
+            console.log(github.pulls);
 
             await github.pulls.requestReviewers({
               owner: context.repo.owner,
