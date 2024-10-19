@@ -436,8 +436,13 @@ class Trigger(TimeOut):
         faultyInd = flatnonzero(diffDist > self.max_variation_of_duration * meanDist)
         if faultyInd.size != 0:
             warn(
-                'In Trigger-Identification: The distances between the peaks (and therefor the lengths of the revolutions) vary too much (check samples %s).'
-                % str(peakLoc[faultyInd] + self.source.start),
+                ' '.join(
+                    [
+                        'In Trigger-Identification: The distances between the peaks',
+                        '(and therefor the lengths of the revolutions) vary too much',
+                        f'(check samples {str(peakLoc[faultyInd] + self.source.start)}).',
+                    ]
+                ),
                 Warning,
                 stacklevel=2,
             )
@@ -767,20 +772,22 @@ class SpatialInterpolator(TimeOut):
                 1. item : float64[nMicsInSpecificSubarray]
                     Ordered positions of the real mics on the new 1d axis, to be used as inputs for numpys interp.
                 2. item : int64[nMicsInArray]
-                    Indices identifying how the measured pressures must be evaluated, s.t. the entries of the previous item (see last line)
-                    correspond to their initial pressure values
+                    Indices identifying how the measured pressures must be evaluated, s.t. the entries of the previous
+                    item (see last line) correspond to their initial pressure values
             If the Array is 2D or 3d the list items are:
                 1. item : Delaunay mesh object
                     Delauney mesh (see scipy.spatial.Delaunay) for the specific Array
                 2. item : int64[nMicsInArray]
-                    same as 1d case, BUT with the difference, that here the rotational periodicy is handled, when constructing the mesh.
-                    Therefor the mesh could have more vertices than the actual Array mics.
+                    same as 1d case, BUT with the difference, that here the rotational periodicy is handled,
+                    when constructing the mesh. Therefor the mesh could have more vertices than the actual Array mics.
 
         virtNewCoord : float64[3, nVirtualMics]
-            Projection of each virtual mic onto its new coordinates. The columns of virtNewCoord correspond to [phi, rho, z]
+            Projection of each virtual mic onto its new coordinates.
+            The columns of virtNewCoord correspond to [phi, rho, z]
 
         newCoord : float64[3, nMics]
-            Projection of each mic onto its new coordinates. The columns of newCoordinates correspond to [phi, rho, z]
+            Projection of each mic onto its new coordinates.
+            The columns of newCoordinates correspond to [phi, rho, z]
 
         """
         # init positions of virtual mics in cyl coordinates
@@ -886,7 +893,14 @@ class SpatialInterpolator(TimeOut):
 
         return mesh, virtNewCoord, newCoord
 
-    def _result_core_func(self, p, phi_delay=None, period=None, Q=Q, interp_at_zero=False):  # noqa: N803, ARG002 (see #226)
+    def _result_core_func(
+        self,
+        p,
+        phi_delay=None,
+        period=None,
+        Q=Q,  # noqa: N803, ARG002 (see #226)
+        interp_at_zero=False,  # noqa: ARG002 (see #226)
+    ):
         """Performs the actual Interpolation.
 
         Parameters
@@ -2072,7 +2086,12 @@ class MaskedTimeInOut(MaskedTimeOut):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         warn(
-            'Using MaskedTimeInOut is deprecated and will be removed in Acoular version 25.07. Use class MaskedTimeOut instead.',
+            ' '.join(
+                [
+                    'Using MaskedTimeInOut is deprecated and will be removed in Acoular version 25.07.',
+                    'Use class MaskedTimeOut instead.',
+                ]
+            ),
             DeprecationWarning,
             stacklevel=2,
         )

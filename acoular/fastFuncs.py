@@ -9,7 +9,8 @@ import numba as nb
 import numpy as np
 
 CACHED_OPTION = True  # if True: saves the numba func as compiled func in sub directory
-PARALLEL_OPTION = 'parallel'  # if numba.guvectorize is used: 'CPU' for single threading; 'parallel' for multithreading; 'cuda' for calculating on GPU
+PARALLEL_OPTION = 'parallel'  # if numba.guvectorize is used: 'CPU' for single threading; 'parallel' for multithreading;
+# 'cuda' for calculating on GPU
 FAST_OPTION = True  # fastmath options
 
 
@@ -98,13 +99,14 @@ def beamformerFreq(steerVecType, boolRemovedDiagOfCSM, normFactor, inputTupleSte
     -------
     *Autopower spectrum beamforming map [nGridPoints]
 
-    *steer normalization factor [nGridPoints]... contains the values the autopower needs to be multiplied with, in order to
-    fullfill 'steer^H * steer = 1' as needed for functional beamforming.
+    *steer normalization factor [nGridPoints]... contains the values the autopower needs to be multiplied with,
+    in order to fullfill 'steer^H * steer = 1' as needed for functional beamforming.
 
     Some Notes on the optimization of all subroutines
     -------------------------------------------------
     Reducing beamforming equation:
-        Let the csm be C and the steering vector be h, than, using Linear Albegra, the conventional beamformer can be written as
+        Let the csm be C and the steering vector be h, than, using Linear Albegra,
+        the conventional beamformer can be written as
 
         .. math:: B = h^H \\cdot C \\cdot h,
         with ^H meaning the complex conjugated transpose.
@@ -134,7 +136,7 @@ def beamformerFreq(steerVecType, boolRemovedDiagOfCSM, normFactor, inputTupleSte
         "eigenVec.conj * steeringVector". BUT (at the moment) this only brings benefits in comp-time for a very
         small range of nMics (approx 250) --> Therefor it is not implemented here.
 
-    """
+    """  # noqa: E501
     boolIsEigValProb = isinstance(inputTupleCsm, tuple)  # len(inputTupleCsm) > 1
     # get the beamformer type (key-tuple = (isEigValProblem, formulationOfSteeringVector, RemovalOfCSMDiag))
     beamformerDict = {
@@ -231,14 +233,16 @@ def _freqBeamformer_FullCSM(
     result,
     normalizeSteer,
 ):
-    # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
+    # see bottom of information header of 'beamformerFreq' for information on which steps are taken,
+    # in order to gain speed improvements.
     nMics = csm.shape[0]
     st2 = steer_type == 2
     st34 = steer_type == 3 or steer_type == 4
     helpNormalize = 0.0  # just a hint for the compiler
     for gi in nb.prange(distGridToArrayCenter.shape[0]):
         steerVec = np.empty((nMics), np.complex128)
-        # building steering vector: in order to save some operation -> some normalization steps are applied after mat-vec-multipl.
+        # building steering vector:
+        # in order to save some operation -> some normalization steps are applied after mat-vec-multipl.
         for cntMics in range(nMics):
             expArg = np.float32(waveNumber * distGridToAllMics[gi, cntMics])
             steerVec[cntMics] = np.cos(expArg) - 1j * np.sin(expArg)
@@ -322,7 +326,8 @@ def _freqBeamformer_EigValues(
     result,
     normalizeSteer,
 ):
-    # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
+    # see bottom of information header of 'beamformerFreq' for information on which steps are taken,
+    # in order to gain speed improvements.
     nMics = eigVec.shape[0]
     nEigs = len(eigVal)
     st2 = steer_type == 2
@@ -330,7 +335,8 @@ def _freqBeamformer_EigValues(
     helpNormalize = 0.0  # just a hint for the compiler
     for gi in nb.prange(distGridToArrayCenter.shape[0]):
         steerVec = np.empty((nMics), np.complex128)
-        # building steering vector: in order to save some operation -> some normalization steps are applied after mat-vec-multipl.
+        # building steering vector:
+        # in order to save some operation -> some normalization steps are applied after mat-vec-multipl.
         for cntMics in range(nMics):
             expArg = np.float32(waveNumber * distGridToAllMics[gi, cntMics])
             steerVec[cntMics] = np.cos(expArg) - 1j * np.sin(expArg)
@@ -394,7 +400,8 @@ def _freqBeamformer_EigValues(
     fastmath=FAST_OPTION,
 )
 def _freqBeamformer_SpecificSteerVec_FullCSM(csm, steerVec, signalLossNormalization, result, normalizeSteer):
-    # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
+    # see bottom of information header of 'beamformerFreq' for information on which steps are taken,
+    # in order to gain speed improvements.
     nMics = csm.shape[0]
 
     # performing matrix-vector-multiplication (see bottom of information header of 'beamformerFreq')
@@ -424,7 +431,8 @@ def _freqBeamformer_SpecificSteerVec_FullCSM(csm, steerVec, signalLossNormalizat
     fastmath=FAST_OPTION,
 )
 def _freqBeamformer_SpecificSteerVec_CsmRemovedDiag(csm, steerVec, signalLossNormalization, result, normalizeSteer):
-    # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
+    # see bottom of information header of 'beamformerFreq' for information on which steps are taken,
+    # in order to gain speed improvements.
     nMics = csm.shape[0]
 
     # performing matrix-vector-multiplication (see bottom of information header of 'beamformerFreq')
@@ -458,7 +466,8 @@ def _freqBeamformer_EigValProb_SpecificSteerVec_FullCSM(
     result,
     normalizeSteer,
 ):
-    # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
+    # see bottom of information header of 'beamformerFreq' for information on which steps are taken,
+    # in order to gain speed improvements.
     nMics = eigVec.shape[0]
 
     # get h^H * h for normalization
@@ -494,7 +503,8 @@ def _freqBeamformer_EigValProb_SpecificSteerVec_CsmRemovedDiag(
     result,
     normalizeSteer,
 ):
-    # see bottom of information header of 'beamformerFreq' for information on which steps are taken, in order to gain speed improvements.
+    # see bottom of information header of 'beamformerFreq' for information on which steps are taken,
+    # in order to gain speed improvements.
     nMics = eigVec.shape[0]
 
     # get h^H * h for normalization
@@ -554,15 +564,16 @@ def calcPointSpreadFunction(steerVecType, distGridToArrayCenter, distGridToAllMi
 
         .. math:: B = \\left| h^H \\cdot a_S \\right| ^ 2.
     Steering vector:
-        Theoretically the steering vector always includes the term "exp(distMicsGrid - distArrayCenterGrid)", but as the steering vector gets multplied with its complex conjugation in
-        all beamformer routines, the constant "distArrayCenterGrid" cancels out --> In order to save operations, it is not implemented.
+        Theoretically the steering vector always includes the term "exp(distMicsGrid - distArrayCenterGrid)", but as the
+        steering vector gets multplied with its complex conjugation in all beamformer routines,
+        the constant "distArrayCenterGrid" cancels out --> In order to save operations, it is not implemented.
     Squares:
         Seemingly "a * a" is slightly faster than "a**2" in numba
     Square of abs():
-        Even though "a.real**2 + a.imag**^2" would have fewer operations, modern processors seem to be optimized for "a * a.conj" and are slightly faster the latter way.
-        Both Versions are much faster than "abs(a)**2".
+        Even though "a.real**2 + a.imag**^2" would have fewer operations, modern processors seem to be optimized
+        for "a * a.conj" and are slightly faster the latter way. Both Versions are much faster than "abs(a)**2".
 
-    """
+    """  # noqa: E501
     # get the steering vector formulation
     psfDict = {
         'classic': _psf_Formulation1AkaClassic,
@@ -613,7 +624,8 @@ def _psf_Formulation1AkaClassic(
 ):  # noqa ARG001
     nMics = distGridToAllMics.shape[0]
     for cntSources in range(len(distSourcesToArrayCenter)):
-        # see bottom of information header of 'calcPointSpreadFunction' for infos on the PSF calculation and speed improvements.
+        # see bottom of information header of 'calcPointSpreadFunction'
+        # for infos on the PSF calculation and speed improvements.
         scalarProd = 0.0 + 0.0j
         for cntMics in range(nMics):
             expArg = np.float32(
@@ -646,7 +658,8 @@ def _psf_Formulation2AkaInverse(
 ):
     nMics = distGridToAllMics.shape[0]
     for cntSources in range(len(distSourcesToArrayCenter)):
-        # see bottom of information header of 'calcPointSpreadFunction' for infos on the PSF calculation and speed improvements.
+        # see bottom of information header of 'calcPointSpreadFunction'
+        # for infos on the PSF calculation and speed improvements.
         scalarProd = 0.0 + 0.0j
         for cntMics in range(nMics):
             expArg = np.float32(
@@ -683,7 +696,8 @@ def _psf_Formulation3AkaTrueLevel(
 ):
     nMics = distGridToAllMics.shape[0]
     for cntSources in range(len(distSourcesToArrayCenter)):
-        # see bottom of information header of 'calcPointSpreadFunction' for infos on the PSF calculation and speed improvements.
+        # see bottom of information header of 'calcPointSpreadFunction'
+        # for infos on the PSF calculation and speed improvements.
         scalarProd = 0.0 + 0.0j
         helpNormalizeGrid = 0.0
         for cntMics in range(nMics):
@@ -722,7 +736,8 @@ def _psf_Formulation4AkaTrueLocation(
 ):  # noqa ARG001
     nMics = distGridToAllMics.shape[0]
     for cntSources in range(len(distSourcesToArrayCenter)):
-        # see bottom of information header of 'calcPointSpreadFunction' for infos on the PSF calculation and speed improvements.
+        # see bottom of information header of 'calcPointSpreadFunction'
+        # for infos on the PSF calculation and speed improvements.
         scalarProd = 0.0 + 0.0j
         helpNormalizeGrid = 0.0
         for cntMics in range(nMics):
@@ -747,7 +762,8 @@ def _psf_Formulation4AkaTrueLocation(
 # def _psf_SpecificSteerVec(steerVec, steerVecSources, result):
 #    nMics = len(steerVec)
 #    for cntSources in range(steerVecSources.shape[0]):
-#        # see bottom of information header of 'calcPointSpreadFunction' for infos on the PSF calculation and speed improvements.
+#        # see bottom of information header of 'calcPointSpreadFunction'
+#        # for infos on the PSF calculation and speed improvements.
 #        scalarProd = 0.0 + 0.0j
 #        for cntMics in range(nMics):
 #            scalarProd += steerVec[cntMics].conjugate() * steerVecSources[cntSources, cntMics]

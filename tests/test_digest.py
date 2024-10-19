@@ -40,7 +40,8 @@ from numpy import array
 UNEQUAL_DIGEST_TEST_DICT = {
     #    "MicGeom.mpos_tot item assignment" : (MicGeom(mpos_tot=[[1.,2.,3.]]), "obj.mpos_tot[:] = 0."),
     'MicGeom.mpos_tot new array assignment': (MicGeom(mpos_tot=[[1.0, 2.0, 3.0]]), 'obj.mpos_tot = array([0.])'),
-    #    "MicGeom.invalid_channels item assignment" : (MicGeom(mpos_tot=[[1.,2.,3.]],invalid_channels=[1]), "obj.invalid_channels[0] = 0"),
+    #    "MicGeom.invalid_channels item assignment" : (MicGeom(mpos_tot=[[1.,2.,3.]],invalid_channels=[1]),
+    #                                                  "obj.invalid_channels[0] = 0"),
     'MicGeom.invalid_channels new list assignment': (
         MicGeom(mpos_tot=[[1.0, 2.0, 3.0]], invalid_channels=[1]),
         'obj.invalid_channels = [0]',
@@ -83,12 +84,14 @@ UNEQUAL_DIGEST_TEST_DICT = {
         'obj.invalid_channels[0] = 0',
     ),
     'MaskedTimeSamples.invalid_channels list assignment': (MaskedTimeSamples(), 'obj.invalid_channels = [0]'),
-    #    "SphericalHarmonicSource.alpha item assignment": (SphericalHarmonicSource(alpha=array((0, 1))), "obj.alpha[0] = 1."),
+    #    "SphericalHarmonicSource.alpha item assignment": (SphericalHarmonicSource(alpha=array((0, 1))),
+    #                                                      "obj.alpha[0] = 1."),
     'SphericalHarmonicSource.alpha array assignment': (
         SphericalHarmonicSource(alpha=array((0, 1))),
         'obj.alpha = array((1., 1., 1.))',
     ),
-    #    "UncorrelatedNoiseSource.seed item assignment": (UncorrelatedNoiseSource(seed=array((1, 2))), "obj.seed[0] = 3"),
+    #    "UncorrelatedNoiseSource.seed item assignment": (UncorrelatedNoiseSource(seed=array((1, 2))),
+    #                                                     "obj.seed[0] = 3"),
     'UncorrelatedNoiseSource.seed array assignment': (
         UncorrelatedNoiseSource(seed=array((1, 2))),
         'obj.seed = array((3,4))',
@@ -133,7 +136,8 @@ UNEQUAL_DIGEST_TEST_DICT = {
         SpatialInterpolatorRotation(),
         'obj.Q = array([[0.,0.,0.],[0.,0.,0.],[0.,0.,0.]])',
     ),
-    #    "SpatialInterpolatorConstantRotation.Q item assignment": (SpatialInterpolatorConstantRotation(), "obj.Q[0] = 0."),
+    #    "SpatialInterpolatorConstantRotation.Q item assignment": (SpatialInterpolatorConstantRotation(),
+    #                                                              "obj.Q[0] = 0."),
     'SpatialInterpolatorConstantRotation.Q array assignment': (
         SpatialInterpolatorConstantRotation(),
         'obj.Q = array([[0.,0.,0.],[0.,0.,0.],[0.,0.,0.]])',

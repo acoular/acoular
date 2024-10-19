@@ -51,8 +51,8 @@ print(
     np.round((1 / block_size * np.sum(spec * spec.conjugate())).real),
 )
 
-# It can be seen, that the energy is not preserved when using the default 'none' scaling.
-# Therefore, we set the scaling to 'energy' to compensate for the energy loss due to truncation to a single-sided spectrum.
+# It can be seen, that the energy is not preserved when using the default 'none' scaling. Therefore, we set the scaling
+# to 'energy' to compensate for the energy loss due to truncation to a single-sided spectrum.
 
 fft.scaling = 'energy'
 spec = next(fft.result(num=1))[0]
@@ -101,7 +101,8 @@ plt.show()
 # %%
 # Create an averaged power spectral density of the signal
 # --------------------------------------------------------
-# To calculate the time averaged power spectral density of the signal, we use the :class:`acoular.fprocess.AutoPowerSpectra` class.
+# To calculate the time averaged power spectral density of the signal,
+# we use the :class:`acoular.fprocess.AutoPowerSpectra` class.
 
 fft.scaling = 'none'
 ap = ac.AutoPowerSpectra(source=fft, scaling='psd')  # results in the power spectrum

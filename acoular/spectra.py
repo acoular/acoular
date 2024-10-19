@@ -712,7 +712,12 @@ class PowerSpectraImport(PowerSpectra):
 
     def _set_csm(self, csm):
         if (len(csm.shape) != 3) or (csm.shape[1] != csm.shape[2]):
-            msg = 'The cross spectral matrix must have the following shape: (number of frequencies, numchannels, numchannels)!'
+            msg = ' '.join(
+                [
+                    'The cross spectral matrix must have the following shape:',
+                    '(number of frequencies, numchannels, numchannels)!',
+                ]
+            )
             raise ValueError(msg)
         self._csmsum = real(self._csm).sum() + (imag(self._csm) ** 2).sum()  # to trigger new digest creation
         self._csm = csm
