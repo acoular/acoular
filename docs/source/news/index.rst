@@ -42,6 +42,7 @@ Upcoming Release
         * drops support for Python 3.8 and 3.9
         * enable Numpy version > 2.0
         * run unittests on the latest MacOS
+        * add reviewer and assignee lottery
 
 24.07
 ------------

@@ -1,0 +1,56 @@
+name: Reviewer Lottery
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review]
+
+jobs:
+  assign-reviewer:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Randomly assign weighted reviewers and assignees
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const people = [
+              { username: 'adku1173', weight: 1 },
+              { username: 'artpelling', weight: 1 },
+              { username: 'esarradj', weight: 1 },
+              { username: 'FrankK20', weight: 1 }
+            ];
+
+            const getWeightedRandomPerson = (people) => {
+              const totalWeight = people.reduce((sum, person) => sum + person.weight, 0);
+              const random = Math.random() * totalWeight;
+              let cumulativeWeight = 0;
+
+              for (const person of people) {
+                cumulativeWeight += person.weight;
+                if (random < cumulativeWeight) {
+                  return person.username;
+                }
+              }
+            };
+
+            const randomReviewer = getWeightedRandomPerson(people);
+            
+            const filteredPeople = people.filter(
+              person => person.username !== randomReviewer
+            );
+
+            const randomAssignee = getWeightedRandomPerson(filteredPeople);
+
+            await github.pulls.requestReviewers({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+              reviewers: [randomReviewer]
+            });
+
+            await github.issues.addAssignees({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              assignees: [randomAssignee]
+            });
