@@ -44,8 +44,8 @@ jobs:
             console.log(github);
             console.log(context);
 
-            console.log(`${randomReviewer}` was chosen as reviewer.);
-            console.log(`${randomAssignee}` was chosen as assignee.);
+            console.log(`${randomReviewer} was chosen as reviewer.`);
+            console.log(`${randomAssignee} was chosen as assignee.`);
 
             await github.pulls.requestReviewers({
               owner: context.repo.owner,
