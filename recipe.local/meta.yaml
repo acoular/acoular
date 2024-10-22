@@ -19,7 +19,7 @@ requirements:
     - hatchling
     - wheel
   run:
-    - python >=3.8
+    - python >=3.10
     - scikit-learn 
     - numba
     - numpy

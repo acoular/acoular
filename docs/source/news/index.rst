@@ -1,7 +1,18 @@
 What's new
 ============
 
-Upcoming Release 
+Upcoming Release (25.01)
+------------------------
+    
+    **New features:**
+    
+    **Bugfixes**
+
+    **Documentation**
+
+    **Internal**
+
+24.10
 ----------------
     
     **New features:**
@@ -81,7 +92,7 @@ Upcoming Release
         * introduce hatch 
         * measure test coverage
         * replace `zenodo.json` by `CITATION.cff` 
-        * bugfixes CI 
+        * Bugfixes CI 
         * update LICENSE 
         * adds code of conduct 
         * allow workflow dispatch for testing on different branches using GitHub
@@ -243,7 +254,7 @@ Upcoming Release
     * Introduces optional use of reference distance for SPL evaluation (current default: reference position at (x,y,z)=(0,0,0) )
     * Introduces some basic Unit tests to evaluate the beamformer results 
     * Bugfix: CLEAN algorithm now uses correct PSFs
-    * some minor bugfixes
+    * some minor Bugfixes
 
 
 
