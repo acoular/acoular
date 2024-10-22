@@ -6,7 +6,7 @@ Upcoming Release (25.01)
     
     **New features:**
     
-    **Bug fixes**
+    **Bugfixes**
 
     **Documentation**
 
@@ -27,7 +27,7 @@ Upcoming Release (25.01)
             * adds documentation example `example_fft.py`
                 * allow more platforms to build the docs files including Linux, MacOS, and Windows 
     
-    **Bug fixes**
+    **Bugfixes**
         * flush file in :class:`~acoular.tprocess.TimeCache` to prevent data loss / corruption
         * fixes use of already deprecated traits
         * fixes import order to avoid the deactivation of parallelization of numba
@@ -62,7 +62,7 @@ Upcoming Release (25.01)
         * Adds flow establishment length traits
         * Updates acoular demo with ASCII map and gets rid of writing file
     
-    Bug fixes:
+    Bugfixes:
         * temporary fix to PyTables - NumPy 2.0 incompatibility problem
         * Fixes :class:`acoular.fbeamform.BeamformerGridlessOrth` `shgo` params and `eva_list` initial value bug
         * makes :class:`acoular.sdinput.SoundDeviceSamplesGenerator` always importable
@@ -84,7 +84,7 @@ Upcoming Release (25.01)
     * drops official support for Python version 3.7
     * provides new tools to import  data in AIAA array benchmark format
 
-    * Bug fixes:
+    * Bugfixes:
         * changes to UMA-16 microphone array arrangement
 
     * Internal:
@@ -92,7 +92,7 @@ Upcoming Release (25.01)
         * introduce hatch 
         * measure test coverage
         * replace `zenodo.json` by `CITATION.cff` 
-        * bug fixes CI 
+        * Bugfixes CI 
         * update LICENSE 
         * adds code of conduct 
         * allow workflow dispatch for testing on different branches using GitHub
@@ -111,7 +111,7 @@ Upcoming Release (25.01)
         * correction of wrong cost-function 
         * speedups through the use of `numpy.einsum_path` together with `numpy.einsum`
         * changed start value `pgtol` for the optimization with `scipy.optimize.fmin_l_bfgs_b` solver
-    * Bug fixes:
+    * Bugfixes:
         * fixes unrecognized sector arguments in :class:`~acoular.tools.MetricEvaluator`
         * handles version-dependent default values for `normalize` attribute in sklearn solvers (relevant for :class:`~acoular.fbeamform.BeamformerCMF` )
         * fixes bug in :class:`~acoular.fbeamform.BeamformerOrth`: assigned strongest source at grid index 0 when instead of `eva_list` the trait `n` was given
@@ -135,7 +135,7 @@ Upcoming Release (25.01)
     * Simple benchmark suite to compare the performance of Acoular core routines on different computers
     * Some internal rework in grid and sector classes
     * Test coverage is improved
-    * Bug fixes:
+    * Bugfixes:
         * minor bugfix for convective amplification in :class:`~acoular.tbeamform.BeamformerCleantTraj` and :class:`~acoular.tbeamform.BeamformerCleantTrajSq`
         * bugfix in some attributes of :class:`~acoular.grids.ImportGrid`
 
@@ -153,7 +153,7 @@ Upcoming Release (25.01)
         * New class :class:`~acoular.spectra.PowerSpectraImport` for cross spectral matrix import
     * :class:`~acoular.microphones.MicGeom` now has an aperture trait
     * Tests are improved
-    * Bug fixes:
+    * Bugfixes:
         * broken numpy.int import 
         * one off bug in :class:`~acoular.grids.LineGrid` 
 
@@ -166,7 +166,7 @@ Upcoming Release (25.01)
     * different steering vector formulations are now available for time beamformers as well
     * Speedups:
         * time domain beamformers and CleanT deconvolution now share a common core codebase and all do blockwise processing
-    * Bug fixes:
+    * Bugfixes:
         * broken digest in :class:`~acoular.grids.RectGrid3D` repaired 
         * :class:`~acoular.tbeamform.BeamformerCleant` and derived classes now never miss samples
 
@@ -183,7 +183,7 @@ Upcoming Release (25.01)
         * frequency domain beamformers are abaout 30% faster
         * time domain beamformers and CLEAN-T is now about 10 x faster
     * Unittests for all major features, much better coverage
-    * Bug fixes:
+    * Bugfixes:
         * integration sectors
         * new grid classes from 20.10 are now imported into module namespace
 
@@ -254,7 +254,7 @@ Upcoming Release (25.01)
     * Introduces optional use of reference distance for SPL evaluation (current default: reference position at (x,y,z)=(0,0,0) )
     * Introduces some basic Unit tests to evaluate the beamformer results 
     * Bugfix: CLEAN algorithm now uses correct PSFs
-    * some minor bug fixes
+    * some minor Bugfixes
 
 
 
