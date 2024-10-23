@@ -30,10 +30,10 @@ jobs:
         uses: ./.github/actions/setup-hatch
       - name: Set up PortAudio
         uses: ./.github/actions/setup-portaudio
-      - name: Set up Graphviz
-        uses: ./.github/actions/setup-graphviz
         with:
           os: ${{ matrix.os }}
+      - name: Set up Graphviz
+        uses: ./.github/actions/setup-graphviz
       - name: Run sphinx
         run: hatch -v run docs:build
       - name: Upload artifacts

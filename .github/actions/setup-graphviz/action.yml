@@ -12,7 +12,7 @@ runs:
       if: inputs.os == 'ubuntu-latest'
       run: sudo apt install graphviz
       shell: bash
-    - name: Install portaudio (on MacOs)
+    - name: Install graphviz (on MacOs)
       if: inputs.os == 'macos-latest'
       run: brew install graphviz
       shell: bash
