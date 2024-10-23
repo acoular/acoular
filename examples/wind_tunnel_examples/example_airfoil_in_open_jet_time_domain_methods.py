@@ -88,7 +88,8 @@ avgts = ac.Average(source=bts, naverage=1024)
 cachts = ac.Cache(source=avgts)  # cache to prevent recalculation
 
 # %%
-# Third, CLEAN deconvolution in the time domain (CLEAN-T) is applied, using the :class:`acoular.tbeamform.BeamformerCleant` class.
+# Third, CLEAN deconvolution in the time domain (CLEAN-T) is applied,
+# using the :class:`acoular.tbeamform.BeamformerCleant` class.
 fct = ac.FiltFiltOctave(source=ts, band=cfreq)
 bct = ac.BeamformerCleant(source=fct, steer=st, n_iter=20, damp=0.7)
 ptct = ac.TimePower(source=bct)
@@ -96,7 +97,8 @@ avgct = ac.Average(source=ptct, naverage=1024)
 cachct = ac.Cache(source=avgct)  # cache to prevent recalculation
 
 # %%
-# Finally, squared signals with autocorrelation removal can be obtained by using the :class:`acoular.tbeamform.BeamformerCleantSq` class.
+# Finally, squared signals with autocorrelation removal can be obtained
+# by using the :class:`acoular.tbeamform.BeamformerCleantSq` class.
 fcts = ac.FiltFiltOctave(source=ts, band=cfreq)
 bcts = ac.BeamformerCleantSq(source=fcts, steer=st, n_iter=20, damp=0.7, r_diag=True)
 avgcts = ac.Average(source=bcts, naverage=1024)

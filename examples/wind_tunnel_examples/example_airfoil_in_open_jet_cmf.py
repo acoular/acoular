@@ -46,7 +46,8 @@ if not time_data_file.exists():
 # Setting up the processing chain for :class:`acoular.fbeamform.BeamformerCMF` methods.
 #
 # .. hint::
-#    A step-by-step explanation for setting up the processing chain is given in the example :doc:`example_airfoil_in_open_jet_steering_vectors`.
+#    A step-by-step explanation for setting up the processing chain is given
+#    in the example :doc:`example_airfoil_in_open_jet_steering_vectors`.
 
 ts = ac.MaskedTimeSamples(
     name=time_data_file,

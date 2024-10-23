@@ -38,9 +38,10 @@ class Generator(HasPrivateTraits):
 
     It provides a common interface for all classes, which generate an output via the generator :meth:`result`
     in block-wise manner. It has a common set of traits that are used by all classes that implement this interface.
-    This includes the sampling frequency of the signal (:attr:`sample_freq`) and the number of samples (:attr:`numsamples`).
-    A private trait :attr:`digest` is used to store the internal identifier of the object, which is a hash of the object's
-    attributes. This is used to check if the object's internal state has changed.
+    This includes the sampling frequency of the signal (:attr:`sample_freq`)
+    and the number of samples (:attr:`numsamples`).
+    A private trait :attr:`digest` is used to store the internal identifier of the object, which is a hash of the
+    object's attributes. This is used to check if the object's internal state has changed.
     """
 
     #: Sampling frequency of the signal, defaults to 1.0
@@ -75,8 +76,9 @@ class Generator(HasPrivateTraits):
 class SamplesGenerator(Generator):
     """Interface for any generating multi-channel time domain signal processing block.
 
-    It provides a common interface for all SamplesGenerator classes, which generate an output via the generator :meth:`result`
-    in block-wise manner. This class has no real functionality on its own and should not be used directly.
+    It provides a common interface for all SamplesGenerator classes, which generate an output
+    via the generator :meth:`result` in block-wise manner. This class has no real functionality on its own
+    and should not be used directly.
     """
 
     #: Number of channels
@@ -107,8 +109,9 @@ class SamplesGenerator(Generator):
 class SpectraGenerator(Generator):
     """Interface for any generating multi-channel signal frequency domain processing block.
 
-    It provides a common interface for all SpectraGenerator classes, which generate an output via the generator :meth:`result`
-    in block-wise manner. This class has no real functionality on its own and should not be used directly.
+    It provides a common interface for all SpectraGenerator classes, which generate an output
+    via the generator :meth:`result` in block-wise manner. This class has no real functionality on its own
+    and should not be used directly.
     """
 
     #: Number of channels

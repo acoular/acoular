@@ -7,6 +7,7 @@ Upcoming Release (25.01)
     **New features:**
     
     **Bugfixes**
+        * reduces (almost) all line lengths to 120 characters or less
 
     **Documentation**
 

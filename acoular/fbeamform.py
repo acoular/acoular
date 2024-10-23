@@ -820,7 +820,8 @@ class BeamformerFunctional(BeamformerBase):
     #: Functional Beamforming is only well defined for full CSM
     r_diag = Enum(False, desc='False, as Functional Beamformer is only well defined for the full CSM')
 
-    #: Normalization factor in case of CSM diagonal removal. Defaults to 1.0 since Functional Beamforming is only well defined for full CSM.
+    #: Normalization factor in case of CSM diagonal removal.
+    #: Defaults to 1.0 since Functional Beamforming is only well defined for full CSM.
     r_diag_norm = Enum(
         1.0,
         desc='No normalization needed. Functional Beamforming is only well defined for full CSM.',
@@ -907,7 +908,8 @@ class BeamformerCapon(BeamformerBase):
     # for Capon beamforming r_diag is set to 'False'.
     r_diag = Enum(False, desc='removal of diagonal')
 
-    #: Normalization factor in case of CSM diagonal removal. Defaults to 1.0 since Beamformer Capon is only well defined for full CSM.
+    #: Normalization factor in case of CSM diagonal removal.
+    #: Defaults to 1.0 since Beamformer Capon is only well defined for full CSM.
     r_diag_norm = Enum(
         1.0,
         desc='No normalization. BeamformerCapon is only well defined for full CSM.',
@@ -1020,7 +1022,8 @@ class BeamformerMusic(BeamformerEig):
     # for MUSIC beamforming r_diag is set to 'False'.
     r_diag = Enum(False, desc='removal of diagonal')
 
-    #: Normalization factor in case of CSM diagonal removal. Defaults to 1.0 since BeamformerMusic is only well defined for full CSM.
+    #: Normalization factor in case of CSM diagonal removal.
+    #: Defaults to 1.0 since BeamformerMusic is only well defined for full CSM.
     r_diag_norm = Enum(
         1.0,
         desc='No normalization. BeamformerMusic is only well defined for full CSM.',
@@ -1208,10 +1211,14 @@ class PointSpreadFunction(HasPrivateTraits):
     #: Flag that defines how to calculate and store the point spread function
     #: defaults to 'single'.
     #:
-    #: * 'full': Calculate the full PSF (for all grid points) in one go (should be used if the PSF at all grid points is needed, as with :class:`DAMAS<BeamformerDamas>`)
-    #: * 'single': Calculate the PSF for the grid points defined by :attr:`grid_indices`, one by one (useful if not all PSFs are needed, as with :class:`CLEAN<BeamformerClean>`)
-    #: * 'block': Calculate the PSF for the grid points defined by :attr:`grid_indices`, in one go (useful if not all PSFs are needed, as with :class:`CLEAN<BeamformerClean>`)
-    #: * 'readonly': Do not attempt to calculate the PSF since it should already be cached (useful if multiple processes have to access the cache file)
+    #: * 'full': Calculate the full PSF (for all grid points) in one go
+    #:     * (should be used if the PSF at all grid points is needed, as with :class:`DAMAS<BeamformerDamas>`)
+    #: * 'single': Calculate the PSF for the grid points defined by :attr:`grid_indices`, one by one
+    #:     * (useful if not all PSFs are needed, as with :class:`CLEAN<BeamformerClean>`)
+    #: * 'block': Calculate the PSF for the grid points defined by :attr:`grid_indices`, in one go
+    #:     * (useful if not all PSFs are needed, as with :class:`CLEAN<BeamformerClean>`)
+    #: * 'readonly': Do not attempt to calculate the PSF since it should already be cached
+    #:     * (useful if multiple processes have to access the cache file)
     calcmode = Trait('single', 'block', 'full', 'readonly', desc='mode of calculation / storage')
 
     #: Floating point precision of property psf. Corresponding to numpy dtypes. Default = 64 Bit.
@@ -1751,7 +1758,8 @@ class BeamformerCleansc(BeamformerBase):
                 hh = hh[:, newaxis]
                 csm1 = hmax * (hh * hh.conj().T)
 
-                # h1 = self.steer._beamformerCall(f[i], self.r_diag, normfactor, (array((hmax, ))[newaxis, :], hh[newaxis, :].conjugate()))[0]
+                # h1 = self.steer._beamformerCall(f[i], self.r_diag, normfactor, (array((hmax, ))[newaxis, :],
+                #                                 hh[newaxis, :].conjugate()))[0]
                 h1 = beamformerFreq(
                     param_steer_type,
                     self.r_diag,
@@ -2428,7 +2436,8 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
                                     emode,
                                 )
                             if self.beta < 1 and it > 1:
-                                # Reorder from the greatest to smallest magnitude to define a reduced-point source distribution , and reform a reduced transfer matrix
+                                # Reorder from the greatest to smallest magnitude to define a reduced-point source
+                                # distribution , and reform a reduced transfer matrix
                                 leftpoints = int(round(numpoints * self.beta ** (it + 1)))
                                 idx = argsort(abs(qi[s, locpoints]))[::-1]
                                 # print(it, leftpoints, locpoints, idx )

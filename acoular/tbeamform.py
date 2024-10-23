@@ -114,7 +114,8 @@ class BeamformerTime(TimeOut):
 
     def _set_steer(self, steer):
         if type(steer) == SteeringVector:
-            # This condition may be replaced at a later time by: isinstance(steer, SteeringVector): -- (derived classes allowed)
+            # This condition may be replaced at a later time by:
+            # isinstance(steer, SteeringVector): -- (derived classes allowed)
             self._steer_obj = steer
         elif steer in ('true level', 'true location', 'classic', 'inverse'):
             # Type of steering vectors, see also :ref:`Sarradj, 2012<Sarradj2012>`.
