@@ -9,6 +9,7 @@ Upcoming Release (25.01)
     **Bugfixes**
 
     **Documentation**
+        * adds guide on how to submit a pull request
 
     **Internal**
         * adds a pull request template
@@ -42,7 +43,6 @@ Upcoming Release (25.01)
         * improves the explanation of the installation of dependencies
         * add explanation on how to test specific Python version only
         * test documentation build on all latest platforms
-        * adds guide on how to submit a pull request
 
     **Internal**
         * refactoring of classes in :mod:`acoular.tbeamform` (moves buffer logic away from Beamformer classes)
