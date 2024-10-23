@@ -1,0 +1,18 @@
+name: 'Set up Graphviz'
+description: 'Set up graphviz'
+inputs:
+  os:
+    description: 'The platform'
+    required: false
+    default: 'ubuntu-latest'
+runs:
+  using: composite
+  steps:
+    - name: Install graphviz (on Ubuntu)
+      if: inputs.os == 'ubuntu-latest'
+      run: sudo apt install graphviz
+      shell: bash
+    - name: Install graphviz (on MacOs)
+      if: inputs.os == 'macos-latest'
+      run: brew install graphviz
+      shell: bash
