@@ -44,12 +44,19 @@ If you visit to your forked Acoular repository on GitHub now, you will see somet
 
 Note the orange box. To open a pull request, click on ``Compare & pull request``. Alternatively you can select the branch you want to commit in the branch menu and click ``Contribute``.
 
-The page you will get redirectet to, will look like this:
+You will get redirectet to a page where you should fill out a Markdown form with a description of your pull request and the issue it is regarding (if it is regarding an issue). Make sure to fill out the checklist boxes with x's (if they apply of course).
 
-.. image:: ../_static/pull_request_form_github_site.png
+The finished result should look like this:
+
+.. image:: ../_static/pull_request_form_github_site_write.png
     :width: 100%
-    :alt: Pull request form
+    :alt: Pull request form (write)
 
-Make sure to fill out the form with a proper commit message and to list your changes below and to read the :doc:`checklist`.
+And if you click ``Preview``, it should look like this:
+
+.. image:: ../_static/pull_request_form_github_site_preview.png
+    :width: 100%
+    :alt: Pull request form (preview)
+
 
 Click ``Create pull request`` to submit your changes and get them reviewed.
