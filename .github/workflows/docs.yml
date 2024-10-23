@@ -34,6 +34,8 @@ jobs:
           os: ${{ matrix.os }}
       - name: Set up Graphviz
         uses: ./.github/actions/setup-graphviz
+        with:
+          os: ${{ matrix.os }}
       - name: Run sphinx
         run: hatch -v run docs:build
       - name: Upload artifacts
