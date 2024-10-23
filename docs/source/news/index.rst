@@ -11,6 +11,7 @@ Upcoming Release (25.01)
     **Documentation**
 
     **Internal**
+        * adds a pull request template
 
 24.10
 ----------------
