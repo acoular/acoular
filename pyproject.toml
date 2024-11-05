@@ -4,7 +4,7 @@
 
 [project]
 name = "acoular"
-version = "24.10"
+dynamic = ["version"]
 description = "Python library for acoustic beamforming"
 requires-python = ">=3.10,<=12"
 authors = [
@@ -87,6 +87,9 @@ repository = "https://github.com/acoular/acoular"
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "acoular/version.py"
 
 [tool.hatch.envs.hatch-static-analysis]
 dependencies = ["ruff==0.4.1"]
