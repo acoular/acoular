@@ -25,7 +25,6 @@
 
 # imports from other packages
 from os import path
-from warnings import warn
 
 from numpy import (
     absolute,
@@ -294,23 +293,6 @@ class Grid(HasPrivateTraits):
     def _get_gpos(self):
         return array([[0.0], [0.0], [0.0]])
 
-    def pos(self):
-        """Calculates grid co-ordinates.
-        Deprecated; use :attr:`gpos` attribute instead.
-        The :meth:`pos` method will be removed in version 25.01.
-
-        Returns
-        -------
-        array of floats of shape (3, :attr:`size`)
-            The grid point x, y, z-coordinates in one array.
-
-        """
-        msg = (
-            "The 'pos' method is deprecated and will be removed in version 25.01. " "Use the 'gpos' attribute instead."
-        )
-        warn(msg, DeprecationWarning, stacklevel=2)
-        return self.gpos  # array([[0.], [0.], [0.]])
-
     def subdomain(self, sector):
         """Queries the indices for a subdomain in the grid.
 
@@ -566,21 +548,6 @@ class RectGrid3D(RectGrid):
     # Respective increments in x,y, and z-direction (in m).
     # Deprecated: Use :attr:`~RectGrid.increment` for this functionality
     increment3D = Property(desc='3D step sizes')  # noqa N815
-
-    def _get_increment3D(self):  # noqa N802
-        msg = "Using 'increment3D' is deprecated and will be removed in version 25.01." "Use 'increment' instead."
-        warn(msg, DeprecationWarning, stacklevel=2)
-        if isscalar(self._increment):
-            return array([self._increment, self._increment, self._increment])
-        return self._increment
-
-    def _set_increment3D(self, inc):  # noqa N802
-        msg = "Using 'increment3D' is deprecated and will be removed in version 25.01." "Use 'increment' instead."
-        warn(msg, DeprecationWarning, stacklevel=2)
-        if not isscalar(inc) and len(inc) == 3:
-            self._increment = array(inc, dtype=float)
-        else:
-            raise (TraitError(args=self, name='increment3D', info='CArray(3,)', value=inc))
 
     # internal identifier
     digest = Property(

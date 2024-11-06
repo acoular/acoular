@@ -528,38 +528,6 @@ class PointSource(SamplesGenerator):
     #: which provides information about the sound propagation in the medium.
     env = Trait(Environment(), Environment)
 
-    # --- List of backwards compatibility traits and their setters/getters -----------
-
-    # Microphone locations.
-    # Deprecated! Use :attr:`mics` trait instead.
-    mpos = Property()
-
-    def _get_mpos(self):
-        return self.mics
-
-    def _set_mpos(self, mpos):
-        msg = (
-            "Deprecated use of 'mpos' trait. Use 'mics' trait instead."
-            "The 'mpos' trait will be removed in version 25.01."
-        )
-        warn(msg, DeprecationWarning, stacklevel=2)
-        self.mics = mpos
-
-    # The speed of sound.
-    # Deprecated! Only kept for backwards compatibility.
-    # Now governed by :attr:`env` trait.
-    c = Property()
-
-    def _get_c(self):
-        return self.env.c
-
-    def _set_c(self, c):
-        msg = "Deprecated use of 'c' trait. Use 'env' trait instead." "The 'c' trait will be removed in version 25.01."
-        warn(msg, DeprecationWarning, stacklevel=2)
-        self.env.c = c
-
-    # --- End of backwards compatibility traits --------------------------------------
-
     #: Start time of the signal in seconds, defaults to 0 s.
     start_t = Float(0.0, desc='signal start time')
 
@@ -1371,25 +1339,6 @@ class UncorrelatedNoiseSource(SamplesGenerator):
 
     #: :class:`~acoular.microphones.MicGeom` object that provides the microphone locations.
     mics = Trait(MicGeom, desc='microphone geometry')
-
-    # --- List of backwards compatibility traits and their setters/getters -----------
-
-    # Microphone locations.
-    # Deprecated! Use :attr:`mics` trait instead.
-    mpos = Property()
-
-    def _get_mpos(self):
-        return self.mics
-
-    def _set_mpos(self, mpos):
-        msg = (
-            "Deprecated use of 'mpos' trait. Use 'mics' trait instead."
-            "The 'mpos' trait will be removed in version 25.01."
-        )
-        warn(msg, DeprecationWarning, stacklevel=2)
-        self.mics = mpos
-
-    # --- End of backwards compatibility traits --------------------------------------
 
     #: Start time of the signal in seconds, defaults to 0 s.
     start_t = Float(0.0, desc='signal start time')
