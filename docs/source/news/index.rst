@@ -12,7 +12,8 @@ Upcoming Release (25.01)
 
     **Internal**
         * adds a pull request template
-        * dynamically set the version in the pyproject.toml file (from version.py) 
+        * dynamically set the version in the pyproject.toml file (from version.py)
+        * add reviewer and assignee lottery
 
 24.10
 ----------------

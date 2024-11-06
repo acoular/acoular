@@ -1,0 +1,19 @@
+name: PR assignment
+
+on:
+    pull_request:
+        types: [opened, edited, synchronize, reopened]
+
+jobs:
+    auto-assign:
+        runs-on: ubuntu-latest
+        permissions:
+            pull-requests: write
+        steps:
+            - name: 'Auto-assign PR'
+              uses: pozil/auto-assign-issue@v2
+              with:
+                  assignees: adku1173:1, artpelling:1, esarradj:1, FrankK20:1, gherold:1, sjekosch:1
+                  numOfAssignee: 1
+                  allowSelfAssign: false
+                  abortIfPreviousAssignees: true
