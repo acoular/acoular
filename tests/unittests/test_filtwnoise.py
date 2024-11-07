@@ -105,6 +105,7 @@ AR_COEFF = array(
     ],
 )
 
+
 def test_filtwnoise_no_coefficients():
     """test that white noise and filtered white noise is equal when no coefficients are
     specified."""
@@ -112,11 +113,11 @@ def test_filtwnoise_no_coefficients():
     wn_signal = RandomState(seed=1).standard_normal(400)
     assert wn_signal.sum() == fwn.signal().sum()
 
+
 @pytest.mark.parametrize(
-    "ar, ma",
-    [(array([]), MA_COEFF), (AR_COEFF, array([])), (AR_COEFF, MA_COEFF)], ids=["MA", "AR", "ARMA"])
+    'ar, ma', [(array([]), MA_COEFF), (AR_COEFF, array([])), (AR_COEFF, MA_COEFF)], ids=['MA', 'AR', 'ARMA']
+)
 def test_filtwnoise_signal_length(ar, ma):
     """test that signal retains correct length after filtering."""
     fwn = FiltWNoiseGenerator(sample_freq=100, numsamples=400, seed=1, ar=ar, ma=ma)
     assert fwn.signal().shape[0] == fwn.numsamples
-

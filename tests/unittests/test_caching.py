@@ -1,21 +1,40 @@
 # ------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
-"""Implements snapshot testing of frequency beamformers."""
+"""Integration tests for all objects that can use Acoular's HDF5 filecache functionality."""
 
-import tempfile
+import re
+from pathlib import Path
 
 import acoular as ac
 import numpy as np
 import pytest
 from acoular.h5files import H5CacheFileH5py, H5CacheFileTables
-from pytest_cases import fixture, parametrize, parametrize_with_cases
+from pytest_cases import fixture, parametrize_with_cases
+from test_caching_cases import Caching
 
-TEST_PARAMS_F_NUM = [
-    pytest.param(8000, 1, id='8kHz_oct')
-    ]
 
-def expected_results_no_cache(h5library):
+def delete_traits_cache(obj):
+    """Delete traits cache from object."""
+    for key in list(obj.__dict__.keys()):
+        if key.startswith('_traits_cache'):
+            obj.__dict__.pop(key)
+
+def expected_results(h5library):
+    """
+    Expected results for test `test_filecache_created` when no cache file exists before the test.
+
+    Parameters
+    ----------
+    h5library : str
+        HDF5 library to use for cache files ('pytables' or 'h5py').
+
+    Returns
+    -------
+    dict
+        Expected results when no cache file exists.
+
+    """
     cache_file_type = H5CacheFileTables if h5library == 'pytables' else H5CacheFileH5py
     # (caching_flag, cached): expected h5f
     return {
@@ -28,65 +47,83 @@ def expected_results_no_cache(h5library):
         ('readonly', True): None,
         ('readonly', False): None,
         ('overwrite', True): cache_file_type,
-        ('overwrite', False): cache_file_type
+        ('overwrite', False): cache_file_type,
     }
 
 
 @fixture
-@pytest.mark.parametrize('h5library', ['h5py', 'pytables'])
-@pytest.mark.parametrize('caching_flag', [
-    'none', 'individual', 'all', 'readonly', 'overwrite'])
-def file_cache_options(h5library, caching_flag):
-    ac.config.cache_dir = tempfile.mkdtemp()
+@pytest.mark.parametrize('h5library', ['pytables', 'h5py'])
+@pytest.mark.parametrize('caching_flag', ['none', 'individual', 'all', 'readonly', 'overwrite'])
+def file_cache_options(tmp_path, h5library, caching_flag):
+    """Fixture to set up file cache options.
+
+    Parameters
+    ----------
+    tmp_path : pytest.fixture
+        Temporary directory that is removed after the test (built-in pytest fixture).
+    h5library : str
+        HDF5 library to use for cache files ('pytables' or 'h5py').
+    caching_flag : str
+        Cache flag to use ('none', 'individual', 'all', 'readonly', 'overwrite').
+    """
+    ac.config.cache_dir = str(tmp_path)
     ac.config.h5library = h5library
     ac.config.global_caching = caching_flag
     return ac.config.h5library, ac.config.global_caching
 
-@parametrize('cached', [False, True], scope='function')
-def case_BeamformerBase_cached(source_case, cached):
-    return ac.BeamformerBase(cached=cached,
-        freq_data=source_case.freq_data, steer=source_case.steer)
 
-@parametrize_with_cases("beamformer", cases=case_BeamformerBase_cached)
-def test_beamformer_no_filecache(mocker, beamformer, file_cache_options):
+@parametrize_with_cases('case', cases=Caching)
+def test_filecache_created(case, file_cache_options):
+    """Test if cache file is created when it should be.
 
-    # Mock the global configuration attributes in Acoular
-    #mocker.patch('acoular.config.h5library', h5library)
-    # mocker.patch('acoular.config.global_caching', caching_flag)
-    # assert ac.config.h5library == h5library
+    Parameters
+    ----------
+    case : pytest.fixture (tuple)
+        Test case with Acoular object, calculation function, and cached attribute value.
+    file_cache_options : pytest.fixture (tuple)
+        File cache options with HDF5 library and caching
+    """
 
     h5library, caching_flag = file_cache_options
-    expected_result = expected_results_no_cache(h5library)
-    assert beamformer.h5f is None
-    beamformer.synthetic(8000, 0)
-    exp_res = expected_result[(caching_flag, beamformer.cached)]
-    if exp_res is None:
-        assert beamformer.h5f is None
+    expected_result = expected_results(h5library)
+    objs, calc, cached = case
+
+    obj1, obj2, obj3 = objs
+
+    expected_error = (
+        isinstance(obj1, ac.PointSpreadFunction)
+        and caching_flag not in ['readonly', 'none']
+        and obj1.calcmode == 'readonly'
+    )
+
+    # run calculation
+    if expected_error:
+        # for PSF a value error is expected if PSF calcmode is 'readonly' and no cache file is present
+        with pytest.raises(ValueError, match=re.escape("Cannot calculate missing PSF (points) in 'readonly' mode.")):
+            result = calc(obj1)
     else:
-        assert beamformer.h5f is not None
-        assert type(beamformer.h5f) == exp_res
-        #beamformer.h5f.close()
+        result = calc(obj1)
+        if caching_flag == 'overwrite':
+            result = result[...] # origiinal array will be overwritten (and closed)
 
-def test_time_cache(file_cache_options, time_data_source):
-    tc = ac.Cache(source=time_data_source)
-    h5library, caching_flag = file_cache_options
-    expected_result = expected_results_no_cache(h5library)
-    exp_res = expected_result[(caching_flag, True)]
-
-    block_size = 32
-    # unfinished evaluation
-    block_c = next(tc.result(block_size))
-    block_nc = next(time_data_source.result(block_size))
-    np.testing.assert_array_almost_equal(block_c, block_nc)
-
-    # finished evaluation
-    block_c = ac.tools.return_result(tc, num=block_size)
-    block_nc = ac.tools.return_result(time_data_source, num=block_size)
-    np.testing.assert_array_almost_equal(block_c, block_nc)
-
-    # assert file
+    # check if cache file is created
+    exp_res = expected_result[(caching_flag, cached)]
     if exp_res is None:
-        assert tc.h5f is None
+        assert obj1.h5f is None
     else:
-        assert tc.h5f is not None
-        assert type(tc.h5f) == exp_res
+        assert obj1.h5f is not None
+        assert type(obj1.h5f) == exp_res
+        assert Path(obj1.h5f.filename).exists()
+
+    # create copy and check if it loads the cache file
+    if not expected_error and exp_res is not None:
+        calc(obj2)
+        assert Path(obj2.h5f.filename).samefile(Path(obj1.h5f.filename)), "Not the same cache file loaded."
+
+    # disable cache and check if result matches uncached result
+    if not expected_error and not isinstance(obj1, ac.Cache) and exp_res is not None:
+        # Test skipped when expected error condition is met (no result to compare).
+        # Test skipped for Cache object (comparison with uncached result already in calc function).")
+        ac.config.global_caching = 'none'
+        result_uncache = calc(obj2)
+        np.testing.assert_allclose(result, result_uncache)

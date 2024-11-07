@@ -14,7 +14,7 @@ import pytest
     ],
     ids=['default', 'custom'],
 )
-def freq_data(request, source_case):
+def freq_data(request, regression_source_case):
     """
     Fixture to create a beamformer instance for testing.
 
@@ -22,10 +22,10 @@ def freq_data(request, source_case):
     ----------
     request : pytest request
         Request fixture (to inject parameters)
-    source_case : fixture
-        source_case fixture (see conftest.py)
+    regression_source_case : fixture
+        regression_source_case fixture (see conftest.py)
     """
-    return ac.PowerSpectra(source=source_case.source, **request.param)
+    return ac.PowerSpectra(source=regression_source_case.source, **request.param)
 
 
 @pytest.mark.parametrize('ind', [(16, 32)])

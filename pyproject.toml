@@ -68,6 +68,7 @@ tests = [
     "pytest",
     "pytest-cov",
     "pytest-regtest",
+    "pytest-cases",
     "sounddevice",
     "traitsui",
     "h5py",

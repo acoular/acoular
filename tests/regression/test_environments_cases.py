@@ -16,8 +16,8 @@ FLOW_SKIP_DEFAULT = [
 ENV_DEFAULT = [env for env in get_subclasses(ac.Environment) if env not in ENV_SKIP_DEFAULT]
 FLOW_DEFAULT = [flow for flow in get_subclasses(ac.FlowField) if flow not in FLOW_SKIP_DEFAULT]
 
-class Flows:
 
+class Flows:
     @parametrize('flow', FLOW_DEFAULT)
     def case_default(self, flow):
         return flow()
@@ -33,7 +33,6 @@ class Flows:
 
 
 class Environments:
-
     @parametrize('env', ENV_DEFAULT)
     def case_default(self, env):
         return env()
@@ -42,5 +41,4 @@ class Environments:
         return ac.UniformFlowEnvironment(ma=0.3)
 
     def case_GeneralFlowEnvironment(self):
-        return ac.GeneralFlowEnvironment(
-            ff=ac.OpenJet(v0=70.0, origin=(-0.7, 0, 0.7)))
+        return ac.GeneralFlowEnvironment(ff=ac.OpenJet(v0=70.0, origin=(-0.7, 0, 0.7)))

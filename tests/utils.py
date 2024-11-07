@@ -13,25 +13,27 @@ def get_subclasses(cls):
             classes.append(obj)
     return classes
 
-def sector_case_filter(case, t="empty"):
+
+def sector_case_filter(case, t='empty'):
     case_id = get_case_id(case)
-    return t in case_id and "default" not in case_id
+    return t in case_id and 'default' not in case_id
 
 
-class SetupSourceCase:
-    def __init__(self, test_config, numsamples, blocksize=128):
-        self.calib = ac.Calib(from_file=test_config.moduledir / 'examples' / 'data' / 'example_calib.xml')
+class SetupStationarySourceCase:
+    def __init__(self, grid, numsamples, blocksize, invalid_channels):
+        module_dir = Path(__file__).parent.parent
+        self.grid = grid
+        self.calib = ac.Calib(from_file=module_dir / 'examples' / 'data' / 'example_calib.xml')
         self.source = ac.MaskedTimeSamples(
-            name=test_config.moduledir / 'examples' / 'data' / 'example_data.h5',
-            invalid_channels=[1, 7],
+            name=module_dir / 'examples' / 'data' / 'example_data.h5',
+            invalid_channels=invalid_channels,
             start=0,
             stop=numsamples,
             calib=self.calib,
         )
         self.mics = ac.MicGeom(
-            from_file=test_config.moduledir / 'acoular' / 'xml' / 'array_56.xml', invalid_channels=[1, 7]
+            from_file=module_dir / 'acoular' / 'xml' / 'array_56.xml', invalid_channels=invalid_channels
         )
-        self.grid = ac.RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=0.68, increment=0.07)
         self.env = ac.Environment(c=346.04)
         self.steer = ac.SteeringVector(grid=self.grid, mics=self.mics, env=self.env)
         self.freq_data = ac.PowerSpectra(
@@ -55,7 +57,7 @@ class SetupMovingSourceCase:
         self.env = ac.Environment(c=346.04)
         self.steer_moving = ac.SteeringVector(grid=self.grid_moving, mics=self.mics)
         self.steer_fixed = ac.SteeringVector(grid=self.grid_fixed, mics=self.mics)
-        numsamples = int(np.max(list(self.traj.points.keys()))*self.sample_freq)
+        numsamples = int(np.max(list(self.traj.points.keys())) * self.sample_freq)
         self.signal = ac.WNoiseGenerator(sample_freq=self.sample_freq, numsamples=numsamples, seed=1)
         if not self.fname.exists():
             self.create_test_time_data()
@@ -91,5 +93,3 @@ class SetupMovingSourceCase:
         print(f'num samples: {self.signal.numsamples}, pass-by time: {np.max(self.traj.points)}s')
         print(50 * '#')
         wh5.save()
-
-

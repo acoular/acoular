@@ -1,54 +1,59 @@
-from copy import deepcopy
-from dataclasses import dataclass
-from pathlib import Path
-
+import acoular as ac
+import numpy as np
 import pytest
 from pytest_cases import fixture, parametrize
 
-from tests.utils import SetupMovingSourceCase, SetupSourceCase
+from tests.utils import SetupMovingSourceCase, SetupStationarySourceCase
 
+RNG = np.random.RandomState(1)
 
-@pytest.fixture(scope='session')
-def test_config():
-    @dataclass
-    class Config:
-        testdir: Path = Path(__file__).parent
-        moduledir: Path = Path(__file__).parent.parent
-        reference_data: Path = Path(__file__).parent / 'reference_data'
-    return Config()
+@fixture(scope='session')
+def create_time_data_source():  # fixture factory
+    def _create_time_data_source(numchannels, numsamples):
+        return ac.TimeSamples(sample_freq=51200, data=RNG.randn(numsamples, numchannels))
 
-@pytest.fixture(scope='session')
-def source_case(test_config):
-    blocksize = 128
-    numsamples = blocksize * 54 * 2 # blocksize * number of microphones * 2
-    return SetupSourceCase(
-        test_config=test_config, numsamples=numsamples, blocksize=blocksize)
+    return _create_time_data_source
+
+@fixture(scope='session')
+@parametrize('numchannels', [1, 2], ids=['1ch', '2ch'])
+def time_data_source(create_time_data_source, numchannels):
+    return create_time_data_source(numchannels=numchannels, numsamples=50)
+
+# moving source cases
 
 @pytest.fixture(scope='session')
 def moving_source_case():
     return SetupMovingSourceCase()
 
-@fixture
-@parametrize('numchannels', [1, 2], ids=['1ch', '2ch'])
-def time_data_source(moving_source_case, numchannels):
-    time_data = deepcopy(moving_source_case.source)
-    time_data.stop = 50
-    time_data.invalid_channels = [i for i in range(time_data.numchannels) if i >= numchannels]
-    return time_data
 
+# Stationary Source Cases
 
-# @pytest.fixture(scope='session', autouse=True)
-# def clear_cache(use_temporary_cache_dir):  # TODO: can this be done with built-in tmp_path fixture?
-#     cache_dir = use_temporary_cache_dir
-#     yield
-#     # Remove the cache directory again after the tests
-#     print(f'Remove temporary cache directory: {ac.config.cache_dir}')
-#     if cache_dir.exists() and cache_dir.is_dir():
-#         shutil.rmtree(cache_dir)
+@fixture(scope='session')
+def create_source_case():
+    def _create_source_case(blocksize=None, numsamples=None, grid=None, invalid_channels=None):
+        return SetupStationarySourceCase(
+            numsamples=numsamples,
+            blocksize=blocksize,
+            grid=grid,
+            invalid_channels=invalid_channels,
+        )
 
-# @pytest.fixture(scope='session')
-# def use_temporary_cache_dir():  # TODO: use built-in tmp_path fixture
-#     ac.config.cache_dir = tempfile.mkdtemp()
-#     print(f'Use temporary cache directory: {ac.config.cache_dir}')
-#     return Path(ac.config.cache_dir)
+    return _create_source_case
 
+@fixture(scope='session')
+def small_source_case(create_source_case):
+    return create_source_case(
+        numsamples=128,
+        blocksize=128,
+        invalid_channels=[i for i in range(56) if i % 2 != 0],
+        grid=ac.RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=0.68, increment=0.2),
+    )
+
+@fixture(scope='session')
+def regression_source_case(create_source_case):
+    return create_source_case(
+        grid=ac.RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=0.68, increment=0.07),
+        numsamples=128 * 54 * 2,
+        blocksize=128,
+        invalid_channels=[1, 7],
+    )

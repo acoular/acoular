@@ -1,5 +1,3 @@
-
-
 import acoular as ac
 import numpy as np
 import pytest
@@ -46,50 +44,50 @@ SKIP_DEFAULT = [
     ac.SpatialInterpolator,
     ac.SpatialInterpolatorConstantRotation,
     ac.SpatialInterpolatorRotation,
-    ]
+    ac.WriteH5,
+    ac.WriteWAV,
+]
 
 DEFAULT = [cls for cls in get_subclasses(ac.Generator) if cls not in SKIP_DEFAULT]
 
+
 def case_single_microphone():
     return ac.MicGeom(mpos_tot=np.array([[0, 0, 0]]).T)
+
 
 def case_two_microphones():
     return ac.MicGeom(mpos_tot=np.array([[0, 0, 0], [0, 1, 0]]).T)
 
 
-
 class Generators:
-
-    @parametrize("acoular_cls", DEFAULT)
+    @parametrize('acoular_cls', DEFAULT)
     def case_default(self, acoular_cls, time_data_source):
         source = time_data_source
-        if (acoular_cls.__name__ in SKIP_DEFAULT):
+        if acoular_cls.__name__ in SKIP_DEFAULT:
             pytest.skip()
         traits = acoular_cls.class_traits()
         if traits.get('source'):
-            if "SpectraGenerator" in traits['source'].info() and not issubclass(acoular_cls, ac.RFFT):
+            if 'SpectraGenerator' in traits['source'].info() and not issubclass(acoular_cls, ac.RFFT):
                 source = ac.RFFT(source=source, block_size=8)
             return acoular_cls(source=source)
         return acoular_cls()
 
-    def case_TimeSamples(self, source_case):
-        return ac.TimeSamples(name=source_case.source.name)
+    def case_TimeSamples(self, small_source_case):
+        return ac.TimeSamples(name=small_source_case.source.name)
 
-    def case_MaskedTimeSamples(self, source_case):
-        return ac.MaskedTimeSamples(name=source_case.source.name, start=0, stop=50)
+    def case_MaskedTimeSamples(self, small_source_case):
+        return ac.MaskedTimeSamples(name=small_source_case.source.name, start=0, stop=50)
 
-    @parametrize_with_cases("mic_setup",
-        cases=[case_single_microphone, case_two_microphones],
-        ids=["1ch", "2ch"])
+    @parametrize_with_cases('mic_setup', cases=[case_single_microphone, case_two_microphones], ids=['1ch', '2ch'])
     def case_UncorrectedNoiseSource(self, mic_setup):
         return ac.UncorrelatedNoiseSource(
-            signal = ac.WNoiseGenerator(sample_freq=1000, numsamples=50, seed=1),
-            mics=mic_setup, sample_freq=1000)
+            signal=ac.WNoiseGenerator(sample_freq=1000, numsamples=50, seed=1), mics=mic_setup, sample_freq=1000
+        )
 
     def case_SourceMixer(self, time_data_source):
         return ac.SourceMixer(sources=[time_data_source])
 
-    @parametrize('weight', ["F", "S", "I"])
+    @parametrize('weight', ['F', 'S', 'I'])
     def case_TimeExpAverage(self, time_data_source, weight):
         return ac.TimeExpAverage(source=time_data_source, weight=weight)
 
@@ -99,17 +97,14 @@ class Generators:
     def case_TimeAverage(self, time_data_source):
         return ac.TimeAverage(source=time_data_source, naverage=2)
 
-    @case(id="sources")
-    @parametrize_with_cases("mic_setup",
-        cases=[case_single_microphone, case_two_microphones],
-        ids=["1ch", "2ch"])
-    @parametrize("acoular_cls",
-        [ac.PointSource, ac.PointSourceDipole, ac.LineSource, ac.SphericalHarmonicSource,
-        ac.PointSourceConvolve])
+    @case(id='sources')
+    @parametrize_with_cases('mic_setup', cases=[case_single_microphone, case_two_microphones], ids=['1ch', '2ch'])
+    @parametrize(
+        'acoular_cls',
+        [ac.PointSource, ac.PointSourceDipole, ac.LineSource, ac.SphericalHarmonicSource, ac.PointSourceConvolve],
+    )
     def case_point_sources(self, acoular_cls, mic_setup):
-        src = acoular_cls(
-            signal=ac.WNoiseGenerator(sample_freq=1000, numsamples=50, seed=1),
-            mics=mic_setup)
+        src = acoular_cls(signal=ac.WNoiseGenerator(sample_freq=1000, numsamples=50, seed=1), mics=mic_setup)
         if issubclass(acoular_cls, ac.PointSourceConvolve):
             kernel = np.zeros(5)
             kernel[1] = 1
@@ -120,19 +115,21 @@ class Generators:
             src.alpha = np.ones(1)
         return src
 
-    @parametrize("conv_amp", [True, False])
-    @parametrize("acoular_cls",
-        [ac.MovingPointSource, ac.MovingLineSource, ac.MovingPointSourceDipole])
+    @parametrize('conv_amp', [True, False])
+    @parametrize('acoular_cls', [ac.MovingPointSource, ac.MovingLineSource, ac.MovingPointSourceDipole])
     def case_point_sources_traj(self, acoular_cls, conv_amp, moving_source_case):
         src = acoular_cls(
-            signal=moving_source_case.signal, mics=moving_source_case.mics, trajectory=moving_source_case.traj, conv_amp=conv_amp)
+            signal=moving_source_case.signal,
+            mics=moving_source_case.mics,
+            trajectory=moving_source_case.traj,
+            conv_amp=conv_amp,
+        )
         if issubclass(acoular_cls, ac.LineSource):
             src.source_strength = [1.0]
         return src
 
-    @parametrize("bf", [
-        ac.BeamformerTime, ac.BeamformerTimeSq, ac.BeamformerCleant, ac.BeamformerCleantSq])
-    @parametrize("steer_type", ["true location", "inverse", "classic", "true level"])
+    @parametrize('bf', [ac.BeamformerTime, ac.BeamformerTimeSq, ac.BeamformerCleant, ac.BeamformerCleantSq])
+    @parametrize('steer_type', ['true location', 'inverse', 'classic', 'true level'])
     def case_beamformer(self, bf, steer_type, moving_source_case):
         moving_source_case.steer_fixed.steer_type = steer_type
         bf = bf(source=moving_source_case.source, steer=moving_source_case.steer_fixed)
@@ -140,22 +137,27 @@ class Generators:
             bf.n_iter = 2
         return bf
 
-    @parametrize("bf", [
-        ac.BeamformerTimeTraj, ac.BeamformerTimeSqTraj, ac.BeamformerCleantTraj, ac.BeamformerCleantSqTraj])
-    @parametrize("steer_type", ["true location", "inverse", "classic", "true level"])
-    @parametrize("conv_amp", [True, False])
+    @parametrize(
+        'bf', [ac.BeamformerTimeTraj, ac.BeamformerTimeSqTraj, ac.BeamformerCleantTraj, ac.BeamformerCleantSqTraj]
+    )
+    @parametrize('steer_type', ['true location', 'inverse', 'classic', 'true level'])
+    @parametrize('conv_amp', [True, False])
     def case_beamformer_traj(self, bf, steer_type, conv_amp, moving_source_case):
         moving_source_case.steer_moving.steer_type = steer_type
-        bf = bf(source=moving_source_case.source, steer=moving_source_case.steer_moving,
-                trajectory=moving_source_case.traj, conv_amp=conv_amp)
+        bf = bf(
+            source=moving_source_case.source,
+            steer=moving_source_case.steer_moving,
+            trajectory=moving_source_case.traj,
+            conv_amp=conv_amp,
+        )
         if issubclass(bf.__class__, ac.BeamformerCleant):
             bf.n_iter = 2
         return bf
 
-    def case_IntegratorSectorTime(self, source_case):
-        #TODO: provide sectors
-        bf = ac.BeamformerTimeSq(source=source_case.source, steer=source_case.steer)
-        return ac.IntegratorSectorTime(source=bf, grid=source_case.grid, sectors=[(-.3,0,.2)])
+    def case_IntegratorSectorTime(self, regression_source_case):
+        # TODO: provide sectors
+        bf = ac.BeamformerTimeSq(source=regression_source_case.source, steer=regression_source_case.steer)
+        return ac.IntegratorSectorTime(source=bf, grid=regression_source_case.grid, sectors=[(-0.3, 0, 0.2)])
 
     def case_OctaveFilterBank(self, moving_source_case):
         return ac.OctaveFilterBank(source=moving_source_case.source, hband=30)
@@ -170,7 +172,12 @@ class Generators:
         ss.register_object(*tps)
         return ac.SourceMixer(sources=tps)
 
-    @parametrize("method", ['linear', 'spline', 'rbf-multiquadric', 'rbf-cubic', 'IDW', 'custom', 'sinc'])
+    @parametrize('method', ['linear', 'spline', 'rbf-multiquadric', 'rbf-cubic', 'IDW', 'custom', 'sinc'])
     def case_SpatialInterpolator(self, moving_source_case, method):
-        return ac.SpatialInterpolator(mics=moving_source_case.mics,
-            source=moving_source_case.source, method=method)
+        return ac.SpatialInterpolator(mics=moving_source_case.mics, source=moving_source_case.source, method=method)
+
+    def case_WriteH5(self, time_data_source, tmp_path):
+        return ac.WriteH5(source=time_data_source, name=tmp_path / 'test.h5')
+
+    def case_WriteWAV(self, time_data_source, tmp_path):
+        return ac.WriteWAV(source=time_data_source, name=tmp_path / 'test.wav')
