@@ -14,6 +14,7 @@ def test_num_args(num, create_time_data_source, numchannels):
         data_comp = ac.tools.return_result(buffer, num=num)
         np.testing.assert_array_equal(data, data_comp)
 
+
 @pytest.mark.parametrize('numchannels', [1, 2], ids=['1ch', '2ch'])
 def test_increase_buffer(create_time_data_source, numchannels):
     buffer_size = 50

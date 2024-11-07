@@ -20,6 +20,7 @@ def delete_traits_cache(obj):
         if key.startswith('_traits_cache'):
             obj.__dict__.pop(key)
 
+
 def expected_results(h5library):
     """
     Expected results for test `test_filecache_created` when no cache file exists before the test.
@@ -104,7 +105,7 @@ def test_filecache_created(case, file_cache_options):
     else:
         result = calc(obj1)
         if caching_flag == 'overwrite':
-            result = result[...] # origiinal array will be overwritten (and closed)
+            result = result[...]  # origiinal array will be overwritten (and closed)
 
     # check if cache file is created
     exp_res = expected_result[(caching_flag, cached)]
@@ -118,7 +119,7 @@ def test_filecache_created(case, file_cache_options):
     # create copy and check if it loads the cache file
     if not expected_error and exp_res is not None:
         calc(obj2)
-        assert Path(obj2.h5f.filename).samefile(Path(obj1.h5f.filename)), "Not the same cache file loaded."
+        assert Path(obj2.h5f.filename).samefile(Path(obj1.h5f.filename)), 'Not the same cache file loaded.'
 
     # disable cache and check if result matches uncached result
     if not expected_error and not isinstance(obj1, ac.Cache) and exp_res is not None:

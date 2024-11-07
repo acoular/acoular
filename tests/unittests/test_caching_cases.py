@@ -35,8 +35,10 @@ class Caching:
             bfs.append(bf)
             if hasattr(bf, 'shgo'):
                 bf.shgo = {'n': 10, 'iters': 1}
+
         def calc(beamformer):
             return beamformer.synthetic(8000, 0)
+
         return bfs, calc, cached
 
     @parametrize('cached', [False, True], ids=['cached-False', 'cached-True'])
@@ -46,8 +48,10 @@ class Caching:
         pss = []
         for _ in range(3):
             pss.append(ac.PowerSpectra(source=source, cached=cached, block_size=128))
+
         def calc(spectra):
             return getattr(spectra, trait)
+
         return pss, calc, cached
 
     @parametrize('calcmode', ['single', 'block', 'full', 'readonly'])
@@ -55,9 +59,12 @@ class Caching:
         psfs = []
         for _ in range(3):
             psfs.append(
-                ac.PointSpreadFunction(calcmode=calcmode, steer=small_source_case.steer, freq=8000, grid_indices=[0, 1]))
+                ac.PointSpreadFunction(calcmode=calcmode, steer=small_source_case.steer, freq=8000, grid_indices=[0, 1])
+            )
+
         def calc(point_spread_function):
             return point_spread_function.psf
+
         return psfs, calc, True
 
     def case_caching_time(self, create_time_data_source):
@@ -65,6 +72,7 @@ class Caching:
         tcs = []
         for _ in range(3):
             tcs.append(ac.Cache(source=source))
+
         def calc(cache):
             block_size = 1
             block_c = ac.tools.return_result(cache, num=block_size)
@@ -75,6 +83,7 @@ class Caching:
             block_nc = ac.tools.return_result(source, num=block_size)
             np.testing.assert_array_almost_equal(block_c, block_nc)
             return block_c
+
         return tcs, calc, True
 
     def case_caching_spectra(self, create_time_data_source):
@@ -83,6 +92,7 @@ class Caching:
         tcs = []
         for _ in range(3):
             tcs.append(ac.Cache(source=source))
+
         def calc(cache):
             block_size = 1
             block_c = ac.tools.return_result(cache, num=block_size)
@@ -93,4 +103,5 @@ class Caching:
             block_nc = ac.tools.return_result(source, num=block_size)
             np.testing.assert_array_almost_equal(block_c, block_nc)
             return block_c
+
         return tcs, calc, True

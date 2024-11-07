@@ -38,24 +38,35 @@ class Beamformer:
 
     @case(id='BfEig')
     def case_BeamformerEig(self, regression_source_case):
-        return ac.BeamformerEig(freq_data=regression_source_case.freq_data_import, steer=regression_source_case.steer, n=54, r_diag=False)
+        return ac.BeamformerEig(
+            freq_data=regression_source_case.freq_data_import, steer=regression_source_case.steer, n=54, r_diag=False
+        )
 
     @case(id='Music')
     def case_BeamformerMusic(self, regression_source_case):
-        return ac.BeamformerMusic(freq_data=regression_source_case.freq_data_import, steer=regression_source_case.steer, n=6)
+        return ac.BeamformerMusic(
+            freq_data=regression_source_case.freq_data_import, steer=regression_source_case.steer, n=6
+        )
 
     @case(id='Orth')
     @parametrize('r_diag', [False, True], ids=['rdiag-False', 'rdiag-True'])
     def case_BeamformerOrth(self, r_diag, regression_source_case):
         return ac.BeamformerOrth(
-            freq_data=regression_source_case.freq_data_import, r_diag=r_diag, steer=regression_source_case.steer, eva_list=list(range(38, 54))
+            freq_data=regression_source_case.freq_data_import,
+            r_diag=r_diag,
+            steer=regression_source_case.steer,
+            eva_list=list(range(38, 54)),
         )
 
     @case(id='Damas')
     @parametrize('r_diag', [False, True], ids=['rdiag-False', 'rdiag-True'])
     def case_BeamformerDamas(self, r_diag, regression_source_case):
         return ac.BeamformerDamas(
-            freq_data=regression_source_case.freq_data_import, r_diag=r_diag, steer=regression_source_case.steer, n_iter=10, damp=0.98
+            freq_data=regression_source_case.freq_data_import,
+            r_diag=r_diag,
+            steer=regression_source_case.steer,
+            n_iter=10,
+            damp=0.98,
         )
 
     @case(id='DamasPlus')
@@ -65,32 +76,52 @@ class Beamformer:
         if method == 'LP' and r_diag:
             pytest.skip('fails for LP and r_diag=True')
         return ac.BeamformerDamasPlus(
-            freq_data=regression_source_case.freq_data_import, r_diag=r_diag, steer=regression_source_case.steer, method=method, max_iter=10
+            freq_data=regression_source_case.freq_data_import,
+            r_diag=r_diag,
+            steer=regression_source_case.steer,
+            method=method,
+            max_iter=10,
         )
 
     @case(id='CleanSC')
     def case_BeamformerCleansc(self, regression_source_case):
         return ac.BeamformerCleansc(
-            freq_data=regression_source_case.freq_data_import, r_diag=False, steer=regression_source_case.steer, n=10, damp=0.9, stopn=4
+            freq_data=regression_source_case.freq_data_import,
+            r_diag=False,
+            steer=regression_source_case.steer,
+            n=10,
+            damp=0.9,
+            stopn=4,
         )
 
     @case(id='Clean')
     def case_BeamformerClean(self, regression_source_case):
         return ac.BeamformerClean(
-            freq_data=regression_source_case.freq_data_import, r_diag=False, steer=regression_source_case.steer, n_iter=10, damp=0.9
+            freq_data=regression_source_case.freq_data_import,
+            r_diag=False,
+            steer=regression_source_case.steer,
+            n_iter=10,
+            damp=0.9,
         )
 
     @case(id='Functional')
     def case_BeamformerFunctional(self, regression_source_case):
-        return ac.BeamformerFunctional(freq_data=regression_source_case.freq_data_import, r_diag=False, steer=regression_source_case.steer, gamma=3)
+        return ac.BeamformerFunctional(
+            freq_data=regression_source_case.freq_data_import, r_diag=False, steer=regression_source_case.steer, gamma=3
+        )
 
     @case(id='GIB')
     @parametrize('method', ['InverseIRLS', 'LassoLars', 'LassoLarsBIC', 'LassoLarsCV', 'OMPCV', 'NNLS', 'Suzuki'])
     @parametrize('r_diag', [False, True], ids=['rdiag-False', 'rdiag-True'])
     def case_BeamformerGIB(self, method, r_diag, regression_source_case):
         return ac.BeamformerGIB(
-            n=10, r_diag=r_diag, freq_data=regression_source_case.freq_data_import, steer=regression_source_case.steer, method=method,
-            eps_perc=0.001, max_iter=5
+            n=10,
+            r_diag=r_diag,
+            freq_data=regression_source_case.freq_data_import,
+            steer=regression_source_case.steer,
+            method=method,
+            eps_perc=0.001,
+            max_iter=5,
         )
 
     @case(id='CMF')
@@ -98,19 +129,32 @@ class Beamformer:
     @parametrize('r_diag', [False, True], ids=['rdiag-False', 'rdiag-True'])
     def case_BeamformerCMF(self, method, r_diag, regression_source_case):
         return ac.BeamformerCMF(
-            r_diag=r_diag, freq_data=regression_source_case.freq_data_import, max_iter=10, steer=regression_source_case.steer, method=method
+            r_diag=r_diag,
+            freq_data=regression_source_case.freq_data_import,
+            max_iter=10,
+            steer=regression_source_case.steer,
+            method=method,
         )
 
     @case(id='SODIX')
     @parametrize('r_diag', [False, True], ids=['rdiag-False', 'rdiag-True'])
     def case_BeamformerSODIX(self, r_diag, regression_source_case):
-        return ac.BeamformerSODIX(r_diag=r_diag, freq_data=regression_source_case.freq_data_import, steer=regression_source_case.steer, max_iter=10)
+        return ac.BeamformerSODIX(
+            r_diag=r_diag,
+            freq_data=regression_source_case.freq_data_import,
+            steer=regression_source_case.steer,
+            max_iter=10,
+        )
 
     @case(id='GridlessOrth')
     @parametrize('r_diag', [False, True], ids=['rdiag-False', 'rdiag-True'])
     def case_BeamformerGridlessOrth(self, r_diag, regression_source_case):
         return ac.BeamformerGridlessOrth(
-            r_diag=r_diag, freq_data=regression_source_case.freq_data_import, steer=regression_source_case.steer, n=1, shgo={'n': 16}
+            r_diag=r_diag,
+            freq_data=regression_source_case.freq_data_import,
+            steer=regression_source_case.steer,
+            n=1,
+            shgo={'n': 16},
         )
 
     @parametrize('bf', BF_DEFAULT)

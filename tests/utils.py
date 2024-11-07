@@ -18,6 +18,7 @@ def get_all_classes():
                 classes.append(obj)
     return classes
 
+
 def get_subclasses(cls):
     classes = []
     for _, obj in inspect.getmembers(ac):
@@ -56,14 +57,13 @@ class SetupStationarySourceCase:
             cached=False,
         )
         # create freq_data_import object (does not rely on any cached data)
-        self.freq_data.csm # noqa: B018 : trigger computation
+        self.freq_data.csm  # noqa: B018 : trigger computation
         self.freq_data_import = ac.PowerSpectraImport(
-            csm = self.freq_data.csm[...],
-            frequencies = self.freq_data.fftfreq(),
+            csm=self.freq_data.csm[...],
+            frequencies=self.freq_data.fftfreq(),
         )
-        self.freq_data_import.eve # noqa: B018 : trigger computation
-        self.freq_data_import.eva # noqa: B018 : trigger computation
-
+        self.freq_data_import.eve  # noqa: B018 : trigger computation
+        self.freq_data_import.eva  # noqa: B018 : trigger computation
 
 
 class SetupMovingSourceCase:

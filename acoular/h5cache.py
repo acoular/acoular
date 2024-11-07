@@ -64,9 +64,20 @@ class HDF5Cache(HasPrivateTraits):
     def _decrease_file_reference_counter(self, filename):
         self.open_file_reference[filename] = self.open_file_reference[filename] - 1
 
+    def get_cache_directories(self):
+        """Return a list of all used cache directories (if multiple paths exist)."""
+        return list({str(k.parent) for k in self.open_file_reference})
+
     def _print_open_files(self):
-        #TODO: prints full path (should only print full path if multiple pathes exist
-        print(list(self.open_file_reference.items()))
+        """Prints open cache files and the number of objects referencing a cache file.
+
+        If multiple cache files are open at different paths, the full path is printed.
+        Otherwise, only the filename is logged.
+        """
+        if len(self.open_file_reference.values()) > 1:
+            print(list({str(k): v for k, v in self.open_file_reference.items()}.items()))
+        else:
+            print(list({str(k.name): v for k, v in self.open_file_reference.items()}.items()))
 
     def get_cache_file(self, obj, basename, mode='a'):
         """Returns pytables .h5 file to h5f trait of calling object for caching."""

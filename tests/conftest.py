@@ -9,7 +9,7 @@ from tests.utils import SetupMovingSourceCase, SetupStationarySourceCase
 
 
 @pytest.hookimpl()
-def pytest_sessionfinish(session): # noqa ARG001
+def pytest_sessionfinish(session):  # noqa ARG001
     """Close all open files after the test session.
 
     This hook is called after the test session is finished and is used to get rid of the
@@ -17,13 +17,17 @@ def pytest_sessionfinish(session): # noqa ARG001
     """
     tb.file._open_files.close_all()
 
+
 @fixture(scope='session')
 def create_time_data_source():
     """Fixture factory for creating time data sources of certain length and number of channels."""
+
     def _create_time_data_source(numchannels, numsamples):
         rng = np.random.RandomState(1)
         return ac.TimeSamples(sample_freq=51200, data=rng.randn(numsamples, numchannels))
+
     return _create_time_data_source
+
 
 @fixture(scope='session')
 @parametrize('numchannels', [1, 2], ids=['1ch', '2ch'])
@@ -34,9 +38,11 @@ def time_data_source(create_time_data_source, numchannels):
 
 # Stationary Source Cases
 
+
 @fixture(scope='session')
 def create_source_case():
     """Fixture factory for creating spatially stationary source cases with certain parameters."""
+
     def _create_source_case(blocksize=None, numsamples=None, grid=None, invalid_channels=None):
         return SetupStationarySourceCase(
             numsamples=numsamples,
@@ -44,6 +50,7 @@ def create_source_case():
             grid=grid,
             invalid_channels=invalid_channels,
         )
+
     return _create_source_case
 
 
@@ -57,17 +64,20 @@ def regression_source_case(create_source_case):
         invalid_channels=[1, 7],
     )
 
+
 @fixture(scope='session')
 def small_source_case(create_source_case):
     """Fixture for testing the caching mechanism (uses fewer microphones and coarse grid to increase testing speed)."""
     return create_source_case(
         numsamples=128,
         blocksize=128,
-        invalid_channels=[1, 7]+[i for i in range(56) if i % 3 == 0], # use every third microphone
+        invalid_channels=[1, 7] + [i for i in range(56) if i % 3 == 0],  # use every third microphone
         grid=ac.RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=0.68, increment=0.2),
     )
 
+
 # moving source cases
+
 
 @pytest.fixture(scope='session')
 def moving_source_case():
