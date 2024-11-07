@@ -4,7 +4,7 @@
 
 # imports from other packages
 import gc
-from os import listdir, path
+from pathlib import Path
 from weakref import WeakValueDictionary
 
 from traits.api import Bool, Delegate, Dict, HasPrivateTraits, Instance
@@ -24,25 +24,15 @@ class HDF5Cache(HasPrivateTraits):
 
     open_files = WeakValueDictionary()
 
-    open_file_reference = Dict()
+    open_file_reference = Dict(key_trait=Path, value_trait=int)
 
     def _idle_if_busy(self):
         while self.busy:
             pass
 
-    def open_cachefile(self, filename, mode):
-        file = _get_cachefile_class()
-        return file(path.join(self.cache_dir, filename), mode)
-
     def close_cachefile(self, cachefile):
-        self.open_file_reference.pop(get_basename(cachefile))
+        self.open_file_reference.pop(Path(cachefile.filename))
         cachefile.close()
-
-    def get_filename(self, file):
-        file_class = _get_cachefile_class()
-        if isinstance(file, file_class):
-            return get_basename(file)
-        return 0
 
     def get_open_cachefiles(self):
         try:
@@ -53,7 +43,6 @@ class HDF5Cache(HasPrivateTraits):
     def close_unreferenced_cachefiles(self):
         for cachefile in self.get_open_cachefiles():
             if not self.is_reference_existent(cachefile):
-                #                print("close unreferenced File:",get_basename(cachefile))
                 self.close_cachefile(cachefile)
 
     def is_reference_existent(self, file):
@@ -69,11 +58,6 @@ class HDF5Cache(HasPrivateTraits):
                 break
         return exist_flag
 
-    def is_cachefile_existent(self, filename):
-        if filename in listdir(self.cache_dir):
-            return True
-        return False
-
     def _increase_file_reference_counter(self, filename):
         self.open_file_reference[filename] = self.open_file_reference.get(filename, 0) + 1
 
@@ -81,34 +65,32 @@ class HDF5Cache(HasPrivateTraits):
         self.open_file_reference[filename] = self.open_file_reference[filename] - 1
 
     def _print_open_files(self):
+        #TODO: prints full path (should only print full path if multiple pathes exist
         print(list(self.open_file_reference.items()))
 
     def get_cache_file(self, obj, basename, mode='a'):
         """Returns pytables .h5 file to h5f trait of calling object for caching."""
         self._idle_if_busy()  #
         self.busy = True
+        file_cls = _get_cachefile_class()
+        filename = (Path(self.cache_dir) / (basename + '_cache.h5')).resolve()
 
-        filename = basename + '_cache.h5'
-        obj_filename = self.get_filename(obj.h5f)
+        if config.global_caching == 'readonly' and not filename.exists():
+            obj.h5f = None
+            self.busy = False
+            return  # cachefile is not created in readonly mode
 
-        if obj_filename:
-            if obj_filename == filename:
+        if isinstance(obj.h5f, file_cls):
+            if Path(obj.h5f.filename).resolve() == filename:
                 self.busy = False
                 return
-            self._decrease_file_reference_counter(obj_filename)
+            self._decrease_file_reference_counter(obj.h5f.filename)
 
         if filename not in self.open_files:  # or tables.file._open_files.filenames
-            if config.global_caching == 'readonly' and not self.is_cachefile_existent(
-                filename,
-            ):  # condition ensures that cachefile is not created in readonly mode
-                obj.h5f = None
-                self.busy = False
-                #                self._print_open_files()
-                return
             if config.global_caching == 'readonly':
                 mode = 'r'
-            f = self.open_cachefile(filename, mode)
-            self.open_files[filename] = f
+            file = file_cls(filename, mode)
+            self.open_files[filename] = file
 
         obj.h5f = self.open_files[filename]
         self._increase_file_reference_counter(filename)
@@ -121,7 +103,3 @@ class HDF5Cache(HasPrivateTraits):
 
 
 H5cache = HDF5Cache(config=config)
-
-
-def get_basename(file):
-    return path.basename(file.filename)

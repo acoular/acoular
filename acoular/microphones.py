@@ -54,7 +54,7 @@ class MicGeom(HasPrivateTraits):
     #: Positions as (3, :attr:`num_mics`) array of floats, may include also invalid
     #: microphones (if any). Set either automatically on change of the
     #: :attr:`from_file` argument or explicitely by assigning an array of floats.
-    mpos_tot = CArray(dtype=float, shape=(3,None), desc='x, y, z position of all microphones')
+    mpos_tot = CArray(dtype=float, shape=(3, None), desc='x, y, z position of all microphones')
 
     #: Positions as (3, :attr:`num_mics`) array of floats, without invalid
     #: microphones; readonly.
