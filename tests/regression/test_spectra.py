@@ -10,8 +10,8 @@ import pytest
 
 @pytest.fixture(
     params=[
-        {'cached':False},  # default (no cache)
-        {'cached':False, 'precision': 'complex64', 'overlap': '50%', 'block_size': 256, 'window': 'Hanning'},
+        {'cached': False},  # default (no cache)
+        {'cached': False, 'precision': 'complex64', 'overlap': '50%', 'block_size': 256, 'window': 'Hanning'},
     ],
     ids=['default', 'custom'],
     scope='module',
