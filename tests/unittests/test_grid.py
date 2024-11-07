@@ -7,8 +7,8 @@ from functools import partial
 
 import pytest
 from pytest_cases import get_case_id, parametrize_with_cases
-from tests.cases.test_grid_cases import Grids, Sectors
 
+from tests.cases.test_grid_cases import Grids, Sectors
 from tests.utils import sector_case_filter
 
 

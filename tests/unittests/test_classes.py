@@ -48,7 +48,7 @@ def test_set_traits(acoular_cls):
                     if k in acoular_cls.class_trait_names():
                         tr = acoular_cls.class_traits()[k]
                         # handling different Trait types
-                        # TODO: use hypothesis based setattr
+                        # TODO: use hypothesis based setattr #noqa: TD002, TD003, FIX002
                         if tr.is_trait_type(Int):
                             setattr(obj, k, 1)
                         elif tr.is_trait_type(Float):

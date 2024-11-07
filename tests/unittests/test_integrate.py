@@ -2,10 +2,12 @@
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
 """Tests integration of beamformer results over sectors."""
+
 import acoular as ac
 import numpy as np
 import pytest
 from pytest_cases import fixture, get_case_id, parametrize, parametrize_with_cases
+
 from tests.cases.test_grid_cases import Grids, Sectors
 
 

@@ -5,6 +5,7 @@
 
 import acoular as ac
 from pytest_cases import parametrize
+
 from tests.utils import get_subclasses
 
 ENV_SKIP_DEFAULT = [

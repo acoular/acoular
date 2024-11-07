@@ -8,6 +8,7 @@ from copy import deepcopy
 import acoular as ac
 import pytest
 from pytest_cases import case, parametrize
+
 from tests.utils import get_subclasses
 
 # skip beamformers that have a dedicated test case in the

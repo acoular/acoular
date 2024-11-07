@@ -6,7 +6,9 @@
 import acoular as ac
 import numpy as np
 import pytest
-from pytest_cases import case, parametrize, parametrize_with_cases
+from pytest_cases import case, get_case_id, parametrize, parametrize_with_cases
+
+from tests.cases.test_grid_cases import Sectors
 from tests.utils import get_subclasses
 
 SKIP_DEFAULT = [
@@ -167,10 +169,14 @@ class Generators:
             bf.n_iter = 2
         return bf
 
-    def case_IntegratorSectorTime(self, regression_source_case):
-        # TODO: provide sectors
+    @parametrize_with_cases(
+        'sector', cases=Sectors, filter=lambda cf: 'numpy' in get_case_id(cf)
+    )
+    def case_IntegratorSectorTime(self, regression_source_case, sector):
         bf = ac.BeamformerTimeSq(source=regression_source_case.source, steer=regression_source_case.steer)
-        return ac.IntegratorSectorTime(source=bf, grid=regression_source_case.grid, sectors=[(-0.3, 0, 0.2)])
+        return ac.IntegratorSectorTime(
+            source=bf, grid=regression_source_case.grid, sectors=[sector]
+        )
 
     def case_OctaveFilterBank(self, moving_source_case):
         return ac.OctaveFilterBank(source=moving_source_case.source, hband=30)

@@ -6,6 +6,7 @@
 import acoular as ac
 import numpy as np
 from pytest_cases import parametrize
+
 from tests.utils import get_subclasses
 
 SECTOR_SKIP_DEFAULT = [
