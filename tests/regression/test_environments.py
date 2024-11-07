@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
-"""Implements testing of environments and helpers."""
+"""Implements testing of environments and flows."""
 
 import acoular as ac
 import numpy as np
@@ -18,12 +18,20 @@ MICS = ac.MicGeom(mpos_tot=((0.5, 0.5, 0), (0, 0, 0), (-0.5, -0.5, 0)))
 def test_flow(snapshot, grid, flow):
     """Performs snapshot testing with snapshot fixture from pytest-regtest
 
+    To overwrite the collected snapshots, run:
+
+    ```bash
+    pytest -v --regtest-reset tests/regression/test_environments.py::test_flow
+    ```
+
     Parameters
     ----------
     snapshot : pytest-regtest snapshot fixture
         Snapshot fixture to compare results
-    flow : acoular.environment.FlowField subclass
-        FlowField to test
+    grid : numpy.ndarray
+        Grid points to test
+    flow : instance of acoular.environment.FlowField
+        FlowField to test (cases from Flows)
     """
     result = np.array([np.vstack(flow.v(x)) for x in grid.T])
     snapshot.check(result, rtol=1e-5, atol=1e-8)
@@ -35,12 +43,22 @@ def test_flow(snapshot, grid, flow):
 def test_environment(snapshot, grid, mics, env):
     """Performs snapshot testing with snapshot fixture from pytest-regtest
 
+    To overwrite the collected snapshots, run:
+
+    ```bash
+    pytest -v --regtest-reset tests/regression/test_environments.py::test_environment
+    ```
+
     Parameters
     ----------
     snapshot : pytest-regtest snapshot fixture
         Snapshot fixture to compare results
-    env : acoular.environment.Environment subclass
-        Environment to test
+    grid : numpy.ndarray
+        Grid points to test
+    mics : numpy.ndarray or scalar
+        Microphone positions to test
+    env : instance of acoular.environment.Environment
+        Environment to test (cases from Environments)
     """
     result = np.vstack((env._r(grid, mics).T, env._r(grid).T))
     snapshot.check(result, rtol=1e-5, atol=1e-8)

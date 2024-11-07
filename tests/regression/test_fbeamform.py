@@ -33,7 +33,7 @@ def test_beamformer(snapshot, beamformer, f, num):
     snapshot : pytest-regtest snapshot fixture
         Snapshot fixture to compare results
     beamformer : instance of acoular.fbeamform.BeamformerBase
-        Beamformer instance to be tested
+        Beamformer instance to be tested (cases from Beamformer)
     f : int
         Frequency to test
     num : int

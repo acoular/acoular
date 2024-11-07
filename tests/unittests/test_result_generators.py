@@ -1,3 +1,8 @@
+# ------------------------------------------------------------------------------
+# Copyright (c) Acoular Development Team.
+# ------------------------------------------------------------------------------
+"""Basic tests for result generators."""
+
 import acoular as ac
 import numpy as np
 from pytest_cases import parametrize, parametrize_with_cases
@@ -9,6 +14,15 @@ from tests.regression.test_generator_cases import Generators
 @parametrize('num', [1, 32], ids=['num=1', 'num=32'])
 @parametrize_with_cases('obj', cases=Generators)
 def test_result_generator(obj, num):  # don't use default value if @parametrize is used
+    """Basic test for result generators if they return numpy arrays with correct shape
+
+    Parameters
+    ----------
+    obj : instance of acoular.base.Generator
+        Generator instance to be tested (cases from Generators)
+    num : int
+        Number of samples to return by the generator
+    """
     result = next(obj.result(num=num))
     assert isinstance(result, np.ndarray)
     assert result.shape[0] == min(obj.numsamples, num)

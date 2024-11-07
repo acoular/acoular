@@ -1,3 +1,8 @@
+# ------------------------------------------------------------------------------
+# Copyright (c) Acoular Development Team.
+# ------------------------------------------------------------------------------
+"""Implementation of test cases for all grids and sectors."""
+
 import acoular as ac
 import numpy as np
 from pytest_cases import parametrize
@@ -28,7 +33,61 @@ SECTOR_DEFAULT = [s for s in get_subclasses(ac.Sector) if s not in SECTOR_SKIP_D
 GRIDS_DEFAULT = [g for g in get_subclasses(ac.Grid) if g not in GRIDS_SKIP_DEFAULT]
 
 
+class Grids:
+    """
+    Test cases for all grids.
+
+    New grids should be added here. If no dedicated test case is added for a :class:`Grid` derived class,
+    the `case_default` case will raise a `NotImplementedError`. If a dedicated test case was added for a grid,
+    it should be added to the `GRIDS_SKIP_DEFAULT` list, which excludes the class from `case_default`.
+
+    New cases should create an instance of the grid with at least one grid-point at (0, 0, 1) and return it.
+    The grid should not exceed the bounds of (-1, -1, 1) and (1, 1, 1) in x, y, and z direction, respectively.
+    """
+
+    def case_RectGrid(self):
+        return ac.RectGrid(x_min=-1, x_max=1, y_min=-1, y_max=1, z=1, increment=1)
+
+    def case_RectGrid3D(self):
+        return ac.RectGrid3D(x_min=-1, x_max=1, y_min=-1, y_max=1, z_min=1, z_max=1, increment=1)
+
+    def case_LineGrid(self):
+        return ac.LineGrid(loc=(-1, 0, 1), length=2, numpoints=3)
+
+    def case_ImportGrid(self):
+        return ac.ImportGrid(gpos_file=ac.RectGrid(x_min=-1, x_max=1, y_min=-1, y_max=1, z=1, increment=1).gpos)
+
+    def case_MergeGrid(self):
+        return ac.MergeGrid(
+            grids=[
+                ac.RectGrid(x_min=-1, x_max=1, y_min=-1, y_max=1, z=1, increment=1),
+                ac.LineGrid(loc=(-1, 0, 1), length=2, numpoints=3),
+            ]
+        )
+
+
+if len(GRIDS_DEFAULT) > 0:
+
+    @parametrize('grid', GRIDS_DEFAULT)
+    def case_default(self, grid):  # noqa: ARG001
+        msg = f'Please write a test case for class {grid.__name__}'
+        raise NotImplementedError(msg)
+
+    Grids.case_default = case_default
+
+
 class Sectors:
+    """
+    Test cases for all sectors.
+
+    New sectors should be added here. If no dedicated test case is added for a :class:`Sector` derived class,
+    the `case_default` case will raise a `NotImplementedError`. If a dedicated test case was added for a sector,
+    it should be added to the `SECTOR_SKIP_DEFAULT` list, which excludes the class from `case_default`.
+
+    For a new sector, two cases should be added: one for a sector containing the point (0, 0, 1) and one
+    for an empty sector, not laying in the region of (-1, -1, 1) and (1, 1, 1) in x, y, and z direction, respectively.
+    """
+
     def case_numpy_array2D(self):
         return np.array([0, 0, 0.2])
 
@@ -148,35 +207,3 @@ if len(SECTOR_DEFAULT) > 0:
         raise NotImplementedError(msg)
 
     Sectors.case_default = case_default
-
-
-class Grids:
-    def case_RectGrid(self):
-        return ac.RectGrid(x_min=-1, x_max=1, y_min=-1, y_max=1, z=1, increment=1)
-
-    def case_RectGrid3D(self):
-        return ac.RectGrid3D(x_min=-1, x_max=1, y_min=-1, y_max=1, z_min=1, z_max=1, increment=1)
-
-    def case_LineGrid(self):
-        return ac.LineGrid(loc=(-1, 0, 1), length=2, numpoints=3)
-
-    def case_ImportGrid(self):
-        return ac.ImportGrid(gpos_file=ac.RectGrid(x_min=-1, x_max=1, y_min=-1, y_max=1, z=1, increment=1).gpos)
-
-    def case_MergeGrid(self):
-        return ac.MergeGrid(
-            grids=[
-                ac.RectGrid(x_min=-1, x_max=1, y_min=-1, y_max=1, z=1, increment=1),
-                ac.LineGrid(loc=(-1, 0, 1), length=2, numpoints=3),
-            ]
-        )
-
-
-if len(GRIDS_DEFAULT) > 0:
-
-    @parametrize('grid', GRIDS_DEFAULT)
-    def case_default(self, grid):  # noqa: ARG001
-        msg = f'Please write a test case for class {grid.__name__}'
-        raise NotImplementedError(msg)
-
-    Grids.case_default = case_default

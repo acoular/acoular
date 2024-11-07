@@ -33,8 +33,8 @@ def expected_results(h5library):
     Returns
     -------
     dict
-        Expected results when no cache file exists.
-
+        Expected results when no cache file exists. Keys are tuples of caching_flag and cached.
+        Values are the expected type of the cache file.
     """
     cache_file_type = H5CacheFileTables if h5library == 'pytables' else H5CacheFileH5py
     # (caching_flag, cached): expected h5f
@@ -123,8 +123,6 @@ def test_filecache_created(case, file_cache_options):
 
     # disable cache and check if result matches uncached result
     if not expected_error and not isinstance(obj1, ac.Cache) and exp_res is not None:
-        # Test skipped when expected error condition is met (no result to compare).
-        # Test skipped for Cache object (comparison with uncached result already in calc function).")
         ac.config.global_caching = 'none'
         result_uncache = calc(obj2)
         np.testing.assert_allclose(result, result_uncache)

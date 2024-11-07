@@ -1,9 +1,15 @@
+# ------------------------------------------------------------------------------
+# Copyright (c) Acoular Development Team.
+# ------------------------------------------------------------------------------
+"""Unit tests for acoular.sdinput module."""
+
 import acoular as ac
 import pytest
 
 
 @pytest.fixture
 def sounddevice_samples_generator(sounddevice_properties):
+    """Fixture to create an instance of ac.SoundDeviceSamplesGenerator."""
     _, max_input_channels, device_index, num = sounddevice_properties
     sdev = ac.SoundDeviceSamplesGenerator(device=device_index, numchannels=min(2, max_input_channels))
     return sdev, num
@@ -48,6 +54,13 @@ def test_result_finite(sounddevice_samples_generator):
 
 
 def test_set_sample_freq(sounddevice_properties):  # noqa ARG001 (uses fixture from conftest.py)
+    """Test that the sample frequency can be set.
+
+    Parameters
+    ----------
+    sounddevice_properties : tuple
+        Tuple with default samplerate, max_input_channels, device_index, num
+    """
     sdev = ac.SoundDeviceSamplesGenerator(device=0)
     default_sample_freq = sdev.sample_freq
     new_sample_freq = default_sample_freq * 2
@@ -56,7 +69,13 @@ def test_set_sample_freq(sounddevice_properties):  # noqa ARG001 (uses fixture f
 
 
 def test_import_error(mock_have_no_lib):  # noqa ARG001 (uses fixture from conftest.py)
-    """Test that ac.SoundDeviceSamplesGenerator raises ImportError if sounddevice is not available."""
+    """Test that ac.SoundDeviceSamplesGenerator raises ImportError if sounddevice is not available.
+
+    Parameters
+    ----------
+    mock_have_no_lib : pytest.fixture
+        Mock behaviour: sounddevice library does not exist.
+    """
     del ac.config.__dict__['_traits_cache_have_sounddevice']  # remove cached property
     with pytest.raises(ImportError):
         ac.SoundDeviceSamplesGenerator()

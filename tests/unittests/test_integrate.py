@@ -1,3 +1,7 @@
+# ------------------------------------------------------------------------------
+# Copyright (c) Acoular Development Team.
+# ------------------------------------------------------------------------------
+"""Tests integration of beamformer results over sectors."""
 import acoular as ac
 import numpy as np
 import pytest
@@ -7,6 +11,9 @@ from test_grid_cases import Grids, Sectors
 
 @fixture(scope='session')
 def setup_mics_integrate():
+    """
+    Fixture for setting up a microphone geometry with 5 microphones.
+    """
     rng1 = np.random.RandomState(1)
     return ac.MicGeom(mpos_tot=rng1.normal(size=3 * 5).reshape((3, 5)))
 
@@ -14,6 +21,16 @@ def setup_mics_integrate():
 @fixture(scope='session')
 @parametrize('f', [2000], ids=['2kHz'])
 def setup_power_spectra_integrate(setup_mics_integrate, f):
+    """
+    Fixture for setting up a power spectra object with 5 microphones and CSM for a single frequency.
+
+    Parameters
+    ----------
+    setup_mics_integrate : instance of acoular.mics.MicGeom
+        Microphone geometry (fixture)
+    f : int
+        Frequency in Hz
+    """
     mics = setup_mics_integrate
     steer = ac.SteeringVector(grid=ac.ImportGrid(gpos_file=np.array([[0], [0], [1]])), mics=mics)
     H = np.empty((1, mics.num_mics, 1), dtype=complex)
@@ -25,12 +42,25 @@ def setup_power_spectra_integrate(setup_mics_integrate, f):
 @fixture(scope='session')
 @parametrize_with_cases('grid', cases=Grids)
 def setup_beamformer_integrate(setup_power_spectra_integrate, setup_mics_integrate, grid):
+    """
+    Fixture for setting up a beamformer with a grid and power spectra object.
+
+    Parameters
+    ----------
+    setup_power_spectra_integrate : instance of acoular.spectra.PowerSpectra
+        Power spectra object (fixture)
+    setup_mics_integrate : acoular.mics.MicGeom
+        Microphone geometry (fixture)
+    grid : acoular.grids.Grid
+        Grid object (fixture)
+    """
     steer = ac.SteeringVector(grid=grid, mics=setup_mics_integrate)
     bf = ac.BeamformerBase(freq_data=setup_power_spectra_integrate, steer=steer)
     return bf, grid
 
 
 def skip_or_fail(grid, sector):
+    """Define conditions to skip or fail tests based on grid and sector types."""
     if grid.__class__.__name__ in ['LineGrid', 'MergeGrid', 'ImportGrid'] and not isinstance(sector, ac.Sector):
         pytest.xfail(f'Grid {grid.__class__.__name__} has no indices method')
 
@@ -45,6 +75,16 @@ def skip_or_fail(grid, sector):
     'sector', cases=Sectors, filter=lambda cf: 'full' in get_case_id(cf) or 'numpy' in get_case_id(cf)
 )
 def test_sector_integration_functional(setup_beamformer_integrate, sector):
+    """
+    Test the integration of a beamformer result over a sector using integrate function.
+
+    Parameters
+    ----------
+    setup_beamformer_integrate : tuple
+        Beamformer and grid objects (fixture)
+    sector : numpy.ndarray
+        Sector indices (non-empty cases from Sectors)
+    """
     bf, grid = setup_beamformer_integrate
     skip_or_fail(grid, sector)
     f = bf.freq_data.frequencies
@@ -58,6 +98,16 @@ def test_sector_integration_functional(setup_beamformer_integrate, sector):
     'sector', cases=Sectors, filter=lambda cf: 'full' in get_case_id(cf) or 'numpy' in get_case_id(cf)
 )
 def test_sector_integration(setup_beamformer_integrate, sector):
+    """
+    Test the integration of a beamformer result over a sector using integrate method.
+
+    Parameters
+    ----------
+    setup_beamformer_integrate : tuple
+        Beamformer and grid objects (fixture)
+    sector : numpy.ndarray
+        Sector indices (non-empty cases from Sectors)
+    """
     bf, grid = setup_beamformer_integrate
     skip_or_fail(grid, sector)
     f = bf.freq_data.frequencies

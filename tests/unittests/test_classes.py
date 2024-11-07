@@ -25,7 +25,7 @@ def create_instance(acoular_cls):
 
 @pytest.mark.parametrize('acoular_cls', all_classes)
 def test_instancing(acoular_cls):
-    """test that all Acoular classes can be instatiated."""
+    """Test that all Acoular classes can be instatiated."""
     with warnings.catch_warnings():
         warnings.simplefilter('ignore', category=DeprecationWarning)
         create_instance(acoular_cls)
@@ -33,7 +33,7 @@ def test_instancing(acoular_cls):
 
 @pytest.mark.parametrize('acoular_cls', all_classes)
 def test_set_traits(acoular_cls):
-    """test that important traits can be set."""
+    """Test that important traits can be set."""
     with warnings.catch_warnings():
         warnings.simplefilter('ignore', category=DeprecationWarning)
         if hasattr(acoular_cls, 'class_traits') and 'digest' in acoular_cls.class_traits():

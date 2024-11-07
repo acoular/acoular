@@ -1,3 +1,8 @@
+# ------------------------------------------------------------------------------
+# Copyright (c) Acoular Development Team.
+# ------------------------------------------------------------------------------
+"""Implement test cases for all :class:`acoular.base.Generator` derived classes"""
+
 import acoular as ac
 import numpy as np
 import pytest
@@ -60,6 +65,14 @@ def case_two_microphones():
 
 
 class Generators:
+    """Test cases for all :class:`acoular.base.Generator` derived classes
+
+    New generators should be added here. If no dedicated test case is added for a :class:`acoular.base.Generator` derived class,
+    the class is still included in the test suite through the use of the `case_default` case.
+    If a dedicated test case was added for a generator, it should be added to the `SKIP_DEFAULT` list,
+    which excludes the class from `case_default`.
+    """
+
     @parametrize('acoular_cls', DEFAULT)
     def case_default(self, acoular_cls, time_data_source):
         source = time_data_source

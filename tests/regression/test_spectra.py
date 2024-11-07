@@ -34,7 +34,7 @@ def test_csm(freq_data, snapshot, ind):
 
     To overwrite the snapshot, run:
     ```bash
-    pytest -v --regtest-reset tests/regression/test_spectra.py
+    pytest -v --regtest-reset tests/regression/test_spectra.py::test_csm
     ```
 
     Parameters
@@ -56,7 +56,7 @@ def test_eva(freq_data, snapshot, ind):
 
     To overwrite the snapshot, run:
     ```bash
-    pytest -v --regtest-reset tests/regression/test_spectra.py
+    pytest -v --regtest-reset tests/regression/test_spectra.py::test_eva
     ```
 
     Parameters
@@ -78,7 +78,7 @@ def test_eve(freq_data, snapshot, ind):
 
     To overwrite the snapshot, run:
     ```bash
-    pytest -v --regtest-reset tests/regression/test_spectra.py
+    pytest -v --regtest-reset tests/regression/test_spectra.py::test_eve
     ```
 
     Parameters
