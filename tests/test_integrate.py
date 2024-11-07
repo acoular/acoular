@@ -1,4 +1,3 @@
-import unittest
 from functools import partial
 
 import acoular as ac
@@ -8,7 +7,7 @@ from test_grid import GridTest
 ac.config.global_caching = 'none'
 
 
-class TestIntegrate(unittest.TestCase):
+class TestIntegrate:
     f = [1000, 2000]
 
     @staticmethod
@@ -86,7 +85,3 @@ class TestIntegrate(unittest.TestCase):
                         integration_res = bf.integrate(sector)
                         self.assertEqual(integration_res.shape, (len(self.f),))
                         self.assertEqual(integration_res[i], bf_max)
-
-
-if __name__ == '__main__':
-    unittest.main()

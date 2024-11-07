@@ -1,5 +1,6 @@
-from unittest import TestCase
+"""Test that ensures that digest of Acoular classes changes correctly on changes of CArray and List attributes."""
 
+import pytest
 from acoular import (
     BeamformerCleantSqTraj,
     BeamformerCleantTraj,
@@ -9,7 +10,7 @@ from acoular import (
     ChannelMixer,
     FiltWNoiseGenerator,
     IntegratorSectorTime,
-    MaskedTimeOut,
+    MaskedTimeInOut,
     MaskedTimeSamples,
     MergeGrid,
     MicGeom,
@@ -116,11 +117,11 @@ UNEQUAL_DIGEST_TEST_DICT = {
         'obj.sectors = [Sector()]',
     ),
     # tprocess.py
-    'MaskedTimeOut.invalid_channels item assignment': (
-        MaskedTimeOut(invalid_channels=[1]),
+    'MaskedTimeInOut.invalid_channels item assignment': (
+        MaskedTimeInOut(invalid_channels=[1]),
         'obj.invalid_channels[0] = 0',
     ),
-    'MaskedTimeOut.invalid_channels list assignment': (MaskedTimeOut(), 'obj.invalid_channels = [0]'),
+    'MaskedTimeInOut.invalid_channels list assignment': (MaskedTimeInOut(), 'obj.invalid_channels = [0]'),
     #    "ChannelMixer.weights item assignment" : (ChannelMixer(weights=[[1.,2.,3.]]), "obj.weights[0] = 0."),
     'ChannelMixer.weights new array assignment': (ChannelMixer(weights=[[1.0, 2.0, 3.0]]), 'obj.weights = array([0.])'),
     #    "SpatialInterpolator.Q item assignment": (SpatialInterpolator(), "obj.Q[0] = 0."),
@@ -151,45 +152,33 @@ UNEQUAL_DIGEST_TEST_DICT = {
 }
 
 
-class Test_DigestChange(TestCase):
-    """Test that ensures that digest of Acoular classes changes correctly on
-    changes of CArray and List attributes.
+def get_digests(obj, statement):
+    """A function that collects the digest of the obj before (d1) and
+    after (d2) executing the statement that should yield to a change
+    of the object digest.
+
+    Parameters
+    ----------
+    obj : instance
+        class instance that has an attribute `digest`
+    statement : "str"
+        a string that can be executed
+
+    Returns
+    -------
+    str, str
+        digest before and after statement execution
+
     """
-
-    def get_digests(self, obj, statement):
-        """A function that collects the digest of the obj before (d1) and
-        after (d2) executing the statement that should yield to a change
-        of the object digest.
-
-        Parameters
-        ----------
-        obj : instance
-            class instance that has an attribute `digest`
-        statement : "str"
-            a string that can be executed
-
-        Returns
-        -------
-        str, str
-            digest before and after statement execution
-
-        """
-        d1 = obj.digest
-        exec(statement)
-        d2 = obj.digest
-        return d1, d2
-
-    def test_digest_changes_on_assignment(self):
-        """test that object digest change on statement execution."""
-        for test_label, (obj, statement) in UNEQUAL_DIGEST_TEST_DICT.items():
-            # use subtest to get individual test result.
-            # tests will not stop if one subtest fails!
-            with self.subTest(test_label):
-                digest_before_statement, digest_after_statement = self.get_digests(obj, statement)
-                self.assertNotEqual(digest_before_statement, digest_after_statement)
+    d1 = obj.digest
+    exec(statement)
+    d2 = obj.digest
+    return d1, d2
 
 
-if __name__ == '__main__':
-    import unittest
-
-    unittest.main()
+@pytest.mark.parametrize('test_label, value', list(UNEQUAL_DIGEST_TEST_DICT.items()))
+def test_digest_changes_on_assignment(test_label, value):  # noqa: ARG001
+    """test that object digest change on statement execution."""
+    obj, statement = value
+    digest_before_statement, digest_after_statement = get_digests(obj, statement)
+    assert digest_before_statement != digest_after_statement
