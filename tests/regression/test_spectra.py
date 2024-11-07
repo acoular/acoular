@@ -10,15 +10,17 @@ import pytest
 
 @pytest.fixture(
     params=[
-        {},  # default
-        {'precision': 'complex64', 'overlap': '50%', 'block_size': 256, 'window': 'Hanning'},
+        {'cached':False},  # default (no cache)
+        {'cached':False, 'precision': 'complex64', 'overlap': '50%', 'block_size': 256, 'window': 'Hanning'},
     ],
     ids=['default', 'custom'],
     scope='module',
 )
 def freq_data(request, regression_source_case):
     """
-    Fixture to create a beamformer instance for testing.
+    Fixture to create a :class:`acoular.freq_data.PowerSpectra` instance for testing.
+
+    The fixture is parametrized to test the object with default and custom configuration.
 
     Parameters
     ----------
@@ -27,7 +29,7 @@ def freq_data(request, regression_source_case):
     regression_source_case : fixture
         regression_source_case fixture (see conftest.py)
     """
-    return ac.PowerSpectra(source=regression_source_case.source, cached=False, **request.param)
+    return ac.PowerSpectra(source=regression_source_case.source, **request.param)
 
 
 @pytest.mark.parametrize('ind', [16, 32])
@@ -92,4 +94,4 @@ def test_eve(freq_data, snapshot, ind):
     ind : tuple
         frequency indices to test
     """
-    snapshot.check(freq_data.eve[ind, -5:, :].astype(np.complex64), rtol=5e-5, atol=1e-8)
+    snapshot.check(np.abs(freq_data.eve[ind, :, -5:].astype(np.complex64)), rtol=5e-5, atol=1e-8)
