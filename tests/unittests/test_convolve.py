@@ -1,0 +1,15 @@
+
+import numpy as np
+from acoular import TimeConvolve, tools
+
+
+def test_time_convolve(time_data_source):
+    """compare results of timeconvolve with numpy convolve"""
+    sig = tools.return_result(time_data_source)
+    nc = time_data_source.numchannels
+    kernel = np.random.rand(20*nc).reshape(20, nc)
+    conv = TimeConvolve(kernel=kernel, source=time_data_source)
+    res = tools.return_result(conv)
+    for i in range(time_data_source.numchannels):
+        ref = np.convolve(np.squeeze(conv.kernel[:,i]), np.squeeze(sig[:, i]))
+        np.testing.assert_allclose(np.squeeze(res[:, i]), ref, rtol=1e-5, atol=1e-8)

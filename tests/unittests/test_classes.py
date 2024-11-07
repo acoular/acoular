@@ -3,12 +3,25 @@
 # ------------------------------------------------------------------------------
 """Tests if all Acoular classes can be instatiated and if important traits can be set without errors."""
 
+import importlib
+import inspect
+import pkgutil
 import tempfile
 import warnings
 
 import pytest
-from conftest import get_all_classes
 from traits.api import Bool, Enum, Float, Int, Range, TraitEnum
+
+
+def get_all_classes():
+    classes = []
+    package = importlib.import_module('acoular')
+    for module_info in pkgutil.walk_packages(package.__path__, package.__name__ + '.'):
+        module = importlib.import_module(module_info.name)
+        for _, obj in inspect.getmembers(module, inspect.isclass):
+            if obj.__module__ == module_info.name:  # ensure class is defined in the current module
+                classes.append(obj)
+    return classes
 
 
 def create_instance(acoular_cls):

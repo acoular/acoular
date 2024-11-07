@@ -1,10 +1,7 @@
-import unittest
-
+import pytest
 from acoular import FiltWNoiseGenerator
 from numpy import array
 from numpy.random import RandomState
-
-# from parameterized import parameterized
 
 # some FIR/MA filter coefficients of a low pass
 MA_COEFF = array(
@@ -108,30 +105,18 @@ AR_COEFF = array(
     ],
 )
 
+def test_filtwnoise_no_coefficients():
+    """test that white noise and filtered white noise is equal when no coefficients are
+    specified."""
+    fwn = FiltWNoiseGenerator(sample_freq=100, numsamples=400, seed=1)
+    wn_signal = RandomState(seed=1).standard_normal(400)
+    assert wn_signal.sum() == fwn.signal().sum()
 
-class Test_FiltWNoiseGenerator(unittest.TestCase):
-    def setUp(self):
-        self.fwn = FiltWNoiseGenerator(sample_freq=100, numsamples=400, seed=1)
+@pytest.mark.parametrize(
+    "ar, ma",
+    [(array([]), MA_COEFF), (AR_COEFF, array([])), (AR_COEFF, MA_COEFF)], ids=["MA", "AR", "ARMA"])
+def test_filtwnoise_signal_length(ar, ma):
+    """test that signal retains correct length after filtering."""
+    fwn = FiltWNoiseGenerator(sample_freq=100, numsamples=400, seed=1, ar=ar, ma=ma)
+    assert fwn.signal().shape[0] == fwn.numsamples
 
-    def test_no_coefficients(self):
-        """test that white noise and filtered white noise is equal when no coefficients are
-        specified."""
-        wn_signal = RandomState(seed=1).standard_normal(400)
-        signal = self.fwn.signal()
-        self.assertEqual(wn_signal.sum(), signal.sum())
-
-    # @parameterized.expand([
-    #     [MA_COEFF,array([]),400],
-    #     [array([]),AR_COEFF,400]
-    # ])
-    def test_correct_signal_length(self):
-        """test that signal retains correct length after filtering."""
-        parameters = [(MA_COEFF, array([]), 400), (array([]), AR_COEFF, 400)]
-        for ma, ar, expected_length in parameters:
-            self.fwn.ar = ar
-            self.fwn.ma = ma
-            self.assertEqual(self.fwn.signal().shape[0], expected_length)
-
-
-if __name__ == '__main__':
-    unittest.main()

@@ -13,6 +13,7 @@ PRECISION_MAPPING = {
     ('32', 'complex'): 'complex64',
 }
 
+#TODO: tests should use time data fixture!
 
 class TestInOutBase:
     def create_time_data(self, numsamples, sample_freq=64):
