@@ -84,13 +84,13 @@ def moving_source_case():
     return SetupMovingSourceCase()
 
 
-@pytest.fixture
-def mock_have_no_lib(mocker):
+@pytest.fixture()
+def _mock_have_no_lib(mocker):
     """Mock behaviour: library does not exist."""
     mocker.patch('importlib.util.find_spec').return_value = None
 
 
-@pytest.fixture
+@pytest.fixture()
 def setup_sounddevice_mocks(mocker):
     """Helper function to set up necessary mocks for tests."""
     num = 128
@@ -104,7 +104,7 @@ def setup_sounddevice_mocks(mocker):
     return num
 
 
-@pytest.fixture
+@pytest.fixture()
 def sounddevice_properties(setup_sounddevice_mocks):
     """Retrieve default device properties."""
     default_device = sd.query_devices(kind='input')

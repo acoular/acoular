@@ -11,7 +11,7 @@ import numpy as np
 import pytest
 from acoular.h5files import H5CacheFileH5py, H5CacheFileTables
 from pytest_cases import fixture, parametrize_with_cases
-from test_caching_cases import Caching
+from tests.cases.test_caching_cases import Caching
 
 
 def delete_traits_cache(obj):
@@ -84,7 +84,6 @@ def test_filecache_created(case, file_cache_options):
     file_cache_options : pytest.fixture (tuple)
         File cache options with HDF5 library and caching
     """
-
     h5library, caching_flag = file_cache_options
     expected_result = expected_results(h5library)
     objs, calc, cached = case

@@ -6,7 +6,8 @@
 import acoular as ac
 import numpy as np
 from pytest_cases import parametrize, parametrize_with_cases
-from tests.regression.test_generator_cases import Generators
+
+from tests.cases.test_generator_cases import Generators
 
 
 # @given(num=st.integers(min_value=1, max_value=1000))
@@ -14,7 +15,7 @@ from tests.regression.test_generator_cases import Generators
 @parametrize('num', [1, 32], ids=['num=1', 'num=32'])
 @parametrize_with_cases('obj', cases=Generators)
 def test_result_generator(obj, num):  # don't use default value if @parametrize is used
-    """Basic test for result generators if they return numpy arrays with correct shape
+    """Basic test for result generators if they return numpy arrays with correct shape.
 
     Parameters
     ----------

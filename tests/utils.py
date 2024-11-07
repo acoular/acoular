@@ -86,12 +86,12 @@ class SetupMovingSourceCase:
 
     def get_mics(self):
         mg = ac.MicGeom()
-        N = 5
-        L = 0.5
-        mg.mpos_tot = np.zeros((3, N), dtype=np.float64)
-        win = np.sin(np.arange(N) * np.pi / (N - 1))
+        num_mics = 5
+        length = 0.5
+        mg.mpos_tot = np.zeros((3, num_mics), dtype=np.float64)
+        win = np.sin(np.arange(num_mics) * np.pi / (num_mics - 1))
         b = 0.4
-        mg.mpos_tot[0] = np.linspace(-L, L, N) * (1 - b) / (win * b + 1 - b)
+        mg.mpos_tot[0] = np.linspace(-length, length, num_mics) * (1 - b) / (win * b + 1 - b)
         return mg
 
     def get_traj(self):
@@ -104,9 +104,7 @@ class SetupMovingSourceCase:
         return traj
 
     def create_test_time_data(self):
-        """
-        Creates test data for a single moving monopole emitting white noise.
-        """
+        """Creates test data for a single moving monopole emitting white noise."""
         p1 = ac.MovingPointSource(signal=self.signal, mics=self.mics, trajectory=self.traj, conv_amp=True)
         wh5 = ac.WriteH5(source=p1, name=self.fname)
         print(50 * '#')

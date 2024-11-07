@@ -8,7 +8,7 @@ from acoular import TimeConvolve, tools
 
 
 def test_time_convolve(time_data_source):
-    """Compare results of timeconvolve with numpy convolve
+    """Compare results of timeconvolve with numpy convolve.
 
     Parameters
     ----------

@@ -6,15 +6,15 @@
 import acoular as ac
 import pytest
 from pytest_cases import parametrize_with_cases
-from test_fbeamform_cases import Beamformer
+from tests.cases.test_fbeamform_cases import Beamformer
 
 TEST_PARAMS_F_NUM = [pytest.param(8000, 3, id='8kHz-3rd-oct')]
 
 
-@pytest.mark.parametrize('f, num', TEST_PARAMS_F_NUM)
+@pytest.mark.parametrize(('f', 'num'), TEST_PARAMS_F_NUM)
 @parametrize_with_cases('beamformer', cases=Beamformer)
 def test_beamformer(snapshot, beamformer, f, num):
-    """Performs snapshot testing with snapshot fixture from pytest-regtest
+    """Performs snapshot testing with snapshot fixture from pytest-regtest.
 
     Uses the beamformer cases defined in class Beamformer from test_fbeamform_cases.py
 
@@ -40,7 +40,6 @@ def test_beamformer(snapshot, beamformer, f, num):
         Bandwidth to test (1: octave)
 
     """
-
     if isinstance(beamformer, ac.BeamformerCMF) and beamformer.method in ['FISTA', 'Split_Bregman']:
         pytest.skip('This is a current issue with Pylops. See: https://github.com/acoular/acoular/issues/203')
     if isinstance(beamformer, ac.BeamformerGIB) and beamformer.method in ['LassoLarsBIC', 'NNLS']:

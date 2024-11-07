@@ -6,14 +6,12 @@ import acoular as ac
 import numpy as np
 import pytest
 from pytest_cases import fixture, get_case_id, parametrize, parametrize_with_cases
-from test_grid_cases import Grids, Sectors
+from tests.cases.test_grid_cases import Grids, Sectors
 
 
 @fixture(scope='session')
 def setup_mics_integrate():
-    """
-    Fixture for setting up a microphone geometry with 5 microphones.
-    """
+    """Fixture for setting up a microphone geometry with 5 microphones."""
     rng1 = np.random.RandomState(1)
     return ac.MicGeom(mpos_tot=rng1.normal(size=3 * 5).reshape((3, 5)))
 
@@ -33,9 +31,9 @@ def setup_power_spectra_integrate(setup_mics_integrate, f):
     """
     mics = setup_mics_integrate
     steer = ac.SteeringVector(grid=ac.ImportGrid(gpos_file=np.array([[0], [0], [1]])), mics=mics)
-    H = np.empty((1, mics.num_mics, 1), dtype=complex)
-    H[0] = steer.transfer(f).T
-    csm = H @ H.swapaxes(2, 1).conjugate()
+    transf = np.empty((1, mics.num_mics, 1), dtype=complex)
+    transf[0] = steer.transfer(f).T
+    csm = transf @ transf.swapaxes(2, 1).conjugate()
     return ac.PowerSpectraImport(csm=csm, frequencies=f)
 
 

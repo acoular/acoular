@@ -24,7 +24,7 @@ def test_filtwnoise_no_coefficients():
 
 
 @pytest.mark.parametrize(
-    'ar, ma', [(array([]), ma_coeff), (ar_coeff, array([])), (ar_coeff, ma_coeff)], ids=['MA', 'AR', 'ARMA']
+    ('ar', 'ma'), [(array([]), ma_coeff), (ar_coeff, array([])), (ar_coeff, ma_coeff)], ids=['MA', 'AR', 'ARMA']
 )
 def test_filtwnoise_signal_length(ar, ma):
     """Test that signal retains correct length after filtering.

@@ -35,9 +35,7 @@ ignore = [
     "D107", # missing docstring in __init__ -> should be fixed by issue #216
     "D417", # missing argument descriptions in the docstring -> should be fixed by issue #216
     # Others
-    "INP", # will be fixed when test are moved
     "T20", # will be fixed when logging is implemented
-    "PT", # will be solved when test infrastructure is refactored
     "SLF001", # should be fixed with issue: #225 
 ]
 
@@ -78,6 +76,6 @@ docstring-code-line-length = "dynamic"
 "acoular/tbeamform.py" = ["F841","N806"] 
 "acoular/tprocess.py" = ["N806"] #
 "acoular/fbeamform.py" = ["N806","B023"] 
-"tests/test_tprocess.py" = ["F403"] 
-"tests/*" = ["D", "N", "SLF001", "TD002", "TD003", "FIX002"] # exclude docstring and naming conventions linting -> must be handled when tests are refactored
-"examples/*" = ["A001", "B007", "D4", "E4", "E701", "F4", "UP036", "SIM108","SLF001"]
+"tests/*" = ["N802"]
+#"tests/*" = ["D", "N", "SLF001", "TD002", "TD003", "FIX002"] # exclude docstring and naming conventions linting -> must be handled when tests are refactored
+"examples/*" = ["A001", "B007", "D4", "E4", "E701", "F4", "UP036", "SIM108","SLF001", "INP001"]

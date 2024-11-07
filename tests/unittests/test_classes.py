@@ -7,8 +7,9 @@ import tempfile
 import warnings
 
 import pytest
-from tests.utils import get_all_classes
 from traits.api import Bool, Enum, Float, Int, Range, TraitEnum
+
+from tests.utils import get_all_classes
 
 all_classes = get_all_classes()
 
@@ -41,7 +42,8 @@ def test_set_traits(acoular_cls):
             if do:
                 obj = create_instance(acoular_cls)
                 digest = obj.digest
-                assert digest is not None and digest != ''
+                assert digest is not None
+                assert digest != ''
                 for k in do:
                     if k in acoular_cls.class_trait_names():
                         tr = acoular_cls.class_traits()[k]

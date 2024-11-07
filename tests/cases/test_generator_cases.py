@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
-"""Implement test cases for all :class:`acoular.base.Generator` derived classes"""
+"""Implement test cases for all :class:`acoular.base.Generator` derived classes."""
 
 import acoular as ac
 import numpy as np
@@ -65,7 +65,7 @@ def case_two_microphones():
 
 
 class Generators:
-    """Test cases for all :class:`acoular.base.Generator` derived classes
+    """Test cases for all :class:`acoular.base.Generator` derived classes.
 
     New generators should be added here. If no dedicated test case is added for a :class:`acoular.base.Generator` derived class,
     the class is still included in the test suite through the use of the `case_default` case.
@@ -176,7 +176,6 @@ class Generators:
         return ac.OctaveFilterBank(source=moving_source_case.source, hband=30)
 
     def case_RFFT(self, time_data_source):
-        # TODO: consolidate with RFFT tests
         return ac.RFFT(source=time_data_source, block_size=8)
 
     def case_SampleSplitter(self, time_data_source):

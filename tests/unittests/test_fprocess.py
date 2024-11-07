@@ -14,8 +14,6 @@ PRECISION_MAPPING = {
     ('32', 'complex'): 'complex64',
 }
 
-# TODO: tests should use time data fixture!
-
 
 class TestInOutBase:
     def create_time_data(self, numsamples, sample_freq=64):
@@ -91,9 +89,7 @@ class TestRFFT(TestInOutBase):
 
     @pytest.mark.parametrize('precision', ['64', '32'])
     def test_precision(self, precision):
-        """
-        test if the desired precision is reflected in the output
-        """
+        """Test if the desired precision is reflected in the output."""
         fft = self.create_source(numsamples=8, block_size=8)
         fft.precision = PRECISION_MAPPING[(precision, 'complex')]
         data = next(fft.result(1))
@@ -132,9 +128,7 @@ class TestIRFFT(TestInOutBase):
 
     @pytest.mark.parametrize('precision', ['64', '32'])
     def test_precision(self, precision):
-        """
-        test if the desired precision is reflected in the output
-        """
+        """Test if the desired precision is reflected in the output."""
         ifft = self.create_source(numsamples=64, precision=precision)
         data = next(ifft.result(1))
         assert data.dtype == PRECISION_MAPPING[(precision, 'real')]
@@ -158,9 +152,7 @@ class TestAutoPowerSpectra(TestInOutBase):
 
     @pytest.mark.parametrize('precision', ['64', '32'])
     def test_precision(self, precision):
-        """
-        test if the desired precision is reflected in the output
-        """
+        """Test if the desired precision is reflected in the output."""
         ap = self.create_source(numsamples=64, precision=precision)
         data = next(ap.result(1))
         assert data.dtype == PRECISION_MAPPING[(precision, 'real')]
@@ -178,9 +170,7 @@ class TestCrossPowerSpectra(TestAutoPowerSpectra):
 
     @pytest.mark.parametrize('precision', ['64', '32'])
     def test_precision(self, precision):
-        """
-        test if the desired precision is reflected in the output
-        """
+        """Test if the desired precision is reflected in the output."""
         cp = self.create_source(numsamples=64, precision=precision)
         data = next(cp.result(1))
         assert data.dtype == PRECISION_MAPPING[(precision, 'complex')]

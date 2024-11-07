@@ -30,7 +30,7 @@ def freq_data(request, regression_source_case):
 
 @pytest.mark.parametrize('ind', [(16, 32)])
 def test_csm(freq_data, snapshot, ind):
-    """Performs snapshot testing for the cross spectral matrix
+    """Performs snapshot testing for the cross spectral matrix.
 
     To overwrite the snapshot, run:
     ```bash
@@ -52,7 +52,7 @@ def test_csm(freq_data, snapshot, ind):
 
 @pytest.mark.parametrize('ind', [(16, 32)])
 def test_eva(freq_data, snapshot, ind):
-    """Performs snapshot testing for the eigenvalues
+    """Performs snapshot testing for the eigenvalues.
 
     To overwrite the snapshot, run:
     ```bash
@@ -74,7 +74,7 @@ def test_eva(freq_data, snapshot, ind):
 
 @pytest.mark.parametrize('ind', [(16, 32)])
 def test_eve(freq_data, snapshot, ind):
-    """Performs snapshot testing for the eigenvectors
+    """Performs snapshot testing for the eigenvectors.
 
     To overwrite the snapshot, run:
     ```bash

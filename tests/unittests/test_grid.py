@@ -7,14 +7,15 @@ from functools import partial
 
 import pytest
 from pytest_cases import get_case_id, parametrize_with_cases
-from test_grid_cases import Grids, Sectors
+from tests.cases.test_grid_cases import Grids, Sectors
+
 from tests.utils import sector_case_filter
 
 
 @parametrize_with_cases('grid', cases=Grids)
 def test_grid_size(grid):
     """
-    Test if the size of the grid matches the number of grid points
+    Test if the size of the grid matches the number of grid points.
 
     Parameters
     ----------
@@ -27,7 +28,7 @@ def test_grid_size(grid):
 @parametrize_with_cases('grid', cases=Grids)
 @parametrize_with_cases('sector', cases=Sectors, filter=partial(sector_case_filter, t='full'))
 def test_subdomain(grid, sector):
-    """Test if the sector is not empty as expected
+    """Test if the sector is not empty as expected.
 
     Parameters
     ----------
@@ -42,7 +43,7 @@ def test_subdomain(grid, sector):
 @parametrize_with_cases('grid', cases=Grids)
 @parametrize_with_cases('sector', cases=Sectors, filter=lambda cf: 'empty' in get_case_id(cf))
 def test_default_nearest(grid, sector):
-    """Verify that the nearest grid point is assigned to the sector if default_nearest is set to True
+    """Verify that the nearest grid point is assigned to the sector if default_nearest is set to True.
 
     Parameters
     ----------
@@ -61,7 +62,7 @@ def test_default_nearest(grid, sector):
 @parametrize_with_cases('grid', cases=Grids)
 @parametrize_with_cases('sector', cases=Sectors, filter=partial(sector_case_filter, t='empty'))
 def test_empty_subdomain(grid, sector):
-    """Test if the sector is empty as expected
+    """Test if the sector is empty as expected.
 
     Parameters
     ----------
