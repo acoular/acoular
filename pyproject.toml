@@ -145,17 +145,11 @@ packages = ["acoular"]
 [tool.pytest.ini_options]
 filterwarnings = [
     "ignore::tables.exceptions.UnclosedFileWarning",
-    
     # Suppress DeprecationWarnings from traits due to deprecated sre_parse and sre_constants modules
     "ignore:module 'sre_parse' is deprecated:DeprecationWarning",
     "ignore:module 'sre_constants' is deprecated:DeprecationWarning",
-    
-    # Suppress UserWarning from numba about FNV hashing
-    "ignore:FNV hashing is not implemented in Numba:UserWarning",
-    
     # Suppress NumbaWarning about TBB threading layer
     "ignore:The TBB threading layer requires TBB version:numba.core.errors.NumbaWarning",
-    
     # Suppress DeprecationWarnings in Acoular's test_generator_cases.py and sources.py
     "ignore:Using MaskedTimeInOut is deprecated:DeprecationWarning",
     "ignore:Using TimeCache is deprecated:DeprecationWarning",

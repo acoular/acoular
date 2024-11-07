@@ -28,7 +28,7 @@ def freq_data(request, regression_source_case):
     return ac.PowerSpectra(source=regression_source_case.source, **request.param)
 
 
-@pytest.mark.parametrize('ind', [(16, 32)])
+@pytest.mark.parametrize('ind', [16, 32])
 def test_csm(freq_data, snapshot, ind):
     """Performs snapshot testing for the cross spectral matrix.
 
@@ -50,7 +50,7 @@ def test_csm(freq_data, snapshot, ind):
     snapshot.check(freq_data.csm[ind, :, :], rtol=5e-5, atol=1e-8)  # uses numpy.testing.assert_allclose
 
 
-@pytest.mark.parametrize('ind', [(16, 32)])
+@pytest.mark.parametrize('ind', [16, 32])
 def test_eva(freq_data, snapshot, ind):
     """Performs snapshot testing for the eigenvalues.
 
@@ -72,7 +72,7 @@ def test_eva(freq_data, snapshot, ind):
     snapshot.check(freq_data.eva[ind, :], rtol=5e-5, atol=1e-8)
 
 
-@pytest.mark.parametrize('ind', [(16, 32)])
+@pytest.mark.parametrize('ind', [16, 32])
 def test_eve(freq_data, snapshot, ind):
     """Performs snapshot testing for the eigenvectors.
 
