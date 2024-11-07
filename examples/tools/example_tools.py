@@ -15,7 +15,7 @@ import numpy as np
 from acoular.tools import barspectrum
 
 #  Set up a single microphone at (0,0,0)
-m = ac.MicGeom(mpos_tot=np.array([[0, 0, 0]]))
+m = ac.MicGeom(mpos_tot=np.array([[0, 0, 0]]).T)
 
 # Create a noise source
 sample_freq = 12800  # sample frequency

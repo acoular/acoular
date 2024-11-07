@@ -7,9 +7,23 @@ Upcoming Release (25.01)
     **New features:**
     
     **Bugfixes**
+        * pass missing `max_iter` as an argument to `LassoLarsCV` in :class:`acoular.fbeamform.BeamformerGIB` (otherwise, LassoLarsCV runs up to 500 iterations)
 
     **Documentation**
         * adds guide on how to submit a pull request
+
+    **Tests**
+        * tests now consequently use `pytest` framework instead of `unittest`
+        * separate tests in into `tests/regression` and `tests/unittests` directories
+        * increases coverage to 76 % 
+        * introduces snapshot / regression testing for all :class:`acoular.base.Generator`, `:class:acoular.fbeamform.BeamformerBase`, :class:`acoular.environment.FlowField`, and :class:`acoular.environment.Environment` derived classes (results in new snapshot data of size 1.1MB (see `tests/regression/_regtest_output`)
+        * use `pytest-cases` to separate parameters from tests (cases are located under `tests/cases`
+        * full coverage of `sdinput.py` module through the use of `pytest-mock` (mocks the behavior of an InputStream object, which cannot be used for CI due to missing audio interfaces)
+        * linting and formatting for tests directory
+        * refactor :class:`~acoular.h5cache.H5Cache` class due to a bug encountered with the new tests (acoular now can handle changing caching directories during a session -> previously, only the basename was observed which caused problems with changing cache directories)
+        * tests now log the 10 slowest test runs
+        * adds `profile` options to hatch test environment to profile test run via `hatch run tests:profile` and save a graphviz chart as SVG file
+
 
     **Internal**
         * adds a pull request template
