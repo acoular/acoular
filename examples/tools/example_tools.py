@@ -39,7 +39,7 @@ band = 3  # octave: 1 ;   1/3-octave: 3 (for plotting)
 # %%
 # create figure with barspectra
 
-from pylab import figure, grid, legend, plot, real, show, title, xlabel, xlim, xscale, xticks, ylabel, ylim
+from pylab import figure, grid, legend, plot, show, title, xlabel, xlim, xscale, xticks, ylabel, ylim
 
 figure(figsize=(20, 6))
 title('Powerspectrum')
