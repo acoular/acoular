@@ -17,9 +17,9 @@ def test_add_element(add_element):
 def test_add_element2(add_element):
     assert add_element == [1,2]
 
-#%% 
-import numpy as np 
+#%%
 import time
+
 
 @pytest.fixture(scope='session')
 #@pytest.fixture

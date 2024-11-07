@@ -32,7 +32,7 @@ class Beamformer:
         return ac.BeamformerDamasPlus(
             freq_data=source_case.freq_data,
             steer=source_case.steer, method=method,
-            max_iter=10, alpha=1**-9, unit_mult=1e10)
+            max_iter=10, alpha=10**-12, unit_mult=1e10)
 
     def case_BeamformerCleansc(self, source_case):
         return ac.BeamformerCleansc(
@@ -51,11 +51,11 @@ class Beamformer:
 
     @parametrize('method', [
         'InverseIRLS', 'LassoLars', 'LassoLarsBIC', 'LassoLarsCV',
-        'OMPCV', 'NNLS'
+        'OMPCV', 'NNLS', 'Suzuki'
         ])
     def case_BeamformerGIB(self, method, source_case):
         return ac.BeamformerGIB(
-            freq_data=source_case.freq_data, n=2,
+            freq_data=source_case.freq_data, n=2, alpha=1e-12, eps_perc=2.0,
             steer=source_case.steer, method=method)
 
     @parametrize('method', ['LassoLars', 'LassoLarsBIC', 'OMPCV', 'NNLS',
