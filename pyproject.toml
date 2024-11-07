@@ -66,6 +66,7 @@ docs = [
 
 tests = [
     "pytest",
+    "pytest-mock",
     "pytest-cov",
     "pytest-regtest",
     "pytest-cases",
