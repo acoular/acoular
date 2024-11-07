@@ -67,6 +67,7 @@ docs = [
 tests = [
     "pytest",
     "pytest-cov",
+    "pytest-regtest",
     "sounddevice",
     "traitsui",
     "h5py",
