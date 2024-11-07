@@ -5,7 +5,7 @@
 
 import acoular as ac
 import pytest
-
+import numpy as np
 
 @pytest.fixture(
     params=[
@@ -13,6 +13,7 @@ import pytest
         {'precision': 'complex64', 'overlap': '50%', 'block_size': 256, 'window': 'Hanning'},
     ],
     ids=['default', 'custom'],
+    scope='module',
 )
 def freq_data(request, regression_source_case):
     """
@@ -25,7 +26,7 @@ def freq_data(request, regression_source_case):
     regression_source_case : fixture
         regression_source_case fixture (see conftest.py)
     """
-    return ac.PowerSpectra(source=regression_source_case.source, **request.param)
+    return ac.PowerSpectra(source=regression_source_case.source, cached=False, **request.param)
 
 
 @pytest.mark.parametrize('ind', [16, 32])
@@ -46,8 +47,7 @@ def test_csm(freq_data, snapshot, ind):
     ind : tuple
         frequency indices to test
     """
-    ac.config.global_caching = 'none'  # we do not cache results!
-    snapshot.check(freq_data.csm[ind, :, :], rtol=5e-5, atol=1e-8)  # uses numpy.testing.assert_allclose
+    snapshot.check(freq_data.csm[ind, :, :].astype(np.complex64), rtol=5e-5, atol=1e-8)  # uses numpy.testing.assert_allclose
 
 
 @pytest.mark.parametrize('ind', [16, 32])
@@ -68,8 +68,7 @@ def test_eva(freq_data, snapshot, ind):
     ind : tuple
         frequency indices to test
     """
-    ac.config.global_caching = 'none'
-    snapshot.check(freq_data.eva[ind, :], rtol=5e-5, atol=1e-8)
+    snapshot.check(freq_data.eva[ind, :].astype(np.float32), rtol=5e-5, atol=1e-8)
 
 
 @pytest.mark.parametrize('ind', [16, 32])
@@ -90,5 +89,4 @@ def test_eve(freq_data, snapshot, ind):
     ind : tuple
         frequency indices to test
     """
-    ac.config.global_caching = 'none'
-    snapshot.check(freq_data.eve[ind, :, :], rtol=5e-5, atol=1e-8)
+    snapshot.check(freq_data.eve[ind, :, :].astype(np.complex64), rtol=5e-5, atol=1e-8)
