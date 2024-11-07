@@ -9,6 +9,7 @@ Upcoming Release (25.01)
     **Bugfixes**
 
     **Documentation**
+        * adds guide on how to submit a pull request
 
     **Internal**
         * adds a pull request template
