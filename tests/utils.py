@@ -1,10 +1,22 @@
+import importlib
 import inspect
+import pkgutil
 from pathlib import Path
 
 import acoular as ac
 import numpy as np
 from pytest_cases import get_case_id
 
+
+def get_all_classes():
+    classes = []
+    package = importlib.import_module('acoular')
+    for module_info in pkgutil.walk_packages(package.__path__, package.__name__ + '.'):
+        module = importlib.import_module(module_info.name)
+        for _, obj in inspect.getmembers(module, inspect.isclass):
+            if obj.__module__ == module_info.name:  # ensure class is defined in the current module
+                classes.append(obj)
+    return classes
 
 def get_subclasses(cls):
     classes = []
@@ -43,6 +55,15 @@ class SetupStationarySourceCase:
             block_size=blocksize,
             cached=False,
         )
+        # create freq_data_import object (does not rely on any cached data)
+        self.freq_data.csm # noqa: B018 : trigger computation
+        self.freq_data_import = ac.PowerSpectraImport(
+            csm = self.freq_data.csm[...],
+            frequencies = self.freq_data.fftfreq(),
+        )
+        self.freq_data_import.eve # noqa: B018 : trigger computation
+        self.freq_data_import.eva # noqa: B018 : trigger computation
+
 
 
 class SetupMovingSourceCase:

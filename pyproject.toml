@@ -69,6 +69,9 @@ tests = [
     "pytest-cov",
     "pytest-regtest",
     "pytest-cases",
+    "pytest-env",
+    "pytest-profiling",
+    #"pytest-xdist",
     "sounddevice",
     "traitsui",
     "h5py",
@@ -116,7 +119,9 @@ python = ["3.10", "3.11", "3.12"]
 
 [tool.hatch.envs.tests.scripts]
 import = ["python -c \"import acoular\""]
-test = ["python -m pytest -v tests"]
+test = ["python -m pytest -v --durations=10 tests"]
+reset_regtest = ["python -m pytest -v --regtest-reset tests/regression"]
+profile = ["test --profile-svg"] 
 demo = ["python -c \"import acoular; acoular.demo.acoular_demo.run()\""]
 coverage = ["test --cov=acoular --cov-report html --cov-report term-missing"]
 doctest = ["python -m pytest --doctest-modules acoular"]
@@ -134,3 +139,35 @@ include = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["acoular"]
+
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore::tables.exceptions.UnclosedFileWarning",
+    
+    # Suppress DeprecationWarnings from traits due to deprecated sre_parse and sre_constants modules
+    "ignore:module 'sre_parse' is deprecated:DeprecationWarning",
+    "ignore:module 'sre_constants' is deprecated:DeprecationWarning",
+    
+    # Suppress UserWarning from numba about FNV hashing
+    "ignore:FNV hashing is not implemented in Numba:UserWarning",
+    
+    # Suppress NumbaWarning about TBB threading layer
+    "ignore:The TBB threading layer requires TBB version:numba.core.errors.NumbaWarning",
+    
+    # Suppress DeprecationWarnings in Acoular's test_generator_cases.py and sources.py
+    "ignore:Using MaskedTimeInOut is deprecated:DeprecationWarning",
+    "ignore:Using TimeCache is deprecated:DeprecationWarning",
+    "ignore:Using TimeAverage is deprecated:DeprecationWarning",
+]
+env = [
+    "OPENBLAS_NUM_THREADS=1"
+]
+
+[tool.coverage.run]
+omit = [
+    "acoular/demo/acoular_demo.py",
+    "acoular/base.py",
+    "acoular/tfastfuncs.py",
+    "acoular/fastFuncs.py",
+    ]

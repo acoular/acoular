@@ -33,6 +33,8 @@ class Caching:
             if hasattr(bf, 'n_iter'):
                 bf.n_iter = 1
             bfs.append(bf)
+            if hasattr(bf, 'shgo'):
+                bf.shgo = {'n': 10, 'iters': 1}
         def calc(beamformer):
             return beamformer.synthetic(8000, 0)
         return bfs, calc, cached
