@@ -4,8 +4,9 @@
 """Implements snapshot testing of spectra classes."""
 
 import acoular as ac
-import pytest
 import numpy as np
+import pytest
+
 
 @pytest.fixture(
     params=[
@@ -47,7 +48,9 @@ def test_csm(freq_data, snapshot, ind):
     ind : tuple
         frequency indices to test
     """
-    snapshot.check(freq_data.csm[ind, :, :].astype(np.complex64), rtol=5e-5, atol=1e-8)  # uses numpy.testing.assert_allclose
+    snapshot.check(
+        freq_data.csm[ind, :, :].astype(np.complex64), rtol=5e-5, atol=1e-8
+    )  # uses numpy.testing.assert_allclose
 
 
 @pytest.mark.parametrize('ind', [16, 32])
@@ -89,4 +92,4 @@ def test_eve(freq_data, snapshot, ind):
     ind : tuple
         frequency indices to test
     """
-    snapshot.check(freq_data.eve[ind, :, :].astype(np.complex64), rtol=5e-5, atol=1e-8)
+    snapshot.check(np.abs(freq_data.eve[ind, :, :].astype(np.complex64)), rtol=5e-5, atol=1e-8)
