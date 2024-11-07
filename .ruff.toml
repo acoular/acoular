@@ -76,5 +76,5 @@ docstring-code-line-length = "dynamic"
 "acoular/tbeamform.py" = ["F841","N806"] 
 "acoular/tprocess.py" = ["N806"] #
 "acoular/fbeamform.py" = ["N806","B023"] 
-"tests/*" = ["N802"]
+"tests/cases/*" = ["N802"]
 "examples/*" = ["A001", "B007", "D4", "E4", "E701", "F4", "UP036", "SIM108","SLF001", "INP001"]
