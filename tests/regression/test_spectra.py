@@ -71,7 +71,7 @@ def test_eva(freq_data, snapshot, ind):
     ind : tuple
         frequency indices to test
     """
-    snapshot.check(freq_data.eva[ind, :-5].astype(np.float32), rtol=5e-5, atol=1e-8)
+    snapshot.check(freq_data.eva[ind, -5:].astype(np.float32), rtol=5e-5, atol=1e-8)
 
 
 @pytest.mark.parametrize('ind', [16, 32])
@@ -92,4 +92,4 @@ def test_eve(freq_data, snapshot, ind):
     ind : tuple
         frequency indices to test
     """
-    snapshot.check(freq_data.eve[ind, :-5, :].astype(np.complex64), rtol=5e-5, atol=1e-8)
+    snapshot.check(freq_data.eve[ind, -5:, :].astype(np.complex64), rtol=5e-5, atol=1e-8)
