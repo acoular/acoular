@@ -327,11 +327,11 @@ class TimeSamples(SamplesGenerator):
         i = 0
         if self.calib:
             warn(
-                       'The use of the calibration functionality in TimeSamples is deprecated and will be removed in \
+                'The use of the calibration functionality in TimeSamples is deprecated and will be removed in \
                        Acoular XX.XX. Use the Calib class as an additional processing block instead.',
-                       DeprecationWarning,
-                       stacklevel=2,
-                   )
+                DeprecationWarning,
+                stacklevel=2,
+            )
             if self.calib.num_mics == self.num_channels:
                 cal_factor = self.calib.data[newaxis]
             else:
