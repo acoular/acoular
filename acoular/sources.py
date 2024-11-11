@@ -326,7 +326,7 @@ class TimeSamples(SamplesGenerator):
         self._datachecksum  # trigger checksum calculation # noqa: B018
         i = 0
         if self.calib:
-            warnings.warn(
+            warn(
                        'The use of the calibration functionality in TimeSamples is deprecated and will be removed in \
                        Acoular XX.XX. Use the Calib as an additional processing block instead.',
                        DeprecationWarning,

@@ -13,7 +13,7 @@
 import xml.dom.minidom
 
 from numpy import array, newaxis
-from traits.api import CArray, CLong, File, HasPrivateTraits, Property, cached_property, on_trait_change
+from traits.api import CArray, CLong, File, Property, cached_property, on_trait_change
 
 from .base import TimeOut
 
@@ -25,7 +25,7 @@ from .internal import digest
 @deprecated_alias({'from_file': 'file'})
 class Calib(HasPrivateTraits):
     """Container for calibration data in `*.xml` format or Numpy format (manually set).
-    
+
     This class loads calibration data and provides information about this data. It implemnts the
     application of calibration factors to the data which is set by setting the source attribute.
     The calibrated data can be accessed (e.g. for use in a block chain) via the
@@ -69,7 +69,7 @@ class Calib(HasPrivateTraits):
             data.append(float(element.getAttribute('factor')))
         self.data = array(data, 'd')
         self.num_mics = self.data.shape[0]
-    
+
     def result(self, num):
         """Python generator that processes the source data and yields the time-signal block-wise.
 
@@ -93,4 +93,5 @@ class Calib(HasPrivateTraits):
                 else:
                     raise ValueError('calibration data not compatible: %i, %i' % (self.num_mics, self.numchannels))
             else:
-                raise ValueError('error in calibration factors')
+                msg = 'error in calibration data: %i, %i' % (self.data.shape[0], self.numchannels)
+                raise ValueError(msg)
