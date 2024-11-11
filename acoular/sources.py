@@ -506,7 +506,13 @@ class MaskedTimeSamples(TimeSamples):
             raise OSError(msg)
         self._datachecksum  # trigger checksum calculation # noqa: B018
         if self.calib:
-            if self.calib.num_mics == self.num_channels_total:
+            warn(
+                'The use of the calibration functionality in MaskedTimeSamples is deprecated and will be removed in \
+                       Acoular XX.XX. Use the Calib class as an additional processing block instead.',
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            if self.calib.num_mics == self.numchannels_total:
                 cal_factor = self.calib.data[self.channels][newaxis]
             elif self.calib.num_mics == self.num_channels:
                 cal_factor = self.calib.data[newaxis]
