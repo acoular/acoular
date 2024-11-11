@@ -12,8 +12,10 @@
 # imports from other packages
 import xml.dom.minidom
 
-from numpy import array
+from numpy import array, newaxis
 from traits.api import CArray, CLong, File, HasPrivateTraits, Property, cached_property, on_trait_change
+
+from .base import TimeOut
 
 # acoular imports
 from .deprecation import deprecated_alias
@@ -22,8 +24,14 @@ from .internal import digest
 
 @deprecated_alias({'from_file': 'file'})
 class Calib(HasPrivateTraits):
-    """Container for calibration data in `*.xml` format.
+    """Container for calibration data in `*.xml` format or Numpy format (manually set).
+    
+    This class loads calibration data and provides information about this data. It implemnts the
+    application of calibration factors to the data which is set by setting the source attribute.
+    The calibrated data can be accessed (e.g. for use in a block chain) via the
+    :meth:`result` generator.
 
+    Depracted and will be removed in Acoular XX.XX:
     This class serves as interface to load calibration data for the used
     microphone array. The calibration factors are stored as [Pa/unit].
     """
@@ -32,15 +40,19 @@ class Calib(HasPrivateTraits):
     file = File(filter=['*.xml'], exists=True, desc='name of the xml file to import')
 
     #: Number of microphones in the calibration data,
-    #: is set automatically / read from file.
+    #: is set automatically when read from file or when data is set.
     num_mics = CLong(0, desc='number of microphones in the geometry')
 
     #: Array of calibration factors,
-    #: is set automatically / read from file.
+    #: is set automatically when read from file can be set manually.
     data = CArray(desc='calibration data')
 
     # Internal identifier
     digest = Property(depends_on=['data'])
+
+    @on_trait_change('data')
+    def set_num_mics(self):
+        self.num_mics = self.data.shape[0]
 
     @cached_property
     def _get_digest(self):
@@ -57,3 +69,28 @@ class Calib(HasPrivateTraits):
             data.append(float(element.getAttribute('factor')))
         self.data = array(data, 'd')
         self.num_mics = self.data.shape[0]
+    
+    def result(self, num):
+        """Python generator that processes the source data and yields the time-signal block-wise.
+
+        This method needs to be implemented by the derived classes.
+
+        Parameters
+        ----------
+        num : int
+            This parameter defines the size of the blocks to be yielded
+            (i.e. the number of samples per block)
+
+        Yields
+        ------
+        numpy.ndarray
+            Two-dimensional output data block of shape (num, numchannels)
+        """
+        for block in self.source.result(num):
+            if self.data.shape[0] == self.num_mics:
+                if self.num_mics == self.numchannels:
+                    yield block * self.data[newaxis]
+                else:
+                    raise ValueError('calibration data not compatible: %i, %i' % (self.num_mics, self.numchannels))
+            else:
+                raise ValueError('error in calibration factors')
