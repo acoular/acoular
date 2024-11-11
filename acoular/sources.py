@@ -328,7 +328,7 @@ class TimeSamples(SamplesGenerator):
         if self.calib:
             warn(
                        'The use of the calibration functionality in TimeSamples is deprecated and will be removed in \
-                       Acoular XX.XX. Use the Calib as an additional processing block instead.',
+                       Acoular XX.XX. Use the Calib class as an additional processing block instead.',
                        DeprecationWarning,
                        stacklevel=2,
                    )
