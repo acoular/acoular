@@ -50,6 +50,7 @@ def create_source_case():
             grid=grid,
             invalid_channels=invalid_channels,
         )
+
     return _create_source_case
 
 
