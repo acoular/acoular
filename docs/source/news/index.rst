@@ -13,7 +13,8 @@ Upcoming Release (25.01)
 
     **Internal**
         * adds a pull request template
-        * dynamically set the version in the pyproject.toml file (from version.py) 
+        * dynamically set the version in the pyproject.toml file (from version.py)
+        * removes deprecated traits ending with version 25.01
 
 24.10
 ----------------
