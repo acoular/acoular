@@ -72,7 +72,6 @@ tests = [
     "pytest-cases",
     "pytest-env",
     "pytest-profiling",
-    #"pytest-xdist",
     "sounddevice",
     "traitsui",
     "h5py",

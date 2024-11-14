@@ -10,8 +10,6 @@ from pytest_cases import parametrize_with_cases
 from tests.cases.test_fbeamform_cases import Beamformer
 
 TEST_PARAMS_F_NUM = [pytest.param(8000, 3, id='8kHz-3rd-oct')]
-
-
 @pytest.mark.parametrize(('f', 'num'), TEST_PARAMS_F_NUM)
 @parametrize_with_cases('beamformer', cases=Beamformer)
 def test_beamformer(snapshot, beamformer, f, num):
@@ -41,15 +39,19 @@ def test_beamformer(snapshot, beamformer, f, num):
         Bandwidth to test (1: octave)
 
     """
-    if isinstance(beamformer, ac.BeamformerCMF) and beamformer.method in ['FISTA', 'Split_Bregman']:
-        pytest.skip('This is a current issue with Pylops. See: https://github.com/acoular/acoular/issues/203')
-    if isinstance(beamformer, ac.BeamformerGIB) and beamformer.method in ['LassoLarsBIC', 'NNLS']:
-        msg = (
-            'BeamformerGIB with LassoLarsBIC solver. Requires number of samples (eigenvalues) '
-            'to be greater than number of features (gird points). Otherwise noise variance estimate is needed. '
-            'BeamformerGIB with NNLS solver. Always fails with maximum iterations reached.'
-        )
-        pytest.skip(msg)
+    if isinstance(beamformer, ac.BeamformerCMF) and beamformer.method == 'Split_Bregman':
+        pytest.xfail("ImportError: cannot import name 'SplitBregman' from 'pylops'")
+
+    if isinstance(beamformer, ac.BeamformerCMF) and beamformer.method == 'FISTA':
+        pytest.xfail("'ImportError: cannot import name 'FISTA' from 'pylops'")
+
+    if isinstance(beamformer, ac.BeamformerGIB) and beamformer.method == 'NNLS':
+        pytest.xfail("RuntimeError: Maximum number of iterations reached")
+
+    if isinstance(beamformer, ac.BeamformerGIB) and beamformer.method == 'LassoLarsBIC':
+        # Requires number of samples (eigenvalues) to be greater than number of features (gird points).
+        # Otherwise noise variance estimate is needed.
+        pytest.xfail("ValueError: You are using LassoLarsIC in the case where the number of samples is smaller than the number of features.")
 
     beamformer.cached = False
     result = beamformer.synthetic(f, num)
