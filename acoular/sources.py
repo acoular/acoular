@@ -1443,7 +1443,7 @@ class UncorrelatedNoiseSource(SamplesGenerator):
         """
         Noise = self.signal.__class__
         # create or get the array of random seeds
-        if not self.seed:
+        if not self.seed.size > 0:
             seed = arange(self.numchannels) + self.signal.seed
         elif self.seed.shape == (self.numchannels,):
             seed = self.seed

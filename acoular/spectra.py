@@ -549,7 +549,7 @@ def synthetic(data, freqs, f, num=3):
         per frequency line.
         The number of entries must be identical to the number of
         grid points.
-    freq : array of floats
+    freqs : array of floats
         The frequencies that correspon to the input *data* (as yielded by
         the :meth:`PowerSpectra.fftfreq<acoular.spectra.PowerSpectra.fftfreq>`
         method).

@@ -62,7 +62,7 @@ The editable installation allows you to make changes to the source code and see 
 
 The ``".[dev]"`` argument is responsible for installing the right dependencies as defined in ``pyproject.toml``:
 
-.. code-clock:: toml
+.. code-block:: toml
 
     dev = [
         "acoular[docs,full,tests]",

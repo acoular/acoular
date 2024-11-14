@@ -2467,7 +2467,7 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
                         elif self.method == 'OMPCV':
                             model = OrthogonalMatchingPursuitCV()
                         elif self.method == 'LassoLarsCV':
-                            model = LassoLarsCV()
+                            model = LassoLarsCV(max_iter=self.max_iter)
                         elif self.method == 'NNLS':
                             model = LinearRegression(positive=True)
                         model.normalize = False

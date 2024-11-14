@@ -35,7 +35,7 @@ jobs:
         run: hatch -v run +py=${{ matrix.python-version }} tests:import
       - name: Check demo
         run: hatch -v run +py=${{ matrix.python-version }} tests:demo
-      - name: Run unittests
+      - name: Run tests
         run: hatch -v run +py=${{ matrix.python-version }} tests:test
       - name: Run doctests
         run: hatch -v run +py=${{ matrix.python-version }} tests:doctest
