@@ -28,7 +28,7 @@ Upcoming Release (25.01)
     **Internal**
         * adds a pull request template
         * dynamically set the version in the pyproject.toml file (from version.py)
-        * avoid auto-adding the docs label when news/index.rst is edited
+        * the docs label will not be auto-added when news/index.rst is edited
 
 24.10
 ----------------
