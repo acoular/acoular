@@ -1,10 +1,8 @@
 docs:
-- changed-files:
-  - any-glob-to-any-file:
-    - docs/**
-    - README.md
-    - AUTHORS.rst
-    - CITATION.cff
+- all:
+  - changed-files:
+    - all-globs-to-all-files: '!docs/source/news/*'
+    - any-glob-to-any-file: 'docs/**/*'
 tests:
 - changed-files:
   - any-glob-to-any-file:
