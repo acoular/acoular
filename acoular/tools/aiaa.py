@@ -23,7 +23,7 @@ Examples
     TriggerAIAABenchmark
     CsmAIAABenchmark
     MicAIAABenchmark
-"""
+""" # noqa: W505
 
 import contextlib
 from os import path
