@@ -33,10 +33,12 @@ BF_DEFAULT = [bf for bf in get_subclasses(ac.BeamformerBase) if bf not in BF_SKI
 class Beamformer:
     """Test cases for all beamformers.
 
-    New beamformers should be added here. If no dedicated test case is added for a :class:`acoular.fbeamform.BeamformerBase` derived class,
-    the class is still included in the test suite through the use of the `case_default` case.
-    If a dedicated test case was added for a beamformer, it should be added to the `BF_SKIP_DEFAULT` list,
-    which excludes the class from `case_default`.
+    New beamformers should be added here. If no dedicated test case is added for a
+    :class:`acoular.fbeamform.BeamformerBase` derived class, the class is still included in the test
+    suite through the use of the `case_default` case. If a dedicated test case was added for a
+    beamformer, it should be added to the `BF_SKIP_DEFAULT` list, which excludes the class from
+    `case_default`.
+
     """
 
     @parametrize(

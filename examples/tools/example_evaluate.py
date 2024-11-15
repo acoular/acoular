@@ -71,8 +71,8 @@ target_data = np.array([[n1.rms**2 / nfft], [n2.rms**2 / nfft], [n3.rms**2 / nff
 
 # %%
 # Finally, we use the :class:`acoular.tools.metrics.MetricEvaluator` class to evaluate the
-# reconstruction accuracy of the beamforming algorithm with three different metrics.
-# A circular sector with a radius of 5% of the aperture is used to define the sectors for the evaluation.
+# reconstruction accuracy of the beamforming algorithm with three different metrics. A circular
+# sector with a radius of 5% of the aperture is used to define the sectors for the evaluation.
 
 mv = MetricEvaluator(
     sector=ac.CircSector(r=0.05 * mg.aperture),

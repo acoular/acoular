@@ -22,8 +22,8 @@ class SamplesBuffer(InOut):
     Examples
     --------
     Let us assume we want to draw blocks of 16 samples from our source, but we want to make sure
-    that we always have twice the number of samples in the buffer. We can achieve this simple behaviour
-    by using the following code:
+    that we always have twice the number of samples in the buffer. We can achieve this simple
+    behaviour by using the following code:
 
     >>> import acoular as ac
     >>> import numpy as np
@@ -41,18 +41,20 @@ class SamplesBuffer(InOut):
     >>> block = next(buffer.result(num=16))
     >>> np.testing.assert_array_equal(block, source.data[:16])
 
-    Here, on the first call to the result method, the buffer will fill up by collecting blocks with same size
-    from the source. The buffer will then return the first block of 16 samples. On the next call to the result
-    method, the buffer will be filled again and returns the next block of 16 samples.
+    Here, on the first call to the result method, the buffer will fill up by collecting blocks with
+    same size from the source. The buffer will then return the first block of 16 samples. On the
+    next call to the result method, the buffer will be filled again and returns the next block of 16
+    samples.
 
-    In some cases, we might want to draw a different number of samples from the source than we want to return.
-    This can be achieved by setting the `source_num` trait of the buffer. A special case is the return of a variable
-    number of samples. This is the case, for example, in the class :class:`~acoular.tbeamform.BeamformerTimeTraj`,
-    in which a different number of time samples is required from the buffer for further delay-and-sum processing
-    depending on the expected delay, which can be vary for moving sources. At the same time, however, only 'num'
-    samples should be written to and removed from the buffer. This behavior can be achieved by setting the
-    `shift_index_by` trait to 'num' and by setting the `result_num` trait to the number of samples that should be
-    returned by the result function.
+    In some cases, we might want to draw a different number of samples from the source than we want
+    to return. This can be achieved by setting the `source_num` trait of the buffer. A special case
+    is the return of a variable number of samples. This is the case, for example, in the class
+    :class:`~acoular.tbeamform.BeamformerTimeTraj`, in which a different number of time samples is
+    required from the buffer for further delay-and-sum processing depending on the expected delay,
+    which can be vary for moving sources. At the same time, however, only 'num' samples should be
+    written to and removed from the buffer. This behavior can be achieved by setting the
+    `shift_index_by` trait to 'num' and by setting the `result_num` trait to the number of samples
+    that should be returned by the result function.
 
     >>> buffer = ac.tools.SamplesBuffer(source=source, length=32, result_num=20, shift_index_by='num')
     >>> block_sizes = []
@@ -64,12 +66,14 @@ class SamplesBuffer(InOut):
     ...     next(buffer.result(num=16)).shape[0]
     ... )  # this time, the buffer will return 24 samples, but the buffer will only forget the first 16 samples
     >>> np.testing.assert_array_equal(block_sizes, [20, 24])
+
     """
 
     #: number of samples that fit in the buffer
     length = Int(desc='number of samples that fit in the buffer')
 
-    #: number of samples per block to obtain from the source. If 'None', use 'num' argument of result method
+    #: number of samples per block to obtain from the source. If 'None', use 'num' argument of
+    #: result method
     source_num = Union(
         None,
         Int(),
@@ -85,8 +89,8 @@ class SamplesBuffer(InOut):
         desc="number of samples to return from the buffer. If 'None', use 'num' argument of result method",
     )
 
-    #: index shift value for the buffer. If "result_num", buffer will return and forget 'result_num' samples.
-    #: If "num", buffer will return 'result_num' samples but will forget 'num' samples
+    #: index shift value for the buffer. If "result_num", buffer will return and forget 'result_num'
+    #: samples. If "num", buffer will return 'result_num' samples but will forget 'num' samples
     shift_index_by = Enum(
         ('result_num', 'num'),
         desc=(

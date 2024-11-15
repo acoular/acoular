@@ -74,7 +74,6 @@ def const_power_weight(bf):
     -------
     array of floats
         The weight factors.
-
     """
     r = bf.steer.env._r(zeros((3, 1)), bf.steer.mics.mpos)  # distances to center
     # round the relative distances to one decimal place
@@ -114,7 +113,8 @@ class BeamformerTime(TimeOut):
 
     def _set_steer(self, steer):
         if type(steer) == SteeringVector:
-            # This condition may be replaced at a later time by: isinstance(steer, SteeringVector): -- (derived classes allowed)
+            # This condition may be replaced at a later time by: isinstance(steer, SteeringVector):
+            # -- (derived classes allowed)
             self._steer_obj = steer
         elif steer in ('true level', 'true location', 'classic', 'inverse'):
             # Type of steering vectors, see also :ref:`Sarradj, 2012<Sarradj2012>`.
@@ -700,7 +700,8 @@ class BeamformerCleant(BeamformerTime):
     def result(self, num=2048):
         """Python generator that yields the deconvolved time-domain beamformer output.
 
-        The output starts for signals that were emitted from the :class:`~acoular.grids.Grid` at `t=0`.
+        The output starts for signals that were emitted from the :class:`~acoular.grids.Grid` at
+        `t=0`.
 
         Parameters
         ----------
@@ -742,9 +743,9 @@ class BeamformerCleantSq(BeamformerCleant):
     def result(self, num=2048):
         """Python generator that yields the *squared* deconvolved time-domain beamformer output.
 
-        The output starts for signals that were emitted from the :class:`~acoular.grids.Grid` at `t=0`.
-        Per default, block-wise removal of autocorrelation is performed, which can be turned of by setting
-        :attr:`r_diag` to `False`.
+        The output starts for signals that were emitted from the :class:`~acoular.grids.Grid` at
+        `t=0`. Per default, block-wise removal of autocorrelation is performed, which can be turned
+        of by setting :attr:`r_diag` to `False`.
 
         Parameters
         ----------
@@ -796,7 +797,8 @@ class BeamformerCleantTraj(BeamformerCleant, BeamformerTimeTraj):
     def result(self, num=2048):
         """Python generator that yields the deconvolved time-domain beamformer output.
 
-        The output starts for signals that were emitted from the :class:`~acoular.grids.Grid` at `t=0`.
+        The output starts for signals that were emitted from the :class:`~acoular.grids.Grid` at
+        `t=0`.
 
         Parameters
         ----------
@@ -850,9 +852,9 @@ class BeamformerCleantSqTraj(BeamformerCleantTraj, BeamformerTimeSq):
     def result(self, num=2048):
         """Python generator that yields the *squared* deconvolved time-domain beamformer output.
 
-        The output starts for signals that were emitted from the :class:`~acoular.grids.Grid` at `t=0`.
-        Per default, block-wise removal of autocorrelation is performed, which can be turned of by setting
-        :attr:`r_diag` to `False`.
+        The output starts for signals that were emitted from the :class:`~acoular.grids.Grid` at
+        `t=0`. Per default, block-wise removal of autocorrelation is performed, which can be turned
+        of by setting :attr:`r_diag` to `False`.
 
         Parameters
         ----------
@@ -917,7 +919,6 @@ class IntegratorSectorTime(TimeOut):
         Samples in blocks of shape (num, :attr:`numchannels`).
         :attr:`numchannels` is the number of sectors.
         The last block may be shorter than num.
-
         """
         inds = [self.grid.indices(*sector) for sector in self.sectors]
         gshape = self.grid.shape

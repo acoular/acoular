@@ -3,9 +3,9 @@
 # ------------------------------------------------------------------------------
 """Implements base classes for signal processing blocks in Acoular.
 
-The classes in this module are abstract base classes that provide a common interface for all classes that generate an
-output via the generator :meth:`result` in block-wise manner. They are not intended to be used directly, but to be
-subclassed by classes that implement the actual signal processing.
+The classes in this module are abstract base classes that provide a common interface for all classes
+that generate an output via the generator :meth:`result` in block-wise manner. They are not intended
+to be used directly, but to be subclassed by classes that implement the actual signal processing.
 
 .. autosummary::
     :toctree: generated/
@@ -36,11 +36,13 @@ from acoular.internal import digest
 class Generator(HasPrivateTraits):
     """Interface for any generating signal processing block.
 
-    It provides a common interface for all classes, which generate an output via the generator :meth:`result`
-    in block-wise manner. It has a common set of traits that are used by all classes that implement this interface.
-    This includes the sampling frequency of the signal (:attr:`sample_freq`) and the number of samples (:attr:`numsamples`).
-    A private trait :attr:`digest` is used to store the internal identifier of the object, which is a hash of the object's
-    attributes. This is used to check if the object's internal state has changed.
+    It provides a common interface for all classes, which generate an output via the generator
+    :meth:`result` in block-wise manner. It has a common set of traits that are used by all classes
+    that implement this interface. This includes the sampling frequency of the signal
+    (:attr:`sample_freq`) and the number of samples (:attr:`numsamples`). A private trait
+    :attr:`digest` is used to store the internal identifier of the object, which is a hash of the
+    object's attributes. This is used to check if the object's internal state has changed.
+
     """
 
     #: Sampling frequency of the signal, defaults to 1.0
@@ -75,8 +77,10 @@ class Generator(HasPrivateTraits):
 class SamplesGenerator(Generator):
     """Interface for any generating multi-channel time domain signal processing block.
 
-    It provides a common interface for all SamplesGenerator classes, which generate an output via the generator :meth:`result`
-    in block-wise manner. This class has no real functionality on its own and should not be used directly.
+    It provides a common interface for all SamplesGenerator classes, which generate an output via
+    the generator :meth:`result` in block-wise manner. This class has no real functionality on its
+    own and should not be used directly.
+
     """
 
     #: Number of channels
@@ -107,8 +111,10 @@ class SamplesGenerator(Generator):
 class SpectraGenerator(Generator):
     """Interface for any generating multi-channel signal frequency domain processing block.
 
-    It provides a common interface for all SpectraGenerator classes, which generate an output via the generator :meth:`result`
-    in block-wise manner. This class has no real functionality on its own and should not be used directly.
+    It provides a common interface for all SpectraGenerator classes, which generate an output via
+    the generator :meth:`result` in block-wise manner. This class has no real functionality on its
+    own and should not be used directly.
+
     """
 
     #: Number of channels
@@ -146,11 +152,12 @@ class SpectraGenerator(Generator):
 
 
 class TimeOut(SamplesGenerator):
-    """Abstract base class for any signal processing block that receives data from any :attr:`source` domain and returns
-    time domain signals.
+    """Abstract base class for any signal processing block that receives data from any
+    :attr:`source` domain and returns time domain signals.
 
-    It provides a base class that can be used to create signal processing blocks that receive data from any
-    generating :attr:`source` and generates a time signal output via the generator :meth:`result` in block-wise manner.
+    It provides a base class that can be used to create signal processing blocks that receive data
+    from any generating :attr:`source` and generates a time signal output via the generator
+    :meth:`result` in block-wise manner.
     """
 
     #: Data source; :class:`~acoular.base.Generator` or derived object.
@@ -192,12 +199,12 @@ class TimeOut(SamplesGenerator):
 
 
 class SpectraOut(SpectraGenerator):
-    """Abstract base class for any signal processing block that receives data from any :attr:`source` domain and
-    returns frequency domain signals.
+    """Abstract base class for any signal processing block that receives data from any
+    :attr:`source` domain and returns frequency domain signals.
 
-    It provides a base class that can be used to create signal processing blocks that receive data from any
-    generating :attr:`source` domain and generates a frequency domain output via the generator :meth:`result`
-    in block-wise manner.
+    It provides a base class that can be used to create signal processing blocks that receive data
+    from any generating :attr:`source` domain and generates a frequency domain output via the
+    generator :meth:`result` in block-wise manner.
     """
 
     #: Data source; :class:`~acoular.base.Generator` or derived object.
@@ -246,11 +253,12 @@ class SpectraOut(SpectraGenerator):
 
 
 class InOut(SamplesGenerator, SpectraGenerator):
-    """Abstract base class for any signal processing block that receives data from any :attr:`source` domain and returns
-    signals in the same domain.
+    """Abstract base class for any signal processing block that receives data from any
+    :attr:`source` domain and returns signals in the same domain.
 
-    It provides a base class that can be used to create signal processing blocks that receive data from any
-    generating :attr:`source` and generates an output via the generator :meth:`result` in block-wise manner.
+    It provides a base class that can be used to create signal processing blocks that receive data
+    from any generating :attr:`source` and generates an output via the generator :meth:`result` in
+    block-wise manner.
     """
 
     #: Data source; :class:`~acoular.base.Generator` or derived object.

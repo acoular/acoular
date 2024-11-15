@@ -912,7 +912,8 @@ class SingleSector(Sector):
     #: Absolute tolerance for sector border
     abs_tol = Float(1e-12, desc='absolute tolerance for sector border')
 
-    #: Boolean flag, if 'True' (default), the nearest grid point is returned if none is inside the sector.
+    #: Boolean flag, if 'True' (default), the nearest grid point is returned if None is inside the
+    #: sector.
     default_nearest = Bool(True, desc='return nearest grid point to center of none inside sector')
 
 

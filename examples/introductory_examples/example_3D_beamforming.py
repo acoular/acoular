@@ -37,7 +37,8 @@ pa = ac.SourceMixer(sources=[p1, p2, p3])
 
 
 # %%
-# Next, the 3D grid defining the source region is set up (very coarse to enable fast computation for this example)
+# Next, the 3D grid defining the source region is set up (very coarse to enable fast computation for
+# this example)
 
 g = ac.RectGrid3D(x_min=-0.2, x_max=0.2, y_min=-0.2, y_max=0.2, z_min=0.1, z_max=0.36, increment=0.02)
 
@@ -49,8 +50,9 @@ st = ac.SteeringVector(grid=g, mics=m, steer_type='true location')
 b = ac.BeamformerCleansc(freq_data=f, steer=st)
 
 # %%
-# Calculate the result for 4 kHz octave band. The result will automatically be cached to disk.
-# By default, the corresponding cache file is located in the cache directory of the current working directory.
+# Calculate the result for 4 kHz octave band. The result will automatically be cached to disk. By
+# default, the corresponding cache file is located in the cache directory of the current working
+# directory.
 
 map = b.synthetic(4000, 1)
 

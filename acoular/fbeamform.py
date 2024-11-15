@@ -820,7 +820,8 @@ class BeamformerFunctional(BeamformerBase):
     #: Functional Beamforming is only well defined for full CSM
     r_diag = Enum(False, desc='False, as Functional Beamformer is only well defined for the full CSM')
 
-    #: Normalization factor in case of CSM diagonal removal. Defaults to 1.0 since Functional Beamforming is only well defined for full CSM.
+    #: Normalization factor in case of CSM diagonal removal. Defaults to 1.0 since Functional
+    #: Beamforming is only well defined for full CSM.
     r_diag_norm = Enum(
         1.0,
         desc='No normalization needed. Functional Beamforming is only well defined for full CSM.',
@@ -859,11 +860,12 @@ class BeamformerFunctional(BeamformerBase):
                 # This case is not used at the moment (see Trait r_diag)
                 # It would need some testing as structural changes were not tested...
                 # ==============================================================================
-                #                     One cannot use spectral decomposition when diagonal of csm is removed,
-                #                     as the resulting modified eigenvectors are not orthogonal to each other anymore.
-                #                     Therefor potentiating cannot be applied only to the eigenvalues.
-                #                     --> To avoid this the root of the csm (removed diag) is calculated directly.
-                #                     WATCH OUT: This doesn't really produce good results.
+                #                     One cannot use spectral decomposition when diagonal of csm is
+                #                     removed, as the resulting modified eigenvectors are not
+                #                     orthogonal to each other anymore. Therefor potentiating cannot
+                #                     be applied only to the eigenvalues. --> To avoid this the root
+                #                     of the csm (removed diag) is calculated directly. WATCH OUT:
+                #                     This doesn't really produce good results.
                 # ==============================================================================
                 csm = self.freq_data.csm[i]
                 fill_diagonal(csm, 0)
@@ -907,7 +909,8 @@ class BeamformerCapon(BeamformerBase):
     # for Capon beamforming r_diag is set to 'False'.
     r_diag = Enum(False, desc='removal of diagonal')
 
-    #: Normalization factor in case of CSM diagonal removal. Defaults to 1.0 since Beamformer Capon is only well defined for full CSM.
+    #: Normalization factor in case of CSM diagonal removal. Defaults to 1.0 since Beamformer Capon
+    #: is only well defined for full CSM.
     r_diag_norm = Enum(
         1.0,
         desc='No normalization. BeamformerCapon is only well defined for full CSM.',
@@ -1020,7 +1023,8 @@ class BeamformerMusic(BeamformerEig):
     # for MUSIC beamforming r_diag is set to 'False'.
     r_diag = Enum(False, desc='removal of diagonal')
 
-    #: Normalization factor in case of CSM diagonal removal. Defaults to 1.0 since BeamformerMusic is only well defined for full CSM.
+    #: Normalization factor in case of CSM diagonal removal. Defaults to 1.0 since BeamformerMusic
+    #: is only well defined for full CSM.
     r_diag_norm = Enum(
         1.0,
         desc='No normalization. BeamformerMusic is only well defined for full CSM.',
@@ -1208,10 +1212,14 @@ class PointSpreadFunction(HasPrivateTraits):
     #: Flag that defines how to calculate and store the point spread function
     #: defaults to 'single'.
     #:
-    #: * 'full': Calculate the full PSF (for all grid points) in one go (should be used if the PSF at all grid points is needed, as with :class:`DAMAS<BeamformerDamas>`)
-    #: * 'single': Calculate the PSF for the grid points defined by :attr:`grid_indices`, one by one (useful if not all PSFs are needed, as with :class:`CLEAN<BeamformerClean>`)
-    #: * 'block': Calculate the PSF for the grid points defined by :attr:`grid_indices`, in one go (useful if not all PSFs are needed, as with :class:`CLEAN<BeamformerClean>`)
-    #: * 'readonly': Do not attempt to calculate the PSF since it should already be cached (useful if multiple processes have to access the cache file)
+    #: * 'full': Calculate the full PSF (for all grid points) in one go (should be used if the PSF
+    #:           at all grid points is needed, as with :class:`DAMAS<BeamformerDamas>`)
+    #: * 'single': Calculate the PSF for the grid points defined by :attr:`grid_indices`, one by one
+    #:             (useful if not all PSFs are needed, as with :class:`CLEAN<BeamformerClean>`)
+    #: * 'block': Calculate the PSF for the grid points defined by :attr:`grid_indices`, in one go
+    #:            (useful if not all PSFs are needed, as with :class:`CLEAN<BeamformerClean>`)
+    #: * 'readonly': Do not attempt to calculate the PSF since it should already be cached (useful
+    #:               if multiple processes have to access the cache file)
     calcmode = Trait('single', 'block', 'full', 'readonly', desc='mode of calculation / storage')
 
     #: Floating point precision of property psf. Corresponding to numpy dtypes. Default = 64 Bit.
@@ -1336,13 +1344,12 @@ class PointSpreadFunction(HasPrivateTraits):
         Parameters
         ----------
         ind : list of int
-            Indices of gridpoints which are assumed to be sources.
-            Normalization factor for the beamforming result (e.g. removal of diag is compensated with this.)
+            Indices of gridpoints which are assumed to be sources. Normalization factor for the
+            beamforming result (e.g. removal of diag is compensated with this.)
 
         Returns
         -------
         The psf [1, nGridPoints, len(ind)]
-
         """
         if type(self.steer) == SteeringVector:  # for simple steering vector, use faster method
             result = calcPointSpreadFunction(
@@ -1353,8 +1360,9 @@ class PointSpreadFunction(HasPrivateTraits):
                 ind,
                 self.precision,
             )
-        else:  # for arbitrary steering sectors, use general calculation
-            # there is a version of this in fastFuncs, may be used later after runtime testing and debugging
+        else:
+            # for arbitrary steering sectors, use general calculation. there is a version of this in
+            # fastFuncs, may be used later after runtime testing and debugging
             product = dot(self.steer.steer_vector(self.freq).conj(), self.steer.transfer(self.freq, ind).T)
             result = (product * product.conj()).real
         return result
@@ -1461,10 +1469,10 @@ class BeamformerDamas(BeamformerBase):
 
 
 class BeamformerDamasPlus(BeamformerDamas):
-    """DAMAS deconvolution :cite:`Brooks2006` for solving the system of equations, instead of the original Gauss-Seidel
-    iterations, this class employs the NNLS or linear programming solvers from
-    scipy.optimize or one  of several optimization algorithms from the scikit-learn module.
-    Needs a-priori delay-and-sum beamforming (:class:`BeamformerBase`).
+    """DAMAS deconvolution :cite:`Brooks2006` for solving the system of equations, instead of the
+    original Gauss-Seidel iterations, this class employs the NNLS or linear programming solvers from
+    scipy.optimize or one of several optimization algorithms from the scikit-learn module. Needs
+    a-priori delay-and-sum beamforming (:class:`BeamformerBase`).
     """
 
     #: Type of fit method to be used ('LassoLars',
@@ -1562,9 +1570,10 @@ class BeamformerDamasPlus(BeamformerDamas):
                     msg = f'Method {self.method} not implemented.'
                     raise NotImplementedError(msg)
                 model.normalize = False
-                # from sklearn 1.2, normalize=True does not work the same way anymore and the pipeline approach
-                # with StandardScaler does scale in a different way, thus we monkeypatch the code and normalize
-                # ourselves to make results the same over different sklearn versions
+                # from sklearn 1.2, normalize=True does not work the same way anymore and the
+                # pipeline approach with StandardScaler does scale in a different way, thus we
+                # monkeypatch the code and normalize ourselves to make results the same over
+                # different sklearn versions
                 norms = norm(psf, axis=0)
                 # get rid of annoying sklearn warnings that appear
                 # for sklearn<1.2 despite any settings
@@ -1751,7 +1760,8 @@ class BeamformerCleansc(BeamformerBase):
                 hh = hh[:, newaxis]
                 csm1 = hmax * (hh * hh.conj().T)
 
-                # h1 = self.steer._beamformerCall(f[i], self.r_diag, normfactor, (array((hmax, ))[newaxis, :], hh[newaxis, :].conjugate()))[0]
+                # h1 = self.steer._beamformerCall(f[i], self.r_diag, normfactor, \
+                # (array((hmax, ))[newaxis, :], hh[newaxis, :].conjugate()))[0]
                 h1 = beamformerFreq(
                     param_steer_type,
                     self.r_diag,
@@ -1924,7 +1934,8 @@ class BeamformerCMF(BeamformerBase):
     #: within fitting method algorithms. Defaults to 1e9.
     unit_mult = Float(1e9, desc='unit multiplier')
 
-    #: If True, shows the status of the PyLops solver. Only relevant in case of FISTA or Split_Bregman
+    #: If True, shows the status of the PyLops solver. Only relevant in case of FISTA or
+    #: Split_Bregman
     show = Bool(False, desc='show output of PyLops solvers')
 
     #: Energy normalization in case of diagonal removal not implemented for inverse methods.
@@ -2096,11 +2107,12 @@ class BeamformerCMF(BeamformerBase):
 
                 self._ac[i] /= unit
             else:
-                # from sklearn 1.2, normalize=True does not work the same way anymore and the pipeline
-                # approach with StandardScaler does scale in a different way, thus we monkeypatch the
-                # code and normalize ourselves to make results the same over different sklearn versions
+                # from sklearn 1.2, normalize=True does not work the same way anymore and the
+                # pipeline approach with StandardScaler does scale in a different way, thus we
+                # monkeypatch the code and normalize ourselves to make results the same over
+                # different sklearn versions
                 norms = norm(A, axis=0)
-                # get rid of annoying sklearn warnings that appear for sklearn<1.2 despite any settings
+                # get rid of sklearn warnings that appear for sklearn<1.2 despite any settings
                 with warnings.catch_warnings():
                     warnings.simplefilter('ignore', category=FutureWarning)
                     # normalized A
@@ -2394,11 +2406,12 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
             eva, eve = eigh(csm)
             eva = eva[::-1]
             eve = eve[:, ::-1]
-            eva[eva < max(eva) / 1e12] = 0  # set small values zo 0, lowers numerical errors in simulated data
+            # set small values zo 0, lowers numerical errors in simulated data
+            eva[eva < max(eva) / 1e12] = 0
             # init sources
             qi = zeros([n + m, numpoints], dtype='complex128')
-            # Select the number of coherent modes to be processed referring to the eigenvalue distribution.
-            # for s in arange(n):
+            # Select the number of coherent modes to be processed referring to the eigenvalue
+            # distribution.
             for s in list(range(m, n + m)):
                 if eva[s] > 0:
                     # Generate the corresponding eigenmodes
@@ -2428,7 +2441,9 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
                                     emode,
                                 )
                             if self.beta < 1 and it > 1:
-                                # Reorder from the greatest to smallest magnitude to define a reduced-point source distribution , and reform a reduced transfer matrix
+                                # Reorder from the greatest to smallest magnitude to define a
+                                # reduced-point source distribution, and reform a reduced transfer
+                                # matrix
                                 leftpoints = int(round(numpoints * self.beta ** (it + 1)))
                                 idx = argsort(abs(qi[s, locpoints]))[::-1]
                                 # print(it, leftpoints, locpoints, idx )
@@ -2494,7 +2509,8 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
                         Warning,
                         stacklevel=2,
                     )
-                # Generate source maps of all selected eigenmodes, and superpose source intensity for each source type.
+                # Generate source maps of all selected eigenmodes, and superpose source intensity
+                # for each source type.
             temp = zeros(numpoints)
             temp[locpoints] = sum(absolute(qi[:, locpoints]) ** 2, axis=0)
             self._ac[i] = temp

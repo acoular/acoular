@@ -43,10 +43,10 @@ if not time_data_file.exists():
     print(f'Time data file location: {time_data_file}')
 
 # %%
-# First, we define the time samples using the :class:`acoular.sources.MaskedTimeSamples` class
-# that provides masking of channels and samples. Here, we exclude the channels with index 1 and 7 and
-# only process the first 16000 samples of the time signals.
-# Alternatively, we could use the :class:`acoular.sources.TimeSamples` class that provides no masking at all.
+# First, we define the time samples using the :class:`acoular.sources.MaskedTimeSamples` class that
+# provides masking of channels and samples. Here, we exclude the channels with index 1 and 7 and
+# only process the first 16000 samples of the time signals. Alternatively, we could use the
+# :class:`acoular.sources.TimeSamples` class that provides no masking at all.
 
 t1 = ac.MaskedTimeSamples(name=time_data_file)
 t1.start = 0
@@ -55,53 +55,59 @@ invalid = [1, 7]
 t1.invalid_channels = invalid
 
 # %%
-# Calibration is usually needed and can be set directly at the :class:`acoular.sources.MaskedTimeSamples`
-# object (preferred) or for frequency domain processing at the :class:`acoular.spectra.PowerSpectra`
-# object (for backwards compatibility)
+# Calibration is usually needed and can be set directly at the
+# :class:`acoular.sources.MaskedTimeSamples` object (preferred) or for frequency domain processing
+# at the :class:`acoular.spectra.PowerSpectra` object (for backwards compatibility).
 
 t1.calib = ac.Calib(from_file=calib_file)
 
 # %%
-# The microphone geometry must have the same number of valid channels as the :class:`acoular.sources.MaskedTimeSamples` object has.
-# It also must be defined, which channels are invalid.
+# The microphone geometry must have the same number of valid channels as the
+# :class:`acoular.sources.MaskedTimeSamples` object has. It also must be defined, which channels are
+# invalid.
 
 micgeofile = Path(ac.__file__).parent / 'xml' / 'array_56.xml'
 m = ac.MicGeom(from_file=micgeofile)
 m.invalid_channels = invalid
 
 # %%
-# Next, we define a planar rectangular grid for calculating the beamforming map (the example grid is very coarse for computational efficiency).
-# A 3D grid is also available via the :class:`acoular.grids.RectGrid3D` class.
+# Next, we define a planar rectangular grid for calculating the beamforming map (the example grid is
+# very coarse for computational efficiency). A 3D grid is also available via the
+# :class:`acoular.grids.RectGrid3D` class.
 
 g = ac.RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=0.68, increment=0.05)
 
 # %%
-# For frequency domain methods, :class:`acoular.spectra.PowerSpectra` provides the cross spectral matrix (and its
-# eigenvalues and eigenvectors). Here, we use the Welch's method with a block size of 128 samples, Hanning window and 50% overlap.
+# For frequency domain methods, :class:`acoular.spectra.PowerSpectra` provides the cross spectral
+# matrix (and its eigenvalues and eigenvectors). Here, we use the Welch's method with a block size
+# of 128 samples, Hanning window and 50% overlap.
 
 f = ac.PowerSpectra(source=t1, window='Hanning', overlap='50%', block_size=128)
 
 # %%
-# To define the measurement environment, i.e. medium characteristics, the :class:`acoular.environment.Environment` class is used.
-# (in this case, only the speed of sound is set)
+# To define the measurement environment, i.e. medium characteristics, the
+# :class:`acoular.environment.Environment` class is used. (in this case, only the speed of sound is
+# set)
 
 env = ac.Environment(c=346.04)
 
 # %%
-# The :class:`acoular.fbeamform.SteeringVector` class provides the standard freefield
-# sound propagation model in the steering vectors.
+# The :class:`acoular.fbeamform.SteeringVector` class provides the standard freefield sound
+# propagation model in the steering vectors.
 
 st = ac.SteeringVector(grid=g, mics=m, env=env)
 
 # %%
-# Finally, we define two different beamformers and subsequently calculate the maps for different steering vector formulations.
-# Diagonal removal for the CSM can be performed via the :attr:`r_diag` parameter.
+# Finally, we define two different beamformers and subsequently calculate the maps for different
+# steering vector formulations. Diagonal removal for the CSM can be performed via the :attr:`r_diag`
+# parameter.
 
 bb = ac.BeamformerBase(freq_data=f, steer=st, r_diag=True)
 bs = ac.BeamformerCleansc(freq_data=f, steer=st, r_diag=True)
 
 # %%
-# Plot result maps for different beamformers in frequency domain (left: with diagonal removal, right: without diagonal removal).
+# Plot result maps for different beamformers in frequency domain (left: with diagonal removal,
+# right: without diagonal removal).
 
 from pylab import colorbar, figure, imshow, show, subplot, tight_layout, title
 
@@ -127,4 +133,5 @@ for r_diag in (True, False):
 
 # %%
 # .. seealso::
-#    :doc:`example_airfoil_in_open_jet_freq_domain_methods` for an application of further frequency domain methods on the same data.
+#    :doc:`example_airfoil_in_open_jet_freq_domain_methods` for an application of further frequency
+#    domain methods on the same data.

@@ -67,7 +67,7 @@ def regression_source_case(create_source_case):
 
 @fixture(scope='session')
 def small_source_case(create_source_case):
-    """Fixture for testing the caching mechanism (uses fewer microphones and coarse grid to increase testing speed)."""
+    """Fixture for faster testing of the caching (uses fewer microphones and coarser grid)."""
     return create_source_case(
         numsamples=128,
         blocksize=128,

@@ -48,4 +48,5 @@ wh5.save()
 
 # %%
 # .. seealso::
-#    :doc:`example_basic_beamforming` for an example on how to load and analyze the generated data with Beamforming.
+#    :doc:`example_basic_beamforming` for an example on how to load and analyze the generated data
+#    with Beamforming.

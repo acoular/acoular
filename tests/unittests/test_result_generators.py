@@ -11,7 +11,8 @@ from tests.cases.test_generator_cases import Generators
 
 
 # @given(num=st.integers(min_value=1, max_value=1000))
-# @settings(max_examples=4, suppress_health_check=HealthCheck) # suppress health check (fixtures are not reset!)
+# suppress health check (fixtures are not reset!)
+# @settings(max_examples=4, suppress_health_check=HealthCheck)
 @parametrize('num', [1, 32], ids=['num=1', 'num=32'])
 @parametrize_with_cases('obj', cases=Generators)
 def test_result_generator(obj, num):  # don't use default value if @parametrize is used

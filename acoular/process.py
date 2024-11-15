@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
-"""Implements general purpose blockwise processing methods independent of the domain (time or frequency).
+"""General purpose blockwise processing methods independent of the domain (time or frequency).
 
 .. autosummary::
     :toctree: generated/
@@ -45,15 +45,16 @@ class LockedGenerator:
 class Average(InOut):
     """Calculates the average across consecutive time samples or frequency snapshots.
 
-    The average operation is performed differently depending on the source type.
-    If the source is a time domain source (e.g. derived from :class:`~acoular.base.SamplesGenerator`),
-    the average is calculated over a certain number of time samples given by :attr:`naverage`.
-    If the source is a frequency domain source (e.g. derived from :class:`~acoular.base.SpectraGenerator`),
-    the average is calculated over a certain number of snapshots given by :attr:`naverage`.
+    The average operation is performed differently depending on the source type. If the source is a
+    time domain source (e.g. derived from :class:`~acoular.base.SamplesGenerator`), the average is
+    calculated over a certain number of time samples given by :attr:`naverage`. If the source is a
+    frequency domain source (e.g. derived from :class:`~acoular.base.SpectraGenerator`), the average
+    is calculated over a certain number of snapshots given by :attr:`naverage`.
 
     Examples
     --------
-        For estimate the RMS of a white noise (time-domain) signal, the average of the squared signal can be calculated:
+        For estimate the RMS of a white noise (time-domain) signal, the average of the squared
+        signal can be calculated:
 
         >>> import acoular as ac
         >>> import numpy as np
@@ -67,11 +68,12 @@ class Average(InOut):
         >>> print(rms)
         1.9985200025816718
 
-        Here, each evaluation of the generator created by the :meth:`result` method of the :class:`Average` object
-        via the :meth:`next` function returns :code:`num=1` average across a snapshot of 512 samples.
+        Here, each evaluation of the generator created by the :meth:`result` method of the
+        :class:`Average` object via the :meth:`next` function returns :code:`num=1` average across a
+        snapshot of 512 samples.
 
-        If the source is a frequency domain source, the average is calculated over a certain number of
-        snapshots, defined by :attr:`naverage`.
+        If the source is a frequency domain source, the average is calculated over a certain number
+        of snapshots, defined by :attr:`naverage`.
 
         >>> fft = ac.RFFT(source=ts, block_size=64)
         >>> ps = ac.AutoPowerSpectra(source=fft)
@@ -282,8 +284,8 @@ class Cache(InOut):
                 elif not self.h5f.get_data_by_reference(nodename).attrs['complete']:
                     if config.global_caching == 'readonly':
                         warn(
-                            "Cache file is incomplete for nodename %s. With config.global_caching='readonly', the cache file will not be used!"
-                            % str(nodename),
+                            f"Cache file is incomplete for nodename {nodename}. With config.global_caching='readonly', \
+                            the cache file will not be used!",
                             Warning,
                             stacklevel=1,
                         )

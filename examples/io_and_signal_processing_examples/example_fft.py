@@ -2,7 +2,7 @@
 Fast Fourier Transform (FFT) of multichannel time data.
 ===============================================================================
 
-Demonstrates how to calculate the FFT of a signal blockwise and how to create a spectrogram of the signal.
+Demonstrates how to calculate the blockwise FFT and spectrogram of the signal.
 """
 
 # %%
@@ -12,8 +12,8 @@ import acoular as ac
 import numpy as np
 
 # %%
-# We define two sine wave signals with different frequencies (1000 Hz and 4000 Hz) and a noise signal.
-# Then, the signals are calculated and added together.
+# We define two sine wave signals with different frequencies (1000 Hz and 4000 Hz) and a noise
+# signal. Then, the signals are calculated and added together.
 
 sample_freq = 25600
 t_in_s = 30.0
@@ -34,12 +34,13 @@ print(ts.numsamples, ts.numchannels)
 # %%
 # Create a spectrogram of the signal
 # ----------------------------------
-# Therefore we want to process the FFT spectra of the signal blockwise.
-# To do so, we use the :class:`acoular.fprocess.RFFT` class, which calculates the FFT spectra of the signal blockwise.
+# Therefore we want to process the FFT spectra of the signal blockwise. To do so, we use the
+# :class:`acoular.fprocess.RFFT` class, which calculates the FFT spectra of the signal blockwise.
 
 block_size = 512
 
-fft = ac.RFFT(source=ts, block_size=block_size, window='Rectangular')  # results in the amplitude spectra
+ # results in the amplitude spectra
+fft = ac.RFFT(source=ts, block_size=block_size, window='Rectangular')
 
 spec = next(fft.result(num=1))[0]  # return a single snapshot
 time_block = next(ts.result(num=block_size))[:, 0]
@@ -51,8 +52,9 @@ print(
     np.round((1 / block_size * np.sum(spec * spec.conjugate())).real),
 )
 
-# It can be seen, that the energy is not preserved when using the default 'none' scaling.
-# Therefore, we set the scaling to 'energy' to compensate for the energy loss due to truncation to a single-sided spectrum.
+# It can be seen, that the energy is not preserved when using the default 'none' scaling. Therefore,
+# we set the scaling to 'energy' to compensate for the energy loss due to truncation to a
+# single-sided spectrum.
 
 fft.scaling = 'energy'
 spec = next(fft.result(num=1))[0]
@@ -67,10 +69,10 @@ time_block_rec = next(ifft.result(num=block_size))[:, 0]
 print('reconstructed signal energy in time domain', np.round(np.sum(time_block_rec**2)))
 
 # %%
-# Plot the spectrogram (time-frequency representation) of the signal.
-# Here, we plot the amplitude spectra for each time block. Therefore, we normalize the fft spectra
-# by the number of samples in the block by setting the :attr:`scaling` to :code:`'amplitude'`.
-# It can be varified from the spectrogram plot that the amplitude of the tones are correctly represented.
+# Plot the spectrogram (time-frequency representation) of the signal. Here, we plot the amplitude
+# spectra for each time block. Therefore, we normalize the fft spectra by the number of samples in
+# the block by setting the :attr:`scaling` to :code:`'amplitude'`. It can be varified from the
+# spectrogram plot that the amplitude of the tones are correctly represented.
 
 import matplotlib.pyplot as plt
 
@@ -101,7 +103,8 @@ plt.show()
 # %%
 # Create an averaged power spectral density of the signal
 # --------------------------------------------------------
-# To calculate the time averaged power spectral density of the signal, we use the :class:`acoular.fprocess.AutoPowerSpectra` class.
+# To calculate the time averaged power spectral density of the signal, we use the
+# :class:`acoular.fprocess.AutoPowerSpectra` class.
 
 fft.scaling = 'none'
 ap = ac.AutoPowerSpectra(source=fft, scaling='psd')  # results in the power spectrum
@@ -128,10 +131,10 @@ for block_size in [256, 1024]:
 # %%
 # Create a cross-spectral matrix for multichannel signals
 # --------------------------------------------------------
-# To calculate the cross-spectral matrix of the signal, we use the :class:`acoular.fprocess.CrossPowerSpectra` class.
-# First, we create a TimeSamples object with two channels.
-# Then, we calculate the cross-spectral matrix of the signal blockwise. We choose
-# a normalization method of 'psd' (Power Spectral Density) for the cross-spectral matrix.
+# To calculate the cross-spectral matrix of the signal, we use the
+# :class:`acoular.fprocess.CrossPowerSpectra` class. First, we create a TimeSamples object with two
+# channels. Then, we calculate the cross-spectral matrix of the signal blockwise. We choose a
+# normalization method of 'psd' (Power Spectral Density) for the cross-spectral matrix.
 
 fft.block_size = 128
 
