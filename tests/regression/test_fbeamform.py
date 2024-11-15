@@ -51,7 +51,7 @@ def test_beamformer(snapshot, beamformer, f, num):
         pytest.xfail('RuntimeError: Maximum number of iterations reached')
 
     if isinstance(beamformer, ac.BeamformerGIB) and beamformer.method == 'LassoLarsBIC':
-        # Requires number of samples (eigenvalues) to be greater than number of features (gird points).
+        # Requires number of samples (eigenvalues) to be greater than number of features (grid points).
         # Otherwise noise variance estimate is needed.
         pytest.xfail(
             'ValueError: You are using LassoLarsIC in the case where the number of samples is smaller than the number of features.'
@@ -98,7 +98,7 @@ def test_beamformer(snapshot, beamformer, f, num):
 #     if isinstance(beamformer, ac.BeamformerGIB) and beamformer.method in ['LassoLarsBIC','NNLS']:
 #         msg = (
 #             'BeamformerGIB with LassoLarsBIC solver: Requires number of samples (eigenvalues) '
-#             'to be greater than number of features (gird points). Otherwise noise variance estimate is needed. '
+#             'to be greater than number of features (grid points). Otherwise noise variance estimate is needed. '
 #             'BeamformerGIB with NNLS solver: Always fails with maximum iterations reached.'
 #         )
 #         pytest.skip(msg)
