@@ -773,23 +773,6 @@ def _psf_Formulation4AkaTrueLocation(
         scalarProdAbsSquared = (scalarProd * scalarProd.conjugate()).real
         result[cntSources] = scalarProdAbsSquared * (normalizeFactor * normalizeFactor) / nMics / helpNormalizeGrid
 
-
-# CURRENTLY NOT NEEDED, AS CUSTOM PSF WILL BE CALCULATED IN fbeamform.SteeringVector WITH THE USE OF Trait transfer
-# @nb.guvectorize([(nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float64[:]),
-#                 (nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:,:], nb.float64[:], nb.float32[:])],
-#                 '(),(m),(s),(s,m),()->(s)', nopython=True, target=PARALLEL_OPTION, cache=CACHED_OPTION)
-# def _psf_SpecificSteerVec(steerVec, steerVecSources, result):
-#    nMics = len(steerVec)
-#    for cntSources in range(steerVecSources.shape[0]):
-#        # see bottom of information header of 'calcPointSpreadFunction' for infos on the PSF
-#        # calculation and speed improvements.
-#        scalarProd = 0.0 + 0.0j
-#        for cntMics in range(nMics):
-#            scalarProd += steerVec[cntMics].conjugate() * steerVecSources[cntSources, cntMics]
-#        scalarProdAbsSquared = (scalarProd * scalarProd.conjugate()).real
-#        result[cntSources] = scalarProdAbsSquared
-
-
 # %% Damas - Gauss Seidel
 # Formerly known as 'gseidel'
 @nb.guvectorize(
@@ -826,19 +809,6 @@ def damasSolverGaussSeidel(A, dirtyMap, nIterations, relax, damasSolution):
     None : as damasSolution is overwritten with end result of the damas iterative solver.
 
     """
-    #    nGridPoints = len(dirtyMap)
-    #    for cntIter in range(nIterations[0]):
-    #        for cntGrid in range(nGridPoints):
-    #            solHelp = np.float32(0)
-    #            for cntGridHelp in range(cntGrid):  # lower sum
-    #                solHelp += A[cntGrid, cntGridHelp] * damasSolution[cntGridHelp]
-    #            for cntGridHelp in range(cntGrid + 1, nGridPoints):  # upper sum
-    #                solHelp += A[cntGrid, cntGridHelp] * damasSolution[cntGridHelp]
-    #            solHelp = (1 - relax[0]) * damasSolution[cntGrid] + relax[0] * (dirtyMap[cntGrid] - solHelp)
-    #            if solHelp > 0.0:
-    #                damasSolution[cntGrid] = solHelp
-    #            else:
-    #                damasSolution[cntGrid] = 0.0
     nGridPoints = len(dirtyMap)
     for _cntIter in range(nIterations[0]):
         for cntGrid in range(nGridPoints):
