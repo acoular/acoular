@@ -53,9 +53,7 @@ def test_beamformer(snapshot, beamformer, f, num):
     if isinstance(beamformer, ac.BeamformerGIB) and beamformer.method == 'LassoLarsBIC':
         # Requires number of samples (eigenvalues) to be greater than number of features (grid
         # points). Otherwise noise variance estimate is needed.
-        pytest.xfail(
-            'ValueError: The number of samples must be larger than the number of features with LassoLarsBIC.'
-        )
+        pytest.xfail('ValueError: The number of samples must be larger than the number of features with LassoLarsBIC.')
 
     beamformer.cached = False
     result = beamformer.synthetic(f, num)

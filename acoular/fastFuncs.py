@@ -263,7 +263,7 @@ def _freqBeamformer_FullCSM(
             helpNormalize = 0.0
             for cntMics in range(nMics):
                 helpNormalize += 1.0 / (distGridToAllMics[gi, cntMics] * distGridToAllMics[gi, cntMics])
-                 # r_{t,i}-normalization is handled here
+                # r_{t,i}-normalization is handled here
                 steerVec[cntMics] /= distGridToAllMics[gi, cntMics]
 
         # performing matrix-vector-multiplication (see bottom of information header of
@@ -772,6 +772,7 @@ def _psf_Formulation4AkaTrueLocation(
         normalizeFactor = distSourcesToArrayCenter[cntSources]
         scalarProdAbsSquared = (scalarProd * scalarProd.conjugate()).real
         result[cntSources] = scalarProdAbsSquared * (normalizeFactor * normalizeFactor) / nMics / helpNormalizeGrid
+
 
 # %% Damas - Gauss Seidel
 # Formerly known as 'gseidel'

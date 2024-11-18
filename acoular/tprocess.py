@@ -695,7 +695,7 @@ class SpatialInterpolator(TimeOut):
     # Number of samples in output, as given by :attr:`source`.
     numsamples = Delegate('source', 'numsamples')
 
-    #Interpolate a point at the origin of the Array geometry
+    # Interpolate a point at the origin of the Array geometry
     interp_at_zero = Bool(False)
 
     # The rotation must be around the z-axis, which means from x to y axis.

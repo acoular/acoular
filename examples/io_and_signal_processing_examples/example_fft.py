@@ -39,7 +39,7 @@ print(ts.numsamples, ts.numchannels)
 
 block_size = 512
 
- # results in the amplitude spectra
+# results in the amplitude spectra
 fft = ac.RFFT(source=ts, block_size=block_size, window='Rectangular')
 
 spec = next(fft.result(num=1))[0]  # return a single snapshot

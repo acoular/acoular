@@ -66,7 +66,7 @@ class SamplesBuffer(InOut):
     ...     next(buffer.result(num=16)).shape[0]
     ... )  # this time, the buffer will return 24 samples, but the buffer will only forget the first 16 samples
     >>> np.testing.assert_array_equal(block_sizes, [20, 24])
-    """ # noqa: W505
+    """  # noqa: W505
 
     #: number of samples that fit in the buffer
     length = Int(desc='number of samples that fit in the buffer')
