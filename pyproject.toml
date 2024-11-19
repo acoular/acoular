@@ -73,6 +73,7 @@ tests = [
     "pytest-env",
     "pytest-profiling",
     "sounddevice",
+    "pylops",
     "traitsui",
     "h5py",
     "PyYAML",

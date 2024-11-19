@@ -41,12 +41,6 @@ def test_beamformer(snapshot, beamformer, f, num):
         Bandwidth to test (1: octave)
 
     """
-    if isinstance(beamformer, ac.BeamformerCMF) and beamformer.method == 'Split_Bregman':
-        pytest.xfail("ImportError: cannot import name 'SplitBregman' from 'pylops'")
-
-    if isinstance(beamformer, ac.BeamformerCMF) and beamformer.method == 'FISTA':
-        pytest.xfail("'ImportError: cannot import name 'FISTA' from 'pylops'")
-
     if isinstance(beamformer, ac.BeamformerGIB) and beamformer.method == 'NNLS':
         pytest.xfail('RuntimeError: Maximum number of iterations reached')
 

@@ -8,6 +8,7 @@ Upcoming Release (25.01)
     
     **Bugfixes**
         * pass missing `max_iter` as an argument to `LassoLarsCV` in :class:`acoular.fbeamform.BeamformerGIB` (otherwise, LassoLarsCV runs up to 500 iterations)
+        * fix broken pylops solvers in :class:`acoular.fbeamform.BeamformerCMF`
 
     **Documentation**
         * adds guide on how to submit a pull request
