@@ -39,8 +39,8 @@ class SoundDeviceSamplesGenerator(SamplesGenerator):
     #: Number of input channels, maximum depends on device
     numchannels = Long(1, desc='number of analog input channels that collects data')
 
-    #: Number of samples to collect; defaults to -1.
-    # If is set to -1 device collects till user breaks streaming by setting Trait: collectsamples = False
+    #: Number of samples to collect; defaults to -1. If is set to -1 device collects until user
+    # breaks streaming by setting Trait: collectsamples = False.
     numsamples = Long(-1, desc='number of samples to collect')
 
     #: Indicates if samples are collected, helper trait to break result loop

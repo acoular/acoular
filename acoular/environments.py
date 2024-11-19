@@ -443,7 +443,7 @@ class OpenJet(FlowField):
 
 
 class RotatingFlow(FlowField):
-    """Provides an analytical approximation of the flow field of a rotating fluid with constant flow."""
+    """Analytical approximation of the flow field of a rotating fluid with constant flow."""
 
     #: Exit velocity at jet origin, i.e. the nozzle. Defaults to 0.
     rpm = Float(0.0, desc='revolutions per minute of the virtual array; negative values for clockwise rotation')

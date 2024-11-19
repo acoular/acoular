@@ -1,9 +1,7 @@
 # Exclude a variety of commonly ignored directories.
 src = ["acoular"]
 exclude = ["tests/unsupported", "docs/source", ".git"]
-    
 line-length = 120
-indent-width = 4
 
 [lint]
 select = [
@@ -18,12 +16,10 @@ select = [
         ]
 
 ignore = [
-    "E501", # ignore line length until fixed through issue #214
     "C901", # do we want to measure code complexity -> TBD
     "COM812", # conflict with ruff formatter 
     "ISC001", # conflict with ruff formatter
     # D
-    "D203", # don't enforce blank line before docstring
     "D401", # first line should be in imperative mood -> TBD
     "D205", # 1 blank line required between summary line and description -> should be fixed by issue #216
     "D100", # missing docstring in public module -> should be fixed by issue #216
@@ -42,6 +38,10 @@ ignore = [
 # Allow fix for all enabled rules (when `--fix`) is provided.
 fixable = ["ALL"]
 unfixable = []
+
+[lint.pycodestyle]
+ignore-overlong-task-comments = true
+max-doc-length = 100
 
 [lint.pydocstyle]
 convention = "numpy"  # Accepts: "google", "numpy", or "pep257".

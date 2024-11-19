@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
-"""Tests if all Acoular classes can be instatiated and if important traits can be set without errors."""
+"""Tests if all Acoular classes can be instatiated and if traits can be set without errors."""
 
 import tempfile
 import warnings

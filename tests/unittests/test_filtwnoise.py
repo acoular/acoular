@@ -17,7 +17,7 @@ ar_coeff = np.load(data_path / 'ar_coeff.npy')
 
 
 def test_filtwnoise_no_coefficients():
-    """Test that white noise and filtered white noise is equal when no coefficients are specified."""
+    """Test that white noise and filtered white noise is equal if no coefficients are specified."""
     fwn = FiltWNoiseGenerator(sample_freq=100, numsamples=400, seed=1)
     wn_signal = RandomState(seed=1).standard_normal(400)
     assert wn_signal.sum() == fwn.signal().sum()

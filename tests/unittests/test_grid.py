@@ -43,7 +43,7 @@ def test_subdomain(grid, sector):
 @parametrize_with_cases('grid', cases=Grids)
 @parametrize_with_cases('sector', cases=Sectors, filter=lambda cf: 'empty' in get_case_id(cf))
 def test_default_nearest(grid, sector):
-    """Verify that the nearest grid point is assigned to the sector if default_nearest is set to True.
+    """Verify that the nearest grid point is assigned to the sector if default_nearest is True.
 
     Parameters
     ----------

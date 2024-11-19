@@ -35,15 +35,16 @@ GRIDS_DEFAULT = [g for g in get_subclasses(ac.Grid) if g not in GRIDS_SKIP_DEFAU
 
 
 class Grids:
-    """
-    Test cases for all grids.
+    """Test cases for all grids.
 
-    New grids should be added here. If no dedicated test case is added for a :class:`Grid` derived class,
-    the `case_default` case will raise a `NotImplementedError`. If a dedicated test case was added for a grid,
-    it should be added to the `GRIDS_SKIP_DEFAULT` list, which excludes the class from `case_default`.
+    New grids should be added here. If no dedicated test case is added for a :class:`Grid` derived
+    class, the `case_default` case will raise a `NotImplementedError`. If a dedicated test case was
+    added for a grid, it should be added to the `GRIDS_SKIP_DEFAULT` list, which excludes the class
+    from `case_default`.
 
-    New cases should create an instance of the grid with at least one grid-point at (0, 0, 1) and return it.
-    The grid should not exceed the bounds of (-1, -1, 1) and (1, 1, 1) in x, y, and z direction, respectively.
+    New cases should create an instance of the grid with at least one grid-point at (0, 0, 1) and
+    return it. The grid should not exceed the bounds of (-1, -1, 1) and (1, 1, 1) in x, y, and z
+    direction, respectively.
     """
 
     def case_RectGrid(self):
@@ -78,15 +79,17 @@ if len(GRIDS_DEFAULT) > 0:
 
 
 class Sectors:
-    """
-    Test cases for all sectors.
+    """Test cases for all sectors.
 
-    New sectors should be added here. If no dedicated test case is added for a :class:`Sector` derived class,
-    the `case_default` case will raise a `NotImplementedError`. If a dedicated test case was added for a sector,
-    it should be added to the `SECTOR_SKIP_DEFAULT` list, which excludes the class from `case_default`.
+    New sectors should be added here. If no dedicated test case is added for a :class:`Sector`
+    derived class, the `case_default` case will raise a `NotImplementedError`. If a dedicated test
+    case was added for a sector, it should be added to the `SECTOR_SKIP_DEFAULT` list, which
+    excludes the class from `case_default`.
 
-    For a new sector, two cases should be added: one for a sector containing the point (0, 0, 1) and one
-    for an empty sector, not laying in the region of (-1, -1, 1) and (1, 1, 1) in x, y, and z direction, respectively.
+    For a new sector, two cases should be added: one for a sector containing the point (0, 0, 1) and
+    one for an empty sector, not laying in the region of (-1, -1, 1) and (1, 1, 1) in x, y, and z
+    direction, respectively.
+
     """
 
     def case_numpy_array2D(self):

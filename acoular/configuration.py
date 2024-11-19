@@ -93,8 +93,8 @@ class Config(HasStrictTraits):
     _global_caching = Trait('individual', 'all', 'none', 'readonly', 'overwrite')
 
     #: Flag that globally defines package used to read and write .h5 files
-    #: defaults to 'pytables'. It is also possible to set it to 'tables', which is an alias for 'pytables'.
-    #: If 'pytables' can not be imported, 'h5py' is used.
+    #: defaults to 'pytables'. It is also possible to set it to 'tables', which is an alias for
+    #: 'pytables'. If pytables cannot be imported, 'h5py' is used.
     h5library = Property()
 
     _h5library = Enum('pytables', 'tables', 'h5py')
@@ -232,8 +232,8 @@ by :attr:`h5library`:
 Some Acoular classes support GUI elements for usage with tools from the TraitsUI package.
 If desired, this package has to be installed manually, as it is not a prerequisite for
 installing Acoular.
-To enable the functionality, the flag attribute :attr:`use_traitsui` has to be set to True (default: False).
-Note: this is independent from the GUI tools implemented in the spectAcoular package.
+To enable the functionality, the flag attribute :attr:`use_traitsui` has to be set to True (default:
+False). Note: this is independent from the GUI tools implemented in the spectAcoular package.
 
 
 Example:

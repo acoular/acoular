@@ -51,65 +51,11 @@ def test_beamformer(snapshot, beamformer, f, num):
         pytest.xfail('RuntimeError: Maximum number of iterations reached')
 
     if isinstance(beamformer, ac.BeamformerGIB) and beamformer.method == 'LassoLarsBIC':
-        # Requires number of samples (eigenvalues) to be greater than number of features (gird points).
-        # Otherwise noise variance estimate is needed.
-        pytest.xfail(
-            'ValueError: You are using LassoLarsIC in the case where the number of samples is smaller than the number of features.'
-        )
+        # Requires number of samples (eigenvalues) to be greater than number of features (grid
+        # points). Otherwise noise variance estimate is needed.
+        pytest.xfail('ValueError: The number of samples must be larger than the number of features with LassoLarsBIC.')
 
     beamformer.cached = False
     result = beamformer.synthetic(f, num)
     assert ac.L_p(result.sum()) > 0
     snapshot.check(result, rtol=5e-5, atol=5e-8)  # uses numpy.testing.assert_allclose
-
-
-# @pytest.mark.parametrize('f, num', TEST_PARAMS_F_NUM)
-# @parametrize_with_cases('beamformer', cases=Beamformer)
-# def test_plot_beamformer(request, beamformer, f, num):
-#     """Performs snapshot testing with snapshot fixture from pytest-regtest
-
-#     Uses the beamformer cases defined in class Beamformer from test_fbeamform_cases.py
-
-#     To overwrite all snapshots produced by this test, run:
-#     ```bash
-#     pytest -v --regtest-reset tests/regression/test_fbeamform.py::test_beamformer
-#     ```
-
-#     To overwrite a specific snapshot, run:
-#     ```bash
-#     pytest -v --regtest-reset tests/regression/test_fbeamform.py::test_beamformer[<node_id>]
-#     ```
-
-#     Parameters
-#     ----------
-#     snapshot : pytest-regtest snapshot fixture
-#         Snapshot fixture to compare results
-#     beamformer : instance of acoular.fbeamform.BeamformerBase
-#         Beamformer instance to be tested
-#     f : int
-#         Frequency to test
-#     num : int
-#         Bandwidth to test (1: octave)
-
-#     """
-
-#     if isinstance(beamformer, ac.BeamformerCMF) and beamformer.method in ['FISTA', 'Split_Bregman']:
-#         pytest.skip('This is a current issue with Pylops. See: https://github.com/acoular/acoular/issues/203')
-#     if isinstance(beamformer, ac.BeamformerGIB) and beamformer.method in ['LassoLarsBIC','NNLS']:
-#         msg = (
-#             'BeamformerGIB with LassoLarsBIC solver: Requires number of samples (eigenvalues) '
-#             'to be greater than number of features (gird points). Otherwise noise variance estimate is needed. '
-#             'BeamformerGIB with NNLS solver: Always fails with maximum iterations reached.'
-#         )
-#         pytest.skip(msg)
-
-#     ac.config.global_caching = 'none'  # we do not cache results!
-#     result = beamformer.synthetic(f, num)
-#     from pathlib import Path
-#     plot_path = Path(__file__).parent / 'plots'
-#     plt.figure()
-#     Lm = ac.L_p(result.T)
-#     plt.imshow(Lm, origin='lower', aspect='auto', vmax=Lm.max(), vmin=Lm.max()-20)
-#     plt.colorbar()
-#     cid = request.node.name
-#     plt.savefig(plot_path / f'{cid}.png')

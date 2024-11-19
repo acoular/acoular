@@ -185,8 +185,8 @@ def get_modes(lOrder, direction, mpos, sourceposition=None):  # noqa: N803
 class TimeSamples(SamplesGenerator):
     """Container for processing time data in `*.h5` or NumPy array format.
 
-    This class loads measured data from HDF5 files and provides information about this data.
-    It also serves as an interface where the data can be accessed (e.g. for use in a block chain) via the
+    This class loads measured data from HDF5 files and provides information about this data. It also
+    serves as an interface where the data can be accessed (e.g. for use in a block chain) via the
     :meth:`result` generator.
 
     Examples
@@ -206,8 +206,9 @@ class TimeSamples(SamplesGenerator):
     >>> data = np.random.rand(1000, 4)
     >>> ts = TimeSamples(data=data, sample_freq=51200)
 
-    Chunks of the time data can be accessed iteratively via the :meth:`result` generator.
-    The last block will be shorter than the block size if the number of samples is not a multiple of the block size.
+    Chunks of the time data can be accessed iteratively via the :meth:`result` generator. The last
+    block will be shorter than the block size if the number of samples is not a multiple of the
+    block size.
 
     >>> blocksize = 512
     >>> generator = ts.result(num=blocksize)
@@ -218,9 +219,9 @@ class TimeSamples(SamplesGenerator):
 
     See Also
     --------
-    acoular.sources.MaskedTimeSamples :
-        Extends the functionality of class :class:`TimeSamples` by enabling the definition of start and stop samples
-        as well as the specification of invalid channels.
+    acoular.sources.MaskedTimeSamples:
+        Extends the functionality of class :class:`TimeSamples` by enabling the definition of start
+        and stop samples as well as the specification of invalid channels.
     """
 
     #: Full name of the .h5 file with data.
@@ -342,11 +343,10 @@ class TimeSamples(SamplesGenerator):
 class MaskedTimeSamples(TimeSamples):
     """Container for processing time data in `*.h5` or NumPy array format.
 
-    This class loads measured data from HDF5 files and provides information about this data.
-    It supports storing information about (in)valid samples and (in)valid channels and allows
-    to specify a start and stop index for the valid samples.
-    It also serves as an interface where the data can be accessed (e.g. for use in a block chain) via the
-    :meth:`result` generator.
+    This class loads measured data from HDF5 files and provides information about this data. It
+    supports storing information about (in)valid samples and (in)valid channels and allows to
+    specify a start and stop index for the valid samples. It also serves as an interface where the
+    data can be accessed (e.g. for use in a block chain) via the :meth:`result` generator.
 
     Examples
     --------
@@ -1570,11 +1570,11 @@ class SourceMixer(SamplesGenerator):
 
 
 class PointSourceConvolve(PointSource):
-    """Class to blockwise convolve an arbitrary source signal with a spatial room impulse response."""
+    """Class to blockwise convolve an arbitrary source signal with a room impulse response."""
 
-    #: Convolution kernel in the time domain.
-    #: The second dimension of the kernel array has to be either 1 or match :attr:`~SamplesGenerator.numchannels`.
-    #: If only a single kernel is supplied, it is applied to all channels.
+    #: Convolution kernel in the time domain. The second dimension of the kernel array has to be
+    #: either 1 or match :attr:`~SamplesGenerator.numchannels`. If only a single kernel is supplied,
+    #: it is applied to all channels.
     kernel = CArray(dtype=float, desc='Convolution kernel.')
 
     # ------------- overwrite traits that are not supported by this class -------------

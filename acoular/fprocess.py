@@ -38,7 +38,8 @@ class RFFT(BaseSpectra, SpectraOut):
     source = Instance(SamplesGenerator)
 
     #: Number of workers to use for the FFT calculation. If negative values are used,
-    #: all available logical CPUs will be considered (``scipy.fft.rfft`` implementation wraps around from ``os.cpu_count()``).
+    #: all available logical CPUs will be considered (``scipy.fft.rfft`` implementation wraps around
+    #: from ``os.cpu_count()``).
     #: Default is `None` (handled by scipy)
     workers = Union(Int(), None, default_value=None, desc='number of workers to use')
 
@@ -46,8 +47,8 @@ class RFFT(BaseSpectra, SpectraOut):
     #: Default is :code:`none`.
     #: 'energy': compensates for the energy loss due to truncation of the FFT result. The resulting
     #: one-sided spectrum is multiplied by 2.0, except for the DC and Nyquist frequency.
-    #: 'amplitude': scales the one-sided spectrum so that the amplitude of discrete tones does not depend
-    #: on the block size.
+    #: 'amplitude': scales the one-sided spectrum so that the amplitude of discrete tones does not
+    #: depend on the block size.
     scaling = Enum('none', 'energy', 'amplitude')
 
     #: block size of the FFT. Default is 1024.
@@ -153,7 +154,8 @@ class IRFFT(TimeOut):
     source = Instance(SpectraGenerator)
 
     #: Number of workers to use for the FFT calculation. If negative values are used,
-    #: all available logical CPUs will be considered (``scipy.fft.rfft`` implementation wraps around from ``os.cpu_count()``).
+    #: all available logical CPUs will be considered (``scipy.fft.rfft`` implementation wraps around
+    #: from ``os.cpu_count()``).
     #: Default is `None` (handled by scipy)
     workers = Union(Int(), None, default_value=None, desc='number of workers to use')
 
@@ -277,9 +279,10 @@ class AutoPowerSpectra(SpectraOut):
 class CrossPowerSpectra(AutoPowerSpectra):
     """Calculates the complex-valued auto- and cross-power spectra.
 
-    Receives the complex-valued spectra from the source and returns the cross-spectral matrix (CSM) in a flattened
-    representation (i.e. the auto- and cross-power spectra are concatenated along the last axis).
-    If :attr:`calc_mode` is 'full', the full CSM is calculated, if 'upper', only the upper triangle is calculated.
+    Receives the complex-valued spectra from the source and returns the cross-spectral matrix (CSM)
+    in a flattened representation (i.e. the auto- and cross-power spectra are concatenated along the
+    last axis). If :attr:`calc_mode` is 'full', the full CSM is calculated, if 'upper', only the
+    upper triangle is calculated.
     """
 
     #: Data source; :class:`~acoular.base.SpectraGenerator` or derived object.

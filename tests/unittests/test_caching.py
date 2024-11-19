@@ -99,7 +99,7 @@ def test_filecache_created(case, file_cache_options):
 
     # run calculation
     if expected_error:
-        # for PSF a value error is expected if PSF calcmode is 'readonly' and no cache file is present
+        # ValueError is expected if PSF calcmode is 'readonly' and no cache file is present
         with pytest.raises(ValueError, match=re.escape("Cannot calculate missing PSF (points) in 'readonly' mode.")):
             result = calc(obj1)
     else:
