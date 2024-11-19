@@ -2035,14 +2035,15 @@ class BeamformerCMF(BeamformerBase):
                 model = LinearRegression(positive=True)
 
             if self.method == 'Split_Bregman' and config.have_pylops:
-                from pylops import Identity, MatrixMult, SplitBregman
+                from pylops import Identity, MatrixMult
+                from pylops.optimization.sparsity import splitbregman
 
                 Oop = MatrixMult(A)  # tranfer operator
                 Iop = self.alpha * Identity(numpoints)  # regularisation
-                self._ac[i], iterations = SplitBregman(
-                    Oop,
-                    [Iop],
-                    R[:, 0],
+                self._ac[i], iterations, cost = splitbregman(
+                    Op=Oop,
+                    RegsL1=[Iop],
+                    y=R[:, 0],
                     niter_outer=self.max_iter,
                     niter_inner=5,
                     RegsL2=None,
@@ -2056,17 +2057,16 @@ class BeamformerCMF(BeamformerBase):
                 self._ac[i] /= unit
 
             elif self.method == 'FISTA' and config.have_pylops:
-                from pylops import FISTA, MatrixMult
+                from pylops import MatrixMult
+                from pylops.optimization.sparsity import fista
 
                 Oop = MatrixMult(A)  # tranfer operator
-                self._ac[i], iterations = FISTA(
+                self._ac[i], iterations, cost = fista(
                     Op=Oop,
-                    data=R[:, 0],
+                    y=R[:, 0],
                     niter=self.max_iter,
                     eps=self.alpha,
                     alpha=None,
-                    eigsiter=None,
-                    eigstol=0,
                     tol=1e-10,
                     show=self.show,
                 )
