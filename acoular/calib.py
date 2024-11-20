@@ -51,7 +51,7 @@ class Calib(InOut):
 
         >>> fft = ac.RFFT(source=ts, block_size=64)
         >>> calib = ac.Calib(source=fft)
-        >>> calib.data = np.zeros(ts.numchannels*fft.numfreqs)
+        >>> calib.data = np.zeros(ts.numchannels * fft.numfreqs)
         >>> print(next(calib.result(num=1)))
         [[0.+0.j 0.+0.j 0.-0.j 0.+0.j 0.+0.j 0.+0.j 0.+0.j 0.+0.j 0.+0.j]]
 
@@ -94,7 +94,6 @@ class Calib(InOut):
         self.data = array(data, 'd')
         self.num_mics = self.data.shape[0]
 
-
     def result(self, num):
         """Python generator that processes the source data and yields the time-signal block-wise.
 
@@ -116,7 +115,10 @@ class Calib(InOut):
         """
         for block in self.source.result(num):
             if self.data.shape[0] == block.shape[1]:
-                    yield block * self.data[newaxis]
+                yield block * self.data[newaxis]
             else:
-                msg = 'calibration data shape does not match source data shape: %i, %i' % (self.data.shape[0], block.shape[1])
+                msg = 'calibration data shape does not match source data shape: %i, %i' % (
+                    self.data.shape[0],
+                    block.shape[1],
+                )
                 raise ValueError(msg)
