@@ -15,7 +15,7 @@ import xml.dom.minidom
 from numpy import array, newaxis
 from traits.api import CArray, CLong, File, Property, cached_property, on_trait_change
 
-from .base import TimeOut
+from .base import InOut
 
 # acoular imports
 from .deprecation import deprecated_alias
@@ -23,15 +23,39 @@ from .internal import digest
 
 
 @deprecated_alias({'from_file': 'file'})
-class Calib(HasPrivateTraits):
+class Calib(InOut):
     """Container for calibration data in `*.xml` format or Numpy format (manually set).
 
-    This class loads calibration data and provides information about this data. It implemnts the
+    This class loads calibration data and provides information about this data. It implements the
     application of calibration factors to the data which is set by setting the source attribute.
     The calibrated data can be accessed (e.g. for use in a block chain) via the
     :meth:`result` generator.
 
-    Depracted and will be removed in Acoular XX.XX:
+
+    Examples
+    --------
+        For example, to calibrate a time signal, the calibration data can be set manually and the
+        calibration factors can be applied to the time signal.
+
+        >>> import acoular as ac
+        >>> import numpy as np
+        >>>
+        >>> signal = ac.WNoiseGenerator(sample_freq=51200, numsamples=51200, rms=2.0).signal()
+        >>> ts = ac.TimeSamples(data=signal[:, np.newaxis], sample_freq=51200)
+        >>> calib = ac.Calib(source=ts)
+        >>> calib.data = np.zeros(ts.numchannels)
+        >>> print(next(calib.result(num=1)))
+        [[0.]]
+
+        Calibration can also be applied in the frequency domain.
+
+        >>> fft = ac.RFFT(source=ts, block_size=64)
+        >>> calib = ac.Calib(source=fft)
+        >>> calib.data = np.zeros(ts.numchannels*fft.numfreqs)
+        >>> print(next(calib.result(num=1)))
+        [[0.+0.j 0.+0.j 0.-0.j 0.+0.j 0.+0.j 0.+0.j 0.+0.j 0.+0.j 0.+0.j]]
+
+    Depracted and will be removed in Acoular 25.10:
     This class serves as interface to load calibration data for the used
     microphone array. The calibration factors are stored as [Pa/unit].
     """
@@ -70,6 +94,7 @@ class Calib(HasPrivateTraits):
         self.data = array(data, 'd')
         self.num_mics = self.data.shape[0]
 
+
     def result(self, num):
         """Python generator that processes the source data and yields the time-signal block-wise.
 
@@ -84,14 +109,14 @@ class Calib(HasPrivateTraits):
         Yields
         ------
         numpy.ndarray
-            Two-dimensional output data block of shape (num, numchannels)
+            Two-dimensional output data block of shape (num, sourcechannels)
+            where sourcechannels is numchannels if the source data is in the time domain
+            or sourcechannels is numchannels*numfreqs of numchannels*numchannels*numfreqs
+            if the source data is in the frequency domain.
         """
         for block in self.source.result(num):
-            if self.data.shape[0] == self.num_mics:
-                if self.num_mics == self.numchannels:
+            if self.data.shape[0] == block.shape[1]:
                     yield block * self.data[newaxis]
-                else:
-                    raise ValueError('calibration data not compatible: %i, %i' % (self.num_mics, self.numchannels))
             else:
-                msg = 'error in calibration data: %i, %i' % (self.data.shape[0], self.numchannels)
+                msg = 'calibration data shape does not match source data shape: %i, %i' % (self.data.shape[0], block.shape[1])
                 raise ValueError(msg)
