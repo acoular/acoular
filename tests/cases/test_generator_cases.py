@@ -53,6 +53,7 @@ SKIP_DEFAULT = [
     ac.SpatialInterpolatorRotation,
     ac.WriteH5,
     ac.WriteWAV,
+    ac.Calib,
 ]
 
 DEFAULT = [cls for cls in get_subclasses(ac.Generator) if cls not in SKIP_DEFAULT]
