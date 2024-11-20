@@ -205,5 +205,5 @@ class Generators:
         return ac.tools.TriggerAIAABenchmark(file=aiaa_bechmark_trigger_file)
 
     def case_Calib(self, time_data_source):
-        cal = np.abs(np.random.random(time_data_source.numchannels))
+        cal = np.abs(np.zeros(time_data_source.numchannels))
         return ac.Calib(source=time_data_source, data=cal)
