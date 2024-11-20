@@ -49,7 +49,7 @@ class Calib(InOut):
 
         Calibration can also be applied in the frequency domain.
 
-        >>> fft = ac.RFFT(source=ts, block_size=64)
+        >>> fft = ac.RFFT(source=ts, block_size=16)
         >>> calib = ac.Calib(source=fft)
         >>> calib.data = np.zeros(ts.numchannels * fft.numfreqs)
         >>> print(next(calib.result(num=1)))
