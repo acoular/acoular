@@ -32,7 +32,7 @@ jobs:
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
-            name: upload regression test results ${{ matrix.os }} ${{ matrix.python-version }}
+            name: upload snapshots ${{ matrix.os }} ${{ matrix.python-version }}
             path: tests/regression/_regtest_outputs
 
 
