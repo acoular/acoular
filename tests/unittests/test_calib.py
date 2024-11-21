@@ -11,7 +11,7 @@ def test_load_xml():
     """
     xml_file_path = Path(__file__).parent.parent.parent / 'examples' / 'data' / 'example_calib.xml'
     with pytest.deprecated_call():
-        calib = ac.Calib(file=xml_file_path)
+        calib = ac.Calib(from_file=xml_file_path)
     calib = ac.Calib(file=xml_file_path)
     assert calib.num_mics == 56
     assert calib.data.shape == (56,)
