@@ -48,7 +48,7 @@ def run():
     h5savefile = 'three_sources.h5'
 
     # generate test data, in real life this would come from an array measurement
-    mg = ac.MicGeom(from_file=micgeofile)
+    mg = ac.MicGeom(file=micgeofile)
     n1 = ac.WNoiseGenerator(sample_freq=sfreq, numsamples=nsamples, seed=1)
     n2 = ac.WNoiseGenerator(sample_freq=sfreq, numsamples=nsamples, seed=2, rms=0.7)
     n3 = ac.WNoiseGenerator(sample_freq=sfreq, numsamples=nsamples, seed=3, rms=0.5)
@@ -56,7 +56,7 @@ def run():
     p2 = ac.PointSource(signal=n2, mics=mg, loc=(0.15, 0, 0.3))
     p3 = ac.PointSource(signal=n3, mics=mg, loc=(0, 0.1, 0.3))
     pa = ac.Mixer(source=p1, sources=[p2, p3])
-    wh5 = ac.WriteH5(source=pa, name=h5savefile)
+    wh5 = ac.WriteH5(source=pa, file=h5savefile)
     wh5.save()
 
     # analyze the data and generate map

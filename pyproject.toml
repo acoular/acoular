@@ -77,6 +77,7 @@ tests = [
     "traitsui",
     "h5py",
     "PyYAML",
+    "pooch",
 ]
 
 dev = [

@@ -1,5 +1,6 @@
 import acoular as ac
 import numpy as np
+import pooch
 import pytest
 import sounddevice as sd
 import tables as tb
@@ -110,3 +111,36 @@ def sounddevice_properties(setup_sounddevice_mocks):
     default_device = sd.query_devices(kind='input')
     num = setup_sounddevice_mocks
     return default_device['default_samplerate'], default_device['max_input_channels'], default_device['index'], num
+
+
+# AIAA Benchmark Data
+
+
+@pytest.fixture(scope='session')
+def aiaa_bechmark_csm_file():
+    return pooch.retrieve(
+        url='https://depositonce.tu-berlin.de/bitstreams/c367dd2b-7be4-43ff-91d4-d8ce9f91eb23/download',
+        fname='aiaa_csm.h5',
+        known_hash='f0f5f1da3551c07078eb86db79d52c76eaacd1e0247c07599da877048d8c766e',
+        progressbar=True,
+    )
+
+
+@pytest.fixture(scope='session')
+def aiaa_bechmark_trigger_file():
+    return pooch.retrieve(
+        url='https://depositonce.tu-berlin.de/bitstreams/a9f04d9b-4ccc-413e-8fac-906d3a0652a7/download',
+        fname='aiaa_trigger.h5',
+        known_hash='ff60355027f1c2cc633092384bf5bbcd069bcc5a53cd878ad1bf33bbfe520bf6',
+        progressbar=True,
+    )
+
+
+@pytest.fixture(scope='session')
+def aiaa_bechmark_time_data_file():
+    return pooch.retrieve(
+        url='https://depositonce.tu-berlin.de/bitstreams/7ac1741d-c553-4bde-8cd8-55cba95893d3/download',
+        fname='aiaa_time.h5',
+        known_hash='6bda79742727921742b75eb240b2373512314eae8ccc1b4f278648deca7b76cc',
+        progressbar=True,
+    )

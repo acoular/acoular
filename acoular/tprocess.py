@@ -104,6 +104,7 @@ from traits.api import (
 # acoular imports
 from .base import SamplesGenerator, TimeOut
 from .configuration import config
+from .deprecation import DeprecatedName
 from .environments import cartToCyl, cylToCart
 from .h5files import _get_h5file_class
 from .internal import digest, ldigest
@@ -1741,7 +1742,7 @@ class OctaveFilterBank(FilterBank):
         return sos
 
 
-class WriteWAV(TimeOut):
+class WriteWAV(TimeOut, DeprecatedName):
     """Saves time signal from one or more channels as mono/stereo/multi-channel
     `*.wav` file.
     """
@@ -1751,7 +1752,7 @@ class WriteWAV(TimeOut):
 
     # Name of the file to be saved. If none is given, the name will be
     # automatically generated from the sources.
-    name = File(filter=['*.wav'], desc='name of wave file')
+    file = File(filter=['*.wav'], desc='name of wave file')
 
     # Basename for cache, readonly.
     basename = Property(depends_on='digest')
@@ -1789,13 +1790,13 @@ class WriteWAV(TimeOut):
             raise ValueError(msg)
         if nc > 2:
             warn('More than two channels given for output, exported file will have %i channels' % nc, stacklevel=1)
-        if self.name == '':
+        if self.file == '':
             name = self.basename
             for nr in self.channels:
                 name += '_%i' % nr
             name += '.wav'
         else:
-            name = self.name
+            name = self.file
         wf = wave.open(name, 'w')
         wf.setnchannels(nc)
         wf.setsampwidth(2)
@@ -1811,7 +1812,7 @@ class WriteWAV(TimeOut):
         wf.close()
 
 
-class WriteH5(TimeOut):
+class WriteH5(TimeOut, DeprecatedName):
     """Saves time signal as `*.h5` file."""
 
     # Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
@@ -1819,7 +1820,7 @@ class WriteH5(TimeOut):
 
     # Name of the file to be saved. If none is given, the name will be
     # automatically generated from a time stamp.
-    name = File(filter=['*.h5'], desc='name of data file')
+    file = File(filter=['*.h5'], desc='name of data file')
 
     # Number of samples to write to file by `result` method.
     # defaults to -1 (write as long as source yields data).
@@ -1843,14 +1844,14 @@ class WriteH5(TimeOut):
         return digest(self)
 
     def create_filename(self):
-        if self.name == '':
+        if self.file == '':
             name = datetime.now(tz=timezone.utc).isoformat('_').replace(':', '-').replace('.', '_')
-            self.name = path.join(config.td_dir, name + '.h5')
+            self.file = path.join(config.td_dir, name + '.h5')
 
     def get_initialized_file(self):
         file = _get_h5file_class()
         self.create_filename()
-        f5h = file(self.name, mode='w')
+        f5h = file(self.file, mode='w')
         f5h.create_extendable_array('time_data', (0, self.numchannels), self.precision)
         ac = f5h.get_data_by_reference('time_data')
         f5h.set_node_attribute(ac, 'sample_freq', self.sample_freq)

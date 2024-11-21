@@ -92,7 +92,7 @@ The positions of the microphones are needed for beamforming, so we create a :cla
 
     In [1]: micgeofile = path.join(path.split(acoular.__file__)[0],'xml','array_64.xml')
 
-    In [1]: mg = acoular.MicGeom( from_file=micgeofile )
+    In [1]: mg = acoular.MicGeom( file=micgeofile )
 
 In order to plot the microphone arrangement, we make use of the convenient matplotlib library with its pylab interface:
 

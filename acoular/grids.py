@@ -24,7 +24,7 @@
 """
 
 # imports from other packages
-from os import path
+import xml.dom.minidom
 from warnings import warn
 
 from numpy import (
@@ -73,6 +73,7 @@ from traits.api import (
 )
 from traits.trait_errors import TraitError
 
+from .deprecation import DeprecatedFromFile
 from .internal import digest
 
 
@@ -698,25 +699,20 @@ class RectGrid3D(RectGrid):
         return s_[xi1 : xi2 + 1], s_[yi1 : yi2 + 1], s_[zi1 : zi2 + 1]
 
 
-class ImportGrid(Grid):
+class ImportGrid(Grid, DeprecatedFromFile):
     """Loads a 3D grid from xml file."""
 
     #: Name of the .xml-file from wich to read the data.
-    from_file = File(filter=['*.xml'], desc='name of the xml file to import')
+    file = File(filter=['*.xml'], exists=True, desc='name of the xml file to import')
 
     gpos_file = CArray(dtype=float, desc='x, y, z position of all Grid Points')
 
-    #: Basename of the .xml-file, without the extension; is set automatically / readonly.
-    basename = Property(depends_on='from_file', desc='basename of xml file')
+    subgrids = CArray(desc='names of subgrids for each point')
 
     # internal identifier
     digest = Property(
-        depends_on=['from_file'],
+        depends_on=['gpos_file'],
     )
-
-    @cached_property
-    def _get_basename(self):
-        return path.splitext(path.basename(self.from_file))[0]
 
     @cached_property
     def _get_digest(self):
@@ -724,33 +720,26 @@ class ImportGrid(Grid):
 
     # 'digest' is a placeholder for other properties in derived classes,
     # necessary to trigger the depends on mechanism
-    @property_depends_on('basename')
+    @property_depends_on('gpos_file')
     def _get_size(self):
         return self.gpos.shape[-1]
 
     # 'digest' is a placeholder for other properties in derived classes
-    @property_depends_on('basename')
+    @property_depends_on('gpos_file')
     def _get_shape(self):
         return (self.gpos.shape[-1],)
 
-    @property_depends_on('basename')
+    @property_depends_on('gpos_file')
     def _get_gpos(self):
         return self.gpos_file
 
-    subgrids = CArray(desc='names of subgrids for each point')
+    def _set_gpos(self, gpos):
+        self.gpos_file = gpos
 
-    @on_trait_change('basename')
+    @on_trait_change('file')
     def import_gpos(self):
-        """Import the the grid point locations from .xml file.
-        Called when :attr:`basename` changes.
-        """
-        if not path.isfile(self.from_file):
-            # no file there
-            self.gpos_file = array([], 'd')
-            return
-        import xml.dom.minidom
-
-        doc = xml.dom.minidom.parse(self.from_file)
+        """Import the the grid point locations from .xml file when :attr:`file` changes."""
+        doc = xml.dom.minidom.parse(self.file)
         names = []
         xyz = []
         for el in doc.getElementsByTagName('pos'):

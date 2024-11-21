@@ -28,9 +28,9 @@ from numpy import amax
 from pickle import dump, load
 
 # see example3
-t = TimeSamples(name='example_data.h5')
-cal = Calib(from_file='example_calib.xml')
-m = MicGeom(from_file=path.join(\
+t = TimeSamples(file='example_data.h5')
+cal = Calib(file='example_calib.xml')
+m = MicGeom(file=path.join(\
     path.split(acoular.__file__)[0], 'xml', 'array_56.xml'))
 g = RectGrid3D(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, \
     z_min=0.48, z_max=0.88, increment=0.1)

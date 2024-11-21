@@ -39,7 +39,7 @@ cfreq = 4000
 # alternatively we could use the TimeSamples class that provides no masking
 # of channels and samples
 #===============================================================================
-t1 = MaskedTimeSamples(name=datafile)
+t1 = MaskedTimeSamples(file=datafile)
 t1.start = 0 # first sample, default
 t1.stop = 16000 # last valid sample = 15999
 invalid = [1,7] # list of invalid channels (unwanted microphones etc.)
@@ -50,13 +50,13 @@ t1.invalid_channels = invalid
 # object (preferred) or for frequency domain processing at the PowerSpectra
 # object (for backwards compatibility)
 #===============================================================================
-t1.calib = Calib(from_file=calibfile)
+t1.calib = Calib(file=calibfile)
 
 #===============================================================================
 # the microphone geometry must have the same number of valid channels as the
 # TimeSamples object has
 #===============================================================================
-m = MicGeom(from_file=micgeofile)
+m = MicGeom(file=micgeofile)
 m.invalid_channels = invalid
 
 #===============================================================================

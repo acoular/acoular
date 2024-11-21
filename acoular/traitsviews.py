@@ -39,7 +39,7 @@ MicGeom.class_trait_view(
     'traits_view',
     View(
         [
-            'from_file',
+            'file',
             'num_mics~',
             '|[Microphone geometry]',
         ],
@@ -70,7 +70,7 @@ Calib.class_trait_view(
     'traits_view',
     View(
         [
-            'from_file{File name}',
+            'file{File name}',
             [
                 'num_mics~{Number of microphones}',
                 '|[Properties]',

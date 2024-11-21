@@ -11,17 +11,26 @@
 """
 
 # imports from other packages
-import errno
-from os import path, strerror
+import xml.dom.minidom
+from pathlib import Path
 
 from numpy import array, average
 from scipy.spatial.distance import cdist
-from traits.api import Bool, CArray, File, HasPrivateTraits, ListInt, Property, cached_property, on_trait_change
+from traits.api import (
+    CArray,
+    File,
+    HasPrivateTraits,
+    ListInt,
+    Property,
+    cached_property,
+    on_trait_change,
+)
 
+from .deprecation import DeprecatedFromFile
 from .internal import digest
 
 
-class MicGeom(HasPrivateTraits):
+class MicGeom(HasPrivateTraits, DeprecatedFromFile):
     """Provides the geometric arrangement of microphones in the array.
 
     The geometric arrangement of microphones is read in from an
@@ -30,13 +39,16 @@ class MicGeom(HasPrivateTraits):
     """
 
     #: Name of the .xml-file from wich to read the data.
-    from_file = File(filter=['*.xml'], exists=True, desc='name of the xml file to import')
+    file = File(filter=['*.xml'], exists=True, desc='name of the xml file to import')
 
-    #: Validate mic geom from file
-    validate_file = Bool(True, desc='Validate mic geom from file')
+    #: Positions as (3, :attr:`num_mics`) array of floats, may include also invalid
+    #: microphones (if any). Set either automatically on change of the
+    #: :attr:`file` argument or explicitely by assigning an array of floats.
+    mpos_tot = CArray(dtype=float, shape=(3, None), desc='x, y, z position of all microphones')
 
-    #: Basename of the .xml-file, without the extension; is set automatically / readonly.
-    basename = Property(depends_on='from_file', desc='basename of xml file')
+    #: Positions as (3, :attr:`num_mics`) array of floats, without invalid
+    #: microphones; readonly.
+    mpos = Property(depends_on=['mpos_tot', 'invalid_channels'], desc='x, y, z position of microphones')
 
     #: List that gives the indices of channels that should not be considered.
     #: Defaults to a blank list.
@@ -51,45 +63,19 @@ class MicGeom(HasPrivateTraits):
     #: Aperture of the array (greatest extent between two microphones); readonly.
     aperture = Property(depends_on=['mpos'], desc='array aperture')
 
-    #: Positions as (3, :attr:`num_mics`) array of floats, may include also invalid
-    #: microphones (if any). Set either automatically on change of the
-    #: :attr:`from_file` argument or explicitely by assigning an array of floats.
-    mpos_tot = CArray(dtype=float, shape=(3, None), desc='x, y, z position of all microphones')
-
-    #: Positions as (3, :attr:`num_mics`) array of floats, without invalid
-    #: microphones; readonly.
-    mpos = Property(depends_on=['mpos_tot', 'invalid_channels'], desc='x, y, z position of microphones')
-
     # internal identifier
     digest = Property(depends_on=['mpos'])
-
-    def _get_env(self):
-        return self._steer_obj.env
-
-    def _set_env(self, env):
-        msg = (
-            "Deprecated use of 'env' trait. Please use the 'steer' trait with an object of class"
-            "'SteeringVector'. The 'env' trait will be removed in version 25.01."
-        )
-        warn(msg, DeprecationWarning, stacklevel=2)
-        self._steer_obj.env = env
 
     @cached_property
     def _get_digest(self):
         return digest(self)
 
     @cached_property
-    def _get_basename(self):
-        return path.splitext(path.basename(self.from_file))[0]
-
-    @cached_property
     def _get_mpos(self):
-        if self.validate_file:
-            if len(self.invalid_channels) == 0:
-                return self.mpos_tot
-            allr = [i for i in range(self.mpos_tot.shape[-1]) if i not in self.invalid_channels]
-            return self.mpos_tot[:, array(allr)]
-        raise FileNotFoundError(errno.ENOENT, strerror(errno.ENOENT), self.from_file)
+        if len(self.invalid_channels) == 0:
+            return self.mpos_tot
+        allr = [i for i in range(self.mpos_tot.shape[-1]) if i not in self.invalid_channels]
+        return self.mpos_tot[:, array(allr)]
 
     @cached_property
     def _get_num_mics(self):
@@ -110,20 +96,12 @@ class MicGeom(HasPrivateTraits):
             return cdist(self.mpos.T, self.mpos.T).max()
         return None
 
-    @on_trait_change('basename')
+    @on_trait_change('file')
     def import_mpos(self):
         """Import the microphone positions from .xml file.
-        Called when :attr:`basename` changes.
+        Called when :attr:`file` changes.
         """
-        if not path.isfile(self.from_file):
-            # no file there
-            self.mpos_tot = array([], 'd')
-            # raise error: File not found on _get functions
-            self.validate_file = False
-
-        import xml.dom.minidom
-
-        doc = xml.dom.minidom.parse(self.from_file)
+        doc = xml.dom.minidom.parse(self.file)
         names = []
         xyz = []
         for el in doc.getElementsByTagName('pos'):
@@ -140,8 +118,9 @@ class MicGeom(HasPrivateTraits):
         filename : str
             Name of the file to which the microphone positions are written.
         """
-        basename = path.splitext(path.basename(filename))[0]
-        with open(filename, 'w') as f:
+        filepath = Path(filename)
+        basename = filepath.stem
+        with filepath.open('w', encoding='utf-8') as f:
             f.write(f'<?xml version="1.1" encoding="utf-8"?><MicArray name="{basename}">\n')
             for i in range(self.mpos.shape[-1]):
                 f.write(

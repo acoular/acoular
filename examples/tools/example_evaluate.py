@@ -29,7 +29,7 @@ micgeofile = Path(ac.__file__).parent / 'xml' / 'array_64.xml'
 # %%
 # Generate test data, in real life this would come from an array measurement
 
-mg = ac.MicGeom(from_file=micgeofile)
+mg = ac.MicGeom(file=micgeofile)
 n1 = ac.WNoiseGenerator(sample_freq=sfreq, numsamples=nsamples, seed=1)
 n2 = ac.WNoiseGenerator(sample_freq=sfreq, numsamples=nsamples, seed=2, rms=0.7)
 n3 = ac.WNoiseGenerator(sample_freq=sfreq, numsamples=nsamples, seed=3, rms=0.5)
