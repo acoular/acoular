@@ -38,7 +38,7 @@ This makes all the functionality available needed for the beamforming analysis. 
 
 .. ipython::
 
-    In [1]: ts = acoular.TimeSamples( name='three_sources.h5' )
+    In [1]: ts = acoular.TimeSamples( file='three_sources.h5' )
 
 The ts object now provides access to the HDF5 file and information stored in it. 
 
