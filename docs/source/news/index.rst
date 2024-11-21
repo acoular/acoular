@@ -5,7 +5,8 @@ Upcoming Release (25.01)
 ------------------------
     
     **New features:**
-    
+        * consistently use `file` as an attribute to specify a filename (instead of `from_file` or `name`)
+
     **Bugfixes**
         * pass missing `max_iter` as an argument to `LassoLarsCV` in :class:`acoular.fbeamform.BeamformerGIB` (otherwise, LassoLarsCV runs up to 500 iterations)
         * fix broken pylops solvers in :class:`acoular.fbeamform.BeamformerCMF`
@@ -24,7 +25,8 @@ Upcoming Release (25.01)
         * refactor :class:`~acoular.h5cache.HDF5Cache` class due to a bug encountered with the new tests (acoular now can handle changing caching directories during a session. Previously, only the basename was observed which caused problems with changing cache directories)
         * tests now log the 10 slowest test runs
         * adds `profile` options to hatch test environment to profile test run via `hatch run tests:profile` and save a graphviz chart as SVG file
-
+        * test AIAA benchmark classes with the benchmark data
+        * test `aperture`, `center`, `export_mpos`` functions in :class:`~acoular.microphones.MicGeom`
 
     **Internal**
         * adds a pull request template
