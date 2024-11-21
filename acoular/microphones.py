@@ -30,7 +30,7 @@ class MicGeom(HasPrivateTraits):
     """
 
     #: Name of the .xml-file from wich to read the data.
-    from_file = File(filter=['*.xml'], desc='name of the xml file to import')
+    from_file = File(filter=['*.xml'], exists=True, desc='name of the xml file to import')
 
     #: Validate mic geom from file
     validate_file = Bool(True, desc='Validate mic geom from file')
@@ -62,6 +62,17 @@ class MicGeom(HasPrivateTraits):
 
     # internal identifier
     digest = Property(depends_on=['mpos'])
+
+    def _get_env(self):
+        return self._steer_obj.env
+
+    def _set_env(self, env):
+        msg = (
+            "Deprecated use of 'env' trait. Please use the 'steer' trait with an object of class"
+            "'SteeringVector'. The 'env' trait will be removed in version 25.01."
+        )
+        warn(msg, DeprecationWarning, stacklevel=2)
+        self._steer_obj.env = env
 
     @cached_property
     def _get_digest(self):
