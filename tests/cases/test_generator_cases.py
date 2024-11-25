@@ -204,6 +204,13 @@ class Generators:
     def case_TriggerAIAABenchmark(self, aiaa_bechmark_trigger_file):
         return ac.tools.TriggerAIAABenchmark(file=aiaa_bechmark_trigger_file)
 
-    def case_Calib(self, time_data_source):
-        cal = np.abs(np.zeros(time_data_source.numchannels))
-        return ac.Calib(source=time_data_source, data=cal)
+    @parametrize('domain', ['time', 'frequency'])
+    def case_Calib(self, time_data_source, domain):
+        if domain == 'time':
+            data = time_data_source
+            shape = data.numchannels
+        else:
+            data = ac.RFFT(source=time_data_source, block_size=8)
+            shape = data.numchannels * data.numfreqs
+        cal = np.abs(np.zeros(shape))
+        return ac.Calib(source=data, data=cal)
