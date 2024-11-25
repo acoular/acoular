@@ -1,6 +1,7 @@
+from pathlib import Path
+
 import acoular as ac
 import numpy as np
-import pooch
 import pytest
 import sounddevice as sd
 import tables as tb
@@ -118,29 +119,35 @@ def sounddevice_properties(setup_sounddevice_mocks):
 
 @pytest.fixture(scope='session')
 def aiaa_bechmark_csm_file():
-    return pooch.retrieve(
-        url='https://depositonce.tu-berlin.de/bitstreams/c367dd2b-7be4-43ff-91d4-d8ce9f91eb23/download',
-        fname='aiaa_csm.h5',
-        known_hash='f0f5f1da3551c07078eb86db79d52c76eaacd1e0247c07599da877048d8c766e',
-        progressbar=True,
-    )
+    """
+    Fixture for the AIAA benchmark file with cross spectral matrix data.
+
+    Uses an adjusted version of the b11aCsmEss.h5 file from the AIAA Benchmark data
+    https://api-depositonce.tu-berlin.de/server/api/core/bitstreams/02a8d97f-9aa8-4d0a-bd2e-9cca3bdddfe0/content
+    with less microphones, shorter measurement time and smaller block size.
+    """
+    return Path(__file__).parent / 'data' / 'b11aCsmEss.h5'
 
 
 @pytest.fixture(scope='session')
 def aiaa_bechmark_trigger_file():
-    return pooch.retrieve(
-        url='https://depositonce.tu-berlin.de/bitstreams/a9f04d9b-4ccc-413e-8fac-906d3a0652a7/download',
-        fname='aiaa_trigger.h5',
-        known_hash='ff60355027f1c2cc633092384bf5bbcd069bcc5a53cd878ad1bf33bbfe520bf6',
-        progressbar=True,
-    )
+    """
+    Fixture for the AIAA benchmark file with trigger data.
+
+    Uses an adjusted version of the b11aTimeSeriesOpt.h5 file from the AIAA Benchmark data
+    https://api-depositonce.tu-berlin.de/server/api/core/bitstreams/02a8d97f-9aa8-4d0a-bd2e-9cca3bdddfe0/content
+    with shorter measurement time and smaller block size.
+    """
+    return Path(__file__).parent / 'data' / 'b11aTimeSeriesOpt.h5'
 
 
 @pytest.fixture(scope='session')
 def aiaa_bechmark_time_data_file():
-    return pooch.retrieve(
-        url='https://depositonce.tu-berlin.de/bitstreams/7ac1741d-c553-4bde-8cd8-55cba95893d3/download',
-        fname='aiaa_time.h5',
-        known_hash='6bda79742727921742b75eb240b2373512314eae8ccc1b4f278648deca7b76cc',
-        progressbar=True,
-    )
+    """
+    Fixture for the AIAA benchmark file with time data.
+
+    Uses an adjusted version of the b11aTimeSeries.h5 file from the AIAA Benchmark data
+    https://api-depositonce.tu-berlin.de/server/api/core/bitstreams/02a8d97f-9aa8-4d0a-bd2e-9cca3bdddfe0/content
+    with shorter measurement time (0.01s).
+    """
+    return Path(__file__).parent / 'data' / 'b11aTimeSeries.h5'
