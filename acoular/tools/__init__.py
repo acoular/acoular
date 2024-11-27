@@ -21,6 +21,7 @@ from .aiaa import (
 from .helpers import (
     bardata,
     barspectrum,
+    c_air,
     return_result,
 )
 from .metrics import MetricEvaluator

@@ -6,7 +6,8 @@ Upcoming Release (25.01)
     
     **New features:**
         * consistently use `file` as an attribute to specify a filename (instead of `from_file` or `name`)
-
+        * adds new function :meth:`~acoular.tools.helper.c_air` to calculate the speed of sound from temperature and humidity
+    
     **Bugfixes**
         * pass missing `max_iter` as an argument to `LassoLarsCV` in :class:`acoular.fbeamform.BeamformerGIB` (otherwise, LassoLarsCV runs up to 500 iterations)
         * fix broken pylops solvers in :class:`acoular.fbeamform.BeamformerCMF`

@@ -33,6 +33,7 @@ extensions = [
     'sphinx.ext.autosummary',
     'sphinxcontrib.bibtex',
     'numpydoc',
+    'matplotlib.sphinxext.plot_directive',
     ] # Sphinx extension modules
 
 # the current time is formatted using time.strftime() and the format given in today_fmt.
@@ -161,3 +162,12 @@ sphinx_gallery_conf = {
 
 bibtex_bibfiles = ["literature/literature.bib"]
 bibtex_default_style = 'unsrt'
+
+
+#%% 
+# matplotlib.sphinxext.plot_directive extension settings
+# ------------------------------------------------------
+
+plot_include_source = True
+plot_html_show_source_link = False
+plot_html_show_formats = False

@@ -9,6 +9,7 @@
     return_result
     barspectrum
     bardata
+    c_air
 """
 
 from numpy import (
@@ -20,6 +21,7 @@ from numpy import (
 from numpy.ma import masked_where
 
 from acoular.spectra import synthetic
+from acoular.tools.utils import mole_fraction_of_water_vapor
 
 
 def return_result(source, nmax=-1, num=128):
@@ -187,3 +189,114 @@ def bardata(data, fc, num=3, bar=True, xoffset=0.0, masked=-360):
     if masked > -360:
         plist = masked_where(plist <= masked, plist)
     return (flulist, plist)
+
+
+def c_air(c, h, p=101325, co2=0.04):
+    r"""
+    Calculates the speed of sound in air according to Eq.(15) in :cite:`Cramer1993`.
+
+    This function calculates the speed of sound in air based on temperature, pressure, relative
+    humidity, and CO_2 concentration. To calculate the mole fraction of water vapor in the air,
+    :meth:`~acoular.tools.utils.mole_fraction_of_water_vapor` uses the more recent work
+    of :cite:`Davis1992` to obtain the saturation vapor pressure.
+
+    The function is only valid over the temperature range from 0°C to 30°C (273.15 K to 303.15 K),
+    for the pressure range 60 to 110 kPa, a water vapor mole fraction up to 0.06, and CO2
+    concentrations up to 1%.
+
+    Parameters
+    ----------
+    c : float
+        Temperature in c (°C).
+    h : float
+        Humidity in percent (0 to 100).
+    p : float
+        Atmospheric pressure in Pa (default is the standard pressure 101325 Pa).
+    co2 : float
+        Carbon dioxide concentration in percent (default is 0.04%).
+
+    Returns
+    -------
+    float
+        Speed of sound in air in m/s.
+
+    Raises
+    ------
+    ValueError
+        If the temperature is out of range (0°C to 30°C), the pressure is out of range
+        (60 kPa to 110 kPa), the water vapor mole fraction is out of range (up to 0.06),
+        or the CO2 concentration is out of range (up to 1%).
+
+    Notes
+    -----
+    The speed of sound in air is calculated using the following equation:
+
+    .. math::
+
+        \begin{aligned}
+        c(t, p, x_w, c_{CO_2}) = & a_0 + a_1 t + a_2 t^2 + \left(a_3 + a_4 t + a_5 t^2\right) x_w \\
+        & + \left(a_6 + a_7 t + a_8 t^2\right) p + \left(a_9 + a_{10} t + a_{11} t^2\right) x_c \\
+        & + a_{12} x_w^2 + a_{13} p^2 + a_{14} x_c^2 + a_{15} x_w p x_c
+        \end{aligned}
+
+    where:
+        - :math:`t` is the temperature in c.
+        - :math:`x_w` is the water vapor mole fraction.
+        - :math:`x_c` is the carbon dioxide mole fraction (:math:`x_c = c_{CO_2} / 100`).
+        - :math:`p` is the atmospheric pressure in Pa.
+
+    Examples
+    --------
+    Code for reproducing Fig.1 from :cite:`Cramer1993`
+
+    .. plot:: plots/c_air.py
+    """
+    if c < 0 or c > 30:
+        msg = 'Temperature out of range (0°C to 30°C)'
+        raise ValueError(msg)
+    if p < 60000 or p > 110000:
+        msg = 'Pressure out of range (60 kPa to 110 kPa)'
+        raise ValueError(msg)
+
+    # Calculate water vapor mole fraction
+    x_w = mole_fraction_of_water_vapor(h / 100, c + 273.15, p)
+    if x_w > 0.06:
+        msg = 'Water vapor mole fraction out of range (up to 0.06)'
+        raise ValueError(msg)
+
+    if co2 > 1.0:
+        msg = 'CO2 concentration out of range (up to 1%)'
+        raise ValueError(msg)
+
+    # Convert CO2 concentration from percent to mole fraction
+    x_c = co2 / 100
+
+    # Coefficients from Eq.(15)
+    a0 = 331.5024
+    a1 = 0.603055
+    a2 = -0.000528
+    a3 = 51.471935
+    a4 = 0.1495874
+    a5 = -0.000782
+    a6 = -1.82 * 10**-7
+    a7 = 3.73 * 10**-8
+    a8 = -2.93 * 10**-10
+    a9 = -85.20931
+    a10 = -0.228525
+    a11 = 5.91 * 10**-5
+    a12 = -2.835149
+    a13 = -2.15 * 10**-13
+    a14 = 29.179762
+    a15 = 0.000486
+    return (
+        a0
+        + a1 * c
+        + a2 * c**2
+        + (a3 + a4 * c + a5 * c**2) * x_w
+        + (a6 + a7 * c + a8 * c**2) * p
+        + (a9 + a10 * c + a11 * c**2) * x_c
+        + a12 * x_w**2
+        + a13 * p**2
+        + a14 * x_c**2
+        + a15 * x_w * p * x_c
+    )
