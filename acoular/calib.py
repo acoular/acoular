@@ -53,7 +53,7 @@ class Calib(InOut):
         calibrated data.
 
         >>> fft = ac.RFFT(source=calib, block_size=16)
-        >>> print(next(calib.result(num=1)))
+        >>> print(next(fft.result(num=1)))
         [[ 0.21277598+0.j          0.06519151-0.03153052j -0.04546857-0.06782166j
            0.00149169+0.00993159j  0.03545392+0.07844662j  0.06390865+0.00359771j
            0.00675808-0.07866847j  0.01878985+0.05065722j  0.05947051+0.j        ]]
