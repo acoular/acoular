@@ -196,8 +196,8 @@ def c_air(t, h, p=101325, co2=0.04):
     Calculates the speed of sound in air according to Eq.(15) in :cite:`Cramer1993`.
 
     This function calculates the speed of sound in air based on temperature, pressure, relative
-    humidity, and CO_2 concentration. To calculate the mole fraction of water vapor in the air,
-    :meth:`~acoular.tools.utils.mole_fraction_of_water_vapor` uses the more recent work
+    humidity, and CO\ :sub:`2` concentration. To calculate the mole fraction of water vapor in
+    the air, :meth:`~acoular.tools.utils.mole_fraction_of_water_vapor` uses the more recent work
     of :cite:`Davis1992` to obtain the saturation vapor pressure.
 
     The function is only valid over the temperature range from 0°C to 30°C (273.15 K to 303.15 K),
@@ -225,7 +225,7 @@ def c_air(t, h, p=101325, co2=0.04):
     ValueError
         If the temperature is out of range (0°C to 30°C), the pressure is out of range
         (60 kPa to 110 kPa), the water vapor mole fraction is out of range (up to 0.06),
-        or the CO2 concentration is out of range (up to 1%).
+        or the CO\ :sub:`2` concentration is out of range (up to 1%).
 
     Notes
     -----
