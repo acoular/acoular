@@ -72,7 +72,7 @@ class Calib(InOut):
     data = CArray(desc='calibration data')
 
     # Internal identifier
-    digest = Property(depends_on=['data'])
+    digest = Property(depends_on=['source.digest', 'data'])
 
     @on_trait_change('data')
     def set_num_mics(self):
