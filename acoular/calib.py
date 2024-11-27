@@ -35,7 +35,9 @@ class Calib(InOut):
     Examples
     --------
         For example, to calibrate a time signal, the calibration data can be set manually and the
-        calibration factors can be applied to the time signal.
+        calibration factors can be applied to the time signal. In the following example, we assume
+        that out the time signal has been recorded with a sensitivity of 1e-2 V/Pa and therefor
+        the sound pressure can be obtained by multiplication with the factor of 1e-2 Pa/V.
 
         >>> import acoular as ac
         >>> import numpy as np
@@ -43,17 +45,28 @@ class Calib(InOut):
         >>> signal = ac.WNoiseGenerator(sample_freq=51200, numsamples=51200, rms=2.0).signal()
         >>> ts = ac.TimeSamples(data=signal[:, np.newaxis], sample_freq=51200)
         >>> calib = ac.Calib(source=ts)
-        >>> calib.data = np.zeros(ts.numchannels)
+        >>> calib.data = np.array([1e-2])
         >>> print(next(calib.result(num=1)))
-        [[0.]]
+        [[0.03528105]]
 
-        Calibration can also be applied in the frequency domain.
+        The calibrated data can then be further processed, e.g. by calculating the FFT of the
+        calibrated data.
+
+        >>> fft = ac.RFFT(source=calib, block_size=16)
+        >>> print(next(calib.result(num=1)))
+        [[ 0.21277598+0.j          0.06519151-0.03153052j -0.04546857-0.06782166j
+           0.00149169+0.00993159j  0.03545392+0.07844662j  0.06390865+0.00359771j
+           0.00675808-0.07866847j  0.01878985+0.05065722j  0.05947051+0.j        ]]
+
+        One could also apply the calibration after the FFT calculation.
 
         >>> fft = ac.RFFT(source=ts, block_size=16)
         >>> calib = ac.Calib(source=fft)
         >>> calib.data = np.zeros(ts.numchannels * fft.numfreqs)
         >>> print(next(calib.result(num=1)))
-        [[0.+0.j 0.+0.j 0.-0.j 0.+0.j 0.+0.j 0.+0.j 0.+0.j 0.+0.j 0.+0.j]]
+        [[ 0.21277598+0.j          0.06519151-0.03153052j -0.04546857-0.06782166j
+           0.00149169+0.00993159j  0.03545392+0.07844662j  0.06390865+0.00359771j
+           0.00675808-0.07866847j  0.01878985+0.05065722j  0.05947051+0.j        ]]
 
     Depracted and will be removed in Acoular 25.10:
     This class serves as interface to load calibration data for the used
