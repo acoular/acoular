@@ -191,7 +191,7 @@ def bardata(data, fc, num=3, bar=True, xoffset=0.0, masked=-360):
     return (flulist, plist)
 
 
-def c_air(c, h, p=101325, co2=0.04):
+def c_air(t, h, p=101325, co2=0.04):
     r"""
     Calculates the speed of sound in air according to Eq.(15) in :cite:`Cramer1993`.
 
@@ -206,8 +206,8 @@ def c_air(c, h, p=101325, co2=0.04):
 
     Parameters
     ----------
-    c : float
-        Temperature in c (°C).
+    t : float
+        Temperature in (°C).
     h : float
         Humidity in percent (0 to 100).
     p : float
@@ -251,7 +251,7 @@ def c_air(c, h, p=101325, co2=0.04):
 
     .. plot:: plots/c_air.py
     """
-    if c < 0 or c > 30:
+    if t < 0 or t > 30:
         msg = 'Temperature out of range (0°C to 30°C)'
         raise ValueError(msg)
     if p < 60000 or p > 110000:
@@ -259,7 +259,7 @@ def c_air(c, h, p=101325, co2=0.04):
         raise ValueError(msg)
 
     # Calculate water vapor mole fraction
-    x_w = mole_fraction_of_water_vapor(h / 100, c + 273.15, p)
+    x_w = mole_fraction_of_water_vapor(h / 100, t + 273.15, p)
     if x_w > 0.06:
         msg = 'Water vapor mole fraction out of range (up to 0.06)'
         raise ValueError(msg)
@@ -290,11 +290,11 @@ def c_air(c, h, p=101325, co2=0.04):
     a15 = 0.000486
     return (
         a0
-        + a1 * c
-        + a2 * c**2
-        + (a3 + a4 * c + a5 * c**2) * x_w
-        + (a6 + a7 * c + a8 * c**2) * p
-        + (a9 + a10 * c + a11 * c**2) * x_c
+        + a1 * t
+        + a2 * t**2
+        + (a3 + a4 * t + a5 * t**2) * x_w
+        + (a6 + a7 * t + a8 * t**2) * p
+        + (a9 + a10 * t + a11 * t**2) * x_c
         + a12 * x_w**2
         + a13 * p**2
         + a14 * x_c**2
