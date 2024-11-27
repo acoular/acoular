@@ -89,10 +89,10 @@ class Generators:
         return acoular_cls()
 
     def case_TimeSamples(self, small_source_case):
-        return ac.TimeSamples(name=small_source_case.source.name)
+        return ac.TimeSamples(file=small_source_case.source.name)
 
     def case_MaskedTimeSamples(self, small_source_case):
-        return ac.MaskedTimeSamples(name=small_source_case.source.name, start=0, stop=50)
+        return ac.MaskedTimeSamples(file=small_source_case.source.name, start=0, stop=50)
 
     @parametrize_with_cases('mic_setup', cases=[case_single_microphone, case_two_microphones], ids=['1ch', '2ch'])
     def case_UncorrectedNoiseSource(self, mic_setup):
@@ -192,7 +192,13 @@ class Generators:
         return ac.SpatialInterpolator(mics=moving_source_case.mics, source=moving_source_case.source, method=method)
 
     def case_WriteH5(self, time_data_source, tmp_path):
-        return ac.WriteH5(source=time_data_source, name=tmp_path / 'test.h5')
+        return ac.WriteH5(source=time_data_source, file=tmp_path / 'test.h5')
 
     def case_WriteWAV(self, time_data_source, tmp_path):
-        return ac.WriteWAV(source=time_data_source, name=tmp_path / 'test.wav')
+        return ac.WriteWAV(source=time_data_source, file=tmp_path / 'test.wav')
+
+    def case_TimeSamplesAIAABenchmark(self, aiaa_bechmark_time_data_file):
+        return ac.tools.TimeSamplesAIAABenchmark(file=aiaa_bechmark_time_data_file)
+
+    def case_TriggerAIAABenchmark(self, aiaa_bechmark_trigger_file):
+        return ac.tools.TriggerAIAABenchmark(file=aiaa_bechmark_trigger_file)

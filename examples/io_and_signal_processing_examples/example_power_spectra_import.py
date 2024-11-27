@@ -24,7 +24,7 @@ loc3 = (0, 0.1, 0.3)
 rms = np.array([1, 0.7, 0.5])
 
 micgeofile = Path(ac.__file__).parent / 'xml' / 'array_64.xml'
-mg = ac.MicGeom(from_file=micgeofile)
+mg = ac.MicGeom(file=micgeofile)
 
 # %%
 # Obtain the transfer function of the monopole sources by using the SteeringVector object

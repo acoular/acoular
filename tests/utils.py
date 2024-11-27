@@ -36,17 +36,15 @@ class SetupStationarySourceCase:
     def __init__(self, grid, numsamples, blocksize, invalid_channels):
         module_dir = Path(__file__).parent.parent
         self.grid = grid
-        self.calib = ac.Calib(from_file=module_dir / 'examples' / 'data' / 'example_calib.xml')
+        self.calib = ac.Calib(file=module_dir / 'examples' / 'data' / 'example_calib.xml')
         self.source = ac.MaskedTimeSamples(
-            name=module_dir / 'examples' / 'data' / 'example_data.h5',
+            file=module_dir / 'examples' / 'data' / 'example_data.h5',
             invalid_channels=invalid_channels,
             start=0,
             stop=numsamples,
             calib=self.calib,
         )
-        self.mics = ac.MicGeom(
-            from_file=module_dir / 'acoular' / 'xml' / 'array_56.xml', invalid_channels=invalid_channels
-        )
+        self.mics = ac.MicGeom(file=module_dir / 'acoular' / 'xml' / 'array_56.xml', invalid_channels=invalid_channels)
         self.env = ac.Environment(c=346.04)
         self.steer = ac.SteeringVector(grid=self.grid, mics=self.mics, env=self.env)
         self.freq_data = ac.PowerSpectra(
@@ -82,7 +80,7 @@ class SetupMovingSourceCase:
         self.signal = ac.WNoiseGenerator(sample_freq=self.sample_freq, numsamples=numsamples, seed=1)
         if not self.fname.exists():
             self.create_test_time_data()
-        self.source = ac.MaskedTimeSamples(name=self.fname, stop=48)
+        self.source = ac.MaskedTimeSamples(file=self.fname, stop=48)
 
     def get_mics(self):
         mg = ac.MicGeom()
@@ -106,7 +104,7 @@ class SetupMovingSourceCase:
     def create_test_time_data(self):
         """Creates test data for a single moving monopole emitting white noise."""
         p1 = ac.MovingPointSource(signal=self.signal, mics=self.mics, trajectory=self.traj, conv_amp=True)
-        wh5 = ac.WriteH5(source=p1, name=self.fname)
+        wh5 = ac.WriteH5(source=p1, file=self.fname)
         print(50 * '#')
         print(f'create {self.fname} ...')
         print(f'num samples: {self.signal.numsamples}, pass-by time: {np.max(self.traj.points)}s')

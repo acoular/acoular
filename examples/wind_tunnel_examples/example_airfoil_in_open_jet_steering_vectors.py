@@ -48,7 +48,7 @@ if not time_data_file.exists():
 # only process the first 16000 samples of the time signals. Alternatively, we could use the
 # :class:`acoular.sources.TimeSamples` class that provides no masking at all.
 
-t1 = ac.MaskedTimeSamples(name=time_data_file)
+t1 = ac.MaskedTimeSamples(file=time_data_file)
 t1.start = 0
 t1.stop = 16000
 invalid = [1, 7]
@@ -59,7 +59,7 @@ t1.invalid_channels = invalid
 # :class:`acoular.sources.MaskedTimeSamples` object (preferred) or for frequency domain processing
 # at the :class:`acoular.spectra.PowerSpectra` object (for backwards compatibility).
 
-t1.calib = ac.Calib(from_file=calib_file)
+t1.calib = ac.Calib(file=calib_file)
 
 # %%
 # The microphone geometry must have the same number of valid channels as the
@@ -67,7 +67,7 @@ t1.calib = ac.Calib(from_file=calib_file)
 # invalid.
 
 micgeofile = Path(ac.__file__).parent / 'xml' / 'array_56.xml'
-m = ac.MicGeom(from_file=micgeofile)
+m = ac.MicGeom(file=micgeofile)
 m.invalid_channels = invalid
 
 # %%

@@ -12,8 +12,8 @@ the framework.
 
 Examples
 --------
->>> micgeom = MicAIAABenchmark(name='some_benchmarkdata.h5')  # doctest: +SKIP
->>> timedata = TimeSamplesAIAABenchmark(name='some_benchmarkdata.h5')  # doctest: +SKIP
+>>> micgeom = MicAIAABenchmark(file='some_benchmarkdata.h5')  # doctest: +SKIP
+>>> timedata = TimeSamplesAIAABenchmark(file='some_benchmarkdata.h5')  # doctest: +SKIP
 
 
 .. autosummary::
@@ -38,6 +38,7 @@ from traits.api import (
     property_depends_on,
 )
 
+from acoular.deprecation import DeprecatedName
 from acoular.h5files import H5FileBase, _get_h5file_class
 from acoular.internal import digest
 from acoular.microphones import MicGeom
@@ -83,15 +84,15 @@ class TriggerAIAABenchmark(TimeSamplesAIAABenchmark):
         (self.numsamples, self.numchannels) = self.data.shape
 
 
-class CsmAIAABenchmark(PowerSpectraImport):
+class CsmAIAABenchmark(PowerSpectraImport, DeprecatedName):
     """Class to load the CSM that is stored in AIAA Benchmark HDF5 file."""
 
     #: Full name of the .h5 file with data
-    name = File(filter=['*.h5'], desc='name of data file')
+    file = File(filter=['*.h5'], exists=True, desc='name of data file')
 
     #: Basename of the .h5 file with data, is set automatically.
     basename = Property(
-        depends_on='name',
+        depends_on='file',
         desc='basename of data file',
     )
 
@@ -110,19 +111,16 @@ class CsmAIAABenchmark(PowerSpectraImport):
 
     @cached_property
     def _get_basename(self):
-        return path.splitext(path.basename(self.name))[0]
+        return path.splitext(path.basename(self.file))[0]
 
     @on_trait_change('basename')
     def load_data(self):
         """Open the .h5 file and set attributes."""
-        if not path.isfile(self.name):
-            # no file there
-            raise OSError('No such file: %s' % self.name)
         if self.h5f is not None:
             with contextlib.suppress(OSError):
                 self.h5f.close()
         file = _get_h5file_class()
-        self.h5f = file(self.name)
+        self.h5f = file(self.file)
 
     # @property_depends_on( 'block_size, ind_low, ind_high' )
     def _get_indices(self):
@@ -168,18 +166,14 @@ class MicAIAABenchmark(MicGeom):
     """
 
     #: Name of the .h5-file from wich to read the data.
-    from_file = File(filter=['*.h5'], desc='name of the h5 file containing the microphone geometry')
+    file = File(filter=['*.h5'], exists=True, desc='name of the h5 file containing the microphone geometry')
 
-    @on_trait_change('basename')
+    @on_trait_change('file')
     def import_mpos(self):
         """Import the microphone positions from .h5 file.
         Called when :attr:`basename` changes.
         """
-        if not path.isfile(self.from_file):
-            # no file there
-            raise OSError('No such file: %s' % self.from_file)
-
         file = _get_h5file_class()
-        h5f = file(self.from_file, mode='r')
+        h5f = file(self.file, mode='r')
         self.mpos_tot = h5f.get_data_by_reference('MetaData/ArrayAttributes/microphonePositionsM')[:].swapaxes(0, 1)
         h5f.close()

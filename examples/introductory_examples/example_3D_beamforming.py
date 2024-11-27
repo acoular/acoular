@@ -19,7 +19,7 @@ import numpy as np
 # First, we define the microphone geometry.
 
 micgeofile = Path(ac.__file__).parent / 'xml' / 'array_64.xml'
-m = ac.MicGeom(from_file=micgeofile)
+m = ac.MicGeom(file=micgeofile)
 
 # %%
 # Now, the sources (signals and types/positions) are defined.

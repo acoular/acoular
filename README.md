@@ -94,9 +94,9 @@ from matplotlib.pylab import figure, plot, axis, imshow, colorbar, show
 # this file contains the microphone coordinates
 micgeofile = path.join(path.split(acoular.__file__)[0],'xml','array_64.xml')
 # set up object managing the microphone coordinates
-mg = acoular.MicGeom( from_file=micgeofile )
+mg = acoular.MicGeom( file=micgeofile )
 # set up object managing the microphone array data (usually from measurement)
-ts = acoular.TimeSamples( name='three_sources.h5' )
+ts = acoular.TimeSamples( file='three_sources.h5' )
 # set up object managing the cross spectral matrix computation
 ps = acoular.PowerSpectra( source=ts, block_size=128, window='Hanning' )
 # set up object managing the mapping grid

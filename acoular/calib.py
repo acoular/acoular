@@ -10,16 +10,18 @@
 """
 
 # imports from other packages
-from os import path
+import xml.dom.minidom
 
 from numpy import array
 from traits.api import CArray, CLong, File, HasPrivateTraits, Property, cached_property, on_trait_change
+
+from .deprecation import DeprecatedFromFile
 
 # acoular imports
 from .internal import digest
 
 
-class Calib(HasPrivateTraits):
+class Calib(HasPrivateTraits, DeprecatedFromFile):
     """Container for calibration data in `*.xml` format.
 
     This class serves as interface to load calibration data for the used
@@ -27,10 +29,7 @@ class Calib(HasPrivateTraits):
     """
 
     #: Name of the .xml file to be imported.
-    from_file = File(filter=['*.xml'], desc='name of the xml file to import')
-
-    #: Basename of the .xml-file. Readonly / is set automatically.
-    basename = Property(depends_on='from_file', desc='basename of xml file')
+    file = File(filter=['*.xml'], exists=True, desc='name of the xml file to import')
 
     #: Number of microphones in the calibration data,
     #: is set automatically / read from file.
@@ -41,34 +40,16 @@ class Calib(HasPrivateTraits):
     data = CArray(desc='calibration data')
 
     # Internal identifier
-    digest = Property(depends_on=['basename'])
+    digest = Property(depends_on=['data'])
 
     @cached_property
     def _get_digest(self):
         return digest(self)
 
-    @cached_property
-    def _get_basename(self):
-        if not path.isfile(self.from_file):
-            return ''
-        return path.splitext(path.basename(self.from_file))[0]
-
-    @on_trait_change('basename')
+    @on_trait_change('file')
     def import_data(self):
         """Loads the calibration data from `*.xml` file ."""
-        if not path.isfile(self.from_file):
-            # empty calibration
-            if self.basename == '':
-                self.data = None
-                self.num_mics = 0
-            # no file there
-            else:
-                self.data = array([1.0], 'd')
-                self.num_mics = 1
-            return
-        import xml.dom.minidom
-
-        doc = xml.dom.minidom.parse(self.from_file)
+        doc = xml.dom.minidom.parse(self.file)
         names = []
         data = []
         for element in doc.getElementsByTagName('pos'):

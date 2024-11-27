@@ -80,6 +80,7 @@ from .base import SamplesGenerator
 
 # acoular imports
 from .calib import Calib
+from .deprecation import DeprecatedName
 from .environments import Environment
 from .h5files import H5FileBase, _get_h5file_class
 from .internal import digest, ldigest
@@ -182,7 +183,7 @@ def get_modes(lOrder, direction, mpos, sourceposition=None):  # noqa: N803
     return modes
 
 
-class TimeSamples(SamplesGenerator):
+class TimeSamples(SamplesGenerator, DeprecatedName):
     """Container for processing time data in `*.h5` or NumPy array format.
 
     This class loads measured data from HDF5 files and provides information about this data. It also
@@ -194,8 +195,8 @@ class TimeSamples(SamplesGenerator):
     Data can be loaded from a HDF5 file as follows:
 
     >>> from acoular import TimeSamples
-    >>> name = <some_h5_file.h5>  # doctest: +SKIP
-    >>> ts = TimeSamples(name=name)  # doctest: +SKIP
+    >>> file = <some_h5_file.h5>  # doctest: +SKIP
+    >>> ts = TimeSamples(file=file)  # doctest: +SKIP
     >>> print(f'number of channels: {ts.numchannels}')  # doctest: +SKIP
     number of channels: 56 # doctest: +SKIP
 
@@ -225,11 +226,11 @@ class TimeSamples(SamplesGenerator):
     """
 
     #: Full name of the .h5 file with data.
-    name = File(filter=['*.h5'], desc='name of data file')
+    file = File(filter=['*.h5'], exists=True, desc='name of data file')
 
     #: Basename of the .h5 file with data, is set automatically.
     basename = Property(
-        depends_on='name',  # filter=['*.h5'],
+        depends_on='file',  # filter=['*.h5'],
         desc='basename of data file',
     )
 
@@ -268,19 +269,16 @@ class TimeSamples(SamplesGenerator):
 
     @cached_property
     def _get_basename(self):
-        return path.splitext(path.basename(self.name))[0]
+        return path.splitext(path.basename(self.file))[0]
 
     @on_trait_change('basename')
     def _load_data(self):
         """Open the .h5 file and set attributes."""
-        if not path.isfile(self.name):
-            self.sample_freq = 0
-            raise OSError('No such file: %s' % self.name)
         if self.h5f is not None:
             with contextlib.suppress(OSError):
                 self.h5f.close()
         file = _get_h5file_class()
-        self.h5f = file(self.name)
+        self.h5f = file(self.file)
         self._load_timedata()
         self._load_metadata()
 
@@ -353,8 +351,8 @@ class MaskedTimeSamples(TimeSamples):
     Data can be loaded from a HDF5 file and invalid channels can be specified as follows:
 
     >>> from acoular import MaskedTimeSamples
-    >>> name = <some_h5_file.h5>  # doctest: +SKIP
-    >>> ts = MaskedTimeSamples(name=name, invalid_channels=[0, 1])  # doctest: +SKIP
+    >>> file = <some_h5_file.h5>  # doctest: +SKIP
+    >>> ts = MaskedTimeSamples(file=file, invalid_channels=[0, 1])  # doctest: +SKIP
     >>> print(f'number of valid channels: {ts.numchannels}')  # doctest: +SKIP
     number of valid channels: 54 # doctest: +SKIP
 
@@ -409,7 +407,7 @@ class MaskedTimeSamples(TimeSamples):
 
     @cached_property
     def _get_basename(self):
-        return path.splitext(path.basename(self.name))[0]
+        return path.splitext(path.basename(self.file))[0]
 
     @cached_property
     def _get_channels(self):
@@ -433,15 +431,15 @@ class MaskedTimeSamples(TimeSamples):
     def _load_data(self):
         # """ open the .h5 file and set attributes
         # """
-        if not path.isfile(self.name):
+        if not path.isfile(self.file):
             # no file there
             self.sample_freq = 0
-            raise OSError('No such file: %s' % self.name)
+            raise OSError('No such file: %s' % self.file)
         if self.h5f is not None:
             with contextlib.suppress(OSError):
                 self.h5f.close()
         file = _get_h5file_class()
-        self.h5f = file(self.name)
+        self.h5f = file(self.file)
         self._load_timedata()
         self._load_metadata()
 

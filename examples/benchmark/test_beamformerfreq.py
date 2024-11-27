@@ -19,7 +19,7 @@ micgeofile = join('..', '..', 'acoular', 'xml', 'array_56.xml')
 t1 = MaskedTimeSamples(name=datafile)
 t1.start = 0  # first sample, default
 t1.stop = 16000  # last valid sample = 15999
-m = MicGeom(from_file=micgeofile)
+m = MicGeom(file=micgeofile)
 g = RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=0.68, increment=0.01)
 env = Environment(c=346.04)
 st = SteeringVector(grid=g, mics=m, env=env, steer_type='classic')

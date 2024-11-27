@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import acoular as ac
 import numpy as np
 import pytest
@@ -110,3 +112,42 @@ def sounddevice_properties(setup_sounddevice_mocks):
     default_device = sd.query_devices(kind='input')
     num = setup_sounddevice_mocks
     return default_device['default_samplerate'], default_device['max_input_channels'], default_device['index'], num
+
+
+# AIAA Benchmark Data
+
+
+@pytest.fixture(scope='session')
+def aiaa_bechmark_csm_file():
+    """
+    Fixture for the AIAA benchmark file with cross spectral matrix data.
+
+    Uses an adjusted version of the b11aCsmEss.h5 file from the AIAA Benchmark data
+    https://api-depositonce.tu-berlin.de/server/api/core/bitstreams/02a8d97f-9aa8-4d0a-bd2e-9cca3bdddfe0/content
+    with less microphones, shorter measurement time and smaller block size.
+    """
+    return Path(__file__).parent / 'data' / 'b11aCsmEss.h5'
+
+
+@pytest.fixture(scope='session')
+def aiaa_bechmark_trigger_file():
+    """
+    Fixture for the AIAA benchmark file with trigger data.
+
+    Uses an adjusted version of the b11aTimeSeriesOpt.h5 file from the AIAA Benchmark data
+    https://api-depositonce.tu-berlin.de/server/api/core/bitstreams/02a8d97f-9aa8-4d0a-bd2e-9cca3bdddfe0/content
+    with shorter measurement time and smaller block size.
+    """
+    return Path(__file__).parent / 'data' / 'b11aTimeSeriesOpt.h5'
+
+
+@pytest.fixture(scope='session')
+def aiaa_bechmark_time_data_file():
+    """
+    Fixture for the AIAA benchmark file with time data.
+
+    Uses an adjusted version of the b11aTimeSeries.h5 file from the AIAA Benchmark data
+    https://api-depositonce.tu-berlin.de/server/api/core/bitstreams/02a8d97f-9aa8-4d0a-bd2e-9cca3bdddfe0/content
+    with shorter measurement time (0.01s).
+    """
+    return Path(__file__).parent / 'data' / 'b11aTimeSeries.h5'
