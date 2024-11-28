@@ -12,7 +12,9 @@ from traits.api import Bool, Enum, Float, Int, Range, TraitEnum
 
 from tests.utils import get_all_classes
 
+
 all_classes = get_all_classes()
+all_hastraits_classes = get_all_classes(hastraits_only=True)
 
 
 def create_instance(acoular_cls):
@@ -35,7 +37,7 @@ def test_instancing(acoular_cls):
         create_instance(acoular_cls)
 
 
-@pytest.mark.parametrize('acoular_cls', all_classes)
+@pytest.mark.parametrize('acoular_cls', all_hastraits_classes)
 def test_set_traits(acoular_cls):
     """Test that important traits can be set."""
     with warnings.catch_warnings():
@@ -65,3 +67,22 @@ def test_set_traits(acoular_cls):
                         elif tr.is_trait_type(TraitEnum) or tr.is_trait_type(Enum):
                             v = tr.handler.values
                             setattr(obj, k, v[len(v) // 2])
+
+
+@pytest.mark.parametrize('acoular_cls', all_hastraits_classes)
+def test_trait_dependencies(acoular_cls):
+    """Assert that a property that is depended on depends on something."""
+    obj = create_instance(acoular_cls)
+    for tname in obj.traits():
+        trait = obj.trait(tname)
+        if trait is None:
+            continue
+        elif trait.is_property:
+            if trait.depends_on is None:
+                continue
+            for otname in trait.depends_on:
+                other_trait = obj.trait(otname)
+                if other_trait is None:
+                    continue
+                elif other_trait.is_property:
+                    assert other_trait.depends_on is not None, f'{tname} depends on {otname} but {otname} does not depend on anything!'
