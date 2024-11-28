@@ -31,7 +31,7 @@ dependencies = [
     "numpy",
     "numba",
     "scipy>=1.1.0",
-    "scikit-learn",
+    "scikit-learn==1.5.2",
     "tables",
     "traits>=6.0",
 ]
