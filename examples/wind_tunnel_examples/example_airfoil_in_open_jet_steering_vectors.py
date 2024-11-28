@@ -55,11 +55,10 @@ invalid = [1, 7]
 t1.invalid_channels = invalid
 
 # %%
-# Calibration is usually needed and can be set directly at the
-# :class:`acoular.sources.MaskedTimeSamples` object (preferred) or for frequency domain processing
-# at the :class:`acoular.spectra.PowerSpectra` object (for backwards compatibility).
+# Calibration is usually needed and can be as a separte processing block with the
+# :class:`acoular.Calib` object.
 
-t1.calib = ac.Calib(file=calib_file)
+calib = ac.Calib(source=t1, file=calib_file)
 
 # %%
 # The microphone geometry must have the same number of valid channels as the
@@ -82,7 +81,7 @@ g = ac.RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=0.68, increment
 # matrix (and its eigenvalues and eigenvectors). Here, we use the Welch's method with a block size
 # of 128 samples, Hanning window and 50% overlap.
 
-f = ac.PowerSpectra(source=t1, window='Hanning', overlap='50%', block_size=128)
+f = ac.PowerSpectra(source=calib, window='Hanning', overlap='50%', block_size=128)
 
 # %%
 # To define the measurement environment, i.e. medium characteristics, the

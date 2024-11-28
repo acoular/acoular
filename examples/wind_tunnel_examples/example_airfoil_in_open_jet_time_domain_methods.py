@@ -57,8 +57,8 @@ ts = ac.MaskedTimeSamples(
     invalid_channels=[1, 7],
     start=0,
     stop=16000,
-    calib=ac.Calib(file=calib_file),
 )
+calib = ac.Calib(source=ts, file=calib_file)
 mics = ac.MicGeom(file=Path(ac.__file__).parent / 'xml' / 'array_56.xml', invalid_channels=[1, 7])
 grid = ac.RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=0.68, increment=0.05)
 env = ac.Environment(c=346.04)
@@ -71,7 +71,7 @@ st = ac.SteeringVector(grid=grid, mics=mics, env=env)
 # is zero-phase filtered, squared and block-wise averaged over time.
 # The result is cached to disk to prevent recalculation.
 
-bt = ac.BeamformerTime(source=ts, steer=st)
+bt = ac.BeamformerTime(source=calib, steer=st)
 ft = ac.FiltFiltOctave(source=bt, band=cfreq)
 pt = ac.TimePower(source=ft)
 avgt = ac.Average(source=pt, naverage=1024)
@@ -82,7 +82,7 @@ cacht = ac.Cache(source=avgt)  # cache to prevent recalculation
 # beamformer is calculated directly. It also allows for the removal of the autocorrelation, which is
 # similar to the removal of the cross spectral matrix diagonal.
 
-fi = ac.FiltFiltOctave(source=ts, band=cfreq)
+fi = ac.FiltFiltOctave(source=calib, band=cfreq)
 bts = ac.BeamformerTimeSq(source=fi, steer=st, r_diag=True)
 avgts = ac.Average(source=bts, naverage=1024)
 cachts = ac.Cache(source=avgts)  # cache to prevent recalculation
@@ -90,7 +90,7 @@ cachts = ac.Cache(source=avgts)  # cache to prevent recalculation
 # %%
 # Third, CLEAN deconvolution in the time domain (CLEAN-T) is applied, using the
 # :class:`acoular.tbeamform.BeamformerCleant` class.
-fct = ac.FiltFiltOctave(source=ts, band=cfreq)
+fct = ac.FiltFiltOctave(source=calib, band=cfreq)
 bct = ac.BeamformerCleant(source=fct, steer=st, n_iter=20, damp=0.7)
 ptct = ac.TimePower(source=bct)
 avgct = ac.Average(source=ptct, naverage=1024)
@@ -99,7 +99,7 @@ cachct = ac.Cache(source=avgct)  # cache to prevent recalculation
 # %%
 # Finally, squared signals with autocorrelation removal can be obtained by using the
 # :class:`acoular.tbeamform.BeamformerCleantSq` class.
-fcts = ac.FiltFiltOctave(source=ts, band=cfreq)
+fcts = ac.FiltFiltOctave(source=calib, band=cfreq)
 bcts = ac.BeamformerCleantSq(source=fcts, steer=st, n_iter=20, damp=0.7, r_diag=True)
 avgcts = ac.Average(source=bcts, naverage=1024)
 cachcts = ac.Cache(source=avgcts)  # cache to prevent recalculation
