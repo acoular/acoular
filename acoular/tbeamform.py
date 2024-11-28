@@ -44,7 +44,7 @@ from numpy import (
     zeros,
 )
 from scipy.linalg import norm
-from traits.api import Bool, CArray, Delegate, Enum, Float, Instance, Int, List, Property, Range, Trait, cached_property
+from traits.api import Bool, CArray, Delegate, Enum, Float, Instance, Int, List, Map, Property, Range, Trait, cached_property
 from traits.trait_errors import TraitError
 
 from .base import SamplesGenerator, TimeOut
@@ -228,7 +228,7 @@ class BeamformerTime(TimeOut):
     numchannels = Delegate('grid', 'size')
 
     #: Spatial weighting function.
-    weights = Trait('none', possible_weights, desc='spatial weighting function')
+    weights = Map(possible_weights, default_value='none', desc='spatial weighting function')
     # (from timedomain.possible_weights)
 
     # internal identifier

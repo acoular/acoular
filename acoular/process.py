@@ -320,7 +320,7 @@ class SampleSplitter(InOut):
     #: * 'none': nothing happens. Possibly leads to lost blocks of data
     buffer_overflow_treatment = Dict(
         key_trait=Instance(Generator),
-        value_trait=Trait('error', 'warning', 'none'),
+        value_trait=Enum('error', 'warning', 'none'),
         desc='defines buffer overflow behaviour.',
     )
 

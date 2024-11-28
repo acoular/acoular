@@ -71,6 +71,7 @@ from traits.api import (
     Str,
     Trait,
     Tuple,
+    Union,
     cached_property,
     observe,
     on_trait_change,
@@ -378,7 +379,7 @@ class MaskedTimeSamples(TimeSamples):
     start = CLong(0, desc='start of valid samples')
 
     #: Index of the last sample to be considered valid.
-    stop = Trait(None, None, CLong, desc='stop of valid samples')
+    stop = Union( None, CLong, desc='stop of valid samples')
 
     #: Channels that are to be treated as invalid.
     invalid_channels = ListInt(desc='list of invalid channels')
@@ -569,7 +570,7 @@ class PointSource(SamplesGenerator):
     #: `loop` take values from the end of :attr:`signal.signal()` array.
     #: `zeros` set source signal to zero, advisable for deterministic signals.
     #: defaults to `loop`.
-    prepadding = Trait('loop', 'zeros', desc='Behaviour for negative time indices.')
+    prepadding = Enum('loop', 'zeros', desc='Behaviour for negative time indices.')
 
     #: Upsampling factor, internal use, defaults to 16.
     up = Int(16, desc='upsampling factor')
@@ -1113,7 +1114,7 @@ class LineSource(PointSource):
     source_strength = CArray(desc='coefficients of the source strength')
 
     #:coherence
-    coherence = Trait('coherent', 'incoherent', desc='coherence mode')
+    coherence = Enum('coherent', 'incoherent', desc='coherence mode')
 
     # internal identifier
     digest = Property(

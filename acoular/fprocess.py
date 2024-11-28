@@ -295,7 +295,7 @@ class CrossPowerSpectra(AutoPowerSpectra):
     #: Calculation mode, either 'full' or 'upper'.
     #: 'full' calculates the full cross-spectral matrix, 'upper' calculates
     # only the upper triangle. Default is 'full'.
-    calc_mode = Trait('full', 'upper', 'lower', desc='calculation mode')
+    calc_mode = Enum('full', 'upper', 'lower', desc='calculation mode')
 
     #: Number of channels in output. If :attr:`calc_mode` is 'full', then
     #: :attr:`numchannels` is :math:`n^2`, where :math:`n` is the number of

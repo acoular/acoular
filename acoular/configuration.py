@@ -90,7 +90,7 @@ class Config(HasStrictTraits):
     #: * 'overwrite': Acoular classes replace existing cachefile content with new data.
     global_caching = Property()
 
-    _global_caching = Trait('individual', 'all', 'none', 'readonly', 'overwrite')
+    _global_caching = Enum('individual', 'all', 'none', 'readonly', 'overwrite')
 
     #: Flag that globally defines package used to read and write .h5 files
     #: defaults to 'pytables'. It is also possible to set it to 'tables', which is an alias for
