@@ -286,18 +286,18 @@ class Grid(ABCHasStrictTraits):
 
     # 'digest' is a placeholder for other properties in derived classes,
     # necessary to trigger the depends on mechanism
-    @property_depends_on('digest')
+    @property_depends_on(['digest'])
     @abstractmethod
     def _get_size(self):
         """Returns the number of grid points."""
 
     # 'digest' is a placeholder for other properties in derived classes
-    @property_depends_on('digest')
+    @property_depends_on(['digest'])
     @abstractmethod
     def _get_shape(self):
         """Returns the shape of the grid as a Tuple."""
 
-    @property_depends_on('digest')
+    @property_depends_on(['digest'])
     @abstractmethod
     def _get_pos(self):
         """Returns the grid positions as (3, size) array of floats."""
@@ -364,22 +364,22 @@ class RectGrid(Grid):
         depends_on=['x_min', 'x_max', 'y_min', 'y_max', 'z', 'increment'],
     )
 
-    @property_depends_on('nxsteps, nysteps')
+    @property_depends_on(['nxsteps', 'nysteps'])
     def _get_size(self):
         return self.nxsteps * self.nysteps
 
-    @property_depends_on('nxsteps, nysteps')
+    @property_depends_on(['nxsteps', 'nysteps'])
     def _get_shape(self):
         return (self.nxsteps, self.nysteps)
 
-    @property_depends_on('x_min, x_max, increment')
+    @property_depends_on(['x_min', 'x_max', 'increment'])
     def _get_nxsteps(self):
         i = abs(self.increment)
         if i != 0:
             return int(round((abs(self.x_max - self.x_min) + i) / i))
         return 1
 
-    @property_depends_on('y_min, y_max, increment')
+    @property_depends_on(['y_min', 'y_max', 'increment'])
     def _get_nysteps(self):
         i = abs(self.increment)
         if i != 0:
@@ -390,7 +390,7 @@ class RectGrid(Grid):
     def _get_digest(self):
         return digest(self)
 
-    @property_depends_on('x_min, x_max, y_min, y_max, increment')
+    @property_depends_on(['x_min', 'x_max', 'y_min', 'y_max', 'increment'])
     def _get_pos(self):
         """Calculates grid co-ordinates.
 
@@ -579,29 +579,29 @@ class RectGrid3D(RectGrid):
         depends_on=['x_min', 'x_max', 'y_min', 'y_max', 'z_min', 'z_max', '_increment'],
     )
 
-    @property_depends_on('nxsteps, nysteps, nzsteps')
+    @property_depends_on(['nxsteps', 'nysteps', 'nzsteps'])
     def _get_size(self):
         return self.nxsteps * self.nysteps * self.nzsteps
 
-    @property_depends_on('nxsteps, nysteps, nzsteps')
+    @property_depends_on(['nxsteps', 'nysteps', 'nzsteps'])
     def _get_shape(self):
         return (self.nxsteps, self.nysteps, self.nzsteps)
 
-    @property_depends_on('x_min, x_max, _increment')
+    @property_depends_on(['x_min', 'x_max', '_increment'])
     def _get_nxsteps(self):
         i = abs(self.increment) if isscalar(self.increment) else abs(self.increment[0])
         if i != 0:
             return int(round((abs(self.x_max - self.x_min) + i) / i))
         return 1
 
-    @property_depends_on('y_min, y_max, _increment')
+    @property_depends_on(['y_min', 'y_max', '_increment'])
     def _get_nysteps(self):
         i = abs(self.increment) if isscalar(self.increment) else abs(self.increment[1])
         if i != 0:
             return int(round((abs(self.y_max - self.y_min) + i) / i))
         return 1
 
-    @property_depends_on('z_min, z_max, _increment')
+    @property_depends_on(['z_min', 'z_max', '_increment'])
     def _get_nzsteps(self):
         i = abs(self.increment) if isscalar(self.increment) else abs(self.increment[2])
         if i != 0:
@@ -702,9 +702,7 @@ class ImportGrid(Grid):
     subgrids = CArray(desc='names of subgrids for each point')
 
     # internal identifier
-    digest = Property(
-        depends_on=['gpos_file'],
-    )
+    digest = Property(depends_on=['gpos_file'])
 
     @cached_property
     def _get_digest(self):
@@ -712,16 +710,16 @@ class ImportGrid(Grid):
 
     # 'digest' is a placeholder for other properties in derived classes,
     # necessary to trigger the depends on mechanism
-    @property_depends_on('gpos_file')
+    @property_depends_on(['gpos_file'])
     def _get_size(self):
         return self.pos.shape[-1]
 
     # 'digest' is a placeholder for other properties in derived classes
-    @property_depends_on('gpos_file')
+    @property_depends_on(['gpos_file'])
     def _get_shape(self):
         return (self.pos.shape[-1],)
 
-    @property_depends_on('gpos_file')
+    @property_depends_on(['gpos_file'])
     def _get_pos(self):
         return self.gpos_file
 
@@ -775,16 +773,16 @@ class LineGrid(Grid):
 
     # 'digest' is a placeholder for other properties in derived classes,
     # necessary to trigger the depends on mechanism
-    @property_depends_on('numpoints')
+    @property_depends_on(['numpoints'])
     def _get_size(self):
         return self.pos.shape[-1]
 
     # 'digest' is a placeholder for other properties in derived classes
-    @property_depends_on('numpoints')
+    @property_depends_on(['numpoints'])
     def _get_shape(self):
         return self.pos.shape[-1]
 
-    @property_depends_on('numpoints,length,direction,loc')
+    @property_depends_on(['numpoints', 'length', 'direction', 'loc'])
     def _get_pos(self):
         dist = self.length / (self.numpoints - 1)
         loc = array(self.loc, dtype=float).reshape((3, 1))
@@ -826,23 +824,23 @@ class MergeGrid(Grid):
 
     # 'digest' is a placeholder for other properties in derived classes,
     # necessary to trigger the depends on mechanism
-    @property_depends_on('digest')
+    @property_depends_on(['digest'])
     def _get_size(self):
         return self.pos.shape[-1]
 
     # 'digest' is a placeholder for other properties in derived classes
-    @property_depends_on('digest')
+    @property_depends_on(['digest'])
     def _get_shape(self):
         return self.pos.shape[-1]
 
-    @property_depends_on('digest')
+    @property_depends_on(['digest'])
     def _get_subgrids(self):
         subgrids = zeros((1, 0), dtype=str)
         for grid in self.grids:
             subgrids = append(subgrids, tile(grid.__class__.__name__ + grid.digest, grid.size))
         return subgrids[:, newaxis].T
 
-    @property_depends_on('digest')
+    @property_depends_on(['digest'])
     def _get_pos(self):
         bpos = zeros((3, 0))
         # subgrids = zeros((1,0))

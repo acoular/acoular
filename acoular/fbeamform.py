@@ -202,7 +202,7 @@ class SteeringVector(HasStrictTraits):
     # internal identifier, use for inverse methods, excluding steering vector type
     inv_digest = Property(depends_on=['env.digest', 'grid.digest', 'mics.digest', '_ref'])
 
-    @property_depends_on('grid.digest, env.digest, _ref')
+    @property_depends_on(['grid.digest', 'env.digest', '_ref'])
     def _get_r0(self):
         if isscalar(self.ref):
             if self.ref > 0:
@@ -210,7 +210,7 @@ class SteeringVector(HasStrictTraits):
             return self.env._r(self.grid.pos())
         return self.env._r(self.grid.pos, self.ref[:, newaxis])
 
-    @property_depends_on('grid.digest, mics.digest, env.digest')
+    @property_depends_on(['grid.digest', 'mics.digest', 'env.digest'])
     def _get_rm(self):
         return atleast_2d(self.env._r(self.grid.pos, self.mics.pos))
 
@@ -533,7 +533,7 @@ class BeamformerBase(HasStrictTraits):
             msg = f'{num_channels:d} channels do not fit {self.steer.mics.num_mics:d} mics'
             raise ValueError(msg)
 
-    @property_depends_on('digest')
+    @property_depends_on(['digest'])
     def _get_result(self):
         """Implements the :attr:`result` getter routine.
         The beamforming result is either loaded or calculated.
@@ -973,7 +973,7 @@ class BeamformerEig(BeamformerBase):
     def _get_digest(self):
         return digest(self)
 
-    @property_depends_on('steer.mics, n')
+    @property_depends_on(['steer.mics', 'n'])
     def _get_na(self):
         na = self.n
         nm = self.steer.mics.num_mics

@@ -60,7 +60,7 @@ class SignalGenerator(ABCHasStrictTraits):
     num_samples = CLong
 
     # internal identifier
-    digest = Property
+    digest = Property(depends_on=['rms', 'sample_freq', 'numsamples'])
 
     @abstractmethod
     def _get_digest(self):
@@ -85,7 +85,6 @@ class SignalGenerator(ABCHasStrictTraits):
         -------
         array of floats
             The resulting signal of length `factor` * :attr:`numsamples`.
-
         """
         return resample(self.signal(), factor * self.numsamples)
 
@@ -99,9 +98,7 @@ class WNoiseGenerator(SignalGenerator):
     seed = Int(0, desc='random seed value')
 
     # internal identifier
-    digest = Property(
-        depends_on=['rms', 'numsamples', 'sample_freq', 'seed', '__class__'],
-    )
+    digest = Property(depends_on=['rms', 'numsamples', 'sample_freq', 'seed', '__class__'])
 
     @cached_property
     def _get_digest(self):
@@ -114,7 +111,6 @@ class WNoiseGenerator(SignalGenerator):
         -------
         Array of floats
             The resulting signal as an array of length :attr:`~SignalGenerator.numsamples`.
-
         """
         rnd_gen = RandomState(self.seed)
         return self.rms * rnd_gen.standard_normal(self.num_samples)
@@ -143,9 +139,7 @@ class PNoiseGenerator(SignalGenerator):
     depth = Int(16, desc='octave depth')
 
     # internal identifier
-    digest = Property(
-        depends_on=['rms', 'numsamples', 'sample_freq', 'seed', 'depth', '__class__'],
-    )
+    digest = Property(depends_on=['rms', 'numsamples', 'sample_freq', 'seed', 'depth', '__class__'])
 
     @cached_property
     def _get_digest(self):
@@ -217,7 +211,6 @@ class FiltWNoiseGenerator(WNoiseGenerator):
         -------
         Array of floats
             The resulting signal as an array of length :attr:`~SignalGenerator.numsamples`.
-
         """
         rnd_gen = RandomState(self.seed)
         ma = self.handle_empty_coefficients(self.ma)
@@ -273,9 +266,7 @@ class SineGenerator(SignalGenerator):
         self._amp = amp
 
     # internal identifier
-    digest = Property(
-        depends_on=['_amp', 'numsamples', 'sample_freq', 'freq', 'phase', '__class__'],
-    )
+    digest = Property(depends_on=['_amp', 'numsamples', 'sample_freq', 'freq', 'phase', '__class__'])
 
     @cached_property
     def _get_digest(self):
@@ -288,7 +279,6 @@ class SineGenerator(SignalGenerator):
         -------
         array of floats
             The resulting signal as an array of length :attr:`~SignalGenerator.numsamples`.
-
         """
         t = arange(self.num_samples, dtype=float) / self.sample_freq
         return self.amplitude * sin(2 * pi * self.freq * t + self.phase)
@@ -308,7 +298,6 @@ class GenericSignalGenerator(SignalGenerator):
     >>> data = np.random.rand(1000, 1)
     >>> ts = TimeSamples(data=data, sample_freq=51200)
     >>> sig = GenericSignalGenerator(source=ts)
-
     """
 
     #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
