@@ -1,0 +1,39 @@
+name: Inspect regression tests
+
+on:
+  workflow_dispatch:
+    branches: [ "*" ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ['3.12']
+    steps:
+      - name: Check out a copy of the repository
+        uses: actions/checkout@v4
+      - name: Set up hatch
+        uses: ./.github/actions/setup-hatch
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Set up PortAudio
+        uses: ./.github/actions/setup-portaudio
+        with:
+          os: ${{ matrix.os }}
+      - name: Run tests
+        run: hatch -v run +py=${{ matrix.python-version }} tests:reset_regtest
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+            name: upload regression test results
+            path: tests/regression/_regtest_outputs
+
+
+
