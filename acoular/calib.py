@@ -62,7 +62,7 @@ class Calib(InOut):
 
         >>> fft = ac.RFFT(source=ts, block_size=16)
         >>> calib = ac.Calib(source=fft)
-        >>> calib.data = np.zeros(ts.numchannels * fft.numfreqs)
+        >>> calib.data = 1e-2 * np.ones(ts.numchannels * fft.numfreqs)
         >>> print(next(calib.result(num=1)))
         [[ 0.21277598+0.j          0.06519151-0.03153052j -0.04546857-0.06782166j
            0.00149169+0.00993159j  0.03545392+0.07844662j  0.06390865+0.00359771j
