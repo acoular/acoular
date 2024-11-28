@@ -1560,10 +1560,7 @@ class BeamformerDamasPlus(BeamformerDamas):
                 self._ac[i] = linprog(c=cT, A_ub=psf, b_ub=y).x / unit  # defaults to simplex method and non-negative x
             else:
                 if self.method == 'LassoLars':
-                    model = LassoLars(
-                        alpha=self.alpha * unit,
-                        max_iter=self.max_iter,
-                    )
+                    model = LassoLars(alpha=self.alpha * unit, max_iter=self.max_iter, positive=True)
                 elif self.method == 'OMPCV':
                     model = OrthogonalMatchingPursuitCV()
                 else:
@@ -2026,9 +2023,9 @@ class BeamformerCMF(BeamformerBase):
             R = realify(reshape(csm.T, (nc * nc, 1))[ind, :])[ind_reim, :] * unit
             # choose method
             if self.method == 'LassoLars':
-                model = LassoLars(alpha=self.alpha * unit, max_iter=self.max_iter, **sklearn_ndict)
+                model = LassoLars(alpha=self.alpha * unit, max_iter=self.max_iter, positive=True, **sklearn_ndict)
             elif self.method == 'LassoLarsBIC':
-                model = LassoLarsIC(criterion='bic', max_iter=self.max_iter, **sklearn_ndict)
+                model = LassoLarsIC(criterion='bic', max_iter=self.max_iter, positive=True, **sklearn_ndict)
             elif self.method == 'OMPCV':
                 model = OrthogonalMatchingPursuitCV(**sklearn_ndict)
             elif self.method == 'NNLS':
@@ -2476,13 +2473,13 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
                         AB = vstack([hstack([A.real, -A.imag]), hstack([A.imag, A.real])])
                         R = hstack([emode.real.T, emode.imag.T]) * unit
                         if self.method == 'LassoLars':
-                            model = LassoLars(alpha=self.alpha * unit, max_iter=self.max_iter)
+                            model = LassoLars(alpha=self.alpha * unit, max_iter=self.max_iter, positive=True)
                         elif self.method == 'LassoLarsBIC':
-                            model = LassoLarsIC(criterion='bic', max_iter=self.max_iter)
+                            model = LassoLarsIC(criterion='bic', max_iter=self.max_iter, positive=True)
                         elif self.method == 'OMPCV':
                             model = OrthogonalMatchingPursuitCV()
                         elif self.method == 'LassoLarsCV':
-                            model = LassoLarsCV(max_iter=self.max_iter)
+                            model = LassoLarsCV(max_iter=self.max_iter, positive=True)
                         elif self.method == 'NNLS':
                             model = LinearRegression(positive=True)
                         model.normalize = False
