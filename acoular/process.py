@@ -97,11 +97,11 @@ class Average(InOut):
     num_per_average = Int(64, desc='number of samples/snapshots to average over')
 
     #: Sampling frequency of the output signal, is set automatically.
-    sample_freq = Property(depends_on='source.sample_freq, num_per_average')
+    sample_freq = Property(depends_on=['source.sample_freq', 'num_per_average'])
 
     #: Number of samples (time domain) or snapshots (frequency domain) of the output signal.
     #: Is set automatically.
-    num_samples = Property(depends_on='source.num_samples, num_per_average')
+    num_samples = Property(depends_on=['source.num_samples', 'num_per_average'])
 
     # internal identifier
     digest = Property(depends_on=['source.digest', '__class__', 'num_per_average'])
@@ -179,7 +179,7 @@ class Cache(InOut):
     """
 
     # basename for cache
-    basename = Property(depends_on='digest')
+    basename = Property(depends_on=['digest'])
 
     # hdf5 cache file
     h5f = Instance(H5CacheFileBase, transient=True)

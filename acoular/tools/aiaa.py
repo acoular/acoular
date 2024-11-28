@@ -93,7 +93,7 @@ class CsmAIAABenchmark(PowerSpectraImport):
 
     #: Basename of the .h5 file with data, is set automatically.
     basename = Property(
-        depends_on='file',
+        depends_on=['file'],
         desc='basename of data file',
     )
 
@@ -130,7 +130,7 @@ class CsmAIAABenchmark(PowerSpectraImport):
         except IndexError:
             return range(0)
 
-    @property_depends_on('digest')
+    @property_depends_on(['digest'])
     def _get_num_channels(self):
         try:
             attrs = self.h5f.get_data_by_reference('MetaData/ArrayAttributes')
@@ -138,7 +138,7 @@ class CsmAIAABenchmark(PowerSpectraImport):
         except IndexError:
             return 0
 
-    @property_depends_on('digest')
+    @property_depends_on(['digest'])
     def _get_csm(self):
         """Loads cross spectral matrix from file."""
         csmre = self.h5f.get_data_by_reference('/CsmData/csmReal')[:].transpose((2, 0, 1))

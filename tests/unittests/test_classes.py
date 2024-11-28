@@ -72,17 +72,34 @@ def test_set_traits(acoular_cls):
 @pytest.mark.parametrize('acoular_cls', all_hastraits_classes)
 def test_trait_dependencies(acoular_cls):
     """Assert that a property that is depended on depends on something."""
+    def check_or_unpack(obj, tname, toplevel=True):
+        assert len(objtname:=tname.split('.')) < 3, 'Trait dependency too deep.'
+        # recurse if trait depends on a trait of another object
+        if len(objtname) == 2:
+            print('objtname: ', objtname)
+            # instantiate the trait
+            obj = create_instance(obj.trait(objtname[0]).trait_type.klass)
+            tname = objtname[1]
+            check_or_unpack(obj, tname, toplevel=False)
+        else:
+            trait = obj.trait(tname)
+            print('trait: ', tname)
+            if trait.is_property:
+                if trait.depends_on is None:
+                    assert toplevel, type(obj).__name__ + '.' + tname
+                else:
+                    do = trait.depends_on
+                    do = do if isinstance(do, list) else [do]
+                    for otname in do:
+                        print('otname: ', otname)
+                        check_or_unpack(obj, otname, toplevel=False)
+
     obj = create_instance(acoular_cls)
     for tname in obj.traits():
-        trait = obj.trait(tname)
-        if trait is None:
-            continue
-        elif trait.is_property:
-            if trait.depends_on is None:
-                continue
-            for otname in trait.depends_on:
-                other_trait = obj.trait(otname)
-                if other_trait is None:
-                    continue
-                elif other_trait.is_property:
-                    assert other_trait.depends_on is not None, f'{tname} depends on {otname} but {otname} does not depend on anything!'
+        print('toplevel: ', tname)
+        try:
+            check_or_unpack(obj, tname)
+        except AssertionError as e:
+            otname = str(e).split(' ')[0].split('\n')[0]
+            tname = type(obj).__name__ + '.' + tname
+            raise AssertionError(f'{tname} depends on {otname}, but {otname} does not depend on anything.')

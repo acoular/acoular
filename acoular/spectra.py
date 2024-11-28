@@ -236,7 +236,7 @@ class PowerSpectra(BaseSpectra):
     indices = Property(desc='index range')
 
     #: Name of the cache file without extension, readonly.
-    basename = Property(depends_on='_source.digest', desc='basename for cache file')
+    basename = Property(depends_on=['_source.digest'], desc='basename for cache file')
 
     #: The cross spectral matrix,
     #: (number of frequencies, num_channels, num_channels) array of complex;
@@ -272,11 +272,11 @@ class PowerSpectra(BaseSpectra):
         warn(msg, DeprecationWarning, stacklevel=2)
         self._calib = calib
 
-    @property_depends_on('_source.num_samples, block_size, overlap')
+    @property_depends_on(['_source.num_samples', 'block_size', 'overlap'])
     def _get_num_blocks(self):
         return self.overlap_ * self._source.num_samples / self.block_size - self.overlap_ + 1
 
-    @property_depends_on('_source.sample_freq, block_size, ind_low, ind_high')
+    @property_depends_on(['_source.sample_freq', 'block_size', 'ind_low', 'ind_high'])
     def _get_freq_range(self):
         fftfreq = self.fftfreq()
         if fftfreq is not None:
@@ -290,7 +290,7 @@ class PowerSpectra(BaseSpectra):
         self._freqlc = freq_range[0]
         self._freqhc = freq_range[1]
 
-    @property_depends_on('_source.sample_freq, block_size, _ind_low, _freqlc')
+    @property_depends_on(['_source.sample_freq', 'block_size', '_ind_low', '_freqlc'])
     def _get_ind_low(self):
         fftfreq = self.fftfreq()
         if fftfreq is not None:
@@ -299,7 +299,7 @@ class PowerSpectra(BaseSpectra):
             return searchsorted(fftfreq[:-1], self._freqlc)
         return None
 
-    @property_depends_on('_source.sample_freq, block_size, _ind_high, _freqhc')
+    @property_depends_on(['_source.sample_freq', 'block_size', '_ind_high', '_freqhc'])
     def _get_ind_high(self):
         fftfreq = self.fftfreq()
         if fftfreq is not None:
@@ -337,7 +337,7 @@ class PowerSpectra(BaseSpectra):
     def _get_source(self):
         return self._source
 
-    @property_depends_on('block_size, ind_low, ind_high')
+    @property_depends_on(['block_size', 'ind_low', 'ind_high'])
     def _get_indices(self):
         fftfreq = self.fftfreq()
         if fftfreq is not None:
@@ -470,7 +470,7 @@ class PowerSpectra(BaseSpectra):
             self.h5f.flush()
         return ac
 
-    @property_depends_on('digest')
+    @property_depends_on(['digest'])
     def _get_csm(self):
         """Main work is done here:
         Cross spectral matrix is either loaded from cache file or
@@ -481,7 +481,7 @@ class PowerSpectra(BaseSpectra):
             return self.calc_csm()
         return self._get_filecache('csm')
 
-    @property_depends_on('digest')
+    @property_depends_on(['digest'])
     def _get_eva(self):
         """Eigenvalues of cross spectral matrix are either loaded from cache file or
         calculated and then additionally stored into cache.
@@ -490,7 +490,7 @@ class PowerSpectra(BaseSpectra):
             return self.calc_eva()
         return self._get_filecache('eva')
 
-    @property_depends_on('digest')
+    @property_depends_on(['digest'])
     def _get_eve(self):
         """Eigenvectors of cross spectral matrix are either loaded from cache file or
         calculated and then additionally stored into cache.
@@ -687,14 +687,10 @@ class PowerSpectraImport(PowerSpectra):
     _ind_high = Union(None, Int, desc='index of highest frequency line')
 
     # internal identifier
-    digest = Property(
-        depends_on=[
-            '_csmsum',
-        ],
-    )
+    digest = Property(depends_on=['_csmsum'])
 
     #: Name of the cache file without extension, readonly.
-    basename = Property(depends_on='digest', desc='basename for cache file')
+    basename = Property(depends_on=['digest'], desc='basename for cache file')
 
     # csm shadow trait, only for internal use.
     _csm = CArray()
@@ -723,14 +719,14 @@ class PowerSpectraImport(PowerSpectra):
         self._csmsum = real(self._csm).sum() + (imag(self._csm) ** 2).sum()  # to trigger new digest creation
         self._csm = csm
 
-    @property_depends_on('digest')
+    @property_depends_on(['digest'])
     def _get_eva(self):
         """Eigenvalues of cross spectral matrix are either loaded from cache file or
         calculated and then additionally stored into cache.
         """
         return self.calc_eva()
 
-    @property_depends_on('digest')
+    @property_depends_on(['digest'])
     def _get_eve(self):
         """Eigenvectors of cross spectral matrix are either loaded from cache file or
         calculated and then additionally stored into cache.

@@ -43,19 +43,17 @@ class Trajectory(HasStrictTraits):
     tck = Property()
 
     # internal identifier
-    digest = Property(
-        depends_on=['points[]'],
-    )
+    digest = Property(depends_on=['points[]'])
 
     @cached_property
     def _get_digest(self):
         return digest(self)
 
-    @property_depends_on('points[]')
+    @property_depends_on(['points[]'])
     def _get_interval(self):
         return sort(list(self.points.keys()))[r_[0, -1]]
 
-    @property_depends_on('points[]')
+    @property_depends_on(['points[]'])
     def _get_tck(self):
         t = sort(list(self.points.keys()))
         xp = array([self.points[i] for i in t]).T
