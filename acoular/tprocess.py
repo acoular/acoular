@@ -97,7 +97,6 @@ from traits.api import (
     Map,
     Property,
     Str,
-    Trait,
     Union,
     cached_property,
     observe,
@@ -1249,7 +1248,7 @@ class Mixer(TimeOut):
     """Mixes the signals from several sources."""
 
     # Data source; :class:`~acoular.base.SamplesGenerator` object.
-    source = Trait(SamplesGenerator)
+    source = Instance(SamplesGenerator)
 
     # List of additional :class:`~acoular.base.SamplesGenerator` objects
     # to be mixed.

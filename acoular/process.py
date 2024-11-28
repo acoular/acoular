@@ -18,7 +18,7 @@ from collections import deque
 from inspect import currentframe
 from warnings import warn
 
-from traits.api import Bool, Dict, Instance, Int, Property, Trait, cached_property, on_trait_change
+from traits.api import Any, Bool, Dict, Enum, Instance, Int, Property, cached_property, on_trait_change
 
 from .base import Generator, InOut
 from .configuration import config
@@ -332,7 +332,7 @@ class SampleSplitter(InOut):
     _buffer_overflow = Bool(False)
 
     # Helper Trait holds source generator
-    _source_generator = Trait()
+    _source_generator = Any()
 
     def _create_block_buffer(self, obj):
         self.block_buffer[obj] = deque([], maxlen=self.buffer_size)

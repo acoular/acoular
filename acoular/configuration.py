@@ -54,7 +54,7 @@ else:
     environ['OPENBLAS_NUM_THREADS'] = '1'
 
 # this loads numpy, so we have to defer loading until OpenBLAS check is done
-from traits.api import Bool, Enum, HasStrictTraits, Property, Str, Trait, cached_property
+from traits.api import Bool, Enum, HasStrictTraits, Property, Str, cached_property
 
 
 class Config(HasStrictTraits):
