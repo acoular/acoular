@@ -12,8 +12,10 @@
 # imports from other packages
 import xml.dom.minidom
 
-from numpy import array, newaxis
+from numpy import arange, array, newaxis
 from traits.api import CArray, CLong, File, Property, cached_property, on_trait_change
+
+import acoular as ac
 
 from .base import InOut
 
@@ -126,9 +128,10 @@ class Calib(InOut):
             or sourcechannels is numchannels*numfreqs of numchannels*numchannels*numfreqs
             if the source data is in the frequency domain.
         """
+        idx = self.source.channels if isinstance(self.source, ac.MaskedTimeSamples) else arange(self.data.shape[0])
         for block in self.source.result(num):
-            if self.data.shape[0] == block.shape[1]:
-                yield block * self.data[newaxis]
+            if self.data[idx].shape[0] == block.shape[1]:
+                yield block * self.data[idx][newaxis]
             else:
                 msg = 'calibration data shape does not match source data shape: %i, %i' % (
                     self.data.shape[0],
