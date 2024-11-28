@@ -48,7 +48,6 @@ from traits.api import (
     Int,
     Map,
     Property,
-    Trait,
     Union,
     cached_property,
     property_depends_on,
@@ -65,7 +64,7 @@ from .internal import digest
 
 class BaseSpectra(HasPrivateTraits):
     #: Data source; :class:`~acoular.sources.SamplesGenerator` or derived object.
-    source = Trait(SamplesGenerator)
+    source = Instance(SamplesGenerator)
 
     #: Sampling frequency of output signal, as given by :attr:`source`.
     sample_freq = Delegate('source')
@@ -164,7 +163,7 @@ class PowerSpectra(BaseSpectra):
     """
 
     # Shadow trait, should not be set directly, for internal use.
-    _source = Trait(SamplesGenerator)
+    _source = Instance(SamplesGenerator)
 
     #: Data source; :class:`~acoular.sources.SamplesGenerator` or derived object.
     source = Property(_source, desc='time data object')

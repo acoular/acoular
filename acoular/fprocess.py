@@ -17,7 +17,7 @@ from warnings import warn
 
 import numpy as np
 from scipy import fft
-from traits.api import Bool, CArray, Enum, Instance, Int, Property, Trait, Union, cached_property
+from traits.api import Bool, CArray, Enum, Instance, Int, Property, Union, cached_property
 
 from .base import SamplesGenerator, SpectraGenerator, SpectraOut, TimeOut
 from .fastFuncs import calcCSM
@@ -286,7 +286,7 @@ class CrossPowerSpectra(AutoPowerSpectra):
     """
 
     #: Data source; :class:`~acoular.base.SpectraGenerator` or derived object.
-    source = Trait(SpectraGenerator)
+    source = Instance(SpectraGenerator)
 
     #: The floating-number-precision of entries of csm, eigenvalues and
     #: eigenvectors, corresponding to numpy dtypes. Default is 64 bit.

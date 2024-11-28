@@ -21,7 +21,7 @@ from warnings import warn
 from numpy import arange, array, log, pi, repeat, sin, sqrt, tile, zeros
 from numpy.random import RandomState
 from scipy.signal import resample, sosfilt, tf2sos
-from traits.api import Bool, CArray, CLong, Delegate, Float, HasPrivateTraits, Int, Property, Trait, cached_property
+from traits.api import Bool, CArray, CLong, Delegate, Float, HasPrivateTraits, Int, Instance, Property, cached_property
 
 # acoular imports
 from .base import SamplesGenerator
@@ -296,7 +296,7 @@ class GenericSignalGenerator(SignalGenerator):
     """
 
     #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
-    source = Trait(SamplesGenerator)
+    source = Instance(SamplesGenerator)
 
     #: Sampling frequency of output signal, as given by :attr:`source`.
     sample_freq = Delegate('source')

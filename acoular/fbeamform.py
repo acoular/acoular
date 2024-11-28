@@ -98,7 +98,6 @@ from traits.api import (
     List,
     Property,
     Range,
-    Trait,
     Tuple,
     cached_property,
     on_trait_change,
@@ -131,10 +130,10 @@ class SteeringVector(HasPrivateTraits):
     """
 
     #: :class:`~acoular.grids.Grid`-derived object that provides the grid locations.
-    grid = Trait(Grid, desc='beamforming grid')
+    grid = Instance(Grid, desc='beamforming grid')
 
     #: :class:`~acoular.microphones.MicGeom` object that provides the microphone locations.
-    mics = Trait(MicGeom, desc='microphone geometry')
+    mics = Instance(MicGeom, desc='microphone geometry')
 
     #: Type of steering vectors, see also :cite:`Sarradj2012`. Defaults to 'true level'.
     steer_type = Enum('true level', 'true location', 'classic', 'inverse', desc='type of steering vectors used')
@@ -433,7 +432,7 @@ class BeamformerBase(HasPrivateTraits):
 
     #: :class:`~acoular.spectra.PowerSpectra` object that provides the
     #: cross spectral matrix and eigenvalues
-    freq_data = Trait(PowerSpectra, desc='freq data object')
+    freq_data = Instance(PowerSpectra, desc='freq data object')
 
     #: Boolean flag, if 'True' (default), the main diagonal is removed before beamforming.
     r_diag = Bool(True, desc='removal of diagonal')
@@ -1380,7 +1379,7 @@ class BeamformerDamas(BeamformerBase):
     beamformer = Property()
 
     # private storage of beamformer instance
-    _beamformer = Trait(BeamformerBase)
+    _beamformer = Instance(BeamformerBase)
 
     #: The floating-number-precision of the PSFs. Default is 64 bit.
     psf_precision = Enum('float64', 'float32', desc='precision of PSF')
@@ -1596,7 +1595,7 @@ class BeamformerOrth(BeamformerBase):
     beamformer = Property()
 
     # private storage of beamformer instance
-    _beamformer = Trait(BeamformerEig)
+    _beamformer = Instance(BeamformerEig)
 
     #: List of components to consider, use this to directly set the eigenvalues
     #: used in the beamformer. Alternatively, set :attr:`n`.
@@ -1784,7 +1783,7 @@ class BeamformerClean(BeamformerBase):
     beamformer = Property()
 
     # private storage of beamformer instance
-    _beamformer = Trait(BeamformerBase)
+    _beamformer = Instance(BeamformerBase)
 
     #: The floating-number-precision of the PSFs. Default is 64 bit.
     psf_precision = Enum('float64', 'float32', desc='precision of PSF.')
@@ -1904,7 +1903,7 @@ class BeamformerCMF(BeamformerBase):
     #: These methods are implemented in
     #: the `scikit-learn <http://scikit-learn.org/stable/user_guide.html>`_
     #: module.
-    method = Trait(
+    method = Enum(
         'LassoLars',
         'LassoLarsBIC',
         'OMPCV',
@@ -2299,7 +2298,7 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
     #: These methods are implemented in
     #: the `scikit-learn <http://scikit-learn.org/stable/user_guide.html>`_
     #: module.
-    method = Trait(
+    method = Enum(
         'Suzuki',
         'InverseIRLS',
         'LassoLars',
