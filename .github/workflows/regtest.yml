@@ -9,7 +9,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  tests:
+  reg_test:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
