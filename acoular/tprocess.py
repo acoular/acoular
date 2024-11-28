@@ -88,6 +88,7 @@ from traits.api import (
     Delegate,
     Dict,
     File,
+    Enum,
     Float,
     Instance,
     Int,
@@ -1834,7 +1835,7 @@ class WriteH5(TimeOut, DeprecatedName):
 
     # The floating-number-precision of entries of H5 File corresponding
     # to numpy dtypes. Default is 32 bit.
-    precision = Trait('float32', 'float64', desc='precision of H5 File')
+    precision = Enum('float32', 'float64', desc='precision of H5 File')
 
     # Metadata to be stored in HDF5 file object
     metadata = Dict(desc='metadata to be stored in .h5 file')

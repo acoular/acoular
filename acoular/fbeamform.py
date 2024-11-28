@@ -450,7 +450,7 @@ class BeamformerBase(HasPrivateTraits):
     )
 
     #: Floating point precision of property result. Corresponding to numpy dtypes. Default = 64 Bit.
-    precision = Trait('float64', 'float32', desc='precision (32/64 Bit) of result, corresponding to numpy dtypes')
+    precision = Enum('float64', 'float32', desc='precision (32/64 Bit) of result, corresponding to numpy dtypes')
 
     #: Boolean flag, if 'True' (default), the result is cached in h5 files.
     cached = Bool(True, desc='cached flag')
@@ -1223,7 +1223,7 @@ class PointSpreadFunction(HasPrivateTraits):
     calcmode = Trait('single', 'block', 'full', 'readonly', desc='mode of calculation / storage')
 
     #: Floating point precision of property psf. Corresponding to numpy dtypes. Default = 64 Bit.
-    precision = Trait('float64', 'float32', desc='precision (32/64 Bit) of result, corresponding to numpy dtypes')
+    precision = Enum('float64', 'float32', desc='precision (32/64 Bit) of result, corresponding to numpy dtypes')
 
     #: The actual point spread function.
     psf = Property(desc='point spread function')
@@ -1383,7 +1383,7 @@ class BeamformerDamas(BeamformerBase):
     _beamformer = Trait(BeamformerBase)
 
     #: The floating-number-precision of the PSFs. Default is 64 bit.
-    psf_precision = Trait('float64', 'float32', desc='precision of PSF')
+    psf_precision = Enum('float64', 'float32', desc='precision of PSF')
 
     #: Number of iterations, defaults to 100.
     n_iter = Int(100, desc='number of iterations')
@@ -1787,7 +1787,7 @@ class BeamformerClean(BeamformerBase):
     _beamformer = Trait(BeamformerBase)
 
     #: The floating-number-precision of the PSFs. Default is 64 bit.
-    psf_precision = Trait('float64', 'float32', desc='precision of PSF.')
+    psf_precision = Enum('float64', 'float32', desc='precision of PSF.')
 
     # iteration damping factor
     # defaults to 0.6

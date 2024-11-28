@@ -105,7 +105,7 @@ class BaseSpectra(HasPrivateTraits):
 
     #: The floating-number-precision of the resulting spectra, corresponding to numpy dtypes.
     #: Default is 'complex128'.
-    precision = Trait('complex128', 'complex64', desc='precision of the fft')
+    precision = Enum('complex128', 'complex64', desc='precision of the fft')
 
     # internal identifier
     digest = Property(depends_on=['precision', 'block_size', 'window', 'overlap'])
