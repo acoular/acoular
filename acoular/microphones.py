@@ -110,7 +110,6 @@ class MicGeom(HasPrivateTraits, DeprecatedFromFile):
             names.append(el.getAttribute('Name'))
             xyz.append([float(el.getAttribute(a)) for a in 'xyz'])
         self.pos_total = array(xyz, 'd').swapaxes(0, 1)
-        self.validate_file = True
 
     def export_mpos(self, filename):
         """Export the microphone positions to .xml file.
