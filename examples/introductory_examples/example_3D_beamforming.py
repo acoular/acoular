@@ -27,9 +27,9 @@ sfreq = 51200
 duration = 1
 nsamples = duration * sfreq
 
-n1 = ac.WNoiseGenerator(sample_freq=sfreq, numsamples=nsamples, seed=1)
-n2 = ac.WNoiseGenerator(sample_freq=sfreq, numsamples=nsamples, seed=2, rms=0.5)
-n3 = ac.WNoiseGenerator(sample_freq=sfreq, numsamples=nsamples, seed=3, rms=0.25)
+n1 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=nsamples, seed=1)
+n2 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=nsamples, seed=2, rms=0.5)
+n3 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=nsamples, seed=3, rms=0.25)
 p1 = ac.PointSource(signal=n1, mics=m, loc=(-0.1, -0.1, 0.3))
 p2 = ac.PointSource(signal=n2, mics=m, loc=(0.15, 0, 0.17))
 p3 = ac.PointSource(signal=n3, mics=m, loc=(0, 0.1, 0.25))

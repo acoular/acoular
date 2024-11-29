@@ -102,7 +102,7 @@ In order to plot the microphone arrangement, we make use of the convenient matpl
 
     In [1]: plt.ion() # switch on interactive plotting mode
 
-    In [1]: plt.plot(mg.mpos[0],mg.mpos[1],'o')
+    In [1]: plt.plot(mg.pos[0],mg.pos[1],'o')
 
 .. figure:: array64_py3colormap.png
    :align: center
