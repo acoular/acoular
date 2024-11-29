@@ -84,7 +84,7 @@ class MetricEvaluator(HasPrivateTraits):
         ns = self.target_data.shape[1]
         radii = ones(ns) * self.sector.r
         if self.adaptive_sector_size:
-            locs = self.target_grid.gpos.T
+            locs = self.target_grid.pos.T
             intersrcdist = cdist(locs, locs)
             intersrcdist[intersrcdist == 0] = inf
             intersrcdist = intersrcdist.min(0) / 2
@@ -97,7 +97,7 @@ class MetricEvaluator(HasPrivateTraits):
         ns = self.target_data.shape[1]
         sectors = []
         for i in range(ns):
-            loc = self.target_grid.gpos[:, i]
+            loc = self.target_grid.pos[:, i]
             sector = copy(self.sector)
             sector.r = r[i]
             sector.x = loc[0]
