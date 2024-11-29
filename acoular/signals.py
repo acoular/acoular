@@ -25,9 +25,11 @@ from traits.api import Bool, CArray, CLong, Delegate, Float, HasPrivateTraits, I
 
 # acoular imports
 from .base import SamplesGenerator
+from .deprecation import deprecated_alias
 from .internal import digest
 
 
+@deprecated_alias({'numsamples': 'num_samples'})
 class SignalGenerator(HasPrivateTraits):
     """Virtual base class for a simple one-channel signal generator.
 
@@ -43,7 +45,7 @@ class SignalGenerator(HasPrivateTraits):
     sample_freq = Float(1.0, desc='sampling frequency')
 
     #: Number of samples to generate.
-    numsamples = CLong
+    num_samples = CLong
 
     # internal identifier
     digest = Property
@@ -101,7 +103,7 @@ class WNoiseGenerator(SignalGenerator):
 
         """
         rnd_gen = RandomState(self.seed)
-        return self.rms * rnd_gen.standard_normal(self.numsamples)
+        return self.rms * rnd_gen.standard_normal(self.num_samples)
 
 
 class PNoiseGenerator(SignalGenerator):
@@ -136,7 +138,7 @@ class PNoiseGenerator(SignalGenerator):
         return digest(self)
 
     def signal(self):
-        nums = self.numsamples
+        nums = self.num_samples
         depth = self.depth
         # maximum depth depending on number of samples
         max_depth = int(log(nums) / log(2))
@@ -178,7 +180,7 @@ class FiltWNoiseGenerator(WNoiseGenerator):
             'ar',
             'ma',
             'rms',
-            'numsamples',
+            'num_samples',
             'sample_freq',
             'seed',
             '__class__',
@@ -210,7 +212,7 @@ class FiltWNoiseGenerator(WNoiseGenerator):
         ntaps = ma.shape[0]
         sdelay = round(0.5 * (ntaps - 1))
         wnoise = self.rms * rnd_gen.standard_normal(
-            self.numsamples + sdelay,
+            self.num_samples + sdelay,
         )  # create longer signal to compensate delay
         return sosfilt(sos, x=wnoise)[sdelay:]
 
@@ -274,7 +276,7 @@ class SineGenerator(SignalGenerator):
             The resulting signal as an array of length :attr:`~SignalGenerator.numsamples`.
 
         """
-        t = arange(self.numsamples, dtype=float) / self.sample_freq
+        t = arange(self.num_samples, dtype=float) / self.sample_freq
         return self.amplitude * sin(2 * pi * self.freq * t + self.phase)
 
 
@@ -301,18 +303,18 @@ class GenericSignalGenerator(SignalGenerator):
     #: Sampling frequency of output signal, as given by :attr:`source`.
     sample_freq = Delegate('source')
 
-    _numsamples = CLong(0)
+    _num_samples = CLong(0)
 
     #: Number of samples to generate. Is set to source.numsamples by default.
-    numsamples = Property()
+    num_samples = Property()
 
-    def _get_numsamples(self):
-        if self._numsamples:
-            return self._numsamples
-        return self.source.numsamples
+    def _get_num_samples(self):
+        if self._num_samples:
+            return self._num_samples
+        return self.source.num_samples
 
-    def _set_numsamples(self, numsamples):
-        self._numsamples = numsamples
+    def _set_num_samples(self, num_samples):
+        self._num_samples = num_samples
 
     #: Boolean flag, if 'True' (default), signal track is repeated if requested
     #: :attr:`numsamples` is higher than available sample number
@@ -320,7 +322,7 @@ class GenericSignalGenerator(SignalGenerator):
 
     # internal identifier
     digest = Property(
-        depends_on=['source.digest', 'loop_signal', 'numsamples', 'rms', '__class__'],
+        depends_on=['source.digest', 'loop_signal', 'num_samples', 'rms', '__class__'],
     )
 
     @cached_property
@@ -337,13 +339,13 @@ class GenericSignalGenerator(SignalGenerator):
 
         """
         block = 1024
-        if self.source.numchannels > 1:
+        if self.source.num_channels > 1:
             warn(
                 'Signal source has more than one channel. Only channel 0 will be used for signal.',
                 Warning,
                 stacklevel=2,
             )
-        nums = self.numsamples
+        nums = self.num_samples
         track = zeros(nums)
 
         # iterate through source generator to fill signal track

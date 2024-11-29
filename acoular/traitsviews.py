@@ -307,8 +307,8 @@ TimeSamples.class_trait_view(
             'name{File name}',
             [
                 'sample_freq~{Sampling frequency}',
-                'numchannels~{Number of channels}',
-                'numsamples~{Number of samples}',
+                'num_channels~{Number of channels}',
+                'num_samples~{Number of samples}',
                 '|[Properties]',
             ],
             '|',
@@ -327,8 +327,8 @@ MaskedTimeSamples.class_trait_view(
             'invalid_channels{Invalid channels}',
             [
                 'sample_freq~{Sampling frequency}',
-                'numchannels~{Number of channels}',
-                'numsamples~{Number of samples}',
+                'num_channels~{Number of channels}',
+                'num_samples~{Number of samples}',
                 '|[Properties]',
             ],
             '|',

@@ -104,13 +104,14 @@ from traits.api import (
 # acoular imports
 from .base import SamplesGenerator, TimeOut
 from .configuration import config
-from .deprecation import DeprecatedName
+from .deprecation import DeprecatedName, deprecated_alias
 from .environments import cartToCyl, cylToCart
 from .h5files import _get_h5file_class
 from .internal import digest, ldigest
 from .microphones import MicGeom
 
 
+@deprecated_alias({'numchannels_total': 'num_channels_total', 'numsamples_total': 'num_samples_total'})
 class MaskedTimeOut(TimeOut):
     """Signal processing block for channel and sample selection.
 
@@ -134,19 +135,23 @@ class MaskedTimeOut(TimeOut):
     invalid_channels = ListInt(desc='list of invalid channels')
 
     # Channel mask to serve as an index for all valid channels, is set automatically.
-    channels = Property(depends_on=['invalid_channels', 'source.numchannels'], desc='channel mask')
+    channels = Property(depends_on=['invalid_channels', 'source.num_channels'], desc='channel mask')
 
     # Number of channels in input, as given by :attr:`~acoular.base.TimeOut.source`.
-    numchannels_total = Delegate('source', 'numchannels')
+    num_channels_total = Delegate('source', 'num_channels')
 
     # Number of samples in input, as given by :attr:`~acoular.base.TimeOut.source`.
-    numsamples_total = Delegate('source', 'numsamples')
+    num_samples_total = Delegate('source', 'num_samples')
 
     # Number of valid channels, is set automatically.
-    numchannels = Property(depends_on=['invalid_channels', 'source.numchannels'], desc='number of valid input channels')
+    num_channels = Property(
+        depends_on=['invalid_channels', 'source.num_channels'], desc='number of valid input channels'
+    )
 
     # Number of valid time samples, is set automatically.
-    numsamples = Property(depends_on=['start', 'stop', 'source.numsamples'], desc='number of valid samples per channel')
+    num_samples = Property(
+        depends_on=['start', 'stop', 'source.num_samples'], desc='number of valid samples per channel'
+    )
 
     # Name of the cache file without extension, readonly.
     basename = Property(depends_on='source.digest', desc='basename for cache file')
@@ -168,18 +173,18 @@ class MaskedTimeOut(TimeOut):
     def _get_channels(self):
         if len(self.invalid_channels) == 0:
             return slice(0, None, None)
-        allr = [i for i in range(self.numchannels_total) if i not in self.invalid_channels]
+        allr = [i for i in range(self.num_channels_total) if i not in self.invalid_channels]
         return array(allr)
 
     @cached_property
-    def _get_numchannels(self):
+    def _get_num_channels(self):
         if len(self.invalid_channels) == 0:
-            return self.numchannels_total
+            return self.num_channels_total
         return len(self.channels)
 
     @cached_property
-    def _get_numsamples(self):
-        sli = slice(self.start, self.stop).indices(self.numsamples_total)
+    def _get_num_samples(self):
+        sli = slice(self.start, self.stop).indices(self.num_samples_total)
         return sli[1] - sli[0]
 
     def result(self, num):
@@ -193,22 +198,22 @@ class MaskedTimeOut(TimeOut):
 
         Returns
         -------
-        Samples in blocks of shape (num, :attr:`numchannels`).
+        Samples in blocks of shape (num, :attr:`num_channels`).
             The last block may be shorter than num.
 
         """
-        sli = slice(self.start, self.stop).indices(self.numsamples_total)
+        sli = slice(self.start, self.stop).indices(self.num_samples_total)
         start = sli[0]
         stop = sli[1]
         if start >= stop:
             msg = 'no samples available'
             raise OSError(msg)
 
-        if start != 0 or stop != self.numsamples_total:
+        if start != 0 or stop != self.num_samples_total:
             offset = -start % num
             if offset == 0:
                 offset = num
-            buf = empty((num + offset, self.numchannels), dtype=float)
+            buf = empty((num + offset, self.num_channels), dtype=float)
             bsize = 0
             i = 0
             fblock = True
@@ -256,7 +261,7 @@ class ChannelMixer(TimeOut):
     weights = CArray(desc='channel weights')
 
     # Number of channels is always one here.
-    numchannels = Constant(1)
+    num_channels = Constant(1)
 
     # internal identifier
     digest = Property(depends_on=['source.digest', 'weights'])
@@ -281,10 +286,10 @@ class ChannelMixer(TimeOut):
 
         """
         if self.weights.size:
-            if self.weights.shape in {(self.source.numchannels,), (1,)}:
+            if self.weights.shape in {(self.source.num_channels,), (1,)}:
                 weights = self.weights
             else:
-                msg = f'Weight factors can not be broadcasted: {self.weights.shape}, {(self.source.numchannels,)}'
+                msg = f'Weight factors can not be broadcasted: {self.weights.shape}, {(self.source.num_channels,)}'
                 raise ValueError(msg)
         else:
             weights = 1
@@ -482,7 +487,7 @@ class Trigger(TimeOut):
         return thresh
 
     def _check_trigger_existence(self):
-        nChannels = self.source.numchannels
+        nChannels = self.source.num_channels
         if not nChannels == 1:
             raise Exception('Trigger signal must consist of ONE channel, instead %s channels are given!' % nChannels)
         return 0
@@ -567,7 +572,7 @@ class AngleTracker(MaskedTimeOut):
         peakloc, maxdist, mindist = self.trigger.trigger_data()
         TriggerPerRevo = self.trigger_per_revo
         rotDirection = self.rot_direction
-        num = self.source.numsamples
+        num = self.source.num_samples
         samplerate = self.source.sample_freq
         self._rpm = zeros(num)
         self._angle = zeros(num)
@@ -691,10 +696,10 @@ class SpatialInterpolator(TimeOut):
     sample_freq = Delegate('source', 'sample_freq')
 
     # Number of channels in output.
-    numchannels = Property()
+    num_channels = Property()
 
     # Number of samples in output, as given by :attr:`source`.
-    numsamples = Delegate('source', 'numsamples')
+    num_samples = Delegate('source', 'num_samples')
 
     # Interpolate a point at the origin of the Array geometry
     interp_at_zero = Bool(False)
@@ -732,7 +737,7 @@ class SpatialInterpolator(TimeOut):
         ],
     )
 
-    def _get_numchannels(self):
+    def _get_num_channels(self):
         return self.mics_virtual.num_mics
 
     @cached_property
@@ -1060,7 +1065,7 @@ class SpatialInterpolator(TimeOut):
                 # using inverse distance weighting
                 elif self.method == 'IDW':
                     newPoint2_M = newPoint.T
-                    newPoint3_M = append(newPoint2_M, zeros([1, self.numchannels]), axis=0)
+                    newPoint3_M = append(newPoint2_M, zeros([1, self.num_channels]), axis=0)
                     newPointCart = cylToCart(newPoint3_M)
                     for ind in arange(len(newPoint[:, 0])):
                         newPoint_Rep = tile(newPointCart[:, ind], (len(newPoint[:, 0]), 1)).T
@@ -1172,7 +1177,7 @@ class SpatialInterpolatorRotation(SpatialInterpolator):
 
         Returns
         -------
-        Samples in blocks of shape (num, :attr:`numchannels`).
+        Samples in blocks of shape (num, :attr:`num_channels`).
             The last block may be shorter than num.
 
         """
@@ -1228,7 +1233,7 @@ class SpatialInterpolatorConstantRotation(SpatialInterpolator):
 
         Returns
         -------
-        Samples in blocks of shape (num, :attr:`numchannels`).
+        Samples in blocks of shape (num, :attr:`num_channels`).
             The last block may be shorter than num.
 
         """
@@ -1257,10 +1262,10 @@ class Mixer(TimeOut):
     sample_freq = Delegate('source')
 
     # Number of channels in output as given by :attr:`source`.
-    numchannels = Delegate('source')
+    num_channels = Delegate('source')
 
     # Number of samples in output as given by :attr:`source`.
-    numsamples = Delegate('source')
+    num_samples = Delegate('source')
 
     # internal identifier
     sdigest = Str()
@@ -1282,7 +1287,7 @@ class Mixer(TimeOut):
             for s in self.sources:
                 if self.sample_freq != s.sample_freq:
                     raise ValueError('Sample frequency of %s does not fit' % s)
-                if self.numchannels != s.numchannels:
+                if self.num_channels != s.num_channels:
                     raise ValueError('Channel count of %s does not fit' % s)
 
     def result(self, num):
@@ -1298,7 +1303,7 @@ class Mixer(TimeOut):
 
         Returns
         -------
-        Samples in blocks of shape (num, numchannels).
+        Samples in blocks of shape (num, num_channels).
             The last block may be shorter than num.
 
         """
@@ -1339,7 +1344,7 @@ class TimePower(TimeOut):
         Returns
         -------
         Squared output of source.
-            Yields samples in blocks of shape (num, numchannels).
+            Yields samples in blocks of shape (num, num_channels).
             The last block may be shorter than num.
 
         """
@@ -1365,7 +1370,7 @@ class TimeCumAverage(TimeOut):
         Returns
         -------
         Cumulative average of the output of source.
-            Yields samples in blocks of shape (num, numchannels).
+            Yields samples in blocks of shape (num, num_channels).
             The last block may be shorter than num.
 
         """
@@ -1397,7 +1402,7 @@ class TimeReverse(TimeOut):
 
         Returns
         -------
-        Yields samples in blocks of shape (num, numchannels).
+        Yields samples in blocks of shape (num, num_channels).
             Time-reversed output of source.
             The last block may be shorter than num.
 
@@ -1443,13 +1448,13 @@ class Filter(TimeOut):
 
         Returns
         -------
-        Samples in blocks of shape (num, numchannels).
+        Samples in blocks of shape (num, num_channels).
             Delivers the bandpass filtered output of source.
             The last block may be shorter than num.
 
         """
         sos = self.sos
-        zi = zeros((sos.shape[0], 2, self.source.numchannels))
+        zi = zeros((sos.shape[0], 2, self.source.num_channels))
         for block in self.source.result(num):
             sos = self.sos  # this line is useful in case of changes
             # to self.sos during generator lifetime
@@ -1547,20 +1552,20 @@ class FiltFiltOctave(FiltOctave):
 
         Returns
         -------
-        Samples in blocks of shape (num, numchannels).
+        Samples in blocks of shape (num, num_channels).
             Delivers the zero-phase bandpass filtered output of source.
             The last block may be shorter than num.
 
         """
         sos = self.sos
-        data = empty((self.source.numsamples, self.source.numchannels))
+        data = empty((self.source.num_samples, self.source.num_channels))
         j = 0
         for block in self.source.result(num):
             ns, nc = block.shape
             data[j : j + ns] = block
             j += ns
         # filter one channel at a time to save memory
-        for j in range(self.source.numchannels):
+        for j in range(self.source.num_channels):
             data[:, j] = sosfiltfilt(sos, data[:, j])
         j = 0
         ns = data.shape[0]
@@ -1634,6 +1639,7 @@ class FiltFreqWeight(Filter):
         return tf2sos(b, a)
 
 
+@deprecated_alias({'numbands': 'num_bands'}, read_only=True)
 class FilterBank(TimeOut):
     """Abstract base class for IIR filter banks based on scipy lfilter
     implements a bank of parallel filters.
@@ -1651,10 +1657,10 @@ class FilterBank(TimeOut):
     bands = Property()
 
     # Number of bands
-    numbands = Property()
+    num_bands = Property()
 
     # Number of bands
-    numchannels = Property()
+    num_channels = Property()
 
     def _get_sos(self):
         return [tf2sos([1], [1])]
@@ -1662,11 +1668,11 @@ class FilterBank(TimeOut):
     def _get_bands(self):
         return ['']
 
-    def _get_numbands(self):
+    def _get_num_bands(self):
         return 0
 
-    def _get_numchannels(self):
-        return self.numbands * self.source.numchannels
+    def _get_num_channels(self):
+        return self.num_bands * self.source.num_channels
 
     def result(self, num):
         """Python generator that yields the output block-wise.
@@ -1679,16 +1685,16 @@ class FilterBank(TimeOut):
 
         Returns
         -------
-        Samples in blocks of shape (num, numchannels).
+        Samples in blocks of shape (num, num_channels).
             Delivers the bandpass filtered output of source.
             The last block may be shorter than num.
 
         """
-        numbands = self.numbands
-        snumch = self.source.numchannels
+        numbands = self.num_bands
+        snumch = self.source.num_channels
         sos = self.sos
         zi = [zeros((sos[0].shape[0], 2, snumch)) for _ in range(numbands)]
-        res = zeros((num, self.numchannels), dtype='float')
+        res = zeros((num, self.num_channels), dtype='float')
         for block in self.source.result(num):
             for i in range(numbands):
                 res[:, i * snumch : (i + 1) * snumch], zi[i] = sosfilt(sos[i], block, axis=0, zi=zi[i])
@@ -1714,7 +1720,7 @@ class OctaveFilterBank(FilterBank):
     bands = Property(depends_on=['lband', 'hband', 'fraction'])
 
     # Number of bands
-    numbands = Property(depends_on=['lband', 'hband', 'fraction'])
+    num_bands = Property(depends_on=['lband', 'hband', 'fraction'])
 
     # internal identifier
     digest = Property(depends_on=['source.digest', '__class__', 'lband', 'hband', 'fraction', 'order'])
@@ -1728,7 +1734,7 @@ class OctaveFilterBank(FilterBank):
         return [10 ** (i / 10) for i in range(self.lband, self.hband, 4 - self.fraction_)]
 
     @cached_property
-    def _get_numbands(self):
+    def _get_num_bands(self):
         return len(self.bands)
 
     @cached_property
@@ -1801,7 +1807,7 @@ class WriteWAV(TimeOut, DeprecatedName):
         wf.setnchannels(nc)
         wf.setsampwidth(2)
         wf.setframerate(self.source.sample_freq)
-        wf.setnframes(self.source.numsamples)
+        wf.setnframes(self.source.num_samples)
         mx = 0.0
         ind = array(self.channels)
         for data in self.source.result(1024):
@@ -1812,6 +1818,7 @@ class WriteWAV(TimeOut, DeprecatedName):
         wf.close()
 
 
+@deprecated_alias({'numsamples_write': 'num_samples_write', 'writeflag': 'write_flag'})
 class WriteH5(TimeOut, DeprecatedName):
     """Saves time signal as `*.h5` file."""
 
@@ -1824,10 +1831,10 @@ class WriteH5(TimeOut, DeprecatedName):
 
     # Number of samples to write to file by `result` method.
     # defaults to -1 (write as long as source yields data).
-    numsamples_write = Int(-1)
+    num_samples_write = Int(-1)
 
     # flag that can be raised to stop file writing
-    writeflag = Bool(True)
+    write_flag = Bool(True)
 
     # internal identifier
     digest = Property(depends_on=['source.digest', '__class__'])
@@ -1852,7 +1859,7 @@ class WriteH5(TimeOut, DeprecatedName):
         file = _get_h5file_class()
         self.create_filename()
         f5h = file(self.file, mode='w')
-        f5h.create_extendable_array('time_data', (0, self.numchannels), self.precision)
+        f5h.create_extendable_array('time_data', (0, self.num_channels), self.precision)
         ac = f5h.get_data_by_reference('time_data')
         f5h.set_node_attribute(ac, 'sample_freq', self.sample_freq)
         self.add_metadata(f5h)
@@ -1887,19 +1894,19 @@ class WriteH5(TimeOut, DeprecatedName):
 
         Returns
         -------
-        Samples in blocks of shape (num, numchannels).
+        Samples in blocks of shape (num, num_channels).
             The last block may be shorter than num.
             Echos the source output, but reads it from cache
             when available and prevents unnecassary recalculation.
 
         """
-        self.writeflag = True
+        self.write_flag = True
         f5h = self.get_initialized_file()
         ac = f5h.get_data_by_reference('time_data')
         scount = 0
-        stotal = self.numsamples_write
+        stotal = self.num_samples_write
         source_gen = self.source.result(num)
-        while self.writeflag:
+        while self.write_flag:
             sleft = stotal - scount
             if stotal != -1 and sleft > 0:
                 anz = min(num, sleft)
@@ -1928,7 +1935,7 @@ class TimeConvolve(TimeOut):
     source = Instance(SamplesGenerator)
 
     # Convolution kernel in the time domain. The second dimension of the kernel array has to be
-    # either 1 or match :attr:`~SamplesGenerator.numchannels`. If only a single kernel is supplied,
+    # either 1 or match :attr:`~SamplesGenerator.num_channels`. If only a single kernel is supplied,
     # it is applied to all channels.
     kernel = CArray(dtype=float, desc='Convolution kernel.')
 
@@ -1955,9 +1962,9 @@ class TimeConvolve(TimeOut):
         if self.kernel.ndim > 2:
             msg = 'Only one or two dimensional kernels accepted.'
             raise ValueError(msg)
-        # check if number of kernels matches numchannels
-        if self.kernel.shape[1] not in (1, self.source.numchannels):
-            msg = 'Number of kernels must be either `numchannels` or one.'
+        # check if number of kernels matches num_channels
+        if self.kernel.shape[1] not in (1, self.source.num_channels):
+            msg = 'Number of kernels must be either `num_channels` or one.'
             raise ValueError(msg)
 
     # compute the rfft of the kernel blockwise
@@ -1991,7 +1998,7 @@ class TimeConvolve(TimeOut):
 
         Returns
         -------
-        Samples in blocks of shape (num, numchannels).
+        Samples in blocks of shape (num, num_channels).
             The last block may be shorter than num.
 
         """
@@ -1999,8 +2006,8 @@ class TimeConvolve(TimeOut):
         # initialize variables
         self._block_size = num
         L = self.kernel.shape[0]
-        N = self.source.numchannels
-        M = self.source.numsamples
+        N = self.source.num_channels
+        M = self.source.num_samples
         numblocks_kernel = int(ceil(L / num))  # number of kernel blocks
         Q = int(ceil(M / num))  # number of signal blocks
         R = int(ceil((L + M - 1) / num))  # number of output blocks

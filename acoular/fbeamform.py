@@ -106,6 +106,7 @@ from traits.api import (
 )
 from traits.trait_errors import TraitError
 
+# acoular imports
 from .configuration import config
 from .environments import Environment
 from .fastFuncs import beamformerFreq, calcPointSpreadFunction, calcTransfer, damasSolverGaussSeidel
@@ -208,11 +209,11 @@ class SteeringVector(HasPrivateTraits):
             if self.ref > 0:
                 return full((self.grid.size,), self.ref)
             return self.env._r(self.grid.pos())
-        return self.env._r(self.grid.gpos, self.ref[:, newaxis])
+        return self.env._r(self.grid.pos, self.ref[:, newaxis])
 
     @property_depends_on('grid.digest, mics.digest, env.digest')
     def _get_rm(self):
-        return atleast_2d(self.env._r(self.grid.gpos, self.mics.mpos))
+        return atleast_2d(self.env._r(self.grid.pos, self.mics.pos))
 
     @cached_property
     def _get_digest(self):
@@ -522,9 +523,9 @@ class BeamformerBase(HasPrivateTraits):
         return (ac, fr, gpos)
 
     def _assert_equal_channels(self):
-        numchannels = self.freq_data.numchannels
-        if numchannels != self.steer.mics.num_mics or numchannels == 0:
-            raise ValueError('%i channels do not fit %i mics' % (numchannels, self.steer.mics.num_mics))
+        num_channels = self.freq_data.num_channels
+        if num_channels != self.steer.mics.num_mics or num_channels == 0:
+            raise ValueError('%i channels do not fit %i mics' % (num_channels, self.steer.mics.num_mics))
 
     @property_depends_on('digest')
     def _get_result(self):
@@ -566,7 +567,7 @@ class BeamformerBase(HasPrivateTraits):
         if not self.r_diag:  # Full CSM --> no normalization needed
             normfactor = 1.0
         elif self.r_diag_norm == 0.0:  # Removed diag: standard normalization factor
-            nMics = float(self.freq_data.numchannels)
+            nMics = float(self.freq_data.num_channels)
             normfactor = nMics / (nMics - 1)
         elif self.r_diag_norm != 0.0:  # Removed diag: user defined normalization factor
             normfactor = self.r_diag_norm
@@ -935,7 +936,7 @@ class BeamformerCapon(BeamformerBase):
 
         """
         f = self._f
-        nMics = self.freq_data.numchannels
+        nMics = self.freq_data.num_channels
         normfactor = self.sig_loss_norm() * nMics**2
         param_steer_type, steer_vector = self._beamformer_params()
         for i in ind:
@@ -952,8 +953,8 @@ class BeamformerEig(BeamformerBase):
     """
 
     #: Number of component to calculate:
-    #: 0 (smallest) ... :attr:`~acoular.base.SamplesGenerator.numchannels`-1;
-    #: defaults to -1, i.e. numchannels-1
+    #: 0 (smallest) ... :attr:`~acoular.base.SamplesGenerator.num_channels`-1;
+    #: defaults to -1, i.e. num_channels-1
     n = Int(-1, desc='No. of eigenvalue')
 
     # Actual component to calculate, internal, readonly.
@@ -1053,7 +1054,7 @@ class BeamformerMusic(BeamformerEig):
 
         """
         f = self._f
-        nMics = self.freq_data.numchannels
+        nMics = self.freq_data.num_channels
         n = int(self.steer.mics.num_mics - self.na)
         normfactor = self.sig_loss_norm() * nMics**2
         param_steer_type, steer_vector = self._beamformer_params()
@@ -1666,7 +1667,7 @@ class BeamformerOrth(BeamformerBase):
 
         """
         f = self._f
-        numchannels = self.freq_data.numchannels
+        num_channels = self.freq_data.num_channels
         normfactor = self.sig_loss_norm()
         param_steer_type, steer_vector = self._beamformer_params()
         for i in ind:
@@ -1680,7 +1681,7 @@ class BeamformerOrth(BeamformerBase):
                     steer_vector(f[i]),
                     (ones(1), eve[:, n].reshape((-1, 1))),
                 )[0]
-                self._ac[i, beamformerOutput.argmax()] += eva[n] / numchannels
+                self._ac[i, beamformerOutput.argmax()] += eva[n] / num_channels
             self._fr[i] = 1
 
 
@@ -1692,7 +1693,7 @@ class BeamformerCleansc(BeamformerBase):
     """
 
     #: no of CLEAN-SC iterations
-    #: defaults to 0, i.e. automatic (max 2*numchannels)
+    #: defaults to 0, i.e. automatic (max 2*num_channels)
     n = Int(0, desc='no of iterations')
 
     #: iteration damping factor
@@ -1731,9 +1732,9 @@ class BeamformerCleansc(BeamformerBase):
         """
         f = self._f
         normfactor = self.sig_loss_norm()
-        numchannels = self.freq_data.numchannels
+        num_channels = self.freq_data.num_channels
         result = zeros((self.steer.grid.size), 'f')
-        J = numchannels * 2 if not self.n else self.n
+        J = num_channels * 2 if not self.n else self.n
         powers = zeros(J, 'd')
 
         param_steer_type, steer_vector = self._beamformer_params()
@@ -1996,7 +1997,7 @@ class BeamformerCMF(BeamformerBase):
             return vstack([matrix.real, matrix.imag])
 
         # prepare calculation
-        nc = self.freq_data.numchannels
+        nc = self.freq_data.num_channels
         numpoints = self.steer.grid.size
         unit = self.unit_mult
 
@@ -2391,9 +2392,9 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
         f = self._f
         n = int(self.na)  # number of eigenvalues
         m = int(self.m)  # number of first eigenvalue
-        numchannels = self.freq_data.numchannels  # number of channels
+        num_channels = self.freq_data.num_channels  # number of channels
         numpoints = self.steer.grid.size
-        hh = zeros((1, numpoints, numchannels), dtype='D')
+        hh = zeros((1, numpoints, num_channels), dtype='D')
 
         # Generate a cross spectral matrix, and perform the eigenvalue decomposition
         for i in ind:
@@ -2423,17 +2424,17 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
                         weights = diag(ones(numpoints))
                         epsilon = arange(self.max_iter)
                         for it in arange(self.max_iter):
-                            if numchannels <= leftpoints:
+                            if num_channels <= leftpoints:
                                 AWA = dot(dot(A[:, locpoints], weights), A[:, locpoints].conj().T)
                                 epsilon[it] = max(absolute(eigvals(AWA))) * self.eps_perc
                                 qi[s, locpoints] = dot(
                                     dot(
                                         dot(weights, A[:, locpoints].conj().T),
-                                        inv(AWA + eye(numchannels) * epsilon[it]),
+                                        inv(AWA + eye(num_channels) * epsilon[it]),
                                     ),
                                     emode,
                                 )
-                            elif numchannels > leftpoints:
+                            elif num_channels > leftpoints:
                                 AA = dot(A[:, locpoints].conj().T, A[:, locpoints])
                                 epsilon[it] = max(absolute(eigvals(AA))) * self.eps_perc
                                 qi[s, locpoints] = dot(
@@ -2459,13 +2460,13 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
                         weights = eye(numpoints)
                         locpoints = arange(numpoints)
                         for _it in arange(self.max_iter):
-                            if numchannels <= numpoints:
+                            if num_channels <= numpoints:
                                 wtwi = inv(dot(weights.T, weights))
                                 aH = A.conj().T
                                 qi[s, :] = dot(dot(wtwi, aH), dot(inv(dot(A, dot(wtwi, aH))), emode))
                                 weights = diag(absolute(qi[s, :]) ** ((2 - self.pnorm) / 2))
                                 weights = weights / sum(absolute(weights))
-                            elif numchannels > numpoints:
+                            elif num_channels > numpoints:
                                 wtw = dot(weights.T, weights)
                                 qi[s, :] = dot(dot(inv(dot(dot(A.conj.T, wtw), A)), dot(A.conj().T, wtw)), emode)
                                 weights = diag(absolute(qi[s, :]) ** ((2 - self.pnorm) / 2))
@@ -2634,14 +2635,14 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
         """
         f = self._f
         normfactor = self.sig_loss_norm()
-        numchannels = self.freq_data.numchannels
+        num_channels = self.freq_data.num_channels
         # eigenvalue number list in standard form from largest to smallest
         eva_list = unique(self.eva_list % self.steer.mics.num_mics)[::-1]
         steer_type = self.steer.steer_type
         if steer_type == 'custom':
             msg = 'custom steer_type is not implemented'
             raise NotImplementedError(msg)
-        mpos = self.steer.mics.mpos
+        mpos = self.steer.mics.pos
         env = self.steer.env
         shgo_opts = {
             'n': 256,
@@ -2685,8 +2686,8 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
                 # store result for position
                 self._gpos[:, i1] = oR['x']
                 # store result for level
-                self._ac[i, i1] = eva[n] / numchannels
-                # print(oR['x'],eva[n]/numchannels,oR)
+                self._ac[i, i1] = eva[n] / num_channels
+                # print(oR['x'],eva[n]/num_channels,oR)
             self._fr[i] = 1
 
 
