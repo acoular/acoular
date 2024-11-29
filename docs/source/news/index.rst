@@ -36,6 +36,7 @@ Upcoming Release (25.01)
         * dynamically set the version in the pyproject.toml file (from version.py)
         * activates maximum line length enforcement of 120 and 100 for comments and docstrings
         * adds CI workflow for inspecting regression test outputs
+        * adds action that automatically assigns a team member to newly opened pull requests
 
 24.10
 ----------------

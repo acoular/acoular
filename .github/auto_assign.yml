@@ -1,0 +1,12 @@
+addReviewers: false
+addAssignees: true
+
+numberOfAssignees: 1
+
+assignees:
+    - adku1173
+    - artpelling
+    - esarradj
+    - FrankK20
+    - gherold
+    - sjekosch
