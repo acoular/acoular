@@ -56,7 +56,8 @@ t1.invalid_channels = invalid
 
 # %%
 # Calibration is usually needed and can be set as a separate processing block with the
-# :class:`acoular.Calib` object.
+# :class:`acoular.Calib` object. Invalid channels can be set here as well, by setting the
+# :attr:`invalid_channels` attribute.
 
 calib = ac.Calib(source=t1, file=calib_file, invalid_channels=invalid)
 
