@@ -143,8 +143,5 @@ class Calib(InOut):
             if self.data[self.channels].shape[0] == block.shape[1]:
                 yield block * self.data[self.channels][newaxis]
             else:
-                msg = 'calibration data shape does not match source data shape: %i, %i' % (
-                    self.data.shape[0],
-                    block.shape[1],
-                )
+                msg = f'calibration data shape does not match source data shape: {self.data.shape[0]}, {block.shape[1]}'
                 raise ValueError(msg)
