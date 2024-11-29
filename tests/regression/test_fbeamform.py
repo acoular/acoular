@@ -4,6 +4,7 @@
 """Implements snapshot testing of frequency beamformers."""
 
 import acoular as ac
+import numpy as np
 import pytest
 from pytest_cases import parametrize_with_cases
 
@@ -49,7 +50,17 @@ def test_beamformer(snapshot, beamformer, f, num):
         # points). Otherwise noise variance estimate is needed.
         pytest.xfail('ValueError: The number of samples must be larger than the number of features with LassoLarsBIC.')
 
+    # see https://github.com/acoular/acoular/pull/356
+    if isinstance(beamformer, ac.BeamformerGIB) and beamformer.method in ['LassoLars', 'LassoLarsCV']:
+        rtol = 1
+        atol = 1e-7
+    else:
+        rtol = 5e-5
+        atol = 5e-8
+
     beamformer.cached = False
     result = beamformer.synthetic(f, num)
-    assert ac.L_p(result.sum()) > 0
-    snapshot.check(result, rtol=5e-5, atol=5e-8)  # uses numpy.testing.assert_allclose
+    if not hasattr(beamformer, 'method') or beamformer.method not in ['FISTA', 'Split_Bregman', 'OMPCV']:
+        assert np.all(result >= 0), 'sourcemap is not strictly positive'
+    assert ac.L_p(result.sum()) > 0  # we don't want to save zero arrays
+    snapshot.check(result, rtol=rtol, atol=atol)  # uses numpy.testing.assert_allclose

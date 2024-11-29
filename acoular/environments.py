@@ -47,7 +47,7 @@ from scipy.integrate import ode
 from scipy.interpolate import LinearNDInterpolator
 from scipy.linalg import norm
 from scipy.spatial import ConvexHull
-from traits.api import CArray, Dict, Float, HasPrivateTraits, Int, Property, Trait, cached_property
+from traits.api import CArray, Dict, Float, HasPrivateTraits, Instance, Int, Property, Union, cached_property
 
 from .internal import digest
 
@@ -156,7 +156,7 @@ class Environment(HasPrivateTraits):
     c = Float(343.0, desc='speed of sound')
 
     #: The region of interest (ROI), not needed for most types of environment
-    roi = Trait(None, (None, CArray))
+    roi = Union(None, CArray)
 
     def _get_digest(self):
         return digest(self)
@@ -545,7 +545,7 @@ class GeneralFlowEnvironment(Environment):
     """
 
     #: The flow field, must be of type :class:`~acoular.environments.FlowField`.
-    ff = Trait(FlowField, desc='flow field')
+    ff = Instance(FlowField, desc='flow field')
 
     #: Number of rays used per solid angle :math:`\Omega`, defaults to 200.
     N = Int(200, desc='number of rays per Om')

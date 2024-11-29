@@ -46,8 +46,9 @@ from traits.api import (
     HasPrivateTraits,
     Instance,
     Int,
+    Map,
     Property,
-    Trait,
+    Union,
     cached_property,
     property_depends_on,
 )
@@ -66,7 +67,7 @@ from .internal import digest
 @deprecated_alias({'numchannels': 'num_channels'}, read_only=True)
 class BaseSpectra(HasPrivateTraits):
     #: Data source; :class:`~acoular.sources.SamplesGenerator` or derived object.
-    source = Trait(SamplesGenerator)
+    source = Instance(SamplesGenerator)
 
     #: Sampling frequency of output signal, as given by :attr:`source`.
     sample_freq = Delegate('source')
@@ -80,23 +81,22 @@ class BaseSpectra(HasPrivateTraits):
     #:   * 'Hamming'
     #:   * 'Bartlett'
     #:   * 'Blackman'
-    window = Trait(
-        'Rectangular',
+    window = Map(
         {'Rectangular': ones, 'Hanning': hanning, 'Hamming': hamming, 'Bartlett': bartlett, 'Blackman': blackman},
+        default_value='Rectangular',
         desc='type of window for FFT',
     )
 
     #: Overlap factor for averaging: 'None'(default), '50%', '75%', '87.5%'.
-    overlap = Trait('None', {'None': 1, '50%': 2, '75%': 4, '87.5%': 8}, desc='overlap of FFT blocks')
+    overlap = Map({'None': 1, '50%': 2, '75%': 4, '87.5%': 8}, default_value='None', desc='overlap of FFT blocks')
 
     #: FFT block size, one of: 128, 256, 512, 1024, 2048 ... 65536,
     #: defaults to 1024.
-    block_size = Trait(
+    block_size = Enum(
         1024,
         128,
         256,
         512,
-        1024,
         2048,
         4096,
         8192,
@@ -108,7 +108,7 @@ class BaseSpectra(HasPrivateTraits):
 
     #: The floating-number-precision of the resulting spectra, corresponding to numpy dtypes.
     #: Default is 'complex128'.
-    precision = Trait('complex128', 'complex64', desc='precision of the fft')
+    precision = Enum('complex128', 'complex64', desc='precision of the fft')
 
     # internal identifier
     digest = Property(depends_on=['precision', 'block_size', 'window', 'overlap'])
@@ -166,7 +166,7 @@ class PowerSpectra(BaseSpectra):
     """
 
     # Shadow trait, should not be set directly, for internal use.
-    _source = Trait(SamplesGenerator)
+    _source = Instance(SamplesGenerator)
 
     #: Data source; :class:`~acoular.sources.SamplesGenerator` or derived object.
     source = Property(_source, desc='time data object')
@@ -190,7 +190,7 @@ class PowerSpectra(BaseSpectra):
     _ind_low = Int(1, desc='index of lowest frequency line')
 
     # Shadow trait, should not be set directly, for internal use.
-    _ind_high = Trait(-1, (Int, None), desc='index of highest frequency line')
+    _ind_high = Union(Int(-1), None, desc='index of highest frequency line')
 
     #: Index of lowest frequency line to compute, integer, defaults to 1,
     #: is used only by objects that fetch the csm, PowerSpectra computes every
@@ -205,7 +205,7 @@ class PowerSpectra(BaseSpectra):
     _freqlc = Float(0)
 
     # Stores the set higher frequency, for internal use, should not be set directly.
-    _freqhc = Trait(0, (Float, None))
+    _freqhc = Union(Float(0), None)
 
     # Saves whether the user set indices or frequencies last, for internal use only,
     # not to be set directly, if True (default), indices are used for setting
@@ -654,7 +654,7 @@ class PowerSpectraImport(PowerSpectra):
 
     #: frequencies included in the cross-spectral matrix in ascending order.
     #: Compound trait that accepts arguments of type list, array, and float
-    frequencies = Trait(None, (CArray, Float), desc='frequencies included in the cross-spectral matrix')
+    frequencies = Union(CArray, Float, desc='frequencies included in the cross-spectral matrix')
 
     #: Number of time data channels
     num_channels = Property(depends_on=['digest'])
@@ -682,7 +682,7 @@ class PowerSpectraImport(PowerSpectra):
     _ind_low = Int(0, desc='index of lowest frequency line')
 
     # Shadow trait, should not be set directly, for internal use.
-    _ind_high = Trait(None, (Int, None), desc='index of highest frequency line')
+    _ind_high = Union(None, Int, desc='index of highest frequency line')
 
     # internal identifier
     digest = Property(

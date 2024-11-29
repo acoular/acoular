@@ -69,8 +69,8 @@ from traits.api import (
     ListInt,
     Property,
     Str,
-    Trait,
     Tuple,
+    Union,
     cached_property,
     observe,
     on_trait_change,
@@ -236,7 +236,7 @@ class TimeSamples(SamplesGenerator):
     )
 
     #: Calibration data, instance of :class:`~acoular.calib.Calib` class, optional .
-    calib = Trait(Calib, desc='Calibration data')
+    calib = Instance(Calib, desc='Calibration data')
 
     #: Number of channels, is set automatically / read from file.
     num_channels = CLong(0, desc='number of input channels')
@@ -388,7 +388,7 @@ class MaskedTimeSamples(TimeSamples):
     start = CLong(0, desc='start of valid samples')
 
     #: Index of the last sample to be considered valid.
-    stop = Trait(None, None, CLong, desc='stop of valid samples')
+    stop = Union(None, CLong, desc='stop of valid samples')
 
     #: Channels that are to be treated as invalid.
     invalid_channels = ListInt(desc='list of invalid channels')
@@ -520,7 +520,7 @@ class PointSource(SamplesGenerator):
     """
 
     #:  Emitted signal, instance of the :class:`~acoular.signals.SignalGenerator` class.
-    signal = Trait(SignalGenerator)
+    signal = Instance(SignalGenerator)
 
     #: Location of source in (`x`, `y`, `z`) coordinates (left-oriented system).
     loc = Tuple((0.0, 0.0, 1.0), desc='source location')
@@ -530,7 +530,7 @@ class PointSource(SamplesGenerator):
     num_channels = Delegate('mics', 'num_mics')
 
     #: :class:`~acoular.microphones.MicGeom` object that provides the microphone locations.
-    mics = Trait(MicGeom, desc='microphone geometry')
+    mics = Instance(MicGeom, desc='microphone geometry')
 
     def _validate_locations(self):
         dist = self.env._r(array(self.loc).reshape((3, 1)), self.mics.pos)
@@ -539,7 +539,7 @@ class PointSource(SamplesGenerator):
 
     #: :class:`~acoular.environments.Environment` or derived object,
     #: which provides information about the sound propagation in the medium.
-    env = Trait(Environment(), Environment)
+    env = Instance(Environment(), Environment)
 
     # --- List of backwards compatibility traits and their setters/getters -----------
 
@@ -584,7 +584,7 @@ class PointSource(SamplesGenerator):
     #: `loop` take values from the end of :attr:`signal.signal()` array.
     #: `zeros` set source signal to zero, advisable for deterministic signals.
     #: defaults to `loop`.
-    prepadding = Trait('loop', 'zeros', desc='Behaviour for negative time indices.')
+    prepadding = Enum('loop', 'zeros', desc='Behaviour for negative time indices.')
 
     #: Upsampling factor, internal use, defaults to 16.
     up = Int(16, desc='upsampling factor')
@@ -774,7 +774,7 @@ class MovingPointSource(PointSource):
     #: Trajectory of the source,
     #: instance of the :class:`~acoular.trajectory.Trajectory` class.
     #: The start time is assumed to be the same as for the samples.
-    trajectory = Trait(Trajectory, desc='trajectory of the source')
+    trajectory = Instance(Trajectory, desc='trajectory of the source')
 
     prepadding = Enum('loop', desc='Behaviour for negative time indices.')
 
@@ -1128,7 +1128,7 @@ class LineSource(PointSource):
     source_strength = CArray(desc='coefficients of the source strength')
 
     #:coherence
-    coherence = Trait('coherent', 'incoherent', desc='coherence mode')
+    coherence = Enum('coherent', 'incoherent', desc='coherence mode')
 
     # internal identifier
     digest = Property(
@@ -1372,7 +1372,7 @@ class UncorrelatedNoiseSource(SamplesGenerator):
     #: Type of noise to generate at the channels.
     #: The `~acoular.signals.SignalGenerator`-derived class has to
     # feature the parameter "seed" (i.e. white or pink noise).
-    signal = Trait(SignalGenerator, desc='type of noise')
+    signal = Instance(SignalGenerator, desc='type of noise')
 
     #: Array with seeds for random number generator.
     #: When left empty, arange(:attr:`num_channels`) + :attr:`signal`.seed
@@ -1384,7 +1384,7 @@ class UncorrelatedNoiseSource(SamplesGenerator):
     num_channels = Delegate('mics', 'num_mics')
 
     #: :class:`~acoular.microphones.MicGeom` object that provides the microphone locations.
-    mics = Trait(MicGeom, desc='microphone geometry')
+    mics = Instance(MicGeom, desc='microphone geometry')
 
     # --- List of backwards compatibility traits and their setters/getters -----------
 

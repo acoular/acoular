@@ -18,7 +18,7 @@ from collections import deque
 from inspect import currentframe
 from warnings import warn
 
-from traits.api import Bool, Dict, Instance, Int, Property, Trait, cached_property, on_trait_change
+from traits.api import Bool, Dict, Enum, Instance, Int, Property, cached_property, on_trait_change
 
 # acoular imports
 from .base import Generator, InOut
@@ -325,7 +325,7 @@ class SampleSplitter(InOut):
     #: * 'none': nothing happens. Possibly leads to lost blocks of data
     buffer_overflow_treatment = Dict(
         key_trait=Instance(Generator),
-        value_trait=Trait('error', 'warning', 'none'),
+        value_trait=Enum('error', 'warning', 'none'),
         desc='defines buffer overflow behaviour.',
     )
 
@@ -337,7 +337,7 @@ class SampleSplitter(InOut):
     _buffer_overflow = Bool(False)
 
     # Helper Trait holds source generator
-    _source_generator = Trait()
+    _source_generator = Instance(LockedGenerator)
 
     def _create_block_buffer(self, obj):
         self.block_buffer[obj] = deque([], maxlen=self.buffer_size)

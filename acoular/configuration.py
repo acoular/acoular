@@ -54,7 +54,7 @@ else:
     environ['OPENBLAS_NUM_THREADS'] = '1'
 
 # this loads numpy, so we have to defer loading until OpenBLAS check is done
-from traits.api import Bool, Enum, HasStrictTraits, Property, Str, Trait, cached_property
+from traits.api import Bool, Enum, HasStrictTraits, Property, Str, cached_property
 
 
 class Config(HasStrictTraits):
@@ -90,7 +90,7 @@ class Config(HasStrictTraits):
     #: * 'overwrite': Acoular classes replace existing cachefile content with new data.
     global_caching = Property()
 
-    _global_caching = Trait('individual', 'all', 'none', 'readonly', 'overwrite')
+    _global_caching = Enum('individual', 'all', 'none', 'readonly', 'overwrite')
 
     #: Flag that globally defines package used to read and write .h5 files
     #: defaults to 'pytables'. It is also possible to set it to 'tables', which is an alias for

@@ -17,7 +17,7 @@ from warnings import warn
 
 import numpy as np
 from scipy import fft
-from traits.api import Bool, CArray, Enum, Instance, Int, Property, Trait, Union, cached_property
+from traits.api import Bool, CArray, Enum, Instance, Int, Property, Union, cached_property
 
 # acoular imports
 from .base import SamplesGenerator, SpectraGenerator, SpectraOut, TimeOut
@@ -165,7 +165,7 @@ class IRFFT(TimeOut):
 
     #: The floating-number-precision of the resulting time signals, corresponding to numpy dtypes.
     #: Default is 64 bit.
-    precision = Trait('float64', 'float32', desc='precision of the time signal after the ifft')
+    precision = Enum('float64', 'float32', desc='precision of the time signal after the ifft')
 
     #: Number of time samples in the output.
     num_samples = Property(depends_on='source.num_samples, source._block_size')
@@ -243,7 +243,7 @@ class AutoPowerSpectra(SpectraOut):
     single_sided = Bool(True, desc='single sided spectrum')
 
     #: The floating-number-precision of entries, corresponding to numpy dtypes. Default is 64 bit.
-    precision = Trait('float64', 'float32', desc='floating-number-precision')
+    precision = Enum('float64', 'float32', desc='floating-number-precision')
 
     # internal identifier
     digest = Property(depends_on=['source.digest', 'precision', 'scaling', 'single_sided'])
@@ -291,16 +291,16 @@ class CrossPowerSpectra(AutoPowerSpectra):
     """
 
     #: Data source; :class:`~acoular.base.SpectraGenerator` or derived object.
-    source = Trait(SpectraGenerator)
+    source = Instance(SpectraGenerator)
 
     #: The floating-number-precision of entries of csm, eigenvalues and
     #: eigenvectors, corresponding to numpy dtypes. Default is 64 bit.
-    precision = Trait('complex128', 'complex64', desc='precision of the fft')
+    precision = Enum('complex128', 'complex64', desc='precision of the fft')
 
     #: Calculation mode, either 'full' or 'upper'.
     #: 'full' calculates the full cross-spectral matrix, 'upper' calculates
     # only the upper triangle. Default is 'full'.
-    calc_mode = Trait('full', 'upper', 'lower', desc='calculation mode')
+    calc_mode = Enum('full', 'upper', 'lower', desc='calculation mode')
 
     #: Number of channels in output. If :attr:`calc_mode` is 'full', then
     #: :attr:`num_channels` is :math:`n^2`, where :math:`n` is the number of

@@ -98,7 +98,6 @@ from traits.api import (
     List,
     Property,
     Range,
-    Trait,
     Tuple,
     cached_property,
     on_trait_change,
@@ -132,13 +131,13 @@ class SteeringVector(HasPrivateTraits):
     """
 
     #: :class:`~acoular.grids.Grid`-derived object that provides the grid locations.
-    grid = Trait(Grid, desc='beamforming grid')
+    grid = Instance(Grid, desc='beamforming grid')
 
     #: :class:`~acoular.microphones.MicGeom` object that provides the microphone locations.
-    mics = Trait(MicGeom, desc='microphone geometry')
+    mics = Instance(MicGeom, desc='microphone geometry')
 
     #: Type of steering vectors, see also :cite:`Sarradj2012`. Defaults to 'true level'.
-    steer_type = Trait('true level', 'true location', 'classic', 'inverse', desc='type of steering vectors used')
+    steer_type = Enum('true level', 'true location', 'classic', 'inverse', desc='type of steering vectors used')
 
     #: :class:`~acoular.environments.Environment` or derived object,
     #: which provides information about the sound propagation in the medium.
@@ -434,7 +433,7 @@ class BeamformerBase(HasPrivateTraits):
 
     #: :class:`~acoular.spectra.PowerSpectra` object that provides the
     #: cross spectral matrix and eigenvalues
-    freq_data = Trait(PowerSpectra, desc='freq data object')
+    freq_data = Instance(PowerSpectra, desc='freq data object')
 
     #: Boolean flag, if 'True' (default), the main diagonal is removed before beamforming.
     r_diag = Bool(True, desc='removal of diagonal')
@@ -451,7 +450,7 @@ class BeamformerBase(HasPrivateTraits):
     )
 
     #: Floating point precision of property result. Corresponding to numpy dtypes. Default = 64 Bit.
-    precision = Trait('float64', 'float32', desc='precision (32/64 Bit) of result, corresponding to numpy dtypes')
+    precision = Enum('float64', 'float32', desc='precision (32/64 Bit) of result, corresponding to numpy dtypes')
 
     #: Boolean flag, if 'True' (default), the result is cached in h5 files.
     cached = Bool(True, desc='cached flag')
@@ -1221,10 +1220,10 @@ class PointSpreadFunction(HasPrivateTraits):
     #:            (useful if not all PSFs are needed, as with :class:`CLEAN<BeamformerClean>`)
     #: * 'readonly': Do not attempt to calculate the PSF since it should already be cached (useful
     #:               if multiple processes have to access the cache file)
-    calcmode = Trait('single', 'block', 'full', 'readonly', desc='mode of calculation / storage')
+    calcmode = Enum('single', 'block', 'full', 'readonly', desc='mode of calculation / storage')
 
     #: Floating point precision of property psf. Corresponding to numpy dtypes. Default = 64 Bit.
-    precision = Trait('float64', 'float32', desc='precision (32/64 Bit) of result, corresponding to numpy dtypes')
+    precision = Enum('float64', 'float32', desc='precision (32/64 Bit) of result, corresponding to numpy dtypes')
 
     #: The actual point spread function.
     psf = Property(desc='point spread function')
@@ -1381,10 +1380,10 @@ class BeamformerDamas(BeamformerBase):
     beamformer = Property()
 
     # private storage of beamformer instance
-    _beamformer = Trait(BeamformerBase)
+    _beamformer = Instance(BeamformerBase)
 
     #: The floating-number-precision of the PSFs. Default is 64 bit.
-    psf_precision = Trait('float64', 'float32', desc='precision of PSF')
+    psf_precision = Enum('float64', 'float32', desc='precision of PSF')
 
     #: Number of iterations, defaults to 100.
     n_iter = Int(100, desc='number of iterations')
@@ -1394,7 +1393,7 @@ class BeamformerDamas(BeamformerBase):
 
     #: Flag that defines how to calculate and store the point spread function,
     #: defaults to 'full'. See :attr:`PointSpreadFunction.calcmode` for details.
-    calcmode = Trait('full', 'single', 'block', 'readonly', desc='mode of psf calculation / storage')
+    calcmode = Enum('full', 'single', 'block', 'readonly', desc='mode of psf calculation / storage')
 
     # internal identifier
     digest = Property(
@@ -1481,7 +1480,7 @@ class BeamformerDamasPlus(BeamformerDamas):
     #: These methods are implemented in
     #: the `scikit-learn <http://scikit-learn.org/stable/user_guide.html>`_
     #: module or within scipy.optimize respectively.
-    method = Trait('NNLS', 'LP', 'LassoLars', 'OMPCV', desc='method used for solving deconvolution problem')
+    method = Enum('NNLS', 'LP', 'LassoLars', 'OMPCV', desc='method used for solving deconvolution problem')
 
     #: Weight factor for LassoLars method,
     #: defaults to 0.0.
@@ -1561,10 +1560,7 @@ class BeamformerDamasPlus(BeamformerDamas):
                 self._ac[i] = linprog(c=cT, A_ub=psf, b_ub=y).x / unit  # defaults to simplex method and non-negative x
             else:
                 if self.method == 'LassoLars':
-                    model = LassoLars(
-                        alpha=self.alpha * unit,
-                        max_iter=self.max_iter,
-                    )
+                    model = LassoLars(alpha=self.alpha * unit, max_iter=self.max_iter, positive=True)
                 elif self.method == 'OMPCV':
                     model = OrthogonalMatchingPursuitCV()
                 else:
@@ -1600,7 +1596,7 @@ class BeamformerOrth(BeamformerBase):
     beamformer = Property()
 
     # private storage of beamformer instance
-    _beamformer = Trait(BeamformerEig)
+    _beamformer = Instance(BeamformerEig)
 
     #: List of components to consider, use this to directly set the eigenvalues
     #: used in the beamformer. Alternatively, set :attr:`n`.
@@ -1788,10 +1784,10 @@ class BeamformerClean(BeamformerBase):
     beamformer = Property()
 
     # private storage of beamformer instance
-    _beamformer = Trait(BeamformerBase)
+    _beamformer = Instance(BeamformerBase)
 
     #: The floating-number-precision of the PSFs. Default is 64 bit.
-    psf_precision = Trait('float64', 'float32', desc='precision of PSF.')
+    psf_precision = Enum('float64', 'float32', desc='precision of PSF.')
 
     # iteration damping factor
     # defaults to 0.6
@@ -1801,7 +1797,7 @@ class BeamformerClean(BeamformerBase):
     n_iter = Int(100, desc='maximum number of iterations')
 
     # how to calculate and store the psf
-    calcmode = Trait('block', 'full', 'single', 'readonly', desc='mode of psf calculation / storage')
+    calcmode = Enum('block', 'full', 'single', 'readonly', desc='mode of psf calculation / storage')
 
     # internal identifier
     digest = Property(
@@ -1908,7 +1904,7 @@ class BeamformerCMF(BeamformerBase):
     #: These methods are implemented in
     #: the `scikit-learn <http://scikit-learn.org/stable/user_guide.html>`_
     #: module.
-    method = Trait(
+    method = Enum(
         'LassoLars',
         'LassoLarsBIC',
         'OMPCV',
@@ -2027,9 +2023,9 @@ class BeamformerCMF(BeamformerBase):
             R = realify(reshape(csm.T, (nc * nc, 1))[ind, :])[ind_reim, :] * unit
             # choose method
             if self.method == 'LassoLars':
-                model = LassoLars(alpha=self.alpha * unit, max_iter=self.max_iter, **sklearn_ndict)
+                model = LassoLars(alpha=self.alpha * unit, max_iter=self.max_iter, positive=True, **sklearn_ndict)
             elif self.method == 'LassoLarsBIC':
-                model = LassoLarsIC(criterion='bic', max_iter=self.max_iter, **sklearn_ndict)
+                model = LassoLarsIC(criterion='bic', max_iter=self.max_iter, positive=True, **sklearn_ndict)
             elif self.method == 'OMPCV':
                 model = OrthogonalMatchingPursuitCV(**sklearn_ndict)
             elif self.method == 'NNLS':
@@ -2132,7 +2128,7 @@ class BeamformerSODIX(BeamformerBase):
     #: Type of fit method to be used ('fmin_l_bfgs_b').
     #: These methods are implemented in
     #: the scipy module.
-    method = Trait('fmin_l_bfgs_b', desc='fit method used')
+    method = Enum('fmin_l_bfgs_b', desc='fit method used')
 
     #: Maximum number of iterations,
     #: tradeoff between speed and precision;
@@ -2303,7 +2299,7 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
     #: These methods are implemented in
     #: the `scikit-learn <http://scikit-learn.org/stable/user_guide.html>`_
     #: module.
-    method = Trait(
+    method = Enum(
         'Suzuki',
         'InverseIRLS',
         'LassoLars',
@@ -2477,13 +2473,13 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
                         AB = vstack([hstack([A.real, -A.imag]), hstack([A.imag, A.real])])
                         R = hstack([emode.real.T, emode.imag.T]) * unit
                         if self.method == 'LassoLars':
-                            model = LassoLars(alpha=self.alpha * unit, max_iter=self.max_iter)
+                            model = LassoLars(alpha=self.alpha * unit, max_iter=self.max_iter, positive=True)
                         elif self.method == 'LassoLarsBIC':
-                            model = LassoLarsIC(criterion='bic', max_iter=self.max_iter)
+                            model = LassoLarsIC(criterion='bic', max_iter=self.max_iter, positive=True)
                         elif self.method == 'OMPCV':
                             model = OrthogonalMatchingPursuitCV()
                         elif self.method == 'LassoLarsCV':
-                            model = LassoLarsCV(max_iter=self.max_iter)
+                            model = LassoLarsCV(max_iter=self.max_iter, positive=True)
                         elif self.method == 'NNLS':
                             model = LinearRegression(positive=True)
                         model.normalize = False
