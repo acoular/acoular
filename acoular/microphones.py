@@ -27,12 +27,12 @@ from traits.api import (
 )
 
 # acoular imports
-from .deprecation import DeprecatedFromFile, deprecated_alias
+from .deprecation import deprecated_alias
 from .internal import digest
 
 
-@deprecated_alias({'mpos_tot': 'pos_total', 'mpos': 'pos'}, read_only=['mpos'])
-class MicGeom(HasPrivateTraits, DeprecatedFromFile):
+@deprecated_alias({'mpos_tot': 'pos_total', 'mpos': 'pos', 'from_file': 'file'}, read_only=['mpos'])
+class MicGeom(HasPrivateTraits):
     """Provides the geometric arrangement of microphones in the array.
 
     The geometric arrangement of microphones is read in from an

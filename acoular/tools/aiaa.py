@@ -38,7 +38,7 @@ from traits.api import (
     property_depends_on,
 )
 
-from acoular.deprecation import DeprecatedName
+from acoular.deprecation import deprecated_alias
 from acoular.h5files import H5FileBase, _get_h5file_class
 from acoular.internal import digest
 from acoular.microphones import MicGeom
@@ -84,7 +84,8 @@ class TriggerAIAABenchmark(TimeSamplesAIAABenchmark):
         (self.num_samples, self.num_channels) = self.data.shape
 
 
-class CsmAIAABenchmark(PowerSpectraImport, DeprecatedName):
+@deprecated_alias({'name': 'file'})
+class CsmAIAABenchmark(PowerSpectraImport):
     """Class to load the CSM that is stored in AIAA Benchmark HDF5 file."""
 
     #: Full name of the .h5 file with data

@@ -74,7 +74,7 @@ from traits.api import (
 from traits.trait_errors import TraitError
 
 # acoular imports
-from .deprecation import DeprecatedFromFile, deprecated_alias
+from .deprecation import deprecated_alias
 from .internal import digest
 
 
@@ -685,7 +685,8 @@ class RectGrid3D(RectGrid):
         return s_[xi1 : xi2 + 1], s_[yi1 : yi2 + 1], s_[zi1 : zi2 + 1]
 
 
-class ImportGrid(Grid, DeprecatedFromFile):
+@deprecated_alias({'from_file': 'file'})
+class ImportGrid(Grid):
     """Loads a 3D grid from xml file."""
 
     #: Name of the .xml-file from wich to read the data.

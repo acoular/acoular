@@ -35,7 +35,7 @@ from .deprecation import deprecated_alias
 from .internal import digest
 
 
-@deprecated_alias({'numsamples': 'num_samples'})
+@deprecated_alias({'numchannels': 'num_channels', 'numsamples': 'num_samples'})
 class Generator(HasPrivateTraits):
     """Interface for any generating signal processing block.
 

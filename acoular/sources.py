@@ -80,7 +80,7 @@ from .base import SamplesGenerator
 
 # acoular imports
 from .calib import Calib
-from .deprecation import DeprecatedName, deprecated_alias
+from .deprecation import deprecated_alias
 from .environments import Environment
 from .h5files import H5FileBase, _get_h5file_class
 from .internal import digest, ldigest
@@ -183,7 +183,8 @@ def get_modes(lOrder, direction, mpos, sourceposition=None):  # noqa: N803
     return modes
 
 
-class TimeSamples(SamplesGenerator, DeprecatedName):
+@deprecated_alias({'name': 'file'})
+class TimeSamples(SamplesGenerator):
     """Container for processing time data in `*.h5` or NumPy array format.
 
     This class loads measured data from HDF5 files and provides information about this data. It also

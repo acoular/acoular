@@ -15,13 +15,13 @@ import xml.dom.minidom
 from numpy import array
 from traits.api import CArray, CLong, File, HasPrivateTraits, Property, cached_property, on_trait_change
 
-from .deprecation import DeprecatedFromFile
-
 # acoular imports
+from .deprecation import deprecated_alias
 from .internal import digest
 
 
-class Calib(HasPrivateTraits, DeprecatedFromFile):
+@deprecated_alias({'from_file': 'file'})
+class Calib(HasPrivateTraits):
     """Container for calibration data in `*.xml` format.
 
     This class serves as interface to load calibration data for the used

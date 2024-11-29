@@ -104,7 +104,7 @@ from traits.api import (
 # acoular imports
 from .base import SamplesGenerator, TimeOut
 from .configuration import config
-from .deprecation import DeprecatedName, deprecated_alias
+from .deprecation import deprecated_alias
 from .environments import cartToCyl, cylToCart
 from .h5files import _get_h5file_class
 from .internal import digest, ldigest
@@ -1748,7 +1748,8 @@ class OctaveFilterBank(FilterBank):
         return sos
 
 
-class WriteWAV(TimeOut, DeprecatedName):
+@deprecated_alias({'name': 'file'})
+class WriteWAV(TimeOut):
     """Saves time signal from one or more channels as mono/stereo/multi-channel
     `*.wav` file.
     """
@@ -1818,8 +1819,8 @@ class WriteWAV(TimeOut, DeprecatedName):
         wf.close()
 
 
-@deprecated_alias({'numsamples_write': 'num_samples_write', 'writeflag': 'write_flag'})
-class WriteH5(TimeOut, DeprecatedName):
+@deprecated_alias({'name': 'file', 'numsamples_write': 'num_samples_write', 'writeflag': 'write_flag'})
+class WriteH5(TimeOut):
     """Saves time signal as `*.h5` file."""
 
     # Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
