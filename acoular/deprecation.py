@@ -103,7 +103,7 @@ def deprecated_alias(old2new, read_only=False):
                 for old in unknown_traits:
                     msg = f"Deprecated use of '{old}' trait. Please use the '{old2new[old]}' trait instead."
                     warn(msg, DeprecationWarning, stacklevel=2)
-        
+
         LocalAliasHost.__name__ = cls.__name__
         return LocalAliasHost
 
