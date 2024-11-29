@@ -378,7 +378,7 @@ class MaskedTimeSamples(TimeSamples):
     start = CLong(0, desc='start of valid samples')
 
     #: Index of the last sample to be considered valid.
-    stop = Union( None, CLong, desc='stop of valid samples')
+    stop = Union(None, CLong, desc='stop of valid samples')
 
     #: Channels that are to be treated as invalid.
     invalid_channels = ListInt(desc='list of invalid channels')
