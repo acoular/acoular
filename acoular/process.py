@@ -18,7 +18,7 @@ from collections import deque
 from inspect import currentframe
 from warnings import warn
 
-from traits.api import Any, Bool, Dict, Enum, Instance, Int, Property, cached_property, on_trait_change
+from traits.api import Bool, Dict, Enum, Instance, Int, Property, cached_property, on_trait_change
 
 from .base import Generator, InOut
 from .configuration import config
