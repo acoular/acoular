@@ -58,7 +58,7 @@ ts = ac.MaskedTimeSamples(
     start=0,
     stop=16000,
 )
-calib = ac.Calib(source=ts, file=calib_file)
+calib = ac.Calib(source=ts, file=calib_file, invalid_channels=[1, 7])
 mics = ac.MicGeom(file=Path(ac.__file__).parent / 'xml' / 'array_56.xml', invalid_channels=[1, 7])
 grid = ac.RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=0.68, increment=0.05)
 env = ac.Environment(c=346.04)

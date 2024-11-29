@@ -58,7 +58,7 @@ t1.invalid_channels = invalid
 # Calibration is usually needed and can be set as a separate processing block with the
 # :class:`acoular.Calib` object.
 
-calib = ac.Calib(source=t1, file=calib_file)
+calib = ac.Calib(source=t1, file=calib_file, invalid_channels=invalid)
 
 # %%
 # The microphone geometry must have the same number of valid channels as the
