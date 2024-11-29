@@ -44,7 +44,7 @@ from numpy import (
     zeros,
 )
 from scipy.linalg import norm
-from traits.api import Bool, CArray, Delegate, Enum, Float, Instance, Int, List, Property, Range, Trait, cached_property
+from traits.api import Bool, CArray, Delegate, Enum, Float, Instance, Int, List, Map, Property, Range, cached_property
 from traits.trait_errors import TraitError
 
 from .base import SamplesGenerator, TimeOut
@@ -228,7 +228,7 @@ class BeamformerTime(TimeOut):
     numchannels = Delegate('grid', 'size')
 
     #: Spatial weighting function.
-    weights = Trait('none', possible_weights, desc='spatial weighting function')
+    weights = Map(possible_weights, default_value='none', desc='spatial weighting function')
     # (from timedomain.possible_weights)
 
     # internal identifier
@@ -400,7 +400,7 @@ class BeamformerTimeTraj(BeamformerTime):
 
     #: :class:`~acoular.trajectory.Trajectory` or derived object.
     #: Start time is assumed to be the same as for the samples.
-    trajectory = Trait(Trajectory, desc='trajectory of the grid center')
+    trajectory = Instance(Trajectory, desc='trajectory of the grid center')
 
     #: Reference vector, perpendicular to the y-axis of moving grid.
     rvec = CArray(dtype=float, shape=(3,), value=array((0, 0, 0)), desc='reference vector')
@@ -409,7 +409,7 @@ class BeamformerTimeTraj(BeamformerTime):
     conv_amp = Bool(False, desc='determines if convective amplification of source is considered')
 
     #: Floating point and integer precision
-    precision = Trait(64, [32, 64], desc='numeric precision')
+    precision = Enum(64, 32, desc='numeric precision')
 
     # internal identifier
     digest = Property(
@@ -772,7 +772,7 @@ class BeamformerCleantTraj(BeamformerCleant, BeamformerTimeTraj):
     """
 
     #: Floating point and integer precision
-    precision = Trait(32, [32, 64], desc='numeric precision')
+    precision = Enum(32, 64, desc='numeric precision')
 
     # internal identifier
     digest = Property(
@@ -880,7 +880,7 @@ class IntegratorSectorTime(TimeOut):
     source = Instance(SamplesGenerator)
 
     #: :class:`~acoular.grids.RectGrid` object that provides the grid locations.
-    grid = Trait(RectGrid, desc='beamforming grid')
+    grid = Instance(RectGrid, desc='beamforming grid')
 
     #: List of sectors in grid
     sectors = List()

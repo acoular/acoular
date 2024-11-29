@@ -9,7 +9,7 @@
     SoundDeviceSamplesGenerator
 """
 
-from traits.api import Any, Bool, Float, Int, Long, Property, Trait, cached_property, observe
+from traits.api import Any, Bool, Enum, Float, Int, Long, Property, cached_property, observe
 
 from .base import SamplesGenerator
 from .configuration import config
@@ -52,7 +52,7 @@ class SoundDeviceSamplesGenerator(SamplesGenerator):
     _sample_freq = Float(default_value=None)
 
     #: Datatype (resolution) of the signal, used as `dtype` in a sd `Stream` object
-    precision = Trait('float32', 'float16', 'int32', 'int16', 'int8', 'uint8', desc='precision (resolution) of signal')
+    precision = Enum('float32', 'float16', 'int32', 'int16', 'int8', 'uint8', desc='precision (resolution) of signal')
 
     #: Indicates that the sounddevice buffer has overflown
     overflow = Bool(False, desc='Indicates if sounddevice buffer overflow')

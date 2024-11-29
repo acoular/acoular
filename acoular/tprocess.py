@@ -87,15 +87,17 @@ from traits.api import (
     Constant,
     Delegate,
     Dict,
+    Enum,
     File,
     Float,
     Instance,
     Int,
     List,
     ListInt,
+    Map,
     Property,
     Str,
-    Trait,
+    Union,
     cached_property,
     observe,
     on_trait_change,
@@ -128,7 +130,7 @@ class MaskedTimeOut(TimeOut):
     start = CLong(0, desc='start of valid samples')
 
     # Index of the last sample to be considered valid.
-    stop = Trait(None, None, CLong, desc='stop of valid samples')
+    stop = Union(None, CLong, desc='stop of valid samples')
 
     # Channels that are to be treated as invalid.
     invalid_channels = ListInt(desc='list of invalid channels')
@@ -346,12 +348,12 @@ class Trigger(TimeOut):
     # is above/below the pos/neg threshold.
     #
     # Default is 'dirac'.
-    trigger_type = Trait('dirac', 'rect')
+    trigger_type = Enum('dirac', 'rect')
 
     # Identifier which peak to consider, if there are multiple peaks in one hunk : (see
     # :attr:`~acoular.tprocess.Trigger.hunk_length`). Default is to 'extremum', : in which case the
     # extremal peak (maximum if threshold > 0, minimum if threshold < 0) is considered.
-    multiple_peaks_in_hunk = Trait('extremum', 'first')
+    multiple_peaks_in_hunk = Enum('extremum', 'first')
 
     # Tuple consisting of 3 entries:
     #
@@ -673,7 +675,7 @@ class SpatialInterpolator(TimeOut):
     # spline uses scipy CloughTocher algorithm
     # rbf is scipy radial basis function with multiquadric, cubic and sinc functions
     # idw refers to the inverse distance weighting algorithm
-    method = Trait(
+    method = Enum(
         'linear',
         'spline',
         'rbf-multiquadric',
@@ -685,7 +687,7 @@ class SpatialInterpolator(TimeOut):
     )
 
     # spacial dimensionality of the array geometry
-    array_dimension = Trait('1D', '2D', 'ring', '3D', 'custom', desc='spacial dimensionality of the array geometry')
+    array_dimension = Enum('1D', '2D', 'ring', '3D', 'custom', desc='spacial dimensionality of the array geometry')
 
     # Sampling frequency of output signal, as given by :attr:`source`.
     sample_freq = Delegate('source', 'sample_freq')
@@ -706,11 +708,10 @@ class SpatialInterpolator(TimeOut):
     # The transformation is done via [x,y,z]_mod = Q * [x,y,z]. (default is Identity).
     Q = CArray(dtype=float64, shape=(3, 3), value=identity(3))
 
-    num_IDW = Trait(3, dtype=int, desc='number of neighboring microphones, DEFAULT=3')  # noqa: N815
+    num_IDW = Int(3, desc='number of neighboring microphones, DEFAULT=3')  # noqa: N815
 
-    p_weight = Trait(
+    p_weight = Float(
         2,
-        dtype=float,
         desc='used in interpolation for virtual microphone, weighting power exponent for IDW',
     )
 
@@ -1247,7 +1248,7 @@ class Mixer(TimeOut):
     """Mixes the signals from several sources."""
 
     # Data source; :class:`~acoular.base.SamplesGenerator` object.
-    source = Trait(SamplesGenerator)
+    source = Instance(SamplesGenerator)
 
     # List of additional :class:`~acoular.base.SamplesGenerator` objects
     # to be mixed.
@@ -1464,7 +1465,7 @@ class FiltOctave(Filter):
     band = Float(1000.0, desc='band center frequency')
 
     # Octave fraction: 'Octave' or 'Third octave'; defaults to 'Octave'.
-    fraction = Trait('Octave', {'Octave': 1, 'Third octave': 3}, desc='fraction of octave')
+    fraction = Map({'Octave': 1, 'Third octave': 3}, default_value='Octave', desc='fraction of octave')
 
     # Filter order
     order = Int(3, desc='IIR filter order')
@@ -1576,7 +1577,7 @@ class TimeExpAverage(Filter):
     """
 
     # time weighting
-    weight = Trait('F', {'F': 0.125, 'S': 1.0, 'I': 0.035}, desc='time weighting')
+    weight = Map({'F': 0.125, 'S': 1.0, 'I': 0.035}, default_value='F', desc='time weighting')
 
     sos = Property(depends_on=['weight', 'source.digest'])
 
@@ -1599,7 +1600,7 @@ class FiltFreqWeight(Filter):
     """Frequency weighting filter accoring to IEC 61672."""
 
     # weighting characteristics
-    weight = Trait('A', ('A', 'C', 'Z'), desc='frequency weighting')
+    weight = Enum('A', 'C', 'Z', desc='frequency weighting')
 
     sos = Property(depends_on=['weight', 'source.digest'])
 
@@ -1705,7 +1706,7 @@ class OctaveFilterBank(FilterBank):
     hband = Int(40, desc='lowest band center frequency index')
 
     # Octave fraction: 'Octave' or 'Third octave'; defaults to 'Octave'.
-    fraction = Trait('Octave', {'Octave': 1, 'Third octave': 3}, desc='fraction of octave')
+    fraction = Map({'Octave': 1, 'Third octave': 3}, default_value='Octave', desc='fraction of octave')
 
     # List of filter coefficients for all filters
     ba = Property(depends_on=['lband', 'hband', 'fraction', 'source.digest'])
@@ -1834,7 +1835,7 @@ class WriteH5(TimeOut, DeprecatedName):
 
     # The floating-number-precision of entries of H5 File corresponding
     # to numpy dtypes. Default is 32 bit.
-    precision = Trait('float32', 'float64', desc='precision of H5 File')
+    precision = Enum('float32', 'float64', desc='precision of H5 File')
 
     # Metadata to be stored in HDF5 file object
     metadata = Dict(desc='metadata to be stored in .h5 file')
