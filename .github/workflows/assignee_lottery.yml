@@ -1,0 +1,24 @@
+name: 'Auto-assign assignee'
+on:
+    pull_request:
+        types: [opened]
+
+jobs:
+    add-reviews:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: kentaro-m/auto-assign-action@v2.0.0
+                with:
+                    addReviewers: false
+                    addAssignees: true
+                    
+                    numberOfAssignees: 1
+                    
+                    assignees:
+                        - adku1173
+                        - jtodev
+                        # - artpelling
+                        # - esarradj
+                        # - FrankK20
+                        # - gherold
+                        # - sjekosch
