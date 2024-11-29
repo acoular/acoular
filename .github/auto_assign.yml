@@ -10,3 +10,5 @@ assignees:
     - FrankK20
     - gherold
     - sjekosch
+
+runOnDraft: true
