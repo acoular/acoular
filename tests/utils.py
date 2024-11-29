@@ -3,12 +3,12 @@ import inspect
 import pkgutil
 import warnings
 from pathlib import Path
-from traits.api import HasTraits
 
 import acoular as ac
 import numpy as np
 import pytest
 from pytest_cases import get_case_id
+from traits.api import HasTraits
 
 
 def get_all_classes(hastraits_only=False):
@@ -17,9 +17,9 @@ def get_all_classes(hastraits_only=False):
     for module_info in pkgutil.walk_packages(package.__path__, package.__name__ + '.'):
         module = importlib.import_module(module_info.name)
         for _, cls in inspect.getmembers(module, inspect.isclass):
-            if cls.__module__ == module_info.name:  # ensure class is defined in the current module
-                if not hastraits_only or issubclass(cls, HasTraits):
-                    classes.append(cls)
+            # ensure class is defined in the current module
+            if cls.__module__ == module_info.name and (not hastraits_only or issubclass(cls, HasTraits)):
+                classes.append(cls)
     return classes
 
 

@@ -8,10 +8,9 @@ import warnings
 from inspect import isabstract
 
 import pytest
-from traits.api import Bool, Enum, Float, Int, Range, TraitEnum
+from traits.api import Any, Bool, Enum, Float, Int, Range, TraitEnum
 
 from tests.utils import get_all_classes
-
 
 all_classes = get_all_classes()
 all_hastraits_classes = get_all_classes(hastraits_only=True)
@@ -72,34 +71,35 @@ def test_set_traits(acoular_cls):
 @pytest.mark.parametrize('acoular_cls', all_hastraits_classes)
 def test_trait_dependencies(acoular_cls):
     """Assert that a property that is depended on depends on something."""
+
     def check_or_unpack(obj, tname, toplevel=True):
-        assert len(objtname:=tname.split('.')) < 3, 'Trait dependency too deep.'
+        assert len(objtname := tname.split('.')) < 3, 'Trait dependency too deep.'
         # recurse if trait depends on a trait of another object
         if len(objtname) == 2:
-            print('objtname: ', objtname)
-            # instantiate the trait
-            obj = create_instance(obj.trait(objtname[0]).trait_type.klass)
-            tname = objtname[1]
-            check_or_unpack(obj, tname, toplevel=False)
+            # skip if trait is Any
+            if obj.trait(objtname[0]).trait_type != Any:
+                # instantiate the trait
+                obj = create_instance(obj.trait(objtname[0]).trait_type.klass)
+                tname = objtname[1]
+                check_or_unpack(obj, tname, toplevel=False)
         else:
+            # deal with traits extended name definition by stripping trailing '[]'
+            # https://docs.enthought.com/traits/traits_user_manual/listening.html#semantics
+            tname = tname.replace('[]', '')
             trait = obj.trait(tname)
-            print('trait: ', tname)
             if trait.is_property:
                 if trait.depends_on is None:
                     assert toplevel, type(obj).__name__ + '.' + tname
                 else:
-                    do = trait.depends_on
-                    do = do if isinstance(do, list) else [do]
-                    for otname in do:
-                        print('otname: ', otname)
+                    for otname in trait.depends_on:
                         check_or_unpack(obj, otname, toplevel=False)
 
     obj = create_instance(acoular_cls)
     for tname in obj.traits():
-        print('toplevel: ', tname)
         try:
             check_or_unpack(obj, tname)
         except AssertionError as e:
             otname = str(e).split(' ')[0].split('\n')[0]
             tname = type(obj).__name__ + '.' + tname
-            raise AssertionError(f'{tname} depends on {otname}, but {otname} does not depend on anything.')
+            err = f'{tname} depends on {otname}, but {otname} does not depend on anything.'
+            raise AssertionError(err) from e
