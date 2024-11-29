@@ -12,6 +12,7 @@ Upcoming Release (25.01)
         * pass missing `max_iter` as an argument to `LassoLarsCV` in :class:`acoular.fbeamform.BeamformerGIB` (otherwise, LassoLarsCV runs up to 500 iterations)
         * fix broken pylops solvers in :class:`acoular.fbeamform.BeamformerCMF`
         * fixes negative values in source maps obtained with the solvers `LassoLars`, `LassoLarsCV` and `LassoLarsBIC`
+        * fix use of Trait() factory and replace by Enum, Instance, Map, Union 
 
     **Documentation**
         * adds guide on how to submit a pull request
