@@ -12,10 +12,8 @@
 # imports from other packages
 import xml.dom.minidom
 
-from numpy import arange, array, newaxis
-from traits.api import CArray, CLong, File, Property, cached_property, on_trait_change
-
-import acoular as ac
+from numpy import array, newaxis
+from traits.api import CArray, CLong, File, ListInt, Property, cached_property, on_trait_change
 
 from .base import InOut
 
@@ -86,12 +84,25 @@ class Calib(InOut):
     #: is set automatically when read from file can be set manually.
     data = CArray(desc='calibration data')
 
+    #: Channels that are to be treated as invalid.
+    invalid_channels = ListInt(desc='list of invalid channels')
+
+    #: Channel mask to serve as an index for all valid channels, is set automatically.
+    channels = Property(depends_on=['invalid_channels', 'num_mics'], desc='channel mask')
+
     # Internal identifier
     digest = Property(depends_on=['source.digest', 'data'])
 
     @on_trait_change('data')
     def set_num_mics(self):
         self.num_mics = self.data.shape[0]
+
+    @cached_property
+    def _get_channels(self):
+        if len(self.invalid_channels) == 0:
+            return slice(0, None, None)
+        allr = [i for i in range(self.num_mics) if i not in self.invalid_channels]
+        return array(allr)
 
     @cached_property
     def _get_digest(self):
@@ -128,10 +139,9 @@ class Calib(InOut):
             or sourcechannels is numchannels*numfreqs of numchannels*numchannels*numfreqs
             if the source data is in the frequency domain.
         """
-        idx = self.source.channels if isinstance(self.source, ac.MaskedTimeSamples) else arange(self.data.shape[0])
         for block in self.source.result(num):
-            if self.data[idx].shape[0] == block.shape[1]:
-                yield block * self.data[idx][newaxis]
+            if self.data[self.channels].shape[0] == block.shape[1]:
+                yield block * self.data[self.channels][newaxis]
             else:
                 msg = 'calibration data shape does not match source data shape: %i, %i' % (
                     self.data.shape[0],
