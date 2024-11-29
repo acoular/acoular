@@ -332,7 +332,7 @@ class SampleSplitter(InOut):
     _buffer_overflow = Bool(False)
 
     # Helper Trait holds source generator
-    _source_generator = Any()
+    _source_generator = Instance(LockedGenerator)
 
     def _create_block_buffer(self, obj):
         self.block_buffer[obj] = deque([], maxlen=self.buffer_size)
