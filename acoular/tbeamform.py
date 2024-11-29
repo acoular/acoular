@@ -409,7 +409,7 @@ class BeamformerTimeTraj(BeamformerTime):
     conv_amp = Bool(False, desc='determines if convective amplification of source is considered')
 
     #: Floating point and integer precision
-    precision = Enum(64, [32, 64], desc='numeric precision')
+    precision = Enum(64, 32, desc='numeric precision')
 
     # internal identifier
     digest = Property(
