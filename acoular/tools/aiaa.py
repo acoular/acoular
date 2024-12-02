@@ -38,7 +38,7 @@ from traits.api import (
     property_depends_on,
 )
 
-from acoular.deprecation import DeprecatedName
+from acoular.deprecation import deprecated_alias
 from acoular.h5files import H5FileBase, _get_h5file_class
 from acoular.internal import digest
 from acoular.microphones import MicGeom
@@ -59,7 +59,7 @@ class TimeSamplesAIAABenchmark(TimeSamples):
         """Loads timedata from .h5 file. Only for internal use."""
         self.data = self.h5f.get_data_by_reference('MicrophoneData/microphoneDataPa')
         self.sample_freq = self.h5f.get_node_attribute(self.data, 'sampleRateHz')
-        (self.numsamples, self.numchannels) = self.data.shape
+        (self.num_samples, self.num_channels) = self.data.shape
 
     def _load_metadata(self):
         """Loads metadata from .h5 file. Only for internal use."""
@@ -81,10 +81,11 @@ class TriggerAIAABenchmark(TimeSamplesAIAABenchmark):
         """Loads timedata from .h5 file. Only for internal use."""
         self.data = self.h5f.get_data_by_reference('TachoData/tachoDataV')
         self.sample_freq = self.h5f.get_node_attribute(self.data, 'sampleRateHz')
-        (self.numsamples, self.numchannels) = self.data.shape
+        (self.num_samples, self.num_channels) = self.data.shape
 
 
-class CsmAIAABenchmark(PowerSpectraImport, DeprecatedName):
+@deprecated_alias({'name': 'file'})
+class CsmAIAABenchmark(PowerSpectraImport):
     """Class to load the CSM that is stored in AIAA Benchmark HDF5 file."""
 
     #: Full name of the .h5 file with data
@@ -97,7 +98,7 @@ class CsmAIAABenchmark(PowerSpectraImport, DeprecatedName):
     )
 
     #: number of channels
-    numchannels = Property()
+    num_channels = Property()
 
     #: HDF5 file object
     h5f = Instance(H5FileBase, transient=True)
@@ -130,7 +131,7 @@ class CsmAIAABenchmark(PowerSpectraImport, DeprecatedName):
             return range(0)
 
     @property_depends_on('digest')
-    def _get_numchannels(self):
+    def _get_num_channels(self):
         try:
             attrs = self.h5f.get_data_by_reference('MetaData/ArrayAttributes')
             return self.h5f.get_node_attribute(attrs, 'microphoneCount')
@@ -175,5 +176,5 @@ class MicAIAABenchmark(MicGeom):
         """
         file = _get_h5file_class()
         h5f = file(self.file, mode='r')
-        self.mpos_tot = h5f.get_data_by_reference('MetaData/ArrayAttributes/microphonePositionsM')[:].swapaxes(0, 1)
+        self.pos_total = h5f.get_data_by_reference('MetaData/ArrayAttributes/microphonePositionsM')[:].swapaxes(0, 1)
         h5f.close()

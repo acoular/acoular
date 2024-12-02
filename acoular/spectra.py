@@ -53,15 +53,18 @@ from traits.api import (
     property_depends_on,
 )
 
+# acoular imports
 from .base import SamplesGenerator
 from .calib import Calib
 from .configuration import config
+from .deprecation import deprecated_alias
 from .fastFuncs import calcCSM
 from .h5cache import H5cache
 from .h5files import H5CacheFileBase
 from .internal import digest
 
 
+@deprecated_alias({'numchannels': 'num_channels'}, read_only=True)
 class BaseSpectra(HasPrivateTraits):
     #: Data source; :class:`~acoular.sources.SamplesGenerator` or derived object.
     source = Instance(SamplesGenerator)
@@ -70,7 +73,7 @@ class BaseSpectra(HasPrivateTraits):
     sample_freq = Delegate('source')
 
     #: Number of time data channels
-    numchannels = Delegate('source')
+    num_channels = Delegate('source')
 
     #: Window function for FFT, one of:
     #:   * 'Rectangular' (default)
@@ -130,7 +133,7 @@ class BaseSpectra(HasPrivateTraits):
     # generator that yields the time data blocks for every channel (with optional overlap)
     def _get_source_data(self):
         bs = self.block_size
-        temp = empty((2 * bs, self.numchannels))
+        temp = empty((2 * bs, self.num_channels))
         pos = bs
         posinc = bs / self.overlap_
         for data_block in self.source.result(bs):
@@ -235,7 +238,7 @@ class PowerSpectra(BaseSpectra):
     basename = Property(depends_on='_source.digest', desc='basename for cache file')
 
     #: The cross spectral matrix,
-    #: (number of frequencies, numchannels, numchannels) array of complex;
+    #: (number of frequencies, num_channels, num_channels) array of complex;
     #: readonly.
     csm = Property(desc='cross spectral matrix')
 
@@ -244,7 +247,7 @@ class PowerSpectra(BaseSpectra):
     eva = Property(desc='eigenvalues of cross spectral matrix')
 
     #: Eigenvectors of the cross spectral matrix as an
-    #: (number of frequencies, numchannels, numchannels) array of floats,
+    #: (number of frequencies, num_channels, num_channels) array of floats,
     #: readonly.
     eve = Property(desc='eigenvectors of cross spectral matrix')
 
@@ -268,9 +271,9 @@ class PowerSpectra(BaseSpectra):
         warn(msg, DeprecationWarning, stacklevel=2)
         self._calib = calib
 
-    @property_depends_on('_source.numsamples, block_size, overlap')
+    @property_depends_on('_source.num_samples, block_size, overlap')
     def _get_num_blocks(self):
-        return self.overlap_ * self._source.numsamples / self.block_size - self.overlap_ + 1
+        return self.overlap_ * self._source.num_samples / self.block_size - self.overlap_ + 1
 
     @property_depends_on('_source.sample_freq, block_size, ind_low, ind_high')
     def _get_freq_range(self):
@@ -363,15 +366,15 @@ class PowerSpectra(BaseSpectra):
         weight = dot(wind, wind)
         wind = wind[newaxis, :].swapaxes(0, 1)
         numfreq = int(self.block_size / 2 + 1)
-        csm_shape = (numfreq, t.numchannels, t.numchannels)
+        csm_shape = (numfreq, t.num_channels, t.num_channels)
         csm_upper = zeros(csm_shape, dtype=self.precision)
         # print "num blocks", self.num_blocks
         # for backward compatibility
         if self.calib and self.calib.num_mics > 0:
-            if self.calib.num_mics == t.numchannels:
+            if self.calib.num_mics == t.num_channels:
                 wind = wind * self.calib.data[newaxis, :]
             else:
-                raise ValueError('Calibration data not compatible: %i, %i' % (self.calib.num_mics, t.numchannels))
+                raise ValueError('Calibration data not compatible: %i, %i' % (self.calib.num_mics, t.num_channels))
         # get time data blockwise
         for data in self._get_source_data():
             ft = fft.rfft(data * wind, None, 0).astype(self.precision)
@@ -429,7 +432,7 @@ class PowerSpectra(BaseSpectra):
         if traitname == 'csm':
             func = self.calc_csm
             numfreq = int(self.block_size / 2 + 1)
-            shape = (numfreq, self._source.numchannels, self._source.numchannels)
+            shape = (numfreq, self._source.num_channels, self._source.num_channels)
             precision = self.precision
         elif traitname == 'eva':
             func = self.calc_eva
@@ -636,7 +639,7 @@ class PowerSpectraImport(PowerSpectra):
     :attr:`csm` attribute. This can be useful when algorithms shall be
     evaluated with existing CSM matrices.
     The frequency or frequencies contained by the CSM must be set via the
-    attr:`frequencies` attribute. The attr:`numchannels` attributes
+    attr:`frequencies` attribute. The attr:`num_channels` attributes
     is determined on the basis of the CSM shape.
     In contrast to the PowerSpectra object, the attributes
     :attr:`sample_freq`, :attr:`time_data`, :attr:`source`,
@@ -646,7 +649,7 @@ class PowerSpectraImport(PowerSpectra):
     """
 
     #: The cross spectral matrix,
-    #: (number of frequencies, numchannels, numchannels) array of complex;
+    #: (number of frequencies, num_channels, num_channels) array of complex;
     csm = Property(desc='cross spectral matrix')
 
     #: frequencies included in the cross-spectral matrix in ascending order.
@@ -654,7 +657,7 @@ class PowerSpectraImport(PowerSpectra):
     frequencies = Union(CArray, Float, desc='frequencies included in the cross-spectral matrix')
 
     #: Number of time data channels
-    numchannels = Property(depends_on=['digest'])
+    num_channels = Property(depends_on=['digest'])
 
     time_data = Enum(None, desc='PowerSpectraImport cannot consume time data')
 
@@ -704,7 +707,7 @@ class PowerSpectraImport(PowerSpectra):
     def _get_digest(self):
         return digest(self)
 
-    def _get_numchannels(self):
+    def _get_num_channels(self):
         return self.csm.shape[1]
 
     def _get_csm(self):
@@ -713,7 +716,7 @@ class PowerSpectraImport(PowerSpectra):
     def _set_csm(self, csm):
         if (len(csm.shape) != 3) or (csm.shape[1] != csm.shape[2]):
             msg = 'The cross spectral matrix must have the following shape: \
-            (number of frequencies, numchannels, numchannels)!'
+            (number of frequencies, num_channels, num_channels)!'
             raise ValueError(msg)
         self._csmsum = real(self._csm).sum() + (imag(self._csm) ** 2).sum()  # to trigger new digest creation
         self._csm = csm

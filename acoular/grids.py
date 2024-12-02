@@ -73,7 +73,8 @@ from traits.api import (
 )
 from traits.trait_errors import TraitError
 
-from .deprecation import DeprecatedFromFile
+# acoular imports
+from .deprecation import deprecated_alias
 from .internal import digest
 
 
@@ -253,6 +254,7 @@ class Polygon:
         return mindst
 
 
+@deprecated_alias({'gpos': 'pos'})
 class Grid(HasPrivateTraits):
     """Virtual base class for grid geometries.
 
@@ -272,7 +274,7 @@ class Grid(HasPrivateTraits):
 
     #: Grid positions as (3, :attr:`size`) array of floats, without invalid
     #: microphones; readonly.
-    gpos = Property(desc='x, y, z positions of grid points')
+    pos = Property(desc='x, y, z positions of grid points')
 
     # internal identifier
     digest = Property
@@ -292,25 +294,8 @@ class Grid(HasPrivateTraits):
         return (1, 1)
 
     @property_depends_on('digest')
-    def _get_gpos(self):
+    def _get_pos(self):
         return array([[0.0], [0.0], [0.0]])
-
-    def pos(self):
-        """Calculates grid co-ordinates.
-        Deprecated; use :attr:`gpos` attribute instead.
-        The :meth:`pos` method will be removed in version 25.01.
-
-        Returns
-        -------
-        array of floats of shape (3, :attr:`size`)
-            The grid point x, y, z-coordinates in one array.
-
-        """
-        msg = (
-            "The 'pos' method is deprecated and will be removed in version 25.01. " "Use the 'gpos' attribute instead."
-        )
-        warn(msg, DeprecationWarning, stacklevel=2)
-        return self.gpos  # array([[0.], [0.], [0.]])
 
     def subdomain(self, sector):
         """Queries the indices for a subdomain in the grid.
@@ -329,13 +314,14 @@ class Grid(HasPrivateTraits):
             an array with the same shape as the grid.
 
         """
-        xpos = self.gpos
+        xpos = self.pos
         # construct grid-shaped array with "True" entries where sector is
         xyi = sector.contains(xpos).reshape(self.shape)
         # return indices of "True" entries
         return where(xyi)
 
 
+@deprecated_alias({'gpos': 'pos'}, read_only=True)
 class RectGrid(Grid):
     """Provides a cartesian 2D grid for the beamforming results.
 
@@ -400,7 +386,7 @@ class RectGrid(Grid):
         return digest(self)
 
     @property_depends_on('x_min, x_max, y_min, y_max, increment')
-    def _get_gpos(self):
+    def _get_pos(self):
         """Calculates grid co-ordinates.
 
         Returns
@@ -470,7 +456,7 @@ class RectGrid(Grid):
 
         """
         if len(r) == 3:  # only 3 values given -> use x,y,radius method
-            xpos = self.gpos
+            xpos = self.pos
             xis = []
             yis = []
             dr2 = (xpos[0, :] - r[0]) ** 2 + (xpos[1, :] - r[1]) ** 2
@@ -487,7 +473,7 @@ class RectGrid(Grid):
             xi1, yi1 = self.index(min(r[0], r[2]), min(r[1], r[3]))
             xi2, yi2 = self.index(max(r[0], r[2]), max(r[1], r[3]))
             return s_[xi1 : xi2 + 1], s_[yi1 : yi2 + 1]
-        xpos = self.gpos
+        xpos = self.pos
         xis = []
         yis = []
         # replaced matplotlib Path by numpy
@@ -618,7 +604,7 @@ class RectGrid3D(RectGrid):
         return 1
 
     @property_depends_on('digest')
-    def _get_gpos(self):
+    def _get_pos(self):
         """Calculates grid co-ordinates.
 
         Returns
@@ -699,7 +685,8 @@ class RectGrid3D(RectGrid):
         return s_[xi1 : xi2 + 1], s_[yi1 : yi2 + 1], s_[zi1 : zi2 + 1]
 
 
-class ImportGrid(Grid, DeprecatedFromFile):
+@deprecated_alias({'from_file': 'file'})
+class ImportGrid(Grid):
     """Loads a 3D grid from xml file."""
 
     #: Name of the .xml-file from wich to read the data.
@@ -722,19 +709,19 @@ class ImportGrid(Grid, DeprecatedFromFile):
     # necessary to trigger the depends on mechanism
     @property_depends_on('gpos_file')
     def _get_size(self):
-        return self.gpos.shape[-1]
+        return self.pos.shape[-1]
 
     # 'digest' is a placeholder for other properties in derived classes
     @property_depends_on('gpos_file')
     def _get_shape(self):
-        return (self.gpos.shape[-1],)
+        return (self.pos.shape[-1],)
 
     @property_depends_on('gpos_file')
-    def _get_gpos(self):
+    def _get_pos(self):
         return self.gpos_file
 
-    def _set_gpos(self, gpos):
-        self.gpos_file = gpos
+    def _set_pos(self, pos):
+        self.gpos_file = pos
 
     @on_trait_change('file')
     def import_gpos(self):
@@ -749,6 +736,7 @@ class ImportGrid(Grid, DeprecatedFromFile):
         self.subgrids = array(names)
 
 
+@deprecated_alias({'gpos': 'pos'}, read_only=True)
 class LineGrid(Grid):
     """Class for Line grid geometries."""
 
@@ -770,7 +758,7 @@ class LineGrid(Grid):
 
     #: Grid positions as (3, :attr:`size`) array of floats, without invalid
     #: microphones; readonly.
-    gpos = Property(desc='x, y, z positions of grid points')
+    pos = Property(desc='x, y, z positions of grid points')
 
     digest = Property(
         depends_on=['loc', 'direction', 'length', 'numpoints', 'size'],
@@ -784,15 +772,15 @@ class LineGrid(Grid):
     # necessary to trigger the depends on mechanism
     @property_depends_on('numpoints')
     def _get_size(self):
-        return self.gpos.shape[-1]
+        return self.pos.shape[-1]
 
     # 'digest' is a placeholder for other properties in derived classes
     @property_depends_on('numpoints')
     def _get_shape(self):
-        return self.gpos.shape[-1]
+        return self.pos.shape[-1]
 
     @property_depends_on('numpoints,length,direction,loc')
-    def _get_gpos(self):
+    def _get_pos(self):
         dist = self.length / (self.numpoints - 1)
         loc = array(self.loc, dtype=float).reshape((3, 1))
         direc_n = array(self.direction) / norm(self.direction)
@@ -802,6 +790,7 @@ class LineGrid(Grid):
         return pos.T
 
 
+@deprecated_alias({'gpos': 'pos'}, read_only=True)
 class MergeGrid(Grid):
     """Base class for merging different grid geometries."""
 
@@ -834,12 +823,12 @@ class MergeGrid(Grid):
     # necessary to trigger the depends on mechanism
     @property_depends_on('digest')
     def _get_size(self):
-        return self.gpos.shape[-1]
+        return self.pos.shape[-1]
 
     # 'digest' is a placeholder for other properties in derived classes
     @property_depends_on('digest')
     def _get_shape(self):
-        return self.gpos.shape[-1]
+        return self.pos.shape[-1]
 
     @property_depends_on('digest')
     def _get_subgrids(self):
@@ -849,11 +838,11 @@ class MergeGrid(Grid):
         return subgrids[:, newaxis].T
 
     @property_depends_on('digest')
-    def _get_gpos(self):
+    def _get_pos(self):
         bpos = zeros((3, 0))
         # subgrids = zeros((1,0))
         for grid in self.grids:
-            bpos = append(bpos, grid.gpos, axis=1)
+            bpos = append(bpos, grid.pos, axis=1)
             # subgrids = append(subgrids,str(grid))
         return unique(bpos, axis=1)
 

@@ -43,7 +43,7 @@ def return_result(source, nmax=-1, num=128):
 
     Returns
     -------
-    array of floats (number of samples, source.numchannels)
+    array of floats (number of samples, source.num_channels)
         Array that holds all the data.
 
     """

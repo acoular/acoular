@@ -32,7 +32,7 @@ class SamplesBuffer(InOut):
     >>> source = ac.TimeSamples(
     ...     data=ac.WNoiseGenerator(
     ...         sample_freq=64,
-    ...         numsamples=512,
+    ...         num_samples=512,
     ...     ).signal()[:, np.newaxis],
     ...     sample_freq=64,
     ... )
@@ -118,7 +118,7 @@ class SamplesBuffer(InOut):
         return self._buffer.shape[0] - self._index
 
     def _create_new_buffer(self):
-        self._buffer = np.zeros((self.length, self.numchannels), dtype=self.dtype)
+        self._buffer = np.zeros((self.length, self.num_channels), dtype=self.dtype)
         self._index = self.length
         self._empty_source = False
 
@@ -135,7 +135,7 @@ class SamplesBuffer(InOut):
         -------
         None
         """
-        ar = np.zeros((num, self.numchannels), dtype=self._buffer.dtype)
+        ar = np.zeros((num, self.num_channels), dtype=self._buffer.dtype)
         self._buffer = np.concatenate((ar, self._buffer), axis=0)
         self._index += num
         self.length += num

@@ -30,18 +30,22 @@ from traits.api import (
     cached_property,
 )
 
-from acoular.internal import digest
+# acoular imports
+from .deprecation import deprecated_alias
+from .internal import digest
 
 
+@deprecated_alias({'numchannels': 'num_channels', 'numsamples': 'num_samples'})
 class Generator(HasPrivateTraits):
     """Interface for any generating signal processing block.
 
     It provides a common interface for all classes, which generate an output via the generator
     :meth:`result` in block-wise manner. It has a common set of traits that are used by all classes
     that implement this interface. This includes the sampling frequency of the signal
-    (:attr:`sample_freq`) and the number of samples (:attr:`numsamples`). A private trait
-    :attr:`digest` is used to store the internal identifier of the object, which is a hash of the
-    object's attributes. This is used to check if the object's internal state has changed.
+    (:attr:`sample_freq`), the number of samples (:attr:`num_samples`), and the number of channels
+    (:attr:`num_channels`). A private trait :attr:`digest` is used to store the internal identifier
+    of the object, which is a hash of the object's attributes.
+    This is used to check if the object's internal state has changed.
 
     """
 
@@ -49,10 +53,13 @@ class Generator(HasPrivateTraits):
     sample_freq = Float(1.0, desc='sampling frequency')
 
     #: Number of signal samples
-    numsamples = CLong
+    num_samples = CLong
+
+    #: Number of channels
+    num_channels = CLong
 
     # internal identifier
-    digest = Property(depends_on=['sample_freq', 'numsamples'])
+    digest = Property(depends_on=['sample_freq', 'num_samples', 'num_channels'])
 
     def _get_digest(self):
         return digest(self)
@@ -83,11 +90,8 @@ class SamplesGenerator(Generator):
 
     """
 
-    #: Number of channels
-    numchannels = CLong
-
     # internal identifier
-    digest = Property(depends_on=['sample_freq', 'numchannels', 'numsamples'])
+    digest = Property(depends_on=['sample_freq', 'num_samples', 'num_channels'])
 
     def _get_digest(self):
         return digest(self)
@@ -104,7 +108,7 @@ class SamplesGenerator(Generator):
         Yields
         ------
         numpy.ndarray
-            The two-dimensional time-data block of shape (num, numchannels).
+            The two-dimensional time-data block of shape (num, num_channels).
         """
 
 
@@ -117,11 +121,8 @@ class SpectraGenerator(Generator):
 
     """
 
-    #: Number of channels
-    numchannels = CLong
-
     #: Number of frequencies
-    numfreqs = CLong
+    num_freqs = CLong
 
     #: 1-D array of frequencies
     freqs = CArray
@@ -130,7 +131,7 @@ class SpectraGenerator(Generator):
     block_size = CLong
 
     # internal identifier
-    digest = Property(depends_on=['sample_freq', 'numchannels', 'numsamples', 'numfreqs', 'block_size'])
+    digest = Property(depends_on=['sample_freq', 'num_samples', 'num_channels', 'num_freqs', 'block_size'])
 
     def _get_digest(self):
         return digest(self)
@@ -147,10 +148,11 @@ class SpectraGenerator(Generator):
         Yields
         ------
         numpy.ndarray
-            A two-dimensional block of shape (num, numchannels*numfreqs).
+            A two-dimensional block of shape (num, num_channels * num_freqs).
         """
 
 
+@deprecated_alias({'numchannels': 'num_channels', 'numsamples': 'num_samples'}, read_only=True)
 class TimeOut(SamplesGenerator):
     """Abstract base class for any signal processing block that receives data from any
     :attr:`source` domain and returns time domain signals.
@@ -167,10 +169,10 @@ class TimeOut(SamplesGenerator):
     sample_freq = Delegate('source')
 
     #: Number of channels in output, as given by :attr:`source`.
-    numchannels = Delegate('source')
+    num_channels = Delegate('source')
 
     #: Number of samples in output, as given by :attr:`source`.
-    numsamples = Delegate('source')
+    num_samples = Delegate('source')
 
     # internal identifier
     digest = Property(depends_on=['source.digest'])
@@ -193,11 +195,12 @@ class TimeOut(SamplesGenerator):
         Yields
         ------
         numpy.ndarray
-            Two-dimensional output data block of shape (num, numchannels)
+            Two-dimensional output data block of shape (num, num_channels)
         """
         yield from self.source.result(num)
 
 
+@deprecated_alias({'numchannels': 'num_channels', 'numsamples': 'num_samples', 'numfreqs': 'num_freqs'}, read_only=True)
 class SpectraOut(SpectraGenerator):
     """Abstract base class for any signal processing block that receives data from any
     :attr:`source` domain and returns frequency domain signals.
@@ -214,13 +217,13 @@ class SpectraOut(SpectraGenerator):
     sample_freq = Delegate('source')
 
     #: Number of channels in output, as given by :attr:`source`.
-    numchannels = Delegate('source')
+    num_channels = Delegate('source')
 
     #: Number of snapshots in output, as given by :attr:`source`.
-    numsamples = Delegate('source')
+    num_samples = Delegate('source')
 
     #: Number of frequencies in output, as given by :attr:`source`.
-    numfreqs = Delegate('source')
+    num_freqs = Delegate('source')
 
     #: 1-D array of frequencies, as given by :attr:`source`.
     freqs = Delegate('source')
@@ -247,11 +250,12 @@ class SpectraOut(SpectraGenerator):
         Yields
         ------
         numpy.ndarray
-            A two-dimensional block of shape (num, numchannels*numfreqs).
+            A two-dimensional block of shape (num, num_channels * num_freqs).
         """
         yield from self.source.result(num)
 
 
+@deprecated_alias({'numchannels': 'num_channels', 'numsamples': 'num_samples'}, read_only=True)
 class InOut(SamplesGenerator, SpectraGenerator):
     """Abstract base class for any signal processing block that receives data from any
     :attr:`source` domain and returns signals in the same domain.
@@ -268,10 +272,10 @@ class InOut(SamplesGenerator, SpectraGenerator):
     sample_freq = Delegate('source')
 
     #: Number of channels in output, as given by :attr:`source`.
-    numchannels = Delegate('source')
+    num_channels = Delegate('source')
 
     #: Number of samples / snapshots in output, as given by :attr:`source`.
-    numsamples = Delegate('source')
+    num_samples = Delegate('source')
 
     # internal identifier
     digest = Property(depends_on=['source.digest'])

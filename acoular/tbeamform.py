@@ -75,7 +75,7 @@ def const_power_weight(bf):
     array of floats
         The weight factors.
     """
-    r = bf.steer.env._r(zeros((3, 1)), bf.steer.mics.mpos)  # distances to center
+    r = bf.steer.env._r(zeros((3, 1)), bf.steer.mics.pos)  # distances to center
     # round the relative distances to one decimal place
     r = (r / r.max()).round(decimals=1)
     ru, ind = unique(r, return_inverse=True)
@@ -225,7 +225,7 @@ class BeamformerTime(TimeOut):
     # --- End of backwards compatibility traits --------------------------------------
 
     #: Number of channels in output (=number of grid points).
-    numchannels = Delegate('grid', 'size')
+    num_channels = Delegate('grid', 'size')
 
     #: Spatial weighting function.
     weights = Map(possible_weights, default_value='none', desc='spatial weighting function')
@@ -258,8 +258,8 @@ class BeamformerTime(TimeOut):
         Yields
         ------
         numpy.ndarray
-            Samples in blocks of shape (num, :attr:`~BeamformerTime.numchannels`).
-                :attr:`~BeamformerTime.numchannels` is usually very \
+            Samples in blocks of shape (num, :attr:`~BeamformerTime.num_channels`).
+                :attr:`~BeamformerTime.num_channels` is usually very \
                 large (number of grid points).
                 The last block returned by the generator may be shorter than num.
         """
@@ -385,8 +385,8 @@ class BeamformerTimeSq(BeamformerTime):
         Yields
         ------
         numpy.ndarray
-            Samples in blocks of shape (num, :attr:`~BeamformerTime.numchannels`).
-                :attr:`~BeamformerTime.numchannels` is usually very \
+            Samples in blocks of shape (num, :attr:`~BeamformerTime.num_channels`).
+                :attr:`~BeamformerTime.num_channels` is usually very \
                 large (number of grid points).
                 The last block returned by the generator may be shorter than num.
         """
@@ -439,7 +439,7 @@ class BeamformerTimeTraj(BeamformerTime):
             return array([a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]])
 
         start_t = 0.0
-        gpos = self.grid.gpos
+        gpos = self.grid.pos
         trajg = self.trajectory.traj(start_t, delta_t=1 / self.source.sample_freq)
         trajg1 = self.trajectory.traj(start_t, delta_t=1 / self.source.sample_freq, der=1)
         rflag = (self.rvec == 0).all()  # flag translation vs. rotation
@@ -465,7 +465,7 @@ class BeamformerTimeTraj(BeamformerTime):
         vvec = array(g1)  # velocity vector
         ma = norm(vvec) / self.steer.env.c  # machnumber
         fdv = (vvec / sqrt((vvec * vvec).sum()))[:, newaxis]  # unit vecor velocity
-        mpos = self.steer.mics.mpos[:, newaxis, :]
+        mpos = self.steer.mics.pos[:, newaxis, :]
         rmv = tpos[:, :, newaxis] - mpos
         return (ma * sum(rmv.reshape((3, -1)) * fdv, 0) / rm.reshape(-1)).reshape(rm.shape)
 
@@ -489,8 +489,8 @@ class BeamformerTimeTraj(BeamformerTime):
         Yields
         ------
         numpy.ndarray
-            Samples in blocks of shape (num, :attr:`~BeamformerTime.numchannels`).
-                :attr:`~BeamformerTime.numchannels` is usually very \
+            Samples in blocks of shape (num, :attr:`~BeamformerTime.num_channels`).
+                :attr:`~BeamformerTime.num_channels` is usually very \
                 large (number of grid points).
                 The last block returned by the generator may be shorter than num.
         """
@@ -504,7 +504,7 @@ class BeamformerTimeTraj(BeamformerTime):
         w = self._get_weights()
         c = self.steer.env.c / self.source.sample_freq
         numMics = self.steer.mics.num_mics
-        mpos = self.steer.mics.mpos.astype(fdtype)
+        mpos = self.steer.mics.pos.astype(fdtype)
         m_index = arange(numMics, dtype=idtype)
         n_index = arange(num, dtype=idtype)[:, newaxis]
         blockrm = empty((num, self.grid.size, numMics), dtype=fdtype)
@@ -663,8 +663,8 @@ class BeamformerTimeSqTraj(BeamformerTimeSq, BeamformerTimeTraj):
         Yields
         ------
         numpy.ndarray
-            Samples in blocks of shape (num, :attr:`~BeamformerTime.numchannels`).
-                :attr:`~BeamformerTime.numchannels` is usually very \
+            Samples in blocks of shape (num, :attr:`~BeamformerTime.num_channels`).
+                :attr:`~BeamformerTime.num_channels` is usually very \
                 large (number of grid points).
                 The last block returned by the generator may be shorter than num.
         """
@@ -712,8 +712,8 @@ class BeamformerCleant(BeamformerTime):
         Yields
         ------
         numpy.ndarray
-            Samples in blocks of shape (num, :attr:`~BeamformerTime.numchannels`).
-                :attr:`~BeamformerTime.numchannels` is usually very \
+            Samples in blocks of shape (num, :attr:`~BeamformerTime.num_channels`).
+                :attr:`~BeamformerTime.num_channels` is usually very \
                 large (number of grid points).
                 The last block returned by the generator may be shorter than num.
         """
@@ -756,8 +756,8 @@ class BeamformerCleantSq(BeamformerCleant):
         Yields
         ------
         numpy.ndarray
-            Samples in blocks of shape (num, :attr:`~BeamformerTime.numchannels`).
-                :attr:`~BeamformerTime.numchannels` is usually very \
+            Samples in blocks of shape (num, :attr:`~BeamformerTime.num_channels`).
+                :attr:`~BeamformerTime.num_channels` is usually very \
                 large (number of grid points).
                 The last block returned by the generator may be shorter than num.
         """
@@ -809,8 +809,8 @@ class BeamformerCleantTraj(BeamformerCleant, BeamformerTimeTraj):
         Yields
         ------
         numpy.ndarray
-            Samples in blocks of shape (num, :attr:`~BeamformerTime.numchannels`).
-                :attr:`~BeamformerTime.numchannels` is usually very \
+            Samples in blocks of shape (num, :attr:`~BeamformerTime.num_channels`).
+                :attr:`~BeamformerTime.num_channels` is usually very \
                 large (number of grid points).
                 The last block returned by the generator may be shorter than num.
         """
@@ -865,8 +865,8 @@ class BeamformerCleantSqTraj(BeamformerCleantTraj, BeamformerTimeSq):
         Yields
         ------
         numpy.ndarray
-            Samples in blocks of shape (num, :attr:`~BeamformerTime.numchannels`).
-                :attr:`~BeamformerTime.numchannels` is usually very \
+            Samples in blocks of shape (num, :attr:`~BeamformerTime.num_channels`).
+                :attr:`~BeamformerTime.num_channels` is usually very \
                 large (number of grid points).
                 The last block returned by the generator may be shorter than num.
         """
@@ -889,7 +889,7 @@ class IntegratorSectorTime(TimeOut):
     clip = Float(-350.0)
 
     #: Number of channels in output (= number of sectors).
-    numchannels = Property(depends_on=['sectors'])
+    num_channels = Property(depends_on=['sectors'])
 
     # internal identifier
     digest = Property(
@@ -901,7 +901,7 @@ class IntegratorSectorTime(TimeOut):
         return digest(self)
 
     @cached_property
-    def _get_numchannels(self):
+    def _get_num_channels(self):
         return len(self.sectors)
 
     def result(self, num=1):
@@ -916,13 +916,13 @@ class IntegratorSectorTime(TimeOut):
 
         Returns
         -------
-        Samples in blocks of shape (num, :attr:`numchannels`).
-        :attr:`numchannels` is the number of sectors.
+        Samples in blocks of shape (num, :attr:`num_channels`).
+        :attr:`num_channels` is the number of sectors.
         The last block may be shorter than num.
         """
         inds = [self.grid.indices(*sector) for sector in self.sectors]
         gshape = self.grid.shape
-        o = empty((num, self.numchannels), dtype=float)  # output array
+        o = empty((num, self.num_channels), dtype=float)  # output array
         for r in self.source.result(num):
             ns = r.shape[0]
             mapshape = (ns,) + gshape

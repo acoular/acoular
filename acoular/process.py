@@ -20,8 +20,10 @@ from warnings import warn
 
 from traits.api import Bool, Dict, Enum, Instance, Int, Property, cached_property, on_trait_change
 
+# acoular imports
 from .base import Generator, InOut
 from .configuration import config
+from .deprecation import deprecated_alias
 from .h5cache import H5cache
 from .h5files import H5CacheFileBase
 from .internal import digest
@@ -42,14 +44,17 @@ class LockedGenerator:
             return self.it.__next__()
 
 
+@deprecated_alias({'naverage': 'num_per_average', 'numsamples': 'num_samples'}, read_only=['numsamples'])
 class Average(InOut):
     """Calculates the average across consecutive time samples or frequency snapshots.
 
-    The average operation is performed differently depending on the source type. If the source is a
-    time domain source (e.g. derived from :class:`~acoular.base.SamplesGenerator`), the average is
-    calculated over a certain number of time samples given by :attr:`naverage`. If the source is a
-    frequency domain source (e.g. derived from :class:`~acoular.base.SpectraGenerator`), the average
-    is calculated over a certain number of snapshots given by :attr:`naverage`.
+    The average operation is performed differently depending on the source type.
+    If the source is a time domain source
+    (e.g. derived from :class:`~acoular.base.SamplesGenerator`), the average is
+    calculated over a certain number of time samples given by :attr:`num_per_average`.
+    If the source is a frequency domain source (e.g. derived from
+    :class:`~acoular.base.SpectraGenerator`), the average is calculated over a certain
+    number of snapshots given by :attr:`num_per_average`.
 
     Examples
     --------
@@ -59,10 +64,10 @@ class Average(InOut):
         >>> import acoular as ac
         >>> import numpy as np
         >>>
-        >>> signal = ac.WNoiseGenerator(sample_freq=51200, numsamples=51200, rms=2.0).signal()
+        >>> signal = ac.WNoiseGenerator(sample_freq=51200, num_samples=51200, rms=2.0).signal()
         >>> ts = ac.TimeSamples(data=signal[:, np.newaxis], sample_freq=51200)
         >>> tp = ac.TimePower(source=ts)
-        >>> avg = ac.Average(source=tp, naverage=512)
+        >>> avg = ac.Average(source=tp, num_per_average=512)
         >>> mean_squared_value = next(avg.result(num=1))
         >>> rms = np.sqrt(mean_squared_value)[0, 0]
         >>> print(rms)
@@ -73,11 +78,11 @@ class Average(InOut):
         snapshot of 512 samples.
 
         If the source is a frequency domain source, the average is calculated over a certain number
-        of snapshots, defined by :attr:`naverage`.
+        of snapshots, defined by :attr:`num_per_average`.
 
         >>> fft = ac.RFFT(source=ts, block_size=64)
         >>> ps = ac.AutoPowerSpectra(source=fft)
-        >>> avg = ac.Average(source=ps, naverage=16)
+        >>> avg = ac.Average(source=ps, num_per_average=16)
         >>> mean_power = next(avg.result(num=1))
         >>> print(np.sqrt(mean_power.sum()))
         2.0024960894399295
@@ -89,17 +94,17 @@ class Average(InOut):
 
     #: Number of samples (time domain source) or snapshots (frequency domain source)
     #: to average over, defaults to 64.
-    naverage = Int(64, desc='number of samples to average over')
+    num_per_average = Int(64, desc='number of samples/snapshots to average over')
 
     #: Sampling frequency of the output signal, is set automatically.
-    sample_freq = Property(depends_on='source.sample_freq, naverage')
+    sample_freq = Property(depends_on='source.sample_freq, num_per_average')
 
     #: Number of samples (time domain) or snapshots (frequency domain) of the output signal.
     #: Is set automatically.
-    numsamples = Property(depends_on='source.numsamples, naverage')
+    num_samples = Property(depends_on='source.num_samples, num_per_average')
 
     # internal identifier
-    digest = Property(depends_on=['source.digest', '__class__', 'naverage'])
+    digest = Property(depends_on=['source.digest', '__class__', 'num_per_average'])
 
     @cached_property
     def _get_digest(self):
@@ -108,13 +113,13 @@ class Average(InOut):
     @cached_property
     def _get_sample_freq(self):
         if self.source:
-            return 1.0 * self.source.sample_freq / self.naverage
+            return 1.0 * self.source.sample_freq / self.num_per_average
         return None
 
     @cached_property
-    def _get_numsamples(self):
+    def _get_num_samples(self):
         if self.source:
-            return self.source.numsamples / self.naverage
+            return self.source.num_samples / self.num_per_average
         return None
 
     def result(self, num):
@@ -129,11 +134,11 @@ class Average(InOut):
         Returns
         -------
         Average of the output of source.
-            Yields samples in blocks of shape (num, numchannels).
+            Yields samples in blocks of shape (num, num_channels).
             The last block may be shorter than num.
 
         """
-        nav = self.naverage
+        nav = self.num_per_average
         for temp in self.source.result(num * nav):
             ns, nc = temp.shape
             nso = int(ns / nav)
@@ -258,7 +263,7 @@ class Cache(InOut):
 
         Returns
         -------
-        Samples in blocks of shape (num, numchannels).
+        Samples in blocks of shape (num, num_channels).
             The last block may be shorter than num.
             Echos the source output, but reads it from cache
             when available and prevents unnecassary recalculation.
@@ -405,7 +410,7 @@ class SampleSplitter(InOut):
 
         Returns
         -------
-        Samples in blocks of shape (num, numchannels).
+        Samples in blocks of shape (num, num_channels).
             Delivers a block of samples to the calling object.
             The last block may be shorter than num.
 

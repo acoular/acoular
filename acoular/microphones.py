@@ -26,11 +26,13 @@ from traits.api import (
     on_trait_change,
 )
 
-from .deprecation import DeprecatedFromFile
+# acoular imports
+from .deprecation import deprecated_alias
 from .internal import digest
 
 
-class MicGeom(HasPrivateTraits, DeprecatedFromFile):
+@deprecated_alias({'mpos_tot': 'pos_total', 'mpos': 'pos', 'from_file': 'file'}, read_only=['mpos'])
+class MicGeom(HasPrivateTraits):
     """Provides the geometric arrangement of microphones in the array.
 
     The geometric arrangement of microphones is read in from an
@@ -44,47 +46,47 @@ class MicGeom(HasPrivateTraits, DeprecatedFromFile):
     #: Positions as (3, :attr:`num_mics`) array of floats, may include also invalid
     #: microphones (if any). Set either automatically on change of the
     #: :attr:`file` argument or explicitely by assigning an array of floats.
-    mpos_tot = CArray(dtype=float, shape=(3, None), desc='x, y, z position of all microphones')
+    pos_total = CArray(dtype=float, shape=(3, None), desc='x, y, z position of all microphones')
 
     #: Positions as (3, :attr:`num_mics`) array of floats, without invalid
     #: microphones; readonly.
-    mpos = Property(depends_on=['mpos_tot', 'invalid_channels'], desc='x, y, z position of microphones')
+    pos = Property(depends_on=['pos_total', 'invalid_channels'], desc='x, y, z position of used microphones')
 
     #: List that gives the indices of channels that should not be considered.
     #: Defaults to a blank list.
     invalid_channels = ListInt(desc='list of invalid channels')
 
-    #: Number of microphones in the array; readonly.
-    num_mics = Property(depends_on=['mpos'], desc='number of microphones in the geometry')
+    #: Number of used microphones in the array; readonly.
+    num_mics = Property(depends_on=['pos'], desc='number of microphones in the geometry')
 
     #: Center of the array (arithmetic mean of all used array positions); readonly.
-    center = Property(depends_on=['mpos'], desc='array center')
+    center = Property(depends_on=['pos'], desc='array center')
 
     #: Aperture of the array (greatest extent between two microphones); readonly.
-    aperture = Property(depends_on=['mpos'], desc='array aperture')
+    aperture = Property(depends_on=['pos'], desc='array aperture')
 
     # internal identifier
-    digest = Property(depends_on=['mpos'])
+    digest = Property(depends_on=['pos'])
 
     @cached_property
     def _get_digest(self):
         return digest(self)
 
     @cached_property
-    def _get_mpos(self):
+    def _get_pos(self):
         if len(self.invalid_channels) == 0:
-            return self.mpos_tot
-        allr = [i for i in range(self.mpos_tot.shape[-1]) if i not in self.invalid_channels]
-        return self.mpos_tot[:, array(allr)]
+            return self.pos_total
+        allr = [i for i in range(self.pos_total.shape[-1]) if i not in self.invalid_channels]
+        return self.pos_total[:, array(allr)]
 
     @cached_property
     def _get_num_mics(self):
-        return self.mpos.shape[-1]
+        return self.pos.shape[-1]
 
     @cached_property
     def _get_center(self):
-        if self.mpos.any():
-            center = average(self.mpos, axis=1)
+        if self.pos.any():
+            center = average(self.pos, axis=1)
             # set very small values to zero
             center[abs(center) < 1e-16] = 0.0
             return center
@@ -92,8 +94,8 @@ class MicGeom(HasPrivateTraits, DeprecatedFromFile):
 
     @cached_property
     def _get_aperture(self):
-        if self.mpos.any():
-            return cdist(self.mpos.T, self.mpos.T).max()
+        if self.pos.any():
+            return cdist(self.pos.T, self.pos.T).max()
         return None
 
     @on_trait_change('file')
@@ -107,8 +109,7 @@ class MicGeom(HasPrivateTraits, DeprecatedFromFile):
         for el in doc.getElementsByTagName('pos'):
             names.append(el.getAttribute('Name'))
             xyz.append([float(el.getAttribute(a)) for a in 'xyz'])
-        self.mpos_tot = array(xyz, 'd').swapaxes(0, 1)
-        self.validate_file = True
+        self.pos_total = array(xyz, 'd').swapaxes(0, 1)
 
     def export_mpos(self, filename):
         """Export the microphone positions to .xml file.
@@ -122,8 +123,8 @@ class MicGeom(HasPrivateTraits, DeprecatedFromFile):
         basename = filepath.stem
         with filepath.open('w', encoding='utf-8') as f:
             f.write(f'<?xml version="1.1" encoding="utf-8"?><MicArray name="{basename}">\n')
-            for i in range(self.mpos.shape[-1]):
+            for i in range(self.pos.shape[-1]):
                 f.write(
-                    f'  <pos Name="Point {i+1}" x="{self.mpos[0, i]}" y="{self.mpos[1, i]}" z="{self.mpos[2, i]}"/>\n',
+                    f'  <pos Name="Point {i+1}" x="{self.pos[0, i]}" y="{self.pos[1, i]}" z="{self.pos[2, i]}"/>\n',
                 )
             f.write('</MicArray>')

@@ -11,14 +11,17 @@
 
 from traits.api import Any, Bool, Enum, Float, Int, Long, Property, cached_property, observe
 
+# acoular imports
 from .base import SamplesGenerator
 from .configuration import config
+from .deprecation import deprecated_alias
 from .internal import digest
 
 if config.have_sounddevice:
     import sounddevice as sd
 
 
+@deprecated_alias({'numchannels': 'num_channels', 'numsamples': 'num_samples', 'collectsamples': 'collect_samples'})
 class SoundDeviceSamplesGenerator(SamplesGenerator):
     """Controller for sound card hardware using sounddevice library.
 
@@ -37,14 +40,14 @@ class SoundDeviceSamplesGenerator(SamplesGenerator):
     device = Int(0, desc='input device index')
 
     #: Number of input channels, maximum depends on device
-    numchannels = Long(1, desc='number of analog input channels that collects data')
+    num_channels = Long(1, desc='number of analog input channels that collects data')
 
     #: Number of samples to collect; defaults to -1. If is set to -1 device collects until user
-    # breaks streaming by setting Trait: collectsamples = False.
-    numsamples = Long(-1, desc='number of samples to collect')
+    # breaks streaming by setting Trait: collect_samples = False.
+    num_samples = Long(-1, desc='number of samples to collect')
 
     #: Indicates if samples are collected, helper trait to break result loop
-    collectsamples = Bool(True, desc='Indicates if samples are collected')
+    collect_samples = Bool(True, desc='Indicates if samples are collected')
 
     #: Sampling frequency of the signal, changes with sinusdevices
     sample_freq = Property(desc='sampling frequency')
@@ -64,16 +67,16 @@ class SoundDeviceSamplesGenerator(SamplesGenerator):
     stream = Any
 
     # internal identifier
-    digest = Property(depends_on=['device', 'numchannels', 'numsamples'])
+    digest = Property(depends_on=['device', 'num_channels', 'num_samples'])
 
     @cached_property
     def _get_digest(self):
         return digest(self)
 
-    # checks that numchannels are not more than device can provide
-    @observe('device,numchannels')
-    def _get_numchannels(self, event):  # noqa ARG002
-        self.numchannels = min(self.numchannels, sd.query_devices(self.device)['max_input_channels'])
+    # checks that num_channels are not more than device can provide
+    @observe('device, num_channels')
+    def _get_num_channels(self, event):  # noqa ARG002
+        self.num_channels = min(self.num_channels, sd.query_devices(self.device)['max_input_channels'])
 
     def _get_sample_freq(self):
         if self._sample_freq is None:
@@ -102,14 +105,14 @@ class SoundDeviceSamplesGenerator(SamplesGenerator):
 
         Returns
         -------
-        Samples in blocks of shape (num, :attr:`numchannels`).
+        Samples in blocks of shape (num, :attr:`num_channels`).
             The last block may be shorter than num.
 
         """
         print(self.device_properties(), self.sample_freq)
         self.stream = stream_obj = sd.InputStream(
             device=self.device,
-            channels=self.numchannels,
+            channels=self.num_channels,
             clip_off=True,
             samplerate=self.sample_freq,
             dtype=self.precision,
@@ -117,15 +120,15 @@ class SoundDeviceSamplesGenerator(SamplesGenerator):
 
         with stream_obj as stream:
             self.running = True
-            if self.numsamples == -1:
-                while self.collectsamples:  # yield data as long as collectsamples is True
+            if self.num_samples == -1:
+                while self.collect_samples:  # yield data as long as collect_samples is True
                     data, self.overflow = stream.read(num)
                     yield data[:num]
 
-            elif self.numsamples > 0:  # amount of samples to collect is specified by user
-                samples_count = 0  # numsamples counter
-                while samples_count < self.numsamples:
-                    anz = min(num, self.numsamples - samples_count)
+            elif self.num_samples > 0:  # amount of samples to collect is specified by user
+                samples_count = 0  # num_samples counter
+                while samples_count < self.num_samples:
+                    anz = min(num, self.num_samples - samples_count)
                     data, self.overflow = stream.read(num)
                     yield data[:anz]
                     samples_count += anz
