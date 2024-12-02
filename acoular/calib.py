@@ -24,7 +24,7 @@ from .internal import digest
 
 @deprecated_alias({'from_file': 'file'})
 class Calib(InOut):
-    """Container for calibration data in `*.xml` format or Numpy format (manually set).
+    """Processing block for handling calibration data in `*.xml` or NumPy format.
 
     This class implements the application of calibration factors to the data obtained from its
     :attr:`source`. The calibrated data can be accessed (e.g. for use in a block chain) via the
