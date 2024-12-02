@@ -34,7 +34,6 @@ class Calib(InOut):
 
     Examples
     --------
-        For example, to calibrate a time signal, the calibration data can be set manually and the
         Consider calibrating a time signal by specifying the calibration factors in NumPy format.
         Assume that the following white noise signal is in Volt and the sensitivity of the virtual
         sensor is 1e-2 V/Pa. Then, the voltage signal can be converted to a calibrated sound
