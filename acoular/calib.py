@@ -26,18 +26,19 @@ from .internal import digest
 class Calib(InOut):
     """Container for calibration data in `*.xml` format or Numpy format (manually set).
 
-    This class loads calibration data and provides information about this data. It implements the
-    application of calibration factors to the data which is set by setting the source attribute.
-    The calibrated data can be accessed (e.g. for use in a block chain) via the
-    :meth:`result` generator.
+    This class implements the application of calibration factors to the data obtained from its
+    :attr:`source`. The calibrated data can be accessed (e.g. for use in a block chain) via the
+    :meth:`result` generator. Depending on the source type, calibration can be performed in the
+    time or frequency domain.
 
 
     Examples
     --------
         For example, to calibrate a time signal, the calibration data can be set manually and the
-        calibration factors can be applied to the time signal. In the following example, we assume
-        that out the time signal has been recorded with a sensitivity of 1e-2 V/Pa and therefor
-        the sound pressure can be obtained by multiplication with the factor of 1e-2 Pa/V.
+        Consider calibrating a time signal by specifying the calibration factors in NumPy format.
+        Assume that the following white noise signal is in Volt and the sensitivity of the virtual
+        sensor is 1e-2 V/Pa. Then, the voltage signal can be converted to a calibrated sound
+        pressure signal by multiplying it with a calibration factor of  100 Pa/V.
 
         >>> import acoular as ac
         >>> import numpy as np
@@ -45,28 +46,32 @@ class Calib(InOut):
         >>> signal = ac.WNoiseGenerator(sample_freq=51200, numsamples=51200, rms=2.0).signal()
         >>> ts = ac.TimeSamples(data=signal[:, np.newaxis], sample_freq=51200)
         >>> calib = ac.Calib(source=ts)
-        >>> calib.data = np.array([1e-2])
+        >>> calib.data = np.array([100])
         >>> print(next(calib.result(num=1)))
-        [[0.03528105]]
+        [[352.81046919]]
 
         The calibrated data can then be further processed, e.g. by calculating the FFT of the
         calibrated data.
 
         >>> fft = ac.RFFT(source=calib, block_size=16)
         >>> print(next(fft.result(num=1)))
-        [[ 0.21277598+0.j          0.06519151-0.03153052j -0.04546857-0.06782166j
-           0.00149169+0.00993159j  0.03545392+0.07844662j  0.06390865+0.00359771j
-           0.00675808-0.07866847j  0.01878985+0.05065722j  0.05947051+0.j        ]]
+        [[2127.75981743  +0.j          651.91512352-315.3052216j
+          -454.68570762-678.21662333j   14.91685605 +99.31587754j
+           354.53920079+784.46619566j  639.0864956  +35.97710777j
+            67.58081917-786.68466133j  187.89848304+506.57222063j
+           594.70514857  +0.j        ]]
 
         One could also apply the calibration after the FFT calculation.
 
         >>> fft = ac.RFFT(source=ts, block_size=16)
         >>> calib = ac.Calib(source=fft)
-        >>> calib.data = 1e-2 * np.ones(ts.numchannels * fft.numfreqs)
+        >>> calib.data = 100 * np.ones(ts.num_channels * fft.num_freqs)
         >>> print(next(calib.result(num=1)))
-        [[ 0.21277598+0.j          0.06519151-0.03153052j -0.04546857-0.06782166j
-           0.00149169+0.00993159j  0.03545392+0.07844662j  0.06390865+0.00359771j
-           0.00675808-0.07866847j  0.01878985+0.05065722j  0.05947051+0.j        ]]
+        [[2127.75981743  +0.j          651.91512352-315.3052216j
+          -454.68570762-678.21662333j   14.91685605 +99.31587754j
+           354.53920079+784.46619566j  639.0864956  +35.97710777j
+            67.58081917-786.68466133j  187.89848304+506.57222063j
+           594.70514857  +0.j        ]]
 
     Depracted and will be removed in Acoular 25.10:
     This class serves as interface to load calibration data for the used
@@ -81,7 +86,10 @@ class Calib(InOut):
     num_mics = CLong(0, desc='number of microphones in the geometry')
 
     #: Array of calibration factors,
-    #: is set automatically when read from file can be set manually.
+    #: is set automatically when read from file.
+    #: Can be set manually by specifying a NumPy array with shape (num_channels, ) if
+    #: :attr:`source` yields time domain signals. For frequency domain signals, the expected
+    #: shape is (num_channels * num_freqs).
     data = CArray(desc='calibration data')
 
     #: Channels that are to be treated as invalid.
@@ -135,13 +143,14 @@ class Calib(InOut):
         ------
         numpy.ndarray
             Two-dimensional output data block of shape (num, sourcechannels)
-            where sourcechannels is numchannels if the source data is in the time domain
-            or sourcechannels is numchannels*numfreqs of numchannels*numchannels*numfreqs
-            if the source data is in the frequency domain.
+            where sourcechannels is num_channels if the source data is in the time domain
+            or sourcechannels is num_channels*num_freqs if the source data is in the frequency
+            domain.
         """
         for block in self.source.result(num):
             if self.data[self.channels].shape[0] == block.shape[1]:
                 yield block * self.data[self.channels][newaxis]
             else:
-                msg = f'calibration data shape does not match source data shape: {self.data.shape[0]}, {block.shape[1]}'
+                msg = f'calibration data shape does not match source data shape: \
+{self.data[self.channels].shape[0]}, {block.shape[1]}'
                 raise ValueError(msg)
