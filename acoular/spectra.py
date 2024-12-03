@@ -32,7 +32,7 @@ from numpy import (
     ones,
     real,
     searchsorted,
-    sum,
+    sum,  # noqa A004
     zeros,
     zeros_like,
 )
@@ -374,7 +374,8 @@ class PowerSpectra(BaseSpectra):
             if self.calib.num_mics == t.num_channels:
                 wind = wind * self.calib.data[newaxis, :]
             else:
-                raise ValueError('Calibration data not compatible: %i, %i' % (self.calib.num_mics, t.num_channels))
+                msg = f'Calibration data not compatible: {self.calib.num_mics:d}, {t.num_channels:d}'
+                raise ValueError(msg)
         # get time data blockwise
         for data in self._get_source_data():
             ft = fft.rfft(data * wind, None, 0).astype(self.precision)
@@ -591,7 +592,7 @@ def synthetic(data, freqs, f, num=3):
             ind = searchsorted(freqs, i)
             if ind >= len(freqs):
                 warn(
-                    'Queried frequency (%g Hz) not in resolved frequency range. Returning zeros.' % i,
+                    f'Queried frequency ({i:g} Hz) not in resolved frequency range. Returning zeros.',
                     Warning,
                     stacklevel=2,
                 )

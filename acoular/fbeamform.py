@@ -67,12 +67,12 @@ from numpy import (
     pi,
     real,
     reshape,
-    round,
+    round,  # noqa: A004
     searchsorted,
     sign,
     size,
     sqrt,
-    sum,
+    sum,  # noqa: A004
     tile,
     trace,
     tril,
@@ -524,7 +524,8 @@ class BeamformerBase(HasPrivateTraits):
     def _assert_equal_channels(self):
         num_channels = self.freq_data.num_channels
         if num_channels != self.steer.mics.num_mics or num_channels == 0:
-            raise ValueError('%i channels do not fit %i mics' % (num_channels, self.steer.mics.num_mics))
+            msg = f'{num_channels:d} channels do not fit {self.steer.mics.num_mics:d} mics'
+            raise ValueError(msg)
 
     @property_depends_on('digest')
     def _get_result(self):
@@ -583,7 +584,7 @@ class BeamformerBase(HasPrivateTraits):
             - Function for frequency-dependent steering vector calculation
 
         """
-        if type(self.steer) == SteeringVector:  # for simple steering vector, use faster method
+        if type(self.steer) is SteeringVector:  # for simple steering vector, use faster method
             param_type = self.steer.steer_type
 
             def param_steer_func(f):
@@ -671,7 +672,7 @@ class BeamformerBase(HasPrivateTraits):
             ind = searchsorted(freq, f)
             if ind >= len(freq):
                 warn(
-                    'Queried frequency (%g Hz) not in resolved frequency range. Returning zeros.' % f,
+                    f'Queried frequency ({f:g} Hz) not in resolved frequency range. Returning zeros.',
                     Warning,
                     stacklevel=2,
                 )
@@ -1247,7 +1248,7 @@ class PointSpreadFunction(HasPrivateTraits):
         exist and global caching mode is 'readonly'.
         """
         filename = 'psf' + self.digest
-        nodename = ('Hz_%.2f' % self.freq).replace('.', '_')
+        nodename = (f'Hz_{self.freq:.2f}').replace('.', '_')
         #        print("get cachefile:", filename)
         H5cache.get_cache_file(self, filename)
         if not self.h5f:  # only happens in case of global caching readonly
@@ -1351,7 +1352,7 @@ class PointSpreadFunction(HasPrivateTraits):
         -------
         The psf [1, nGridPoints, len(ind)]
         """
-        if type(self.steer) == SteeringVector:  # for simple steering vector, use faster method
+        if type(self.steer) is SteeringVector:  # for simple steering vector, use faster method
             result = calcPointSpreadFunction(
                 self.steer.steer_type,
                 self.steer.r0,

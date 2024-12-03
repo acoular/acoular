@@ -38,7 +38,7 @@ from numpy import (
     r_,
     s_,
     sqrt,
-    sum,
+    sum,  # noqa: A004
     unique,
     where,
     zeros,
@@ -112,7 +112,7 @@ class BeamformerTime(TimeOut):
         return self._steer_obj
 
     def _set_steer(self, steer):
-        if type(steer) == SteeringVector:
+        if type(steer) is SteeringVector:
             # This condition may be replaced at a later time by: isinstance(steer, SteeringVector):
             # -- (derived classes allowed)
             self._steer_obj = steer

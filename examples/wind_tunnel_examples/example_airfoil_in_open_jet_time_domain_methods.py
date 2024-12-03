@@ -126,7 +126,7 @@ for b in (cacht, cachts, cachct, cachcts):
         map = r[0].reshape(grid.shape)
         mx = ac.L_p(map.max())
         imshow(ac.L_p(map.T), vmax=mx, vmin=mx - 15, origin='lower', interpolation='nearest', extent=grid.extend())
-        title('%i' % ((i3 - 1) * 1024))
+        title(f'{(i3 - 1) * 1024}')
     res /= i3 - 1  # average
     tight_layout()
 

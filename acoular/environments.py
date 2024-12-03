@@ -39,7 +39,7 @@ from numpy import (
     sign,
     sin,
     sqrt,
-    sum,
+    sum,  # noqa: A004
     vstack,
     zeros_like,
 )
