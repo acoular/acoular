@@ -8,11 +8,12 @@ import warnings
 from inspect import isabstract
 
 import pytest
-from traits.api import Bool, Enum, Float, Int, Range, TraitEnum
+from traits.api import Any, Bool, Enum, Float, Int, Range, TraitEnum
 
 from tests.utils import get_all_classes
 
 all_classes = get_all_classes()
+all_hastraits_classes = get_all_classes(hastraits_only=True)
 
 
 def create_instance(acoular_cls):
@@ -35,7 +36,7 @@ def test_instancing(acoular_cls):
         create_instance(acoular_cls)
 
 
-@pytest.mark.parametrize('acoular_cls', all_classes)
+@pytest.mark.parametrize('acoular_cls', all_hastraits_classes)
 def test_set_traits(acoular_cls):
     """Test that important traits can be set."""
     with warnings.catch_warnings():
@@ -65,3 +66,40 @@ def test_set_traits(acoular_cls):
                         elif tr.is_trait_type(TraitEnum) or tr.is_trait_type(Enum):
                             v = tr.handler.values
                             setattr(obj, k, v[len(v) // 2])
+
+
+@pytest.mark.parametrize('acoular_cls', all_hastraits_classes)
+def test_trait_dependencies(acoular_cls):
+    """Assert that a property that is depended on depends on something."""
+
+    def check_or_unpack(obj, tname, toplevel=True):
+        assert len(objtname := tname.split('.')) < 3, 'Trait dependency too deep.'
+        # recurse if trait depends on a trait of another object
+        if len(objtname) == 2:
+            # skip if trait is Any
+            if obj.trait(objtname[0]).trait_type != Any:
+                # instantiate the trait
+                obj = create_instance(obj.trait(objtname[0]).trait_type.klass)
+                tname = objtname[1]
+                check_or_unpack(obj, tname, toplevel=False)
+        else:
+            # deal with traits extended name definition by stripping trailing '[]'
+            # https://docs.enthought.com/traits/traits_user_manual/listening.html#semantics
+            tname = tname.replace('[]', '')
+            trait = obj.trait(tname)
+            if trait.is_property:
+                if trait.depends_on is None:
+                    assert toplevel, type(obj).__name__ + '.' + tname
+                else:
+                    for otname in trait.depends_on:
+                        check_or_unpack(obj, otname, toplevel=False)
+
+    obj = create_instance(acoular_cls)
+    for tname in obj.traits():
+        try:
+            check_or_unpack(obj, tname)
+        except AssertionError as e:
+            otname = str(e).split(' ')[0].split('\n')[0]
+            tname = type(obj).__name__ + '.' + tname
+            err = f'{tname} depends on {otname}, but {otname} does not depend on anything.'
+            raise AssertionError(err) from e
