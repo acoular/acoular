@@ -7,7 +7,7 @@ from warnings import warn
 from traits.api import Property
 
 
-def deprecated_alias(old2new, read_only=False, removal_version = ''):
+def deprecated_alias(old2new, read_only=False, removal_version=''):
     """Decorator function for deprecating renamed class traits.
     Replaced traits should no longer be part of the class definition
     and only mentioned in this decorator's parameter list.
@@ -27,17 +27,17 @@ def deprecated_alias(old2new, read_only=False, removal_version = ''):
         Adds version of trait removal to deprecation message.
         If not an empty string, it will be interpreted as version when
         all traits in list will be deprecated.
-        If dictionary, keys are expected to be trait names and values 
+        If dictionary, keys are expected to be trait names and values
         are the removal version strings.
     """
 
     def decorator(cls):
         """Decorator function that gets applied to the class `cls`."""
 
-        def _alias_accessor_factory(cls, old, new, trait_read_only=False, trait_removal_version = ''):
+        def _alias_accessor_factory(old, new, trait_read_only=False, trait_removal_version=''):
             """Function to define setter and getter routines for alias property trait."""
             if trait_removal_version:
-                trait_removal_version = f" (will be removed in version {trait_removal_version})"
+                trait_removal_version = f' (will be removed in version {trait_removal_version})'
             msg = f"Deprecated use of '{old}' trait{trait_removal_version}. Please use the '{new}' trait instead."
 
             def getter(cls):
@@ -56,7 +56,6 @@ def deprecated_alias(old2new, read_only=False, removal_version = ''):
         # Add deprecated traits to class traits and link them to
         # the new ones with a deprecation warning.
         for old, new in old2new.items():
-            
             # Set "read only" status depending on global read_only argument
             current_read_only = (old in read_only) if isinstance(read_only, list) else read_only
             # If version for trait removal is given, pass info to accessors
@@ -67,7 +66,7 @@ def deprecated_alias(old2new, read_only=False, removal_version = ''):
             else:
                 current_removal_version = ''
             # Define Trait Property type
-            trait_type = Property(*_alias_accessor_factory(cls, old, new, current_read_only, current_removal_version))
+            trait_type = Property(*_alias_accessor_factory(old, new, current_read_only, current_removal_version))
 
             # If the new trait exists, set or update alias
             if new in cls.class_traits():
@@ -76,7 +75,7 @@ def deprecated_alias(old2new, read_only=False, removal_version = ''):
                 else:
                     # Access class dictionary to change trait
                     cls.__dict__['__class_traits__'][old] = trait_type
-                
+
             else:
                 error_msg = f"Cannot create trait '{old}' because its replacement trait '{new}' does not exist."
                 raise ValueError(error_msg)
