@@ -180,12 +180,7 @@ class PowerSpectra(BaseSpectra):
 
     #: The :class:`~acoular.calib.Calib` object that provides the calibration data,
     #: defaults to no calibration, i.e. the raw time data is used.
-    #: **deprecated, will be removed in version 25.01**: use
-    #: :attr:`~acoular.sources.TimeSamples.calib` property of :class:`~acoular.sources.TimeSamples`
-    #: objects
-    calib = Property(desc='calibration object (deprecated, will be removed in version 25.01)')
-
-    _calib = Instance(Calib)
+    calib = Instance(Calib)
 
     # Shadow trait, should not be set directly, for internal use.
     _ind_low = Int(1, desc='index of lowest frequency line')
@@ -260,18 +255,6 @@ class PowerSpectra(BaseSpectra):
     # hdf5 cache file
     h5f = Instance(H5CacheFileBase, transient=True)
 
-    def _get_calib(self):
-        return self._calib
-
-    def _set_calib(self, calib):
-        msg = (
-            "Using 'calib' attribute is deprecated and will be removed in version 25.01. "
-            'use :attr:`~acoular.sources.TimeSamples.calib` property of '
-            ':class:`~acoular.sources.TimeSamples` object instead.'
-        )
-        warn(msg, DeprecationWarning, stacklevel=2)
-        self._calib = calib
-
     @property_depends_on(['_source.num_samples', 'block_size', 'overlap'])
     def _get_num_blocks(self):
         return self.overlap_ * self._source.num_samples / self.block_size - self.overlap_ + 1
@@ -320,19 +303,8 @@ class PowerSpectra(BaseSpectra):
         self._index_set_last = True
         self._ind_low = ind_low
 
-    def _set_time_data(self, time_data):
-        msg = (
-            "Using 'time_data' attribute is deprecated and will be removed in version 25.01. "
-            "Use 'source' attribute instead."
-        )
-        warn(msg, DeprecationWarning, stacklevel=2)
-        self._source = time_data
-
     def _set_source(self, source):
         self._source = source
-
-    def _get_time_data(self):
-        return self._source
 
     def _get_source(self):
         return self._source

@@ -559,21 +559,6 @@ class RectGrid3D(RectGrid):
     # Deprecated: Use :attr:`~RectGrid.increment` for this functionality
     increment3D = Property(desc='3D step sizes')  # noqa N815
 
-    def _get_increment3D(self):  # noqa N802
-        msg = "Using 'increment3D' is deprecated and will be removed in version 25.01." "Use 'increment' instead."
-        warn(msg, DeprecationWarning, stacklevel=2)
-        if isscalar(self._increment):
-            return array([self._increment, self._increment, self._increment])
-        return self._increment
-
-    def _set_increment3D(self, inc):  # noqa N802
-        msg = "Using 'increment3D' is deprecated and will be removed in version 25.01." "Use 'increment' instead."
-        warn(msg, DeprecationWarning, stacklevel=2)
-        if not isscalar(inc) and len(inc) == 3:
-            self._increment = array(inc, dtype=float)
-        else:
-            raise (TraitError(args=self, name='increment3D', info='CArray(3,)', value=inc))
-
     # internal identifier
     digest = Property(
         depends_on=['x_min', 'x_max', 'y_min', 'y_max', 'z_min', 'z_max', '_increment'],
