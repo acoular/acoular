@@ -208,9 +208,9 @@ class Generators:
     def case_Calib(self, time_data_source, domain):
         if domain == 'time':
             data = time_data_source
-            shape = data.numchannels
+            shape = data.num_channels
         else:
             data = ac.RFFT(source=time_data_source, block_size=8)
-            shape = data.numchannels * data.numfreqs
+            shape = data.num_channels * data.num_freqs
         cal = np.abs(np.zeros(shape))
         return ac.Calib(source=data, data=cal)

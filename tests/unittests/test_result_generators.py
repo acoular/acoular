@@ -33,6 +33,6 @@ def test_result_generator(obj, num):  # don't use default value if @parametrize 
         while isinstance(obj_copy, ac.InOut):
             obj_copy = obj_copy.source
     if isinstance(obj_copy, ac.SamplesGenerator):
-        assert result.shape[1] == obj.numchannels
+        assert result.shape[1] == obj.num_channels
     elif isinstance(obj_copy, ac.SpectraGenerator):
-        assert result.shape[1] == obj.numchannels * obj.numfreqs
+        assert result.shape[1] == obj.num_channels * obj.num_freqs
