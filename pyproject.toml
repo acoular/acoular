@@ -82,7 +82,7 @@ tests = [
 dev = [
     "acoular[docs,full,tests]",
     "hatch",
-    "ruff==0.8.1",
+    "ruff==0.8.1", # remember to change version pin in docs/source/contributing/install.rst
 ]
 
 [project.urls]
