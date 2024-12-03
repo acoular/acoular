@@ -36,41 +36,41 @@ class Calib(InOut):
 
     Examples
     --------
-        Consider calibrating a time signal by specifying the calibration factors in NumPy format.
-        Assume that the following white noise signal is in Volt and the sensitivity of the virtual
-        sensor is 1e-2 V/Pa. Then, the voltage signal can be converted to a calibrated sound
-        pressure signal by multiplying it with a calibration factor of  100 Pa/V.
+    Consider calibrating a time signal by specifying the calibration factors in NumPy format.
+    Assume that the following white noise signal is in Volt and the sensitivity of the virtual
+    sensor is 1e-2 V/Pa. Then, the voltage signal can be converted to a calibrated sound
+    pressure signal by multiplying it with a calibration factor of  100 Pa/V.
 
-        >>> import acoular as ac
-        >>> import numpy as np
-        >>>
-        >>> signal = ac.WNoiseGenerator(sample_freq=51200, num_samples=51200, rms=0.01).signal()
-        >>> ts = ac.TimeSamples(data=signal[:, np.newaxis], sample_freq=51200)
-        >>> calib = ac.Calib(source=ts)
-        >>> calib.data = np.array([100])
-        >>> print(next(calib.result(num=1)))
-        [[1.76405235]]
+    >>> import acoular as ac
+    >>> import numpy as np
+    >>>
+    >>> signal = ac.WNoiseGenerator(sample_freq=51200, num_samples=51200, rms=0.01).signal()
+    >>> ts = ac.TimeSamples(data=signal[:, np.newaxis], sample_freq=51200)
+    >>> calib = ac.Calib(source=ts)
+    >>> calib.data = np.array([100])
+    >>> print(next(calib.result(num=1)))
+    [[1.76405235]]
 
-        The calibrated data can then be further processed, e.g. by calculating the FFT of the
-        calibrated data.
+    The calibrated data can then be further processed, e.g. by calculating the FFT of the
+    calibrated data.
 
-        >>> fft = ac.RFFT(source=calib, block_size=16)
-        >>> print(next(fft.result(num=1)))
-        [[10.63879909+0.j          3.25957562-1.57652611j -2.27342854-3.39108312j
+    >>> fft = ac.RFFT(source=calib, block_size=16)
+    >>> print(next(fft.result(num=1)))
+    [[10.63879909+0.j          3.25957562-1.57652611j -2.27342854-3.39108312j
     0.07458428+0.49657939j  1.772696  +3.92233098j  3.19543248+0.17988554j
     0.3379041 -3.93342331j  0.93949242+2.5328611j   2.97352574+0.j        ]]
 
-        One could also apply the calibration after the FFT calculation.
+    One could also apply the calibration after the FFT calculation.
 
-        >>> fft = ac.RFFT(source=ts, block_size=16)
-        >>> calib = ac.Calib(source=fft)
-        >>> calib.data = 100 * np.ones(ts.num_channels * fft.num_freqs)
-        >>> print(next(calib.result(num=1)))
-        [[10.63879909+0.j          3.25957562-1.57652611j -2.27342854-3.39108312j
+    >>> fft = ac.RFFT(source=ts, block_size=16)
+    >>> calib = ac.Calib(source=fft)
+    >>> calib.data = 100 * np.ones(ts.num_channels * fft.num_freqs)
+    >>> print(next(calib.result(num=1)))
+    [[10.63879909+0.j          3.25957562-1.57652611j -2.27342854-3.39108312j
     0.07458428+0.49657939j  1.772696  +3.92233098j  3.19543248+0.17988554j
     0.3379041 -3.93342331j  0.93949242+2.5328611j   2.97352574+0.j        ]]
 
-    Depracted and will be removed in Acoular 25.10:
+    Deprecated and will be removed in Acoular 25.10:
     This class serves as interface to load calibration data for the used
     microphone array. The calibration factors are stored as [Pa/unit].
     """
