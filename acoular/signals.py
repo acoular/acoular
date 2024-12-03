@@ -60,7 +60,7 @@ class SignalGenerator(ABCHasStrictTraits):
     num_samples = CLong
 
     # internal identifier
-    digest = Property(depends_on=['rms', 'sample_freq', 'numsamples'])
+    digest = Property(depends_on=['rms', 'sample_freq', 'num_samples'])
 
     @abstractmethod
     def _get_digest(self):
@@ -84,9 +84,9 @@ class SignalGenerator(ABCHasStrictTraits):
         Returns
         -------
         array of floats
-            The resulting signal of length `factor` * :attr:`numsamples`.
+            The resulting signal of length `factor` * :attr:`num_samples`.
         """
-        return resample(self.signal(), factor * self.numsamples)
+        return resample(self.signal(), factor * self.num_samples)
 
 
 class WNoiseGenerator(SignalGenerator):
@@ -98,7 +98,7 @@ class WNoiseGenerator(SignalGenerator):
     seed = Int(0, desc='random seed value')
 
     # internal identifier
-    digest = Property(depends_on=['rms', 'numsamples', 'sample_freq', 'seed', '__class__'])
+    digest = Property(depends_on=['rms', 'num_samples', 'sample_freq', 'seed', '__class__'])
 
     @cached_property
     def _get_digest(self):
@@ -110,7 +110,7 @@ class WNoiseGenerator(SignalGenerator):
         Returns
         -------
         Array of floats
-            The resulting signal as an array of length :attr:`~SignalGenerator.numsamples`.
+            The resulting signal as an array of length :attr:`~SignalGenerator.num_samples`.
         """
         rnd_gen = RandomState(self.seed)
         return self.rms * rnd_gen.standard_normal(self.num_samples)
@@ -139,7 +139,7 @@ class PNoiseGenerator(SignalGenerator):
     depth = Int(16, desc='octave depth')
 
     # internal identifier
-    digest = Property(depends_on=['rms', 'numsamples', 'sample_freq', 'seed', 'depth', '__class__'])
+    digest = Property(depends_on=['rms', 'num_samples', 'sample_freq', 'seed', 'depth', '__class__'])
 
     @cached_property
     def _get_digest(self):
@@ -210,7 +210,7 @@ class FiltWNoiseGenerator(WNoiseGenerator):
         Returns
         -------
         Array of floats
-            The resulting signal as an array of length :attr:`~SignalGenerator.numsamples`.
+            The resulting signal as an array of length :attr:`~SignalGenerator.num_samples`.
         """
         rnd_gen = RandomState(self.seed)
         ma = self.handle_empty_coefficients(self.ma)
@@ -266,7 +266,7 @@ class SineGenerator(SignalGenerator):
         self._amp = amp
 
     # internal identifier
-    digest = Property(depends_on=['_amp', 'numsamples', 'sample_freq', 'freq', 'phase', '__class__'])
+    digest = Property(depends_on=['_amp', 'num_samples', 'sample_freq', 'freq', 'phase', '__class__'])
 
     @cached_property
     def _get_digest(self):
@@ -278,7 +278,7 @@ class SineGenerator(SignalGenerator):
         Returns
         -------
         array of floats
-            The resulting signal as an array of length :attr:`~SignalGenerator.numsamples`.
+            The resulting signal as an array of length :attr:`~SignalGenerator.num_samples`.
         """
         t = arange(self.num_samples, dtype=float) / self.sample_freq
         return self.amplitude * sin(2 * pi * self.freq * t + self.phase)
@@ -308,7 +308,7 @@ class GenericSignalGenerator(SignalGenerator):
 
     _num_samples = CLong(0)
 
-    #: Number of samples to generate. Is set to source.numsamples by default.
+    #: Number of samples to generate. Is set to source.num_samples by default.
     num_samples = Property()
 
     def _get_num_samples(self):
@@ -320,7 +320,7 @@ class GenericSignalGenerator(SignalGenerator):
         self._num_samples = num_samples
 
     #: Boolean flag, if 'True' (default), signal track is repeated if requested
-    #: :attr:`numsamples` is higher than available sample number
+    #: :attr:`num_samples` is higher than available sample number
     loop_signal = Bool(True)
 
     # internal identifier
@@ -338,7 +338,7 @@ class GenericSignalGenerator(SignalGenerator):
         Returns
         -------
         array of floats
-            The resulting signal as an array of length :attr:`~GenericSignalGenerator.numsamples`.
+            The resulting signal as an array of length :attr:`~GenericSignalGenerator.num_samples`.
 
         """
         block = 1024
