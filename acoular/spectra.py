@@ -165,11 +165,8 @@ class PowerSpectra(BaseSpectra):
     and the same file name in case of that the data is read from a file.
     """
 
-    # Shadow trait, should not be set directly, for internal use.
-    _source = Instance(SamplesGenerator)
-
     #: Data source; :class:`~acoular.sources.SamplesGenerator` or derived object.
-    source = Property(_source, desc='time data object')
+    source = Instance(SamplesGenerator)
 
     # Shadow trait, should not be set directly, for internal use.
     _ind_low = Int(1, desc='index of lowest frequency line')
@@ -220,7 +217,7 @@ class PowerSpectra(BaseSpectra):
     indices = Property(desc='index range')
 
     #: Name of the cache file without extension, readonly.
-    basename = Property(depends_on=['_source.digest'], desc='basename for cache file')
+    basename = Property(depends_on=['source.digest'], desc='basename for cache file')
 
     #: The cross spectral matrix,
     #: (number of frequencies, num_channels, num_channels) array of complex;
@@ -238,17 +235,17 @@ class PowerSpectra(BaseSpectra):
 
     # internal identifier
     digest = Property(
-        depends_on=['_source.digest', 'block_size', 'window', 'overlap', 'precision'],
+        depends_on=['source.digest', 'block_size', 'window', 'overlap', 'precision'],
     )
 
     # hdf5 cache file
     h5f = Instance(H5CacheFileBase, transient=True)
 
-    @property_depends_on(['_source.num_samples', 'block_size', 'overlap'])
+    @property_depends_on(['source.num_samples', 'block_size', 'overlap'])
     def _get_num_blocks(self):
-        return self.overlap_ * self._source.num_samples / self.block_size - self.overlap_ + 1
+        return self.overlap_ * self.source.num_samples / self.block_size - self.overlap_ + 1
 
-    @property_depends_on(['_source.sample_freq', 'block_size', 'ind_low', 'ind_high'])
+    @property_depends_on(['source.sample_freq', 'block_size', 'ind_low', 'ind_high'])
     def _get_freq_range(self):
         fftfreq = self.fftfreq()
         if fftfreq is not None:
@@ -262,7 +259,7 @@ class PowerSpectra(BaseSpectra):
         self._freqlc = freq_range[0]
         self._freqhc = freq_range[1]
 
-    @property_depends_on(['_source.sample_freq', 'block_size', '_ind_low', '_freqlc'])
+    @property_depends_on(['source.sample_freq', 'block_size', '_ind_low', '_freqlc'])
     def _get_ind_low(self):
         fftfreq = self.fftfreq()
         if fftfreq is not None:
@@ -271,7 +268,7 @@ class PowerSpectra(BaseSpectra):
             return searchsorted(fftfreq[:-1], self._freqlc)
         return None
 
-    @property_depends_on(['_source.sample_freq', 'block_size', '_ind_high', '_freqhc'])
+    @property_depends_on(['source.sample_freq', 'block_size', '_ind_high', '_freqhc'])
     def _get_ind_high(self):
         fftfreq = self.fftfreq()
         if fftfreq is not None:
@@ -292,12 +289,6 @@ class PowerSpectra(BaseSpectra):
         self._index_set_last = True
         self._ind_low = ind_low
 
-    def _set_source(self, source):
-        self._source = source
-
-    def _get_source(self):
-        return self._source
-
     @property_depends_on(['block_size', 'ind_low', 'ind_high'])
     def _get_indices(self):
         fftfreq = self.fftfreq()
@@ -317,9 +308,9 @@ class PowerSpectra(BaseSpectra):
 
     @cached_property
     def _get_basename(self):
-        if 'basename' in self._source.all_trait_names():
-            return self._source.basename
-        return self._source.__class__.__name__ + self._source.digest
+        if 'basename' in self.source.all_trait_names():
+            return self.source.basename
+        return self.source.__class__.__name__ + self.source.digest
 
     def calc_csm(self):
         """Csm calculation."""
@@ -370,7 +361,7 @@ class PowerSpectra(BaseSpectra):
         if traitname == 'csm':
             func = self.calc_csm
             numfreq = int(self.block_size / 2 + 1)
-            shape = (numfreq, self._source.num_channels, self._source.num_channels)
+            shape = (numfreq, self.source.num_channels, self.source.num_channels)
             precision = self.precision
         elif traitname == 'eva':
             func = self.calc_eva
