@@ -5,6 +5,7 @@ on:
 
 jobs:
     add-assignee:
+        if: github.event.pull_request.requested_reviewers.*.name == ''
         runs-on: ubuntu-latest
         steps:
             - uses: kentaro-m/auto-assign-action@v2.0.0
