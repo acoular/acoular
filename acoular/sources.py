@@ -90,7 +90,7 @@ from .tprocess import TimeConvolve
 from .trajectory import Trajectory
 
 
-@nb.njit(cache=True, error_model='numpy')  # jit with nopython
+@nb.njit(cache=True, error_model='numpy')  # pragma: no cover
 def _fill_mic_signal_block(out, signal, rm, ind, blocksize, num_channels, up, prepadding):
     if prepadding:
         for b in range(blocksize):

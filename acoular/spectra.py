@@ -12,6 +12,7 @@
     PowerSpectraImport
 """
 
+from abc import abstractmethod
 from warnings import warn
 
 from numpy import (
@@ -38,12 +39,12 @@ from numpy import (
 )
 from scipy import fft
 from traits.api import (
+    ABCHasStrictTraits,
     Bool,
     CArray,
     Delegate,
     Enum,
     Float,
-    HasPrivateTraits,
     Instance,
     Int,
     Map,
@@ -65,7 +66,7 @@ from .internal import digest
 
 
 @deprecated_alias({'numchannels': 'num_channels'}, read_only=True)
-class BaseSpectra(HasPrivateTraits):
+class BaseSpectra(ABCHasStrictTraits):
     #: Data source; :class:`~acoular.sources.SamplesGenerator` or derived object.
     source = Instance(SamplesGenerator)
 
@@ -113,9 +114,9 @@ class BaseSpectra(HasPrivateTraits):
     # internal identifier
     digest = Property(depends_on=['precision', 'block_size', 'window', 'overlap'])
 
-    @cached_property
+    @abstractmethod
     def _get_digest(self):
-        return digest(self)
+        """Return internal identifier."""
 
     def fftfreq(self):
         """Return the Discrete Fourier Transform sample frequencies.

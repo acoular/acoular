@@ -8,7 +8,7 @@ select = [
         "F", # pyflakes
         "C","E","R", "W",  # pylint (including pycodestyle)
         "C90", "I", "N","D", "UP", 
-        "YTT", "ASYNC", "TRIO", "BLE", "B", "A", "COM", # flake8 plugins
+        "YTT", "ASYNC", "ASYNC1", "BLE", "B", "A", "COM", # flake8 plugins
         "C4", "DTZ","T10","EM", "FA", "ISC", "ICN", # flake8 plugins
         "LOG", "G", "INP", "PIE", "T20", "PYI", "PT", "RSE", # flake8 plugins
         "RET", "SLF", "SLOT", "SIM", "TID", "TCH", "INT", "ARG", "TD", "FIX", # flake8 plugins

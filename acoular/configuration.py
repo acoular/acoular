@@ -15,6 +15,8 @@ import sys
 from os import environ, mkdir, path
 from warnings import warn
 
+from traits.api import File
+
 # When numpy is using OpenBLAS then it runs with OPENBLAS_NUM_THREADS which may lead to
 # overcommittment when called from within numba jitted function that run on
 # NUMBA_NUM_THREADS. If overcommitted, things get extremely! slow. Therefore we make an
@@ -54,7 +56,7 @@ else:
     environ['OPENBLAS_NUM_THREADS'] = '1'
 
 # this loads numpy, so we have to defer loading until OpenBLAS check is done
-from traits.api import Bool, Enum, HasStrictTraits, Property, Str, cached_property
+from traits.api import Bool, Enum, HasStrictTraits, Property, cached_property
 
 
 class Config(HasStrictTraits):
@@ -104,14 +106,14 @@ class Config(HasStrictTraits):
     #: it will be created. :attr:`cache_dir` defaults to current session path.
     cache_dir = Property()
 
-    _cache_dir = Str('')
+    _cache_dir = File()
 
     #: Defines the working directory containing data files. Used only by
     #: :class:`~acoular.tprocess.WriteH5` class.
     #: Defaults to current session path.
     td_dir = Property()
 
-    _td_dir = Str(path.curdir)
+    _td_dir = File(path.curdir)
 
     #: Boolean Flag that determines whether user has access to traitsui features.
     #: Defaults to False.

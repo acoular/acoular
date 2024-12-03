@@ -12,13 +12,13 @@
 # imports from other packages
 from numpy import arange, array, r_, sort
 from scipy.interpolate import splev, splprep
-from traits.api import Dict, Float, HasPrivateTraits, Property, Tuple, cached_property, property_depends_on
+from traits.api import Dict, Float, HasStrictTraits, Property, Tuple, cached_property, property_depends_on
 
 # acoular imports
 from .internal import digest
 
 
-class Trajectory(HasPrivateTraits):
+class Trajectory(HasStrictTraits):
     """Describes a trajectory from sampled points.
 
     Based on a discrete number of points in space and time, a

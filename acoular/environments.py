@@ -47,7 +47,7 @@ from scipy.integrate import ode
 from scipy.interpolate import LinearNDInterpolator
 from scipy.linalg import norm
 from scipy.spatial import ConvexHull
-from traits.api import CArray, Dict, Float, HasPrivateTraits, Instance, Int, Property, Union, cached_property
+from traits.api import CArray, Dict, Float, HasStrictTraits, Instance, Int, Property, Union, cached_property
 
 from .internal import digest
 
@@ -56,7 +56,7 @@ f32ro = nb.types.Array(nb.types.float32, 2, 'C', readonly=True)
 
 
 @nb.njit([(f64ro, f64ro), (f64ro, f32ro), (f32ro, f64ro), (f32ro, f32ro)], cache=True, fastmath=True)
-def dist_mat(gpos, mpos):
+def dist_mat(gpos, mpos):  # pragma: no cover
     """Computes distance matrix, accelerated with numba.
 
     Args:
@@ -140,7 +140,7 @@ def cylToCart(x, Q=None):  # noqa: N802, N803
     return array([x[1] * sin(x[0]), x[1] * cos(x[0]), x[2]])
 
 
-class Environment(HasPrivateTraits):
+class Environment(HasStrictTraits):
     """A simple acoustic environment without flow.
 
     This class provides the facilities to calculate the travel time (distances)
@@ -252,7 +252,7 @@ class UniformFlowEnvironment(Environment):
         return rm
 
 
-class FlowField(HasPrivateTraits):
+class FlowField(HasStrictTraits):
     """An abstract base class for a spatial flow field."""
 
     digest = Property
@@ -271,11 +271,12 @@ class FlowField(HasPrivateTraits):
 
         Returns
         -------
-        tuple with two elements
-            The first element in the tuple is the velocity vector and the
-            second is the Jacobian of the velocity vector field, both at the
-            given location.
-
+        tuple
+            A tuple with two elements:
+            - velocity_vector : array of floats of shape (3, )
+                The velocity vector at the given location.
+            - jacobian_matrix : array of floats of shape (3, 3)
+                The Jacobian matrix of the velocity vector field at the given location.
         """
         v = array((0.0, 0.0, 0.0))
         dv = array(((0.0, 0.0, 0.0), (0.0, 0.0, 0.0), (0.0, 0.0, 0.0)))

@@ -43,6 +43,7 @@ SKIP_DEFAULT = [
     ac.MovingPointSource,
     ac.MovingLineSource,
     ac.MovingPointSourceDipole,
+    ac.FilterBank,
     ac.OctaveFilterBank,
     ac.RFFT,
     ac.SampleSplitter,

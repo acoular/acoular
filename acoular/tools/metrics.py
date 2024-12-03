@@ -18,13 +18,13 @@ from numpy import (
     ones,
 )
 from scipy.spatial.distance import cdist
-from traits.api import Bool, CArray, HasPrivateTraits, Instance, Property
+from traits.api import Bool, CArray, HasStrictTraits, Instance, Property
 
 from acoular.fbeamform import L_p, integrate
 from acoular.grids import CircSector, Grid
 
 
-class MetricEvaluator(HasPrivateTraits):
+class MetricEvaluator(HasStrictTraits):
     """Evaluate the reconstruction performance of source mapping methods.
 
     This class can be used to calculate the following performance metrics
