@@ -230,10 +230,7 @@ class TimeSamples(SamplesGenerator):
     file = File(filter=['*.h5'], exists=True, desc='name of data file')
 
     #: Basename of the .h5 file with data, is set automatically.
-    basename = Property(
-        depends_on='file',  # filter=['*.h5'],
-        desc='basename of data file',
-    )
+    basename = Property(depends_on=['file'], desc='basename of data file')
 
     #: Calibration data, instance of :class:`~acoular.calib.Calib` class, optional .
     calib = Instance(Calib, desc='Calibration data')

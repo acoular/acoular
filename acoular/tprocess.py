@@ -157,7 +157,7 @@ class MaskedTimeOut(TimeOut):
     )
 
     # Name of the cache file without extension, readonly.
-    basename = Property(depends_on='source.digest', desc='basename for cache file')
+    basename = Property(depends_on=['source.digest'], desc='basename for cache file')
 
     # internal identifier
     digest = Property(depends_on=['source.digest', 'start', 'stop', 'invalid_channels'])
@@ -541,13 +541,13 @@ class AngleTracker(MaskedTimeOut):
     start_angle = Float(0, desc='rotation angle for trigger position')
 
     # revolutions per minute for each sample, read-only
-    rpm = Property(depends_on='digest', desc='revolutions per minute for each sample')
+    rpm = Property(depends_on=['digest'], desc='revolutions per minute for each sample')
 
     # average revolutions per minute, read-only
-    average_rpm = Property(depends_on='digest', desc='average revolutions per minute')
+    average_rpm = Property(depends_on=['digest'], desc='average revolutions per minute')
 
     # rotation angle in radians for each sample, read-only
-    angle = Property(depends_on='digest', desc='rotation angle for each sample')
+    angle = Property(depends_on=['digest'], desc='rotation angle for each sample')
 
     # Internal flag to determine whether rpm and angle calculation has been processed,
     # prevents recalculation
@@ -1780,7 +1780,7 @@ class WriteWAV(TimeOut):
     file = File(filter=['*.wav'], desc='name of wave file')
 
     # Basename for cache, readonly.
-    basename = Property(depends_on='digest')
+    basename = Property(depends_on=['digest'])
 
     # Channel(s) to save. List can only contain one or two channels.
     channels = ListInt(desc='channel to save')
