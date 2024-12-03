@@ -16,6 +16,8 @@
 
 """
 
+from abc import abstractmethod
+
 import numba as nb
 from numpy import (
     arange,
@@ -47,7 +49,7 @@ from scipy.integrate import ode
 from scipy.interpolate import LinearNDInterpolator
 from scipy.linalg import norm
 from scipy.spatial import ConvexHull
-from traits.api import CArray, Dict, Float, HasPrivateTraits, Instance, Int, Property, Union, cached_property
+from traits.api import ABCHasStrictTraits, CArray, Dict, Float, HasStrictTraits, Instance, Int, Property, Union, cached_property
 
 from .internal import digest
 
@@ -140,7 +142,7 @@ def cylToCart(x, Q=None):  # noqa: N802, N803
     return array([x[1] * sin(x[0]), x[1] * cos(x[0]), x[2]])
 
 
-class Environment(HasPrivateTraits):
+class Environment(HasStrictTraits):
     """A simple acoustic environment without flow.
 
     This class provides the facilities to calculate the travel time (distances)
@@ -252,7 +254,7 @@ class UniformFlowEnvironment(Environment):
         return rm
 
 
-class FlowField(HasPrivateTraits):
+class FlowField(ABCHasStrictTraits):
     """An abstract base class for a spatial flow field."""
 
     digest = Property
@@ -260,7 +262,8 @@ class FlowField(HasPrivateTraits):
     def _get_digest(self):
         return ''
 
-    def v(self, xx):  # noqa: ARG002
+    @abstractmethod
+    def v(self, xx=None): # pragma: no cover
         """Provides the flow field as a function of the location. This is
         implemented here for the possibly most simple case: a quiescent fluid.
 
@@ -271,11 +274,12 @@ class FlowField(HasPrivateTraits):
 
         Returns
         -------
-        tuple with two elements
-            The first element in the tuple is the velocity vector and the
-            second is the Jacobian of the velocity vector field, both at the
-            given location.
-
+        tuple
+            A tuple with two elements:
+            - velocity_vector : array of floats of shape (3, )
+                The velocity vector at the given location.
+            - jacobian_matrix : array of floats of shape (3, 3)
+                The Jacobian matrix of the velocity vector field at the given location.
         """
         v = array((0.0, 0.0, 0.0))
         dv = array(((0.0, 0.0, 0.0), (0.0, 0.0, 0.0), (0.0, 0.0, 0.0)))
