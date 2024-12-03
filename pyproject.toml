@@ -6,7 +6,7 @@
 name = "acoular"
 dynamic = ["version"]
 description = "Python library for acoustic beamforming"
-requires-python = ">=3.10,<=12"
+requires-python = ">=3.10,<=3.12"
 authors = [
     {name = "Acoular Development Team", email = "info@acoular.org"},
 ]
