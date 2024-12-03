@@ -58,10 +58,10 @@ class RFFT(BaseSpectra, SpectraOut):
     block_size = Property()
 
     #: Number of frequencies in the output.
-    num_freqs = Property(depends_on='_block_size')
+    num_freqs = Property(depends_on=['_block_size'])
 
     #: Number of snapshots in the output.
-    num_samples = Property(depends_on='source.num_samples, _block_size')
+    num_samples = Property(depends_on=['source.num_samples', '_block_size'])
 
     #: 1-D array of FFT sample frequencies.
     freqs = Property()
@@ -168,7 +168,7 @@ class IRFFT(TimeOut):
     precision = Enum('float64', 'float32', desc='precision of the time signal after the ifft')
 
     #: Number of time samples in the output.
-    num_samples = Property(depends_on='source.num_samples, source._block_size')
+    num_samples = Property(depends_on=['source.num_samples', 'source._block_size'])
 
     # internal time signal buffer to handle arbitrary output block sizes
     _buffer = CArray(desc='signal buffer')
@@ -306,7 +306,7 @@ class CrossPowerSpectra(AutoPowerSpectra):
     #: :attr:`num_channels` is :math:`n^2`, where :math:`n` is the number of
     #: channels in the input. If :attr:`calc_mode` is 'upper', then
     #: :attr:`num_channels` is :math:`n + n(n-1)/2`.
-    num_channels = Property(depends_on='source.num_channels')
+    num_channels = Property(depends_on=['source.num_channels'])
 
     # internal identifier
     digest = Property(depends_on=['source.digest', 'precision', 'scaling', 'single_sided', 'calc_mode'])
