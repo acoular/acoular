@@ -19,12 +19,14 @@ to be used directly, but to be subclassed by classes that implement the actual s
     TimeInOut
 """
 
+from abc import abstractmethod
+
 from traits.api import (
+    ABCHasStrictTraits,
     CArray,
     CLong,
     Delegate,
     Float,
-    HasPrivateTraits,
     Instance,
     Property,
     cached_property,
@@ -36,7 +38,7 @@ from .internal import digest
 
 
 @deprecated_alias({'numchannels': 'num_channels', 'numsamples': 'num_samples'})
-class Generator(HasPrivateTraits):
+class Generator(ABCHasStrictTraits):
     """Interface for any generating signal processing block.
 
     It provides a common interface for all classes, which generate an output via the generator
@@ -64,6 +66,7 @@ class Generator(HasPrivateTraits):
     def _get_digest(self):
         return digest(self)
 
+    @abstractmethod
     def result(self, num):
         """Python generator that yields the output block-wise.
 
