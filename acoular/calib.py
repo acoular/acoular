@@ -44,23 +44,21 @@ class Calib(InOut):
         >>> import acoular as ac
         >>> import numpy as np
         >>>
-        >>> signal = ac.WNoiseGenerator(sample_freq=51200, num_samples=51200, rms=2.0).signal()
+        >>> signal = ac.WNoiseGenerator(sample_freq=51200, num_samples=51200, rms=0.01).signal()
         >>> ts = ac.TimeSamples(data=signal[:, np.newaxis], sample_freq=51200)
         >>> calib = ac.Calib(source=ts)
         >>> calib.data = np.array([100])
         >>> print(next(calib.result(num=1)))
-        [[352.81046919]]
+        [[1.76405235]]
 
         The calibrated data can then be further processed, e.g. by calculating the FFT of the
         calibrated data.
 
         >>> fft = ac.RFFT(source=calib, block_size=16)
         >>> print(next(fft.result(num=1)))
-        [[2127.75981743  +0.j          651.91512352-315.3052216j
-          -454.68570762-678.21662333j   14.91685605 +99.31587754j
-           354.53920079+784.46619566j  639.0864956  +35.97710777j
-            67.58081917-786.68466133j  187.89848304+506.57222063j
-           594.70514857  +0.j        ]]
+        [[10.63879909+0.j          3.25957562-1.57652611j -2.27342854-3.39108312j
+    0.07458428+0.49657939j  1.772696  +3.92233098j  3.19543248+0.17988554j
+    0.3379041 -3.93342331j  0.93949242+2.5328611j   2.97352574+0.j        ]]
 
         One could also apply the calibration after the FFT calculation.
 
@@ -68,11 +66,9 @@ class Calib(InOut):
         >>> calib = ac.Calib(source=fft)
         >>> calib.data = 100 * np.ones(ts.num_channels * fft.num_freqs)
         >>> print(next(calib.result(num=1)))
-        [[2127.75981743  +0.j          651.91512352-315.3052216j
-          -454.68570762-678.21662333j   14.91685605 +99.31587754j
-           354.53920079+784.46619566j  639.0864956  +35.97710777j
-            67.58081917-786.68466133j  187.89848304+506.57222063j
-           594.70514857  +0.j        ]]
+        [[10.63879909+0.j          3.25957562-1.57652611j -2.27342854-3.39108312j
+    0.07458428+0.49657939j  1.772696  +3.92233098j  3.19543248+0.17988554j
+    0.3379041 -3.93342331j  0.93949242+2.5328611j   2.97352574+0.j        ]]
 
     Depracted and will be removed in Acoular 25.10:
     This class serves as interface to load calibration data for the used
