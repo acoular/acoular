@@ -67,7 +67,7 @@ The ``".[dev]"`` argument is responsible for installing the right dependencies a
     dev = [
         "acoular[docs,full,tests]",
         "hatch",
-        "ruff==0.4.1",
+        "ruff==0.8.1",
     ]
 
 If not included, the dependencies have to be installed manually.

@@ -145,7 +145,7 @@ class PNoiseGenerator(SignalGenerator):
 
         if depth > max_depth:
             depth = max_depth
-            print('Pink noise filter depth set to maximum possible value of %d.' % max_depth)
+            print(f'Pink noise filter depth set to maximum possible value of {max_depth:d}.')
 
         rnd_gen = RandomState(self.seed)
         s = rnd_gen.standard_normal(nums)

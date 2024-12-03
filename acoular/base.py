@@ -274,6 +274,9 @@ class InOut(SamplesGenerator, SpectraGenerator):
     #: Number of channels in output, as given by :attr:`source`.
     num_channels = Delegate('source')
 
+    #: Number of frequencies in output, as given by :attr:`source`.
+    num_freqs = Delegate('source')
+
     #: Number of samples / snapshots in output, as given by :attr:`source`.
     num_samples = Delegate('source')
 

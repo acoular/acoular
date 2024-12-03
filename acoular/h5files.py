@@ -111,9 +111,7 @@ if config.have_tables:
         def is_cached(self, nodename, group=None):
             if not group:
                 group = self.root
-            if nodename in group:
-                return True
-            return False
+            return nodename in group
 
         def create_compressible_array(self, nodename, shape, precision, group=None):
             if not group:
@@ -190,9 +188,7 @@ if config.have_h5py:
         def is_cached(self, nodename, group=None):
             if not group:
                 group = '/'
-            if group + nodename in self:
-                return True
-            return False
+            return group + nodename in self
 
         def create_compressible_array(self, nodename, shape, precision, group=None):
             in_file_path = self._get_in_file_path(nodename, group)

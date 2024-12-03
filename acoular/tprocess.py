@@ -70,7 +70,7 @@ from numpy import (
     split,
     sqrt,
     stack,
-    sum,
+    sum,  # noqa: A004
     tile,
     unique,
     zeros,
@@ -483,15 +483,16 @@ class Trigger(TimeOut):
             maxTriggerHelp = [minVal, maxVal] - meanVal
             argInd = argmax(abs(maxTriggerHelp))
             thresh = maxTriggerHelp[argInd] * 0.75  # 0.75 for 75% of max trigger signal
-            warn('No threshold was passed. An estimated threshold of %s is assumed.' % thresh, Warning, stacklevel=2)
+            warn(f'No threshold was passed. An estimated threshold of {thresh} is assumed.', Warning, stacklevel=2)
         else:  # take user defined  threshold
             thresh = self.threshold
         return thresh
 
     def _check_trigger_existence(self):
         nChannels = self.source.num_channels
-        if not nChannels == 1:
-            raise Exception('Trigger signal must consist of ONE channel, instead %s channels are given!' % nChannels)
+        if nChannels != 1:
+            msg = f'Trigger signal must consist of ONE channel, instead {nChannels} channels are given!'
+            raise Exception(msg)
         return 0
 
 
@@ -571,7 +572,7 @@ class AngleTracker(MaskedTimeOut):
         # init
         ind = 0
         # trigger data
-        peakloc, maxdist, mindist = self.trigger.trigger_data()
+        peakloc, maxdist, mindist = self.trigger.trigger_data
         TriggerPerRevo = self.trigger_per_revo
         rotDirection = self.rot_direction
         num = self.source.num_samples
@@ -645,7 +646,7 @@ class AngleTracker(MaskedTimeOut):
 
         """
         # trigger indices data
-        peakloc = self.trigger.trigger_data()[0]
+        peakloc = self.trigger.trigger_data[0]
         # calculation of average rpm in 1/min
         return (len(peakloc) - 1) / (peakloc[-1] - peakloc[0]) / self.trigger_per_revo * self.source.sample_freq * 60
 
@@ -1287,9 +1288,11 @@ class Mixer(TimeOut):
         if self.source:
             for s in self.sources:
                 if self.sample_freq != s.sample_freq:
-                    raise ValueError('Sample frequency of %s does not fit' % s)
+                    msg = f'Sample frequency of {s} does not fit'
+                    raise ValueError(msg)
                 if self.num_channels != s.num_channels:
-                    raise ValueError('Channel count of %s does not fit' % s)
+                    msg = f'Channel count of {s} does not fit'
+                    raise ValueError(msg)
 
     def result(self, num):
         """Python generator that yields the output block-wise.
@@ -1797,27 +1800,26 @@ class WriteWAV(TimeOut):
             msg = 'No channels given for output.'
             raise ValueError(msg)
         if nc > 2:
-            warn('More than two channels given for output, exported file will have %i channels' % nc, stacklevel=1)
+            warn(f'More than two channels given for output, exported file will have {nc:d} channels', stacklevel=1)
         if self.file == '':
             name = self.basename
             for nr in self.channels:
-                name += '_%i' % nr
+                name += f'{nr:d}'
             name += '.wav'
         else:
             name = self.file
-        wf = wave.open(name, 'w')
-        wf.setnchannels(nc)
-        wf.setsampwidth(2)
-        wf.setframerate(self.source.sample_freq)
-        wf.setnframes(self.source.num_samples)
-        mx = 0.0
-        ind = array(self.channels)
-        for data in self.source.result(1024):
-            mx = max(abs(data[:, ind]).max(), mx)
-        scale = 0.9 * 2**15 / mx
-        for data in self.source.result(1024):
-            wf.writeframesraw(array(data[:, ind] * scale, dtype=int16).tostring())
-        wf.close()
+        with wave.open(name, 'w') as wf:
+            wf.setnchannels(nc)
+            wf.setsampwidth(2)
+            wf.setframerate(self.source.sample_freq)
+            wf.setnframes(self.source.num_samples)
+            mx = 0.0
+            ind = array(self.channels)
+            for data in self.source.result(1024):
+                mx = max(abs(data[:, ind]).max(), mx)
+            scale = 0.9 * 2**15 / mx
+            for data in self.source.result(1024):
+                wf.writeframesraw(array(data[:, ind] * scale, dtype=int16).tostring())
 
 
 @deprecated_alias({'name': 'file', 'numsamples_write': 'num_samples_write', 'writeflag': 'write_flag'})
