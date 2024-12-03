@@ -53,6 +53,7 @@ SKIP_DEFAULT = [
     ac.SpatialInterpolatorRotation,
     ac.WriteH5,
     ac.WriteWAV,
+    ac.Calib,
 ]
 
 DEFAULT = [cls for cls in get_subclasses(ac.Generator) if cls not in SKIP_DEFAULT]
@@ -202,3 +203,14 @@ class Generators:
 
     def case_TriggerAIAABenchmark(self, aiaa_bechmark_trigger_file):
         return ac.tools.TriggerAIAABenchmark(file=aiaa_bechmark_trigger_file)
+
+    @parametrize('domain', ['time', 'frequency'])
+    def case_Calib(self, time_data_source, domain):
+        if domain == 'time':
+            data = time_data_source
+            shape = data.num_channels
+        else:
+            data = ac.RFFT(source=time_data_source, block_size=8)
+            shape = data.num_channels * data.num_freqs
+        cal = np.abs(np.zeros(shape))
+        return ac.Calib(source=data, data=cal)
