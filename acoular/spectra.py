@@ -12,6 +12,7 @@
     PowerSpectraImport
 """
 
+from abc import abstractmethod
 from warnings import warn
 
 from numpy import (
@@ -113,7 +114,7 @@ class BaseSpectra(ABCHasStrictTraits):
     # internal identifier
     digest = Property(depends_on=['precision', 'block_size', 'window', 'overlap'])
 
-    @cached_property
+    @abstractmethod
     def _get_digest(self):
         """Return internal identifier."""
 

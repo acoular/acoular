@@ -17,7 +17,7 @@ all_classes = get_all_classes()
 
 def create_instance(acoular_cls):
     if isabstract(acoular_cls):
-        pytest.skip(f'{acoular_cls.__name__} is abstract')
+        pytest.skip(f'{acoular_cls.__name__} is an abstract base class')
     if acoular_cls.__name__ in ['H5CacheFileH5py', 'H5CacheFileTables', 'H5FileH5py', 'H5FileTables']:
         return acoular_cls(tempfile.mkstemp()[1] + '.h5', 'w')
     if acoular_cls.__name__ in ['LockedGenerator', 'LazyBfResult']:

@@ -300,7 +300,7 @@ class ChannelMixer(TimeOut):
             yield sum(weights * block, 1, keepdims=True)
 
 
-class Trigger(TimeOut):
+class Trigger(TimeOut):  # pragma: no cover
     """Class for identifying trigger signals.
     Gets samples from :attr:`source` and stores the trigger samples in :meth:`trigger_data`.
 
