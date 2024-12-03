@@ -233,22 +233,12 @@ class SineGenerator(SignalGenerator):
     #: Sine wave phase (in radians), float, defaults to 0.0.
     phase = Float(0.0, desc='Phase')
 
-    # Internal shadow trait for rms/amplitude values.
-    # Do not set directly.
-    _amp = Float(1.0)
-
     #: Amplitude of source signal (for point source: in 1 m distance).
     #: Defaults to 1.0.
-    amplitude = Property(desc='amplitude')
-
-    def _get_amplitude(self):
-        return self._amp
-
-    def _set_amplitude(self, amp):
-        self._amp = amp
+    amplitude = Float(1.0)
 
     # internal identifier
-    digest = Property(depends_on=['_amp', 'numsamples', 'sample_freq', 'freq', 'phase', '__class__'])
+    digest = Property(depends_on=['amplitude', 'numsamples', 'sample_freq', 'freq', 'phase', '__class__'])
 
     @cached_property
     def _get_digest(self):

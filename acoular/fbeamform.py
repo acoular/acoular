@@ -310,7 +310,7 @@ class BeamformerBase(HasStrictTraits):
     # Instance of :class:`~acoular.fbeamform.SteeringVector` or its derived classes
     # that contains information about the steering vector. This is a private trait.
     # Do not set this directly, use `steer` trait instead.
-    steer = Instance(SteeringVector(), SteeringVector)
+    steer = Instance(SteeringVector, args=())
 
     #: :class:`~acoular.spectra.PowerSpectra` object that provides the
     #: cross spectral matrix and eigenvalues
@@ -379,7 +379,7 @@ class BeamformerBase(HasStrictTraits):
             #            print("no data existent for nodename:", nodename)
             if config.global_caching == 'readonly':
                 return (None, None, None)
-            numfreq = self.freq_data.fftfreq().shape[0]  # block_size/2 + 1steer_obj
+            numfreq = self.freq_data.fftfreq().shape[0]
             group = self.h5f.create_new_group(nodename)
             self.h5f.create_compressible_array(
                 'freqs',

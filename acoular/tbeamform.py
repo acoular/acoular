@@ -101,8 +101,9 @@ class BeamformerTime(TimeOut):
     # that contains information about the steering vector. This is a private trait.
     # Do not set this directly, use `steer` trait instead.
     steer = Instance(SteeringVector, args=())
+
     #: Number of channels in output (=number of grid points).
-    numchannels = Property(depends_on=['steer.grid'])
+    num_channels = Property()
 
     #: Spatial weighting function.
     weights = Map(possible_weights, default_value='none', desc='spatial weighting function')
@@ -113,8 +114,7 @@ class BeamformerTime(TimeOut):
         depends_on=['steer.digest', 'source.digest', 'weights', '__class__'],
     )
 
-    @cached_property
-    def _get_numchannels(self):
+    def _get_num_channels(self):
         return self.steer.grid.size
 
     def _get_digest(self):
