@@ -104,7 +104,7 @@ class Average(InOut):
     num_samples = Property(depends_on=['source.num_samples', 'num_per_average'])
 
     # internal identifier
-    digest = Property(depends_on=['source.digest', '__class__', 'num_per_average'])
+    digest = Property(depends_on=['source.digest', 'num_per_average'])
 
     @cached_property
     def _get_digest(self):
@@ -185,7 +185,7 @@ class Cache(InOut):
     h5f = Instance(H5CacheFileBase, transient=True)
 
     # internal identifier
-    digest = Property(depends_on=['source.digest', '__class__'])
+    digest = Property(depends_on=['source.digest'])
 
     @cached_property
     def _get_digest(self):

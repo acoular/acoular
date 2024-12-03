@@ -1492,7 +1492,7 @@ class FiltOctave(Filter):
     sos = Property(depends_on=['band', 'fraction', 'source.digest', 'order'])
 
     # internal identifier
-    digest = Property(depends_on=['source.digest', '__class__', 'band', 'fraction', 'order'])
+    digest = Property(depends_on=['source.digest', 'band', 'fraction', 'order'])
 
     @cached_property
     def _get_digest(self):
@@ -1529,7 +1529,7 @@ class FiltFiltOctave(FiltOctave):
     order = Int(2, desc='IIR filter half order')
 
     # internal identifier
-    digest = Property(depends_on=['source.digest', '__class__', 'band', 'fraction', 'order'])
+    digest = Property(depends_on=['source.digest', 'band', 'fraction', 'order'])
 
     @cached_property
     def _get_digest(self):
@@ -1601,7 +1601,7 @@ class TimeExpAverage(Filter):
     sos = Property(depends_on=['weight', 'source.digest'])
 
     # internal identifier
-    digest = Property(depends_on=['source.digest', '__class__', 'weight'])
+    digest = Property(depends_on=['source.digest', 'weight'])
 
     @cached_property
     def _get_digest(self):
@@ -1624,7 +1624,7 @@ class FiltFreqWeight(Filter):
     sos = Property(depends_on=['weight', 'source.digest'])
 
     # internal identifier
-    digest = Property(depends_on=['source.digest', '__class__', 'weight'])
+    digest = Property(depends_on=['source.digest', 'weight'])
 
     @cached_property
     def _get_digest(self):
@@ -1741,7 +1741,7 @@ class OctaveFilterBank(FilterBank):
     num_bands = Property(depends_on=['lband', 'hband', 'fraction'])
 
     # internal identifier
-    digest = Property(depends_on=['source.digest', '__class__', 'lband', 'hband', 'fraction', 'order'])
+    digest = Property(depends_on=['source.digest', 'lband', 'hband', 'fraction', 'order'])
 
     @cached_property
     def _get_digest(self):
@@ -1786,7 +1786,7 @@ class WriteWAV(TimeOut):
     channels = ListInt(desc='channel to save')
 
     # internal identifier
-    digest = Property(depends_on=['source.digest', 'channels', '__class__'])
+    digest = Property(depends_on=['source.digest', 'channels'])
 
     @cached_property
     def _get_digest(self):
@@ -1860,7 +1860,7 @@ class WriteH5(TimeOut):
     write_flag = Bool(True)
 
     # internal identifier
-    digest = Property(depends_on=['source.digest', '__class__'])
+    digest = Property(depends_on=['source.digest'])
 
     # The floating-number-precision of entries of H5 File corresponding
     # to numpy dtypes. Default is 32 bit.
@@ -1972,7 +1972,7 @@ class TimeConvolve(TimeOut):
     )
 
     # internal identifier
-    digest = Property(depends_on=['source.digest', 'kernel', '__class__'])
+    digest = Property(depends_on=['source.digest', 'kernel'])
 
     @cached_property
     def _get_digest(self):
