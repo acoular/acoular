@@ -18,6 +18,8 @@ from traits.api import CArray, CLong, File, ListInt, Property, cached_property, 
 import acoular as ac
 
 from .base import InOut
+from numpy import array
+from traits.api import CArray, CLong, File, Property, cached_property, on_trait_change
 
 # acoular imports
 from .deprecation import deprecated_alias

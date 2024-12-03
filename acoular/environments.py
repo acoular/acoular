@@ -260,7 +260,7 @@ class FlowField(HasStrictTraits):
     def _get_digest(self):
         return ''
 
-    def v(self, xx=None):
+    def v(self, xx):  # noqa: ARG002
         """Provides the flow field as a function of the location. This is
         implemented here for the possibly most simple case: a quiescent fluid.
 

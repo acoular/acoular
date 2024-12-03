@@ -495,6 +495,11 @@ class Trigger(TimeOut):
             raise Exception(msg)
         return 0
 
+    def result(self, num):
+        msg = 'result method not implemented yet! Data from source will be passed without transformation.'
+        warn(msg, Warning, stacklevel=2)
+        yield from self.source.result(num)
+
 
 class AngleTracker(MaskedTimeOut):
     """Calculates rotation angle and rpm per sample from a trigger signal
@@ -651,7 +656,7 @@ class AngleTracker(MaskedTimeOut):
         return (len(peakloc) - 1) / (peakloc[-1] - peakloc[0]) / self.trigger_per_revo * self.source.sample_freq * 60
 
 
-class SpatialInterpolator(TimeOut):
+class SpatialInterpolator(TimeOut):  # pragma: no cover
     """Base class for spatial interpolation of microphone data.
     Gets samples from :attr:`source` and generates output via the
     generator :meth:`result`.
@@ -1140,8 +1145,13 @@ class SpatialInterpolator(TimeOut):
         # return interpolated pressure values
         return pInterp
 
+    def result(self, num):
+        msg = 'result method not implemented yet! Data from source will be passed without transformation.'
+        warn(msg, Warning, stacklevel=2)
+        yield from self.source.result(num)
 
-class SpatialInterpolatorRotation(SpatialInterpolator):
+
+class SpatialInterpolatorRotation(SpatialInterpolator):  # pragma: no cover
     """Spatial  Interpolation for rotating sources. Gets samples from :attr:`source`
     and angles from  :attr:`AngleTracker`.Generates output via the generator :meth:`result`.
 
@@ -1196,7 +1206,7 @@ class SpatialInterpolatorRotation(SpatialInterpolator):
             count += num
 
 
-class SpatialInterpolatorConstantRotation(SpatialInterpolator):
+class SpatialInterpolatorConstantRotation(SpatialInterpolator):  # pragma: no cover
     """Spatial linear Interpolation for constantly rotating sources.
     Gets samples from :attr:`source` and generates output via the
     generator :meth:`result`.
@@ -1820,6 +1830,11 @@ class WriteWAV(TimeOut):
             scale = 0.9 * 2**15 / mx
             for data in self.source.result(1024):
                 wf.writeframesraw(array(data[:, ind] * scale, dtype=int16).tostring())
+
+    def result(self, num):
+        msg = 'result method not implemented yet! Data from source will be passed without transformation.'
+        warn(msg, Warning, stacklevel=2)
+        yield from self.source.result(num)
 
 
 @deprecated_alias({'name': 'file', 'numsamples_write': 'num_samples_write', 'writeflag': 'write_flag'})

@@ -43,7 +43,7 @@ from traits.api import (
     Delegate,
     Enum,
     Float,
-    HasPrivateTraits,
+    ABCHasStrictTraits,
     Instance,
     Int,
     Map,
@@ -65,7 +65,7 @@ from .internal import digest
 
 
 @deprecated_alias({'numchannels': 'num_channels'}, read_only=True)
-class BaseSpectra(HasPrivateTraits):
+class BaseSpectra(ABCHasStrictTraits):
     #: Data source; :class:`~acoular.sources.SamplesGenerator` or derived object.
     source = Instance(SamplesGenerator)
 
@@ -115,7 +115,7 @@ class BaseSpectra(HasPrivateTraits):
 
     @cached_property
     def _get_digest(self):
-        return digest(self)
+        """Return internal identifier."""
 
     def fftfreq(self):
         """Return the Discrete Fourier Transform sample frequencies.

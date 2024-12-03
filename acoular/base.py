@@ -99,6 +99,7 @@ class SamplesGenerator(Generator):
     def _get_digest(self):
         return digest(self)
 
+    @abstractmethod
     def result(self, num):
         """Python generator that yields the output block-wise.
 
@@ -139,6 +140,7 @@ class SpectraGenerator(Generator):
     def _get_digest(self):
         return digest(self)
 
+    @abstractmethod
     def result(self, num=1):
         """Python generator that yields the output block-wise.
 
@@ -184,6 +186,7 @@ class TimeOut(SamplesGenerator):
     def _get_digest(self):
         return digest(self)
 
+    @abstractmethod
     def result(self, num):
         """Python generator that processes the source data and yields the time-signal block-wise.
 
@@ -200,7 +203,6 @@ class TimeOut(SamplesGenerator):
         numpy.ndarray
             Two-dimensional output data block of shape (num, num_channels)
         """
-        yield from self.source.result(num)
 
 
 @deprecated_alias({'numchannels': 'num_channels', 'numsamples': 'num_samples', 'numfreqs': 'num_freqs'}, read_only=True)
@@ -241,6 +243,7 @@ class SpectraOut(SpectraGenerator):
     def _get_digest(self):
         return digest(self)
 
+    @abstractmethod
     def result(self, num=1):
         """Python generator that processes the source data and yields the output block-wise.
 
@@ -255,7 +258,6 @@ class SpectraOut(SpectraGenerator):
         numpy.ndarray
             A two-dimensional block of shape (num, num_channels * num_freqs).
         """
-        yield from self.source.result(num)
 
 
 @deprecated_alias({'numchannels': 'num_channels', 'numsamples': 'num_samples'}, read_only=True)
@@ -290,6 +292,7 @@ class InOut(SamplesGenerator, SpectraGenerator):
     def _get_digest(self):
         return digest(self)
 
+    @abstractmethod
     def result(self, num):
         """Python generator that processes the source data and yields the output block-wise.
 
@@ -305,7 +308,6 @@ class InOut(SamplesGenerator, SpectraGenerator):
         numpy.ndarray
             Two-dimensional output data block of shape (num, ...)
         """
-        yield from self.source.result(num)
 
 
 class TimeInOut(TimeOut):

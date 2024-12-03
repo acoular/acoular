@@ -16,12 +16,13 @@
 """
 
 # imports from other packages
+from abc import abstractmethod
 from warnings import warn
 
 from numpy import arange, array, log, pi, repeat, sin, sqrt, tile, zeros
 from numpy.random import RandomState
 from scipy.signal import resample, sosfilt, tf2sos
-from traits.api import Bool, CArray, CLong, Delegate, Float, HasPrivateTraits, Instance, Int, Property, cached_property
+from traits.api import ABCHasStrictTraits, Bool, CArray, CLong, Delegate, Float, Instance, Int, Property, cached_property
 
 # acoular imports
 from .base import SamplesGenerator
@@ -30,7 +31,7 @@ from .internal import digest
 
 
 @deprecated_alias({'numsamples': 'num_samples'})
-class SignalGenerator(HasPrivateTraits):
+class SignalGenerator(ABCHasStrictTraits):
     """Virtual base class for a simple one-channel signal generator.
 
     Defines the common interface for all SignalGenerator classes. This class
@@ -50,9 +51,11 @@ class SignalGenerator(HasPrivateTraits):
     # internal identifier
     digest = Property
 
+    @abstractmethod
     def _get_digest(self):
-        return ''
+        """Returns the internal identifier."""
 
+    @abstractmethod
     def signal(self):
         """Deliver the signal."""
 
