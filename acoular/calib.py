@@ -15,6 +15,8 @@ import xml.dom.minidom
 from numpy import array, newaxis
 from traits.api import CArray, CLong, File, ListInt, Property, cached_property, on_trait_change
 
+import acoular as ac
+
 from .base import InOut
 
 # acoular imports
@@ -127,6 +129,28 @@ class Calib(InOut):
         self.data = array(data, 'd')
         self.num_mics = self.data.shape[0]
 
+    def __validate_data(self):
+        """Validates the calibration data."""
+        if self.data is None:
+            msg = 'No calibration data available.'
+            raise ValueError(msg)
+        if self.source is None:
+            msg = 'No source data available.'
+            raise ValueError(msg)
+        tobj = self.source
+        while isinstance(tobj, ac.InOut):
+            tobj = tobj.source
+        if isinstance(tobj, ac.SamplesGenerator) and (self.data[self.channels].shape[0] != tobj.num_channels):
+            msg = f'calibration data shape {self.data[self.channels].shape[0]} does not match \
+                source data shape {tobj.num_channels}'
+            raise ValueError(msg)
+        if isinstance(tobj, ac.SpectraGenerator) and (
+            self.data[self.channels].shape[0] != tobj.num_channels * tobj.num_freqs
+        ):
+            msg = f'calibration data shape {self.data[self.channels].shape[0]} does not match \
+                source data shape {tobj.num_channels * tobj.num_freqs}'
+            raise ValueError(msg)
+
     def result(self, num):
         """Python generator that processes the source data and yields the time-signal block-wise.
 
@@ -146,10 +170,6 @@ class Calib(InOut):
             or sourcechannels is num_channels*num_freqs if the source data is in the frequency
             domain.
         """
+        self.__validate_data()
         for block in self.source.result(num):
-            if self.data[self.channels].shape[0] == block.shape[1]:
-                yield block * self.data[self.channels][newaxis]
-            else:
-                msg = f'calibration data shape does not match source data shape: \
-{self.data[self.channels].shape[0]}, {block.shape[1]}'
-                raise ValueError(msg)
+            yield block * self.data[self.channels][newaxis]
