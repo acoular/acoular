@@ -857,7 +857,7 @@ class BeamformerFunctional(BeamformerBase):
         normfactor = self.sig_loss_norm()
         param_steer_type, steer_vector = self._beamformer_params()
         for i in ind:
-            if self.r_diag:
+            if self.r_diag:  # pragma: no cover
                 # This case is not used at the moment (see Trait r_diag)
                 # It would need some testing as structural changes were not tested...
                 # ==============================================================================

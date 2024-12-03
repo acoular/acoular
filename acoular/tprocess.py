@@ -1883,6 +1883,8 @@ class WriteH5(TimeOut):
         if nitems > 0:
             f5h.create_new_group('metadata', '/')
             for key, value in self.metadata.items():
+                if isinstance(value, str):
+                    value = array(value, dtype='S')
                 f5h.create_array('/metadata', key, value)
 
     def result(self, num):
@@ -2061,13 +2063,13 @@ class TimeConvolve(TimeOut):
 
 
 @nb.jit(nopython=True, cache=True)
-def _append_to_fdl(fdl, idx, numblocks_kernel, buff):
+def _append_to_fdl(fdl, idx, numblocks_kernel, buff):  # pragma: no cover
     fdl[idx] = buff
     idx = int(idx + 1 % numblocks_kernel)
 
 
 @nb.jit(nopython=True, cache=True)
-def _spectral_sum(out, fdl, kb):
+def _spectral_sum(out, fdl, kb):  # pragma: no cover
     P, B, N = kb.shape
     for n in range(N):
         for b in range(B):

@@ -56,7 +56,7 @@ f32ro = nb.types.Array(nb.types.float32, 2, 'C', readonly=True)
 
 
 @nb.njit([(f64ro, f64ro), (f64ro, f32ro), (f32ro, f64ro), (f32ro, f32ro)], cache=True, fastmath=True)
-def dist_mat(gpos, mpos):
+def dist_mat(gpos, mpos):  # pragma: no cover
     """Computes distance matrix, accelerated with numba.
 
     Args:
