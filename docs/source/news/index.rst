@@ -42,6 +42,7 @@ Upcoming Release (25.01)
         * activates maximum line length enforcement of 120 and 100 for comments and docstrings
         * adds CI workflow for inspecting regression test outputs
         * adds action that automatically assigns a team member to newly opened pull requests
+        * `depends_on` now only accepts a list of strings
 
 24.10
 ----------------
