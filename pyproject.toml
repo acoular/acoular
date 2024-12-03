@@ -6,7 +6,7 @@
 name = "acoular"
 dynamic = ["version"]
 description = "Python library for acoustic beamforming"
-requires-python = ">=3.10,<=3.12"
+requires-python = ">=3.10,<3.13"
 authors = [
     {name = "Acoular Development Team", email = "info@acoular.org"},
 ]
@@ -82,7 +82,7 @@ tests = [
 dev = [
     "acoular[docs,full,tests]",
     "hatch",
-    "ruff==0.8.1",
+    "ruff==0.8.1", # remember to change version pin in docs/source/contributing/install.rst
 ]
 
 [project.urls]
