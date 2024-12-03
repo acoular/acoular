@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import acoular as ac
 import pytest
 from pytest_cases import parametrize
@@ -20,3 +22,11 @@ def test_deprecation_warnings(tmp_path, acoular_cls, suffix):
     with pytest.deprecated_call():
         acoular_cls(name=file_path)
     acoular_cls(file=file_path)
+
+
+def test_td_dir(tmp_path, time_data_source):
+    """Test that global time data directory is used when no filename is given."""
+    ac.config.td_dir = tmp_path
+    h5 = ac.WriteH5(source=time_data_source)
+    h5.save()
+    assert (tmp_path / Path(h5.file).name).exists()
