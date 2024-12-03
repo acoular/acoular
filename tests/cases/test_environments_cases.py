@@ -39,6 +39,9 @@ class Flows:
     def case_default(self, flow):
         return flow()
 
+    def case_FlowField(self):
+        return ac.FlowField()
+
     def case_SlotJet(self):
         return ac.SlotJet(v0=70.0, origin=(-0.7, 0, 0.7))
 

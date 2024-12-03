@@ -92,7 +92,7 @@ from traits.api import (
     Dict,
     Enum,
     Float,
-    HasPrivateTraits,
+    HasStrictTraits,
     Instance,
     Int,
     List,
@@ -119,12 +119,12 @@ from .tfastfuncs import _steer_I, _steer_II, _steer_III, _steer_IV
 
 sklearn_ndict = {}
 if parse(sklearn.__version__) < parse('1.4'):
-    sklearn_ndict['normalize'] = False
+    sklearn_ndict['normalize'] = False  # pragma: no cover
 
 BEAMFORMER_BASE_DIGEST_DEPENDENCIES = ['freq_data.digest', 'r_diag', 'r_diag_norm', 'precision', '_steer_obj.digest']
 
 
-class SteeringVector(HasPrivateTraits):
+class SteeringVector(HasStrictTraits):
     """Basic class for implementing steering vectors with monopole source transfer models.
 
     Handles four different steering vector formulations. See :cite:`Sarradj2012` for details.
@@ -304,7 +304,7 @@ class LazyBfResult:
         return self.bf._ac.__getitem__(key)
 
 
-class BeamformerBase(HasPrivateTraits):
+class BeamformerBase(HasStrictTraits):
     """Beamforming using the basic delay-and-sum algorithm in the frequency domain."""
 
     # Instance of :class:`~acoular.fbeamform.SteeringVector` or its derived classes
@@ -466,6 +466,12 @@ class BeamformerBase(HasPrivateTraits):
 
     # internal identifier
     digest = Property(depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES)
+
+    # private traits
+    _ac = Any(desc='beamforming result')
+    _fr = Any(desc='flag for beamforming result at frequency index')
+    _f = CArray(dtype='float64', desc='frequencies')
+    _numfreq = Int(desc='number of frequencies')
 
     @cached_property
     def _get_digest(self):
@@ -857,7 +863,7 @@ class BeamformerFunctional(BeamformerBase):
         normfactor = self.sig_loss_norm()
         param_steer_type, steer_vector = self._beamformer_params()
         for i in ind:
-            if self.r_diag:
+            if self.r_diag:  # pragma: no cover
                 # This case is not used at the moment (see Trait r_diag)
                 # It would need some testing as structural changes were not tested...
                 # ==============================================================================
@@ -1072,7 +1078,7 @@ class BeamformerMusic(BeamformerEig):
             self._fr[i] = 1
 
 
-class PointSpreadFunction(HasPrivateTraits):
+class PointSpreadFunction(HasStrictTraits):
     """The point spread function.
 
     This class provides tools to calculate the PSF depending on the used
@@ -2516,7 +2522,7 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
 
 
 class BeamformerAdaptiveGrid(BeamformerBase, Grid):
-    """Base class for array methods without predefined grid."""
+    """Abstract base class for array methods without predefined grid."""
 
     # the grid positions live in a shadow trait
     _gpos = Any

@@ -32,6 +32,7 @@
 
 # imports from other packages
 import wave
+from abc import abstractmethod
 from datetime import datetime, timezone
 from os import path
 from warnings import warn
@@ -300,7 +301,7 @@ class ChannelMixer(TimeOut):
             yield sum(weights * block, 1, keepdims=True)
 
 
-class Trigger(TimeOut):
+class Trigger(TimeOut):  # pragma: no cover
     """Class for identifying trigger signals.
     Gets samples from :attr:`source` and stores the trigger samples in :meth:`trigger_data`.
 
@@ -495,6 +496,11 @@ class Trigger(TimeOut):
             raise Exception(msg)
         return 0
 
+    def result(self, num):
+        msg = 'result method not implemented yet! Data from source will be passed without transformation.'
+        warn(msg, Warning, stacklevel=2)
+        yield from self.source.result(num)
+
 
 class AngleTracker(MaskedTimeOut):
     """Calculates rotation angle and rpm per sample from a trigger signal
@@ -651,7 +657,7 @@ class AngleTracker(MaskedTimeOut):
         return (len(peakloc) - 1) / (peakloc[-1] - peakloc[0]) / self.trigger_per_revo * self.source.sample_freq * 60
 
 
-class SpatialInterpolator(TimeOut):
+class SpatialInterpolator(TimeOut):  # pragma: no cover
     """Base class for spatial interpolation of microphone data.
     Gets samples from :attr:`source` and generates output via the
     generator :meth:`result`.
@@ -1140,8 +1146,13 @@ class SpatialInterpolator(TimeOut):
         # return interpolated pressure values
         return pInterp
 
+    def result(self, num):
+        msg = 'result method not implemented yet! Data from source will be passed without transformation.'
+        warn(msg, Warning, stacklevel=2)
+        yield from self.source.result(num)
 
-class SpatialInterpolatorRotation(SpatialInterpolator):
+
+class SpatialInterpolatorRotation(SpatialInterpolator):  # pragma: no cover
     """Spatial  Interpolation for rotating sources. Gets samples from :attr:`source`
     and angles from  :attr:`AngleTracker`.Generates output via the generator :meth:`result`.
 
@@ -1196,7 +1207,7 @@ class SpatialInterpolatorRotation(SpatialInterpolator):
             count += num
 
 
-class SpatialInterpolatorConstantRotation(SpatialInterpolator):
+class SpatialInterpolatorConstantRotation(SpatialInterpolator):  # pragma: no cover
     """Spatial linear Interpolation for constantly rotating sources.
     Gets samples from :attr:`source` and generates output via the
     generator :meth:`result`.
@@ -1666,14 +1677,17 @@ class FilterBank(TimeOut):
     # Number of bands
     num_channels = Property()
 
+    @abstractmethod
     def _get_sos(self):
-        return [tf2sos([1], [1])]
+        """Returns a list of second order section coefficients."""
 
+    @abstractmethod
     def _get_bands(self):
-        return ['']
+        """Returns a list of labels for the bands."""
 
+    @abstractmethod
     def _get_num_bands(self):
-        return 0
+        """Returns the number of bands."""
 
     def _get_num_channels(self):
         return self.num_bands * self.source.num_channels
@@ -1821,6 +1835,11 @@ class WriteWAV(TimeOut):
             for data in self.source.result(1024):
                 wf.writeframesraw(array(data[:, ind] * scale, dtype=int16).tostring())
 
+    def result(self, num):
+        msg = 'result method not implemented yet! Data from source will be passed without transformation.'
+        warn(msg, Warning, stacklevel=2)
+        yield from self.source.result(num)
+
 
 @deprecated_alias({'name': 'file', 'numsamples_write': 'num_samples_write', 'writeflag': 'write_flag'})
 class WriteH5(TimeOut):
@@ -1883,6 +1902,8 @@ class WriteH5(TimeOut):
         if nitems > 0:
             f5h.create_new_group('metadata', '/')
             for key, value in self.metadata.items():
+                if isinstance(value, str):
+                    value = array(value, dtype='S')
                 f5h.create_array('/metadata', key, value)
 
     def result(self, num):
@@ -2061,13 +2082,13 @@ class TimeConvolve(TimeOut):
 
 
 @nb.jit(nopython=True, cache=True)
-def _append_to_fdl(fdl, idx, numblocks_kernel, buff):
+def _append_to_fdl(fdl, idx, numblocks_kernel, buff):  # pragma: no cover
     fdl[idx] = buff
     idx = int(idx + 1 % numblocks_kernel)
 
 
 @nb.jit(nopython=True, cache=True)
-def _spectral_sum(out, fdl, kb):
+def _spectral_sum(out, fdl, kb):  # pragma: no cover
     P, B, N = kb.shape
     for n in range(N):
         for b in range(B):

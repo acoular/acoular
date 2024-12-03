@@ -25,6 +25,7 @@
 
 # imports from other packages
 import xml.dom.minidom
+from abc import abstractmethod
 from warnings import warn
 
 from numpy import (
@@ -56,11 +57,11 @@ from scipy.linalg import norm
 # from matplotlib.path import Path
 from scipy.spatial import Delaunay
 from traits.api import (
+    ABCHasStrictTraits,
     Bool,
     CArray,
     File,
     Float,
-    HasPrivateTraits,
     Instance,
     Int,
     List,
@@ -255,7 +256,7 @@ class Polygon:
 
 
 @deprecated_alias({'gpos': 'pos'})
-class Grid(HasPrivateTraits):
+class Grid(ABCHasStrictTraits):
     """Virtual base class for grid geometries.
 
     Defines the common interface for all grid classes and
@@ -279,23 +280,27 @@ class Grid(HasPrivateTraits):
     # internal identifier
     digest = Property
 
+    @abstractmethod
     def _get_digest(self):
-        return ''
+        """Returns the digest of the grid object."""
 
     # 'digest' is a placeholder for other properties in derived classes,
     # necessary to trigger the depends on mechanism
     @property_depends_on('digest')
+    @abstractmethod
     def _get_size(self):
-        return 1
+        """Returns the number of grid points."""
 
     # 'digest' is a placeholder for other properties in derived classes
     @property_depends_on('digest')
+    @abstractmethod
     def _get_shape(self):
-        return (1, 1)
+        """Returns the shape of the grid as a Tuple."""
 
     @property_depends_on('digest')
+    @abstractmethod
     def _get_pos(self):
-        return array([[0.0], [0.0], [0.0]])
+        """Returns the grid positions as (3, size) array of floats."""
 
     def subdomain(self, sector):
         """Queries the indices for a subdomain in the grid.
@@ -847,7 +852,7 @@ class MergeGrid(Grid):
         return unique(bpos, axis=1)
 
 
-class Sector(HasPrivateTraits):
+class Sector(ABCHasStrictTraits):
     """Base class for all sector types.
 
     Defines the common interface for all tbdsector classes. This class

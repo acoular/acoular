@@ -7,13 +7,13 @@ import gc
 from pathlib import Path
 from weakref import WeakValueDictionary
 
-from traits.api import Bool, Delegate, Dict, HasPrivateTraits, Instance
+from traits.api import Bool, Delegate, Dict, HasStrictTraits, Instance
 
 from .configuration import Config, config
 from .h5files import _get_cachefile_class
 
 
-class HDF5Cache(HasPrivateTraits):
+class HDF5Cache(HasStrictTraits):
     """Cache class that handles opening and closing 'tables.File' objects."""
 
     config = Instance(Config)

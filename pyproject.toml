@@ -165,4 +165,5 @@ omit = [
     "acoular/base.py",
     "acoular/tfastfuncs.py",
     "acoular/fastFuncs.py",
+    "acoular/deprecation",
     ]

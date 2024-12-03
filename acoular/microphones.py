@@ -19,7 +19,7 @@ from scipy.spatial.distance import cdist
 from traits.api import (
     CArray,
     File,
-    HasPrivateTraits,
+    HasStrictTraits,
     ListInt,
     Property,
     cached_property,
@@ -32,7 +32,7 @@ from .internal import digest
 
 
 @deprecated_alias({'mpos_tot': 'pos_total', 'mpos': 'pos', 'from_file': 'file'}, read_only=['mpos'])
-class MicGeom(HasPrivateTraits):
+class MicGeom(HasStrictTraits):
     """Provides the geometric arrangement of microphones in the array.
 
     The geometric arrangement of microphones is read in from an

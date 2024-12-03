@@ -1,5 +1,6 @@
 import re
 
+import acoular as ac
 import numpy as np
 import pytest
 from acoular.tools import c_air
@@ -44,3 +45,11 @@ def test_value_error(t, h, p, co2):
 
     with pytest.raises(ValueError, match=re.escape(match)):
         c_air(t=t, h=h, p=p, co2=co2)
+
+
+@pytest.mark.xfail(strict=True)
+def test_cart_cyl_transform():
+    """Tests if transformation between cartesian and cylindrical coordinates are consistent."""
+    original_cartesian = np.abs(np.random.RandomState(1).rand(3))
+    converted_cartesian = ac.cylToCart(ac.cartToCyl(original_cartesian))
+    np.testing.assert_allclose(converted_cartesian, original_cartesian)
