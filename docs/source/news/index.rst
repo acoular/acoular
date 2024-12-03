@@ -30,6 +30,7 @@ Upcoming Release (25.01)
         * adds `profile` options to hatch test environment to profile test run via `hatch run tests:profile` and save a graphviz chart as SVG file
         * test AIAA benchmark classes with the benchmark data
         * test `aperture`, `center`, `export_mpos`` functions in :class:`~acoular.microphones.MicGeom`
+        * fix a typo in `AngleTracker` that lead to a property being incorrectly accessed
 
     **Internal**
         * adds a pull request template
