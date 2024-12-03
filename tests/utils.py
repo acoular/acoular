@@ -18,14 +18,14 @@ def get_all_classes():
                 classes.append(obj)
     return classes
 
-
-def get_subclasses(cls):
+def get_subclasses(cls, include_abstract=False):
     classes = []
     for _, obj in inspect.getmembers(ac):
         if inspect.isclass(obj) and issubclass(obj, cls):
+            if inspect.isabstract(obj) and not include_abstract:
+                continue
             classes.append(obj)
     return classes
-
 
 def sector_case_filter(case, t='empty'):
     case_id = get_case_id(case)
