@@ -32,6 +32,7 @@
 
 # imports from other packages
 import wave
+from abc import abstractmethod
 from datetime import datetime, timezone
 from os import path
 from warnings import warn
@@ -1676,14 +1677,17 @@ class FilterBank(TimeOut):
     # Number of bands
     num_channels = Property()
 
+    @abstractmethod
     def _get_sos(self):
-        return [tf2sos([1], [1])]
+        """Returns a list of second order section coefficients."""
 
+    @abstractmethod
     def _get_bands(self):
-        return ['']
+        """Returns a list of labels for the bands."""
 
+    @abstractmethod
     def _get_num_bands(self):
-        return 0
+        """Returns the number of bands."""
 
     def _get_num_channels(self):
         return self.num_bands * self.source.num_channels
