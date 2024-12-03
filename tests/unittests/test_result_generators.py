@@ -29,9 +29,8 @@ def test_result_generator(obj, num):  # don't use default value if @parametrize 
     assert isinstance(result, np.ndarray)
     assert result.shape[0] == min(obj.numsamples, num)
     obj_copy = obj
-    if isinstance(obj, ac.InOut):
-        while isinstance(obj_copy, ac.InOut):
-            obj_copy = obj_copy.source
+    while isinstance(obj_copy, ac.InOut):
+        obj_copy = obj_copy.source
     if isinstance(obj_copy, ac.SamplesGenerator):
         assert result.shape[1] == obj.num_channels
     elif isinstance(obj_copy, ac.SpectraGenerator):
