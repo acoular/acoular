@@ -329,7 +329,8 @@ class TimeSamples(SamplesGenerator):
             if self.calib.num_mics == self.num_channels:
                 cal_factor = self.calib.data[newaxis]
             else:
-                raise ValueError('calibration data not compatible: %i, %i' % (self.calib.num_mics, self.num_channels))
+                msg = f'calibration data not compatible: {self.calib.num_mics:d}, {self.num_channels:d}'
+                raise ValueError(msg)
             while i < self.num_samples:
                 yield self.data[i : i + num] * cal_factor
                 i += num
@@ -448,7 +449,8 @@ class MaskedTimeSamples(TimeSamples):
         if not path.isfile(self.file):
             # no file there
             self.sample_freq = 0
-            raise OSError('No such file: %s' % self.file)
+            msg = f'No such file: {self.file}'
+            raise OSError(msg)
         if self.h5f is not None:
             with contextlib.suppress(OSError):
                 self.h5f.close()
@@ -505,7 +507,8 @@ class MaskedTimeSamples(TimeSamples):
             elif self.calib.num_mics == 0:
                 warn('No calibration data used.', Warning, stacklevel=2)
             else:
-                raise ValueError('calibration data not compatible: %i, %i' % (self.calib.num_mics, self.num_channels))
+                msg = f'calibration data not compatible: {self.calib.num_mics:d}, {self.num_channels:d}'
+                raise ValueError(msg)
         while i < stop:
             yield self.data[i : min(i + num, stop)][:, self.channels] * cal_factor
             i += num
@@ -1462,11 +1465,8 @@ class UncorrelatedNoiseSource(SamplesGenerator):
         elif self.seed.shape == (self.num_channels,):
             seed = self.seed
         else:
-            raise ValueError(
-                'Seed array expected to be of shape (%i,), but has shape %s.'
-                % (self.num_channels, str(self.seed.shape)),
-            )
-
+            msg = f'Seed array expected to be of shape ({self.num_channels:d},), but has shape {self.seed.shape}.'
+            raise ValueError(msg)
         # create array with [num_channels] noise signal tracks
         signal = array(
             [
@@ -1541,11 +1541,14 @@ class SourceMixer(SamplesGenerator):
             raise ValueError(msg)
         for s in self.sources[1:]:
             if self.sample_freq != s.sample_freq:
-                raise ValueError('Sample frequency of %s does not fit' % s)
+                msg = f'Sample frequency of {s} does not fit'
+                raise ValueError(msg)
             if self.num_channels != s.num_channels:
-                raise ValueError('Channel count of %s does not fit' % s)
+                msg = f'Channel count of {s} does not fit'
+                raise ValueError(msg)
             if self.num_samples != s.num_samples:
-                raise ValueError('Number of samples of %s does not fit' % s)
+                msg = f'Number of samples of {s} does not fit'
+                raise ValueError(msg)
 
     def result(self, num):
         """Python generator that yields the output block-wise.

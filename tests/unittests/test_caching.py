@@ -113,7 +113,7 @@ def test_filecache_created(case, file_cache_options):
         assert obj1.h5f is None
     else:
         assert obj1.h5f is not None
-        assert type(obj1.h5f) == exp_res
+        assert type(obj1.h5f) is exp_res
         assert Path(obj1.h5f.filename).exists()
 
     # create copy and check if it loads the cache file

@@ -45,7 +45,7 @@ from numpy import (
     ones,
     ones_like,
     s_,
-    sum,
+    sum,  # noqa: A004
     tile,
     unique,
     where,

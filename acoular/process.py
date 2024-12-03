@@ -356,7 +356,8 @@ class SampleSplitter(InOut):
 
     def _assert_obj_registered(self, obj):
         if obj not in self.block_buffer:
-            raise OSError('calling object %s is not registered.' % obj)
+            msg = f'calling object {obj} is not registered.'
+            raise OSError(msg)
 
     def _get_objs_to_inspect(self):
         return [obj for obj in self.buffer_overflow_treatment if self.buffer_overflow_treatment[obj] != 'none']
@@ -367,7 +368,7 @@ class SampleSplitter(InOut):
                 if self.buffer_overflow_treatment[obj] == 'error':
                     self._buffer_overflow = True
                 elif self.buffer_overflow_treatment[obj] == 'warning':
-                    warn('overfilled buffer for object: %s data will get lost' % obj, UserWarning, stacklevel=1)
+                    warn(f'overfilled buffer for object: {obj} data will get lost', UserWarning, stacklevel=1)
 
     def _create_source_generator(self, num):
         for obj in self.block_buffer:

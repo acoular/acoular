@@ -82,7 +82,7 @@ tests = [
 dev = [
     "acoular[docs,full,tests]",
     "hatch",
-    "ruff==0.4.1",
+    "ruff==0.8.1",
 ]
 
 [project.urls]
@@ -98,7 +98,7 @@ build-backend = "hatchling.build"
 path = "acoular/version.py"
 
 [tool.hatch.envs.hatch-static-analysis]
-dependencies = ["ruff==0.4.1"]
+dependencies = ["ruff==0.8.1"]
 config-path = [".ruff.toml"]
 
 [tool.hatch.envs.docs]
