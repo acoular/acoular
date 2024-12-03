@@ -38,12 +38,12 @@ from numpy import (
 )
 from scipy import fft
 from traits.api import (
+    ABCHasStrictTraits,
     Bool,
     CArray,
     Delegate,
     Enum,
     Float,
-    ABCHasStrictTraits,
     Instance,
     Int,
     Map,

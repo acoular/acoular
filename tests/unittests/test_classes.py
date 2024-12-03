@@ -6,6 +6,7 @@
 import tempfile
 import warnings
 from inspect import isabstract
+
 import pytest
 from traits.api import Bool, Enum, Float, Int, Range, TraitEnum
 

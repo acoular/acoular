@@ -22,7 +22,18 @@ from warnings import warn
 from numpy import arange, array, log, pi, repeat, sin, sqrt, tile, zeros
 from numpy.random import RandomState
 from scipy.signal import resample, sosfilt, tf2sos
-from traits.api import ABCHasStrictTraits, Bool, CArray, CLong, Delegate, Float, Instance, Int, Property, cached_property
+from traits.api import (
+    ABCHasStrictTraits,
+    Bool,
+    CArray,
+    CLong,
+    Delegate,
+    Float,
+    Instance,
+    Int,
+    Property,
+    cached_property,
+)
 
 # acoular imports
 from .base import SamplesGenerator
