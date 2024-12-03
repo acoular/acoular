@@ -509,7 +509,7 @@ class MaskedTimeSamples(TimeSamples):
                 DeprecationWarning,
                 stacklevel=2,
             )
-            if self.calib.num_mics == self.numchannels_total:
+            if self.calib.num_mics == self.num_channels_total:
                 cal_factor = self.calib.data[self.channels][newaxis]
             elif self.calib.num_mics == self.num_channels:
                 cal_factor = self.calib.data[newaxis]
