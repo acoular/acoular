@@ -572,7 +572,7 @@ class AngleTracker(MaskedTimeOut):
         # init
         ind = 0
         # trigger data
-        peakloc, maxdist, mindist = self.trigger.trigger_data()
+        peakloc, maxdist, mindist = self.trigger.trigger_data
         TriggerPerRevo = self.trigger_per_revo
         rotDirection = self.rot_direction
         num = self.source.num_samples
@@ -646,7 +646,7 @@ class AngleTracker(MaskedTimeOut):
 
         """
         # trigger indices data
-        peakloc = self.trigger.trigger_data()[0]
+        peakloc = self.trigger.trigger_data[0]
         # calculation of average rpm in 1/min
         return (len(peakloc) - 1) / (peakloc[-1] - peakloc[0]) / self.trigger_per_revo * self.source.sample_freq * 60
 
