@@ -56,7 +56,6 @@ from traits.api import (
 
 # acoular imports
 from .base import SamplesGenerator
-from .calib import Calib
 from .configuration import config
 from .deprecation import deprecated_alias
 from .fastFuncs import calcCSM
@@ -172,16 +171,6 @@ class PowerSpectra(BaseSpectra):
     #: Data source; :class:`~acoular.sources.SamplesGenerator` or derived object.
     source = Property(_source, desc='time data object')
 
-    #: The :class:`~acoular.base.SamplesGenerator` object that provides the data.
-    time_data = Property(
-        _source,
-        desc='deprecated attribute holding the time data object. Use PowerSpectra.source instead!',
-    )
-
-    #: The :class:`~acoular.calib.Calib` object that provides the calibration data,
-    #: defaults to no calibration, i.e. the raw time data is used.
-    calib = Instance(Calib)
-
     # Shadow trait, should not be set directly, for internal use.
     _ind_low = Int(1, desc='index of lowest frequency line')
 
@@ -249,7 +238,7 @@ class PowerSpectra(BaseSpectra):
 
     # internal identifier
     digest = Property(
-        depends_on=['_source.digest', 'calib.digest', 'block_size', 'window', 'overlap', 'precision'],
+        depends_on=['_source.digest', 'block_size', 'window', 'overlap', 'precision'],
     )
 
     # hdf5 cache file
@@ -341,14 +330,6 @@ class PowerSpectra(BaseSpectra):
         numfreq = int(self.block_size / 2 + 1)
         csm_shape = (numfreq, t.num_channels, t.num_channels)
         csm_upper = zeros(csm_shape, dtype=self.precision)
-        # print "num blocks", self.num_blocks
-        # for backward compatibility
-        if self.calib and self.calib.num_mics > 0:
-            if self.calib.num_mics == t.num_channels:
-                wind = wind * self.calib.data[newaxis, :]
-            else:
-                msg = f'Calibration data not compatible: {self.calib.num_mics:d}, {t.num_channels:d}'
-                raise ValueError(msg)
         # get time data blockwise
         for data in self._get_source_data():
             ft = fft.rfft(data * wind, None, 0).astype(self.precision)
@@ -381,23 +362,6 @@ class PowerSpectra(BaseSpectra):
     def calc_eve(self):
         """Calculates eigenvectors of csm."""
         return self.calc_ev()[1]
-
-    def _handle_dual_calibration(self):
-        obj = self.source  # start with time_data obj
-        while obj:
-            if 'calib' in obj.all_trait_names():  # at original source?
-                if obj.calib and self.calib:
-                    if obj.calib.digest == self.calib.digest:
-                        self.calib = None  # ignore it silently
-                    else:
-                        msg = 'Non-identical dual calibration for both TimeSamples and PowerSpectra object'
-                        raise ValueError(msg)
-                obj = None
-            else:
-                try:
-                    obj = obj.source  # traverse down until original data source
-                except AttributeError:
-                    obj = None
 
     def _get_filecache(self, traitname):
         """Function handles result caching of csm, eigenvectors and eigenvalues
@@ -448,7 +412,6 @@ class PowerSpectra(BaseSpectra):
         Cross spectral matrix is either loaded from cache file or
         calculated and then additionally stored into cache.
         """
-        self._handle_dual_calibration()
         if config.global_caching == 'none' or (config.global_caching == 'individual' and self.cached is False):
             return self.calc_csm()
         return self._get_filecache('csm')
@@ -616,8 +579,7 @@ class PowerSpectraImport(PowerSpectra):
     attr:`frequencies` attribute. The attr:`num_channels` attributes
     is determined on the basis of the CSM shape.
     In contrast to the PowerSpectra object, the attributes
-    :attr:`sample_freq`, :attr:`time_data`, :attr:`source`,
-    :attr:`block_size`, :attr:`calib`, :attr:`window`,
+    :attr:`sample_freq`, :attr:`source`, :attr:`block_size`, :attr:`window`,
     :attr:`overlap`, :attr:`cached`, and :attr:`num_blocks`
     have no functionality.
     """
@@ -633,16 +595,12 @@ class PowerSpectraImport(PowerSpectra):
     #: Number of time data channels
     num_channels = Property(depends_on=['digest'])
 
-    time_data = Enum(None, desc='PowerSpectraImport cannot consume time data')
-
     source = Enum(None, desc='PowerSpectraImport cannot consume time data')
 
     # Sampling frequency of the signal, defaults to None
     sample_freq = Enum(None, desc='sampling frequency')
 
     block_size = Enum(None, desc='PowerSpectraImport does not operate on blocks of time data')
-
-    calib = Enum(None, desc='PowerSpectraImport cannot calibrate the time data')
 
     window = Enum(None, desc='PowerSpectraImport does not perform windowing')
 
