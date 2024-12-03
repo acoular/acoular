@@ -16,8 +16,6 @@
 
 """
 
-from abc import abstractmethod
-
 import numba as nb
 from numpy import (
     arange,
@@ -49,7 +47,7 @@ from scipy.integrate import ode
 from scipy.interpolate import LinearNDInterpolator
 from scipy.linalg import norm
 from scipy.spatial import ConvexHull
-from traits.api import ABCHasStrictTraits, CArray, Dict, Float, HasStrictTraits, Instance, Int, Property, Union, cached_property
+from traits.api import CArray, Dict, Float, HasStrictTraits, Instance, Int, Property, Union, cached_property
 
 from .internal import digest
 
@@ -254,7 +252,7 @@ class UniformFlowEnvironment(Environment):
         return rm
 
 
-class FlowField(ABCHasStrictTraits):
+class FlowField(HasStrictTraits):
     """An abstract base class for a spatial flow field."""
 
     digest = Property
@@ -262,8 +260,7 @@ class FlowField(ABCHasStrictTraits):
     def _get_digest(self):
         return ''
 
-    @abstractmethod
-    def v(self, xx=None): # pragma: no cover
+    def v(self, xx=None):
         """Provides the flow field as a function of the location. This is
         implemented here for the possibly most simple case: a quiescent fluid.
 
