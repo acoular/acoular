@@ -1378,10 +1378,7 @@ class UncorrelatedNoiseSource(SamplesGenerator):
     digest = Property(
         depends_on=[
             'mics.digest',
-            'signal.rms',
-            'signal.num_samples',
-            'signal.sample_freq',
-            'signal.__class__',
+            'signal.digest',
             'seed',
             'loc',
             'start_t',
