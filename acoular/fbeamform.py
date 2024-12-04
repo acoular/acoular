@@ -971,7 +971,7 @@ class PointSpreadFunction(HasStrictTraits):
     # Instance of :class:`~acoular.fbeamform.SteeringVector` or its derived classes
     # that contains information about the steering vector. This is a private trait.
     # Do not set this directly, use `steer` trait instead.
-    steer = Instance(SteeringVector(), SteeringVector)
+    steer = Instance(SteeringVector, args=())
 
     #: Indices of grid points to calculate the PSF for.
     grid_indices = CArray(
