@@ -38,19 +38,22 @@ class SetupStationarySourceCase:
     def __init__(self, grid, numsamples, blocksize, invalid_channels):
         module_dir = Path(__file__).parent.parent
         self.grid = grid
-        self.calib = ac.Calib(file=module_dir / 'examples' / 'data' / 'example_calib.xml')
-        self.source = ac.MaskedTimeSamples(
+        self.time = ac.MaskedTimeSamples(
             file=module_dir / 'examples' / 'data' / 'example_data.h5',
             invalid_channels=invalid_channels,
             start=0,
             stop=numsamples,
-            calib=self.calib,
+        )
+        self.calib = ac.Calib(
+            source=self.time,
+            file=module_dir / 'examples' / 'data' / 'example_calib.xml',
+            invalid_channels=invalid_channels,
         )
         self.mics = ac.MicGeom(file=module_dir / 'acoular' / 'xml' / 'array_56.xml', invalid_channels=invalid_channels)
         self.env = ac.Environment(c=346.04)
         self.steer = ac.SteeringVector(grid=self.grid, mics=self.mics, env=self.env)
         self.freq_data = ac.PowerSpectra(
-            source=self.source,
+            source=self.calib,
             window='Hanning',
             overlap='50%',
             block_size=blocksize,
