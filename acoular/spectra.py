@@ -56,7 +56,6 @@ from traits.api import (
 
 # acoular imports
 from .base import SamplesGenerator
-from .calib import Calib
 from .configuration import config
 from .deprecation import deprecated_alias
 from .fastFuncs import calcCSM
@@ -166,26 +165,8 @@ class PowerSpectra(BaseSpectra):
     and the same file name in case of that the data is read from a file.
     """
 
-    # Shadow trait, should not be set directly, for internal use.
-    _source = Instance(SamplesGenerator)
-
     #: Data source; :class:`~acoular.sources.SamplesGenerator` or derived object.
-    source = Property(_source, desc='time data object')
-
-    #: The :class:`~acoular.base.SamplesGenerator` object that provides the data.
-    time_data = Property(
-        _source,
-        desc='deprecated attribute holding the time data object. Use PowerSpectra.source instead!',
-    )
-
-    #: The :class:`~acoular.calib.Calib` object that provides the calibration data,
-    #: defaults to no calibration, i.e. the raw time data is used.
-    #: **deprecated, will be removed in version 25.01**: use
-    #: :attr:`~acoular.sources.TimeSamples.calib` property of :class:`~acoular.sources.TimeSamples`
-    #: objects
-    calib = Property(desc='calibration object (deprecated, will be removed in version 25.01)')
-
-    _calib = Instance(Calib)
+    source = Instance(SamplesGenerator)
 
     # Shadow trait, should not be set directly, for internal use.
     _ind_low = Int(1, desc='index of lowest frequency line')
@@ -236,7 +217,7 @@ class PowerSpectra(BaseSpectra):
     indices = Property(desc='index range')
 
     #: Name of the cache file without extension, readonly.
-    basename = Property(depends_on=['_source.digest'], desc='basename for cache file')
+    basename = Property(depends_on=['source.digest'], desc='basename for cache file')
 
     #: The cross spectral matrix,
     #: (number of frequencies, num_channels, num_channels) array of complex;
@@ -254,29 +235,17 @@ class PowerSpectra(BaseSpectra):
 
     # internal identifier
     digest = Property(
-        depends_on=['_source.digest', 'calib.digest', 'block_size', 'window', 'overlap', 'precision'],
+        depends_on=['source.digest', 'block_size', 'window', 'overlap', 'precision'],
     )
 
     # hdf5 cache file
     h5f = Instance(H5CacheFileBase, transient=True)
 
-    def _get_calib(self):
-        return self._calib
-
-    def _set_calib(self, calib):
-        msg = (
-            "Using 'calib' attribute is deprecated and will be removed in version 25.01. "
-            'use :attr:`~acoular.sources.TimeSamples.calib` property of '
-            ':class:`~acoular.sources.TimeSamples` object instead.'
-        )
-        warn(msg, DeprecationWarning, stacklevel=2)
-        self._calib = calib
-
-    @property_depends_on(['_source.num_samples', 'block_size', 'overlap'])
+    @property_depends_on(['source.num_samples', 'block_size', 'overlap'])
     def _get_num_blocks(self):
-        return self.overlap_ * self._source.num_samples / self.block_size - self.overlap_ + 1
+        return self.overlap_ * self.source.num_samples / self.block_size - self.overlap_ + 1
 
-    @property_depends_on(['_source.sample_freq', 'block_size', 'ind_low', 'ind_high'])
+    @property_depends_on(['source.sample_freq', 'block_size', 'ind_low', 'ind_high'])
     def _get_freq_range(self):
         fftfreq = self.fftfreq()
         if fftfreq is not None:
@@ -290,7 +259,7 @@ class PowerSpectra(BaseSpectra):
         self._freqlc = freq_range[0]
         self._freqhc = freq_range[1]
 
-    @property_depends_on(['_source.sample_freq', 'block_size', '_ind_low', '_freqlc'])
+    @property_depends_on(['source.sample_freq', 'block_size', '_ind_low', '_freqlc'])
     def _get_ind_low(self):
         fftfreq = self.fftfreq()
         if fftfreq is not None:
@@ -299,7 +268,7 @@ class PowerSpectra(BaseSpectra):
             return searchsorted(fftfreq[:-1], self._freqlc)
         return None
 
-    @property_depends_on(['_source.sample_freq', 'block_size', '_ind_high', '_freqhc'])
+    @property_depends_on(['source.sample_freq', 'block_size', '_ind_high', '_freqhc'])
     def _get_ind_high(self):
         fftfreq = self.fftfreq()
         if fftfreq is not None:
@@ -320,23 +289,6 @@ class PowerSpectra(BaseSpectra):
         self._index_set_last = True
         self._ind_low = ind_low
 
-    def _set_time_data(self, time_data):
-        msg = (
-            "Using 'time_data' attribute is deprecated and will be removed in version 25.01. "
-            "Use 'source' attribute instead."
-        )
-        warn(msg, DeprecationWarning, stacklevel=2)
-        self._source = time_data
-
-    def _set_source(self, source):
-        self._source = source
-
-    def _get_time_data(self):
-        return self._source
-
-    def _get_source(self):
-        return self._source
-
     @property_depends_on(['block_size', 'ind_low', 'ind_high'])
     def _get_indices(self):
         fftfreq = self.fftfreq()
@@ -356,9 +308,9 @@ class PowerSpectra(BaseSpectra):
 
     @cached_property
     def _get_basename(self):
-        if 'basename' in self._source.all_trait_names():
-            return self._source.basename
-        return self._source.__class__.__name__ + self._source.digest
+        if 'basename' in self.source.all_trait_names():
+            return self.source.basename
+        return self.source.__class__.__name__ + self.source.digest
 
     def calc_csm(self):
         """Csm calculation."""
@@ -369,14 +321,6 @@ class PowerSpectra(BaseSpectra):
         numfreq = int(self.block_size / 2 + 1)
         csm_shape = (numfreq, t.num_channels, t.num_channels)
         csm_upper = zeros(csm_shape, dtype=self.precision)
-        # print "num blocks", self.num_blocks
-        # for backward compatibility
-        if self.calib and self.calib.num_mics > 0:
-            if self.calib.num_mics == t.num_channels:
-                wind = wind * self.calib.data[newaxis, :]
-            else:
-                msg = f'Calibration data not compatible: {self.calib.num_mics:d}, {t.num_channels:d}'
-                raise ValueError(msg)
         # get time data blockwise
         for data in self._get_source_data():
             ft = fft.rfft(data * wind, None, 0).astype(self.precision)
@@ -410,23 +354,6 @@ class PowerSpectra(BaseSpectra):
         """Calculates eigenvectors of csm."""
         return self.calc_ev()[1]
 
-    def _handle_dual_calibration(self):
-        obj = self.source  # start with time_data obj
-        while obj:
-            if 'calib' in obj.all_trait_names():  # at original source?
-                if obj.calib and self.calib:
-                    if obj.calib.digest == self.calib.digest:
-                        self.calib = None  # ignore it silently
-                    else:
-                        msg = 'Non-identical dual calibration for both TimeSamples and PowerSpectra object'
-                        raise ValueError(msg)
-                obj = None
-            else:
-                try:
-                    obj = obj.source  # traverse down until original data source
-                except AttributeError:
-                    obj = None
-
     def _get_filecache(self, traitname):
         """Function handles result caching of csm, eigenvectors and eigenvalues
         calculation depending on global/local caching behaviour.
@@ -434,7 +361,7 @@ class PowerSpectra(BaseSpectra):
         if traitname == 'csm':
             func = self.calc_csm
             numfreq = int(self.block_size / 2 + 1)
-            shape = (numfreq, self._source.num_channels, self._source.num_channels)
+            shape = (numfreq, self.source.num_channels, self.source.num_channels)
             precision = self.precision
         elif traitname == 'eva':
             func = self.calc_eva
@@ -476,7 +403,6 @@ class PowerSpectra(BaseSpectra):
         Cross spectral matrix is either loaded from cache file or
         calculated and then additionally stored into cache.
         """
-        self._handle_dual_calibration()
         if config.global_caching == 'none' or (config.global_caching == 'individual' and self.cached is False):
             return self.calc_csm()
         return self._get_filecache('csm')
@@ -644,8 +570,7 @@ class PowerSpectraImport(PowerSpectra):
     attr:`frequencies` attribute. The attr:`num_channels` attributes
     is determined on the basis of the CSM shape.
     In contrast to the PowerSpectra object, the attributes
-    :attr:`sample_freq`, :attr:`time_data`, :attr:`source`,
-    :attr:`block_size`, :attr:`calib`, :attr:`window`,
+    :attr:`sample_freq`, :attr:`source`, :attr:`block_size`, :attr:`window`,
     :attr:`overlap`, :attr:`cached`, and :attr:`num_blocks`
     have no functionality.
     """
@@ -661,16 +586,12 @@ class PowerSpectraImport(PowerSpectra):
     #: Number of time data channels
     num_channels = Property(depends_on=['digest'])
 
-    time_data = Enum(None, desc='PowerSpectraImport cannot consume time data')
-
     source = Enum(None, desc='PowerSpectraImport cannot consume time data')
 
     # Sampling frequency of the signal, defaults to None
     sample_freq = Enum(None, desc='sampling frequency')
 
     block_size = Enum(None, desc='PowerSpectraImport does not operate on blocks of time data')
-
-    calib = Enum(None, desc='PowerSpectraImport cannot calibrate the time data')
 
     window = Enum(None, desc='PowerSpectraImport does not perform windowing')
 

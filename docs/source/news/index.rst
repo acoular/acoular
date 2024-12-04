@@ -43,6 +43,7 @@ Upcoming Release (25.01)
         * adds CI workflow for inspecting regression test outputs
         * adds action that automatically assigns a team member to newly opened pull requests
         * `depends_on` now only accepts a list of strings
+        * removes deprecated traits ending with version 25.01
 
 24.10
 ----------------

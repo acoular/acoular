@@ -26,7 +26,6 @@
 # imports from other packages
 import xml.dom.minidom
 from abc import abstractmethod
-from warnings import warn
 
 from numpy import (
     absolute,
@@ -554,25 +553,6 @@ class RectGrid3D(RectGrid):
             self._increment = array(increment, dtype=float)
         else:
             raise (TraitError(args=self, name='increment', info='Float or CArray(3,)', value=increment))
-
-    # Respective increments in x,y, and z-direction (in m).
-    # Deprecated: Use :attr:`~RectGrid.increment` for this functionality
-    increment3D = Property(desc='3D step sizes')  # noqa N815
-
-    def _get_increment3D(self):  # noqa N802
-        msg = "Using 'increment3D' is deprecated and will be removed in version 25.01." "Use 'increment' instead."
-        warn(msg, DeprecationWarning, stacklevel=2)
-        if isscalar(self._increment):
-            return array([self._increment, self._increment, self._increment])
-        return self._increment
-
-    def _set_increment3D(self, inc):  # noqa N802
-        msg = "Using 'increment3D' is deprecated and will be removed in version 25.01." "Use 'increment' instead."
-        warn(msg, DeprecationWarning, stacklevel=2)
-        if not isscalar(inc) and len(inc) == 3:
-            self._increment = array(inc, dtype=float)
-        else:
-            raise (TraitError(args=self, name='increment3D', info='CArray(3,)', value=inc))
 
     # internal identifier
     digest = Property(
