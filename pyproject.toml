@@ -144,21 +144,17 @@ packages = ["acoular"]
 
 [tool.pytest.ini_options]
 filterwarnings = [
-    "error",
-    "ignore::pluggy.PluggyTeardownRaisedWarning",
-    # Suppress pylops warnings about deprecated functions
-    "ignore:numpy.core.multiarray is deprecated*:DeprecationWarning",
+    "error", # treat warnings as errors
+    "ignore::pluggy.PluggyTeardownRaisedWarning", # raised internally by pytest-regtest
+    "ignore:numpy.core.multiarray is deprecated*:DeprecationWarning", # raised internally by pylops
+    "ignore:module 'sre_parse' is deprecated:DeprecationWarning", # raised internally by traits
+    "ignore:module 'sre_constants' is deprecated:DeprecationWarning", # raised internally by traits
+    "ignore:The TBB threading layer requires TBB version:numba.core.errors.NumbaWarning", # raised internally by numba
+    "ignore:FNV hashing is not implemented in Numba:UserWarning", # raised internally by numba
+    # Suppress DeprecationWarnings in Acoular (only temporarily!)
+    "ignore:Deprecated use of *:DeprecationWarning", 
     # Suppress warnings about unclosed files in tables at the end of the tests
     "ignore:Closing remaining open file*:tables.exceptions.UnclosedFileWarning",
-    # Suppress DeprecationWarnings from traits due to deprecated sre_parse and sre_constants modules
-    "ignore:module 'sre_parse' is deprecated:DeprecationWarning",
-    "ignore:module 'sre_constants' is deprecated:DeprecationWarning",
-    # Suppress NumbaWarnings
-    "ignore:The TBB threading layer requires TBB version:numba.core.errors.NumbaWarning",
-    "ignore:FNV hashing is not implemented in Numba:UserWarning",
-    # Suppress DeprecationWarnings in Acoular's test_generator_cases.py and sources.py
-    "ignore:Deprecated use of *:DeprecationWarning", 
-    "ignore:result method not implemented yet*:Warning", # see https://github.com/acoular/acoular/issues/382
 ]
 env = [
     "OPENBLAS_NUM_THREADS=1"

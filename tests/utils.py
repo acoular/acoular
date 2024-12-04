@@ -1,10 +1,12 @@
 import importlib
 import inspect
 import pkgutil
+import warnings
 from pathlib import Path
 
 import acoular as ac
 import numpy as np
+import pytest
 from pytest_cases import get_case_id
 
 
@@ -32,6 +34,20 @@ def get_subclasses(cls, include_abstract=False):
 def sector_case_filter(case, t='empty'):
     case_id = get_case_id(case)
     return t in case_id and 'default' not in case_id
+
+
+def get_result(obj, num):
+    """For classes with no explicit result method a warning is expected and is catched here to
+    prevent test failure.
+    See https://github.com/acoular/acoular/issues/382 for details.
+    """
+    missing_result = {'WriteWAV', 'Trigger', 'SpatialInterpolator'}
+    if obj.__class__.__name__ in missing_result:
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', Warning)
+            with pytest.warns(Warning):
+                return next(obj.result(num))
+    return next(obj.result(num))
 
 
 class SetupStationarySourceCase:
