@@ -6,6 +6,7 @@
 from pytest_cases import parametrize_with_cases
 
 from tests.cases.test_generator_cases import Generators
+from tests.utils import get_result
 
 
 @parametrize_with_cases('obj', cases=Generators)
@@ -27,6 +28,5 @@ def test_generators(snapshot, obj):
     obj : instance of acoular.base.Generator
         Generator instance to be tested (cases from Generators)
     """
-    gen = obj.result(num=1)
-    result = next(gen)  # Trigger calculation
-    snapshot.check(result, rtol=5e-5, atol=5e-8)  # uses numpy.testing.assert_allclose
+    result = get_result(obj, num=1)
+    snapshot.check(result, rtol=5e-5, atol=5e-8)

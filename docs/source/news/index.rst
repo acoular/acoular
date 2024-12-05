@@ -37,6 +37,7 @@ Upcoming Release (25.01)
         * test `aperture`, `center`, `export_mpos`` functions in :class:`~acoular.microphones.MicGeom`
         * fix a typo in `AngleTracker` that lead to a property being incorrectly accessed
         * exclude jited functions from test coverage report
+        * treat warnings as errors in tests
 
     **Internal**
         * adds a pull request template

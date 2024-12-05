@@ -8,6 +8,7 @@ import numpy as np
 from pytest_cases import parametrize, parametrize_with_cases
 
 from tests.cases.test_generator_cases import Generators
+from tests.utils import get_result
 
 
 # @given(num=st.integers(min_value=1, max_value=1000))
@@ -25,7 +26,7 @@ def test_result_generator(obj, num):  # don't use default value if @parametrize 
     num : int
         Number of samples to return by the generator
     """
-    result = next(obj.result(num=num))
+    result = get_result(obj, num=num)
     assert isinstance(result, np.ndarray)
     assert result.shape[0] == min(obj.numsamples, num)
     obj_copy = obj

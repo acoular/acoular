@@ -29,7 +29,7 @@ def freq_data(request, regression_source_case):
     regression_source_case : fixture
         regression_source_case fixture (see conftest.py)
     """
-    return ac.PowerSpectra(source=regression_source_case.source, **request.param)
+    return ac.PowerSpectra(source=regression_source_case.calib, **request.param)
 
 
 @pytest.mark.parametrize('ind', [16, 32])
