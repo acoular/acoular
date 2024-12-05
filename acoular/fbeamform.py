@@ -750,10 +750,10 @@ class BeamformerFunctional(BeamformerBase):
                 # ==============================================================================
                 #                     One cannot use spectral decomposition when diagonal of csm is
                 #                     removed, as the resulting modified eigenvectors are not
-                #                     orthogonal to each other anymore. Therefore potentiating cannot
-                #                     be applied only to the eigenvalues. --> To avoid this the root
-                #                     of the csm (removed diag) is calculated directly. WATCH OUT:
-                #                     This doesn't really produce good results.
+                #                     orthogonal to each other anymore. Therefore potentiating
+                #                     cannot be applied only to the eigenvalues. --> To avoid this
+                #                     the root of the csm (removed diag) is calculated directly.
+                #                     WATCH OUT: This doesn't really produce good results.
                 # ==============================================================================
                 csm = self.freq_data.csm[i]
                 fill_diagonal(csm, 0)
