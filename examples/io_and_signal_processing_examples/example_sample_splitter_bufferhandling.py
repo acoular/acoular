@@ -29,19 +29,24 @@ fs = 16000
 ts = ac.TimeSamples(data=np.random.randn(fs * 1)[:, np.newaxis], sample_freq=fs)
 
 # %%
-# Connect SampleSplitter to data source. We limit the buffer size to 5 blocks.
+# Connect SampleSplitter to data source
 
-ss = ac.SampleSplitter(source=ts, buffer_size=5)
+ss = ac.SampleSplitter(source=ts)
 
 
 # %%
-# Create three objects to process the data
+# Create two objects to process the time data. Registration of these objects will
+# be done at the SampleSplitter object. For each object, a buffer will be created
+# at the SampleSplitter object, which can store 5 blocks of data for each object.
+# We set the buffer overflow behaviour to 'none' so that no warning or error is
+# raised when the buffer is full. If the maximum size of the buffer is reached,
+# the oldest block will be removed from the buffer.
 
 tp1 = ac.TimePower(source=ss)
 tp2 = ac.TimePower(source=ss)
 
 # register these objects at SampleSplitter
-ss.register_object(tp1, tp2)  # register objects
+ss.register_object(tp1, tp2, buffer_size=5, buffer_overflow_treatment='none')
 
 # %%
 # Define some useful functions for inspecting and for reading data from
@@ -79,9 +84,6 @@ def get_data_slow(obj):  # more time consuming function
 # (no warning or error when block buffer is full)
 
 print("buffer overflow behaviour == 'none'")
-
-ss.buffer_overflow_treatment[tp1] = 'none'
-ss.buffer_overflow_treatment[tp2] = 'none'
 
 worker1 = threading.Thread(target=get_data_fast, args=(tp1,))
 worker2 = threading.Thread(target=get_data_slow, args=(tp2,))

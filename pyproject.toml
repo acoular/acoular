@@ -124,7 +124,10 @@ test = ["python -m pytest -v --durations=10 tests"]
 reset_regtest = ["python -m pytest -v --regtest-reset tests/regression"]
 profile = ["test --profile-svg"] 
 demo = ["python -c \"import acoular; acoular.demo.acoular_demo.run()\""]
-coverage = ["test --cov=acoular --cov-report html --cov-report term-missing"]
+coverage = [
+    "test --cov=acoular --cov-report html --cov-report term-missing",
+    "python -m pytest -v --cov=acoular --cov-report html --cov-report term-missing --cov-append --doctest-modules acoular",
+    ]
 doctest = ["python -m pytest --doctest-modules acoular"]
 
 [tool.hatch.envs.tests.overrides]

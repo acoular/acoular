@@ -18,7 +18,7 @@ from collections import deque
 from inspect import currentframe
 from warnings import warn
 
-from traits.api import Bool, Dict, Enum, Instance, Int, Property, cached_property, on_trait_change
+from traits.api import Bool, Dict, Enum, Instance, Int, Property, Union, cached_property, on_trait_change
 
 # acoular imports
 from .base import Generator, InOut
@@ -305,9 +305,74 @@ class Cache(InOut):
 
 
 class SampleSplitter(InOut):
-    """Distributes data blocks from source to several following objects.
-    A separate block buffer is created for each registered object in
-    (:attr:`block_buffer`) .
+    """
+    Distributes data from a source to several following objects in a block-wise manner.
+
+    The `SampleSplitter` class is designed to take data from a single
+    :class:`~acoular.base.Generator` derived source object and distribute it to multiple
+    :class:`~acoular.base.Generator` derived objects. For each object, the :class:`SampleSplitter`
+    holds a virtual block buffer from which the subsequently connected objects receive data in a
+    first-in-first-out (FIFO) manner. This allows for efficient data handling and processing in
+    parallel.
+
+    Examples
+    --------
+    Consider a time domain source signal stream from which the FFT spectra and the signal power
+    are calculated block-wise and in parallel by using the :class:`~acoular.fprocess.RFFT` as well
+    as the :class:`~acoular.tprocess.TimePower` and :class:`~acoular.process.Average`
+    objects. The `SampleSplitter` object is used to distribute the incoming blocks of data to the
+    `RFFT` and `TimePower` object buffers whenever one of these objects calls the :meth:`result`
+    generator.
+    For the `TimePower` object, the buffer size is set to 10 blocks. If the buffer is full, an error
+    is raised since the buffer overflow treatment is set to 'error'. For the `RFFT` object, the
+    block buffer size is set to 1 block, and the buffer overflow treatment is set to 'none'. This
+    is done to reduce latency in the FFT calculation, as the FFT calculation may take longer than
+    the signal power calculation. If new data is available and the block buffer for the `RFFT`
+    object is full, the `SampleSplitter` will drop the oldest block of data in the buffer. Thus, the
+    `RFFT` object will always receive the most recent block of data.
+
+    >>> import acoular as ac
+    >>> import numpy as np
+    >>>
+    >>> # create a time domain signal source
+    >>> ts = ac.TimeSamples(data=np.random.rand(1024, 1), sample_freq=51200)
+    >>>
+    >>> # create the sample splitter object
+    >>> ss = ac.SampleSplitter(source=ts)
+    >>>
+    >>> # create the FFT spectra and further objects that receive the data
+    >>> fft = ac.RFFT(source=ss, block_size=64)
+    >>> pow = ac.TimePower(source=ss)
+    >>> avg = ac.Average(source=pow, num_per_average=64)
+    >>>
+    >>> # register the subsequent processing block objects at the sample splitter
+    >>> ss.register_object(fft, buffer_size=1, buffer_overflow_treatment='none')
+    >>> ss.register_object(pow, buffer_size=10, buffer_overflow_treatment='error')
+
+    After object registration, the `SampleSplitter` object is ready to distribute the data to the
+    object buffers. The block buffers can be accessed via the `block_buffer` attribute of the
+    `SampleSplitter` object.
+
+    >>> ss.block_buffer.values()
+    dict_values([deque([], maxlen=1), deque([], maxlen=10)])
+
+    Calling the result method of the FFT object will start the data collection and distribution
+    process.
+
+    >>> generator = fft.result(num=1)
+    >>> fft_res = next(generator)
+
+    Although we haven't called the result method of the signal power object, one data block is
+    already available in the buffer.
+
+    >>> print(len(ss.block_buffer[pow]))
+    1
+
+    To remove registered objects from the `SampleSplitter`, use the :meth:`remove_object` method.
+
+    >>> ss.remove_object(pow)
+    >>> print(len(ss.block_buffer))
+    1
     """
 
     #: dictionary with block buffers (dict values) of registered objects (dict
@@ -315,7 +380,13 @@ class SampleSplitter(InOut):
     block_buffer = Dict(key_trait=Instance(Generator))
 
     #: max elements/blocks in block buffers.
-    buffer_size = Int(100)
+    #: Can be set individually for each registered object.
+    #: Default is 100 blocks for each registered object.
+    buffer_size = Union(
+        Int,
+        Dict(key_trait=Instance(Generator), value_trait=Int),
+        default_value=100,
+    )
 
     #: defines behaviour in case of block_buffer overflow. Can be set individually
     #: for each registered object.
@@ -339,11 +410,15 @@ class SampleSplitter(InOut):
     # Helper Trait holds source generator
     _source_generator = Instance(LockedGenerator)
 
-    def _create_block_buffer(self, obj):
-        self.block_buffer[obj] = deque([], maxlen=self.buffer_size)
+    def _create_block_buffer(self, obj, buffer_size=None):
+        if buffer_size is None:
+            buffer_size = self.buffer_size if isinstance(self.buffer_size, int) else self.buffer_size[obj]
+        self.block_buffer[obj] = deque([], maxlen=buffer_size)
 
-    def _create_buffer_overflow_treatment(self, obj):
-        self.buffer_overflow_treatment[obj] = 'error'
+    def _create_buffer_overflow_treatment(self, obj, buffer_overflow_treatment=None):
+        if buffer_overflow_treatment is None:
+            buffer_overflow_treatment = 'error'
+        self.buffer_overflow_treatment[obj] = buffer_overflow_treatment
 
     def _clear_block_buffer(self, obj):
         self.block_buffer[obj].clear()
@@ -387,15 +462,45 @@ class SampleSplitter(InOut):
             self._remove_block_buffer(obj)
             self._create_block_buffer(obj)
 
-    def register_object(self, *objects_to_register):
-        """Function that can be used to register objects that receive blocks from this class."""
+    def register_object(self, *objects_to_register, buffer_size=None, buffer_overflow_treatment=None):
+        """Register one or multiple :class:`~acoular.base.Generator` objects to the SampleSplitter.
+
+        Creates a block buffer for each object and sets the buffer size and buffer
+        overflow treatment.
+
+        Parameters
+        ----------
+        objects_to_register : Generator
+            One or multiple :class:`~acoular.base.Generator` derived objects to be registered.
+        buffer_size : int, optional
+            Maximum number of elements/blocks in block buffer. If not set, the default buffer size
+            of 100 blocks is used.
+        buffer_overflow_treatment : str, optional
+            Defines the behaviour in case of reaching the buffer size.
+            Can be set individually for each object. Possible values are 'error', 'warning', and
+            'none'. If not set, the default value is 'error'.
+        """
         for obj in objects_to_register:
             if obj not in self.block_buffer:
-                self._create_block_buffer(obj)
-                self._create_buffer_overflow_treatment(obj)
+                self._create_block_buffer(obj, buffer_size)
+                self._create_buffer_overflow_treatment(obj, buffer_overflow_treatment)
+            else:
+                msg = f'object {obj} is already registered.'
+                raise OSError(msg)
 
     def remove_object(self, *objects_to_remove):
-        """Function that can be used to remove registered objects."""
+        """Function that can be used to remove registered objects.
+
+        If no objects are given, all registered objects are removed.
+
+        Parameters
+        ----------
+        objects_to_remove : list
+            One or multiple :class:`~acoular.base.Generator` derived objects to be removed.
+            If not set, all registered objects are removed.
+        """
+        if not objects_to_remove:
+            objects_to_remove = list(self.block_buffer.keys())
         for obj in objects_to_remove:
             self._remove_block_buffer(obj)
             self._remove_buffer_overflow_treatment(obj)
