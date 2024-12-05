@@ -556,7 +556,7 @@ class PointSource(SamplesGenerator):
     #: Start time of the signal in seconds, defaults to 0 s.
     start_t = Float(0.0, desc='signal start time')
 
-    #: Start time of the data aquisition at microphones in seconds,
+    #: Start time of the data acquisition at microphones in seconds,
     #: defaults to 0 s.
     start = Float(0.0, desc='sample start time')
 
@@ -798,7 +798,7 @@ class MovingPointSource(PointSource):
 
         signal = self.signal.usignal(self.up)
         out = empty((num, self.num_channels))
-        # shortcuts and intial values
+        # shortcuts and initial values
         m = self.mics
         t = self.start * ones(m.num_mics)
         i = 0
@@ -1045,7 +1045,7 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
 
         signal = self.signal.usignal(self.up)
         out = empty((num, self.num_channels))
-        # shortcuts and intial values
+        # shortcuts and initial values
         m = self.mics
         t = self.start * ones(m.num_mics)
 
@@ -1302,7 +1302,7 @@ class MovingLineSource(LineSource, MovingPointSource):
             signals[s] = self.signal.usignal(self.up)
         mpos = self.mics.pos
 
-        # shortcuts and intial values
+        # shortcuts and initial values
         m = self.mics
         t = self.start * ones(m.num_mics)
         i = 0
@@ -1369,7 +1369,7 @@ class UncorrelatedNoiseSource(SamplesGenerator):
     #: Start time of the signal in seconds, defaults to 0 s.
     start_t = Float(0.0, desc='signal start time')
 
-    #: Start time of the data aquisition at microphones in seconds,
+    #: Start time of the data acquisition at microphones in seconds,
     #: defaults to 0 s.
     start = Float(0.0, desc='sample start time')
 
@@ -1558,7 +1558,7 @@ class PointSourceConvolve(PointSource):
     #: Start time of the signal in seconds, defaults to 0 s.
     start_t = Enum(0.0, desc='signal start time')
 
-    #: Start time of the data aquisition at microphones in seconds,
+    #: Start time of the data acquisition at microphones in seconds,
     #: defaults to 0 s.
     start = Enum(0.0, desc='sample start time')
 
