@@ -169,9 +169,9 @@ class Environment(HasStrictTraits):
         ----------
         gpos : array of floats of shape (3, N)
             The locations of points in the beamforming map grid in 3D cartesian
-            coordinates.
+            co-ordinates.
         mpos : array of floats of shape (3, M), optional
-            The locations of microphones in 3D cartesian coordinates. If not
+            The locations of microphones in 3D cartesian co-ordinates. If not
             given, then only one microphone at the origin (0, 0, 0) is
             considered.
 
@@ -226,9 +226,9 @@ class UniformFlowEnvironment(Environment):
         ----------
         gpos : array of floats of shape (3, N)
             The locations of points in the beamforming map grid in 3D cartesian
-            coordinates.
+            co-ordinates.
         mpos : array of floats of shape (3, M), optional
-            The locations of microphones in 3D cartesian coordinates. If not
+            The locations of microphones in 3D cartesian co-ordinates. If not
             given, then only one microphone at the origin (0, 0, 0) is
             considered.
 
@@ -293,7 +293,7 @@ class SlotJet(FlowField):
     v0 = Float(0.0, desc='exit velocity')
 
     #: Location of a point at the slot center line,
-    #: defaults to the coordinate origin.
+    #: defaults to the co-ordinate origin.
     origin = CArray(dtype=float64, shape=(3,), value=array((0.0, 0.0, 0.0)), desc='center of nozzle')
 
     #: Unit flow direction of the slot jet, defaults to (1,0,0).
@@ -338,12 +338,12 @@ class SlotJet(FlowField):
         # normalize
         flow = self.flow / norm(self.flow)
         plane = self.plane / norm(self.plane)
-        # additional axes of global coordinate system
+        # additional axes of global co-ordinate system
         yy = -cross(flow, plane)
         zz = cross(flow, yy)
         # distance from slot exit plane
         xx1 = xx - self.origin
-        # local coordinate system
+        # local co-ordinate system
         x = dot(flow, xx1)
         y = dot(yy, xx1)
         x1 = 0.5668 / self.l * x  # C1 in Albertson1950
@@ -381,7 +381,7 @@ class OpenJet(FlowField):
     #: Exit velocity at jet origin, i.e. the nozzle. Defaults to 0.
     v0 = Float(0.0, desc='exit velocity')
 
-    #: Location of the nozzle center, defaults to the coordinate origin.
+    #: Location of the nozzle center, defaults to the co-ordinate origin.
     origin = CArray(dtype=float64, shape=(3,), value=array((0.0, 0.0, 0.0)), desc='center of nozzle')
 
     #: Diameter of the nozzle, defaults to 0.2 .
@@ -451,7 +451,7 @@ class RotatingFlow(FlowField):
 
     v0 = Float(0.0, desc='flow velocity')
 
-    #: Location of the nozzle center, defaults to the coordinate origin.
+    #: Location of the nozzle center, defaults to the co-ordinate origin.
     origin = CArray(dtype=float64, shape=(3,), value=array((0.0, 0.0, 0.0)), desc='center of nozzle')
 
     # internal identifier
@@ -576,9 +576,9 @@ class GeneralFlowEnvironment(Environment):
         ----------
         gpos : array of floats of shape (3, N)
             The locations of points in the beamforming map grid in 3D cartesian
-            coordinates.
+            co-ordinates.
         mpos : array of floats of shape (3, M), optional
-            The locations of microphones in 3D cartesian coordinates. If not
+            The locations of microphones in 3D cartesian co-ordinates. If not
             given, then only one microphone at the origin (0, 0, 0) is
             considered.
 
@@ -619,10 +619,10 @@ class GeneralFlowEnvironment(Environment):
         ----------
         roi : array of floats of shape (3, N)
             The locations of points in the region of interest in 3D cartesian
-            coordinates. Used to estimate the maximum distance and ROI
+            co-ordinates. Used to estimate the maximum distance and ROI
             extension and center.
         x0 : array of floats of shape (3)
-            The location of the microphone in 3D cartesian coordinates.
+            The location of the microphone in 3D cartesian co-ordinates.
 
         Returns
         -------

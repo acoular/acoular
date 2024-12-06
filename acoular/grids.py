@@ -331,7 +331,7 @@ class RectGrid(Grid):
 
     The grid has square or nearly square cells and is on a plane perpendicular
     to the z-axis. It is defined by lower and upper x- and  y-limits and the
-    z coordinate.
+    z co-ordinate.
     """
 
     #: The lower x-limit that defines the grid, defaults to -1.
@@ -346,7 +346,7 @@ class RectGrid(Grid):
     #: The upper y-limit that defines the grid, defaults to 1.
     y_max = Float(1.0, desc='maximum  y-value')
 
-    #: The z coordinate that defines the grid, defaults to 1.
+    #: The z co-ordinate that defines the grid, defaults to 1.
     z = Float(1.0, desc='position on z-axis')
 
     #: The cell side length for the grid, defaults to 0.1.
@@ -391,7 +391,7 @@ class RectGrid(Grid):
 
     @property_depends_on(['x_min', 'x_max', 'y_min', 'y_max', 'increment'])
     def _get_pos(self):
-        """Calculates grid coordinates.
+        """Calculates grid co-ordinates.
 
         Returns
         -------
@@ -408,21 +408,21 @@ class RectGrid(Grid):
         return bpos
 
     def index(self, x, y):
-        """Queries the indices for a grid point near a certain coordinate.
+        """Queries the indices for a grid point near a certain co-ordinate.
 
-        This can be used to query results or coordinates at/near a certain
-        coordinate.
+        This can be used to query results or co-ordinates at/near a certain
+        co-ordinate.
 
         Parameters
         ----------
         x, y : float
-            The coordinates for which the indices are queried.
+            The co-ordinates for which the indices are queried.
 
         Returns
         -------
         2-tuple of integers
             The indices that give the grid point nearest to the given x, y
-            coordinates from an array with the same shape as the grid.
+            co-ordinates from an array with the same shape as the grid.
 
         """
         if x < self.x_min or x > self.x_max:
@@ -590,7 +590,7 @@ class RectGrid3D(RectGrid):
 
     @property_depends_on('digest')
     def _get_pos(self):
-        """Calculates grid coordinates.
+        """Calculates grid co-ordinates.
 
         Returns
         -------
@@ -611,21 +611,21 @@ class RectGrid3D(RectGrid):
         return digest(self)
 
     def index(self, x, y, z):
-        """Queries the indices for a grid point near a certain coordinate.
+        """Queries the indices for a grid point near a certain co-ordinate.
 
-        This can be used to query results or coordinates at/near a certain
-        coordinate.
+        This can be used to query results or co-ordinates at/near a certain
+        co-ordinate.
 
         Parameters
         ----------
         x, y, z : float
-            The coordinates for which the indices is queried.
+            The co-ordinates for which the indices is queried.
 
         Returns
         -------
         3-tuple of integers
             The indices that give the grid point nearest to the given x, y, z
-            coordinates from an array with the same shape as the grid.
+            co-ordinates from an array with the same shape as the grid.
 
         """
         if x < self.x_min or x > self.x_max:
