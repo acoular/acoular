@@ -353,7 +353,7 @@ class CrossPowerSpectra(AutoPowerSpectra):
                 else:  # lower
                     csm_lower = csm_upper.conj().transpose(0, 2, 1)
                     csm_flat[i] = csm_lower[:, :nc].reshape(-1)
-                csm_upper[...] = 0  # calcCSM adds cummulative
+                csm_upper[...] = 0  # calcCSM adds cumulative
             yield csm_flat[: i + 1] * scale
 
 

@@ -750,10 +750,10 @@ class BeamformerFunctional(BeamformerBase):
                 # ==============================================================================
                 #                     One cannot use spectral decomposition when diagonal of csm is
                 #                     removed, as the resulting modified eigenvectors are not
-                #                     orthogonal to each other anymore. Therefor potentiating cannot
-                #                     be applied only to the eigenvalues. --> To avoid this the root
-                #                     of the csm (removed diag) is calculated directly. WATCH OUT:
-                #                     This doesn't really produce good results.
+                #                     orthogonal to each other anymore. Therefore potentiating
+                #                     cannot be applied only to the eigenvalues. --> To avoid this
+                #                     the root of the csm (removed diag) is calculated directly.
+                #                     WATCH OUT: This doesn't really produce good results.
                 # ==============================================================================
                 csm = self.freq_data.csm[i]
                 fill_diagonal(csm, 0)
@@ -1806,7 +1806,7 @@ class BeamformerCMF(BeamformerBase):
                 from pylops import Identity, MatrixMult
                 from pylops.optimization.sparsity import splitbregman
 
-                Oop = MatrixMult(A)  # tranfer operator
+                Oop = MatrixMult(A)  # transfer operator
                 Iop = self.alpha * Identity(numpoints)  # regularisation
                 self._ac[i], iterations, cost = splitbregman(
                     Op=Oop,
@@ -1828,7 +1828,7 @@ class BeamformerCMF(BeamformerBase):
                 from pylops import MatrixMult
                 from pylops.optimization.sparsity import fista
 
-                Oop = MatrixMult(A)  # tranfer operator
+                Oop = MatrixMult(A)  # transfer operator
                 self._ac[i], iterations, cost = fista(
                     Op=Oop,
                     y=R[:, 0],
@@ -1850,8 +1850,8 @@ class BeamformerCMF(BeamformerBase):
 
                 # initial guess
                 x0 = ones([numpoints])
-                # boundarys - set to non negative
-                boundarys = tile((0, +inf), (len(x0), 1))
+                # boundaries - set to non negative
+                boundaries = tile((0, +inf), (len(x0), 1))
 
                 # optimize
                 self._ac[i], yval, dicts = fmin_l_bfgs_b(
@@ -1860,7 +1860,7 @@ class BeamformerCMF(BeamformerBase):
                     fprime=None,
                     args=(),
                     approx_grad=0,
-                    bounds=boundarys,
+                    bounds=boundaries,
                     m=10,
                     factr=10000000.0,
                     pgtol=1e-05,
@@ -2017,8 +2017,8 @@ class BeamformerSODIX(BeamformerBase):
                             * real(trace(csm) / trace(array(self.freq_data.csm[i - 1], dtype='complex128', copy=1))),
                         )
 
-                    # boundarys - set to non negative [2*(numpoints*num_mics)]
-                    boundarys = tile((0, +inf), (numpoints * num_mics, 1))
+                    # boundaries - set to non negative [2*(numpoints*num_mics)]
+                    boundaries = tile((0, +inf), (numpoints * num_mics, 1))
 
                     # optimize with gradient solver
                     # see https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.fmin_l_bfgs_b.html
@@ -2030,7 +2030,7 @@ class BeamformerSODIX(BeamformerBase):
                         fprime=None,
                         args=(),
                         approx_grad=0,
-                        bounds=boundarys,
+                        bounds=boundaries,
                         factr=100.0,
                         pgtol=1e-12,
                         epsilon=1e-08,
@@ -2165,7 +2165,7 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
 
         # Generate a cross spectral matrix, and perform the eigenvalue decomposition
         for i in ind:
-            # for monopole and source strenght Q needs to define density
+            # for monopole and source strength Q needs to define density
             # calculate a transfer matrix A
             hh = self.steer.transfer(f[i])
             A = hh.T
@@ -2345,7 +2345,7 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
     n = Int(1)
 
     #: Geometrical bounds of the search domain to consider.
-    #: :attr:`bound` ist a list that contains exactly three tuple of
+    #: :attr:`bound` is a list that contains exactly three tuple of
     #: (min,max) for each of the coordinates x, y, z.
     #: Defaults to [(-1.,1.),(-1.,1.),(0.01,1.)]
     bounds = List(Tuple(Float, Float), minlen=3, maxlen=3, value=[(-1.0, 1.0), (-1.0, 1.0), (0.01, 1.0)])

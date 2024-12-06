@@ -166,7 +166,7 @@ class MicAIAABenchmark(MicGeom):
     file containing the measurement data.
     """
 
-    #: Name of the .h5-file from wich to read the data.
+    #: Name of the .h5-file from which to read the data.
     file = File(filter=['*.h5'], exists=True, desc='name of the h5 file containing the microphone geometry')
 
     @on_trait_change('file')
