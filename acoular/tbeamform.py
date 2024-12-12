@@ -568,7 +568,7 @@ class BeamformerCleant(BeamformerTime):
 
     # internal identifier
     digest = Property(
-        depends_on=['steer.digest', 'source.digest', 'weights', 'n_iter'],
+        depends_on=['steer.digest', 'source.digest', 'weights', 'damp', 'n_iter'],
     )
 
     @cached_property
