@@ -765,7 +765,7 @@ class IntegratorSectorTime(TimeOut):
     #: List of sectors in grid
     sectors = List()
 
-    #: Clipping, in Dezibel relative to maximum (negative values)
+    #: Clipping, in Decibel relative to maximum (negative values)
     clip = Float(-350.0)
 
     #: Number of channels in output (= number of sectors).
