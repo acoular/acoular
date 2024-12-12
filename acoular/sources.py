@@ -588,7 +588,6 @@ class PointSource(SamplesGenerator):
             'start',
             'up',
             'prepadding',
-            '__class__',
         ],
     )
 
@@ -680,7 +679,6 @@ class SphericalHarmonicSource(PointSource):
             'start_t',
             'start',
             'up',
-            '__class__',
             'alpha',
             'lOrder',
             'prepadding',
@@ -770,7 +768,6 @@ class MovingPointSource(PointSource):
             'start',
             'trajectory.digest',
             'prepadding',
-            '__class__',
         ],
     )
 
@@ -869,7 +866,6 @@ class PointSourceDipole(PointSource):
             'up',
             'direction',
             'prepadding',
-            '__class__',
         ],
     )
 
@@ -966,7 +962,6 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
             'start',
             'up',
             'direction',
-            '__class__',
         ],
     )
 
@@ -1123,7 +1118,6 @@ class LineSource(PointSource):
             'direction',
             'source_strength',
             'coherence',
-            '__class__',
         ],
     )
 
@@ -1212,7 +1206,6 @@ class MovingLineSource(LineSource, MovingPointSource):
             'start',
             'up',
             'direction',
-            '__class__',
         ],
     )
 
@@ -1385,15 +1378,11 @@ class UncorrelatedNoiseSource(SamplesGenerator):
     digest = Property(
         depends_on=[
             'mics.digest',
-            'signal.rms',
-            'signal.num_samples',
-            'signal.sample_freq',
-            'signal.__class__',
+            'signal.digest',
             'seed',
             'loc',
             'start_t',
             'start',
-            '__class__',
         ],
     )
 
@@ -1573,7 +1562,7 @@ class PointSourceConvolve(PointSource):
 
     # internal identifier
     digest = Property(
-        depends_on=['mics.digest', 'signal.digest', 'loc', 'kernel', '__class__'],
+        depends_on=['mics.digest', 'signal.digest', 'loc', 'kernel'],
     )
 
     @cached_property

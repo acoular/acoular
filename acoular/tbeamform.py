@@ -111,7 +111,7 @@ class BeamformerTime(TimeOut):
 
     # internal identifier
     digest = Property(
-        depends_on=['steer.digest', 'source.digest', 'weights', '__class__'],
+        depends_on=['steer.digest', 'source.digest', 'weights'],
     )
 
     def _get_num_channels(self):
@@ -243,7 +243,7 @@ class BeamformerTimeSq(BeamformerTime):
 
     # internal identifier
     digest = Property(
-        depends_on=['steer.digest', 'source.digest', 'r_diag', 'weights', '__class__'],
+        depends_on=['steer.digest', 'source.digest', 'r_diag', 'weights'],
     )
 
     @cached_property
@@ -301,7 +301,6 @@ class BeamformerTimeTraj(BeamformerTime):
             'rvec',
             'conv_amp',
             'trajectory.digest',
-            '__class__',
         ],
     )
 
@@ -520,7 +519,6 @@ class BeamformerTimeSqTraj(BeamformerTimeSq, BeamformerTimeTraj):
             'rvec',
             'conv_amp',
             'trajectory.digest',
-            '__class__',
         ],
     )
 
@@ -570,7 +568,7 @@ class BeamformerCleant(BeamformerTime):
 
     # internal identifier
     digest = Property(
-        depends_on=['steer.digest', 'source.digest', 'weights', '__class__', 'damp', 'n_iter'],
+        depends_on=['steer.digest', 'source.digest', 'weights', 'damp', 'n_iter'],
     )
 
     @cached_property
@@ -613,7 +611,7 @@ class BeamformerCleantSq(BeamformerCleant):
 
     # internal identifier
     digest = Property(
-        depends_on=['steer.digest', 'source.digest', 'weights', '__class__', 'damp', 'n_iter', 'r_diag'],
+        depends_on=['steer.digest', 'source.digest', 'weights', 'damp', 'n_iter', 'r_diag'],
     )
 
     @cached_property
@@ -661,7 +659,6 @@ class BeamformerCleantTraj(BeamformerCleant, BeamformerTimeTraj):
             'source.digest',
             'weights',
             'precision',
-            '__class__',
             'damp',
             'n_iter',
             'rvec',
@@ -715,7 +712,6 @@ class BeamformerCleantSqTraj(BeamformerCleantTraj, BeamformerTimeSq):
             'source.digest',
             'weights',
             'precision',
-            '__class__',
             'damp',
             'n_iter',
             'rvec',
@@ -773,7 +769,7 @@ class IntegratorSectorTime(TimeOut):
 
     # internal identifier
     digest = Property(
-        depends_on=['sectors', 'clip', 'grid.digest', 'source.digest', '__class__'],
+        depends_on=['sectors', 'clip', 'grid.digest', 'source.digest'],
     )
 
     @cached_property
