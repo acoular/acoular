@@ -260,7 +260,7 @@ class Grid(ABCHasStrictTraits):
 
     Defines the common interface for all grid classes and
     provides facilities to query grid properties and related data. This class
-    may be used as a base for specialized grid implementaions. It should not
+    may be used as a base for specialized grid implementations. It should not
     be used directly as it contains no real functionality.
     """
 
@@ -447,7 +447,7 @@ class RectGrid(Grid):
         x1, y1, x2, y2, ... : float
             If three parameters are given, then a circular sector is assumed
             that is given by its center (x1, y1) and the radius x2.
-            If four paramters are given, then a rectangular sector is
+            If four parameters are given, then a rectangular sector is
             assumed that is given by two corners (x1, y1) and (x2, y2).
             If more parameters are given, the subdomain is assumed to have
             polygonial shape with corners at (x_n, y_n).
@@ -674,7 +674,7 @@ class RectGrid3D(RectGrid):
 class ImportGrid(Grid):
     """Loads a 3D grid from xml file."""
 
-    #: Name of the .xml-file from wich to read the data.
+    #: Name of the .xml-file from which to read the data.
     file = File(filter=['*.xml'], exists=True, desc='name of the xml file to import')
 
     gpos_file = CArray(dtype=float, desc='x, y, z position of all Grid Points')
@@ -834,7 +834,7 @@ class Sector(ABCHasStrictTraits):
     """Base class for all sector types.
 
     Defines the common interface for all tbdsector classes. This class
-    may be used as a base for diverse sector implementaions. If used
+    may be used as a base for diverse sector implementations. If used
     directly, it implements a sector encompassing the whole grid.
     """
 
@@ -863,7 +863,7 @@ class SingleSector(Sector):
     """Base class for single sector types.
 
     Defines the common interface for all single sector classes. This class
-    may be used as a base for diverse single sector implementaions. If used
+    may be used as a base for diverse single sector implementations. If used
     directly, it implements a sector encompassing the whole grid.
     """
 
@@ -881,7 +881,7 @@ class SingleSector(Sector):
 class RectSector(SingleSector):
     """Class for defining a rectangular sector.
 
-    Can be used for 2D Grids for definining a rectangular sector or
+    Can be used for 2D Grids for defining a rectangular sector or
     for 3D grids for a rectangular cylinder sector parallel to the z-axis.
     """
 
@@ -952,7 +952,7 @@ class RectSector(SingleSector):
 class RectSector3D(RectSector):
     """Class for defining a cuboid sector.
 
-    Can be used for 3D Grids for definining a cuboid sector.
+    Can be used for 3D Grids for defining a cuboid sector.
     """
 
     #: The lower z position of the cuboid
@@ -1022,7 +1022,7 @@ class RectSector3D(RectSector):
 class CircSector(SingleSector):
     """Class for defining a circular sector.
 
-    Can be used for 2D Grids for definining a circular sector or
+    Can be used for 2D Grids for defining a circular sector or
     for 3D grids for a cylindrical sector parallel to the z-axis.
     """
 
@@ -1058,7 +1058,7 @@ class CircSector(SingleSector):
         # which points are in the circle?
         inds = dr2 - self.r**2 < self.abs_tol if self.include_border else dr2 - self.r**2 < -self.abs_tol
 
-        # if there's no poit inside
+        # if there's no point inside
         if ~inds.any() and self.default_nearest:
             inds[argmin(dr2)] = True
 
@@ -1068,17 +1068,16 @@ class CircSector(SingleSector):
 class PolySector(SingleSector):
     """Class for defining a polygon sector.
 
-    Can be used for 2D Grids for definining a polygon sector.
+    Can be used for 2D Grids for defining a polygon sector.
     """
 
     # x1, y1, x2, y2, ... xn, yn :
     edges = List(Float)
 
     def contains(self, pos):
-        """Queries whether the coordinates in a given array lie within the
-        ploygon sector.
-        If no coordinate is inside, the nearest one to the rectangle center
-        is returned if :attr:`~Sector.default_nearest` is True.
+        """Queries whether the coordinates in a given array lie within the polygon sector. If no
+        coordinate is inside, the nearest one to the rectangle center is returned if
+        :attr:`~Sector.default_nearest` is True.
 
         Parameters
         ----------
@@ -1108,7 +1107,7 @@ class PolySector(SingleSector):
 class ConvexSector(SingleSector):
     """Class for defining a convex hull sector.
 
-    Can be used for 2D Grids for definining a convex hull sector.
+    Can be used for 2D Grids for defining a convex hull sector.
     """
 
     # x1, y1, x2, y2, ... xn, yn :

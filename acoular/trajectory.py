@@ -116,7 +116,6 @@ class Trajectory(HasStrictTraits):
             t_start, t_end = self.interval
         if not t_end:
             t_end = self.interval[1]
-        # all locations are fetched in one go because thats much faster
-        # further improvement could be possible if interpolated locations are fetched
-        # in blocks
+        # all locations are fetched in one go because that is much faster further improvement could
+        # be possible if interpolated locations are fetched in blocks
         yield from zip(*self.location(arange(t_start, t_end, delta_t), der))

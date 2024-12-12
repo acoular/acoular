@@ -156,7 +156,7 @@ class PowerSpectra(BaseSpectra):
     the CSM's eigenvalues and eigenvectors and additional properties.
 
     The result is computed only when needed, that is when the :attr:`csm`,
-    :attr:`eva`, or :attr:`eve` attributes are acturally read.
+    :attr:`eva`, or :attr:`eve` attributes are actually read.
     Any change in the input data or parameters leads to a new calculation,
     again triggered when an attribute is read. The result may be
     cached on disk in HDF5 files and need not to be recomputed during
@@ -481,7 +481,7 @@ def synthetic(data, freqs, f, num=3):
         The number of entries must be identical to the number of
         grid points.
     freqs : array of floats
-        The frequencies that correspon to the input *data* (as yielded by
+        The frequencies that correspond to the input *data* (as yielded by
         the :meth:`PowerSpectra.fftfreq<acoular.spectra.PowerSpectra.fftfreq>`
         method).
     f : float or list of floats

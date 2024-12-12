@@ -119,7 +119,7 @@ def beamformerFreq(steerVecType, boolRemovedDiagOfCSM, normFactor, inputTupleSte
         where C_D and C_U are the diagonal part and upper part of C respectively.
     Steering vector:
         Theoretically the steering vector always includes the term "exp(distMicsGrid -
-        distArrayCenterGrid)", but as the steering vector gets multplied with its complex
+        distArrayCenterGrid)", but as the steering vector gets multiplied with its complex
         conjugation in all beamformer routines, the constant "distArrayCenterGrid" cancels out -->
         In order to save operations, it is not implemented.
     Spectral decomposition of the CSM:
@@ -140,7 +140,7 @@ def beamformerFreq(steerVecType, boolRemovedDiagOfCSM, normFactor, inputTupleSte
     Using Cascading Sums:
         When using the Spectral-Decomposition-Beamformer one could use numpys cascading sums for the
         scalar product "eigenVec.conj * steeringVector". BUT (at the moment) this only brings
-        benefits in comp-time for a very small range of nMics (approx 250) --> Therefor it is not
+        benefits in comp-time for a very small range of nMics (approx 250) --> Therefore it is not
         implemented here.
     """
     boolIsEigValProb = isinstance(inputTupleCsm, tuple)  # len(inputTupleCsm) > 1
@@ -489,7 +489,7 @@ def _freqBeamformer_EigValProb_SpecificSteerVec_FullCSM(
     for cntMics in range(nMics):
         helpNormalize += steerVec[cntMics] * steerVec[cntMics].conjugate()
 
-    # performing matrix-vector-multplication via spectral decomp. (see bottom of information header
+    # performing matrix-vector-multiplication via spectral decomp. (see bottom of information header
     # of 'beamformerFreq')
     scalarProdFullCSM = 0.0
     for cntEigVal in range(len(eigVal)):
@@ -527,7 +527,7 @@ def _freqBeamformer_EigValProb_SpecificSteerVec_CsmRemovedDiag(
     for cntMics in range(nMics):
         helpNormalize += steerVec[cntMics] * steerVec[cntMics].conjugate()
 
-    # performing matrix-vector-multplication via spectral decomp. (see bottom of information header
+    # performing matrix-vector-multiplication via spectral decomp. (see bottom of information header
     # of 'beamformerFreq')
     scalarProdReducedCSM = 0.0
     for cntEigVal in range(len(eigVal)):
@@ -561,7 +561,7 @@ def calcPointSpreadFunction(steerVecType, distGridToArrayCenter, distGridToAllMi
         The free field wave number.
     indSource : a LIST of int (e.g. indSource=[5] is fine; indSource=5 doesn't work):
         specifies which gridpoints should be assumed to be sources
-        --> a seperate psf will be calculated for each source
+        --> a separate psf will be calculated for each source
     dtype : either 'float64' or 'float32'
         Determines the precision of the result. For big maps this could be worth downgrading.
 
@@ -583,7 +583,7 @@ def calcPointSpreadFunction(steerVecType, distGridToArrayCenter, distGridToAllMi
         .. math:: B = \\left| h^H \\cdot a_S \\right| ^ 2.
     Steering vector:
         Theoretically the steering vector always includes the term "exp(distMicsGrid -
-        distArrayCenterGrid)", but as the steering vector gets multplied with its complex
+        distArrayCenterGrid)", but as the steering vector gets multiplied with its complex
         conjugation in all beamformer routines, the constant "distArrayCenterGrid" cancels out -->
         In order to save operations, it is not implemented.
     Squares:

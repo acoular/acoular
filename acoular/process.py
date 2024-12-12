@@ -266,7 +266,7 @@ class Cache(InOut):
         Samples in blocks of shape (num, num_channels).
             The last block may be shorter than num.
             Echos the source output, but reads it from cache
-            when available and prevents unnecassary recalculation.
+            when available and prevents unnecessary recalculation.
 
         """
         if config.global_caching == 'none':
