@@ -98,7 +98,7 @@ class WNoiseGenerator(SignalGenerator):
     seed = Int(0, desc='random seed value')
 
     # internal identifier
-    digest = Property(depends_on=['rms', 'num_samples', 'sample_freq', 'seed', '__class__'])
+    digest = Property(depends_on=['rms', 'num_samples', 'sample_freq', 'seed'])
 
     @cached_property
     def _get_digest(self):
@@ -139,7 +139,7 @@ class PNoiseGenerator(SignalGenerator):
     depth = Int(16, desc='octave depth')
 
     # internal identifier
-    digest = Property(depends_on=['rms', 'num_samples', 'sample_freq', 'seed', 'depth', '__class__'])
+    digest = Property(depends_on=['rms', 'num_samples', 'sample_freq', 'seed', 'depth'])
 
     @cached_property
     def _get_digest(self):
@@ -237,7 +237,7 @@ class SineGenerator(SignalGenerator):
     amplitude = Float(1.0)
 
     # internal identifier
-    digest = Property(depends_on=['_amp', 'num_samples', 'sample_freq', 'freq', 'phase', '__class__'])
+    digest = Property(depends_on=['_amp', 'num_samples', 'sample_freq', 'freq', 'phase'])
 
     @cached_property
     def _get_digest(self):
