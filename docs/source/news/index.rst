@@ -8,6 +8,8 @@ Upcoming Release (25.01)
         * consistently use `file` as an attribute to specify a filename (instead of `from_file` or `name`)
         * adds new function :meth:`~acoular.tools.helper.c_air` to calculate the speed of sound from temperature and humidity
         * :class:`acoular.calib.Calib` can now be used as as a separte processing block
+        * enable varying block buffer sizes for :class:`~acoular.process.SampleSplitter`
+
         * Replaces `HasPrivateTraits` with `HasStrictTraits` and `ABCHasStrictTraits` for better implementation of ABCs.
         * Allow Path objects to specify the caching and time data directory via `acoular.Config`
 
@@ -35,6 +37,7 @@ Upcoming Release (25.01)
         * test `aperture`, `center`, `export_mpos`` functions in :class:`~acoular.microphones.MicGeom`
         * fix a typo in `AngleTracker` that lead to a property being incorrectly accessed
         * exclude jited functions from test coverage report
+        * treat warnings as errors in tests
 
     **Internal**
         * adds a pull request template
@@ -43,6 +46,8 @@ Upcoming Release (25.01)
         * adds CI workflow for inspecting regression test outputs
         * adds action that automatically assigns a team member to newly opened pull requests
         * `depends_on` now only accepts a list of strings
+        * removes deprecated traits ending with version 25.01
+        * include doctests in coverage report
 
 24.10
 ----------------

@@ -553,42 +553,10 @@ class PointSource(SamplesGenerator):
     #: which provides information about the sound propagation in the medium.
     env = Instance(Environment(), Environment)
 
-    # --- List of backwards compatibility traits and their setters/getters -----------
-
-    # Microphone locations.
-    # Deprecated! Use :attr:`mics` trait instead.
-    mpos = Property()
-
-    def _get_mpos(self):
-        return self.mics
-
-    def _set_mpos(self, mpos):
-        msg = (
-            "Deprecated use of 'mpos' trait. Use 'mics' trait instead."
-            "The 'mpos' trait will be removed in version 25.01."
-        )
-        warn(msg, DeprecationWarning, stacklevel=2)
-        self.mics = mpos
-
-    # The speed of sound.
-    # Deprecated! Only kept for backwards compatibility.
-    # Now governed by :attr:`env` trait.
-    c = Property()
-
-    def _get_c(self):
-        return self.env.c
-
-    def _set_c(self, c):
-        msg = "Deprecated use of 'c' trait. Use 'env' trait instead." "The 'c' trait will be removed in version 25.01."
-        warn(msg, DeprecationWarning, stacklevel=2)
-        self.env.c = c
-
-    # --- End of backwards compatibility traits --------------------------------------
-
     #: Start time of the signal in seconds, defaults to 0 s.
     start_t = Float(0.0, desc='signal start time')
 
-    #: Start time of the data aquisition at microphones in seconds,
+    #: Start time of the data acquisition at microphones in seconds,
     #: defaults to 0 s.
     start = Float(0.0, desc='sample start time')
 
@@ -620,7 +588,6 @@ class PointSource(SamplesGenerator):
             'start',
             'up',
             'prepadding',
-            '__class__',
         ],
     )
 
@@ -712,7 +679,6 @@ class SphericalHarmonicSource(PointSource):
             'start_t',
             'start',
             'up',
-            '__class__',
             'alpha',
             'lOrder',
             'prepadding',
@@ -802,7 +768,6 @@ class MovingPointSource(PointSource):
             'start',
             'trajectory.digest',
             'prepadding',
-            '__class__',
         ],
     )
 
@@ -830,7 +795,7 @@ class MovingPointSource(PointSource):
 
         signal = self.signal.usignal(self.up)
         out = empty((num, self.num_channels))
-        # shortcuts and intial values
+        # shortcuts and initial values
         m = self.mics
         t = self.start * ones(m.num_mics)
         i = 0
@@ -901,7 +866,6 @@ class PointSourceDipole(PointSource):
             'up',
             'direction',
             'prepadding',
-            '__class__',
         ],
     )
 
@@ -998,7 +962,6 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
             'start',
             'up',
             'direction',
-            '__class__',
         ],
     )
 
@@ -1077,7 +1040,7 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
 
         signal = self.signal.usignal(self.up)
         out = empty((num, self.num_channels))
-        # shortcuts and intial values
+        # shortcuts and initial values
         m = self.mics
         t = self.start * ones(m.num_mics)
 
@@ -1155,7 +1118,6 @@ class LineSource(PointSource):
             'direction',
             'source_strength',
             'coherence',
-            '__class__',
         ],
     )
 
@@ -1244,7 +1206,6 @@ class MovingLineSource(LineSource, MovingPointSource):
             'start',
             'up',
             'direction',
-            '__class__',
         ],
     )
 
@@ -1334,7 +1295,7 @@ class MovingLineSource(LineSource, MovingPointSource):
             signals[s] = self.signal.usignal(self.up)
         mpos = self.mics.pos
 
-        # shortcuts and intial values
+        # shortcuts and initial values
         m = self.mics
         t = self.start * ones(m.num_mics)
         i = 0
@@ -1398,29 +1359,10 @@ class UncorrelatedNoiseSource(SamplesGenerator):
     #: :class:`~acoular.microphones.MicGeom` object that provides the microphone locations.
     mics = Instance(MicGeom, desc='microphone geometry')
 
-    # --- List of backwards compatibility traits and their setters/getters -----------
-
-    # Microphone locations.
-    # Deprecated! Use :attr:`mics` trait instead.
-    mpos = Property()
-
-    def _get_mpos(self):
-        return self.mics
-
-    def _set_mpos(self, mpos):
-        msg = (
-            "Deprecated use of 'mpos' trait. Use 'mics' trait instead."
-            "The 'mpos' trait will be removed in version 25.01."
-        )
-        warn(msg, DeprecationWarning, stacklevel=2)
-        self.mics = mpos
-
-    # --- End of backwards compatibility traits --------------------------------------
-
     #: Start time of the signal in seconds, defaults to 0 s.
     start_t = Float(0.0, desc='signal start time')
 
-    #: Start time of the data aquisition at microphones in seconds,
+    #: Start time of the data acquisition at microphones in seconds,
     #: defaults to 0 s.
     start = Float(0.0, desc='sample start time')
 
@@ -1436,15 +1378,11 @@ class UncorrelatedNoiseSource(SamplesGenerator):
     digest = Property(
         depends_on=[
             'mics.digest',
-            'signal.rms',
-            'signal.num_samples',
-            'signal.sample_freq',
-            'signal.__class__',
+            'signal.digest',
             'seed',
             'loc',
             'start_t',
             'start',
-            '__class__',
         ],
     )
 
@@ -1609,7 +1547,7 @@ class PointSourceConvolve(PointSource):
     #: Start time of the signal in seconds, defaults to 0 s.
     start_t = Enum(0.0, desc='signal start time')
 
-    #: Start time of the data aquisition at microphones in seconds,
+    #: Start time of the data acquisition at microphones in seconds,
     #: defaults to 0 s.
     start = Enum(0.0, desc='sample start time')
 
@@ -1624,7 +1562,7 @@ class PointSourceConvolve(PointSource):
 
     # internal identifier
     digest = Property(
-        depends_on=['mics.digest', 'signal.digest', 'loc', 'kernel', '__class__'],
+        depends_on=['mics.digest', 'signal.digest', 'loc', 'kernel'],
     )
 
     @cached_property

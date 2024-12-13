@@ -3,6 +3,8 @@
 # ------------------------------------------------------------------------------
 """Implement test cases for all :class:`acoular.base.Generator` derived classes."""
 
+import warnings
+
 import acoular as ac
 import numpy as np
 import pytest
@@ -27,7 +29,6 @@ SKIP_DEFAULT = [
     ac.PointSourceDipole,
     ac.SphericalHarmonicSource,
     ac.Average,
-    ac.TimeAverage,
     ac.TimeSamples,
     ac.MaskedTimeSamples,
     ac.BeamformerTime,
@@ -55,6 +56,10 @@ SKIP_DEFAULT = [
     ac.WriteH5,
     ac.WriteWAV,
     ac.Calib,
+    # deprecated:
+    ac.TimeAverage,
+    ac.MaskedTimeInOut,
+    ac.TimeCache,
 ]
 
 DEFAULT = [cls for cls in get_subclasses(ac.Generator) if cls not in SKIP_DEFAULT]
@@ -91,10 +96,10 @@ class Generators:
         return acoular_cls()
 
     def case_TimeSamples(self, small_source_case):
-        return ac.TimeSamples(file=small_source_case.source.name)
+        return ac.TimeSamples(file=small_source_case.time.name)
 
     def case_MaskedTimeSamples(self, small_source_case):
-        return ac.MaskedTimeSamples(file=small_source_case.source.name, start=0, stop=50)
+        return ac.MaskedTimeSamples(file=small_source_case.time.name, start=0, stop=50)
 
     @parametrize_with_cases('mic_setup', cases=[case_single_microphone, case_two_microphones], ids=['1ch', '2ch'])
     def case_UncorrectedNoiseSource(self, mic_setup):
@@ -110,10 +115,7 @@ class Generators:
         return ac.TimeExpAverage(source=time_data_source, weight=weight)
 
     def case_Average(self, time_data_source):
-        return ac.Average(source=time_data_source, naverage=2)
-
-    def case_TimeAverage(self, time_data_source):
-        return ac.TimeAverage(source=time_data_source, naverage=2)
+        return ac.Average(source=time_data_source, num_per_average=2)
 
     @case(id='sources')
     @parametrize_with_cases('mic_setup', cases=[case_single_microphone, case_two_microphones], ids=['1ch', '2ch'])
@@ -174,7 +176,7 @@ class Generators:
 
     @parametrize_with_cases('sector', cases=Sectors, filter=lambda cf: 'numpy' in get_case_id(cf))
     def case_IntegratorSectorTime(self, regression_source_case, sector):
-        bf = ac.BeamformerTimeSq(source=regression_source_case.source, steer=regression_source_case.steer)
+        bf = ac.BeamformerTimeSq(source=regression_source_case.calib, steer=regression_source_case.steer)
         return ac.IntegratorSectorTime(source=bf, grid=regression_source_case.grid, sectors=[sector])
 
     def case_OctaveFilterBank(self, moving_source_case):
@@ -215,3 +217,12 @@ class Generators:
             shape = data.num_channels * data.num_freqs
         cal = np.abs(np.zeros(shape))
         return ac.Calib(source=data, data=cal)
+
+    @parametrize('acoular_cls', [ac.TimeAverage, ac.MaskedTimeInOut, ac.TimeCache])
+    def case_deprecated(self, time_data_source, acoular_cls):
+        args = {'num_per_average': 2} if acoular_cls is ac.TimeAverage else {}
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', DeprecationWarning)
+            with pytest.deprecated_call():
+                obj = acoular_cls(source=time_data_source, **args)
+        return obj

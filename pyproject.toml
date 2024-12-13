@@ -124,7 +124,10 @@ test = ["python -m pytest -v --durations=10 tests"]
 reset_regtest = ["python -m pytest -v --regtest-reset tests/regression"]
 profile = ["test --profile-svg"] 
 demo = ["python -c \"import acoular; acoular.demo.acoular_demo.run()\""]
-coverage = ["test --cov=acoular --cov-report html --cov-report term-missing"]
+coverage = [
+    "test --cov=acoular --cov-report html --cov-report term-missing",
+    "python -m pytest -v --cov=acoular --cov-report html --cov-report term-missing --cov-append --doctest-modules acoular",
+    ]
 doctest = ["python -m pytest --doctest-modules acoular"]
 
 [tool.hatch.envs.tests.overrides]
@@ -144,16 +147,17 @@ packages = ["acoular"]
 
 [tool.pytest.ini_options]
 filterwarnings = [
-    "ignore::tables.exceptions.UnclosedFileWarning",
-    # Suppress DeprecationWarnings from traits due to deprecated sre_parse and sre_constants modules
-    "ignore:module 'sre_parse' is deprecated:DeprecationWarning",
-    "ignore:module 'sre_constants' is deprecated:DeprecationWarning",
-    # Suppress NumbaWarning about TBB threading layer
-    "ignore:The TBB threading layer requires TBB version:numba.core.errors.NumbaWarning",
-    # Suppress DeprecationWarnings in Acoular's test_generator_cases.py and sources.py
-    "ignore:Using MaskedTimeInOut is deprecated:DeprecationWarning",
-    "ignore:Using TimeCache is deprecated:DeprecationWarning",
-    "ignore:Using TimeAverage is deprecated:DeprecationWarning",
+    "error", # treat warnings as errors
+    "ignore::pluggy.PluggyTeardownRaisedWarning", # raised internally by pytest-regtest
+    "ignore:numpy.core.multiarray is deprecated*:DeprecationWarning", # raised internally by pylops
+    "ignore:module 'sre_parse' is deprecated:DeprecationWarning", # raised internally by traits
+    "ignore:module 'sre_constants' is deprecated:DeprecationWarning", # raised internally by traits
+    "ignore:The TBB threading layer requires TBB version:numba.core.errors.NumbaWarning", # raised internally by numba
+    "ignore:FNV hashing is not implemented in Numba:UserWarning", # raised internally by numba
+    # Suppress DeprecationWarnings in Acoular (only temporarily!)
+    "ignore:Deprecated use of *:DeprecationWarning", 
+    # Suppress warnings about unclosed files in tables at the end of the tests
+    "ignore:Closing remaining open file*:tables.exceptions.UnclosedFileWarning",
 ]
 env = [
     "OPENBLAS_NUM_THREADS=1"

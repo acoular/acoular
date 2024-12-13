@@ -342,16 +342,13 @@ class Trigger(TimeOut):  # pragma: no cover
 
     # Type of trigger.
     #
-    # 'dirac': a single puls is assumed (sign of
-    # :attr:`~acoular.tprocess.Trigger.trigger_type` is important).
-    # Sample will trigger if its value is above/below the pos/neg threshold.
+    # 'dirac': a single pulse is assumed (sign of :attr:`~acoular.tprocess.Trigger.trigger_type` is
+    # important). Sample will trigger if its value is above/below the pos/neg threshold.
     #
-    # 'rect' : repeating rectangular functions. Only every second
-    # edge is assumed to be a trigger. The sign of
-    # :attr:`~acoular.tprocess.Trigger.trigger_type` gives information
-    # on which edge should be used (+ for rising edge, - for falling edge).
-    # Sample will trigger if the difference between its value and its predecessors value
-    # is above/below the pos/neg threshold.
+    # 'rect' : repeating rectangular functions. Only every second edge is assumed to be a trigger.
+    # The sign of :attr:`~acoular.tprocess.Trigger.trigger_type` gives information on which edge
+    # should be used (+ for rising edge, - for falling edge). Sample will trigger if the difference
+    # between its value and its predecessors value is above/below the pos/neg threshold.
     #
     # Default is 'dirac'.
     trigger_type = Enum('dirac', 'rect')
@@ -588,7 +585,7 @@ class AngleTracker(MaskedTimeOut):
         # number of spline points
         InterpPoints = self.interp_points
 
-        # loop over alle timesamples
+        # loop over all timesamples
         while ind < num:
             # when starting spline forward
             if ind < peakloc[InterpPoints]:
@@ -682,7 +679,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
     def _set_mics_virtual(self, mics_virtual):
         self._mics_virtual = mics_virtual
 
-    # Interpolation method in spacial domain, defaults to linear
+    # Interpolation method in spatial domain, defaults to linear
     # linear uses numpy linear interpolation
     # spline uses scipy CloughTocher algorithm
     # rbf is scipy radial basis function with multiquadric, cubic and sinc functions
@@ -698,8 +695,8 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
         desc='method for interpolation used',
     )
 
-    # spacial dimensionality of the array geometry
-    array_dimension = Enum('1D', '2D', 'ring', '3D', 'custom', desc='spacial dimensionality of the array geometry')
+    # spatial dimensionality of the array geometry
+    array_dimension = Enum('1D', '2D', 'ring', '3D', 'custom', desc='spatial dimensionality of the array geometry')
 
     # Sampling frequency of output signal, as given by :attr:`source`.
     sample_freq = Delegate('source', 'sample_freq')
@@ -961,7 +958,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
             # if no rotation given
             else:
                 xInterp = tile(virtNewCoord[0, :], (nTime, 1))
-            # get ordered microphone posions in radiant
+            # get ordered microphone positions in radiant
             x = newCoord[0]
             for cntTime in range(nTime):
                 if self.method == 'linear':
@@ -1440,7 +1437,7 @@ class Filter(TimeOut):
     implements a filter with coefficients that may be changed
     during processing.
 
-    Should not be instanciated by itself
+    Should not be instantiated by itself.
     """
 
     # Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
@@ -1492,7 +1489,7 @@ class FiltOctave(Filter):
     sos = Property(depends_on=['band', 'fraction', 'source.digest', 'order'])
 
     # internal identifier
-    digest = Property(depends_on=['source.digest', '__class__', 'band', 'fraction', 'order'])
+    digest = Property(depends_on=['source.digest', 'band', 'fraction', 'order'])
 
     @cached_property
     def _get_digest(self):
@@ -1529,7 +1526,7 @@ class FiltFiltOctave(FiltOctave):
     order = Int(2, desc='IIR filter half order')
 
     # internal identifier
-    digest = Property(depends_on=['source.digest', '__class__', 'band', 'fraction', 'order'])
+    digest = Property(depends_on=['source.digest', 'band', 'fraction', 'order'])
 
     @cached_property
     def _get_digest(self):
@@ -1601,7 +1598,7 @@ class TimeExpAverage(Filter):
     sos = Property(depends_on=['weight', 'source.digest'])
 
     # internal identifier
-    digest = Property(depends_on=['source.digest', '__class__', 'weight'])
+    digest = Property(depends_on=['source.digest', 'weight'])
 
     @cached_property
     def _get_digest(self):
@@ -1616,7 +1613,7 @@ class TimeExpAverage(Filter):
 
 
 class FiltFreqWeight(Filter):
-    """Frequency weighting filter accoring to IEC 61672."""
+    """Frequency weighting filter according to IEC 61672."""
 
     # weighting characteristics
     weight = Enum('A', 'C', 'Z', desc='frequency weighting')
@@ -1624,7 +1621,7 @@ class FiltFreqWeight(Filter):
     sos = Property(depends_on=['weight', 'source.digest'])
 
     # internal identifier
-    digest = Property(depends_on=['source.digest', '__class__', 'weight'])
+    digest = Property(depends_on=['source.digest', 'weight'])
 
     @cached_property
     def _get_digest(self):
@@ -1659,7 +1656,7 @@ class FilterBank(TimeOut):
     """Abstract base class for IIR filter banks based on scipy lfilter
     implements a bank of parallel filters.
 
-    Should not be instanciated by itself
+    Should not be instantiated by itself.
     """
 
     # Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
@@ -1741,7 +1738,7 @@ class OctaveFilterBank(FilterBank):
     num_bands = Property(depends_on=['lband', 'hband', 'fraction'])
 
     # internal identifier
-    digest = Property(depends_on=['source.digest', '__class__', 'lband', 'hband', 'fraction', 'order'])
+    digest = Property(depends_on=['source.digest', 'lband', 'hband', 'fraction', 'order'])
 
     @cached_property
     def _get_digest(self):
@@ -1786,7 +1783,7 @@ class WriteWAV(TimeOut):
     channels = ListInt(desc='channel to save')
 
     # internal identifier
-    digest = Property(depends_on=['source.digest', 'channels', '__class__'])
+    digest = Property(depends_on=['source.digest', 'channels'])
 
     @cached_property
     def _get_digest(self):
@@ -1860,7 +1857,7 @@ class WriteH5(TimeOut):
     write_flag = Bool(True)
 
     # internal identifier
-    digest = Property(depends_on=['source.digest', '__class__'])
+    digest = Property(depends_on=['source.digest'])
 
     # The floating-number-precision of entries of H5 File corresponding
     # to numpy dtypes. Default is 32 bit.
@@ -1922,7 +1919,7 @@ class WriteH5(TimeOut):
         Samples in blocks of shape (num, num_channels).
             The last block may be shorter than num.
             Echos the source output, but reads it from cache
-            when available and prevents unnecassary recalculation.
+            when available and prevents unnecessary recalculation.
 
         """
         self.write_flag = True
@@ -1972,7 +1969,7 @@ class TimeConvolve(TimeOut):
     )
 
     # internal identifier
-    digest = Property(depends_on=['source.digest', 'kernel', '__class__'])
+    digest = Property(depends_on=['source.digest', 'kernel'])
 
     @cached_property
     def _get_digest(self):

@@ -40,12 +40,12 @@ class MicGeom(HasStrictTraits):
     Can also be used with programmatically generated arrangements.
     """
 
-    #: Name of the .xml-file from wich to read the data.
+    #: Name of the .xml-file from which to read the data.
     file = File(filter=['*.xml'], exists=True, desc='name of the xml file to import')
 
     #: Positions as (3, :attr:`num_mics`) array of floats, may include also invalid
     #: microphones (if any). Set either automatically on change of the
-    #: :attr:`file` argument or explicitely by assigning an array of floats.
+    #: :attr:`file` argument or explicitly by assigning an array of floats.
     pos_total = CArray(dtype=float, shape=(3, None), desc='x, y, z position of all microphones')
 
     #: Positions as (3, :attr:`num_mics`) array of floats, without invalid

@@ -121,7 +121,7 @@ sklearn_ndict = {}
 if parse(sklearn.__version__) < parse('1.4'):
     sklearn_ndict['normalize'] = False  # pragma: no cover
 
-BEAMFORMER_BASE_DIGEST_DEPENDENCIES = ['freq_data.digest', 'r_diag', 'r_diag_norm', 'precision', '_steer_obj.digest']
+BEAMFORMER_BASE_DIGEST_DEPENDENCIES = ['freq_data.digest', 'r_diag', 'r_diag_norm', 'precision', 'steer.digest']
 
 
 class SteeringVector(HasStrictTraits):
@@ -310,126 +310,7 @@ class BeamformerBase(HasStrictTraits):
     # Instance of :class:`~acoular.fbeamform.SteeringVector` or its derived classes
     # that contains information about the steering vector. This is a private trait.
     # Do not set this directly, use `steer` trait instead.
-    _steer_obj = Instance(SteeringVector(), SteeringVector)
-
-    #: :class:`~acoular.fbeamform.SteeringVector` or derived object.
-    #: Defaults to :class:`~acoular.fbeamform.SteeringVector` object.
-    steer = Property(desc='steering vector object')
-
-    def _get_steer(self):
-        return self._steer_obj
-
-    def _set_steer(self, steer):
-        if isinstance(steer, SteeringVector):
-            self._steer_obj = steer
-        elif steer in ('true level', 'true location', 'classic', 'inverse'):
-            # Type of steering vectors, see also :cite:`Sarradj2012`.
-            msg = (
-                "Deprecated use of 'steer' trait. Please use the 'steer' with an object of class "
-                "'SteeringVector'. Using a string to specify the steer type will be removed in "
-                'version 25.01.'
-            )
-            warn(
-                msg,
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            self._steer_obj.steer_type = steer
-        else:
-            raise (TraitError(args=self, name='steer', info='SteeringVector', value=steer))
-
-    # --- List of backwards compatibility traits and their setters/getters -----------
-
-    # :class:`~acoular.environments.Environment` or derived object.
-    # Deprecated! Only kept for backwards compatibility.
-    # Now governed by :attr:`steer` trait.
-    env = Property()
-
-    def _get_env(self):
-        return self._steer_obj.env
-
-    def _set_env(self, env):
-        msg = (
-            "Deprecated use of 'env' trait. Please use the 'steer' trait with an object of class"
-            "'SteeringVector'. The 'env' trait will be removed in version 25.01."
-        )
-        warn(msg, DeprecationWarning, stacklevel=2)
-        self._steer_obj.env = env
-
-    # The speed of sound.
-    # Deprecated! Only kept for backwards compatibility.
-    # Now governed by :attr:`steer` trait.
-    c = Property()
-
-    def _get_c(self):
-        return self._steer_obj.env.c
-
-    def _set_c(self, c):
-        msg = (
-            "Deprecated use of 'c' trait. Please use the 'steer' trait with an object of class"
-            "'SteeringVector' that holds an 'Environment' instance."
-            "The 'c' trait will be removed in version 25.01."
-        )
-        warn(msg, DeprecationWarning, stacklevel=2)
-        self._steer_obj.env.c = c
-
-    # :class:`~acoular.grids.Grid`-derived object that provides the grid locations.
-    # Deprecated! Only kept for backwards compatibility.
-    # Now governed by :attr:`steer` trait.
-    grid = Property()
-
-    def _get_grid(self):
-        return self._steer_obj.grid
-
-    def _set_grid(self, grid):
-        msg = (
-            "Deprecated use of 'grid' trait. Please use the 'steer' trait with an object of class"
-            "'SteeringVector'. The 'grid' trait will be removed in version 25.01."
-        )
-        warn(msg, DeprecationWarning, stacklevel=2)
-        self._steer_obj.grid = grid
-
-    # :class:`~acoular.microphones.MicGeom` object that provides the microphone locations.
-    # Deprecated! Only kept for backwards compatibility.
-    # Now governed by :attr:`steer` trait
-    mpos = Property()
-
-    def _get_mpos(self):
-        return self._steer_obj.mics
-
-    def _set_mpos(self, mpos):
-        msg = (
-            "Deprecated use of 'mpos' trait. Please use the 'steer' trait with an object of class"
-            "'SteeringVector'. The 'mpos' trait will be removed in version 25.01."
-        )
-        warn(msg, DeprecationWarning, stacklevel=2)
-        self._steer_obj.mics = mpos
-
-    # Sound travel distances from microphone array center to grid points (r0)
-    # and all array mics to grid points (rm). Readonly.
-    # Deprecated! Only kept for backwards compatibility.
-    # Now governed by :attr:`steer` trait
-    r0 = Property()
-
-    def _get_r0(self):
-        msg = (
-            "Deprecated use of 'r0' trait. Please use the 'steer' trait with an object of class"
-            "'SteeringVector'. The 'r0' trait will be removed in version 25.01."
-        )
-        warn(msg, DeprecationWarning, stacklevel=2)
-        return self._steer_obj.r0
-
-    rm = Property()
-
-    def _get_rm(self):
-        msg = (
-            "Deprecated use of 'rm' trait. Please use the 'steer' trait with an object of class"
-            "'SteeringVector'. The 'rm' trait will be removed in version 25.01."
-        )
-        warn(msg, DeprecationWarning, stacklevel=2)
-        return self._steer_obj.rm
-
-    # --- End of backwards compatibility traits --------------------------------------
+    steer = Instance(SteeringVector, args=())
 
     #: :class:`~acoular.spectra.PowerSpectra` object that provides the
     #: cross spectral matrix and eigenvalues
@@ -498,7 +379,7 @@ class BeamformerBase(HasStrictTraits):
             #            print("no data existent for nodename:", nodename)
             if config.global_caching == 'readonly':
                 return (None, None, None)
-            numfreq = self.freq_data.fftfreq().shape[0]  # block_size/2 + 1steer_obj
+            numfreq = self.freq_data.fftfreq().shape[0]
             group = self.h5f.create_new_group(nodename)
             self.h5f.create_compressible_array(
                 'freqs',
@@ -869,10 +750,10 @@ class BeamformerFunctional(BeamformerBase):
                 # ==============================================================================
                 #                     One cannot use spectral decomposition when diagonal of csm is
                 #                     removed, as the resulting modified eigenvectors are not
-                #                     orthogonal to each other anymore. Therefor potentiating cannot
-                #                     be applied only to the eigenvalues. --> To avoid this the root
-                #                     of the csm (removed diag) is calculated directly. WATCH OUT:
-                #                     This doesn't really produce good results.
+                #                     orthogonal to each other anymore. Therefore potentiating
+                #                     cannot be applied only to the eigenvalues. --> To avoid this
+                #                     the root of the csm (removed diag) is calculated directly.
+                #                     WATCH OUT: This doesn't really produce good results.
                 # ==============================================================================
                 csm = self.freq_data.csm[i]
                 fill_diagonal(csm, 0)
@@ -1090,131 +971,14 @@ class PointSpreadFunction(HasStrictTraits):
     # Instance of :class:`~acoular.fbeamform.SteeringVector` or its derived classes
     # that contains information about the steering vector. This is a private trait.
     # Do not set this directly, use `steer` trait instead.
-    _steer_obj = Instance(SteeringVector(), SteeringVector)
-
-    #: :class:`~acoular.fbeamform.SteeringVector` or derived object.
-    #: Defaults to :class:`~acoular.fbeamform.SteeringVector` object.
-    steer = Property(desc='steering vector object')
-
-    def _get_steer(self):
-        return self._steer_obj
-
-    def _set_steer(self, steer):
-        if isinstance(steer, SteeringVector):
-            self._steer_obj = steer
-        elif steer in ('true level', 'true location', 'classic', 'inverse'):
-            msg = (
-                "Deprecated use of 'steer' trait. Please use object of class 'SteeringVector'."
-                "The functionality of using string values for 'steer' will be removed in version 25.01."
-            )
-            # Type of steering vectors, see also :cite:`Sarradj2012`.
-            warn(
-                msg,
-                Warning,
-                stacklevel=2,
-            )
-            self._steer_obj = SteeringVector(steer_type=steer)
-        else:
-            raise (TraitError(args=self, name='steer', info='SteeringVector', value=steer))
-
-    # --- List of backwards compatibility traits and their setters/getters -----------
-
-    # :class:`~acoular.environments.Environment` or derived object.
-    # Deprecated! Only kept for backwards compatibility.
-    # Now governed by :attr:`steer` trait.
-    env = Property()
-
-    def _get_env(self):
-        return self._steer_obj.env
-
-    def _set_env(self, env):
-        msg = (
-            "Deprecated use of 'env' trait. Please use the 'steer' trait with an object of class"
-            "'SteeringVector'. The 'env' trait will be removed in version 25.01."
-        )
-        warn(msg, DeprecationWarning, stacklevel=2)
-        self._steer_obj.env = env
-
-    # The speed of sound.
-    # Deprecated! Only kept for backwards compatibility.
-    # Now governed by :attr:`steer` trait.
-    c = Property()
-
-    def _get_c(self):
-        return self._steer_obj.env.c
-
-    def _set_c(self, c):
-        msg = (
-            "Deprecated use of 'c' trait. Please use the 'steer' trait with an object of class"
-            "'SteeringVector'. The 'c' trait will be removed in version 25.01."
-        )
-        warn(msg, DeprecationWarning, stacklevel=2)
-        self._steer_obj.env.c = c
-
-    # :class:`~acoular.grids.Grid`-derived object that provides the grid locations.
-    # Deprecated! Only kept for backwards compatibility.
-    # Now governed by :attr:`steer` trait.
-    grid = Property()
-
-    def _get_grid(self):
-        return self._steer_obj.grid
-
-    def _set_grid(self, grid):
-        msg = (
-            "Deprecated use of 'grid' trait. Please use the 'steer' trait with an object of class"
-            "'SteeringVector'. The 'grid' trait will be removed in version 25.01."
-        )
-        warn(msg, DeprecationWarning, stacklevel=2)
-        self._steer_obj.grid = grid
-
-    # :class:`~acoular.microphones.MicGeom` object that provides the microphone locations.
-    # Deprecated! Only kept for backwards compatibility.
-    # Now governed by :attr:`steer` trait
-    mpos = Property()
-
-    def _get_mpos(self):
-        return self._steer_obj.mics
-
-    def _set_mpos(self, mpos):
-        msg = (
-            "Deprecated use of 'mpos' trait. Please use the 'steer' trait with an object of class"
-            "'SteeringVector'. The 'mpos' trait will be removed in version 25.01."
-        )
-        warn(msg, DeprecationWarning, stacklevel=2)
-        self._steer_obj.mics = mpos
-
-    # Sound travel distances from microphone array center to grid points (r0)
-    # and all array mics to grid points (rm). Readonly.
-    # Deprecated! Only kept for backwards compatibility.
-    # Now governed by :attr:`steer` trait
-    r0 = Property()
-
-    def _get_r0(self):
-        msg = (
-            "Deprecated use of 'r0' trait. Please use the 'steer' trait with an object of class"
-            "'SteeringVector'. The 'r0' trait will be removed in version 25.01."
-        )
-        warn(msg, DeprecationWarning, stacklevel=2)
-        return self._steer_obj.r0
-
-    rm = Property()
-
-    def _get_rm(self):
-        msg = (
-            "Deprecated use of 'rm' trait. Please use the 'steer' trait with an object of class"
-            "'SteeringVector'. The 'rm' trait will be removed in version 25.01."
-        )
-        warn(msg, DeprecationWarning, stacklevel=2)
-        return self._steer_obj.rm
-
-    # --- End of backwards compatibility traits --------------------------------------
+    steer = Instance(SteeringVector, args=())
 
     #: Indices of grid points to calculate the PSF for.
     grid_indices = CArray(
         dtype=int,
         value=array([]),
         desc='indices of grid points for psf',
-    )  # value=array([]), value=self.grid.pos(),
+    )  # value=array([]), value=self.steer.grid.pos(),
 
     #: Flag that defines how to calculate and store the point spread function
     #: defaults to 'single'.
@@ -1242,7 +1006,7 @@ class PointSpreadFunction(HasStrictTraits):
     h5f = Instance(H5CacheFileBase, transient=True)
 
     # internal identifier
-    digest = Property(depends_on=['_steer_obj.digest', 'precision'], cached=True)
+    digest = Property(depends_on=['steer.digest', 'precision'], cached=True)
 
     @cached_property
     def _get_digest(self):
@@ -1363,7 +1127,7 @@ class PointSpreadFunction(HasStrictTraits):
                 self.steer.steer_type,
                 self.steer.r0,
                 self.steer.rm,
-                2 * pi * self.freq / self.env.c,
+                2 * pi * self.freq / self.steer.env.c,
                 ind,
                 self.precision,
             )
@@ -2042,7 +1806,7 @@ class BeamformerCMF(BeamformerBase):
                 from pylops import Identity, MatrixMult
                 from pylops.optimization.sparsity import splitbregman
 
-                Oop = MatrixMult(A)  # tranfer operator
+                Oop = MatrixMult(A)  # transfer operator
                 Iop = self.alpha * Identity(numpoints)  # regularisation
                 self._ac[i], iterations, cost = splitbregman(
                     Op=Oop,
@@ -2064,7 +1828,7 @@ class BeamformerCMF(BeamformerBase):
                 from pylops import MatrixMult
                 from pylops.optimization.sparsity import fista
 
-                Oop = MatrixMult(A)  # tranfer operator
+                Oop = MatrixMult(A)  # transfer operator
                 self._ac[i], iterations, cost = fista(
                     Op=Oop,
                     y=R[:, 0],
@@ -2086,8 +1850,8 @@ class BeamformerCMF(BeamformerBase):
 
                 # initial guess
                 x0 = ones([numpoints])
-                # boundarys - set to non negative
-                boundarys = tile((0, +inf), (len(x0), 1))
+                # boundaries - set to non negative
+                boundaries = tile((0, +inf), (len(x0), 1))
 
                 # optimize
                 self._ac[i], yval, dicts = fmin_l_bfgs_b(
@@ -2096,7 +1860,7 @@ class BeamformerCMF(BeamformerBase):
                     fprime=None,
                     args=(),
                     approx_grad=0,
-                    bounds=boundarys,
+                    bounds=boundaries,
                     m=10,
                     factr=10000000.0,
                     pgtol=1e-05,
@@ -2253,8 +2017,8 @@ class BeamformerSODIX(BeamformerBase):
                             * real(trace(csm) / trace(array(self.freq_data.csm[i - 1], dtype='complex128', copy=1))),
                         )
 
-                    # boundarys - set to non negative [2*(numpoints*num_mics)]
-                    boundarys = tile((0, +inf), (numpoints * num_mics, 1))
+                    # boundaries - set to non negative [2*(numpoints*num_mics)]
+                    boundaries = tile((0, +inf), (numpoints * num_mics, 1))
 
                     # optimize with gradient solver
                     # see https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.fmin_l_bfgs_b.html
@@ -2266,7 +2030,7 @@ class BeamformerSODIX(BeamformerBase):
                         fprime=None,
                         args=(),
                         approx_grad=0,
-                        bounds=boundarys,
+                        bounds=boundaries,
                         factr=100.0,
                         pgtol=1e-12,
                         epsilon=1e-08,
@@ -2401,7 +2165,7 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
 
         # Generate a cross spectral matrix, and perform the eigenvalue decomposition
         for i in ind:
-            # for monopole and source strenght Q needs to define density
+            # for monopole and source strength Q needs to define density
             # calculate a transfer matrix A
             hh = self.steer.transfer(f[i])
             A = hh.T
@@ -2581,7 +2345,7 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
     n = Int(1)
 
     #: Geometrical bounds of the search domain to consider.
-    #: :attr:`bound` ist a list that contains exactly three tuple of
+    #: :attr:`bound` is a list that contains exactly three tuple of
     #: (min,max) for each of the coordinates x, y, z.
     #: Defaults to [(-1.,1.),(-1.,1.),(0.01,1.)]
     bounds = List(Tuple(Float, Float), minlen=3, maxlen=3, value=[(-1.0, 1.0), (-1.0, 1.0), (0.01, 1.0)])
@@ -2602,7 +2366,7 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
 
     # internal identifier
     digest = Property(
-        depends_on=['freq_data.digest', '_steer_obj.digest', 'precision', 'r_diag', 'eva_list', 'bounds', 'shgo'],
+        depends_on=['freq_data.digest', 'steer.digest', 'precision', 'r_diag', 'eva_list', 'bounds', 'shgo'],
     )
 
     @cached_property
