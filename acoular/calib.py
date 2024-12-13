@@ -44,7 +44,9 @@ class Calib(InOut):
     >>> import acoular as ac
     >>> import numpy as np
     >>>
-    >>> signal = ac.WNoiseGenerator(sample_freq=51200, num_samples=51200, rms=0.01).signal()# doctest: +SKIP
+    >>> signal = ac.WNoiseGenerator(sample_freq=51200,# doctest: +SKIP
+    >>>                             num_samples=51200,# doctest: +SKIP
+    >>>                             rms=0.01).signal()# doctest: +SKIP
     >>> ts = ac.TimeSamples(data=signal[:, np.newaxis], sample_freq=51200)# doctest: +SKIP
     >>> calib = ac.Calib(source=ts)# doctest: +SKIP
     >>> calib.data = np.array([100])# doctest: +SKIP
