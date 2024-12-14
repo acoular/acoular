@@ -670,19 +670,19 @@ class RectGrid3D(RectGrid):
         return s_[xi1 : xi2 + 1], s_[yi1 : yi2 + 1], s_[zi1 : zi2 + 1]
 
 
-@deprecated_alias({'from_file': 'file'})
+@deprecated_alias({'from_file': 'file', 'gpos_file': 'pos'})
 class ImportGrid(Grid):
     """Loads a 3D grid from xml file."""
 
     #: Name of the .xml-file from which to read the data.
     file = File(filter=['*.xml'], exists=True, desc='name of the xml file to import')
 
-    gpos_file = CArray(dtype=float, desc='x, y, z position of all Grid Points')
+    _gpos = CArray(dtype=float, desc='x, y, z position of all Grid Points')
 
     subgrids = CArray(desc='names of subgrids for each point')
 
     # internal identifier
-    digest = Property(depends_on=['gpos_file'])
+    digest = Property(depends_on=['_gpos'])
 
     @cached_property
     def _get_digest(self):
@@ -690,21 +690,21 @@ class ImportGrid(Grid):
 
     # 'digest' is a placeholder for other properties in derived classes,
     # necessary to trigger the depends on mechanism
-    @property_depends_on(['gpos_file'])
+    @property_depends_on(['_gpos'])
     def _get_size(self):
         return self.pos.shape[-1]
 
     # 'digest' is a placeholder for other properties in derived classes
-    @property_depends_on(['gpos_file'])
+    @property_depends_on(['_gpos'])
     def _get_shape(self):
         return (self.pos.shape[-1],)
 
-    @property_depends_on(['gpos_file'])
+    @property_depends_on(['_gpos'])
     def _get_pos(self):
-        return self.gpos_file
+        return self._gpos
 
     def _set_pos(self, pos):
-        self.gpos_file = pos
+        self._gpos = pos
 
     @on_trait_change('file')
     def import_gpos(self):
@@ -715,7 +715,7 @@ class ImportGrid(Grid):
         for el in doc.getElementsByTagName('pos'):
             names.append(el.getAttribute('subgrid'))
             xyz.append([float(el.getAttribute(a)) for a in 'xyz'])
-        self.gpos_file = array(xyz, 'd').swapaxes(0, 1)
+        self._gpos = array(xyz, 'd').swapaxes(0, 1)
         self.subgrids = array(names)
 
 

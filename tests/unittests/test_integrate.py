@@ -32,7 +32,7 @@ def setup_power_spectra_integrate(setup_mics_integrate, f):
         Frequency in Hz
     """
     mics = setup_mics_integrate
-    steer = ac.SteeringVector(grid=ac.ImportGrid(gpos_file=np.array([[0], [0], [1]])), mics=mics)
+    steer = ac.SteeringVector(grid=ac.ImportGrid(pos=np.array([[0], [0], [1]])), mics=mics)
     transf = np.empty((1, mics.num_mics, 1), dtype=complex)
     transf[0] = steer.transfer(f).T
     csm = transf @ transf.swapaxes(2, 1).conjugate()
