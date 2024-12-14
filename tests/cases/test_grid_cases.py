@@ -54,7 +54,7 @@ class Grids:
         return ac.RectGrid3D(x_min=-1, x_max=1, y_min=-1, y_max=1, z_min=1, z_max=1, increment=1)
 
     def case_LineGrid(self):
-        return ac.LineGrid(loc=(-1, 0, 1), length=2, numpoints=3)
+        return ac.LineGrid(loc=(-1, 0, 1), length=2, num_points=3)
 
     def case_ImportGrid(self):
         return ac.ImportGrid(gpos_file=ac.RectGrid(x_min=-1, x_max=1, y_min=-1, y_max=1, z=1, increment=1).gpos)
@@ -63,7 +63,7 @@ class Grids:
         return ac.MergeGrid(
             grids=[
                 ac.RectGrid(x_min=-1, x_max=1, y_min=-1, y_max=1, z=1, increment=1),
-                ac.LineGrid(loc=(-1, 0, 1), length=2, numpoints=3),
+                ac.LineGrid(loc=(-1, 0, 1), length=2, num_points=3),
             ]
         )
 

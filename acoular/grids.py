@@ -719,7 +719,7 @@ class ImportGrid(Grid):
         self.subgrids = array(names)
 
 
-@deprecated_alias({'gpos': 'pos'}, read_only=True)
+@deprecated_alias({'gpos': 'pos', 'numpoints': 'num_points'}, read_only=['gpos'])
 class LineGrid(Grid):
     """Class for Line grid geometries."""
 
@@ -733,7 +733,7 @@ class LineGrid(Grid):
     length = Float(1, desc='length of the line source')
 
     #:number of grid points.
-    numpoints = Int(1, desc='length of the line source')
+    num_points = Int(1, desc='length of the line source')
 
     #: Overall number of grid points. Readonly; is set automatically when
     #: other grid defining properties are set
@@ -744,7 +744,7 @@ class LineGrid(Grid):
     pos = Property(desc='x, y, z positions of grid points')
 
     digest = Property(
-        depends_on=['loc', 'direction', 'length', 'numpoints', 'size'],
+        depends_on=['loc', 'direction', 'length', 'num_points', 'size'],
     )
 
     @cached_property
@@ -753,22 +753,22 @@ class LineGrid(Grid):
 
     # 'digest' is a placeholder for other properties in derived classes,
     # necessary to trigger the depends on mechanism
-    @property_depends_on(['numpoints'])
+    @property_depends_on(['num_points'])
     def _get_size(self):
         return self.pos.shape[-1]
 
     # 'digest' is a placeholder for other properties in derived classes
-    @property_depends_on(['numpoints'])
+    @property_depends_on(['num_points'])
     def _get_shape(self):
         return self.pos.shape[-1]
 
-    @property_depends_on(['numpoints', 'length', 'direction', 'loc'])
+    @property_depends_on(['num_points', 'length', 'direction', 'loc'])
     def _get_pos(self):
-        dist = self.length / (self.numpoints - 1)
+        dist = self.length / (self.num_points - 1)
         loc = array(self.loc, dtype=float).reshape((3, 1))
         direc_n = array(self.direction) / norm(self.direction)
-        pos = zeros((self.numpoints, 3))
-        for s in range(self.numpoints):
+        pos = zeros((self.num_points, 3))
+        for s in range(self.num_points):
             pos[s] = loc.T + direc_n * dist * s
         return pos.T
 
