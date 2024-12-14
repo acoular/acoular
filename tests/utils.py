@@ -51,14 +51,14 @@ def get_result(obj, num):
 
 
 class SetupStationarySourceCase:
-    def __init__(self, grid, numsamples, blocksize, invalid_channels):
+    def __init__(self, grid, num_samples, blocksize, invalid_channels):
         module_dir = Path(__file__).parent.parent
         self.grid = grid
         self.time = ac.MaskedTimeSamples(
             file=module_dir / 'examples' / 'data' / 'example_data.h5',
             invalid_channels=invalid_channels,
             start=0,
-            stop=numsamples,
+            stop=num_samples,
         )
         self.calib = ac.Calib(
             source=self.time,
@@ -97,8 +97,8 @@ class SetupMovingSourceCase:
         self.env = ac.Environment(c=346.04)
         self.steer_moving = ac.SteeringVector(grid=self.grid_moving, mics=self.mics)
         self.steer_fixed = ac.SteeringVector(grid=self.grid_fixed, mics=self.mics)
-        numsamples = int(np.max(list(self.traj.points.keys())) * self.sample_freq)
-        self.signal = ac.WNoiseGenerator(sample_freq=self.sample_freq, numsamples=numsamples, seed=1)
+        num_samples = int(np.max(list(self.traj.points.keys())) * self.sample_freq)
+        self.signal = ac.WNoiseGenerator(sample_freq=self.sample_freq, num_samples=num_samples, seed=1)
         if not self.fname.exists():
             self.create_test_time_data()
         self.source = ac.MaskedTimeSamples(file=self.fname, stop=48)
@@ -128,6 +128,6 @@ class SetupMovingSourceCase:
         wh5 = ac.WriteH5(source=p1, file=self.fname)
         print(50 * '#')
         print(f'create {self.fname} ...')
-        print(f'num samples: {self.signal.numsamples}, pass-by time: {np.max(self.traj.points)}s')
+        print(f'num samples: {self.signal.num_samples}, pass-by time: {np.max(self.traj.points)}s')
         print(50 * '#')
         wh5.save()

@@ -104,7 +104,7 @@ class Generators:
     @parametrize_with_cases('mic_setup', cases=[case_single_microphone, case_two_microphones], ids=['1ch', '2ch'])
     def case_UncorrectedNoiseSource(self, mic_setup):
         return ac.UncorrelatedNoiseSource(
-            signal=ac.WNoiseGenerator(sample_freq=1000, numsamples=50, seed=1), mics=mic_setup, sample_freq=1000
+            signal=ac.WNoiseGenerator(sample_freq=1000, num_samples=50, seed=1), mics=mic_setup, sample_freq=1000
         )
 
     def case_SourceMixer(self, time_data_source):
@@ -124,7 +124,7 @@ class Generators:
         [ac.PointSource, ac.PointSourceDipole, ac.LineSource, ac.SphericalHarmonicSource, ac.PointSourceConvolve],
     )
     def case_point_sources(self, acoular_cls, mic_setup):
-        src = acoular_cls(signal=ac.WNoiseGenerator(sample_freq=1000, numsamples=50, seed=1), mics=mic_setup)
+        src = acoular_cls(signal=ac.WNoiseGenerator(sample_freq=1000, num_samples=50, seed=1), mics=mic_setup)
         if issubclass(acoular_cls, ac.PointSourceConvolve):
             kernel = np.zeros(5)
             kernel[1] = 1
