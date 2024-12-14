@@ -27,7 +27,7 @@ def test_load_xml():
     # Test for correct number of microphones and shapes
     mic_geom = ac.MicGeom(file=xml_file_path)
     assert mic_geom.num_mics == 64
-    assert mic_geom.mpos.shape == (3, 64)
+    assert mic_geom.pos.shape == (3, 64)
     assert mic_geom.pos_total.shape == (3, 64)
 
 

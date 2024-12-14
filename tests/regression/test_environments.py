@@ -38,7 +38,7 @@ def test_flow(snapshot, grid, flow):
     snapshot.check(result, rtol=1e-5, atol=1e-8)
 
 
-@pytest.mark.parametrize('mics', [MICS.mpos, 0.0], ids=['mics-arr', 'mics-scalar'])
+@pytest.mark.parametrize('mics', [MICS.pos, 0.0], ids=['mics-arr', 'mics-scalar'])
 @pytest.mark.parametrize('grid', [GRID.pos], ids=['RectGrid3D'])
 @parametrize_with_cases('env', cases=Environments)
 def test_environment(snapshot, grid, mics, env):
