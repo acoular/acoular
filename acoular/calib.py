@@ -47,27 +47,27 @@ class Calib(InOut):
     >>> signal = ac.WNoiseGenerator(sample_freq=51200,# doctest: +SKIP
     >>>                             num_samples=51200,# doctest: +SKIP
     >>>                             rms=0.01).signal()# doctest: +SKIP
-    >>> ts = ac.TimeSamples(data=signal[:, np.newaxis], sample_freq=51200)# doctest: +SKIP
-    >>> calib = ac.Calib(source=ts)# doctest: +SKIP
-    >>> calib.data = np.array([100])# doctest: +SKIP
-    >>> print(next(calib.result(num=1)))# doctest: +SKIP
+    >>> ts = ac.TimeSamples(data=signal[:, np.newaxis], sample_freq=51200)  # doctest: +SKIP
+    >>> calib = ac.Calib(source=ts)  # doctest: +SKIP
+    >>> calib.data = np.array([100])  # doctest: +SKIP
+    >>> print(next(calib.result(num=1)))  # doctest: +SKIP
     [[1.76405235]]
 
     The calibrated data can then be further processed, e.g. by calculating the FFT of the
     calibrated data.
 
-    >>> fft = ac.RFFT(source=calib, block_size=16)# doctest: +SKIP
-    >>> print(next(fft.result(num=1)))# doctest: +SKIP
+    >>> fft = ac.RFFT(source=calib, block_size=16)  # doctest: +SKIP
+    >>> print(next(fft.result(num=1)))  # doctest: +SKIP
     [[10.63879909+0.j          3.25957562-1.57652611j -2.27342854-3.39108312j
     0.07458428+0.49657939j  1.772696  +3.92233098j  3.19543248+0.17988554j
     0.3379041 -3.93342331j  0.93949242+2.5328611j   2.97352574+0.j        ]]
 
     One could also apply the calibration after the FFT calculation.
 
-    >>> fft = ac.RFFT(source=ts, block_size=16)# doctest: +SKIP
-    >>> calib = ac.Calib(source=fft)# doctest: +SKIP
-    >>> calib.data = 100 * np.ones(ts.num_channels * fft.num_freqs)# doctest: +SKIP
-    >>> print(next(calib.result(num=1)))# doctest: +SKIP
+    >>> fft = ac.RFFT(source=ts, block_size=16)  # doctest: +SKIP
+    >>> calib = ac.Calib(source=fft)  # doctest: +SKIP
+    >>> calib.data = 100 * np.ones(ts.num_channels * fft.num_freqs)  # doctest: +SKIP
+    >>> print(next(calib.result(num=1)))  # doctest: +SKIP
     [[10.63879909+0.j          3.25957562-1.57652611j -2.27342854-3.39108312j
     0.07458428+0.49657939j  1.772696  +3.92233098j  3.19543248+0.17988554j
     0.3379041 -3.93342331j  0.93949242+2.5328611j   2.97352574+0.j        ]]
