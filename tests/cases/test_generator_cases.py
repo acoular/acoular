@@ -96,10 +96,10 @@ class Generators:
         return acoular_cls()
 
     def case_TimeSamples(self, small_source_case):
-        return ac.TimeSamples(file=small_source_case.time.name)
+        return ac.TimeSamples(file=small_source_case.time.file)
 
     def case_MaskedTimeSamples(self, small_source_case):
-        return ac.MaskedTimeSamples(file=small_source_case.time.name, start=0, stop=50)
+        return ac.MaskedTimeSamples(file=small_source_case.time.file, start=0, stop=50)
 
     @parametrize_with_cases('mic_setup', cases=[case_single_microphone, case_two_microphones], ids=['1ch', '2ch'])
     def case_UncorrectedNoiseSource(self, mic_setup):
