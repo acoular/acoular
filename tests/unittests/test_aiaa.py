@@ -18,7 +18,7 @@ def test_load_mics(aiaa_bechmark_time_data_file):
     mic_geom = ac.tools.MicAIAABenchmark(file=aiaa_bechmark_time_data_file)
     assert mic_geom.num_mics == 8
     assert mic_geom.mpos.shape == (3, 8)
-    assert mic_geom.mpos_tot.shape == (3, 8)
+    assert mic_geom.pos_total.shape == (3, 8)
 
 
 def test_load_csm(aiaa_bechmark_csm_file):

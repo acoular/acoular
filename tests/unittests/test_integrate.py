@@ -15,7 +15,7 @@ from tests.cases.test_grid_cases import Grids, Sectors
 def setup_mics_integrate():
     """Fixture for setting up a microphone geometry with 5 microphones."""
     rng1 = np.random.RandomState(1)
-    return ac.MicGeom(mpos_tot=rng1.normal(size=3 * 5).reshape((3, 5)))
+    return ac.MicGeom(pos_total=rng1.normal(size=3 * 5).reshape((3, 5)))
 
 
 @fixture(scope='session')

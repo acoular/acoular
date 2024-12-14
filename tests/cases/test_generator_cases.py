@@ -66,11 +66,11 @@ DEFAULT = [cls for cls in get_subclasses(ac.Generator) if cls not in SKIP_DEFAUL
 
 
 def case_single_microphone():
-    return ac.MicGeom(mpos_tot=np.array([[0, 0, 0]]).T)
+    return ac.MicGeom(pos_total=np.array([[0, 0, 0]]).T)
 
 
 def case_two_microphones():
-    return ac.MicGeom(mpos_tot=np.array([[0, 0, 0], [0, 1, 0]]).T)
+    return ac.MicGeom(pos_total=np.array([[0, 0, 0], [0, 1, 0]]).T)
 
 
 class Generators:

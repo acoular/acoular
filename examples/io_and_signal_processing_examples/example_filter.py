@@ -19,7 +19,7 @@ import numpy as np
 ac.config.global_caching = 'none'
 numsamples = 51200 * 10
 n1 = ac.WNoiseGenerator(sample_freq=51200, numsamples=numsamples, seed=1)
-m1 = ac.MicGeom(mpos_tot=[[1], [1], [1]])
+m1 = ac.MicGeom(pos_total=[[1], [1], [1]])
 p1 = ac.PointSource(signal=n1, mics=m1)
 f1 = ac.FiltFiltOctave(source=p1, band=10, fraction='Octave')
 hs = 0.0

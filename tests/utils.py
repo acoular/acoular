@@ -107,10 +107,10 @@ class SetupMovingSourceCase:
         mg = ac.MicGeom()
         num_mics = 5
         length = 0.5
-        mg.mpos_tot = np.zeros((3, num_mics), dtype=np.float64)
+        mg.pos_total = np.zeros((3, num_mics), dtype=np.float64)
         win = np.sin(np.arange(num_mics) * np.pi / (num_mics - 1))
         b = 0.4
-        mg.mpos_tot[0] = np.linspace(-length, length, num_mics) * (1 - b) / (win * b + 1 - b)
+        mg.pos_total[0] = np.linspace(-length, length, num_mics) * (1 - b) / (win * b + 1 - b)
         return mg
 
     def get_traj(self):
