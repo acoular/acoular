@@ -7,7 +7,7 @@ import acoular as ac
 import pytest
 
 
-@pytest.fixture()
+@pytest.fixture
 def sounddevice_samples_generator(sounddevice_properties):
     """Fixture to create an instance of ac.SoundDeviceSamplesGenerator."""
     _, max_input_channels, device_index, num = sounddevice_properties
