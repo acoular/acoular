@@ -2294,7 +2294,7 @@ class BeamformerAdaptiveGrid(BeamformerBase, Grid):
     def _get_shape(self):
         return (self.size,)
 
-    def _get_gpos(self):
+    def _get_pos(self):
         return self._gpos
 
     def integrate(self, sector):
