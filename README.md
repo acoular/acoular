@@ -87,35 +87,60 @@ If you are interested in contributing, have a look at the [CONTRIBUTING.md](CONT
 This reads data from 64 microphone channels and computes a beamforming map for the 8kHz third octave band:
 
 ```python
-from os import path
-import acoular
-from matplotlib.pylab import figure, plot, axis, imshow, colorbar, show
+from os.path import join, split
+import acoular as ac
+import matplotlib.pylab as plt
 
+# sampling frequency
+sfreq = 51200
+# duration of generated audio in seconds
+duration = 1
+nsamples = duration * sfreq
 # this file contains the microphone coordinates
-micgeofile = path.join(path.split(acoular.__file__)[0],'xml','array_64.xml')
+micgeofile = join(split(ac.__file__)[0],'xml','array_64.xml')
+
 # set up object managing the microphone coordinates
-mg = acoular.MicGeom( file=micgeofile )
+mg = ac.MicGeom( file=micgeofile )
+# set up white noise generators with different rms sound pressures
+n1 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=nsamples, seed=1)
+n2 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=nsamples, seed=2, rms=0.7)
+n3 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=nsamples, seed=3, rms=0.5)
+# create point sources in space that emit the generated noise
+p1 = ac.PointSource(signal=n1, mics=mg, loc=(-0.1, -0.1, 0.3))
+p2 = ac.PointSource(signal=n2, mics=mg, loc=(0.15, 0, 0.3))
+p3 = ac.PointSource(signal=n3, mics=mg, loc=(0, 0.1, 0.3))
+# mix all sources together
+p = ac.Mixer(source=p1, sources=[p2, p3])
+# save the synthetic data to disk as .h5 file
+wh5 = ac.WriteH5(source=p, file='three_sources.h5')
+wh5.save()
+
 # set up object managing the microphone array data (usually from measurement)
-ts = acoular.TimeSamples( file='three_sources.h5' )
+ts = ac.TimeSamples( file='three_sources.h5')
 # set up object managing the cross spectral matrix computation
-ps = acoular.PowerSpectra( source=ts, block_size=128, window='Hanning' )
+ps = ac.PowerSpectra( source=ts, block_size=128, window='Hanning' )
 # set up object managing the mapping grid
-rg = acoular.RectGrid( x_min=-0.2, x_max=0.2, y_min=-0.2, y_max=0.2, z=0.3, \
+rg = ac.RectGrid( x_min=-0.2, x_max=0.2, y_min=-0.2, y_max=0.2, z=0.3, \
 increment=0.01 )
 # set up steering vector, implicitely contains also the standard quiescent 
 # environment with standard speed of sound
-st = acoular.SteeringVector( grid = rg, mics=mg )
+st = ac.SteeringVector( grid = rg, mics=mg )
 # set up the object managing the delay & sum beamformer
-bb = acoular.BeamformerBase( freq_data=ps, steer=st )
+bb = ac.BeamformerBase( freq_data=ps, steer=st )
 # request the result in the 8kHz third octave band from approriate FFT-Lines
 # this starts the actual computation (data intake, FFT, Welch CSM, beamforming)
 pm = bb.synthetic( 8000, 3 )
 # compute the sound pressure level
-Lm = acoular.L_p( pm )
+Lm = ac.L_p( pm )
 # plot the map
-imshow( Lm.T, origin='lower', vmin=Lm.max()-10, extent=rg.extend(), \
+plt.imshow( Lm.T, origin='lower', vmin=Lm.max()-10, extent=rg.extend(), \
 interpolation='bicubic')
-colorbar()
+plt.title(f'Beamformer (base) for 3 sources measured for 8000 Hz')
+plt.xlabel('x in m')
+plt.ylabel('y in m')
+plt.colorbar(label=r'$L_p$')
+plt.savefig('three_sources.png', dpi=300, bbox_inches='tight')
+plt.show()
 ```
 
 ![result](https://github.com/acoular/acoular/blob/master/docs/source/get_started/three_source_py3_colormap.png?raw=true)
