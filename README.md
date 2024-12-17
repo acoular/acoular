@@ -119,6 +119,8 @@ wh5.save()
 ts = ac.TimeSamples( file='three_sources.h5')
 # set up object managing the cross spectral matrix computation
 ps = ac.PowerSpectra( source=ts, block_size=128, window='Hanning' )
+# alternatively, you can use the in-memory Mixer object directly:
+# ps = ac.PowerSpectra( source=p, block_size=128, window='Hanning' )
 # set up object managing the mapping grid
 rg = ac.RectGrid( x_min=-0.2, x_max=0.2, y_min=-0.2, y_max=0.2, z=0.3, \
 increment=0.01 )
