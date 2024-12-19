@@ -41,14 +41,14 @@ def _delayandsum4(data, offsets, ifactor2, steeramp, out, autopower):
     None : as the inputs out and autopower get overwritten.
 
     """
-    gridsize, numchannels = offsets.shape
+    gridsize, num_channels = offsets.shape
     num = out.shape[0]
     zero_constant = data.dtype.type(0.0)
     for n in nb.prange(num):
         for gi in nb.prange(gridsize):
             out[n, gi] = zero_constant
             autopower[n, gi] = zero_constant
-            for mi in range(numchannels):
+            for mi in range(num_channels):
                 ind = (gi, mi)
                 r = (
                     data[offsets[ind] + n, mi] * (1.0 - ifactor2[ind]) + data[offsets[ind] + n + 1, mi] * ifactor2[ind]
@@ -99,7 +99,7 @@ def _delayandsum5(data, offsets, ifactor2, steeramp, out, autopower):
     None : as the inputs out and autopower get overwritten.
 
     """
-    num, gridsize, numchannels = offsets.shape
+    num, gridsize, num_channels = offsets.shape
     num = out.shape[0]
     # ZERO = data.dtype.type(0.)
     one_constant = data.dtype.type(1.0)
@@ -107,7 +107,7 @@ def _delayandsum5(data, offsets, ifactor2, steeramp, out, autopower):
         for gi in nb.prange(gridsize):
             out[n, gi] = 0
             autopower[n, gi] = 0
-            for mi in range(numchannels):
+            for mi in range(num_channels):
                 ind = offsets[n, gi, mi] + n
                 r = (
                     data[ind, mi] * (one_constant - ifactor2[n, gi, mi]) + data[ind + 1, mi] * ifactor2[n, gi, mi]
@@ -130,12 +130,12 @@ def _delayandsum5(data, offsets, ifactor2, steeramp, out, autopower):
     fastmath=True,
 )
 def _steer_I(rm, r0, amp):  # noqa: ARG001, N802
-    num, gridsize, numchannels = rm.shape
-    amp[0, 0, 0] = 1.0 / numchannels  # to get the same type for rm2 as for rm
+    num, gridsize, num_channels = rm.shape
+    amp[0, 0, 0] = 1.0 / num_channels  # to get the same type for rm2 as for rm
     nr = amp[0, 0, 0]
     for n in nb.prange(num):
         for gi in nb.prange(gridsize):
-            for mi in nb.prange(numchannels):
+            for mi in nb.prange(num_channels):
                 amp[n, gi, mi] = nr
 
 
@@ -149,13 +149,13 @@ def _steer_I(rm, r0, amp):  # noqa: ARG001, N802
     fastmath=True,
 )
 def _steer_II(rm, r0, amp):  # noqa: N802
-    num, gridsize, numchannels = rm.shape
-    amp[0, 0, 0] = 1.0 / numchannels  # to get the same type for rm2 as for rm
+    num, gridsize, num_channels = rm.shape
+    amp[0, 0, 0] = 1.0 / num_channels  # to get the same type for rm2 as for rm
     nr = amp[0, 0, 0]
     for n in nb.prange(num):
         for gi in nb.prange(gridsize):
             rm2 = np.divide(nr, r0[n, gi])
-            for mi in nb.prange(numchannels):
+            for mi in nb.prange(num_channels):
                 amp[n, gi, mi] = rm[n, gi, mi] * rm2
 
 
@@ -169,16 +169,16 @@ def _steer_II(rm, r0, amp):  # noqa: N802
     fastmath=True,
 )
 def _steer_III(rm, r0, amp):  # noqa: N802
-    num, gridsize, numchannels = rm.shape
+    num, gridsize, num_channels = rm.shape
     rm20 = rm[0, 0, 0] - rm[0, 0, 0]  # to get the same type for rm2 as for rm
     rm1 = rm[0, 0, 0] / rm[0, 0, 0]
     for n in nb.prange(num):
         for gi in nb.prange(gridsize):
             rm2 = rm20
-            for mi in nb.prange(numchannels):
+            for mi in nb.prange(num_channels):
                 rm2 += np.divide(rm1, np.square(rm[n, gi, mi]))
             rm2 *= r0[n, gi]
-            for mi in nb.prange(numchannels):
+            for mi in nb.prange(num_channels):
                 amp[n, gi, mi] = np.divide(rm1, rm[n, gi, mi] * rm2)
 
 
@@ -192,18 +192,18 @@ def _steer_III(rm, r0, amp):  # noqa: N802
     fastmath=True,
 )
 def _steer_IV(rm, r0, amp):  # noqa: ARG001, N802
-    num, gridsize, numchannels = rm.shape
-    amp[0, 0, 0] = np.sqrt(1.0 / numchannels)  # to get the same type for rm2 as for rm
+    num, gridsize, num_channels = rm.shape
+    amp[0, 0, 0] = np.sqrt(1.0 / num_channels)  # to get the same type for rm2 as for rm
     nr = amp[0, 0, 0]
     rm1 = rm[0, 0, 0] / rm[0, 0, 0]
     rm20 = rm[0, 0, 0] - rm[0, 0, 0]  # to get the same type for rm2 as for rm
     for n in nb.prange(num):
         for gi in nb.prange(gridsize):
             rm2 = rm20
-            for mi in nb.prange(numchannels):
+            for mi in nb.prange(num_channels):
                 rm2 += np.divide(rm1, np.square(rm[n, gi, mi]))
             rm2 = np.sqrt(rm2)
-            for mi in nb.prange(numchannels):
+            for mi in nb.prange(num_channels):
                 amp[n, gi, mi] = np.divide(nr, rm[n, gi, mi] * rm2)
 
 
@@ -217,12 +217,12 @@ def _steer_IV(rm, r0, amp):  # noqa: ARG001, N802
     fastmath=True,
 )
 def _delays(rm, c, interp2, index):
-    num, gridsize, numchannels = rm.shape
+    num, gridsize, num_channels = rm.shape
     invc = 1 / c
     intt = index.dtype.type
     for n in nb.prange(num):
         for gi in nb.prange(gridsize):
-            for mi in nb.prange(numchannels):
+            for mi in nb.prange(num_channels):
                 delays = invc * rm[n, gi, mi]
                 index[n, gi, mi] = intt(delays)
                 interp2[n, gi, mi] = delays - nb.int64(delays)
@@ -238,10 +238,10 @@ def _delays(rm, c, interp2, index):
     fastmath=True,
 )
 def _modf(delays, interp2, index):
-    num, gridsize, numchannels = delays.shape
+    num, gridsize, num_channels = delays.shape
     for n in nb.prange(num):
         for gi in nb.prange(gridsize):
-            for mi in nb.prange(numchannels):
+            for mi in nb.prange(num_channels):
                 index[n, gi, mi] = int(delays[n, gi, mi])
                 interp2[n, gi, mi] = delays[n, gi, mi] - index[n, gi, mi]
 
