@@ -17,18 +17,18 @@ import numpy as np
 
 sample_freq = 25600
 t_in_s = 30.0
-numsamples = int(sample_freq * t_in_s)
+num_samples = int(sample_freq * t_in_s)
 
-sine1 = ac.SineGenerator(sample_freq=sample_freq, numsamples=numsamples, freq=1000, amplitude=2.0)
-sine2 = ac.SineGenerator(sample_freq=sample_freq, numsamples=numsamples, freq=4000, amplitude=0.5)
-noise = ac.WNoiseGenerator(sample_freq=sample_freq, numsamples=numsamples, rms=0.5)
+sine1 = ac.SineGenerator(sample_freq=sample_freq, num_samples=num_samples, freq=1000, amplitude=2.0)
+sine2 = ac.SineGenerator(sample_freq=sample_freq, num_samples=num_samples, freq=4000, amplitude=0.5)
+noise = ac.WNoiseGenerator(sample_freq=sample_freq, num_samples=num_samples, rms=0.5)
 mixed_signal = (sine1.signal() + sine2.signal() + noise.signal())[:, np.newaxis]
 
 # %%
 # The mixed signal is then used to create a TimeSamples object.
 
 ts = ac.TimeSamples(data=mixed_signal, sample_freq=sample_freq)
-print(ts.numsamples, ts.numchannels)
+print(ts.num_samples, ts.num_channels)
 
 
 # %%
@@ -150,14 +150,14 @@ ps = ac.CrossPowerSpectra(source=fft)
 avg = ac.Average(source=ps, naverage=int(ps1.num_blocks))
 csm = next(avg.result(num=1))
 
-# reshape the cross-spectral matrix to a 3D array of shape (numfreq, numchannels, numchannels)
-csm = csm.reshape(fft.numfreqs, ts.numchannels, ts.numchannels)
+# reshape the cross-spectral matrix to a 3D array of shape (numfreq, num_channels, num_channels)
+csm = csm.reshape(fft.numfreqs, ts.num_channels, ts.num_channels)
 
 # %%
 # Plot both spectra
 plt.figure()
 colors = ['r', 'b']
-for i in range(ts.numchannels):
+for i in range(ts.num_channels):
     c = colors[i]
     auto_pow_spectrum = ac.L_p(csm_comp[:, i, i].real)
     plt.plot(fft.freqs, auto_pow_spectrum, label=f'PowerSpectra ({i})', color=c, linestyle='-', linewidth=0.8)

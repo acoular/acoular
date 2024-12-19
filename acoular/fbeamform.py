@@ -1765,7 +1765,7 @@ class BeamformerCMF(BeamformerBase):
 
         # prepare calculation
         nc = self.freq_data.num_channels
-        numpoints = self.steer.grid.size
+        num_points = self.steer.grid.size
         unit = self.unit_mult
 
         for i in ind:
@@ -1775,7 +1775,7 @@ class BeamformerCMF(BeamformerBase):
 
             # reduced Kronecker product (only where solution matrix != 0)
             Bc = (h[:, :, newaxis] * h.conjugate().T[newaxis, :, :]).transpose(2, 0, 1)
-            Ac = Bc.reshape(nc * nc, numpoints)
+            Ac = Bc.reshape(nc * nc, num_points)
 
             # get indices for upper triangular matrices (use tril b/c transposed)
             ind = reshape(tril(ones((nc, nc))), (nc * nc,)) > 0
@@ -1807,7 +1807,7 @@ class BeamformerCMF(BeamformerBase):
                 from pylops.optimization.sparsity import splitbregman
 
                 Oop = MatrixMult(A)  # transfer operator
-                Iop = self.alpha * Identity(numpoints)  # regularisation
+                Iop = self.alpha * Identity(num_points)  # regularisation
                 self._ac[i], iterations, cost = splitbregman(
                     Op=Oop,
                     RegsL1=[Iop],
@@ -1849,7 +1849,7 @@ class BeamformerCMF(BeamformerBase):
                     return func[0].T, der[:, 0]
 
                 # initial guess
-                x0 = ones([numpoints])
+                x0 = ones([num_points])
                 # boundaries - set to non negative
                 boundaries = tile((0, +inf), (len(x0), 1))
 
@@ -1960,7 +1960,7 @@ class BeamformerSODIX(BeamformerBase):
         """
         # prepare calculation
         f = self._f
-        numpoints = self.steer.grid.size
+        num_points = self.steer.grid.size
         # unit = self.unit_mult
         num_mics = self.steer.mics.num_mics
         # SODIX needs special treatment as the result from one frequency is used to
@@ -1981,18 +1981,18 @@ class BeamformerSODIX(BeamformerBase):
                         """Parameters
                         ----------
                         directions
-                        [numpoints*num_mics]
+                        [num_points*num_mics]
 
                         Returns
                         -------
                         func - Sodix function to optimize
                              [1]
                         derdrl - derivitaives in direction of D
-                            [num_mics*numpoints].
+                            [num_mics*num_points].
 
                         """
                         #### the sodix function ####
-                        Djm = directions.reshape([numpoints, num_mics])
+                        Djm = directions.reshape([num_points, num_mics])
                         p = h.T * Djm
                         csm_mod = dot(p.T, p.conj())
                         Q = csm - csm_mod
@@ -2010,20 +2010,20 @@ class BeamformerSODIX(BeamformerBase):
 
                     ##### initial guess ####
                     if not self._fr[(i - 1)]:
-                        D0 = ones([numpoints, num_mics])
+                        D0 = ones([num_points, num_mics])
                     else:
                         D0 = sqrt(
                             self._ac[(i - 1)]
                             * real(trace(csm) / trace(array(self.freq_data.csm[i - 1], dtype='complex128', copy=1))),
                         )
 
-                    # boundaries - set to non negative [2*(numpoints*num_mics)]
-                    boundaries = tile((0, +inf), (numpoints * num_mics, 1))
+                    # boundaries - set to non negative [2*(num_points*num_mics)]
+                    boundaries = tile((0, +inf), (num_points * num_mics, 1))
 
                     # optimize with gradient solver
                     # see https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.fmin_l_bfgs_b.html
 
-                    qi = ones([numpoints, num_mics])
+                    qi = ones([num_points, num_mics])
                     qi, yval, dicts = fmin_l_bfgs_b(
                         function,
                         D0,
@@ -2160,8 +2160,8 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
         n = int(self.na)  # number of eigenvalues
         m = int(self.m)  # number of first eigenvalue
         num_channels = self.freq_data.num_channels  # number of channels
-        numpoints = self.steer.grid.size
-        hh = zeros((1, numpoints, num_channels), dtype='D')
+        num_points = self.steer.grid.size
+        hh = zeros((1, num_points, num_channels), dtype='D')
 
         # Generate a cross spectral matrix, and perform the eigenvalue decomposition
         for i in ind:
@@ -2177,7 +2177,7 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
             # set small values zo 0, lowers numerical errors in simulated data
             eva[eva < max(eva) / 1e12] = 0
             # init sources
-            qi = zeros([n + m, numpoints], dtype='complex128')
+            qi = zeros([n + m, num_points], dtype='complex128')
             # Select the number of coherent modes to be processed referring to the eigenvalue
             # distribution.
             for s in list(range(m, n + m)):
@@ -2186,9 +2186,9 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
                     emode = array(sqrt(eva[s]) * eve[:, s], dtype='complex128')
                     # choose method for computation
                     if self.method == 'Suzuki':
-                        leftpoints = numpoints
-                        locpoints = arange(numpoints)
-                        weights = diag(ones(numpoints))
+                        leftpoints = num_points
+                        locpoints = arange(num_points)
+                        weights = diag(ones(num_points))
                         epsilon = arange(self.max_iter)
                         for it in arange(self.max_iter):
                             if num_channels <= leftpoints:
@@ -2212,7 +2212,7 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
                                 # Reorder from the greatest to smallest magnitude to define a
                                 # reduced-point source distribution, and reform a reduced transfer
                                 # matrix
-                                leftpoints = int(round(numpoints * self.beta ** (it + 1)))
+                                leftpoints = int(round(num_points * self.beta ** (it + 1)))
                                 idx = argsort(abs(qi[s, locpoints]))[::-1]
                                 # print(it, leftpoints, locpoints, idx )
                                 locpoints = delete(locpoints, [idx[leftpoints::]])
@@ -2224,22 +2224,22 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
                                 weights = diag(absolute(qi[s, :]) ** (2 - self.pnorm))
 
                     elif self.method == 'InverseIRLS':
-                        weights = eye(numpoints)
-                        locpoints = arange(numpoints)
+                        weights = eye(num_points)
+                        locpoints = arange(num_points)
                         for _it in arange(self.max_iter):
-                            if num_channels <= numpoints:
+                            if num_channels <= num_points:
                                 wtwi = inv(dot(weights.T, weights))
                                 aH = A.conj().T
                                 qi[s, :] = dot(dot(wtwi, aH), dot(inv(dot(A, dot(wtwi, aH))), emode))
                                 weights = diag(absolute(qi[s, :]) ** ((2 - self.pnorm) / 2))
                                 weights = weights / sum(absolute(weights))
-                            elif num_channels > numpoints:
+                            elif num_channels > num_points:
                                 wtw = dot(weights.T, weights)
                                 qi[s, :] = dot(dot(inv(dot(dot(A.conj.T, wtw), A)), dot(A.conj().T, wtw)), emode)
                                 weights = diag(absolute(qi[s, :]) ** ((2 - self.pnorm) / 2))
                                 weights = weights / sum(absolute(weights))
                     else:
-                        locpoints = arange(numpoints)
+                        locpoints = arange(num_points)
                         unit = self.unit_mult
                         AB = vstack([hstack([A.real, -A.imag]), hstack([A.imag, A.real])])
                         R = hstack([emode.real.T, emode.imag.T]) * unit
@@ -2279,7 +2279,7 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
                     )
                 # Generate source maps of all selected eigenmodes, and superpose source intensity
                 # for each source type.
-            temp = zeros(numpoints)
+            temp = zeros(num_points)
             temp[locpoints] = sum(absolute(qi[:, locpoints]) ** 2, axis=0)
             self._ac[i] = temp
             self._fr[i] = 1
@@ -2294,7 +2294,7 @@ class BeamformerAdaptiveGrid(BeamformerBase, Grid):
     def _get_shape(self):
         return (self.size,)
 
-    def _get_gpos(self):
+    def _get_pos(self):
         return self._gpos
 
     def integrate(self, sector):

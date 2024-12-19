@@ -8,11 +8,11 @@ import numpy as np
 import pytest
 
 
-@pytest.mark.parametrize('numchannels', [1, 2], ids=['1ch', '2ch'])
+@pytest.mark.parametrize('num_channels', [1, 2], ids=['1ch', '2ch'])
 @pytest.mark.parametrize('num', [1, 64, 127, 128, 129, 256])
-def test_num_args(num, create_time_data_source, numchannels):
+def test_num_args(num, create_time_data_source, num_channels):
     buffer_size = 512
-    time_data_source = create_time_data_source(numchannels=numchannels, numsamples=buffer_size + 10)
+    time_data_source = create_time_data_source(num_channels=num_channels, num_samples=buffer_size + 10)
     for snum in [128, None]:
         buffer = ac.tools.utils.SamplesBuffer(source=time_data_source, length=buffer_size, source_num=snum)
         data = ac.tools.return_result(time_data_source, num=num)
@@ -20,10 +20,10 @@ def test_num_args(num, create_time_data_source, numchannels):
         np.testing.assert_array_equal(data, data_comp)
 
 
-@pytest.mark.parametrize('numchannels', [1, 2], ids=['1ch', '2ch'])
-def test_increase_buffer(create_time_data_source, numchannels):
+@pytest.mark.parametrize('num_channels', [1, 2], ids=['1ch', '2ch'])
+def test_increase_buffer(create_time_data_source, num_channels):
     buffer_size = 50
-    time_data_source = create_time_data_source(numchannels=numchannels, numsamples=512 + 10)
+    time_data_source = create_time_data_source(num_channels=num_channels, num_samples=512 + 10)
     data = ac.tools.return_result(time_data_source, num=256)
     # test buffer
     buffer = ac.tools.utils.SamplesBuffer(source=time_data_source, length=buffer_size, source_num=25)

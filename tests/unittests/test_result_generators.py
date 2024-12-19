@@ -28,7 +28,7 @@ def test_result_generator(obj, num):  # don't use default value if @parametrize 
     """
     result = get_result(obj, num=num)
     assert isinstance(result, np.ndarray)
-    assert result.shape[0] == min(obj.numsamples, num)
+    assert result.shape[0] == min(obj.num_samples, num)
     obj_copy = obj
     while isinstance(obj_copy, ac.InOut):
         obj_copy = obj_copy.source

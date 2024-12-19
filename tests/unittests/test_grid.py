@@ -22,7 +22,7 @@ def test_grid_size(grid):
     grid : acoular.grids.Grid
         Grid instance to be tested
     """
-    assert grid.size == grid.gpos.shape[-1], 'Size of grid does not match number of grid points'
+    assert grid.size == grid.pos.shape[-1], 'Size of grid does not match number of grid points'
 
 
 @parametrize_with_cases('grid', cases=Grids)

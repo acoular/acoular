@@ -28,7 +28,7 @@ def test_deprecation_warnings(tmp_path, acoular_cls, suffix):
 def test_td_dir(tmp_path, create_time_data_source):
     """Test that global time data directory is used when no filename is given."""
     ac.config.td_dir = tmp_path
-    time_data = create_time_data_source(numchannels=2, numsamples=1)
+    time_data = create_time_data_source(num_channels=2, num_samples=1)
     h5 = ac.WriteH5(source=time_data)
     h5.save()
     assert (tmp_path / Path(h5.file).name).exists()
@@ -42,7 +42,7 @@ def test_metadata(tmp_path, create_time_data_source, acoular_cls, h5library, dat
     ac.config.h5library = h5library
     # save metadata in h5 file
     ac.config.td_dir = tmp_path
-    time_data = create_time_data_source(numchannels=2, numsamples=1)
+    time_data = create_time_data_source(num_channels=2, num_samples=1)
     h5 = ac.WriteH5(source=time_data, metadata={'test': data})
     h5.save()
     # load metadata from h5 file

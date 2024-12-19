@@ -15,7 +15,7 @@ from tests.cases.test_grid_cases import Grids, Sectors
 def setup_mics_integrate():
     """Fixture for setting up a microphone geometry with 5 microphones."""
     rng1 = np.random.RandomState(1)
-    return ac.MicGeom(mpos_tot=rng1.normal(size=3 * 5).reshape((3, 5)))
+    return ac.MicGeom(pos_total=rng1.normal(size=3 * 5).reshape((3, 5)))
 
 
 @fixture(scope='session')
@@ -32,7 +32,7 @@ def setup_power_spectra_integrate(setup_mics_integrate, f):
         Frequency in Hz
     """
     mics = setup_mics_integrate
-    steer = ac.SteeringVector(grid=ac.ImportGrid(gpos_file=np.array([[0], [0], [1]])), mics=mics)
+    steer = ac.SteeringVector(grid=ac.ImportGrid(pos=np.array([[0], [0], [1]])), mics=mics)
     transf = np.empty((1, mics.num_mics, 1), dtype=complex)
     transf[0] = steer.transfer(f).T
     csm = transf @ transf.swapaxes(2, 1).conjugate()

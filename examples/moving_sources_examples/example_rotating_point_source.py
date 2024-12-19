@@ -61,7 +61,7 @@ for t in np.arange(0, tmax * 1.001, delta_t):
 # Define a circular microphone array with 28 microphones.
 
 m = ac.MicGeom()
-m.mpos_tot = np.array(
+m.pos_total = np.array(
     [
         (r * np.sin(2 * np.pi * i + np.pi / 4), r * np.cos(2 * np.pi * i + np.pi / 4), 0)
         for i in np.linspace(0.0, 1.0, 28, False)
@@ -71,9 +71,9 @@ m.mpos_tot = np.array(
 # %%
 # Define the different source signals
 
-nsamples = int(sfreq * tmax)
-n1 = ac.WNoiseGenerator(sample_freq=sfreq, numsamples=nsamples)
-s1 = ac.SineGenerator(sample_freq=sfreq, numsamples=nsamples, freq=freq)
+num_samples = int(sfreq * tmax)
+n1 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=num_samples)
+s1 = ac.SineGenerator(sample_freq=sfreq, num_samples=num_samples, freq=freq)
 
 # %%
 # Define the moving source and one fixed source and mix their signals.

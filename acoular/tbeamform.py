@@ -147,13 +147,13 @@ class BeamformerTime(TimeOut):
         steer_func = self.steer._steer_funcs_time[self.steer.steer_type]
         fdtype = float64
         idtype = int64
-        numMics = self.steer.mics.num_mics
+        num_mics = self.steer.mics.num_mics
         n_index = arange(0, num + 1)[:, newaxis]
         c = self.steer.env.c / self.source.sample_freq
-        amp = empty((1, self.steer.grid.size, numMics), dtype=fdtype)
-        # delays = empty((1,self.steer.grid.size,numMics),dtype=fdtype)
-        d_index = empty((1, self.steer.grid.size, numMics), dtype=idtype)
-        d_interp2 = empty((1, self.steer.grid.size, numMics), dtype=fdtype)
+        amp = empty((1, self.steer.grid.size, num_mics), dtype=fdtype)
+        # delays = empty((1,self.steer.grid.size,num_mics),dtype=fdtype)
+        d_index = empty((1, self.steer.grid.size, num_mics), dtype=idtype)
+        d_interp2 = empty((1, self.steer.grid.size, num_mics), dtype=fdtype)
         steer_func(self.steer.rm[newaxis, :, :], self.steer.r0[newaxis, :], amp)
         _delays(self.steer.rm[newaxis, :, :], c, d_interp2, d_index)
         amp.shape = amp.shape[1:]
@@ -196,7 +196,7 @@ class BeamformerTime(TimeOut):
                     imax = argmax(powPhi)
                     t_float = d_interp2[imax] + d_index[imax] + n_index
                     t_ind = t_float.astype(int64)
-                    for m in range(numMics):
+                    for m in range(num_mics):
                         p_res_copy[t_ind[: num + 1, m], m] -= self.damp * interp(
                             t_ind[: num + 1, m],
                             t_float[:num, m],
@@ -382,16 +382,16 @@ class BeamformerTimeTraj(BeamformerTime):
             idtype = int32
         w = self._get_weights()
         c = self.steer.env.c / self.source.sample_freq
-        numMics = self.steer.mics.num_mics
+        num_mics = self.steer.mics.num_mics
         mpos = self.steer.mics.pos.astype(fdtype)
-        m_index = arange(numMics, dtype=idtype)
+        m_index = arange(num_mics, dtype=idtype)
         n_index = arange(num, dtype=idtype)[:, newaxis]
-        blockrm = empty((num, self.steer.grid.size, numMics), dtype=fdtype)
-        blockrmconv = empty((num, self.steer.grid.size, numMics), dtype=fdtype)
-        amp = empty((num, self.steer.grid.size, numMics), dtype=fdtype)
-        # delays = empty((num,self.steer.grid.size,numMics),dtype=fdtype)
-        d_index = empty((num, self.steer.grid.size, numMics), dtype=idtype)
-        d_interp2 = empty((num, self.steer.grid.size, numMics), dtype=fdtype)
+        blockrm = empty((num, self.steer.grid.size, num_mics), dtype=fdtype)
+        blockrmconv = empty((num, self.steer.grid.size, num_mics), dtype=fdtype)
+        amp = empty((num, self.steer.grid.size, num_mics), dtype=fdtype)
+        # delays = empty((num,self.steer.grid.size,num_mics),dtype=fdtype)
+        d_index = empty((num, self.steer.grid.size, num_mics), dtype=idtype)
+        d_interp2 = empty((num, self.steer.grid.size, num_mics), dtype=fdtype)
         blockr0 = empty((num, self.steer.grid.size), dtype=fdtype)
         movgpos = self._get_moving_gpos()  # create moving grid pos generator
         movgspeed = self.trajectory.traj(0.0, delta_t=1 / self.source.sample_freq, der=1)
@@ -464,7 +464,7 @@ class BeamformerTimeTraj(BeamformerTime):
                     ind_min = t_float.min(0).astype(idtype)
                     # store time history at max power focus point
                     h = Phi[:num, imax] * blockr0[:num, imax]
-                    for m in range(numMics):
+                    for m in range(num_mics):
                         # subtract interpolated time history from microphone signals
                         p_res[ind_min[m] : ind_max[m], m] -= self.damp * interp(
                             t_ind[ind_min[m] : ind_max[m]],

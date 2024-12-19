@@ -11,7 +11,7 @@ import pytest
 def sounddevice_samples_generator(sounddevice_properties):
     """Fixture to create an instance of ac.SoundDeviceSamplesGenerator."""
     _, max_input_channels, device_index, num = sounddevice_properties
-    sdev = ac.SoundDeviceSamplesGenerator(device=device_index, numchannels=min(2, max_input_channels))
+    sdev = ac.SoundDeviceSamplesGenerator(device=device_index, num_channels=min(2, max_input_channels))
     return sdev, num
 
 
@@ -29,13 +29,13 @@ def test_default_sounddevice_properties(sounddevice_properties):
 def test_result_infinite(sounddevice_samples_generator):
     """Test that one signal block of samples is collected with correct shape."""
     sdev, num = sounddevice_samples_generator
-    sdev.numsamples = -1
+    sdev.num_samples = -1
     for i, block in enumerate(sdev.result(num)):
         assert sdev.running
         assert block.shape == (
             num,
-            sdev.numchannels,
-        ), f'Expected shape {(num, sdev.numchannels)}, but got {block.shape}'
+            sdev.num_channels,
+        ), f'Expected shape {(num, sdev.num_channels)}, but got {block.shape}'
         if i > 1:
             break
 
@@ -43,13 +43,13 @@ def test_result_infinite(sounddevice_samples_generator):
 def test_result_finite(sounddevice_samples_generator):
     """Test that one signal block of samples is collected with correct shape."""
     sdev, num = sounddevice_samples_generator
-    sdev.numsamples = num * 2
+    sdev.num_samples = num * 2
     for block in sdev.result(num):
         assert sdev.running
         assert block.shape == (
             num,
-            sdev.numchannels,
-        ), f'Expected shape {(num, sdev.numchannels)}, but got {block.shape}'
+            sdev.num_channels,
+        ), f'Expected shape {(num, sdev.num_channels)}, but got {block.shape}'
     assert not sdev.running
 
 
