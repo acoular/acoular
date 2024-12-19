@@ -24,11 +24,11 @@ def deprecated_alias(old2new, read_only=False, removal_version=''):
         If False (default), all deprecated traits can be read and set.
         If list, traits whose names are in list will be "read only".
     removal_version: string or dict
-        Adds version of trait removal to deprecation message.
-        If not an empty string, it will be interpreted as version when
-        all traits in list will be deprecated.
-        If dictionary, keys are expected to be trait names and values
-        are the removal version strings.
+        Adds the acoular version of trait removal to the deprecation message.
+        If a non-empty string, it will be interpreted as the acoular version when
+        all traits in the list will be deprecated.
+        If a dictionary, the keys are expected to be trait names and the values
+        are the removal version as strings.
     """
 
     def decorator(cls):
