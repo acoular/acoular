@@ -49,9 +49,9 @@ def run():
 
     # generate test data, in real life this would come from an array measurement
     mg = ac.MicGeom(file=micgeofile)
-    n1 = ac.WNoiseGenerator(sample_freq=sfreq, numsamples=nsamples, seed=1)
-    n2 = ac.WNoiseGenerator(sample_freq=sfreq, numsamples=nsamples, seed=2, rms=0.7)
-    n3 = ac.WNoiseGenerator(sample_freq=sfreq, numsamples=nsamples, seed=3, rms=0.5)
+    n1 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=nsamples, seed=1)
+    n2 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=nsamples, seed=2, rms=0.7)
+    n3 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=nsamples, seed=3, rms=0.5)
     p1 = ac.PointSource(signal=n1, mics=mg, loc=(-0.1, -0.1, 0.3))
     p2 = ac.PointSource(signal=n2, mics=mg, loc=(0.15, 0, 0.3))
     p3 = ac.PointSource(signal=n3, mics=mg, loc=(0, 0.1, 0.3))

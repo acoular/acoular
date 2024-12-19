@@ -28,7 +28,7 @@ mg = ac.MicGeom(file=micgeofile)
 
 # %%
 # Obtain the transfer function of the monopole sources by using the SteeringVector object
-st_src = ac.SteeringVector(grid=ac.ImportGrid(gpos_file=np.array([loc1, loc2, loc3]).T), mics=mg)
+st_src = ac.SteeringVector(grid=ac.ImportGrid(pos=np.array([loc1, loc2, loc3]).T), mics=mg)
 H = st_src.transfer(8000).T  # transfer functions for 8000 Hz
 H_h = H.transpose().conjugate()  # H hermetian
 

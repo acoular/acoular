@@ -71,9 +71,9 @@ m.pos_total = np.array(
 # %%
 # Define the different source signals
 
-nsamples = int(sfreq * tmax)
-n1 = ac.WNoiseGenerator(sample_freq=sfreq, numsamples=nsamples)
-s1 = ac.SineGenerator(sample_freq=sfreq, numsamples=nsamples, freq=freq)
+num_samples = int(sfreq * tmax)
+n1 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=num_samples)
+s1 = ac.SineGenerator(sample_freq=sfreq, num_samples=num_samples, freq=freq)
 
 # %%
 # Define the moving source and one fixed source and mix their signals.
