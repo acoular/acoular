@@ -93,7 +93,7 @@ def in_hull(p, hull, border=True, tol=0):
         computed.
     border : bool, optional
         Points in :attr:`p` on the border of :attr:`hull` will be kept in the return if `True`. If
-        `False`, only points inside :attr:`hull` will be kept.  Default is `True`.
+        `False`, only points inside :attr:`hull` will be kept. Default is `True`.
     tol : float, optional
         Tolerance allowed in the inside-triangle check. Default is `0`.
 
@@ -129,27 +129,6 @@ def in_hull(p, hull, border=True, tol=0):
 
 
 def _det(xvert, yvert):
-    """
-    Compute twice the area of the triangle defined by points by using determinant formula.
-
-    Parameters
-    ----------
-    xvert : array_like
-        Array of nodal x-coordinates.
-    yvert : array_like
-        Vector of nodal y-coordinates.
-
-    Returns
-    -------
-    float
-        Twice the area of the triangle defined by the points.
-
-    Notes
-    -----
-    - _det is positive if points define polygon in anticlockwise order.
-    - _det is negative if points define polygon in clockwise order.
-    - _det is zero if at least two of the points are concident or if all points are collinear.
-    """
     xvert = asarray(xvert, dtype=float)
     yvert = asarray(yvert, dtype=float)
     x_prev = concatenate(([xvert[-1]], xvert[:-1]))
@@ -344,14 +323,7 @@ class Grid(ABCHasStrictTraits):
 
     @abstractmethod
     def _get_digest(self):
-        """
-        Generate a unique digest for the grid.
-
-        Returns
-        -------
-        str
-            Unique digest based on grid-defining properties.
-        """
+        """Generate a unique digest for the grid."""
 
     # 'digest' is a placeholder for other properties in derived classes, necessary to trigger the
     # depends on mechanism
@@ -435,38 +407,14 @@ class RectGrid(Grid):
 
     @property_depends_on(['nxsteps', 'nysteps'])
     def _get_size(self):
-        """
-        Calculate the total number of grid points.
-
-        Returns
-        -------
-        int
-            Total number of grid points in the grid.
-        """
         return self.nxsteps * self.nysteps
 
     @property_depends_on(['nxsteps', 'nysteps'])
     def _get_shape(self):
-        """
-        Compute the shape of the grid.
-
-        Returns
-        -------
-        tuple
-            A tuple containing the number of steps along the x- and y-axes, respectively.
-        """
         return (self.nxsteps, self.nysteps)
 
     @property_depends_on(['x_min', 'x_max', 'increment'])
     def _get_nxsteps(self):
-        """
-        Calculate the number of grid points along the x-axis.
-
-        Returns
-        -------
-        int
-            Number of steps along the x-axis.
-        """
         i = abs(self.increment)
         if i != 0:
             return int(round((abs(self.x_max - self.x_min) + i) / i))
@@ -474,14 +422,6 @@ class RectGrid(Grid):
 
     @property_depends_on(['y_min', 'y_max', 'increment'])
     def _get_nysteps(self):
-        """
-        Calculate the number of grid points along the y-axis.
-
-        Returns
-        -------
-        int
-            Number of steps along the y-axis.
-        """
         i = abs(self.increment)
         if i != 0:
             return int(round((abs(self.y_max - self.y_min) + i) / i))
@@ -489,31 +429,10 @@ class RectGrid(Grid):
 
     @cached_property
     def _get_digest(self):
-        """
-        Generate a unique digest for the grid.
-
-        Returns
-        -------
-        str
-            Unique digest based on grid-defining properties.
-        """
         return digest(self)
 
     @property_depends_on(['x_min', 'x_max', 'y_min', 'y_max', 'increment'])
     def _get_pos(self):
-        """
-        Calculate the grid point coordinates.
-
-        Returns
-        -------
-        numpy.ndarray
-            A (3, :attr:`~Grid.size`) array of floats representing the grid point coordinates for x,
-            y, and z respectively.
-
-        Notes
-        -----
-        The grid is generated using `numpy.mgrid`.
-        """
         bpos = mgrid[
             self.x_min : self.x_max : self.nxsteps * 1j,
             self.y_min : self.y_max : self.nysteps * 1j,
@@ -561,7 +480,7 @@ class RectGrid(Grid):
 
         Parameters
         ----------
-        *r : float
+        r : tuple of floats
             Defines the subdomain shape and dimensions:
                 - If 3 values are provided: center `(x1, y1)` and radius `r2` define a circle.
                 - If 4 values are provided: corners `(x1, y1)` and `(x2, y2)` define a rectangle.
@@ -656,38 +575,14 @@ class RectGrid3D(RectGrid):
     _increment = Union(Float(), CArray(shape=(3,), dtype=float), default_value=0.1, desc='step size')
 
     #: The cell side length for the grid. This can either be a scalar (same increments in all 3
-    #: dimensions) or a (3,) array of floats with respective increments in x-, y-, and z-direction
-    #: (in m). Default is 0.1.
+    #: dimensions) or a (3,) array of floats with respective increments in x-, y-, and z-direction.
+    #: Default is 0.1.
     increment = Property(desc='step size')
 
     def _get_increment(self):
-        """
-        Return the increment used for grid spacing.
-
-        Returns
-        -------
-        float or ndarray
-            The current increment value for grid spacing.
-        """
         return self._increment
 
     def _set_increment(self, increment):
-        """
-        Set the increment value for grid spacing.
-
-        This method allows setting the increment as a scalar (for uniform grid spacing) or a
-        3-element array (for different spacing along the x-, y-, and z-axes).
-
-        Parameters
-        ----------
-        increment : float or ndarray
-            The increment value for the grid spacing.
-
-        Raises
-        ------
-        TraitError
-            If the increment is neither a float nor a 3-element array.
-        """
         if isscalar(increment):
             try:
                 self._increment = absolute(float(increment))
@@ -705,38 +600,14 @@ class RectGrid3D(RectGrid):
 
     @property_depends_on(['nxsteps', 'nysteps', 'nzsteps'])
     def _get_size(self):
-        """
-        Return the total number of grid points.
-
-        Returns
-        -------
-        int
-            The total number of grid points in the 3D grid.
-        """
         return self.nxsteps * self.nysteps * self.nzsteps
 
     @property_depends_on(['nxsteps', 'nysteps', 'nzsteps'])
     def _get_shape(self):
-        """
-        Return the shape of the grid as a tuple.
-
-        Returns
-        -------
-        tuple of int
-            A tuple representing the shape of the grid in the form (nxsteps, nysteps, nzsteps).
-        """
         return (self.nxsteps, self.nysteps, self.nzsteps)
 
     @property_depends_on(['x_min', 'x_max', '_increment'])
     def _get_nxsteps(self):
-        """
-        Return the number of grid points along the x-axis.
-
-        Returns
-        -------
-        int
-            The number of grid points along the x-axis.
-        """
         i = abs(self.increment) if isscalar(self.increment) else abs(self.increment[0])
         if i != 0:
             return int(round((abs(self.x_max - self.x_min) + i) / i))
@@ -744,14 +615,6 @@ class RectGrid3D(RectGrid):
 
     @property_depends_on(['y_min', 'y_max', '_increment'])
     def _get_nysteps(self):
-        """
-        Return the number of grid points along the y-axis.
-
-        Returns
-        -------
-        int
-            The number of grid points along the y-axis.
-        """
         i = abs(self.increment) if isscalar(self.increment) else abs(self.increment[1])
         if i != 0:
             return int(round((abs(self.y_max - self.y_min) + i) / i))
@@ -759,14 +622,6 @@ class RectGrid3D(RectGrid):
 
     @property_depends_on(['z_min', 'z_max', '_increment'])
     def _get_nzsteps(self):
-        """
-        Return the number of grid points along the z-axis.
-
-        Returns
-        -------
-        int
-            The number of grid points along the z-axis.
-        """
         i = abs(self.increment) if isscalar(self.increment) else abs(self.increment[2])
         if i != 0:
             return int(round((abs(self.z_max - self.z_min) + i) / i))
@@ -774,30 +629,6 @@ class RectGrid3D(RectGrid):
 
     @property_depends_on('digest')
     def _get_pos(self):
-        """
-        Calculate grid point coordinates.
-
-        Returns
-        -------
-        array of floats, shape (3, :attr:`~Grid.size`)
-            Array of the grid point locations with arrays for the x-, y and z-coordinates
-            respectively.
-
-        Examples
-        --------
-        >>> import acoular as ac
-        >>>
-        >>> grid = ac.grids.RectGrid3D()
-        >>> grid.increment = 2
-        >>> grid.pos
-        array([[-1., -1., -1., -1.,  1.,  1.,  1.,  1.],
-               [-1., -1.,  1.,  1., -1., -1.,  1.,  1.],
-               [-1.,  1., -1.,  1., -1.,  1., -1.,  1.]])
-
-        Notes
-        -----
-        - The grid is created using `numpy.mgrid`.
-        """
         bpos = mgrid[
             self.x_min : self.x_max : self.nxsteps * 1j,
             self.y_min : self.y_max : self.nysteps * 1j,
@@ -932,63 +763,21 @@ class ImportGrid(Grid):
 
     @cached_property
     def _get_digest(self):
-        """
-        Compute the unique digest for the grid based on its data.
-
-        Returns
-        -------
-        str
-            A hash representing the grid's properties.
-        """
         return digest(self)
 
     @property_depends_on(['_gpos'])
     def _get_size(self):
-        """
-        Calculate the total number of grid points.
-
-        Returns
-        -------
-        int
-            The total number of grid points.
-        """
         return self.pos.shape[-1]
 
     @property_depends_on(['_gpos'])
     def _get_shape(self):
-        """
-        Get the shape of the grid.
-
-        Returns
-        -------
-        tuple
-            A tuple representing the shape of the grid.
-        """
         return (self.pos.shape[-1],)
 
     @property_depends_on(['_gpos'])
     def _get_pos(self):
-        """
-        Calculate grid point coordinates.
-
-        Returns
-        -------
-        array of floats, shape (3, :attr:`~Grid.size`)
-            Array of the grid point locations with arrays for the x-, y and z-coordinates
-            respectively.
-        """
         return self._gpos
 
     def _set_pos(self, pos):
-        """
-        Set grid point coordinates.
-
-        Parameters
-        ----------
-        pos : array of floats
-            A (3, N) array of the locations of N grid points with arrays for the x-, y and
-            z-coordinates respectively.
-        """
         self._gpos = pos
 
     @on_trait_change('file')
@@ -1073,7 +862,7 @@ class LineGrid(Grid):
     #: are set. (read-only)
     size = Property(desc='overall number of grid points')
 
-    #: A (3, :attr:`size``) array containing the x, y, and z positions of the grid points, without
+    #: A (3, :attr:`size`) array containing the x, y, and z positions of the grid points, without
     #: invalid microphones. (read-only)
     pos = Property(desc='x, y, z positions of grid points')
 
@@ -1084,54 +873,18 @@ class LineGrid(Grid):
 
     @cached_property
     def _get_digest(self):
-        """
-        Compute a unique digest for the grid.
-
-        Returns
-        -------
-        str
-            A hash representing the current grid configuration.
-        """
         return digest(self)
 
     @property_depends_on(['num_points'])
     def _get_size(self):
-        """
-        Calculate the total number of grid points.
-
-        Returns
-        -------
-        int
-            The total number of grid points.
-        """
         return self.pos.shape[-1]
 
     @property_depends_on(['num_points'])
     def _get_shape(self):
-        """
-        Get the shape of the grid.
-
-        Returns
-        -------
-        int
-            The total number of grid points.
-        """
         return self.pos.shape[-1]
 
     @property_depends_on(['num_points', 'length', 'direction', 'loc'])
     def _get_pos(self):
-        """
-        Calculate the positions of the grid points.
-
-        The grid points are evenly distributed along the line defined by :attr:`loc`,
-        :attr:`direction`, and :attr:`length`.
-
-        Returns
-        -------
-        numpy.ndarray
-            A (3, :attr:`num_points`) array representing the x, y, and z positions of the grid
-            points.
-        """
         dist = self.length / (self.num_points - 1)
         loc = array(self.loc, dtype=float).reshape((3, 1))
         direc_n = array(self.direction) / norm(self.direction)
@@ -1187,26 +940,10 @@ class MergeGrid(Grid):
 
     @cached_property
     def _get_digest(self):
-        """
-        Generate a unique digest for the merged grid.
-
-        Returns
-        -------
-        str
-            A hash representing the combined configuration of the input grids.
-        """
         return digest(self)
 
     @cached_property
     def _get_grid_digest(self):
-        """
-        Retrieve the unique digests of all input grids.
-
-        Returns
-        -------
-        list of str
-            A list of digests corresponding to each grid in the `grids` attribute.
-        """
         griddigest = []
         for grid in self.grids:
             griddigest.append(grid.digest)
@@ -1214,40 +951,14 @@ class MergeGrid(Grid):
 
     @property_depends_on(['digest'])
     def _get_size(self):
-        """
-        Calculate the total number of points in the merged grid.
-
-        Returns
-        -------
-        int
-            The total number of unique points in the merged grid.
-        """
         return self.pos.shape[-1]
 
     @property_depends_on(['digest'])
     def _get_shape(self):
-        """
-        Get the shape of the merged grid.
-
-        Returns
-        -------
-        int
-            The total number of points in the merged grid.
-        """
         return self.pos.shape[-1]
 
     @property_depends_on(['digest'])
     def _get_subgrids(self):
-        """
-        Assign subgrid names to each point in the merged grid.
-
-        Each point is associated with the corresponding subgrid it originated from.
-
-        Returns
-        -------
-        numpy.ndarray
-            A 1D array containing the names of subgrids for each grid point.
-        """
         subgrids = zeros((1, 0), dtype=str)
         for grid in self.grids:
             subgrids = append(subgrids, tile(grid.__class__.__name__ + grid.digest, grid.size))
@@ -1255,15 +966,6 @@ class MergeGrid(Grid):
 
     @property_depends_on(['digest'])
     def _get_pos(self):
-        """
-        Merge the positions of all input grids, removing duplicates.
-
-        Returns
-        -------
-        numpy.ndarray
-            A (3, :attr:`~Grid.size`) array containing the unique x, y, and z positions of the
-            merged grid.
-        """
         bpos = zeros((3, 0))
         for grid in self.grids:
             bpos = append(bpos, grid.pos, axis=1)
@@ -1576,7 +1278,7 @@ class PolySector(SingleSector):
 
     Notes
     -----
-    - The polygon is specified by the :class:`Polygon` class.
+    The polygon is specified by the :class:`Polygon` class.
     """
 
     #: List of coordinates representing the polygon's vertices. The coordinates must define a closed
