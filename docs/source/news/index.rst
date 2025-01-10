@@ -21,6 +21,7 @@ Upcoming Release (25.01)
 
     **Documentation**
         * adds guide on how to submit a pull request
+        * adds docstrings to spectra.py
 
     **Tests**
         * tests now consequently use `pytest` framework instead of `unittest`
