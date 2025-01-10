@@ -48,6 +48,7 @@ Upcoming Release (25.01)
         * `depends_on` now only accepts a list of strings
         * removes deprecated traits ending with version 25.01
         * include doctests in coverage report
+        * no longer add docs label if news/index.rst is updated
 
 24.10
 ----------------
