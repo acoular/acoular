@@ -33,6 +33,7 @@ Upcoming Release
         * updates examples to use a right hand co-ordinate system
         * adds new docstrings to trajectory.py
         * adds new docstrings to grids.py
+        * adds new docstrings to microphones.py
 
     **Tests**
         * tests now consequently use `pytest` framework instead of `unittest`
