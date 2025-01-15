@@ -1,27 +1,20 @@
 docs:
-- changed-files:
-  - any-glob-to-any-file:
-    - docs/**
-    - README.md
-    - AUTHORS.rst
-    - CITATION.cff
+- all:
+  - changed-files:
+    - any-glob-to-any-file: ['docs/**', 'README.md', 'AUTHORS.rst', 'CITATION.cff']
+    - all-globs-to-any-file: '!docs/source/news/index.rst'
 tests:
 - changed-files:
-  - any-glob-to-any-file:
-    - tests/**
+  - any-glob-to-any-file: 'tests/**'
 ci:
 - changed-files:
-  - any-glob-to-any-file: .github/**
+  - any-glob-to-any-file: '.github/**'
 linting:
 - changed-files:
-  - any-glob-to-any-file: .ruff.toml
+  - any-glob-to-any-file: '.ruff.toml'
 maintenance:
 - changed-files:
-  - any-glob-to-any-file:
-    - pyproject.toml
-    - CONTRIBUTING.md
-    - CODE_OF_CONDUCT.md
-    - LICENSE
+  - any-glob-to-any-file: ['pyproject.toml', 'CONTRIBUTING.md', 'CODE_OF_CONDUCT.md', 'LICENSE']
 new feature:
  - head-branch: ['^feature', 'feature']
 sinus:
