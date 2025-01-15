@@ -1,5 +1,5 @@
 from pathlib import Path
-
+import sys
 import acoular
 from sphinx_gallery.sorting import ExplicitOrder
 
@@ -31,6 +31,7 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.inheritance_diagram',
     'sphinx.ext.autosummary',
+    'sphinx.ext.intersphinx',
     'sphinxcontrib.bibtex',
     'numpydoc',
     'matplotlib.sphinxext.plot_directive',
@@ -171,3 +172,12 @@ bibtex_default_style = 'unsrt'
 plot_include_source = True
 plot_html_show_source_link = False
 plot_html_show_formats = False
+
+#%% 
+# intersphinx extension settings
+
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/{.major}".format(sys.version_info), None),
+    "numpy": ("https://numpy.org/doc/stable", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/", None),
+}
