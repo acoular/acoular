@@ -15,7 +15,7 @@ import sys
 from os import environ, mkdir, path
 from warnings import warn
 
-from traits.api import File
+# WARNING: DO NOT ADD ANY IMPORTS HERE THAT MIGHT IMPORT NUMPY
 
 # When numpy is using OpenBLAS then it runs with OPENBLAS_NUM_THREADS which may lead to
 # overcommittment when called from within numba jitted function that run on
@@ -52,11 +52,11 @@ if 'numpy' in sys.modules:
             stacklevel=2,
         )
 else:
-    # numpy is not loaded
+    # numpy is not loaded, make sure that OpenBLAS runs single threaded
     environ['OPENBLAS_NUM_THREADS'] = '1'
 
 # this loads numpy, so we have to defer loading until OpenBLAS check is done
-from traits.api import Bool, Enum, HasStrictTraits, Property, cached_property
+from traits.api import Bool, Enum, HasStrictTraits, File, Property, cached_property  # noqa: I001
 
 
 class Config(HasStrictTraits):
