@@ -19,30 +19,65 @@ from .internal import digest
 
 
 class Trajectory(HasStrictTraits):
-    """Describes a trajectory from sampled points.
+    """
+    Represents a trajectory as a continuous curve derived from sampled points.
 
-    Based on a discrete number of points in space and time, a
-    continuous trajectory is calculated using spline interpolation
-    of positions between samples.
+    The :class:`Trajectory` class computes a smooth, continuous path through a set of discrete
+    points in space and time using spline interpolation. It also supports evaluating the trajectory
+    and its derivatives at arbitrary time instants.
+
+    See Also
+    --------
+    :func:`scipy.interpolate.splprep` : Underlying spline generation function.
+    :func:`scipy.interpolate.splev` : Used for evaluating the spline.
+    :class:`~acoular.sources.MovingPointSource` : Model a point source moving along a trajectory.
+    :class:`~acoular.sources.MovingPointSourceDipole` : Model a point source dipole moving along a
+                                                        trajectory.
+    :class:`~acoular.sources.MovingLineSource` : Model a line source moving along a trajectory.
+
+    Notes
+    -----
+    - Spline interpolation provides a smooth trajectory that passes through all sampled points. The
+      interpolation order is adjusted automatically based on the number of points.
+    - The trajectory can be used in simulations where a source's motion must be modeled
+      continuously.
+
+    Examples
+    --------
+    Create a trajectory and evaluate positions and velocities:
+
+    >>> from acoular import Trajectory
+    >>> points = {0.0: (0.0, 0.0, 0.0), 1.0: (1.0, 0.0, 0.0), 2.0: (2.0, 1.0, 0.0)}
+    >>> tr = Trajectory(points=points)
+    >>>
+    >>> tr.location(1.5)  # Position at t=1.5
+    [array(1.5), array(0.375), array(0.)]
+    >>>
+    >>> for pos in tr.traj(0.0, 2.0, 0.5):  # Positions every 0.5 seconds
+    ...     print(pos)
+    (np.float64(0.0), np.float64(0.0), np.float64(0.0))
+    (np.float64(0.5), np.float64(-0.125), np.float64(0.0))
+    (np.float64(1.0), np.float64(0.0), np.float64(0.0))
+    (np.float64(1.5), np.float64(0.375), np.float64(0.0))
     """
 
-    #: Dictionary that assigns discrete time instants (keys) to
-    #: sampled `(x, y, z)` positions along the trajectory (values).
+    #: Dictionary mapping time instants (keys, as floats) to sampled ``(x, y, z)`` positions
+    #: (values, as tuples of floats) along the trajectory.
     points = Dict(
         key_trait=Float,
         value_trait=Tuple(Float, Float, Float),
         desc='sampled positions along the trajectory',
     )
 
-    #: Tuple of the start and end time, is set automatically
-    #: (depending on :attr:`points`).
+    #: Automatically determined tuple ``(t_min, t_max)`` representing the start and end times of the
+    #: trajectory, based on the keys in :attr:`points`.
     interval = Property()
     # t_min, t_max tuple
 
-    #: Spline data, internal use.
+    #: Internal representation of the spline, generated using :func:`scipy.interpolate.splprep`.
     tck = Property()
 
-    # internal identifier
+    #: A unique identifier for the trajectory, based on its points. (read-only)
     digest = Property(depends_on=['points[]'])
 
     @cached_property
@@ -62,54 +97,95 @@ class Trajectory(HasStrictTraits):
         return tcku[0]
 
     def location(self, t, der=0):
-        """Returns the positions for one or more instants in time.
+        """
+        Compute the trajectory's position or derivatives at specified times.
 
         Parameters
         ----------
-        t : array of floats
-            Instances in time to calculate the positions at.
-        der : integer
-            The order of derivative of the spline to compute, defaults to 0.
+        t : float or array-like of floats
+            Time instant(s) at which to compute the position(s) or derivative(s).
+        der : int, optional
+            Order of the derivative to compute:
+                - ``0`` for positions (default),
+                - ``1`` for velocities,
+                - ``2`` for accelerations, etc.
 
         Returns
         -------
-        (x, y, z) : tuple with arrays of floats
-            Positions at the given times; `x`, `y` and `z` have the same shape as `t`.
+        :class:`numpy.ndarray`
+            ``(x, y, z)`` arrays representing the trajectory's position (or derivative) at the given
+            time(s). The shape matches that of ``t``.
 
+        Examples
+        --------
+        >>> from acoular import Trajectory
+        >>> points = {0.0: (0.0, 0.0, 0.0), 1.0: (1.0, 2.0, 0.0), 2.0: (2.0, 4.0, 0.0)}
+        >>> tr = Trajectory(points=points)
+        >>> tr.location(1.0)  # Position at t=1.0
+        [array(1.), array(2.), array(0.)]
+        >>> tr.location([0.5, 1.5], der=1)  # Velocity at t=0.5 and t=1.5
+        [array([1., 1.]), array([2., 2.]), array([0., 0.])]
         """
         return splev(t, self.tck, der)
 
     def traj(self, t_start, t_end=None, delta_t=None, der=0):
-        """Python generator that yields locations along the trajectory.
+        """
+        Interate through trajectory positions or derivatives at specified intervals.
 
         Parameters
         ----------
         t_start : float
-            Starting time of the trajectory, defaults to the earliest
-            time in :attr:`points`.
-        t_end : float
-            Ending time of the trajectory, defaults to the latest
-            time in :attr:`points`.
-        delta_t : float
-            Time interval between yielded trajectory points, defaults to earliest
-            time in :attr:`points`.
+            Start time for the trajectory. Default is earliest key in :attr:`points`.
+        t_end : float, optional
+            End time of the trajectory. Default is the latest key in :attr:`points`.
+        delta_t : float, optional
+            Time interval between consecutive points to yield. Default is the value of ``t_start``.
+        der : int, optional
+            Order of the derivative to compute:
+                - ``0`` for positions (default),
+                - ``1`` for velocities,
+                - ``2`` for accelerations, etc.
 
-        Returns
-        -------
-        (x, y, z) : tuples of floats
-            Positions at the desired times are yielded.
+        Yields
+        ------
+        tuple of floats
+            ``(x, y, z)`` positions or derivatives at the specified time intervals.
+
+        Notes
+        -----
+        The function precomputes all interpolated locations for efficiency and yields them
+        sequentially.
 
         Examples
         --------
-        x.traj(0.1)
-            Yields the position every 0.1 s within the
-            given :attr:`interval`.
-        x.traj(2.5, 4.5, 0.1)
-            Yields the position every 0.1 s between 2.5 s and 4.5 s.
-        x.traj(0.1, der=1)
-            Yields the 1st derivative of the spline (= velocity vector) every 0.1 s
-            within the given :attr:`interval`.
+        Create a trajectory and iterate through the positions in the :attr:`interval`:
 
+        >>> points = {0.0: (0.0, 0.0, 0.0), 1.0: (1.0, 0.0, 0.0), 2.0: (2.0, 1.0, 0.0)}
+        >>> tr = Trajectory(points=points)
+        >>> for pos in tr.traj(0.0, 2.0, 0.5):
+        ...     print(pos)
+        (np.float64(0.0), np.float64(0.0), np.float64(0.0))
+        (np.float64(0.5), np.float64(-0.125), np.float64(0.0))
+        (np.float64(1.0), np.float64(0.0), np.float64(0.0))
+        (np.float64(1.5), np.float64(0.375), np.float64(0.0))
+
+        Iterate through the velocities of the :attr:`interval` in 0.5-second steps:
+
+        >>> for vel in tr.traj(0.0, delta_t=0.5, der=1):
+        ...     print(vel)
+        (np.float64(1.0), np.float64(-0.5), np.float64(0.0))
+        (np.float64(1.0), np.float64(0.0), np.float64(0.0))
+        (np.float64(1.0), np.float64(0.5), np.float64(0.0))
+        (np.float64(1.0), np.float64(1.0), np.float64(0.0))
+
+        Iterate through the accelerations of the :attr:`interval` up to 0.9 seconds in 0.3-second
+        steps:
+
+        >>> for acc in tr.traj(0.0, 0.9, 0.3, der=2):
+        ...     print(acc)
+        (np.float64(0.0), np.float64(1.0), np.float64(0.0))
+        (np.float64(0.0), np.float64(1.0), np.float64(0.0))
+        (np.float64(0.0), np.float64(1.0), np.float64(0.0))
         """
         if not delta_t:
             delta_t = t_start
