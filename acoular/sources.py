@@ -85,7 +85,7 @@ from .environments import Environment
 from .h5files import H5FileBase, _get_h5file_class
 from .internal import digest, ldigest
 from .microphones import MicGeom
-from .signals import SignalGenerator
+from .signals import NoiseGenerator, SignalGenerator
 from .tprocess import TimeConvolve
 from .trajectory import Trajectory
 
@@ -1345,7 +1345,7 @@ class UncorrelatedNoiseSource(SamplesGenerator):
     #: Type of noise to generate at the channels.
     #: The `~acoular.signals.SignalGenerator`-derived class has to
     # feature the parameter "seed" (i.e. white or pink noise).
-    signal = Instance(SignalGenerator, desc='type of noise')
+    signal = Instance(NoiseGenerator, desc='type of noise')
 
     #: Array with seeds for random number generator.
     #: When left empty, arange(:attr:`num_channels`) + :attr:`signal`.seed

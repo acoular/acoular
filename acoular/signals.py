@@ -7,6 +7,8 @@
     :toctree: generated/
 
     SignalGenerator
+    PeriodicSignalGenerator
+    NoiseGenerator
     WNoiseGenerator
     PNoiseGenerator
     FiltWNoiseGenerator
@@ -50,9 +52,6 @@ class SignalGenerator(ABCHasStrictTraits):
     should not be used directly as it contains no real functionality.
     """
 
-    #: RMS amplitude of source signal (for point source: in 1 m distance).
-    rms = Float(1.0, desc='rms amplitude')
-
     #: Sampling frequency of the signal.
     sample_freq = Float(1.0, desc='sampling frequency')
 
@@ -60,7 +59,7 @@ class SignalGenerator(ABCHasStrictTraits):
     num_samples = CLong
 
     # internal identifier
-    digest = Property(depends_on=['rms', 'sample_freq', 'num_samples'])
+    digest = Property(depends_on=['sample_freq', 'num_samples'])
 
     @abstractmethod
     def _get_digest(self):
@@ -89,8 +88,47 @@ class SignalGenerator(ABCHasStrictTraits):
         return resample(self.signal(), factor * self.num_samples)
 
 
-class WNoiseGenerator(SignalGenerator):
-    """White noise signal generator."""
+class PeriodicSignalGenerator(SignalGenerator):
+    """
+    Virtual base class for periodic signal generators.
+
+    Defines the common interface for all PeriodicSignalGenerator classes. This class
+    may be used as a base for class handling periodic signals that can be characterized by their
+    frequency, phase and amplitude. It should not be used directly as it contains no real
+    functionality.
+    """
+
+    #: Frequency of the signal, float, defaults to 1000.0.
+    freq = Float(1000.0, desc='Frequency')
+
+    #: Phase of the signal (in radians), float, defaults to 0.0.
+    phase = Float(0.0, desc='Phase')
+
+    #: Amplitude of the signal. Defaults to 1.0.
+    amplitude = Float(1.0)
+
+    # internal identifier
+    digest = Property(depends_on=['amplitude', 'num_samples', 'sample_freq', 'freq', 'phase'])
+
+    @abstractmethod
+    def _get_digest(self):
+        """Returns the internal identifier."""
+
+    @abstractmethod
+    def signal(self):
+        """Deliver the signal."""
+
+
+class NoiseGenerator(SignalGenerator):
+    """Virtual base class for noise signal generators.
+
+    Defines the common interface for all NoiseGenerator classes. This class
+    may be used as a base for class handling noise signals that can be characterized by their
+    RMS amplitude. It should not be used directly as it contains no real functionality.
+    """
+
+    #: RMS amplitude of the signal.
+    rms = Float(1.0, desc='rms amplitude')
 
     #: Seed for random number generator, defaults to 0.
     #: This parameter should be set differently for different instances
@@ -98,7 +136,22 @@ class WNoiseGenerator(SignalGenerator):
     seed = Int(0, desc='random seed value')
 
     # internal identifier
-    digest = Property(depends_on=['rms', 'num_samples', 'sample_freq', 'seed'])
+    digest = Property(depends_on=['rms', 'seed', 'sample_freq', 'num_samples'])
+
+    @abstractmethod
+    def _get_digest(self):
+        """Returns the internal identifier."""
+
+    @abstractmethod
+    def signal(self):
+        """Deliver the signal."""
+
+
+class WNoiseGenerator(NoiseGenerator):
+    """White noise signal generator."""
+
+    # internal identifier
+    digest = Property(depends_on=['rms', 'seed', 'sample_freq', 'num_samples'])
 
     @cached_property
     def _get_digest(self):
@@ -116,7 +169,7 @@ class WNoiseGenerator(SignalGenerator):
         return self.rms * rnd_gen.standard_normal(self.num_samples)
 
 
-class PNoiseGenerator(SignalGenerator):
+class PNoiseGenerator(NoiseGenerator):
     """Pink noise signal generator.
 
     Simulation of pink noise is based on the Voss-McCartney algorithm.
@@ -129,17 +182,12 @@ class PNoiseGenerator(SignalGenerator):
     characteristic.
     """
 
-    #: Seed for random number generator, defaults to 0.
-    #: This parameter should be set differently for different instances
-    #: to guarantee statistically independent (non-correlated) outputs.
-    seed = Int(0, desc='random seed value')
-
     #: "Octave depth" -- higher values for 1/f spectrum at low frequencies,
     #: but longer calculation, defaults to 16.
     depth = Int(16, desc='octave depth')
 
     # internal identifier
-    digest = Property(depends_on=['rms', 'num_samples', 'sample_freq', 'seed', 'depth'])
+    digest = Property(depends_on=['rms', 'seed', 'sample_freq', 'num_samples', 'depth'])
 
     @cached_property
     def _get_digest(self):
@@ -183,16 +231,7 @@ class FiltWNoiseGenerator(WNoiseGenerator):
     ma = CArray(value=array([]), dtype=float, desc='moving-average coefficients (coefficients of the numerator)')
 
     # internal identifier
-    digest = Property(
-        depends_on=[
-            'ar',
-            'ma',
-            'rms',
-            'num_samples',
-            'sample_freq',
-            'seed',
-        ],
-    )
+    digest = Property(depends_on=['rms', 'seed', 'sample_freq', 'num_samples', 'ar', 'ma'])
 
     @cached_property
     def _get_digest(self):
@@ -223,21 +262,11 @@ class FiltWNoiseGenerator(WNoiseGenerator):
         return sosfilt(sos, x=wnoise)[sdelay:]
 
 
-class SineGenerator(SignalGenerator):
-    """Sine signal generator with adjustable frequency and phase."""
-
-    #: Sine wave frequency, float, defaults to 1000.0.
-    freq = Float(1000.0, desc='Frequency')
-
-    #: Sine wave phase (in radians), float, defaults to 0.0.
-    phase = Float(0.0, desc='Phase')
-
-    #: Amplitude of source signal (for point source: in 1 m distance).
-    #: Defaults to 1.0.
-    amplitude = Float(1.0)
+class SineGenerator(PeriodicSignalGenerator):
+    """Sine signal generator with adjustable amplitude, frequency and phase."""
 
     # internal identifier
-    digest = Property(depends_on=['_amp', 'num_samples', 'sample_freq', 'freq', 'phase'])
+    digest = Property(depends_on=['num_samples', 'sample_freq', 'amplitude', 'freq', 'phase'])
 
     @cached_property
     def _get_digest(self):
@@ -255,6 +284,7 @@ class SineGenerator(SignalGenerator):
         return self.amplitude * sin(2 * pi * self.freq * t + self.phase)
 
 
+@deprecated_alias({'rms': 'amplitude'})
 class GenericSignalGenerator(SignalGenerator):
     """Generate signal from output of :class:`~acoular.base.SamplesGenerator` object.
 
@@ -273,6 +303,9 @@ class GenericSignalGenerator(SignalGenerator):
 
     #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
     source = Instance(SamplesGenerator)
+
+    #: Amplitude of the signal. Defaults to 1.0.
+    amplitude = Float(1.0)
 
     #: Sampling frequency of output signal, as given by :attr:`source`.
     sample_freq = Delegate('source')
@@ -296,7 +329,7 @@ class GenericSignalGenerator(SignalGenerator):
 
     # internal identifier
     digest = Property(
-        depends_on=['source.digest', 'loop_signal', 'num_samples', 'rms'],
+        depends_on=['source.digest', 'loop_signal', 'num_samples', 'amplitude'],
     )
 
     @cached_property
@@ -342,6 +375,4 @@ class GenericSignalGenerator(SignalGenerator):
             res = nums % stop  # last part of unfinished loop
             if res > 0:
                 track[stop * nloops :] = track[:res]
-
-        # The rms value is just an amplification here
-        return self.rms * track
+        return self.amplitude * track
