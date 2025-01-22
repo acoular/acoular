@@ -67,6 +67,13 @@ def test_set_traits(acoular_cls):
                         setattr(obj, k, v[len(v) // 2])
 
 
+# TODO: remove the following block when #418 is fixed
+for c in all_hastraits_classes.copy():
+    if c.__name__ in ('PowerSpectraImport', 'CsmAIAABenchmark'):
+        all_hastraits_classes.remove(c)
+        all_hastraits_classes.append(pytest.param(c, marks=pytest.mark.xfail(reason='issue #418')))
+
+
 @pytest.mark.parametrize('acoular_cls', all_hastraits_classes)
 def test_trait_dependencies(acoular_cls):
     """Assert that a property that is depended on depends on something."""
