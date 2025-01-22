@@ -8,7 +8,7 @@ import warnings
 from inspect import isabstract
 
 import pytest
-from traits.api import Any, Bool, Enum, Float, Int, Range, TraitEnum
+from traits.api import Bool, Enum, Float, Int, Range, TraitEnum
 
 from tests.utils import get_all_classes
 
@@ -67,7 +67,7 @@ def test_set_traits(acoular_cls):
                         setattr(obj, k, v[len(v) // 2])
 
 
-# TODO: remove the entries when respective issue is fixed
+# TODO: #418, #419, #420 remove the entries when respective issue is fixed #noqa: TD002, TD003, FIX002
 xfails = {
     'PowerSpectraImport': 'Issue #418',
     'CsmAIAABenchmark': 'Issue #418',
@@ -76,7 +76,7 @@ xfails = {
 }
 for c in all_hastraits_classes.copy():
     try:
-        if c.__name__ in xfails.keys():
+        if c.__name__ in xfails:
             all_hastraits_classes.remove(c)
             all_hastraits_classes.append(pytest.param(c, marks=pytest.mark.xfail(reason=xfails[c.__name__])))
     except AttributeError:

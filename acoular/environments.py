@@ -17,6 +17,7 @@
 """
 
 from abc import abstractmethod
+
 import numba as nb
 from numpy import (
     arange,
@@ -48,7 +49,18 @@ from scipy.integrate import ode
 from scipy.interpolate import LinearNDInterpolator
 from scipy.linalg import norm
 from scipy.spatial import ConvexHull
-from traits.api import ABCHasStrictTraits, CArray, Dict, Float, HasStrictTraits, Instance, Int, Property, Union, cached_property
+from traits.api import (
+    ABCHasStrictTraits,
+    CArray,
+    Dict,
+    Float,
+    HasStrictTraits,
+    Instance,
+    Int,
+    Property,
+    Union,
+    cached_property,
+)
 
 from .internal import digest
 
