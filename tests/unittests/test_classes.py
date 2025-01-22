@@ -82,12 +82,10 @@ def test_trait_dependencies(acoular_cls):
         assert len(objtname := tname.split('.')) < 3, 'Trait dependency too deep.'
         # recurse if trait depends on a trait of another object
         if len(objtname) == 2:
-            # skip if trait is Any
-            if obj.trait(objtname[0]).trait_type != Any:
-                # instantiate the trait
-                obj = create_instance(obj.trait(objtname[0]).trait_type.klass)
-                tname = objtname[1]
-                check_or_unpack(obj, tname, toplevel=False)
+            # instantiate the trait
+            obj = create_instance(obj.trait(objtname[0]).trait_type.klass)
+            tname = objtname[1]
+            check_or_unpack(obj, tname, toplevel=False)
         else:
             # deal with traits extended name definition by stripping trailing '[]'
             # https://docs.enthought.com/traits/traits_user_manual/listening.html#semantics
