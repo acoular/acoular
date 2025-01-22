@@ -16,6 +16,7 @@
 
 """
 
+from abc import abstractmethod
 import numba as nb
 from numpy import (
     arange,
@@ -47,7 +48,7 @@ from scipy.integrate import ode
 from scipy.interpolate import LinearNDInterpolator
 from scipy.linalg import norm
 from scipy.spatial import ConvexHull
-from traits.api import CArray, Dict, Float, HasStrictTraits, Instance, Int, Property, Union, cached_property
+from traits.api import ABCHasStrictTraits, CArray, Dict, Float, HasStrictTraits, Instance, Int, Property, Union, cached_property
 
 from .internal import digest
 
@@ -252,14 +253,16 @@ class UniformFlowEnvironment(Environment):
         return rm
 
 
-class FlowField(HasStrictTraits):
+class FlowField(ABCHasStrictTraits):
     """An abstract base class for a spatial flow field."""
 
     digest = Property
 
+    @abstractmethod
     def _get_digest(self):
-        return ''
+        pass
 
+    @abstractmethod
     def v(self, xx):  # noqa: ARG002
         """Provides the flow field as a function of the location. This is
         implemented here for the possibly most simple case: a quiescent fluid.
@@ -278,10 +281,6 @@ class FlowField(HasStrictTraits):
             - jacobian_matrix : array of floats of shape (3, 3)
                 The Jacobian matrix of the velocity vector field at the given location.
         """
-        v = array((0.0, 0.0, 0.0))
-        dv = array(((0.0, 0.0, 0.0), (0.0, 0.0, 0.0), (0.0, 0.0, 0.0)))
-        return -v, -dv
-
 
 class SlotJet(FlowField):
     """Provides an analytical approximation of the flow field of a slot jet.
