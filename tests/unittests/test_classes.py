@@ -67,11 +67,20 @@ def test_set_traits(acoular_cls):
                         setattr(obj, k, v[len(v) // 2])
 
 
-# TODO: remove the following block when #418 is fixed
+# TODO: remove the entries when respective issue is fixed
+xfails = {
+    'PowerSpectraImport': 'Issue #418',
+    'CsmAIAABenchmark': 'Issue #418',
+    'MergeGrid': 'Issue #419',
+    'SpatialInterpolator': 'Issue #420',
+}
 for c in all_hastraits_classes.copy():
-    if c.__name__ in ('PowerSpectraImport', 'CsmAIAABenchmark'):
-        all_hastraits_classes.remove(c)
-        all_hastraits_classes.append(pytest.param(c, marks=pytest.mark.xfail(reason='issue #418')))
+    try:
+        if c.__name__ in xfails.keys():
+            all_hastraits_classes.remove(c)
+            all_hastraits_classes.append(pytest.param(c, marks=pytest.mark.xfail(reason=xfails[c.__name__])))
+    except AttributeError:
+        pass
 
 
 @pytest.mark.parametrize('acoular_cls', all_hastraits_classes)
