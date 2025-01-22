@@ -17,7 +17,8 @@ all_hastraits_classes = get_all_classes(hastraits_only=True)
 
 
 def create_instance(acoular_cls):
-    with warnings.catch_warnings(action='ignore'):
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=DeprecationWarning)
         if isabstract(acoular_cls):
             pytest.skip(f'{acoular_cls.__name__} is an abstract base class.')
         if acoular_cls.__name__ in ['H5CacheFileH5py', 'H5CacheFileTables', 'H5FileH5py', 'H5FileTables']:
