@@ -294,6 +294,7 @@ class FlowField(ABCHasStrictTraits):
                 The Jacobian matrix of the velocity vector field at the given location.
         """
 
+
 class SlotJet(FlowField):
     """Provides an analytical approximation of the flow field of a slot jet.
 

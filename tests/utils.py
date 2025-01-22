@@ -26,10 +26,9 @@ def get_all_classes(hastraits_only=False):
 def get_subclasses(cls, include_abstract=False):
     classes = []
     for _, subcls in inspect.getmembers(ac):
-        if all([
-                inspect.isclass(subcls) and issubclass(subcls, cls),
-                not inspect.isabstract(subcls) or include_abstract
-        ]):
+        if all(
+            [inspect.isclass(subcls) and issubclass(subcls, cls), not inspect.isabstract(subcls) or include_abstract]
+        ):
             classes.append(subcls)
     return classes
 
