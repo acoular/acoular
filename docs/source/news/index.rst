@@ -7,21 +7,21 @@ Upcoming Release (25.01)
     **New features:**
         * consistently use `file` as an attribute to specify a filename (instead of `from_file` or `name`)
         * adds new function :meth:`~acoular.tools.helper.c_air` to calculate the speed of sound from temperature and humidity
-        * :class:`acoular.calib.Calib` can now be used as as a separte processing block
+        * :class:`~acoular.calib.Calib` can now be used as a separate processing block
         * enable varying block buffer sizes for :class:`~acoular.process.SampleSplitter`
 
         * Replaces `HasPrivateTraits` with `HasStrictTraits` and `ABCHasStrictTraits` for better implementation of ABCs.
         * Allow Path objects to specify the caching and time data directory via `acoular.Config`
 
     **Bugfixes**
-        * pass missing `max_iter` as an argument to `LassoLarsCV` in :class:`acoular.fbeamform.BeamformerGIB` (otherwise, LassoLarsCV runs up to 500 iterations)
-        * fix broken pylops solvers in :class:`acoular.fbeamform.BeamformerCMF`
+        * pass missing `max_iter` as an argument to `LassoLarsCV` in :class:`acoular.fbeamform.BeamformerGIB` (otherwise, `LassoLarsCV` runs up to 500 iterations)
+        * fix broken `pylops` solvers in :class:`~acoular.fbeamform.BeamformerCMF`
         * fixes negative values in source maps obtained with the solvers `LassoLars`, `LassoLarsCV` and `LassoLarsBIC`
-        * fix use of Trait() factory and replace by Enum, Instance, Map, Union
+        * fix use of `Trait()` factory and replace by `Enum`, `Instance`, `Map`, `Union`
 
     **Documentation**
         * adds guide on how to submit a pull request
-        * adds intersphinx extension to cross-link documentation from other projects
+        * adds `intersphinx` extension to cross-link documentation from other projects
 
     **Tests**
         * tests now consequently use `pytest` framework instead of `unittest`
@@ -29,13 +29,13 @@ Upcoming Release (25.01)
         * increases coverage to 76 %
         * introduces snapshot / regression testing for all :class:`~acoular.base.Generator`, :class:`~acoular.fbeamform.BeamformerBase`, :class:`~acoular.environments.FlowField`, and :class:`~acoular.environments.Environment` derived classes (results in new snapshot data of size 1.1MB (see `tests/regression/_regtest_output`)
         * use `pytest-cases` to separate parameters from tests (cases are located under `tests/cases`)
-        * full coverage of `sdinput.py` module through the use of `pytest-mock` (mocks the behavior of an InputStream object, which cannot be used for CI due to missing audio interfaces)
+        * full coverage of `sdinput.py` module through the use of `pytest-mock` (mocks the behavior of an `InputStream` object, which cannot be used for CI due to missing audio interfaces)
         * linting and formatting for tests directory
-        * refactor :class:`~acoular.h5cache.HDF5Cache` class due to a bug encountered with the new tests (acoular now can handle changing caching directories during a session. Previously, only the basename was observed which caused problems with changing cache directories)
+        * refactor :class:`~acoular.h5cache.HDF5Cache` class due to a bug encountered with the new tests (`acoular` now can handle changing caching directories during a session. Previously, only the basename was observed which caused problems with changing cache directories)
         * tests now log the 10 slowest test runs
-        * adds `profile` options to hatch test environment to profile test run via `hatch run tests:profile` and save a graphviz chart as SVG file
+        * adds `profile` options to hatch test environment to profile test run via `hatch run tests:profile` and save a `graphviz` chart as SVG file
         * test AIAA benchmark classes with the benchmark data
-        * test `aperture`, `center`, `export_mpos`` functions in :class:`~acoular.microphones.MicGeom`
+        * test `aperture`, `center`, `export_mpos` functions in :class:`~acoular.microphones.MicGeom`
         * fix a typo in `AngleTracker` that lead to a property being incorrectly accessed
         * exclude jited functions from test coverage report
         * treat warnings as errors in tests
@@ -43,14 +43,14 @@ Upcoming Release (25.01)
 
     **Internal**
         * adds a pull request template
-        * dynamically set the version in the pyproject.toml file (from version.py)
+        * dynamically set the version in the `pyproject.toml` file (from `version.py`)
         * activates maximum line length enforcement of 120 and 100 for comments and docstrings
         * adds CI workflow for inspecting regression test outputs
         * adds action that automatically assigns a team member to newly opened pull requests
         * `depends_on` now only accepts a list of strings
         * removes deprecated traits ending with version 25.01
         * include doctests in coverage report
-        * no longer add docs label if news/index.rst is updated
+        * no longer add docs label if `news/index.rst` is updated
 
 24.10
 ----------------
