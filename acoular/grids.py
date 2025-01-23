@@ -65,9 +65,11 @@ from traits.api import (
     Int,
     List,
     Property,
+    Str,
     Tuple,
     Union,
     cached_property,
+    observe,
     on_trait_change,
     property_depends_on,
 )
@@ -75,7 +77,7 @@ from traits.trait_errors import TraitError
 
 # acoular imports
 from .deprecation import deprecated_alias
-from .internal import digest
+from .internal import digest, ldigest
 
 
 def in_hull(p, hull, border=True, tol=0):
@@ -782,7 +784,7 @@ class MergeGrid(Grid):
     #: other grid defining properties are set
     grids = List(desc='list of grids')
 
-    grid_digest = Property(desc='digest of the merged grids')
+    grid_digest = Str(desc='digest of the merged grids')
 
     subgrids = Property(desc='names of subgrids for each point')
 
@@ -795,12 +797,9 @@ class MergeGrid(Grid):
     def _get_digest(self):
         return digest(self)
 
-    @cached_property
-    def _get_grid_digest(self):
-        griddigest = []
-        for grid in self.grids:
-            griddigest.append(grid.digest)
-        return griddigest
+    @observe('grids.items.digest')
+    def _set_sourcesdigest(self, event):  # noqa ARG002
+        self.grid_digest = ldigest(self.grids)
 
     # 'digest' is a placeholder for other properties in derived classes,
     # necessary to trigger the depends on mechanism
@@ -823,10 +822,8 @@ class MergeGrid(Grid):
     @property_depends_on(['digest'])
     def _get_pos(self):
         bpos = zeros((3, 0))
-        # subgrids = zeros((1,0))
         for grid in self.grids:
             bpos = append(bpos, grid.pos, axis=1)
-            # subgrids = append(subgrids,str(grid))
         return unique(bpos, axis=1)
 
 
