@@ -776,7 +776,11 @@ class LineGrid(Grid):
 
 @deprecated_alias({'gpos': 'pos'}, read_only=True)
 class MergeGrid(Grid):
-    """Base class for merging different grid geometries."""
+    """Grid class for merging different grid geometries.
+    
+    Represents a single grid that is composed of several subgrids. The subgrids of type 
+    :class:`~acoular.grid.Grid`.
+    """
 
     #: List of Grids to be merged
     #: each grid gets a new subdomain in the new grid
@@ -821,10 +825,8 @@ class MergeGrid(Grid):
     @property_depends_on(['digest'])
     def _get_pos(self):
         bpos = zeros((3, 0))
-        # subgrids = zeros((1,0))
         for grid in self.grids:
             bpos = append(bpos, grid.pos, axis=1)
-            # subgrids = append(subgrids,str(grid))
         return unique(bpos, axis=1)
 
 
