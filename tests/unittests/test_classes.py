@@ -52,7 +52,8 @@ def test_set_traits(acoular_cls):
                 if k in acoular_cls.class_trait_names():
                     tr = acoular_cls.class_traits()[k]
                     # handling different Trait types
-                    # TODO: use hypothesis based setattr #noqa: TD002, TD003, FIX002
+                    # TODO(adku1173): use hypothesis based setattr
+                    # 421
                     if tr.is_trait_type(Int):
                         setattr(obj, k, 1)
                     elif tr.is_trait_type(Float):
@@ -68,7 +69,10 @@ def test_set_traits(acoular_cls):
                         setattr(obj, k, v[len(v) // 2])
 
 
-# TODO: #418, #419, #420 remove the entries when respective issue is fixed #noqa: TD002, TD003, FIX002
+# TODO(artpelling): remove the entries when respective issue is fixed
+# 418
+# 419
+# 420
 xfails = {
     'PowerSpectraImport': 'Issue #418',
     'CsmAIAABenchmark': 'Issue #418',
