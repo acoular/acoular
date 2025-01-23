@@ -11,7 +11,7 @@ Upcoming Release (25.01)
         * enable varying block buffer sizes for :class:`~acoular.process.SampleSplitter`
         * Replaces `HasPrivateTraits` with `HasStrictTraits` and `ABCHasStrictTraits` for better implementation of ABCs.
         * Allow Path objects to specify the caching and time data directory via `acoular.Config`
-        * Adds new virtual base classes :class:`~acoular.signals.PeriodicSignalGenerator` and :class:`~acoular.signals.NoiseGenerator`
+        * Adds new abstract base classes :class:`~acoular.signals.PeriodicSignalGenerator` and :class:`~acoular.signals.NoiseGenerator`
 
     **Bugfixes**
         * pass missing `max_iter` as an argument to `LassoLarsCV` in :class:`acoular.fbeamform.BeamformerGIB` (otherwise, LassoLarsCV runs up to 500 iterations)
