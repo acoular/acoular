@@ -96,7 +96,7 @@ micgeofile = join(split(ac.__file__)[0],'xml','array_64.xml')
 # set up object managing the microphone coordinates
 mg = ac.MicGeom( file=micgeofile )
 # generate test data, in real life this would come from an array measurement
-p = ac.demo.acoular_demo.create_three_sources(mg, h5savefile='three_sources.h5')
+p = ac.demo.create_three_sources(mg, h5savefile='three_sources.h5')
 # set up object managing the microphone array data (usually from measurement)
 ts = ac.TimeSamples( file='three_sources.h5')
 # set up object managing the cross spectral matrix computation
