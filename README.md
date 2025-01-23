@@ -91,30 +91,12 @@ from os.path import join, split
 import acoular as ac
 import matplotlib.pylab as plt
 
-# sampling frequency
-sfreq = 51200
-# duration of generated audio in seconds
-duration = 1
-nsamples = duration * sfreq
 # this file contains the microphone coordinates
 micgeofile = join(split(ac.__file__)[0],'xml','array_64.xml')
-
 # set up object managing the microphone coordinates
 mg = ac.MicGeom( file=micgeofile )
-# set up white noise generators with different rms sound pressures
-n1 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=nsamples, seed=1)
-n2 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=nsamples, seed=2, rms=0.7)
-n3 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=nsamples, seed=3, rms=0.5)
-# create point sources in space that emit the generated noise
-p1 = ac.PointSource(signal=n1, mics=mg, loc=(-0.1, -0.1, 0.3))
-p2 = ac.PointSource(signal=n2, mics=mg, loc=(0.15, 0, 0.3))
-p3 = ac.PointSource(signal=n3, mics=mg, loc=(0, 0.1, 0.3))
-# mix all sources together
-p = ac.Mixer(source=p1, sources=[p2, p3])
-# save the synthetic data to disk as .h5 file
-wh5 = ac.WriteH5(source=p, file='three_sources.h5')
-wh5.save()
-
+# generate test data, in real life this would come from an array measurement
+p = ac.demo.acoular_demo.create_three_sources(mg, h5savefile='three_sources.h5')
 # set up object managing the microphone array data (usually from measurement)
 ts = ac.TimeSamples( file='three_sources.h5')
 # set up object managing the cross spectral matrix computation
