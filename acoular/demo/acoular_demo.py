@@ -34,7 +34,6 @@ Source Location        RMS
 
 def create_three_sources(mg, h5savefile='three_sources.h5'):
     """Create three noise sources and return them as Mixer."""
-    from pathlib import Path
     import acoular as ac
 
     # set up the parameters
