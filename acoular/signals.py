@@ -122,7 +122,7 @@ class PeriodicSignalGenerator(SignalGenerator):
 class NoiseGenerator(SignalGenerator):
     """Abstract base class for noise signal generators.
 
-    Defines the common interface for all NoiseGenerator classes. This class
+    Defines the common interface for all :class:`SignalGenerator` classes with noise signals. This class
     may be used as a base for class handling noise signals that can be characterized by their
     RMS amplitude. It should not be used directly as it contains no real functionality.
     """
