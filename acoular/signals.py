@@ -90,7 +90,7 @@ class SignalGenerator(ABCHasStrictTraits):
 
 class PeriodicSignalGenerator(SignalGenerator):
     """
-    Virtual base class for periodic signal generators.
+    Abstract base class for periodic signal generators.
 
     Defines the common interface for all PeriodicSignalGenerator classes. This class
     may be used as a base for class handling periodic signals that can be characterized by their
