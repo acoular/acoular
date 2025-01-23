@@ -276,8 +276,7 @@ class FlowField(ABCHasStrictTraits):
 
     @abstractmethod
     def v(self, xx):  # noqa: ARG002
-        """Provides the flow field as a function of the location. This is
-        implemented here for the possibly most simple case: a quiescent fluid.
+        """Provides the flow field as a function of the location.
 
         Parameters
         ----------
