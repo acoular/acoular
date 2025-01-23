@@ -120,7 +120,7 @@ class PeriodicSignalGenerator(SignalGenerator):
 
 
 class NoiseGenerator(SignalGenerator):
-    """Virtual base class for noise signal generators.
+    """Abstract base class for noise signal generators.
 
     Defines the common interface for all NoiseGenerator classes. This class
     may be used as a base for class handling noise signals that can be characterized by their
