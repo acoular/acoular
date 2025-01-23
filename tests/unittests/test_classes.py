@@ -90,14 +90,14 @@ for c in all_hastraits_classes.copy():
 def test_trait_dependencies(acoular_cls):
     """Assert that any property that is being depended on itself depends on something."""
 
-    def check_or_unpack(obj, tname, toplevel=True):
+    def check_or_unpack(obj, tname, toptrait, toplevel=True):
         assert len(objtname := tname.split('.')) < 3, 'Trait dependency too deep.'
         # recurse if trait depends on a trait of another object
         if len(objtname) == 2:
             # instantiate the trait
             obj = create_instance(obj.trait(objtname[0]).trait_type.klass)
             tname = objtname[1]
-            check_or_unpack(obj, tname, toplevel=False)
+            check_or_unpack(obj, tname, toptrait, toplevel=False)
         else:
             # deal with traits extended name definition by stripping trailing '[]'
             # https://docs.enthought.com/traits/traits_user_manual/listening.html#semantics
@@ -105,17 +105,11 @@ def test_trait_dependencies(acoular_cls):
             trait = obj.trait(tname)
             if trait.is_property:
                 if trait.depends_on is None:
-                    assert toplevel, type(obj).__name__ + '.' + tname
+                    assert toplevel, f'{toptrait} depends on {tname}, but {tname} does not depend on anything.'
                 else:
                     for otname in trait.depends_on:
-                        check_or_unpack(obj, otname, toplevel=False)
+                        check_or_unpack(obj, otname, toptrait, toplevel=False)
 
     obj = create_instance(acoular_cls)
     for tname in obj.traits():
-        try:
-            check_or_unpack(obj, tname)
-        except AssertionError as e:
-            otname = str(e).split(' ')[0].split('\n')[0]
-            tname = type(obj).__name__ + '.' + tname
-            err = f'{tname} depends on {otname}, but {otname} does not depend on anything.'
-            raise AssertionError(err) from e
+        check_or_unpack(obj, tname, tname)
