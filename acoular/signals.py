@@ -92,10 +92,10 @@ class PeriodicSignalGenerator(SignalGenerator):
     """
     Abstract base class for periodic signal generators.
 
-    Defines the common interface for all :class:`SignalGenerator`-derived classes with periodic signals. This class
-    may be used as a base for class handling periodic signals that can be characterized by their
-    frequency, phase and amplitude. It should not be used directly as it contains no real
-    functionality.
+    Defines the common interface for all :class:`SignalGenerator`-derived classes with periodic
+    signals. This class may be used as a base for class handling periodic signals that can be
+    characterized by their frequency, phase and amplitude. It should not be used directly as it
+    contains no real functionality.
     """
 
     #: Frequency of the signal, float, defaults to 1000.0.
@@ -122,8 +122,8 @@ class PeriodicSignalGenerator(SignalGenerator):
 class NoiseGenerator(SignalGenerator):
     """Abstract base class for noise signal generators.
 
-    Defines the common interface for all :class:`SignalGenerator` classes with noise signals. This class
-    may be used as a base for class handling noise signals that can be characterized by their
+    Defines the common interface for all :class:`SignalGenerator` classes with noise signals. This
+    class may be used as a base for class handling noise signals that can be characterized by their
     RMS amplitude. It should not be used directly as it contains no real functionality.
     """
 
