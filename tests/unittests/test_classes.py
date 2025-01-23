@@ -90,7 +90,7 @@ for c in all_hastraits_classes.copy():
 
 @pytest.mark.parametrize('acoular_cls', all_hastraits_classes)
 def test_trait_dependencies(acoular_cls):
-    """Assert that a property that is depended on depends on something."""
+    """Assert that any property, that is being depended on, itself depends on something."""
 
     def check_or_unpack(obj, tname, toplevel=True):
         assert len(objtname := tname.split('.')) < 3, 'Trait dependency too deep.'
