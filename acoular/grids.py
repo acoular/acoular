@@ -69,10 +69,11 @@ from traits.api import (
     Tuple,
     Union,
     cached_property,
+    observe,
     on_trait_change,
     property_depends_on,
 )
-from traits.trait_errors import TraitError, observe
+from traits.trait_errors import TraitError
 
 # acoular imports
 from .deprecation import deprecated_alias
@@ -776,11 +777,7 @@ class LineGrid(Grid):
 
 @deprecated_alias({'gpos': 'pos'}, read_only=True)
 class MergeGrid(Grid):
-    """Grid class for merging different grid geometries.
-    
-    Represents a single grid that is composed of several subgrids. The subgrids of type 
-    :class:`~acoular.grid.Grid`.
-    """
+    """Base class for merging different grid geometries."""
 
     #: List of Grids to be merged
     #: each grid gets a new subdomain in the new grid
