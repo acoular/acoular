@@ -71,12 +71,10 @@ def test_set_traits(acoular_cls):
 
 # TODO(artpelling): remove the entries when respective issue is fixed
 # 418
-# 419
 # 420
 xfails = {
     'PowerSpectraImport': 'Issue #418',
     'CsmAIAABenchmark': 'Issue #418',
-    'MergeGrid': 'Issue #419',
     'SpatialInterpolator': 'Issue #420',
 }
 for c in all_hastraits_classes.copy():
@@ -90,7 +88,7 @@ for c in all_hastraits_classes.copy():
 
 @pytest.mark.parametrize('acoular_cls', all_hastraits_classes)
 def test_trait_dependencies(acoular_cls):
-    """Assert that any property, that is being depended on, itself depends on something."""
+    """Assert that any property that is being depended on itself depends on something."""
 
     def check_or_unpack(obj, tname, toplevel=True):
         assert len(objtname := tname.split('.')) < 3, 'Trait dependency too deep.'
