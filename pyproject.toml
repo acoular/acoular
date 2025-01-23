@@ -154,8 +154,7 @@ filterwarnings = [
     "ignore:module 'sre_constants' is deprecated:DeprecationWarning", # raised internally by traits
     "ignore:The TBB threading layer requires TBB version:numba.core.errors.NumbaWarning", # raised internally by numba
     "ignore:FNV hashing is not implemented in Numba:UserWarning", # raised internally by numba
-    # Suppress DeprecationWarnings in Acoular (only temporarily!)
-    "ignore:Deprecated use of *:DeprecationWarning", 
+    "ignore:`scipy.special.sph_harm` is deprecated*:DeprecationWarning", # raised by SciPy
     # Suppress warnings about unclosed files in tables at the end of the tests
     "ignore:Closing remaining open file*:tables.exceptions.UnclosedFileWarning",
 ]

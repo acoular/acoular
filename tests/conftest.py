@@ -24,18 +24,18 @@ def pytest_sessionfinish(session):  # noqa ARG001
 def create_time_data_source():
     """Fixture factory for creating time data sources of certain length and number of channels."""
 
-    def _create_time_data_source(numchannels, numsamples):
+    def _create_time_data_source(num_channels, num_samples):
         rng = np.random.RandomState(1)
-        return ac.TimeSamples(sample_freq=51200, data=rng.randn(numsamples, numchannels))
+        return ac.TimeSamples(sample_freq=51200, data=rng.randn(num_samples, num_channels))
 
     return _create_time_data_source
 
 
 @fixture(scope='session')
-@parametrize('numchannels', [1, 2], ids=['1ch', '2ch'])
-def time_data_source(create_time_data_source, numchannels):
+@parametrize('num_channels', [1, 2], ids=['1ch', '2ch'])
+def time_data_source(create_time_data_source, num_channels):
     """Default time data source fixture for testing generator classes."""
-    return create_time_data_source(numchannels=numchannels, numsamples=50)
+    return create_time_data_source(num_channels=num_channels, num_samples=50)
 
 
 # Stationary Source Cases
@@ -45,9 +45,9 @@ def time_data_source(create_time_data_source, numchannels):
 def create_source_case():
     """Fixture factory for creating spatially stationary source cases with certain parameters."""
 
-    def _create_source_case(blocksize=None, numsamples=None, grid=None, invalid_channels=None):
+    def _create_source_case(blocksize=None, num_samples=None, grid=None, invalid_channels=None):
         return SetupStationarySourceCase(
-            numsamples=numsamples,
+            num_samples=num_samples,
             blocksize=blocksize,
             grid=grid,
             invalid_channels=invalid_channels,
@@ -61,7 +61,7 @@ def regression_source_case(create_source_case):
     """Fixture for snapshot testing of beamformer classes."""
     return create_source_case(
         grid=ac.RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=0.68, increment=0.07),
-        numsamples=128 * 54 * 2,
+        num_samples=128 * 54 * 2,
         blocksize=128,
         invalid_channels=[1, 7],
     )
@@ -71,7 +71,7 @@ def regression_source_case(create_source_case):
 def small_source_case(create_source_case):
     """Fixture for faster testing of the caching (uses fewer microphones and coarser grid)."""
     return create_source_case(
-        numsamples=128,
+        num_samples=128,
         blocksize=128,
         invalid_channels=[1, 7] + [i for i in range(56) if i % 3 == 0],  # use every third microphone
         grid=ac.RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=0.68, increment=0.2),

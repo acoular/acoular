@@ -66,11 +66,11 @@ DEFAULT = [cls for cls in get_subclasses(ac.Generator) if cls not in SKIP_DEFAUL
 
 
 def case_single_microphone():
-    return ac.MicGeom(mpos_tot=np.array([[0, 0, 0]]).T)
+    return ac.MicGeom(pos_total=np.array([[0, 0, 0]]).T)
 
 
 def case_two_microphones():
-    return ac.MicGeom(mpos_tot=np.array([[0, 0, 0], [0, 1, 0]]).T)
+    return ac.MicGeom(pos_total=np.array([[0, 0, 0], [0, 1, 0]]).T)
 
 
 class Generators:
@@ -96,15 +96,15 @@ class Generators:
         return acoular_cls()
 
     def case_TimeSamples(self, small_source_case):
-        return ac.TimeSamples(file=small_source_case.time.name)
+        return ac.TimeSamples(file=small_source_case.time.file)
 
     def case_MaskedTimeSamples(self, small_source_case):
-        return ac.MaskedTimeSamples(file=small_source_case.time.name, start=0, stop=50)
+        return ac.MaskedTimeSamples(file=small_source_case.time.file, start=0, stop=50)
 
     @parametrize_with_cases('mic_setup', cases=[case_single_microphone, case_two_microphones], ids=['1ch', '2ch'])
     def case_UncorrectedNoiseSource(self, mic_setup):
         return ac.UncorrelatedNoiseSource(
-            signal=ac.WNoiseGenerator(sample_freq=1000, numsamples=50, seed=1), mics=mic_setup, sample_freq=1000
+            signal=ac.WNoiseGenerator(sample_freq=1000, num_samples=50, seed=1), mics=mic_setup, sample_freq=1000
         )
 
     def case_SourceMixer(self, time_data_source):
@@ -124,7 +124,7 @@ class Generators:
         [ac.PointSource, ac.PointSourceDipole, ac.LineSource, ac.SphericalHarmonicSource, ac.PointSourceConvolve],
     )
     def case_point_sources(self, acoular_cls, mic_setup):
-        src = acoular_cls(signal=ac.WNoiseGenerator(sample_freq=1000, numsamples=50, seed=1), mics=mic_setup)
+        src = acoular_cls(signal=ac.WNoiseGenerator(sample_freq=1000, num_samples=50, seed=1), mics=mic_setup)
         if issubclass(acoular_cls, ac.PointSourceConvolve):
             kernel = np.zeros(5)
             kernel[1] = 1

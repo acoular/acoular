@@ -11,8 +11,8 @@ from pytest_cases import fixture, parametrize
 def micgeom(invalid_channels):
     """Fixture for creating a rectangular MicGeom object with 4 microphones."""
     # create 4 points with center at (0, 0, 0) and aperture of 2
-    mpos_tot = np.array([[0, 1, 0, -1], [1, 0, -1, 0], [0, 0, 0, 0]])
-    return ac.MicGeom(mpos_tot=mpos_tot, invalid_channels=invalid_channels)
+    pos_total = np.array([[0, 1, 0, -1], [1, 0, -1, 0], [0, 0, 0, 0]])
+    return ac.MicGeom(pos_total=pos_total, invalid_channels=invalid_channels)
 
 
 def test_load_xml():
@@ -27,8 +27,8 @@ def test_load_xml():
     # Test for correct number of microphones and shapes
     mic_geom = ac.MicGeom(file=xml_file_path)
     assert mic_geom.num_mics == 64
-    assert mic_geom.mpos.shape == (3, 64)
-    assert mic_geom.mpos_tot.shape == (3, 64)
+    assert mic_geom.pos.shape == (3, 64)
+    assert mic_geom.pos_total.shape == (3, 64)
 
 
 def test_export_mpos(tmp_path, micgeom):

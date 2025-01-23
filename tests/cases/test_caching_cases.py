@@ -44,7 +44,7 @@ class Caching:
     @parametrize('cached', [False, True], ids=['cached-False', 'cached-True'])
     @parametrize('trait', ['csm', 'eve', 'eva'])
     def case_caching_PowerSpectra(self, create_time_data_source, cached, trait):
-        source = create_time_data_source(numchannels=2, numsamples=128)
+        source = create_time_data_source(num_channels=2, num_samples=128)
         pss = []
         for _ in range(3):
             pss.append(ac.PowerSpectra(source=source, cached=cached, block_size=128))
@@ -68,7 +68,7 @@ class Caching:
         return psfs, calc, True
 
     def case_caching_time(self, create_time_data_source):
-        source = create_time_data_source(numchannels=1, numsamples=2)
+        source = create_time_data_source(num_channels=1, num_samples=2)
         tcs = []
         for _ in range(3):
             tcs.append(ac.Cache(source=source))
@@ -87,7 +87,7 @@ class Caching:
         return tcs, calc, True
 
     def case_caching_spectra(self, create_time_data_source):
-        source = create_time_data_source(numchannels=1, numsamples=4)
+        source = create_time_data_source(num_channels=1, num_samples=4)
         source = ac.RFFT(source=source, block_size=2)
         tcs = []
         for _ in range(3):

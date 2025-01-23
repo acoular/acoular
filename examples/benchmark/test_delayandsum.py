@@ -9,18 +9,18 @@ from numpy import empty, float32, int32
 # set_num_threads(1)
 
 # set up test case
-NUMMICS = 64
-NUMSAMPLES = 2048
+NUM_MICS = 64
+NUM_SAMPLES = 2048
 GRIDSIZE = 2048
 NUM = 512
 
-data = random.normal(size=(NUMSAMPLES, NUMMICS))
-offsets = random.randint(low=0, high=NUMSAMPLES / 2, size=(GRIDSIZE, NUMMICS))
-ifactor2 = random.uniform(low=0, high=1.0, size=(GRIDSIZE, NUMMICS))
-steeramp = random.uniform(low=0, high=1.0, size=(GRIDSIZE, NUMMICS))
-offsets5 = random.randint(low=0, high=NUMSAMPLES / 2, size=(NUM, GRIDSIZE, NUMMICS))
-ifactor25 = random.uniform(low=0, high=1.0, size=(NUM, GRIDSIZE, NUMMICS))
-steeramp5 = random.uniform(low=0, high=1.0, size=(NUM, GRIDSIZE, NUMMICS))
+data = random.normal(size=(NUM_SAMPLES, NUM_MICS))
+offsets = random.randint(low=0, high=NUM_SAMPLES / 2, size=(GRIDSIZE, NUM_MICS))
+ifactor2 = random.uniform(low=0, high=1.0, size=(GRIDSIZE, NUM_MICS))
+steeramp = random.uniform(low=0, high=1.0, size=(GRIDSIZE, NUM_MICS))
+offsets5 = random.randint(low=0, high=NUM_SAMPLES / 2, size=(NUM, GRIDSIZE, NUM_MICS))
+ifactor25 = random.uniform(low=0, high=1.0, size=(NUM, GRIDSIZE, NUM_MICS))
+steeramp5 = random.uniform(low=0, high=1.0, size=(NUM, GRIDSIZE, NUM_MICS))
 out = empty((NUM, GRIDSIZE))
 autopower = empty((NUM, GRIDSIZE))
 

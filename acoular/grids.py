@@ -65,9 +65,11 @@ from traits.api import (
     Int,
     List,
     Property,
+    Str,
     Tuple,
     Union,
     cached_property,
+    observe,
     on_trait_change,
     property_depends_on,
 )
@@ -75,7 +77,7 @@ from traits.trait_errors import TraitError
 
 # acoular imports
 from .deprecation import deprecated_alias
-from .internal import digest
+from .internal import digest, ldigest
 
 
 def in_hull(p, hull, border=True, tol=0):
@@ -670,19 +672,19 @@ class RectGrid3D(RectGrid):
         return s_[xi1 : xi2 + 1], s_[yi1 : yi2 + 1], s_[zi1 : zi2 + 1]
 
 
-@deprecated_alias({'from_file': 'file'})
+@deprecated_alias({'from_file': 'file', 'gpos_file': 'pos'})
 class ImportGrid(Grid):
     """Loads a 3D grid from xml file."""
 
     #: Name of the .xml-file from which to read the data.
     file = File(filter=['*.xml'], exists=True, desc='name of the xml file to import')
 
-    gpos_file = CArray(dtype=float, desc='x, y, z position of all Grid Points')
+    _gpos = CArray(dtype=float, desc='x, y, z position of all Grid Points')
 
     subgrids = CArray(desc='names of subgrids for each point')
 
     # internal identifier
-    digest = Property(depends_on=['gpos_file'])
+    digest = Property(depends_on=['_gpos'])
 
     @cached_property
     def _get_digest(self):
@@ -690,21 +692,21 @@ class ImportGrid(Grid):
 
     # 'digest' is a placeholder for other properties in derived classes,
     # necessary to trigger the depends on mechanism
-    @property_depends_on(['gpos_file'])
+    @property_depends_on(['_gpos'])
     def _get_size(self):
         return self.pos.shape[-1]
 
     # 'digest' is a placeholder for other properties in derived classes
-    @property_depends_on(['gpos_file'])
+    @property_depends_on(['_gpos'])
     def _get_shape(self):
         return (self.pos.shape[-1],)
 
-    @property_depends_on(['gpos_file'])
+    @property_depends_on(['_gpos'])
     def _get_pos(self):
-        return self.gpos_file
+        return self._gpos
 
     def _set_pos(self, pos):
-        self.gpos_file = pos
+        self._gpos = pos
 
     @on_trait_change('file')
     def import_gpos(self):
@@ -715,11 +717,11 @@ class ImportGrid(Grid):
         for el in doc.getElementsByTagName('pos'):
             names.append(el.getAttribute('subgrid'))
             xyz.append([float(el.getAttribute(a)) for a in 'xyz'])
-        self.gpos_file = array(xyz, 'd').swapaxes(0, 1)
+        self._gpos = array(xyz, 'd').swapaxes(0, 1)
         self.subgrids = array(names)
 
 
-@deprecated_alias({'gpos': 'pos'}, read_only=True)
+@deprecated_alias({'gpos': 'pos', 'numpoints': 'num_points'}, read_only=['gpos'])
 class LineGrid(Grid):
     """Class for Line grid geometries."""
 
@@ -733,7 +735,7 @@ class LineGrid(Grid):
     length = Float(1, desc='length of the line source')
 
     #:number of grid points.
-    numpoints = Int(1, desc='length of the line source')
+    num_points = Int(1, desc='length of the line source')
 
     #: Overall number of grid points. Readonly; is set automatically when
     #: other grid defining properties are set
@@ -744,7 +746,7 @@ class LineGrid(Grid):
     pos = Property(desc='x, y, z positions of grid points')
 
     digest = Property(
-        depends_on=['loc', 'direction', 'length', 'numpoints', 'size'],
+        depends_on=['loc', 'direction', 'length', 'num_points', 'size'],
     )
 
     @cached_property
@@ -753,22 +755,22 @@ class LineGrid(Grid):
 
     # 'digest' is a placeholder for other properties in derived classes,
     # necessary to trigger the depends on mechanism
-    @property_depends_on(['numpoints'])
+    @property_depends_on(['num_points'])
     def _get_size(self):
         return self.pos.shape[-1]
 
     # 'digest' is a placeholder for other properties in derived classes
-    @property_depends_on(['numpoints'])
+    @property_depends_on(['num_points'])
     def _get_shape(self):
         return self.pos.shape[-1]
 
-    @property_depends_on(['numpoints', 'length', 'direction', 'loc'])
+    @property_depends_on(['num_points', 'length', 'direction', 'loc'])
     def _get_pos(self):
-        dist = self.length / (self.numpoints - 1)
+        dist = self.length / (self.num_points - 1)
         loc = array(self.loc, dtype=float).reshape((3, 1))
         direc_n = array(self.direction) / norm(self.direction)
-        pos = zeros((self.numpoints, 3))
-        for s in range(self.numpoints):
+        pos = zeros((self.num_points, 3))
+        for s in range(self.num_points):
             pos[s] = loc.T + direc_n * dist * s
         return pos.T
 
@@ -782,7 +784,7 @@ class MergeGrid(Grid):
     #: other grid defining properties are set
     grids = List(desc='list of grids')
 
-    grid_digest = Property(desc='digest of the merged grids')
+    grid_digest = Str(desc='digest of the merged grids')
 
     subgrids = Property(desc='names of subgrids for each point')
 
@@ -795,12 +797,9 @@ class MergeGrid(Grid):
     def _get_digest(self):
         return digest(self)
 
-    @cached_property
-    def _get_grid_digest(self):
-        griddigest = []
-        for grid in self.grids:
-            griddigest.append(grid.digest)
-        return griddigest
+    @observe('grids.items.digest')
+    def _set_sourcesdigest(self, event):  # noqa ARG002
+        self.grid_digest = ldigest(self.grids)
 
     # 'digest' is a placeholder for other properties in derived classes,
     # necessary to trigger the depends on mechanism
@@ -823,10 +822,8 @@ class MergeGrid(Grid):
     @property_depends_on(['digest'])
     def _get_pos(self):
         bpos = zeros((3, 0))
-        # subgrids = zeros((1,0))
         for grid in self.grids:
             bpos = append(bpos, grid.pos, axis=1)
-            # subgrids = append(subgrids,str(grid))
         return unique(bpos, axis=1)
 
 

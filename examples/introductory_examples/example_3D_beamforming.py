@@ -25,11 +25,11 @@ m = ac.MicGeom(file=micgeofile)
 # Now, the sources (signals and types/positions) are defined.
 sfreq = 51200
 duration = 1
-nsamples = duration * sfreq
+num_samples = duration * sfreq
 
-n1 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=nsamples, seed=1)
-n2 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=nsamples, seed=2, rms=0.5)
-n3 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=nsamples, seed=3, rms=0.25)
+n1 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=num_samples, seed=1)
+n2 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=num_samples, seed=2, rms=0.5)
+n3 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=num_samples, seed=3, rms=0.25)
 p1 = ac.PointSource(signal=n1, mics=m, loc=(-0.1, -0.1, 0.3))
 p2 = ac.PointSource(signal=n2, mics=m, loc=(0.15, 0, 0.17))
 p3 = ac.PointSource(signal=n3, mics=m, loc=(0, 0.1, 0.25))
@@ -113,7 +113,7 @@ title('Side view (zy)')
 colorbar()
 
 ax0 = fig.add_subplot((224), projection='3d')
-ax0.scatter(m.mpos[0], m.mpos[1], -m.mpos[2])
+ax0.scatter(m.pos[0], m.pos[1], -m.pos[2])
 source_locs = np.array([p1.loc, p2.loc, p3.loc]).T
 ax0.scatter(source_locs[0], source_locs[1], -source_locs[2])
 ax0.set_xlabel('x')
