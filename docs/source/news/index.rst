@@ -18,6 +18,7 @@ Upcoming Release (25.01)
         * fix broken `pylops` solvers in :class:`~acoular.fbeamform.BeamformerCMF`
         * fixes negative values in source maps obtained with the solvers `LassoLars`, `LassoLarsCV` and `LassoLarsBIC`
         * fix use of `Trait()` factory and replace by `Enum`, `Instance`, `Map`, `Union`
+        * fix use of deprecated `CLong`, `Long`, and `ListInt` traits
         * The previously broken example in the main `README` now runs out of the box.
 
     **Documentation**
