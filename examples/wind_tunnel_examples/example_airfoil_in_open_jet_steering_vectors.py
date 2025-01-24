@@ -75,7 +75,7 @@ m.invalid_channels = invalid
 # very coarse for computational efficiency). A 3D grid is also available via the
 # :class:`acoular.grids.RectGrid3D` class.
 
-g = ac.RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=0.68, increment=0.05)
+g = ac.RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=-0.68, increment=0.05)
 
 # %%
 # For frequency domain methods, :class:`acoular.spectra.PowerSpectra` provides the cross spectral

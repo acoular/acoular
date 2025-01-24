@@ -60,7 +60,7 @@ ts = ac.MaskedTimeSamples(
 )
 calib = ac.Calib(source=ts, file=calib_file, invalid_channels=[1, 7])
 mics = ac.MicGeom(file=Path(ac.__file__).parent / 'xml' / 'array_56.xml', invalid_channels=[1, 7])
-grid = ac.RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=0.68, increment=0.05)
+grid = ac.RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=-0.68, increment=0.05)
 env = ac.Environment(c=346.04)
 st = ac.SteeringVector(grid=grid, mics=mics, env=env)
 
@@ -74,7 +74,7 @@ st = ac.SteeringVector(grid=grid, mics=mics, env=env)
 bt = ac.BeamformerTime(source=calib, steer=st)
 ft = ac.FiltFiltOctave(source=bt, band=cfreq)
 pt = ac.TimePower(source=ft)
-avgt = ac.Average(source=pt, naverage=1024)
+avgt = ac.Average(source=pt, num_per_average=1024)
 cacht = ac.Cache(source=avgt)  # cache to prevent recalculation
 
 # %%
@@ -84,7 +84,7 @@ cacht = ac.Cache(source=avgt)  # cache to prevent recalculation
 
 fi = ac.FiltFiltOctave(source=calib, band=cfreq)
 bts = ac.BeamformerTimeSq(source=fi, steer=st, r_diag=True)
-avgts = ac.Average(source=bts, naverage=1024)
+avgts = ac.Average(source=bts, num_per_average=1024)
 cachts = ac.Cache(source=avgts)  # cache to prevent recalculation
 
 # %%
@@ -93,7 +93,7 @@ cachts = ac.Cache(source=avgts)  # cache to prevent recalculation
 fct = ac.FiltFiltOctave(source=calib, band=cfreq)
 bct = ac.BeamformerCleant(source=fct, steer=st, n_iter=20, damp=0.7)
 ptct = ac.TimePower(source=bct)
-avgct = ac.Average(source=ptct, naverage=1024)
+avgct = ac.Average(source=ptct, num_per_average=1024)
 cachct = ac.Cache(source=avgct)  # cache to prevent recalculation
 
 # %%
@@ -101,7 +101,7 @@ cachct = ac.Cache(source=avgct)  # cache to prevent recalculation
 # :class:`acoular.tbeamform.BeamformerCleantSq` class.
 fcts = ac.FiltFiltOctave(source=calib, band=cfreq)
 bcts = ac.BeamformerCleantSq(source=fcts, steer=st, n_iter=20, damp=0.7, r_diag=True)
-avgcts = ac.Average(source=bcts, naverage=1024)
+avgcts = ac.Average(source=bcts, num_per_average=1024)
 cachcts = ac.Cache(source=avgcts)  # cache to prevent recalculation
 
 # %%

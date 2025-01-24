@@ -35,7 +35,7 @@ micgeofile = Path(ac.__file__).parent / 'xml' / 'array_56.xml'
 mg = ac.MicGeom(file=micgeofile)
 ts = ac.TimeSamples(file=time_data_file)
 ps = ac.PowerSpectra(source=ts, block_size=128, window='Hanning')
-rg = ac.RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=0.68, increment=0.02)
+rg = ac.RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=-0.68, increment=0.02)
 st = ac.SteeringVector(grid=rg, mics=mg)
 f = ac.PowerSpectra(source=ts, block_size=128)
 bf = ac.BeamformerBase(freq_data=f, steer=st)
