@@ -32,6 +32,29 @@ Source Location        RMS
 """
 
 
+def create_three_sources(mg, h5savefile='three_sources.h5'):
+    """Create three noise sources and return them as Mixer."""
+    import acoular as ac
+
+    # set up the parameters
+
+    sfreq = 51200
+    duration = 1
+    nsamples = duration * sfreq
+
+    n1 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=nsamples, seed=1)
+    n2 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=nsamples, seed=2, rms=0.7)
+    n3 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=nsamples, seed=3, rms=0.5)
+    p1 = ac.PointSource(signal=n1, mics=mg, loc=(-0.1, -0.1, 0.3))
+    p2 = ac.PointSource(signal=n2, mics=mg, loc=(0.15, 0, 0.3))
+    p3 = ac.PointSource(signal=n3, mics=mg, loc=(0, 0.1, 0.3))
+    pa = ac.Mixer(source=p1, sources=[p2, p3])
+    if h5savefile:
+        wh5 = ac.WriteH5(source=pa, file=h5savefile)
+        wh5.save()
+    return pa
+
+
 def run():
     """Run the Acoular demo."""
     from pathlib import Path
@@ -40,24 +63,14 @@ def run():
 
     ac.config.global_caching = 'none'
 
-    # set up the parameters
-    sfreq = 51200
-    duration = 1
-    nsamples = duration * sfreq
+    # set up microphone geometry
+
     micgeofile = Path(ac.__file__).parent / 'xml' / 'array_64.xml'
-    h5savefile = 'three_sources.h5'
+    mg = ac.MicGeom(file=micgeofile)
 
     # generate test data, in real life this would come from an array measurement
-    mg = ac.MicGeom(file=micgeofile)
-    n1 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=nsamples, seed=1)
-    n2 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=nsamples, seed=2, rms=0.7)
-    n3 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=nsamples, seed=3, rms=0.5)
-    p1 = ac.PointSource(signal=n1, mics=mg, loc=(-0.1, -0.1, 0.3))
-    p2 = ac.PointSource(signal=n2, mics=mg, loc=(0.15, 0, 0.3))
-    p3 = ac.PointSource(signal=n3, mics=mg, loc=(0, 0.1, 0.3))
-    pa = ac.Mixer(source=p1, sources=[p2, p3])
-    wh5 = ac.WriteH5(source=pa, file=h5savefile)
-    wh5.save()
+
+    pa = create_three_sources(mg)
 
     # analyze the data and generate map
 
@@ -79,7 +92,7 @@ def run():
 
         # plot microphone geometry
         figure(2)
-        plot(mg.mpos[0], mg.mpos[1], 'o')
+        plot(mg.pos[0], mg.pos[1], 'o')
         axis('equal')
 
         show()
