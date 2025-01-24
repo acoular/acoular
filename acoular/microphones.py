@@ -20,7 +20,7 @@ from traits.api import (
     CArray,
     File,
     HasStrictTraits,
-    ListInt,
+    List,
     Property,
     cached_property,
     on_trait_change,
@@ -54,7 +54,7 @@ class MicGeom(HasStrictTraits):
 
     #: List that gives the indices of channels that should not be considered.
     #: Defaults to a blank list.
-    invalid_channels = ListInt(desc='list of invalid channels')
+    invalid_channels = List(int, desc='list of invalid channels')
 
     #: Number of used microphones in the array; readonly.
     num_mics = Property(depends_on=['pos'], desc='number of microphones in the geometry')

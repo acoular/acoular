@@ -13,7 +13,7 @@
 import xml.dom.minidom
 
 from numpy import array, newaxis
-from traits.api import CArray, CInt, File, ListInt, Property, cached_property, on_trait_change
+from traits.api import CArray, CInt, File, List, Property, cached_property, on_trait_change
 
 import acoular as ac
 
@@ -92,7 +92,7 @@ class Calib(InOut):
     data = CArray(desc='calibration data')
 
     #: Channels that are to be treated as invalid.
-    invalid_channels = ListInt(desc='list of invalid channels')
+    invalid_channels = List(int, desc='list of invalid channels')
 
     #: Channel mask to serve as an index for all valid channels, is set automatically.
     channels = Property(depends_on=['invalid_channels', 'num_mics'], desc='channel mask')

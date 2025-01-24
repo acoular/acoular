@@ -66,7 +66,6 @@ from traits.api import (
     Instance,
     Int,
     List,
-    ListInt,
     Property,
     Str,
     Tuple,
@@ -395,7 +394,7 @@ class MaskedTimeSamples(TimeSamples):
     stop = Union(None, CInt, desc='stop of valid samples')
 
     #: Channels that are to be treated as invalid.
-    invalid_channels = ListInt(desc='list of invalid channels')
+    invalid_channels = List(int, desc='list of invalid channels')
 
     #: Channel mask to serve as an index for all valid channels, is set automatically.
     channels = Property(depends_on=['invalid_channels', 'num_channels_total'], desc='channel mask')
