@@ -9,9 +9,9 @@ Upcoming Release (25.01)
         * adds new function :meth:`~acoular.tools.helper.c_air` to calculate the speed of sound from temperature and humidity
         * :class:`~acoular.calib.Calib` can now be used as a separate processing block
         * enable varying block buffer sizes for :class:`~acoular.process.SampleSplitter`
-
         * Replaces `HasPrivateTraits` with `HasStrictTraits` and `ABCHasStrictTraits` for better implementation of ABCs.
         * Allow Path objects to specify the caching and time data directory via `acoular.Config`
+        * Adds new abstract base classes :class:`~acoular.signals.PeriodicSignalGenerator` and :class:`~acoular.signals.NoiseGenerator`
 
     **Bugfixes**
         * pass missing `max_iter` as an argument to `LassoLarsCV` in :class:`acoular.fbeamform.BeamformerGIB` (otherwise, `LassoLarsCV` runs up to 500 iterations)
