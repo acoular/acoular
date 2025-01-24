@@ -3,57 +3,58 @@ What's new
 
 Upcoming Release (25.01)
 ------------------------
-    
+
     **New features:**
         * consistently use `file` as an attribute to specify a filename (instead of `from_file` or `name`)
         * adds new function :meth:`~acoular.tools.helper.c_air` to calculate the speed of sound from temperature and humidity
-        * :class:`acoular.calib.Calib` can now be used as as a separte processing block
+        * :class:`~acoular.calib.Calib` can now be used as a separate processing block
         * enable varying block buffer sizes for :class:`~acoular.process.SampleSplitter`
         * Replaces `HasPrivateTraits` with `HasStrictTraits` and `ABCHasStrictTraits` for better implementation of ABCs.
         * Allow Path objects to specify the caching and time data directory via `acoular.Config`
         * Adds new abstract base classes :class:`~acoular.signals.PeriodicSignalGenerator` and :class:`~acoular.signals.NoiseGenerator`
 
     **Bugfixes**
-        * pass missing `max_iter` as an argument to `LassoLarsCV` in :class:`acoular.fbeamform.BeamformerGIB` (otherwise, LassoLarsCV runs up to 500 iterations)
-        * fix broken pylops solvers in :class:`acoular.fbeamform.BeamformerCMF`
+        * pass missing `max_iter` as an argument to `LassoLarsCV` in :class:`acoular.fbeamform.BeamformerGIB` (otherwise, `LassoLarsCV` runs up to 500 iterations)
+        * fix broken `pylops` solvers in :class:`~acoular.fbeamform.BeamformerCMF`
         * fixes negative values in source maps obtained with the solvers `LassoLars`, `LassoLarsCV` and `LassoLarsBIC`
-        * fix use of Trait() factory and replace by Enum, Instance, Map, Union 
+        * fix use of `Trait()` factory and replace by `Enum`, `Instance`, `Map`, `Union`
 
     **Documentation**
         * adds guide on how to submit a pull request
-        * adds intersphinx extension to cross-link documentation from other projects
+        * adds `intersphinx` extension to cross-link documentation from other projects
 
     **Tests**
         * tests now consequently use `pytest` framework instead of `unittest`
         * separate tests in into `tests/regression` and `tests/unittests` directories
-        * increases coverage to 76 % 
+        * increases coverage to 76 %
         * introduces snapshot / regression testing for all :class:`~acoular.base.Generator`, :class:`~acoular.fbeamform.BeamformerBase`, :class:`~acoular.environments.FlowField`, and :class:`~acoular.environments.Environment` derived classes (results in new snapshot data of size 1.1MB (see `tests/regression/_regtest_output`)
         * use `pytest-cases` to separate parameters from tests (cases are located under `tests/cases`)
-        * full coverage of `sdinput.py` module through the use of `pytest-mock` (mocks the behavior of an InputStream object, which cannot be used for CI due to missing audio interfaces)
+        * full coverage of `sdinput.py` module through the use of `pytest-mock` (mocks the behavior of an `InputStream` object, which cannot be used for CI due to missing audio interfaces)
         * linting and formatting for tests directory
-        * refactor :class:`~acoular.h5cache.HDF5Cache` class due to a bug encountered with the new tests (acoular now can handle changing caching directories during a session. Previously, only the basename was observed which caused problems with changing cache directories)
+        * refactor :class:`~acoular.h5cache.HDF5Cache` class due to a bug encountered with the new tests (`acoular` now can handle changing caching directories during a session. Previously, only the basename was observed which caused problems with changing cache directories)
         * tests now log the 10 slowest test runs
-        * adds `profile` options to hatch test environment to profile test run via `hatch run tests:profile` and save a graphviz chart as SVG file
+        * adds `profile` options to hatch test environment to profile test run via `hatch run tests:profile` and save a `graphviz` chart as SVG file
         * test AIAA benchmark classes with the benchmark data
-        * test `aperture`, `center`, `export_mpos`` functions in :class:`~acoular.microphones.MicGeom`
+        * test `aperture`, `center`, `export_mpos` functions in :class:`~acoular.microphones.MicGeom`
         * fix a typo in `AngleTracker` that lead to a property being incorrectly accessed
         * exclude jited functions from test coverage report
         * treat warnings as errors in tests
+        * recursively tests for empty dependencies in `Property` traits that are depended on
 
     **Internal**
         * adds a pull request template
-        * dynamically set the version in the pyproject.toml file (from version.py)
+        * dynamically set the version in the `pyproject.toml` file (from `version.py`)
         * activates maximum line length enforcement of 120 and 100 for comments and docstrings
         * adds CI workflow for inspecting regression test outputs
         * adds action that automatically assigns a team member to newly opened pull requests
         * `depends_on` now only accepts a list of strings
         * removes deprecated traits ending with version 25.01
         * include doctests in coverage report
-        * no longer add docs label if news/index.rst is updated
+        * no longer add docs label if `news/index.rst` is updated
 
 24.10
 ----------------
-    
+
     **New features:**
         * Sounddevice inputs now allow for user-settable sample rates and precision types
         * Block-wise frequency domain processing
@@ -64,8 +65,8 @@ Upcoming Release (25.01)
             * Deprecates: :class:`~acoular.base.TimeInOut`, :class:`~acoular.fprocess.FFTSpectra`, :class:`~acoular.process.TimeAverage`, :class:`~acoular.tprocess.MaskedTimeInOut`, :class:`~acoular.process.TimeCache`
             * adds unittests `test_process.py`, `test_fprocess.py`
             * adds documentation example `example_fft.py`
-                * allow more platforms to build the docs files including Linux, MacOS, and Windows 
-    
+                * allow more platforms to build the docs files including Linux, MacOS, and Windows
+
     **Bugfixes**
         * flush file in :class:`~acoular.tprocess.TimeCache` to prevent data loss / corruption
         * fixes use of already deprecated traits
@@ -82,7 +83,7 @@ Upcoming Release (25.01)
 
     **Internal**
         * refactoring of classes in :mod:`acoular.tbeamform` (moves buffer logic away from Beamformer classes)
-            * adds new :class:`~acoular.tools.utils.SamplesBuffer` class located in :mod:`~acoular.tools.utils` 
+            * adds new :class:`~acoular.tools.utils.SamplesBuffer` class located in :mod:`~acoular.tools.utils`
         * replaces the markdown-link-check by lychee
             * faster CI (written in RUST)
             * allows more files to be checked, including the .rst files in the documentation
@@ -100,7 +101,7 @@ Upcoming Release (25.01)
         * Implement a lazy result array for :class:`acoular.fbeamform.BeamformerBase` derived classes
         * Adds flow establishment length traits
         * Updates acoular demo with ASCII map and gets rid of writing file
-    
+
     Bugfixes:
         * temporary fix to PyTables - NumPy 2.0 incompatibility problem
         * Fixes :class:`acoular.fbeamform.BeamformerGridlessOrth` `shgo` params and `eva_list` initial value bug
@@ -111,7 +112,7 @@ Upcoming Release (25.01)
         * add issue templates
         * adds Conda CI
         * CI for TestPyPI and PyPI
-        * remove `plot_example.py` 
+        * remove `plot_example.py`
         * add autolabel rule for `fix` and `linting`
         * fix linting rules
         * add zenodo release to `CITAITON.cff`
@@ -127,19 +128,19 @@ Upcoming Release (25.01)
         * changes to UMA-16 microphone array arrangement
 
     * Internal:
-        * formatting and linting with ruff 
-        * introduce hatch 
+        * formatting and linting with ruff
+        * introduce hatch
         * measure test coverage
-        * replace `zenodo.json` by `CITATION.cff` 
-        * Bugfixes CI 
-        * update LICENSE 
-        * adds code of conduct 
+        * replace `zenodo.json` by `CITATION.cff`
+        * Bugfixes CI
+        * update LICENSE
+        * adds code of conduct
         * allow workflow dispatch for testing on different branches using GitHub
-        * improve documentation 
+        * improve documentation
         * refine package structure
             * move test directory outside of the source directory
             * remove outdated submodules `fileimport` and `nidaqimport`
-            * introduce new submodule `acoular/tools` 
+            * introduce new submodule `acoular/tools`
 
 
 
@@ -147,18 +148,18 @@ Upcoming Release (25.01)
 ------------
     * Improve test coverage for :class:`~acoular.fbeamform.BeamformerCMF`
     * Changes to :class:`~acoular.fbeamform.BeamformerSODIX`:
-        * correction of wrong cost-function 
+        * correction of wrong cost-function
         * speedups through the use of `numpy.einsum_path` together with `numpy.einsum`
         * changed start value `pgtol` for the optimization with `scipy.optimize.fmin_l_bfgs_b` solver
     * Bugfixes:
         * fixes unrecognized sector arguments in :class:`~acoular.tools.MetricEvaluator`
         * handles version-dependent default values for `normalize` attribute in sklearn solvers (relevant for :class:`~acoular.fbeamform.BeamformerCMF` )
         * fixes bug in :class:`~acoular.fbeamform.BeamformerOrth`: assigned strongest source at grid index 0 when instead of `eva_list` the trait `n` was given
-        * fixes broken :class:`~acoular.tprocess.SpatialInterpolator` 
-        * minor bugfix for single microphone transfer functions calculated with :class:`~acoular.fbeamform.SteeringVector` 
+        * fixes broken :class:`~acoular.tprocess.SpatialInterpolator`
+        * minor bugfix for single microphone transfer functions calculated with :class:`~acoular.fbeamform.SteeringVector`
         * fixes broken `NNLS` method in :class:`~acoular.fbeamform.BeamformerCMF` (wrong keyword argument `normalize`)
     * Internal:
-        * new GitHub workflow for CI of the documentation 
+        * new GitHub workflow for CI of the documentation
         * added Zenodo metadata file
         * changes to author name in `pyproject.toml`
 
@@ -168,7 +169,7 @@ Upcoming Release (25.01)
     * New class :class:`~acoular.tools.MetricEvaluator` to evaluate the performance of source mapping methods according to Herold and Sarradj (2017)
     * New class :class:`~acoular.sources.PointSourceConvolve` to blockwise convolve an arbitrary source signal with a spatial room impulse response
     * All filter classes derived from :class:`~acoular.tprocess.Filter` use SOS filters now
-    * No more version restrictions for scikit-learn 
+    * No more version restrictions for scikit-learn
     * Speedups for numba jitted functions by enforcing C-contiguous arguments and the efficient use SIMD processor instructions
     * :class:`~acoular.fbeamform.BeamformerOrth` now reimplements orthogonal deconvolution to be even faster and has a slightly different interface
     * Simple benchmark suite to compare the performance of Acoular core routines on different computers
@@ -193,8 +194,8 @@ Upcoming Release (25.01)
     * :class:`~acoular.microphones.MicGeom` now has an aperture trait
     * Tests are improved
     * Bugfixes:
-        * broken numpy.int import 
-        * one off bug in :class:`~acoular.grids.LineGrid` 
+        * broken numpy.int import
+        * one off bug in :class:`~acoular.grids.LineGrid`
 
 
 22.3
@@ -206,7 +207,7 @@ Upcoming Release (25.01)
     * Speedups:
         * time domain beamformers and CleanT deconvolution now share a common core codebase and all do blockwise processing
     * Bugfixes:
-        * broken digest in :class:`~acoular.grids.RectGrid3D` repaired 
+        * broken digest in :class:`~acoular.grids.RectGrid3D` repaired
         * :class:`~acoular.tbeamform.BeamformerCleant` and derived classes now never miss samples
 
 
@@ -217,7 +218,7 @@ Upcoming Release (25.01)
     * New class :class:`~acoular.signals.FiltWNoiseGenerator`
     * New classes :class:`~acoular.sources.SphericalHarmonicSource`, :class:`~acoular.sources.Linesource`, :class:`~acoular.sources.MovingPointSourceDipole`, :class:`~acoular.sources.MovingLineSource`
     * New class :class:`~acoular.tprocess.TimeConvolve`
-    * Speedups: 
+    * Speedups:
         * CSM works now in parallel and is faster
         * frequency domain beamformers are abaout 30% faster
         * time domain beamformers and CLEAN-T is now about 10 x faster
@@ -228,7 +229,7 @@ Upcoming Release (25.01)
 
 20.10
 ------------
-    
+
     * Supports Python 3.6, 3.7, 3.8
     * New base classes for time signal processing: :class:`~acoular.tprocess.Filter`, :class:`~acoular.tprocess.FilterBank`
         * New filter classes: :class:`~acoular.tprocess.TimeExpAverage`, :class:`~acoular.tprocess.FiltFreqWeight`, :class:`~acoular.tprocess.OctaveFilterBank`
@@ -262,7 +263,7 @@ Upcoming Release (25.01)
 19.11
 ------------
     * Adds new classes for handling rotating data, including detection of trigger signals and interpolation of sensor data for virtual array emulation (:class:`~acoular.tprocess.Trigger`, :class:`~acoular.tprocess.AngleTracker`, :class:`~acoular.tprocess.SpatialInterpolator`, :class:`~acoular.tprocess.SpatialInterpolatorRotation`, :class:`~acoular.tprocess.SpatialInterpolatorConstantRotation`)
-    * Introduces new :class:`~acoular.process.SampleSplitter` class, which allows distribution of data streams 
+    * Introduces new :class:`~acoular.process.SampleSplitter` class, which allows distribution of data streams
     * Adds new (global) caching options for more flexible cache file handling (e.g. never cache results, always cache, cache read-only). See :class:`~acoular.configuration.config` for information on how to use this.
     * User can choose whether to use h5py or pytables package for handling hdf files. See :class:`~acoular.configuration.config` for information on how to use this.
     * Change: BeamformerGIB behaviour (not calculating sources with eigenvalue of zero)
@@ -273,7 +274,7 @@ Upcoming Release (25.01)
 
 19.08
 ------------
-    
+
     * Supports Python 3.5, 3.6, 3.7
     * This will be the last version to officially support Python 2.7
     * Cache and data directories are now always created in current directory (Linux and Windows)
@@ -287,11 +288,11 @@ Upcoming Release (25.01)
 
 19.02
 ------------
-    
+
     * Adds support for Python 3.7
     * Introduces new :class:`~acoular.fbeamform.SteeringVector` class (see :doc:`../get_started/index` and `../examples/index` for usage). With this, some of the Beamformer and PointSource traits are deprecated and should no longer be used. While the current version is intended to be fully compatible with older scripts, deprecation warnings will be raised if necessary.
     * Introduces optional use of reference distance for SPL evaluation (current default: reference position at (x,y,z)=(0,0,0) )
-    * Introduces some basic Unit tests to evaluate the beamformer results 
+    * Introduces some basic Unit tests to evaluate the beamformer results
     * Bugfix: CLEAN algorithm now uses correct PSFs
     * some minor Bugfixes
 
@@ -305,11 +306,11 @@ Upcoming Release (25.01)
     * Floating point precision of CSM, PSF and beamformer customizable (default: float64) -- affects cache file size
     * PowerSpectra class now includes EigSpectra functionality (EigSpectra still callable for backwards compatibility)
     * Inverse methods: unit of sound pressure for internal calculation customizable (default: nPa) for better numeric stability with sklearn solvers. Still returns all values in Pa.
-    * Bugfix: BeamformerFunctional works now with steering vector formulation II (inverse) and III (true level) which produced incorrect results in the past. 
+    * Bugfix: BeamformerFunctional works now with steering vector formulation II (inverse) and III (true level) which produced incorrect results in the past.
     * Bugfix: BeamformerFunctional can only be called when the diagonal of the CSM is included
     * Bugfix: Corrected calculation of PSF for steering vector formulation IV
     * Bugfix: Behaviour of normalizing PSF at assumed source location (psf=1) is removed
-    
+
 
 
 
@@ -317,10 +318,6 @@ Upcoming Release (25.01)
 17.11
 ------------
 
-    * Added support for Python 3.4, 3.5 and 3.6 
+    * Added support for Python 3.4, 3.5 and 3.6
     * Implementation of fast/parallelized code now with Numba (instead of C++ and SciPy.weave)
     * cross spectral matrix (CSM) orientation changed (was transposed in earlier versions). Please do not use the cache files from earlier versions in version 17.11!
-        
-
-
-

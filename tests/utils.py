@@ -8,26 +8,28 @@ import acoular as ac
 import numpy as np
 import pytest
 from pytest_cases import get_case_id
+from traits.api import HasTraits
 
 
-def get_all_classes():
+def get_all_classes(hastraits_only=False):
     classes = []
     package = importlib.import_module('acoular')
     for module_info in pkgutil.walk_packages(package.__path__, package.__name__ + '.'):
         module = importlib.import_module(module_info.name)
-        for _, obj in inspect.getmembers(module, inspect.isclass):
-            if obj.__module__ == module_info.name:  # ensure class is defined in the current module
-                classes.append(obj)
+        for _, cls in inspect.getmembers(module, inspect.isclass):
+            # ensure class is defined in the current module
+            if cls.__module__ == module_info.name and (not hastraits_only or issubclass(cls, HasTraits)):
+                classes.append(cls)
     return classes
 
 
 def get_subclasses(cls, include_abstract=False):
     classes = []
-    for _, obj in inspect.getmembers(ac):
-        if inspect.isclass(obj) and issubclass(obj, cls):
-            if inspect.isabstract(obj) and not include_abstract:
-                continue
-            classes.append(obj)
+    for _, subcls in inspect.getmembers(ac):
+        if all(
+            [inspect.isclass(subcls) and issubclass(subcls, cls), not inspect.isabstract(subcls) or include_abstract]
+        ):
+            classes.append(subcls)
     return classes
 
 
