@@ -97,6 +97,9 @@ class Calib(InOut):
     #: Channel mask to serve as an index for all valid channels, is set automatically.
     channels = Property(depends_on=['invalid_channels', 'num_mics'], desc='channel mask')
 
+    # Name of the cache file without extension, readonly.
+    basename = Property(depends_on=['source.digest'], desc='basename for cache file')
+
     # Internal identifier
     digest = Property(depends_on=['source.digest', 'data'])
 
@@ -114,6 +117,12 @@ class Calib(InOut):
     @cached_property
     def _get_digest(self):
         return digest(self)
+
+    @cached_property
+    def _get_basename(self):
+        if 'basename' in self.source.all_trait_names():
+            return self.source.basename
+        return self.source.__class__.__name__ + self.source.digest
 
     @on_trait_change('file')
     def import_data(self):
