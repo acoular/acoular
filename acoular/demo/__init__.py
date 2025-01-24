@@ -11,3 +11,4 @@
 """
 
 from . import acoular_demo
+from .acoular_demo import create_three_sources
