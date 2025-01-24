@@ -9,7 +9,7 @@
     SoundDeviceSamplesGenerator
 """
 
-from traits.api import Any, Bool, Enum, Float, Int, Long, Property, cached_property, observe
+from traits.api import Any, Bool, Enum, Float, Int, Property, cached_property, observe
 
 # acoular imports
 from .base import SamplesGenerator
