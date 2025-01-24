@@ -74,6 +74,8 @@ from .sdinput import SoundDeviceSamplesGenerator
 from .signals import (
     FiltWNoiseGenerator,
     GenericSignalGenerator,
+    NoiseGenerator,
+    PeriodicSignalGenerator,
     PNoiseGenerator,
     SignalGenerator,
     SineGenerator,
