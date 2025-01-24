@@ -24,7 +24,7 @@ from abc import abstractmethod
 from traits.api import (
     ABCHasStrictTraits,
     CArray,
-    CLong,
+    CInt,
     Delegate,
     Float,
     Instance,
@@ -55,10 +55,10 @@ class Generator(ABCHasStrictTraits):
     sample_freq = Float(1.0, desc='sampling frequency')
 
     #: Number of signal samples
-    num_samples = CLong
+    num_samples = CInt
 
     #: Number of channels
-    num_channels = CLong
+    num_channels = CInt
 
     # internal identifier
     digest = Property(depends_on=['sample_freq', 'num_samples', 'num_channels'])
@@ -126,13 +126,13 @@ class SpectraGenerator(Generator):
     """
 
     #: Number of frequencies
-    num_freqs = CLong
+    num_freqs = CInt
 
     #: 1-D array of frequencies
     freqs = CArray
 
     #: The length of the block used to calculate the spectra
-    block_size = CLong
+    block_size = CInt
 
     # internal identifier
     digest = Property(depends_on=['sample_freq', 'num_samples', 'num_channels', 'num_freqs', 'block_size'])

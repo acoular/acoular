@@ -84,7 +84,7 @@ from scipy.spatial import Delaunay
 from traits.api import (
     Bool,
     CArray,
-    CLong,
+    CInt,
     Constant,
     Delegate,
     Dict,
@@ -129,10 +129,10 @@ class MaskedTimeOut(TimeOut):
     source = Instance(SamplesGenerator)
 
     # Index of the first sample to be considered valid.
-    start = CLong(0, desc='start of valid samples')
+    start = CInt(0, desc='start of valid samples')
 
     # Index of the last sample to be considered valid.
-    stop = Union(None, CLong, desc='stop of valid samples')
+    stop = Union(None, CInt, desc='stop of valid samples')
 
     # Channels that are to be treated as invalid.
     invalid_channels = ListInt(desc='list of invalid channels')

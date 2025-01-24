@@ -57,7 +57,7 @@ from traits.api import (
     Any,
     Bool,
     CArray,
-    CLong,
+    CInt,
     Delegate,
     Dict,
     Enum,
@@ -236,10 +236,10 @@ class TimeSamples(SamplesGenerator):
     calib = Instance(Calib, desc='Calibration data')
 
     #: Number of channels, is set automatically / read from file.
-    num_channels = CLong(0, desc='number of input channels')
+    num_channels = CInt(0, desc='number of input channels')
 
     #: Number of time data samples, is set automatically / read from file.
-    num_samples = CLong(0, desc='number of samples')
+    num_samples = CInt(0, desc='number of samples')
 
     #: The time data as array of floats with dimension (num_samples, num_channels).
     data = Any(transient=True, desc='the actual time data array')
@@ -389,10 +389,10 @@ class MaskedTimeSamples(TimeSamples):
     """
 
     #: Index of the first sample to be considered valid.
-    start = CLong(0, desc='start of valid samples')
+    start = CInt(0, desc='start of valid samples')
 
     #: Index of the last sample to be considered valid.
-    stop = Union(None, CLong, desc='stop of valid samples')
+    stop = Union(None, CInt, desc='stop of valid samples')
 
     #: Channels that are to be treated as invalid.
     invalid_channels = ListInt(desc='list of invalid channels')
@@ -401,10 +401,10 @@ class MaskedTimeSamples(TimeSamples):
     channels = Property(depends_on=['invalid_channels', 'num_channels_total'], desc='channel mask')
 
     #: Number of channels (including invalid channels), is set automatically.
-    num_channels_total = CLong(0, desc='total number of input channels')
+    num_channels_total = CInt(0, desc='total number of input channels')
 
     #: Number of time data samples (including invalid samples), is set automatically.
-    num_samples_total = CLong(0, desc='total number of samples per channel')
+    num_samples_total = CInt(0, desc='total number of samples per channel')
 
     #: Number of valid channels, is set automatically.
     num_channels = Property(

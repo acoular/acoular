@@ -13,7 +13,7 @@
 import xml.dom.minidom
 
 from numpy import array, newaxis
-from traits.api import CArray, CLong, File, ListInt, Property, cached_property, on_trait_change
+from traits.api import CArray, CInt, File, ListInt, Property, cached_property, on_trait_change
 
 import acoular as ac
 
@@ -82,7 +82,7 @@ class Calib(InOut):
 
     #: Number of microphones in the calibration data,
     #: is set automatically when read from file or when data is set.
-    num_mics = CLong(0, desc='number of microphones in the geometry')
+    num_mics = CInt(0, desc='number of microphones in the geometry')
 
     #: Array of calibration factors,
     #: is set automatically when read from file.
