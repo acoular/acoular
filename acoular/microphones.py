@@ -42,8 +42,8 @@ class MicGeom(HasStrictTraits):
 
     Notes
     -----
-    - If :attr:`file` is updated, the :meth:`import_mpos` method is automatically called to update
-      :attr:`pos_total`.
+    - The microphone geometry as in :attr:`total_pos` is automatically changed if the :attr:`file`
+      attribute is updated.
     - Small numerical values in the computed :attr:`center` are set to zero for numerical stability.
 
     Examples
@@ -234,13 +234,13 @@ class MicGeom(HasStrictTraits):
 
         Parameters
         ----------
-        filename : str
-            The name of the file to which the microphone positions will be written. The file
+        filename : :class:`str`
+            The path to the file to which the microphone positions will be written. The file
             extension must be ``.xml``.
 
         Raises
         ------
-        OSError
+        :obj:`OSError`
             If the file cannot be written due to permissions issues or invalid file paths.
 
         Notes
