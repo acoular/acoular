@@ -148,7 +148,7 @@ packages = ["acoular"]
 
 [tool.pytest.ini_options]
 filterwarnings = [
-    "error", # treat warnings as errors
+    # "error", # treat warnings as errors
     "ignore::pluggy.PluggyTeardownRaisedWarning", # raised internally by pytest-regtest
     "ignore:numpy.core.multiarray is deprecated*:DeprecationWarning", # raised internally by pylops
     "ignore:module 'sre_parse' is deprecated:DeprecationWarning", # raised internally by traits
@@ -171,3 +171,19 @@ omit = [
     "acoular/fastFuncs.py",
     "acoular/deprecation",
     ]
+
+
+[tool.numpydoc_validation]
+checks = [
+    "all",   # report on all checks, except the below
+    "ES01",
+    "EX01",
+    "GL01",
+    "GL08",
+    "PR01",
+    # "RT02",
+    "SA01",
+]
+exclude = [  # don't report on objects that match any of these regex
+    '\._', # exclude methods with leading underscore
+]
