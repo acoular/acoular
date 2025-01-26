@@ -116,15 +116,15 @@ def spherical_hn1(n, z):
     r"""
     Compute the Spherical Hankel Function of the First Kind.
 
-    The spherical Hankel function of the first kind, :math:`h_n^{(1)}(z)`, is defined like this:
+    The spherical Hankel function of the first kind, :math:`h_n^{(1)}(z)`, is defined as:
 
     .. math:: h_n^{(1)}(z) = j_n(z) + i \cdot y_n(z)
 
-    with the complex unit :math:`i`, the spherical Bessel function of the first kind:
+    with the complex unit :math:`i`, the spherical Bessel function of the first kind as
 
     .. math:: j_n(z) = \sqrt{\frac{\pi}{2z}} J_{n + 1/2}(z),
 
-    and the spherical Bessel function of the second kind:
+    and the spherical Bessel function of the second kind as
 
     .. math:: y_n(z) = \sqrt{\frac{\pi}{2z}} Y_{n + 1/2}(z),
 
@@ -132,9 +132,9 @@ def spherical_hn1(n, z):
 
     Parameters
     ----------
-    n : int
+    n : :class:`int`
         Order of the spherical Hankel function. Must be a non-negative integer.
-    z : array_like or scalar
+    z : array or scalar
         Argument of the spherical Hankel function. Can be real or complex.
 
     Returns
@@ -146,22 +146,23 @@ def spherical_hn1(n, z):
 
     See Also
     --------
-    scipy.special.spherical_jn : Computes the spherical Bessel function of the first kind.
-    scipy.special.spherical_yn : Computes the spherical Bessel function of the second kind.
+    :func:`scipy.special.spherical_jn` : Computes the spherical Bessel function of the first kind.
+    :func:`scipy.special.spherical_yn` : Computes the spherical Bessel function of the second kind.
 
     Notes
     -----
-    - The function relies on ``scipy.special.spherical_jn`` for the spherical Bessel function of the
-      first kind and ``scipy.special.spherical_yn`` for the spherical Bessel function of the second
-      kind.
+    - The function relies on :func:`scipy.special.spherical_jn` for the spherical Bessel function of
+      the first kind and :func:`scipy.special.spherical_yn` for the spherical Bessel function of the
+      second kind.
     - The input ``n`` must be a non-negative integer; otherwise, the behavior is undefined.
 
     Examples
     --------
-    >>> from acoular.sources import spherical_hn1
-    >>> spherical_hn1(0, 1.0)
+    >>> import acoular as ac
+    >>>
+    >>> ac.sources.spherical_hn1(0, 1.0)
     np.complex128(0.8414709848078965-0.5403023058681398j)
-    >>> spherical_hn1(1, [1.0, 2.0])
+    >>> ac.sources.spherical_hn1(1, [1.0, 2.0])
     array([0.30116868-1.38177329j, 0.43539777-0.350612j  ])
     """
     return spherical_jn(n, z, derivative=False) + 1j * spherical_yn(n, z, derivative=False)
@@ -177,13 +178,13 @@ def get_radiation_angles(direction, mpos, sourceposition):
 
     Parameters
     ----------
-    direction : array_like of shape ``(3,)``
+    direction : array of shape ``(3,)``
         Unit vector representing the spherical harmonic orientation. It should be a 3-element array
         corresponding to the ``x``, ``y``, and ``z`` components of the direction.
-    mpos : array_like of shape ``(3, N)``
+    mpos : array of shape ``(3, N)``
         Microphone positions in a 3D Cartesian coordinate system. The array should have 3 rows (the
         ``x``, ``y`` and ``z`` coordinates) and ``N`` columns (one for each microphone).
-    sourceposition : array_like of shape ``(3,)``
+    sourceposition : array of shape ``(3,)``
         Position of the source in a 3D Cartesian coordinate system. It should be a 3-element array
         corresponding to the ``x``, ``y``, and ``z`` coordinates of the source.
 
@@ -213,12 +214,13 @@ def get_radiation_angles(direction, mpos, sourceposition):
 
     Examples
     --------
-    >>> from acoular.sources import get_radiation_angles
+    >>> import acoular as ac
     >>> import numpy as np
+    >>>
     >>> direction = [1, 0, 0]
     >>> mpos = np.array([[1, 2], [0, 0], [0, 1]])  # Two microphones
     >>> sourceposition = [0, 0, 0]
-    >>> azi, ele = get_radiation_angles(direction, mpos, sourceposition)
+    >>> azi, ele = ac.sources.get_radiation_angles(direction, mpos, sourceposition)
     >>> azi
     array([0.       , 5.8195377])
     >>> ele
@@ -245,7 +247,7 @@ def get_radiation_angles(direction, mpos, sourceposition):
 
 def get_modes(lOrder, direction, mpos, sourceposition=None):  # noqa: N803
     """
-    Calculate the Spherical Harmonic Radiation Pattern at microphone positions.
+    Calculate the spherical harmonic radiation pattern at microphone positions.
 
     This function computes the spherical harmonic radiation pattern values at each
     microphone position for a given maximum spherical harmonic order (``lOrder``),
@@ -253,16 +255,16 @@ def get_modes(lOrder, direction, mpos, sourceposition=None):  # noqa: N803
 
     Parameters
     ----------
-    lOrder : int
+    lOrder : :class:`int`
         The maximum order of spherical harmonics to compute. The resulting modes will include all
         orders up to and including ``lOrder``.
-    direction : array_like of shape ``(3,)``
+    direction : array of shape ``(3,)``
         Unit vector representing the orientation of the spherical harmonics. Should contain the
         ``x``, ``y``, and ``z`` components of the direction.
-    mpos : array_like of shape ``(3, N)``
+    mpos : array of shape ``(3, N)``
         Microphone positions in a 3D Cartesian coordinate system. The array should have 3 rows (the
         ``x``, ``y`` and ``z`` coordinates) and ``N`` columns (one for each microphone).
-    sourceposition : array_like of shape ``(3,)``, optional
+    sourceposition : array of shape ``(3,)``, optional
         Position of the source in a 3D Cartesian coordinate system. If not provided, it defaults to
         the origin ``[0, 0, 0]``.
 
@@ -274,14 +276,14 @@ def get_modes(lOrder, direction, mpos, sourceposition=None):  # noqa: N803
 
     See Also
     --------
-    :meth:`get_radiation_angles` : Computes azimuth and elevation angles between microphones and the
-                                   source.
-    scipy.special.sph_harm : Computes spherical harmonic values.
+    :func:`get_radiation_angles` :
+        Computes azimuth and elevation angles between microphones and the source.
+    :func:`scipy.special.sph_harm` : Computes spherical harmonic values.
 
     Notes
     -----
     - The azimuth (``azi``) and elevation (``ele``) angles between the microphones and the source
-      are calculated using the :meth:`get_radiation_angles` function.
+      are calculated using the :func:`get_radiation_angles` function.
     - Spherical harmonics (``sph_harm``) are computed for each mode ``(l, m)``, where ``l`` is the
       degree (ranging from ``0`` to ``lOrder``) and ``m`` is the order
       (ranging from ``-l`` to ``+l``).
@@ -290,7 +292,7 @@ def get_modes(lOrder, direction, mpos, sourceposition=None):  # noqa: N803
 
     Examples
     --------
-    >>> from acoular.sources import get_modes
+    >>> import acoular as ac
     >>> import numpy as np
     >>>
     >>> lOrder = 2
@@ -298,7 +300,7 @@ def get_modes(lOrder, direction, mpos, sourceposition=None):  # noqa: N803
     >>> mpos = np.array([[1, -1], [1, -1], [0, 0]])  # Two microphones
     >>> sourcepos = [0, 0, 0]  # Source at origin
     >>>
-    >>> modes = get_modes(lOrder, direction, mpos, sourcepos)
+    >>> modes = ac.sources.get_modes(lOrder, direction, mpos, sourcepos)
     >>> modes.shape
     (2, 9)
     """
@@ -452,22 +454,22 @@ class TimeSamples(SamplesGenerator):
 
         Parameters
         ----------
-        num : int, optional, default=128
+        num : :class:`int`, optional
             The size of each block to be yielded, representing the number of time-domain
             samples per block.
 
         Yields
         ------
         :class:`numpy.ndarray`
-            A 2D array of shape ``( num,`` :attr:`num_channels` ``)`` representing a block of
+            A 2D array of shape (``num``, :attr:`num_channels`) representing a block of
             time-domain data. The last block may have fewer than ``num`` samples if the total number
             of samples is not a multiple of ``num``.
 
         Raises
         ------
-        OSError
+        :obj:`OSError`
             If no samples are available (i.e., :attr:`num_samples` is ``0``).
-        ValueError
+        :obj:`ValueError`
             If the calibration data does not match the number of channels.
 
         Warnings
@@ -669,7 +671,7 @@ class MaskedTimeSamples(TimeSamples):
 
         Parameters
         ----------
-        num : int, optional
+        num : :class:`int`, optional
             The size of each block to be yielded, representing the number of time-domain samples
             per block. Default is ``128``.
 
@@ -682,10 +684,10 @@ class MaskedTimeSamples(TimeSamples):
 
         Raises
         ------
-        OSError
+        :obj:`OSError`
             If no valid samples are available (i.e., :attr:`start` and :attr:`stop` indices result
             in an empty range).
-        ValueError
+        :obj:`ValueError`
             If the :attr:`calibration data<calib>` is incompatible with the
             :attr:`number of valid channels<num_channels>`.
 
@@ -747,7 +749,7 @@ class MaskedTimeSamples(TimeSamples):
 @deprecated_alias({'numchannels': 'num_channels', 'numsamples': 'num_samples'}, read_only=True)
 class PointSource(SamplesGenerator):
     """
-    Defines a fixed point source emitting a signal, intended for simulations.
+    Define a fixed point source emitting a signal, intended for simulations.
 
     The :class:`PointSource` class models a stationary sound source that generates a signal
     detected by microphones. It includes support for specifying the source's location, handling
@@ -756,9 +758,9 @@ class PointSource(SamplesGenerator):
 
     See Also
     --------
-    :class:`~acoular.signals.SignalGenerator` : For defining custom emitted signals.
-    :class:`~acoular.microphones.MicGeom` : For specifying microphone geometries.
-    :class:`~acoular.environments.Environment` : For modeling sound propagation effects.
+    :class:`acoular.signals.SignalGenerator` : For defining custom emitted signals.
+    :class:`acoular.microphones.MicGeom` : For specifying microphone geometries.
+    :class:`acoular.environments.Environment` : For modeling sound propagation effects.
 
     Notes
     -----
@@ -852,7 +854,7 @@ class PointSource(SamplesGenerator):
     #: Total number of samples in the emitted signal, derived from the :attr:`signal` generator.
     num_samples = Delegate('signal')
 
-    # Sampling frequency of the signal, derived from the :attr:`signal` generator.
+    #: Sampling frequency of the signal, derived from the :attr:`signal` generator.
     sample_freq = Delegate('signal')
 
     #: A unique identifier for the current state of the source, based on its properties. (read-only)
@@ -883,7 +885,7 @@ class PointSource(SamplesGenerator):
 
         Parameters
         ----------
-        num : int, optional
+        num : :class:`int`, optional
             Number of samples per block to be yielded. Default is ``128``.
 
         Yields
@@ -895,9 +897,9 @@ class PointSource(SamplesGenerator):
 
         Raises
         ------
-        ValueError
+        :obj:`ValueError`
             If the source and a microphone are located at the same position.
-        RuntimeError
+        :obj:`RuntimeError`
             If signal processing or propagation cannot be performed.
         """
         self._validate_locations()
@@ -944,7 +946,7 @@ class PointSource(SamplesGenerator):
 
 class SphericalHarmonicSource(PointSource):
     """
-    Define a fixed Spherical Harmonic Source emitting a signal.
+    Define a fixed spherical harmonic source emitting a signal.
 
     The :class:`SphericalHarmonicSource` class models a stationary sound source that emits a signal
     with spatial properties represented by spherical harmonics. This source can simulate
@@ -1009,11 +1011,11 @@ class SphericalHarmonicSource(PointSource):
 
         See Also
         --------
-        :meth:`get_modes` : Method for computing spherical harmonic modes.
+        :func:`get_modes` : Method for computing spherical harmonic modes.
 
         Notes
         -----
-        - The spherical harmonic modes are computed using the :meth:`get_modes` method, which
+        - The spherical harmonic modes are computed using the :func:`get_modes` function, which
           requires the microphone positions, source position, and source orientation.
         - The transformation applies the spherical harmonic coefficients (:attr:`alpha`) to the
           signal in the frequency domain.
@@ -1036,7 +1038,7 @@ class SphericalHarmonicSource(PointSource):
 
         Parameters
         ----------
-        num : int, optional
+        num : :class:`int`, optional
             Number of samples per block to be yielded. Default is ``128``.
 
         Yields
@@ -1048,7 +1050,7 @@ class SphericalHarmonicSource(PointSource):
 
         Raises
         ------
-        IndexError
+        :obj:`IndexError`
             If no more samples are available from the signal source.
         """
         # If signal samples are needed for te < t_start, then samples are taken
@@ -1078,16 +1080,17 @@ class SphericalHarmonicSource(PointSource):
 
 class MovingPointSource(PointSource):
     """
-    Defines a moving :class:`point source<PointSource>` emitting a signal.
+    Define a moving :class:`point source<PointSource>` emitting a :attr:`~PointSource.signal`.
 
     The :class:`MovingPointSource` class models a sound source that follows a
-    :attr:`specified trajectory` while emitting a signal. This allows for the simulation of dynamic
-    acoustic scenarios, such as vehicles in motion or sources changing position over time.
+    :attr:`specified trajectory<trajectory>` while emitting a :attr:`~PointSource.signal`.
+    This allows for the simulation of dynamic acoustic scenarios,
+    such as vehicles in motion or sources changingposition over time.
 
     See Also
     --------
-    :class:`PointSource` : For modeling stationary point sources.
-    :class:`~acoular.trajectory.Trajectory` : For specifying source motion paths.
+    :class:`acoular.sources.PointSource` : For modeling stationary point sources.
+    :class:`acoular.trajectory.Trajectory` : For specifying source motion paths.
     """
 
     #: Determines whether convective amplification is considered. When ``True``, the amplitude of
@@ -1132,7 +1135,7 @@ class MovingPointSource(PointSource):
 
         Parameters
         ----------
-        num : int, optional
+        num : :class:`int`, optional
             Number of samples per block to be yielded. Default is ``128``.
 
         Yields
@@ -1144,7 +1147,7 @@ class MovingPointSource(PointSource):
 
         Raises
         ------
-        IndexError
+        :obj:`IndexError`
             If no more samples are available from the signal source.
 
         Notes
@@ -1214,7 +1217,7 @@ class PointSourceDipole(PointSource):
 
     See Also
     --------
-    :class:`PointSource` : For modeling stationary point sources.
+    :class:`acoular.sources.PointSource` : For modeling stationary point sources.
 
     Notes
     -----
@@ -1225,10 +1228,11 @@ class PointSourceDipole(PointSource):
 
     #: Vector defining the orientation of the dipole lobes and the distance between the inversely
     #: phased monopoles. The magnitude of the vector determines the monopoles' separation:
-    #:   - ``distance = [lowest wavelength in spectrum] * [magnitude] * 1e-5``
-    #: Use vectors with magnitudes on the order of ``1.0`` or smaller for best results. Default is
-    #: ``(0.0, 0.0, 1.0)`` (z-axis orientation).
-    #: *Note: Use vectors with order of magnitude around ``1.0`` or less for good results.*
+    #:     - ``distance = [lowest wavelength in spectrum] * [magnitude] * 1e-5``
+    #: Use vectors with magnitudes on the order of ``1.0`` or smaller for best results.
+    #: Default is ``(0.0, 0.0, 1.0)`` (z-axis orientation).
+    #:
+    #: **Note:** Use vectors with order of magnitude around ``1.0`` or less for good results.
     direction = Tuple((0.0, 0.0, 1.0), desc='dipole orientation and distance of the inversely phased monopoles')
 
     #: Behavior of the signal for negative time indices. Currently only supports ``'loop'``.
@@ -1260,7 +1264,7 @@ class PointSourceDipole(PointSource):
 
         Parameters
         ----------
-        num : int, optional
+        num : :class:`int`, optional
             Number of samples per block to yield. Default is ``128``.
 
         Yields
@@ -1272,7 +1276,7 @@ class PointSourceDipole(PointSource):
 
         Raises
         ------
-        IndexError
+        :obj:`IndexError`
             If no more samples are available from the source.
 
         Notes
@@ -1360,8 +1364,9 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
 
     See Also
     --------
-    :class:`PointSourceDipole` : For stationary dipole sources.
-    :class:`MovingPointSource` : For moving point sources without dipole characteristics.
+    :class:`acoular.sources.PointSourceDipole` : For stationary dipole sources.
+    :class:`acoular.sources.MovingPointSource` :
+        For moving point sources without dipole characteristics.
     """
 
     #: A unique identifier for the current state of the source, based on its properties. (read-only)
@@ -1395,7 +1400,7 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
         ----------
         t : :class:`numpy.ndarray`
             The current receiving time at the microphones.
-        direction : float or :class:`numpy.ndarray`
+        direction : :class:`float` or :class:`numpy.ndarray`
             Direction vector for the source's dipole directivity.
 
         Returns
@@ -1413,14 +1418,14 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
 
         Warnings
         --------
-        Ensure that the maximum iteration count (100) is sufficient for convergence in all
+        Ensure that the maximum iteration count (``100``) is sufficient for convergence in all
         scenarios, especially for high Mach numbers or long trajectories.
 
         Notes
         -----
         The emission times are computed iteratively using the Newton-Raphson method. The iteration
-        tops when the time discrepancy (``eps``) is below a threshold (``epslim``) or after 100
-        iterations.
+        terminates when the time discrepancy (``eps``) is below a threshold (``epslim``)
+        or after 100 iterations.
         """
         eps = ones(self.mics.num_mics)
         epslim = 0.1 / self.up / self.sample_freq
@@ -1455,7 +1460,7 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
         direction : :class:`numpy.ndarray`
             The initial direction vector of the dipole, specified as a 3-element
             array representing the orientation of the dipole lobes.
-        time : float, optional
+        time : :class:`float`, optional
             The time at which the trajectory position and velocity are evaluated. Defaults to ``0``.
 
         Returns
@@ -1492,7 +1497,7 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
 
         Parameters
         ----------
-        num : int, optional
+        num : :class:`int`, optional
             Number of samples per block to yield. Default is ``128``.
 
         Yields
@@ -1586,7 +1591,7 @@ class LineSource(PointSource):
 
     See Also
     --------
-    :class:`PointSource` : For modeling stationary point sources.
+    :class:`acoular.sources.PointSource` : For modeling stationary point sources.
 
     Notes
     -----
@@ -1599,7 +1604,7 @@ class LineSource(PointSource):
     #: Vector to define the length of the line source in meters. Default is ``1.0``.
     length = Float(1, desc='length of the line source')
 
-    #:  Number of monopole sources in the line source. Default is ``1``.
+    #: Number of monopole sources in the line source. Default is ``1``.
     num_sources = Int(1)
 
     #: Strength coefficients for each monopole source.
@@ -1634,7 +1639,7 @@ class LineSource(PointSource):
 
         Parameters
         ----------
-        num : int, optional
+        num : :class:`int`, optional
             Number of samples per block to yield. Default is ``128``.
 
         Yields
@@ -1715,9 +1720,11 @@ class MovingLineSource(LineSource, MovingPointSource):
 
     See Also
     --------
-    :class:`LineSource` : For :class:`line sources<LineSource>` consisting of
-                          :attr:`co- or incoherent<LineSource.coherence>` monopoles.
-    :class:`MovingPointSource` : For moving point sources without dipole characteristics.
+    :class:`acoular.sources.LineSource` :
+        For :class:`line sources<LineSource>` consisting of
+        :attr:`coherent or incoherent<LineSource.coherence>` monopoles.
+    :class:`acoular.sources.MovingPointSource` :
+        For moving point sources without dipole characteristics.
     """
 
     #: A unique identifier for the current state of the source, based on its properties. (read-only)
@@ -1759,7 +1766,7 @@ class MovingLineSource(LineSource, MovingPointSource):
         direction : :class:`numpy.ndarray`
             The initial direction vector of the line source, specified as a
             3-element array representing the orientation of the line.
-        time : float, optional
+        time : :class:`float`, optional
             The time at which the :attr:`~MovingPointSource.trajectory` position and velocity
             are evaluated. Defaults to ``0``.
 
@@ -1802,7 +1809,7 @@ class MovingLineSource(LineSource, MovingPointSource):
 
         Parameters
         ----------
-        t : float
+        t : :class:`float`
             The current receiving time at the microphones, specified in seconds.
         direction : :class:`numpy.ndarray`
             The current direction vector of the line source, specified as a 3-element array
@@ -1829,7 +1836,7 @@ class MovingLineSource(LineSource, MovingPointSource):
         - The distance between the line source and microphones is computed using
           Euclidean geometry.
         - The radial Mach number (``Mr``) is calculated using the velocity of the source
-          and the speed of sound in the medium (:attr:`PointSource.env`.c).
+          and the speed of sound in the medium (:attr:`~acoular.environments.Environment.c`).
         - The method iterates until the difference between the computed emission time and
           the current time is sufficiently small (within a defined threshold).
         """
@@ -1858,7 +1865,7 @@ class MovingLineSource(LineSource, MovingPointSource):
 
         Parameters
         ----------
-        num : int, optional
+        num : :class:`int`, optional
             Number of samples per block to yield. Default is ``128``.
 
         Yields
@@ -1948,8 +1955,8 @@ class UncorrelatedNoiseSource(SamplesGenerator):
 
     See Also
     --------
-    :class:`~acoular.signals.SignalGenerator` : For defining noise types and properties.
-    :class:`~acoular.microphones.MicGeom` : For specifying microphone geometries.
+    :class:`acoular.signals.SignalGenerator` : For defining noise types and properties.
+    :class:`acoular.microphones.MicGeom` : For specifying microphone geometries.
 
     Notes
     -----
@@ -1995,7 +2002,7 @@ class UncorrelatedNoiseSource(SamplesGenerator):
     signal = Instance(NoiseGenerator, desc='type of noise')
 
     #: Array of random seed values for generating uncorrelated noise at each channel. If left empty,
-    #: seeds will be automatically generated as ``arange(self.num_channels) + signal.seed``. The
+    #: seeds will be automatically generated as ``np.arange(self.num_channels) + signal.seed``. The
     #: size of the array must match the :attr:`number of output channels<num_channels>`.
     seed = CArray(dtype=uint32, desc='random seed values')
 
@@ -2052,7 +2059,7 @@ class UncorrelatedNoiseSource(SamplesGenerator):
 
         Parameters
         ----------
-        num : int, optional
+        num : :class:`int`, optional
             Number of samples per block to be yielded. Default is ``128``.
 
         Yields
@@ -2064,7 +2071,7 @@ class UncorrelatedNoiseSource(SamplesGenerator):
 
         Raises
         ------
-        ValueError
+        :obj:`ValueError`
             If the shape of the :attr:`seed` array does not match the number of channels.
 
         Notes
@@ -2112,7 +2119,7 @@ class SourceMixer(SamplesGenerator):
 
     See Also
     --------
-    :class:`~acoular.base.SamplesGenerator` : Base class for signal generators.
+    :class:`acoular.base.SamplesGenerator` : Base class for signal generators.
 
     Notes
     -----
@@ -2254,7 +2261,7 @@ class SourceMixer(SamplesGenerator):
 
         Raises
         ------
-        ValueError
+        :obj:`ValueError`
             If any source has incompatible attributes.
         """
         if len(self.sources) < 1:
@@ -2281,7 +2288,7 @@ class SourceMixer(SamplesGenerator):
 
         Parameters
         ----------
-        num : int
+        num : :class:`int`
             Number of samples per block to be yielded.
 
         Yields
@@ -2293,7 +2300,7 @@ class SourceMixer(SamplesGenerator):
 
         Raises
         ------
-        ValueError
+        :obj:`ValueError`
             If the sources are not compatible for mixing.
         """
         # check whether all sources fit together
@@ -2331,14 +2338,14 @@ class PointSourceConvolve(PointSource):
     See Also
     --------
     :class:`PointSource` : Base class for point sources.
-    :class:`~acoular.tprocess.TimeConvolve` : Class used for performing time-domain convolution.
+    :class:`acoular.tprocess.TimeConvolve` : Class used for performing time-domain convolution.
 
     Notes
     -----
     - The input :attr:`convolution kernel<kernel>` must be provided as a time-domain array.
-    - The second dimension of :attr:`kernel` must either be 1 (a single kernel applied
-      to all channels) or match the number of channels in the output
-      (:class:`~acoular.base.SamplesGenerator`.num_channels).
+    - The second dimension of :attr:`kernel` must either be ``1`` (a single kernel applied to all
+      channels) or match the :attr:`number of channels<acoular.base.Generator.num_channels>`
+      in the output.
     - Convolution is performed using the :class:`~acoular.tprocess.TimeConvolve` class.
 
     Examples
@@ -2413,7 +2420,7 @@ class PointSourceConvolve(PointSource):
 
         Parameters
         ----------
-        num : int, optional
+        num : :class:`int`, optional
             The number of samples per block to yield. Default is ``128``.
 
         Yields
