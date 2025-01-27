@@ -28,7 +28,7 @@ from traits.api import (
     ABCHasStrictTraits,
     Bool,
     CArray,
-    CLong,
+    CInt,
     Delegate,
     Float,
     Instance,
@@ -56,7 +56,7 @@ class SignalGenerator(ABCHasStrictTraits):
     sample_freq = Float(1.0, desc='sampling frequency')
 
     #: Number of samples to generate.
-    num_samples = CLong
+    num_samples = CInt
 
     # internal identifier
     digest = Property(depends_on=['sample_freq', 'num_samples'])
@@ -310,7 +310,7 @@ class GenericSignalGenerator(SignalGenerator):
     #: Sampling frequency of output signal, as given by :attr:`source`.
     sample_freq = Delegate('source')
 
-    _num_samples = CLong(0)
+    _num_samples = CInt(0)
 
     #: Number of samples to generate. Is set to source.num_samples by default.
     num_samples = Property()
