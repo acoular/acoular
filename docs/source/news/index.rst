@@ -86,7 +86,7 @@ Upcoming Release (25.01)
 
     **Internal**
         * refactoring of classes in :mod:`acoular.tbeamform` (moves buffer logic away from Beamformer classes)
-            * adds new :class:`~acoular.tools.utils.SamplesBuffer` class located in :mod:`~acoular.tools.utils`
+            * adds new :class:`~acoular.process.SamplesBuffer` class located in :mod:`~acoular.tools.utils`
         * replaces the markdown-link-check by lychee
             * faster CI (written in RUST)
             * allows more files to be checked, including the .rst files in the documentation

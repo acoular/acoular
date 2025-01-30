@@ -594,7 +594,7 @@ class SamplesBuffer(InOut):
     ...     sample_freq=64,
     ... )
     >>> # create a buffer with a size of 32 samples
-    >>> buffer = ac.tools.SamplesBuffer(source=source, length=32)
+    >>> buffer = ac.process.SamplesBuffer(source=source, length=32)
     >>> # get the first block of 16 samples
     >>> block = next(buffer.result(num=16))
     >>> np.testing.assert_array_equal(block, source.data[:16])
@@ -614,7 +614,7 @@ class SamplesBuffer(InOut):
     `shift_index_by` trait to 'num' and by setting the `result_num` trait to the number of samples
     that should be returned by the result function.
 
-    >>> buffer = ac.tools.SamplesBuffer(source=source, length=32, result_num=20, shift_index_by='num')
+    >>> buffer = ac.process.SamplesBuffer(source=source, length=32, result_num=20, shift_index_by='num')
     >>> block_sizes = []
     >>> block_sizes.append(
     ...     next(buffer.result(num=16)).shape[0]
