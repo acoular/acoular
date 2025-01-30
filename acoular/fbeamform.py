@@ -1454,6 +1454,7 @@ class BeamformerOrth(BeamformerBase):
             self._fr[i] = 1
 
 
+@deprecated_alias({'n': 'n_iter'})
 class BeamformerCleansc(BeamformerBase):
     """CLEAN-SC deconvolution algorithm.
 
@@ -1463,7 +1464,7 @@ class BeamformerCleansc(BeamformerBase):
 
     #: no of CLEAN-SC iterations
     #: defaults to 0, i.e. automatic (max 2*num_channels)
-    n = Int(0, desc='no of iterations')
+    n_iter = Int(0, desc='no of iterations')
 
     #: iteration damping factor
     #: defaults to 0.6
@@ -1475,7 +1476,7 @@ class BeamformerCleansc(BeamformerBase):
     stopn = Int(3, desc='stop criterion index')
 
     # internal identifier
-    digest = Property(depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['n', 'damp', 'stopn'])
+    digest = Property(depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['n_iter', 'damp', 'stopn'])
 
     @cached_property
     def _get_digest(self):
@@ -1503,7 +1504,7 @@ class BeamformerCleansc(BeamformerBase):
         normfactor = self.sig_loss_norm()
         num_channels = self.freq_data.num_channels
         result = zeros((self.steer.grid.size), 'f')
-        J = num_channels * 2 if not self.n else self.n
+        J = num_channels * 2 if not self.n_iter else self.n_iter
         powers = zeros(J, 'd')
 
         param_steer_type, steer_vector = self._beamformer_params()
