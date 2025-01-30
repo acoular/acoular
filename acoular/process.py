@@ -168,7 +168,7 @@ class Cache(InOut):
     >>> cache = ac.Cache(source=fft)  # cache the output of the FFT in cache file
     >>> for block in cache.result(num=1):  # read the cached data block-wise
     ...     print(block.shape)
-    [('_cache.h5', 1)]
+    [('void_cache.h5', 1)]
     (1, 513)
 
     The caching behaviour can be controlled by the :class:`~acoular.configuration.Config` instance
