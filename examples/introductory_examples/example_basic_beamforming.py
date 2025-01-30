@@ -13,9 +13,8 @@ Beamforming and generates a map of the three sources.
 """
 
 from pathlib import Path
-
+import matplotlib.pyplot as plt
 import acoular as ac
-from matplotlib.pyplot import axis, colorbar, figure, imshow, plot, show
 
 micgeofile = Path(ac.__file__).parent / 'xml' / 'array_64.xml'
 datafile = Path('three_sources.h5')
@@ -29,9 +28,12 @@ st = ac.SteeringVector(grid=rg, mics=mg)
 bb = ac.BeamformerBase(freq_data=ps, steer=st)
 pm = bb.synthetic(8000, 3)
 Lm = ac.L_p(pm)
-imshow(Lm.T, origin='lower', vmin=Lm.max() - 10, extent=rg.extend(), interpolation='bicubic')
-colorbar()
-figure(2)
-plot(mg.pos[0], mg.pos[1], 'o')
-axis('equal')
-show()
+
+plt.figure(1)
+plt.imshow(Lm.T, origin='lower', vmin=Lm.max() - 10, extent=rg.extend(), interpolation='bicubic')
+plt.colorbar()
+
+plt.figure(2)
+plt.plot(mg.pos[0], mg.pos[1], 'o')
+plt.axis('equal')
+plt.show()

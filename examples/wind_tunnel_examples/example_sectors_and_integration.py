@@ -106,13 +106,13 @@ levels_multi_sector = bf.integrate(multi_sector)
 # %%
 # Plot map and sectors
 
-from matplotlib.pyplot import cm, colorbar, figure, imshow, legend, plot, show, xlim, ylim
+import matplotlib.pyplot as plt
 
-figure()
+plt.figure()
 map = bf.synthetic(2000, 1)
 mx = ac.L_p(map.max())
-imshow(ac.L_p(map.T), origin='lower', vmin=mx - 15, interpolation='nearest', extent=rg.extend(), cmap=cm.hot_r)
-colorbar()
+plt.imshow(ac.L_p(map.T), origin='lower', vmin=mx - 15, interpolation='nearest', extent=rg.extend(), cmap=plt.cm.hot_r)
+plt.colorbar()
 circle1 = plt.Circle((-0.3, 0.1), 0.05, color='k', fill=False)
 plt.gcf().gca().add_artist(circle1)
 polygon = Polygon(poly.reshape(-1, 2), color='k', fill=False)
@@ -124,22 +124,22 @@ plt.gcf().gca().add_artist(rect)
 fftfreqs = np.arange(128 / 2 + 1) * (51200 / 128)
 
 # plot from shapes
-figure()
-plot(fftfreqs, ac.L_p(levels_circ))
-plot(fftfreqs, ac.L_p(levels_rect))
-plot(fftfreqs, ac.L_p(levels_poly))
-xlim([2000, 20000])
-ylim([10, 80])
-legend(['Circle', 'Rectangle', 'Polygon'])
+plt.figure()
+plt.plot(fftfreqs, ac.L_p(levels_circ))
+plt.plot(fftfreqs, ac.L_p(levels_rect))
+plt.plot(fftfreqs, ac.L_p(levels_poly))
+plt.xlim([2000, 20000])
+plt.ylim([10, 80])
+plt.legend(['Circle', 'Rectangle', 'Polygon'])
 
 # plot from sector classes
-figure()
-plot(fftfreqs, ac.L_p(levels_circ_sector))
-plot(fftfreqs, ac.L_p(levels_rect_sector))
-plot(fftfreqs, ac.L_p(levels_poly_sector))
-plot(fftfreqs, ac.L_p(levels_multi_sector))
-xlim([2000, 20000])
-ylim([10, 80])
-legend(['Circle Sector', 'Rectangle Sector', 'Polygon Sector', 'Multisector'])
+plt.figure()
+plt.plot(fftfreqs, ac.L_p(levels_circ_sector))
+plt.plot(fftfreqs, ac.L_p(levels_rect_sector))
+plt.plot(fftfreqs, ac.L_p(levels_poly_sector))
+plt.plot(fftfreqs, ac.L_p(levels_multi_sector))
+plt.xlim([2000, 20000])
+plt.ylim([10, 80])
+plt.legend(['Circle Sector', 'Rectangle Sector', 'Polygon Sector', 'Multisector'])
 
-show()
+plt.show()

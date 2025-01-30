@@ -73,20 +73,20 @@ b = ac.BeamformerCMF(freq_data=f, steer=st, alpha=1e-8)
 # * NNLS
 # * fmin_l_bfgs_b
 
-from matplotlib.pyplot import colorbar, figure, imshow, show, subplot, tight_layout, title
+import matplotlib.pyplot as plt
 
-figure(1, (10, 7))  # no of figure
+plt.figure(1, (10, 7))  # no of figure
 i1 = 1  # no of subplot
 
 for method in ('LassoLars', 'LassoLarsBIC', 'OMPCV', 'NNLS', 'fmin_l_bfgs_b'):
     b.method = method
-    subplot(2, 3, i1)
+    plt.subplot(2, 3, i1)
     i1 += 1
     map = b.synthetic(cfreq, 1)
     mx = ac.L_p(map.max())
-    imshow(ac.L_p(map.T), vmax=mx, vmin=mx - 15, origin='lower', interpolation='nearest', extent=grid.extend())
-    colorbar(shrink=0.5)
-    title(b.method)
+    plt.imshow(ac.L_p(map.T), vmax=mx, vmin=mx - 15, origin='lower', interpolation='nearest', extent=grid.extend())
+    plt.colorbar(shrink=0.5)
+    plt.title(b.method)
 
-tight_layout()
-show()
+plt.tight_layout()
+plt.show()

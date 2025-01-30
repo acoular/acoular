@@ -14,7 +14,7 @@ from pathlib import Path
 
 import acoular as ac
 import numpy as np
-from matplotlib.pyplot import figure, show
+import matplotlib.pyplot as plt
 
 # %%
 # First, we define the microphone geometry.
@@ -64,7 +64,7 @@ map = b.synthetic(4000, 1)
 # Display views of setup and result.
 # For each view, the values along the repsective axis are summed.
 
-fig = figure(1, (8, 8))
+fig = plt.figure(1, (8, 8))
 
 # plot the results
 
@@ -120,6 +120,6 @@ ax0.scatter(source_locs[0], source_locs[1], source_locs[2])
 ax0.set_xlabel('x')
 ax0.set_ylabel('y')
 ax0.set_zlabel('z')
-show()
+plt.show()
 
 # %%

@@ -109,27 +109,27 @@ bs = ac.BeamformerCleansc(freq_data=f, steer=st, r_diag=True)
 # Plot result maps for different beamformers in frequency domain (left: with diagonal removal,
 # right: without diagonal removal).
 
-from matplotlib.pyplot import colorbar, figure, imshow, show, subplot, tight_layout, title
+import matplotlib.pyplot as plt
 
 fi = 1  # no of figure
 for r_diag in (True, False):
-    figure(fi, (5, 6))
+    plt.figure(fi, (5, 6))
     fi += 1
     i1 = 1  # no of subplot
     for steer in ('true level', 'true location', 'classic', 'inverse'):
         st.steer_type = steer
         for b in (bb, bs):
-            subplot(4, 2, i1)
+            plt.subplot(4, 2, i1)
             i1 += 1
             b.r_diag = r_diag
             map = b.synthetic(cfreq, num)
             mx = ac.L_p(map.max())
-            imshow(ac.L_p(map.T), vmax=mx, vmin=mx - 15, origin='lower', interpolation='nearest', extent=g.extend())
-            colorbar()
-            title(b.__class__.__name__, fontsize='small')
+            plt.imshow(ac.L_p(map.T), vmax=mx, vmin=mx - 15, origin='lower', interpolation='nearest', extent=g.extend())
+            plt.colorbar()
+            plt.title(b.__class__.__name__, fontsize='small')
 
-    tight_layout()
-    show()
+    plt.tight_layout()
+    plt.show()
 
 # %%
 # .. seealso::

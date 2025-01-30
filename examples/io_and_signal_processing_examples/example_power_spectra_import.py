@@ -54,9 +54,9 @@ Lm = ac.L_p(pm)
 
 # %%
 # Show the source map
-from matplotlib.pyplot import colorbar, figure, imshow, show
+import matplotlib.pyplot as plt
 
-figure()
-imshow(Lm.T, origin='lower', vmin=Lm.max() - 10, extent=rg.extend(), interpolation='bicubic')
-colorbar()
-show()
+plt.figure()
+plt.imshow(Lm.T, origin='lower', vmin=Lm.max() - 10, extent=rg.extend(), interpolation='bicubic')
+plt.colorbar()
+plt.show()
