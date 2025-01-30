@@ -24,6 +24,7 @@ Upcoming Release (25.01)
     **Documentation**
         * adds guide on how to submit a pull request
         * adds `intersphinx` extension to cross-link documentation from other projects
+        * updates examples to use a right hand co-ordinate system
 
     **Tests**
         * tests now consequently use `pytest` framework instead of `unittest`

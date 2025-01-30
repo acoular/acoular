@@ -59,7 +59,7 @@ ts = ac.MaskedTimeSamples(
 )
 calib = ac.Calib(source=ts, file=calib_file, invalid_channels=[1, 7])
 mics = ac.MicGeom(file=Path(ac.__file__).parent / 'xml' / 'array_56.xml', invalid_channels=[1, 7])
-grid = ac.RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=0.68, increment=0.05)
+grid = ac.RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=-0.68, increment=0.05)
 env = ac.Environment(c=346.04)
 st = ac.SteeringVector(grid=grid, mics=mics, env=env)
 f = ac.PowerSpectra(source=calib, window='Hanning', overlap='50%', block_size=128)
@@ -87,17 +87,18 @@ bgib = ac.BeamformerGIB(freq_data=f, steer=st, method='LassoLars', n=10)
 # %%
 # Plot result maps for different beamformers in frequency domain
 
-from pylab import colorbar, figure, imshow, show, subplot, tight_layout, title
 
-figure(1, (10, 6))
+import matplotlib.pyplot as plt
+
+plt.figure(1, (10, 6))
 i1 = 1  # no of subplot
 for b in (bb, bc, be, bm, bl, bo, bs, bd, bcmf, bf, bdp, bgib):
-    subplot(3, 4, i1)
+    plt.subplot(3, 4, i1)
     i1 += 1
     map = b.synthetic(cfreq, num)
     mx = ac.L_p(map.max())
-    imshow(ac.L_p(map.T), origin='lower', vmin=mx - 15, interpolation='nearest', extent=grid.extend())
-    colorbar()
-    title(b.__class__.__name__)
-    tight_layout()
-show()
+    plt.imshow(ac.L_p(map.T), origin='lower', vmin=mx - 15, interpolation='nearest', extent=grid.extend())
+    plt.colorbar()
+    plt.title(b.__class__.__name__)
+    plt.tight_layout()
+plt.show()

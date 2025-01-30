@@ -38,20 +38,19 @@ band = 3  # octave: 1 ;   1/3-octave: 3 (for plotting)
 
 # %%
 # create figure with barspectra
+import matplotlib.pyplot as plt
 
-from pylab import figure, grid, legend, plot, show, title, xlabel, xlim, xscale, xticks, ylabel, ylim
-
-figure(figsize=(20, 6))
-title('Powerspectrum')
-plot(f_borders, ac.L_p(p), label='bar=True')
-plot(f_borders_, ac.L_p(p_), label='bar=False')
-xlim(f_borders[0] * 2 ** (-1.0 / 6), f_borders[-1] * 2 ** (1.0 / 6))
-ylim(50, 90)
-xscale('symlog')
+plt.figure(figsize=(20, 6))
+plt.title('Powerspectrum')
+plt.plot(f_borders, ac.L_p(p), label='bar=True')
+plt.plot(f_borders_, ac.L_p(p_), label='bar=False')
+plt.xlim(f_borders[0] * 2 ** (-1.0 / 6), f_borders[-1] * 2 ** (1.0 / 6))
+plt.ylim(50, 90)
+plt.xscale('symlog')
 label_freqs = [str(int(_)) for _ in f_center]  # create string labels
-xticks(f_center, label_freqs)
-xlabel('f in Hz')
-ylabel('SPL in dB')
-grid(True)
-legend()
-show()
+plt.xticks(f_center, label_freqs)
+plt.xlabel('f in Hz')
+plt.ylabel('SPL in dB')
+plt.grid(True)
+plt.legend()
+plt.show()

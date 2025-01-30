@@ -18,6 +18,7 @@ Four different methods are compared:
 """
 
 import acoular as ac
+import matplotlib.pyplot as plt
 import numpy as np
 
 # %%
@@ -100,6 +101,17 @@ cached_mix = ac.Cache(source=t)
 g = ac.RectGrid(x_min=-3.0, x_max=+3.0, y_min=-3.0, y_max=+3.0, z=Z, increment=0.3)
 st = ac.SteeringVector(grid=g, mics=m)
 
+# %%
+# Plot the scene
+
+fig, ax = plt.subplots(subplot_kw={'projection': '3d'}, num=1)
+ax.plot(m.pos[0], m.pos[1], m.pos[2], 'o', label='mics')
+gpos = g.pos.reshape((3, g.nxsteps, g.nysteps))
+ax.plot_wireframe(gpos[0], gpos[1], gpos[2], color='k', lw=0.2, label='grid')
+txyz = np.array(list(tr.traj(0, 4.1, 0.1)))
+ax.plot(*txyz.T, 'k', label='trajectory')
+ax.set(xlabel='x', ylabel='y', zlabel='z')
+fig.legend()
 
 # %%
 # Fixed focus time domain beamforming
@@ -107,31 +119,32 @@ st = ac.SteeringVector(grid=g, mics=m)
 
 fi = ac.FiltFiltOctave(source=cached_mix, band=freq, fraction='Third octave')
 bt = ac.BeamformerTimeSq(source=fi, steer=st, r_diag=True)
-avgt = ac.Average(source=bt, naverage=int(sfreq * tmax / 16))  # 16 single images
+avgt = ac.Average(source=bt, num_per_average=int(sfreq * tmax / 16))  # 16 single images
 cacht = ac.Cache(source=avgt)  # cache to prevent recalculation
 
 # %%
-# Plot single frames
+# Plot single frames. Note that the look direction is _towards_ the array. If you want a
+# look direction _from_ the array (like a photo camera would do), the image needs to be mirrored.
 
-from pylab import axis, colorbar, figure, imshow, show, subplot, text, tight_layout, title, transpose
-
-figure(1, (8, 7))
+plt.figure(2, (8, 7))
 i = 1
 map2 = np.zeros(g.shape)  # accumulator for average
 for res in cacht.result(1):
     res0 = res[0].reshape(g.shape)
     map2 += res0  # average
     i += 1
-    subplot(4, 4, i)
+    plt.subplot(4, 4, i)
     mx = ac.L_p(res0.max())
-    imshow(ac.L_p(transpose(res0)), vmax=mx, vmin=mx - 10, interpolation='nearest', extent=g.extend(), origin='lower')
-    colorbar()
+    plt.imshow(
+        ac.L_p(np.transpose(res0)), vmax=mx, vmin=mx - 10, interpolation='nearest', extent=g.extend(), origin='lower'
+    )
+    plt.colorbar()
 map2 /= i
 
-subplot(4, 4, 1)
-text(0.4, 0.25, 'fixed\nfocus', fontsize=15, ha='center')
-axis('off')
-tight_layout()
+plt.subplot(4, 4, 1)
+plt.text(0.4, 0.25, 'fixed\nfocus', fontsize=15, ha='center')
+plt.axis('off')
+plt.tight_layout()
 
 
 # %%
@@ -151,29 +164,52 @@ g1 = ac.RectGrid(
 st1 = ac.SteeringVector(grid=g1, mics=m)
 # beamforming with trajectory (rvec axis perpendicular to trajectory)
 bts = ac.BeamformerTimeSqTraj(source=fi, steer=st1, trajectory=tr, rvec=np.array((0, 0, 1.0)))
-avgts = ac.Average(source=bts, naverage=int(sfreq * tmax / 16))  # 16 single images
+avgts = ac.Average(source=bts, num_per_average=int(sfreq * tmax / 16))  # 16 single images
 cachts = ac.Cache(source=avgts)  # cache to prevent recalculation
+
+# %%
+# Plot the scene with moving grid. We show three example positions of the grid when it get moved and
+# swiveled along the trajectory.
+
+fig, ax = plt.subplots(subplot_kw={'projection': '3d'}, num=3)
+ax.plot(m.pos[0], m.pos[1], m.pos[2], 'o', label='mics')
+# translation and direction of trajectory
+for loc, dx, co in zip(tr.traj(0, 1.3, 0.6), tr.traj(0, 1.3, 0.6, der=1), 'krg'):
+    dy = np.cross(bts.rvec, dx)  # new y-axis
+    dz = np.cross(dx, dy)  # new z-axis
+    RM = np.array((dx, dy, dz)).T  # rotation matrix
+    RM /= np.sqrt((RM * RM).sum(0))  # column normalized
+    tpos = np.dot(RM, g1.pos) + np.array(loc)[:, np.newaxis]  # rotation+translation
+    gpos = tpos.reshape((3, g.nxsteps, g.nysteps))
+    ax.plot_wireframe(gpos[0], gpos[1], gpos[2], color=co, lw=0.2)
+    ax.plot(loc[0], loc[1], loc[2], 'o', color=co, label='grid origin')
+txyz = np.array(list(tr.traj(0, 4.1, 0.1)))
+ax.plot(*txyz.T, 'k', label='trajectory')
+ax.set(xlabel='x', ylabel='y', zlabel='z')
+fig.legend()
 
 # %%
 # Plot single frames
 
-figure(2, (8, 7))
+plt.figure(4, (8, 7))
 i = 1
 map3 = np.zeros(g1.shape)  # accumulator for average
 for res in cachts.result(1):
     res0 = res[0].reshape(g1.shape)
     map3 += res0  # average
     i += 1
-    subplot(4, 4, i)
+    plt.subplot(4, 4, i)
     mx = ac.L_p(res0.max())
-    imshow(ac.L_p(transpose(res0)), vmax=mx, vmin=mx - 10, interpolation='nearest', extent=g1.extend(), origin='lower')
-    colorbar()
+    plt.imshow(
+        ac.L_p(np.transpose(res0)), vmax=mx, vmin=mx - 10, interpolation='nearest', extent=g1.extend(), origin='lower'
+    )
+    plt.colorbar()
 map3 /= i
 
-subplot(4, 4, 1)
-text(0.4, 0.25, 'moving\nfocus', fontsize=15, ha='center')
-axis('off')
-tight_layout()
+plt.subplot(4, 4, 1)
+plt.text(0.4, 0.25, 'moving\nfocus', fontsize=15, ha='center')
+plt.axis('off')
+plt.tight_layout()
 
 # %%
 # Moving focus time domain deconvolution
@@ -181,29 +217,31 @@ tight_layout()
 # beamforming with trajectory (rvec axis perpendicular to trajectory)
 
 bct = ac.BeamformerCleantSqTraj(source=fi, steer=st1, trajectory=tr, rvec=np.array((0, 0, 1.0)), n_iter=5)
-avgct = ac.Average(source=bct, naverage=int(sfreq * tmax / 16))  # 16 single images
+avgct = ac.Average(source=bct, num_per_average=int(sfreq * tmax / 16))  # 16 single images
 cachct = ac.Cache(source=avgct)  # cache to prevent recalculation
 
 # %%
 # Plot single frames
 
-figure(3, (8, 7))
+plt.figure(5, (8, 7))
 i = 1
 map4 = np.zeros(g1.shape)  # accumulator for average
 for res in cachct.result(1):
     res0 = res[0].reshape(g1.shape)
     map4 += res0  # average
     i += 1
-    subplot(4, 4, i)
+    plt.subplot(4, 4, i)
     mx = ac.L_p(res0.max())
-    imshow(ac.L_p(transpose(res0)), vmax=mx, vmin=mx - 10, interpolation='nearest', extent=g1.extend(), origin='lower')
-    colorbar()
+    plt.imshow(
+        ac.L_p(np.transpose(res0)), vmax=mx, vmin=mx - 10, interpolation='nearest', extent=g1.extend(), origin='lower'
+    )
+    plt.colorbar()
 map4 /= i
 
-subplot(4, 4, 1)
-text(0.4, 0.25, 'moving\nfocus\ndeconvolution', fontsize=15, ha='center')
-axis('off')
-tight_layout()
+plt.subplot(4, 4, 1)
+plt.text(0.4, 0.25, 'moving\nfocus\ndeconvolution', fontsize=15, ha='center')
+plt.axis('off')
+plt.tight_layout()
 
 # %%
 # Fixed focus frequency domain beamforming
@@ -222,27 +260,23 @@ map1 = b.synthetic(freq, num)
 # %%
 # Compare all four methods
 
-figure(4, (10, 3))
-subplot(1, 4, 1)
-mx = ac.L_p(map1.max())
-imshow(ac.L_p(transpose(map1)), vmax=mx, vmin=mx - 10, interpolation='nearest', extent=g.extend(), origin='lower')
-colorbar(shrink=0.4)
-title('frequency domain\n fixed focus')
-subplot(1, 4, 2)
-mx = ac.L_p(map2.max())
-imshow(ac.L_p(transpose(map2)), vmax=mx, vmin=mx - 10, interpolation='nearest', extent=g.extend(), origin='lower')
-colorbar(shrink=0.4)
-title('time domain\n fixed focus')
-subplot(1, 4, 3)
-mx = ac.L_p(map3.max())
-imshow(ac.L_p(transpose(map3)), vmax=mx, vmin=mx - 10, interpolation='nearest', extent=g.extend(), origin='lower')
-colorbar(shrink=0.4)
-title('time domain\n moving focus')
-subplot(1, 4, 4)
-mx = ac.L_p(map4.max())
-imshow(ac.L_p(transpose(map4)), vmax=mx, vmin=mx - 10, interpolation='none', extent=g.extend(), origin='lower')
-colorbar(shrink=0.4)
-title('time domain\n deconvolution (moving focus)')
-
-tight_layout()
-show()
+plt.figure(6, (10, 3))
+for i, map, tit in zip(
+    (1, 2, 3, 4),
+    (map1, map2, map3, map4),
+    (
+        'frequency domain\n fixed focus',
+        'time domain\n fixed focus',
+        'time domain\n fixed focus',
+        'time domain\n deconvolution (moving focus)',
+    ),
+):
+    plt.subplot(1, 4, i)
+    mx = ac.L_p(map.max())
+    plt.imshow(
+        ac.L_p(np.transpose(map)), vmax=mx, vmin=mx - 10, interpolation='nearest', extent=g.extend(), origin='lower'
+    )
+    plt.colorbar(shrink=0.4)
+    plt.title(tit)
+plt.tight_layout()
+plt.show()
