@@ -85,7 +85,7 @@ from .h5files import H5FileBase, _get_h5file_class
 from .internal import digest, ldigest
 from .microphones import MicGeom
 from .signals import NoiseGenerator, SignalGenerator
-from .tools import get_file_basename
+from .tools.utils import get_file_basename
 from .tprocess import TimeConvolve
 from .trajectory import Trajectory
 

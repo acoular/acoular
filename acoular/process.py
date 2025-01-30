@@ -29,7 +29,7 @@ from .deprecation import deprecated_alias
 from .h5cache import H5cache
 from .h5files import H5CacheFileBase
 from .internal import digest
-from .tools import find_basename
+from .tools.utils import find_basename
 
 
 class LockedGenerator:

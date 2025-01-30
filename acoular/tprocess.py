@@ -111,7 +111,7 @@ from .environments import cartToCyl, cylToCart
 from .h5files import _get_h5file_class
 from .internal import digest, ldigest
 from .microphones import MicGeom
-from .tools import find_basename
+from .tools.utils import find_basename
 
 
 @deprecated_alias({'numchannels_total': 'num_channels_total', 'numsamples_total': 'num_samples_total'})

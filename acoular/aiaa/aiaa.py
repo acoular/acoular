@@ -1,8 +1,8 @@
 # ------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
-"""Classes for importing AIAA Array Benchmarks
-from . import aiaa
+"""Classes for importing AIAA Array Benchmarks.
+
 These classes allow importing data from HDF5 files following the specifications of
 the AIAA microphone array methods benchmarking effort:
 https://www-docs.b-tu.de/fg-akustik/public/veroeffentlichungen/ArrayMethodsFileFormatsR2P4Release.pdf .
