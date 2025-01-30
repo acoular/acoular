@@ -105,7 +105,7 @@ class Beamformer:
             freq_data=regression_source_case.freq_data_import,
             r_diag=False,
             steer=regression_source_case.steer,
-            n=10,
+            n_iter=10,
             damp=0.9,
             stopn=4,
         )
