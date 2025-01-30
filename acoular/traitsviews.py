@@ -473,7 +473,7 @@ BeamformerCleansc.class_trait_view(
         [
             #            [Item('mpos{}', style='custom')],
             #            [Item('grid', style='custom'), '-<>'],
-            [Item('n', label='No. of iterations', style='simple')],
+            [Item('n_iter', label='No. of iterations', style='simple')],
             [Item('r_diag', label='Diagonal removed')],
             #            [Item('env{}', style='custom')],
             '|',

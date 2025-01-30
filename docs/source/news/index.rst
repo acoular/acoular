@@ -6,7 +6,7 @@ Upcoming Release (25.01)
 
     **New features:**
         * consistently use `file` as an attribute to specify a filename (instead of `from_file` or `name`)
-        * consistently use `n_iter` in beamformer algorithms that require setting a fixed or maximum number of iterations (`max_iter` deprecated)
+        * consistently use `n_iter` in beamformer algorithms that require setting a fixed or maximum number of iterations (e.g. `max_iter` deprecated)
         * adds new function :meth:`~acoular.tools.helper.c_air` to calculate the speed of sound from temperature and humidity
         * :class:`~acoular.calib.Calib` can now be used as a separate processing block
         * enable varying block buffer sizes for :class:`~acoular.process.SampleSplitter`
