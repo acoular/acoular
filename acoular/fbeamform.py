@@ -1695,7 +1695,7 @@ class BeamformerCMF(BeamformerBase):
     #: (Use values in the order of 10^⁻9 for good results.)
     alpha = Range(0.0, 1.0, 0.0, desc='Lasso weight factor')
 
-    #: Total or maximum number of iterations 
+    #: Total or maximum number of iterations
     #: (depending on :attr:`method`),
     #: tradeoff between speed and precision;
     #: defaults to 500
@@ -2067,7 +2067,7 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
     #: within fitting method algorithms. Defaults to 1e9.
     unit_mult = Float(1e9, desc='unit multiplier')
 
-    #: Total or maximum number of iterations 
+    #: Total or maximum number of iterations
     #: (depending on :attr:`method`),
     #: tradeoff between speed and precision;
     #: defaults to 10
