@@ -24,8 +24,8 @@ from .base import SamplesGenerator, SpectraGenerator, SpectraOut, TimeOut
 from .deprecation import deprecated_alias
 from .fastFuncs import calcCSM
 from .internal import digest
+from .process import SamplesBuffer
 from .spectra import BaseSpectra
-from .tools.utils import SamplesBuffer
 
 
 @deprecated_alias({'numfreqs': 'num_freqs', 'numsamples': 'num_samples'}, read_only=True)

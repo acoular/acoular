@@ -111,6 +111,7 @@ from .environments import cartToCyl, cylToCart
 from .h5files import _get_h5file_class
 from .internal import digest, ldigest
 from .microphones import MicGeom
+from .tools import find_basename
 
 
 @deprecated_alias({'numchannels_total': 'num_channels_total', 'numsamples_total': 'num_samples_total'})
@@ -167,9 +168,15 @@ class MaskedTimeOut(TimeOut):
 
     @cached_property
     def _get_basename(self):
-        if 'basename' in self.source.all_trait_names():
-            return self.source.basename
-        return self.source.__class__.__name__ + self.source.digest
+        warn(
+            (
+                f'The basename attribute of a {self.__class__.__name__} object is deprecated'
+                ' and will be removed in a future release!'
+            ),
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return find_basename(self.source, alternative_basename=self.source.__class__.__name__ + self.source.digest)
 
     @cached_property
     def _get_channels(self):
@@ -1790,18 +1797,15 @@ class WriteWAV(TimeOut):
 
     @cached_property
     def _get_basename(self):
-        obj = self.source  # start with source
-        try:
-            while obj:
-                if 'basename' in obj.all_trait_names():  # at original source?
-                    basename = obj.basename  # get the name
-                    break
-                obj = obj.source  # traverse down until original data source
-            else:
-                basename = 'void'
-        except AttributeError:
-            basename = 'void'  # if no file source is found
-        return basename
+        warn(
+            (
+                f'The basename attribute of a {self.__class__.__name__} object is deprecated'
+                ' and will be removed in a future release!'
+            ),
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return find_basename(self.source)
 
     def save(self):
         """Saves source output to one- or multiple-channel `*.wav` file."""

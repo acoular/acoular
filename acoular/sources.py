@@ -85,6 +85,7 @@ from .h5files import H5FileBase, _get_h5file_class
 from .internal import digest, ldigest
 from .microphones import MicGeom
 from .signals import NoiseGenerator, SignalGenerator
+from .tools import get_file_basename
 from .tprocess import TimeConvolve
 from .trajectory import Trajectory
 
@@ -266,7 +267,7 @@ class TimeSamples(SamplesGenerator):
 
     @cached_property
     def _get_basename(self):
-        return path.splitext(path.basename(self.file))[0]
+        return get_file_basename(self.file)
 
     @on_trait_change('basename')
     def _load_data(self):
@@ -421,10 +422,6 @@ class MaskedTimeSamples(TimeSamples):
     @cached_property
     def _get_digest(self):
         return digest(self)
-
-    @cached_property
-    def _get_basename(self):
-        return path.splitext(path.basename(self.file))[0]
 
     @cached_property
     def _get_channels(self):

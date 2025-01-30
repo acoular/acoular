@@ -51,8 +51,8 @@ from .grids import RectGrid
 
 # acoular imports
 from .internal import digest
+from .process import SamplesBuffer
 from .tfastfuncs import _delayandsum4, _delayandsum5, _delays
-from .tools.utils import SamplesBuffer
 from .trajectory import Trajectory
 
 

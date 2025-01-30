@@ -62,6 +62,7 @@ from .fastFuncs import calcCSM
 from .h5cache import H5cache
 from .h5files import H5CacheFileBase
 from .internal import digest
+from .tools import find_basename
 
 
 @deprecated_alias({'numchannels': 'num_channels'}, read_only=True)
@@ -308,9 +309,7 @@ class PowerSpectra(BaseSpectra):
 
     @cached_property
     def _get_basename(self):
-        if 'basename' in self.source.all_trait_names():
-            return self.source.basename
-        return self.source.__class__.__name__ + self.source.digest
+        return find_basename(self.source, alternative_basename=self.source.__class__.__name__ + self.source.digest)
 
     def calc_csm(self):
         """Csm calculation."""
