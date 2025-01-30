@@ -96,7 +96,7 @@ class Beamformer:
             r_diag=r_diag,
             steer=regression_source_case.steer,
             method=method,
-            max_iter=10,
+            n_iter=10,
         )
 
     @case(id='CleanSC')
@@ -137,7 +137,7 @@ class Beamformer:
             steer=regression_source_case.steer,
             method=method,
             eps_perc=0.001,
-            max_iter=5,
+            n_iter=5,
         )
 
     @case(id='CMF')
@@ -147,7 +147,7 @@ class Beamformer:
         return ac.BeamformerCMF(
             r_diag=r_diag,
             freq_data=regression_source_case.freq_data_import,
-            max_iter=10,
+            n_iter=10,
             steer=regression_source_case.steer,
             method=method,
         )
@@ -159,7 +159,7 @@ class Beamformer:
             r_diag=r_diag,
             freq_data=regression_source_case.freq_data_import,
             steer=regression_source_case.steer,
-            max_iter=10,
+            n_iter=10,
         )
 
     @case(id='GridlessOrth')
