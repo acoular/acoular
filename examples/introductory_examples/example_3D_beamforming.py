@@ -68,7 +68,7 @@ fig = figure(1, (8, 8))
 
 # plot the results
 
-ax1 = fig.add_subplot(2,2,1)
+ax1 = fig.add_subplot(2, 2, 1)
 map_z = np.sum(map, 2)
 mx = ac.L_p(map_z.max())
 ax1.imshow(
@@ -97,7 +97,7 @@ ax2.set_xlabel('x')
 ax2.set_ylabel('z')
 ax2.set_title('Side view (xz)')
 
-ax3 = fig.add_subplot(2, 2, 2,  sharey=ax1)
+ax3 = fig.add_subplot(2, 2, 2, sharey=ax1)
 map_x = np.sum(map, 0)
 im3 = ax3.imshow(
     ac.L_p(map_x),
