@@ -87,7 +87,7 @@ bgib = ac.BeamformerGIB(freq_data=f, steer=st, method='LassoLars', n=10)
 # %%
 # Plot result maps for different beamformers in frequency domain
 
-from pylab import colorbar, figure, imshow, show, subplot, tight_layout, title
+from matplotlib.pyplot import colorbar, figure, imshow, show, subplot, tight_layout, title
 
 figure(1, (10, 6))
 i1 = 1  # no of subplot

@@ -73,7 +73,7 @@ b = ac.BeamformerCMF(freq_data=f, steer=st, alpha=1e-8)
 # * NNLS
 # * fmin_l_bfgs_b
 
-from pylab import colorbar, figure, imshow, show, subplot, tight_layout, title
+from matplotlib.pyplot import colorbar, figure, imshow, show, subplot, tight_layout, title
 
 figure(1, (10, 7))  # no of figure
 i1 = 1  # no of subplot

@@ -107,7 +107,7 @@ cachcts = ac.Cache(source=avgcts)  # cache to prevent recalculation
 # %%
 # Plot result maps for different beamformers in time domain
 
-from pylab import colorbar, figure, imshow, show, subplot, tight_layout, title
+from matplotlib.pyplot import colorbar, figure, imshow, show, subplot, tight_layout, title
 
 ftitles = ['BeamformerTime', 'BeamformerTimeSq', 'BeamformerCleant', 'BeamformerCleantSq']
 i2 = 1  # no of figure

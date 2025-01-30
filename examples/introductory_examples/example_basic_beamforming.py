@@ -15,7 +15,7 @@ Beamforming and generates a map of the three sources.
 from pathlib import Path
 
 import acoular as ac
-from pylab import axis, colorbar, figure, imshow, plot, show
+from matplotlib.pyplot import axis, colorbar, figure, imshow, plot, show
 
 micgeofile = Path(ac.__file__).parent / 'xml' / 'array_64.xml'
 datafile = Path('three_sources.h5')

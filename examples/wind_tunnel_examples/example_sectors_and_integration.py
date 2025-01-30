@@ -106,7 +106,7 @@ levels_multi_sector = bf.integrate(multi_sector)
 # %%
 # Plot map and sectors
 
-from pylab import cm, colorbar, figure, imshow, legend, plot, show, xlim, ylim
+from matplotlib.pyplot import cm, colorbar, figure, imshow, legend, plot, show, xlim, ylim
 
 figure()
 map = bf.synthetic(2000, 1)

@@ -109,7 +109,7 @@ bs = ac.BeamformerCleansc(freq_data=f, steer=st, r_diag=True)
 # Plot result maps for different beamformers in frequency domain (left: with diagonal removal,
 # right: without diagonal removal).
 
-from pylab import colorbar, figure, imshow, show, subplot, tight_layout, title
+from matplotlib.pyplot import colorbar, figure, imshow, show, subplot, tight_layout, title
 
 fi = 1  # no of figure
 for r_diag in (True, False):
