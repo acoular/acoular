@@ -69,12 +69,16 @@ Upcoming Release (25.01)
             * adds unittests `test_process.py`, `test_fprocess.py`
             * adds documentation example `example_fft.py`
                 * allow more platforms to build the docs files including Linux, MacOS, and Windows
+            * move submodule `acoular.tools.aiaa` to `acoular.aiaa`
 
     **Bugfixes**
         * flush file in :class:`~acoular.tprocess.TimeCache` to prevent data loss / corruption
         * fixes use of already deprecated traits
         * fixes import order to avoid the deactivation of parallelization of numba
         * fixes numpy.matlib deprecation warning
+        * better handling of `basename` attributes:
+            * adds new utils functions `find_basename` and `get_file_basename` for consistent handling of `basename` attributes
+            * deprecates `basename` attribute of :class:`~acoular.tprocess.WriteWAV` and :class:`~acoular.tprocess.MaskedTimeOut` for reasons of inconsistency
 
     **Documentation**
         * updates literature and adds `sphinxcontrib-bibtex` extension to support bibtex citation in the documentation.
