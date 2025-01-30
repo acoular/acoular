@@ -168,8 +168,8 @@ avgts = ac.Average(source=bts, num_per_average=int(sfreq * tmax / 16))  # 16 sin
 cachts = ac.Cache(source=avgts)  # cache to prevent recalculation
 
 # %%
-# Plot the scene with moving grid. We show thrre example positions that get swiped along the
-# trajectory
+# Plot the scene with moving grid. We show three example positions of the grid when it get moved and
+# swiveled along the trajectory.
 
 fig, ax = plt.subplots(subplot_kw={'projection': '3d'})
 ax.plot(m.pos[0], m.pos[1], m.pos[2], 'o', label='mics')
