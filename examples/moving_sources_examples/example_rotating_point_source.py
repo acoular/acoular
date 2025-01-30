@@ -101,6 +101,17 @@ cached_mix = ac.Cache(source=t)
 g = ac.RectGrid(x_min=-3.0, x_max=+3.0, y_min=-3.0, y_max=+3.0, z=Z, increment=0.3)
 st = ac.SteeringVector(grid=g, mics=m)
 
+# %%
+# Plot the scene
+
+fig, ax = plt.subplots(subplot_kw={'projection': '3d'})
+ax.plot(m.pos[0], m.pos[1], m.pos[2], 'o', label='mics')
+gpos = g.pos.reshape((3, g.nxsteps, g.nysteps))
+ax.plot_wireframe(gpos[0], gpos[1], gpos[2], color='k', lw=0.2, label='grid')
+txyz = np.array(list(tr.traj(0, 4.1, 0.1)))
+ax.plot(*txyz.T, 'k', label='trajectory')
+ax.set(xlabel='x', ylabel='y', zlabel='z')
+fig.legend()
 
 # %%
 # Fixed focus time domain beamforming
@@ -112,7 +123,8 @@ avgt = ac.Average(source=bt, num_per_average=int(sfreq * tmax / 16))  # 16 singl
 cacht = ac.Cache(source=avgt)  # cache to prevent recalculation
 
 # %%
-# Plot single frames
+# Plot single frames. Note that the look direction is _towards_ the array. If you want a
+# look direction _from_ the array (like a photo camera would do), the image needs to be mirrored.
 
 plt.figure(1, (8, 7))
 i = 1
@@ -123,7 +135,9 @@ for res in cacht.result(1):
     i += 1
     plt.subplot(4, 4, i)
     mx = ac.L_p(res0.max())
-    plt.imshow(ac.L_p(np.transpose(res0)), vmax=mx, vmin=mx - 10, interpolation='nearest', extent=g.extend(), origin='lower')
+    plt.imshow(
+        ac.L_p(np.transpose(res0)), vmax=mx, vmin=mx - 10, interpolation='nearest', extent=g.extend(), origin='lower'
+    )
     plt.colorbar()
 map2 /= i
 
@@ -154,6 +168,27 @@ avgts = ac.Average(source=bts, num_per_average=int(sfreq * tmax / 16))  # 16 sin
 cachts = ac.Cache(source=avgts)  # cache to prevent recalculation
 
 # %%
+# Plot the scene with moving grid. We show thrre example positions that get swiped along the
+# trajectory
+
+fig, ax = plt.subplots(subplot_kw={'projection': '3d'})
+ax.plot(m.pos[0], m.pos[1], m.pos[2], 'o', label='mics')
+# translation and direction of trajectory
+for loc, dx, co in zip(tr.traj(0, 1.3, 0.6), tr.traj(0, 1.3, 0.6, der=1), 'krg'):
+    dy = np.cross(bts.rvec, dx)  # new y-axis
+    dz = np.cross(dx, dy)  # new z-axis
+    RM = np.array((dx, dy, dz)).T  # rotation matrix
+    RM /= np.sqrt((RM * RM).sum(0))  # column normalized
+    tpos = np.dot(RM, g1.pos) + np.array(loc)[:, np.newaxis]  # rotation+translation
+    gpos = tpos.reshape((3, g.nxsteps, g.nysteps))
+    ax.plot_wireframe(gpos[0], gpos[1], gpos[2], color=co, lw=0.2)
+    ax.plot(loc[0], loc[1], loc[2], 'o', color=co, label='grid origin')
+txyz = np.array(list(tr.traj(0, 4.1, 0.1)))
+ax.plot(*txyz.T, 'k', label='trajectory')
+ax.set(xlabel='x', ylabel='y', zlabel='z')
+fig.legend()
+
+# %%
 # Plot single frames
 
 plt.figure(2, (8, 7))
@@ -165,7 +200,9 @@ for res in cachts.result(1):
     i += 1
     plt.subplot(4, 4, i)
     mx = ac.L_p(res0.max())
-    plt.imshow(ac.L_p(np.transpose(res0)), vmax=mx, vmin=mx - 10, interpolation='nearest', extent=g1.extend(), origin='lower')
+    plt.imshow(
+        ac.L_p(np.transpose(res0)), vmax=mx, vmin=mx - 10, interpolation='nearest', extent=g1.extend(), origin='lower'
+    )
     plt.colorbar()
 map3 /= i
 
@@ -195,7 +232,9 @@ for res in cachct.result(1):
     i += 1
     plt.subplot(4, 4, i)
     mx = ac.L_p(res0.max())
-    plt.imshow(ac.L_p(np.transpose(res0)), vmax=mx, vmin=mx - 10, interpolation='nearest', extent=g1.extend(), origin='lower')
+    plt.imshow(
+        ac.L_p(np.transpose(res0)), vmax=mx, vmin=mx - 10, interpolation='nearest', extent=g1.extend(), origin='lower'
+    )
     plt.colorbar()
 map4 /= i
 
@@ -222,26 +261,22 @@ map1 = b.synthetic(freq, num)
 # Compare all four methods
 
 plt.figure(4, (10, 3))
-plt.subplot(1, 4, 1)
-mx = ac.L_p(map1.max())
-plt.imshow(ac.L_p(np.transpose(map1)), vmax=mx, vmin=mx - 10, interpolation='nearest', extent=g.extend(), origin='lower')
-plt.colorbar(shrink=0.4)
-plt.title('frequency domain\n fixed focus')
-plt.subplot(1, 4, 2)
-mx = ac.L_p(map2.max())
-plt.imshow(ac.L_p(np.transpose(map2)), vmax=mx, vmin=mx - 10, interpolation='nearest', extent=g.extend(), origin='lower')
-plt.colorbar(shrink=0.4)
-plt.title('time domain\n fixed focus')
-plt.subplot(1, 4, 3)
-mx = ac.L_p(map3.max())
-plt.imshow(ac.L_p(np.transpose(map3)), vmax=mx, vmin=mx - 10, interpolation='nearest', extent=g.extend(), origin='lower')
-plt.colorbar(shrink=0.4)
-plt.title('time domain\n moving focus')
-plt.subplot(1, 4, 4)
-mx = ac.L_p(map4.max())
-plt.imshow(ac.L_p(np.transpose(map4)), vmax=mx, vmin=mx - 10, interpolation='none', extent=g.extend(), origin='lower')
-plt.colorbar(shrink=0.4)
-plt.title('time domain\n deconvolution (moving focus)')
-
+for i, map, tit in zip(
+    (1, 2, 3, 4),
+    (map1, map2, map3, map4),
+    (
+        'frequency domain\n fixed focus',
+        'time domain\n fixed focus',
+        'time domain\n fixed focus',
+        'time domain\n deconvolution (moving focus)',
+    ),
+):
+    plt.subplot(1, 4, i)
+    mx = ac.L_p(map.max())
+    plt.imshow(
+        ac.L_p(np.transpose(map)), vmax=mx, vmin=mx - 10, interpolation='nearest', extent=g.extend(), origin='lower'
+    )
+    plt.colorbar(shrink=0.4)
+    plt.title(tit)
 plt.tight_layout()
 plt.show()
