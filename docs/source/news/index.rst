@@ -9,15 +9,17 @@ Upcoming Release (25.01)
         * adds new function :meth:`~acoular.tools.helper.c_air` to calculate the speed of sound from temperature and humidity
         * :class:`~acoular.calib.Calib` can now be used as a separate processing block
         * enable varying block buffer sizes for :class:`~acoular.process.SampleSplitter`
-
         * Replaces `HasPrivateTraits` with `HasStrictTraits` and `ABCHasStrictTraits` for better implementation of ABCs.
         * Allow Path objects to specify the caching and time data directory via `acoular.Config`
+        * Adds new abstract base classes :class:`~acoular.signals.PeriodicSignalGenerator` and :class:`~acoular.signals.NoiseGenerator`
 
     **Bugfixes**
         * pass missing `max_iter` as an argument to `LassoLarsCV` in :class:`acoular.fbeamform.BeamformerGIB` (otherwise, `LassoLarsCV` runs up to 500 iterations)
         * fix broken `pylops` solvers in :class:`~acoular.fbeamform.BeamformerCMF`
         * fixes negative values in source maps obtained with the solvers `LassoLars`, `LassoLarsCV` and `LassoLarsBIC`
         * fix use of `Trait()` factory and replace by `Enum`, `Instance`, `Map`, `Union`
+        * fix use of deprecated `CLong`, `Long`, and `ListInt` traits
+        * The previously broken example in the main `README` now runs out of the box.
 
     **Documentation**
         * adds guide on how to submit a pull request

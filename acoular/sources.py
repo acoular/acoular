@@ -57,7 +57,7 @@ from traits.api import (
     Any,
     Bool,
     CArray,
-    CLong,
+    CInt,
     Delegate,
     Dict,
     Enum,
@@ -66,7 +66,6 @@ from traits.api import (
     Instance,
     Int,
     List,
-    ListInt,
     Property,
     Str,
     Tuple,
@@ -85,7 +84,7 @@ from .environments import Environment
 from .h5files import H5FileBase, _get_h5file_class
 from .internal import digest, ldigest
 from .microphones import MicGeom
-from .signals import SignalGenerator
+from .signals import NoiseGenerator, SignalGenerator
 from .tprocess import TimeConvolve
 from .trajectory import Trajectory
 
@@ -236,10 +235,10 @@ class TimeSamples(SamplesGenerator):
     calib = Instance(Calib, desc='Calibration data')
 
     #: Number of channels, is set automatically / read from file.
-    num_channels = CLong(0, desc='number of input channels')
+    num_channels = CInt(0, desc='number of input channels')
 
     #: Number of time data samples, is set automatically / read from file.
-    num_samples = CLong(0, desc='number of samples')
+    num_samples = CInt(0, desc='number of samples')
 
     #: The time data as array of floats with dimension (num_samples, num_channels).
     data = Any(transient=True, desc='the actual time data array')
@@ -389,22 +388,22 @@ class MaskedTimeSamples(TimeSamples):
     """
 
     #: Index of the first sample to be considered valid.
-    start = CLong(0, desc='start of valid samples')
+    start = CInt(0, desc='start of valid samples')
 
     #: Index of the last sample to be considered valid.
-    stop = Union(None, CLong, desc='stop of valid samples')
+    stop = Union(None, CInt, desc='stop of valid samples')
 
     #: Channels that are to be treated as invalid.
-    invalid_channels = ListInt(desc='list of invalid channels')
+    invalid_channels = List(int, desc='list of invalid channels')
 
     #: Channel mask to serve as an index for all valid channels, is set automatically.
     channels = Property(depends_on=['invalid_channels', 'num_channels_total'], desc='channel mask')
 
     #: Number of channels (including invalid channels), is set automatically.
-    num_channels_total = CLong(0, desc='total number of input channels')
+    num_channels_total = CInt(0, desc='total number of input channels')
 
     #: Number of time data samples (including invalid samples), is set automatically.
-    num_samples_total = CLong(0, desc='total number of samples per channel')
+    num_samples_total = CInt(0, desc='total number of samples per channel')
 
     #: Number of valid channels, is set automatically.
     num_channels = Property(
@@ -1345,7 +1344,7 @@ class UncorrelatedNoiseSource(SamplesGenerator):
     #: Type of noise to generate at the channels.
     #: The `~acoular.signals.SignalGenerator`-derived class has to
     # feature the parameter "seed" (i.e. white or pink noise).
-    signal = Instance(SignalGenerator, desc='type of noise')
+    signal = Instance(NoiseGenerator, desc='type of noise')
 
     #: Array with seeds for random number generator.
     #: When left empty, arange(:attr:`num_channels`) + :attr:`signal`.seed
