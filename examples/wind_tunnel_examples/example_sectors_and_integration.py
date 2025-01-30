@@ -106,7 +106,6 @@ levels_multi_sector = bf.integrate(multi_sector)
 # %%
 # Plot map and sectors
 
-import matplotlib.pyplot as plt
 
 plt.figure()
 map = bf.synthetic(2000, 1)
