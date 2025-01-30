@@ -104,7 +104,7 @@ st = ac.SteeringVector(grid=g, mics=m)
 # %%
 # Plot the scene
 
-fig, ax = plt.subplots(subplot_kw={'projection': '3d'})
+fig, ax = plt.subplots(subplot_kw={'projection': '3d'}, num=1)
 ax.plot(m.pos[0], m.pos[1], m.pos[2], 'o', label='mics')
 gpos = g.pos.reshape((3, g.nxsteps, g.nysteps))
 ax.plot_wireframe(gpos[0], gpos[1], gpos[2], color='k', lw=0.2, label='grid')
@@ -126,7 +126,7 @@ cacht = ac.Cache(source=avgt)  # cache to prevent recalculation
 # Plot single frames. Note that the look direction is _towards_ the array. If you want a
 # look direction _from_ the array (like a photo camera would do), the image needs to be mirrored.
 
-plt.figure(1, (8, 7))
+plt.figure(2, (8, 7))
 i = 1
 map2 = np.zeros(g.shape)  # accumulator for average
 for res in cacht.result(1):
@@ -171,7 +171,7 @@ cachts = ac.Cache(source=avgts)  # cache to prevent recalculation
 # Plot the scene with moving grid. We show three example positions of the grid when it get moved and
 # swiveled along the trajectory.
 
-fig, ax = plt.subplots(subplot_kw={'projection': '3d'})
+fig, ax = plt.subplots(subplot_kw={'projection': '3d'}, num=3)
 ax.plot(m.pos[0], m.pos[1], m.pos[2], 'o', label='mics')
 # translation and direction of trajectory
 for loc, dx, co in zip(tr.traj(0, 1.3, 0.6), tr.traj(0, 1.3, 0.6, der=1), 'krg'):
@@ -191,7 +191,7 @@ fig.legend()
 # %%
 # Plot single frames
 
-plt.figure(2, (8, 7))
+plt.figure(4, (8, 7))
 i = 1
 map3 = np.zeros(g1.shape)  # accumulator for average
 for res in cachts.result(1):
@@ -223,7 +223,7 @@ cachct = ac.Cache(source=avgct)  # cache to prevent recalculation
 # %%
 # Plot single frames
 
-plt.figure(3, (8, 7))
+plt.figure(5, (8, 7))
 i = 1
 map4 = np.zeros(g1.shape)  # accumulator for average
 for res in cachct.result(1):
@@ -260,7 +260,7 @@ map1 = b.synthetic(freq, num)
 # %%
 # Compare all four methods
 
-plt.figure(4, (10, 3))
+plt.figure(6, (10, 3))
 for i, map, tit in zip(
     (1, 2, 3, 4),
     (map1, map2, map3, map4),
