@@ -70,6 +70,7 @@ docstring-code-line-length = "dynamic"
 "acoular/__init__.py" = ["F401"] 
 "acoular/demo/__init__.py" = ["F401"] 
 "acoular/tools/__init__.py" = ["F401"] 
+"acoular/aiaa/__init__.py" = ["F401"]
 "acoular/fastFuncs.py" = ["N802", "N803","N806","N999"] # allow different naming convention
 "acoular/environments.py" = ["N806"] 
 "acoular/sources.py" = ["N806"] 

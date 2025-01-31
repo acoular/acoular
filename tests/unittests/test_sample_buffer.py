@@ -14,7 +14,7 @@ def test_num_args(num, create_time_data_source, num_channels):
     buffer_size = 512
     time_data_source = create_time_data_source(num_channels=num_channels, num_samples=buffer_size + 10)
     for snum in [128, None]:
-        buffer = ac.tools.utils.SamplesBuffer(source=time_data_source, length=buffer_size, source_num=snum)
+        buffer = ac.process.SamplesBuffer(source=time_data_source, length=buffer_size, source_num=snum)
         data = ac.tools.return_result(time_data_source, num=num)
         data_comp = ac.tools.return_result(buffer, num=num)
         np.testing.assert_array_equal(data, data_comp)
@@ -26,7 +26,7 @@ def test_increase_buffer(create_time_data_source, num_channels):
     time_data_source = create_time_data_source(num_channels=num_channels, num_samples=512 + 10)
     data = ac.tools.return_result(time_data_source, num=256)
     # test buffer
-    buffer = ac.tools.utils.SamplesBuffer(source=time_data_source, length=buffer_size, source_num=25)
+    buffer = ac.process.SamplesBuffer(source=time_data_source, length=buffer_size, source_num=25)
     gen = buffer.result(num=25)
     collected_data = np.zeros_like(data)
     i = 0

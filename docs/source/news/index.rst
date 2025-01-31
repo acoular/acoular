@@ -74,12 +74,16 @@ Upcoming Release
             * adds unittests `test_process.py`, `test_fprocess.py`
             * adds documentation example `example_fft.py`
                 * allow more platforms to build the docs files including Linux, MacOS, and Windows
+            * move submodule `acoular.tools.aiaa` to `acoular.aiaa`
 
     **Bugfixes**
         * flush file in :class:`~acoular.tprocess.TimeCache` to prevent data loss / corruption
         * fixes use of already deprecated traits
         * fixes import order to avoid the deactivation of parallelization of numba
         * fixes numpy.matlib deprecation warning
+        * better handling of `basename` attributes:
+            * adds new utils functions `find_basename` and `get_file_basename` for consistent handling of `basename` attributes
+            * deprecates `basename` attribute of :class:`~acoular.tprocess.WriteWAV` and :class:`~acoular.tprocess.MaskedTimeOut` for reasons of inconsistency
 
     **Documentation**
         * updates literature and adds `sphinxcontrib-bibtex` extension to support bibtex citation in the documentation.
@@ -91,7 +95,7 @@ Upcoming Release
 
     **Internal**
         * refactoring of classes in :mod:`acoular.tbeamform` (moves buffer logic away from Beamformer classes)
-            * adds new :class:`~acoular.tools.utils.SamplesBuffer` class located in :mod:`~acoular.tools.utils`
+            * adds new :class:`~acoular.process.SamplesBuffer` class located in :mod:`~acoular.tools.utils`
         * replaces the markdown-link-check by lychee
             * faster CI (written in RUST)
             * allows more files to be checked, including the .rst files in the documentation
