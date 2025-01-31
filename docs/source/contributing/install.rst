@@ -29,12 +29,12 @@ The Acoular development team had good experience with the following distribution
 Create a fresh environment
 --------------------------
 
-We recommend using the latest compatible version of Python, which is currently 3.12.
+We recommend using the latest compatible version of Python, which is currently 3.13.
 If you are using the anaconda distribution, you can create a new environment, for example named `dev`, with
 
 .. code-block:: bash
 
-    conda create -n dev python=3.12
+    conda create -n dev python=3.13
     conda activate dev
 
 The same command can be used with mamba or micromamba by simply replacing `conda` with `mamba` or `micromamba`.
@@ -44,7 +44,7 @@ Equally, you can create a new environment with virtualenv:
 
 .. code-block:: bash
 
-    virtualenv -p python3.12 dev
+    virtualenv -p python3.13 dev
     source dev/bin/activate
 
 
