@@ -107,6 +107,7 @@ from traits.trait_errors import TraitError
 
 # acoular imports
 from .configuration import config
+from .deprecation import deprecated_alias
 from .environments import Environment
 from .fastFuncs import beamformerFreq, calcPointSpreadFunction, calcTransfer, damasSolverGaussSeidel
 from .grids import Grid, Sector
@@ -1239,6 +1240,7 @@ class BeamformerDamas(BeamformerBase):
             self._fr[i] = 1
 
 
+@deprecated_alias({'max_iter': 'n_iter'})
 class BeamformerDamasPlus(BeamformerDamas):
     """DAMAS deconvolution :cite:`Brooks2006` for solving the system of equations, instead of the
     original Gauss-Seidel iterations, this class employs the NNLS or linear programming solvers from
@@ -1261,7 +1263,7 @@ class BeamformerDamasPlus(BeamformerDamas):
     #: Maximum number of iterations,
     #: tradeoff between speed and precision;
     #: defaults to 500
-    max_iter = Int(500, desc='maximum number of iterations')
+    n_iter = Int(500, desc='maximum number of iterations')
 
     #: Unit multiplier for evaluating, e.g., nPa instead of Pa.
     #: Values are converted back before returning.
@@ -1271,7 +1273,7 @@ class BeamformerDamasPlus(BeamformerDamas):
 
     # internal identifier
     digest = Property(
-        depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['alpha', 'method', 'max_iter', 'unit_mult'],
+        depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['alpha', 'method', 'n_iter', 'unit_mult'],
     )
 
     @cached_property
@@ -1331,7 +1333,7 @@ class BeamformerDamasPlus(BeamformerDamas):
                 self._ac[i] = linprog(c=cT, A_ub=psf, b_ub=y).x / unit  # defaults to simplex method and non-negative x
             else:
                 if self.method == 'LassoLars':
-                    model = LassoLars(alpha=self.alpha * unit, max_iter=self.max_iter, positive=True)
+                    model = LassoLars(alpha=self.alpha * unit, max_iter=self.n_iter, positive=True)
                 elif self.method == 'OMPCV':
                     model = OrthogonalMatchingPursuitCV()
                 else:
@@ -1452,6 +1454,7 @@ class BeamformerOrth(BeamformerBase):
             self._fr[i] = 1
 
 
+@deprecated_alias({'n': 'n_iter'})
 class BeamformerCleansc(BeamformerBase):
     """CLEAN-SC deconvolution algorithm.
 
@@ -1461,7 +1464,7 @@ class BeamformerCleansc(BeamformerBase):
 
     #: no of CLEAN-SC iterations
     #: defaults to 0, i.e. automatic (max 2*num_channels)
-    n = Int(0, desc='no of iterations')
+    n_iter = Int(0, desc='no of iterations')
 
     #: iteration damping factor
     #: defaults to 0.6
@@ -1473,7 +1476,7 @@ class BeamformerCleansc(BeamformerBase):
     stopn = Int(3, desc='stop criterion index')
 
     # internal identifier
-    digest = Property(depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['n', 'damp', 'stopn'])
+    digest = Property(depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['n_iter', 'damp', 'stopn'])
 
     @cached_property
     def _get_digest(self):
@@ -1501,7 +1504,7 @@ class BeamformerCleansc(BeamformerBase):
         normfactor = self.sig_loss_norm()
         num_channels = self.freq_data.num_channels
         result = zeros((self.steer.grid.size), 'f')
-        J = num_channels * 2 if not self.n else self.n
+        J = num_channels * 2 if not self.n_iter else self.n_iter
         powers = zeros(J, 'd')
 
         param_steer_type, steer_vector = self._beamformer_params()
@@ -1663,6 +1666,7 @@ class BeamformerClean(BeamformerBase):
             self._fr[i] = 1
 
 
+@deprecated_alias({'max_iter': 'n_iter'})
 class BeamformerCMF(BeamformerBase):
     """Covariance Matrix Fitting algorithm.
 
@@ -1691,10 +1695,11 @@ class BeamformerCMF(BeamformerBase):
     #: (Use values in the order of 10^⁻9 for good results.)
     alpha = Range(0.0, 1.0, 0.0, desc='Lasso weight factor')
 
-    #: Maximum number of iterations,
+    #: Total or maximum number of iterations
+    #: (depending on :attr:`method`),
     #: tradeoff between speed and precision;
     #: defaults to 500
-    max_iter = Int(500, desc='maximum number of iterations')
+    n_iter = Int(500, desc='maximum number of iterations')
 
     #: Unit multiplier for evaluating, e.g., nPa instead of Pa.
     #: Values are converted back before returning.
@@ -1718,7 +1723,7 @@ class BeamformerCMF(BeamformerBase):
             'freq_data.digest',
             'alpha',
             'method',
-            'max_iter',
+            'n_iter',
             'unit_mult',
             'r_diag',
             'precision',
@@ -1794,9 +1799,9 @@ class BeamformerCMF(BeamformerBase):
             R = realify(reshape(csm.T, (nc * nc, 1))[ind, :])[ind_reim, :] * unit
             # choose method
             if self.method == 'LassoLars':
-                model = LassoLars(alpha=self.alpha * unit, max_iter=self.max_iter, positive=True, **sklearn_ndict)
+                model = LassoLars(alpha=self.alpha * unit, max_iter=self.n_iter, positive=True, **sklearn_ndict)
             elif self.method == 'LassoLarsBIC':
-                model = LassoLarsIC(criterion='bic', max_iter=self.max_iter, positive=True, **sklearn_ndict)
+                model = LassoLarsIC(criterion='bic', max_iter=self.n_iter, positive=True, **sklearn_ndict)
             elif self.method == 'OMPCV':
                 model = OrthogonalMatchingPursuitCV(**sklearn_ndict)
             elif self.method == 'NNLS':
@@ -1812,7 +1817,7 @@ class BeamformerCMF(BeamformerBase):
                     Op=Oop,
                     RegsL1=[Iop],
                     y=R[:, 0],
-                    niter_outer=self.max_iter,
+                    niter_outer=self.n_iter,
                     niter_inner=5,
                     RegsL2=None,
                     dataregsL2=None,
@@ -1832,7 +1837,7 @@ class BeamformerCMF(BeamformerBase):
                 self._ac[i], iterations, cost = fista(
                     Op=Oop,
                     y=R[:, 0],
-                    niter=self.max_iter,
+                    niter=self.n_iter,
                     eps=self.alpha,
                     alpha=None,
                     tol=1e-10,
@@ -1867,7 +1872,7 @@ class BeamformerCMF(BeamformerBase):
                     epsilon=1e-08,
                     iprint=-1,
                     maxfun=15000,
-                    maxiter=self.max_iter,
+                    maxiter=self.n_iter,
                     disp=None,
                     callback=None,
                     maxls=20,
@@ -1890,6 +1895,7 @@ class BeamformerCMF(BeamformerBase):
             self._fr[i] = 1
 
 
+@deprecated_alias({'max_iter': 'n_iter'})
 class BeamformerSODIX(BeamformerBase):
     """Source directivity modeling in the cross-spectral matrix (SODIX) algorithm.
 
@@ -1904,7 +1910,7 @@ class BeamformerSODIX(BeamformerBase):
     #: Maximum number of iterations,
     #: tradeoff between speed and precision;
     #: defaults to 200
-    max_iter = Int(200, desc='maximum number of iterations')
+    n_iter = Int(200, desc='maximum number of iterations')
 
     #: Weight factor for regularization,
     #: defaults to 0.0.
@@ -1928,7 +1934,7 @@ class BeamformerSODIX(BeamformerBase):
             'freq_data.digest',
             'alpha',
             'method',
-            'max_iter',
+            'n_iter',
             'unit_mult',
             'r_diag',
             'precision',
@@ -2036,7 +2042,7 @@ class BeamformerSODIX(BeamformerBase):
                         epsilon=1e-08,
                         iprint=-1,
                         maxfun=1500000,
-                        maxiter=self.max_iter,
+                        maxiter=self.n_iter,
                         disp=-1,
                         callback=None,
                         maxls=20,
@@ -2048,6 +2054,7 @@ class BeamformerSODIX(BeamformerBase):
                 self._fr[i] = 1
 
 
+@deprecated_alias({'max_iter': 'n_iter'})
 class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
     """Beamforming GIB methods with different normalizations.
 
@@ -2060,10 +2067,11 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
     #: within fitting method algorithms. Defaults to 1e9.
     unit_mult = Float(1e9, desc='unit multiplier')
 
-    #: Maximum number of iterations,
+    #: Total or maximum number of iterations
+    #: (depending on :attr:`method`),
     #: tradeoff between speed and precision;
     #: defaults to 10
-    max_iter = Int(10, desc='maximum number of iterations')
+    n_iter = Int(10, desc='maximum number of iterations')
 
     #: Type of fit method to be used ('Suzuki', 'LassoLars', 'LassoLarsCV', 'LassoLarsBIC',
     #: 'OMPCV' or 'NNLS', defaults to 'Suzuki').
@@ -2116,7 +2124,7 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
             'precision',
             'alpha',
             'method',
-            'max_iter',
+            'n_iter',
             'unit_mult',
             'eps_perc',
             'pnorm',
@@ -2189,8 +2197,8 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
                         leftpoints = num_points
                         locpoints = arange(num_points)
                         weights = diag(ones(num_points))
-                        epsilon = arange(self.max_iter)
-                        for it in arange(self.max_iter):
+                        epsilon = arange(self.n_iter)
+                        for it in arange(self.n_iter):
                             if num_channels <= leftpoints:
                                 AWA = dot(dot(A[:, locpoints], weights), A[:, locpoints].conj().T)
                                 epsilon[it] = max(absolute(eigvals(AWA))) * self.eps_perc
@@ -2226,7 +2234,7 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
                     elif self.method == 'InverseIRLS':
                         weights = eye(num_points)
                         locpoints = arange(num_points)
-                        for _it in arange(self.max_iter):
+                        for _it in arange(self.n_iter):
                             if num_channels <= num_points:
                                 wtwi = inv(dot(weights.T, weights))
                                 aH = A.conj().T
@@ -2244,13 +2252,13 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
                         AB = vstack([hstack([A.real, -A.imag]), hstack([A.imag, A.real])])
                         R = hstack([emode.real.T, emode.imag.T]) * unit
                         if self.method == 'LassoLars':
-                            model = LassoLars(alpha=self.alpha * unit, max_iter=self.max_iter, positive=True)
+                            model = LassoLars(alpha=self.alpha * unit, max_iter=self.n_iter, positive=True)
                         elif self.method == 'LassoLarsBIC':
-                            model = LassoLarsIC(criterion='bic', max_iter=self.max_iter, positive=True)
+                            model = LassoLarsIC(criterion='bic', max_iter=self.n_iter, positive=True)
                         elif self.method == 'OMPCV':
                             model = OrthogonalMatchingPursuitCV()
                         elif self.method == 'LassoLarsCV':
-                            model = LassoLarsCV(max_iter=self.max_iter, positive=True)
+                            model = LassoLarsCV(max_iter=self.n_iter, positive=True)
                         elif self.method == 'NNLS':
                             model = LinearRegression(positive=True)
                         model.normalize = False
