@@ -1,7 +1,11 @@
 What's new
 ============
 
-Upcoming Release (25.01)
+Upcoming Release
+------------------------
+
+
+25.01
 ------------------------
 
     **New features:**
