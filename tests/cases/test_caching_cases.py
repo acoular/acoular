@@ -28,8 +28,6 @@ class Caching:
         bfs = []
         for _ in range(3):
             bf = beamformer(cached=cached, freq_data=small_source_case.freq_data, steer=small_source_case.steer)
-            if hasattr(bf, 'max_iter'):
-                bf.max_iter = 1
             if hasattr(bf, 'n_iter'):
                 bf.n_iter = 1
             bfs.append(bf)

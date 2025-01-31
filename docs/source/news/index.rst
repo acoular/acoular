@@ -6,6 +6,7 @@ Upcoming Release (25.01)
 
     **New features:**
         * consistently use `file` as an attribute to specify a filename (instead of `from_file` or `name`)
+        * consistently use `n_iter` in beamformer algorithms that require setting a fixed or maximum number of iterations (e.g. `max_iter` deprecated)
         * adds new function :meth:`~acoular.tools.helper.c_air` to calculate the speed of sound from temperature and humidity
         * :class:`~acoular.calib.Calib` can now be used as a separate processing block
         * enable varying block buffer sizes for :class:`~acoular.process.SampleSplitter`
@@ -14,7 +15,7 @@ Upcoming Release (25.01)
         * Adds new abstract base classes :class:`~acoular.signals.PeriodicSignalGenerator` and :class:`~acoular.signals.NoiseGenerator`
 
     **Bugfixes**
-        * pass missing `max_iter` as an argument to `LassoLarsCV` in :class:`acoular.fbeamform.BeamformerGIB` (otherwise, `LassoLarsCV` runs up to 500 iterations)
+        * pass missing `n_iter` as an argument to `LassoLarsCV` in :class:`acoular.fbeamform.BeamformerGIB` (otherwise, `LassoLarsCV` runs up to 500 iterations)
         * fix broken `pylops` solvers in :class:`~acoular.fbeamform.BeamformerCMF`
         * fixes negative values in source maps obtained with the solvers `LassoLars`, `LassoLarsCV` and `LassoLarsBIC`
         * fix use of `Trait()` factory and replace by `Enum`, `Instance`, `Map`, `Union`
