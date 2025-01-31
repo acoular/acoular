@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Evaluate source characterization performance. &#8212; Acoular 25.01 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../_static/documentation_options.js?v=8ae8cc2e"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="What’s new" href="../../news/index.html" />
+    <link rel="prev" title="Tools – Demonstrates barspectrum tool of Acoular" href="example_tools.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../index.html">
+          <span>Acoular 25.01 documentation</span></a></h1>
+        <h2 class="heading"><span>Evaluate source characterization performance.</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="example_tools.html">Tools – Demonstrates barspectrum tool of Acoular</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Tools</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../../news/index.html">What’s new</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-tools-example-evaluate-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code.</p>
+</div>
+<section class="sphx-glr-example-title" id="evaluate-source-characterization-performance">
+<span id="sphx-glr-auto-examples-tools-example-evaluate-py"></span><h1>Evaluate source characterization performance.<a class="headerlink" href="#evaluate-source-characterization-performance" title="Link to this heading">¶</a></h1>
+<p>This example demonstrates how to evaluate the performance of a beamforming algorithm using
+the <a class="reference internal" href="../../api_ref/generated/generated/generated/acoular.tools.metrics.MetricEvaluator.html#acoular.tools.metrics.MetricEvaluator" title="acoular.tools.metrics.MetricEvaluator"><code class="xref py py-class docutils literal notranslate"><span class="pre">acoular.tools.metrics.MetricEvaluator</span></code></a> class to calculate the metrics introduced in
+<span id="id1">[<a class="reference internal" href="../../literature/index.html#id22" title="Gert Herold and Ennes Sarradj. Performance analysis of microphone array methods. Journal of Sound and Vibration, 401:152–168, 2017. doi:10.1016/j.jsv.2017.04.030.">1</a>]</span>.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <a href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="pathlib.Path" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class"><span class="n">Path</span></a>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">acoular</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ac</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">acoular.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">MetricEvaluator</span>
+</pre></div>
+</div>
+<p>Set up the parameters</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">sfreq</span></a> <span class="o">=</span> <span class="mi">51200</span>
+<a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">duration</span></a> <span class="o">=</span> <span class="mi">1</span>
+<a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">num_samples</span></a> <span class="o">=</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">duration</span></a> <span class="o">*</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">sfreq</span></a>
+<a href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">micgeofile</span></a> <span class="o">=</span> <a href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="pathlib.Path" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class"><span class="n">Path</span></a><span class="p">(</span><span class="n">ac</span><span class="o">.</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s1">&#39;xml&#39;</span> <span class="o">/</span> <span class="s1">&#39;array_64.xml&#39;</span>
+</pre></div>
+</div>
+<p>Generate test data, in real life this would come from an array measurement</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">mg</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">MicGeom</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><a href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">micgeofile</span></a><span class="p">)</span>
+<span class="n">n1</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">WNoiseGenerator</span><span class="p">(</span><span class="n">sample_freq</span><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">sfreq</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">num_samples</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">num_samples</span></a><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">n2</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">WNoiseGenerator</span><span class="p">(</span><span class="n">sample_freq</span><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">sfreq</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">num_samples</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">num_samples</span></a><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">rms</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+<span class="n">n3</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">WNoiseGenerator</span><span class="p">(</span><span class="n">sample_freq</span><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">sfreq</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">num_samples</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">num_samples</span></a><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">rms</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">p1</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">PointSource</span><span class="p">(</span><span class="n">signal</span><span class="o">=</span><span class="n">n1</span><span class="p">,</span> <span class="n">mics</span><span class="o">=</span><span class="n">mg</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">))</span>
+<span class="n">p2</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">PointSource</span><span class="p">(</span><span class="n">signal</span><span class="o">=</span><span class="n">n2</span><span class="p">,</span> <span class="n">mics</span><span class="o">=</span><span class="n">mg</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="p">(</span><span class="mf">0.15</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">))</span>
+<span class="n">p3</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">PointSource</span><span class="p">(</span><span class="n">signal</span><span class="o">=</span><span class="n">n3</span><span class="p">,</span> <span class="n">mics</span><span class="o">=</span><span class="n">mg</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">))</span>
+<span class="n">pa</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">Mixer</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">p1</span><span class="p">,</span> <span class="n">sources</span><span class="o">=</span><span class="p">[</span><span class="n">p2</span><span class="p">,</span> <span class="n">p3</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Analyze the data and generate a deconvolved source map with CLEAN-SC</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">ps</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">PowerSpectra</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">pa</span><span class="p">,</span> <span class="n">block_size</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="s1">&#39;Hanning&#39;</span><span class="p">)</span>
+<span class="n">rg</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">RectGrid</span><span class="p">(</span><span class="n">x_min</span><span class="o">=-</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">x_max</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">y_min</span><span class="o">=-</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">y_max</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">z</span><span class="o">=-</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">increment</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+<span class="n">st</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">SteeringVector</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="n">rg</span><span class="p">,</span> <span class="n">mics</span><span class="o">=</span><span class="n">mg</span><span class="p">,</span> <span class="n">ref</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="n">bb</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">BeamformerCleansc</span><span class="p">(</span><span class="n">freq_data</span><span class="o">=</span><span class="n">ps</span><span class="p">,</span> <span class="n">steer</span><span class="o">=</span><span class="n">st</span><span class="p">)</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pm</span></a> <span class="o">=</span> <span class="n">bb</span><span class="o">.</span><span class="n">synthetic</span><span class="p">(</span><span class="mi">8000</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Lm</span></a> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">L_p</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pm</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<p>Evaluate the results:
+Therefore, we define a custom grid containing the source locations.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">target_grid</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">ImportGrid</span><span class="p">(</span>
+    <span class="n">pos</span><span class="o">=</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.array.html#numpy.array" title="numpy.array" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="nb">list</span><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">p1</span><span class="o">.</span><span class="n">loc</span></a><span class="p">),</span>
+            <span class="nb">list</span><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">p2</span><span class="o">.</span><span class="n">loc</span></a><span class="p">),</span>
+            <span class="nb">list</span><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">p3</span><span class="o">.</span><span class="n">loc</span></a><span class="p">),</span>
+        <span class="p">],</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Next, we define the target squared sound pressure values for each source.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">nfft</span></a> <span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="n">fftfreq</span><span class="p">()</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">target_data</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.array.html#numpy.array" title="numpy.array" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">([[</span><a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">n1</span><span class="o">.</span><span class="n">rms</span></a><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">nfft</span></a><span class="p">],</span> <span class="p">[</span><a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">n2</span><span class="o">.</span><span class="n">rms</span></a><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">nfft</span></a><span class="p">],</span> <span class="p">[</span><a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">n3</span><span class="o">.</span><span class="n">rms</span></a><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">nfft</span></a><span class="p">]])</span><span class="o">.</span><span class="n">T</span>
+</pre></div>
+</div>
+<p>Finally, we use the <a class="reference internal" href="../../api_ref/generated/generated/generated/acoular.tools.metrics.MetricEvaluator.html#acoular.tools.metrics.MetricEvaluator" title="acoular.tools.metrics.MetricEvaluator"><code class="xref py py-class docutils literal notranslate"><span class="pre">acoular.tools.metrics.MetricEvaluator</span></code></a> class to evaluate the
+reconstruction accuracy of the beamforming algorithm with three different metrics. A circular
+sector with a radius of 5% of the aperture is used to define the sectors for the evaluation.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">mv</span> <span class="o">=</span> <span class="n">MetricEvaluator</span><span class="p">(</span>
+    <span class="n">sector</span><span class="o">=</span><span class="n">ac</span><span class="o">.</span><span class="n">CircSector</span><span class="p">(</span><span class="n">r</span><span class="o">=</span><span class="mf">0.05</span> <span class="o">*</span> <a href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float64" title="numpy.float64" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute"><span class="n">mg</span><span class="o">.</span><span class="n">aperture</span></a><span class="p">),</span>
+    <span class="n">grid</span><span class="o">=</span><span class="n">rg</span><span class="p">,</span>
+    <span class="n">data</span><span class="o">=</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pm</span></a><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)),</span>
+    <span class="n">target_grid</span><span class="o">=</span><span class="n">target_grid</span><span class="p">,</span>
+    <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">target_data</span></a><span class="o">=</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">target_data</span></a><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Plot the data</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="c1"># show map</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Lm</span><span class="o">.</span><span class="n">T</span></a><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Lm</span></a><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="mi">10</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">rg</span><span class="o">.</span><span class="n">extend</span><span class="p">(),</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">)</span>
+<span class="c1"># plot sectors</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+<span class="k">for</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">j</span></a><span class="p">,</span> <span class="n">sector</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">mv</span><span class="o">.</span><span class="n">sectors</span></a><span class="p">):</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">Circle</span><span class="p">((</span><a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">sector</span><span class="o">.</span><span class="n">x</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">sector</span><span class="o">.</span><span class="n">y</span></a><span class="p">),</span> <a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">sector</span><span class="o">.</span><span class="n">r</span></a><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+    <span class="c1"># annotate specific level error below circles</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span>
+        <span class="sa">r</span><span class="s1">&#39;$\Delta L_{p,e,s}$=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">mv</span><span class="o">.</span><span class="n">get_specific_level_error</span><span class="p">()[</span><span class="mi">0</span><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">j</span></a><span class="p">],</span> <span class="mi">2</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39; dB&#39;</span><span class="p">,</span>
+        <span class="n">xy</span><span class="o">=</span><span class="p">(</span><a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">sector</span><span class="o">.</span><span class="n">x</span></a> <span class="o">-</span> <span class="mf">0.1</span><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">sector</span><span class="o">.</span><span class="n">y</span></a> <span class="o">-</span> <a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">sector</span><span class="o">.</span><span class="n">r</span></a> <span class="o">-</span> <span class="mf">0.01</span><span class="p">),</span>
+        <span class="n">color</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="c1"># annotate overall level error</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span>
+    <span class="sa">r</span><span class="s1">&#39;$\Delta L_{p,e,o}$=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">mv</span><span class="o">.</span><span class="n">get_overall_level_error</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">2</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39; dB&#39;</span><span class="p">,</span>
+    <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">),</span>
+    <span class="n">xycoords</span><span class="o">=</span><span class="s1">&#39;axes fraction&#39;</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span>
+    <span class="sa">r</span><span class="s1">&#39;$\Delta L_{p,e,i}$=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">mv</span><span class="o">.</span><span class="n">get_inverse_level_error</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">2</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39; dB&#39;</span><span class="p">,</span>
+    <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">),</span>
+    <span class="n">xycoords</span><span class="o">=</span><span class="s1">&#39;axes fraction&#39;</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_example_evaluate_001.png" srcset="../../_images/sphx_glr_example_evaluate_001.png" alt="example evaluate" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 0.345 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-tools-example-evaluate-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/58b42eda71aa40b2451380543ea6b7f8/example_evaluate.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">example_evaluate.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/3938eb7592c2d573e246034d93f215e6/example_evaluate.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">example_evaluate.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/1c6445074a27ff5d25b767e31924098e/example_evaluate.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">example_evaluate.zip</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="example_tools.html">Tools – Demonstrates barspectrum tool of Acoular</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Tools</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../../news/index.html">What’s new</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, Acoular Development Team.
+      Last updated on Jan 31, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    </div>
+  </body>
+</html>

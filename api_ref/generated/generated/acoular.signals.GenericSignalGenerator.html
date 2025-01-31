@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>GenericSignalGenerator &#8212; Acoular 25.01 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=8ae8cc2e"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="sources" href="../acoular.sources.html" />
+    <link rel="prev" title="SineGenerator" href="acoular.signals.SineGenerator.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.01 documentation</span></a></h1>
+        <h2 class="heading"><span>GenericSignalGenerator</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.signals.SineGenerator.html">SineGenerator</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.signals.html">signals</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../acoular.sources.html">sources</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="genericsignalgenerator">
+<h1>GenericSignalGenerator<a class="headerlink" href="#genericsignalgenerator" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.signals.GenericSignalGenerator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.signals.</span></span><span class="sig-name descname"><span class="pre">GenericSignalGenerator</span></span><a class="headerlink" href="#acoular.signals.GenericSignalGenerator" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.signals.SignalGenerator.html#acoular.signals.SignalGenerator" title="acoular.signals.SignalGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SignalGenerator</span></code></a></p>
+<p>Generate signal from output of <a class="reference internal" href="acoular.base.SamplesGenerator.html#acoular.base.SamplesGenerator" title="acoular.base.SamplesGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplesGenerator</span></code></a> object.</p>
+<p>This class can be used to inject arbitrary signals into Acoular processing
+chains. For example, it can be used to read signals from a HDF5 file or create any signal
+by using the <a class="reference internal" href="acoular.sources.TimeSamples.html#acoular.sources.TimeSamples" title="acoular.sources.TimeSamples"><code class="xref py py-class docutils literal notranslate"><span class="pre">acoular.sources.TimeSamples</span></code></a> class.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.signals.GenericSignalGenerator.source">
+<span class="sig-name descname"><span class="pre">source</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Instance(SamplesGenerator)</span></em><a class="headerlink" href="#acoular.signals.GenericSignalGenerator.source" title="Link to this definition">¶</a></dt>
+<dd><p>Data source; <a class="reference internal" href="acoular.base.SamplesGenerator.html#acoular.base.SamplesGenerator" title="acoular.base.SamplesGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplesGenerator</span></code></a> or derived object.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.signals.GenericSignalGenerator.amplitude">
+<span class="sig-name descname"><span class="pre">amplitude</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(1.0)</span></em><a class="headerlink" href="#acoular.signals.GenericSignalGenerator.amplitude" title="Link to this definition">¶</a></dt>
+<dd><p>Amplitude of the signal. Defaults to 1.0.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.signals.GenericSignalGenerator.sample_freq">
+<span class="sig-name descname"><span class="pre">sample_freq</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Delegate('source')</span></em><a class="headerlink" href="#acoular.signals.GenericSignalGenerator.sample_freq" title="Link to this definition">¶</a></dt>
+<dd><p>Sampling frequency of output signal, as given by <a class="reference internal" href="#acoular.signals.GenericSignalGenerator.source" title="acoular.signals.GenericSignalGenerator.source"><code class="xref py py-attr docutils literal notranslate"><span class="pre">source</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.signals.GenericSignalGenerator.num_samples">
+<span class="sig-name descname"><span class="pre">num_samples</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property()</span></em><a class="headerlink" href="#acoular.signals.GenericSignalGenerator.num_samples" title="Link to this definition">¶</a></dt>
+<dd><p>Number of samples to generate. Is set to source.num_samples by default.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.signals.GenericSignalGenerator.loop_signal">
+<span class="sig-name descname"><span class="pre">loop_signal</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Bool(True)</span></em><a class="headerlink" href="#acoular.signals.GenericSignalGenerator.loop_signal" title="Link to this definition">¶</a></dt>
+<dd><p>Boolean flag, if ‘True’ (default), signal track is repeated if requested
+<a class="reference internal" href="#acoular.signals.GenericSignalGenerator.num_samples" title="acoular.signals.GenericSignalGenerator.num_samples"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_samples</span></code></a> is higher than available sample number</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.signals.GenericSignalGenerator.signal">
+<span class="sig-name descname"><span class="pre">signal</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#acoular.signals.GenericSignalGenerator.signal" title="Link to this definition">¶</a></dt>
+<dd><p>Deliver the signal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>array of floats</dt><dd><p>The resulting signal as an array of length <a class="reference internal" href="#acoular.signals.GenericSignalGenerator.num_samples" title="acoular.signals.GenericSignalGenerator.num_samples"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_samples</span></code></a>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.signals.SineGenerator.html">SineGenerator</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.signals.html">signals</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../acoular.sources.html">sources</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, Acoular Development Team.
+      Last updated on Jan 31, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>MicGeom &#8212; Acoular 25.01 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=8ae8cc2e"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="process" href="../acoular.process.html" />
+    <link rel="prev" title="microphones" href="../acoular.microphones.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.01 documentation</span></a></h1>
+        <h2 class="heading"><span>MicGeom</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.microphones.html">microphones</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.microphones.html">microphones</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../acoular.process.html">process</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="micgeom">
+<h1>MicGeom<a class="headerlink" href="#micgeom" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.microphones.MicGeom">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.microphones.</span></span><span class="sig-name descname"><span class="pre">MicGeom</span></span><a class="headerlink" href="#acoular.microphones.MicGeom" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">HasStrictTraits</span></code></p>
+<p>Provides the geometric arrangement of microphones in the array.</p>
+<p>The geometric arrangement of microphones is read in from an
+xml-source with element tag names <cite>pos</cite> and attributes Name, <cite>x</cite>, <cite>y</cite> and <cite>z</cite>.
+Can also be used with programmatically generated arrangements.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.microphones.MicGeom.file">
+<span class="sig-name descname"><span class="pre">file</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">File(filter=['*.xml'],</span> <span class="pre">exists=True,</span> <span class="pre">desc='name</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">xml</span> <span class="pre">file</span> <span class="pre">to</span> <span class="pre">import')</span></em><a class="headerlink" href="#acoular.microphones.MicGeom.file" title="Link to this definition">¶</a></dt>
+<dd><p>Name of the .xml-file from which to read the data.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.microphones.MicGeom.pos_total">
+<span class="sig-name descname"><span class="pre">pos_total</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CArray(dtype=float,</span> <span class="pre">shape=(3,</span> <span class="pre">None),</span> <span class="pre">desc='x,</span> <span class="pre">y,</span> <span class="pre">z</span> <span class="pre">position</span> <span class="pre">of</span> <span class="pre">all</span> <span class="pre">microphones')</span></em><a class="headerlink" href="#acoular.microphones.MicGeom.pos_total" title="Link to this definition">¶</a></dt>
+<dd><p>Positions as (3, <a class="reference internal" href="#acoular.microphones.MicGeom.num_mics" title="acoular.microphones.MicGeom.num_mics"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_mics</span></code></a>) array of floats, may include also invalid
+microphones (if any). Set either automatically on change of the
+<a class="reference internal" href="#acoular.microphones.MicGeom.file" title="acoular.microphones.MicGeom.file"><code class="xref py py-attr docutils literal notranslate"><span class="pre">file</span></code></a> argument or explicitly by assigning an array of floats.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.microphones.MicGeom.pos">
+<span class="sig-name descname"><span class="pre">pos</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['pos_total',</span> <span class="pre">'invalid_channels'],</span> <span class="pre">desc='x,</span> <span class="pre">y,</span> <span class="pre">z</span> <span class="pre">position</span> <span class="pre">of</span> <span class="pre">used</span> <span class="pre">microphones')</span></em><a class="headerlink" href="#acoular.microphones.MicGeom.pos" title="Link to this definition">¶</a></dt>
+<dd><p>Positions as (3, <a class="reference internal" href="#acoular.microphones.MicGeom.num_mics" title="acoular.microphones.MicGeom.num_mics"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_mics</span></code></a>) array of floats, without invalid
+microphones; readonly.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.microphones.MicGeom.invalid_channels">
+<span class="sig-name descname"><span class="pre">invalid_channels</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">List(int,</span> <span class="pre">desc='list</span> <span class="pre">of</span> <span class="pre">invalid</span> <span class="pre">channels')</span></em><a class="headerlink" href="#acoular.microphones.MicGeom.invalid_channels" title="Link to this definition">¶</a></dt>
+<dd><p>List that gives the indices of channels that should not be considered.
+Defaults to a blank list.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.microphones.MicGeom.num_mics">
+<span class="sig-name descname"><span class="pre">num_mics</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['pos'],</span> <span class="pre">desc='number</span> <span class="pre">of</span> <span class="pre">microphones</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">geometry')</span></em><a class="headerlink" href="#acoular.microphones.MicGeom.num_mics" title="Link to this definition">¶</a></dt>
+<dd><p>Number of used microphones in the array; readonly.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.microphones.MicGeom.center">
+<span class="sig-name descname"><span class="pre">center</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['pos'],</span> <span class="pre">desc='array</span> <span class="pre">center')</span></em><a class="headerlink" href="#acoular.microphones.MicGeom.center" title="Link to this definition">¶</a></dt>
+<dd><p>Center of the array (arithmetic mean of all used array positions); readonly.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.microphones.MicGeom.aperture">
+<span class="sig-name descname"><span class="pre">aperture</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['pos'],</span> <span class="pre">desc='array</span> <span class="pre">aperture')</span></em><a class="headerlink" href="#acoular.microphones.MicGeom.aperture" title="Link to this definition">¶</a></dt>
+<dd><p>Aperture of the array (greatest extent between two microphones); readonly.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.microphones.MicGeom.import_mpos">
+<span class="sig-name descname"><span class="pre">import_mpos</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#acoular.microphones.MicGeom.import_mpos" title="Link to this definition">¶</a></dt>
+<dd><p>Import the microphone positions from .xml file.
+Called when <a class="reference internal" href="#acoular.microphones.MicGeom.file" title="acoular.microphones.MicGeom.file"><code class="xref py py-attr docutils literal notranslate"><span class="pre">file</span></code></a> changes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.microphones.MicGeom.export_mpos">
+<span class="sig-name descname"><span class="pre">export_mpos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.microphones.MicGeom.export_mpos" title="Link to this definition">¶</a></dt>
+<dd><p>Export the microphone positions to .xml file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>filename</strong><span class="classifier">str</span></dt><dd><p>Name of the file to which the microphone positions are written.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.microphones.html">microphones</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.microphones.html">microphones</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../acoular.process.html">process</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, Acoular Development Team.
+      Last updated on Jan 31, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    </div>
+  </body>
+</html>

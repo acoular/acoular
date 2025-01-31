@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Average &#8212; Acoular 25.01 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=8ae8cc2e"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Cache" href="acoular.process.Cache.html" />
+    <link rel="prev" title="process" href="../acoular.process.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.01 documentation</span></a></h1>
+        <h2 class="heading"><span>Average</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.process.html">process</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.process.html">process</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.process.Cache.html">Cache</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="average">
+<h1>Average<a class="headerlink" href="#average" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.process.Average">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.process.</span></span><span class="sig-name descname"><span class="pre">Average</span></span><a class="headerlink" href="#acoular.process.Average" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.base.InOut.html#acoular.base.InOut" title="acoular.base.InOut"><code class="xref py py-class docutils literal notranslate"><span class="pre">InOut</span></code></a></p>
+<p>Calculates the average across consecutive time samples or frequency snapshots.</p>
+<p>The average operation is performed differently depending on the source type.
+If the source is a time domain source
+(e.g. derived from <a class="reference internal" href="acoular.base.SamplesGenerator.html#acoular.base.SamplesGenerator" title="acoular.base.SamplesGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplesGenerator</span></code></a>), the average is
+calculated over a certain number of time samples given by <a class="reference internal" href="#acoular.process.Average.num_per_average" title="acoular.process.Average.num_per_average"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_per_average</span></code></a>.
+If the source is a frequency domain source (e.g. derived from
+<a class="reference internal" href="acoular.base.SpectraGenerator.html#acoular.base.SpectraGenerator" title="acoular.base.SpectraGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpectraGenerator</span></code></a>), the average is calculated over a certain
+number of snapshots given by <a class="reference internal" href="#acoular.process.Average.num_per_average" title="acoular.process.Average.num_per_average"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_per_average</span></code></a>.</p>
+<p class="rubric">Examples</p>
+<p>For estimate the RMS of a white noise (time-domain) signal, the average of the squared
+signal can be calculated:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">acoular</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ac</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">signal</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">WNoiseGenerator</span><span class="p">(</span><span class="n">sample_freq</span><span class="o">=</span><span class="mi">51200</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="mi">51200</span><span class="p">,</span> <span class="n">rms</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span><span class="o">.</span><span class="n">signal</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ts</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">TimeSamples</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">signal</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span> <span class="n">sample_freq</span><span class="o">=</span><span class="mi">51200</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tp</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">TimePower</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">ts</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">avg</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">Average</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">tp</span><span class="p">,</span> <span class="n">num_per_average</span><span class="o">=</span><span class="mi">512</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mean_squared_value</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">avg</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mean_squared_value</span><span class="p">)[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">rms</span><span class="p">)</span>
+<span class="go">1.9985200025816718</span>
+</pre></div>
+</div>
+<p>Here, each evaluation of the generator created by the <a class="reference internal" href="#acoular.process.Average.result" title="acoular.process.Average.result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">result()</span></code></a> method of the
+<a class="reference internal" href="#acoular.process.Average" title="acoular.process.Average"><code class="xref py py-class docutils literal notranslate"><span class="pre">Average</span></code></a> object via the <code class="xref py py-meth docutils literal notranslate"><span class="pre">next()</span></code> function returns <code class="code docutils literal notranslate"><span class="pre">num=1</span></code> average across a
+snapshot of 512 samples.</p>
+<p>If the source is a frequency domain source, the average is calculated over a certain number
+of snapshots, defined by <a class="reference internal" href="#acoular.process.Average.num_per_average" title="acoular.process.Average.num_per_average"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_per_average</span></code></a>.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fft</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">RFFT</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">ts</span><span class="p">,</span> <span class="n">block_size</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ps</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">AutoPowerSpectra</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">fft</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">avg</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">Average</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">ps</span><span class="p">,</span> <span class="n">num_per_average</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mean_power</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">avg</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mean_power</span><span class="o">.</span><span class="n">sum</span><span class="p">()))</span>
+<span class="go">2.0024960894399295</span>
+</pre></div>
+</div>
+<p>Here, the generator created by the <a class="reference internal" href="#acoular.process.Average.result" title="acoular.process.Average.result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">result()</span></code></a> method of the <a class="reference internal" href="#acoular.process.Average" title="acoular.process.Average"><code class="xref py py-class docutils literal notranslate"><span class="pre">Average</span></code></a> object
+returns the average across 16 snapshots in the frequency domain.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.process.Average.num_per_average">
+<span class="sig-name descname"><span class="pre">num_per_average</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Int(64,</span> <span class="pre">desc='number</span> <span class="pre">of</span> <span class="pre">samples/snapshots</span> <span class="pre">to</span> <span class="pre">average</span> <span class="pre">over')</span></em><a class="headerlink" href="#acoular.process.Average.num_per_average" title="Link to this definition">¶</a></dt>
+<dd><p>Number of samples (time domain source) or snapshots (frequency domain source)
+to average over, defaults to 64.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.process.Average.sample_freq">
+<span class="sig-name descname"><span class="pre">sample_freq</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['source.sample_freq',</span> <span class="pre">'num_per_average'])</span></em><a class="headerlink" href="#acoular.process.Average.sample_freq" title="Link to this definition">¶</a></dt>
+<dd><p>Sampling frequency of the output signal, is set automatically.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.process.Average.num_samples">
+<span class="sig-name descname"><span class="pre">num_samples</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['source.num_samples',</span> <span class="pre">'num_per_average'])</span></em><a class="headerlink" href="#acoular.process.Average.num_samples" title="Link to this definition">¶</a></dt>
+<dd><p>Number of samples (time domain) or snapshots (frequency domain) of the output signal.
+Is set automatically.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.process.Average.result">
+<span class="sig-name descname"><span class="pre">result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.process.Average.result" title="Link to this definition">¶</a></dt>
+<dd><p>Python generator that yields the output block-wise.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>num</strong><span class="classifier">integer</span></dt><dd><p>This parameter defines the size of the blocks to be yielded
+(i.e. the number of samples per block).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>Average of the output of source.</dt><dd><p>Yields samples in blocks of shape (num, num_channels).
+The last block may be shorter than num.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.process.html">process</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.process.html">process</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.process.Cache.html">Cache</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, Acoular Development Team.
+      Last updated on Jan 31, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    </div>
+  </body>
+</html>

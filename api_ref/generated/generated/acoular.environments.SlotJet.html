@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>SlotJet &#8212; Acoular 25.01 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=8ae8cc2e"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="fbeamform" href="../acoular.fbeamform.html" />
+    <link rel="prev" title="RotatingFlow" href="acoular.environments.RotatingFlow.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.01 documentation</span></a></h1>
+        <h2 class="heading"><span>SlotJet</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.environments.RotatingFlow.html">RotatingFlow</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.environments.html">environments</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../acoular.fbeamform.html">fbeamform</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="slotjet">
+<h1>SlotJet<a class="headerlink" href="#slotjet" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.environments.SlotJet">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.environments.</span></span><span class="sig-name descname"><span class="pre">SlotJet</span></span><a class="headerlink" href="#acoular.environments.SlotJet" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.environments.FlowField.html#acoular.environments.FlowField" title="acoular.environments.FlowField"><code class="xref py py-class docutils literal notranslate"><span class="pre">FlowField</span></code></a></p>
+<p>Provides an analytical approximation of the flow field of a slot jet.</p>
+<p>See <span id="id1">[<a class="reference internal" href="../../../literature/index.html#id9" title="M. L. Albertson, Y. B. Dai, R. A. Jensen, and Hunter Rouse. Diffusion of submerged jets. Transactions of the American Society of Civil Engineers, 115(1):639-664, 1950. doi:10.1061/TACEAT.0006302.">2</a>]</span> for details.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.SlotJet.v0">
+<span class="sig-name descname"><span class="pre">v0</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(0.0,</span> <span class="pre">desc='exit</span> <span class="pre">velocity')</span></em><a class="headerlink" href="#acoular.environments.SlotJet.v0" title="Link to this definition">¶</a></dt>
+<dd><p>Exit velocity at jet origin, i.e. the nozzle. Defaults to 0.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.SlotJet.origin">
+<span class="sig-name descname"><span class="pre">origin</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CArray(dtype=float64,</span> <span class="pre">shape=(3,),</span> <span class="pre">value=array((0.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0)),</span> <span class="pre">desc='center</span> <span class="pre">of</span> <span class="pre">nozzle')</span></em><a class="headerlink" href="#acoular.environments.SlotJet.origin" title="Link to this definition">¶</a></dt>
+<dd><p>Location of a point at the slot center line,
+defaults to the co-ordinate origin.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.SlotJet.flow">
+<span class="sig-name descname"><span class="pre">flow</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CArray(dtype=float64,</span> <span class="pre">shape=(3,),</span> <span class="pre">value=array((1.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0)),</span> <span class="pre">desc='flow</span> <span class="pre">direction')</span></em><a class="headerlink" href="#acoular.environments.SlotJet.flow" title="Link to this definition">¶</a></dt>
+<dd><p>Unit flow direction of the slot jet, defaults to (1,0,0).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.SlotJet.plane">
+<span class="sig-name descname"><span class="pre">plane</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CArray(dtype=float64,</span> <span class="pre">shape=(3,),</span> <span class="pre">value=array((0.0,</span> <span class="pre">1.0,</span> <span class="pre">0.0)),</span> <span class="pre">desc='slot</span> <span class="pre">center</span> <span class="pre">line</span> <span class="pre">direction')</span></em><a class="headerlink" href="#acoular.environments.SlotJet.plane" title="Link to this definition">¶</a></dt>
+<dd><p>Unit vector parallel to slot center plane, defaults to (0,1,0).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.SlotJet.B">
+<span class="sig-name descname"><span class="pre">B</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(0.2,</span> <span class="pre">desc='nozzle</span> <span class="pre">diameter')</span></em><a class="headerlink" href="#acoular.environments.SlotJet.B" title="Link to this definition">¶</a></dt>
+<dd><p>Width of the slot, defaults to 0.2 .</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.SlotJet.l">
+<span class="sig-name descname"><span class="pre">l</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(5.2,</span> <span class="pre">desc='flow</span> <span class="pre">establishment</span> <span class="pre">length')</span>&#160; <span class="pre">#</span> <span class="pre">noqa:</span> <span class="pre">E741</span></em><a class="headerlink" href="#acoular.environments.SlotJet.l" title="Link to this definition">¶</a></dt>
+<dd><p>Nondimensional length of zone of flow establishment (jet core length), defaults to 5.2</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.environments.SlotJet.v">
+<span class="sig-name descname"><span class="pre">v</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.environments.SlotJet.v" title="Link to this definition">¶</a></dt>
+<dd><p>Provides the flow field as a function of the location. This is
+implemented here only for the component in the direction of <a class="reference internal" href="#acoular.environments.SlotJet.flow" title="acoular.environments.SlotJet.flow"><code class="xref py py-attr docutils literal notranslate"><span class="pre">flow</span></code></a>;
+entrainment components are set to zero.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>xx</strong><span class="classifier">array of floats of shape (3, )</span></dt><dd><p>Location in the fluid for which to provide the data.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>tuple with two elements</dt><dd><p>The first element in the tuple is the velocity vector and the
+second is the Jacobian of the velocity vector field, both at the
+given location.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.environments.RotatingFlow.html">RotatingFlow</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.environments.html">environments</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../acoular.fbeamform.html">fbeamform</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, Acoular Development Team.
+      Last updated on Jan 31, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    </div>
+  </body>
+</html>

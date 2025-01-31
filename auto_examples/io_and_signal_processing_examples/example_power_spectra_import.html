@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Cross-spectral matrix import &#8212; Acoular 25.01 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../_static/documentation_options.js?v=8ae8cc2e"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Parallel processing chains – Multithreading with the SampleSplitter." href="example_sample_splitter_multithreading.html" />
+    <link rel="prev" title="Show basic filtering capabilities." href="example_filter.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../index.html">
+          <span>Acoular 25.01 documentation</span></a></h1>
+        <h2 class="heading"><span>Cross-spectral matrix import</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="example_filter.html">Show basic filtering capabilities.</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">IO and signal processing examples</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="example_sample_splitter_multithreading.html">Parallel processing chains – Multithreading with the SampleSplitter.</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-io-and-signal-processing-examples-example-power-spectra-import-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code.</p>
+</div>
+<section class="sphx-glr-example-title" id="cross-spectral-matrix-import">
+<span id="sphx-glr-auto-examples-io-and-signal-processing-examples-example-power-spectra-import-py"></span><h1>Cross-spectral matrix import<a class="headerlink" href="#cross-spectral-matrix-import" title="Link to this heading">¶</a></h1>
+<p>This example demonstrates how to import a cross-spectral matrix from a external source by means of
+the <a class="reference internal" href="../../api_ref/generated/generated/acoular.spectra.PowerSpectraImport.html#acoular.spectra.PowerSpectraImport" title="acoular.spectra.PowerSpectraImport"><code class="xref py py-class docutils literal notranslate"><span class="pre">acoular.spectra.PowerSpectraImport</span></code></a> class. The CSM is created numerically for a
+frequency of 8 kHz.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <a href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="pathlib.Path" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class"><span class="n">Path</span></a>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">acoular</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ac</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+</pre></div>
+</div>
+<p>Define the source positions and rms values of three sources as well as the microphone positions</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">loc1</span></a> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">)</span>
+<a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">loc2</span></a> <span class="o">=</span> <span class="p">(</span><span class="mf">0.15</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">)</span>
+<a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">loc3</span></a> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">)</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">rms</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.array.html#numpy.array" title="numpy.array" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span>
+
+<a href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">micgeofile</span></a> <span class="o">=</span> <a href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="pathlib.Path" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class"><span class="n">Path</span></a><span class="p">(</span><span class="n">ac</span><span class="o">.</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s1">&#39;xml&#39;</span> <span class="o">/</span> <span class="s1">&#39;array_64.xml&#39;</span>
+<span class="n">mg</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">MicGeom</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><a href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">micgeofile</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<p>Obtain the transfer function of the monopole sources by using the SteeringVector object</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">st_src</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">SteeringVector</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="n">ac</span><span class="o">.</span><span class="n">ImportGrid</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.array.html#numpy.array" title="numpy.array" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">([</span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">loc1</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">loc2</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">loc3</span></a><span class="p">])</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">mics</span><span class="o">=</span><span class="n">mg</span><span class="p">)</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">H</span></a> <span class="o">=</span> <span class="n">st_src</span><span class="o">.</span><span class="n">transfer</span><span class="p">(</span><span class="mi">8000</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>  <span class="c1"># transfer functions for 8000 Hz</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">H_h</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">H</span></a><span class="o">.</span><span class="n">transpose</span><span class="p">()</span><span class="o">.</span><span class="n">conjugate</span><span class="p">()</span>  <span class="c1"># H hermetian</span>
+</pre></div>
+</div>
+<p>Calculate the cross-spectral matrix for the three sources without noise</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Q</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.diag.html#numpy.diag" title="numpy.diag" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">diag</span></a><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">rms</span></a><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>  <span class="c1"># matrix containing the source strength</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">csm</span></a> <span class="o">=</span> <span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">H</span></a> <span class="o">@</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Q</span></a><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">complex</span><span class="p">)</span> <span class="o">@</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">H_h</span></a><span class="p">)[</span><a href="https://numpy.org/doc/stable/reference/constants.html#numpy.newaxis" title="numpy.newaxis" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-data"><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span></a><span class="p">]</span>  <span class="c1"># calculate csm</span>
+</pre></div>
+</div>
+<p>Import the cross-spectral matrix using the PowerSpectraImport object</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">ps_import</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">PowerSpectraImport</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">csm</span></a><span class="o">=</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">csm</span></a><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">frequencies</span><span class="o">=</span><span class="mi">8000</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Calculate the Beamforming result for the imported cross-spectral matrix</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">rg</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">RectGrid</span><span class="p">(</span><span class="n">x_min</span><span class="o">=-</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">x_max</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">y_min</span><span class="o">=-</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">y_max</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">z</span><span class="o">=-</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">increment</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+<span class="n">st</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">SteeringVector</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="n">rg</span><span class="p">,</span> <span class="n">mics</span><span class="o">=</span><span class="n">mg</span><span class="p">)</span>
+<span class="n">bb</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">BeamformerBase</span><span class="p">(</span><span class="n">freq_data</span><span class="o">=</span><span class="n">ps_import</span><span class="p">,</span> <span class="n">steer</span><span class="o">=</span><span class="n">st</span><span class="p">,</span> <span class="n">r_diag</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">cached</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pm</span></a> <span class="o">=</span> <span class="n">bb</span><span class="o">.</span><span class="n">synthetic</span><span class="p">(</span><span class="mi">8000</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Lm</span></a> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">L_p</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pm</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<p>Show the source map</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Lm</span><span class="o">.</span><span class="n">T</span></a><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Lm</span></a><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="mi">10</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">rg</span><span class="o">.</span><span class="n">extend</span><span class="p">(),</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;bicubic&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_example_power_spectra_import_001.png" srcset="../../_images/sphx_glr_example_power_spectra_import_001.png" alt="example power spectra import" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 0.102 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-io-and-signal-processing-examples-example-power-spectra-import-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/5a4ed98113eaf8bbe7681b5835ff78a2/example_power_spectra_import.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">example_power_spectra_import.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/e1b4dccf80c6b8e4bff6f0b6a8d2781b/example_power_spectra_import.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">example_power_spectra_import.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/4a4aff3325c85658a0f28c1021a96305/example_power_spectra_import.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">example_power_spectra_import.zip</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="example_filter.html">Show basic filtering capabilities.</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">IO and signal processing examples</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="example_sample_splitter_multithreading.html">Parallel processing chains – Multithreading with the SampleSplitter.</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, Acoular Development Team.
+      Last updated on Jan 31, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    </div>
+  </body>
+</html>

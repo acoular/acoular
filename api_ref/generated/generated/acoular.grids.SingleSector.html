@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>SingleSector &#8212; Acoular 25.01 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=8ae8cc2e"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="RectSector" href="acoular.grids.RectSector.html" />
+    <link rel="prev" title="Sector" href="acoular.grids.Sector.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.01 documentation</span></a></h1>
+        <h2 class="heading"><span>SingleSector</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.grids.Sector.html">Sector</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.grids.html">grids</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.grids.RectSector.html">RectSector</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="singlesector">
+<h1>SingleSector<a class="headerlink" href="#singlesector" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.grids.SingleSector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.grids.</span></span><span class="sig-name descname"><span class="pre">SingleSector</span></span><a class="headerlink" href="#acoular.grids.SingleSector" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.grids.Sector.html#acoular.grids.Sector" title="acoular.grids.Sector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sector</span></code></a></p>
+<p>Base class for single sector types.</p>
+<p>Defines the common interface for all single sector classes. This class
+may be used as a base for diverse single sector implementations. If used
+directly, it implements a sector encompassing the whole grid.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.grids.SingleSector.include_border">
+<span class="sig-name descname"><span class="pre">include_border</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Bool(True,</span> <span class="pre">desc='include</span> <span class="pre">points</span> <span class="pre">on</span> <span class="pre">the</span> <span class="pre">border')</span></em><a class="headerlink" href="#acoular.grids.SingleSector.include_border" title="Link to this definition">¶</a></dt>
+<dd><p>Boolean flag, if ‘True’ (default), grid points lying on the sector border are included.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.grids.SingleSector.abs_tol">
+<span class="sig-name descname"><span class="pre">abs_tol</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(1e-12,</span> <span class="pre">desc='absolute</span> <span class="pre">tolerance</span> <span class="pre">for</span> <span class="pre">sector</span> <span class="pre">border')</span></em><a class="headerlink" href="#acoular.grids.SingleSector.abs_tol" title="Link to this definition">¶</a></dt>
+<dd><p>Absolute tolerance for sector border</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.grids.SingleSector.default_nearest">
+<span class="sig-name descname"><span class="pre">default_nearest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Bool(True,</span> <span class="pre">desc='return</span> <span class="pre">nearest</span> <span class="pre">grid</span> <span class="pre">point</span> <span class="pre">to</span> <span class="pre">center</span> <span class="pre">of</span> <span class="pre">none</span> <span class="pre">inside</span> <span class="pre">sector')</span></em><a class="headerlink" href="#acoular.grids.SingleSector.default_nearest" title="Link to this definition">¶</a></dt>
+<dd><p>Boolean flag, if ‘True’ (default), the nearest grid point is returned if None is inside the
+sector.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.grids.Sector.html">Sector</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.grids.html">grids</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.grids.RectSector.html">RectSector</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, Acoular Development Team.
+      Last updated on Jan 31, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    </div>
+  </body>
+</html>

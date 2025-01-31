@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>SampleSplitter &#8212; Acoular 25.01 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=8ae8cc2e"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="TimeAverage" href="acoular.process.TimeAverage.html" />
+    <link rel="prev" title="Cache" href="acoular.process.Cache.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.01 documentation</span></a></h1>
+        <h2 class="heading"><span>SampleSplitter</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.process.Cache.html">Cache</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.process.html">process</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.process.TimeAverage.html">TimeAverage</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="samplesplitter">
+<h1>SampleSplitter<a class="headerlink" href="#samplesplitter" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.process.SampleSplitter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.process.</span></span><span class="sig-name descname"><span class="pre">SampleSplitter</span></span><a class="headerlink" href="#acoular.process.SampleSplitter" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.base.InOut.html#acoular.base.InOut" title="acoular.base.InOut"><code class="xref py py-class docutils literal notranslate"><span class="pre">InOut</span></code></a></p>
+<p>Distributes data from a source to several following objects in a block-wise manner.</p>
+<p>The <cite>SampleSplitter</cite> class is designed to take data from a single
+<a class="reference internal" href="acoular.base.Generator.html#acoular.base.Generator" title="acoular.base.Generator"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a> derived source object and distribute it to multiple
+<a class="reference internal" href="acoular.base.Generator.html#acoular.base.Generator" title="acoular.base.Generator"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a> derived objects. For each object, the <a class="reference internal" href="#acoular.process.SampleSplitter" title="acoular.process.SampleSplitter"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleSplitter</span></code></a>
+holds a virtual block buffer from which the subsequently connected objects receive data in a
+first-in-first-out (FIFO) manner. This allows for efficient data handling and processing in
+parallel.</p>
+<p class="rubric">Examples</p>
+<p>Consider a time domain source signal stream from which the FFT spectra and the signal power
+are calculated block-wise and in parallel by using the <a class="reference internal" href="acoular.fprocess.RFFT.html#acoular.fprocess.RFFT" title="acoular.fprocess.RFFT"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFFT</span></code></a> as well
+as the <a class="reference internal" href="acoular.tprocess.TimePower.html#acoular.tprocess.TimePower" title="acoular.tprocess.TimePower"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimePower</span></code></a> and <a class="reference internal" href="acoular.process.Average.html#acoular.process.Average" title="acoular.process.Average"><code class="xref py py-class docutils literal notranslate"><span class="pre">Average</span></code></a>
+objects. The <cite>SampleSplitter</cite> object is used to distribute the incoming blocks of data to the
+<cite>RFFT</cite> and <cite>TimePower</cite> object buffers whenever one of these objects calls the <a class="reference internal" href="#acoular.process.SampleSplitter.result" title="acoular.process.SampleSplitter.result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">result()</span></code></a>
+generator.
+For the <cite>TimePower</cite> object, the buffer size is set to 10 blocks. If the buffer is full, an error
+is raised since the buffer overflow treatment is set to ‘error’. For the <cite>RFFT</cite> object, the
+block buffer size is set to 1 block, and the buffer overflow treatment is set to ‘none’. This
+is done to reduce latency in the FFT calculation, as the FFT calculation may take longer than
+the signal power calculation. If new data is available and the block buffer for the <cite>RFFT</cite>
+object is full, the <cite>SampleSplitter</cite> will drop the oldest block of data in the buffer. Thus, the
+<cite>RFFT</cite> object will always receive the most recent block of data.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">acoular</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ac</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># create a time domain signal source</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ts</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">TimeSamples</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">1024</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">sample_freq</span><span class="o">=</span><span class="mi">51200</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># create the sample splitter object</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ss</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">SampleSplitter</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">ts</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># create the FFT spectra and further objects that receive the data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fft</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">RFFT</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">ss</span><span class="p">,</span> <span class="n">block_size</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">pow</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">TimePower</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">ss</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">avg</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">Average</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="nb">pow</span><span class="p">,</span> <span class="n">num_per_average</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># register the subsequent processing block objects at the sample splitter</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ss</span><span class="o">.</span><span class="n">register_object</span><span class="p">(</span><span class="n">fft</span><span class="p">,</span> <span class="n">buffer_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">buffer_overflow_treatment</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ss</span><span class="o">.</span><span class="n">register_object</span><span class="p">(</span><span class="nb">pow</span><span class="p">,</span> <span class="n">buffer_size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">buffer_overflow_treatment</span><span class="o">=</span><span class="s1">&#39;error&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>After object registration, the <cite>SampleSplitter</cite> object is ready to distribute the data to the
+object buffers. The block buffers can be accessed via the <cite>block_buffer</cite> attribute of the
+<cite>SampleSplitter</cite> object.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ss</span><span class="o">.</span><span class="n">block_buffer</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+<span class="go">dict_values([deque([], maxlen=1), deque([], maxlen=10)])</span>
+</pre></div>
+</div>
+<p>Calling the result method of the FFT object will start the data collection and distribution
+process.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">generator</span> <span class="o">=</span> <span class="n">fft</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fft_res</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">generator</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Although we haven’t called the result method of the signal power object, one data block is
+already available in the buffer.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ss</span><span class="o">.</span><span class="n">block_buffer</span><span class="p">[</span><span class="nb">pow</span><span class="p">]))</span>
+<span class="go">1</span>
+</pre></div>
+</div>
+<p>To remove registered objects from the <cite>SampleSplitter</cite>, use the <a class="reference internal" href="#acoular.process.SampleSplitter.remove_object" title="acoular.process.SampleSplitter.remove_object"><code class="xref py py-meth docutils literal notranslate"><span class="pre">remove_object()</span></code></a> method.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ss</span><span class="o">.</span><span class="n">remove_object</span><span class="p">(</span><span class="nb">pow</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ss</span><span class="o">.</span><span class="n">block_buffer</span><span class="p">))</span>
+<span class="go">1</span>
+</pre></div>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.process.SampleSplitter.block_buffer">
+<span class="sig-name descname"><span class="pre">block_buffer</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Dict(key_trait=Instance(Generator))</span></em><a class="headerlink" href="#acoular.process.SampleSplitter.block_buffer" title="Link to this definition">¶</a></dt>
+<dd><p>dictionary with block buffers (dict values) of registered objects (dict
+keys).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.process.SampleSplitter.buffer_size">
+<span class="sig-name descname"><span class="pre">buffer_size</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Union(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.process.SampleSplitter.buffer_size" title="Link to this definition">¶</a></dt>
+<dd><p>max elements/blocks in block buffers.
+Can be set individually for each registered object.
+Default is 100 blocks for each registered object.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.process.SampleSplitter.buffer_overflow_treatment">
+<span class="sig-name descname"><span class="pre">buffer_overflow_treatment</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Dict(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.process.SampleSplitter.buffer_overflow_treatment" title="Link to this definition">¶</a></dt>
+<dd><p>defines behaviour in case of block_buffer overflow. Can be set individually
+for each registered object.</p>
+<ul class="simple">
+<li><p>‘error’: an IOError is thrown by the class</p></li>
+<li><p>‘warning’: a warning is displayed. Possibly leads to lost blocks of data</p></li>
+<li><p>‘none’: nothing happens. Possibly leads to lost blocks of data</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.process.SampleSplitter.register_object">
+<span class="sig-name descname"><span class="pre">register_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">objects_to_register</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_overflow_treatment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.process.SampleSplitter.register_object" title="Link to this definition">¶</a></dt>
+<dd><p>Register one or multiple <a class="reference internal" href="acoular.base.Generator.html#acoular.base.Generator" title="acoular.base.Generator"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a> objects to the SampleSplitter.</p>
+<p>Creates a block buffer for each object and sets the buffer size and buffer
+overflow treatment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>objects_to_register</strong><span class="classifier">Generator</span></dt><dd><p>One or multiple <a class="reference internal" href="acoular.base.Generator.html#acoular.base.Generator" title="acoular.base.Generator"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a> derived objects to be registered.</p>
+</dd>
+<dt><strong>buffer_size</strong><span class="classifier">int, optional</span></dt><dd><p>Maximum number of elements/blocks in block buffer. If not set, the default buffer size
+of 100 blocks is used.</p>
+</dd>
+<dt><strong>buffer_overflow_treatment</strong><span class="classifier">str, optional</span></dt><dd><p>Defines the behaviour in case of reaching the buffer size.
+Can be set individually for each object. Possible values are ‘error’, ‘warning’, and
+‘none’. If not set, the default value is ‘error’.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.process.SampleSplitter.remove_object">
+<span class="sig-name descname"><span class="pre">remove_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">objects_to_remove</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.process.SampleSplitter.remove_object" title="Link to this definition">¶</a></dt>
+<dd><p>Function that can be used to remove registered objects.</p>
+<p>If no objects are given, all registered objects are removed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>objects_to_remove</strong><span class="classifier">list</span></dt><dd><p>One or multiple <a class="reference internal" href="acoular.base.Generator.html#acoular.base.Generator" title="acoular.base.Generator"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a> derived objects to be removed.
+If not set, all registered objects are removed.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.process.SampleSplitter.result">
+<span class="sig-name descname"><span class="pre">result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.process.SampleSplitter.result" title="Link to this definition">¶</a></dt>
+<dd><p>Python generator that yields the output block-wise from block-buffer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>num</strong><span class="classifier">integer</span></dt><dd><p>This parameter defines the size of the blocks to be yielded
+(i.e. the number of samples per block).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>Samples in blocks of shape (num, num_channels).</dt><dd><p>Delivers a block of samples to the calling object.
+The last block may be shorter than num.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.process.Cache.html">Cache</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.process.html">process</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.process.TimeAverage.html">TimeAverage</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, Acoular Development Team.
+      Last updated on Jan 31, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    </div>
+  </body>
+</html>

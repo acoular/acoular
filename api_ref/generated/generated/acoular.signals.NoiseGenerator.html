@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>NoiseGenerator &#8212; Acoular 25.01 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=8ae8cc2e"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="WNoiseGenerator" href="acoular.signals.WNoiseGenerator.html" />
+    <link rel="prev" title="PeriodicSignalGenerator" href="acoular.signals.PeriodicSignalGenerator.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.01 documentation</span></a></h1>
+        <h2 class="heading"><span>NoiseGenerator</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.signals.PeriodicSignalGenerator.html">PeriodicSignalGenerator</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.signals.html">signals</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.signals.WNoiseGenerator.html">WNoiseGenerator</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="noisegenerator">
+<h1>NoiseGenerator<a class="headerlink" href="#noisegenerator" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.signals.NoiseGenerator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.signals.</span></span><span class="sig-name descname"><span class="pre">NoiseGenerator</span></span><a class="headerlink" href="#acoular.signals.NoiseGenerator" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.signals.SignalGenerator.html#acoular.signals.SignalGenerator" title="acoular.signals.SignalGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SignalGenerator</span></code></a></p>
+<p>Abstract base class for noise signal generators.</p>
+<p>Defines the common interface for all <a class="reference internal" href="acoular.signals.SignalGenerator.html#acoular.signals.SignalGenerator" title="acoular.signals.SignalGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SignalGenerator</span></code></a> classes with noise signals. This
+class may be used as a base for class handling noise signals that can be characterized by their
+RMS amplitude. It should not be used directly as it contains no real functionality.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.signals.NoiseGenerator.rms">
+<span class="sig-name descname"><span class="pre">rms</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(1.0,</span> <span class="pre">desc='rms</span> <span class="pre">amplitude')</span></em><a class="headerlink" href="#acoular.signals.NoiseGenerator.rms" title="Link to this definition">¶</a></dt>
+<dd><p>RMS amplitude of the signal.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.signals.NoiseGenerator.seed">
+<span class="sig-name descname"><span class="pre">seed</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Int(0,</span> <span class="pre">desc='random</span> <span class="pre">seed</span> <span class="pre">value')</span></em><a class="headerlink" href="#acoular.signals.NoiseGenerator.seed" title="Link to this definition">¶</a></dt>
+<dd><p>Seed for random number generator, defaults to 0.
+This parameter should be set differently for different instances
+to guarantee statistically independent (non-correlated) outputs.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.signals.NoiseGenerator.signal">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">signal</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#acoular.signals.NoiseGenerator.signal" title="Link to this definition">¶</a></dt>
+<dd><p>Deliver the signal.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.signals.PeriodicSignalGenerator.html">PeriodicSignalGenerator</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.signals.html">signals</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.signals.WNoiseGenerator.html">WNoiseGenerator</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, Acoular Development Team.
+      Last updated on Jan 31, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    </div>
+  </body>
+</html>

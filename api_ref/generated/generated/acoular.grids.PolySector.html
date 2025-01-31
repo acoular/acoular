@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>PolySector &#8212; Acoular 25.01 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=8ae8cc2e"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="ConvexSector" href="acoular.grids.ConvexSector.html" />
+    <link rel="prev" title="CircSector" href="acoular.grids.CircSector.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.01 documentation</span></a></h1>
+        <h2 class="heading"><span>PolySector</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.grids.CircSector.html">CircSector</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.grids.html">grids</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.grids.ConvexSector.html">ConvexSector</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="polysector">
+<h1>PolySector<a class="headerlink" href="#polysector" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.grids.PolySector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.grids.</span></span><span class="sig-name descname"><span class="pre">PolySector</span></span><a class="headerlink" href="#acoular.grids.PolySector" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.grids.SingleSector.html#acoular.grids.SingleSector" title="acoular.grids.SingleSector"><code class="xref py py-class docutils literal notranslate"><span class="pre">SingleSector</span></code></a></p>
+<p>Class for defining a polygon sector.</p>
+<p>Can be used for 2D Grids for defining a polygon sector.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.grids.PolySector.contains">
+<span class="sig-name descname"><span class="pre">contains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.grids.PolySector.contains" title="Link to this definition">¶</a></dt>
+<dd><p>Queries whether the coordinates in a given array lie within the polygon sector. If no
+coordinate is inside, the nearest one to the rectangle center is returned if
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">default_nearest</span></code> is True.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>pos</strong><span class="classifier">array of floats</span></dt><dd><p>Array with the shape 3x[number of gridpoints] containing the
+grid positions</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>array of bools with as many entries as columns in pos</dt><dd><p>Array indicating which of the given positions lie within the
+given sector</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.grids.CircSector.html">CircSector</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.grids.html">grids</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.grids.ConvexSector.html">ConvexSector</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, Acoular Development Team.
+      Last updated on Jan 31, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    </div>
+  </body>
+</html>

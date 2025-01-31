@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>acoular.fbeamform.integrate &#8212; Acoular 25.01 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=8ae8cc2e"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="fprocess" href="../acoular.fprocess.html" />
+    <link rel="prev" title="acoular.fbeamform.L_p" href="acoular.fbeamform.L_p.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.01 documentation</span></a></h1>
+        <h2 class="heading"><span>acoular.fbeamform.integrate</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.fbeamform.L_p.html">acoular.fbeamform.L_p</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.fbeamform.html">fbeamform</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../acoular.fprocess.html">fprocess</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="acoular-fbeamform-integrate">
+<h1>acoular.fbeamform.integrate<a class="headerlink" href="#acoular-fbeamform-integrate" title="Link to this heading">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="acoular.fbeamform.integrate">
+<span class="sig-prename descclassname"><span class="pre">acoular.fbeamform.</span></span><span class="sig-name descname"><span class="pre">integrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sector</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.fbeamform.integrate" title="Link to this definition">¶</a></dt>
+<dd><p>Integrates a sound pressure map over a given sector.</p>
+<p>This function can be applied on beamforming results to
+quantitatively analyze the sound pressure in a given sector.
+If used with <a class="reference internal" href="acoular.fbeamform.BeamformerBase.html#acoular.fbeamform.BeamformerBase.result" title="acoular.fbeamform.BeamformerBase.result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Beamformer.result()</span></code></a>,
+the output is identical to the result of the intrinsic
+<a class="reference internal" href="acoular.fbeamform.BeamformerBase.html#acoular.fbeamform.BeamformerBase.integrate" title="acoular.fbeamform.BeamformerBase.integrate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Beamformer.integrate</span></code></a> method.
+It can, however, also be used with the
+<a class="reference internal" href="acoular.fbeamform.BeamformerBase.html#acoular.fbeamform.BeamformerBase.synthetic" title="acoular.fbeamform.BeamformerBase.synthetic"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Beamformer.synthetic</span></code></a>
+output.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>data: array of floats</strong></dt><dd><p>Contains the calculated squared sound pressure values in Pa**2.
+If data has the same number of entries than the number of grid points
+only one value is returned.
+In case of a 2-D array with the second dimension identical
+to the number of grid points an array containing as many entries as
+the first dimension is returned.</p>
+</dd>
+<dt><strong>grid: Grid object</strong></dt><dd><p>Object of a <a class="reference internal" href="acoular.grids.Grid.html#acoular.grids.Grid" title="acoular.grids.Grid"><code class="xref py py-class docutils literal notranslate"><span class="pre">Grid</span></code></a>-derived class
+that provides the grid locations.</p>
+</dd>
+<dt><strong>sector: array of floats or :class:`~acoular.grids.Sector`-derived object</strong></dt><dd><p>Tuple with arguments for the <cite>indices</cite> method
+of a <a class="reference internal" href="acoular.grids.Grid.html#acoular.grids.Grid" title="acoular.grids.Grid"><code class="xref py py-class docutils literal notranslate"><span class="pre">Grid</span></code></a>-derived class
+(e.g. <a class="reference internal" href="acoular.grids.RectGrid.html#acoular.grids.RectGrid.indices" title="acoular.grids.RectGrid.indices"><code class="xref py py-meth docutils literal notranslate"><span class="pre">RectGrid.indices</span></code></a>
+or <a class="reference internal" href="acoular.grids.RectGrid3D.html#acoular.grids.RectGrid3D.indices" title="acoular.grids.RectGrid3D.indices"><code class="xref py py-meth docutils literal notranslate"><span class="pre">RectGrid3D.indices</span></code></a>).
+Possible sectors would be <cite>array([xmin, ymin, xmax, ymax])</cite>
+or <cite>array([x, y, radius])</cite>.
+Alternatively, a <a class="reference internal" href="acoular.grids.Sector.html#acoular.grids.Sector" title="acoular.grids.Sector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sector</span></code></a>-derived object
+can be used.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>array of floats</dt><dd><p>The spectrum (all calculated frequency bands) for the integrated sector.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.fbeamform.L_p.html">acoular.fbeamform.L_p</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.fbeamform.html">fbeamform</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../acoular.fprocess.html">fprocess</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, Acoular Development Team.
+      Last updated on Jan 31, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    </div>
+  </body>
+</html>

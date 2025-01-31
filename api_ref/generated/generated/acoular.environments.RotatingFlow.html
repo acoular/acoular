@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>RotatingFlow &#8212; Acoular 25.01 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=8ae8cc2e"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="SlotJet" href="acoular.environments.SlotJet.html" />
+    <link rel="prev" title="OpenJet" href="acoular.environments.OpenJet.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.01 documentation</span></a></h1>
+        <h2 class="heading"><span>RotatingFlow</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.environments.OpenJet.html">OpenJet</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.environments.html">environments</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.environments.SlotJet.html">SlotJet</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="rotatingflow">
+<h1>RotatingFlow<a class="headerlink" href="#rotatingflow" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.environments.RotatingFlow">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.environments.</span></span><span class="sig-name descname"><span class="pre">RotatingFlow</span></span><a class="headerlink" href="#acoular.environments.RotatingFlow" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.environments.FlowField.html#acoular.environments.FlowField" title="acoular.environments.FlowField"><code class="xref py py-class docutils literal notranslate"><span class="pre">FlowField</span></code></a></p>
+<p>Analytical approximation of the flow field of a rotating fluid with constant flow.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.RotatingFlow.rpm">
+<span class="sig-name descname"><span class="pre">rpm</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(0.0,</span> <span class="pre">desc='revolutions</span> <span class="pre">per</span> <span class="pre">minute</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">virtual</span> <span class="pre">array;</span> <span class="pre">negative</span> <span class="pre">values</span> <span class="pre">for</span> <span class="pre">clockwise</span> <span class="pre">rotation')</span></em><a class="headerlink" href="#acoular.environments.RotatingFlow.rpm" title="Link to this definition">¶</a></dt>
+<dd><p>Exit velocity at jet origin, i.e. the nozzle. Defaults to 0.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.RotatingFlow.origin">
+<span class="sig-name descname"><span class="pre">origin</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CArray(dtype=float64,</span> <span class="pre">shape=(3,),</span> <span class="pre">value=array((0.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0)),</span> <span class="pre">desc='center</span> <span class="pre">of</span> <span class="pre">nozzle')</span></em><a class="headerlink" href="#acoular.environments.RotatingFlow.origin" title="Link to this definition">¶</a></dt>
+<dd><p>Location of the nozzle center, defaults to the co-ordinate origin.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.environments.RotatingFlow.v">
+<span class="sig-name descname"><span class="pre">v</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.environments.RotatingFlow.v" title="Link to this definition">¶</a></dt>
+<dd><p>Provides the rotating flow field around the z-Axis as a function of the location.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>xx</strong><span class="classifier">array of floats of shape (3, )</span></dt><dd><p>Location in the fluid for which to provide the data.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>tuple with two elements</dt><dd><p>The first element in the tuple is the velocity vector and the
+second is the Jacobian of the velocity vector field, both at the
+given location.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.environments.OpenJet.html">OpenJet</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.environments.html">environments</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.environments.SlotJet.html">SlotJet</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, Acoular Development Team.
+      Last updated on Jan 31, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    </div>
+  </body>
+</html>

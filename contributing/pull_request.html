@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Submitting a pull request &#8212; Acoular 25.01 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../_static/documentation_options.js?v=8ae8cc2e"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Contribution Checklist" href="checklist.html" />
+    <link rel="prev" title="Release Policy" href="release.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../index.html">
+          <span>Acoular 25.01 documentation</span></a></h1>
+        <h2 class="heading"><span>Submitting a pull request</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="release.html">Release Policy</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contributing</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="checklist.html">Contribution Checklist</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="submitting-a-pull-request">
+<span id="id1"></span><h1>Submitting a pull request<a class="headerlink" href="#submitting-a-pull-request" title="Link to this heading">¶</a></h1>
+<section id="preparing-the-branches">
+<h2>Preparing the branches<a class="headerlink" href="#preparing-the-branches" title="Link to this heading">¶</a></h2>
+<p>Before submitting your fist pull request, make sure to have the commits you want so submit on a branch other than your <code class="docutils literal notranslate"><span class="pre">master</span></code> branch. If not, add a new branch like this:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>branch<span class="w"> </span>new-branch
+</pre></div>
+</div>
+<p>You have just created a new branch called <code class="docutils literal notranslate"><span class="pre">new-branch</span></code>. This branch will have the same commit history as the <code class="docutils literal notranslate"><span class="pre">master</span></code> branch.</p>
+<p>You want to keep the <code class="docutils literal notranslate"><span class="pre">master</span></code> branch in sync with the <code class="docutils literal notranslate"><span class="pre">master</span></code> branch on the main <a class="reference external" href="https://github.com/acoular/acoular">Acoular repository</a> on GitHub. To make sure it is, look <a class="reference external" href="https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork">here</a>.</p>
+<p>In case your <code class="docutils literal notranslate"><span class="pre">master</span></code> branch has changed, execute the following commands to make sure that there will be no merge conflicts later on. Mind that you should be on your <code class="docutils literal notranslate"><span class="pre">master</span></code> branch when doing this.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>fetch
+git<span class="w"> </span>reset<span class="w"> </span>origin/master
+git<span class="w"> </span>checkout<span class="w"> </span>new-branch
+git<span class="w"> </span>rebase<span class="w"> </span>master
+</pre></div>
+</div>
+<p>You are now on the <code class="docutils literal notranslate"><span class="pre">new-branch</span></code> branch. If you are pleased with your changes and they meet the criteria stated in the contributing guidelines, push your changes to your GitHub repository. At this point, there might be no upstream branch in your GitHub repository. To create one, execute:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>push<span class="w"> </span>--set-upstream<span class="w"> </span>origin<span class="w"> </span>new-branch
+</pre></div>
+</div>
+</section>
+<section id="creating-a-pull-request-on-github">
+<h2>Creating a pull request on GitHub<a class="headerlink" href="#creating-a-pull-request-on-github" title="Link to this heading">¶</a></h2>
+<p>If you visit to your forked Acoular repository on GitHub now, you will see something like this:</p>
+<a class="reference internal image-reference" href="../_images/forked_acoular_repository_github_site.png"><img alt="Forked Acoular repository" src="../_images/forked_acoular_repository_github_site.png" style="width: 100%;" />
+</a>
+<p>Note the orange box. To open a pull request, click on <code class="docutils literal notranslate"><span class="pre">Compare</span> <span class="pre">&amp;</span> <span class="pre">pull</span> <span class="pre">request</span></code>. Alternatively you can select the branch you want to commit in the branch menu and click <code class="docutils literal notranslate"><span class="pre">Contribute</span></code>.</p>
+<p>You will get redirectet to a page where you should fill out a Markdown form with a description of your pull request and the issue it is regarding (if it is regarding an issue). Make sure to fill out the checklist boxes with x’s (if they apply of course).</p>
+<p>The finished result should look like this:</p>
+<a class="reference internal image-reference" href="../_images/pull_request_form_github_site_write.png"><img alt="Pull request form (write)" src="../_images/pull_request_form_github_site_write.png" style="width: 100%;" />
+</a>
+<p>And if you click <code class="docutils literal notranslate"><span class="pre">Preview</span></code>, it should look like this:</p>
+<a class="reference internal image-reference" href="../_images/pull_request_form_github_site_preview.png"><img alt="Pull request form (preview)" src="../_images/pull_request_form_github_site_preview.png" style="width: 100%;" />
+</a>
+<p>Click <code class="docutils literal notranslate"><span class="pre">Create</span> <span class="pre">pull</span> <span class="pre">request</span></code> to submit your changes and get them reviewed.</p>
+</section>
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="release.html">Release Policy</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contributing</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="checklist.html">Contribution Checklist</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, Acoular Development Team.
+      Last updated on Jan 31, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    </div>
+  </body>
+</html>

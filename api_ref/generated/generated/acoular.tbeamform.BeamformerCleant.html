@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>BeamformerCleant &#8212; Acoular 25.01 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=8ae8cc2e"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="BeamformerCleantTraj" href="acoular.tbeamform.BeamformerCleantTraj.html" />
+    <link rel="prev" title="BeamformerTimeSqTraj" href="acoular.tbeamform.BeamformerTimeSqTraj.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.01 documentation</span></a></h1>
+        <h2 class="heading"><span>BeamformerCleant</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tbeamform.BeamformerTimeSqTraj.html">BeamformerTimeSqTraj</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tbeamform.html">tbeamform</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tbeamform.BeamformerCleantTraj.html">BeamformerCleantTraj</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="beamformercleant">
+<h1>BeamformerCleant<a class="headerlink" href="#beamformercleant" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.tbeamform.BeamformerCleant">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.tbeamform.</span></span><span class="sig-name descname"><span class="pre">BeamformerCleant</span></span><a class="headerlink" href="#acoular.tbeamform.BeamformerCleant" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.tbeamform.BeamformerTime.html#acoular.tbeamform.BeamformerTime" title="acoular.tbeamform.BeamformerTime"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerTime</span></code></a></p>
+<p>CLEANT deconvolution method.</p>
+<p>An implementation of the CLEAN method in time domain. This class can only
+be used for static sources. See <span id="id1">[<a class="reference internal" href="../../../literature/index.html#id12" title="R. Cousson, Q. Leclère, M.-A. Pallas, and M. Berengier. A time domain clean approach for the identification of acoustic moving sources. Journal of Sound and Vibration, 443:47-62, 2019. doi:10.1016/j.jsv.2018.11.026.">18</a>]</span> for details.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tbeamform.BeamformerCleant.r_diag">
+<span class="sig-name descname"><span class="pre">r_diag</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum(False,</span> <span class="pre">desc='False,</span> <span class="pre">as</span> <span class="pre">we</span> <span class="pre">do</span> <span class="pre">not</span> <span class="pre">remove</span> <span class="pre">autopower</span> <span class="pre">in</span> <span class="pre">this</span> <span class="pre">beamformer')</span></em><a class="headerlink" href="#acoular.tbeamform.BeamformerCleant.r_diag" title="Link to this definition">¶</a></dt>
+<dd><p>Boolean flag, always False</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tbeamform.BeamformerCleant.damp">
+<span class="sig-name descname"><span class="pre">damp</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Range(0.01,</span> <span class="pre">1.0,</span> <span class="pre">0.6,</span> <span class="pre">desc='damping</span> <span class="pre">factor</span> <span class="pre">(loop</span> <span class="pre">gain)')</span></em><a class="headerlink" href="#acoular.tbeamform.BeamformerCleant.damp" title="Link to this definition">¶</a></dt>
+<dd><p>iteration damping factor also referred as loop gain in Cousson et al.
+defaults to 0.6</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tbeamform.BeamformerCleant.n_iter">
+<span class="sig-name descname"><span class="pre">n_iter</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Int(100,</span> <span class="pre">desc='maximum</span> <span class="pre">number</span> <span class="pre">of</span> <span class="pre">iterations')</span></em><a class="headerlink" href="#acoular.tbeamform.BeamformerCleant.n_iter" title="Link to this definition">¶</a></dt>
+<dd><p>max number of iterations</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.tbeamform.BeamformerCleant.result">
+<span class="sig-name descname"><span class="pre">result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2048</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.tbeamform.BeamformerCleant.result" title="Link to this definition">¶</a></dt>
+<dd><p>Python generator that yields the deconvolved time-domain beamformer output.</p>
+<p>The output starts for signals that were emitted from the <a class="reference internal" href="acoular.grids.Grid.html#acoular.grids.Grid" title="acoular.grids.Grid"><code class="xref py py-class docutils literal notranslate"><span class="pre">Grid</span></code></a> at
+<cite>t=0</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>num</strong><span class="classifier">int</span></dt><dd><p>This parameter defines the size of the blocks to be yielded
+(i.e. the number of samples per block). Defaults to 2048.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>numpy.ndarray</dt><dd><dl class="simple">
+<dt>Samples in blocks of shape (num, <a class="reference internal" href="acoular.tbeamform.BeamformerTime.html#acoular.tbeamform.BeamformerTime.num_channels" title="acoular.tbeamform.BeamformerTime.num_channels"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_channels</span></code></a>).</dt><dd><p><a class="reference internal" href="acoular.tbeamform.BeamformerTime.html#acoular.tbeamform.BeamformerTime.num_channels" title="acoular.tbeamform.BeamformerTime.num_channels"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_channels</span></code></a> is usually very                 large (number of grid points).
+The last block returned by the generator may be shorter than num.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tbeamform.BeamformerTimeSqTraj.html">BeamformerTimeSqTraj</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tbeamform.html">tbeamform</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tbeamform.BeamformerCleantTraj.html">BeamformerCleantTraj</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, Acoular Development Team.
+      Last updated on Jan 31, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    </div>
+  </body>
+</html>
