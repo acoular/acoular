@@ -6,18 +6,11 @@
 .. autosummary::
     :toctree: generated/
 
-    aiaa
     helpers
     metrics
     utils
 """
 
-from .aiaa import (
-    CsmAIAABenchmark,
-    MicAIAABenchmark,
-    TimeSamplesAIAABenchmark,
-    TriggerAIAABenchmark,
-)
 from .helpers import (
     bardata,
     barspectrum,
@@ -25,4 +18,4 @@ from .helpers import (
     return_result,
 )
 from .metrics import MetricEvaluator
-from .utils import SamplesBuffer
+from .utils import find_basename, get_file_basename

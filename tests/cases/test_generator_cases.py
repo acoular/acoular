@@ -202,10 +202,10 @@ class Generators:
         return ac.WriteWAV(source=time_data_source, file=tmp_path / 'test.wav')
 
     def case_TimeSamplesAIAABenchmark(self, aiaa_bechmark_time_data_file):
-        return ac.tools.TimeSamplesAIAABenchmark(file=aiaa_bechmark_time_data_file)
+        return ac.aiaa.TimeSamplesAIAABenchmark(file=aiaa_bechmark_time_data_file)
 
     def case_TriggerAIAABenchmark(self, aiaa_bechmark_trigger_file):
-        return ac.tools.TriggerAIAABenchmark(file=aiaa_bechmark_trigger_file)
+        return ac.aiaa.TriggerAIAABenchmark(file=aiaa_bechmark_trigger_file)
 
     @parametrize('domain', ['time', 'frequency'])
     def case_Calib(self, time_data_source, domain):

@@ -1,8 +1,8 @@
 # ------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
-"""Classes for importing AIAA Array Benchmarks
-from . import aiaa
+"""Classes for importing AIAA Array Benchmarks.
+
 These classes allow importing data from HDF5 files following the specifications of
 the AIAA microphone array methods benchmarking effort:
 https://www-docs.b-tu.de/fg-akustik/public/veroeffentlichungen/ArrayMethodsFileFormatsR2P4Release.pdf .
@@ -26,7 +26,6 @@ Examples
 """  # noqa: W505
 
 import contextlib
-from os import path
 
 from numpy import array
 from traits.api import (
@@ -44,6 +43,7 @@ from acoular.internal import digest
 from acoular.microphones import MicGeom
 from acoular.sources import TimeSamples
 from acoular.spectra import PowerSpectraImport
+from acoular.tools.utils import get_file_basename
 
 
 class TimeSamplesAIAABenchmark(TimeSamples):
@@ -112,7 +112,7 @@ class CsmAIAABenchmark(PowerSpectraImport):
 
     @cached_property
     def _get_basename(self):
-        return path.splitext(path.basename(self.file))[0]
+        return get_file_basename(self.file)
 
     @on_trait_change('basename')
     def load_data(self):

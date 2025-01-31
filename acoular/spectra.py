@@ -8,7 +8,6 @@
 
     BaseSpectra
     PowerSpectra
-    synthetic
     PowerSpectraImport
 """
 
@@ -26,7 +25,6 @@ from numpy import (
     hamming,
     hanning,
     imag,
-    isscalar,
     linalg,
     ndarray,
     newaxis,
@@ -35,7 +33,6 @@ from numpy import (
     searchsorted,
     sum,  # noqa A004
     zeros,
-    zeros_like,
 )
 from scipy import fft
 from traits.api import (
@@ -62,6 +59,7 @@ from .fastFuncs import calcCSM
 from .h5cache import H5cache
 from .h5files import H5CacheFileBase
 from .internal import digest
+from .tools.utils import find_basename
 
 
 @deprecated_alias({'numchannels': 'num_channels'}, read_only=True)
@@ -308,9 +306,7 @@ class PowerSpectra(BaseSpectra):
 
     @cached_property
     def _get_basename(self):
-        if 'basename' in self.source.all_trait_names():
-            return self.source.basename
-        return self.source.__class__.__name__ + self.source.digest
+        return find_basename(self.source, alternative_basename=self.source.__class__.__name__ + self.source.digest)
 
     def calc_csm(self):
         """Csm calculation."""
@@ -461,101 +457,6 @@ class PowerSpectra(BaseSpectra):
         if f1 == f2:
             return self.eva[f1]
         return sum(self.eva[f1:f2], 0)
-
-
-def synthetic(data, freqs, f, num=3):
-    """Returns synthesized frequency band values of spectral data.
-
-    If used with :meth:`Beamformer.result()<acoular.fbeamform.BeamformerBase.result>`
-    and only one frequency band, the output is identical to the result of the intrinsic
-    :meth:`Beamformer.synthetic<acoular.fbeamform.BeamformerBase.synthetic>` method.
-    It can, however, also be used with the
-    :meth:`Beamformer.integrate<acoular.fbeamform.BeamformerBase.integrate>`
-    output and more frequency bands.
-
-    Parameters
-    ----------
-    data : array of floats
-        The spectral data (squared sound pressures in Pa^2) in an array with one value
-        per frequency line.
-        The number of entries must be identical to the number of
-        grid points.
-    freqs : array of floats
-        The frequencies that correspond to the input *data* (as yielded by
-        the :meth:`PowerSpectra.fftfreq<acoular.spectra.PowerSpectra.fftfreq>`
-        method).
-    f : float or list of floats
-        Band center frequency/frequencies for which to return the results.
-    num : integer
-        Controls the width of the frequency bands considered; defaults to
-        3 (third-octave band).
-
-        ===  =====================
-        num  frequency band width
-        ===  =====================
-        0    single frequency line
-        1    octave band
-        3    third-octave band
-        n    1/n-octave band
-        ===  =====================
-
-    Returns
-    -------
-    array of floats
-        Synthesized frequency band values of the beamforming result at
-        each grid point (the sum of all values that are contained in the band).
-        Note that the frequency resolution and therefore the bandwidth
-        represented by a single frequency line depends on
-        the :attr:`sampling frequency<acoular.base.SamplesGenerator.sample_freq>`
-        and used :attr:`FFT block size<acoular.spectra.PowerSpectra.block_size>`.
-
-    """
-    if isscalar(f):
-        f = (f,)
-    if num == 0:
-        # single frequency lines
-        res = []
-        for i in f:
-            ind = searchsorted(freqs, i)
-            if ind >= len(freqs):
-                warn(
-                    f'Queried frequency ({i:g} Hz) not in resolved frequency range. Returning zeros.',
-                    Warning,
-                    stacklevel=2,
-                )
-                h = zeros_like(data[0])
-            else:
-                if freqs[ind] != i:
-                    warn(
-                        f'Queried frequency ({i:g} Hz) not in set of '
-                        'discrete FFT sample frequencies. '
-                        f'Using frequency {freqs[ind]:g} Hz instead.',
-                        Warning,
-                        stacklevel=2,
-                    )
-                h = data[ind]
-            res += [h]
-    else:
-        # fractional octave bands
-        res = []
-        for i in f:
-            f1 = i * 2.0 ** (-0.5 / num)
-            f2 = i * 2.0 ** (+0.5 / num)
-            ind1 = searchsorted(freqs, f1)
-            ind2 = searchsorted(freqs, f2)
-            if ind1 == ind2:
-                warn(
-                    f'Queried frequency band ({f1:g} to {f2:g} Hz) does not '
-                    'include any discrete FFT sample frequencies. '
-                    'Returning zeros.',
-                    Warning,
-                    stacklevel=2,
-                )
-                h = zeros_like(data[0])
-            else:
-                h = sum(data[ind1:ind2], 0)
-            res += [h]
-    return array(res)
 
 
 class PowerSpectraImport(PowerSpectra):
