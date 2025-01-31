@@ -6,7 +6,7 @@ Depending on your operating system and python distribution, there are different 
 Requirements
 ------------
 
-Acoular runs under 64bit Windows, Linux and MacOS, and needs Python 3.10, 3.11 or 3.12
+Acoular runs under 64bit Windows, Linux and MacOS, and needs Python 3.10, 3.11, 3.12 or 3.13
 
 Upon installation using options 1 or 2 below, all necessary dependencies will also be installed.
 
