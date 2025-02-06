@@ -42,7 +42,7 @@ class MicGeom(HasStrictTraits):
 
     Notes
     -----
-    - The microphone geometry as in :attr:`total_pos` is automatically changed if the :attr:`file`
+    - The microphone geometry as in :attr:`pos_total` is automatically changed if the :attr:`file`
       attribute is updated.
     - Small numerical values in the computed :attr:`center` are set to zero for numerical stability.
 
