@@ -3,6 +3,8 @@ What's new
 
 Upcoming Release
 ------------------------
+        * adds new docstrings to trajectory.py
+        * adds new docstrings to microphones.py
 
 
 25.01
@@ -31,7 +33,6 @@ Upcoming Release
         * adds guide on how to submit a pull request
         * adds `intersphinx` extension to cross-link documentation from other projects
         * updates examples to use a right hand co-ordinate system
-        * adds new docstrings to trajectory.py
 
     **Tests**
         * tests now consequently use `pytest` framework instead of `unittest`
