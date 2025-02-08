@@ -32,6 +32,7 @@ Upcoming Release
         * adds `intersphinx` extension to cross-link documentation from other projects
         * updates examples to use a right hand co-ordinate system
         * adds new docstrings to trajectory.py
+        * adds new docstrings to grids.py
 
     **Tests**
         * tests now consequently use `pytest` framework instead of `unittest`

@@ -3,6 +3,8 @@
 # ------------------------------------------------------------------------------
 # %%
 """
+.. _sphx_glr_auto_examples_wind_tunnel_examples_example_sectors_and_integration.py:
+
 Sector Integration Example
 ==========================
 
