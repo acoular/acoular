@@ -63,6 +63,7 @@ from .tools.utils import find_basename
 
 
 @deprecated_alias({'numchannels': 'num_channels'}, read_only=True)
+@deprecated_alias({'time_data': 'source'}, read_only=False)
 class BaseSpectra(ABCHasStrictTraits):
     #: Data source; :class:`~acoular.sources.SamplesGenerator` or derived object.
     source = Instance(SamplesGenerator)
