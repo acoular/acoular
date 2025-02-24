@@ -1,8 +1,6 @@
-{% set version = os.popen("hatch version").read().strip() %}
-
 package:
   name: acoular
-  version: {{ version }}
+  version: "{{ os.popen('hatch version').read().strip() }}"
 
 source:
   path: ..
