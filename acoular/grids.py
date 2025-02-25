@@ -207,9 +207,9 @@ class Polygon:
         :class:`float` or array_like
             The distance from the point to the nearest point on the polygon. The values returned
             have the following meanings:
-                - ``mindst < 0``: Point is outside the polygon.
-                - ``mindst = 0``: Point is on an edge of the polygon.
-                - ``mindst > 0``: Point is inside the polygon.
+            - ``mindst < 0``: Point is outside the polygon.
+            - ``mindst = 0``: Point is on an edge of the polygon.
+            - ``mindst > 0``: Point is inside the polygon.
 
         Notes
         -----
