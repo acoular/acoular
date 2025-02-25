@@ -1,7 +1,8 @@
 # ------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
-"""Implements support for two- and threedimensional grids.
+"""
+Implement support for multidimensional grids and integration sectors.
 
 .. autosummary::
     :toctree: generated/
@@ -20,7 +21,8 @@
     PolySector
     ConvexSector
     MultiSector
-
+    Polygon
+    in_hull
 """
 
 # imports from other packages
@@ -81,12 +83,49 @@ from .internal import digest, ldigest
 
 
 def in_hull(p, hull, border=True, tol=0):
-    """Test if points in `p` are in `hull`
-    `p` should be a `NxK` coordinates of `N` points in `K` dimensions
-    `hull` is either a scipy.spatial.Delaunay object or the `MxK` array of the
-    coordinates of `M` points in `K`dimensions for which Delaunay triangulation
-    will be computed.
     """
+    Test if points in ``p`` are in ``hull``, in- or excluding the border.
+
+    Parameters
+    ----------
+    p : :class:`numpy.ndarray` of :class:`floats<float>`, shape `(N, K)`
+        Coordinates of `N` points in `K` dimensions.
+
+    hull : :class:`numpy.ndarray` of :class:`floats<float>`, shape `(M, K)`, or :class:`~scipy.spatial.Delaunay` object
+        Coordinates of `M` points in `K` dimensions for which Delaunay triangulation will be
+        computed.
+
+    border : bool, optional
+        Points in :attr:`p` on the border of :attr:`hull` will be kept in the return if `True`. If
+        `False`, only points inside :attr:`hull` will be kept. Default is `True`.
+
+    tol : :class:`float`, optional
+        Tolerance allowed in the :meth:`inside-triangle check<scipy.spatial.Delaunay.find_simplex>`.
+        Default is ``0``.
+
+    Returns
+    -------
+    :class:`numpy.ndarray` of :class:`bools<bool>`
+        An array of boolean values indicating which points in ``p`` are inside the hull, same
+        shape as ``p``. Each entry is ``True`` if the corresponding point is inside the hull (or
+        on the border, if ``border=True``), and ``False`` otherwise.
+
+    Notes
+    -----
+    This function uses Delaunay triangulation to determine if a point is inside the convex hull,
+    which is efficient and robust for arbitrary shapes in higher-dimensional spaces.
+
+    Examples
+    --------
+    >>> from acoular.grids import in_hull
+    >>> import numpy as np
+    >>> from scipy.spatial import Delaunay
+    >>> points = np.array([[0, 0], [1, 0], [0, 1], [1, 1]])
+    >>> hull = Delaunay(points)
+    >>> p = np.array([[0.5, 0.5], [2, 2]])
+    >>> in_hull(p, hull)
+    array([ True, False])
+    """  # noqa W505
     if not isinstance(hull, Delaunay):
         hull = Delaunay(hull)
 
@@ -96,25 +135,6 @@ def in_hull(p, hull, border=True, tol=0):
 
 
 def _det(xvert, yvert):
-    """Compute twice the area of the triangle defined by points with using
-    determinant formula.
-
-    Input parameters:
-
-    xvert -- A vector of nodal x-coords (array-like).
-    yvert -- A vector of nodal y-coords (array-like).
-
-    Output parameters:
-    Twice the area of the triangle defined by the points.
-
-    Notes
-    -----
-    _det is positive if points define polygon in anticlockwise order.
-    _det is negative if points define polygon in clockwise order.
-    _det is zero if at least two of the points are concident or if
-        all points are collinear.
-
-    """
     xvert = asarray(xvert, dtype=float)
     yvert = asarray(yvert, dtype=float)
     x_prev = concatenate(([xvert[-1]], xvert[:-1]))
@@ -123,10 +143,30 @@ def _det(xvert, yvert):
 
 
 class Polygon:
-    """Polygon object.
-    Input parameters:
-    x -- A sequence of nodal x-coords.
-    y -- A sequence of nodal y-coords.
+    """
+    Create an object representing a general polygon in a 2D plane.
+
+    This class allows defining a polygon by specifying the coordinates of its vertices and provides
+    methods for checking whether a set of points lies inside the polygon, or if a point is closer to
+    a side or vertex of the polygon.
+
+    Parameters
+    ----------
+    x : array_like
+        Array of x-coordinates of the vertices that define the polygon. These coordinates should
+        form a closed shape (i.e., the last point should be the same as the first point).
+
+    y : array_like
+        Array of y-coordinates of the vertices that define the polygon. These coordinates should
+        correspond to the x-coordinates, forming a closed shape.
+
+    Attributes
+    ----------
+    x : :class:`numpy.ndarray`
+        Array of x-coordinates of the polygon vertices.
+
+    y : :class:`numpy.ndarray`
+        Array of y-coordinates of the polygon vertices.
     """
 
     def __init__(self, x, y):
@@ -147,29 +187,34 @@ class Polygon:
             self.y = self.y[::-1]
 
     def is_inside(self, xpoint, ypoint, smalld=1e-12):
-        """Check if point is inside a general polygon.
+        """
+        Check if a point or set of points are inside the polygon.
 
-        Input parameters:
-        xpoint -- The x-coord of the point to be tested.
-        ypoint -- The y-coords of the point to be tested.
-        smalld -- A small float number.
+        Parameters
+        ----------
+        xpoint : :class:`float` or array_like
+            Array of x-coordinates of the points to be tested.
 
-        xpoint and ypoint could be scalars or array-like sequences.
+        ypoint : :class:`float` or array_like
+            Array of y-coordinates of the points to be tested.
 
-        Output parameters:
+        smalld : :class:`float`, optional
+            Tolerance used for floating point comparisons when checking if a point is exactly on a
+            polygon's edge. The default value is ``1e-12``.
 
-        mindst -- The distance from the point to the nearest point of the
-                  polygon.
-                  If mindst < 0 then point is outside the polygon.
-                  If mindst = 0 then point in on a side of the polygon.
-                  If mindst > 0 then point is inside the polygon.
+        Returns
+        -------
+        :class:`float` or array_like
+            The distance from the point to the nearest point on the polygon. The values returned
+            have the following meanings:
+            - ``mindst < 0``: Point is outside the polygon.
+            - ``mindst = 0``: Point is on an edge of the polygon.
+            - ``mindst > 0``: Point is inside the polygon.
 
         Notes
         -----
-        An improved version of the algorithm of Nordbeck and Rydstedt.
-        REF: SLOAN, S.W. (1985): A point-in-polygon program. Adv. Eng.
-             Software, Vol 7, No. 1, pp 45-47.
-
+        The method uses an improved algorithm based on Nordbeck and Rydstedt for determining
+        whether a point is inside a polygon :cite:`SLOAN198545`.
         """
         xpoint = asarray(xpoint, dtype=float)
         ypoint = asarray(ypoint, dtype=float)
@@ -258,67 +303,71 @@ class Polygon:
 
 @deprecated_alias({'gpos': 'pos'})
 class Grid(ABCHasStrictTraits):
-    """Virtual base class for grid geometries.
+    """
+    Abstract base class for grid geometries.
 
-    Defines the common interface for all grid classes and
-    provides facilities to query grid properties and related data. This class
-    may be used as a base for specialized grid implementations. It should not
-    be used directly as it contains no real functionality.
+    This class defines a common interface for all grid geometries and provides tools to query grid
+    properties and related data. It is intended to serve as a base class for specialized grid
+    implementations and should not be instantiated directly as it lacks concrete functionality.
     """
 
-    #: Overall number of grid points. Readonly; is set automatically when
-    #: other grid defining properties are set
+    #: The total number of grid points. This property is automatically calculated based on other
+    #: defining attributes of the grid. (read-only)
     size = Property(desc='overall number of grid points')
 
-    #: Shape of grid. Readonly, gives the shape as tuple, useful for cartesian
-    #: grids
+    #: The shape of the grid, represented as a tuple. Primarily useful for Cartesian grids.
+    #: (read-only)
     shape = Property(desc='grid shape as tuple')
 
-    #: Grid positions as (3, :attr:`size`) array of floats, without invalid
-    #: microphones; readonly.
+    #: The grid positions represented as a (3, :attr:`size`) array of :class:`floats<float>`.
+    #: (read-only)
     pos = Property(desc='x, y, z positions of grid points')
 
-    # internal identifier
+    #: A unique identifier for the grid, based on its properties. (read-only)
     digest = Property
 
     @abstractmethod
     def _get_digest(self):
-        """Returns the digest of the grid object."""
+        """Generate a unique digest for the grid."""
 
-    # 'digest' is a placeholder for other properties in derived classes,
-    # necessary to trigger the depends on mechanism
+    # 'digest' is a placeholder for other properties in derived classes, necessary to trigger the
+    # depends on mechanism
     @property_depends_on(['digest'])
     @abstractmethod
     def _get_size(self):
-        """Returns the number of grid points."""
+        """Return the number of grid points."""
 
     # 'digest' is a placeholder for other properties in derived classes
     @property_depends_on(['digest'])
     @abstractmethod
     def _get_shape(self):
-        """Returns the shape of the grid as a Tuple."""
+        """Return the shape of the grid as a Tuple."""
 
     @property_depends_on(['digest'])
     @abstractmethod
     def _get_pos(self):
-        """Returns the grid positions as (3, size) array of floats."""
+        """Return the grid positions as array of floats, shape (3, :attr:`size`)."""
 
     def subdomain(self, sector):
-        """Queries the indices for a subdomain in the grid.
+        """
+        Return the indices for a subdomain in the grid.
 
-        Allows arbitrary subdomains of type :class:`Sector`
+        Allows arbitrary subdomains of type :class:`Sector`.
 
         Parameters
         ----------
-        sector : :class:`Sector`
+        sector : :class:`Sector` object
             Sector describing the subdomain.
 
         Returns
         -------
-        2-tuple of arrays of integers or of numpy slice objects
-            The indices that can be used to mask/select the grid subdomain from
-            an array with the same shape as the grid.
+        :class:`tuple`
+            A 2-tuple of arrays of integers or :obj:`numpy.s_` objects that can be used to mask or
+            select the specified subdomain from a grid-shaped array.
 
+        Notes
+        -----
+        The :func:`numpy.where` method is used to determine the the indices.
         """
         xpos = self.pos
         # construct grid-shaped array with "True" entries where sector is
@@ -329,38 +378,38 @@ class Grid(ABCHasStrictTraits):
 
 @deprecated_alias({'gpos': 'pos'}, read_only=True)
 class RectGrid(Grid):
-    """Provides a cartesian 2D grid for the beamforming results.
+    """
+    Provides a 2D Cartesian grid for beamforming results.
 
-    The grid has square or nearly square cells and is on a plane perpendicular
-    to the z-axis. It is defined by lower and upper x- and  y-limits and the
-    z co-ordinate.
+    This grid is composed of square or nearly square cells and lies on a plane perpendicular
+    to the z-axis. It is defined by the lower and upper x- and y-limits and a constant z-coordinate.
     """
 
-    #: The lower x-limit that defines the grid, defaults to -1.
+    #: The lower x-limit that defines the grid. Default is ``-1``.
     x_min = Float(-1.0, desc='minimum  x-value')
 
-    #: The upper x-limit that defines the grid, defaults to 1.
+    #: The upper x-limit that defines the grid. Default is ``1``.
     x_max = Float(1.0, desc='maximum  x-value')
 
-    #: The lower y-limit that defines the grid, defaults to -1.
+    #: The lower y-limit that defines the grid. Default is ``-1``.
     y_min = Float(-1.0, desc='minimum  y-value')
 
-    #: The upper y-limit that defines the grid, defaults to 1.
+    #: The upper y-limit that defines the grid. Default is ``1``.
     y_max = Float(1.0, desc='maximum  y-value')
 
-    #: The z co-ordinate that defines the grid, defaults to 1.
+    #: The constant z-coordinate of the grid plane. Default is ``1.0``.
     z = Float(1.0, desc='position on z-axis')
 
-    #: The cell side length for the grid, defaults to 0.1.
+    #: The side length of each cell. Default is ``0.1``.
     increment = Float(0.1, desc='step size')
 
-    #: Number of grid points along x-axis, readonly.
+    #: Number of grid points along x-axis. (read-only)
     nxsteps = Property(desc='number of grid points along x-axis')
 
-    #: Number of grid points along y-axis, readonly.
+    #: Number of grid points along y-axis. (read-only)
     nysteps = Property(desc='number of grid points along y-axis')
 
-    # internal identifier
+    #: A unique identifier for the grid, based on its properties. (read-only)
     digest = Property(
         depends_on=['x_min', 'x_max', 'y_min', 'y_max', 'z', 'increment'],
     )
@@ -393,14 +442,6 @@ class RectGrid(Grid):
 
     @property_depends_on(['x_min', 'x_max', 'y_min', 'y_max', 'increment'])
     def _get_pos(self):
-        """Calculates grid co-ordinates.
-
-        Returns
-        -------
-        array of floats of shape (3, :attr:`~Grid.size`)
-            The grid point x, y, z-coordinates in one array.
-
-        """
         bpos = mgrid[
             self.x_min : self.x_max : self.nxsteps * 1j,
             self.y_min : self.y_max : self.nysteps * 1j,
@@ -410,22 +451,25 @@ class RectGrid(Grid):
         return bpos
 
     def index(self, x, y):
-        """Queries the indices for a grid point near a certain co-ordinate.
-
-        This can be used to query results or co-ordinates at/near a certain
-        co-ordinate.
+        """
+        Find the indices of a grid point near a given coordinate.
 
         Parameters
         ----------
-        x, y : float
-            The co-ordinates for which the indices are queried.
+        x : :class:`float`
+            The x coordinate of interest.
+        y : :class:`float`
+            The y coordinate of interest.
 
         Returns
         -------
-        2-tuple of integers
-            The indices that give the grid point nearest to the given x, y
-            co-ordinates from an array with the same shape as the grid.
+        :class:`tuple` of :class:`ints<int>`
+            Indices corresponding to the nearest grid point.
 
+        Raises
+        ------
+        ValueError
+            If the coordinates are outside the grid boundaries.
         """
         if x < self.x_min or x > self.x_max:
             msg = 'x-value out of range'
@@ -438,28 +482,24 @@ class RectGrid(Grid):
         return xi, yi
 
     def indices(self, *r):
-        """Queries the indices for a subdomain in the grid.
+        """
+        Find the indices of a subdomain in the grid.
 
-        Allows either rectangular, circular or polygonial subdomains.
-        This can be used to mask or to query results from a certain
-        sector or subdomain.
+        Supports rectangular, circular, and polygonal subdomains.
 
         Parameters
         ----------
-        x1, y1, x2, y2, ... : float
-            If three parameters are given, then a circular sector is assumed
-            that is given by its center (x1, y1) and the radius x2.
-            If four parameters are given, then a rectangular sector is
-            assumed that is given by two corners (x1, y1) and (x2, y2).
-            If more parameters are given, the subdomain is assumed to have
-            polygonial shape with corners at (x_n, y_n).
+        r : :class:`tuple` of :class:`floats<float>`
+            Defines the subdomain shape and dimensions:
+                - If 3 values are provided: center ``(x1, y1)`` and radius ``r2`` define a circle.
+                - If 4 values are provided: corners ``(x1, y1)`` and ``(x2, y2)`` define a
+                  rectangle.
+                - If more than 4 values are provided: vertices ``(xn, yn)`` define a polygon.
 
         Returns
         -------
-        2-tuple of arrays of integers or of numpy slice objects
-            The indices that can be used to mask/select the grid subdomain from
-            an array with the same shape as the grid.
-
+        :class:`tuple`
+            A 2-tuple of indices or slices corresponding to the subdomain.
         """
         if len(r) == 3:  # only 3 values given -> use x,y,radius method
             xpos = self.pos
@@ -500,46 +540,62 @@ class RectGrid(Grid):
         # return arange(self.size)[inds]
 
     def extend(self):
-        """The extension of the grid in pylab.imshow compatible form.
+        """
+        Return the grid's extension in :obj:`matplotlib.pyplot.imshow` compatible form.
 
         Returns
         -------
-        4-tuple of floats
-            The extent of the grid as a tuple of x_min, x_max, y_min, y_max)
+        :class:`tuple` of :class:`floats<float>`
+            (:attr:`x_min`, :attr:`x_max`, :attr:`y_min`, :attr:`y_max`) representing the grid's
+            extent.
 
+        Notes
+        -----
+        - ``pylab.imhow`` is the same as :obj:`matplotlib.pyplot.imshow`. It's only using a
+          different namespace.
+        - The return of the method is ment for the ``extent`` parameter of
+          :obj:`matplotlib.pyplot.imshow`.
+
+        Examples
+        --------
+        >>> from acoular import RectGrid
+        >>> grid = RectGrid()
+        >>> grid.y_min = -5
+        >>> grid.y_max = 5
+        >>> grid.extend()
+        (-1.0, 1.0, -5.0, 5.0)
         """
         return (self.x_min, self.x_max, self.y_min, self.y_max)
 
 
 class RectGrid3D(RectGrid):
-    """Provides a cartesian 3D grid for the beamforming results.
+    """
+    Provide a cartesian 3D grid for the beamforming results.
 
-    The grid has cubic or nearly cubic cells. It is defined by lower and upper
-    x-, y- and  z-limits.
+    The grid has cubic or nearly cubic cells. It is defined by lower and upper x-, y- and  z-limits.
     """
 
-    #: The lower z-limit that defines the grid, defaults to -1.
+    #: The lower z-limit that defines the grid. Default is ``-1``.
     z_min = Float(-1.0, desc='minimum  z-value')
 
-    #: The upper z-limit that defines the grid, defaults to 1.
+    #: The upper z-limit that defines the grid. Default is ``1``.
     z_max = Float(1.0, desc='maximum  z-value')
 
-    #: Number of grid points along x-axis, readonly.
+    #: Number of grid points along x-axis. (read-only)
     nxsteps = Property(desc='number of grid points along x-axis')
 
-    #: Number of grid points along y-axis, readonly.
+    #: Number of grid points along y-axis. (read-only)
     nysteps = Property(desc='number of grid points along y-axis')
 
-    #: Number of grid points along x-axis, readonly.
-    nzsteps = Property(desc='number of grid points along x-axis')
+    #: Number of grid points along z-axis. (read-only)
+    nzsteps = Property(desc='number of grid points along z-axis')
 
     # Private trait for increment handling
     _increment = Union(Float(), CArray(shape=(3,), dtype=float), default_value=0.1, desc='step size')
 
-    #: The cell side length for the grid. This can either be a scalar (same
-    #: increments in all 3 dimensions) or a (3,) array of floats with
-    #: respective increments in x,y, and z-direction (in m).
-    #: Defaults to 0.1.
+    #: The cell side length for the grid. This can either be a scalar (same increments in all 3
+    #: dimensions) or a (3,) array of :class:`tuple` of :class:`floats<float>` with respective
+    #: increments in x-, y-, and z-direction. Default is ``0.1``.
     increment = Property(desc='step size')
 
     def _get_increment(self):
@@ -556,7 +612,7 @@ class RectGrid3D(RectGrid):
         else:
             raise (TraitError(args=self, name='increment', info='Float or CArray(3,)', value=increment))
 
-    # internal identifier
+    #: A unique identifier for the grid, based on its properties. (read-only)
     digest = Property(
         depends_on=['x_min', 'x_max', 'y_min', 'y_max', 'z_min', 'z_max', '_increment'],
     )
@@ -592,14 +648,6 @@ class RectGrid3D(RectGrid):
 
     @property_depends_on('digest')
     def _get_pos(self):
-        """Calculates grid co-ordinates.
-
-        Returns
-        -------
-        array of floats of shape (3, :attr:`~Grid.size`)
-            The grid point x, y, z-coordinates in one array.
-
-        """
         bpos = mgrid[
             self.x_min : self.x_max : self.nxsteps * 1j,
             self.y_min : self.y_max : self.nysteps * 1j,
@@ -613,22 +661,39 @@ class RectGrid3D(RectGrid):
         return digest(self)
 
     def index(self, x, y, z):
-        """Queries the indices for a grid point near a certain co-ordinate.
+        """
+        Return the indices for a grid point near a certain coordinate.
 
-        This can be used to query results or co-ordinates at/near a certain
-        co-ordinate.
+        This can be used to query results or coordinates at or near a certain coordinate. Raises an
+        exception if the given coordinate is outside the grid.
 
         Parameters
         ----------
-        x, y, z : float
-            The co-ordinates for which the indices is queried.
+        x, y, z : :class:`float`
+            The coordinates for which the indices is queried.
 
         Returns
         -------
-        3-tuple of integers
-            The indices that give the grid point nearest to the given x, y, z
-            co-ordinates from an array with the same shape as the grid.
+        3-:class:`tuple` of :class:`ints<int>`
+            The indices that give the grid point nearest to the given x, y, z coordinates from an
+            array with the same shape as the grid.
 
+        Examples
+        --------
+        Check which of the points in a simple 8-point rectangular grid is closest to the point
+        ``(0.5, 0.5, 1.0)``.
+
+        >>> import acoular as ac
+        >>>
+        >>> grid = ac.RectGrid3D()
+        >>> grid.increment = 2
+        >>> grid.pos
+        array([[-1., -1., -1., -1.,  1.,  1.,  1.,  1.],
+               [-1., -1.,  1.,  1., -1., -1.,  1.,  1.],
+               [-1.,  1., -1.,  1., -1.,  1., -1.,  1.]])
+        >>>
+        >>> grid.index(0.5, 0.5, 1.0)
+        (1, 1, 1)
         """
         if x < self.x_min or x > self.x_max:
             msg = f'x-value out of range {x:f} ({self.x_min:f}, {self.x_max:f})'
@@ -649,23 +714,46 @@ class RectGrid3D(RectGrid):
         return xi, yi, zi
 
     def indices(self, x1, y1, z1, x2, y2, z2):
-        """Queries the indices for a subdomain in the grid.
+        """
+        Return the indices for a subdomain in the grid.
 
-        Allows box-shaped subdomains. This can be used to
-        mask or to query results from a certain sector or subdomain.
+        Allows box-shaped subdomains. This can be used to mask or to query results from a certain
+        sector or subdomain.
 
         Parameters
         ----------
-        x1, y1, z1, x2, y2, z2 : float
-            A box-shaped sector is assumed that is given by two corners
-            (x1,y1,z1) and (x2,y2,z2).
+        x1, y1, z1, x2, y2, z2 : :class:`float`
+            A box-shaped sector is assumed that is given by two corners ``(x1,y1,z1)`` and
+            ``(x2,y2,z2)``.
 
         Returns
         -------
-        3-tuple of numpy slice objects
-            The indices that can be used to mask/select the grid subdomain from
-            an array with the same shape as the grid.
+        3-:class:`tuple` of :obj:`numpy.s_` objects
+            The indices that can be used to mask/select the grid subdomain from an array with the
+            same shape as the grid.
 
+        Examples
+        --------
+        Get the indices of the grid points of a simple 27-point rectangular grid which are located
+        inside the first octant.
+
+        >>> import acoular as ac
+        >>>
+        >>> grid = ac.RectGrid3D()
+        >>> grid.increment = 1
+        >>> grid.pos
+        array([[-1., -1., -1., -1., -1., -1., -1., -1., -1.,  0.,  0.,  0.,  0.,
+                 0.,  0.,  0.,  0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,
+                 1.],
+               [-1., -1., -1.,  0.,  0.,  0.,  1.,  1.,  1., -1., -1., -1.,  0.,
+                 0.,  0.,  1.,  1.,  1., -1., -1., -1.,  0.,  0.,  0.,  1.,  1.,
+                 1.],
+               [-1.,  0.,  1., -1.,  0.,  1., -1.,  0.,  1., -1.,  0.,  1., -1.,
+                 0.,  1., -1.,  0.,  1., -1.,  0.,  1., -1.,  0.,  1., -1.,  0.,
+                 1.]])
+        >>>
+        >>> grid.indices(0, 0, 0, 1, 1, 1)
+        (slice(1, 3, None), slice(1, 3, None), slice(1, 3, None))
         """
         xi1, yi1, zi1 = self.index(min(x1, x2), min(y1, y2), min(z1, z2))
         xi2, yi2, zi2 = self.index(max(x1, x2), max(y1, y2), max(z1, z2))
@@ -674,29 +762,33 @@ class RectGrid3D(RectGrid):
 
 @deprecated_alias({'from_file': 'file', 'gpos_file': 'pos'})
 class ImportGrid(Grid):
-    """Loads a 3D grid from xml file."""
+    """
+    Load a 3D grid from an XML file.
+
+    This class is used to import a 3D grid defined in an XML file. The grid's
+    positions and subgrid names are parsed and stored for further processing.
+    """
 
     #: Name of the .xml-file from which to read the data.
     file = File(filter=['*.xml'], exists=True, desc='name of the xml file to import')
 
     _gpos = CArray(dtype=float, desc='x, y, z position of all Grid Points')
 
+    #: Names of subgrids for each point.
+    #: This is an optional property, typically used when grids are divided into named subregions.
     subgrids = CArray(desc='names of subgrids for each point')
 
-    # internal identifier
+    #: A unique identifier for the grid, based on its properties. (read-only)
     digest = Property(depends_on=['_gpos'])
 
     @cached_property
     def _get_digest(self):
         return digest(self)
 
-    # 'digest' is a placeholder for other properties in derived classes,
-    # necessary to trigger the depends on mechanism
     @property_depends_on(['_gpos'])
     def _get_size(self):
         return self.pos.shape[-1]
 
-    # 'digest' is a placeholder for other properties in derived classes
     @property_depends_on(['_gpos'])
     def _get_shape(self):
         return (self.pos.shape[-1],)
@@ -710,7 +802,122 @@ class ImportGrid(Grid):
 
     @on_trait_change('file')
     def import_gpos(self):
-        """Import the the grid point locations from .xml file when :attr:`file` changes."""
+        """
+        Import the grid point locations and subgrid names from an XML file.
+
+        This method is automatically called whenever the :attr:`file` attribute changes.
+
+        Notes
+        -----
+        The XML file should have elements with tag ``<pos>``, where each ``<pos>`` element
+        contains attributes for ``x``, ``y``, ``z``, and optionally ``subgrid``.
+
+        Examples
+        --------
+        Generate the positional data of two microphone grids:
+
+        >>> import numpy as np
+        >>>
+        >>> # Grid 1: ten points aranged in a circle in the x-y plane at z=0
+        >>> args = 2 * np.pi * np.arange(10) / 10
+        >>> x1 = np.cos(args)
+        >>> y1 = np.sin(args)
+        >>> z1 = np.zeros_like(x1)
+        >>> grid1 = np.vstack([x1, y1, z1]).T
+        >>>
+        >>> # Grid 2: nine points aranged in a mesh grid the the x-y plane at z=1
+        >>> a = np.linspace(-1, 1, 3)
+        >>> x2, y2 = np.meshgrid(a, a)
+        >>> z2 = np.ones_like(x2)
+        >>> grid2 = np.vstack([x2, y2, z2])
+
+        Save the generated data in an XML file:
+
+        >>> import xml.etree.cElementTree as ET
+        >>>
+        >>> # Create the root element for the XML document
+        >>> root = ET.Element('root')
+        >>>
+        >>> # Loop over both grid 1 and grid 2, and create XML elements for each of their points
+        >>> for num, grid in enumerate([grid1, grid2]):  # doctest: +SKIP
+        ...     for x, y, z in grid:
+        ...         # For each point in the grid, create a 'pos' XML element
+        ...         ET.SubElement(root, 'pos', subgrid=str(num), x=str(x), y=str(y), z=str(z))
+        >>>
+        >>> # Create the final XML tree
+        >>> tree = ET.ElementTree(root)
+        >>>
+        >>> # Write the XML tree to a file named 'two_grids.xml'
+        >>> tree.write('two_grids.xml')  # doctest: +SKIP
+
+        The ``two_grids.xml`` file will look like this:
+
+        .. code-block:: xml
+
+            <root>
+                <pos subgrid="0" x="1.0" y="0.0" z="0.0" />
+                <pos subgrid="0" x="0.8090169943749475" y="0.5877852522924731" z="0.0" />
+                <pos subgrid="0" x="0.30901699437494745" y="0.9510565162951535" z="0.0" />
+                <pos subgrid="0" x="-0.30901699437494734" y="0.9510565162951536" z="0.0" />
+                <pos subgrid="0" x="-0.8090169943749473" y="0.5877852522924732" z="0.0" />
+                <pos subgrid="0" x="-1.0" y="1.2246467991473532e-16" z="0.0" />
+                <pos subgrid="0" x="-0.8090169943749475" y="-0.587785252292473" z="0.0" />
+                <pos subgrid="0" x="-0.30901699437494756" y="-0.9510565162951535" z="0.0" />
+                <pos subgrid="0" x="0.30901699437494723" y="-0.9510565162951536" z="0.0" />
+                <pos subgrid="0" x="0.8090169943749473" y="-0.5877852522924732" z="0.0" />
+                <pos subgrid="1" x="-1.0" y="0.0" z="1.0" />
+                <pos subgrid="1" x="-1.0" y="0.0" z="1.0" />
+                <pos subgrid="1" x="-1.0" y="0.0" z="1.0" />
+                <pos subgrid="1" x="-1.0" y="-1.0" z="-1.0" />
+                <pos subgrid="1" x="0.0" y="0.0" z="0.0" />
+                <pos subgrid="1" x="1.0" y="1.0" z="1.0" />
+                <pos subgrid="1" x="1.0" y="1.0" z="1.0" />
+                <pos subgrid="1" x="1.0" y="1.0" z="1.0" />
+                <pos subgrid="1" x="1.0" y="1.0" z="1.0" />
+            </root>
+
+        Importing the ``two_grids.xml`` file:
+
+        >>> import acoular as ac
+        >>>
+        >>> grids = ac.ImportGrid(file='two_grids.xml')  # doctest: +SKIP
+        >>> grids.size  # doctest: +SKIP
+        19
+        >>> grids.subgrids  # doctest: +SKIP
+        array(['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '1', '1',
+               '1', '1', '1', '1', '1', '1'], dtype='<U1')
+        >>> grids.gpos.T  # doctest: +SKIP
+        array([[ 1.00000000e+00,  0.00000000e+00,  0.00000000e+00],
+               [ 8.09016994e-01,  5.87785252e-01,  0.00000000e+00],
+               [ 3.09016994e-01,  9.51056516e-01,  0.00000000e+00],
+               [-3.09016994e-01,  9.51056516e-01,  0.00000000e+00],
+               [-8.09016994e-01,  5.87785252e-01,  0.00000000e+00],
+               [-1.00000000e+00,  1.22464680e-16,  0.00000000e+00],
+               [-8.09016994e-01, -5.87785252e-01,  0.00000000e+00],
+               [-3.09016994e-01, -9.51056516e-01,  0.00000000e+00],
+               [ 3.09016994e-01, -9.51056516e-01,  0.00000000e+00],
+               [ 8.09016994e-01, -5.87785252e-01,  0.00000000e+00],
+               [-1.00000000e+00,  0.00000000e+00,  1.00000000e+00],
+               [-1.00000000e+00,  0.00000000e+00,  1.00000000e+00],
+               [-1.00000000e+00,  0.00000000e+00,  1.00000000e+00],
+               [-1.00000000e+00, -1.00000000e+00, -1.00000000e+00],
+               [ 0.00000000e+00,  0.00000000e+00,  0.00000000e+00],
+               [ 1.00000000e+00,  1.00000000e+00,  1.00000000e+00],
+               [ 1.00000000e+00,  1.00000000e+00,  1.00000000e+00],
+               [ 1.00000000e+00,  1.00000000e+00,  1.00000000e+00],
+               [ 1.00000000e+00,  1.00000000e+00,  1.00000000e+00]])
+
+        Consider two XML files, ``grid1.xml`` and ``grid2.xml`` containing different grids.
+
+        >>> import acoular as ac
+        >>>
+        >>> grid = ac.ImportGrid(file='grid1.xml')  # doctest: +SKIP
+        >>> grid.size  # doctest: +SKIP
+        8
+        >>> grid.file = 'grid2.xml'  # doctest: +SKIP
+        >>> grid.size  # doctest: +SKIP
+        12
+        """
         doc = xml.dom.minidom.parse(self.file)
         names = []
         xyz = []
@@ -723,28 +930,57 @@ class ImportGrid(Grid):
 
 @deprecated_alias({'gpos': 'pos', 'numpoints': 'num_points'}, read_only=['gpos'])
 class LineGrid(Grid):
-    """Class for Line grid geometries."""
+    """
+    Define a 3D grid for a line geometry.
 
-    #: Staring point of the Grid
+    The :class:`LineGrid` class represents a grid where points are arranged linearly in 3D space.
+    The grid is defined by a starting location (:attr:`loc`), a direction vector
+    (:attr:`direction`), a total length (:attr:`length`), and the number of points
+    (:attr:`num_points`) along the line.
+
+    Notes
+    -----
+    - The distance between points is :attr:`length` ``/ (`` :attr:`num_points` ``- 1)``.
+    - The direction vector is normalized to ensure consistency.
+
+    Examples
+    --------
+    Create a line grid with 5 points along the x-axis, starting at (0, 0, 0), with a length of 4
+    meters:
+
+    >>> import acoular as ac
+    >>> grid = ac.LineGrid()
+    >>> grid.loc = (0.0, 0.0, 0.0)
+    >>> grid.direction = (1.0, 0.0, 0.0)
+    >>> grid.length = 4
+    >>> grid.num_points = 5
+    >>> grid.pos
+    array([[0., 1., 2., 3., 4.],
+           [0., 0., 0., 0., 0.],
+           [0., 0., 0., 0., 0.]])
+    """
+
+    #: Starting point of the grid in 3D space. Default is ``(0.0, 0.0, 0.0)``.
     loc = Tuple((0.0, 0.0, 0.0))
 
-    #: Vector to define the orientation of the line source
+    #: A vector defining the orientation of the line in 3D space. Default is ``(1.0, 0.0, 0.0)``.
     direction = Tuple((1.0, 0.0, 0.0), desc='Line orientation ')
 
-    #: Vector to define the length of the line source in meter
+    #: Total length of the line. Default is ``1.0``.
     length = Float(1, desc='length of the line source')
 
-    #:number of grid points.
+    #: Number of grid points along the line. Default is ``1``.
     num_points = Int(1, desc='length of the line source')
 
-    #: Overall number of grid points. Readonly; is set automatically when
-    #: other grid defining properties are set
+    #: The total number of grid points. Automatically updated when other grid-defining attributes
+    #: are set. (read-only)
     size = Property(desc='overall number of grid points')
 
-    #: Grid positions as (3, :attr:`size`) array of floats, without invalid
-    #: microphones; readonly.
+    #: A (3, :attr:`size`) array containing the x, y, and z positions
+    #: of the grid points. (read-only)
     pos = Property(desc='x, y, z positions of grid points')
 
+    #: A unique identifier for the grid, based on its properties. (read-only)
     digest = Property(
         depends_on=['loc', 'direction', 'length', 'num_points', 'size'],
     )
@@ -753,13 +989,10 @@ class LineGrid(Grid):
     def _get_digest(self):
         return digest(self)
 
-    # 'digest' is a placeholder for other properties in derived classes,
-    # necessary to trigger the depends on mechanism
     @property_depends_on(['num_points'])
     def _get_size(self):
         return self.pos.shape[-1]
 
-    # 'digest' is a placeholder for other properties in derived classes
     @property_depends_on(['num_points'])
     def _get_shape(self):
         return self.pos.shape[-1]
@@ -777,21 +1010,47 @@ class LineGrid(Grid):
 
 @deprecated_alias({'gpos': 'pos'}, read_only=True)
 class MergeGrid(Grid):
-    """Base class for merging different grid geometries."""
+    """
+    Base class for merging multiple grid geometries.
 
-    #: List of Grids to be merged
-    #: each grid gets a new subdomain in the new grid
-    #: other grid defining properties are set
+    The `MergeGrid` class allows the combination of multiple grid geometries into a single unified
+    grid. Each input grid is assigned a subdomain in the resulting grid, and all properties, such as
+    positions and identifiers, are appropriately merged.
+
+    Notes
+    -----
+    - The merged grid eliminates duplicate points based on their positions.
+    - Each subgrid retains its original grid properties, such as digest and size.
+
+    Examples
+    --------
+    Merging two simple grids:
+
+    >>> import acoular as ac
+    >>> grid1 = ac.LineGrid(loc=(0, 0, 0), direction=(1, 0, 0), length=1, num_points=3)
+    >>> grid2 = ac.LineGrid(loc=(0, 0, 0), direction=(0, 1, 0), length=1, num_points=3)
+    >>> merged_grid = ac.MergeGrid()
+    >>> merged_grid.grids = [grid1, grid2]
+    >>> merged_grid.size
+    5
+    >>> merged_grid.pos
+    array([[0. , 0. , 0. , 0.5, 1. ],
+           [0. , 0.5, 1. , 0. , 0. ],
+           [0. , 0. , 0. , 0. , 0. ]])
+    """
+
+    #: A list of :class:`Grid` objects to be merged. Each grid is treated as a subdomain in the
+    #: resulting merged grid.
     grids = List(desc='list of grids')
 
+    #: A list of unique digests for each grid being merged. (read-only)
     grid_digest = Str(desc='digest of the merged grids')
 
+    #: Names of subgrids corresponding to each point in the merged grid. (read-only)
     subgrids = Property(desc='names of subgrids for each point')
 
-    # internal identifier
-    digest = Property(
-        depends_on=['grids', 'grid_digest'],
-    )
+    #: A unique identifier for the grid, based on its properties. (read-only)
+    digest = Property(depends_on=['grids', 'grid_digest'])
 
     @cached_property
     def _get_digest(self):
@@ -801,13 +1060,10 @@ class MergeGrid(Grid):
     def _set_sourcesdigest(self, event):  # noqa ARG002
         self.grid_digest = ldigest(self.grids)
 
-    # 'digest' is a placeholder for other properties in derived classes,
-    # necessary to trigger the depends on mechanism
     @property_depends_on(['digest'])
     def _get_size(self):
         return self.pos.shape[-1]
 
-    # 'digest' is a placeholder for other properties in derived classes
     @property_depends_on(['digest'])
     def _get_shape(self):
         return self.pos.shape[-1]
@@ -828,90 +1084,140 @@ class MergeGrid(Grid):
 
 
 class Sector(ABCHasStrictTraits):
-    """Base class for all sector types.
+    """
+    Abstract base class for all sector types.
 
-    Defines the common interface for all tbdsector classes. This class
-    may be used as a base for diverse sector implementations. If used
-    directly, it implements a sector encompassing the whole grid.
+    The :class:`Sector` class defines the common interface for all sector implementations. It serves
+    as the base class for creating diverse sector geometries, each capable of determining whether
+    specific grid points fall within its bounds.
+
+    When used directly, this class represents a sector encompassing the entire grid, meaning all
+    positions are considered valid.
+
+    Notes
+    -----
+    This class is designed to be subclassed. Derived classes should override the :meth:`contains`
+    method to implement specific sector geometries (e.g., circular, rectangular, or polygon shapes).
+
+    Examples
+    --------
+    Load example data and set different Sectors for integration in the
+    :ref:`sector integration example<sector_integration_example>`.
     """
 
     def contains(self, pos):
-        """Queries whether the coordinates in a given array lie within the
-        defined sector.
-        For this sector type, any position is valid.
+        """
+        Check whether the given coordinates lie within the sector's bounds.
+
+        This method determines if each column of the input array :attr:`pos` corresponds to a point
+        that falls within the sector. For this base class, all points are considered within the
+        sector.
 
         Parameters
         ----------
-        pos : array of floats
-            Array with the shape 3x[number of gridpoints] containing the
-            grid positions
+        pos : :class:`numpy.ndarray`
+            A 2D array with shape `(3, N)`, where `N` is the number of grid points. Each column
+            represents the ``x, y, z`` coordinates of a grid point.
 
         Returns
         -------
-        array of bools with as many entries as columns in pos
-            Array indicating which of the given positions lie within the
-            given sector
+        :class:`numpy.ndarray` of :class:`bools<bool>`
+            A 1D array of length `N`, where each entry indicates whether the corresponding
+            column in :attr:`pos` lies within the sector's bounds.
 
+        Examples
+        --------
+        >>> import numpy as np
+        >>> import acoular as ac
+        >>> sector = ac.Sector()
+        >>> positions = np.array([[0, 1], [0, 0], [0, 0]])  # Two grid points
+        >>> sector.contains(positions)
+        array([ True,  True])
         """
         return ones(pos.shape[1], dtype=bool)
 
 
 class SingleSector(Sector):
-    """Base class for single sector types.
+    """
+    Base class for single sector types.
 
-    Defines the common interface for all single sector classes. This class
-    may be used as a base for diverse single sector implementations. If used
-    directly, it implements a sector encompassing the whole grid.
+    Defines the common interface for all single sector classes. This class can serve as a base for
+    various single sector implementations. When used directly, it defines a sector that encompasses
+    the whole grid. It includes attributes for handling border inclusion, tolerance for sector
+    borders, and default behavior when no points are inside the sector.
+
+    Examples
+    --------
+    Load example data and set diffrent Sectors for intergration in the
+    :ref:`sector integration example<sector_integration_example>`.
     """
 
-    #: Boolean flag, if 'True' (default), grid points lying on the sector border are included.
+    #: If ``True``, grid points lying on the sector border are included in the sector. Default is
+    #: ``True``.
     include_border = Bool(True, desc='include points on the border')
 
-    #: Absolute tolerance for sector border
+    #: The absolute tolerance to apply when determining if a grid point lies on the sector border.
+    #: Default is ``1e-12``.
     abs_tol = Float(1e-12, desc='absolute tolerance for sector border')
 
-    #: Boolean flag, if 'True' (default), the nearest grid point is returned if None is inside the
-    #: sector.
-    default_nearest = Bool(True, desc='return nearest grid point to center of none inside sector')
+    #: If ``True``, the ``contains`` method (as in :meth:`RectSector.contains`,
+    #: :meth:`RectSector3D.contains`, :meth:`CircSector.contains`, and :meth:`PolySector.contains`)
+    #: returns the nearest grid point if no grid points are inside the sector. Default is ``True``.
+    default_nearest = Bool(True, desc='``contains`` method return nearest grid point to center if none inside sector')
 
 
 class RectSector(SingleSector):
-    """Class for defining a rectangular sector.
+    """
+    Class for defining a rectangular sector.
 
-    Can be used for 2D Grids for defining a rectangular sector or
-    for 3D grids for a rectangular cylinder sector parallel to the z-axis.
+    Defines a rectangular sector either for 2D grids (rectangle in the XY-plane) or for 3D grids
+    (rectangular cylindrical sector parallel to the z-axis). The sector is bounded by the
+    specified :attr:`x_min`, :attr:`x_max`, :attr:`y_min`, and :attr:`y_max` positions, defining the
+    lower and upper bounds of the rectangle along the x and y axes.
+
+    Examples
+    --------
+    Load example data and set diffrent Sectors for intergration in the
+    :ref:`sector integration example<sector_integration_example>`.
     """
 
-    #: The lower x position of the rectangle
+    #: The minimum x position of the rectangle. Default is ``-1.0``.
     x_min = Float(-1.0, desc='minimum x position of the rectangle')
 
-    #: The upper x position of the rectangle
+    #: The maximum x position of the rectangle. Default is ``1.0``.
     x_max = Float(1.0, desc='maximum x position of the rectangle')
 
-    #: The lower y position of the rectangle
+    #: The minimum y position of the rectangle. Default is ``-1.0``.
     y_min = Float(-1.0, desc='minimum y position of the rectangle')
 
-    #: The upper y position of the rectangle
+    #: The maximum y position of the rectangle. Default is ``1.0``.
     y_max = Float(1.0, desc='maximum y position of the rectangle')
 
     def contains(self, pos):
-        """Queries whether the coordinates in a given array lie within the
-        rectangular sector.
-        If no coordinate is inside, the nearest one to the rectangle center
-        is returned if :attr:`~Sector.default_nearest` is True.
+        """
+        Check if the coordinates in a given array lie within the rectangular sector.
+
+        If no coordinate is inside, the nearest one to the rectangle center is returned if
+        :attr:`~SingleSector.default_nearest` is ``True``.
 
         Parameters
         ----------
-        pos : array of floats
-            Array with the shape 3x[number of gridpoints] containing the
-            grid positions
+        pos : array of :class:`floats<float>`
+            A `(3, N)` array containing the positions of `N` grid points.
 
         Returns
         -------
-        array of bools with as many entries as columns in pos
-            Array indicating which of the given positions lie within the
-            given sector
+        :class:`numpy.ndarray` of :class:`bools<bool>`
+            An array of shape (N,) indicating which of the given positions
+            lie within the given sector.
 
+        Examples
+        --------
+        >>> import acoular as ac
+        >>> grid = ac.RectGrid(increment=2)
+        >>> sec = ac.RectSector(x_min=0, y_min=0)
+        >>> sec.contains(grid.pos)
+        array([False, False, False,  True])
         """
         # make sure xmin is minimum etc
         xmin = min(self.x_min, self.x_max)
@@ -947,35 +1253,53 @@ class RectSector(SingleSector):
 
 
 class RectSector3D(RectSector):
-    """Class for defining a cuboid sector.
+    """
+    Class for defining a cuboid sector.
 
-    Can be used for 3D Grids for defining a cuboid sector.
+    This class extends the :class:`RectSector` class to define a cuboid sector, which can be used
+    for 3D grids. The cuboid sector is defined by its bounds along the x, y, and z axes.
+
+    Examples
+    --------
+    Load example data and set diffrent Sectors for intergration in the
+    :ref:`sector integration example<sector_integration_example>`.
     """
 
-    #: The lower z position of the cuboid
+    #: The lower z position of the cuboid. Default is ``-1.0``.
     z_min = Float(-1.0, desc='minimum z position of the cuboid')
 
-    #: The upper z position of the cuboid
+    #: The upper z position of the cuboid.  Default is ``1.0``.
     z_max = Float(1.0, desc='maximum z position of the cuboid')
 
     def contains(self, pos):
-        """Queries whether the coordinates in a given array lie within the
-        rectangular sector.
-        If no coordinate is inside, the nearest one to the rectangle center
-        is returned if :attr:`~Sector.default_nearest` is True.
+        """
+        Check if the coordinates in a given array lie within the cuboid sector.
+
+        The method checks if the points in the provided position array are within the cuboid
+        defined by the bounds along the x, y, and z axes. If no point is inside the sector, and if
+        :attr:`~SingleSector.default_nearest` is ``True``, the nearest point to the center of the
+        cuboid is returned.
 
         Parameters
         ----------
-        pos : array of floats
-            Array with the shape 3x[number of gridpoints] containing the
-            grid positions
+        pos : array of :class:`floats<float>`
+            A (3, N) array containing the positions of N grid points, where each point is
+            represented by its x, y, and z coordinates.
 
         Returns
         -------
-        array of bools with as many entries as columns in pos
-            Array indicating which of the given positions lie within the
-            given sector
+        :class:`numpy.ndarray` of :class:`bools<bool>`
+            A boolean array of shape shape ``(N,)`` indicating which of the given positions lie
+            within the cuboid sector. ``True`` if the grid point is inside the cuboid,
+            otherwise ``False``.
 
+        Examples
+        --------
+        >>> import acoular as ac
+        >>> grid = ac.RectGrid3D(increment=2)
+        >>> sec = ac.RectSector3D(x_min=0, y_min=0, z_min=0)
+        >>> sec.contains(grid.pos)
+        array([False, False, False, False, False, False, False,  True])
         """
         # make sure xmin is minimum etc
         xmin = min(self.x_min, self.x_max)
@@ -1017,39 +1341,61 @@ class RectSector3D(RectSector):
 
 
 class CircSector(SingleSector):
-    """Class for defining a circular sector.
+    """
+    Class for defining a circular sector.
 
-    Can be used for 2D Grids for defining a circular sector or
-    for 3D grids for a cylindrical sector parallel to the z-axis.
+    Defines a circular sector, which can be used for both 2D grids (as a circle in the XY-plane) or
+    for 3D grids (as a cylindrical sector parallel to the z-axis). The sector is defined by its
+    center position (:attr:`x`, :attr:`y`) and its radius :attr:`r`.
+
+    Examples
+    --------
+    Load example data and set diffrent Sectors for intergration in the
+    :ref:`sector integration example<sector_integration_example>`.
     """
 
-    #: x position of the circle center
+    #: The x position of the circle center. Default is ``0.0``.
     x = Float(0.0, desc='x position of the circle center')
 
-    #: y position of the circle center
+    #: The y position of the circle center. Default is ``0.0``.
     y = Float(0.0, desc='y position of the circle center')
 
-    #: radius of the circle
+    #: Radius of the circle. Default is ``1.0``.
     r = Float(1.0, desc='radius of the circle')
 
     def contains(self, pos):
-        """Queries whether the coordinates in a given array lie within the
-        circular sector.
-        If no coordinate is inside, the nearest one outside is returned
-        if :attr:`~Sector.default_nearest` is True.
+        """
+        Check if the coordinates in a given array lie within the circular sector.
+
+        The method calculates the squared distance of each point from the center of the circle and
+        checks if it lies within the sector, considering the sector's radius :attr:`r`. If no point
+        is inside and :attr:`~SingleSector.default_nearest` is ``True``, the nearest point outside
+        the sector will be returned.
 
         Parameters
         ----------
-        pos : array of floats
-            Array with the shape 3x[number of gridpoints] containing the
-            grid positions
+        pos : array of :class:`floats<float>`
+            A (3, N) array containing the positions of N grid points, where each point is
+            represented by its x, y, and z coordinates.
 
         Returns
         -------
-        array of bools with as many entries as columns in pos
-            Array indicating which of the given positions lie within the
-            given sector
+        :class:`numpy.ndarray` of :class:`bools<bool>`
+            A boolean array of shape shape (N,) indicating which of the given positions lie within
+            the circular sector. ``True`` if the grid point is inside the circular sector,
+            otherwise ``False``.
 
+        Examples
+        --------
+        >>> import acoular as ac
+        >>> grid = ac.RectGrid(increment=1)
+        >>> grid.pos
+        array([[-1., -1., -1.,  0.,  0.,  0.,  1.,  1.,  1.],
+               [-1.,  0.,  1., -1.,  0.,  1., -1.,  0.,  1.],
+               [ 1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.]])
+        >>> sec = ac.CircSector(x=1, y=1, r=0.5)
+        >>> sec.contains(grid.pos)
+        array([False, False, False, False, False, False, False, False,  True])
         """
         dr2 = (pos[0, :] - self.x) ** 2 + (pos[1, :] - self.y) ** 2
         # which points are in the circle?
@@ -1063,31 +1409,56 @@ class CircSector(SingleSector):
 
 
 class PolySector(SingleSector):
-    """Class for defining a polygon sector.
+    """
+    Class for defining a polygon sector.
 
-    Can be used for 2D Grids for defining a polygon sector.
+    Inherits from :class:`SingleSector` and provides functionality to define a polygonal sector on a
+    2D grid.
+
+    Notes
+    -----
+    The polygon is specified by the :class:`Polygon` class.
+
+    Examples
+    --------
+    Load example data and set diffrent Sectors for intergration in the
+    :ref:`sector integration example<sector_integration_example>`.
     """
 
-    # x1, y1, x2, y2, ... xn, yn :
+    #: List of coordinates representing the polygon's vertices. The coordinates must define a closed
+    #: polygon like ``x1, y1, x2, y2, ... xn, yn``.
     edges = List(Float)
 
     def contains(self, pos):
-        """Queries whether the coordinates in a given array lie within the polygon sector. If no
-        coordinate is inside, the nearest one to the rectangle center is returned if
-        :attr:`~Sector.default_nearest` is True.
+        """
+        Check if the coordinates in a given array lie within the polygon sector.
+
+        If no coordinate is inside, the nearest one to the rectangle center is returned if
+        :attr:`~SingleSector.default_nearest` is ``True``.
 
         Parameters
         ----------
-        pos : array of floats
-            Array with the shape 3x[number of gridpoints] containing the
-            grid positions
+        pos : array of :class:`floats<float>`
+            A (3, N) array containing the positions of N grid points where each point is represented
+            by its x, y, and z coordinates.
 
         Returns
         -------
-        array of bools with as many entries as columns in pos
-            Array indicating which of the given positions lie within the
-            given sector
+        :class:`numpy.ndarray` of :class:`bools<bool>`
+            A boolean array of shape `(N,)` indicating which of the given positions lie within the
+            polygon sector. ``True`` if the grid point is inside the polygon, otherwise ``False``.
 
+        Examples
+        --------
+        >>> import acoular as ac
+        >>> grid = ac.RectGrid(increment=1)
+        >>> grid.pos
+        array([[-1., -1., -1.,  0.,  0.,  0.,  1.,  1.,  1.],
+               [-1.,  0.,  1., -1.,  0.,  1., -1.,  0.,  1.],
+               [ 1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.]])
+        >>> sec = ac.PolySector(edges=[0, 0, 1, 0, 1, 1, 0, 1])
+        >>> sec.contains(grid.pos)
+        array([False, False, False, False,  True,  True, False,  True,  True])
         """
         poly = Polygon(array(self.edges).reshape(-1, 2)[:, 0], array(self.edges).reshape(-1, 2)[:, 1])
         dists = poly.is_inside(pos[0, :], pos[1, :])
@@ -1102,71 +1473,111 @@ class PolySector(SingleSector):
 
 
 class ConvexSector(SingleSector):
-    """Class for defining a convex hull sector.
+    """
+    Class for defining a convex hull sector.
 
-    Can be used for 2D Grids for defining a convex hull sector.
+    This class defines a convex hull sector for 2D grids. The sector is created using a list of edge
+    coordinates :attr:`edges` which represent the vertices of a polygon. The convex hull is the
+    smallest convex shape that contains all the given vertices.
+
+    Examples
+    --------
+    Load example data and set diffrent Sectors for intergration in the
+    :ref:`sector integration example<sector_integration_example>`.
     """
 
-    # x1, y1, x2, y2, ... xn, yn :
+    #: List of edge coordinates that define the convex hull. The coordinates must define a closed
+    #: polygon that forms the convex hull like `x1, y1, x2, y2, ... xn, yn`.
     edges = List(Float)
 
     def contains(self, pos):
-        """Queries whether the coordinates in a given array lie within the
-        convex sector.
-        If no coordinate is inside, the nearest one to the rectangle center
-        is returned if :attr:`~Sector.default_nearest` is True.
+        """
+        Check if the coordinates in a given array lie within the convex sector.
+
+        If no coordinate is inside, the nearest one to the rectangle center is returned if
+        :attr:`~SingleSector.default_nearest` is ``True``.
 
         Parameters
         ----------
-        pos : array of floats
-            Array with the shape 3x[number of gridpoints] containing the
-            grid positions
+        pos : array of :class:`floats<float>`
+            Array containing the positions of N grid points, shape `(3, N)`.
 
         Returns
         -------
-        array of bools with as many entries as columns in pos
-            Array indicating which of the given positions lie within the
-            given sector
+        :class:`numpy.ndarray` of :class:`bools<bool>`
+            An array of shape `(N,)` indicating which of the given positions
+            lie within the given sector.
 
+        Examples
+        --------
+        >>> import acoular as ac
+        >>> grid = ac.RectGrid(increment=1)
+        >>> grid.pos
+        array([[-1., -1., -1.,  0.,  0.,  0.,  1.,  1.,  1.],
+               [-1.,  0.,  1., -1.,  0.,  1., -1.,  0.,  1.],
+               [ 1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.]])
+        >>> sec = ac.ConvexSector(edges=[0, 0, 1, 0, 1, 1, 0, 1])
+        >>> sec.contains(grid.pos)
+        array([False, False, False, False,  True,  True, False,  True,  True])
         """
         inds = in_hull(pos[:2, :].T, array(self.edges).reshape(-1, 2), border=self.include_border, tol=self.abs_tol)
 
         # if none inside, take nearest
         if ~inds.any() and self.default_nearest:
-            dr2 = array(self.edges).reshape(-1, 2).mean(0)
+            dr2 = array(self.edges).reshape(-1, 2).mean(0)  # Use the centroid of the polygon as the "center"
             inds[argmin(dr2)] = True
 
         return inds
 
 
 class MultiSector(Sector):
-    """Class for defining a sector consisting of multiple sectors.
+    """
+    Class for defining a sector consisting of multiple sectors.
 
-    Can be used to sum over different sectors. Takes a list of sectors
-    and returns the points contained in each sector.
+    This class allows the combination of several individual sectors into one.
 
+    Examples
+    --------
+    Load example data and set diffrent Sectors for intergration in the
+    :ref:`sector integration example<sector_integration_example>`.
     """
 
-    #: List of :class:`acoular.grids.Sector` objects
-    #: to be mixed.
+    #: List of :class:`Sector` objects to be mixed, each defining a different sector.
     sectors = List(Instance(Sector))
 
     def contains(self, pos):
-        """Queries whether the coordinates in a given array lie within any
-        of the sub-sectors.
+        """
+        Check if the coordinates in a given array lie within any of the sub-sectors.
+
+        This method iterates over the list of sectors, checking if each point in the given position
+        array lies within any of the defined sectors.
 
         Parameters
         ----------
-        pos : array of floats
-            Array with the shape 3x[number of gridpoints] containing the
-            grid positions
+        pos : array of :class:`floats<float>`
+            A (3, N) array containing the positions of N grid points, where each point is
+            represented by its x, y, and z coordinates.
 
         Returns
         -------
-        array of bools with as many entries as columns in pos
-            Array indicating which of the given positions lie within the
-            sectors
+        :class:`numpy.ndarray` of :class:`bools<bool>`
+            A boolean array of shape `(N,)` indicating which of the given positions lie within any
+            of the defined sectors. ``True`` if the grid point is inside the circular sector,
+            ``False`` if otherwise.
 
+        Examples
+        --------
+        >>> import acoular as ac
+        >>> grid = ac.RectGrid(increment=1)
+        >>> grid.pos
+        array([[-1., -1., -1.,  0.,  0.,  0.,  1.,  1.,  1.],
+               [-1.,  0.,  1., -1.,  0.,  1., -1.,  0.,  1.],
+               [ 1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.]])
+        >>> sec1 = ac.RectSector(x_min=0, y_min=0)
+        >>> sec2 = ac.CircSector(x=1, y=1, r=0.5)
+        >>> multi_sec = ac.MultiSector(sectors=[sec1, sec2])
+        >>> multi_sec.contains(grid.pos)
+        array([False, False, False, False,  True,  True, False,  True,  True])
         """
         # initialize with only "False" entries
         inds = zeros(pos.shape[1], dtype=bool)

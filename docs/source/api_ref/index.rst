@@ -11,6 +11,7 @@ The following modules are part of Acoular:
     :toctree: generated/
     :recursive:
 
+    aiaa
     base
     calib
     configuration

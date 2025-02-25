@@ -34,7 +34,7 @@ class Trajectory(HasStrictTraits):
           and :class:`~acoular.tbeamform.BeamformerCleantTraj`)
 
     Exemplary use can also be seen in the
-    :ref:`rotating point source example<sphx_glr_auto_examples_moving_sources_examples_example_rotating_point_source.py>`.
+    :ref:`rotating point source example<rotating_point_source>`.
 
     See Also
     --------
