@@ -1101,9 +1101,9 @@ class Sector(ABCHasStrictTraits):
 
     Examples
     --------
-    Load example data and set diffrent Sectors for intergration in the
-    :ref:`sector integration example <sphx_glr_auto_examples_wind_tunnel_examples_example_sectors_and_integration.py>`.
-    """  # noqa W505
+    Load example data and set different Sectors for integration in the
+    :ref:`sector integration example<sector_integration_example>`.
+    """
 
     def contains(self, pos):
         """
@@ -1149,8 +1149,8 @@ class SingleSector(Sector):
     Examples
     --------
     Load example data and set diffrent Sectors for intergration in the
-    :ref:`sector integration example <sphx_glr_auto_examples_wind_tunnel_examples_example_sectors_and_integration.py>`.
-    """  # noqa W505
+    :ref:`sector integration example<sector_integration_example>`.
+    """
 
     #: If ``True``, grid points lying on the sector border are included in the sector. Default is
     #: ``True``.
@@ -1178,8 +1178,8 @@ class RectSector(SingleSector):
     Examples
     --------
     Load example data and set diffrent Sectors for intergration in the
-    :ref:`sector integration example <sphx_glr_auto_examples_wind_tunnel_examples_example_sectors_and_integration.py>`.
-    """  # noqa W505
+    :ref:`sector integration example<sector_integration_example>`.
+    """
 
     #: The minimum x position of the rectangle. Default is ``-1.0``.
     x_min = Float(-1.0, desc='minimum x position of the rectangle')
@@ -1262,8 +1262,8 @@ class RectSector3D(RectSector):
     Examples
     --------
     Load example data and set diffrent Sectors for intergration in the
-    :ref:`sector integration example <sphx_glr_auto_examples_wind_tunnel_examples_example_sectors_and_integration.py>`.
-    """  # noqa W505
+    :ref:`sector integration example<sector_integration_example>`.
+    """
 
     #: The lower z position of the cuboid. Default is ``-1.0``.
     z_min = Float(-1.0, desc='minimum z position of the cuboid')
@@ -1351,8 +1351,8 @@ class CircSector(SingleSector):
     Examples
     --------
     Load example data and set diffrent Sectors for intergration in the
-    :ref:`sector integration example <sphx_glr_auto_examples_wind_tunnel_examples_example_sectors_and_integration.py>`.
-    """  # noqa W505
+    :ref:`sector integration example<sector_integration_example>`.
+    """
 
     #: The x position of the circle center. Default is ``0.0``.
     x = Float(0.0, desc='x position of the circle center')
@@ -1422,8 +1422,8 @@ class PolySector(SingleSector):
     Examples
     --------
     Load example data and set diffrent Sectors for intergration in the
-    :ref:`sector integration example <sphx_glr_auto_examples_wind_tunnel_examples_example_sectors_and_integration.py>`.
-    """  # noqa W505
+    :ref:`sector integration example<sector_integration_example>`.
+    """
 
     #: List of coordinates representing the polygon's vertices. The coordinates must define a closed
     #: polygon like ``x1, y1, x2, y2, ... xn, yn``.
@@ -1483,8 +1483,8 @@ class ConvexSector(SingleSector):
     Examples
     --------
     Load example data and set diffrent Sectors for intergration in the
-    :ref:`sector integration example <sphx_glr_auto_examples_wind_tunnel_examples_example_sectors_and_integration.py>`.
-    """  # noqa W505
+    :ref:`sector integration example<sector_integration_example>`.
+    """
 
     #: List of edge coordinates that define the convex hull. The coordinates must define a closed
     #: polygon that forms the convex hull like `x1, y1, x2, y2, ... xn, yn`.
@@ -1539,8 +1539,8 @@ class MultiSector(Sector):
     Examples
     --------
     Load example data and set diffrent Sectors for intergration in the
-    :ref:`sector integration example <sphx_glr_auto_examples_wind_tunnel_examples_example_sectors_and_integration.py>`.
-    """  # noqa W505
+    :ref:`sector integration example<sector_integration_example>`.
+    """
 
     #: List of :class:`Sector` objects to be mixed, each defining a different sector.
     sectors = List(Instance(Sector))

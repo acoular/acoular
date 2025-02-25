@@ -3,7 +3,7 @@
 # ------------------------------------------------------------------------------
 # %%
 """
-.. _sphx_glr_auto_examples_moving_sources_examples_example_rotating_point_sourcepy:
+.. _rotating_point_source:
 
 Rotating point source
 =====================
