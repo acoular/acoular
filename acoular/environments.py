@@ -84,18 +84,18 @@ def dist_mat(gpos, mpos):  # pragma: no cover
 
     Parameters
     ----------
-    gpos : array of :class:`floats<float>`
+    gpos : :class:`numpy.ndarray` of :class:`floats<float>`
         The locations of `N` points in the beamforming map grid in 3D cartesian coordinates,
-        shape `(3,N)`.
+        shape `(3, N)`.
 
-    mpos : array of :class:`floats<float>`
-        The locations of `M` microphones in 3D cartesian coordinates, shape `(3,M)`.
+    mpos : :class:`numpy.ndarray` of :class:`floats<float>`
+        The locations of `M` microphones in 3D cartesian coordinates, shape `(3, M)`.
 
     Returns
     -------
     :class:`numpy.ndarray` of :class:`floats<float>`
         Matrix of the distances between each microphone and each point in the beamforming map grid,
-        shape `(N,M)`.
+        shape `(N, M)`.
     """
     _, M = mpos.shape
     _, N = gpos.shape
@@ -122,11 +122,11 @@ def cartToCyl(x, Q=None):  # noqa: N802, N803
 
     Parameters
     ----------
-    x : array of :class:`floats<float>`
-        Cartesian coordinates of `N` points, shape `(3,N)`.
+    x : :class:`numpy.ndarray` of :class:`floats<float>`
+        Cartesian coordinates of `N` points, shape `(3, N)`.
 
-    Q : array of :class:`floats<float>`, optional
-        Orthogonal transformation matrix, shape `(3,3)`. If provided, the positional vectors are
+    Q : :class:`numpy.ndarray` of :class:`floats<float>`, optional
+        Orthogonal transformation matrix, shape `(3, 3)`. If provided, the positional vectors are
         transformed via ``new_x = Q * x``, before transforming those modified coordinates into
         cylindrical ones. Default is the identity matrix.
 
@@ -134,7 +134,7 @@ def cartToCyl(x, Q=None):  # noqa: N802, N803
     -------
     :class:`numpy.ndarray` of :class:`floats<float>`
         Cylindrical representation of given `N` points in cartesian coodrinates as
-        an array of shape `(3,N)` with new coordinates :math:`(\phi, r, z)`.
+        an array of shape `(3, N)` with new coordinates :math:`(\phi, r, z)`.
     """
     Q = identity(3) if Q is None else Q
     if not (Q == identity(3)).all():  # noqa: SIM300
@@ -151,19 +151,19 @@ def cylToCart(x, Q=None):  # noqa: N802, N803
 
     Parameters
     ----------
-    x : array of :class:`floats<float>`
-        Cylindrical coordinates of `N` points, shape `(3,N)`.
+    x : :class:`numpy.ndarray` of :class:`floats<float>`
+        Cylindrical coordinates of `N` points, shape `(3, N)`.
 
-    Q : array of :class:`floats<float>`, optional
-        Orthogonal transformation matrix, shape `(3,3)`. If provided, the positional vectors are
-        transformed via ``new_x = Q * x``, before transforming those modified coordinates into
+    Q : :class:`numpy.ndarray` of :class:`floats<float>`, optional
+        Orthogonal transformation matrix, shape `(3, 3)`. If provided, the positional vectors are
+        transformed via ``new_x = Q * x`` before transforming those modified coordinates into
         cartesian ones. Default is the identity matrix.
 
     Returns
     -------
     :class:`numpy.ndarray` of :class:`floats<float>`
         Cartesian representation of given `N` points in cylindrical coodrinates as
-        an array of shape `(3,N)` with coodinates :math:`(x, y, z)`.
+        an array of shape `(3, N)` with coodinates :math:`(x, y, z)`.
     """
     Q = identity(3) if Q is None else Q
     if not (Q == identity(3)).all():  # noqa: SIM300
@@ -190,8 +190,8 @@ class Environment(HasStrictTraits):
     #: A unique identifier based on the environment properties. (read-only)
     digest = Property(depends_on=['c'])
 
-    #: The speed of sound in the environment. Default is ``343.0``,
-    #: which corresponds to the approximate speed of sound at 20°C in dry air at sea level.
+    #: The speed of sound in the environment. Default is ``343.0``, which corresponds to the
+    #: approximate speed of sound at 20°C in dry air at sea level, if the unit is m/s.
     c = Float(343.0, desc='speed of sound')
 
     #: The region of interest (ROI) for calculations. (Not needed for most types of environment.)
@@ -202,6 +202,34 @@ class Environment(HasStrictTraits):
         return digest(self)
 
     def _r(self, gpos, mpos=0.0):
+        # Compute the distance between two sets of points.
+        #
+        # The distance for each of the `N` points in ``gpos`` in 3-D space to each of the `M` points
+        # in ``mpos``.
+        #
+        # See Also
+        # --------
+        # :func:`dist_mat`: Compute distance matrix.
+        #
+        # Parameters
+        # ----------
+        # gpos : :class:`numpy.ndarray` of :class:`floats<float>`
+        #     The coordinates of the first set of points. Should be of shape `(N, 3)`,
+        #     where `N` is the number of points.
+        #
+        # mpos : :class:`float` or :class:`numpy.ndarray` of :class:`floats<float>`, optional
+        #     The coordinates of the second set of points. If a scalar is provided,
+        #     it is treated as the origin ``(0, 0, 0)``. If an array is given,
+        #     it should have shape `(M, 3)`, where `M` is the number of points.
+        #
+        # Returns
+        # -------
+        # rm : :class:`numpy.ndarray` of :class:`floats<float>`
+        #     The distances between each point in ``gpos`` and ``mpos``.
+        #     The result is an array of
+        #
+        #         - shape `(N,)` if ``mpos`` is a single point, or
+        #         - shape `(N, M)` if ``mpos`` consists of multiple points.
         if isscalar(mpos):
             mpos = array((0, 0, 0), dtype=float64)[:, newaxis]
         rm = dist_mat(ascontiguousarray(gpos), ascontiguousarray(mpos))
@@ -248,6 +276,30 @@ class UniformFlowEnvironment(Environment):
         return digest(self)
 
     def _r(self, gpos, mpos=0.0):
+        # Compute the distance between two sets of points.
+        #
+        # This method calculates the distance between points ``gpos`` and ``mpos`` in a 3-D space,
+        # with an additional adjustment based on a mass term and force vector. The result is
+        # affected by the angle between the direction of movement and the force vector.
+        #
+        # Parameters
+        # ----------
+        # gpos : :class:`numpy.ndarray` of :class:`floats<float>`
+        #     The 3-D coordinates of the first set of points, shape `(N, 3)`.
+        #
+        # mpos : :class:`float` or :class:`numpy.ndarray` of :class:`floats<float>`, optional
+        #     The 3-D coordinates of the second set of points. If a scalar is provided, it is
+        #     treated as the origin ``(0, 0, 0)``. If an array is given, it should have shape
+        #     `(M, 3)`, where `M` is the number of points.
+        #
+        # Returns
+        # -------
+        # rm : :class:`numpy.ndarray` of :class:`floats<float>`
+        #     The distances between each point in ``gpos`` and ``mpos``.
+        #     The result is an array of
+        #
+        #         - shape `(N,)` if ``mpos`` is a single point, or
+        #         - shape `(N, M)` if ``mpos`` consists of multiple points.
         if isscalar(mpos):
             mpos = array((0, 0, 0), dtype=float32)[:, newaxis]
         fdv = self.fdv / sqrt((self.fdv * self.fdv).sum())
@@ -278,7 +330,7 @@ class FlowField(ABCHasStrictTraits):
 
         Parameters
         ----------
-        xx : array of :class:`floats<float>`
+        xx : :class:`numpy.ndarray` of :class:`floats<float>`
             Location in the fluid for which to provide the data, shape (3,).
         """
 
@@ -340,7 +392,7 @@ class SlotJet(FlowField):
 
         Parameters
         ----------
-        xx : array of :class:`floats<float>`
+        xx : :class:`numpy.ndarray` of :class:`floats<float>`
             The 3D Cartesian coordinates of the location in the fluid where the velocity field
             is to be computed, shape `(3,)`.
 
@@ -401,7 +453,7 @@ class OpenJet(FlowField):
 
     Notes
     -----
-    - This is not a fully generic implementation and is limited to flow in the x-direction only.
+    - This is not a fully generic implementation, and is limited to flow in the x-direction only.
       No other directions are possible at the moment and flow components in
       the other direction are zero.
     - The flow field transitions from the jet core to the shear layer, with velocity decay
@@ -412,12 +464,12 @@ class OpenJet(FlowField):
     >>> import acoular as ac
     >>> import numpy as np
     >>>
-    >>> jet = ac.OpenJet(v0=10.0, D=0.4, l=3.121)
+    >>> jet = ac.OpenJet(v0=10.0, D=0.4, l=6.2)
     >>> velocity, jacobian = jet.v(np.array((1.0, 0.1, 0.1)))
     >>> velocity
-    array([8.1691626, 0.       , 0.       ])
+    array([9.62413564, 0.        , 0.        ])
     >>> jacobian
-    array([[ -1.89129622, -22.82996488, -22.82996488],
+    array([[ -1.92660591, -23.25619062, -23.25619062],
            [  0.        ,   0.        ,   0.        ],
            [  0.        ,   0.        ,   0.        ]])
     """
@@ -432,7 +484,7 @@ class OpenJet(FlowField):
     D = Float(0.2, desc='nozzle diameter')
 
     #: Non-dimensional length of the zone of flow establishment (jet core length).
-    #: Default is ``6.2``.
+    #: Default is ``6.2``. :cite:`Albertson1950`
     l = Float(6.2, desc='flow establishment length')  # noqa: E741
 
     #: A unique identifier based on the field properties. (read-only)
@@ -454,7 +506,7 @@ class OpenJet(FlowField):
 
         Parameters
         ----------
-        xx : array of :class:`floats<float>`
+        xx : :class:`numpy.ndarray` of :class:`floats<float>`
             The 3D Cartesian coordinates of the location in the fluid where the velocity
             field is to be computed, shape `(3,)`.
 
@@ -616,7 +668,7 @@ def spiral_sphere(N, Om=None, b=None):  # noqa: N803 # change to 4*pi
     Generate unit vectors equally distributed over a sphere or a portion of it.
 
     Internal helper function for the raycasting that returns an array of unit
-    vectors of shape `(N,3)` giving equally distributed directions on a part
+    vectors of shape `(N, 3)` giving equally distributed directions on a part
     of sphere given by the center direction ``b`` and the solid angle ``Om``.
 
     The function uses spherical coordinates to distribute the points, the converts them to Cartesian
@@ -630,10 +682,10 @@ def spiral_sphere(N, Om=None, b=None):  # noqa: N803 # change to 4*pi
 
     Om : :class:`float`, optional
         The solid angle in steradians to cover on the sphere. Default is ``2 * pi``,
-        which corresponds to half of the sphere. Smaller values result in covering
-        a smaller portion of the sphere.
+        which corresponds to a hemisphere. Smaller values result in covering
+        a smaller portion of the hemisphere.
 
-    b : array of :class:`floats<float>`, optional
+    b : :class:`numpy.ndarray` of :class:`floats<float>`, optional
         A 3D unit vector specifying the desired center direction of the distribution.
         Points are mirrored such that this vector points toward the center of the sphere.
         Default is ``[0, 0, 1]``, which corresponds to the z-axis.
@@ -656,14 +708,14 @@ def spiral_sphere(N, Om=None, b=None):  # noqa: N803 # change to 4*pi
 
     Examples
     --------
-    Generate 100 points over a full sphere:
+    Generate 100 points over a hemisphere:
 
     >>> from acoular.environments import spiral_sphere
     >>> points = spiral_sphere(100)
     >>> points.shape
     (3, 100)
 
-    Generate 50 points over a hemisphere with the z-axis as the center direction:
+    Generate 50 points over half a hemisphere with the z-axis as the center direction:
 
     >>> import numpy as np
     >>> points = spiral_sphere(50, Om=np.pi, b=array((0, 0, 1)))
@@ -711,7 +763,7 @@ class GeneralFlowEnvironment(Environment):
 
     See Also
     --------
-    :obj:`scipy.interpolate.LinearNDInterpolator` :
+    :class:`scipy.interpolate.LinearNDInterpolator` :
         Piecewise linear interpolator in N > 1 dimensions.
 
     Examples
@@ -800,7 +852,7 @@ class GeneralFlowEnvironment(Environment):
 
         Returns
         -------
-        :obj:`scipy.interpolate.LinearNDInterpolator` object
+        :class:`scipy.interpolate.LinearNDInterpolator` object
             A linear interpolator object for estimating travel times for 3D positions
             within the computed ray trajectories.
         """
