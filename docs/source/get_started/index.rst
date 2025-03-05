@@ -90,7 +90,7 @@ The positions of the microphones are needed for beamforming, so we create a :cla
 
     In [1]: from pathlib import Path
 
-    In [1]: micgeofile = Path(ac.__file__).parent / 'xml' / 'array_64.xml'
+    In [1]: micgeofile = Path(acoular.__file__).parent / 'xml' / 'array_64.xml'
 
     In [1]: mg = acoular.MicGeom( file=micgeofile )
 
