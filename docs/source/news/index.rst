@@ -4,6 +4,9 @@ What's new
 Upcoming Release
 ------------------------
 
+    **Documentation**
+        * adds new docstrings to microphones.py
+
 
 25.01
 ------------------------

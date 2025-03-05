@@ -1,13 +1,13 @@
 # ------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
-"""Implements support for array microphone arrangements.
+"""
+Implements support for array microphone arrangements.
 
 .. autosummary::
     :toctree: generated/
 
     MicGeom
-
 """
 
 # imports from other packages
@@ -33,39 +33,127 @@ from .internal import digest
 
 @deprecated_alias({'mpos_tot': 'pos_total', 'mpos': 'pos', 'from_file': 'file'}, read_only=['mpos'])
 class MicGeom(HasStrictTraits):
-    """Provides the geometric arrangement of microphones in the array.
+    """
+    Provide the geometric arrangement of microphones in an array.
 
-    The geometric arrangement of microphones is read in from an
-    xml-source with element tag names `pos` and attributes Name, `x`, `y` and `z`.
-    Can also be used with programmatically generated arrangements.
+    This class allows you to define, import, and manage the spatial positions of microphones in a
+    microphone array. The positions can be read from an XML file or set programmatically. Invalid
+    microphones can be excluded by specifying their indices via :attr:`invalid_channels`.
+
+    Notes
+    -----
+    - The microphone geometry as in :attr:`total_pos` is automatically changed if the :attr:`file`
+      attribute is updated.
+    - Small numerical values in the computed :attr:`center` are set to zero for numerical stability.
+
+    Examples
+    --------
+    To set a microphone geomerty for ``n`` programmatically, first a ``(3,n)`` array is needed. In
+    this case we'll use ``n=9`` and generate an array containing the positional data.
+
+    >>> import numpy as np
+    >>>
+    >>> # Generate a (3,3) grid of points in the x-y plane
+    >>> x = np.linspace(-1, 1, 3)  # Generate 3 points for x, from -1 to 1
+    >>> y = np.linspace(-1, 1, 3)  # Generate 3 points for y, from -1 to 1
+    >>>
+    >>> # Create a meshgrid for 3D coordinates, with z=0 for all points
+    >>> X, Y = np.meshgrid(x, y)
+    >>> Z = np.zeros_like(X)  # Set all z-values to 0
+    >>>
+    >>> # Stack the coordinates into a single (3,9) array
+    >>> points = np.vstack([X.ravel(), Y.ravel(), Z.ravel()])
+    >>> points
+    array([[-1.,  0.,  1., -1.,  0.,  1., -1.,  0.,  1.],
+           [-1., -1., -1.,  0.,  0.,  0.,  1.,  1.,  1.],
+           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.]])
+
+    Now, to implement this array as a microphone geomertry, create a :class:`MicGeom` object and
+    assign the array to it the by using the :attr:`pos_total` attribute:
+
+    >>> from acoular import MicGeom
+    >>> mg = MicGeom(pos_total=points)
+    >>> mg.pos
+    array([[-1.,  0.,  1., -1.,  0.,  1., -1.,  0.,  1.],
+           [-1., -1., -1.,  0.,  0.,  0.,  1.,  1.,  1.],
+           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.]])
+
+    The microphones along the diagonal can be removed by setting their indices in the
+    :attr:`invalid_channels` attribute:
+
+    >>> mg.invalid_channels = [0, 4, 9]
+    >>> mg.pos
+    array([[ 0.,  1., -1.,  1., -1.,  0.,  1.],
+           [-1., -1.,  0.,  0.,  1.,  1.,  1.],
+           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.]])
+
+    But they will still be included in :attr:`pos_total`:
+
+    >>> mg.pos_total
+    array([[-1.,  0.,  1., -1.,  0.,  1., -1.,  0.,  1.],
+           [-1., -1., -1.,  0.,  0.,  0.,  1.,  1.,  1.],
+           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.]])
+
+    To export this microphone geometry, use the :meth:`export_mpos` method. Note that the
+    microphones marked as invalid in :attr:`invalid_channels` will not be exported.
+
+    >>> mg.export_mpos('micgeom.xml')  # doctest: +SKIP
+
+    The newly generated ``micgeom.xml`` file looks like this:
+
+    .. code-block:: xml
+
+        <?xml version="1.1" encoding="utf-8"?><MicArray name="micgeom">
+          <pos Name="Point 1" x="0.0" y="-1.0" z="0.0"/>
+          <pos Name="Point 2" x="1.0" y="-1.0" z="0.0"/>
+          <pos Name="Point 3" x="-1.0" y="0.0" z="0.0"/>
+          <pos Name="Point 4" x="1.0" y="0.0" z="0.0"/>
+          <pos Name="Point 5" x="-1.0" y="1.0" z="0.0"/>
+          <pos Name="Point 6" x="0.0" y="1.0" z="0.0"/>
+          <pos Name="Point 7" x="1.0" y="1.0" z="0.0"/>
+        </MicArray>
+
+    Note that when importing a microphone geometry, the XML file needs to look similar to this one:
+    There must be ``<pos>`` elements with ``Name``, ``x``, ``y``, and ``z`` attributes.
+
+    To load this same file as a new :class:`MicGeom` object, the ``micgeom.xml`` file can be
+    assigned to the :attr:`file` attribute:
+
+    >>> new_mg = MicGeom(file='micgeom.xml')  # doctest: +SKIP
+    >>> new_mg.pos  # doctest: +SKIP
+    array([[ 0.,  1., -1.,  1., -1.,  0.,  1.],
+           [-1., -1.,  0.,  0.,  1.,  1.,  1.],
+           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.]])
     """
 
-    #: Name of the .xml-file from which to read the data.
+    #: Path to the XML file containing microphone positions. The XML file should have elements with
+    #: the tag ``pos`` and attributes ``Name``, ``x``, ``y``, and ``z``.
     file = File(filter=['*.xml'], exists=True, desc='name of the xml file to import')
 
-    #: Positions as (3, :attr:`num_mics`) array of floats, may include also invalid
-    #: microphones (if any). Set either automatically on change of the
-    #: :attr:`file` argument or explicitly by assigning an array of floats.
+    #: Array containing the ``x, y, z`` positions of all microphones, including invalid ones, shape
+    #: ``(3,`` :attr:`num_mics` ``)``. This is set automatically when :attr:`file` changes or
+    #: explicitly by assigning an array of floats.
     pos_total = CArray(dtype=float, shape=(3, None), desc='x, y, z position of all microphones')
 
-    #: Positions as (3, :attr:`num_mics`) array of floats, without invalid
-    #: microphones; readonly.
+    #: Array containing the ``x, y, z`` positions of valid microphones (i.e., excluding those in
+    #: :attr:`invalid_channels`), shape ``(3,`` :attr:`num_mics` ``)``. (read-only)
     pos = Property(depends_on=['pos_total', 'invalid_channels'], desc='x, y, z position of used microphones')
 
-    #: List that gives the indices of channels that should not be considered.
-    #: Defaults to a blank list.
+    #: List of indices indicating microphones to be excluded from calculations and results.
+    #: Default is ``[]``.
     invalid_channels = List(int, desc='list of invalid channels')
 
-    #: Number of used microphones in the array; readonly.
+    #: Number of valid microphones in the array. (read-only)
     num_mics = Property(depends_on=['pos'], desc='number of microphones in the geometry')
 
-    #: Center of the array (arithmetic mean of all used array positions); readonly.
+    #: The geometric center of the array, calculated as the arithmetic mean of the positions of all
+    #: valid microphones. (read-only)
     center = Property(depends_on=['pos'], desc='array center')
 
-    #: Aperture of the array (greatest extent between two microphones); readonly.
+    #: The maximum distance between any two valid microphones in the array. (read-only)
     aperture = Property(depends_on=['pos'], desc='array aperture')
 
-    # internal identifier
+    #: A unique identifier for the geometry, based on its properties. (read-only)
     digest = Property(depends_on=['pos'])
 
     @cached_property
@@ -99,10 +187,34 @@ class MicGeom(HasStrictTraits):
         return None
 
     @on_trait_change('file')
-    def import_mpos(self):
-        """Import the microphone positions from .xml file.
-        Called when :attr:`file` changes.
-        """
+    def _import_mpos(self):
+        # Import the microphone positions from an XML file.
+        #
+        # This method parses the XML file specified in :attr:`file` and extracts the ``x``, ``y``,
+        # and ``z`` positions of microphones. The data is stored in :attr:`pos_total` attribute as
+        # an array of shape ``(3,`` :attr:`num_mics` ``)``.
+        #
+        # This method is called when :attr:`file` changes.
+        #
+        # Raises
+        # ------
+        # xml.parsers.expat.ExpatError
+        #     If the XML file is malformed or cannot be parsed.
+        # ValueError
+        #     If the attributes ``x``, ``y``, or ``z`` in any ``<pos>`` element are missing or
+        #     cannot be converted to a float.
+        #
+        # Examples
+        # --------
+        # The microphone geometry changes by changing the :attr:`file` attribute.
+        #
+        # >>> from acoular import MicGeom  # doctest: +SKIP
+        # >>> mg = MicGeom(file='/path/to/geom1.xml')  # doctest: +SKIP
+        # >>> mg.center  # doctest: +SKIP
+        # array([-0.25,  0.  ,  0.25]) # doctest: +SKIP
+        # >>> mg.file = '/path/to/geom2.xml'  # doctest: +SKIP
+        # >>> mg.center  # doctest: +SKIP
+        # array([0.        , 0.33333333, 0.66666667]) # doctest: +SKIP
         doc = xml.dom.minidom.parse(self.file)
         names = []
         xyz = []
@@ -112,12 +224,32 @@ class MicGeom(HasStrictTraits):
         self.pos_total = array(xyz, 'd').swapaxes(0, 1)
 
     def export_mpos(self, filename):
-        """Export the microphone positions to .xml file.
+        """
+        Export the microphone positions to an XML file.
+
+        This method generates an XML file containing the positions of all valid microphones in the
+        array. Each microphone is represented by a ``<pos>`` element with ``Name``, ``x``, ``y``,
+        and ``z`` attributes. The generated XML is formatted to match the structure required for
+        importing into the :class:`MicGeom` class.
 
         Parameters
         ----------
-        filename : str
-            Name of the file to which the microphone positions are written.
+        filename : :class:`str`
+            The path to the file to which the microphone positions will be written. The file
+            extension must be ``.xml``.
+
+        Raises
+        ------
+        :obj:`OSError`
+            If the file cannot be written due to permissions issues or invalid file paths.
+
+        Notes
+        -----
+        - The file will be saved in UTF-8 encoding.
+        - The ``Name`` attribute for each microphone is set as ``"Point {i+1}"``, where ``i`` is the
+          index of the microphone.
+        - This method only exports the positions of the valid microphones (those not listed in
+          :attr:`invalid_channels`).
         """
         filepath = Path(filename)
         basename = filepath.stem
