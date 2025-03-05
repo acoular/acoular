@@ -6,7 +6,7 @@ Upcoming Release
 
     **Documentation**
         * adds new docstrings to microphones.py
-
+        * adds docstrings to spectra.py
 
 25.01
 ------------------------
