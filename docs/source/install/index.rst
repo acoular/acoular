@@ -16,7 +16,7 @@ Optional dependencies are only required in some circumsstances and must be insta
     3. Some solvers for the CMF method need `Pylops <https://pylops.readthedocs.io/en/stable/installation.html>`_.
 
 
-Install option 2: pip
+Install option 1: pip
 ----------------------------------------------------
 If you have pip installed on your system, you may type
 
