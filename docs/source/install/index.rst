@@ -69,7 +69,7 @@ On Linux OS and for Python version 3.13, the following error may occur after imp
 
     ImportError: traits/ctraits.cpython-313-x86_64-linux-gnu.so: undefined symbol: Py_TRASHCAN_SAFE_BEGIN
 
-We therefore recommend to install Acoular via pip or to use a different Python version (3.10, 3.11, 3.12) when installing via conda.
+We therefore recommend installing Acoular via pip or to use a different Python version (3.10, 3.11, 3.12) when installing via conda.
 Alternatively, you can update the traits package from the conda-forge channel:
 
 .. code-block:: console
