@@ -48,14 +48,14 @@ class RFFT(BaseSpectra, SpectraOut):
 
     #: The number of workers to use for FFT calculation.
     #: If set to a negative value, all available logical CPUs are used.
-    #: Default is ``None``, which relies on the :class:`scipy.fft.rfft` implementation.
+    #: Default is ``None``, which relies on the :func:`scipy.fft.rfft` implementation.
     workers = Union(Int(), None, default_value=None, desc='number of workers to use')
 
     #: Defines the scaling method for the FFT result. Options are:
     #:
     #:     - ``'none'``: No scaling is applied.
     #:     - ``'energy'``: Compensates for energy loss in the FFT result due to truncation,
-    #:       doubling the values for frequencies other than DC and Nyquist.
+    #:       doubling the values for frequencies other than DC and the Nyquist frequency.
     #:     - ``'amplitude'``: Scales the result so that the amplitude
     #:       of discrete tones is independent of the block size.
     scaling = Enum('none', 'energy', 'amplitude')
@@ -64,14 +64,14 @@ class RFFT(BaseSpectra, SpectraOut):
     #: Default is ``1024``.
     block_size = Property()
 
-    #: The number of frequency bins in the FFT result, calculated as ``block_size / 2 + 1``.
+    #: The number of frequency bins in the FFT result, calculated as ``block_size // 2 + 1``.
     num_freqs = Property(depends_on=['_block_size'])
 
     #: The total number of snapshots (blocks) available in the FFT result,
     #: determined by the size of the input data and the block size.
     num_samples = Property(depends_on=['source.num_samples', '_block_size'])
 
-    #: A 1D array containing the Discrete Fourier Transform
+    #: A 1-D array containing the Discrete Fourier Transform
     #: sample frequencies corresponding to the FFT output.
     freqs = Property()
 
@@ -118,7 +118,7 @@ class RFFT(BaseSpectra, SpectraOut):
         # Returns
         # -------
         # f : ndarray
-        #     1-D Array of length *block_size/2+1* containing the sample frequencies.
+        #     1-D Array of length *block_size // 2 + 1* containing the sample frequencies.
         if self.source is not None:
             return abs(fft.fftfreq(self.block_size, 1.0 / self.source.sample_freq)[: int(self.block_size / 2 + 1)])
         return np.array([])
@@ -173,7 +173,7 @@ class RFFT(BaseSpectra, SpectraOut):
 @deprecated_alias({'numsamples': 'num_samples'}, read_only=True)
 class IRFFT(TimeOut):
     """
-    Performs the inverse Fast Fourier Transform (IFFT) for one-sided multi-channel spectra.
+    Perform the inverse Fast Fourier Transform (IFFT) for one-sided multi-channel spectra.
 
     This class converts spectral data from the frequency domain back into time-domain signals.
     The IFFT is calculated block-wise, where the block size is defined by the spectral data
@@ -187,7 +187,7 @@ class IRFFT(TimeOut):
 
     #: The number of workers (threads) to use for the IFFT calculation.
     #: A negative value utilizes all available logical CPUs.
-    #: Default is ``None``, which relies on the :class:`scipy.fft.irfft` implementation.
+    #: Default is ``None``, which relies on the :func:`scipy.fft.irfft` implementation.
     workers = Union(Int(), None, default_value=None, desc='number of workers to use')
 
     #: Determines the floating-point precision of the resulting time-domain signals.
@@ -196,10 +196,11 @@ class IRFFT(TimeOut):
     precision = Enum('float64', 'float32', desc='precision of the time signal after the ifft')
 
     #: The total number of time-domain samples in the output.
-    #: Computed as the product of the number of spectra snapshots and the block size.
+    #: Computed as the product of the number of input samples and the block size.
+    #: Returns ``-1`` if the number of input samples is negative.
     num_samples = Property(depends_on=['source.num_samples', 'source._block_size'])
 
-    # Internal signal buffer used for handling arbitrary output block sizes. Ensures efficient
+    # Internal signal buffer used for handling arbitrary output block sizes. Optimizes
     # processing when the requested output block size does not match the source block size.
     _buffer = CArray(desc='signal buffer')
 
@@ -249,12 +250,12 @@ class IRFFT(TimeOut):
         Yields
         ------
         :class:`numpy.ndarray`
-            Blocks of time-domain signals with shape (num, num_channels). The last block may
+            Blocks of time-domain signals with shape (num, :attr:`num_channels`). The last block may
             contain fewer samples if the input data is insufficient to fill the requested size.
 
         Notes
         -----
-        - The method ensures the source block size and frequency data are compatible for IFFT.
+        - The method ensures that the source block size and frequency data are compatible for IFFT.
         - If the requested block size does not match the source block size, a buffer is used
           to assemble the output, allowing arbitrary block sizes to be generated.
         - For performance optimization, the number of workers (threads) can be specified via
@@ -275,11 +276,12 @@ class IRFFT(TimeOut):
 
 class AutoPowerSpectra(SpectraOut):
     """
-    Computes the real-valued auto-power spectra from multi-channel frequency-domain data.
+    Compute the real-valued auto-power spectra from multi-channel frequency-domain data.
 
     The auto-power spectra provide a measure of the power contained in each frequency bin
     for each channel. This class processes spectral data from the source block-by-block,
-    applying scaling and precision adjustments as configured by its attributes.
+    applying scaling and precision adjustments as configured by the :attr:`scaling` and
+    :attr:`precision` attributes.
     """
 
     #: The data source that provides frequency-domain spectra,
@@ -290,7 +292,7 @@ class AutoPowerSpectra(SpectraOut):
     #:
     #:     - ``'power'``: Outputs the raw power of the spectra.
     #:     - ``'psd'``: Outputs the Power Spectral Density (PSD),
-    #:       normalized by the block size and sample frequency.
+    #:       normalized by the block size and sampling frequency.
     scaling = Enum('power', 'psd')
 
     #: A Boolean flag indicating whether the input spectra are single-sided. Default is ``True``.
@@ -331,8 +333,7 @@ class AutoPowerSpectra(SpectraOut):
         Yields
         ------
         :class:`numpy.ndarray`
-            Blocks of real-valued auto-power spectra with shape
-            (``num``, ``num_channels * num_freqs``). The last block may contain fewer
+            (num, :attr:`num_channels` ``*`` :attr:`num_freqs`). The last block may contain fewer
             snapshots if the input data does not completely fill the requested block size.
 
         Notes
@@ -352,11 +353,11 @@ class AutoPowerSpectra(SpectraOut):
 @deprecated_alias({'numchannels': 'num_channels'}, read_only=True)
 class CrossPowerSpectra(AutoPowerSpectra):
     """
-    Computes the complex-valued auto- and cross-power spectra from frequency-domain data.
+    Compute the complex-valued auto- and cross-power spectra from frequency-domain data.
 
     This class generates the cross-spectral matrix (CSM) in a flattened representation, which
     includes the auto-power spectra (diagonal elements) and cross-power spectra (off-diagonal
-    elements). Depending on the :attr:`calculation mode<calc_mode>`, the class can compute:
+    elements). Depending on the :attr:`calc_mode`, the class can compute:
 
     - The full CSM, which includes all elements.
     - Only the upper triangle of the CSM.
@@ -366,7 +367,7 @@ class CrossPowerSpectra(AutoPowerSpectra):
     """
 
     #: The data source providing the input spectra,
-    #: implemented as an instance of :class:'~acoular.base.SpectraGenerator' or a derived object.
+    #: implemented as an instance of :class:`~acoular.base.SpectraGenerator` or a derived object.
     source = Instance(SpectraGenerator)
 
     #: Specifies the floating-point precision of the computed cross-spectral matrix (CSM).
@@ -378,7 +379,8 @@ class CrossPowerSpectra(AutoPowerSpectra):
     #:     - ``'full'``: Computes the full CSM, including all auto- and cross-power spectra.
     #:     - ``'upper'``: Computes only the upper triangle of the CSM,
     #        excluding redundant lower-triangle elements.
-    #:     - ``'lower'``: Computes only the lower triangle of the CSM.
+    #:     - ``'lower'``: Computes only the lower triangle of the CSM,
+    #:       excluding redundant upper-triangle elements.
     #:
     #: Default is ``'full'``.
     calc_mode = Enum('full', 'upper', 'lower', desc='calculation mode')
@@ -388,7 +390,7 @@ class CrossPowerSpectra(AutoPowerSpectra):
     #:
     #:     - ``'full'``: :math:`n^2` (all elements in the CSM).
     #:     - ``'upper'``: :math:`n + n(n-1)/2` (diagonal + upper triangle elements).
-    #:     - ``'lower'``: Similar to ``'upper'`` but for the lower triangle.
+    #:     - ``'lower'``: :math:`n + n(n-1)/2` (diagonal + lower triangle elements).
     num_channels = Property(depends_on=['source.num_channels'])
 
     #: A unique identifier based on the computation properties.
@@ -417,14 +419,15 @@ class CrossPowerSpectra(AutoPowerSpectra):
         Parameters
         ----------
         num : :class:`int`, optional
-            Number of snapshots (blocks) in each output data block. Defaults to 1.
+            Number of snapshots (blocks) in each output data block. Default is ``1``.
 
         Yields
         ------
         :class:`numpy.ndarray`
             Blocks of complex-valued auto- and cross-power spectra with shape
-            ``(num, num_channels * num_freqs)``. The last block may be shorter than ``num``
-            if the input data does not completely fill the requested block size.
+            ``(num, :attr:`num_channels` * :attr:`num_freqs`)``.
+            The last block may contain fewer than ``num`` elements if the input data
+            does not completely fill the requested block size.
         """
         nc_src = self.source.num_channels
         nc = self.num_channels
@@ -462,7 +465,7 @@ class FFTSpectra(RFFT):
 
     Warnings
     --------
-    This class is retained temporarily for backward compatibility but should not be used in
+    This class remains temporarily available for backward compatibility but should not be used in
     new implementations.
     """
 
