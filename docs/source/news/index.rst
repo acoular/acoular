@@ -6,7 +6,7 @@ Upcoming Release
 
     **Documentation**
         * adds new docstrings to microphones.py
-
+        * adds docstrings to spectra.py
 
 25.01
 ------------------------
@@ -36,7 +36,6 @@ Upcoming Release
         * updates examples to use a right hand co-ordinate system
         * adds new docstrings to trajectory.py
         * adds new docstrings to grids.py
-        * adds docstrings to spectra.py
 
     **Tests**
         * tests now consequently use `pytest` framework instead of `unittest`
