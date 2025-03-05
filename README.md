@@ -87,12 +87,13 @@ If you are interested in contributing, have a look at the [CONTRIBUTING.md](CONT
 This reads data from 64 microphone channels and computes a beamforming map for the 8kHz third octave band:
 
 ```python
-from os.path import join, split
+from pathlib import Path
+
 import acoular as ac
 import matplotlib.pylab as plt
 
 # this file contains the microphone coordinates
-micgeofile = join(split(ac.__file__)[0],'xml','array_64.xml')
+micgeofile = Path(ac.__file__).parent / 'xml' / 'array_64.xml'
 # set up object managing the microphone coordinates
 mg = ac.MicGeom( file=micgeofile )
 # generate test data, in real life this would come from an array measurement
@@ -104,7 +105,7 @@ ps = ac.PowerSpectra( source=ts, block_size=128, window='Hanning' )
 # alternatively, you can use the in-memory Mixer object directly:
 # ps = ac.PowerSpectra( source=p, block_size=128, window='Hanning' )
 # set up object managing the mapping grid
-rg = ac.RectGrid( x_min=-0.2, x_max=0.2, y_min=-0.2, y_max=0.2, z=0.3, \
+rg = ac.RectGrid( x_min=-0.2, x_max=0.2, y_min=-0.2, y_max=0.2, z=-0.3, \
 increment=0.01 )
 # set up steering vector, implicitely contains also the standard quiescent 
 # environment with standard speed of sound
@@ -119,7 +120,7 @@ Lm = ac.L_p( pm )
 # plot the map
 plt.imshow( Lm.T, origin='lower', vmin=Lm.max()-10, extent=rg.extend(), \
 interpolation='bicubic')
-plt.title(f'Beamformer (base) for 3 sources measured for 8000 Hz')
+plt.title('Beamformer (base) for 3 sources measured for 8000 Hz')
 plt.xlabel('x in m')
 plt.ylabel('y in m')
 plt.colorbar(label=r'$L_p$')

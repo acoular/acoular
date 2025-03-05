@@ -74,8 +74,8 @@ Our aim is to produce a mapping of the acoustic sources. Because such a map can 
 
 .. ipython:: 
 
-    In [1]: rg = acoular.RectGrid( x_min=-0.2, x_max=0.2, y_min=-0.2, y_max=0.2, z=0.3, increment=0.01 )
-
+    In [1]: rg = acoular.RectGrid( x_min=-0.2, x_max=0.2, y_min=-0.2, y_max=0.2, z=-0.3, increment=0.01 )
+ 
 The traits assigned in brackets determine the dimensions of the grid and distance (increment) between individual source positions. Using
 
 .. ipython:: 
@@ -88,9 +88,9 @@ The positions of the microphones are needed for beamforming, so we create a :cla
 
 .. ipython:: 
 
-    In [1]: from os import path
+    In [1]: from pathlib import Path
 
-    In [1]: micgeofile = path.join(path.split(acoular.__file__)[0],'xml','array_64.xml')
+    In [1]: micgeofile = Path(acoular.__file__).parent / 'xml' / 'array_64.xml'
 
     In [1]: mg = acoular.MicGeom( file=micgeofile )
 
