@@ -17,6 +17,8 @@ jobs:
         uses: actions/checkout@v4
       - name: Conda environment creation and activation
         uses: ./.github/actions/setup-conda
+      - name: Set up hatch
+        uses: ./.github/actions/setup-hatch
       - name: Build package
         run: conda build --no-anaconda-upload --no-copy-test-source-files recipe.local --output-folder ./conda_package
       - name: Upload conda package artifact
