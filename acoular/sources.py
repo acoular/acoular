@@ -114,9 +114,9 @@ def _fill_mic_signal_block(out, signal, rm, ind, blocksize, num_channels, up, pr
 
 def spherical_hn1(n, z):
     r"""
-    Compute the Spherical Hankel Function of the First Kind.
+    Compute the spherical Hankel Function of the first kind.
 
-    The spherical Hankel function of the first kind, :math:`h_n^{(1)}(z)`, is defined as:
+    The spherical Hankel function of the first kind, :math:`h_n^{(1)}(z)`, is defined as
 
     .. math:: h_n^{(1)}(z) = j_n(z) + i \cdot y_n(z)
 
@@ -132,9 +132,9 @@ def spherical_hn1(n, z):
 
     Parameters
     ----------
-    n : :class:`int`
+    n : :class:`int`, array_like
         Order of the spherical Hankel function. Must be a non-negative integer.
-    z : array or scalar
+    z : complex or :class:`float`, array_like
         Argument of the spherical Hankel function. Can be real or complex.
 
     Returns
@@ -170,7 +170,7 @@ def spherical_hn1(n, z):
 
 def get_radiation_angles(direction, mpos, sourceposition):
     r"""
-    Calculate the azimuthal and elevation angles between microphones and the source.
+    Calculate the azimuthal and elevation angles between the microphones and the source.
 
     The function computes the azimuth (``azi``) and elevation (``ele``) angles between each
     microphone position and the source position, taking into account the orientation of the
@@ -178,13 +178,13 @@ def get_radiation_angles(direction, mpos, sourceposition):
 
     Parameters
     ----------
-    direction : array of shape ``(3,)``
+    direction : :class:`numpy.ndarray` of shape ``(3,)``
         Unit vector representing the spherical harmonic orientation. It should be a 3-element array
         corresponding to the ``x``, ``y``, and ``z`` components of the direction.
-    mpos : array of shape ``(3, N)``
+    mpos : :class:`numpy.ndarray` of shape ``(3, N)``
         Microphone positions in a 3D Cartesian coordinate system. The array should have 3 rows (the
         ``x``, ``y`` and ``z`` coordinates) and ``N`` columns (one for each microphone).
-    sourceposition : array of shape ``(3,)``
+    sourceposition : :class:`numpy.ndarray` of shape ``(3,)``
         Position of the source in a 3D Cartesian coordinate system. It should be a 3-element array
         corresponding to the ``x``, ``y``, and ``z`` coordinates of the source.
 
@@ -199,9 +199,9 @@ def get_radiation_angles(direction, mpos, sourceposition):
 
     See Also
     --------
-    :class:`numpy.linalg.norm` :
+    :func:`numpy.linalg.norm` :
         Computes the norm of a vector.
-    :class:`numpy.arctan2` :
+    :func:`numpy.arctan2` :
         Computes the arctangent of two variables, preserving quadrant information.
 
     Notes
@@ -258,13 +258,13 @@ def get_modes(lOrder, direction, mpos, sourceposition=None):  # noqa: N803
     lOrder : :class:`int`
         The maximum order of spherical harmonics to compute. The resulting modes will include all
         orders up to and including ``lOrder``.
-    direction : array of shape ``(3,)``
+    direction : :class:`numpy.ndarray` of shape ``(3,)``
         Unit vector representing the orientation of the spherical harmonics. Should contain the
         ``x``, ``y``, and ``z`` components of the direction.
-    mpos : array of shape ``(3, N)``
+    mpos : :class:`numpy.ndarray` of shape ``(3, N)``
         Microphone positions in a 3D Cartesian coordinate system. The array should have 3 rows (the
         ``x``, ``y`` and ``z`` coordinates) and ``N`` columns (one for each microphone).
-    sourceposition : array of shape ``(3,)``, optional
+    sourceposition : :class:`numpy.ndarray` of shape ``(3,)``, optional
         Position of the source in a 3D Cartesian coordinate system. If not provided, it defaults to
         the origin ``[0, 0, 0]``.
 
@@ -278,7 +278,7 @@ def get_modes(lOrder, direction, mpos, sourceposition=None):  # noqa: N803
     --------
     :func:`get_radiation_angles` :
         Computes azimuth and elevation angles between microphones and the source.
-    :func:`scipy.special.sph_harm` : Computes spherical harmonic values.
+    :obj:`scipy.special.sph_harm` : Computes spherical harmonic values.
 
     Notes
     -----
@@ -349,7 +349,7 @@ class TimeSamples(SamplesGenerator):
     >>> print(f'number of channels: {ts.num_channels}')  # doctest: +SKIP
     number of channels: 56 # doctest: +SKIP
 
-    Alternatively, the time data can be specified directly as a numpy array. In this case, the
+    Alternatively, the time data can be specified directly as a NumPy array. In this case, the
     :attr:`data` and :attr:`~acoular.base.Generator.sample_freq` attributes must be set manually.
 
     >>> import numpy as np
@@ -493,7 +493,7 @@ class TimeSamples(SamplesGenerator):
         (256, 4)
         (232, 4)
 
-        The last block has fewer samples.
+        Note that the last block may have fewer that ``num`` samples.
         """
         if self.num_samples == 0:
             msg = 'no samples available'
@@ -715,7 +715,7 @@ class MaskedTimeSamples(TimeSamples):
         (256, 4)
         (32, 4)
 
-        The last block has fewer samples.
+        Note that the last block may have fewer that ``num`` samples.
         """
         sli = slice(self.start, self.stop).indices(self.num_samples_total)
         i = sli[0]
@@ -800,7 +800,7 @@ class PointSource(SamplesGenerator):
     >>> sg = SineGenerator(freq=1000, sample_freq=51200, num_samples=6)
     >>> ps = PointSource(signal=sg, loc=(0.5, 0.5, 1.0), mics=mg)
 
-    For blocksize we choose 4. Generate the output signal at the microphones in blocks:
+    We choose a blocksize of 4 and generate the output signal at the microphones in blocks:
 
     >>> for block in ps.result(num=4):
     ...     print(block.shape)
@@ -830,9 +830,8 @@ class PointSource(SamplesGenerator):
             warn('Source and microphone locations are identical.', Warning, stacklevel=2)
 
     #: An :class:`~acoular.environments.Environment` or derived object providing sound propagation
-    #: details, such as speed of sound in the medium (``c`` attribute of
-    #: :attr:~acoular.environments.Environment). Default is
-    #: :class:`~acoular.environments.Environment`.
+    #: details, such as :attr:`speed of sound in the medium<acoular.environments.Environment.c>`.
+    #: Default is :class:`~acoular.environments.Environment`.
     env = Instance(Environment(), Environment)
 
     #: Start time of the signal in seconds. Default is ``0.0``.
@@ -842,9 +841,11 @@ class PointSource(SamplesGenerator):
     start = Float(0.0, desc='sample start time')
 
     #: Behavior of the signal for negative time indices,
-    #: i.e. if (:attr:`start` ``<`` `:attr:start_t`):
-    #:    - ``'loop'``: Repeat the :attr:`signal` from its end.
-    #:    - ``'zeros'``: Use zeros, recommended for deterministic signals.
+    #: i.e. if (:attr:`start` ``<`` :attr:`start_t`):
+    #:
+    #: - ``'loop'``: Repeat the :attr:`signal` from its end.
+    #: - ``'zeros'``: Use zeros, recommended for deterministic signals.
+    #:
     #: Default is ``'loop'``.
     prepadding = Enum('loop', 'zeros', desc='Behaviour for negative time indices.')
 
@@ -1085,7 +1086,7 @@ class MovingPointSource(PointSource):
     The :class:`MovingPointSource` class models a sound source that follows a
     :attr:`specified trajectory<trajectory>` while emitting a :attr:`~PointSource.signal`.
     This allows for the simulation of dynamic acoustic scenarios,
-    such as vehicles in motion or sources changingposition over time.
+    e.g. sources changing position over time such as vehicles in motion.
 
     See Also
     --------
@@ -1131,7 +1132,7 @@ class MovingPointSource(PointSource):
 
         The :meth:`result` method provides a generator that yields blocks of the signal received at
         microphones. It incorporates the :attr:`source's trajectory<trajectory>`, convective
-        amplification (if enabled), and the environmental propagation effects.
+        amplification (if enabled), and environmental propagation effects.
 
         Parameters
         ----------
@@ -1228,7 +1229,9 @@ class PointSourceDipole(PointSource):
 
     #: Vector defining the orientation of the dipole lobes and the distance between the inversely
     #: phased monopoles. The magnitude of the vector determines the monopoles' separation:
-    #:     - ``distance = [lowest wavelength in spectrum] * [magnitude] * 1e-5``
+    #:
+    #: - ``distance = [lowest wavelength in spectrum] * [magnitude] * 1e-5``
+    #:
     #: Use vectors with magnitudes on the order of ``1.0`` or smaller for best results.
     #: Default is ``(0.0, 0.0, 1.0)`` (z-axis orientation).
     #:
@@ -1407,14 +1410,15 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
         -------
         tuple
             A tuple containing:
-                - te : :class:`numpy.ndarray`
-                    Emission times for each microphone.
-                - rm : :class:`numpy.ndarray`
-                    Distances from the source to each microphone.
-                - Mr : :class:`numpy.ndarray`
-                    Radial Mach numbers for the source's motion.
-                - xs : :class:`numpy.ndarray`
-                    Source coordinates at the calculated emission times.
+
+            - te : :class:`numpy.ndarray`
+                Emission times for each microphone.
+            - rm : :class:`numpy.ndarray`
+                Distances from the source to each microphone.
+            - Mr : :class:`numpy.ndarray`
+                Radial Mach numbers for the source's motion.
+            - xs : :class:`numpy.ndarray`
+                Source coordinates at the calculated emission times.
 
         Warnings
         --------
@@ -2326,11 +2330,11 @@ class SourceMixer(SamplesGenerator):
 
 class PointSourceConvolve(PointSource):
     """
-    Blockwise convolution of a source signal with a room impulse response (RIR).
+    Blockwise convolution of a source signal with an impulse response (IR).
 
     The :class:`PointSourceConvolve` class extends :class:`PointSource` to simulate the effects of
     sound propagation through a room or acoustic environment by convolving the input signal with a
-    specified :attr:`convolution kernel<kernel>` (representing the RIR).
+    specified :attr:`convolution kernel<kernel>` (the IR).
 
     The convolution is performed block-by-block to allow efficient streaming
     and processing of large signals.
@@ -2362,14 +2366,14 @@ class PointSourceConvolve(PointSource):
     >>> # Generate a sine wave signal
     >>> sine_signal = ac.SineGenerator(freq=1000, sample_freq=48000, num_samples=1000)
     >>>
-    >>> # Define a room impulse response kernel (example: 100-tap random kernel)
-    >>> rir_kernel = np.random.randn(100, 1)  # One kernel for all channels
+    >>> # Define an impulse response kernel (example: 100-tap random kernel)
+    >>> kernel = np.random.randn(100, 1)  # One kernel for all channels
     >>>
     >>> # Create the convolving source
     >>> convolve_source = PointSourceConvolve(
     ...     signal=sine_signal,
     ...     loc=(0, 0, 1),  # Source located at (0, 0, 1)
-    ...     kernel=rir_kernel,
+    ...     kernel=kernel,
     ...     mics=mg,
     ... )
     >>>
