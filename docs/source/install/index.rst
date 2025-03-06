@@ -16,7 +16,21 @@ Optional dependencies are only required in some circumsstances and must be insta
     3. Some solvers for the CMF method need `Pylops <https://pylops.readthedocs.io/en/stable/installation.html>`_.
 
 
-Install option 1: Anaconda 
+Install option 1: pip
+----------------------------------------------------
+If you have pip installed on your system, you may type
+
+.. code-block:: console
+
+	$ pip install acoular
+
+to install Acoular without optional dependencies. If you wish to include the optional dependencies, you may type
+
+.. code-block:: console
+
+    $ pip install acoular[full]
+
+Install option 2: Anaconda 
 ----------------------------------------------------
 
 This option assumes that you have the `Anaconda <https://www.anaconda.com/download/>`_ Python-distribution installed on your computer.
@@ -33,15 +47,6 @@ Depending on your type of Anaconda installation (single user or system-wide), yo
 
 Alternatively, you may choose to install into a dedicated conda environment. 
 
-Install option 2: pip
-----------------------------------------------------
-If you have pip installed on your system, you may type
-
-.. code-block:: console
-
-	$ pip install acoular
-
-to install acoular.
 
 Install option 3: source install
 --------------------------------
@@ -54,10 +59,28 @@ You may download the `source tarball <https://pypi.python.org/pypi/acoular>`_. U
 to install the software.   
 Another option to get the source is to clone or fork from `Github <https://github.com/acoular/acoular>`_.
 
+Known Issues
+------------
+
+Recently, we have encountered some issues with the installation of Acoular via conda using the defaults channel.
+On Linux OS and for Python version 3.13, the following error may occur after importing acoular in Python:
+
+.. code-block:: python
+
+    ImportError: traits/ctraits.cpython-313-x86_64-linux-gnu.so: undefined symbol: Py_TRASHCAN_SAFE_BEGIN
+
+We therefore recommend installing Acoular via pip or to use a different Python version (3.10, 3.11, 3.12) when installing via conda.
+Alternatively, you can update the traits package from the conda-forge channel:
+
+.. code-block:: console
+
+    $ conda update -c conda-forge traits
+
 Verify Acoular installation
 ---------------------------
 
-If the installation has finished, you may try out Acoular by importing the module and running the Acoular demo script in a Python console. The acoular demo script needs `matplotlib <http://matplotlib.org>`_ installed to render the graphical output.
+If the installation has finished, you may try out Acoular by importing the module and running the Acoular demo script in a Python console. 
+The Acoular demo script needs `matplotlib <http://matplotlib.org>`_ installed to render the graphical output.
 
 .. code-block:: console
 
