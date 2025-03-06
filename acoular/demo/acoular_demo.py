@@ -45,9 +45,9 @@ def create_three_sources(mg, h5savefile='three_sources.h5'):
     n1 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=nsamples, seed=1)
     n2 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=nsamples, seed=2, rms=0.7)
     n3 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=nsamples, seed=3, rms=0.5)
-    p1 = ac.PointSource(signal=n1, mics=mg, loc=(-0.1, -0.1, 0.3))
-    p2 = ac.PointSource(signal=n2, mics=mg, loc=(0.15, 0, 0.3))
-    p3 = ac.PointSource(signal=n3, mics=mg, loc=(0, 0.1, 0.3))
+    p1 = ac.PointSource(signal=n1, mics=mg, loc=(-0.1, -0.1, -0.3))
+    p2 = ac.PointSource(signal=n2, mics=mg, loc=(0.15, 0, -0.3))
+    p3 = ac.PointSource(signal=n3, mics=mg, loc=(0, 0.1, -0.3))
     pa = ac.Mixer(source=p1, sources=[p2, p3])
     if h5savefile:
         wh5 = ac.WriteH5(source=pa, file=h5savefile)
@@ -76,7 +76,7 @@ def run():
 
     ps = ac.PowerSpectra(source=pa, block_size=128, window='Hanning')
 
-    rg = ac.RectGrid(x_min=-0.2, x_max=0.2, y_min=-0.2, y_max=0.2, z=0.3, increment=0.01)
+    rg = ac.RectGrid(x_min=-0.2, x_max=0.2, y_min=-0.2, y_max=0.2, z=-0.3, increment=0.01)
     st = ac.SteeringVector(grid=rg, mics=mg)
 
     bb = ac.BeamformerBase(freq_data=ps, steer=st)
@@ -84,7 +84,7 @@ def run():
     spl = ac.L_p(pm)
 
     if ac.config.have_matplotlib:
-        from pylab import axis, colorbar, figure, imshow, plot, show
+        from matplotlib.pyplot import axis, colorbar, figure, imshow, plot, show
 
         # show map
         imshow(spl.T, origin='lower', vmin=spl.max() - 10, extent=rg.extend(), interpolation='bicubic')

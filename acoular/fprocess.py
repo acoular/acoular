@@ -1,7 +1,8 @@
 # ------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
-"""Implements blockwise processing methods in the frequency domain.
+"""
+Implements blockwise processing methods in the frequency domain.
 
 .. autosummary::
     :toctree: generated/
@@ -30,46 +31,55 @@ from .spectra import BaseSpectra
 
 @deprecated_alias({'numfreqs': 'num_freqs', 'numsamples': 'num_samples'}, read_only=True)
 class RFFT(BaseSpectra, SpectraOut):
-    """Provides the one-sided Fast Fourier Transform (FFT) for real-valued multichannel time data.
+    """
+    Compute the one-sided Fast Fourier Transform (FFT) for real-valued multichannel time data.
 
-    The FFT is calculated block-wise, i.e. the input data is divided into blocks of length
-    :attr:`block_size` and the FFT is calculated for each block. Optionally, a window function
-    can be applied to the data before the FFT calculation via the :attr:`window` attribute.
+    The FFT is performed block-wise, dividing the input data into blocks of length specified
+    by the :attr:`block_size` attribute. A window function can be optionally
+    applied to each block before the FFT calculation, controlled via the :attr:`window` attribute.
+
+    This class provides flexibility in scaling the FFT results for different use cases, such as
+    preserving amplitude or energy, by setting the :attr:`scaling` attribute.
     """
 
-    #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
+    #: Data source; an instance of :class:`~acoular.base.SamplesGenerator` or a derived object.
+    #: This provides the input time-domain data for FFT processing.
     source = Instance(SamplesGenerator)
 
-    #: Number of workers to use for the FFT calculation. If negative values are used,
-    #: all available logical CPUs will be considered (``scipy.fft.rfft`` implementation wraps around
-    #: from ``os.cpu_count()``).
-    #: Default is `None` (handled by scipy)
+    #: The number of workers to use for FFT calculation.
+    #: If set to a negative value, all available logical CPUs are used.
+    #: Default is ``None``, which relies on the :func:`scipy.fft.rfft` implementation.
     workers = Union(Int(), None, default_value=None, desc='number of workers to use')
 
-    #: Scaling method, either 'amplitude', 'energy' or :code:`none`.
-    #: Default is :code:`none`.
-    #: 'energy': compensates for the energy loss due to truncation of the FFT result. The resulting
-    #: one-sided spectrum is multiplied by 2.0, except for the DC and Nyquist frequency.
-    #: 'amplitude': scales the one-sided spectrum so that the amplitude of discrete tones does not
-    #: depend on the block size.
+    #: Defines the scaling method for the FFT result. Options are:
+    #:
+    #:     - ``'none'``: No scaling is applied.
+    #:     - ``'energy'``: Compensates for energy loss in the FFT result due to truncation,
+    #:       doubling the values for frequencies other than DC and the Nyquist frequency.
+    #:     - ``'amplitude'``: Scales the result so that the amplitude
+    #:       of discrete tones is independent of the block size.
     scaling = Enum('none', 'energy', 'amplitude')
 
-    #: block size of the FFT. Default is 1024.
+    #: The length of each block of time-domain data used for the FFT. Must be an even number.
+    #: Default is ``1024``.
     block_size = Property()
 
-    #: Number of frequencies in the output.
+    #: The number of frequency bins in the FFT result, calculated as ``block_size // 2 + 1``.
     num_freqs = Property(depends_on=['_block_size'])
 
-    #: Number of snapshots in the output.
+    #: The total number of snapshots (blocks) available in the FFT result,
+    #: determined by the size of the input data and the block size.
     num_samples = Property(depends_on=['source.num_samples', '_block_size'])
 
-    #: 1-D array of FFT sample frequencies.
+    #: A 1-D array containing the Discrete Fourier Transform
+    #: sample frequencies corresponding to the FFT output.
     freqs = Property()
 
-    # internal block size variable
+    # Internal representation of the block size for FFT processing.
+    # Used for validation and property management.
     _block_size = Int(1024, desc='block size of the FFT')
 
-    # internal identifier
+    #: A unique identifier based on the process properties.
     digest = Property(depends_on=['source.digest', 'scaling', 'precision', '_block_size', 'window', 'overlap'])
 
     @cached_property
@@ -96,39 +106,49 @@ class RFFT(BaseSpectra, SpectraOut):
         self._block_size = value
 
     def _scale(self, data, scaling_value):
-        """Corrects the energy of the one-sided FFT data."""
+        # Corrects the energy of the one-sided FFT data.
         if self.scaling == 'amplitude' or self.scaling == 'energy':
             data[1:-1] *= 2.0
         data *= scaling_value
         return data
 
     def _get_freqs(self):
-        """Return the Discrete Fourier Transform sample frequencies.
+        # Return the Discrete Fourier Transform sample frequencies.
 
-        Returns
-        -------
-        f : ndarray
-            1-D Array of length *block_size/2+1* containing the sample frequencies.
-
-        """
+        # Returns
+        # -------
+        # f : ndarray
+        #     1-D Array of length *block_size // 2 + 1* containing the sample frequencies.
         if self.source is not None:
             return abs(fft.fftfreq(self.block_size, 1.0 / self.source.sample_freq)[: int(self.block_size / 2 + 1)])
         return np.array([])
 
     def result(self, num=1):
-        """Python generator that yields the output block-wise.
+        """
+        Yield the FFT results block-wise as multi-channel spectra.
+
+        This generator processes the input data block-by-block, applying the specified
+        window function and FFT parameters. The output consists of the FFT spectra for
+        each block, scaled according to the selected :attr:`scaling` method.
 
         Parameters
         ----------
-        num : integer
-            This parameter defines the number of multi-channel spectra (i.e. snapshots) per block
-            returned by the generator.
+        num : :class:`int`, optional
+            Number of multi-channel spectra (snapshots) per block to return. Default is ``1``.
 
-        Returns
-        -------
-        Spectra block of shape (num, :attr:`num_channels` * :attr:`num_freqs`).
-            The last block may be shorter than num.
+        Yields
+        ------
+        :class:`numpy.ndarray`
+            A block of FFT spectra with shape (num, :attr:`num_channels` ``*`` :attr:`num_freqs`).
+            The final block may contain fewer than ``num`` spectra if the input data is insufficient
+            to fill the last block.
 
+        Notes
+        -----
+        - The generator compensates for energy or amplitude loss based on the :attr:`scaling`
+          attribute.
+        - If the input data source provides fewer samples than required for a complete block,
+          the remaining spectra are padded or adjusted accordingly.
         """
         wind = self.window_(self.block_size)
         if self.scaling == 'none' or self.scaling == 'energy':  # only compensate for the window
@@ -152,28 +172,39 @@ class RFFT(BaseSpectra, SpectraOut):
 
 @deprecated_alias({'numsamples': 'num_samples'}, read_only=True)
 class IRFFT(TimeOut):
-    """Calculates the inverse Fast Fourier Transform (IFFT) for one-sided multi-channel spectra."""
+    """
+    Perform the inverse Fast Fourier Transform (IFFT) for one-sided multi-channel spectra.
 
-    #: Data source; :class:`~acoular.base.SpectraGenerator` or derived object.
+    This class converts spectral data from the frequency domain back into time-domain signals.
+    The IFFT is calculated block-wise, where the block size is defined by the spectral data
+    source. The output time-domain signals are scaled and processed according to the precision
+    defined by the :attr:`precision` attribute.
+    """
+
+    #: Data source providing one-sided spectra, implemented as an instance of
+    # :class:`~acoular.base.SpectraGenerator` or a derived object.
     source = Instance(SpectraGenerator)
 
-    #: Number of workers to use for the FFT calculation. If negative values are used,
-    #: all available logical CPUs will be considered (``scipy.fft.rfft`` implementation wraps around
-    #: from ``os.cpu_count()``).
-    #: Default is `None` (handled by scipy)
+    #: The number of workers (threads) to use for the IFFT calculation.
+    #: A negative value utilizes all available logical CPUs.
+    #: Default is ``None``, which relies on the :func:`scipy.fft.irfft` implementation.
     workers = Union(Int(), None, default_value=None, desc='number of workers to use')
 
-    #: The floating-number-precision of the resulting time signals, corresponding to numpy dtypes.
-    #: Default is 64 bit.
+    #: Determines the floating-point precision of the resulting time-domain signals.
+    #: Options include ``'float64'`` and ``'float32'``.
+    #: Default is ``'float64'``, ensuring high precision.
     precision = Enum('float64', 'float32', desc='precision of the time signal after the ifft')
 
-    #: Number of time samples in the output.
+    #: The total number of time-domain samples in the output.
+    #: Computed as the product of the number of input samples and the block size.
+    #: Returns ``-1`` if the number of input samples is negative.
     num_samples = Property(depends_on=['source.num_samples', 'source._block_size'])
 
-    # internal time signal buffer to handle arbitrary output block sizes
+    # Internal signal buffer used for handling arbitrary output block sizes. Optimizes
+    # processing when the requested output block size does not match the source block size.
     _buffer = CArray(desc='signal buffer')
 
-    # internal identifier
+    #: A unique identifier based on the process properties.
     digest = Property(depends_on=['source.digest', 'scaling', 'precision', '_block_size', 'window', 'overlap'])
 
     def _get_num_samples(self):
@@ -203,18 +234,32 @@ class IRFFT(TimeOut):
             raise ValueError(msg)
 
     def result(self, num):
-        """Python generator that yields the output block-wise.
+        """
+        Generate time-domain signal blocks from spectral data.
+
+        This generator processes spectral data block-by-block, performing an inverse Fast
+        Fourier Transform (IFFT) to convert the input spectra into time-domain signals.
+        The output is yielded in blocks of the specified size.
 
         Parameters
         ----------
-        num : integer
-            This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block). The last block may be shorter than num.
+        num : :class:`int`
+            The number of time samples per output block. If ``num`` differs from the
+            source block size, an internal buffer is used to assemble the required output.
 
         Yields
         ------
-        numpy.ndarray
-            Yields blocks of shape (num, num_channels).
+        :class:`numpy.ndarray`
+            Blocks of time-domain signals with shape (num, :attr:`num_channels`). The last block may
+            contain fewer samples if the input data is insufficient to fill the requested size.
+
+        Notes
+        -----
+        - The method ensures that the source block size and frequency data are compatible for IFFT.
+        - If the requested block size does not match the source block size, a buffer is used
+          to assemble the output, allowing arbitrary block sizes to be generated.
+        - For performance optimization, the number of workers (threads) can be specified via
+          the :attr:`workers` attribute.
         """
         self._validate()
         bs = self.source.block_size
@@ -230,22 +275,34 @@ class IRFFT(TimeOut):
 
 
 class AutoPowerSpectra(SpectraOut):
-    """Calculates the real-valued auto-power spectra."""
+    """
+    Compute the real-valued auto-power spectra from multi-channel frequency-domain data.
 
-    #: Data source; :class:`~acoular.base.SpectraGenerator` or derived object.
+    The auto-power spectra provide a measure of the power contained in each frequency bin
+    for each channel. This class processes spectral data from the source block-by-block,
+    applying scaling and precision adjustments as configured by the :attr:`scaling` and
+    :attr:`precision` attributes.
+    """
+
+    #: The data source that provides frequency-domain spectra,
+    #: implemented as an instance of :class:`~acoular.base.SpectraGenerator` or a derived object.
     source = Instance(SpectraGenerator)
 
-    #: Scaling method, either 'power' or 'psd' (Power Spectral Density).
-    #: Only relevant if the source is a :class:`~acoular.fprocess.FreqInOut` object.
+    #: Specifies the scaling method for the auto-power spectra. Options are:
+    #:
+    #:     - ``'power'``: Outputs the raw power of the spectra.
+    #:     - ``'psd'``: Outputs the Power Spectral Density (PSD),
+    #:       normalized by the block size and sampling frequency.
     scaling = Enum('power', 'psd')
 
-    #: Determines if the spectra yielded by the source are single-sided spectra.
+    #: A Boolean flag indicating whether the input spectra are single-sided. Default is ``True``.
     single_sided = Bool(True, desc='single sided spectrum')
 
-    #: The floating-number-precision of entries, corresponding to numpy dtypes. Default is 64 bit.
+    #: Specifies the floating-point precision of the computed auto-power spectra.
+    #: Options are ``'float64'`` and ``'float32'``. Default is ``'float64'``.
     precision = Enum('float64', 'float32', desc='floating-number-precision')
 
-    # internal identifier
+    #: A unique identifier based on the computation properties.
     digest = Property(depends_on=['source.digest', 'precision', 'scaling', 'single_sided'])
 
     @cached_property
@@ -261,19 +318,32 @@ class AutoPowerSpectra(SpectraOut):
         return scale
 
     def result(self, num=1):
-        """Python generator that yields the real-valued auto-power spectra.
+        """
+        Generate real-valued auto-power spectra blocks.
+
+        This generator computes the auto-power spectra by taking the element-wise squared
+        magnitude of the input spectra and applying the appropriate scaling. The results
+        are yielded block-by-block with the specified number of snapshots.
 
         Parameters
         ----------
-        num : integer
-            This parameter defines the number of snapshots within each output data block.
+        num : :class:`int`, optional
+            Number of snapshots in each output block. Default is ``1``.
 
         Yields
         ------
-        numpy.ndarray
-            Yields blocks of shape (num, num_channels * num_freqs).
-            The last block may be shorter than num.
+        :class:`numpy.ndarray`
+            (num, :attr:`num_channels` ``*`` :attr:`num_freqs`). The last block may contain fewer
+            snapshots if the input data does not completely fill the requested block size.
 
+        Notes
+        -----
+        - The auto-power spectra are computed as the squared magnitude of the spectra
+          :math:`|S(f)|^2`, where :math:`S(f)` is the frequency-domain signal.
+        - Scaling is applied based on the configuration of the :attr:`scaling` and
+          :attr:`single_sided` attributes.
+        - The floating-point precision of the output is determined by the
+          :attr:`precision` attribute.
         """
         scale = self._get_scaling_value()
         for temp in self.source.result(num):
@@ -282,33 +352,48 @@ class AutoPowerSpectra(SpectraOut):
 
 @deprecated_alias({'numchannels': 'num_channels'}, read_only=True)
 class CrossPowerSpectra(AutoPowerSpectra):
-    """Calculates the complex-valued auto- and cross-power spectra.
+    """
+    Compute the complex-valued auto- and cross-power spectra from frequency-domain data.
 
-    Receives the complex-valued spectra from the source and returns the cross-spectral matrix (CSM)
-    in a flattened representation (i.e. the auto- and cross-power spectra are concatenated along the
-    last axis). If :attr:`calc_mode` is 'full', the full CSM is calculated, if 'upper', only the
-    upper triangle is calculated.
+    This class generates the cross-spectral matrix (CSM) in a flattened representation, which
+    includes the auto-power spectra (diagonal elements) and cross-power spectra (off-diagonal
+    elements). Depending on the :attr:`calc_mode`, the class can compute:
+
+    - The full CSM, which includes all elements.
+    - Only the upper triangle of the CSM.
+    - Only the lower triangle of the CSM.
+
+    The results are computed block-by-block and scaled according to the specified configuration.
     """
 
-    #: Data source; :class:`~acoular.base.SpectraGenerator` or derived object.
+    #: The data source providing the input spectra,
+    #: implemented as an instance of :class:`~acoular.base.SpectraGenerator` or a derived object.
     source = Instance(SpectraGenerator)
 
-    #: The floating-number-precision of entries of csm, eigenvalues and
-    #: eigenvectors, corresponding to numpy dtypes. Default is 64 bit.
+    #: Specifies the floating-point precision of the computed cross-spectral matrix (CSM).
+    #: Options are ``'complex128'`` and ``'complex64'``. Default is ``'complex128'``.
     precision = Enum('complex128', 'complex64', desc='precision of the fft')
 
-    #: Calculation mode, either 'full' or 'upper'.
-    #: 'full' calculates the full cross-spectral matrix, 'upper' calculates
-    # only the upper triangle. Default is 'full'.
+    #: Defines the calculation mode for the cross-spectral matrix:
+    #:
+    #:     - ``'full'``: Computes the full CSM, including all auto- and cross-power spectra.
+    #:     - ``'upper'``: Computes only the upper triangle of the CSM,
+    #        excluding redundant lower-triangle elements.
+    #:     - ``'lower'``: Computes only the lower triangle of the CSM,
+    #:       excluding redundant upper-triangle elements.
+    #:
+    #: Default is ``'full'``.
     calc_mode = Enum('full', 'upper', 'lower', desc='calculation mode')
 
-    #: Number of channels in output. If :attr:`calc_mode` is 'full', then
-    #: :attr:`num_channels` is :math:`n^2`, where :math:`n` is the number of
-    #: channels in the input. If :attr:`calc_mode` is 'upper', then
-    #: :attr:`num_channels` is :math:`n + n(n-1)/2`.
+    #: The number of channels in the output data. The value depends on the number of input channels
+    #: :math:`n` and the selected :attr:`calc_mode`:
+    #:
+    #:     - ``'full'``: :math:`n^2` (all elements in the CSM).
+    #:     - ``'upper'``: :math:`n + n(n-1)/2` (diagonal + upper triangle elements).
+    #:     - ``'lower'``: :math:`n + n(n-1)/2` (diagonal + lower triangle elements).
     num_channels = Property(depends_on=['source.num_channels'])
 
-    # internal identifier
+    #: A unique identifier based on the computation properties.
     digest = Property(depends_on=['source.digest', 'precision', 'scaling', 'single_sided', 'calc_mode'])
 
     @cached_property
@@ -321,18 +406,28 @@ class CrossPowerSpectra(AutoPowerSpectra):
         return digest(self)
 
     def result(self, num=1):
-        """Python generator that yields the output block-wise.
+        """
+        Generate blocks of complex-valued auto- and cross-power spectra.
+
+        This generator computes the cross-spectral matrix (CSM) for input spectra block-by-block.
+        Depending on the :attr:`calc_mode`, the resulting CSM is flattened in one of three ways:
+
+        - ``'full'``: Includes all elements of the CSM.
+        - ``'upper'``: Includes only the diagonal and upper triangle.
+        - ``'lower'``: Includes only the diagonal and lower triangle.
 
         Parameters
         ----------
-        num : integer
-            This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block).
+        num : :class:`int`, optional
+            Number of snapshots (blocks) in each output data block. Default is ``1``.
 
         Yields
         ------
-        numpy.ndarray
-            Yields blocks of shape (num, num_channels * num_freqs).
+        :class:`numpy.ndarray`
+            Blocks of complex-valued auto- and cross-power spectra with shape
+            ``(num, :attr:`num_channels` * :attr:`num_freqs`)``.
+            The last block may contain fewer than ``num`` elements if the input data
+            does not completely fill the requested block size.
         """
         nc_src = self.source.num_channels
         nc = self.num_channels
@@ -358,13 +453,20 @@ class CrossPowerSpectra(AutoPowerSpectra):
 
 
 class FFTSpectra(RFFT):
-    """Provides the one-sided Fast Fourier Transform (FFT) for multichannel time data.
-
-    Alias for :class:`~acoular.fprocess.RFFT`.
+    """
+    Provide the one-sided Fast Fourier Transform (FFT) for multichannel time data.
 
     .. deprecated:: 24.10
-        Using :class:`~acoular.fprocess.FFTSpectra` is deprecated and will be removed in Acoular
-        version 25.07. Use :class:`~acoular.fprocess.RFFT` instead.
+        The :class:`~acoular.fprocess.FFTSpectra` class is deprecated and will be removed
+        in Acoular version 25.07. Please use :class:`~acoular.fprocess.RFFT` instead.
+
+    Alias for the :class:`~acoular.fprocess.RFFT` class, which computes the one-sided
+    Fast Fourier Transform (FFT) for multichannel time data.
+
+    Warnings
+    --------
+    This class remains temporarily available for backward compatibility but should not be used in
+    new implementations.
     """
 
     def __init__(self, *args, **kwargs):
