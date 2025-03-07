@@ -69,7 +69,7 @@ class SignalGenerator(ABCHasStrictTraits):
     #: The number of samples to generate for the signal.
     num_samples = CInt
 
-    #: A unique identifier based on the generator properties. (read-only)
+    #: A unique checksum identifier based on the object properties. (read-only)
     digest = Property(depends_on=['sample_freq', 'num_samples'])
 
     @abstractmethod
@@ -137,10 +137,10 @@ class PeriodicSignalGenerator(SignalGenerator):
     SineGenerator : Generate a sine signal.
     """
 
-    #: The frequency of the signal. Defaults is ``1000.0``.
+    #: The frequency of the signal. Default is ``1000.0``.
     freq = Float(1000.0, desc='Frequency')
 
-    #: The phase of the signal (in radians). Defaults is ``0.0``.
+    #: The phase of the signal (in radians). Default is ``0.0``.
     phase = Float(0.0, desc='Phase')
 
     #: The amplitude of the signal. Default is ``1.0``.
@@ -252,7 +252,7 @@ class WNoiseGenerator(NoiseGenerator):
         Generate and deliver the white noise signal.
 
         The signal is created using a Gaussian distribution with mean 0 and variance 1,
-        scaled by the :attr:`RMS<SignalGenerator.rms>` amplitude of the generator.
+        scaled by the :attr:`RMS<SignalGenerator.rms>` amplitude of the object.
 
         Returns
         -------
@@ -293,7 +293,7 @@ class PNoiseGenerator(NoiseGenerator):
     #: Default is ``16``.
     depth = Int(16, desc='octave depth')
 
-    # A unique identifier based on the generator properties. (read-only)
+    #: A unique checksum identifier based on the object properties. (read-only)
     digest = Property(depends_on=['rms', 'seed', 'sample_freq', 'num_samples', 'depth'])
 
     @cached_property
@@ -405,7 +405,7 @@ class FiltWNoiseGenerator(WNoiseGenerator):
     #: which results in no MA filtering (i.e., all-zero filter is ``[1.0]``).
     ma = CArray(value=array([]), dtype=float, desc='moving-average coefficients (coefficients of the numerator)')
 
-    #: A unique identifier based on the generator properties. (read-only)
+    #: A unique checksum identifier based on the object properties. (read-only)
     digest = Property(depends_on=['rms', 'seed', 'sample_freq', 'num_samples', 'ar', 'ma'])
 
     @cached_property
@@ -524,7 +524,7 @@ class SineGenerator(PeriodicSignalGenerator):
     array([1.        , 0.95105652, 0.80901699, 0.58778525, 0.30901699])
     """
 
-    #: A unique identifier based on the generator properties. (read-only)
+    #: A unique checksum identifier based on the object properties. (read-only)
     digest = Property(depends_on=['num_samples', 'sample_freq', 'amplitude', 'freq', 'phase'])
 
     @cached_property
@@ -617,7 +617,7 @@ class GenericSignalGenerator(SignalGenerator):
     #: If ``False``, the signal stops once the source data is exhausted.
     loop_signal = Bool(True)
 
-    #: A unique identifier based on the generator properties. (read-only)
+    #: A unique checksum identifier based on the object properties. (read-only)
     digest = Property(
         depends_on=['source.digest', 'loop_signal', 'num_samples', 'amplitude'],
     )
