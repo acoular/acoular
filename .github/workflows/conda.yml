@@ -1,9 +1,12 @@
 name: Build conda package
 
 on:
-    workflow_dispatch:
-      branches: [ '*' ] # allow manual trigger for all branches (only master will upload to Anaconda Cloud)
-  
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+    branches: [ "*" ]
     
 jobs:
   conda_build_install_upload:
@@ -14,8 +17,10 @@ jobs:
         uses: actions/checkout@v4
       - name: Conda environment creation and activation
         uses: ./.github/actions/setup-conda
+      - name: Set up hatch
+        uses: ./.github/actions/setup-hatch
       - name: Build package
-        run: conda build --no-anaconda-upload --no-copy-test-source-files recipe.local --output-folder ./conda_package
+        run: conda build --channel conda-forge --no-anaconda-upload --no-copy-test-source-files recipe.local --output-folder ./conda_package
       - name: Upload conda package artifact
         uses: actions/upload-artifact@v4
         with:
@@ -27,5 +32,5 @@ jobs:
           eval "$(conda shell.bash hook)"
           conda activate base
           anaconda login --username ${{ secrets.ANACONDA_USERNAME }} --password ${{ secrets.ANACONDA_PASSWORD }}
-          anaconda upload ./conda_package/noarch/*.tar.bz2
+          anaconda upload ./conda_package/noarch/*.conda
 

@@ -11,6 +11,10 @@ Upcoming Release
         * adds docstrings to environments.py
         * adds new docstrings to fprocess.py
 
+
+    **Internal**
+        * fix broken meta.yaml (adds conda build stage to CI)
+
 25.01
 ------------------------
 

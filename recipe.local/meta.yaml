@@ -1,9 +1,6 @@
-{% set pyproject = load_file_data('../pyproject.toml',from_recipe_dir=True) %}
-{% set version = pyproject['project']['version'] %}
-
 package:
   name: acoular
-  version: {{ version }}
+  version: "{{ os.popen('hatch version').read().strip() }}"
 
 source:
   path: ..
