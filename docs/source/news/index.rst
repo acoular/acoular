@@ -43,6 +43,8 @@ Upcoming Release
         * updates examples to use a right hand co-ordinate system
         * adds new docstrings to trajectory.py
         * adds new docstrings to grids.py
+        * adds docstrings to environments.py
+        * adds new docstrings to signals.py
 
     **Tests**
         * tests now consequently use `pytest` framework instead of `unittest`
