@@ -105,7 +105,7 @@ class Average(InOut):
     snapshot of 512 time samples.
 
     If the source is a frequency domain source, the average is calculated over a certain number
-    of snapshots, defined by :attr:`num_per_average`.
+    of frequency snapshots, defined by :attr:`num_per_average`.
 
     >>> fft = ac.RFFT(source=ts, block_size=64)
     >>> ps = ac.AutoPowerSpectra(source=fft)
