@@ -378,7 +378,7 @@ class Cache(InOut):
 
 class SampleSplitter(InOut):
     """
-    Distributes data from a source to multiple connected objects in a block-wise manner.
+    Distribute data from a source to multiple connected objects in a block-wise manner.
 
     The :class:`SampleSplitter` class is designed to manage the distribution of data blocks from a
     single source object, derived from :class:`~acoular.base.Generator`, to multiple target
