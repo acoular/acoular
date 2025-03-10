@@ -389,12 +389,10 @@ class SampleSplitter(InOut):
     This class is particularly useful when distributing data blocks from a streaming source
     to multiple downstream processing objects.
 
-    **Key features**
-
-    - Maintains a separate block buffer for each registered object.
-    - Supports customizable buffer sizes for individual objects.
-    - Configurable buffer overflow behaviors: raise an error, issue a warning, or discard old data.
-    - Ensures seamless parallel data processing for complex workflows.
+    Each registered target object maintains its own dedicated block buffer, allowing for independent 
+    data management. The buffer size can be customized per object, and different overflow handling 
+    strategies can be configured, such as raising an error, issuing a warning, or discarding old data. 
+    This ensures efficient parallel data processing, making it well-suited for complex workflows.  
 
     Notes
     -----
