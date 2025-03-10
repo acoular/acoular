@@ -163,15 +163,15 @@ class Average(InOut):
         ----------
         num : :class:`int`
             The number of averaged blocks to yield at a time. Each block contains the average over
-            :attr:`num_per_average` time samples or frequency snapshots. The last block may be shorter than the
-            specified size if the remaining data is insufficient.
+            :attr:`num_per_average` time samples or frequency snapshots. The last block may be
+            shorter than the specified size if the remaining data is insufficient.
 
         Yields
         ------
         :class:`numpy.ndarray`
             A 2D NumPy array of shape ``(num, num_channels)``, where ``num`` is the number
-            of averaged blocks requested, and ``num_channels`` corresponds to the
-            number of channels in the source, as specified by :attr:`~acoular.base.Generator.num_channels`.
+            of averaged blocks requested, and ``num_channels`` corresponds to the number of channels
+            in the source, as specified by :attr:`~acoular.base.Generator.num_channels`.
             Each entry in the array is the average over :attr:`num_per_average` samples/snapshots.
 
         Notes
@@ -179,8 +179,9 @@ class Average(InOut):
         - The averaging operation depends on the source type:
             - For time-domain sources (e.g., derived from :class:`~acoular.base.SamplesGenerator`),
               the average is calculated over :attr:`num_per_average` time samples.
-            - For frequency-domain sources (e.g., derived from :class:`~acoular.base.SpectraGenerator`),
-              the average is calculated over :attr:`num_per_average` frequency snapshots.
+            - For frequency-domain sources (e.g., derived from
+              :class:`~acoular.base.SpectraGenerator`), the average is calculated over
+              :attr:`num_per_average` frequency snapshots.
         - The generator will stop yielding when the source data is exhausted.
         - If the source provides fewer than ``num * num_per_average`` samples,
           the final block may be smaller than the requested ``num`` size.
@@ -206,9 +207,10 @@ class Cache(InOut):
     The class intelligently determines whether to use the cached data, update it,
     or bypass caching based on the global caching configuration and the state of the cache file.
     The caching mechanism supports scenarios such as:
-        - Reading from a complete or incomplete cache.
-        - Overwriting an existing cache.
-        - Operating in a read-only or no-cache mode.
+    
+    - Reading from a complete or incomplete cache.
+    - Overwriting an existing cache.
+    - Operating in a read-only or no-cache mode.
 
     See Also
     --------
@@ -389,10 +391,11 @@ class SampleSplitter(InOut):
     This class is particularly useful when distributing data blocks from a streaming source
     to multiple downstream processing objects.
 
-    Each registered target object maintains its own dedicated block buffer, allowing for independent 
-    data management. The buffer size can be customized per object, and different overflow handling 
-    strategies can be configured, such as raising an error, issuing a warning, or discarding old data. 
-    This ensures efficient parallel data processing, making it well-suited for complex workflows.  
+    Each registered target object maintains its own dedicated block buffer, allowing for independent
+    data management. The buffer size can be customized per object, and different overflow handling
+    strategies can be configured, such as raising an error, issuing a warning, or discarding old
+    data. This ensures efficient parallel data processing, making it well-suited for complex
+    workflows.
 
     Notes
     -----
@@ -554,8 +557,8 @@ class SampleSplitter(InOut):
         Parameters
         ----------
         objects_to_register : :class:`~acoular.base.Generator` or list of :class:`~acoular.base.Generator`
-             A single object or a list of objects derived from :class:`~acoular.base.Generator` to be registered
-            as targets for data distribution.
+            A single object or a list of objects derived from :class:`~acoular.base.Generator` to be
+            registered as targets for data distribution.
         buffer_size : :class:`int`, optional
             The maximum number of data blocks each object's buffer can hold. If not specified,
             the default buffer size (100 blocks) is used, or a globally defined size if
@@ -563,16 +566,16 @@ class SampleSplitter(InOut):
         buffer_overflow_treatment : :attr:`str`, optional
             Defines the behavior when a buffer exceeds its maximum size. Options are:
 
-                - ``'error'``: Raises an :obj:`IOError` when the buffer overflows.
-                - ``'warning'``: Issues a warning and may result in data loss.
-                - ``'none'``: Silently discards the oldest data blocks to make room for new ones.
-                  If not specified, the default behavior is ``'error'``.
+            - ``'error'``: Raises an :obj:`IOError` when the buffer overflows.
+            - ``'warning'``: Issues a warning and may result in data loss.
+            - ``'none'``: Silently discards the oldest data blocks to make room for new ones.
+              If not specified, the default behavior is ``'error'``.
 
         Raises
         ------
         :obj:`OSError`
             If any of the specified objects is already registered.
-        """
+        """  # noqa: W505
         for obj in objects_to_register:
             if obj not in self.block_buffer:
                 self._create_block_buffer(obj, buffer_size)
@@ -592,8 +595,8 @@ class SampleSplitter(InOut):
         Parameters
         ----------
         objects_to_remove : :class:`~acoular.base.Generator` or list of :class:`~acoular.base.Generator`, optional
-        A single object or a list of objects derived from :class:`~acoular.base.Generator` to be removed
-        from the :class:`SampleSplitter`.
+            A single object or a list of objects derived from :class:`~acoular.base.Generator` to be
+            removed from the :class:`SampleSplitter`.
             If no objects are provided, all registered objects will be removed.
 
         Raises
@@ -606,7 +609,7 @@ class SampleSplitter(InOut):
         - Once an object is removed, it will no longer receive data from the
           :class:`SampleSplitter`.
         - Removing an object also clears its associated buffer.
-        """
+        """  # noqa: W505
         if not objects_to_remove:
             objects_to_remove = list(self.block_buffer.keys())
         for obj in objects_to_remove:
