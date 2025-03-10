@@ -340,7 +340,7 @@ class Cache(InOut):
             - ``'readonly'``: Reads data from the cache if available; otherwise,
               retrieves data from the source without caching.
             - ``'overwrite'``: Replaces any existing cache with newly computed data.
-            
+
         - If the cache file is incomplete or corrupted, the method may generate new data
           from the source to update the cache unless the caching mode is ``'readonly'``.
         - The cache node name is based on the source's :attr:`digest` attribute.
