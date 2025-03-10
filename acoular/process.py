@@ -198,7 +198,7 @@ class Cache(InOut):
     Cache the output of a source in a file to avoid redundant computations.
 
     The :class:`Cache` class is designed to store the output of a source (derived from
-    :class:`acoular.base.Generator`) in a cache file within the Acoular cache directory.
+    :class:`~acoular.base.Generator`) in a cache file within the Acoular cache directory.
     This enables faster reuse of precomputed data by avoiding time-consuming recalculations.
     The cache behavior is managed through the
     :class:`Acoular configuration<acoular.configuration.Config>` class.
