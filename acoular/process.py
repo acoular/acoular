@@ -170,8 +170,8 @@ class Average(InOut):
         ------
         :class:`numpy.ndarray`
             A 2D NumPy array of shape ``(num, num_channels)``, where ``num`` is the number
-            of averaged blocks requested, and ``num_channels`` is the
-            :attr:`number of channels in the source<acoular.base.Generator.num_channels>`.
+            of averaged blocks requested, and ``num_channels`` corresponds to the
+            number of channels in the source, as specified by :attr:`~acoular.base.Generator.num_channels`.
             Each entry in the array is the average over :attr:`num_per_average` samples/snapshots.
 
         Notes
