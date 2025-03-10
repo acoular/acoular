@@ -611,7 +611,7 @@ class SampleSplitter(InOut):
         -----
         - Once an object is removed, it will no longer receive data from the
           :class:`SampleSplitter`.
-        .. note:: Removing an object also clears its associated buffer.
+        - Removing an object also clears its associated buffer.
         """
         if not objects_to_remove:
             objects_to_remove = list(self.block_buffer.keys())
