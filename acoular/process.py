@@ -414,7 +414,7 @@ class SampleSplitter(InOut):
     block, and the overflow treatment is set to ``'none'``. This setup helps reduce latency in FFT
     calculations, which may take longer than signal power calculations. If new data arrives and the
     :class:`~acoular.fprocess.RFFT` buffer is full, the :class:`SampleSplitter` will discard the
-    oldest block to make room for the new one. This ensures that the :class:`~acoular.fprocess.RFFT`
+    oldest block, ensuring that the :class:`~acoular.fprocess.RFFT`
     object always receives the most recent block of data.
 
     >>> import acoular as ac
