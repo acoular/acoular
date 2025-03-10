@@ -699,7 +699,7 @@ class TimeAverage(Average):
 
 class TimeCache(Cache):
     """
-    Caches source signals in cache file.
+    Cache source signals in cache file.
 
     .. deprecated:: 24.10
         The use of :class:`~acoular.process.TimeCache` is deprecated
