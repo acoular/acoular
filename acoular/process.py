@@ -847,9 +847,6 @@ class SamplesBuffer(InOut):
         ----------
         num : :class:`int`
             The number of samples by which to increase the buffer size.
-
-        Returns
-        -------
         """
         ar = np.zeros((num, self.num_channels), dtype=self._buffer.dtype)
         self._buffer = np.concatenate((ar, self._buffer), axis=0)
