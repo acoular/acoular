@@ -214,8 +214,8 @@ class Cache(InOut):
 
     See Also
     --------
-    :class:`acoular.base.InOut` :
-        Receive data from any source domain and return signals in the same domain.
+    :class:`acoular.base.InOut` : Receive data from any source domain and return signals in the same
+                                  domain.
 
     Examples
     --------
@@ -335,10 +335,12 @@ class Cache(InOut):
         -----
         - The behavior of the caching mechanism depends on the
           :attr:`~acoular.configuration.Config.global_caching` setting:
+
             - ``'none'``: Bypasses caching and directly retrieves data from the source.
             - ``'readonly'``: Reads data from the cache if available; otherwise,
               retrieves data from the source without caching.
             - ``'overwrite'``: Replaces any existing cache with newly computed data.
+            
         - If the cache file is incomplete or corrupted, the method may generate new data
           from the source to update the cache unless the caching mode is ``'readonly'``.
         - The cache node name is based on the source's :attr:`digest` attribute.
@@ -793,10 +795,10 @@ class SamplesBuffer(InOut):
     )
 
     #: Index shift value for the buffer.
-    #:     - If set to ``'result_num'``, the buffer will return and forget :attr:`result_num`
-    #:       samples.
-    #:     - If set to ``'num'``, the buffer will return :attr:`result_num` samples but forget
-    #:       ``num`` samples.
+    #:
+    #: - If set to ``'result_num'``, the buffer will return and forget :attr:`result_num` samples.
+    #: - If set to ``'num'``, the buffer will return :attr:`result_num` samples but forget ``num``
+    #:   samples.
     shift_index_by = Enum(
         ('result_num', 'num'),
         desc=(
@@ -876,6 +878,7 @@ class SamplesBuffer(InOut):
         - If the :attr:`result_num` attribute is set, it determines the number of samples to return.
         - The method ensures the buffer index is adjusted according to the :attr:`shift_index_by`
           setting. Options are:
+
             - ``'result_num'``: The index will shift by the number of samples returned.
             - ``'num'``: The index will shift by the number of samples requested (``num``).
         """
