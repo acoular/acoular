@@ -474,11 +474,7 @@ class SampleSplitter(InOut):
         default_value=100,
     )
 
-    #: Defines behavior when a buffer exceeds its maximum size. This can be set individually
-    #: for each registered object. Options include:
-    #:     - ``'error'``: an IOError is thrown by the class
-    #:     - ``'warning'``: a warning is displayed. Possibly leads to lost blocks of data
-    #:     - ``'none'``: nothing happens. Possibly leads to lost blocks of data
+    #: Defines behavior when a buffer exceeds its maximum size.
     buffer_overflow_treatment = Dict(
         key_trait=Instance(Generator),
         value_trait=Enum('error', 'warning', 'none'),
