@@ -76,7 +76,7 @@ class Average(InOut):
     over a certain number of time samples given by :attr:`num_per_average`.
     If the source is a frequency domain source (e.g. derived from
     :class:`~acoular.base.SpectraGenerator`), the average is calculated
-    over a certain number of snapshots given by :attr:`num_per_average`.
+    over a certain number of frequency snapshots given by :attr:`num_per_average`.
 
     See Also
     --------
