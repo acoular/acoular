@@ -559,8 +559,8 @@ class SampleSplitter(InOut):
 
         Parameters
         ----------
-        objects_to_register : :class:`~acoular.base.Generator` object
-            One or more objects derived from :class:`~acoular.base.Generator` to be registered
+        objects_to_register : :class:`~acoular.base.Generator` or list of :class:`~acoular.base.Generator`
+             A single object or a list of objects derived from :class:`~acoular.base.Generator` to be registered
             as targets for data distribution.
         buffer_size : :class:`int`, optional
             The maximum number of data blocks each object's buffer can hold. If not specified,
