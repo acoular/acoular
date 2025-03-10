@@ -114,7 +114,7 @@ def _fill_mic_signal_block(out, signal, rm, ind, blocksize, num_channels, up, pr
 
 def spherical_hn1(n, z):
     r"""
-    Compute the spherical Hankel Function of the first kind.
+    Compute the spherical Hankel function of the first kind.
 
     The spherical Hankel function of the first kind, :math:`h_n^{(1)}(z)`, is defined as
 
