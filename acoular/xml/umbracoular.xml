@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?><MicArray name="umbracoular">
+   <!-- DAGA2025 Acoular demo array made from an umbrella (setup with 8 stereo-nodes -->
+   <!-- form two tight circles with radii of 42 and 41 cm and a z offset of 1.5 cm) -->
+  <pos Name="Point 1" x="0.42" y="0.0" z="0.0"/>
+  <pos Name="Point 2" x="0.41" y="0.0" z="1.5"/>
+  <pos Name="Point 3" x="0.30" y="0.30" z="0.0"/>
+  <pos Name="Point 4" x="0.29" y="0.29" z="1.5"/>
+  <pos Name="Point 5" x="0.0" y="0.42" z="0.0"/>
+  <pos Name="Point 6" x="0.0" y="0.41" z="1.5"/>
+  <pos Name="Point 7" x="-0.30" y="0.30" z="0.0"/>
+  <pos Name="Point 8" x="-0.29" y="0.29" z="1.5"/>
+  <pos Name="Point 9" x="-0.42" y="0.0" z="0.0"/>
+  <pos Name="Point 10" x="-0.41" y="0.0" z="1.5"/>
+  <pos Name="Point 11" x="-0.30" y="-0.30" z="0.0"/>
+  <pos Name="Point 12" x="-0.29" y="-0.29" z="1.5"/>
+  <pos Name="Point 13" x="0.0" y="-0.42" z="0.0"/>
+  <pos Name="Point 14" x="0.0" y="-0.41" z="1.5"/>
+  <pos Name="Point 15" x="0.30" y="-0.30" z="0.0"/>
+  <pos Name="Point 16" x="0.29" y="-0.29" z="1.5"/>
+</MicArray>
