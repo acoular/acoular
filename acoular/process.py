@@ -595,9 +595,9 @@ class SampleSplitter(InOut):
 
         Parameters
         ----------
-        objects_to_remove : :class:`~acoular.base.Generator` object, optional
-            One or more objects derived from :class:`~acoular.base.Generator` to be removed
-            from the :class:`SampleSplitter`.
+        objects_to_remove : :class:`~acoular.base.Generator` or list of :class:`~acoular.base.Generator`, optional
+        A single object or a list of objects derived from :class:`~acoular.base.Generator` to be removed
+        from the :class:`SampleSplitter`.
             If no objects are provided, all registered objects will be removed.
 
         Raises
