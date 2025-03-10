@@ -319,7 +319,7 @@ class Cache(InOut):
         Parameters
         ----------
         num : :class:`int`
-            The number of samples per block to yield.
+            The number of time samples or frequency snapshots per block to yield.
             The final block may be smaller if there is insufficient data.
 
         Yields
