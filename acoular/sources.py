@@ -832,7 +832,7 @@ class PointSource(SamplesGenerator):
     #: An :class:`~acoular.environments.Environment` or derived object providing sound propagation
     #: details, such as :attr:`speed of sound in the medium<acoular.environments.Environment.c>`.
     #: Default is :class:`~acoular.environments.Environment`.
-    env = Instance(Environment(), Environment)
+    env = Instance(Environment, args=())
 
     #: Start time of the signal in seconds. Default is ``0.0``.
     start_t = Float(0.0, desc='signal start time')
