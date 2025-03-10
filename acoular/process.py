@@ -1,7 +1,8 @@
 # ------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
-"""General purpose blockwise processing methods independent of the domain (time or frequency).
+"""
+General purpose blockwise processing methods independent of the domain (time or frequency).
 
 .. autosummary::
     :toctree: generated/
@@ -33,9 +34,25 @@ from .tools.utils import find_basename
 
 
 class LockedGenerator:
-    """Creates a Thread Safe Iterator.
-    Takes an iterator/generator and makes it thread-safe by
-    serializing call to the `next` method of given iterator/generator.
+    """
+    Thread-safe wrapper for an iterator or generator.
+
+    The :class:`LockedGenerator` class ensures that calls to the ``__next__`` method of the
+    given iterator or generator are thread-safe, preventing race conditions when accessed by
+    multiple threads simultaneously.
+
+    It achieves thread safety by using a lock to serialize access to the underlying
+    iterator or generator.
+
+    Parameters
+    ----------
+    it : iterator or generator
+        The iterator or generator to be made thread-safe.
+
+    See Also
+    --------
+    :class:`acoular.process.SampleSplitter` :
+        Distribute data from a source to several following objects in a block-wise manner.
     """
 
     def __init__(self, it):
@@ -43,70 +60,78 @@ class LockedGenerator:
         self.lock = threading.Lock()
 
     def __next__(self):
+        """Fetch the next item from the iterator or generator in a thread-safe manner."""
         with self.lock:
             return self.it.__next__()
 
 
 @deprecated_alias({'naverage': 'num_per_average', 'numsamples': 'num_samples'}, read_only=['numsamples'])
 class Average(InOut):
-    """Calculates the average across consecutive time samples or frequency snapshots.
+    """
+    Calculate the average across consecutive time samples or frequency snapshots.
 
     The average operation is performed differently depending on the source type.
-    If the source is a time domain source
-    (e.g. derived from :class:`~acoular.base.SamplesGenerator`), the average is
-    calculated over a certain number of time samples given by :attr:`num_per_average`.
+    If the source is a time domain source (e.g. derived from
+    :class:`~acoular.base.SamplesGenerator`), the average is calculated
+    over a certain number of time samples given by :attr:`num_per_average`.
     If the source is a frequency domain source (e.g. derived from
-    :class:`~acoular.base.SpectraGenerator`), the average is calculated over a certain
-    number of snapshots given by :attr:`num_per_average`.
+    :class:`~acoular.base.SpectraGenerator`), the average is calculated
+    over a certain number of frequency snapshots given by :attr:`num_per_average`.
+
+    See Also
+    --------
+    :class:`acoular.base.InOut` :
+        Receive data from any source domain and return signals in the same domain.
 
     Examples
     --------
-        For estimate the RMS of a white noise (time-domain) signal, the average of the squared
-        signal can be calculated:
+    To estimate the RMS of a white noise (time-domain) signal, the average of the squared
+    signal can be calculated:
 
-        >>> import acoular as ac
-        >>> import numpy as np
-        >>>
-        >>> signal = ac.WNoiseGenerator(sample_freq=51200, num_samples=51200, rms=2.0).signal()
-        >>> ts = ac.TimeSamples(data=signal[:, np.newaxis], sample_freq=51200)
-        >>> tp = ac.TimePower(source=ts)
-        >>> avg = ac.Average(source=tp, num_per_average=512)
-        >>> mean_squared_value = next(avg.result(num=1))
-        >>> rms = np.sqrt(mean_squared_value)[0, 0]
-        >>> print(rms)
-        1.9985200025816718
+    >>> import acoular as ac
+    >>> import numpy as np
+    >>>
+    >>> signal = ac.WNoiseGenerator(sample_freq=51200, num_samples=51200, rms=2.0).signal()
+    >>> ts = ac.TimeSamples(data=signal[:, np.newaxis], sample_freq=51200)
+    >>> tp = ac.TimePower(source=ts)
+    >>> avg = ac.Average(source=tp, num_per_average=512)
+    >>> mean_squared_value = next(avg.result(num=1))
+    >>> rms = np.sqrt(mean_squared_value)[0, 0]
+    >>> print(rms)
+    1.9985200025816718
 
-        Here, each evaluation of the generator created by the :meth:`result` method of the
-        :class:`Average` object via the :meth:`next` function returns :code:`num=1` average across a
-        snapshot of 512 samples.
+    Here, each evaluation of the generator created by the :meth:`result` method of the
+    :class:`Average` object via the :meth:`next` function returns :code:`num=1` average across a
+    snapshot of 512 time samples.
 
-        If the source is a frequency domain source, the average is calculated over a certain number
-        of snapshots, defined by :attr:`num_per_average`.
+    If the source is a frequency domain source, the average is calculated over a certain number
+    of frequency snapshots, defined by :attr:`num_per_average`.
 
-        >>> fft = ac.RFFT(source=ts, block_size=64)
-        >>> ps = ac.AutoPowerSpectra(source=fft)
-        >>> avg = ac.Average(source=ps, num_per_average=16)
-        >>> mean_power = next(avg.result(num=1))
-        >>> print(np.sqrt(mean_power.sum()))
-        2.0024960894399295
+    >>> fft = ac.RFFT(source=ts, block_size=64)
+    >>> ps = ac.AutoPowerSpectra(source=fft)
+    >>> avg = ac.Average(source=ps, num_per_average=16)
+    >>> mean_power = next(avg.result(num=1))
+    >>> print(np.sqrt(mean_power.sum()))
+    2.0024960894399295
 
-        Here, the generator created by the :meth:`result` method of the :class:`Average` object
-        returns the average across 16 snapshots in the frequency domain.
-
+    Here, the generator created by the :meth:`result` method of the :class:`Average` object
+    returns the average across 16 snapshots in the frequency domain.
     """
 
-    #: Number of samples (time domain source) or snapshots (frequency domain source)
-    #: to average over, defaults to 64.
+    #: The number of samples (time domain source) or snapshots (frequency domain source)
+    #: to average over. Default is ``64``.
     num_per_average = Int(64, desc='number of samples/snapshots to average over')
 
-    #: Sampling frequency of the output signal, is set automatically.
+    #: The sampling frequency of the output signal. It is set automatically as
+    #: (:attr:`~acoular.base.Generator.sample_freq` ``/`` :attr:`num_per_average`).
     sample_freq = Property(depends_on=['source.sample_freq', 'num_per_average'])
 
-    #: Number of samples (time domain) or snapshots (frequency domain) of the output signal.
-    #: Is set automatically.
+    #: The number of samples (time domain) or snapshots (frequency domain) of the output signal.
+    #: It is set automatically as
+    #: (:attr:`~acoular.base.Generator.num_samples` ``/`` :attr:`num_per_average`).
     num_samples = Property(depends_on=['source.num_samples', 'num_per_average'])
 
-    # internal identifier
+    #: A unique identifier based on the class properties.
     digest = Property(depends_on=['source.digest', 'num_per_average'])
 
     @cached_property
@@ -126,20 +151,40 @@ class Average(InOut):
         return None
 
     def result(self, num):
-        """Python generator that yields the output block-wise.
+        """
+        Generate averaged output blocks from the source data.
+
+        This method implements a Python generator that yields blocks of averaged data
+        from the source. The averaging is performed over :attr:`num_per_average` samples
+        (for time-domain sources) or snapshots (for frequency-domain sources).
+        The size of the blocks yielded is defined by the ``num`` parameter.
 
         Parameters
         ----------
-        num : integer
-            This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block).
+        num : :class:`int`
+            The number of averaged blocks to yield at a time. Each block contains the average over
+            :attr:`num_per_average` time samples or frequency snapshots. The last block may be
+            shorter than the specified size if the remaining data is insufficient.
 
-        Returns
-        -------
-        Average of the output of source.
-            Yields samples in blocks of shape (num, num_channels).
-            The last block may be shorter than num.
+        Yields
+        ------
+        :class:`numpy.ndarray`
+            A 2D NumPy array of shape ``(num, num_channels)``, where ``num`` is the number
+            of averaged blocks requested, and ``num_channels`` corresponds to the number of channels
+            in the source, as specified by :attr:`~acoular.base.Generator.num_channels`.
+            Each entry in the array is the average over :attr:`num_per_average` samples/snapshots.
 
+        Notes
+        -----
+        - The averaging operation depends on the source type:
+            - For time-domain sources (e.g., derived from :class:`~acoular.base.SamplesGenerator`),
+              the average is calculated over :attr:`num_per_average` time samples.
+            - For frequency-domain sources (e.g., derived from
+              :class:`~acoular.base.SpectraGenerator`), the average is calculated over
+              :attr:`num_per_average` frequency snapshots.
+        - The generator will stop yielding when the source data is exhausted.
+        - If the source provides fewer than ``num * num_per_average`` samples,
+          the final block may be smaller than the requested ``num`` size.
         """
         nav = self.num_per_average
         for temp in self.source.result(num * nav):
@@ -150,14 +195,32 @@ class Average(InOut):
 
 
 class Cache(InOut):
-    """Caches source output in cache file.
+    """
+    Cache the output of a source in a file to avoid redundant computations.
 
-    This class is used to cache the output of a :class:`acoular.base.Generator` derived source
-    object in a cache file to circumvent time-consuming re-calculation.
-    The cache file is created in the Acoular cache directory.
+    The :class:`Cache` class stores the output of a source (derived from
+    :class:`~acoular.base.Generator`) in a cache file within the Acoular cache directory.
+    This enables faster reuse of precomputed data by avoiding time-consuming recalculations.
+    The cache behavior is managed through the :class:`~acoular.configuration.Config` class by
+    setting the :attr:`~acoular.configuration.Config.global_caching` attribute.
+
+    The class intelligently determines whether to use the cached data, update it,
+    or bypass caching based on the global caching configuration and the state of the cache file.
+    The caching mechanism supports scenarios such as:
+
+    - Reading from a complete or incomplete cache.
+    - Overwriting an existing cache.
+    - Operating in a read-only or no-cache mode.
+
+    See Also
+    --------
+    :class:`acoular.base.InOut` : Receive data from any source domain and return signals in the same
+                                  domain.
 
     Examples
     --------
+    Caching the output of an FFT computation:
+
     >>> import acoular as ac
     >>> import numpy as np
     >>>
@@ -171,23 +234,24 @@ class Cache(InOut):
     [('void_cache.h5', 1)]
     (1, 513)
 
-    The caching behaviour can be controlled by the :class:`~acoular.configuration.Config` instance
-    via the :attr:`~acoular.configuration.Config.global_caching` attribute.
-    To turn off caching, set :attr:`~acoular.configuration.Config.global_caching` to 'none' before
-    running the code. The cache file directory can be obtained (and set) via the
-    :attr:`~acoular.configuration.Config.cache_dir`
+    Disabling caching globally:
 
     >>> ac.config.global_caching = 'none'
 
+    Changing the cache directory:
+
+    >>> ac.config.cache_dir = '/path/to/cache_dir'  # doctest: +SKIP
     """
 
-    # basename for cache
+    # The basename for the cache file.
+    # Derived from the :attr:`digest` property and used to uniquely identify the cache file.
     basename = Property(depends_on=['digest'])
 
-    # hdf5 cache file
+    # The HDF5 cache file instance.
+    # This is used to store or retrieve cached data in the Acoular cache directory.
     h5f = Instance(H5CacheFileBase, transient=True)
 
-    # internal identifier
+    #: A unique identifier based on the cache properties.
     digest = Property(depends_on=['source.digest'])
 
     @cached_property
@@ -246,21 +310,40 @@ class Cache(InOut):
 
     # result generator: delivers input, possibly from cache
     def result(self, num):
-        """Python generator that yields the output from cache block-wise.
+        """
+        Generate data blocks from the source, using cache when available.
+
+        This method acts as a Python generator that yields blocks of output data from the source,
+        reading from the cache file when possible. The size of the data blocks is determined by the
+        ``num`` parameter. The caching mechanism helps prevent redundant calculations by storing and
+        reusing the source's output.
 
         Parameters
         ----------
-        num : integer
-            This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block).
+        num : :class:`int`
+            The number of time samples or frequency snapshots per block to yield.
+            The final block may be smaller if there is insufficient data.
 
-        Returns
-        -------
-        Samples in blocks of shape (num, num_channels).
-            The last block may be shorter than num.
-            Echos the source output, but reads it from cache
-            when available and prevents unnecessary recalculation.
+        Yields
+        ------
+        :class:`numpy.ndarray`
+            A 2D NumPy array of shape ``(num, num_channels)`` representing the output data.
+            Each block is either retrieved from the cache file or generated by the source
+            and cached dynamically during processing.
 
+        Notes
+        -----
+        - The behavior of the caching mechanism depends on the
+          :attr:`~acoular.configuration.Config.global_caching` setting:
+
+            - ``'none'``: Bypasses caching and directly retrieves data from the source.
+            - ``'readonly'``: Reads data from the cache if available; otherwise,
+              retrieves data from the source without caching.
+            - ``'overwrite'``: Replaces any existing cache with newly computed data.
+
+        - If the cache file is incomplete or corrupted, the method may generate new data
+          from the source to update the cache unless the caching mode is ``'readonly'``.
+        - The cache node name is based on the source's :attr:`digest` attribute.
         """
         if config.global_caching == 'none':
             generator = self._pass_data
@@ -299,30 +382,45 @@ class Cache(InOut):
 
 class SampleSplitter(InOut):
     """
-    Distributes data from a source to several following objects in a block-wise manner.
+    Distribute data from a source to multiple connected objects in a block-wise manner.
 
-    The `SampleSplitter` class is designed to take data from a single
-    :class:`~acoular.base.Generator` derived source object and distribute it to multiple
-    :class:`~acoular.base.Generator` derived objects. For each object, the :class:`SampleSplitter`
-    holds a virtual block buffer from which the subsequently connected objects receive data in a
-    first-in-first-out (FIFO) manner. This allows for efficient data handling and processing in
-    parallel.
+    The :class:`SampleSplitter` class is designed to manage the distribution of data blocks from a
+    single source object, derived from :class:`~acoular.base.Generator`, to multiple target
+    objects, also derived from :class:`~acoular.base.Generator`. Each connected target object
+    is assigned a dedicated buffer to hold incoming data blocks. These buffers operate in a
+    first-in-first-out (FIFO) manner, ensuring efficient and parallelized data handling.
+
+    This class is particularly useful when distributing data blocks from a streaming source
+    to multiple downstream processing objects.
+
+    Each registered target object maintains its own dedicated block buffer, allowing for independent
+    data management. The buffer size can be customized per object, and different overflow handling
+    strategies can be configured, such as raising an error, issuing a warning, or discarding old
+    data. This ensures efficient parallel data processing, making it well-suited for complex
+    workflows.
+
+    Notes
+    -----
+    - Buffers are dynamically created and managed for each registered object.
+    - Buffer overflow behavior can be set individually for each target object.
 
     Examples
     --------
-    Consider a time domain source signal stream from which the FFT spectra and the signal power
-    are calculated block-wise and in parallel by using the :class:`~acoular.fprocess.RFFT` as well
-    as the :class:`~acoular.tprocess.TimePower` and :class:`~acoular.process.Average`
-    objects. The `SampleSplitter` object is used to distribute the incoming blocks of data to the
-    `RFFT` and `TimePower` object buffers whenever one of these objects calls the :meth:`result`
-    generator.
-    For the `TimePower` object, the buffer size is set to 10 blocks. If the buffer is full, an error
-    is raised since the buffer overflow treatment is set to 'error'. For the `RFFT` object, the
-    block buffer size is set to 1 block, and the buffer overflow treatment is set to 'none'. This
-    is done to reduce latency in the FFT calculation, as the FFT calculation may take longer than
-    the signal power calculation. If new data is available and the block buffer for the `RFFT`
-    object is full, the `SampleSplitter` will drop the oldest block of data in the buffer. Thus, the
-    `RFFT` object will always receive the most recent block of data.
+    Consider a time-domain signal stream where the FFT spectra and signal power are calculated
+    block-by-block and in parallel using the :class:`~acoular.fprocess.RFFT`,
+    :class:`~acoular.tprocess.TimePower`, and :class:`~acoular.process.Average` objects.
+    The :class:`SampleSplitter` is responsible for distributing incoming data blocks to the buffers
+    of the :class:`~acoular.fprocess.RFFT` and :class:`~acoular.tprocess.TimePower` objects whenever
+    either object requests data via the :meth:`result` generator.
+
+    For the :class:`~acoular.tprocess.TimePower` object, the buffer size is set to 10 blocks.
+    If the buffer is full, an error is raised, as the buffer overflow treatment is set to
+    ``'error'``. For the :class:`~acoular.fprocess.RFFT` object, the buffer size is limited to 1
+    block, and the overflow treatment is set to ``'none'``. This setup helps reduce latency in FFT
+    calculations, which may take longer than signal power calculations. If new data arrives and the
+    :class:`~acoular.fprocess.RFFT` buffer is full, the :class:`SampleSplitter` will discard the
+    oldest block, ensuring that the :class:`~acoular.fprocess.RFFT`
+    object always receives the most recent block of data.
 
     >>> import acoular as ac
     >>> import numpy as np
@@ -342,9 +440,9 @@ class SampleSplitter(InOut):
     >>> ss.register_object(fft, buffer_size=1, buffer_overflow_treatment='none')
     >>> ss.register_object(pow, buffer_size=10, buffer_overflow_treatment='error')
 
-    After object registration, the `SampleSplitter` object is ready to distribute the data to the
-    object buffers. The block buffers can be accessed via the `block_buffer` attribute of the
-    `SampleSplitter` object.
+    After object registration, the ``SampleSplitter`` object is ready to distribute the data to the
+    object buffers. The block buffers can be accessed via the :attr:`block_buffer` attribute of the
+    ``SampleSplitter`` object.
 
     >>> ss.block_buffer.values()
     dict_values([deque([], maxlen=1), deque([], maxlen=10)])
@@ -361,42 +459,37 @@ class SampleSplitter(InOut):
     >>> print(len(ss.block_buffer[pow]))
     1
 
-    To remove registered objects from the `SampleSplitter`, use the :meth:`remove_object` method.
+    To remove registered objects from the :class:`SampleSplitter`, use the :meth:`remove_object`
+    method.
 
     >>> ss.remove_object(pow)
     >>> print(len(ss.block_buffer))
     1
     """
 
-    #: dictionary with block buffers (dict values) of registered objects (dict
-    #: keys).
+    #: A dictionary containing block buffers for registered objects.
+    #: Keys are the registered objects, and values are deque structures holding data blocks.
     block_buffer = Dict(key_trait=Instance(Generator))
 
-    #: max elements/blocks in block buffers.
-    #: Can be set individually for each registered object.
-    #: Default is 100 blocks for each registered object.
+    #: The maximum number of blocks each buffer can hold.
+    #: Can be set globally for all objects or individually using a dictionary.
     buffer_size = Union(
         Int,
         Dict(key_trait=Instance(Generator), value_trait=Int),
         default_value=100,
     )
 
-    #: defines behaviour in case of block_buffer overflow. Can be set individually
-    #: for each registered object.
-    #:
-    #: * 'error': an IOError is thrown by the class
-    #: * 'warning': a warning is displayed. Possibly leads to lost blocks of data
-    #: * 'none': nothing happens. Possibly leads to lost blocks of data
+    #: Defines behavior when a buffer exceeds its maximum size.
     buffer_overflow_treatment = Dict(
         key_trait=Instance(Generator),
         value_trait=Enum('error', 'warning', 'none'),
         desc='defines buffer overflow behaviour.',
     )
 
-    # shadow trait to monitor if source deliver samples or is empty
+    # A shadow trait to monitor if source deliver samples or is empty.
     _source_generator_exist = Bool(False)
 
-    # shadow trait to monitor if buffer of objects with overflow treatment = 'error'
+    # A shadow trait to monitor if buffer of objects with overflow treatment = 'error'
     # or warning is overfilled. Error will be raised in all threads.
     _buffer_overflow = Bool(False)
 
@@ -456,23 +549,35 @@ class SampleSplitter(InOut):
             self._create_block_buffer(obj)
 
     def register_object(self, *objects_to_register, buffer_size=None, buffer_overflow_treatment=None):
-        """Register one or multiple :class:`~acoular.base.Generator` objects to the SampleSplitter.
+        """
+        Register one or more target objects to the :class:`SampleSplitter` object.
 
-        Creates a block buffer for each object and sets the buffer size and buffer
-        overflow treatment.
+        This method creates and configures block buffers for the specified target objects, enabling
+        them to receive data blocks from the :class:`SampleSplitter`. Each registered object is
+        assigned a dedicated buffer with customizable size and overflow behavior.
 
         Parameters
         ----------
-        objects_to_register : Generator
-            One or multiple :class:`~acoular.base.Generator` derived objects to be registered.
-        buffer_size : int, optional
-            Maximum number of elements/blocks in block buffer. If not set, the default buffer size
-            of 100 blocks is used.
-        buffer_overflow_treatment : str, optional
-            Defines the behaviour in case of reaching the buffer size.
-            Can be set individually for each object. Possible values are 'error', 'warning', and
-            'none'. If not set, the default value is 'error'.
-        """
+        objects_to_register : :class:`~acoular.base.Generator` or list of :class:`~acoular.base.Generator`
+            A single object or a list of objects derived from :class:`~acoular.base.Generator` to be
+            registered as targets for data distribution.
+        buffer_size : :class:`int`, optional
+            The maximum number of data blocks each object's buffer can hold. If not specified,
+            the default buffer size (100 blocks) is used, or a globally defined size if
+            ``buffer_size`` is a dictionary.
+        buffer_overflow_treatment : :attr:`str`, optional
+            Defines the behavior when a buffer exceeds its maximum size. Options are:
+
+            - ``'error'``: Raises an :obj:`IOError` when the buffer overflows.
+            - ``'warning'``: Issues a warning and may result in data loss.
+            - ``'none'``: Silently discards the oldest data blocks to make room for new ones.
+              If not specified, the default behavior is ``'error'``.
+
+        Raises
+        ------
+        :obj:`OSError`
+            If any of the specified objects is already registered.
+        """  # noqa: W505
         for obj in objects_to_register:
             if obj not in self.block_buffer:
                 self._create_block_buffer(obj, buffer_size)
@@ -482,16 +587,31 @@ class SampleSplitter(InOut):
                 raise OSError(msg)
 
     def remove_object(self, *objects_to_remove):
-        """Function that can be used to remove registered objects.
+        """
+        Unregister one or more objects from the :class:`SampleSplitter`.
 
-        If no objects are given, all registered objects are removed.
+        This method removes the specified objects and their associated block buffers from the
+        :class:`SampleSplitter`. If no objects are specified, all currently registered objects
+        are unregistered, effectively clearing all buffers.
 
         Parameters
         ----------
-        objects_to_remove : list
-            One or multiple :class:`~acoular.base.Generator` derived objects to be removed.
-            If not set, all registered objects are removed.
-        """
+        objects_to_remove : :class:`~acoular.base.Generator` or list of :class:`~acoular.base.Generator`, optional
+            A single object or a list of objects derived from :class:`~acoular.base.Generator` to be
+            removed from the :class:`SampleSplitter`.
+            If no objects are provided, all registered objects will be removed.
+
+        Raises
+        ------
+        :obj:`KeyError`
+            If any of the specified objects are not currently registered.
+
+        Notes
+        -----
+        - Once an object is removed, it will no longer receive data from the
+          :class:`SampleSplitter`.
+        - Removing an object also clears its associated buffer.
+        """  # noqa: W505
         if not objects_to_remove:
             objects_to_remove = list(self.block_buffer.keys())
         for obj in objects_to_remove:
@@ -499,20 +619,39 @@ class SampleSplitter(InOut):
             self._remove_buffer_overflow_treatment(obj)
 
     def result(self, num):
-        """Python generator that yields the output block-wise from block-buffer.
+        """
+        Yield data blocks from the buffer to the calling object.
+
+        This generator method retrieves blocks of data for the calling object, either
+        from its dedicated block buffer or by processing new data from the source.
+        If the buffer is empty, new data blocks are generated and distributed to
+        all registered objects in a block-wise manner.
 
         Parameters
         ----------
-        num : integer
-            This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block).
+        num : :class:`int`
+            The size of each block to be yielded, defined as the number of samples per block.
 
-        Returns
-        -------
-        Samples in blocks of shape (num, num_channels).
-            Delivers a block of samples to the calling object.
-            The last block may be shorter than num.
+        Yields
+        ------
+        :class:`numpy.ndarray`
+            Blocks of data with shape ``(num, num_channels)``.
+            The last block may be shorter than ``num`` if the source data is exhausted.
 
+        Raises
+        ------
+        :obj:`OSError`
+            If the calling object is not registered with the :class:`SampleSplitter`.
+        :obj:`OSError`
+            If the block buffer reaches its maximum size and the overflow handling
+            policy is set to ``'error'``.
+
+        Notes
+        -----
+        - If the block buffer is empty, new data is fetched from the source and distributed to all
+          registered objects.
+        - Buffer overflow behavior is controlled by the :attr:`buffer_overflow_treatment` attribute,
+          which can be set to ``'error'``, ``'warning'``, or ``'none'``.
         """
         calling_obj = currentframe().f_back.f_locals['self']
         self._assert_obj_registered(calling_obj)
@@ -537,11 +676,15 @@ class SampleSplitter(InOut):
 
 
 class TimeAverage(Average):
-    """Calculates average of the signal (Alias for :class:`acoular.process.Average`).
+    """
+    Calculate the average of the signal.
 
     .. deprecated:: 24.10
-        Using :class:`~acoular.process.TimeAverage` is deprecated and will be removed in Acoular
-        version 25.07. Use :class:`~acoular.process.Average` instead.
+        The use of :class:`~acoular.process.TimeAverage` is deprecated
+        and will be removed in Acoular version 25.07.
+        Please use :class:`~acoular.process.Average` instead for future compatibility.
+
+    Alias for :class:`~acoular.process.Average`.
     """
 
     def __init__(self, *args, **kwargs):
@@ -554,11 +697,15 @@ class TimeAverage(Average):
 
 
 class TimeCache(Cache):
-    """Caches source signals in cache file (Alias for :class:`acoular.process.Cache`).
+    """
+    Cache source signals in cache file.
 
     .. deprecated:: 24.10
-        Using :class:`~acoular.process.TimeCache` is deprecated and will be removed in Acoular
-        version 25.07. Use :class:`~acoular.process.Cache` instead.
+        The use of :class:`~acoular.process.TimeCache` is deprecated
+        and will be removed in Acoular version 25.07.
+        Please use :class:`~acoular.process.Cache` instead for future compatibility.
+
+    Alias for :class:`~acoular.process.Cache`.
     """
 
     def __init__(self, *args, **kwargs):
@@ -571,17 +718,17 @@ class TimeCache(Cache):
 
 
 class SamplesBuffer(InOut):
-    """Handles buffering of samples from a source.
+    """
+    Handle buffering of samples from a source.
 
-    This class is used to buffer samples from a source and provide them in blocks
-    of a specified size. There are several usecases for this class, as demonstrated in
-    the following.
+    The :class:`SamplesBuffer` class buffers samples from a source and provides them in blocks of a
+    specified size. It supports various use cases for efficient handling of sample data.
+    Below is an example demonstrating its functionality.
 
     Examples
     --------
-    Let us assume we want to draw blocks of 16 samples from our source, but we want to make sure
-    that we always have twice the number of samples in the buffer. We can achieve this simple
-    behaviour by using the following code:
+    Suppose we want to draw blocks of 16 samples from the source, while ensuring that the buffer
+    always holds twice that number (32 samples). The following code achieves this behavior:
 
     >>> import acoular as ac
     >>> import numpy as np
@@ -599,20 +746,20 @@ class SamplesBuffer(InOut):
     >>> block = next(buffer.result(num=16))
     >>> np.testing.assert_array_equal(block, source.data[:16])
 
-    Here, on the first call to the result method, the buffer will fill up by collecting blocks with
-    same size from the source. The buffer will then return the first block of 16 samples. On the
-    next call to the result method, the buffer will be filled again and returns the next block of 16
-    samples.
+    In the example above, the buffer initially collects blocks of the specified size from the
+    source. It then returns the first block of 16 samples. With subsequent calls to the
+    :meth:`result` method, the buffer refills and returns additional blocks of 16 samples.
 
-    In some cases, we might want to draw a different number of samples from the source than we want
-    to return. This can be achieved by setting the `source_num` trait of the buffer. A special case
-    is the return of a variable number of samples. This is the case, for example, in the class
-    :class:`~acoular.tbeamform.BeamformerTimeTraj`, in which a different number of time samples is
-    required from the buffer for further delay-and-sum processing depending on the expected delay,
-    which can be vary for moving sources. At the same time, however, only 'num' samples should be
-    written to and removed from the buffer. This behavior can be achieved by setting the
-    `shift_index_by` trait to 'num' and by setting the `result_num` trait to the number of samples
-    that should be returned by the result function.
+    In some cases, you may wish to retrieve a different number of samples from the source than you
+    want to return. This can be achieved by setting the :attr:`source_num` attribute. For example,
+    in the :class:`~acoular.tbeamform.BeamformerTimeTraj` class, the number of time samples varies
+    based on the expected delay for moving sources, while still adhering to the desired block size
+    for the buffer.
+
+    The :attr:`shift_index_by` attribute controls how the buffer updates its index when retrieving
+    data. If set to ``'num'``, the buffer returns :attr:`result_num` samples but forgets ``'num'``
+    samples from the buffer.
+    If set to :attr:`result_num`, the buffer will return and forget the same number of samples.
 
     >>> buffer = ac.process.SamplesBuffer(source=source, length=32, result_num=20, shift_index_by='num')
     >>> block_sizes = []
@@ -626,11 +773,11 @@ class SamplesBuffer(InOut):
     >>> np.testing.assert_array_equal(block_sizes, [20, 24])
     """  # noqa: W505
 
-    #: number of samples that fit in the buffer
+    #: The number of samples that the buffer can hold.
     length = Int(desc='number of samples that fit in the buffer')
 
-    #: number of samples per block to obtain from the source. If 'None', use 'num' argument of
-    #: result method
+    #: The number of samples per block to obtain from the source. If set to ``None``, the number of
+    #: samples will be determined by the ``num`` argument of the :meth:`result` method.
     source_num = Union(
         None,
         Int(),
@@ -638,7 +785,8 @@ class SamplesBuffer(InOut):
         desc='number of samples to return from the source. If "None", use "num" argument of result method',
     )
 
-    #: number of samples to return from the buffer. If 'None', use 'num' argument of result method
+    #: The number of samples to return from the buffer. If set to ``None``, the number of
+    #: samples will be determined by the ``num`` argument of the :meth:`result` method.
     result_num = Union(
         None,
         Int(),
@@ -646,8 +794,11 @@ class SamplesBuffer(InOut):
         desc="number of samples to return from the buffer. If 'None', use 'num' argument of result method",
     )
 
-    #: index shift value for the buffer. If "result_num", buffer will return and forget 'result_num'
-    #: samples. If "num", buffer will return 'result_num' samples but will forget 'num' samples
+    #: Index shift value for the buffer.
+    #:
+    #: - If set to ``'result_num'``, the buffer will return and forget :attr:`result_num` samples.
+    #: - If set to ``'num'``, the buffer will return :attr:`result_num` samples but forget ``num``
+    #:   samples.
     shift_index_by = Enum(
         ('result_num', 'num'),
         desc=(
@@ -656,19 +807,19 @@ class SamplesBuffer(InOut):
         ),
     )
 
-    #: current filling level of buffer
+    #: The current filling level of the buffer, i.e., how many samples are currently available.
     level = Property(desc='current filling level of buffer')
 
-    #: data type of the buffer elements
+    #: The data type of the elements in the buffer.
     dtype = Any(desc='data type of the buffer')
 
-    # flag to indicate that the source is empty, for internal use
+    # Flag indicating if the source is empty (for internal use).
     _empty_source = Bool(False, desc='flag to indicate that the source is empty')
 
-    # the buffer for processing
+    # The actual buffer holding the samples for processing.
     _buffer = Array(shape=(None, None), desc='buffer for block processing')
 
-    # current index in buffer
+    # The current index position in the buffer.
     _index = Int(desc='current index in buffer')
 
     def _get_level(self):
@@ -686,11 +837,17 @@ class SamplesBuffer(InOut):
         self._index -= ns
 
     def increase_buffer(self, num):
-        """Increase the buffer by 'num' samples.
+        """
+        Increase the size of the buffer by a specified number of samples.
 
-        Returns
-        -------
-        None
+        This method expands the buffer by appending additional samples, effectively increasing
+        its capacity. The new samples are initialized to zero. The index of the buffer is adjusted
+        accordingly to accommodate the increase.
+
+        Parameters
+        ----------
+        num : :class:`int`
+            The number of samples by which to increase the buffer size.
         """
         ar = np.zeros((num, self.num_channels), dtype=self._buffer.dtype)
         self._buffer = np.concatenate((ar, self._buffer), axis=0)
@@ -698,18 +855,32 @@ class SamplesBuffer(InOut):
         self.length += num
 
     def read_from_buffer(self, num):
-        """Read samples from the buffer.
+        """
+        Read a specified number of samples from the buffer.
+
+        This method retrieves samples from the buffer, ensuring that the requested number of samples
+        is returned. If the buffer contains fewer samples than requested, the method will return all
+        available samples. The index of the buffer is updated based on the :attr:`shift_index_by`
+        setting.
 
         Parameters
         ----------
-        num : int
-            number of samples to read from the buffer.
+        num : :class:`int`
+            The number of samples to read from the buffer.
 
         Returns
         -------
-        numpy.ndarray
-            block of samples from the buffer
+        :class:`numpy.ndarray`
+            A block of samples (array) from the buffer.
 
+        Notes
+        -----
+        - If the :attr:`result_num` attribute is set, it determines the number of samples to return.
+        - The method ensures the buffer index is adjusted according to the :attr:`shift_index_by`
+          setting. Options are:
+
+            - ``'result_num'``: The index will shift by the number of samples returned.
+            - ``'num'``: The index will shift by the number of samples requested (``num``).
         """
         rnum = num if self.result_num is None else self.result_num
         rnum = rnum if self.level >= rnum else self.level
@@ -721,16 +892,32 @@ class SamplesBuffer(InOut):
         return data
 
     def fill_buffer(self, snum):
-        """Fill the buffer with samples from the source.
+        """
+        Fill the buffer with samples from the source.
+
+        The :meth:`fill_buffer` method collects samples from the source and writes them to the
+        buffer. It continues to fill the buffer until there are enough samples available, or the
+        source runs out of data. If the buffer reaches its maximum capacity, additional samples are
+        discarded. The buffer will only contain the most recent data, and its index will be updated
+        accordingly.
 
         Parameters
         ----------
-        snum : int
-            number of samples to return from the source.
+        snum : :class:`int`
+            The number of samples to retrieve from the source in each iteration.
 
         Yields
         ------
-        None
+        :obj:`None`
+            This method is a generator and yields control back after filling the buffer.
+
+        Notes
+        -----
+        - The method ensures that the buffer is filled with the required number of samples,
+          adjusting the buffer size if necessary (via the :meth:`increase_buffer` method) when more
+          space is needed.
+        - Once the buffer is filled, it yields control and resumes only when the buffer is ready for
+          more data.
         """
         source_generator = self.source.result(snum)
         while not self._empty_source:
@@ -746,17 +933,34 @@ class SamplesBuffer(InOut):
             yield
 
     def result(self, num):
-        """Return blocks of samples from the buffer.
+        """
+        Return blocks of samples from the buffer.
+
+        The :meth:`result` method retrieves blocks of samples from the buffer and yields them to the
+        calling process. The number of samples per block is determined by the ``num`` argument, but
+        can also be influenced by other attributes like `result_num` (if set). If the buffer is not
+        yet filled, it will continue to collect samples from the source until the buffer contains
+        enough data. Once the buffer is full, it will return the requested blocks of samples.
 
         Parameters
         ----------
-        num : int
-            number of samples to return.
+        num : :class:`int`
+            The number of samples to return in each block.
+            This value specifies the size of the blocks to be yielded from the buffer.
 
         Yields
         ------
-        numpy.ndarray
-            block of samples from the buffer
+        :class:`numpy.ndarray`
+            A block of samples from the buffer. The size of the block is determined by the ``num``
+            parameter or the :attr:`result_num` attribute, depending on the buffer's configuration.
+
+        Notes
+        -----
+        - If :attr:`result_num` is set, the method will use it to determine the number of samples
+          returned instead of the ``num`` parameter.
+        - If the buffer is empty or does not have enough samples, it will attempt to fill the buffer
+          by collecting data from the source. If there are not enough samples available from the
+          source, the method will yield whatever samples are left in the buffer.
         """
         self._create_new_buffer()
         snum = num
