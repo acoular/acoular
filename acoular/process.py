@@ -207,7 +207,7 @@ class Cache(InOut):
     The class intelligently determines whether to use the cached data, update it,
     or bypass caching based on the global caching configuration and the state of the cache file.
     The caching mechanism supports scenarios such as:
-    
+
     - Reading from a complete or incomplete cache.
     - Overwriting an existing cache.
     - Operating in a read-only or no-cache mode.
