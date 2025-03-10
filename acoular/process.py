@@ -850,9 +850,6 @@ class SamplesBuffer(InOut):
 
         Returns
         -------
-        :obj:`None`
-            The buffer is resized, and the internal state is updated to reflect the new size and
-            index.
         """
         ar = np.zeros((num, self.num_channels), dtype=self._buffer.dtype)
         self._buffer = np.concatenate((ar, self._buffer), axis=0)
