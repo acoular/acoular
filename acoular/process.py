@@ -177,9 +177,9 @@ class Average(InOut):
         Notes
         -----
         - The averaging operation depends on the source type:
-            - For time-domain sources (e.g., derived from `acoular.base.SamplesGenerator`),
+            - For time-domain sources (e.g., derived from :class:`~acoular.base.SamplesGenerator`),
               the average is calculated over :attr:`num_per_average` time samples.
-            - For frequency-domain sources (e.g., derived from `acoular.base.SpectraGenerator`),
+            - For frequency-domain sources (e.g., derived from :class:`~acoular.base.SpectraGenerator`),
               the average is calculated over :attr:`num_per_average` frequency snapshots.
         - The generator will stop yielding when the source data is exhausted.
         - If the source provides fewer than ``num * num_per_average`` samples,
