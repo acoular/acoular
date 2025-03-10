@@ -201,7 +201,7 @@ class Cache(InOut):
     :class:`~acoular.base.Generator`) in a cache file within the Acoular cache directory.
     This enables faster reuse of precomputed data by avoiding time-consuming recalculations.
     The cache behavior is managed through the
-    :class:`Acoular configuration<acoular.configuration.Config>` class.
+    :class:`~acoular.configuration.Config` class.
 
     The class intelligently determines whether to use the cached data, update it,
     or bypass caching based on the global caching configuration and the state of the cache file.
