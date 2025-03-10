@@ -399,7 +399,7 @@ class SampleSplitter(InOut):
     Notes
     -----
     - Buffers are dynamically created and managed for each registered object.
-    .. note:: Buffer overflow behavior can be set individually for each target object.
+    - Buffer overflow behavior can be set individually for each target object.
 
     Examples
     --------
