@@ -102,7 +102,7 @@ class Average(InOut):
 
     Here, each evaluation of the generator created by the :meth:`result` method of the
     :class:`Average` object via the :meth:`next` function returns :code:`num=1` average across a
-    snapshot of 512 samples.
+    snapshot of 512 time samples.
 
     If the source is a frequency domain source, the average is calculated over a certain number
     of snapshots, defined by :attr:`num_per_average`.
