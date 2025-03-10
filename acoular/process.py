@@ -85,7 +85,7 @@ class Average(InOut):
 
     Examples
     --------
-    For estimate the RMS of a white noise (time-domain) signal, the average of the squared
+    To estimate the RMS of a white noise (time-domain) signal, the average of the squared
     signal can be calculated:
 
     >>> import acoular as ac
