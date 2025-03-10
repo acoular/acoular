@@ -406,7 +406,7 @@ class SampleSplitter(InOut):
     :class:`~acoular.tprocess.TimePower`, and :class:`~acoular.process.Average` objects.
     The :class:`SampleSplitter` is responsible for distributing incoming data blocks to the buffers
     of the :class:`~acoular.fprocess.RFFT` and :class:`~acoular.tprocess.TimePower` objects whenever
-    one of them calls the :meth:`result` generator.
+    either object requests data via the :meth:`result` generator.
 
     For the :class:`~acoular.tprocess.TimePower` object, the buffer size is set to 10 blocks.
     If the buffer is full, an error is raised, as the buffer overflow treatment is set to
