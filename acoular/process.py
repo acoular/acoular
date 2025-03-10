@@ -163,7 +163,7 @@ class Average(InOut):
         ----------
         num : :class:`int`
             The number of averaged blocks to yield at a time. Each block contains the average over
-            :attr:`num_per_average` samples or snapshots. The last block may be shorter than the
+            :attr:`num_per_average` time samples or frequency snapshots. The last block may be shorter than the
             specified size if the remaining data is insufficient.
 
         Yields
