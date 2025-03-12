@@ -10,6 +10,7 @@ Upcoming Release
         * adds docstrings to spectra.py        
         * adds docstrings to environments.py
         * adds new docstrings to fprocess.py
+        * adds new docstrings to sources.py
 
 
     **Internal**
@@ -44,6 +45,7 @@ Upcoming Release
         * adds new docstrings to trajectory.py
         * adds new docstrings to grids.py
         * adds docstrings to environments.py
+        * adds new docstrings to process.py
         * adds new docstrings to signals.py
 
     **Tests**
