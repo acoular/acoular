@@ -4,6 +4,10 @@ What's new
 Upcoming Release
 ------------------------
 
+
+25.03
+------------------------
+
     **Documentation**
         * add known issue section to install guide
         * adds new docstrings to submodules :mod:`acoular.spectra`, :mod:`acoular.environments`, :mod:`acoular.fprocess`, :mod:`acoular.process`, :mod:`acoular.signals`, :mod:`acoular.sources`, :mod:`acoular.trajectory`
