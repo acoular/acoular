@@ -569,15 +569,15 @@ class RotatingFlow(FlowField):
     - The rotation is assumed to be about the z-axis. The velocity components in the x-y plane are
       determined by the angular velocity :attr:`omega`, while the z-component is constant
       and set by :attr:`v0`.
-    - The angular velocity :attr:`omega` is computed as: ``omega = 2 * pi * rotational_speed``,
-      with the :attr:`rotational_speed` given in revolutions per second (i.e. Hz).
+    - The angular velocity :attr:`omega` is computed as: ``omega = 2 * pi * rps``,
+      with the :attr:`rps` given in revolutions per second (i.e. Hz).
 
     Examples
     --------
     >>> import acoular as ac
     >>> import numpy as np
     >>>
-    >>> flow = RotatingFlow(rotational_speed=1, v0=1.0)
+    >>> flow = RotatingFlow(rps=1, v0=1.0)
     >>> velocity, jacobian = flow.v(array((1.0, 1.0, 0.0)))
     >>> velocity
     array([ -6.28318531,  6.28318531,  1.        ])
@@ -588,29 +588,30 @@ class RotatingFlow(FlowField):
     """
 
     # Revolutions per minute (RPM). Default is ``0.0``.
-    # Positive values indicate clockwise rotation (sic!) of the flow.
-    # Deprecated! Please use the differently defined :attr:`rotational_speed` attribute instead.
+    # Positive values indicate clockwise rotation of the flow.
+    # This is contrary to the usual definition of the direction of rotation.
+    # Deprecated! Please use the differently defined :attr:`rps` attribute instead.
     rpm = Property(desc='revolutions per minute of the flow; positive values for clockwise rotation')
 
     def _get_rpm(self):
         warn(
-            'Deprecated use of "rpm" trait. Please use the "rotational_speed" trait instead.',
+            'Deprecated use of "rpm" trait. Please use the "rps" trait instead.',
             DeprecationWarning,
             stacklevel=2,
         )
-        return -60 * self.rotational_speed
+        return -60 * self.rps
 
     def _set_rpm(self, rpm):
         warn(
-            'Deprecated use of "rpm" trait. Please use the "rotational_speed" trait instead.',
+            'Deprecated use of "rpm" trait. Please use the "rps" trait instead (divide rpm value by -60).',
             DeprecationWarning,
             stacklevel=2,
         )
-        self.rotational_speed = -rpm / 60
+        self.rps = -rpm / 60
 
-    #: Revolutions per second. Negative values indicate clockwise
+    #: Rotational speed in revolutions per second. Negative values indicate clockwise
     #: rigid-body-like rotation of the flow. Default is ``0.0``.
-    rotational_speed = Float(0.0, desc='rotational speed of the flow')
+    rps = Float(0.0, desc='rotational speed of the flow in Hz')
 
     #: Constant flow velocity in the z-direction. Default is ``0.0``.
     v0 = Float(0.0, desc='flow velocity')
@@ -621,18 +622,18 @@ class RotatingFlow(FlowField):
 
     #: A unique identifier based on the field properties. (read-only)
     digest = Property(
-        depends_on=['v0', 'origin', 'rotational_speed'],
+        depends_on=['v0', 'origin', 'rps'],
     )
 
     #: Angular velocity (in radians per second) of the rotation.
-    #: This is a derived property based on :attr:`rotational_speed`.
+    #: This is a derived property based on :attr:`rps`.
     omega = Property(
-        depends_on=['rotational_speed'],
+        depends_on=['rps'],
     )
 
     @cached_property
     def _get_omega(self):
-        return 2 * pi * self.rotational_speed
+        return 2 * pi * self.rps
 
     @cached_property
     def _get_digest(self):
