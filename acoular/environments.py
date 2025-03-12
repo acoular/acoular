@@ -580,7 +580,7 @@ class RotatingFlow(FlowField):
     >>> flow = RotatingFlow(rps=1, v0=1.0)
     >>> velocity, jacobian = flow.v(array((1.0, 1.0, 0.0)))
     >>> velocity
-    array([ -6.28318531,  6.28318531,  1.        ])
+    array([-6.28318531,  6.28318531,  1.        ])
     >>> jacobian
     array([[ 0.        ,  6.28318531,  0.        ],
            [-6.28318531,  0.        ,  0.        ],
