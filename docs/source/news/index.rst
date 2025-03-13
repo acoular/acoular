@@ -4,6 +4,9 @@ What's new
 Upcoming Release
 ------------------------
 
+    **New features:**
+        * Introduces `rps` trait in :class:`~acoular.environments.FlowField`, that now correctly defines direction of rotation
+
     **Documentation**
         * add known issue section to install guide
         * adds new docstrings to microphones.py
