@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>IRFFT &#8212; Acoular 25.03 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=43776ca6"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="AutoPowerSpectra" href="acoular.fprocess.AutoPowerSpectra.html" />
+    <link rel="prev" title="RFFT" href="acoular.fprocess.RFFT.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.03 documentation</span></a></h1>
+        <h2 class="heading"><span>IRFFT</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.fprocess.RFFT.html">RFFT</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.fprocess.html">fprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.fprocess.AutoPowerSpectra.html">AutoPowerSpectra</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="irfft">
+<h1>IRFFT<a class="headerlink" href="#irfft" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.fprocess.IRFFT">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.fprocess.</span></span><span class="sig-name descname"><span class="pre">IRFFT</span></span><a class="headerlink" href="#acoular.fprocess.IRFFT" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.base.TimeOut.html#acoular.base.TimeOut" title="acoular.base.TimeOut"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeOut</span></code></a></p>
+<p>Perform the inverse Fast Fourier Transform (IFFT) for one-sided multi-channel spectra.</p>
+<p>This class converts spectral data from the frequency domain back into time-domain signals.
+The IFFT is calculated block-wise, where the block size is defined by the spectral data
+source. The output time-domain signals are scaled and processed according to the precision
+defined by the <a class="reference internal" href="#acoular.fprocess.IRFFT.precision" title="acoular.fprocess.IRFFT.precision"><code class="xref py py-attr docutils literal notranslate"><span class="pre">precision</span></code></a> attribute.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fprocess.IRFFT.workers">
+<span class="sig-name descname"><span class="pre">workers</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Union(Int(),</span> <span class="pre">None,</span> <span class="pre">default_value=None,</span> <span class="pre">desc='number</span> <span class="pre">of</span> <span class="pre">workers</span> <span class="pre">to</span> <span class="pre">use')</span></em><a class="headerlink" href="#acoular.fprocess.IRFFT.workers" title="Link to this definition">¶</a></dt>
+<dd><p>The number of workers (threads) to use for the IFFT calculation.
+A negative value utilizes all available logical CPUs.
+Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>, which relies on the <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.fft.irfft.html#scipy.fft.irfft" title="(in SciPy v1.15.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.fft.irfft()</span></code></a> implementation.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fprocess.IRFFT.precision">
+<span class="sig-name descname"><span class="pre">precision</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum('float64',</span> <span class="pre">'float32',</span> <span class="pre">desc='precision</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">time</span> <span class="pre">signal</span> <span class="pre">after</span> <span class="pre">the</span> <span class="pre">ifft')</span></em><a class="headerlink" href="#acoular.fprocess.IRFFT.precision" title="Link to this definition">¶</a></dt>
+<dd><p>Determines the floating-point precision of the resulting time-domain signals.
+Options include <code class="docutils literal notranslate"><span class="pre">'float64'</span></code> and <code class="docutils literal notranslate"><span class="pre">'float32'</span></code>.
+Default is <code class="docutils literal notranslate"><span class="pre">'float64'</span></code>, ensuring high precision.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fprocess.IRFFT.num_samples">
+<span class="sig-name descname"><span class="pre">num_samples</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['source.num_samples',</span> <span class="pre">'source._block_size'])</span></em><a class="headerlink" href="#acoular.fprocess.IRFFT.num_samples" title="Link to this definition">¶</a></dt>
+<dd><p>The total number of time-domain samples in the output.
+Computed as the product of the number of input samples and the block size.
+Returns <code class="docutils literal notranslate"><span class="pre">-1</span></code> if the number of input samples is negative.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fprocess.IRFFT.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['source.digest',</span> <span class="pre">'scaling',</span> <span class="pre">'precision',</span> <span class="pre">'_block_size',</span> <span class="pre">'window',</span> <span class="pre">'overlap'])</span></em><a class="headerlink" href="#acoular.fprocess.IRFFT.digest" title="Link to this definition">¶</a></dt>
+<dd><p>A unique identifier based on the process properties.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.fprocess.IRFFT.result">
+<span class="sig-name descname"><span class="pre">result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.fprocess.IRFFT.result" title="Link to this definition">¶</a></dt>
+<dd><p>Generate time-domain signal blocks from spectral data.</p>
+<p>This generator processes spectral data block-by-block, performing an inverse Fast
+Fourier Transform (IFFT) to convert the input spectra into time-domain signals.
+The output is yielded in blocks of the specified size.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>num</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></dt><dd><p>The number of time samples per output block. If <code class="docutils literal notranslate"><span class="pre">num</span></code> differs from the
+source block size, an internal buffer is used to assemble the required output.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p>Blocks of time-domain signals with shape (num, <code class="xref py py-attr docutils literal notranslate"><span class="pre">num_channels</span></code>). The last block may
+contain fewer samples if the input data is insufficient to fill the requested size.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The method ensures that the source block size and frequency data are compatible for IFFT.</p></li>
+<li><p>If the requested block size does not match the source block size, a buffer is used
+to assemble the output, allowing arbitrary block sizes to be generated.</p></li>
+<li><p>For performance optimization, the number of workers (threads) can be specified via
+the <a class="reference internal" href="#acoular.fprocess.IRFFT.workers" title="acoular.fprocess.IRFFT.workers"><code class="xref py py-attr docutils literal notranslate"><span class="pre">workers</span></code></a> attribute.</p></li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.fprocess.RFFT.html">RFFT</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.fprocess.html">fprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.fprocess.AutoPowerSpectra.html">AutoPowerSpectra</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Mar 13, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>CrossPowerSpectra &#8212; Acoular 25.03 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=43776ca6"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="FFTSpectra" href="acoular.fprocess.FFTSpectra.html" />
+    <link rel="prev" title="AutoPowerSpectra" href="acoular.fprocess.AutoPowerSpectra.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.03 documentation</span></a></h1>
+        <h2 class="heading"><span>CrossPowerSpectra</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.fprocess.AutoPowerSpectra.html">AutoPowerSpectra</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.fprocess.html">fprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.fprocess.FFTSpectra.html">FFTSpectra</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="crosspowerspectra">
+<h1>CrossPowerSpectra<a class="headerlink" href="#crosspowerspectra" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.fprocess.CrossPowerSpectra">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.fprocess.</span></span><span class="sig-name descname"><span class="pre">CrossPowerSpectra</span></span><a class="headerlink" href="#acoular.fprocess.CrossPowerSpectra" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.fprocess.AutoPowerSpectra.html#acoular.fprocess.AutoPowerSpectra" title="acoular.fprocess.AutoPowerSpectra"><code class="xref py py-class docutils literal notranslate"><span class="pre">AutoPowerSpectra</span></code></a></p>
+<p>Compute the complex-valued auto- and cross-power spectra from frequency-domain data.</p>
+<p>This class generates the cross-spectral matrix (CSM) in a flattened representation, which
+includes the auto-power spectra (diagonal elements) and cross-power spectra (off-diagonal
+elements). Depending on the <a class="reference internal" href="#acoular.fprocess.CrossPowerSpectra.calc_mode" title="acoular.fprocess.CrossPowerSpectra.calc_mode"><code class="xref py py-attr docutils literal notranslate"><span class="pre">calc_mode</span></code></a>, the class can compute:</p>
+<ul class="simple">
+<li><p>The full CSM, which includes all elements.</p></li>
+<li><p>Only the upper triangle of the CSM.</p></li>
+<li><p>Only the lower triangle of the CSM.</p></li>
+</ul>
+<p>The results are computed block-by-block and scaled according to the specified configuration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fprocess.CrossPowerSpectra.source">
+<span class="sig-name descname"><span class="pre">source</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Instance(SpectraGenerator)</span></em><a class="headerlink" href="#acoular.fprocess.CrossPowerSpectra.source" title="Link to this definition">¶</a></dt>
+<dd><p>The data source providing the input spectra,
+implemented as an instance of <a class="reference internal" href="acoular.base.SpectraGenerator.html#acoular.base.SpectraGenerator" title="acoular.base.SpectraGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpectraGenerator</span></code></a> or a derived object.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fprocess.CrossPowerSpectra.precision">
+<span class="sig-name descname"><span class="pre">precision</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum('complex128',</span> <span class="pre">'complex64',</span> <span class="pre">desc='precision</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">fft')</span></em><a class="headerlink" href="#acoular.fprocess.CrossPowerSpectra.precision" title="Link to this definition">¶</a></dt>
+<dd><p>Specifies the floating-point precision of the computed cross-spectral matrix (CSM).
+Options are <code class="docutils literal notranslate"><span class="pre">'complex128'</span></code> and <code class="docutils literal notranslate"><span class="pre">'complex64'</span></code>. Default is <code class="docutils literal notranslate"><span class="pre">'complex128'</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fprocess.CrossPowerSpectra.calc_mode">
+<span class="sig-name descname"><span class="pre">calc_mode</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum('full',</span> <span class="pre">'upper',</span> <span class="pre">'lower',</span> <span class="pre">desc='calculation</span> <span class="pre">mode')</span></em><a class="headerlink" href="#acoular.fprocess.CrossPowerSpectra.calc_mode" title="Link to this definition">¶</a></dt>
+<dd><ul class="simple">
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">'lower'</span></code>: Computes only the lower triangle of the CSM,</dt><dd><p>excluding redundant upper-triangle elements.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p>Default is <code class="docutils literal notranslate"><span class="pre">'full'</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fprocess.CrossPowerSpectra.num_channels">
+<span class="sig-name descname"><span class="pre">num_channels</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['source.num_channels'])</span></em><a class="headerlink" href="#acoular.fprocess.CrossPowerSpectra.num_channels" title="Link to this definition">¶</a></dt>
+<dd><p>The number of channels in the output data. The value depends on the number of input channels
+<span class="math notranslate nohighlight">\(n\)</span> and the selected <a class="reference internal" href="#acoular.fprocess.CrossPowerSpectra.calc_mode" title="acoular.fprocess.CrossPowerSpectra.calc_mode"><code class="xref py py-attr docutils literal notranslate"><span class="pre">calc_mode</span></code></a>:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'full'</span></code>: <span class="math notranslate nohighlight">\(n^2\)</span> (all elements in the CSM).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'upper'</span></code>: <span class="math notranslate nohighlight">\(n + n(n-1)/2\)</span> (diagonal + upper triangle elements).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'lower'</span></code>: <span class="math notranslate nohighlight">\(n + n(n-1)/2\)</span> (diagonal + lower triangle elements).</p></li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fprocess.CrossPowerSpectra.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['source.digest',</span> <span class="pre">'precision',</span> <span class="pre">'scaling',</span> <span class="pre">'single_sided',</span> <span class="pre">'calc_mode'])</span></em><a class="headerlink" href="#acoular.fprocess.CrossPowerSpectra.digest" title="Link to this definition">¶</a></dt>
+<dd><p>A unique identifier based on the computation properties.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.fprocess.CrossPowerSpectra.result">
+<span class="sig-name descname"><span class="pre">result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.fprocess.CrossPowerSpectra.result" title="Link to this definition">¶</a></dt>
+<dd><p>Generate blocks of complex-valued auto- and cross-power spectra.</p>
+<p>This generator computes the cross-spectral matrix (CSM) for input spectra block-by-block.
+Depending on the <a class="reference internal" href="#acoular.fprocess.CrossPowerSpectra.calc_mode" title="acoular.fprocess.CrossPowerSpectra.calc_mode"><code class="xref py py-attr docutils literal notranslate"><span class="pre">calc_mode</span></code></a>, the resulting CSM is flattened in one of three ways:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'full'</span></code>: Includes all elements of the CSM.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'upper'</span></code>: Includes only the diagonal and upper triangle.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'lower'</span></code>: Includes only the diagonal and lower triangle.</p></li>
+</ul>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>num</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, optional</span></dt><dd><p>Number of snapshots (blocks) in each output data block. Default is <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p>Blocks of complex-valued auto- and cross-power spectra with shape
+<code class="docutils literal notranslate"><span class="pre">(num,</span> <span class="pre">:attr:`num_channels`</span> <span class="pre">*</span> <span class="pre">:attr:`num_freqs`)</span></code>.
+The last block may contain fewer than <code class="docutils literal notranslate"><span class="pre">num</span></code> elements if the input data
+does not completely fill the requested block size.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.fprocess.AutoPowerSpectra.html">AutoPowerSpectra</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.fprocess.html">fprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.fprocess.FFTSpectra.html">FFTSpectra</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Mar 13, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

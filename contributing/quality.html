@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Code Quality Standards &#8212; Acoular 25.03 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../_static/documentation_options.js?v=43776ca6"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Documentation" href="documentation.html" />
+    <link rel="prev" title="Setting up a development environment" href="install.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../index.html">
+          <span>Acoular 25.03 documentation</span></a></h1>
+        <h2 class="heading"><span>Code Quality Standards</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="install.html">Setting up a development environment</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contributing</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="documentation.html">Documentation</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="code-quality-standards">
+<span id="id1"></span><h1>Code Quality Standards<a class="headerlink" href="#code-quality-standards" title="Link to this heading">¶</a></h1>
+<p>Acoular requires a high standard of code quality, and we test if these requirements are met via Continuous Integration (CI) with <a class="reference external" href="https://github.com/acoular/acoular/actions">GitHub Actions</a>.</p>
+<p>Currently, three main checks are performed on the code:</p>
+<ol class="arabic simple">
+<li><p><a class="reference internal" href="#linting-and-formatting">Linting and Formatting</a>: The code must be correctly formatted and free of linting errors.</p></li>
+<li><p><a class="reference internal" href="#documentation-compilation">Documentation Compilation</a>: The documentation must be correctly compiled without errors.</p></li>
+<li><p><a class="reference internal" href="#testing">Testing</a>: The tests must pass without errors.</p></li>
+</ol>
+<p>We recommend running these checks before submitting a pull request. This can be done locally or on a GitHub runner.
+The latter is possible by using the <cite>workflow_dispatch</cite> event from the desired branch holding the changes.
+To do this, go to the <cite>Actions</cite> tab in the forked GitHub repository, select the <cite>Tests</cite> workflow and press the <cite>Run workflow</cite> button.</p>
+<section id="linting-and-formatting">
+<span id="id2"></span><h2>Linting and Formatting<a class="headerlink" href="#linting-and-formatting" title="Link to this heading">¶</a></h2>
+<p>Acoular primarily follows the coding style of <a class="reference external" href="https://www.python.org/dev/peps/pep-0008/">PEP8</a>.
+To verify that the code meets the PEP8 standard, we use the <a class="reference external" href="https://pypi.org/project/ruff/">ruff</a> code linter and formatter. Configurations for the <a class="reference external" href="https://pypi.org/project/ruff/">ruff</a> code checker are contained in <code class="docutils literal notranslate"><span class="pre">.ruff.toml</span></code> file.</p>
+<p>The source code must be correctly formatted and free of linting errors. You can check your code locally by running the following command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>hatch<span class="w"> </span>fmt<span class="w"> </span>--check
+</pre></div>
+</div>
+<p>which should return:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>All<span class="w"> </span>checks<span class="w"> </span>passed!
+</pre></div>
+</div>
+</section>
+<section id="documentation-compilation">
+<span id="id4"></span><h2>Documentation Compilation<a class="headerlink" href="#documentation-compilation" title="Link to this heading">¶</a></h2>
+<p>The package documentation is provided under <code class="docutils literal notranslate"><span class="pre">acoular/docs/source</span></code>. This directory contains the <code class="docutils literal notranslate"><span class="pre">index.rst</span></code> file, which is the root document embedding several other subdocuments (sub-pages).</p>
+<p>You can check if the documentation can be compiled without errors by running</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>hatch<span class="w"> </span>run<span class="w"> </span>docs:build
+</pre></div>
+</div>
+<p>which should end with the following message:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Build<span class="w"> </span>finished.<span class="w"> </span>The<span class="w"> </span>HTML<span class="w"> </span>pages<span class="w"> </span>are<span class="w"> </span><span class="k">in</span><span class="w"> </span>build/html.
+</pre></div>
+</div>
+</section>
+<section id="testing">
+<span id="id5"></span><h2>Testing<a class="headerlink" href="#testing" title="Link to this heading">¶</a></h2>
+<p>Acoular provides several tests to ensure the correct functionality of the package at different Python versions. The tests are located in the <code class="docutils literal notranslate"><span class="pre">acoular/tests</span></code> directory.</p>
+<p>To run the tests locally, execute the following command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>hatch<span class="w"> </span>run<span class="w"> </span>tests:test
+</pre></div>
+</div>
+<p>Note that the tests are executed on different Python versions and take several minutes to complete.</p>
+<p>To check a specific Python version only, the command can be modified to:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>hatch<span class="w"> </span>-v<span class="w"> </span>run<span class="w"> </span>+py<span class="o">=</span><span class="m">3</span>.11<span class="w"> </span>tests:test
+</pre></div>
+</div>
+<p>Here the tests will be executed for the Python version 3.11 only. The <code class="docutils literal notranslate"><span class="pre">-v</span></code> flag increases verbosity.</p>
+</section>
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="install.html">Setting up a development environment</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contributing</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="documentation.html">Documentation</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Mar 13, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

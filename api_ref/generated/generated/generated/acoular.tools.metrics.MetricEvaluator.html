@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>MetricEvaluator &#8212; Acoular 25.03 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../../_static/documentation_options.js?v=43776ca6"></script>
+    <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="utils" href="../acoular.tools.utils.html" />
+    <link rel="prev" title="metrics" href="../acoular.tools.metrics.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../../index.html">
+          <span>Acoular 25.03 documentation</span></a></h1>
+        <h2 class="heading"><span>MetricEvaluator</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.tools.metrics.html">metrics</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tools.metrics.html">metrics</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../acoular.tools.utils.html">utils</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="metricevaluator">
+<h1>MetricEvaluator<a class="headerlink" href="#metricevaluator" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.tools.metrics.MetricEvaluator">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.tools.metrics.</span></span><span class="sig-name descname"><span class="pre">MetricEvaluator</span></span><a class="headerlink" href="#acoular.tools.metrics.MetricEvaluator" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">HasStrictTraits</span></code></p>
+<p>Evaluate the reconstruction performance of source mapping methods.</p>
+<p>This class can be used to calculate the following performance metrics
+according <span id="id1">[<a class="reference internal" href="../../../../literature/index.html#id22" title="Gert Herold and Ennes Sarradj. Performance analysis of microphone array methods. Journal of Sound and Vibration, 401:152–168, 2017. doi:10.1016/j.jsv.2017.04.030.">1</a>]</span>:
+* Specific level error
+* Overall level error
+* Inverse level error</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tools.metrics.MetricEvaluator.data">
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CArray(shape=(None,</span> <span class="pre">None),</span> <span class="pre">desc='Contains</span> <span class="pre">the</span> <span class="pre">calculated</span> <span class="pre">squared</span> <span class="pre">sound</span> <span class="pre">pressure</span> <span class="pre">values</span> <span class="pre">in</span> <span class="pre">Pa**2.')</span></em><a class="headerlink" href="#acoular.tools.metrics.MetricEvaluator.data" title="Link to this definition">¶</a></dt>
+<dd><p>an array of shape=(nf,ng) containing the squared sound pressure data of the
+source mapping. (nf: number of frequencies, ng: number of grid points)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tools.metrics.MetricEvaluator.target_data">
+<span class="sig-name descname"><span class="pre">target_data</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CArray(shape=(None,</span> <span class="pre">None),</span> <span class="pre">desc='Contains</span> <span class="pre">the</span> <span class="pre">ground-truth</span> <span class="pre">squared</span> <span class="pre">sound</span> <span class="pre">pressure</span> <span class="pre">values</span> <span class="pre">in</span> <span class="pre">Pa**2.')</span></em><a class="headerlink" href="#acoular.tools.metrics.MetricEvaluator.target_data" title="Link to this definition">¶</a></dt>
+<dd><p>an array of shape=(nf,ns) containing the squared sound pressure data of the
+ground-truth sources. (nf: number of frequencies, ns: number of sources)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tools.metrics.MetricEvaluator.grid">
+<span class="sig-name descname"><span class="pre">grid</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Instance(Grid,</span> <span class="pre">desc='Grid</span> <span class="pre">instance</span> <span class="pre">that</span> <span class="pre">belongs</span> <span class="pre">to</span> <span class="pre">the</span> <span class="pre">calculated</span> <span class="pre">data')</span></em><a class="headerlink" href="#acoular.tools.metrics.MetricEvaluator.grid" title="Link to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="../acoular.grids.Grid.html#acoular.grids.Grid" title="acoular.grids.Grid"><code class="xref py py-class docutils literal notranslate"><span class="pre">Grid</span></code></a>-derived object that provides the grid locations
+for the calculated source mapping data.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tools.metrics.MetricEvaluator.target_grid">
+<span class="sig-name descname"><span class="pre">target_grid</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Instance(Grid,</span> <span class="pre">desc='Grid</span> <span class="pre">instance</span> <span class="pre">that</span> <span class="pre">belongs</span> <span class="pre">to</span> <span class="pre">the</span> <span class="pre">ground-truth</span> <span class="pre">data')</span></em><a class="headerlink" href="#acoular.tools.metrics.MetricEvaluator.target_grid" title="Link to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="../acoular.grids.Grid.html#acoular.grids.Grid" title="acoular.grids.Grid"><code class="xref py py-class docutils literal notranslate"><span class="pre">Grid</span></code></a>-derived object that provides the grid locations
+for the ground-truth data.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tools.metrics.MetricEvaluator.sector">
+<span class="sig-name descname"><span class="pre">sector</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Instance(CircSector,</span> <span class="pre">default=CircSector())</span></em><a class="headerlink" href="#acoular.tools.metrics.MetricEvaluator.sector" title="Link to this definition">¶</a></dt>
+<dd><p>sector type. Currently only circular sectors are supported.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tools.metrics.MetricEvaluator.adaptive_sector_size">
+<span class="sig-name descname"><span class="pre">adaptive_sector_size</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Bool(True,</span> <span class="pre">desc='adaptive</span> <span class="pre">integration</span> <span class="pre">area')</span></em><a class="headerlink" href="#acoular.tools.metrics.MetricEvaluator.adaptive_sector_size" title="Link to this definition">¶</a></dt>
+<dd><p>if set True: use shrink integration area if two sources are closer
+than 2*r. The radius of the integration area is then set to half the
+distance between the two sources.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tools.metrics.MetricEvaluator.multi_assignment">
+<span class="sig-name descname"><span class="pre">multi_assignment</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Bool(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.tools.metrics.MetricEvaluator.multi_assignment" title="Link to this definition">¶</a></dt>
+<dd><p>if set <cite>True</cite>, the same amplitude can be assigned to multiple targets if
+the integration area overlaps. If set <cite>False</cite>, the amplitude is assigned
+to the first target and the other targets are ignored.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tools.metrics.MetricEvaluator.sectors">
+<span class="sig-name descname"><span class="pre">sectors</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property()</span></em><a class="headerlink" href="#acoular.tools.metrics.MetricEvaluator.sectors" title="Link to this definition">¶</a></dt>
+<dd><p>returns the determined sector sizes for each ground-truth source position</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.tools.metrics.MetricEvaluator.get_overall_level_error">
+<span class="sig-name descname"><span class="pre">get_overall_level_error</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#acoular.tools.metrics.MetricEvaluator.get_overall_level_error" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the overall level error (Herold and Sarradj, 2017).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>numpy.array</dt><dd><p>overall level error of shape=(nf,)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.tools.metrics.MetricEvaluator.get_specific_level_error">
+<span class="sig-name descname"><span class="pre">get_specific_level_error</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#acoular.tools.metrics.MetricEvaluator.get_specific_level_error" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the specific level error (Herold and Sarradj, 2017).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>numpy.array</dt><dd><p>specific level error of shape=(nf,ns). nf: number of frequencies, ns: number of sources</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.tools.metrics.MetricEvaluator.get_inverse_level_error">
+<span class="sig-name descname"><span class="pre">get_inverse_level_error</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#acoular.tools.metrics.MetricEvaluator.get_inverse_level_error" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the inverse level error (Herold and Sarradj, 2017).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>numpy.array</dt><dd><p>inverse level error of shape=(nf,1)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.tools.metrics.html">metrics</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tools.metrics.html">metrics</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../acoular.tools.utils.html">utils</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Mar 13, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

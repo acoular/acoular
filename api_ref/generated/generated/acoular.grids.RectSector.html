@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>RectSector &#8212; Acoular 25.03 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=43776ca6"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="RectSector3D" href="acoular.grids.RectSector3D.html" />
+    <link rel="prev" title="SingleSector" href="acoular.grids.SingleSector.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.03 documentation</span></a></h1>
+        <h2 class="heading"><span>RectSector</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.grids.SingleSector.html">SingleSector</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.grids.html">grids</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.grids.RectSector3D.html">RectSector3D</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="rectsector">
+<h1>RectSector<a class="headerlink" href="#rectsector" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.grids.RectSector">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.grids.</span></span><span class="sig-name descname"><span class="pre">RectSector</span></span><a class="headerlink" href="#acoular.grids.RectSector" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.grids.SingleSector.html#acoular.grids.SingleSector" title="acoular.grids.SingleSector"><code class="xref py py-class docutils literal notranslate"><span class="pre">SingleSector</span></code></a></p>
+<p>Class for defining a rectangular sector.</p>
+<p>Defines a rectangular sector either for 2D grids (rectangle in the XY-plane) or for 3D grids
+(rectangular cylindrical sector parallel to the z-axis). The sector is bounded by the
+specified <a class="reference internal" href="#acoular.grids.RectSector.x_min" title="acoular.grids.RectSector.x_min"><code class="xref py py-attr docutils literal notranslate"><span class="pre">x_min</span></code></a>, <a class="reference internal" href="#acoular.grids.RectSector.x_max" title="acoular.grids.RectSector.x_max"><code class="xref py py-attr docutils literal notranslate"><span class="pre">x_max</span></code></a>, <a class="reference internal" href="#acoular.grids.RectSector.y_min" title="acoular.grids.RectSector.y_min"><code class="xref py py-attr docutils literal notranslate"><span class="pre">y_min</span></code></a>, and <a class="reference internal" href="#acoular.grids.RectSector.y_max" title="acoular.grids.RectSector.y_max"><code class="xref py py-attr docutils literal notranslate"><span class="pre">y_max</span></code></a> positions, defining the
+lower and upper bounds of the rectangle along the x and y axes.</p>
+<p class="rubric">Examples</p>
+<p>Load example data and set diffrent Sectors for intergration in the
+<a class="reference internal" href="../../../auto_examples/wind_tunnel_examples/example_sectors_and_integration.html#sector-integration-example"><span class="std std-ref">sector integration example</span></a>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.grids.RectSector.x_min">
+<span class="sig-name descname"><span class="pre">x_min</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(-1.0,</span> <span class="pre">desc='minimum</span> <span class="pre">x</span> <span class="pre">position</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">rectangle')</span></em><a class="headerlink" href="#acoular.grids.RectSector.x_min" title="Link to this definition">¶</a></dt>
+<dd><p>The minimum x position of the rectangle. Default is <code class="docutils literal notranslate"><span class="pre">-1.0</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.grids.RectSector.x_max">
+<span class="sig-name descname"><span class="pre">x_max</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(1.0,</span> <span class="pre">desc='maximum</span> <span class="pre">x</span> <span class="pre">position</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">rectangle')</span></em><a class="headerlink" href="#acoular.grids.RectSector.x_max" title="Link to this definition">¶</a></dt>
+<dd><p>The maximum x position of the rectangle. Default is <code class="docutils literal notranslate"><span class="pre">1.0</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.grids.RectSector.y_min">
+<span class="sig-name descname"><span class="pre">y_min</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(-1.0,</span> <span class="pre">desc='minimum</span> <span class="pre">y</span> <span class="pre">position</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">rectangle')</span></em><a class="headerlink" href="#acoular.grids.RectSector.y_min" title="Link to this definition">¶</a></dt>
+<dd><p>The minimum y position of the rectangle. Default is <code class="docutils literal notranslate"><span class="pre">-1.0</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.grids.RectSector.y_max">
+<span class="sig-name descname"><span class="pre">y_max</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(1.0,</span> <span class="pre">desc='maximum</span> <span class="pre">y</span> <span class="pre">position</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">rectangle')</span></em><a class="headerlink" href="#acoular.grids.RectSector.y_max" title="Link to this definition">¶</a></dt>
+<dd><p>The maximum y position of the rectangle. Default is <code class="docutils literal notranslate"><span class="pre">1.0</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.grids.RectSector.contains">
+<span class="sig-name descname"><span class="pre">contains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.grids.RectSector.contains" title="Link to this definition">¶</a></dt>
+<dd><p>Check if the coordinates in a given array lie within the rectangular sector.</p>
+<p>If no coordinate is inside, the nearest one to the rectangle center is returned if
+<a class="reference internal" href="acoular.grids.SingleSector.html#acoular.grids.SingleSector.default_nearest" title="acoular.grids.SingleSector.default_nearest"><code class="xref py py-attr docutils literal notranslate"><span class="pre">default_nearest</span></code></a> is <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>pos</strong><span class="classifier">array of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floats</span></code></a></span></dt><dd><p>A <cite>(3, N)</cite> array containing the positions of <cite>N</cite> grid points.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bools</span></code></a></dt><dd><p>An array of shape (N,) indicating which of the given positions
+lie within the given sector.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">acoular</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ac</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">grid</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">RectGrid</span><span class="p">(</span><span class="n">increment</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sec</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">RectSector</span><span class="p">(</span><span class="n">x_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y_min</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sec</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
+<span class="go">array([False, False, False,  True])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.grids.SingleSector.html">SingleSector</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.grids.html">grids</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.grids.RectSector3D.html">RectSector3D</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Mar 13, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

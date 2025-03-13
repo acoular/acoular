@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>RotatingFlow &#8212; Acoular 25.03 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=43776ca6"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="SlotJet" href="acoular.environments.SlotJet.html" />
+    <link rel="prev" title="OpenJet" href="acoular.environments.OpenJet.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.03 documentation</span></a></h1>
+        <h2 class="heading"><span>RotatingFlow</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.environments.OpenJet.html">OpenJet</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.environments.html">environments</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.environments.SlotJet.html">SlotJet</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="rotatingflow">
+<h1>RotatingFlow<a class="headerlink" href="#rotatingflow" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.environments.RotatingFlow">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.environments.</span></span><span class="sig-name descname"><span class="pre">RotatingFlow</span></span><a class="headerlink" href="#acoular.environments.RotatingFlow" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.environments.FlowField.html#acoular.environments.FlowField" title="acoular.environments.FlowField"><code class="xref py py-class docutils literal notranslate"><span class="pre">FlowField</span></code></a></p>
+<p>Analytical approximation of a rotating flow field with additional velocity component
+in z-direction.</p>
+<p>This class provides an analytical model for a fluid flow field with a
+rigid-body-like rotation about the z-axis. The flow combines rotational motion
+in the x-y plane and a constant velocity component in the z-direction.</p>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The rotation is assumed to be about the z-axis. The velocity components in the x-y plane are
+determined by the angular velocity <a class="reference internal" href="#acoular.environments.RotatingFlow.omega" title="acoular.environments.RotatingFlow.omega"><code class="xref py py-attr docutils literal notranslate"><span class="pre">omega</span></code></a>, while the z-component is constant
+and set by <a class="reference internal" href="#acoular.environments.RotatingFlow.v0" title="acoular.environments.RotatingFlow.v0"><code class="xref py py-attr docutils literal notranslate"><span class="pre">v0</span></code></a>.</p></li>
+<li><p>The angular velocity <a class="reference internal" href="#acoular.environments.RotatingFlow.omega" title="acoular.environments.RotatingFlow.omega"><code class="xref py py-attr docutils literal notranslate"><span class="pre">omega</span></code></a> is computed as: <code class="docutils literal notranslate"><span class="pre">omega</span> <span class="pre">=</span> <span class="pre">2</span> <span class="pre">*</span> <span class="pre">pi</span> <span class="pre">*</span> <span class="pre">rps</span></code>,
+with the <a class="reference internal" href="#acoular.environments.RotatingFlow.rps" title="acoular.environments.RotatingFlow.rps"><code class="xref py py-attr docutils literal notranslate"><span class="pre">rps</span></code></a> given in revolutions per second (i.e. Hz).</p></li>
+</ul>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">acoular</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ac</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">flow</span> <span class="o">=</span> <span class="n">RotatingFlow</span><span class="p">(</span><span class="n">rps</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">v0</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">velocity</span><span class="p">,</span> <span class="n">jacobian</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">v</span><span class="p">(</span><span class="n">array</span><span class="p">((</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">velocity</span>
+<span class="go">array([-6.28318531,  6.28318531,  1.        ])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">jacobian</span>
+<span class="go">array([[ 0.        , -6.28318531,  0.        ],</span>
+<span class="go">       [ 6.28318531,  0.        ,  0.        ],</span>
+<span class="go">       [ 0.        ,  0.        ,  0.        ]])</span>
+</pre></div>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.RotatingFlow.rps">
+<span class="sig-name descname"><span class="pre">rps</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">2,</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.environments.RotatingFlow.rps" title="Link to this definition">¶</a></dt>
+<dd><p>Rotational speed in revolutions per second. Negative values indicate clockwise
+rigid-body-like rotation of the flow. Default is <code class="docutils literal notranslate"><span class="pre">0.0</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.RotatingFlow.v0">
+<span class="sig-name descname"><span class="pre">v0</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(0.0,</span> <span class="pre">desc='flow</span> <span class="pre">velocity')</span></em><a class="headerlink" href="#acoular.environments.RotatingFlow.v0" title="Link to this definition">¶</a></dt>
+<dd><p>Constant flow velocity in the z-direction. Default is <code class="docutils literal notranslate"><span class="pre">0.0</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.RotatingFlow.origin">
+<span class="sig-name descname"><span class="pre">origin</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CArray(dtype=float64,</span> <span class="pre">shape=(3,),</span> <span class="pre">value=array((0.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0)),</span> <span class="pre">desc='center</span> <span class="pre">of</span> <span class="pre">rotation')</span></em><a class="headerlink" href="#acoular.environments.RotatingFlow.origin" title="Link to this definition">¶</a></dt>
+<dd><p>The location of the center of rotation.
+Default is <code class="docutils literal notranslate"><span class="pre">(0.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0)</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.RotatingFlow.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.environments.RotatingFlow.digest" title="Link to this definition">¶</a></dt>
+<dd><p>A unique identifier based on the field properties. (read-only)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.RotatingFlow.omega">
+<span class="sig-name descname"><span class="pre">omega</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.environments.RotatingFlow.omega" title="Link to this definition">¶</a></dt>
+<dd><p>Angular velocity (in radians per second) of the rotation.
+This is a derived property based on <a class="reference internal" href="#acoular.environments.RotatingFlow.rps" title="acoular.environments.RotatingFlow.rps"><code class="xref py py-attr docutils literal notranslate"><span class="pre">rps</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.environments.RotatingFlow.v">
+<span class="sig-name descname"><span class="pre">v</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.environments.RotatingFlow.v" title="Link to this definition">¶</a></dt>
+<dd><p>Compute the rotating flow field and its Jacobian matrix at a given location.</p>
+<p>This method calculates the velocity vector and its Jacobian matrix at the specified location
+<code class="docutils literal notranslate"><span class="pre">xx</span></code> in the fluid domain. The flow field consists of rotational components in the
+x-y plane and a constant velocity component in the z-direction.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>xx</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floats</span></code></a></span></dt><dd><p>The 3D Cartesian coordinates of the location in the fluid where the velocity
+field is to be computed, shape <cite>(3,)</cite>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>velocity_vector</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floats</span></code></a></span></dt><dd><dl class="simple">
+<dt>The velocity vector at the specified location <code class="docutils literal notranslate"><span class="pre">xx</span></code>, shape <cite>(3,)</cite>. The components are:</dt><dd><ul class="simple">
+<li><p>U: Velocity in the x-direction (dependent on y-coordinate and <a class="reference internal" href="#acoular.environments.RotatingFlow.omega" title="acoular.environments.RotatingFlow.omega"><code class="xref py py-attr docutils literal notranslate"><span class="pre">omega</span></code></a>).</p></li>
+<li><p>V: Velocity in the y-direction (dependent on x-coordinate and <a class="reference internal" href="#acoular.environments.RotatingFlow.omega" title="acoular.environments.RotatingFlow.omega"><code class="xref py py-attr docutils literal notranslate"><span class="pre">omega</span></code></a>).</p></li>
+<li><p>W: Constant velocity in the z-direction (set by <a class="reference internal" href="#acoular.environments.RotatingFlow.v0" title="acoular.environments.RotatingFlow.v0"><code class="xref py py-attr docutils literal notranslate"><span class="pre">v0</span></code></a>).</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+<dt><strong>jacobian_matrix</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floats</span></code></a></span></dt><dd><p>The Jacobian matrix of the velocity vector field at the specified location <code class="docutils literal notranslate"><span class="pre">xx</span></code>.
+The matrix contains partial derivatives of each velocity component with
+respect to the spatial coordinates <span class="math notranslate nohighlight">\((x, y, z)\)</span>, shape <cite>(3, 3)</cite>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The Jacobian matrix is constant for this flow field and represents the linear relationship
+between the velocity components and spatial coordinates in the x-y plane.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.environments.OpenJet.html">OpenJet</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.environments.html">environments</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.environments.SlotJet.html">SlotJet</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Mar 13, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

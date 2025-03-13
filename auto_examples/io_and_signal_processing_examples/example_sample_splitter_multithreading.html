@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Parallel processing chains – Multithreading with the SampleSplitter. &#8212; Acoular 25.03 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../_static/documentation_options.js?v=43776ca6"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Parallel processing chains – SampleSplitter buffer handling." href="example_sample_splitter_bufferhandling.html" />
+    <link rel="prev" title="Cross-spectral matrix import" href="example_power_spectra_import.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../index.html">
+          <span>Acoular 25.03 documentation</span></a></h1>
+        <h2 class="heading"><span>Parallel processing chains – Multithreading with the SampleSplitter.</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="example_power_spectra_import.html">Cross-spectral matrix import</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">IO and signal processing examples</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="example_sample_splitter_bufferhandling.html">Parallel processing chains – SampleSplitter buffer handling.</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-io-and-signal-processing-examples-example-sample-splitter-multithreading-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code.</p>
+</div>
+<section class="sphx-glr-example-title" id="parallel-processing-chains-multithreading-with-the-samplesplitter">
+<span id="sphx-glr-auto-examples-io-and-signal-processing-examples-example-sample-splitter-multithreading-py"></span><h1>Parallel processing chains – Multithreading with the SampleSplitter.<a class="headerlink" href="#parallel-processing-chains-multithreading-with-the-samplesplitter" title="Link to this heading">¶</a></h1>
+<p>This Examples shows how to use the SampleSplitter class in a multithreading
+(3 threads) scenario.</p>
+<p>Three different objects (tp1, tp2 and tp3) obtain and process time data
+from the same MaskedTimeSamples object in parallel. The SampleSplitter class
+is used to split the data stream for parallel processing.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <a href="https://docs.python.org/3/library/time.html#time.sleep" title="time.sleep" class="sphx-glr-backref-module-time sphx-glr-backref-type-py-function"><span class="n">sleep</span></a>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">acoular</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ac</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+</pre></div>
+</div>
+<p>Set up data source. For convenience, we use a synthetic white noise with length of 1 s.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fs</span></a> <span class="o">=</span> <span class="mi">8192</span>
+<span class="n">ts</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">TimeSamples</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><a href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.randn.html#numpy.random.randn" title="numpy.random.randn" class="sphx-glr-backref-module-numpy-random sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span></a><span class="p">(</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fs</span></a> <span class="o">*</span> <span class="mi">1</span><span class="p">)[:,</span> <a href="https://numpy.org/doc/stable/reference/constants.html#numpy.newaxis" title="numpy.newaxis" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-data"><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span></a><span class="p">],</span> <span class="n">sample_freq</span><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fs</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<p>Connect SampleSplitter to data source</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">ss</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">SampleSplitter</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">ts</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create three objects to process the data</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">tp1</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">TimePower</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">ss</span><span class="p">)</span>
+<span class="n">tp2</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">TimePower</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">ss</span><span class="p">)</span>
+<span class="n">tp3</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">TimePower</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">ss</span><span class="p">)</span>
+
+<span class="c1"># register these objects at SampleSplitter</span>
+<span class="n">ss</span><span class="o">.</span><span class="n">register_object</span><span class="p">(</span><span class="n">tp1</span><span class="p">,</span> <span class="n">tp2</span><span class="p">,</span> <span class="n">tp3</span><span class="p">)</span>  <span class="c1"># register objects</span>
+</pre></div>
+</div>
+<p>Define some useful functions for inspecting and for reading data from
+the SampleSplitter buffers. Three different functions are defined to
+simulate different processing speeds (fast, mid, slow).</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">print_number_of_blocks_in_block_buffers</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Prints the number of data blocks in SampleSplitter-buffers. For each</span>
+<span class="sd">    subsequent object, a buffer exist.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">buffers</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">ss</span><span class="o">.</span><span class="n">block_buffer</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="n">elements</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span> <span class="k">for</span> <span class="n">buf</span> <span class="ow">in</span> <span class="n">buffers</span><span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;num blocks in buffers: </span><span class="si">{</span><span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">([</span><span class="s1">&#39;tp1&#39;</span><span class="p">,</span><span class="s1">&#39;tp2&#39;</span><span class="p">,</span><span class="s1">&#39;tp3&#39;</span><span class="p">],</span><span class="w"> </span><span class="n">elements</span><span class="p">))</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_data_fast</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>  <span class="c1"># not time consuming function</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Gets data fast (pause 0.03 seconds)&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="mi">2048</span><span class="p">):</span>  <span class="c1">#</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;tp1 calls sample splitter&#39;</span><span class="p">)</span>
+        <span class="n">print_number_of_blocks_in_block_buffers</span><span class="p">()</span>
+        <a href="https://docs.python.org/3/library/time.html#time.sleep" title="time.sleep" class="sphx-glr-backref-module-time sphx-glr-backref-type-py-function"><span class="n">sleep</span></a><span class="p">(</span><span class="mf">0.03</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_data_mid</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>  <span class="c1"># not time consuming function</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Gets data mid speed (pause 0.05 seconds)&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="mi">2048</span><span class="p">):</span>  <span class="c1">#</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;tp2 calls sample splitter&#39;</span><span class="p">)</span>
+        <span class="n">print_number_of_blocks_in_block_buffers</span><span class="p">()</span>
+        <a href="https://docs.python.org/3/library/time.html#time.sleep" title="time.sleep" class="sphx-glr-backref-module-time sphx-glr-backref-type-py-function"><span class="n">sleep</span></a><span class="p">(</span><span class="mf">0.05</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_data_slow</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>  <span class="c1"># more time consuming function</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Gets data slow (pause 0.07 seconds)&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="mi">2048</span><span class="p">):</span>  <span class="c1">#</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;tp3 calls sample splitter&#39;</span><span class="p">)</span>
+        <span class="n">print_number_of_blocks_in_block_buffers</span><span class="p">()</span>
+        <a href="https://docs.python.org/3/library/time.html#time.sleep" title="time.sleep" class="sphx-glr-backref-module-time sphx-glr-backref-type-py-function"><span class="n">sleep</span></a><span class="p">(</span><span class="mf">0.07</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Prepare and start processing in threads</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/threading.html#threading.Thread" title="threading.Thread" class="sphx-glr-backref-module-threading sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">worker1</span></a> <span class="o">=</span> <a href="https://docs.python.org/3/library/threading.html#threading.Thread" title="threading.Thread" class="sphx-glr-backref-module-threading sphx-glr-backref-type-py-class"><span class="n">threading</span><span class="o">.</span><span class="n">Thread</span></a><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">get_data_fast</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">tp1</span><span class="p">,))</span>
+<a href="https://docs.python.org/3/library/threading.html#threading.Thread" title="threading.Thread" class="sphx-glr-backref-module-threading sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">worker2</span></a> <span class="o">=</span> <a href="https://docs.python.org/3/library/threading.html#threading.Thread" title="threading.Thread" class="sphx-glr-backref-module-threading sphx-glr-backref-type-py-class"><span class="n">threading</span><span class="o">.</span><span class="n">Thread</span></a><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">get_data_mid</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">tp2</span><span class="p">,))</span>
+<a href="https://docs.python.org/3/library/threading.html#threading.Thread" title="threading.Thread" class="sphx-glr-backref-module-threading sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">worker3</span></a> <span class="o">=</span> <a href="https://docs.python.org/3/library/threading.html#threading.Thread" title="threading.Thread" class="sphx-glr-backref-module-threading sphx-glr-backref-type-py-class"><span class="n">threading</span><span class="o">.</span><span class="n">Thread</span></a><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">get_data_slow</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">tp3</span><span class="p">,))</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;start threads&#39;</span><span class="p">)</span>
+
+<a href="https://docs.python.org/3/library/threading.html#threading.Thread.start" title="threading.Thread.start" class="sphx-glr-backref-module-threading sphx-glr-backref-type-py-method"><span class="n">worker1</span><span class="o">.</span><span class="n">start</span></a><span class="p">()</span>
+<a href="https://docs.python.org/3/library/threading.html#threading.Thread.start" title="threading.Thread.start" class="sphx-glr-backref-module-threading sphx-glr-backref-type-py-method"><span class="n">worker2</span><span class="o">.</span><span class="n">start</span></a><span class="p">()</span>
+<a href="https://docs.python.org/3/library/threading.html#threading.Thread.start" title="threading.Thread.start" class="sphx-glr-backref-module-threading sphx-glr-backref-type-py-method"><span class="n">worker3</span><span class="o">.</span><span class="n">start</span></a><span class="p">()</span>
+
+<span class="p">[</span><span class="n">thr</span><span class="o">.</span><span class="n">join</span><span class="p">()</span> <span class="k">for</span> <span class="n">thr</span> <span class="ow">in</span> <span class="p">[</span><a href="https://docs.python.org/3/library/threading.html#threading.Thread" title="threading.Thread" class="sphx-glr-backref-module-threading sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">worker1</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/threading.html#threading.Thread" title="threading.Thread" class="sphx-glr-backref-module-threading sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">worker2</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/threading.html#threading.Thread" title="threading.Thread" class="sphx-glr-backref-module-threading sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">worker3</span></a><span class="p">]]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;threads finished&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>start threads
+tp1 calls sample splitter
+num blocks in buffers: {&#39;tp1&#39;: 0, &#39;tp2&#39;: 1, &#39;tp3&#39;: 1}
+tp2 calls sample splitter
+num blocks in buffers: {&#39;tp1&#39;: 0, &#39;tp2&#39;: 0, &#39;tp3&#39;: 1}
+tp3 calls sample splitter
+num blocks in buffers: {&#39;tp1&#39;: 0, &#39;tp2&#39;: 0, &#39;tp3&#39;: 0}
+tp1 calls sample splitter
+num blocks in buffers: {&#39;tp1&#39;: 0, &#39;tp2&#39;: 1, &#39;tp3&#39;: 1}
+tp2 calls sample splitter
+num blocks in buffers: {&#39;tp1&#39;: 0, &#39;tp2&#39;: 0, &#39;tp3&#39;: 1}
+tp1 calls sample splitter
+num blocks in buffers: {&#39;tp1&#39;: 0, &#39;tp2&#39;: 1, &#39;tp3&#39;: 2}
+tp3 calls sample splitter
+num blocks in buffers: {&#39;tp1&#39;: 0, &#39;tp2&#39;: 1, &#39;tp3&#39;: 1}
+tp1 calls sample splitter
+num blocks in buffers: {&#39;tp1&#39;: 0, &#39;tp2&#39;: 2, &#39;tp3&#39;: 2}
+tp2 calls sample splitter
+num blocks in buffers: {&#39;tp1&#39;: 0, &#39;tp2&#39;: 1, &#39;tp3&#39;: 2}
+tp3 calls sample splitter
+num blocks in buffers: {&#39;tp1&#39;: 0, &#39;tp2&#39;: 1, &#39;tp3&#39;: 1}
+tp2 calls sample splitter
+num blocks in buffers: {&#39;tp1&#39;: 0, &#39;tp2&#39;: 0, &#39;tp3&#39;: 1}
+tp3 calls sample splitter
+num blocks in buffers: {&#39;tp1&#39;: 0, &#39;tp2&#39;: 0, &#39;tp3&#39;: 0}
+threads finished
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 0.287 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-io-and-signal-processing-examples-example-sample-splitter-multithreading-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/6f5c8efb15a7261a6372b4781b9c6c94/example_sample_splitter_multithreading.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">example_sample_splitter_multithreading.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/a27473273666c9de489602d7ca24ff6a/example_sample_splitter_multithreading.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">example_sample_splitter_multithreading.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/534a211bacbfd9deff8e5d1e32ec779c/example_sample_splitter_multithreading.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">example_sample_splitter_multithreading.zip</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="example_power_spectra_import.html">Cross-spectral matrix import</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">IO and signal processing examples</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="example_sample_splitter_bufferhandling.html">Parallel processing chains – SampleSplitter buffer handling.</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Mar 13, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

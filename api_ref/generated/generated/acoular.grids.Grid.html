@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Grid &#8212; Acoular 25.03 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=43776ca6"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="RectGrid" href="acoular.grids.RectGrid.html" />
+    <link rel="prev" title="grids" href="../acoular.grids.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.03 documentation</span></a></h1>
+        <h2 class="heading"><span>Grid</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.grids.html">grids</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.grids.html">grids</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.grids.RectGrid.html">RectGrid</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="grid">
+<h1>Grid<a class="headerlink" href="#grid" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.grids.Grid">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.grids.</span></span><span class="sig-name descname"><span class="pre">Grid</span></span><a class="headerlink" href="#acoular.grids.Grid" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABCHasStrictTraits</span></code></p>
+<p>Abstract base class for grid geometries.</p>
+<p>This class defines a common interface for all grid geometries and provides tools to query grid
+properties and related data. It is intended to serve as a base class for specialized grid
+implementations and should not be instantiated directly as it lacks concrete functionality.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.grids.Grid.size">
+<span class="sig-name descname"><span class="pre">size</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(desc='overall</span> <span class="pre">number</span> <span class="pre">of</span> <span class="pre">grid</span> <span class="pre">points')</span></em><a class="headerlink" href="#acoular.grids.Grid.size" title="Link to this definition">¶</a></dt>
+<dd><p>The total number of grid points. This property is automatically calculated based on other
+defining attributes of the grid. (read-only)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.grids.Grid.shape">
+<span class="sig-name descname"><span class="pre">shape</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(desc='grid</span> <span class="pre">shape</span> <span class="pre">as</span> <span class="pre">tuple')</span></em><a class="headerlink" href="#acoular.grids.Grid.shape" title="Link to this definition">¶</a></dt>
+<dd><p>The shape of the grid, represented as a tuple. Primarily useful for Cartesian grids.
+(read-only)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.grids.Grid.pos">
+<span class="sig-name descname"><span class="pre">pos</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(desc='x,</span> <span class="pre">y,</span> <span class="pre">z</span> <span class="pre">positions</span> <span class="pre">of</span> <span class="pre">grid</span> <span class="pre">points')</span></em><a class="headerlink" href="#acoular.grids.Grid.pos" title="Link to this definition">¶</a></dt>
+<dd><p>The grid positions represented as a (3, <a class="reference internal" href="#acoular.grids.Grid.size" title="acoular.grids.Grid.size"><code class="xref py py-attr docutils literal notranslate"><span class="pre">size</span></code></a>) array of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floats</span></code></a>.
+(read-only)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.grids.Grid.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property</span></em><a class="headerlink" href="#acoular.grids.Grid.digest" title="Link to this definition">¶</a></dt>
+<dd><p>A unique identifier for the grid, based on its properties. (read-only)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.grids.Grid.subdomain">
+<span class="sig-name descname"><span class="pre">subdomain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sector</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.grids.Grid.subdomain" title="Link to this definition">¶</a></dt>
+<dd><p>Return the indices for a subdomain in the grid.</p>
+<p>Allows arbitrary subdomains of type <a class="reference internal" href="acoular.grids.Sector.html#acoular.grids.Sector" title="acoular.grids.Sector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sector</span></code></a>.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>sector</strong><span class="classifier"><a class="reference internal" href="acoular.grids.Sector.html#acoular.grids.Sector" title="acoular.grids.Sector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sector</span></code></a> object</span></dt><dd><p>Sector describing the subdomain.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a></dt><dd><p>A 2-tuple of arrays of integers or <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.s_.html#numpy.s_" title="(in NumPy v2.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.s_</span></code></a> objects that can be used to mask or
+select the specified subdomain from a grid-shaped array.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.where.html#numpy.where" title="(in NumPy v2.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.where()</span></code></a> method is used to determine the the indices.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.grids.html">grids</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.grids.html">grids</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.grids.RectGrid.html">RectGrid</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Mar 13, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

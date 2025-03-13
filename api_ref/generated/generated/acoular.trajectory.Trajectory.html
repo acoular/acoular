@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Trajectory &#8212; Acoular 25.03 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=43776ca6"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="prev" title="trajectory" href="../acoular.trajectory.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.03 documentation</span></a></h1>
+        <h2 class="heading"><span>Trajectory</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.trajectory.html">trajectory</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.trajectory.html">trajectory</a>
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="trajectory">
+<h1>Trajectory<a class="headerlink" href="#trajectory" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.trajectory.Trajectory">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.trajectory.</span></span><span class="sig-name descname"><span class="pre">Trajectory</span></span><a class="headerlink" href="#acoular.trajectory.Trajectory" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">HasStrictTraits</span></code></p>
+<p>Represents a trajectory as a continuous curve derived from sampled points.</p>
+<p>The <a class="reference internal" href="#acoular.trajectory.Trajectory" title="acoular.trajectory.Trajectory"><code class="xref py py-class docutils literal notranslate"><span class="pre">Trajectory</span></code></a> class computes a smooth, continuous path through a set of discrete
+points in space and time using spline interpolation. It also supports evaluating the trajectory
+and its derivatives at arbitrary time instants.</p>
+<dl class="simple">
+<dt>It can be used to:</dt><dd><ul class="simple">
+<li><p>define the traveling path of a moving sound source, e.g. for microphone array data
+simulation (see <a class="reference internal" href="acoular.sources.MovingPointSource.html#acoular.sources.MovingPointSource" title="acoular.sources.MovingPointSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">MovingPointSource</span></code></a>)</p></li>
+<li><p>move a source grid along a certain path to create a fixed focus
+(see <a class="reference internal" href="acoular.tbeamform.BeamformerTimeTraj.html#acoular.tbeamform.BeamformerTimeTraj" title="acoular.tbeamform.BeamformerTimeTraj"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerTimeTraj</span></code></a>
+and <a class="reference internal" href="acoular.tbeamform.BeamformerCleantTraj.html#acoular.tbeamform.BeamformerCleantTraj" title="acoular.tbeamform.BeamformerCleantTraj"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerCleantTraj</span></code></a>)</p></li>
+</ul>
+</dd>
+</dl>
+<p>Exemplary use can also be seen in the
+<a class="reference internal" href="../../../auto_examples/moving_sources_examples/example_rotating_point_source.html#rotating-point-source"><span class="std std-ref">rotating point source example</span></a>.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="acoular.sources.MovingPointSource.html#acoular.sources.MovingPointSource" title="acoular.sources.MovingPointSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">MovingPointSource</span></code></a></dt><dd><p>Model a point source moving along a trajectory.</p>
+</dd>
+<dt><a class="reference internal" href="acoular.sources.MovingPointSourceDipole.html#acoular.sources.MovingPointSourceDipole" title="acoular.sources.MovingPointSourceDipole"><code class="xref py py-class docutils literal notranslate"><span class="pre">MovingPointSourceDipole</span></code></a></dt><dd><p>Model a point source dipole moving along a trajectory.</p>
+</dd>
+<dt><a class="reference internal" href="acoular.sources.MovingLineSource.html#acoular.sources.MovingLineSource" title="acoular.sources.MovingLineSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">MovingLineSource</span></code></a></dt><dd><p>Model a line source moving along a trajectory.</p>
+</dd>
+<dt><a class="reference internal" href="acoular.tbeamform.BeamformerCleantTraj.html#acoular.tbeamform.BeamformerCleantTraj" title="acoular.tbeamform.BeamformerCleantTraj"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerCleantTraj</span></code></a></dt><dd><p>Beamformer implementing the CLEAN method <span id="id1">[<a class="reference internal" href="../../../literature/index.html#id8" title="Adam Kujawski and Ennes Sarradj. Application of the CLEANT Method for High Speed Railway Train Measurements. In Proceedings on CD of the 8th Berlin Beamforming Conference, 1–13. Berlin, 2020. Gesellschaft zur Förderung angewandter Informatik (GFaI).">21</a>]</span> in time domain for moving sources with known trajectory.</p>
+</dd>
+<dt><a class="reference internal" href="acoular.tbeamform.BeamformerTimeTraj.html#acoular.tbeamform.BeamformerTimeTraj" title="acoular.tbeamform.BeamformerTimeTraj"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerTimeTraj</span></code></a></dt><dd><p>Basic time domain beamformer with time signal output for a grid moving along a trajectory.</p>
+</dd>
+<dt><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.splprep.html#scipy.interpolate.splprep" title="(in SciPy v1.15.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.interpolate.splprep()</span></code></a></dt><dd><p>Underlying spline generation function.</p>
+</dd>
+<dt><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.splev.html#scipy.interpolate.splev" title="(in SciPy v1.15.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.interpolate.splev()</span></code></a></dt><dd><p>Used for evaluating the spline.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>Spline interpolation provides a smooth trajectory that passes through all sampled points.
+The interpolation order is adjusted automatically based on the number of points.</p></li>
+<li><p>The trajectory can be used in simulations where a source’s motion must be modeled
+continuously.</p></li>
+</ul>
+<p class="rubric">Examples</p>
+<p>Create a trajectory and evaluate positions and velocities:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">acoular</span><span class="w"> </span><span class="kn">import</span> <span class="n">Trajectory</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">points</span> <span class="o">=</span> <span class="p">{</span><span class="mf">0.0</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="mf">1.0</span><span class="p">:</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="mf">2.0</span><span class="p">:</span> <span class="p">(</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tr</span> <span class="o">=</span> <span class="n">Trajectory</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="n">points</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tr</span><span class="o">.</span><span class="n">location</span><span class="p">(</span><span class="mf">1.5</span><span class="p">)</span>  <span class="c1"># Position at t=1.5</span>
+<span class="go">[array(1.5), array(0.375), array(0.)]</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">pos</span> <span class="ow">in</span> <span class="n">tr</span><span class="o">.</span><span class="n">traj</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">):</span>  <span class="c1"># Positions every 0.5 seconds</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+<span class="go">(np.float64(0.0), np.float64(0.0), np.float64(0.0))</span>
+<span class="go">(np.float64(0.5), np.float64(-0.125), np.float64(0.0))</span>
+<span class="go">(np.float64(1.0), np.float64(0.0), np.float64(0.0))</span>
+<span class="go">(np.float64(1.5), np.float64(0.375), np.float64(0.0))</span>
+</pre></div>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.trajectory.Trajectory.points">
+<span class="sig-name descname"><span class="pre">points</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Dict(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.trajectory.Trajectory.points" title="Link to this definition">¶</a></dt>
+<dd><p>Dictionary mapping time instants (keys, as floats) to sampled <code class="docutils literal notranslate"><span class="pre">(x,</span> <span class="pre">y,</span> <span class="pre">z)</span></code> positions
+(values, as tuples of floats) along the trajectory.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.trajectory.Trajectory.interval">
+<span class="sig-name descname"><span class="pre">interval</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property()</span></em><a class="headerlink" href="#acoular.trajectory.Trajectory.interval" title="Link to this definition">¶</a></dt>
+<dd><p>Automatically determined tuple <code class="docutils literal notranslate"><span class="pre">(t_min,</span> <span class="pre">t_max)</span></code> representing the start and end times of the
+trajectory, based on the keys in <a class="reference internal" href="#acoular.trajectory.Trajectory.points" title="acoular.trajectory.Trajectory.points"><code class="xref py py-attr docutils literal notranslate"><span class="pre">points</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.trajectory.Trajectory.tck">
+<span class="sig-name descname"><span class="pre">tck</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property()</span></em><a class="headerlink" href="#acoular.trajectory.Trajectory.tck" title="Link to this definition">¶</a></dt>
+<dd><p>Internal representation of the spline, generated using <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.splprep.html#scipy.interpolate.splprep" title="(in SciPy v1.15.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.interpolate.splprep()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.trajectory.Trajectory.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['points[]'])</span></em><a class="headerlink" href="#acoular.trajectory.Trajectory.digest" title="Link to this definition">¶</a></dt>
+<dd><p>A unique identifier for the trajectory, based on its points. (read-only)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.trajectory.Trajectory.location">
+<span class="sig-name descname"><span class="pre">location</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">der</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.trajectory.Trajectory.location" title="Link to this definition">¶</a></dt>
+<dd><p>Compute the trajectory’s position or derivatives at specified times.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>t</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a> or array of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floats</span></code></a></span></dt><dd><p>Time instant(s) at which to compute the position(s) or derivative(s).</p>
+</dd>
+<dt><strong>der</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, optional</span></dt><dd><dl class="simple">
+<dt>Order of the derivative to compute:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">0</span></code> for positions (default),</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">1</span></code> for velocities,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">2</span></code> for accelerations, etc.</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p><code class="docutils literal notranslate"><span class="pre">(x,</span> <span class="pre">y,</span> <span class="pre">z)</span></code> arrays representing the trajectory’s position (or derivative) at the given
+time(s). The shape matches that of <code class="docutils literal notranslate"><span class="pre">t</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">acoular</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ac</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">points</span> <span class="o">=</span> <span class="p">{</span><span class="mf">0.0</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="mf">1.0</span><span class="p">:</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="mf">2.0</span><span class="p">:</span> <span class="p">(</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tr</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">Trajectory</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="n">points</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tr</span><span class="o">.</span><span class="n">location</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>  <span class="c1"># Position at t=1.0</span>
+<span class="go">[array(1.), array(2.), array(0.)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tr</span><span class="o">.</span><span class="n">location</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">],</span> <span class="n">der</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># Velocity at t=0.5 and t=1.5</span>
+<span class="go">[array([1., 1.]), array([2., 2.]), array([0., 0.])]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.trajectory.Trajectory.traj">
+<span class="sig-name descname"><span class="pre">traj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t_start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_t</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">der</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.trajectory.Trajectory.traj" title="Link to this definition">¶</a></dt>
+<dd><p>Interate through trajectory positions or derivatives at specified intervals.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>t_start</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span></dt><dd><p>Start time for the trajectory. Default is earliest key in <a class="reference internal" href="#acoular.trajectory.Trajectory.points" title="acoular.trajectory.Trajectory.points"><code class="xref py py-attr docutils literal notranslate"><span class="pre">points</span></code></a>.</p>
+</dd>
+<dt><strong>t_end</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, optional</span></dt><dd><p>End time of the trajectory. Default is the latest key in <a class="reference internal" href="#acoular.trajectory.Trajectory.points" title="acoular.trajectory.Trajectory.points"><code class="xref py py-attr docutils literal notranslate"><span class="pre">points</span></code></a>.</p>
+</dd>
+<dt><strong>delta_t</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, optional</span></dt><dd><p>Time interval between consecutive points to yield. Default is the value of <code class="docutils literal notranslate"><span class="pre">t_start</span></code>.</p>
+</dd>
+<dt><strong>der</strong><span class="classifier">int, optional</span></dt><dd><dl class="simple">
+<dt>Order of the derivative to compute:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">0</span></code> for positions (default),</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">1</span></code> for velocities,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">2</span></code> for accelerations, etc.</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floats</span></code></a></dt><dd><p><code class="docutils literal notranslate"><span class="pre">(x,</span> <span class="pre">y,</span> <span class="pre">z)</span></code> positions or derivatives at the specified time intervals.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The function precomputes all interpolated locations for efficiency and yields them
+sequentially.</p>
+<p class="rubric">Examples</p>
+<p>Create a trajectory and iterate through the positions in the <a class="reference internal" href="#acoular.trajectory.Trajectory.interval" title="acoular.trajectory.Trajectory.interval"><code class="xref py py-attr docutils literal notranslate"><span class="pre">interval</span></code></a>:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">acoular</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ac</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">points</span> <span class="o">=</span> <span class="p">{</span><span class="mf">0.0</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="mf">1.0</span><span class="p">:</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="mf">2.0</span><span class="p">:</span> <span class="p">(</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tr</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">Trajectory</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="n">points</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">pos</span> <span class="ow">in</span> <span class="n">tr</span><span class="o">.</span><span class="n">traj</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+<span class="go">(np.float64(0.0), np.float64(0.0), np.float64(0.0))</span>
+<span class="go">(np.float64(0.5), np.float64(-0.125), np.float64(0.0))</span>
+<span class="go">(np.float64(1.0), np.float64(0.0), np.float64(0.0))</span>
+<span class="go">(np.float64(1.5), np.float64(0.375), np.float64(0.0))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.trajectory.html">trajectory</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.trajectory.html">trajectory</a>
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Mar 13, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

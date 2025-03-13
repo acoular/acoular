@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>PointSourceConvolve &#8212; Acoular 25.03 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=43776ca6"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="acoular.sources.spherical_hn1" href="acoular.sources.spherical_hn1.html" />
+    <link rel="prev" title="SourceMixer" href="acoular.sources.SourceMixer.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.03 documentation</span></a></h1>
+        <h2 class="heading"><span>PointSourceConvolve</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.sources.SourceMixer.html">SourceMixer</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.sources.html">sources</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.sources.spherical_hn1.html">acoular.sources.spherical_hn1</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="pointsourceconvolve">
+<h1>PointSourceConvolve<a class="headerlink" href="#pointsourceconvolve" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.sources.PointSourceConvolve">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.sources.</span></span><span class="sig-name descname"><span class="pre">PointSourceConvolve</span></span><a class="headerlink" href="#acoular.sources.PointSourceConvolve" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.sources.PointSource.html#acoular.sources.PointSource" title="acoular.sources.PointSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">PointSource</span></code></a></p>
+<p>Blockwise convolution of a source signal with an impulse response (IR).</p>
+<p>The <a class="reference internal" href="#acoular.sources.PointSourceConvolve" title="acoular.sources.PointSourceConvolve"><code class="xref py py-class docutils literal notranslate"><span class="pre">PointSourceConvolve</span></code></a> class extends <a class="reference internal" href="acoular.sources.PointSource.html#acoular.sources.PointSource" title="acoular.sources.PointSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">PointSource</span></code></a> to simulate the effects of
+sound propagation through a room or acoustic environment by convolving the input signal with a
+specified <a class="reference internal" href="#acoular.sources.PointSourceConvolve.kernel" title="acoular.sources.PointSourceConvolve.kernel"><code class="xref py py-attr docutils literal notranslate"><span class="pre">convolution</span> <span class="pre">kernel</span></code></a> (the IR).</p>
+<p>The convolution is performed block-by-block to allow efficient streaming
+and processing of large signals.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="acoular.sources.PointSource.html#acoular.sources.PointSource" title="acoular.sources.PointSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">PointSource</span></code></a></dt><dd><p>Base class for point sources.</p>
+</dd>
+<dt><a class="reference internal" href="acoular.tprocess.TimeConvolve.html#acoular.tprocess.TimeConvolve" title="acoular.tprocess.TimeConvolve"><code class="xref py py-class docutils literal notranslate"><span class="pre">acoular.tprocess.TimeConvolve</span></code></a></dt><dd><p>Class used for performing time-domain convolution.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The input <a class="reference internal" href="#acoular.sources.PointSourceConvolve.kernel" title="acoular.sources.PointSourceConvolve.kernel"><code class="xref py py-attr docutils literal notranslate"><span class="pre">convolution</span> <span class="pre">kernel</span></code></a> must be provided as a time-domain array.</p></li>
+<li><p>The second dimension of <a class="reference internal" href="#acoular.sources.PointSourceConvolve.kernel" title="acoular.sources.PointSourceConvolve.kernel"><code class="xref py py-attr docutils literal notranslate"><span class="pre">kernel</span></code></a> must either be <code class="docutils literal notranslate"><span class="pre">1</span></code> (a single kernel applied to all
+channels) or match the <a class="reference internal" href="acoular.base.Generator.html#acoular.base.Generator.num_channels" title="acoular.base.Generator.num_channels"><code class="xref py py-attr docutils literal notranslate"><span class="pre">number</span> <span class="pre">of</span> <span class="pre">channels</span></code></a>
+in the output.</p></li>
+<li><p>Convolution is performed using the <a class="reference internal" href="acoular.tprocess.TimeConvolve.html#acoular.tprocess.TimeConvolve" title="acoular.tprocess.TimeConvolve"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeConvolve</span></code></a> class.</p></li>
+</ul>
+<p class="rubric">Examples</p>
+<p>Convolve a stationary sine wave source with a room impulse response (RIR):</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">acoular</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ac</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Define microphone geometry: 4 microphones in a 2x2 grid at z=0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mic_positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span><span class="o">.</span><span class="n">T</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mg</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">MicGeom</span><span class="p">(</span><span class="n">pos_total</span><span class="o">=</span><span class="n">mic_positions</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Generate a sine wave signal</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sine_signal</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">SineGenerator</span><span class="p">(</span><span class="n">freq</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">sample_freq</span><span class="o">=</span><span class="mi">48000</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Define an impulse response kernel (example: 100-tap random kernel)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">kernel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># One kernel for all channels</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create the convolving source</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">convolve_source</span> <span class="o">=</span> <span class="n">PointSourceConvolve</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">signal</span><span class="o">=</span><span class="n">sine_signal</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">loc</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>  <span class="c1"># Source located at (0, 0, 1)</span>
+<span class="gp">... </span>    <span class="n">kernel</span><span class="o">=</span><span class="n">kernel</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">mics</span><span class="o">=</span><span class="n">mg</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Generate the convolved signal block by block</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">convolve_source</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="mi">256</span><span class="p">):</span>  <span class="c1"># 256 samples per block</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="go">(256, 4)</span>
+<span class="go">(256, 4)</span>
+<span class="go">(256, 4)</span>
+<span class="go">(256, 4)</span>
+<span class="go">(75, 4)</span>
+</pre></div>
+</div>
+<p>The last block has fewer samples.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.PointSourceConvolve.kernel">
+<span class="sig-name descname"><span class="pre">kernel</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CArray(dtype=float,</span> <span class="pre">desc='Convolution</span> <span class="pre">kernel.')</span></em><a class="headerlink" href="#acoular.sources.PointSourceConvolve.kernel" title="Link to this definition">¶</a></dt>
+<dd><p>Convolution kernel in the time domain.
+The array must either have one column (a single kernel applied to all channels)
+or match the number of output channels in its second dimension.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.PointSourceConvolve.start_t">
+<span class="sig-name descname"><span class="pre">start_t</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum(0.0,</span> <span class="pre">desc='signal</span> <span class="pre">start</span> <span class="pre">time')</span></em><a class="headerlink" href="#acoular.sources.PointSourceConvolve.start_t" title="Link to this definition">¶</a></dt>
+<dd><p>Start time of the signal in seconds. Default is <code class="docutils literal notranslate"><span class="pre">0.0</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.PointSourceConvolve.start">
+<span class="sig-name descname"><span class="pre">start</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum(0.0,</span> <span class="pre">desc='sample</span> <span class="pre">start</span> <span class="pre">time')</span></em><a class="headerlink" href="#acoular.sources.PointSourceConvolve.start" title="Link to this definition">¶</a></dt>
+<dd><p>Start time of the data acquisition the the microphones in seconds. Default is <code class="docutils literal notranslate"><span class="pre">0.0</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.PointSourceConvolve.prepadding">
+<span class="sig-name descname"><span class="pre">prepadding</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum(None,</span> <span class="pre">desc='Behavior</span> <span class="pre">for</span> <span class="pre">negative</span> <span class="pre">time</span> <span class="pre">indices.')</span></em><a class="headerlink" href="#acoular.sources.PointSourceConvolve.prepadding" title="Link to this definition">¶</a></dt>
+<dd><p>Behavior for negative time indices. Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.PointSourceConvolve.up">
+<span class="sig-name descname"><span class="pre">up</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum(None,</span> <span class="pre">desc='upsampling</span> <span class="pre">factor')</span></em><a class="headerlink" href="#acoular.sources.PointSourceConvolve.up" title="Link to this definition">¶</a></dt>
+<dd><p>Upsampling factor for internal use. Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.PointSourceConvolve.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['mics.digest',</span> <span class="pre">'signal.digest',</span> <span class="pre">'loc',</span> <span class="pre">'kernel'])</span></em><a class="headerlink" href="#acoular.sources.PointSourceConvolve.digest" title="Link to this definition">¶</a></dt>
+<dd><p>Unique identifier for the current state of the source,
+based on microphone geometry, input signal, source location, and kernel. (read-only)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.sources.PointSourceConvolve.result">
+<span class="sig-name descname"><span class="pre">result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">128</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.sources.PointSourceConvolve.result" title="Link to this definition">¶</a></dt>
+<dd><p>Generate the convolved signal at microphones in blocks.</p>
+<p>The <a class="reference internal" href="#acoular.sources.PointSourceConvolve.result" title="acoular.sources.PointSourceConvolve.result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">result()</span></code></a> method produces blocks of the output signal
+by convolving the input signal with the specified kernel. Each block
+contains the signal for all output channels (microphones).</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>num</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, optional</span></dt><dd><p>The number of samples per block to yield. Default is <code class="docutils literal notranslate"><span class="pre">128</span></code>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p>A 2D array of shape (<code class="docutils literal notranslate"><span class="pre">num</span></code>, <a class="reference internal" href="acoular.sources.PointSource.html#acoular.sources.PointSource.num_channels" title="acoular.sources.PointSource.num_channels"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_channels</span></code></a>) containing
+the convolved signal for all microphones. The last block may
+contain fewer samples if the total number of samples is not
+a multiple of <code class="docutils literal notranslate"><span class="pre">num</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The input signal is expanded to match the number of microphones, if necessary.</p></li>
+<li><p>Convolution is performed using the <a class="reference internal" href="acoular.tprocess.TimeConvolve.html#acoular.tprocess.TimeConvolve" title="acoular.tprocess.TimeConvolve"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeConvolve</span></code></a> class
+to ensure efficiency.</p></li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.sources.SourceMixer.html">SourceMixer</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.sources.html">sources</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.sources.spherical_hn1.html">acoular.sources.spherical_hn1</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Mar 13, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

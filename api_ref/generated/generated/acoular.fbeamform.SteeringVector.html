@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>SteeringVector &#8212; Acoular 25.03 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=43776ca6"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="BeamformerBase" href="acoular.fbeamform.BeamformerBase.html" />
+    <link rel="prev" title="fbeamform" href="../acoular.fbeamform.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.03 documentation</span></a></h1>
+        <h2 class="heading"><span>SteeringVector</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.fbeamform.html">fbeamform</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.fbeamform.html">fbeamform</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.fbeamform.BeamformerBase.html">BeamformerBase</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="steeringvector">
+<h1>SteeringVector<a class="headerlink" href="#steeringvector" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.fbeamform.SteeringVector">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.fbeamform.</span></span><span class="sig-name descname"><span class="pre">SteeringVector</span></span><a class="headerlink" href="#acoular.fbeamform.SteeringVector" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">HasStrictTraits</span></code></p>
+<p>Basic class for implementing steering vectors with monopole source transfer models.</p>
+<p>Handles four different steering vector formulations. See <span id="id1">[<a class="reference internal" href="../../../literature/index.html#id17" title="E. Sarradj. Three-dimensional acoustic source mapping with different beamforming steering vector formulations. Advances in Acoustics and Vibration, 2012:1-12, 2012. doi:10.1155/2012/292695.">4</a>]</span> for details.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.SteeringVector.grid">
+<span class="sig-name descname"><span class="pre">grid</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Instance(Grid,</span> <span class="pre">desc='beamforming</span> <span class="pre">grid')</span></em><a class="headerlink" href="#acoular.fbeamform.SteeringVector.grid" title="Link to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="acoular.grids.Grid.html#acoular.grids.Grid" title="acoular.grids.Grid"><code class="xref py py-class docutils literal notranslate"><span class="pre">Grid</span></code></a>-derived object that provides the grid locations.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.SteeringVector.mics">
+<span class="sig-name descname"><span class="pre">mics</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Instance(MicGeom,</span> <span class="pre">desc='microphone</span> <span class="pre">geometry')</span></em><a class="headerlink" href="#acoular.fbeamform.SteeringVector.mics" title="Link to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="acoular.microphones.MicGeom.html#acoular.microphones.MicGeom" title="acoular.microphones.MicGeom"><code class="xref py py-class docutils literal notranslate"><span class="pre">MicGeom</span></code></a> object that provides the microphone locations.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.SteeringVector.steer_type">
+<span class="sig-name descname"><span class="pre">steer_type</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum('true</span> <span class="pre">level',</span> <span class="pre">'true</span> <span class="pre">location',</span> <span class="pre">'classic',</span> <span class="pre">'inverse',</span> <span class="pre">desc='type</span> <span class="pre">of</span> <span class="pre">steering</span> <span class="pre">vectors</span> <span class="pre">used')</span></em><a class="headerlink" href="#acoular.fbeamform.SteeringVector.steer_type" title="Link to this definition">¶</a></dt>
+<dd><p>Type of steering vectors, see also <span id="id2">[<a class="reference internal" href="../../../literature/index.html#id17" title="E. Sarradj. Three-dimensional acoustic source mapping with different beamforming steering vector formulations. Advances in Acoustics and Vibration, 2012:1-12, 2012. doi:10.1155/2012/292695.">4</a>]</span>. Defaults to ‘true level’.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.SteeringVector.env">
+<span class="sig-name descname"><span class="pre">env</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Instance(Environment(),</span> <span class="pre">Environment)</span></em><a class="headerlink" href="#acoular.fbeamform.SteeringVector.env" title="Link to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="acoular.environments.Environment.html#acoular.environments.Environment" title="acoular.environments.Environment"><code class="xref py py-class docutils literal notranslate"><span class="pre">Environment</span></code></a> or derived object,
+which provides information about the sound propagation in the medium.
+Defaults to standard <a class="reference internal" href="acoular.environments.Environment.html#acoular.environments.Environment" title="acoular.environments.Environment"><code class="xref py py-class docutils literal notranslate"><span class="pre">Environment</span></code></a> object.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.SteeringVector.ref">
+<span class="sig-name descname"><span class="pre">ref</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(desc='reference</span> <span class="pre">position</span> <span class="pre">or</span> <span class="pre">distance')</span></em><a class="headerlink" href="#acoular.fbeamform.SteeringVector.ref" title="Link to this definition">¶</a></dt>
+<dd><p>Reference position or distance at which to evaluate the sound pressure
+of a grid point.
+If set to a scalar, this is used as reference distance to the grid points.
+If set to a vector, this is interpreted as x,y,z coordinates of the reference position.
+Defaults to [0.,0.,0.].</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.fbeamform.SteeringVector.transfer">
+<span class="sig-name descname"><span class="pre">transfer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.fbeamform.SteeringVector.transfer" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the transfer matrix for one frequency.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>f</strong><span class="classifier">float</span></dt><dd><p>Frequency for which to calculate the transfer matrix</p>
+</dd>
+<dt><strong>ind</strong><span class="classifier">(optional) array of ints</span></dt><dd><p>If set, only the transfer function of the gridpoints addressed by
+the given indices will be calculated. Useful for algorithms like CLEAN-SC,
+where not the full transfer matrix is needed</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>array of complex128</dt><dd><p>array of shape (ngridpts, nmics) containing the transfer matrix for the given frequency</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.fbeamform.SteeringVector.steer_vector">
+<span class="sig-name descname"><span class="pre">steer_vector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.fbeamform.SteeringVector.steer_vector" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the steering vectors based on the transfer function.</p>
+<p>See also <span id="id3">[<a class="reference internal" href="../../../literature/index.html#id17" title="E. Sarradj. Three-dimensional acoustic source mapping with different beamforming steering vector formulations. Advances in Acoustics and Vibration, 2012:1-12, 2012. doi:10.1155/2012/292695.">4</a>]</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>f</strong><span class="classifier">float</span></dt><dd><p>Frequency for which to calculate the transfer matrix</p>
+</dd>
+<dt><strong>ind</strong><span class="classifier">(optional) array of ints</span></dt><dd><p>If set, only the steering vectors of the gridpoints addressed by
+the given indices will be calculated. Useful for algorithms like CLEAN-SC,
+where not the full transfer matrix is needed</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>array of complex128</dt><dd><p>array of shape (ngridpts, nmics) containing the steering vectors for the given frequency</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.fbeamform.html">fbeamform</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.fbeamform.html">fbeamform</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.fbeamform.BeamformerBase.html">BeamformerBase</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Mar 13, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

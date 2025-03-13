@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>SignalGenerator &#8212; Acoular 25.03 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=43776ca6"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="PeriodicSignalGenerator" href="acoular.signals.PeriodicSignalGenerator.html" />
+    <link rel="prev" title="signals" href="../acoular.signals.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.03 documentation</span></a></h1>
+        <h2 class="heading"><span>SignalGenerator</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.signals.html">signals</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.signals.html">signals</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.signals.PeriodicSignalGenerator.html">PeriodicSignalGenerator</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="signalgenerator">
+<h1>SignalGenerator<a class="headerlink" href="#signalgenerator" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.signals.SignalGenerator">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.signals.</span></span><span class="sig-name descname"><span class="pre">SignalGenerator</span></span><a class="headerlink" href="#acoular.signals.SignalGenerator" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABCHasStrictTraits</span></code></p>
+<p>ABC for a simple one-channel signal generator.</p>
+<p>This ABC defines the common interface and attributes for all signal generator implementations.
+It provides a template for generating one-channel signals with specified amplitude,
+sampling frequency, and duration. Subclasses should implement the core functionality,
+including signal generation and computation of the internal identifier.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.resample.html#scipy.signal.resample" title="(in SciPy v1.15.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.signal.resample()</span></code></a></dt><dd><p>Used for resampling signals in the <a class="reference internal" href="#acoular.signals.SignalGenerator.usignal" title="acoular.signals.SignalGenerator.usignal"><code class="xref py py-meth docutils literal notranslate"><span class="pre">usignal()</span></code></a> method.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>This class should not be instantiated directly. Instead, use a subclass that
+implements the required methods for signal generation.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.signals.SignalGenerator.sample_freq">
+<span class="sig-name descname"><span class="pre">sample_freq</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(1.0,</span> <span class="pre">desc='sampling</span> <span class="pre">frequency')</span></em><a class="headerlink" href="#acoular.signals.SignalGenerator.sample_freq" title="Link to this definition">¶</a></dt>
+<dd><p>Sampling frequency of the signal in Hz. Default is <code class="docutils literal notranslate"><span class="pre">1.0</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.signals.SignalGenerator.num_samples">
+<span class="sig-name descname"><span class="pre">num_samples</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CInt</span></em><a class="headerlink" href="#acoular.signals.SignalGenerator.num_samples" title="Link to this definition">¶</a></dt>
+<dd><p>The number of samples to generate for the signal.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.signals.SignalGenerator.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['sample_freq',</span> <span class="pre">'num_samples'])</span></em><a class="headerlink" href="#acoular.signals.SignalGenerator.digest" title="Link to this definition">¶</a></dt>
+<dd><p>A unique checksum identifier based on the object properties. (read-only)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.signals.SignalGenerator.signal">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">signal</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#acoular.signals.SignalGenerator.signal" title="Link to this definition">¶</a></dt>
+<dd><p>Generate and return the signal.</p>
+<p>This method must be implemented by subclasses to provide the generated signal
+as a 1D array of samples.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.signals.SignalGenerator.usignal">
+<span class="sig-name descname"><span class="pre">usignal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">factor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.signals.SignalGenerator.usignal" title="Link to this definition">¶</a></dt>
+<dd><p>Resample the signal at a higher sampling frequency.</p>
+<p>This method uses Fourier transform-based resampling to deliver the signal at a
+sampling frequency that is a multiple of the original <a class="reference internal" href="#acoular.signals.SignalGenerator.sample_freq" title="acoular.signals.SignalGenerator.sample_freq"><code class="xref py py-attr docutils literal notranslate"><span class="pre">sample_freq</span></code></a>.
+The resampled signal has a length of <code class="docutils literal notranslate"><span class="pre">factor</span> <span class="pre">*</span> <span class="pre">num_samples</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>factor</strong><span class="classifier">int</span></dt><dd><p>The resampling factor. Defines how many times larger the new sampling frequency is
+compared to the original <a class="reference internal" href="#acoular.signals.SignalGenerator.sample_freq" title="acoular.signals.SignalGenerator.sample_freq"><code class="xref py py-attr docutils literal notranslate"><span class="pre">sample_freq</span></code></a>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p>The resampled signal as a 1D array of floats.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This method relies on the <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.resample.html#scipy.signal.resample" title="(in SciPy v1.15.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.signal.resample()</span></code></a> function for resampling.</p>
+<p class="rubric">Examples</p>
+<p>Resample a signal by a factor of 4:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">acoular</span><span class="w"> </span><span class="kn">import</span> <span class="n">SineGenerator</span>  <span class="c1"># Class extending SignalGenerator</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sg</span> <span class="o">=</span> <span class="n">SineGenerator</span><span class="p">(</span><span class="n">sample_freq</span><span class="o">=</span><span class="mf">100.0</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">resampled_signal</span> <span class="o">=</span> <span class="n">sg</span><span class="o">.</span><span class="n">usignal</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">resampled_signal</span><span class="p">)</span>
+<span class="go">4000</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.signals.html">signals</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.signals.html">signals</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.signals.PeriodicSignalGenerator.html">PeriodicSignalGenerator</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Mar 13, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

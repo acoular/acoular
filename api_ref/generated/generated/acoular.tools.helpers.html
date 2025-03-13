@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>helpers &#8212; Acoular 25.03 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=43776ca6"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="acoular.tools.helpers.synthetic" href="generated/acoular.tools.helpers.synthetic.html" />
+    <link rel="prev" title="tools" href="../acoular.tools.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.03 documentation</span></a></h1>
+        <h2 class="heading"><span>helpers</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.tools.html">tools</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tools.html">tools</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="generated/acoular.tools.helpers.synthetic.html">acoular.tools.helpers.synthetic</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="module-acoular.tools.helpers">
+<span id="helpers"></span><h1>helpers<a class="headerlink" href="#module-acoular.tools.helpers" title="Link to this heading">¶</a></h1>
+<p>Implements some helper functions that are useful for Acoular.</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.tools.helpers.synthetic.html#acoular.tools.helpers.synthetic" title="acoular.tools.helpers.synthetic"><code class="xref py py-obj docutils literal notranslate"><span class="pre">synthetic</span></code></a>(data, freqs, f[, num])</p></td>
+<td><p>Returns synthesized frequency band values of spectral data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/acoular.tools.helpers.return_result.html#acoular.tools.helpers.return_result" title="acoular.tools.helpers.return_result"><code class="xref py py-obj docutils literal notranslate"><span class="pre">return_result</span></code></a>(source[, nmax, num])</p></td>
+<td><p>Collects the output from a <a class="reference internal" href="acoular.base.SamplesGenerator.html#acoular.base.SamplesGenerator.result" title="acoular.base.SamplesGenerator.result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SamplesGenerator.result()</span></code></a> generator and returns an assembled array with all the data.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.tools.helpers.barspectrum.html#acoular.tools.helpers.barspectrum" title="acoular.tools.helpers.barspectrum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">barspectrum</span></code></a>(data, fftfreqs[, num, bar, xoffset])</p></td>
+<td><p>Returns synthesized frequency band values of spectral data to be plotted as bar graph with the matlpotlib plot command.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/acoular.tools.helpers.bardata.html#acoular.tools.helpers.bardata" title="acoular.tools.helpers.bardata"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bardata</span></code></a>(data, fc[, num, bar, xoffset, masked])</p></td>
+<td><p>Returns data to be plotted as bar graph with the matlpotlib plot command.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.tools.helpers.c_air.html#acoular.tools.helpers.c_air" title="acoular.tools.helpers.c_air"><code class="xref py py-obj docutils literal notranslate"><span class="pre">c_air</span></code></a>(t, h[, p, co2])</p></td>
+<td><p>Calculates the speed of sound in air according to Eq.(15) in <span id="id1">[<a class="reference internal" href="../../../literature/index.html#id3" title="Owen Cramer. The variation of the specific heat ratio and the speed of sound in air with temperature, pressure, humidity, and CO2 concentration. The Journal of the Acoustical Society of America, 93(5):2510–2516, May 1993. doi:10.1121/1.405827.">22</a>]</span>.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.tools.html">tools</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tools.html">tools</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="generated/acoular.tools.helpers.synthetic.html">acoular.tools.helpers.synthetic</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Mar 13, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

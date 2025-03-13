@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Cache &#8212; Acoular 25.03 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=43776ca6"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="SampleSplitter" href="acoular.process.SampleSplitter.html" />
+    <link rel="prev" title="Average" href="acoular.process.Average.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.03 documentation</span></a></h1>
+        <h2 class="heading"><span>Cache</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.process.Average.html">Average</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.process.html">process</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.process.SampleSplitter.html">SampleSplitter</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="cache">
+<h1>Cache<a class="headerlink" href="#cache" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.process.Cache">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.process.</span></span><span class="sig-name descname"><span class="pre">Cache</span></span><a class="headerlink" href="#acoular.process.Cache" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.base.InOut.html#acoular.base.InOut" title="acoular.base.InOut"><code class="xref py py-class docutils literal notranslate"><span class="pre">InOut</span></code></a></p>
+<p>Cache the output of a source in a file to avoid redundant computations.</p>
+<p>The <a class="reference internal" href="#acoular.process.Cache" title="acoular.process.Cache"><code class="xref py py-class docutils literal notranslate"><span class="pre">Cache</span></code></a> class stores the output of a source (derived from
+<a class="reference internal" href="acoular.base.Generator.html#acoular.base.Generator" title="acoular.base.Generator"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a>) in a cache file within the Acoular cache directory.
+This enables faster reuse of precomputed data by avoiding time-consuming recalculations.
+The cache behavior is managed through the <a class="reference internal" href="acoular.configuration.Config.html#acoular.configuration.Config" title="acoular.configuration.Config"><code class="xref py py-class docutils literal notranslate"><span class="pre">Config</span></code></a> class by
+setting the <a class="reference internal" href="acoular.configuration.Config.html#acoular.configuration.Config.global_caching" title="acoular.configuration.Config.global_caching"><code class="xref py py-attr docutils literal notranslate"><span class="pre">global_caching</span></code></a> attribute.</p>
+<p>The class intelligently determines whether to use the cached data, update it,
+or bypass caching based on the global caching configuration and the state of the cache file.
+The caching mechanism supports scenarios such as:</p>
+<ul class="simple">
+<li><p>Reading from a complete or incomplete cache.</p></li>
+<li><p>Overwriting an existing cache.</p></li>
+<li><p>Operating in a read-only or no-cache mode.</p></li>
+</ul>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="acoular.base.InOut.html#acoular.base.InOut" title="acoular.base.InOut"><code class="xref py py-class docutils literal notranslate"><span class="pre">acoular.base.InOut</span></code></a></dt><dd><p>Receive data from any source domain and return signals in the same domain.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<p>Caching the output of an FFT computation:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">acoular</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ac</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ac</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">h5library</span> <span class="o">=</span> <span class="s1">&#39;tables&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">1024</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ts</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">TimeSamples</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">sample_freq</span><span class="o">=</span><span class="mi">51200</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fft</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">RFFT</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">ts</span><span class="p">,</span> <span class="n">block_size</span><span class="o">=</span><span class="mi">1024</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cache</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">Cache</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">fft</span><span class="p">)</span>  <span class="c1"># cache the output of the FFT in cache file</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">cache</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>  <span class="c1"># read the cached data block-wise</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="go">[(&#39;void_cache.h5&#39;, 1)]</span>
+<span class="go">(1, 513)</span>
+</pre></div>
+</div>
+<p>Disabling caching globally:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ac</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">global_caching</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+</pre></div>
+</div>
+<p>Changing the cache directory:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ac</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cache_dir</span> <span class="o">=</span> <span class="s1">&#39;/path/to/cache_dir&#39;</span>
+</pre></div>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.process.Cache.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['source.digest'])</span></em><a class="headerlink" href="#acoular.process.Cache.digest" title="Link to this definition">¶</a></dt>
+<dd><p>A unique identifier based on the cache properties.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.process.Cache.result">
+<span class="sig-name descname"><span class="pre">result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.process.Cache.result" title="Link to this definition">¶</a></dt>
+<dd><p>Generate data blocks from the source, using cache when available.</p>
+<p>This method acts as a Python generator that yields blocks of output data from the source,
+reading from the cache file when possible. The size of the data blocks is determined by the
+<code class="docutils literal notranslate"><span class="pre">num</span></code> parameter. The caching mechanism helps prevent redundant calculations by storing and
+reusing the source’s output.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>num</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></dt><dd><p>The number of time samples or frequency snapshots per block to yield.
+The final block may be smaller if there is insufficient data.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p>A 2D NumPy array of shape <code class="docutils literal notranslate"><span class="pre">(num,</span> <span class="pre">num_channels)</span></code> representing the output data.
+Each block is either retrieved from the cache file or generated by the source
+and cached dynamically during processing.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul>
+<li><p>The behavior of the caching mechanism depends on the
+<a class="reference internal" href="acoular.configuration.Config.html#acoular.configuration.Config.global_caching" title="acoular.configuration.Config.global_caching"><code class="xref py py-attr docutils literal notranslate"><span class="pre">global_caching</span></code></a> setting:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'none'</span></code>: Bypasses caching and directly retrieves data from the source.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'readonly'</span></code>: Reads data from the cache if available; otherwise,
+retrieves data from the source without caching.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'overwrite'</span></code>: Replaces any existing cache with newly computed data.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>If the cache file is incomplete or corrupted, the method may generate new data
+from the source to update the cache unless the caching mode is <code class="docutils literal notranslate"><span class="pre">'readonly'</span></code>.</p></li>
+<li><p>The cache node name is based on the source’s <a class="reference internal" href="#acoular.process.Cache.digest" title="acoular.process.Cache.digest"><code class="xref py py-attr docutils literal notranslate"><span class="pre">digest</span></code></a> attribute.</p></li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.process.Average.html">Average</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.process.html">process</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.process.SampleSplitter.html">SampleSplitter</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Mar 13, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

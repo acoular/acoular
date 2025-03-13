@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>TimeOut &#8212; Acoular 25.03 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=43776ca6"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="SpectraOut" href="acoular.base.SpectraOut.html" />
+    <link rel="prev" title="InOut" href="acoular.base.InOut.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.03 documentation</span></a></h1>
+        <h2 class="heading"><span>TimeOut</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.base.InOut.html">InOut</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.base.html">base</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.base.SpectraOut.html">SpectraOut</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="timeout">
+<h1>TimeOut<a class="headerlink" href="#timeout" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.base.TimeOut">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.base.</span></span><span class="sig-name descname"><span class="pre">TimeOut</span></span><a class="headerlink" href="#acoular.base.TimeOut" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.base.SamplesGenerator.html#acoular.base.SamplesGenerator" title="acoular.base.SamplesGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplesGenerator</span></code></a></p>
+<p>Abstract base class for any signal processing block that receives data from any
+<a class="reference internal" href="#acoular.base.TimeOut.source" title="acoular.base.TimeOut.source"><code class="xref py py-attr docutils literal notranslate"><span class="pre">source</span></code></a> domain and returns time domain signals.</p>
+<p>It provides a base class that can be used to create signal processing blocks that receive data
+from any generating <a class="reference internal" href="#acoular.base.TimeOut.source" title="acoular.base.TimeOut.source"><code class="xref py py-attr docutils literal notranslate"><span class="pre">source</span></code></a> and generates a time signal output via the generator
+<a class="reference internal" href="#acoular.base.TimeOut.result" title="acoular.base.TimeOut.result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">result()</span></code></a> in block-wise manner.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.base.TimeOut.source">
+<span class="sig-name descname"><span class="pre">source</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Instance(Generator)</span></em><a class="headerlink" href="#acoular.base.TimeOut.source" title="Link to this definition">¶</a></dt>
+<dd><p>Data source; <a class="reference internal" href="acoular.base.Generator.html#acoular.base.Generator" title="acoular.base.Generator"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a> or derived object.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.base.TimeOut.sample_freq">
+<span class="sig-name descname"><span class="pre">sample_freq</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Delegate('source')</span></em><a class="headerlink" href="#acoular.base.TimeOut.sample_freq" title="Link to this definition">¶</a></dt>
+<dd><p>Sampling frequency of output signal, as given by <a class="reference internal" href="#acoular.base.TimeOut.source" title="acoular.base.TimeOut.source"><code class="xref py py-attr docutils literal notranslate"><span class="pre">source</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.base.TimeOut.num_channels">
+<span class="sig-name descname"><span class="pre">num_channels</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Delegate('source')</span></em><a class="headerlink" href="#acoular.base.TimeOut.num_channels" title="Link to this definition">¶</a></dt>
+<dd><p>Number of channels in output, as given by <a class="reference internal" href="#acoular.base.TimeOut.source" title="acoular.base.TimeOut.source"><code class="xref py py-attr docutils literal notranslate"><span class="pre">source</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.base.TimeOut.num_samples">
+<span class="sig-name descname"><span class="pre">num_samples</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Delegate('source')</span></em><a class="headerlink" href="#acoular.base.TimeOut.num_samples" title="Link to this definition">¶</a></dt>
+<dd><p>Number of samples in output, as given by <a class="reference internal" href="#acoular.base.TimeOut.source" title="acoular.base.TimeOut.source"><code class="xref py py-attr docutils literal notranslate"><span class="pre">source</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.base.TimeOut.result">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.base.TimeOut.result" title="Link to this definition">¶</a></dt>
+<dd><p>Python generator that processes the source data and yields the time-signal block-wise.</p>
+<p>This method needs to be implemented by the derived classes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>num</strong><span class="classifier">int</span></dt><dd><p>This parameter defines the size of the blocks to be yielded
+(i.e. the number of samples per block)</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>numpy.ndarray</dt><dd><p>Two-dimensional output data block of shape (num, num_channels)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.base.InOut.html">InOut</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.base.html">base</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.base.SpectraOut.html">SpectraOut</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Mar 13, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

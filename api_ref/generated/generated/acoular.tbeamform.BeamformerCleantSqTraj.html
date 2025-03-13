@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>BeamformerCleantSqTraj &#8212; Acoular 25.03 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=43776ca6"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="IntegratorSectorTime" href="acoular.tbeamform.IntegratorSectorTime.html" />
+    <link rel="prev" title="BeamformerCleantSq" href="acoular.tbeamform.BeamformerCleantSq.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.03 documentation</span></a></h1>
+        <h2 class="heading"><span>BeamformerCleantSqTraj</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tbeamform.BeamformerCleantSq.html">BeamformerCleantSq</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tbeamform.html">tbeamform</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tbeamform.IntegratorSectorTime.html">IntegratorSectorTime</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="beamformercleantsqtraj">
+<h1>BeamformerCleantSqTraj<a class="headerlink" href="#beamformercleantsqtraj" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.tbeamform.BeamformerCleantSqTraj">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.tbeamform.</span></span><span class="sig-name descname"><span class="pre">BeamformerCleantSqTraj</span></span><a class="headerlink" href="#acoular.tbeamform.BeamformerCleantSqTraj" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.tbeamform.BeamformerCleantTraj.html#acoular.tbeamform.BeamformerCleantTraj" title="acoular.tbeamform.BeamformerCleantTraj"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerCleantTraj</span></code></a>, <a class="reference internal" href="acoular.tbeamform.BeamformerTimeSq.html#acoular.tbeamform.BeamformerTimeSq" title="acoular.tbeamform.BeamformerTimeSq"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerTimeSq</span></code></a></p>
+<p>CLEANT deconvolution method with optional removal of autocorrelation.</p>
+<p>An implementation of the CLEAN method in time domain for moving sources
+with known trajectory. See <span id="id1">[<a class="reference internal" href="../../../literature/index.html#id12" title="R. Cousson, Q. Leclère, M.-A. Pallas, and M. Berengier. A time domain clean approach for the identification of acoustic moving sources. Journal of Sound and Vibration, 443:47-62, 2019. doi:10.1016/j.jsv.2018.11.026.">20</a>]</span> for details on the method and
+<span id="id2">[<a class="reference internal" href="../../../literature/index.html#id8" title="Adam Kujawski and Ennes Sarradj. Application of the CLEANT Method for High Speed Railway Train Measurements. In Proceedings on CD of the 8th Berlin Beamforming Conference, 1–13. Berlin, 2020. Gesellschaft zur Förderung angewandter Informatik (GFaI).">21</a>]</span> for details on the autocorrelation removal.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tbeamform.BeamformerCleantSqTraj.r_diag">
+<span class="sig-name descname"><span class="pre">r_diag</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Bool(True,</span> <span class="pre">desc='removal</span> <span class="pre">of</span> <span class="pre">diagonal')</span></em><a class="headerlink" href="#acoular.tbeamform.BeamformerCleantSqTraj.r_diag" title="Link to this definition">¶</a></dt>
+<dd><p>Boolean flag, if ‘True’ (default), the main diagonal is removed before beamforming.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.tbeamform.BeamformerCleantSqTraj.result">
+<span class="sig-name descname"><span class="pre">result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2048</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.tbeamform.BeamformerCleantSqTraj.result" title="Link to this definition">¶</a></dt>
+<dd><p>Python generator that yields the <em>squared</em> deconvolved time-domain beamformer output.</p>
+<p>The output starts for signals that were emitted from the <a class="reference internal" href="acoular.grids.Grid.html#acoular.grids.Grid" title="acoular.grids.Grid"><code class="xref py py-class docutils literal notranslate"><span class="pre">Grid</span></code></a> at
+<cite>t=0</cite>. Per default, block-wise removal of autocorrelation is performed, which can be turned
+of by setting <a class="reference internal" href="#acoular.tbeamform.BeamformerCleantSqTraj.r_diag" title="acoular.tbeamform.BeamformerCleantSqTraj.r_diag"><code class="xref py py-attr docutils literal notranslate"><span class="pre">r_diag</span></code></a> to <cite>False</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>num</strong><span class="classifier">int</span></dt><dd><p>This parameter defines the size of the blocks to be yielded
+(i.e. the number of samples per block). Defaults to 2048.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>numpy.ndarray</dt><dd><dl class="simple">
+<dt>Samples in blocks of shape (num, <a class="reference internal" href="acoular.tbeamform.BeamformerTime.html#acoular.tbeamform.BeamformerTime.num_channels" title="acoular.tbeamform.BeamformerTime.num_channels"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_channels</span></code></a>).</dt><dd><p><a class="reference internal" href="acoular.tbeamform.BeamformerTime.html#acoular.tbeamform.BeamformerTime.num_channels" title="acoular.tbeamform.BeamformerTime.num_channels"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_channels</span></code></a> is usually very                 large (number of grid points).
+The last block returned by the generator may be shorter than num.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tbeamform.BeamformerCleantSq.html">BeamformerCleantSq</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tbeamform.html">tbeamform</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tbeamform.IntegratorSectorTime.html">IntegratorSectorTime</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Mar 13, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

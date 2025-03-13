@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>SphericalHarmonicSource &#8212; Acoular 25.03 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=43776ca6"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="LineSource" href="acoular.sources.LineSource.html" />
+    <link rel="prev" title="PointSourceDipole" href="acoular.sources.PointSourceDipole.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.03 documentation</span></a></h1>
+        <h2 class="heading"><span>SphericalHarmonicSource</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.sources.PointSourceDipole.html">PointSourceDipole</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.sources.html">sources</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.sources.LineSource.html">LineSource</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="sphericalharmonicsource">
+<h1>SphericalHarmonicSource<a class="headerlink" href="#sphericalharmonicsource" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.sources.SphericalHarmonicSource">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.sources.</span></span><span class="sig-name descname"><span class="pre">SphericalHarmonicSource</span></span><a class="headerlink" href="#acoular.sources.SphericalHarmonicSource" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.sources.PointSource.html#acoular.sources.PointSource" title="acoular.sources.PointSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">PointSource</span></code></a></p>
+<p>Define a fixed spherical harmonic source emitting a signal.</p>
+<p>The <a class="reference internal" href="#acoular.sources.SphericalHarmonicSource" title="acoular.sources.SphericalHarmonicSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">SphericalHarmonicSource</span></code></a> class models a stationary sound source that emits a signal
+with spatial properties represented by spherical harmonics. This source can simulate
+directionality and orientation in sound emission, making it suitable for advanced acoustic
+simulations.</p>
+<p>The output is being generated via the <a class="reference internal" href="#acoular.sources.SphericalHarmonicSource.result" title="acoular.sources.SphericalHarmonicSource.result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">result()</span></code></a> generator.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.SphericalHarmonicSource.lOrder">
+<span class="sig-name descname"><span class="pre">lOrder</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Int(0,</span> <span class="pre">desc='Order</span> <span class="pre">of</span> <span class="pre">spherical</span> <span class="pre">harmonic')</span>&#160; <span class="pre">#</span> <span class="pre">noqa:</span> <span class="pre">N815</span></em><a class="headerlink" href="#acoular.sources.SphericalHarmonicSource.lOrder" title="Link to this definition">¶</a></dt>
+<dd><p>Order of the spherical harmonic representation. Default is <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.SphericalHarmonicSource.alpha">
+<span class="sig-name descname"><span class="pre">alpha</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CArray(desc='coefficients</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">(lOrder,)</span> <span class="pre">spherical</span> <span class="pre">harmonic</span> <span class="pre">mode')</span></em><a class="headerlink" href="#acoular.sources.SphericalHarmonicSource.alpha" title="Link to this definition">¶</a></dt>
+<dd><p>Coefficients of the spherical harmonic modes for the given <a class="reference internal" href="#acoular.sources.SphericalHarmonicSource.lOrder" title="acoular.sources.SphericalHarmonicSource.lOrder"><code class="xref py py-attr docutils literal notranslate"><span class="pre">lOrder</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.SphericalHarmonicSource.direction">
+<span class="sig-name descname"><span class="pre">direction</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Tuple((1.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0),</span> <span class="pre">desc='Spherical</span> <span class="pre">Harmonic</span> <span class="pre">orientation')</span></em><a class="headerlink" href="#acoular.sources.SphericalHarmonicSource.direction" title="Link to this definition">¶</a></dt>
+<dd><p>Vector defining the orientation of the spherical harmonic source. Default is
+<code class="docutils literal notranslate"><span class="pre">(1.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0)</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.SphericalHarmonicSource.prepadding">
+<span class="sig-name descname"><span class="pre">prepadding</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum('loop',</span> <span class="pre">desc='Behaviour</span> <span class="pre">for</span> <span class="pre">negative</span> <span class="pre">time</span> <span class="pre">indices.')</span></em><a class="headerlink" href="#acoular.sources.SphericalHarmonicSource.prepadding" title="Link to this definition">¶</a></dt>
+<dd><p>Behavior of the signal for negative time indices. Currently only supports <cite>loop</cite>. Default is
+<code class="docutils literal notranslate"><span class="pre">'loop'</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.sources.SphericalHarmonicSource.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">signals</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.sources.SphericalHarmonicSource.transform" title="Link to this definition">¶</a></dt>
+<dd><p>Apply spherical harmonic transformation to input signals.</p>
+<p>The <a class="reference internal" href="#acoular.sources.SphericalHarmonicSource.transform" title="acoular.sources.SphericalHarmonicSource.transform"><code class="xref py py-meth docutils literal notranslate"><span class="pre">transform()</span></code></a> method modifies the input signals using the spherical harmonic modes,
+taking into account the specified coefficients (<a class="reference internal" href="#acoular.sources.SphericalHarmonicSource.alpha" title="acoular.sources.SphericalHarmonicSource.alpha"><code class="xref py py-attr docutils literal notranslate"><span class="pre">alpha</span></code></a>), order (<a class="reference internal" href="#acoular.sources.SphericalHarmonicSource.lOrder" title="acoular.sources.SphericalHarmonicSource.lOrder"><code class="xref py py-attr docutils literal notranslate"><span class="pre">lOrder</span></code></a>), and
+source orientation (<a class="reference internal" href="#acoular.sources.SphericalHarmonicSource.direction" title="acoular.sources.SphericalHarmonicSource.direction"><code class="xref py py-attr docutils literal notranslate"><span class="pre">direction</span></code></a>).</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>signals</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></span></dt><dd><p>Input signal array of shape (<code class="xref py py-attr docutils literal notranslate"><span class="pre">num_samples</span></code>,
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">num_channels</span></code>).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p>Transformed signal array of the same shape as <code class="docutils literal notranslate"><span class="pre">signals</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="acoular.sources.get_modes.html#acoular.sources.get_modes" title="acoular.sources.get_modes"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_modes()</span></code></a></dt><dd><p>Method for computing spherical harmonic modes.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The spherical harmonic modes are computed using the <a class="reference internal" href="acoular.sources.get_modes.html#acoular.sources.get_modes" title="acoular.sources.get_modes"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_modes()</span></code></a> function, which
+requires the microphone positions, source position, and source orientation.</p></li>
+<li><p>The transformation applies the spherical harmonic coefficients (<a class="reference internal" href="#acoular.sources.SphericalHarmonicSource.alpha" title="acoular.sources.SphericalHarmonicSource.alpha"><code class="xref py py-attr docutils literal notranslate"><span class="pre">alpha</span></code></a>) to the
+signal in the frequency domain.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.sources.SphericalHarmonicSource.result">
+<span class="sig-name descname"><span class="pre">result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">128</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.sources.SphericalHarmonicSource.result" title="Link to this definition">¶</a></dt>
+<dd><p>Generate output signal at microphones in blocks, incorporating propagation effects.</p>
+<p>The <a class="reference internal" href="#acoular.sources.SphericalHarmonicSource.result" title="acoular.sources.SphericalHarmonicSource.result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">result()</span></code></a> method provides a generator that yields blocks of the signal detected at
+microphones. The signal is adjusted for the distances between the source and microphones, as
+well as any environmental propagation effects.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>num</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, optional</span></dt><dd><p>Number of samples per block to be yielded. Default is <code class="docutils literal notranslate"><span class="pre">128</span></code>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p>A 2D array of shape (<code class="docutils literal notranslate"><span class="pre">num</span></code>, <a class="reference internal" href="acoular.sources.PointSource.html#acoular.sources.PointSource.num_channels" title="acoular.sources.PointSource.num_channels"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_channels</span></code></a>) containing the signal
+detected at the microphones. The last block may have fewer samples if
+<a class="reference internal" href="acoular.sources.PointSource.html#acoular.sources.PointSource.num_samples" title="acoular.sources.PointSource.num_samples"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_samples</span></code></a> is not a multiple of <code class="docutils literal notranslate"><span class="pre">num</span></code>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#IndexError" title="(in Python v3.13)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IndexError</span></code></a></dt><dd><p>If no more samples are available from the signal source.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.sources.PointSourceDipole.html">PointSourceDipole</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.sources.html">sources</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.sources.LineSource.html">LineSource</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Mar 13, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>
