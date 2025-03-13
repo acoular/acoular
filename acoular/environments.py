@@ -21,6 +21,7 @@ Implements acoustic environments with and without flow.
 """
 
 from abc import abstractmethod
+from warnings import warn
 
 import numba as nb
 from numpy import (
@@ -556,60 +557,83 @@ class OpenJet(FlowField):
 
 class RotatingFlow(FlowField):
     """
-    Analytical approximation of the flow field of a rotating fluid with constant flow.
+    Analytical approximation of a rotating flow field with additional velocity component
+    in z-direction.
 
-    This class provides an analytical model for a rotating fluid flow field, where the rotation
-    occurs about the z-axis. The flow combines rotational motion in the x-y plane and a constant
-    velocity component in the z-direction.
+    This class provides an analytical model for a fluid flow field with a
+    rigid-body-like rotation about the z-axis. The flow combines rotational motion
+    in the x-y plane and a constant velocity component in the z-direction.
 
     Notes
     -----
     - The rotation is assumed to be about the z-axis. The velocity components in the x-y plane are
       determined by the angular velocity :attr:`omega`, while the z-component is constant
       and set by :attr:`v0`.
-    - The angular velocity :attr:`omega` is computed as: ``omega = 2 * pi * rpm / 60``,
-      where :attr:`rpm` is the rotational speed in revolutions per minute.
+    - The angular velocity :attr:`omega` is computed as: ``omega = 2 * pi * rps``,
+      with the :attr:`rps` given in revolutions per second (i.e. Hz).
 
     Examples
     --------
     >>> import acoular as ac
     >>> import numpy as np
     >>>
-    >>> flow = RotatingFlow(rpm=60, v0=1.0)
+    >>> flow = RotatingFlow(rps=1, v0=1.0)
     >>> velocity, jacobian = flow.v(array((1.0, 1.0, 0.0)))
     >>> velocity
-    array([ 6.28318531, -6.28318531,  1.        ])
+    array([-6.28318531,  6.28318531,  1.        ])
     >>> jacobian
-    array([[ 0.        ,  6.28318531,  0.        ],
-           [-6.28318531,  0.        ,  0.        ],
+    array([[ 0.        , -6.28318531,  0.        ],
+           [ 6.28318531,  0.        ,  0.        ],
            [ 0.        ,  0.        ,  0.        ]])
     """
 
-    #: Revolutions per minute (RPM) of the virtual rotating array.
-    #: Negative values indicate clockwise rotation. Default is ``0.0``.
-    rpm = Float(0.0, desc='revolutions per minute of the virtual array; negative values for clockwise rotation')
+    # Revolutions per minute (RPM). Default is ``0.0``.
+    # Positive values indicate clockwise rotation of the flow.
+    # This is contrary to the usual definition of the direction of rotation.
+    # Deprecated! Please use the differently defined :attr:`rps` attribute instead.
+    rpm = Property(desc='revolutions per minute of the flow; positive values for clockwise rotation')
+
+    def _get_rpm(self):
+        warn(
+            'Deprecated use of "rpm" trait. Please use the "rps" trait instead.',
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return -60 * self.rps
+
+    def _set_rpm(self, rpm):
+        warn(
+            'Deprecated use of "rpm" trait. Please use the "rps" trait instead (divide rpm value by -60).',
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        self.rps = -rpm / 60
+
+    #: Rotational speed in revolutions per second. Negative values indicate clockwise
+    #: rigid-body-like rotation of the flow. Default is ``0.0``.
+    rps = Float(0.0, desc='rotational speed of the flow in Hz')
 
     #: Constant flow velocity in the z-direction. Default is ``0.0``.
     v0 = Float(0.0, desc='flow velocity')
 
-    #: The location of the center of rotation, typically the nozzle center.
+    #: The location of the center of rotation.
     #: Default is ``(0.0, 0.0, 0.0)``.
-    origin = CArray(dtype=float64, shape=(3,), value=array((0.0, 0.0, 0.0)), desc='center of nozzle')
+    origin = CArray(dtype=float64, shape=(3,), value=array((0.0, 0.0, 0.0)), desc='center of rotation')
 
     #: A unique identifier based on the field properties. (read-only)
     digest = Property(
-        depends_on=['v0', 'origin', 'rpm'],
+        depends_on=['v0', 'origin', 'rps'],
     )
 
     #: Angular velocity (in radians per second) of the rotation.
-    #: This is a derived property based on :attr:`rpm`.
+    #: This is a derived property based on :attr:`rps`.
     omega = Property(
-        depends_on=['rpm'],
+        depends_on=['rps'],
     )
 
     @cached_property
     def _get_omega(self):
-        return 2 * pi * self.rpm / 60
+        return 2 * pi * self.rps
 
     @cached_property
     def _get_digest(self):
@@ -648,18 +672,18 @@ class RotatingFlow(FlowField):
         """
         x, y, z = xx - self.origin
 
-        # rotational speed
+        # angular velocity
         omega = self.omega
 
         # velocity vector
-        U = omega * y
-        V = -omega * x
+        U = omega * -y
+        V = omega * x
         W = self.v0
 
         # flow field
         v = array((U, V, W))
         # Jacobi matrix
-        dv = array(((0, -omega, 0.0), (omega, 0, 0.0), (0.0, 0.0, 0.0))).T
+        dv = array(((0.0, omega, 0.0), (-omega, 0.0, 0.0), (0.0, 0.0, 0.0))).T
         return v, dv
 
 

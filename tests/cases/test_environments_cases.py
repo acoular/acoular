@@ -46,7 +46,7 @@ class Flows:
         return ac.OpenJet(v0=70.0, origin=(-0.7, 0, 0.7))
 
     def case_RotatingFlow(self):
-        return ac.RotatingFlow(v0=70.0, rpm=1000.0)
+        return ac.RotatingFlow(v0=70.0, rps=-1000.0 / 60)
 
 
 class Environments:
