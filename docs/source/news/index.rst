@@ -4,17 +4,14 @@ What's new
 Upcoming Release
 ------------------------
 
+25.03
+------------------------
     **New features:**
         * Introduces `rps` trait in :class:`~acoular.environments.FlowField`, that now correctly defines direction of rotation
 
     **Documentation**
         * add known issue section to install guide
-        * adds new docstrings to microphones.py
-        * adds docstrings to spectra.py        
-        * adds docstrings to environments.py
-        * adds new docstrings to fprocess.py
-        * adds new docstrings to sources.py
-
+        * adds new docstrings to submodules :mod:`acoular.spectra`, :mod:`acoular.environments`, :mod:`acoular.fprocess`, :mod:`acoular.process`, :mod:`acoular.signals`, :mod:`acoular.sources`, :mod:`acoular.trajectory`
 
     **Internal**
         * fix broken meta.yaml (adds conda build stage to CI)
@@ -45,11 +42,6 @@ Upcoming Release
         * adds guide on how to submit a pull request
         * adds `intersphinx` extension to cross-link documentation from other projects
         * updates examples to use a right hand co-ordinate system
-        * adds new docstrings to trajectory.py
-        * adds new docstrings to grids.py
-        * adds docstrings to environments.py
-        * adds new docstrings to process.py
-        * adds new docstrings to signals.py
 
     **Tests**
         * tests now consequently use `pytest` framework instead of `unittest`
