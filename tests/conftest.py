@@ -1,3 +1,4 @@
+import pickle
 from pathlib import Path
 
 import acoular as ac
@@ -7,7 +8,7 @@ import sounddevice as sd
 import tables as tb
 from pytest_cases import fixture, parametrize
 
-from tests.utils import SetupMovingSourceCase, SetupStationarySourceCase
+from tests.utils import SetupMovingSourceCase, SetupStationarySourceCase, create_instance
 
 
 @pytest.hookimpl()
@@ -76,6 +77,20 @@ def small_source_case(create_source_case):
         invalid_channels=[1, 7] + [i for i in range(56) if i % 3 == 0],  # use every third microphone
         grid=ac.RectGrid(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, z=0.68, increment=0.2),
     )
+
+
+@pytest.fixture
+def pickle_file(tmp_path):
+    """Fixture to create and return a pickle file for a given class."""
+
+    def _create_pickle_file(acoular_cls):
+        cls_instance = create_instance(acoular_cls)
+        file_path = tmp_path / f'{acoular_cls.__name__}.pickle'
+        with open(file_path, 'wb') as f:
+            pickle.dump(cls_instance, f)
+        return file_path, cls_instance
+
+    return _create_pickle_file
 
 
 # moving source cases

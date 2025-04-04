@@ -770,7 +770,7 @@ class ImportGrid(Grid):
     """
 
     #: Name of the .xml-file from which to read the data.
-    file = File(filter=['*.xml'], exists=True, desc='name of the xml file to import')
+    file = Union(None, File(filter=['*.xml'], exists=True), desc='name of the xml file to import')
 
     _gpos = CArray(dtype=float, desc='x, y, z position of all Grid Points')
 

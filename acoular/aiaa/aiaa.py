@@ -32,6 +32,7 @@ from traits.api import (
     File,
     Instance,
     Property,
+    Union,
     cached_property,
     on_trait_change,
     property_depends_on,
@@ -89,7 +90,7 @@ class CsmAIAABenchmark(PowerSpectraImport):
     """Class to load the CSM that is stored in AIAA Benchmark HDF5 file."""
 
     #: Full name of the .h5 file with data
-    file = File(filter=['*.h5'], exists=True, desc='name of data file')
+    file = Union(None, File(filter=['*.h5'], exists=True), desc='name of data file')
 
     #: Basename of the .h5 file with data, is set automatically.
     basename = Property(
@@ -167,7 +168,9 @@ class MicAIAABenchmark(MicGeom):
     """
 
     #: Name of the .h5-file from which to read the data.
-    file = File(filter=['*.h5'], exists=True, desc='name of the h5 file containing the microphone geometry')
+    file = Union(
+        None, File(filter=['*.h5'], exists=True), desc='name of the h5 file containing the microphone geometry'
+    )
 
     @on_trait_change('file')
     def _import_mpos(self):

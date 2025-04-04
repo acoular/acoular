@@ -369,7 +369,7 @@ class TimeSamples(SamplesGenerator):
     """
 
     #: Full path to the ``.h5`` file containing time-domain data.
-    file = File(filter=['*.h5'], exists=True, desc='name of data file')
+    file = Union(None, File(filter=['*.h5'], exists=True), desc='name of data file')
 
     #: Basename of the ``.h5`` file, set automatically from the :attr:`file` attribute.
     basename = Property(depends_on=['file'], desc='basename of data file')

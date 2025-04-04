@@ -170,6 +170,7 @@ class SteeringVector(HasStrictTraits):
             'true level': lambda x: x / einsum('ij,ij->i', x, x.conj())[:, newaxis],
             'true location': lambda x: x / sqrt(einsum('ij,ij->i', x, x.conj()) * x.shape[-1])[:, newaxis],
         },
+        transient=True,
         desc='dictionary of frequency domain steering vector functions',
     )
 
@@ -180,6 +181,7 @@ class SteeringVector(HasStrictTraits):
             'true level': _steer_III,
             'true location': _steer_IV,
         },
+        transient=True,
         desc='dictionary of time domain steering vector functions',
     )
 

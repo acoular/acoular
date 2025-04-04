@@ -333,7 +333,7 @@ class Trigger(TimeOut):  # pragma: no cover
     # mean value of the trigger signal. E.g: the mean value is 0 and there are positive
     # extremums at 400 and negative extremums at -800. Then the estimated threshold would be
     # 0.75 * -800 = -600.
-    threshold = Float(None)
+    threshold = Union(None, Float)
 
     # Maximum allowable variation of length of each revolution duration. Default is
     # 2%. A warning is thrown, if any revolution length surpasses this value:

@@ -13,7 +13,7 @@
 import xml.dom.minidom
 
 from numpy import array, newaxis
-from traits.api import CArray, CInt, File, List, Property, cached_property, on_trait_change
+from traits.api import CArray, CInt, File, List, Property, Union, cached_property, on_trait_change
 
 import acoular as ac
 
@@ -78,7 +78,7 @@ class Calib(InOut):
     """
 
     #: Name of the .xml file to be imported.
-    file = File(filter=['*.xml'], exists=True, desc='name of the xml file to import')
+    file = Union(None, File(filter=['*.xml'], exists=True), desc='name of the xml file to import')
 
     #: Number of microphones in the calibration data,
     #: is set automatically when read from file or when data is set.
