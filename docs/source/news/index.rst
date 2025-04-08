@@ -4,6 +4,10 @@ What's new
 Upcoming Release
 ------------------------
 
+    **Tests**
+        * fixes unpickable classes and adds pickle test
+
+
 25.03
 ------------------------
     **New features:**
