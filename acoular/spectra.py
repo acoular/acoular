@@ -12,7 +12,6 @@
 """
 
 from abc import abstractmethod
-from warnings import warn
 
 from numpy import (
     arange,
