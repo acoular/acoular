@@ -16,13 +16,13 @@ This "Getting started" tutorial assumes that the Acoular library is :doc:`instal
 
 This should, after some seconds, produce two pictures (a 64 microphone arrangement and a beamforming map with three sources). You may close the pictures in order to continue. 
 
-Apart from showing that everything works well, the demo also produced some data to work on. You should now have a **file 'three_sources.h5' (13MB)** in your working directory.
+Apart from showing that everything works well, the demo also produced some data to work on. You should now have a **file 'three_sources_2d.h5' (13MB)** in your working directory.
 
 Beamforming example step-by-step 
 --------------------------------
 
 One possible way to use the library is for doing classic delay-and-sum beamforming. This can either be done directly in the time domain or in the frequency domain. To get started with Acoular, we will present a very basic example of beamforming in the frequency domain. In order to perform such an analysis we do need some data to work on. In a practical application, this data is acquired during multichannel measurements using a microphone array. The library provides some functionality to do so and stores the measured sound pressure time histories for all channels of the microphone array in a hierarchical data file (HDF5) format. 
-However, a working measurement set-up is required. Thus, we will use simulated data here. The 'three_sources.h5' file, generated using Acoular's simulation capabilities (see the :doc:`reference <../api_ref/index>`), contains the time history data for 64 microphone channels, which are sampled at 51200 Hz for a duration of 1 second, i.e. 51200 samples per channel. 
+However, a working measurement set-up is required. Thus, we will use simulated data here. The 'three_sources_2d.h5' file, generated using Acoular's simulation capabilities (see the :doc:`reference <../api_ref/index>`), contains the time history data for 64 microphone channels, which are sampled at 51200 Hz for a duration of 1 second, i.e. 51200 samples per channel. 
 
 In what follows, it is assumed that an interactive python session is started, preferably an IPython or jupyter session:
 
@@ -38,7 +38,7 @@ This makes all the functionality available needed for the beamforming analysis. 
 
 .. ipython::
 
-    In [1]: ts = acoular.TimeSamples( file='three_sources.h5' )
+    In [1]: ts = acoular.TimeSamples( file='three_sources_2d.h5' )
 
 The ts object now provides access to the HDF5 file and information stored in it. 
 
