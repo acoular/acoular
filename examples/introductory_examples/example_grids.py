@@ -33,20 +33,8 @@ import numpy as np
 micgeofile = Path(ac.__file__).parent / 'xml' / 'array_64.xml'
 # Now, we'll create a MicGeom object to represent our microphone geometry.
 mg = ac.MicGeom(file=micgeofile)
-
 # Next, we'll generate time sample data.
-sfreq = 51200
-duration = 1
-num_samples = duration * sfreq
-
-n1 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=num_samples, seed=1)
-n2 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=num_samples, seed=2, rms=0.7)
-n3 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=num_samples, seed=3, rms=0.5)
-p1 = ac.PointSource(signal=n1, mics=mg, loc=(-0.1, -0.1, -0.25))
-p2 = ac.PointSource(signal=n2, mics=mg, loc=(0.15, 0, -0.2))
-p3 = ac.PointSource(signal=n3, mics=mg, loc=(0, 0.1, -0.15))
-pa = ac.SourceMixer(sources=[p1, p2, p3])
-
+pa = ac.demo.create_three_sources_2d(mg)
 # To prepare for beamforming, we need to calculate the frequency spectra of the signals.
 # We'll do this using the PowerSpectra object.
 ps = ac.PowerSpectra(source=pa, block_size=128, window='Hanning')
@@ -139,7 +127,6 @@ plt.show()
 # =======
 #
 # Let's briefly introduce 3D grids.
-# Also check out the 'example_3d_beamforming.py' example for more information on 3D beamforming.
 #
 # **Basic RectGrid3D usage**
 
@@ -149,13 +136,14 @@ print('3D-grid size:', rg3d.size)
 
 # We can also apply different increments for each dimension if needed.
 rg3d.increment = (0.02, 0.02, 0.01)
-print('3D-grid size with bigger incerement in the z dimension:', rg3d.size)
+print('3D-grid size with bigger incerement in the z-dimension:', rg3d.size)
 
 # %%
 # **3D-grid properties**
 #
-# Accessing properties of a 3D grid is similar to 2D grids.
+# 3D rectangular grids hold a range of properties similar to those of their 2D counterparts.
 # The main difference is that we now have 'nzsteps' and a 3D 'shape'.
+# Accessing these properties also is similar to the 2D-grids case.
 # Let's take a look:
 
 # Access 3D grid properties
@@ -169,56 +157,89 @@ print(f'3D Grid positions:\n{rg3d.pos[:, :5]}')
 # %%
 # **Beamforming with 3D grids**
 #
-# Let's visualize 3D beamforming results using our example data.
-# For this, we'll need a 3D beamforming method.We'll use BeamformerBase,
-# but in a real-world scenario, you might choose a more advanced technique.
+# For the visualize 3D beamforming results, we'll first mix up our examples data a little and
+# generate time sample data of three white-noise point sources with diffrent x-, y-, and
+# z-coodinates each.
 
-# First, ensure the steering vector is set up for 3D grids.
+# Here, we generate the 3D time samples data.
+# We use the same microphone geometry we used for the 2D grids.
+pa = ac.demo.create_three_sources_3d(mg)
+# Again, we plug the sample data into a PowerSpectra object.
+# This time we use a block size of 128 and a Bartlett window for a change.
+ps = ac.PowerSpectra(source=pa, block_size=128, window='Bartlett')
+# Now, we need a 3D beamforming method. We'll use BeamformerCleansc,
+# which is a more advanced technique than BeamformerBase.
+bc = ac.BeamformerCleansc(freq_data=ps, steer=st)
+
+# %%
+# Note, that we needn't change the steering vector.
+# However we need to change the grid attributed to it, which currently still is the 2D grid.
+
+# Here, we change the steering vector's grid to the 3D grid.
 st.grid = rg3d
+# And we change the grid increment to a unifrom value.
 rg3d.increment = 0.01
 
 # %%
 # Let's display the results in a plot.
 
-fig = plt.figure(figsize=(12, 5))
+fig = plt.figure()
 
 # Calculate the beamforming output.
 # Note: For true 3D beamforming, the result is a 3D field.
 #       This time, we'll calculate it for a frequency of exactly 8000.
-map_3d = bb.synthetic(8000, 1)
+map_3d = bc.synthetic(8000, 1)
+print(map_3d.shape)
+print(map_3d)
 
 # To visualize this 3D data, we need to reshape it to 3D.
 map_3d = map_3d.reshape(rg3d.shape)
+print(map_3d.shape)
 
-# Now, we'll make a couple of handy definitions that will help us with plotting soon.
-# Here, we define a list for labeling the plots.
-xyz = ['x-y', 'x-z', 'y-z']
-# Here, another one to manage the extents.
-extents = [
-    (rg3d.x_min, rg3d.x_max, rg3d.y_min, rg3d.y_max),
-    (rg3d.x_min, rg3d.x_max, rg3d.z_min, rg3d.z_max),
-    (rg3d.y_min, rg3d.y_max, rg3d.z_min, rg3d.z_max),
-]
-# And here, the max value for scaling the plots.
-mx = ac.L_p(np.max(map_3d))
+# %%
+# Unterbrechung
 
-for i in range(3):
-    # To display this 3D result in 2D, we can integrate (sum) along one axis.
-    # This gives us a projection of the 3D sound field onto a 2D plane.
-    map_2d_sum = np.sum(map_3d, axis=2 - i)  # Sum along z-, y- or x-axis (in this order)
+# # Now, we'll make a couple of handy definitions that will help us with plotting soon.
+# # Here, we define a list for labeling the plots.
+# xyz = ['x-y', 'x-z', 'y-z']
+# # Here, another one to manage the extents.
+# extents = [
+#     (rg3d.x_min, rg3d.x_max, rg3d.y_min, rg3d.y_max),
+#     (rg3d.x_min, rg3d.x_max, rg3d.z_min, rg3d.z_max),
+#     (rg3d.y_min, rg3d.y_max, rg3d.z_min, rg3d.z_max),
+# ]
+# # And here, the max value for scaling the plots.
+# mx = ac.L_p(np.max(map_3d))
 
-    ax = fig.add_subplot(1, 3, i + 1)
-    ax.imshow(
-        ac.L_p(map_2d_sum.T),  # Transpose for correct orientation
-        vmax=mx,
-        vmin=mx - 20,
-        origin='lower',
-        interpolation='nearest',
-        extent=extents[i],
-    )
-    ax.set_xlabel(xyz[i][0])
-    ax.set_ylabel(xyz[i][2])
-    ax.set_title(f'{xyz[i]} view\n(grid increment: {rg3d.increment})')
+# for i in range(3):
+#     # To display this 3D result in 2D, we can integrate (sum) along one axis.
+#     # This gives us a projection of the 3D sound field onto a 2D plane.
+#     map_2d_sum = np.sum(map_3d, axis=2 - i)  # Sum along z-, y- or x-axis (in this order)
+
+#     ax = fig.add_subplot(1, 3, i + 1)
+#     ax.imshow(
+#         ac.L_p(map_2d_sum.T),  # Transpose for correct orientation
+#         vmax=mx,
+#         vmin=mx - 20,
+#         origin='lower',
+#         interpolation='nearest',
+#         extent=extents[i],
+#     )
+#     ax.set_xlabel(xyz[i][0])
+#     ax.set_ylabel(xyz[i][2])
+#     ax.set_title(f'{xyz[i]} view\n(grid increment: {rg3d.increment})')
+
+ax = fig.add_subplot(projection='3d')
+
+ax.plot(*mg.pos, 'o', label='mics')
+
+ax.scatter(*map_3d)
+
+# gpos = rg3d.pos.reshape((3, rg3d.nxsteps, rg3d.nysteps))
+# ax.plot_wireframe(gpos[0], gpos[1], gpos[2], color='k', lw=0.2, label='grid')
+
+ax.set(xlabel='x', ylabel='y', zlabel='z')
+fig.legend()
 
 plt.tight_layout()
 plt.show()
@@ -227,3 +248,8 @@ plt.show()
 # =========
 # Line Grid
 # =========
+
+# Here, we create a microphone line geometry.
+pos_total = np.zeros((3, 32))
+pos_total[0, :] = np.linspace(-0.3, 0.3, 32)
+line_mg = ac.MicGeom(pos_total=pos_total)
