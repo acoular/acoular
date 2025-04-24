@@ -32,27 +32,41 @@ Source Location        RMS
 """
 
 
-def create_three_sources(mg, h5savefile='three_sources.h5'):
-    """Create three noise sources and return them as Mixer."""
+def create_three_sources(mg, locs, h5savefile='', sfreq=51200, duration=1):
+    """Create three noise sources with custom locations and return them as Mixer."""
     import acoular as ac
 
-    # set up the parameters
-
-    sfreq = 51200
-    duration = 1
     nsamples = duration * sfreq
 
     n1 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=nsamples, seed=1)
     n2 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=nsamples, seed=2, rms=0.7)
     n3 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=nsamples, seed=3, rms=0.5)
-    p1 = ac.PointSource(signal=n1, mics=mg, loc=(-0.1, -0.1, -0.3))
-    p2 = ac.PointSource(signal=n2, mics=mg, loc=(0.15, 0, -0.3))
-    p3 = ac.PointSource(signal=n3, mics=mg, loc=(0, 0.1, -0.3))
-    pa = ac.Mixer(source=p1, sources=[p2, p3])
+
+    noises = [n1, n2, n3]
+    ps = [ac.PointSource(signal=n, mics=mg, loc=loc) for n, loc in list(zip(noises, locs))]
+    pa = ac.Mixer(source=ps[0], sources=ps[1:])
     if h5savefile:
         wh5 = ac.WriteH5(source=pa, file=h5savefile)
         wh5.save()
     return pa
+
+
+def create_three_sources_1d(mg):
+    """Create three noise sources in a 3D plane and return them as Mixer."""
+    locs = [(-0.1, 0, -0.3), (0.15, 0, -0.3), (0, 0, -0.3)]
+    return create_three_sources(mg, locs, h5savefile='three_sources_1d.h5')
+
+
+def create_three_sources_2d(mg):
+    """Create three noise sources in a 2D plane and return them as Mixer."""
+    locs = [(-0.1, -0.1, -0.3), (0.15, 0, -0.3), (0, 0.1, -0.3)]
+    return create_three_sources(mg, locs, h5savefile='three_sources_2d.h5')
+
+
+def create_three_sources_3d(mg):
+    """Create three noise sources in a 3D plane and return them as Mixer."""
+    locs = [(-0.1, -0.1, -0.3), (0.15, 0, -0.17), (0, 0.1, -0.25)]
+    return create_three_sources(mg, locs, h5savefile='three_sources_3d.h5')
 
 
 def run():
@@ -70,7 +84,7 @@ def run():
 
     # generate test data, in real life this would come from an array measurement
 
-    pa = create_three_sources(mg)
+    pa = create_three_sources_2d(mg)
 
     # analyze the data and generate map
 
