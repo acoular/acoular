@@ -12,13 +12,14 @@ and generating non-uniform grids. To give you a practical context, we'll
 also include a basic measurement setup, showing how grids fit into
 beamforming applications.
 """
-
+# %%
 # Let's start by importing Acoular and the other modules we'll need.
+
+from pathlib import Path
+
 import acoular as ac
 import matplotlib.pyplot as plt
 import numpy as np
-
-from pathlib import Path
 
 # %%
 # =================
@@ -33,7 +34,7 @@ micgeofile = Path(ac.__file__).parent / 'xml' / 'array_64.xml'
 # Now, we'll create a MicGeom object to represent our microphone geometry.
 mg = ac.MicGeom(file=micgeofile)
 
-# Next, we'll generate time sample data from an HDF5 file.
+# Next, we'll generate time sample data.
 sfreq = 51200
 duration = 1
 num_samples = duration * sfreq
@@ -54,7 +55,8 @@ ps = ac.PowerSpectra(source=pa, block_size=128, window='Hanning')
 # Keep in mind that the steering vector requires a grid as input, which we'll provide later.
 st = ac.SteeringVector(mics=mg)
 # Finally, let's create a BeamformerBase object.
-# This is the foundation for our beamforming algorithms, and it takes the frequency data and steering vectors as input.
+# This is the foundation for our beamforming algorithms,
+# and it takes the frequency data and steering vectors as input.
 bb = ac.BeamformerBase(freq_data=ps, steer=st)
 
 # %%
@@ -66,7 +68,7 @@ bb = ac.BeamformerBase(freq_data=ps, steer=st)
 # RectGrid helps us define the spatial points where the beamforming output will be calculated.
 
 # %%
-# Basic RectGrid usage
+# **Basic RectGrid usage**
 #
 # Let's start by creating a RectGrid object.
 # This will define a rectangular grid in the x-y plane.
@@ -83,90 +85,46 @@ print(f'Grid shape: {rg.shape}')  # (nxsteps, nysteps)
 print(f'Grid positions:\n{rg.pos[:, :5]}')  # Display the first 5 grid point positions
 
 # %%
-# Another useful grid characteristic is its "extent".
-# The "extent" is particularly helpful for visualization, especially with matplotlib's `imshow` function.
+# Another useful grid characteristic is its *extent*.
+# The *extent* is particularly helpful for visualization, especially with matplotlib's
+# :obj:`~matplotlib.pyplot.imshow` function.
 # It defines the grid's boundaries for plotting.
+
 # Let's get the grid's extent:
 print(f'Grid extent: {rg.extend()}')
 
 # %%
-# Now, let's see how to divide a RectGrid into subdomains.
-# Subdomains allow us to focus our analysis on specific regions of interest within the grid.
-# This can improve computational efficiency and help us concentrate on the most relevant areas.
-# Here, we'll look at a subdomain in the first quadrant.
-# To keep things clear, we'll use a smaller grid for this example.
-rg.increment = 0.1  # Increase grid spacing for fewer points
-
-# First, we'll create a rectangular sector in the first quadrant using the RectSector class.
-rect_sector = ac.RectSector(x_min=0, x_max=1, y_min=0, y_max=1)
-
-# Next, we'll get the indices of the grid points that fall within this rectangular sector.
-subdomain_indices = rg.subdomain(rect_sector)
-print('Subdomain indices:', subdomain_indices)
-
-# Using these indices, we can extract the corresponding grid points from the grid.
-# This allows us to work only with the points inside our subdomain.
-x_indices, y_indices = subdomain_indices
-subdomain_points = rg.pos[:, x_indices * rg.nysteps + y_indices]
-print('Subdomain points:\n', subdomain_points)
-
-# %%
-# Coordinate Mapping
-#
-# Acoular provides handy methods for mapping between coordinates and grid indices.
-# This is useful for finding the grid point closest to a given location
-# or for defining subdomains based on coordinate values.
-# Let's find the grid index closest to a specific coordinate:
-x_coord = 0.05
-y_coord = -0.05
-index_of_coord = rg.index(x_coord, y_coord)
-print(f'Index of ({x_coord}, {y_coord}): {index_of_coord}')
-
-# %%
-# We can also get indices for various types of subdomains: rectangular, circular, and polygonal.
-# Let's try that:
-# Get indices of a rectangular subdomain
-rect_subdomain_indices = rg.indices(-0.1, -0.1, 0.1, 0.1)
-print('Rectangular subdomain indices:', rect_subdomain_indices)
-
-# Get indices of a circular subdomain
-circ_subdomain_indices = rg.indices(0, 0, 0.15)  # x, y, radius
-print('Circular subdomain indices:', circ_subdomain_indices)
-
-# Get indices of a polygonal subdomain
-poly_subdomain_indices = rg.indices(-0.1, -0.1, 0.1, -0.1, 0.1, 0.1, -0.1, 0.1)
-print('Polygonal subdomain indices:', poly_subdomain_indices)
-
-# %%
-# Visualization
+# **Beamforming with rectangular grids**
 #
 # Now, let's visualize some beamforming results on our grid.
+
 # First, we need to pass the grid to the steering vector.
 st.grid = rg
 
 # %%
 # We can now calculate the beamforming output and display it in a plot.
+
 fig = plt.figure(figsize=(12, 5))
 
 # We'll do this for three different grid increments to see the effect of resolution.
 for i in range(3):
     # Increase grid increment
-    rg.increment = 0.01 * (i+1)
+    rg.increment = 0.01 * (i + 1)
 
-    # Calculate beamforming output
+    # Here, we'll calculate the beamforming output.
+    # We'll calculate it for the third-octave band around a frequency of 8000.
     pm = bb.synthetic(8000, 3)
     Lm = ac.L_p(pm)
 
     # Create the plot
-    ax = fig.add_subplot(1, 3, i+1)
+    ax = fig.add_subplot(1, 3, i + 1)
     ax.imshow(
         Lm.T,
         origin='lower',
         vmin=Lm.max() - 10,
         extent=rg.extend(),
-        interpolation='bicubic',
     )
-    ax.set_title(f'Beamforming map\n(Grid increment: {rg.increment})')
+    ax.set_title(f'Beamforming map\n(grid increment: {rg.increment})')
     ax.set_xlabel('x')
     ax.set_ylabel('y')
 
@@ -174,32 +132,32 @@ plt.tight_layout()
 plt.show()
 
 # %%
-# Notice how the results become more precise as the grid increment decreases.
-
-# %%
+# Note how the results become less precise as the grid increment increases.
+#
 # =======
 # 3D Grid
 # =======
 #
 # Let's briefly introduce 3D grids.
-# For more in-depth examples of 3D beamforming, check out the 'example_3d_beamforming.py' example.
+# Also check out the 'example_3d_beamforming.py' example for more information on 3D beamforming.
 #
-# Basic RectGrid3D Usage
+# **Basic RectGrid3D usage**
 
 # To create a 3D grid, we use the RectGrid3D object.
 rg3d = ac.RectGrid3D(x_min=-0.2, x_max=0.2, y_min=-0.2, y_max=0.2, z_min=-0.3, z_max=-0.1, increment=0.01)
-print(rg3d.size)
+print('3D-grid size:', rg3d.size)
 
 # We can also apply different increments for each dimension if needed.
 rg3d.increment = (0.02, 0.02, 0.01)
-print(rg3d.size)
+print('3D-grid size with bigger incerement in the z dimension:', rg3d.size)
 
 # %%
-# 3D Grid Properties
+# **3D-grid properties**
 #
 # Accessing properties of a 3D grid is similar to 2D grids.
 # The main difference is that we now have 'nzsteps' and a 3D 'shape'.
 # Let's take a look:
+
 # Access 3D grid properties
 print(f'3D Grid size: {rg3d.size}')
 print(f'Number of x steps: {rg3d.nxsteps}')
@@ -209,58 +167,63 @@ print(f'3D Grid shape: {rg3d.shape}')
 print(f'3D Grid positions:\n{rg3d.pos[:, :5]}')
 
 # %%
-# 3D Visualization
+# **Beamforming with 3D grids**
 #
 # Let's visualize 3D beamforming results using our example data.
-# For this, we'll need a 3D beamforming method. We'll use BeamformerBase,
+# For this, we'll need a 3D beamforming method.We'll use BeamformerBase,
 # but in a real-world scenario, you might choose a more advanced technique.
 
 # First, ensure the steering vector is set up for 3D grids.
 st.grid = rg3d
+rg3d.increment = 0.01
 
-# Let's display the results.
-fig = plt.figure(figsize=(12, 10))
+# %%
+# Let's display the results in a plot.
 
-for j in range(3):
-    # Again we will look at the affect of different increments.
-    rg3d.increment = 0.01 * (i+1)
+fig = plt.figure(figsize=(12, 5))
 
-    # Calculate the beamforming output.
-    # Note: For true 3D beamforming, the result is a 3D field.
-    #       Here, we'll calculate it for the third-octave band around a frequency of 8000.
-    map_3d = bb.synthetic(8000, 3)  # shape will be (number of grid points)
+# Calculate the beamforming output.
+# Note: For true 3D beamforming, the result is a 3D field.
+#       This time, we'll calculate it for a frequency of exactly 8000.
+map_3d = bb.synthetic(8000, 1)
 
-    #  To visualize this 3D data, we need to reshape it to 3D.
-    map_3d = map_3d.reshape(rg3d.shape)
+# To visualize this 3D data, we need to reshape it to 3D.
+map_3d = map_3d.reshape(rg3d.shape)
 
-    # Let's define a handy list for labeling the plots...
-    xyz = ['x-y', 'x-z', 'y-z']
-    # and one to manage the extents.
-    extents = [
-        (rg3d.x_min, rg3d.x_max, rg3d.y_min, rg3d.y_max),
-        (rg3d.x_min, rg3d.x_max, rg3d.z_min, rg3d.z_max),
-        (rg3d.y_min, rg3d.y_max, rg3d.z_min, rg3d.z_max)
-    ]
-    # And the max value for scaling the plots
-    mx = ac.L_p(np.max(map_3d))
+# Now, we'll make a couple of handy definitions that will help us with plotting soon.
+# Here, we define a list for labeling the plots.
+xyz = ['x-y', 'x-z', 'y-z']
+# Here, another one to manage the extents.
+extents = [
+    (rg3d.x_min, rg3d.x_max, rg3d.y_min, rg3d.y_max),
+    (rg3d.x_min, rg3d.x_max, rg3d.z_min, rg3d.z_max),
+    (rg3d.y_min, rg3d.y_max, rg3d.z_min, rg3d.z_max),
+]
+# And here, the max value for scaling the plots.
+mx = ac.L_p(np.max(map_3d))
 
-    for i in range(3):
-        # To display this 3D result in 2D, we can integrate (sum) along one axis.
-        # This gives us a projection of the 3D sound field onto a 2D plane.
-        map_2d_sum = np.sum(map_3d, axis=2-i) # Sum along z-, y- or x-axis (in this order)
+for i in range(3):
+    # To display this 3D result in 2D, we can integrate (sum) along one axis.
+    # This gives us a projection of the 3D sound field onto a 2D plane.
+    map_2d_sum = np.sum(map_3d, axis=2 - i)  # Sum along z-, y- or x-axis (in this order)
 
-        ax = fig.add_subplot(3, 3, (3*j)+i+1)
-        ax.imshow(
-            ac.L_p(map_2d_sum.T),  # Transpose for correct orientation
-            vmax=mx,
-            vmin=mx - 20,
-            origin='lower',
-            interpolation='nearest',
-            extent=extents[i],
-        )
-        ax.set_xlabel(xyz[i][0])
-        ax.set_ylabel(xyz[i][2])
-        ax.set_title(f'Top view ({xyz[i]})')
+    ax = fig.add_subplot(1, 3, i + 1)
+    ax.imshow(
+        ac.L_p(map_2d_sum.T),  # Transpose for correct orientation
+        vmax=mx,
+        vmin=mx - 20,
+        origin='lower',
+        interpolation='nearest',
+        extent=extents[i],
+    )
+    ax.set_xlabel(xyz[i][0])
+    ax.set_ylabel(xyz[i][2])
+    ax.set_title(f'{xyz[i]} view\n(grid increment: {rg3d.increment})')
 
 plt.tight_layout()
 plt.show()
+
+# %%
+# =========
+# Line Grid
+# =========
