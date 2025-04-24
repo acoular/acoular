@@ -181,67 +181,33 @@ st.grid = rg3d
 rg3d.increment = 0.01
 
 # %%
-# Let's display the results in a plot.
+# Now we are ready to compute the beamforming output.
+# This time, we'll calculate it for a frequency of exactly 8000.
 
-fig = plt.figure()
-
-# Calculate the beamforming output.
-# Note: For true 3D beamforming, the result is a 3D field.
-#       This time, we'll calculate it for a frequency of exactly 8000.
 map_3d = bc.synthetic(8000, 1)
-print(map_3d.shape)
-print(map_3d)
-
-# To visualize this 3D data, we need to reshape it to 3D.
-map_3d = map_3d.reshape(rg3d.shape)
-print(map_3d.shape)
+# Note that the output of 3D beamforming is a 3D field:
+print('3D beamforming output shape:', map_3d.shape)
 
 # %%
-# Unterbrechung
+# Let's display the results in a 3D plot.
 
-# # Now, we'll make a couple of handy definitions that will help us with plotting soon.
-# # Here, we define a list for labeling the plots.
-# xyz = ['x-y', 'x-z', 'y-z']
-# # Here, another one to manage the extents.
-# extents = [
-#     (rg3d.x_min, rg3d.x_max, rg3d.y_min, rg3d.y_max),
-#     (rg3d.x_min, rg3d.x_max, rg3d.z_min, rg3d.z_max),
-#     (rg3d.y_min, rg3d.y_max, rg3d.z_min, rg3d.z_max),
-# ]
-# # And here, the max value for scaling the plots.
-# mx = ac.L_p(np.max(map_3d))
-
-# for i in range(3):
-#     # To display this 3D result in 2D, we can integrate (sum) along one axis.
-#     # This gives us a projection of the 3D sound field onto a 2D plane.
-#     map_2d_sum = np.sum(map_3d, axis=2 - i)  # Sum along z-, y- or x-axis (in this order)
-
-#     ax = fig.add_subplot(1, 3, i + 1)
-#     ax.imshow(
-#         ac.L_p(map_2d_sum.T),  # Transpose for correct orientation
-#         vmax=mx,
-#         vmin=mx - 20,
-#         origin='lower',
-#         interpolation='nearest',
-#         extent=extents[i],
-#     )
-#     ax.set_xlabel(xyz[i][0])
-#     ax.set_ylabel(xyz[i][2])
-#     ax.set_title(f'{xyz[i]} view\n(grid increment: {rg3d.increment})')
-
+fig = plt.figure()
 ax = fig.add_subplot(projection='3d')
 
-ax.plot(*mg.pos, 'o', label='mics')
+indices = np.nonzero(map_3d)
 
-ax.scatter(*map_3d)
+# Plot the 3D scatter plot with color mapping.
+scatter = ax.scatter(*indices, c=map_3d[*indices], marker='o', label='beamforming output')
+# Add a color bar to indicate the beamforming intensity
+cbar = fig.colorbar(scatter)
+cbar.set_label('$L_p$ / dB')
 
-# gpos = rg3d.pos.reshape((3, rg3d.nxsteps, rg3d.nysteps))
-# ax.plot_wireframe(gpos[0], gpos[1], gpos[2], color='k', lw=0.2, label='grid')
+# # Plot the 3D grid.
+# ax.scatter(*[rg3d.pos[i, :].reshape(rg3d.shape) for i in range(3)], c='k', label='3D grid')
 
 ax.set(xlabel='x', ylabel='y', zlabel='z')
+ax.set_title('3D beamforming output')
 fig.legend()
-
-plt.tight_layout()
 plt.show()
 
 # %%
