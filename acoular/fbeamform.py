@@ -1151,7 +1151,7 @@ class BeamformerDamas(BeamformerBase):
     #: (only for backward compatibility) :class:`BeamformerBase` object
     #: if set, provides :attr:`freq_data`, :attr:`steer`, :attr:`r_diag`
     #: if not set, these have to be set explicitly.
-    beamformer = Property()
+    beamformer = Property(transient=True)
 
     # private storage of beamformer instance
     _beamformer = Instance(BeamformerBase)
@@ -1368,7 +1368,7 @@ class BeamformerOrth(BeamformerBase):
     #: (only for backward compatibility) :class:`BeamformerEig` object
     #: if set, provides :attr:`freq_data`, :attr:`steer`, :attr:`r_diag`
     #: if not set, these have to be set explicitly.
-    beamformer = Property()
+    beamformer = Property(transient=True)
 
     # private storage of beamformer instance
     _beamformer = Instance(BeamformerEig)
@@ -1557,7 +1557,7 @@ class BeamformerClean(BeamformerBase):
     #: (only for backward compatibility) :class:`BeamformerBase` object
     #: if set, provides :attr:`freq_data`, :attr:`steer`, :attr:`r_diag`
     #: if not set, these have to be set explicitly.
-    beamformer = Property()
+    beamformer = Property(transient=True)
 
     # private storage of beamformer instance
     _beamformer = Instance(BeamformerBase)
