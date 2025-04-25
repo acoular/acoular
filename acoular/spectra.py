@@ -694,8 +694,8 @@ class PowerSpectraImport(PowerSpectra):
                 msg = 'The cross spectral matrix must have the following shape: \
                 (number of frequencies, num_channels, num_channels)!'
                 raise ValueError(msg)
-            self._csmsum = real(self._csm).sum() + (imag(self._csm) ** 2).sum()  # to trigger new digest creation
             self._csm = csm
+            self._csmsum = real(self._csm).sum() + (imag(self._csm) ** 2).sum()  # to trigger new digest creation
 
     @property_depends_on(['digest'])
     def _get_eva(self):

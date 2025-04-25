@@ -26,8 +26,7 @@ def get_file_basename(file, alternative_basename='void'):
     str
         Basename of the file.
     """
-    basename = Path(file).stem
-    return basename if basename else alternative_basename
+    return Path(file).stem if file else alternative_basename
 
 
 def find_basename(source, alternative_basename='void'):
