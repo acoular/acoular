@@ -194,20 +194,25 @@ print('3D beamforming output shape:', map_3d.shape)
 fig = plt.figure()
 ax = fig.add_subplot(projection='3d')
 
-indices = np.nonzero(map_3d)
+# Plot the microphone geometry.
+ax.scatter(*mg.pos, marker='o', label='Mics')
 
-# Plot the 3D scatter plot with color mapping.
-scatter = ax.scatter(*indices, c=map_3d[*indices], marker='o', label='beamforming output')
-# Add a color bar to indicate the beamforming intensity
+# Plot the 3D grid.
+ax.scatter(*rg3d.pos, s=.05, c='k', marker='.', label='3D grid')
+
+# Finde the indices of the nonzero entries in the output map.
+indices = np.nonzero(map_3d)
+# Find the corresponding grid points to the indices.
+pos = [p.reshape(map_3d.shape)[indices] for p in rg3d.pos]
+# Plot the points with color mapping according to their beamforming intensity.
+scatter = ax.scatter(*pos, c=map_3d[indices], marker='^', label='Output')
+# Add a color bar to indicate the beamforming intensity.s
 cbar = fig.colorbar(scatter)
 cbar.set_label('$L_p$ / dB')
 
-# # Plot the 3D grid.
-# ax.scatter(*[rg3d.pos[i, :].reshape(rg3d.shape) for i in range(3)], c='k', label='3D grid')
-
 ax.set(xlabel='x', ylabel='y', zlabel='z')
 ax.set_title('3D beamforming output')
-fig.legend()
+ax.legend()
 plt.show()
 
 # %%
