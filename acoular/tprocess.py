@@ -1561,7 +1561,7 @@ class Mixer(TimeOut):
         Yields
         ------
         :class:`numpy.ndarray`
-            An array containing the mixed audio samples in blocks of shape
+            An array containing the mixed time samples in blocks of shape
             (``num``, :attr:`~acoular.base.TimeOut.num_channels`), where
             :attr:`~acoular.base.TimeOut.num_channels` is inhereted from the
             :class:`~acoular.base.TimeOut` base class.
