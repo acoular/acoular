@@ -1548,7 +1548,7 @@ class Mixer(TimeOut):
 
     def result(self, num):
         """
-        Generate mixed audio data in blocks of ``num`` samples.
+        Generate mixed time signal data in blocks of ``num`` samples.
 
         This generator method retrieves audio data from all sources, aligns their block sizes, and
         sums them together to produce a combined output.
