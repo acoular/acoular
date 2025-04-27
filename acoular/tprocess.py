@@ -1490,6 +1490,9 @@ class Mixer(TimeOut):
     This class takes a primary audio source and a list of additional sources, synchronizes their
     sampling rates and channel counts, and outputs a mixed signal. The mixing process is performed
     block-wise using a generator.
+
+    If one of the additional sources holds a shorter signal than the other sources
+    the :meth:`result` method will stop yielding mixed audio at that point.
     """
 
     #: The primary time signal source. It must be an instance of a
@@ -1552,6 +1555,13 @@ class Mixer(TimeOut):
 
         This generator method retrieves audio data from all sources, aligns their block sizes, and
         sums them together to produce a combined output.
+
+        .. note::
+        
+            Yielding stops when one of the additionally provied signals ends; i.e. if one of the
+            additional sources holds a signal of shorter length than that of the
+            :attr:`primary source<source>` that (shorter) signal forms the lower bound of the length
+            of the mixed time signal yielded.
 
         Parameters
         ----------
