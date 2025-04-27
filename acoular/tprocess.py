@@ -302,7 +302,7 @@ class ChannelMixer(TimeOut):
 
     This class is particularly useful for cases where a combined signal representation is needed,
     such as beamforming, array signal processing, or when reducing the dimensionality of
-    multi-channel audio data.
+    multi-channel time signal data.
     """
 
     #: The input data source. It must be an instance of a
@@ -1380,8 +1380,8 @@ class SpatialInterpolatorRotation(SpatialInterpolator):  # pragma: no cover
         """
         Generate interpolated output samples in block-wise fashion.
 
-        This method acts as a generator, yielding time-domain audio samples that have been spatially
-        interpolated based on rotational movement.
+        This method acts as a generator, yielding time-domain time signal samples that have been
+        spatially interpolated based on rotational movement.
 
         Parameters
         ----------
@@ -1391,7 +1391,7 @@ class SpatialInterpolatorRotation(SpatialInterpolator):  # pragma: no cover
         Yields
         ------
         :class:`numpy.ndarray`
-            Interpolated audio samples in blocks of shape
+            Interpolated time signal samples in blocks of shape
             (``num``, :attr:`~SpatialInterpolator.num_channels`), where
             :attr:`~SpatialInterpolator.num_channels` is inherited from the
             :class:`SpatialInterpolator` base class.
@@ -1450,11 +1450,11 @@ class SpatialInterpolatorConstantRotation(SpatialInterpolator):  # pragma: no co
 
     def result(self, num=1):
         """
-        Generate interpolated audio data in blocks of size ``num``.
+        Generate interpolated time signal data in blocks of size ``num``.
 
-        This generator method continuously processes incoming audio data while applying rotational
-        interpolation. The phase delay is computed based on the rotational speed and applied to the
-        signal.
+        This generator method continuously processes incoming time signal data while applying
+        rotational interpolation. The phase delay is computed based on the rotational speed and
+        applied to the signal.
 
         Parameters
         ----------
@@ -1465,7 +1465,7 @@ class SpatialInterpolatorConstantRotation(SpatialInterpolator):  # pragma: no co
         Yields
         ------
         :class:`numpy.ndarray`
-            An array containing the interpolated audio samples in blocks of shape
+            An array containing the interpolated time signal samples in blocks of shape
             (``num``, :attr:`~SpatialInterpolator.num_channels`), where
             :attr:`~SpatialInterpolator.num_channels` is inherited from the
             :class:`SpatialInterpolator` base class.
@@ -1487,12 +1487,12 @@ class Mixer(TimeOut):
     """
     Mix signals from multiple sources into a single output.
 
-    This class takes a primary audio source and a list of additional sources, synchronizes their
-    sampling rates and channel counts, and outputs a mixed signal. The mixing process is performed
-    block-wise using a generator.
+    This class takes a :attr:`primary time signal source<source>` and a list of
+    :attr:`additional sources<sources>`, synchronizes their sampling rates and channel counts,
+    and outputs a mixed signal. The mixing process is performed block-wise using a generator.
 
-    If one of the additional sources holds a shorter signal than the other sources
-    the :meth:`result` method will stop yielding mixed audio at that point.
+    If one of the :attr:`additional sources<sources>` holds a shorter signal than the other
+    sources the :meth:`result` method will stop yielding mixed time signal at that point.
     """
 
     #: The primary time signal source. It must be an instance of a
@@ -1553,11 +1553,11 @@ class Mixer(TimeOut):
         """
         Generate mixed time signal data in blocks of ``num`` samples.
 
-        This generator method retrieves audio data from all sources, aligns their block sizes, and
-        sums them together to produce a combined output.
+        This generator method retrieves time signal data from all sources, aligns their block sizes,
+        and sums them together to produce a combined output.
 
         .. note::
-        
+
             Yielding stops when one of the additionally provied signals ends; i.e. if one of the
             additional sources holds a signal of shorter length than that of the
             :attr:`primary source<source>` that (shorter) signal forms the lower bound of the length
@@ -1609,7 +1609,7 @@ class TimePower(TimeOut):
     Attributes
     ----------
     source : SamplesGenerator
-        The input data source, which provides the audio or signal samples
+        The input data source, which provides the time signal or signal samples
         to be processed. It must be an instance of :class:`~acoular.base.SamplesGenerator`
         or any derived class that provides a `result()` method.
     """
@@ -1707,7 +1707,7 @@ class TimeReverse(TimeOut):
     This class takes the input signal from a source and computes the time-reversed version of the
     signal. It processes the signal in blocks, yielding the time-reversed signal block by block.
     This can be useful for various signal processing tasks, such as creating echoes or reversing
-    the playback of audio signals.
+    the playback of time signal signals.
     """
 
     #: The input data source. It must be an instance of a
@@ -2196,7 +2196,7 @@ class FilterBank(TimeOut):
     Implements a bank of parallel filters. This class should not be instantiated by itself.
 
     Inherits from :class:`acoular.base.TimeOut`, and defines the structure for working with filter
-    banks for processing multi-channel time series data, such as audio signals.
+    banks for processing multi-channel time series data, such as time signal signals.
 
     See Also
     --------
@@ -2281,7 +2281,7 @@ class OctaveFilterBank(FilterBank):
     Octave or third-octave filter bank.
 
     Inherits from :class:`FilterBank` and implements an octave or third-octave filter bank.
-    This class is used for filtering multi-channel time series data, such as audio signals,
+    This class is used for filtering multi-channel time series data, such as time signal signals,
     using bandpass filters with center frequencies at octave or third-octave intervals.
 
     See Also
