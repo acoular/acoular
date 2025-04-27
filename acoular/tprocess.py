@@ -1500,7 +1500,7 @@ class Mixer(TimeOut):
     #: instance of :class:`~acoular.base.SamplesGenerator`.
     sources = List(Instance(SamplesGenerator, ()))
 
-    #: The sampling frequency of the audio signal, delegated from :attr:`source`.
+    #: The sampling frequency of the primary time signal, delegated from :attr:`source`.
     sample_freq = Delegate('source')
 
     #: The number of primary source channels in the output, delegated from :attr:`source`.
