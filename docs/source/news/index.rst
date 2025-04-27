@@ -3,6 +3,8 @@ What's new
 
 Upcoming Release
 ------------------------
+    **Documentation**
+        * adds new docstrings to submodule :mod:`acoular.tprocess`
 
 25.03
 ------------------------
@@ -11,7 +13,7 @@ Upcoming Release
 
     **Documentation**
         * add known issue section to install guide
-        * adds new docstrings to submodules :mod:`acoular.spectra`, :mod:`acoular.environments`, :mod:`acoular.fprocess`, :mod:`acoular.process`, :mod:`acoular.signals`, :mod:`acoular.sources`, :mod:`acoular.trajectory`, :mod:`acoular.tprocess`
+        * adds new docstrings to submodules :mod:`acoular.spectra`, :mod:`acoular.environments`, :mod:`acoular.fprocess`, :mod:`acoular.process`, :mod:`acoular.signals`, :mod:`acoular.sources`, :mod:`acoular.trajectory`
 
     **Internal**
         * fix broken meta.yaml (adds conda build stage to CI)
