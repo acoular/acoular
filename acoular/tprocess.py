@@ -1492,7 +1492,7 @@ class Mixer(TimeOut):
     block-wise using a generator.
     """
 
-    #: The primary source of audio samples. It must be an instance of a
+    #: The primary time signal source. It must be an instance of a
     #: :class:`~acoular.base.SamplesGenerator`-derived class.
     source = Instance(SamplesGenerator)
 
