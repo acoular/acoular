@@ -1496,7 +1496,7 @@ class Mixer(TimeOut):
     #: :class:`~acoular.base.SamplesGenerator`-derived class.
     source = Instance(SamplesGenerator)
 
-    #: A list of additional audio sources to be mixed with the primary source, each must be an
+    #: A list of additional time signal sources to be mixed with the primary source, each must be an
     #: instance of :class:`~acoular.base.SamplesGenerator`.
     sources = List(Instance(SamplesGenerator, ()))
 
