@@ -1503,7 +1503,7 @@ class Mixer(TimeOut):
     #: The sampling frequency of the audio signal, delegated from :attr:`source`.
     sample_freq = Delegate('source')
 
-    #: The number of audio channels in the output, delegated from :attr:`source`.
+    #: The number of primary source channels in the output, delegated from :attr:`source`.
     num_channels = Delegate('source')
 
     #: The total number of samples in the output, delegated from :attr:`source`.
