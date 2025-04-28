@@ -12,7 +12,6 @@
 """
 
 from abc import abstractmethod
-from warnings import warn
 
 from numpy import (
     arange,
@@ -298,9 +297,10 @@ class PowerSpectra(BaseSpectra):
         return None
 
     def _set_freq_range(self, freq_range):  # by setting this the user sets _freqlc and _freqhc
-        self._index_set_last = False
-        self._freqlc = freq_range[0]
-        self._freqhc = freq_range[1]
+        if freq_range is not None:
+            self._index_set_last = False
+            self._freqlc = freq_range[0]
+            self._freqhc = freq_range[1]
 
     @property_depends_on(['source.sample_freq', 'block_size', '_ind_low', '_freqlc'])
     def _get_ind_low(self):
@@ -309,7 +309,7 @@ class PowerSpectra(BaseSpectra):
             if self._index_set_last:
                 return min(self._ind_low, fftfreq.shape[0] - 1)
             return searchsorted(fftfreq[:-1], self._freqlc)
-        return None
+        return 0
 
     @property_depends_on(['source.sample_freq', 'block_size', '_ind_high', '_freqhc'])
     def _get_ind_high(self):
@@ -631,7 +631,7 @@ class PowerSpectraImport(PowerSpectra):
 
     #: The frequencies included in the CSM in ascending order. Accepts list, array, or a single
     #: float value.
-    frequencies = Union(CArray, Float, desc='frequencies included in the cross-spectral matrix')
+    frequencies = Union(None, CArray, Float, desc='frequencies included in the cross-spectral matrix')
 
     #: Number of time data channels, inferred from the shape of the CSM.
     num_channels = Property(depends_on=['digest'])
@@ -670,7 +670,7 @@ class PowerSpectraImport(PowerSpectra):
     basename = Property(depends_on=['digest'], desc='basename for cache file')
 
     # Shadow trait for storing the CSM, for internal use only.
-    _csm = CArray()
+    _csm = Union(None, CArray(shape=(None, None, None)), desc='cross spectral matrix')
 
     # Checksum for the CSM to trigger digest calculation, for internal use only.
     _csmsum = Float()
@@ -689,12 +689,13 @@ class PowerSpectraImport(PowerSpectra):
         return self._csm
 
     def _set_csm(self, csm):
-        if (len(csm.shape) != 3) or (csm.shape[1] != csm.shape[2]):
-            msg = 'The cross spectral matrix must have the following shape: \
-            (number of frequencies, num_channels, num_channels)!'
-            raise ValueError(msg)
-        self._csmsum = real(self._csm).sum() + (imag(self._csm) ** 2).sum()  # to trigger new digest creation
-        self._csm = csm
+        if csm is not None:
+            if csm.shape[1] != csm.shape[2]:
+                msg = 'The cross spectral matrix must have the following shape: \
+                (number of frequencies, num_channels, num_channels)!'
+                raise ValueError(msg)
+            self._csm = csm
+            self._csmsum = real(self._csm).sum() + (imag(self._csm) ** 2).sum()  # to trigger new digest creation
 
     @property_depends_on(['digest'])
     def _get_eva(self):
@@ -720,6 +721,4 @@ class PowerSpectraImport(PowerSpectra):
             return array([self.frequencies])
         if isinstance(self.frequencies, ndarray):
             return self.frequencies
-        if self.frequencies is None:
-            warn('No frequencies defined for PowerSpectraImport object!', stacklevel=1)
         return self.frequencies

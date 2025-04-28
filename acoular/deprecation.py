@@ -66,7 +66,10 @@ def deprecated_alias(old2new, read_only=False, removal_version=''):
             else:
                 current_removal_version = ''
             # Define Trait Property type
-            trait_type = Property(*_alias_accessor_factory(old, new, current_read_only, current_removal_version))
+            trait_type = Property(
+                *_alias_accessor_factory(old, new, current_read_only, current_removal_version),
+                transient=True,
+            )
 
             # If the new trait exists, set or update alias
             if new in cls.class_traits():

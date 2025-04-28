@@ -3,31 +3,15 @@
 # ------------------------------------------------------------------------------
 """Tests if all Acoular classes can be instatiated and if traits can be set without errors."""
 
-import tempfile
 import warnings
-from inspect import isabstract
 
 import pytest
 from traits.api import Bool, Enum, Float, Int, Range, TraitEnum
 
-from tests.utils import get_all_classes
+from tests.utils import create_instance, get_all_classes
 
 all_classes = get_all_classes()
 all_hastraits_classes = get_all_classes(hastraits_only=True)
-
-
-def create_instance(acoular_cls):
-    with warnings.catch_warnings():
-        warnings.filterwarnings('ignore', category=DeprecationWarning)
-        if isabstract(acoular_cls):
-            pytest.skip(f'{acoular_cls.__name__} is an abstract base class.')
-        if acoular_cls.__name__ in ['H5CacheFileH5py', 'H5CacheFileTables', 'H5FileH5py', 'H5FileTables']:
-            return acoular_cls(tempfile.mkstemp()[1] + '.h5', 'w')
-        if acoular_cls.__name__ in ['LockedGenerator', 'LazyBfResult']:
-            return acoular_cls(None)
-        if acoular_cls.__name__ == 'Polygon':
-            return acoular_cls([0], [1])
-        return acoular_cls()
 
 
 @pytest.mark.parametrize('acoular_cls', all_classes)

@@ -591,7 +591,7 @@ class RotatingFlow(FlowField):
     # Positive values indicate clockwise rotation of the flow.
     # This is contrary to the usual definition of the direction of rotation.
     # Deprecated! Please use the differently defined :attr:`rps` attribute instead.
-    rpm = Property(desc='revolutions per minute of the flow; positive values for clockwise rotation')
+    rpm = Property(transient=True, desc='revolutions per minute of the flow; positive values for clockwise rotation')
 
     def _get_rpm(self):
         warn(
