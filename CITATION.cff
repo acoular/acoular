@@ -47,7 +47,10 @@ authors:
 identifiers:
   - description: "acoular: all versions"
     type: "doi"
-    value: "10.5281/zenodo.3690794"
+    value: "10.5281/zenodo.15019298"
+  - description: "acoular: v25.03"
+    type: "doi"
+    value: 10.5281/zenodo.15019298
   - description: "acoular: v25.01"
     type: "doi"
     value: 10.5281/zenodo.14780740
@@ -84,8 +87,8 @@ identifiers:
 repository-code: "https://github.com/acoular/acoular"
 url: "https://acoular.org"
 license: "BSD-3-Clause"
-version: "25.03"
-date-released: "2025-03-12"
+version: "25.04"
+date-released: "2025-04-29"
 contact:
   - email: "info@acoular.org"
     name: "Acoular Development Team"

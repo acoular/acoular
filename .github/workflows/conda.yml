@@ -20,7 +20,9 @@ jobs:
       - name: Set up hatch
         uses: ./.github/actions/setup-hatch
       - name: Build package
-        run: conda build --channel conda-forge --no-anaconda-upload --no-copy-test-source-files recipe.local --output-folder ./conda_package
+        run: |
+          export VERSION=$(hatch version)
+          conda build --channel conda-forge --no-anaconda-upload --no-copy-test-source-files recipe.local --output-folder ./conda_package
       - name: Upload conda package artifact
         uses: actions/upload-artifact@v4
         with:
