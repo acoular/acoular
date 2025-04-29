@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>BeamformerBase &#8212; Acoular 25.04 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=a6695b3b"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="BeamformerFunctional" href="acoular.fbeamform.BeamformerFunctional.html" />
+    <link rel="prev" title="SteeringVector" href="acoular.fbeamform.SteeringVector.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.04 documentation</span></a></h1>
+        <h2 class="heading"><span>BeamformerBase</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.fbeamform.SteeringVector.html">SteeringVector</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.fbeamform.html">fbeamform</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.fbeamform.BeamformerFunctional.html">BeamformerFunctional</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="beamformerbase">
+<h1>BeamformerBase<a class="headerlink" href="#beamformerbase" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerBase">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.fbeamform.</span></span><span class="sig-name descname"><span class="pre">BeamformerBase</span></span><a class="headerlink" href="#acoular.fbeamform.BeamformerBase" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">HasStrictTraits</span></code></p>
+<p>Beamforming using the basic delay-and-sum algorithm in the frequency domain.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerBase.freq_data">
+<span class="sig-name descname"><span class="pre">freq_data</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Instance(PowerSpectra,</span> <span class="pre">desc='freq</span> <span class="pre">data</span> <span class="pre">object')</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerBase.freq_data" title="Link to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="acoular.spectra.PowerSpectra.html#acoular.spectra.PowerSpectra" title="acoular.spectra.PowerSpectra"><code class="xref py py-class docutils literal notranslate"><span class="pre">PowerSpectra</span></code></a> object that provides the
+cross spectral matrix and eigenvalues</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerBase.r_diag">
+<span class="sig-name descname"><span class="pre">r_diag</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Bool(True,</span> <span class="pre">desc='removal</span> <span class="pre">of</span> <span class="pre">diagonal')</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerBase.r_diag" title="Link to this definition">¶</a></dt>
+<dd><p>Boolean flag, if ‘True’ (default), the main diagonal is removed before beamforming.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerBase.r_diag_norm">
+<span class="sig-name descname"><span class="pre">r_diag_norm</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerBase.r_diag_norm" title="Link to this definition">¶</a></dt>
+<dd><p>If r_diag==True: if r_diag_norm==0.0, the standard
+normalization = num_mics/(num_mics-1) is used.
+If r_diag_norm !=0.0, the user input is used instead.
+If r_diag==False, the normalization is 1.0 either way.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerBase.precision">
+<span class="sig-name descname"><span class="pre">precision</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum('float64',</span> <span class="pre">'float32',</span> <span class="pre">desc='precision</span> <span class="pre">(32/64</span> <span class="pre">Bit)</span> <span class="pre">of</span> <span class="pre">result,</span> <span class="pre">corresponding</span> <span class="pre">to</span> <span class="pre">numpy</span> <span class="pre">dtypes')</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerBase.precision" title="Link to this definition">¶</a></dt>
+<dd><p>Floating point precision of property result. Corresponding to numpy dtypes. Default = 64 Bit.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerBase.cached">
+<span class="sig-name descname"><span class="pre">cached</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Bool(True,</span> <span class="pre">desc='cached</span> <span class="pre">flag')</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerBase.cached" title="Link to this definition">¶</a></dt>
+<dd><p>Boolean flag, if ‘True’ (default), the result is cached in h5 files.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerBase.result">
+<span class="sig-name descname"><span class="pre">result</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(desc='beamforming</span> <span class="pre">result')</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerBase.result" title="Link to this definition">¶</a></dt>
+<dd><p>The beamforming result as squared sound pressure values
+at all grid point locations (readonly).
+Returns a (number of frequencies, number of gridpoints) array-like
+of floats. Values can only be accessed via the index operator [].</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerBase.sig_loss_norm">
+<span class="sig-name descname"><span class="pre">sig_loss_norm</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#acoular.fbeamform.BeamformerBase.sig_loss_norm" title="Link to this definition">¶</a></dt>
+<dd><p>If the diagonal of the CSM is removed one has to handle the loss
+of signal energy –&gt; Done via a normalization factor.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerBase.synthetic">
+<span class="sig-name descname"><span class="pre">synthetic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.fbeamform.BeamformerBase.synthetic" title="Link to this definition">¶</a></dt>
+<dd><p>Evaluates the beamforming result for an arbitrary frequency band.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>f: float</strong></dt><dd><p>Band center frequency.</p>
+</dd>
+<dt><strong>num</strong><span class="classifier">integer</span></dt><dd><p>Controls the width of the frequency bands considered; defaults to
+0 (single frequency line).</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>num</p></th>
+<th class="head"><p>frequency band width</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>single frequency line</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>octave band</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>third-octave band</p></td>
+</tr>
+<tr class="row-odd"><td><p>n</p></td>
+<td><p>1/n-octave band</p></td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>array of floats</dt><dd><p>The synthesized frequency band values of the beamforming result at
+each grid point .
+Note that the frequency resolution and therefore the bandwidth
+represented by a single frequency line depends on
+the <code class="xref py py-attr docutils literal notranslate"><span class="pre">sampling</span> <span class="pre">frequency</span></code> and
+used <code class="xref py py-attr docutils literal notranslate"><span class="pre">FFT</span> <span class="pre">block</span> <span class="pre">size</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerBase.integrate">
+<span class="sig-name descname"><span class="pre">integrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frange</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.fbeamform.BeamformerBase.integrate" title="Link to this definition">¶</a></dt>
+<dd><p>Integrates result map over a given sector.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>sector: array of floats or :class:`~acoular.grids.Sector`</strong></dt><dd><p>either an array, tuple or list with arguments for the ‘indices’
+method of a <a class="reference internal" href="acoular.grids.Grid.html#acoular.grids.Grid" title="acoular.grids.Grid"><code class="xref py py-class docutils literal notranslate"><span class="pre">Grid</span></code></a>-derived class
+(e.g. <a class="reference internal" href="acoular.grids.RectGrid.html#acoular.grids.RectGrid.indices" title="acoular.grids.RectGrid.indices"><code class="xref py py-meth docutils literal notranslate"><span class="pre">RectGrid.indices</span></code></a>
+or <a class="reference internal" href="acoular.grids.RectGrid3D.html#acoular.grids.RectGrid3D.indices" title="acoular.grids.RectGrid3D.indices"><code class="xref py py-meth docutils literal notranslate"><span class="pre">RectGrid3D.indices</span></code></a>).
+Possible sectors would be <em>array([xmin, ymin, xmax, ymax])</em>
+or <em>array([x, y, radius])</em> or an instance of a
+<a class="reference internal" href="acoular.grids.Sector.html#acoular.grids.Sector" title="acoular.grids.Sector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sector</span></code></a>-derived class</p>
+</dd>
+<dt><strong>frange: tuple or None</strong></dt><dd><p>a tuple of (fmin,fmax) frequencies to include in the result if <em>num*==0,
+or band center frequency/frequencies for which to return the results
+if *num</em>&gt;0; if None, then the frequency range is determined from
+the settings of the <code class="xref py py-attr docutils literal notranslate"><span class="pre">PowerSpectra.ind_low</span></code> and
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">PowerSpectra.ind_high</span></code> of <a class="reference internal" href="#acoular.fbeamform.BeamformerBase.freq_data" title="acoular.fbeamform.BeamformerBase.freq_data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">freq_data</span></code></a></p>
+</dd>
+<dt><strong>num</strong><span class="classifier">integer</span></dt><dd><p>Controls the width of the frequency bands considered; defaults to
+0 (single frequency line). Only considered if <em>frange</em> is not None.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>num</p></th>
+<th class="head"><p>frequency band width</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>single frequency line</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>octave band</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>third-octave band</p></td>
+</tr>
+<tr class="row-odd"><td><p>n</p></td>
+<td><p>1/n-octave band</p></td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>res or (f, res): array of floats or tuple(array of floats, array of floats)</dt><dd><p>If <em>frange*==None or *num</em>&gt;0, the spectrum (all calculated frequency bands)
+for the integrated sector is returned as <em>res</em>. The dimension of this array is the
+number of frequencies given by <a class="reference internal" href="#acoular.fbeamform.BeamformerBase.freq_data" title="acoular.fbeamform.BeamformerBase.freq_data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">freq_data</span></code></a> and entries not computed are zero.
+If <em>frange</em>!=None and <em>num*==0, then (f, res) is returned where *f</em> are the (band)
+frequencies and the dimension of both arrays is determined from <em>frange</em></p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.fbeamform.SteeringVector.html">SteeringVector</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.fbeamform.html">fbeamform</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.fbeamform.BeamformerFunctional.html">BeamformerFunctional</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Apr 29, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

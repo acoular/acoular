@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Setting up a development environment &#8212; Acoular 25.04 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../_static/documentation_options.js?v=a6695b3b"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Code Quality Standards" href="quality.html" />
+    <link rel="prev" title="Contributing" href="index.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../index.html">
+          <span>Acoular 25.04 documentation</span></a></h1>
+        <h2 class="heading"><span>Setting up a development environment</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="index.html">Contributing</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contributing</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="quality.html">Code Quality Standards</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="setting-up-a-development-environment">
+<h1>Setting up a development environment<a class="headerlink" href="#setting-up-a-development-environment" title="Link to this heading">¶</a></h1>
+<section id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading">¶</a></h2>
+<p>Before you can start contributing to Acoular</p>
+<ul class="simple">
+<li><p>Create a fork of the <a class="reference external" href="https://github.com/acoular/acoular">Acoular repository</a> on GitHub</p></li>
+<li><p>Clone your fork to your local machine via</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>&lt;https://your_fork/acoular&gt;
+<span class="nb">cd</span><span class="w"> </span>acoular
+</pre></div>
+</div>
+<p>If you don’t already have an existing virtual environment, you have the choice to create one with a package distribution of your choice.
+The Acoular development team had good experience with the following distributions:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference external" href="https://docs.conda.io/en/latest/">conda</a></p></li>
+<li><p><a class="reference external" href="https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html">mamba</a></p></li>
+<li><p><a class="reference external" href="https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html">micromamba</a></p></li>
+<li><p><a class="reference external" href="https://virtualenv.pypa.io/en/latest/">virtualenv</a></p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="create-a-fresh-environment">
+<h2>Create a fresh environment<a class="headerlink" href="#create-a-fresh-environment" title="Link to this heading">¶</a></h2>
+<p>We recommend using the latest compatible version of Python, which is currently 3.13.
+If you are using the anaconda distribution, you can create a new environment, for example named <cite>dev</cite>, with</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>dev<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.13
+conda<span class="w"> </span>activate<span class="w"> </span>dev
+</pre></div>
+</div>
+<p>The same command can be used with mamba or micromamba by simply replacing <cite>conda</cite> with <cite>mamba</cite> or <cite>micromamba</cite>.</p>
+<p>Equally, you can create a new environment with virtualenv:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>virtualenv<span class="w"> </span>-p<span class="w"> </span>python3.13<span class="w"> </span>dev
+<span class="nb">source</span><span class="w"> </span>dev/bin/activate
+</pre></div>
+</div>
+</section>
+<section id="install-dependencies">
+<h2>Install dependencies<a class="headerlink" href="#install-dependencies" title="Link to this heading">¶</a></h2>
+<p>Then, make an editable installation of Acoular with:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[dev]&quot;</span>
+</pre></div>
+</div>
+<p>The editable installation allows you to make changes to the source code and see the effects immediately without having to reinstall the package.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&quot;.[dev]&quot;</span></code> argument is responsible for installing the right dependencies as defined in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>:</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="n">dev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;acoular[docs,full,tests]&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;hatch&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;ruff==0.8.1&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>If not included, the dependencies have to be installed manually.</p>
+</section>
+<section id="system-dependencies">
+<h2>System dependencies<a class="headerlink" href="#system-dependencies" title="Link to this heading">¶</a></h2>
+<p>Some of the Acoular dependencies require system packages to be installed. On Ubuntu, we frequently encounter that the portaudio library is missing, which is required by the sounddevice package. In addition, the graphviz package is required for the documentation.
+You can install both with:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>graphviz<span class="w"> </span>libportaudio2
+</pre></div>
+</div>
+</section>
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="index.html">Contributing</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contributing</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="quality.html">Code Quality Standards</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Apr 29, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

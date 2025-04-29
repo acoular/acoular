@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>GeneralFlowEnvironment &#8212; Acoular 25.04 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=a6695b3b"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="FlowField" href="acoular.environments.FlowField.html" />
+    <link rel="prev" title="UniformFlowEnvironment" href="acoular.environments.UniformFlowEnvironment.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.04 documentation</span></a></h1>
+        <h2 class="heading"><span>GeneralFlowEnvironment</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.environments.UniformFlowEnvironment.html">UniformFlowEnvironment</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.environments.html">environments</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.environments.FlowField.html">FlowField</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="generalflowenvironment">
+<h1>GeneralFlowEnvironment<a class="headerlink" href="#generalflowenvironment" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.environments.GeneralFlowEnvironment">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.environments.</span></span><span class="sig-name descname"><span class="pre">GeneralFlowEnvironment</span></span><a class="headerlink" href="#acoular.environments.GeneralFlowEnvironment" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.environments.Environment.html#acoular.environments.Environment" title="acoular.environments.Environment"><code class="xref py py-class docutils literal notranslate"><span class="pre">Environment</span></code></a></p>
+<p>An acoustic environment with a generic flow field.</p>
+<p>This class provides the facilities to calculate the travel time (distances) between grid point
+locations and microphone locations in a generic flow field with non-uniform velocities that
+depend on the location. The algorithm for the calculation uses a ray-tracing approach that bases
+on rays cast from every microphone position in multiple directions and traced backwards in time.
+The result is interpolated within a tetrahedal grid spanned between these rays.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.LinearNDInterpolator.html#scipy.interpolate.LinearNDInterpolator" title="(in SciPy v1.15.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipy.interpolate.LinearNDInterpolator</span></code></a></dt><dd><p>Piecewise linear interpolator in N &gt; 1 dimensions.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">acoular</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ac</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Instantiate the flow field</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">flow_field</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">OpenJet</span><span class="p">(</span><span class="n">v0</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">D</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">l</span><span class="o">=</span><span class="mf">3.121</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create an instance of GeneralFlowEnvironment</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">environment</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">GeneralFlowEnvironment</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">ff</span><span class="o">=</span><span class="n">flow_field</span><span class="p">,</span>  <span class="c1"># Use the custom flow field</span>
+<span class="gp">... </span>    <span class="n">N</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>  <span class="c1"># Number of rays</span>
+<span class="gp">... </span>    <span class="n">Om</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span>  <span class="c1"># Maximum solid angle</span>
+<span class="gp">... </span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.GeneralFlowEnvironment.ff">
+<span class="sig-name descname"><span class="pre">ff</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Instance(FlowField,</span> <span class="pre">desc='flow</span> <span class="pre">field')</span></em><a class="headerlink" href="#acoular.environments.GeneralFlowEnvironment.ff" title="Link to this definition">¶</a></dt>
+<dd><p>The flow field object describing the velocity field,
+which must be an instance of <a class="reference internal" href="acoular.environments.FlowField.html#acoular.environments.FlowField" title="acoular.environments.FlowField"><code class="xref py py-class docutils literal notranslate"><span class="pre">FlowField</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.GeneralFlowEnvironment.N">
+<span class="sig-name descname"><span class="pre">N</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Int(200,</span> <span class="pre">desc='number</span> <span class="pre">of</span> <span class="pre">rays</span> <span class="pre">per</span> <span class="pre">Om')</span></em><a class="headerlink" href="#acoular.environments.GeneralFlowEnvironment.N" title="Link to this definition">¶</a></dt>
+<dd><p>The number of rays used per solid angle <span class="math notranslate nohighlight">\(\Omega\)</span>. Defaults to <code class="docutils literal notranslate"><span class="pre">200</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.GeneralFlowEnvironment.Om">
+<span class="sig-name descname"><span class="pre">Om</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(pi,</span> <span class="pre">desc='maximum</span> <span class="pre">solid</span> <span class="pre">angle')</span></em><a class="headerlink" href="#acoular.environments.GeneralFlowEnvironment.Om" title="Link to this definition">¶</a></dt>
+<dd><p>The maximum solid angle (in steradians) used in the ray-tracing algorithm.
+Default is <a class="reference external" href="https://numpy.org/doc/stable/reference/constants.html#numpy.pi" title="(in NumPy v2.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.pi</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.GeneralFlowEnvironment.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.environments.GeneralFlowEnvironment.digest" title="Link to this definition">¶</a></dt>
+<dd><p>A unique identifier based on the environment properties. (read-only)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.GeneralFlowEnvironment.idict">
+<span class="sig-name descname"><span class="pre">idict</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Dict</span></em><a class="headerlink" href="#acoular.environments.GeneralFlowEnvironment.idict" title="Link to this definition">¶</a></dt>
+<dd><p>A dictionary for storing precomputed interpolators to optimize repeated calculations.
+(internal use)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.environments.GeneralFlowEnvironment.get_interpolator">
+<span class="sig-name descname"><span class="pre">get_interpolator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">roi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.environments.GeneralFlowEnvironment.get_interpolator" title="Link to this definition">¶</a></dt>
+<dd><p>Generate an interpolator for ray travel times based on a region of interest.</p>
+<p>This method computes the ray trajectories starting from a given microphone position (<code class="docutils literal notranslate"><span class="pre">x0</span></code>)
+through a region of interest (<code class="docutils literal notranslate"><span class="pre">roi</span></code>). The rays’ paths are integrated numerically using a
+system of differential equations, and the resulting points are used to construct a
+convex hull. A linear interpolator is then created to estimate travel times for arbitrary
+points within the region.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>roi</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floats</span></code></a></span></dt><dd><p>Array representing the region of interest (ROI), where each column corresponds
+to a point in the 3D space <span class="math notranslate nohighlight">\((x, y, z)\)</span>, shape <cite>(3, M)</cite>.</p>
+</dd>
+<dt><strong>x0</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floats</span></code></a></span></dt><dd><p>Array representing the location of the microphone in 3D Cartesian coordinates,
+shape <cite>(3,)</cite>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.LinearNDInterpolator.html#scipy.interpolate.LinearNDInterpolator" title="(in SciPy v1.15.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipy.interpolate.LinearNDInterpolator</span></code></a> object</dt><dd><p>A linear interpolator object for estimating travel times for 3D positions
+within the computed ray trajectories.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.environments.UniformFlowEnvironment.html">UniformFlowEnvironment</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.environments.html">environments</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.environments.FlowField.html">FlowField</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Apr 29, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

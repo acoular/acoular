@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>acoular.tools.helpers.bardata &#8212; Acoular 25.04 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../../_static/documentation_options.js?v=a6695b3b"></script>
+    <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="acoular.tools.helpers.c_air" href="acoular.tools.helpers.c_air.html" />
+    <link rel="prev" title="acoular.tools.helpers.barspectrum" href="acoular.tools.helpers.barspectrum.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../../index.html">
+          <span>Acoular 25.04 documentation</span></a></h1>
+        <h2 class="heading"><span>acoular.tools.helpers.bardata</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tools.helpers.barspectrum.html">acoular.tools.helpers.barspectrum</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tools.helpers.html">helpers</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tools.helpers.c_air.html">acoular.tools.helpers.c_air</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="acoular-tools-helpers-bardata">
+<h1>acoular.tools.helpers.bardata<a class="headerlink" href="#acoular-tools-helpers-bardata" title="Link to this heading">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="acoular.tools.helpers.bardata">
+<span class="sig-prename descclassname"><span class="pre">acoular.tools.helpers.</span></span><span class="sig-name descname"><span class="pre">bardata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xoffset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">masked</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-360</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.tools.helpers.bardata" title="Link to this definition">¶</a></dt>
+<dd><p>Returns data to be plotted
+as bar graph with the matlpotlib plot command.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>data</strong><span class="classifier">array of floats</span></dt><dd><p>The spectral data</p>
+</dd>
+<dt><strong>fc</strong><span class="classifier">array of floats</span></dt><dd><p>Band center frequencies</p>
+</dd>
+<dt><strong>bar</strong><span class="classifier">bool</span></dt><dd><p>If True, returns bar-like curve. If False, normal plot (direct
+line between data points) is returned.</p>
+</dd>
+<dt><strong>xoffset</strong><span class="classifier">float</span></dt><dd><p>If bar is True, offset of the perpendicular line (helpful if
+plotting several curves above each other).</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>num</p></th>
+<th class="head"><p>frequency band width</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>octave band</p></td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p>third-octave band</p></td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>(flulist, plist)</dt><dd></dd>
+<dt><strong>flulist</strong><span class="classifier">array of floats</span></dt><dd><p>Lower/upper band frequencies in plottable format.</p>
+</dd>
+<dt><strong>plist</strong><span class="classifier">array of floats</span></dt><dd><p>Corresponding values in plottable format.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tools.helpers.barspectrum.html">acoular.tools.helpers.barspectrum</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tools.helpers.html">helpers</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tools.helpers.c_air.html">acoular.tools.helpers.c_air</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Apr 29, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

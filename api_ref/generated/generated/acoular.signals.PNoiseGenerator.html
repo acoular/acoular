@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>PNoiseGenerator &#8212; Acoular 25.04 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=a6695b3b"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="FiltWNoiseGenerator" href="acoular.signals.FiltWNoiseGenerator.html" />
+    <link rel="prev" title="WNoiseGenerator" href="acoular.signals.WNoiseGenerator.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.04 documentation</span></a></h1>
+        <h2 class="heading"><span>PNoiseGenerator</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.signals.WNoiseGenerator.html">WNoiseGenerator</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.signals.html">signals</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.signals.FiltWNoiseGenerator.html">FiltWNoiseGenerator</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="pnoisegenerator">
+<h1>PNoiseGenerator<a class="headerlink" href="#pnoisegenerator" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.signals.PNoiseGenerator">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.signals.</span></span><span class="sig-name descname"><span class="pre">PNoiseGenerator</span></span><a class="headerlink" href="#acoular.signals.PNoiseGenerator" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.signals.NoiseGenerator.html#acoular.signals.NoiseGenerator" title="acoular.signals.NoiseGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoiseGenerator</span></code></a></p>
+<p>Generate pink noise signal.</p>
+<p>The <a class="reference internal" href="#acoular.signals.PNoiseGenerator" title="acoular.signals.PNoiseGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">PNoiseGenerator</span></code></a> class generates pink noise signals,
+which exhibit a <span class="math notranslate nohighlight">\(1/f\)</span> power spectral density. Pink noise is characterized by
+equal energy per octave, making it useful in various applications such as audio testing,
+sound synthesis, and environmental noise simulations.</p>
+<p>The pink noise simulation is based on the Voss-McCartney algorithm, which iteratively adds
+noise with increasing wavelength to achieve the desired <span class="math notranslate nohighlight">\(1/f\)</span> characteristic.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="acoular.signals.WNoiseGenerator.html#acoular.signals.WNoiseGenerator" title="acoular.signals.WNoiseGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">acoular.signals.WNoiseGenerator</span></code></a></dt><dd><p>For white noise generation.</p>
+</dd>
+<dt><a class="reference internal" href="acoular.sources.UncorrelatedNoiseSource.html#acoular.sources.UncorrelatedNoiseSource" title="acoular.sources.UncorrelatedNoiseSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">acoular.sources.UncorrelatedNoiseSource</span></code></a></dt><dd><p>For per-channel noise generation.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">References</p>
+<ul class="simple">
+<li><p>S.J. Orfanidis: Signal Processing (2010), pp. 729-733 <span id="id1">[<a class="reference internal" href="../../../literature/index.html#id25">18</a>]</span></p></li>
+<li><p>Online discussion: <a class="reference external" href="http://www.firstpr.com.au/dsp/pink-noise/">http://www.firstpr.com.au/dsp/pink-noise/</a></p></li>
+</ul>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.signals.PNoiseGenerator.depth">
+<span class="sig-name descname"><span class="pre">depth</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Int(16,</span> <span class="pre">desc='octave</span> <span class="pre">depth')</span></em><a class="headerlink" href="#acoular.signals.PNoiseGenerator.depth" title="Link to this definition">¶</a></dt>
+<dd><p>“Octave depth” of the pink noise generation. Higher values result in a better approximation
+of the <span class="math notranslate nohighlight">\(1/f\)</span> spectrum at low frequencies but increase computation time. The  maximum
+allowable value depends on the <a class="reference internal" href="acoular.signals.SignalGenerator.html#acoular.signals.SignalGenerator.num_samples" title="acoular.signals.SignalGenerator.num_samples"><code class="xref py py-attr docutils literal notranslate"><span class="pre">number</span> <span class="pre">of</span> <span class="pre">samples</span></code></a>.
+Default is <code class="docutils literal notranslate"><span class="pre">16</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.signals.PNoiseGenerator.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['rms',</span> <span class="pre">'seed',</span> <span class="pre">'sample_freq',</span> <span class="pre">'num_samples',</span> <span class="pre">'depth'])</span></em><a class="headerlink" href="#acoular.signals.PNoiseGenerator.digest" title="Link to this definition">¶</a></dt>
+<dd><p>A unique checksum identifier based on the object properties. (read-only)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.signals.PNoiseGenerator.signal">
+<span class="sig-name descname"><span class="pre">signal</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#acoular.signals.PNoiseGenerator.signal" title="Link to this definition">¶</a></dt>
+<dd><p>Generate and deliver the pink noise signal.</p>
+<p>The signal is computed using the Voss-McCartney algorithm, which generates noise
+with a <span class="math notranslate nohighlight">\(1/f\)</span> power spectral density. The method ensures that the output has the
+desired <code class="xref py py-attr docutils literal notranslate"><span class="pre">RMS</span></code> amplitude and spectrum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p>A 1D array of floats containing the generated pink noise signal. The length
+of the array is equal to <a class="reference internal" href="acoular.signals.SignalGenerator.html#acoular.signals.SignalGenerator.num_samples" title="acoular.signals.SignalGenerator.num_samples"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_samples</span></code></a>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The “depth” parameter controls the number of octaves included in the pink noise
+simulation. If the specified depth exceeds the maximum possible value based on
+the number of samples, it is automatically adjusted, and a warning is printed.</p></li>
+<li><p>The output signal is scaled to have the same overall level as white noise by dividing
+the result by <code class="docutils literal notranslate"><span class="pre">sqrt(depth</span> <span class="pre">+</span> <span class="pre">1.5)</span></code>.</p></li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.signals.WNoiseGenerator.html">WNoiseGenerator</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.signals.html">signals</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.signals.FiltWNoiseGenerator.html">FiltWNoiseGenerator</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Apr 29, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

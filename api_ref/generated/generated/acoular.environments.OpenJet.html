@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>OpenJet &#8212; Acoular 25.04 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=a6695b3b"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="RotatingFlow" href="acoular.environments.RotatingFlow.html" />
+    <link rel="prev" title="FlowField" href="acoular.environments.FlowField.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.04 documentation</span></a></h1>
+        <h2 class="heading"><span>OpenJet</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.environments.FlowField.html">FlowField</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.environments.html">environments</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.environments.RotatingFlow.html">RotatingFlow</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="openjet">
+<h1>OpenJet<a class="headerlink" href="#openjet" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.environments.OpenJet">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.environments.</span></span><span class="sig-name descname"><span class="pre">OpenJet</span></span><a class="headerlink" href="#acoular.environments.OpenJet" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.environments.FlowField.html#acoular.environments.FlowField" title="acoular.environments.FlowField"><code class="xref py py-class docutils literal notranslate"><span class="pre">FlowField</span></code></a></p>
+<p>Analytical approximation of the flow field of an open jet.</p>
+<p>This class provides a simplified analytical model of the velocity field for an open jet, based
+on the description in <span id="id1">[<a class="reference internal" href="../../../literature/index.html#id9" title="M. L. Albertson, Y. B. Dai, R. A. Jensen, and Hunter Rouse. Diffusion of submerged jets. Transactions of the American Society of Civil Engineers, 115(1):639-664, 1950. doi:10.1061/TACEAT.0006302.">2</a>]</span>. It calculates the velocity vector and its
+Jacobian matrix at a given location in the fluid domain, assuming flow in the x-direction only.</p>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>This is not a fully generic implementation, and is limited to flow in the x-direction only.
+No other directions are possible at the moment and flow components in
+the other direction are zero.</p></li>
+<li><p>The flow field transitions from the jet core to the shear layer, with velocity decay
+modeled using a Gaussian profile in the shear layer.</p></li>
+</ul>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">acoular</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ac</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">jet</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">OpenJet</span><span class="p">(</span><span class="n">v0</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">D</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">l</span><span class="o">=</span><span class="mf">6.2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">velocity</span><span class="p">,</span> <span class="n">jacobian</span> <span class="o">=</span> <span class="n">jet</span><span class="o">.</span><span class="n">v</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">velocity</span>
+<span class="go">array([9.62413564, 0.        , 0.        ])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">jacobian</span>
+<span class="go">array([[ -1.92660591, -23.25619062, -23.25619062],</span>
+<span class="go">       [  0.        ,   0.        ,   0.        ],</span>
+<span class="go">       [  0.        ,   0.        ,   0.        ]])</span>
+</pre></div>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.OpenJet.v0">
+<span class="sig-name descname"><span class="pre">v0</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(0.0,</span> <span class="pre">desc='exit</span> <span class="pre">velocity')</span></em><a class="headerlink" href="#acoular.environments.OpenJet.v0" title="Link to this definition">¶</a></dt>
+<dd><p>Exit velocity at the jet origin (nozzle). Default is <code class="docutils literal notranslate"><span class="pre">0.0</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.OpenJet.origin">
+<span class="sig-name descname"><span class="pre">origin</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CArray(dtype=float64,</span> <span class="pre">shape=(3,),</span> <span class="pre">value=array((0.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0)),</span> <span class="pre">desc='center</span> <span class="pre">of</span> <span class="pre">nozzle')</span></em><a class="headerlink" href="#acoular.environments.OpenJet.origin" title="Link to this definition">¶</a></dt>
+<dd><p>The location of the nozzle center. Default is <code class="docutils literal notranslate"><span class="pre">(0.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0)</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.OpenJet.D">
+<span class="sig-name descname"><span class="pre">D</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(0.2,</span> <span class="pre">desc='nozzle</span> <span class="pre">diameter')</span></em><a class="headerlink" href="#acoular.environments.OpenJet.D" title="Link to this definition">¶</a></dt>
+<dd><p>Diameter of the nozzle. Default is <code class="docutils literal notranslate"><span class="pre">0.2</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.OpenJet.l">
+<span class="sig-name descname"><span class="pre">l</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(6.2,</span> <span class="pre">desc='flow</span> <span class="pre">establishment</span> <span class="pre">length')</span>&#160; <span class="pre">#</span> <span class="pre">noqa:</span> <span class="pre">E741</span></em><a class="headerlink" href="#acoular.environments.OpenJet.l" title="Link to this definition">¶</a></dt>
+<dd><p>Non-dimensional length of the zone of flow establishment (jet core length).
+Default is <code class="docutils literal notranslate"><span class="pre">6.2</span></code>. <span id="id2">[<a class="reference internal" href="../../../literature/index.html#id9" title="M. L. Albertson, Y. B. Dai, R. A. Jensen, and Hunter Rouse. Diffusion of submerged jets. Transactions of the American Society of Civil Engineers, 115(1):639-664, 1950. doi:10.1061/TACEAT.0006302.">2</a>]</span></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.OpenJet.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.environments.OpenJet.digest" title="Link to this definition">¶</a></dt>
+<dd><p>A unique identifier based on the field properties. (read-only)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.environments.OpenJet.v">
+<span class="sig-name descname"><span class="pre">v</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.environments.OpenJet.v" title="Link to this definition">¶</a></dt>
+<dd><p>Compute the velocity field and its Jacobian matrix at a given location.</p>
+<p>This method calculates the velocity vector and its Jacobian matrix at the
+specified location <code class="docutils literal notranslate"><span class="pre">xx</span></code> in the fluid domain. The velocity is modeled only for the
+x-component of the flow, while the y- and z-components are assumed to be zero.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>xx</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floats</span></code></a></span></dt><dd><p>The 3D Cartesian coordinates of the location in the fluid where the velocity
+field is to be computed, shape <cite>(3,)</cite>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>velocity_vector</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floats</span></code></a></span></dt><dd><p>The velocity vector at the specified location <code class="docutils literal notranslate"><span class="pre">xx</span></code>, shape <cite>(3,)</cite>.</p>
+</dd>
+<dt><strong>jacobian_matrix</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floats</span></code></a></span></dt><dd><p>The Jacobian matrix of the velocity vector field at the specified location <code class="docutils literal notranslate"><span class="pre">xx</span></code>,
+shape <cite>(3, 3)</cite>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The velocity field is determined based on whether the location is within the jet core
+region or in the shear layer. Within the jet core, the velocity is constant and equal
+to <a class="reference internal" href="#acoular.environments.OpenJet.v0" title="acoular.environments.OpenJet.v0"><code class="xref py py-attr docutils literal notranslate"><span class="pre">v0</span></code></a>. In the shear layer, the velocity decays following a Gaussian distribution.</p></li>
+<li><p>The Jacobian matrix provides the partial derivatives of the velocity components
+with respect to the spatial coordinates.</p></li>
+<li><p>If the radial distance <cite>r</cite> from the jet axis is zero, the derivatives with respect
+to <cite>y</cite> and <cite>z</cite> are set to zero to avoid division by zero.</p></li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.environments.FlowField.html">FlowField</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.environments.html">environments</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.environments.RotatingFlow.html">RotatingFlow</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Apr 29, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>
