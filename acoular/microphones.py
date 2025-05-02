@@ -47,8 +47,9 @@ class MicGeom(HasStrictTraits):
       attribute is updated.
     - Small numerical values in the computed :attr:`center` are set to zero for numerical stability.
     - By default, all positions are assumed to be in meters. This is consistent with the standard
-      :class:`Environment` class which uses meters as the default unit for spatial coordinates.
-      The actual unit system can be changed by adjusting the speed of sound in the environment.
+      :class:`acoular.environments.Environment` class which uses meters as the default unit for
+      spatial coordinates. The actual unit system can be changed by adjusting the speed of sound in
+      the environment.
 
     Examples
     --------

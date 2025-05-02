@@ -313,8 +313,9 @@ class Grid(ABCHasStrictTraits):
     Notes
     -----
     - By default, all positions are assumed to be in meters. This is consistent with the standard
-      :class:`Environment` class which uses meters as the default unit for spatial coordinates.
-      The actual unit system can be changed by adjusting the speed of sound in the environment.
+      :class:`acoular.environments.Environment` class which uses meters as the default unit for
+      spatial coordinates. The actual unit system can be changed by adjusting the speed of sound in
+      the environment.
     """
 
     #: The total number of grid points. This property is automatically calculated based on other
