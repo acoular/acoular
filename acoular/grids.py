@@ -309,6 +309,12 @@ class Grid(ABCHasStrictTraits):
     This class defines a common interface for all grid geometries and provides tools to query grid
     properties and related data. It is intended to serve as a base class for specialized grid
     implementations and should not be instantiated directly as it lacks concrete functionality.
+
+    Notes
+    -----
+    - By default, all positions are assumed to be in meters. This is consistent with the standard
+      :class:`Environment` class which uses meters as the default unit for spatial coordinates.
+      The actual unit system can be changed by adjusting the speed of sound in the environment.
     """
 
     #: The total number of grid points. This property is automatically calculated based on other
