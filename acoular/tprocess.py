@@ -126,11 +126,9 @@ class MaskedTimeOut(TimeOut):
     subsequent processing steps, ensuring that only the selected portion of the data is passed
     along.
 
-    This class is particularly useful when working with large datasets where only a subset of the
-    data is required for analysis. It ensures efficient memory handling and processing by only
-    yielding the necessary samples and channels. The processed data is accessed through the
-    generator method :meth:`result`, which returns data in block-wise fashion for efficient
-    streaming.
+    This class is useful for selecting specific portions of data for analysis. The processed data is 
+    accessed through the generator method :meth:`result`, which returns data in block-wise fashion 
+    for efficient streaming.
     """
 
     #: The input data source. It must be an instance of a
@@ -217,11 +215,7 @@ class MaskedTimeOut(TimeOut):
 
         This method fetches data from the :attr:`source` object, applies the defined :attr:`start`
         and :attr:`stop` constraints on time samples, and filters out :attr:`invalid_channels`. The
-        data is then yielded in block-wise fashion to facilitate efficient memory usage and
-        streaming.
-
-        This function is particularly useful when working with large datasets, as it allows
-        selective data processing without requiring the entire dataset to be loaded into memory.
+        data is then yielded in block-wise fashion to facilitate efficient streaming.
 
         Parameters
         ----------
@@ -1488,8 +1482,9 @@ class Mixer(TimeOut):
     Mix signals from multiple sources into a single output.
 
     This class takes a :attr:`primary time signal source<source>` and a list of
-    :attr:`additional sources<sources>`, synchronizes their sampling rates and channel counts,
-    and outputs a mixed signal. The mixing process is performed block-wise using a generator.
+    :attr:`additional sources<sources>` with the same sampling rates and channel counts across all
+    :attr:`primary time signal source<source>`, and outputs a mixed signal.
+    The mixing process is performed block-wise using a generator.
 
     If one of the :attr:`additional sources<sources>` holds a shorter signal than the other
     sources the :meth:`result` method will stop yielding mixed time signal at that point.
@@ -1553,8 +1548,9 @@ class Mixer(TimeOut):
         """
         Generate mixed time signal data in blocks of ``num`` samples.
 
-        This generator method retrieves time signal data from all sources, aligns their block sizes,
-        and sums them together to produce a combined output.
+        This generator method retrieves time signal data from all sources and sums them together 
+        to produce a combined output. The data from each source is processed in blocks of the 
+        same size, ensuring synchronized mixing.
 
         .. note::
 
@@ -2080,7 +2076,7 @@ class TimeExpAverage(Filter):
         # - :math:`f_s` is the sampling frequency of the source.
         #
         # This implementation ensures that the filter adapts dynamically
-        # based on the source’s sampling frequency.
+        # based on the source's sampling frequency.
         alpha = 1 - exp(-1 / self.weight_ / self.sample_freq)
         a = [1, alpha - 1]
         b = [alpha]
