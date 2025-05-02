@@ -1,10 +1,19 @@
 What's new
 ============
 
+
 Upcoming Release
 ------------------------
     **Documentation**
         * adds new docstrings to submodule :mod:`acoular.tprocess`
+
+
+25.04
+------------------------
+
+    **Tests**
+        * fixes unpickable classes and adds pickle test
+
 
 25.03
 ------------------------

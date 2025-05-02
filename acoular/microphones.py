@@ -22,6 +22,7 @@ from traits.api import (
     HasStrictTraits,
     List,
     Property,
+    Union,
     cached_property,
     on_trait_change,
 )
@@ -128,7 +129,7 @@ class MicGeom(HasStrictTraits):
 
     #: Path to the XML file containing microphone positions. The XML file should have elements with
     #: the tag ``pos`` and attributes ``Name``, ``x``, ``y``, and ``z``.
-    file = File(filter=['*.xml'], exists=True, desc='name of the xml file to import')
+    file = Union(None, File(filter=['*.xml'], exists=True), desc='name of the xml file to import')
 
     #: Array containing the ``x, y, z`` positions of all microphones, including invalid ones, shape
     #: ``(3,`` :attr:`num_mics` ``)``. This is set automatically when :attr:`file` changes or

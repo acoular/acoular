@@ -170,6 +170,7 @@ class SteeringVector(HasStrictTraits):
             'true level': lambda x: x / einsum('ij,ij->i', x, x.conj())[:, newaxis],
             'true location': lambda x: x / sqrt(einsum('ij,ij->i', x, x.conj()) * x.shape[-1])[:, newaxis],
         },
+        transient=True,
         desc='dictionary of frequency domain steering vector functions',
     )
 
@@ -180,6 +181,7 @@ class SteeringVector(HasStrictTraits):
             'true level': _steer_III,
             'true location': _steer_IV,
         },
+        transient=True,
         desc='dictionary of time domain steering vector functions',
     )
 
@@ -1149,7 +1151,7 @@ class BeamformerDamas(BeamformerBase):
     #: (only for backward compatibility) :class:`BeamformerBase` object
     #: if set, provides :attr:`freq_data`, :attr:`steer`, :attr:`r_diag`
     #: if not set, these have to be set explicitly.
-    beamformer = Property()
+    beamformer = Property(transient=True)
 
     # private storage of beamformer instance
     _beamformer = Instance(BeamformerBase)
@@ -1366,7 +1368,7 @@ class BeamformerOrth(BeamformerBase):
     #: (only for backward compatibility) :class:`BeamformerEig` object
     #: if set, provides :attr:`freq_data`, :attr:`steer`, :attr:`r_diag`
     #: if not set, these have to be set explicitly.
-    beamformer = Property()
+    beamformer = Property(transient=True)
 
     # private storage of beamformer instance
     _beamformer = Instance(BeamformerEig)
@@ -1555,7 +1557,7 @@ class BeamformerClean(BeamformerBase):
     #: (only for backward compatibility) :class:`BeamformerBase` object
     #: if set, provides :attr:`freq_data`, :attr:`steer`, :attr:`r_diag`
     #: if not set, these have to be set explicitly.
-    beamformer = Property()
+    beamformer = Property(transient=True)
 
     # private storage of beamformer instance
     _beamformer = Instance(BeamformerBase)

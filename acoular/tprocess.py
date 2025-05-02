@@ -399,7 +399,7 @@ class Trigger(TimeOut):  # pragma: no cover
     #: E.g: If the mean value is :math:`0` and there are positive extrema at :math:`400` and
     #: negative extrema at :math:`-800`. Then the estimated threshold would be
     #: :math:`0.75 \cdot (-800) = -600`.
-    threshold = Float(None)
+    threshold = Union(None, Float)
 
     #: The maximum allowable variation in revolution duration. If any revolution exceeds this
     #: variation threshold, a warning is issued. Default is ``0.02``.
