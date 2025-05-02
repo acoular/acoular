@@ -112,9 +112,9 @@ for i in range(3):
         vmin=Lm.max() - 10,
         extent=rg.extend(),
     )
-    ax.set_title(f'Beamforming map\n(grid increment: {rg.increment})')
-    ax.set_xlabel('x')
-    ax.set_ylabel('y')
+    ax.set_title(f'Beamforming Results on Rectangular Grid\n(grid increment: {rg.increment})')
+    ax.set_xlabel('x / m')
+    ax.set_ylabel('y / m')
 
 plt.tight_layout()
 plt.show()
@@ -195,23 +195,23 @@ fig = plt.figure()
 ax = fig.add_subplot(projection='3d')
 
 # Plot the microphone geometry.
-ax.scatter(*mg.pos, marker='o', label='Mics')
+ax.scatter(*mg.pos, marker='o', label='Microphones')
 
 # Plot the 3D grid.
-ax.scatter(*rg3d.pos, s=.05, c='k', marker='.', label='3D grid')
+ax.scatter(*rg3d.pos, s=0.05, c='k', marker='.', label='3D Grid Points')
 
 # Finde the indices of the nonzero entries in the output map.
 indices = np.nonzero(map_3d)
 # Find the corresponding grid points to the indices.
 pos = [p.reshape(map_3d.shape)[indices] for p in rg3d.pos]
 # Plot the points with color mapping according to their beamforming intensity.
-scatter = ax.scatter(*pos, c=map_3d[indices], marker='^', label='Output')
+scatter = ax.scatter(*pos, c=map_3d[indices], marker='^', label='Beamforming Results')
 # Add a color bar to indicate the beamforming intensity.s
 cbar = fig.colorbar(scatter)
 cbar.set_label('$L_p$ / dB')
 
-ax.set(xlabel='x', ylabel='y', zlabel='z')
-ax.set_title('3D beamforming output')
+ax.set(xlabel='x / m', ylabel='y / m', zlabel='z / m')
+ax.set_title('Beamforming Results on 3D Grid')
 ax.legend()
 plt.show()
 
@@ -219,8 +219,85 @@ plt.show()
 # =========
 # Line Grid
 # =========
+#
+# Let's explore the LineGrid class, which is useful for analyzing sound sources
+# along a straight line in 3D space.
 
-# Here, we create a microphone line geometry.
+# %%
+# **Basic LineGrid usage**
+#
+# First, let's create a line grid along the x-axis.
+line_grid = ac.LineGrid()
+line_grid.loc = (-0.2, 0.0, 0.0)  # Start at -0.2 m
+line_grid.direction = (1.0, 0.0, 0.0)  # Point along x-axis
+line_grid.length = 0.4  # 40 cm long
+line_grid.num_points = 100  # 100 points along the line
+
+# %%
+# **Line grid properties**
+#
+# The LineGrid class provides several properties that you can access:
+
+# Basic properties
+print(f'Line grid size: {line_grid.size}')  # Total number of grid points
+print(f'Line grid length: {line_grid.length} m')  # Total length of the line
+print(f'Number of points: {line_grid.num_points}')  # Number of points along the line
+print(f'Start location: {line_grid.loc}')  # Starting point of the line
+print(f'Direction vector: {line_grid.direction}')  # Direction of the line
+print(f'First 5 grid positions:\n{line_grid.pos[:, :5]}')  # First 5 positions
+
+# %%
+# **Beamforming with line grids**
+#
+# Let's set up a simple measurement scenario to demonstrate beamforming with a line grid.
+
+# Create a microphone line geometry.
 pos_total = np.zeros((3, 32))
-pos_total[0, :] = np.linspace(-0.3, 0.3, 32)
+pos_total[0, :] = np.linspace(-0.3, 0.3, 32) # 32 microphones along a 60 cm line
 line_mg = ac.MicGeom(pos_total=pos_total)
+
+# Generate test data with three sources along the line
+line_pa = ac.demo.create_three_sources_1d(line_mg)
+
+# %%
+# Calculate the power spectrum
+ps = ac.PowerSpectra(source=line_pa, block_size=128, window='Hanning')
+freqs = ps.fftfreq()  # Get the FFT frequencies
+
+# %%
+# Change the steering vector grid and microphone geometry to the line grid and line microphone
+# geometry.
+st.grid = line_grid
+st.mics = line_mg
+
+# %%
+# Change the frequency data to the line frequency data.
+bc.freq_data = ps
+
+# %%
+# Calculate the beamforming output for a range of frequencies
+freq_range = np.logspace(2, 4, 100)  # Frequencies from 100 Hz to 10 kHz
+results = np.zeros((len(freq_range), line_grid.num_points))
+
+for i, freq in enumerate(freq_range):
+    pm = bc.synthetic(freq, 3)  # Use 1/3 octave band
+    results[i, :] = ac.L_p(pm)
+
+# %%
+# Create the visualization
+plt.figure(figsize=(10, 6))
+plt.pcolormesh(
+    line_grid.pos[0, :],  # x positions
+    freq_range,  # frequencies
+    results,
+    shading='auto',
+    cmap='viridis',
+)
+plt.colorbar(label='$L_p$ / dB')
+plt.xlabel('Position along line / m')
+plt.ylabel('Frequency / Hz')
+plt.title('Beamforming Results along Line Grid')
+plt.yscale('log')
+plt.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
