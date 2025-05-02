@@ -11,7 +11,9 @@ Upcoming Release
 
     **Tests**
         * fixes unpickable classes and adds pickle test
-
+    
+    **Documentation**
+        * adds comments for missing meter units to docstrings in :class:`MicGeom` and :class:`Grid`
 
 25.03
 ------------------------
