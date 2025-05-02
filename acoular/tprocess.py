@@ -126,8 +126,8 @@ class MaskedTimeOut(TimeOut):
     subsequent processing steps, ensuring that only the selected portion of the data is passed
     along.
 
-    This class is useful for selecting specific portions of data for analysis. The processed data is 
-    accessed through the generator method :meth:`result`, which returns data in block-wise fashion 
+    This class is useful for selecting specific portions of data for analysis. The processed data is
+    accessed through the generator method :meth:`result`, which returns data in block-wise fashion
     for efficient streaming.
     """
 
@@ -1548,8 +1548,8 @@ class Mixer(TimeOut):
         """
         Generate mixed time signal data in blocks of ``num`` samples.
 
-        This generator method retrieves time signal data from all sources and sums them together 
-        to produce a combined output. The data from each source is processed in blocks of the 
+        This generator method retrieves time signal data from all sources and sums them together
+        to produce a combined output. The data from each source is processed in blocks of the
         same size, ensuring synchronized mixing.
 
         .. note::
