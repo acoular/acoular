@@ -170,20 +170,4 @@ omit = [
     "acoular/tfastfuncs.py",
     "acoular/fastFuncs.py",
     "acoular/deprecation",
-    ]
-
-
-[tool.numpydoc_validation]
-checks = [
-    "all",   # report on all checks, except the below
-    "ES01",
-    "EX01",
-    "GL01",
-    "GL08",
-    "PR01",
-    # "RT02",
-    "SA01",
-]
-exclude = [  # don't report on objects that match any of these regex
-    '\._', # exclude methods with leading underscore
 ]

@@ -20,16 +20,16 @@ ignore = [
     "COM812", # conflict with ruff formatter 
     "ISC001", # conflict with ruff formatter
     # D
-    # "D401", # first line should be in imperative mood -> TBD
-    # "D205", # 1 blank line required between summary line and description -> should be fixed by issue #216
-    # "D100", # missing docstring in public module -> should be fixed by issue #216
-    # "D101", # missing docstring in public class -> should be fixed by issue #216
-    # "D102", # missing docstring in public method -> should be fixed by issue #216
-    # "D103", # missing docstring in public function -> should be fixed by issue #216
-    # "D104", # missing docstring in public package -> should be fixed by issue #216
-    # "D105", # missing docstring in magic method -> should be fixed by issue #216
-    # "D107", # missing docstring in __init__ -> should be fixed by issue #216
-    # "D417", # missing argument descriptions in the docstring -> should be fixed by issue #216
+    "D401", # first line should be in imperative mood -> TBD
+    "D205", # 1 blank line required between summary line and description -> should be fixed by issue #216
+    "D100", # missing docstring in public module -> should be fixed by issue #216
+    "D101", # missing docstring in public class -> should be fixed by issue #216
+    "D102", # missing docstring in public method -> should be fixed by issue #216
+    "D103", # missing docstring in public function -> should be fixed by issue #216
+    "D104", # missing docstring in public package -> should be fixed by issue #216
+    "D105", # missing docstring in magic method -> should be fixed by issue #216
+    "D107", # missing docstring in __init__ -> should be fixed by issue #216
+    "D417", # missing argument descriptions in the docstring -> should be fixed by issue #216
     # Others
     "T20", # will be fixed when logging is implemented
     "SLF001", # should be fixed with issue: #225 
