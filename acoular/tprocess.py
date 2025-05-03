@@ -1523,18 +1523,16 @@ class Mixer(TimeOut):
         return digest(self)
 
     def validate_sources(self):
-        """
-        Validate whether the additional sources are compatible with the primary source.
-
-        This method checks if all sources have the same sampling frequency and the same number of
-        channels. If a mismatch is detected, a :obj:`ValueError` is raised.
-
-        Raises
-        ------
-        :obj:`ValueError`
-            If any source in :attr:`sources` has a different sampling frequency or
-            number of channels than :attr:`source`.
-        """
+        # Validate whether the additional sources are compatible with the primary source.
+        #
+        # This method checks if all sources have the same sampling frequency and the same number of
+        # channels. If a mismatch is detected, a :obj:`ValueError` is raised.
+        #
+        # Raises
+        # ------
+        # :obj:`ValueError`
+        #     If any source in :attr:`sources` has a different sampling frequency or
+        #     number of channels than :attr:`source`.
         if self.source:
             for s in self.sources:
                 if self.sample_freq != s.sample_freq:
