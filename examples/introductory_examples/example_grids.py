@@ -19,9 +19,12 @@ and how to visualize them effectively.
 
 See Also
 --------
-:doc:`example_basic_beamforming` : For basic beamforming concepts
-:doc:`example_3D_beamforming` : For more advanced 3D beamforming applications
-:doc:`example_sectors_and_integration` : For working with grid sectors and integration
+- :doc:`example_basic_beamforming` :
+    For basic beamforming concepts
+- :doc:`example_3D_beamforming` :
+    For more advanced 3D beamforming applications
+- :doc:`../wind_tunnel_examples/example_sectors_and_integration` :
+    For working with grid sectors and integration
 """
 
 # %%
@@ -69,7 +72,7 @@ bb = ac.BeamformerBase(freq_data=ps, steer=st)
 # Rectangular Grid
 # ================
 #
-# The :class:`acoular.grids.RectGrid` class provides a 2D Cartesian grid for beamforming.
+# The ``RectGrid`` class provides a 2D Cartesian grid for beamforming.
 # It's defined by its boundaries in the x-y plane and a constant z-coordinate.
 
 # %%
@@ -137,7 +140,7 @@ plt.show()
 # 3D Grid
 # =======
 #
-# The :class:`acoular.grids.RectGrid3D` class extends RectGrid to three dimensions,
+# The ``RectGrid3D`` class extends RectGrid to three dimensions,
 # allowing for volumetric beamforming analysis.
 
 # %%
@@ -221,7 +224,7 @@ plt.show()
 # Line Grid
 # =========
 #
-# The :class:`acoular.grids.LineGrid` class is useful for analyzing sound sources
+# The ``LineGrid`` class is useful for analyzing sound sources
 # along a straight line, such as in pipe flow or linear machinery.
 
 # %%
