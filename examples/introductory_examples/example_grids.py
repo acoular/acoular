@@ -6,13 +6,26 @@
 Grids
 =====
 
-This example will guide you through using Acoular's grid functionalities. We'll cover grid creation,
-accessing grid properties, working with subdomains, and generating non-uniform grids. To give you a
-practical context, we'll also include a basic measurement setup, showing how grids fit into
-beamforming applications.
+This example demonstrates the various grid types available in Acoular and their applications in
+beamforming. We'll cover:
+
+1. Rectangular grids (2D and 3D) for standard beamforming applications
+2. Line grids for analyzing sound sources along a straight line
+3. Grid properties and visualization techniques
+4. Integration with beamforming algorithms
+
+The example includes practical demonstrations of how different grid types affect beamforming results
+and how to visualize them effectively.
+
+See Also
+--------
+:doc:`example_basic_beamforming` : For basic beamforming concepts
+:doc:`example_3D_beamforming` : For more advanced 3D beamforming applications
+:doc:`example_sectors_and_integration` : For working with grid sectors and integration
 """
+
 # %%
-# Let's start by importing Acoular and the other modules we'll need.
+# Let's start by importing the necessary modules.
 
 from pathlib import Path
 
@@ -25,23 +38,28 @@ import numpy as np
 # Measurement Setup
 # =================
 #
-# First, let's set up a simulated measurement.
-# This will illustrate how grids are typically used within a standard Acoular workflow.
+# First, we'll set up a simulated measurement scenario to demonstrate how grids are used in
+# a typical Acoular workflow. This setup includes:
+#
+# 1. A microphone array geometry
+# 2. Simulated sound sources
+# 3. Signal processing components
+# 4. A basic beamformer
 
-# We'll begin by defining the microphone geometry using an XML file.
+# Define the microphone array geometry using the standard 64-microphone array stored in an xml file
 micgeofile = Path(ac.__file__).parent / 'xml' / 'array_64.xml'
-# Now, we'll create a MicGeom object to represent our microphone geometry.
+# Create a MicGeom object to represent our microphone geometry
 mg = ac.MicGeom(file=micgeofile)
-# Next, we'll generate time sample data.
+# Generate simulated time data with three sound sources
 pa = ac.demo.create_three_sources_2d(mg)
-# To prepare for beamforming, we need to calculate the frequency spectra of the signals.
-# We'll do this using the PowerSpectra object.
+# To prepare for beamforming, we need to calculate the frequency spectra (cross spectral matrix)
+# of the signals. For this we'll use the PowerSpectra object.
 ps = ac.PowerSpectra(source=pa, block_size=128, window='Hanning')
 # Next, we'll create a SteeringVector object.
 # Steering vectors are crucial for beamforming; they handle the time delays between microphones.
 # Keep in mind that the steering vector requires a grid as input, which we'll provide later.
 st = ac.SteeringVector(mics=mg)
-# Finally, let's create a BeamformerBase object.
+# Finally, well instantiate a BeamformerBase object.
 # This is the foundation for our beamforming algorithms,
 # and it takes the frequency data and steering vectors as input.
 bb = ac.BeamformerBase(freq_data=ps, steer=st)
@@ -51,59 +69,53 @@ bb = ac.BeamformerBase(freq_data=ps, steer=st)
 # Rectangular Grid
 # ================
 #
-# In this section, we'll explore how to create and use RectGrid objects in Acoular.
-# RectGrid helps us define the spatial points where the beamforming output will be calculated.
+# The :class:`acoular.grids.RectGrid` class provides a 2D Cartesian grid for beamforming.
+# It's defined by its boundaries in the x-y plane and a constant z-coordinate.
 
 # %%
 # **Basic RectGrid usage**
 #
-# Let's start by creating a RectGrid object.
-# This will define a rectangular grid in the x-y plane.
+# Create a rectangular grid in the x-y plane at z = -0.2 m
 rg = ac.RectGrid(x_min=-0.2, x_max=0.2, y_min=-0.2, y_max=0.2, z=-0.2, increment=0.01)
 
 # %%
-# The RectGrid class provides several properties that you can easily access.
+# **Grid Properties**
+#
+# RectGrid provides several useful properties for accessing grid information:
 
-# Let's access some of these grid properties:
 print(f'Grid size: {rg.size}')  # Total number of grid points
 print(f'Number of x steps: {rg.nxsteps}')  # Grid points along the x axis
 print(f'Number of y steps: {rg.nysteps}')  # Grid points along the y axis
 print(f'Grid shape: {rg.shape}')  # (nxsteps, nysteps)
-print(f'Grid positions:\n{rg.pos[:, :5]}')  # Display the first 5 grid point positions
+print(f'Grid positions:\n{rg.pos[:, :5]}')  # First 5 grid point positions
 
 # %%
-# Another useful grid characteristic is its *extent*.
-# The *extent* is particularly helpful for visualization, especially with matplotlib's
-# :obj:`~matplotlib.pyplot.imshow` function.
-# It defines the grid's boundaries for plotting.
+# **Grid Extent**
+#
+# The ``extend`` method returns the grid boundaries in a format suitable for
+# matplotlib's :func:`~matplotlib.pyplot.imshow` function.
 
-# Let's get the grid's extent:
 print(f'Grid extent: {rg.extend()}')
 
 # %%
-# **Beamforming with rectangular grids**
+# **Beamforming with Rectangular Grids**
 #
-# Now, let's visualize some beamforming results on our grid.
+# Let's demonstrate how grid resolution affects beamforming results by varying the grid increment.
+# Before we do this, we need to assign the grid to the steering vector.
 
-# First, we need to pass the grid to the steering vector.
-st.grid = rg
-
-# %%
-# We can now calculate the beamforming output and display it in a plot.
+st.grid = rg  # Assign the grid to the steering vector
 
 fig = plt.figure(figsize=(12, 5))
 
-# We'll do this for three different grid increments to see the effect of resolution.
+# Calculate and plot results for three different grid resolutions
 for i in range(3):
-    # Increase grid increment
-    rg.increment = 0.01 * (i + 1)
+    rg.increment = 0.01 * (i + 1)  # Increase grid increment
 
-    # Here, we'll calculate the beamforming output.
-    # We'll calculate it for the third-octave band around a frequency of 8000.
+    # Calculate beamforming output for 8 kHz third-octave band
     pm = bb.synthetic(8000, 3)
     Lm = ac.L_p(pm)
 
-    # Create the plot
+    # Plot the results
     ax = fig.add_subplot(1, 3, i + 1)
     ax.imshow(
         Lm.T,
@@ -111,7 +123,7 @@ for i in range(3):
         vmin=Lm.max() - 10,
         extent=rg.extend(),
     )
-    ax.set_title(f'Beamforming Results on Rectangular Grid\n(grid increment: {rg.increment})')
+    ax.set_title(f'Beamforming Results\n(grid increment: {rg.increment})')
     ax.set_xlabel('x / m')
     ax.set_ylabel('y / m')
 
@@ -125,27 +137,25 @@ plt.show()
 # 3D Grid
 # =======
 #
-# Let's briefly introduce 3D grids.
-#
-# **Basic RectGrid3D usage**
+# The :class:`acoular.grids.RectGrid3D` class extends RectGrid to three dimensions,
+# allowing for volumetric beamforming analysis.
 
-# To create a 3D grid, we use the RectGrid3D object.
+# %%
+# **Basic RectGrid3D usage**
+#
+# Create a 3D grid with uniform spacing
 rg3d = ac.RectGrid3D(x_min=-0.2, x_max=0.2, y_min=-0.2, y_max=0.2, z_min=-0.3, z_max=-0.1, increment=0.01)
 print('3D-grid size:', rg3d.size)
 
-# We can also apply different increments for each dimension if needed.
+# We can also use different increments for each dimension
 rg3d.increment = (0.02, 0.02, 0.01)
-print('3D-grid size with bigger incerement in the z-dimension:', rg3d.size)
+print('3D-grid size with different increments:', rg3d.size)
 
 # %%
-# **3D-grid properties**
+# **3D Grid Properties**
 #
-# 3D rectangular grids hold a range of properties similar to those of their 2D counterparts.
-# The main difference is that we now have 'nzsteps' and a 3D 'shape'.
-# Accessing these properties also is similar to the 2D-grids case.
-# Let's take a look:
+# RectGrid3D provides additional properties for the z-dimension:
 
-# Access 3D grid properties
 print(f'3D Grid size: {rg3d.size}')
 print(f'Number of x steps: {rg3d.nxsteps}')
 print(f'Number of y steps: {rg3d.nysteps}')
@@ -154,30 +164,18 @@ print(f'3D Grid shape: {rg3d.shape}')
 print(f'3D Grid positions:\n{rg3d.pos[:, :5]}')
 
 # %%
-# **Beamforming with 3D grids**
+# **Beamforming with 3D Grids**
 #
-# For the visualize 3D beamforming results, we'll first mix up our examples data a little and
-# generate time sample data of three white-noise point sources with diffrent x-, y-, and
-# z-coodinates each.
+# Let's demonstrate 3D beamforming using the CLEAN-SC algorithm.
 
-# Here, we generate the 3D time samples data.
-# We use the same microphone geometry we used for the 2D grids.
+# Generate 3D test data
 pa = ac.demo.create_three_sources_3d(mg)
-# Again, we plug the sample data into a PowerSpectra object.
-# This time we use a block size of 128 and a Bartlett window for a change.
 ps = ac.PowerSpectra(source=pa, block_size=128, window='Bartlett')
-# Now, we need a 3D beamforming method. We'll use BeamformerCleansc,
-# which is a more advanced technique than BeamformerBase.
 bc = ac.BeamformerCleansc(freq_data=ps, steer=st)
 
-# %%
-# Note, that we needn't change the steering vector.
-# However we need to change the grid attributed to it, which currently still is the 2D grid.
-
-# Here, we change the steering vector's grid to the 3D grid.
+# Update the steering vector with the 3D grid
 st.grid = rg3d
-# And we change the grid increment to a unifrom value.
-rg3d.increment = 0.01
+rg3d.increment = 0.01  # Set uniform increment
 
 # %%
 # Now we are ready to compute the beamforming output.
@@ -188,27 +186,31 @@ map_3d = bc.synthetic(8000, 1)
 print('3D beamforming output shape:', map_3d.shape)
 
 # %%
-# Let's display the results in a 3D plot.
+# **Visualizing 3D Results**
+#
+# Let's create a 3D visualization of the beamforming results.
 
 fig = plt.figure()
 ax = fig.add_subplot(projection='3d')
 
-# Plot the microphone geometry.
+# Plot microphone positions
 ax.scatter(*mg.pos, marker='o', label='Microphones')
 
-# Plot the 3D grid.
+# Plot grid points
 ax.scatter(*rg3d.pos, s=0.05, c='k', marker='.', label='3D Grid Points')
 
-# Finde the indices of the nonzero entries in the output map.
+# Plot beamforming results
 indices = np.nonzero(map_3d)
-# Find the corresponding grid points to the indices.
+# Find the corresponding grid points to the indices
 pos = [p.reshape(map_3d.shape)[indices] for p in rg3d.pos]
-# Plot the points with color mapping according to their beamforming intensity.
+# Plot the points with color mapping according to their beamforming intensity
 scatter = ax.scatter(*pos, c=map_3d[indices], marker='^', label='Beamforming Results')
-# Add a color bar to indicate the beamforming intensity.s
+
+# Add colorbar
 cbar = fig.colorbar(scatter)
 cbar.set_label('$L_p$ / dB')
 
+# Set labels and title
 ax.set(xlabel='x / m', ylabel='y / m', zlabel='z / m')
 ax.set_title('Beamforming Results on 3D Grid')
 ax.legend(loc='upper left')
@@ -219,14 +221,13 @@ plt.show()
 # Line Grid
 # =========
 #
-# Let's explore the LineGrid class, which is useful for analyzing sound sources along a straight
-# line in 3D space. This is perfect for situations where you know your sound sources are aligned
-# along a specific direction, like along a pipe or a linear array of machinery.
+# The :class:`acoular.grids.LineGrid` class is useful for analyzing sound sources
+# along a straight line, such as in pipe flow or linear machinery.
 
 # %%
 # **Basic LineGrid usage**
 #
-# First, let's create a line grid along the x-axis.
+# Create a line grid along the x-axis
 line_grid = ac.LineGrid()
 # We'll start our line at -0.2 meters in the x-direction, with y=0 and z=-0.3 meters
 line_grid.loc = (-0.2, 0.0, -0.3)
@@ -238,9 +239,9 @@ line_grid.length = 0.4
 line_grid.num_points = 100
 
 # %%
-# **Line grid properties**
+# **Line Grid Properties**
 #
-# The LineGrid class gives us some handy properties to understand our grid:
+# Let's examine the properties of our line grid:
 
 # Let's print out some basic information about our line grid.
 print(f'Line grid size: {line_grid.size}')  # Total number of grid points
@@ -251,51 +252,37 @@ print(f'Direction vector: {line_grid.direction}')  # Direction of the line
 print(f'First 5 grid positions:\n{line_grid.pos[:, :5]}')  # First 5 positions
 
 # %%
-# **Beamforming with line grids**
+# **Beamforming with Line Grids**
 #
-# Now, let's set up a practical measurement scenario to demonstrate beamforming with our line grid.
-# We'll create a line of microphones and some test sources.
+# Let's set up a line array measurement scenario.
 
-# First, let's create a line of microphones to match our grid.
-pos_total = np.zeros((3, 32))  # We'll use 32 microphones.
-# Place them along the x-axis from -0.2 to 0.2 meters
+# Create a line of microphones
+pos_total = np.zeros((3, 32))
 pos_total[0, :] = np.linspace(-0.2, 0.2, 32)
 line_mg = ac.MicGeom(pos_total=pos_total)
 
-# Generate some test data with three sources along our line.
+# Generate test data
 line_pa = ac.demo.create_three_sources_1d(line_mg)
-
-# Calculate the power spectrum of our signals.
 ps = ac.PowerSpectra(source=line_pa, block_size=128, window='Hanning')
-freqs = ps.fftfreq()  # Get the FFT frequencies
+freqs = ps.fftfreq()
 
-# %%
-# Now, let's set up our beamformer to work with our line grid.
-# First, update the steering vector to use our line grid and line microphone setup
-
+# Set up beamformer
 st.grid = line_grid
 st.mics = line_mg
+bc = ac.BeamformerDamasPlus(freq_data=ps, steer=st)
 
-# %%
-# Create a new beamformer with our updated setup. We'll use BeamformerDamas this time.
-
-bc = ac.BeamformerDamas(freq_data=ps, steer=st)
-
-# %%
-# Let's analyze a range of frequencies to see how our sources behave.
-
-# We'll look at frequencies from 100 Hz to 10 kHz.
+# Calculate results across frequency range
 freq_range = np.logspace(2, 4, 100)
 results = np.zeros((freq_range.size, line_grid.num_points))
 
-# Calculate beamforming output for all frequencies.
 for i, freq in enumerate(freq_range):
-    # For each frequency, calculate the beamforming output using 1/3 octave bands
     pm = bc.synthetic(freq, 3)
-    results[i, :] = ac.L_p(pm)  # Convert to sound pressure level
+    results[i, :] = ac.L_p(pm)
 
 # %%
-# Time to visualize our results!
+# **Visualizing Line Grid Results**
+#
+# Create a frequency-position plot of the beamforming results.
 
 plt.figure(figsize=(10, 6))
 # Create a color plot showing sound levels along the line at different frequencies.
@@ -304,9 +291,13 @@ plt.pcolormesh(
     freq_range,  # frequencies
     results,  # beamforming results
 )
-plt.colorbar(label='$L_p$ / dB')  # Add a color bar showing sound levels
-plt.xlabel('Position along line / m')  # Label our x-axis
-plt.ylabel('Frequency / Hz')  # Label our y-axis
-plt.title('Beamforming Results along Line Grid')  # Give our plot a title
-plt.yscale('log')  # Use a logarithmic scale for frequencies
+plt.colorbar(label='$L_p$ / dB')
+plt.xlabel('Position along line / m')
+plt.ylabel('Frequency / Hz')
+plt.title('Beamforming Results on Line Grid')
 plt.show()
+
+# %%
+# Here we see the beamforming results along the line grid.
+# The sources are clearly visible as peaks in the sound pressure level and for the higher
+# frequencies converge to the positions of the sources in the simulated data.
