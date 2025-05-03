@@ -6,10 +6,9 @@
 Grids
 =====
 
-This example will guide you through using Acoular's grid functionalities.
-We'll cover grid creation, accessing grid properties, working with subdomains,
-and generating non-uniform grids. To give you a practical context, we'll
-also include a basic measurement setup, showing how grids fit into
+This example will guide you through using Acoular's grid functionalities. We'll cover grid creation,
+accessing grid properties, working with subdomains, and generating non-uniform grids. To give you a
+practical context, we'll also include a basic measurement setup, showing how grids fit into
 beamforming applications.
 """
 # %%
@@ -212,7 +211,7 @@ cbar.set_label('$L_p$ / dB')
 
 ax.set(xlabel='x / m', ylabel='y / m', zlabel='z / m')
 ax.set_title('Beamforming Results on 3D Grid')
-ax.legend()
+ax.legend(loc='upper left')
 plt.show()
 
 # %%
@@ -220,25 +219,30 @@ plt.show()
 # Line Grid
 # =========
 #
-# Let's explore the LineGrid class, which is useful for analyzing sound sources
-# along a straight line in 3D space.
+# Let's explore the LineGrid class, which is useful for analyzing sound sources along a straight
+# line in 3D space. This is perfect for situations where you know your sound sources are aligned
+# along a specific direction, like along a pipe or a linear array of machinery.
 
 # %%
 # **Basic LineGrid usage**
 #
 # First, let's create a line grid along the x-axis.
 line_grid = ac.LineGrid()
-line_grid.loc = (-0.2, 0.0, 0.0)  # Start at -0.2 m
-line_grid.direction = (1.0, 0.0, 0.0)  # Point along x-axis
-line_grid.length = 0.4  # 40 cm long
-line_grid.num_points = 100  # 100 points along the line
+# We'll start our line at -0.2 meters in the x-direction, with y=0 and z=-0.3 meters
+line_grid.loc = (-0.2, 0.0, -0.3)
+# The line will point along the x-axis ((1,0,0) being the unit vector in the x-direction)
+line_grid.direction = (1.0, 0.0, 0.0)
+# Our line will be 40 cm long
+line_grid.length = 0.4
+# And we'll place 100 points along this line.
+line_grid.num_points = 100
 
 # %%
 # **Line grid properties**
 #
-# The LineGrid class provides several properties that you can access:
+# The LineGrid class gives us some handy properties to understand our grid:
 
-# Basic properties
+# Let's print out some basic information about our line grid.
 print(f'Line grid size: {line_grid.size}')  # Total number of grid points
 print(f'Line grid length: {line_grid.length} m')  # Total length of the line
 print(f'Number of points: {line_grid.num_points}')  # Number of points along the line
@@ -249,55 +253,60 @@ print(f'First 5 grid positions:\n{line_grid.pos[:, :5]}')  # First 5 positions
 # %%
 # **Beamforming with line grids**
 #
-# Let's set up a simple measurement scenario to demonstrate beamforming with a line grid.
+# Now, let's set up a practical measurement scenario to demonstrate beamforming with our line grid.
+# We'll create a line of microphones and some test sources.
 
-# Create a microphone line geometry.
-pos_total = np.zeros((3, 32))
-pos_total[0, :] = np.linspace(-0.3, 0.3, 32) # 32 microphones along a 60 cm line
+# First, let's create a line of microphones to match our grid.
+pos_total = np.zeros((3, 32))  # We'll use 32 microphones.
+# Place them along the x-axis from -0.2 to 0.2 meters
+pos_total[0, :] = np.linspace(-0.2, 0.2, 32)
 line_mg = ac.MicGeom(pos_total=pos_total)
 
-# Generate test data with three sources along the line
+# Generate some test data with three sources along our line.
 line_pa = ac.demo.create_three_sources_1d(line_mg)
 
-# %%
-# Calculate the power spectrum
+# Calculate the power spectrum of our signals.
 ps = ac.PowerSpectra(source=line_pa, block_size=128, window='Hanning')
 freqs = ps.fftfreq()  # Get the FFT frequencies
 
 # %%
-# Change the steering vector grid and microphone geometry to the line grid and line microphone
-# geometry.
+# Now, let's set up our beamformer to work with our line grid.
+# First, update the steering vector to use our line grid and line microphone setup
+
 st.grid = line_grid
 st.mics = line_mg
 
 # %%
-# Change the frequency data to the line frequency data.
-bc.freq_data = ps
+# Create a new beamformer with our updated setup. We'll use BeamformerDamas this time.
+
+bc = ac.BeamformerDamas(freq_data=ps, steer=st)
 
 # %%
-# Calculate the beamforming output for a range of frequencies
-freq_range = np.logspace(2, 4, 100)  # Frequencies from 100 Hz to 10 kHz
-results = np.zeros((len(freq_range), line_grid.num_points))
+# Let's analyze a range of frequencies to see how our sources behave.
 
+# We'll look at frequencies from 100 Hz to 10 kHz.
+freq_range = np.logspace(2, 4, 100)
+results = np.zeros((freq_range.size, line_grid.num_points))
+
+# Calculate beamforming output for all frequencies.
 for i, freq in enumerate(freq_range):
-    pm = bc.synthetic(freq, 3)  # Use 1/3 octave band
-    results[i, :] = ac.L_p(pm)
+    # For each frequency, calculate the beamforming output using 1/3 octave bands
+    pm = bc.synthetic(freq, 3)
+    results[i, :] = ac.L_p(pm)  # Convert to sound pressure level
 
 # %%
-# Create the visualization
+# Time to visualize our results!
+
 plt.figure(figsize=(10, 6))
+# Create a color plot showing sound levels along the line at different frequencies.
 plt.pcolormesh(
     line_grid.pos[0, :],  # x positions
     freq_range,  # frequencies
-    results,
-    shading='auto',
-    cmap='viridis',
+    results,  # beamforming results
 )
-plt.colorbar(label='$L_p$ / dB')
-plt.xlabel('Position along line / m')
-plt.ylabel('Frequency / Hz')
-plt.title('Beamforming Results along Line Grid')
-plt.yscale('log')
-plt.grid(True, alpha=0.3)
-plt.tight_layout()
+plt.colorbar(label='$L_p$ / dB')  # Add a color bar showing sound levels
+plt.xlabel('Position along line / m')  # Label our x-axis
+plt.ylabel('Frequency / Hz')  # Label our y-axis
+plt.title('Beamforming Results along Line Grid')  # Give our plot a title
+plt.yscale('log')  # Use a logarithmic scale for frequencies
 plt.show()
