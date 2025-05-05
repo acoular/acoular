@@ -38,6 +38,7 @@ Contents:
     
     How to Get <install/index>
     Getting Started <get_started/index>
+    User Guide <user_guide/index>
     Examples <auto_examples/index>
     What's new <news/index>
     Contributing <contributing/index>
@@ -57,6 +58,10 @@ Contents:
 
       - The basics for using Acoular, explained with a simple example.
 
+    * - :doc:`user_guide/index`
+
+      - A comprehensive guide demonstrating the core functionalities implemented in Acoular
+    
     * - :doc:`auto_examples/index` 
 
       - Example scripts covering different use cases.
