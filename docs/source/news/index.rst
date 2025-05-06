@@ -4,6 +4,8 @@ What's new
 
 Upcoming Release
 ------------------------
+    **New features:**
+        * deprecate `extend` method in :class:`~acoular.grids.RectGrid` in favor of `extent` property
 
 
 25.04

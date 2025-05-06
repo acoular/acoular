@@ -409,6 +409,9 @@ class RectGrid(Grid):
     #: Number of grid points along y-axis. (read-only)
     nysteps = Property(desc='number of grid points along y-axis')
 
+    #: The grid's extension in :obj:`matplotlib.pyplot.imshow` compatible form. (read-only)
+    extent = Property(desc='grid extent as (x_min, x_max, y_min, y_max)')
+
     #: A unique identifier for the grid, based on its properties. (read-only)
     digest = Property(
         depends_on=['x_min', 'x_max', 'y_min', 'y_max', 'z', 'increment'],
@@ -475,7 +478,6 @@ class RectGrid(Grid):
         # (-1.0, 1.0, -5.0, 5.0)
         return (self.x_min, self.x_max, self.y_min, self.y_max)
 
-    @deprecated_alias({'extend': 'extent'})
     def extend(self):
         """
         Return the grid's extension in :obj:`matplotlib.pyplot.imshow` compatible form.
@@ -490,6 +492,12 @@ class RectGrid(Grid):
         -----
         This method is deprecated. Use the :attr:`extent` property instead.
         """
+        import warnings
+        warnings.warn(
+            "The extend() method is deprecated. Use the extent property instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
         return self.extent
 
     def index(self, x, y):

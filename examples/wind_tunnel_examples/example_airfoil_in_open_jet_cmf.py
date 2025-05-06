@@ -84,7 +84,7 @@ for method in ('LassoLars', 'LassoLarsBIC', 'OMPCV', 'NNLS', 'fmin_l_bfgs_b'):
     i1 += 1
     map = b.synthetic(cfreq, 1)
     mx = ac.L_p(map.max())
-    plt.imshow(ac.L_p(map.T), vmax=mx, vmin=mx - 15, origin='lower', interpolation='nearest', extent=grid.extend())
+    plt.imshow(ac.L_p(map.T), vmax=mx, vmin=mx - 15, origin='lower', interpolation='nearest', extent=grid.extent)
     plt.colorbar(shrink=0.5)
     plt.title(b.method)
 

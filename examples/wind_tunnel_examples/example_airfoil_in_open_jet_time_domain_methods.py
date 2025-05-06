@@ -125,7 +125,7 @@ for b in (cacht, cachts, cachct, cachcts):
         res += r[0]  # average accum.
         map = r[0].reshape(grid.shape)
         mx = ac.L_p(map.max())
-        plt.imshow(ac.L_p(map.T), vmax=mx, vmin=mx - 15, origin='lower', interpolation='nearest', extent=grid.extend())
+        plt.imshow(ac.L_p(map.T), vmax=mx, vmin=mx - 15, origin='lower', interpolation='nearest', extent=grid.extent)
         plt.title(f'{(i3 - 1) * 1024}')
     res /= i3 - 1  # average
     plt.tight_layout()
@@ -137,7 +137,7 @@ for b in (cacht, cachts, cachct, cachcts):
     i1 += 1
     map = res.reshape(grid.shape)
     mx = ac.L_p(map.max())
-    plt.imshow(ac.L_p(map.T), vmax=mx, vmin=mx - 15, origin='lower', interpolation='nearest', extent=grid.extend())
+    plt.imshow(ac.L_p(map.T), vmax=mx, vmin=mx - 15, origin='lower', interpolation='nearest', extent=grid.extent)
     plt.colorbar(shrink=0.5)
     plt.title(('BeamformerTime', 'BeamformerTimeSq', 'BeamformerCleant', 'BeamformerCleantSq')[i2 - 2])
 plt.tight_layout()
