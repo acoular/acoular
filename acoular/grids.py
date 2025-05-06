@@ -450,6 +450,48 @@ class RectGrid(Grid):
         bpos.resize((3, self.size))
         return bpos
 
+    @property_depends_on(['x_min', 'x_max', 'y_min', 'y_max'])
+    def _get_extent(self):
+        # Return the grid's extension in :obj:`matplotlib.pyplot.imshow` compatible form.
+        #
+        # Returns
+        # -------
+        # :class:`tuple` of :class:`floats<float>`
+        #     (:attr:`x_min`, :attr:`x_max`, :attr:`y_min`, :attr:`y_max`) representing the grid's
+        #     extent.
+        #
+        # Notes
+        # -----
+        # This property is intended for use with the ``extent`` parameter of
+        # :obj:`matplotlib.pyplot.imshow`.
+        #
+        # Examples
+        # --------
+        # >>> from acoular import RectGrid
+        # >>> grid = RectGrid()
+        # >>> grid.y_min = -5
+        # >>> grid.y_max = 5
+        # >>> grid.extent
+        # (-1.0, 1.0, -5.0, 5.0)
+        return (self.x_min, self.x_max, self.y_min, self.y_max)
+
+    @deprecated_alias({'extend': 'extent'})
+    def extend(self):
+        """
+        Return the grid's extension in :obj:`matplotlib.pyplot.imshow` compatible form.
+
+        Returns
+        -------
+        :class:`tuple` of :class:`floats<float>`
+            (:attr:`x_min`, :attr:`x_max`, :attr:`y_min`, :attr:`y_max`) representing the grid's
+            extent.
+
+        Notes
+        -----
+        This method is deprecated. Use the :attr:`extent` property instead.
+        """
+        return self.extent
+
     def index(self, x, y):
         """
         Find the indices of a grid point near a given coordinate.
@@ -538,34 +580,6 @@ class RectGrid(Grid):
             return self.index(center[0], center[1])
         return array(xis), array(yis)
         # return arange(self.size)[inds]
-
-    def extend(self):
-        """
-        Return the grid's extension in :obj:`matplotlib.pyplot.imshow` compatible form.
-
-        Returns
-        -------
-        :class:`tuple` of :class:`floats<float>`
-            (:attr:`x_min`, :attr:`x_max`, :attr:`y_min`, :attr:`y_max`) representing the grid's
-            extent.
-
-        Notes
-        -----
-        - ``pylab.imhow`` is the same as :obj:`matplotlib.pyplot.imshow`. It's only using a
-          different namespace.
-        - The return of the method is ment for the ``extent`` parameter of
-          :obj:`matplotlib.pyplot.imshow`.
-
-        Examples
-        --------
-        >>> from acoular import RectGrid
-        >>> grid = RectGrid()
-        >>> grid.y_min = -5
-        >>> grid.y_max = 5
-        >>> grid.extend()
-        (-1.0, 1.0, -5.0, 5.0)
-        """
-        return (self.x_min, self.x_max, self.y_min, self.y_max)
 
 
 class RectGrid3D(RectGrid):
