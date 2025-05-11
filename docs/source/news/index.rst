@@ -11,7 +11,7 @@ Upcoming Release
 
     **Tests**
         * fixes unpickable classes and adds pickle test
-    
+
     **Documentation**
         * adds comments for missing meter units to docstrings in :mod:`acoular.microphones` and :mod:`acoular.grids`
 
