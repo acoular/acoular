@@ -43,11 +43,6 @@ import numpy as np
 #
 # First, we'll set up a simulated measurement scenario to demonstrate how grids are used in
 # a typical Acoular workflow. This setup includes:
-#
-# 1. A microphone array geometry
-# 2. Simulated sound sources
-# 3. Signal processing components
-# 4. A basic beamformer
 
 # Define the microphone array geometry using the standard 64-microphone array stored in an xml file
 micgeofile = Path(ac.__file__).parent / 'xml' / 'array_64.xml'
@@ -184,7 +179,8 @@ rg3d.increment = 0.01  # Set uniform increment
 # Now we are ready to compute the beamforming output.
 # This time, we'll calculate it for a frequency of exactly 8000.
 
-map_3d = bc.synthetic(8000, 1)
+map_3d = bc.synthetic(8000, 1)  # Beamformer result in Pa^2
+map_3d = ac.L_p(map_3d)  # Convert to SPL / dB
 # Note that the output of 3D beamforming is a 3D field:
 print('3D beamforming output shape:', map_3d.shape)
 
@@ -260,47 +256,55 @@ print(f'First 5 grid positions:\n{line_grid.pos[:, :5]}')  # First 5 positions
 # Let's set up a line array measurement scenario.
 
 # Create a line of microphones
-pos_total = np.zeros((3, 32))
-pos_total[0, :] = np.linspace(-0.2, 0.2, 32)
+num_mics = 32
+pos_total = np.zeros((3, num_mics))
+pos_total[0, :] = np.linspace(-0.2, 0.2, num_mics)
 line_mg = ac.MicGeom(pos_total=pos_total)
 
 # Generate test data
 line_pa = ac.demo.create_three_sources_1d(line_mg)
 ps = ac.PowerSpectra(source=line_pa, block_size=128, window='Hanning')
-freqs = ps.fftfreq()
 
 # Set up beamformer
 st.grid = line_grid
 st.mics = line_mg
-bc = ac.BeamformerDamasPlus(freq_data=ps, steer=st)
+bb = ac.BeamformerBase(freq_data=ps, steer=st)
+bs = ac.BeamformerCleansc(freq_data=ps, steer=st)
 
-# Calculate results across frequency range
-freq_range = np.logspace(2, 4, 100)
-results = np.zeros((freq_range.size, line_grid.num_points))
+# Calculate results across full frequency range
+freqs = ps.fftfreq()
+results = {key: np.zeros((freqs.size, line_grid.num_points)) for key in ['base', 'clean']}
 
-for i, freq in enumerate(freq_range):
-    pm = bc.synthetic(freq, 3)
-    results[i, :] = ac.L_p(pm)
+for i, freq in enumerate(freqs):
+    results['base'][i, :] = bb.synthetic(freq, 3)
+    results['clean'][i, :] = bs.synthetic(freq, 3)
 
 # %%
 # **Visualizing Line Grid Results**
 #
-# Create a frequency-position plot of the beamforming results.
+# Create frequency-position plots of the beamforming and source mapping results.
 
-plt.figure(figsize=(10, 6))
-# Create a color plot showing sound levels along the line at different frequencies.
-plt.pcolormesh(
-    line_grid.pos[0, :],  # x positions
-    freq_range,  # frequencies
-    results,  # beamforming results
-)
-plt.colorbar(label='$L_p$ / dB')
-plt.xlabel('Position along line / m')
-plt.ylabel('Frequency / Hz')
-plt.title('Beamforming Results on Line Grid')
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5), sharey=True)
+
+base_levels = ac.L_p(results['base'])
+clean_levels = ac.L_p(results['clean'])
+vmin = max(base_levels.max(), clean_levels.max()) - 20
+
+mesh1 = ax1.pcolormesh(line_grid.pos[0, :], freqs, base_levels, vmin=vmin)
+ax1.set_xlabel('Position along line / m')
+ax1.set_ylabel('Frequency / Hz')
+ax1.set_title('Beamforming Results on Line Grid\n(Base Beamformer)')
+
+mesh2 = ax2.pcolormesh(line_grid.pos[0, :], freqs, clean_levels, vmin=vmin)
+ax2.set_xlabel('Position along line / m')
+ax2.set_title('Source Mapping on Line Grid\n(CLEAN-SC)')
+
+fig.colorbar(mesh1, ax=[ax1, ax2], label='$L_p$ / dB')
 plt.show()
 
 # %%
-# Here we see the beamforming results along the line grid.
-# The sources are clearly visible as peaks in the sound pressure level and for the higher
-# frequencies converge to the positions of the sources in the simulated data.
+# Here we see the beamforming results of the base beamformer and the source mapping results of the
+# CLEAN-SC algorithm along the line grid. The sources are clearly visible as peaks in the sound
+# pressure level and for the higher frequencies converge to the positions of the sources in the
+# simulated data. Note that the CLEAN-SC algorithm is able to resolve the sources better for lower
+# frequencies than the base beamformer.
