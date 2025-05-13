@@ -284,11 +284,11 @@ for i, freq in enumerate(freqs):
 #
 # Create frequency-position plots of the beamforming and source mapping results.
 
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5), sharey=True)
-
 base_levels = ac.L_p(results['base'])
 clean_levels = ac.L_p(results['clean'])
 vmin = max(base_levels.max(), clean_levels.max()) - 20
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5), sharey=True)
 
 mesh1 = ax1.pcolormesh(line_grid.pos[0, :], freqs, base_levels, vmin=vmin)
 ax1.set_xlabel('Position along line / m')
