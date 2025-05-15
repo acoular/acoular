@@ -50,23 +50,22 @@ def create_three_sources(mg, locs, h5savefile='', sfreq=51200, duration=1):
         wh5.save()
     return pa
 
-
-def create_three_sources_1d(mg):
+def create_three_sources_1d(mg, h5savefile='three_sources_1d.h5'):
     """Create three noise sources in a 3D plane and return them as Mixer."""
     locs = [(-0.1, 0, -0.3), (0.15, 0, -0.3), (0, 0, -0.3)]
-    return create_three_sources(mg, locs, h5savefile='three_sources_1d.h5')
+    return create_three_sources(mg, locs, h5savefile=h5savefile)
 
 
-def create_three_sources_2d(mg):
+def create_three_sources_2d(mg, h5savefile='three_sources_2d.h5'):
     """Create three noise sources in a 2D plane and return them as Mixer."""
     locs = [(-0.1, -0.1, -0.3), (0.15, 0, -0.3), (0, 0.1, -0.3)]
-    return create_three_sources(mg, locs, h5savefile='three_sources_2d.h5')
+    return create_three_sources(mg, locs, h5savefile=h5savefile)
 
 
-def create_three_sources_3d(mg):
+def create_three_sources_3d(mg, h5savefile='three_sources_3d.h5'):
     """Create three noise sources in a 3D plane and return them as Mixer."""
     locs = [(-0.1, -0.1, -0.3), (0.15, 0, -0.17), (0, 0.1, -0.25)]
-    return create_three_sources(mg, locs, h5savefile='three_sources_3d.h5')
+    return create_three_sources(mg, locs, h5savefile=h5savefile)
 
 
 def run():
