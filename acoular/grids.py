@@ -589,7 +589,7 @@ class RectGrid3D(RectGrid):
     #: The lower z-limit that defines the grid. Default is ``-1``.
     z_min = Float(-1.0, desc='minimum  z-value')
 
-    #: The upper z-limit that defines the grid. Default is ``1``.
+    #: The upper z-limit that defines the grid. Default is ``1.0``.
     z_max = Float(1.0, desc='maximum  z-value')
 
     #: Number of grid points along x-axis. (read-only)
@@ -810,6 +810,66 @@ class ImportGrid(Grid):
 
     def _set_pos(self, pos):
         self._gpos = pos
+
+    def export_gpos(self, filename):
+        """
+        Export the grid positions to an XML file.
+
+        This method generates an XML file containing the positions of all grid points.
+        Each point is represented by a ``<pos>`` element with ``Name``, ``x``, ``y``, and ``z``
+        attributes. The generated XML is formatted to match the structure required for importing
+        into the :class:`ImportGrid` class.
+
+        Parameters
+        ----------
+        filename : :class:`str`
+            The path to the file to which the grid positions will be written. The file
+            extension must be ``.xml``.
+
+        Raises
+        ------
+        :obj:`OSError`
+            If the file cannot be written due to permissions issues or invalid file paths.
+
+        Notes
+        -----
+        - The file will be saved in UTF-8 encoding.
+        - The ``Name`` attribute for each point is set as ``"Point {i+1}"``, where ``i`` is the
+          index of the grid point.
+        - If subgrids are defined, they will be included as the ``subgrid`` attribute.
+
+        Examples
+        --------
+        Export a grid with 100 points to an XML file:
+
+        >>> import acoular as ac
+        >>> import numpy as np
+        >>> grid = ac.ImportGrid()
+        >>> # Create some random grid points
+        >>> points = np.random.rand(3, 100)
+        >>> grid.pos = points
+        >>> grid.export_gpos('grid_points.xml')  # doctest: +SKIP
+
+        The generated ``grid_points.xml`` file will look like this:
+
+        .. code-block:: xml
+
+            <?xml version="1.1" encoding="utf-8"?><Grid name="grid_points">
+              <pos Name="Point 1" x="0.123" y="0.456" z="0.789"/>
+              <pos Name="Point 2" x="0.234" y="0.567" z="0.890"/>
+              ...
+            </Grid>
+        """
+        filepath = Path(filename)
+        basename = filepath.stem
+        with filepath.open('w', encoding='utf-8') as f:
+            f.write(f'<?xml version="1.1" encoding="utf-8"?><Grid name="{basename}">\n')
+            for i in range(self.pos.shape[-1]):
+                subgrid_attr = f' subgrid="{self.subgrids[i]}"' if hasattr(self, 'subgrids') and len(self.subgrids) > i else ''
+                f.write(
+                    f'  <pos Name="Point {i+1}" x="{self.pos[0, i]}" y="{self.pos[1, i]}" z="{self.pos[2, i]}"{subgrid_attr}/>\n',
+                )
+            f.write('</Grid>')
 
     @on_trait_change('file')
     def import_gpos(self):
