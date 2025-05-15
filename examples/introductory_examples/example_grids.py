@@ -41,6 +41,8 @@ import numpy as np
 # Measurement Setup
 # =================
 #
+# .. _measurement_setup:
+#
 # First, we'll set up a simulated measurement scenario to demonstrate how grids are used in
 # a typical Acoular workflow. This setup includes:
 
@@ -48,6 +50,8 @@ import numpy as np
 micgeofile = Path(ac.__file__).parent / 'xml' / 'array_64.xml'
 # Create a MicGeom object to represent our microphone geometry
 mg = ac.MicGeom(file=micgeofile)
+# Deactivate every other microphone
+mg.invalid_channels = list(range(0, mg.num_mics, 2))
 # Generate simulated time data with three sound sources
 pa = ac.demo.create_three_sources_2d(mg, h5savefile='')
 # To prepare for beamforming, we need to calculate the frequency spectra (cross spectral matrix)
@@ -66,6 +70,8 @@ bb = ac.BeamformerBase(freq_data=ps, steer=st)
 # ================
 # Rectangular Grid
 # ================
+#
+# .. _rectangular_grid_example:
 #
 # The ``RectGrid`` class provides a 2D Cartesian grid for beamforming.
 # It's defined by its boundaries in the x-y plane and a constant z-coordinate.
@@ -135,6 +141,8 @@ plt.show()
 # 3D Grid
 # =======
 #
+# .. _3d_grid_example:
+#
 # The ``RectGrid3D`` class extends RectGrid to three dimensions,
 # allowing for volumetric beamforming analysis.
 
@@ -178,9 +186,9 @@ rg3d.increment = 0.03  # Set uniform increment
 # This time, we'll calculate it for a frequency of exactly 8 kHz.
 
 map_3d = bc.synthetic(8000, 0)  # Beamformer result in Pa^2
-map_3d = ac.L_p(map_3d)  # Convert to SPL / dB
+Lm = ac.L_p(map_3d)  # Convert to SPL / dB
 # Note that the output of 3D beamforming is a 3D field:
-print('3D beamforming output shape:', map_3d.shape)
+print('3D beamforming output shape:', Lm.shape)
 
 # %%
 # **Visualizing 3D Results**
@@ -197,11 +205,11 @@ ax.scatter(*mg.pos, marker='o', label='Microphones')
 ax.scatter(*rg3d.pos, s=0.1, c='k', marker='.', label='3D Grid Points')
 
 # Plot beamforming results
-indices = map_3d > 0
+indices = Lm > 0
 # Find the corresponding grid points to the indices
-pos = [p.reshape(map_3d.shape)[indices] for p in rg3d.pos]
+pos = [p.reshape(Lm.shape)[indices] for p in rg3d.pos]
 # Plot the points with color mapping according to their beamforming intensity
-scatter = ax.scatter(*pos, c=map_3d[indices], marker='^', label='Beamforming Results')
+scatter = ax.scatter(*pos, c=Lm[indices], marker='^', label='Beamforming Results')
 
 # Add colorbar
 cbar = fig.colorbar(scatter)
@@ -288,12 +296,12 @@ vmin = max(base_levels.max(), clean_levels.max()) - 20
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5), sharey=True)
 
-mesh1 = ax1.pcolormesh(line_grid.pos[0, :], freqs / 1000, base_levels, vmin=vmin)
+mesh1 = ax1.pcolormesh(line_grid.pos[0, :], freqs / 1e3, base_levels, vmin=vmin)
 ax1.set_xlabel('Position along line / m')
 ax1.set_ylabel('Frequency / kHz')
 ax1.set_title('Beamforming Results on Line Grid\n(Base Beamformer)')
 
-mesh2 = ax2.pcolormesh(line_grid.pos[0, :], freqs / 1000, clean_levels, vmin=vmin)
+mesh2 = ax2.pcolormesh(line_grid.pos[0, :], freqs / 1e3, clean_levels, vmin=vmin)
 ax2.set_xlabel('Position along line / m')
 ax2.set_title('Source Mapping on Line Grid\n(CLEAN-SC)')
 
@@ -306,3 +314,73 @@ plt.show()
 # pressure level and for the higher frequencies converge to the positions of the sources in the
 # simulated data. Note that the CLEAN-SC algorithm is able to resolve the sources better for lower
 # frequencies than the base beamformer.
+#
+# ===========
+# Import Grid
+# ===========
+
+# Define source positions
+spos = np.array([[-0.1, -0.1], [0.15, 0], [0, 0.1]])
+
+# Create three grids with bivariate normal distributed points around each source
+grids = np.zeros(3, dtype=ac.Grid)
+grid_size = 100
+for i, p in enumerate(spos):
+    gpos = np.zeros((3, grid_size)) - 0.2
+    # Generate 100 points with bivariate normal distribution around each source
+    # Using a small covariance matrix (1/200) to keep points close to source
+    gpos[:2, :] = np.random.multivariate_normal(p, np.eye(2) / 5e2, size=grid_size).T
+    # Create ImportGrid object for each set of points
+    grids[i] = ac.ImportGrid(pos=gpos)
+
+# Create a MergeGrid to combine all three grids
+merged_grid = ac.MergeGrid(grids=list(grids))
+
+# %%
+# Let's visualize the merged grid points.
+
+plt.figure(figsize=(5, 5))
+plt.scatter(*merged_grid.pos[:2], c='b', label='Grid Points')
+plt.scatter(*spos.T, c='r', marker='*', s=200, label='Source Positions')
+plt.xlabel('x / m')
+plt.ylabel('y / m')
+plt.title('Merged Grid with Bivariate Normal Distributed Points')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+# %%
+# Here we see the merged grid points distributed around the three source positions.
+# Each source has 100 points following a bivariate normal distribution, creating
+# a cloud of points that is denser near the source and sparser further away.
+
+# %%
+# **Beamforming with Merged Grid**
+#
+# For beamforming with the merged grid, we return to the :ref:`measurement setup<measurement_setup>`
+# from the :ref:`Rectangular Grid<rectangular_grid_example>` and :ref:`3D Grid<3d_grid_example>`
+# examples.
+
+# Set up the beamformer with the merged grid
+pa = ac.demo.create_three_sources_2d(mg, h5savefile='')
+ps = ac.PowerSpectra(source=pa, block_size=128, window='Hanning')
+st = ac.SteeringVector(grids=merged_grid, mics=mg)
+bb = ac.BeamformerBase(freq_data=ps, steer=st)
+
+# Calculate beamforming output for exactly 8 kHz
+pm = bb.synthetic(8000, 0)
+Lm = ac.L_p(pm)
+
+# Create a scatter plot of the beamforming results
+plt.figure(figsize=(6, 5))
+
+scatter = plt.scatter(*merged_grid.pos[:2], c=Lm, vmin=Lm.max() - 20, label='Beamforming Results')
+plt.scatter(*spos.T, c='r', marker='*', s=200, label='Source Positions')
+
+plt.colorbar(scatter, label='$L_p$ / dB')
+plt.xlabel('x / m')
+plt.ylabel('y / m')
+plt.title('Beamforming Results on Merged Grid\n(Base Beamformer)')
+plt.legend()
+plt.grid(True)
+plt.show()
