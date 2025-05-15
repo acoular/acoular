@@ -49,7 +49,7 @@ micgeofile = Path(ac.__file__).parent / 'xml' / 'array_64.xml'
 # Create a MicGeom object to represent our microphone geometry
 mg = ac.MicGeom(file=micgeofile)
 # Generate simulated time data with three sound sources
-pa = ac.demo.create_three_sources_2d(mg)
+pa = ac.demo.create_three_sources_2d(mg, h5savefile='')
 # To prepare for beamforming, we need to calculate the frequency spectra (cross spectral matrix)
 # of the signals. For this we'll use the PowerSpectra object.
 ps = ac.PowerSpectra(source=pa, block_size=128, window='Hanning')
@@ -165,7 +165,7 @@ print(f'3D Grid positions:\n{rg3d.pos[:, :5]}')
 # Let's demonstrate 3D beamforming using the CLEAN-SC algorithm.
 
 # Generate 3D test data
-pa = ac.demo.create_three_sources_3d(mg)
+pa = ac.demo.create_three_sources_3d(mg, h5savefile='')
 ps = ac.PowerSpectra(source=pa, block_size=128, window='Bartlett')
 bc = ac.BeamformerCleansc(freq_data=ps, steer=st, n_iter=10)
 
@@ -260,7 +260,7 @@ pos_total[0, :] = np.linspace(-0.2, 0.2, num_mics)
 line_mg = ac.MicGeom(pos_total=pos_total)
 
 # Generate test data
-line_pa = ac.demo.create_three_sources_1d(line_mg)
+line_pa = ac.demo.create_three_sources_1d(line_mg, h5savefile='')
 ps = ac.PowerSpectra(source=line_pa, block_size=128, window='Hanning')
 
 # Set up beamformer
