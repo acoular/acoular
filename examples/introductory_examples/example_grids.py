@@ -114,7 +114,7 @@ for i in range(2):
     Lm = ac.L_p(pm)
 
     # Plot the results
-    ax = fig.add_subplot(1, 3, i + 1)
+    ax = fig.add_subplot(1, 2, i + 1)
     ax.imshow(
         Lm.T,
         origin='lower',
