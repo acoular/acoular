@@ -106,11 +106,11 @@ st.grid = rg  # Assign the grid to the steering vector
 fig = plt.figure(figsize=(12, 5))
 
 # Calculate and plot results for three different grid resolutions
-for i in range(3):
+for i in range(2):
     rg.increment = 0.01 * (i + 1)  # Increase grid increment
 
-    # Calculate beamforming output for 8 kHz third-octave band
-    pm = bb.synthetic(8000, 3)
+    # Calculate beamforming output for exactly 8 kHz
+    pm = bb.synthetic(8000, 0)
     Lm = ac.L_p(pm)
 
     # Plot the results
@@ -142,12 +142,10 @@ plt.show()
 # **Basic RectGrid3D usage**
 #
 # Create a 3D grid with uniform spacing
-rg3d = ac.RectGrid3D(x_min=-0.2, x_max=0.2, y_min=-0.2, y_max=0.2, z_min=-0.3, z_max=-0.1, increment=0.01)
-print('3D-grid size:', rg3d.size)
+rg3d = ac.RectGrid3D(x_min=-0.2, x_max=0.2, y_min=-0.2, y_max=0.2, z_min=-0.3, z_max=-0.1, increment=0.03)
 
-# We can also use different increments for each dimension
-rg3d.increment = (0.02, 0.02, 0.01)
-print('3D-grid size with different increments:', rg3d.size)
+# We can also use different increments for each dimension:
+# rg3d.increment = (0.02, 0.02, 0.01)
 
 # %%
 # **3D Grid Properties**
@@ -169,17 +167,17 @@ print(f'3D Grid positions:\n{rg3d.pos[:, :5]}')
 # Generate 3D test data
 pa = ac.demo.create_three_sources_3d(mg)
 ps = ac.PowerSpectra(source=pa, block_size=128, window='Bartlett')
-bc = ac.BeamformerCleansc(freq_data=ps, steer=st)
+bc = ac.BeamformerCleansc(freq_data=ps, steer=st, n_iter=10)
 
 # Update the steering vector with the 3D grid
 st.grid = rg3d
-rg3d.increment = 0.01  # Set uniform increment
+rg3d.increment = 0.03  # Set uniform increment
 
 # %%
 # Now we are ready to compute the beamforming output.
-# This time, we'll calculate it for a frequency of exactly 8000.
+# This time, we'll calculate it for a frequency of exactly 8 kHz.
 
-map_3d = bc.synthetic(8000, 1)  # Beamformer result in Pa^2
+map_3d = bc.synthetic(8000, 0)  # Beamformer result in Pa^2
 map_3d = ac.L_p(map_3d)  # Convert to SPL / dB
 # Note that the output of 3D beamforming is a 3D field:
 print('3D beamforming output shape:', map_3d.shape)
@@ -196,10 +194,10 @@ ax = fig.add_subplot(projection='3d')
 ax.scatter(*mg.pos, marker='o', label='Microphones')
 
 # Plot grid points
-ax.scatter(*rg3d.pos, s=0.05, c='k', marker='.', label='3D Grid Points')
+ax.scatter(*rg3d.pos, s=0.1, c='k', marker='.', label='3D Grid Points')
 
 # Plot beamforming results
-indices = np.nonzero(map_3d)
+indices = map_3d > 0
 # Find the corresponding grid points to the indices
 pos = [p.reshape(map_3d.shape)[indices] for p in rg3d.pos]
 # Plot the points with color mapping according to their beamforming intensity
@@ -234,8 +232,8 @@ line_grid.loc = (-0.2, 0.0, -0.3)
 line_grid.direction = (1.0, 0.0, 0.0)
 # Our line will be 40 cm long
 line_grid.length = 0.4
-# And we'll place 100 points along this line.
-line_grid.num_points = 100
+# And we'll place 50 points along this line.
+line_grid.num_points = 50
 
 # %%
 # **Line Grid Properties**
@@ -276,8 +274,8 @@ freqs = ps.fftfreq()
 results = {key: np.zeros((freqs.size, line_grid.num_points)) for key in ['base', 'clean']}
 
 for i, freq in enumerate(freqs):
-    results['base'][i, :] = bb.synthetic(freq, 3)
-    results['clean'][i, :] = bs.synthetic(freq, 3)
+    results['base'][i, :] = bb.synthetic(freq, 0)
+    results['clean'][i, :] = bs.synthetic(freq, 0)
 
 # %%
 # **Visualizing Line Grid Results**
@@ -290,12 +288,12 @@ vmin = max(base_levels.max(), clean_levels.max()) - 20
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5), sharey=True)
 
-mesh1 = ax1.pcolormesh(line_grid.pos[0, :], freqs, base_levels, vmin=vmin)
+mesh1 = ax1.pcolormesh(line_grid.pos[0, :], freqs / 1000, base_levels, vmin=vmin)
 ax1.set_xlabel('Position along line / m')
-ax1.set_ylabel('Frequency / Hz')
+ax1.set_ylabel('Frequency / kHz')
 ax1.set_title('Beamforming Results on Line Grid\n(Base Beamformer)')
 
-mesh2 = ax2.pcolormesh(line_grid.pos[0, :], freqs, clean_levels, vmin=vmin)
+mesh2 = ax2.pcolormesh(line_grid.pos[0, :], freqs / 1000, clean_levels, vmin=vmin)
 ax2.set_xlabel('Position along line / m')
 ax2.set_title('Source Mapping on Line Grid\n(CLEAN-SC)')
 
