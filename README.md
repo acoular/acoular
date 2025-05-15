@@ -97,7 +97,7 @@ micgeofile = Path(ac.__file__).parent / 'xml' / 'array_64.xml'
 # set up object managing the microphone coordinates
 mg = ac.MicGeom( file=micgeofile )
 # generate test data, in real life this would come from an array measurement
-p = ac.demo.create_three_sources_2d(mg)
+p = ac.demo.create_three_sources_2d( mg )
 # set up object managing the microphone array data (usually from measurement)
 ts = ac.TimeSamples( file='three_sources_2d.h5')
 # set up object managing the cross spectral matrix computation
