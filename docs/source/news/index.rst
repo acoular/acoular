@@ -13,6 +13,7 @@ Upcoming Release
 
     **Documentation**
         * generalizes data import in the airfoil examples using the :func:`~acoular.tools.helpers.get_data_file` helper function
+        * add a new example for grids
 
 25.04
 ------------------------
