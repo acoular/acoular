@@ -4,7 +4,9 @@ What's new
 
 Upcoming Release
 ------------------------
-
+    
+    **Documentation**
+        * add example for grids
 
 25.04
 ------------------------
