@@ -89,7 +89,7 @@ def test_load_xml():
     """Test if grid data is loaded correctly from an XML file."""
     xml_file_path = Path(ac.__file__).parent / 'xml' / 'gpos.xml'
     # Test for correct number of grid positions and shapes
-    grid = ac.ImportGrid(file=xml_file_path)
+    grid = ac.ImportGrid(file=str(xml_file_path))
     assert grid.size == 3
     assert grid.pos.shape == (3, 3)
     # Verify subgrids
