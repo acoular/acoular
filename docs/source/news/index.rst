@@ -5,8 +5,18 @@ What's new
 Upcoming Release
 ------------------------
     
+    **New features**
+        * add :meth:`~acoular.grids.ImportGrid`.export_gpos` to :class:`~acoular.grids.ImportGrid`
+
     **Documentation**
         * add example for grids
+
+    **Tests**
+        * add tests for export and load XML functionalities of :class:`~acoular.grids.ImportGrid`
+
+    **Internal**
+        * add `three_sources_1d.h5` and `three_sources_3d.h5`
+        * change `three_sources.h5` to `three_sources_2d.h5`
 
 25.04
 ------------------------
