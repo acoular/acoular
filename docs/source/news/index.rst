@@ -4,6 +4,7 @@ What's new
 
 Upcoming Release
 ------------------------
+
     **Internal**
         * introduces speedup for :class:'~acoular.sources.MovingPointSource' by using block-wise processing
         * fixes :class:`~acoular.tbeamform.BeamformerTime` crashing if buffer exceeds processing block size
@@ -11,9 +12,19 @@ Upcoming Release
         * excludes `scipy` version 1.16 from the dependencies due to bug affecting the `scipy.signal.tf2sos` function
         * adds the :func:`~acoular.tools.helpers.get_data_file` helper function for ensuring that a file is available locally
 
+    **New features**
+        * add :meth:`~acoular.grids.ImportGrid`.export_gpos` to :class:`~acoular.grids.ImportGrid`
+
     **Documentation**
         * generalizes data import in the airfoil examples using the :func:`~acoular.tools.helpers.get_data_file` helper function
         * add a new example for grids
+
+    **Tests**
+        * add tests for export and load XML functionalities of :class:`~acoular.grids.ImportGrid`
+
+    **Internal**
+        * add `three_sources_1d.h5` and `three_sources_3d.h5`
+        * change `three_sources.h5` to `three_sources_2d.h5`
 
 25.04
 ------------------------
