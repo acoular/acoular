@@ -327,11 +327,15 @@ grids = np.zeros(3, dtype=ac.Grid)
 grid_size = 100
 for i, p in enumerate(spos):
     gpos = np.zeros((3, grid_size)) - 0.2
-    # Generate 100 points with bivariate normal distribution around each source
-    # Using a small covariance matrix (1/200) to keep points close to source
-    gpos[:2, :] = np.random.multivariate_normal(p, np.eye(2) / 5e2, size=grid_size).T
+    # Generate 100 points with bivariate normal distribution around each source using a small
+    # covariance matrix (identity matrix scaled by 1/500) to keep points close to source
+    gpos[:2, :] = np.random.multivariate_normal(p, np.eye(2) / 500, size=grid_size).T
     # Create ImportGrid object for each set of points
     grids[i] = ac.ImportGrid(pos=gpos)
+
+# %%
+# The merged grid can be exported to an XML file using the
+# :meth:`~acoular.grids.ImportGrid.export_gpos` method.
 
 # Create a MergeGrid to combine all three grids
 merged_grid = ac.MergeGrid(grids=list(grids))
@@ -339,8 +343,8 @@ merged_grid = ac.MergeGrid(grids=list(grids))
 # %%
 # Let's visualize the merged grid points.
 
-plt.figure(figsize=(5, 5))
-plt.scatter(*merged_grid.pos[:2], c='b', label='Grid Points')
+plt.figure(figsize=(6, 5))
+plt.scatter(*merged_grid.pos[:2], c='gray', s=10, label='Grid Points')
 plt.scatter(*spos.T, c='r', marker='*', s=200, label='Source Positions')
 plt.xlabel('x / m')
 plt.ylabel('y / m')
@@ -364,7 +368,7 @@ plt.show()
 # Set up the beamformer with the merged grid
 pa = ac.demo.create_three_sources_2d(mg, h5savefile='')
 ps = ac.PowerSpectra(source=pa, block_size=128, window='Hanning')
-st = ac.SteeringVector(grids=merged_grid, mics=mg)
+st = ac.SteeringVector(grid=merged_grid, mics=mg)
 bb = ac.BeamformerBase(freq_data=ps, steer=st)
 
 # Calculate beamforming output for exactly 8 kHz
@@ -372,12 +376,12 @@ pm = bb.synthetic(8000, 0)
 Lm = ac.L_p(pm)
 
 # Create a scatter plot of the beamforming results
-plt.figure(figsize=(6, 5))
+plt.figure(figsize=(7, 5))
 
-scatter = plt.scatter(*merged_grid.pos[:2], c=Lm, vmin=Lm.max() - 20, label='Beamforming Results')
+s = plt.scatter(*merged_grid.pos[:2], c=Lm, s=10, vmin=Lm.max() - 20, label='Beamforming Results')
 plt.scatter(*spos.T, c='r', marker='*', s=200, label='Source Positions')
 
-plt.colorbar(scatter, label='$L_p$ / dB')
+plt.colorbar(s, label='$L_p$ / dB')
 plt.xlabel('x / m')
 plt.ylabel('y / m')
 plt.title('Beamforming Results on Merged Grid\n(Base Beamformer)')
