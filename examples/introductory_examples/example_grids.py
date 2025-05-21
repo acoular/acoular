@@ -337,7 +337,19 @@ for i, p in enumerate(spos):
 # The merged grid can be exported to an XML file using the
 # :meth:`~acoular.grids.ImportGrid.export_gpos` method.
 
-# Create a MergeGrid to combine all three grids
+# grids[0].export_gpos('grid1.xml')
+# grids[1].export_gpos('grid2.xml')
+# grids[2].export_gpos('grid3.xml')
+
+# %%
+# The XML files can be imported using the :meth:`~acoular.grids.ImportGrid.file` attribute.
+
+# grid = ac.ImportGrid(file='grid1.xml')
+
+# %%
+# For now, we will create a MergeGrid to combine all three grids and use this merged grid for
+# further processing.
+
 merged_grid = ac.MergeGrid(grids=list(grids))
 
 # %%
@@ -388,3 +400,6 @@ plt.title('Beamforming Results on Merged Grid\n(Base Beamformer)')
 plt.legend()
 plt.grid(True)
 plt.show()
+
+# %%
+# We see that the sound pressure level is highest in the area between the microphones.
