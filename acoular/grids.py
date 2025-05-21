@@ -28,6 +28,7 @@ Implement support for multidimensional grids and integration sectors.
 # imports from other packages
 import xml.dom.minidom
 from abc import abstractmethod
+from pathlib import Path
 
 from numpy import (
     absolute,
@@ -586,7 +587,7 @@ class RectGrid3D(RectGrid):
     The grid has cubic or nearly cubic cells. It is defined by lower and upper x-, y- and  z-limits.
     """
 
-    #: The lower z-limit that defines the grid. Default is ``-1``.
+    #: The lower z-limit that defines the grid. Default is ``-1.0``.
     z_min = Float(-1.0, desc='minimum  z-value')
 
     #: The upper z-limit that defines the grid. Default is ``1.0``.
@@ -845,8 +846,8 @@ class ImportGrid(Grid):
         >>> import acoular as ac
         >>> import numpy as np
         >>> grid = ac.ImportGrid()
-        >>> # Create some random grid points
-        >>> points = np.random.rand(3, 100)
+        >>> # Create some grid points
+        >>> points = np.arange(9).reshape(3, 3)
         >>> grid.pos = points
         >>> grid.export_gpos('grid_points.xml')  # doctest: +SKIP
 
@@ -855,9 +856,9 @@ class ImportGrid(Grid):
         .. code-block:: xml
 
             <?xml version="1.1" encoding="utf-8"?><Grid name="grid_points">
-              <pos Name="Point 1" x="0.123" y="0.456" z="0.789"/>
-              <pos Name="Point 2" x="0.234" y="0.567" z="0.890"/>
-              ...
+              <pos Name="Point 1" x="0" y="1" z="2"/>
+              <pos Name="Point 2" x="3" y="4" z="5"/>
+              <pos Name="Point 3" x="6" y="7" z="8"/>
             </Grid>
         """
         filepath = Path(filename)
@@ -865,10 +866,17 @@ class ImportGrid(Grid):
         with filepath.open('w', encoding='utf-8') as f:
             f.write(f'<?xml version="1.1" encoding="utf-8"?><Grid name="{basename}">\n')
             for i in range(self.pos.shape[-1]):
-                subgrid_attr = f' subgrid="{self.subgrids[i]}"' if hasattr(self, 'subgrids') and len(self.subgrids) > i else ''
-                f.write(
-                    f'  <pos Name="Point {i+1}" x="{self.pos[0, i]}" y="{self.pos[1, i]}" z="{self.pos[2, i]}"{subgrid_attr}/>\n',
-                )
+                has_subgrids = hasattr(self, 'subgrids') and len(self.subgrids) > i
+                subgrid_attr = f'subgrid="{self.subgrids[i]}"' if has_subgrids else ''
+                pos_str = ' '.join([
+                    '  <pos',
+                    f'Name="Point {i+1}"',
+                    f'x="{self.pos[0, i]}"',
+                    f'y="{self.pos[1, i]}"',
+                    f'z="{self.pos[2, i]}"',
+                    f'{subgrid_attr}/>\n'
+                ])
+                f.write(pos_str)
             f.write('</Grid>')
 
     @on_trait_change('file')
