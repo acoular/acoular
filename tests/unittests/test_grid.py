@@ -8,7 +8,7 @@ from pathlib import Path
 
 import acoular as ac
 import pytest
-from numpy import array, array_equal
+from numpy import array
 from pytest_cases import fixture, get_case_id, parametrize_with_cases
 
 from tests.cases.test_grid_cases import Grids, Sectors
@@ -101,6 +101,8 @@ def test_export_gpos(tmp_path, import_grid):
     ----------
     tmp_path : pathlib.Path
         Temporary directory to store the exported file (fixture).
+    import_grid : acoular.grids.ImportGrid
+        Grid instance to be exported.
     """
     # Export the grid positions to a temporary file
     export_file = tmp_path / 'test_gpos.xml'
