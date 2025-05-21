@@ -162,6 +162,11 @@ filterwarnings = [
 env = [
     "OPENBLAS_NUM_THREADS=1"
 ]
+norecursedirs = [
+    "acoular/lib",
+    "acoular/lib/python*",
+    "acoular/lib/python*/site-packages/pip",
+]
 
 [tool.coverage.run]
 omit = [

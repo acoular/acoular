@@ -4,9 +4,12 @@
 """Tests for Grid classes and sector classes."""
 
 from functools import partial
+from pathlib import Path
 
+import acoular as ac
 import pytest
-from pytest_cases import get_case_id, parametrize_with_cases
+from numpy import array, array_equal
+from pytest_cases import fixture, get_case_id, parametrize_with_cases
 
 from tests.cases.test_grid_cases import Grids, Sectors
 from tests.utils import sector_case_filter
@@ -72,3 +75,39 @@ def test_empty_subdomain(grid, sector):
         Sector instance to be tested
     """
     assert grid.subdomain(sector)[0].shape[0] == 0, 'Subdomain is not empty'
+
+
+@fixture(scope='module')
+def import_grid():
+    """Fixture for creating a rectangular ImportGrid object with 4 grid points."""
+    # Create 4 points with center at (0, 0, 0) and aperture of 2
+    pos_total = array([[0, 1, 0, -1], [1, 0, -1, 0], [0, 0, 0, 0]])
+    return ac.ImportGrid(pos=pos_total)
+
+
+def test_load_xml():
+    """Test if grid data is loaded correctly from an XML file."""
+    xml_file_path = Path(ac.__file__).parent / 'xml' / 'gpos.xml'
+    # Test for correct number of grid positions and shapes
+    grid = ac.ImportGrid(file=xml_file_path)
+    assert grid.size == 3
+    assert grid.pos.shape == (3, 3)
+    # Verify subgrids
+    expected_subgrids = array(['subgrid1', 'subgrid2', 'subgrid3'], dtype='<U8')
+    assert array_equal(grid.subgrids, expected_subgrids)
+
+
+def test_export_gpos(tmp_path, import_grid):
+    """Test if the grid positions are exported correctly to an XML file.
+
+    Parameters
+    ----------
+    tmp_path : pathlib.Path
+        Temporary directory to store the exported file (fixture).
+    """
+    # Export the grid positions to a temporary file
+    export_file = tmp_path / 'test_gpos.xml'
+    import_grid.export_gpos(export_file)
+    # Load and check if the digests match
+    new_grid = ac.ImportGrid(file=export_file)
+    assert import_grid.digest == new_grid.digest
