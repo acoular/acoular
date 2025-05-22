@@ -5,10 +5,10 @@
 """Basic Beamforming -- Generate a map of three sources.
 =====================================================
 
-Loads the simulated signals from the `three_sources_2d.h5` file, analyzes them with Conventional
+Loads the simulated signals from the `three_sources.h5` file, analyzes them with Conventional
 Beamforming and generates a map of the three sources.
 
-.. note:: The `three_sources_2d.h5` file must be generated first by running the
+.. note:: The `three_sources.h5` file must be generated first by running the
 :doc:`example_three_sources` example.
 """
 
@@ -18,7 +18,7 @@ import acoular as ac
 import matplotlib.pyplot as plt
 
 micgeofile = Path(ac.__file__).parent / 'xml' / 'array_64.xml'
-datafile = Path('three_sources_2d.h5')
+datafile = Path('three_sources.h5')
 assert datafile.exists(), 'Data file not found, run example_three_sources.py first'
 
 mg = ac.MicGeom(file=micgeofile)

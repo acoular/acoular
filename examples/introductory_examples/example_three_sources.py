@@ -11,7 +11,7 @@ Generates a test data set for three sources.
 The simulation generates the sound pressure at 64 microphones that are
 arrangend in the 'array64' geometry which is part of the package. The sound
 pressure signals are sampled at 51200 Hz for a duration of 1 second.
-The simulated signals are stored in a HDF5 file named 'three_sources_2d.h5'.
+The simulated signals are stored in a HDF5 file named 'three_sources.h5'.
 
 Source location (relative to array center) and levels:
 
@@ -34,7 +34,7 @@ sfreq = 51200
 duration = 1
 num_samples = duration * sfreq
 micgeofile = Path(ac.__file__).parent / 'xml' / 'array_64.xml'
-h5savefile = Path('three_sources_2d.h5')
+h5savefile = Path('three_sources.h5')
 
 m = ac.MicGeom(file=micgeofile)
 n1 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=num_samples, seed=1)

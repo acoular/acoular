@@ -23,6 +23,7 @@ MANIFEST
 
 examples/all_bf.sav
 examples/benchmark/results/
+**/three_sources.h5
 **/three_sources_1d.h5
 **/three_sources_2d.h5
 **/three_sources_3d.h5
