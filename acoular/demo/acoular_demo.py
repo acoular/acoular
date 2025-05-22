@@ -32,7 +32,16 @@ Source Location        RMS
 """
 
 
-def create_three_sources(mg, locs, h5savefile='', sfreq=51200, duration=1):
+def create_three_sources(mg, h5savefile='three_sources.h5'):
+    """
+    Create three noise sources and return them as Mixer.
+
+    Alias for :func:`create_three_sources_2d`.
+    """
+    return create_three_sources_2d(mg, h5savefile=h5savefile)
+
+
+def _create_three_sources(mg, locs, h5savefile='', sfreq=51200, duration=1):
     """Create three noise sources with custom locations and return them as Mixer."""
     import acoular as ac
 
@@ -45,6 +54,7 @@ def create_three_sources(mg, locs, h5savefile='', sfreq=51200, duration=1):
     noises = [n1, n2, n3]
     ps = [ac.PointSource(signal=n, mics=mg, loc=loc) for n, loc in list(zip(noises, locs))]
     pa = ac.Mixer(source=ps[0], sources=ps[1:])
+
     if h5savefile:
         wh5 = ac.WriteH5(source=pa, file=h5savefile)
         wh5.save()
@@ -54,19 +64,19 @@ def create_three_sources(mg, locs, h5savefile='', sfreq=51200, duration=1):
 def create_three_sources_1d(mg, h5savefile='three_sources_1d.h5'):
     """Create three noise sources in a 3D plane and return them as Mixer."""
     locs = [(-0.1, 0, -0.3), (0.15, 0, -0.3), (0, 0, -0.3)]
-    return create_three_sources(mg, locs, h5savefile=h5savefile)
+    return _create_three_sources(mg, locs, h5savefile=h5savefile)
 
 
 def create_three_sources_2d(mg, h5savefile='three_sources_2d.h5'):
     """Create three noise sources in a 2D plane and return them as Mixer."""
     locs = [(-0.1, -0.1, -0.3), (0.15, 0, -0.3), (0, 0.1, -0.3)]
-    return create_three_sources(mg, locs, h5savefile=h5savefile)
+    return _create_three_sources(mg, locs, h5savefile=h5savefile)
 
 
 def create_three_sources_3d(mg, h5savefile='three_sources_3d.h5'):
     """Create three noise sources in a 3D plane and return them as Mixer."""
     locs = [(-0.1, -0.1, -0.3), (0.15, 0, -0.17), (0, 0.1, -0.25)]
-    return create_three_sources(mg, locs, h5savefile=h5savefile)
+    return _create_three_sources(mg, locs, h5savefile=h5savefile)
 
 
 def run():
@@ -84,7 +94,7 @@ def run():
 
     # generate test data, in real life this would come from an array measurement
 
-    pa = create_three_sources_2d(mg)
+    pa = create_three_sources(mg)
 
     # analyze the data and generate map
 
