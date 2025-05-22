@@ -326,7 +326,7 @@ spos = np.array([[-0.1, -0.1], [0.15, 0], [0, 0.1]])
 grids = np.zeros(3, dtype=ac.Grid)
 grid_size = 100
 for i, p in enumerate(spos):
-    gpos = np.zeros((3, grid_size)) - 0.2
+    gpos = np.zeros((3, grid_size)) - 0.3
     # Generate 100 points with bivariate normal distribution around each source using a small
     # covariance matrix (identity matrix scaled by 1/500) to keep points close to source
     gpos[:2, :] = np.random.multivariate_normal(p, np.eye(2) / 500, size=grid_size).T
@@ -391,7 +391,7 @@ Lm = ac.L_p(pm)
 plt.figure(figsize=(7, 5))
 
 s = plt.scatter(*merged_grid.pos[:2], c=Lm, s=10, vmin=Lm.max() - 20, label='Beamforming Results')
-plt.scatter(*spos.T, c='r', marker='*', s=200, label='Source Positions')
+plt.scatter(*spos.T, c='r', marker='*', s=50, label='Source Positions')
 
 plt.colorbar(s, label='$L_p$ / dB')
 plt.xlabel('x / m')
