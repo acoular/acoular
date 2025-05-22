@@ -857,14 +857,16 @@ class ImportGrid(Grid):
             for i in range(self.pos.shape[-1]):
                 has_subgrids = hasattr(self, 'subgrids') and len(self.subgrids) > i
                 subgrid_attr = f'subgrid="{self.subgrids[i]}"' if has_subgrids else ''
-                pos_str = ' '.join([
-                    '  <pos',
-                    f'Name="Point {i+1}"',
-                    f'x="{self.pos[0, i]}"',
-                    f'y="{self.pos[1, i]}"',
-                    f'z="{self.pos[2, i]}"',
-                    f'{subgrid_attr}/>\n'
-                ])
+                pos_str = ' '.join(
+                    [
+                        '  <pos',
+                        f'Name="Point {i+1}"',
+                        f'x="{self.pos[0, i]}"',
+                        f'y="{self.pos[1, i]}"',
+                        f'z="{self.pos[2, i]}"',
+                        f'{subgrid_attr}/>\n',
+                    ]
+                )
                 f.write(pos_str)
             f.write('</Grid>')
 
