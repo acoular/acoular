@@ -50,6 +50,7 @@ def create_three_sources(mg, locs, h5savefile='', sfreq=51200, duration=1):
         wh5.save()
     return pa
 
+
 def create_three_sources_1d(mg, h5savefile='three_sources_1d.h5'):
     """Create three noise sources in a 3D plane and return them as Mixer."""
     locs = [(-0.1, 0, -0.3), (0.15, 0, -0.3), (0, 0, -0.3)]
