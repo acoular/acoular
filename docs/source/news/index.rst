@@ -4,6 +4,8 @@ What's new
 
 Upcoming Release
 ------------------------
+    **Documentation**
+        * adds new docstrings to submodule :mod:`acoular.tprocess`
 
 
 25.04
