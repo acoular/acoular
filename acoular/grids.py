@@ -317,7 +317,8 @@ class Grid(ABCHasStrictTraits):
     The source code is agnostic to the unit of length. The positions' coordinates are assumed to be
     in meters. This is consistent with the standard :class:`~acoular.environments.Environment` class
     which uses the speed of sound at 20°C at sea level under standard atmosphere pressure in m/s.
-    The actual unit system can be changed by adjusting the speed of sound in the environment.
+    If the positions' coordinates are provided in a unit other than meter, it is advisable to change
+    the :attr:`~acoular.environments.Environment.c` attribute to match the given unit.
     """
 
     #: The total number of grid points. This property is automatically calculated based on other
