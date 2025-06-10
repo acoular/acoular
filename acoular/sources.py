@@ -1172,7 +1172,8 @@ class MovingPointSource(PointSource):
         epslim = 0.1 / self.up / self.sample_freq
         c0 = self.env.c
         tr = self.trajectory
-        while True:
+        n = self.num_samples
+        while n>0:
             eps = ones_like(t)  # init discrepancy in time
             te = t.copy()  # init emission time = receiving time
             j = 0
@@ -1195,7 +1196,7 @@ class MovingPointSource(PointSource):
             try:
                 ind = array(0.5 + ind * self.up, dtype=int64)
                 out = (signal[ind] / rm).T
-                yield out
+                yield out[:n]
             except IndexError:  # last incomplete frame
                 signal_length = signal.shape[0]
                 # Filter ind to exclude columns containing values greater than signal_length
@@ -1203,9 +1204,9 @@ class MovingPointSource(PointSource):
                 out = (signal[ind[:, mask]] / rm[:, mask]).T
                 # If out is not empty, yield it
                 if out.size > 0:
-                    yield out
+                    yield out[:n]
                 break
-
+            n -= num
 
 class PointSourceDipole(PointSource):
     """
