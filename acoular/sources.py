@@ -1173,7 +1173,7 @@ class MovingPointSource(PointSource):
         c0 = self.env.c
         tr = self.trajectory
         n = self.num_samples
-        while n>0:
+        while n > 0:
             eps = ones_like(t)  # init discrepancy in time
             te = t.copy()  # init emission time = receiving time
             j = 0
@@ -1207,6 +1207,7 @@ class MovingPointSource(PointSource):
                     yield out[:n]
                 break
             n -= num
+
 
 class PointSourceDipole(PointSource):
     """
