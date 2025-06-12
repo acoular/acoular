@@ -22,7 +22,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from acoular.tools import barspectrum
 
-
 # %%
 # ================
 # Data Preparation
@@ -116,7 +115,7 @@ plt.show()
 freqs = f.fftfreq()
 bf_sector = bb.integrate(sector)
 spl_sector = ac.L_p(bf_sector)
-spl_sector = np.where(spl_sector > 0, spl_sector, 0) # Keep positve entries only
+spl_sector = np.where(spl_sector > 0, spl_sector, 0)  # Keep positve entries only
 
 print(freqs.shape, spl_sector.shape)
 print(freqs)
