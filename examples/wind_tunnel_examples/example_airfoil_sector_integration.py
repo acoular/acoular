@@ -111,7 +111,6 @@ plt.show()
 #
 # Now for the main event: integrating the beamforming result over our sector! This step gives
 # you the total sound pressure level (SPL) coming from just your region of interest.
-
 freqs = f.fftfreq()
 bf_sector = bb.integrate(sector)
 spl_sector = ac.L_p(bf_sector)
@@ -123,9 +122,9 @@ print(spl_sector)
 
 plt.figure(figsize=(8, 5))
 
-plt.plot(freqs, spl_sector)
+plt.plot(freqs / 1000, spl_sector)
 
-plt.xlabel('Frequency / Hz')
+plt.xlabel('Frequency / kHz')
 plt.ylabel('$L_p$ / dB')
 plt.title('Integrated spectrum over sector')
 plt.grid()
@@ -164,7 +163,7 @@ plt.show()
 # - :class:`~acoular.grids.RectSector`: Rectangle in the x-y plane (as used above).
 # - :class:`~acoular.grids.CircSector`: Circular sector in the x-y plane.
 # - :class:`~acoular.grids.PolySector`: Arbitrary polygonal sector in the x-y plane.
-# - :class:`~acoular.grids.ConvexSector`: Convex hull sector x-y plane.
+# - :class:`~acoular.grids.ConvexSector`: Convex hull sector in the x-y plane.
 # - :class:`~acoular.grids.RectSector3D`: 3D cuboid sector (for 3D grids).
 # - :class:`~acoular.grids.MultiSector`: Combines multiple sectors of any type.
 #
