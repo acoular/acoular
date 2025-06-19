@@ -4,9 +4,21 @@ What's new
 
 Upcoming Release
 ------------------------
-    **Internal**
-        * introduces speedup for :class:'~acoular.sources.MovingPointSource' by using block-wise processing
 
+    **New features**
+        * add :meth:`~acoular.grids.ImportGrid`.export_gpos` to :class:`~acoular.grids.ImportGrid`
+
+    **Documentation**
+        * add example for grids
+
+    **Tests**
+        * add tests for export and load XML functionalities of :class:`~acoular.grids.ImportGrid`
+
+    **Internal**
+        * add `three_sources_1d.h5`, `three_sources_2d.h5`, and `three_sources_3d.h5`
+        * add functions `_create_three_sources`, `create_three_sources_1d`, `create_three_sources_2d`, and `create_three_sources_3d` to create the test data
+        * change `create_three_sources` function to an alias of `create_three_sources_2d`
+        * introduces speedup for :class:'~acoular.sources.MovingPointSource' by using block-wise processing
 25.04
 ------------------------
 
