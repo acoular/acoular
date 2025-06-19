@@ -62,7 +62,7 @@ def _create_three_sources(mg, locs, h5savefile='', sfreq=51200, duration=1):
 
 
 def create_three_sources_1d(mg, h5savefile='three_sources_1d.h5'):
-    """Create three noise sources in a 3D plane and return them as Mixer."""
+    """Create three noise sources on a 1D line and return them as Mixer."""
     locs = [(-0.1, 0, -0.3), (0.15, 0, -0.3), (0, 0, -0.3)]
     return _create_three_sources(mg, locs, h5savefile=h5savefile)
 
@@ -74,7 +74,7 @@ def create_three_sources_2d(mg, h5savefile='three_sources_2d.h5'):
 
 
 def create_three_sources_3d(mg, h5savefile='three_sources_3d.h5'):
-    """Create three noise sources in a 3D plane and return them as Mixer."""
+    """Create three noise sources in 3D space and return them as Mixer."""
     locs = [(-0.1, -0.1, -0.3), (0.15, 0, -0.17), (0, 0.1, -0.25)]
     return _create_three_sources(mg, locs, h5savefile=h5savefile)
 
