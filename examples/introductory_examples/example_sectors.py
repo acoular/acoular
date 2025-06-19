@@ -3,8 +3,8 @@
 # ------------------------------------------------------------------------------
 # %%
 """
-Airfoil in open jet -- Sector Integration Example
-================================================
+Sectors
+=======
 
 This example demonstrates how to use a sector for spatial integration in Acoular.
 It uses the airfoil-in-open-jet dataset, places a rectangular sector behind the airfoil,
