@@ -20,7 +20,9 @@ from pathlib import Path
 import acoular as ac
 import matplotlib.pyplot as plt
 import numpy as np
+
 from acoular.tools import barspectrum
+from acoular.tools.helpers import get_calib_file, get_time_data_file
 
 # %%
 # ================
@@ -33,26 +35,9 @@ from acoular.tools import barspectrum
 
 cfreq = 4000  # Center frequency for demonstration
 
-# Download data if necessary
-calib_file = Path('../data/example_calib.xml')
-if not calib_file.exists():
-    calib_file = Path().cwd() / 'example_calib.xml'
-    if not calib_file.exists():
-        import urllib
-
-        url = 'https://github.com/acoular/acoular/raw/master/examples/data/example_calib.xml'
-        urllib.request.urlretrieve(url, calib_file)
-    print(f'Calibration file location: {calib_file}')
-
-time_data_file = Path('../data/example_data.h5')
-if not time_data_file.exists():
-    time_data_file = Path().cwd() / 'example_data.h5'
-    if not time_data_file.exists():
-        import urllib
-
-        url = 'https://github.com/acoular/acoular/raw/master/examples/data/example_data.h5'
-        time_data_file, _ = urllib.request.urlretrieve(url, time_data_file)
-    print(f'Time data file location: {time_data_file}')
+# Download example data if necessary
+calib_file = get_calib_file()
+time_data_file = get_time_data_file()
 
 ts = ac.MaskedTimeSamples(
     file=time_data_file,
