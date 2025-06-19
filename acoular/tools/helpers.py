@@ -11,9 +11,13 @@
     barspectrum
     bardata
     c_air
+    get_time_data_file
+    get_calib_file
 """
 
 from warnings import warn
+
+from pathlib import Path
 
 from numpy import (
     array,
@@ -401,3 +405,53 @@ def c_air(t, h, p=101325, co2=0.04):
         + a14 * x_c**2
         + a15 * x_w * p * x_c
     )
+
+
+def get_calib_file():
+    """
+    Ensures the example calibration file is available locally.
+
+    If the file does not exist in ``'../data/'`` or the current directory,
+    it is downloaded from the Acoular GitHub repository.
+
+    Returns
+    -------
+    :class:`pathlib.Path`
+        Path to the calibration XML file.
+    """
+    calib_file = Path('../data/example_calib.xml')
+    if not calib_file.exists():
+        calib_file = Path().cwd() / 'example_calib.xml'
+        if not calib_file.exists():
+            import urllib
+
+            url = 'https://github.com/acoular/acoular/raw/master/examples/data/example_calib.xml'
+            urllib.request.urlretrieve(url, calib_file)
+        print(f'Calibration file location: {calib_file}')
+
+    return calib_file
+
+
+def get_time_data_file():
+    """
+    Ensures the example time data file is available locally.
+
+    If the file does not exist in ``'../data/'`` or the current directory,
+    it is downloaded from the Acoular GitHub repository.
+
+    Returns
+    -------
+    :class:`pathlib.Path`
+        Path to the HDF5 time data file.
+    """
+    time_data_file = Path('../data/example_data.h5')
+    if not time_data_file.exists():
+        time_data_file = Path().cwd() / 'example_data.h5'
+        if not time_data_file.exists():
+            import urllib
+
+            url = 'https://github.com/acoular/acoular/raw/master/examples/data/example_data.h5'
+            time_data_file, _ = urllib.request.urlretrieve(url, time_data_file)
+        print(f'Time data file location: {time_data_file}')
+
+    return time_data_file
