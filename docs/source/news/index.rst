@@ -18,12 +18,15 @@ Upcoming Release
         * add `three_sources_1d.h5`, `three_sources_2d.h5`, and `three_sources_3d.h5`
         * add functions `_create_three_sources`, `create_three_sources_1d`, `create_three_sources_2d`, and `create_three_sources_3d` to create the test data
         * change `create_three_sources` function to an alias of `create_three_sources_2d`
+        * introduces speedup for :class:'~acoular.sources.MovingPointSource' by using block-wise processing
 25.04
 ------------------------
 
     **Tests**
         * fixes unpickable classes and adds pickle test
 
+    **Documentation**
+        * adds comments for missing meter units to docstrings in :mod:`acoular.microphones` and :mod:`acoular.grids`
 
 25.03
 ------------------------

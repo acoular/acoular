@@ -92,10 +92,11 @@ class HDF5Cache(HasStrictTraits):
             return  # cachefile is not created in readonly mode
 
         if isinstance(obj.h5f, file_cls):
-            if Path(obj.h5f.filename).resolve() == filename:
+            h5filename = Path(obj.h5f.filename).resolve()
+            if h5filename == filename:
                 self.busy = False
                 return
-            self._decrease_file_reference_counter(obj.h5f.filename)
+            self._decrease_file_reference_counter(h5filename)
 
         if filename not in self.open_files:  # or tables.file._open_files.filenames
             if config.global_caching == 'readonly':

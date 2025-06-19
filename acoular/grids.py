@@ -310,6 +310,16 @@ class Grid(ABCHasStrictTraits):
     This class defines a common interface for all grid geometries and provides tools to query grid
     properties and related data. It is intended to serve as a base class for specialized grid
     implementations and should not be instantiated directly as it lacks concrete functionality.
+
+    .. _units_note_grids:
+
+    Unit System
+    ----------
+    The source code is agnostic to the unit of length. The positions' coordinates are assumed to be
+    in meters. This is consistent with the standard :class:`~acoular.environments.Environment` class
+    which uses the speed of sound at 20°C at sea level under standard atmosphere pressure in m/s.
+    If the positions' coordinates are provided in a unit other than meter, it is advisable to change
+    the :attr:`~acoular.environments.Environment.c` attribute to match the given unit.
     """
 
     #: The total number of grid points. This property is automatically calculated based on other
@@ -322,6 +332,7 @@ class Grid(ABCHasStrictTraits):
 
     #: The grid positions represented as a (3, :attr:`size`) array of :class:`floats<float>`.
     #: (read-only)
+    #: All positions' coordinates are in meters by default (see :ref:`notes <units_note_grids>`).
     pos = Property(desc='x, y, z positions of grid points')
 
     #: A unique identifier for the grid, based on its properties. (read-only)
@@ -1046,8 +1057,9 @@ class LineGrid(Grid):
     #: are set. (read-only)
     size = Property(desc='overall number of grid points')
 
-    #: A (3, :attr:`size`) array containing the x, y, and z positions
-    #: of the grid points. (read-only)
+    #: A (3, :attr:`size`) array containing the x, y, and z positions of the grid points.
+    #: (read-only)
+    #: All positions' coordinates are in meters by default (see :ref:`notes <units_note_grids>`).
     pos = Property(desc='x, y, z positions of grid points')
 
     #: A unique identifier for the grid, based on its properties. (read-only)
