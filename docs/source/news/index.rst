@@ -6,6 +6,7 @@ Upcoming Release
 ------------------------
     **Internal**
         * introduces speedup for :class:'~acoular.sources.MovingPointSource' by using block-wise processing
+        * fixes :class:`~acoular.tbeamform.BeamformerTime` crashing if buffer exceeds processing block size
 
 25.04
 ------------------------

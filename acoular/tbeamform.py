@@ -174,6 +174,8 @@ class BeamformerTime(TimeOut):
             p_res *= weights
             if p_res.shape[0] < buffer.result_num:  # last block shorter
                 num = p_res.shape[0] - max_sample_delay
+                # exit loop if there is not enough data left to be processed
+                if num <= 0: break
                 n_index = arange(0, num + 1)[:, newaxis]
             # init step
             Phi, autopow = self._delay_and_sum(num, p_res, d_interp2, d_index, amp)
