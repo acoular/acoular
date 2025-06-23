@@ -6,6 +6,7 @@ Upcoming Release
 ------------------------
     **Internal**
         * introduces speedup for :class:'~acoular.sources.MovingPointSource' by using block-wise processing
+        * fixes deprecation issue for output parameters of scipy.optimize.fmin_l_bfgs_b solver
 
 25.04
 ------------------------
