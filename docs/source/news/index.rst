@@ -6,6 +6,7 @@ Upcoming Release
 ------------------------
     **Internal**
         * introduces speedup for :class:'~acoular.sources.MovingPointSource' by using block-wise processing
+        * excludes `scipy` version 1.16 from the dependencies due to bug affecting the `scipy.signal.tf2sos` function
 
 25.04
 ------------------------
