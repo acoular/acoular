@@ -31,10 +31,10 @@ classifiers = [
 dependencies = [
     "numpy",
     "numba",
-    "scipy>=1.1.0",
+    "scipy >= 1.1.0, != 1.16.*", # scipy 1.16 has a bug in signal that causes issues with Acoular
     "scikit-learn",
     "tables",
-    "traits>=6.0",
+    "traits >= 6.0",
 ]
 maintainers = [
     {name = "Adam Kujawski", email = "adam.kujawski@tu-berlin.de"},
