@@ -45,6 +45,7 @@ from numpy import (
     mod,
     newaxis,
     ones,
+    ones_like,
     pi,
     real,
     repeat,
@@ -1164,46 +1165,48 @@ class MovingPointSource(PointSource):
         # from the end of the calculated signal.
 
         signal = self.signal.usignal(self.up)
-        out = empty((num, self.num_channels))
         # shortcuts and initial values
-        m = self.mics
-        t = self.start * ones(m.num_mics)
-        i = 0
+        num_mics = self.num_channels
+        mpos = self.mics.pos[:, :, newaxis]
+        t = self.start + ones(num_mics)[:, newaxis] * arange(num) / self.sample_freq
         epslim = 0.1 / self.up / self.sample_freq
         c0 = self.env.c
         tr = self.trajectory
         n = self.num_samples
-        while n:
-            n -= 1
-            eps = ones(m.num_mics)
+        while n > 0:
+            eps = ones_like(t)  # init discrepancy in time
             te = t.copy()  # init emission time = receiving time
             j = 0
             # Newton-Rhapson iteration
             while abs(eps).max() > epslim and j < 100:
-                loc = array(tr.location(te))
-                rm = loc - m.pos  # distance vectors to microphones
+                loc = array(tr.location(te.flatten())).reshape((3, num_mics, -1))
+                rm = loc - mpos  # distance vectors to microphones
                 rm = sqrt((rm * rm).sum(0))  # absolute distance
                 loc /= sqrt((loc * loc).sum(0))  # distance unit vector
-                der = array(tr.location(te, der=1))
+                der = array(tr.location(te.flatten(), der=1)).reshape((3, num_mics, -1))
                 Mr = (der * loc).sum(0) / c0  # radial Mach number
-                eps = (te + rm / c0 - t) / (1 + Mr)  # discrepancy in time
+                eps[:] = (te + rm / c0 - t) / (1 + Mr)  # discrepancy in time
                 te -= eps
                 j += 1  # iteration count
-            t += 1.0 / self.sample_freq
+            t += num / self.sample_freq
             # emission time relative to start time
             ind = (te - self.start_t + self.start) * self.sample_freq
             if self.conv_amp:
                 rm *= (1 - Mr) ** 2
             try:
-                out[i] = signal[array(0.5 + ind * self.up, dtype=int64)] / rm
-                i += 1
-                if i == num:
-                    yield out
-                    i = 0
-            except IndexError:  # if no more samples available from the source
+                ind = array(0.5 + ind * self.up, dtype=int64)
+                out = (signal[ind] / rm).T
+                yield out[:n]
+            except IndexError:  # last incomplete frame
+                signal_length = signal.shape[0]
+                # Filter ind to exclude columns containing values greater than signal_length
+                mask = (ind < signal_length).all(axis=0)
+                out = (signal[ind[:, mask]] / rm[:, mask]).T
+                # If out is not empty, yield it
+                if out.size > 0:
+                    yield out[:n]
                 break
-        if i > 0:  # if there are still samples to yield
-            yield out[:i]
+            n -= num
 
 
 class PointSourceDipole(PointSource):
