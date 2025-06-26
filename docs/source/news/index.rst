@@ -19,6 +19,9 @@ Upcoming Release
         * add functions `_create_three_sources`, `create_three_sources_1d`, `create_three_sources_2d`, and `create_three_sources_3d` to create the test data
         * change `create_three_sources` function to an alias of `create_three_sources_2d`
         * introduces speedup for :class:'~acoular.sources.MovingPointSource' by using block-wise processing
+        * fixes :class:`~acoular.tbeamform.BeamformerTime` crashing if buffer exceeds processing block size
+        * fixes deprecation issue for output parameters of scipy.optimize.fmin_l_bfgs_b solver
+        * excludes `scipy` version 1.16 from the dependencies due to bug affecting the `scipy.signal.tf2sos` function
 25.04
 ------------------------
 
