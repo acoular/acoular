@@ -1872,10 +1872,8 @@ class BeamformerCMF(BeamformerBase):
                     factr=10000000.0,
                     pgtol=1e-05,
                     epsilon=1e-08,
-                    iprint=-1,
                     maxfun=15000,
                     maxiter=self.n_iter,
-                    disp=None,
                     callback=None,
                     maxls=20,
                 )
@@ -2042,10 +2040,8 @@ class BeamformerSODIX(BeamformerBase):
                         factr=100.0,
                         pgtol=1e-12,
                         epsilon=1e-08,
-                        iprint=-1,
                         maxfun=1500000,
                         maxiter=self.n_iter,
-                        disp=-1,
                         callback=None,
                         maxls=20,
                     )
