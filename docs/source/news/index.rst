@@ -4,6 +4,9 @@ What's new
 
 Upcoming Release
 ------------------------
+    **Documentation**
+        * adds new docstrings to submodule :mod:`acoular.tprocess`
+
     **Internal**
         * introduces speedup for :class:'~acoular.sources.MovingPointSource' by using block-wise processing
         * fixes :class:`~acoular.tbeamform.BeamformerTime` crashing if buffer exceeds processing block size
