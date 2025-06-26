@@ -7,6 +7,8 @@ Upcoming Release
     **Documentation**
         * adds new docstrings to submodule :mod:`acoular.tprocess`
 
+    **Internal**
+        * introduces speedup for :class:'~acoular.sources.MovingPointSource' by using block-wise processing
 
 25.04
 ------------------------
@@ -14,6 +16,8 @@ Upcoming Release
     **Tests**
         * fixes unpickable classes and adds pickle test
 
+    **Documentation**
+        * adds comments for missing meter units to docstrings in :mod:`acoular.microphones` and :mod:`acoular.grids`
 
 25.03
 ------------------------
