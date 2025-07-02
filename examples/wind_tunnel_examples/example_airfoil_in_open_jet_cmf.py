@@ -11,7 +11,7 @@ Uses measured data in file example_data.h5, calibration in file example_calib.xm
 microphone geometry in array_56.xml (part of Acoular).
 """
 
-import urllib
+import urllib.request
 from pathlib import Path
 
 import acoular as ac
