@@ -12,7 +12,7 @@ Loads the example data set, sets diffrent Sectors for intergration.
 Shows Acoular's Sector und Sound Pressure level Integration functionality.
 """
 
-import urllib
+import urllib.request
 from pathlib import Path
 
 import acoular as ac
