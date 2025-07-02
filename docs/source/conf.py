@@ -181,4 +181,5 @@ intersphinx_mapping = {
     "numpy": ("https://numpy.org/doc/stable", None),
     "scipy": ("https://docs.scipy.org/doc/scipy/", None),
     "matplotlib": ("https://matplotlib.org/stable", None),
+    "h5py": ("https://docs.h5py.org/en/stable/", None),
 }
