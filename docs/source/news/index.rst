@@ -4,8 +4,12 @@ What's new
 
 Upcoming Release
 ------------------------
+
     **New features:**
-        * deprecate `extend` method in :class:`~acoular.grids.RectGrid` in favor of `extent` property
+        * deprecates :meth:`~acoular.grids.RectGrid.extend` method in favor of :attr:`~acoular.grids.RectGrid.extent` property
+
+    **Documentation**
+        * changes all appearances of :meth:`~acoular.grids.RectGrid.extend` to :attr:`~acoular.grids.RectGrid.extent`
 
     **Internal**
         * introduces speedup for :class:'~acoular.sources.MovingPointSource' by using block-wise processing
