@@ -193,7 +193,7 @@ print('3D beamforming output shape:', Lm.shape)
 # %%
 # **Visualizing 3D Results**
 #
-# Let's create a 3D visualization of the beamforming results.
+# A 3D visualization of the beamforming results can be done in the following way:
 
 fig = plt.figure()
 ax = fig.add_subplot(projection='3d')
