@@ -504,8 +504,9 @@ class RectGrid(Grid):
         This method is deprecated. Use the :attr:`extent` property instead.
         """
         import warnings
+
         warnings.warn(
-            "The extend() method is deprecated. Use the extent property instead.",
+            'The extend() method is deprecated. Use the extent property instead.',
             DeprecationWarning,
             stacklevel=2
         )
