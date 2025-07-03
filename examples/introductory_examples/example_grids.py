@@ -366,7 +366,7 @@ plt.grid(True)
 plt.show()
 
 # %%
-# Here we see the merged grid points distributed around the three source positions.
+# Here, we see the merged grid points distributed around the three source positions.
 # Each source has 100 points following a bivariate normal distribution, creating
 # a cloud of points that is denser near the source and sparser further away.
 
