@@ -9,8 +9,7 @@ Upcoming Release
         * fixes :class:`~acoular.tbeamform.BeamformerTime` crashing if buffer exceeds processing block size
         * fixes deprecation issue for output parameters of scipy.optimize.fmin_l_bfgs_b solver
         * excludes `scipy` version 1.16 from the dependencies due to bug affecting the `scipy.signal.tf2sos` function
-        * add the :func:`~acoular.tools.helpers.get_calib_file` helper function for ensuring that the example calibration file is available locally
-        * add the :func:`~acoular.tools.helpers.get_time_data_file` helper function for ensuring that the time data calibration file is available locally
+        * add the :func:`~acoular.tools.helpers.get_data_file` helper function for ensuring that a file is available locally
     
     **Documentation**
         * add example for sectors

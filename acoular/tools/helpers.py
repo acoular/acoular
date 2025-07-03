@@ -11,8 +11,7 @@
     barspectrum
     bardata
     c_air
-    get_time_data_file
-    get_calib_file
+    get_data_file
 """
 
 from warnings import warn
@@ -407,9 +406,9 @@ def c_air(t, h, p=101325, co2=0.04):
     )
 
 
-def get_calib_file():
+def get_data_file(file):
     """
-    Ensures the example calibration file is available locally.
+    Ensures a file is available locally.
 
     If the file does not exist in ``'../data/'`` or the current directory,
     it is downloaded from the Acoular GitHub repository.
@@ -417,41 +416,16 @@ def get_calib_file():
     Returns
     -------
     :class:`pathlib.Path`
-        Path to the calibration XML file.
+        Path to the file.
     """
-    calib_file = Path('../data/example_calib.xml')
-    if not calib_file.exists():
-        calib_file = Path().cwd() / 'example_calib.xml'
-        if not calib_file.exists():
+    data_file = Path('../data/' + file)
+    if not data_file.exists():
+        data_file = Path().cwd() / file
+        if not data_file.exists():
             import urllib.request
 
-            url = 'https://github.com/acoular/acoular/raw/master/examples/data/example_calib.xml'
-            urllib.request.urlretrieve(url, calib_file)
-        print(f'Calibration file location: {calib_file}')
+            url = 'https://github.com/acoular/acoular/raw/master/examples/data/' + file
+            urllib.request.urlretrieve(url, data_file)
+        print(f'Calibration file location: {data_file}')
 
-    return calib_file
-
-
-def get_time_data_file():
-    """
-    Ensures the example time data file is available locally.
-
-    If the file does not exist in ``'../data/'`` or the current directory,
-    it is downloaded from the Acoular GitHub repository.
-
-    Returns
-    -------
-    :class:`pathlib.Path`
-        Path to the HDF5 time data file.
-    """
-    time_data_file = Path('../data/example_data.h5')
-    if not time_data_file.exists():
-        time_data_file = Path().cwd() / 'example_data.h5'
-        if not time_data_file.exists():
-            import urllib.request
-
-            url = 'https://github.com/acoular/acoular/raw/master/examples/data/example_data.h5'
-            time_data_file, _ = urllib.request.urlretrieve(url, time_data_file)
-        print(f'Time data file location: {time_data_file}')
-
-    return time_data_file
+    return data_file

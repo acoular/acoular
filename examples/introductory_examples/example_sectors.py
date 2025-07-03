@@ -26,7 +26,7 @@ import acoular as ac
 import matplotlib.pyplot as plt
 import numpy as np
 from acoular.tools import barspectrum
-from acoular.tools.helpers import get_calib_file, get_time_data_file
+from acoular.tools.helpers import get_data_file
 
 # %%
 # Also, we make sure we have the example data we need.
@@ -35,8 +35,8 @@ from acoular.tools.helpers import get_calib_file, get_time_data_file
 # This way, you can run the example out of the box!
 
 # Download example data if necessary
-time_data_file = get_time_data_file()
-calib_file = get_calib_file()
+time_data_file = get_data_file('example_data.h5')
+calib_file = get_data_file('example_calib.xml')
 
 ts = ac.MaskedTimeSamples(
     file=time_data_file,
