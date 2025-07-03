@@ -227,7 +227,7 @@ plt.show()
 # =========
 #
 # The ``LineGrid`` class is useful for analyzing sound sources
-# along a straight line, such as in pipe flow or linear machinery.
+# along a straight line, such as in pipe flow or for linear machinery.
 
 # %%
 # **Basic LineGrid usage**
