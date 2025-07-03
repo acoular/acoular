@@ -7,7 +7,7 @@ Grids
 =====
 
 This example demonstrates the various grid types available in Acoular and their applications in
-beamforming. We'll cover:
+beamforming. We will cover:
 
 1. Rectangular grids (2D and 3D) for standard beamforming applications
 2. Line grids for analyzing sound sources along a straight line
