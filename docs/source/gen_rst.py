@@ -33,7 +33,6 @@ except ImportError:
     from io import StringIO
     import pickle
     import urllib.request
-    import urllib.error
     import urllib.parse
     from urllib.error import HTTPError, URLError
 
