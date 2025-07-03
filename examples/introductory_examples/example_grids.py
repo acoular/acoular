@@ -126,7 +126,9 @@ plt.tight_layout()
 plt.show()
 
 # %%
-# Note how the results become less precise as the grid increment increases.
+# Note that the results become less precise as the grid increment increases. Conversely, decreasing
+# the grid increment increases the runtime, as more calculations are required. This trade-off
+# between precision and computational cost should be kept in mind for practical applications.
 #
 # =======
 # 3D Grid
