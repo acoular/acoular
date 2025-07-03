@@ -59,9 +59,9 @@ bb = ac.BeamformerBase(freq_data=f, steer=st)
 # ===============
 #
 # Let us start by defining a sector.
-# 
+#
 # Think of a sector as a region in the sound map where you want to focus your analysis.
-# 
+#
 # Here, we will create a rectangular sector that covers the trailing edge of the airfoil.
 # This is often where interesting noise sources are found in aeroacoustic measurements.
 
