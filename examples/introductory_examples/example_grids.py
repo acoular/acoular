@@ -261,7 +261,7 @@ print(f'First 5 grid positions:\n{line_grid.pos[:, :5]}')  # First 5 positions
 #
 # Let's set up a line array measurement scenario.
 
-# Create a line of microphones
+# Create a line of microphones:
 num_mics = 32
 pos_total = np.zeros((3, num_mics))
 pos_total[0, :] = np.linspace(-0.2, 0.2, num_mics)
