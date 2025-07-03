@@ -9,6 +9,9 @@ Upcoming Release
         * fixes :class:`~acoular.tbeamform.BeamformerTime` crashing if buffer exceeds processing block size
         * fixes deprecation issue for output parameters of scipy.optimize.fmin_l_bfgs_b solver
         * excludes `scipy` version 1.16 from the dependencies due to bug affecting the `scipy.signal.tf2sos` function
+    
+    **Documentation**
+        * add example for sectors
 
 25.04
 ------------------------

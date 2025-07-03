@@ -31,7 +31,7 @@ from acoular.tools.helpers import get_calib_file, get_time_data_file
 # %%
 # Also, we make sure we have the example data we need.
 #
-# If the calibration or measurement files aren't present, we'll download them automatically.
+# If the calibration or measurement files aren't present, we will download them automatically.
 # This way, you can run the example out of the box!
 
 # Download example data if necessary
@@ -58,17 +58,17 @@ bb = ac.BeamformerBase(freq_data=f, steer=st)
 # Define a Sector
 # ===============
 #
-# Let's start by defining a sector.
+# Let us start by defining a sector.
 # 
 # Think of a sector as a region in the sound map where you want to focus your analysis.
 # 
-# Here, we'll create a rectangular sector that covers the trailing edge of the airfoil.
+# Here, we will create a rectangular sector that covers the trailing edge of the airfoil.
 # This is often where interesting noise sources are found in aeroacoustic measurements.
 
 sector = ac.RectSector(x_min=-0.3, x_max=-0.25, y_min=-0.05, y_max=0.05)
 
 # %%
-# Let's see how our sector and airfoil look together. We visulaize the airfoil's front and trailing
+# To see how our sector and airfoil look together, we visulaize the airfoil's front and trailing
 # edges (as dashed lines), the sector (as a light blue rectangle), and the grid points (where the
 # sound field is calculated). This helps us see exactly what region we are integrating over later.
 #
