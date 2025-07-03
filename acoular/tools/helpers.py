@@ -14,9 +14,8 @@
     get_data_file
 """
 
-from warnings import warn
-
 from pathlib import Path
+from warnings import warn
 
 from numpy import (
     array,
