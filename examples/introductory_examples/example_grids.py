@@ -309,7 +309,7 @@ fig.colorbar(mesh1, ax=[ax1, ax2], label='$L_p$ / dB')
 plt.show()
 
 # %%
-# Here we see the beamforming results of the base beamformer and the source mapping results of the
+# Here, we see the beamforming results of the base beamformer and the source mapping results of the
 # CLEAN-SC algorithm along the line grid. The sources are clearly visible as peaks in the sound
 # pressure level and for the higher frequencies converge to the positions of the sources in the
 # simulated data. Note that the CLEAN-SC algorithm is able to resolve the sources better for lower
