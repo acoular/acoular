@@ -386,7 +386,7 @@ class Grid(ABCHasStrictTraits):
         xyi = sector.contains(xpos).reshape(self.shape)
         # return indices of "True" entries
         return where(xyi)
-    
+
     def export_gpos(self, filename):
         """
         Export the grid positions to an XML file.
