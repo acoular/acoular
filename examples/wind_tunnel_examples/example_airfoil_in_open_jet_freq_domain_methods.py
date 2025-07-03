@@ -12,7 +12,7 @@ microphone geometry in array_56.xml (part of Acoular).
 
 """
 
-import urllib
+import urllib.request
 from pathlib import Path
 
 import acoular as ac
