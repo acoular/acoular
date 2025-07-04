@@ -2,7 +2,7 @@ docs:
 - all:
   - changed-files:
     - any-glob-to-any-file: ['docs/**', 'README.md', 'AUTHORS.rst', 'CITATION.cff']
-    - all-globs-to-any-file: '!docs/source/news/index.rst'
+    - all-globs-to-all-files: ['!docs/source/news/index.rst']
 tests:
 - changed-files:
   - any-glob-to-any-file: 'tests/**'
