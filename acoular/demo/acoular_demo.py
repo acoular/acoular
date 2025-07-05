@@ -87,7 +87,7 @@ def run():
         from matplotlib.pyplot import axis, colorbar, figure, imshow, plot, show
 
         # show map
-        imshow(spl.T, origin='lower', vmin=spl.max() - 10, extent=rg.extend(), interpolation='bicubic')
+        imshow(spl.T, origin='lower', vmin=spl.max() - 10, extent=rg.extent, interpolation='bicubic')
         colorbar()
 
         # plot microphone geometry

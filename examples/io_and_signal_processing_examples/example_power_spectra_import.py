@@ -57,6 +57,6 @@ Lm = ac.L_p(pm)
 import matplotlib.pyplot as plt
 
 plt.figure()
-plt.imshow(Lm.T, origin='lower', vmin=Lm.max() - 10, extent=rg.extend(), interpolation='bicubic')
+plt.imshow(Lm.T, origin='lower', vmin=Lm.max() - 10, extent=rg.extent, interpolation='bicubic')
 plt.colorbar()
 plt.show()

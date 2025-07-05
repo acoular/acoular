@@ -4,6 +4,13 @@ What's new
 
 Upcoming Release
 ------------------------
+
+    **New features:**
+        * deprecates :meth:`~acoular.grids.RectGrid.extend` method in favor of :attr:`~acoular.grids.RectGrid.extent` property
+
+    **Documentation**
+        * changes all appearances of :meth:`~acoular.grids.RectGrid.extend` to :attr:`~acoular.grids.RectGrid.extent`
+
     **Internal**
         * introduces speedup for :class:'~acoular.sources.MovingPointSource' by using block-wise processing
         * fixes :class:`~acoular.tbeamform.BeamformerTime` crashing if buffer exceeds processing block size

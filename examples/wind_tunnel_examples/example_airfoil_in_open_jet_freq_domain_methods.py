@@ -83,7 +83,7 @@ for b in (bb, bc, be, bm, bl, bo, bs, bd, bcmf, bf, bdp, bgib):
     i1 += 1
     map = b.synthetic(cfreq, num)
     mx = ac.L_p(map.max())
-    plt.imshow(ac.L_p(map.T), origin='lower', vmin=mx - 15, interpolation='nearest', extent=grid.extend())
+    plt.imshow(ac.L_p(map.T), origin='lower', vmin=mx - 15, interpolation='nearest', extent=grid.extent)
     plt.colorbar()
     plt.title(b.__class__.__name__)
     plt.tight_layout()
