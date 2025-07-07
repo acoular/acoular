@@ -662,19 +662,16 @@ class BeamformerBase(HasStrictTraits):
                 msg,
             )
         gshape = self.steer.grid.shape
+        num_freqs = self.freq_data.fftfreq().shape[0]
         if num == 0 or frange is None:
             if frange is None:
                 ind_low = self.freq_data.ind_low
                 ind_high = self.freq_data.ind_high
                 if ind_low is None:
                     ind_low = 0
-                if ind_low < 0:
-                    ind_low += self._numfreq
                 if ind_high is None:
-                    ind_high = self._numfreq
-                if ind_high < 0:
-                    ind_high += self._numfreq
-                irange = (ind_low, ind_high)
+                    ind_high = num_freqs-1
+                irange = (ind_low % num_freqs, ind_high % num_freqs)
                 num = 0
             elif len(frange) == 2:
                 irange = (searchsorted(self._f, frange[0]), searchsorted(self._f, frange[1]))
@@ -683,7 +680,7 @@ class BeamformerBase(HasStrictTraits):
                 raise TypeError(
                     msg,
                 )
-            h = zeros(self._numfreq, dtype=float)
+            h = zeros(num_freqs, dtype=float)
             sl = slice(*irange)
             r = self.result[sl]
             for i in range(*irange):
