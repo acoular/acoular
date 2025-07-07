@@ -670,7 +670,7 @@ class BeamformerBase(HasStrictTraits):
                 if ind_low is None:
                     ind_low = 0
                 if ind_high is None:
-                    ind_high = num_freqs-1
+                    ind_high = num_freqs - 1
                 irange = (ind_low % num_freqs, ind_high % num_freqs)
                 num = 0
             elif len(frange) == 2:
