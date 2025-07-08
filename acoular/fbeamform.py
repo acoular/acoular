@@ -670,8 +670,8 @@ class BeamformerBase(HasStrictTraits):
                 if ind_low is None:
                     ind_low = 0
                 if ind_high is None:
-                    ind_high = num_freqs - 1
-                irange = (ind_low % num_freqs, ind_high % num_freqs)
+                    ind_high = num_freqs
+                irange = (ind_low, ind_high)#(ind_low % num_freqs, ind_high % num_freqs)
                 num = 0
             elif len(frange) == 2:
                 irange = (searchsorted(self._f, frange[0]), searchsorted(self._f, frange[1]))
@@ -683,7 +683,7 @@ class BeamformerBase(HasStrictTraits):
             h = zeros(num_freqs, dtype=float)
             sl = slice(*irange)
             r = self.result[sl]
-            for i in range(*irange):
+            for i in range(num_freqs)[sl]:
                 # we do this per frequency because r might not have fancy indexing
                 h[i] = r[i - sl.start].reshape(gshape)[ind].sum()
             if frange is None:
