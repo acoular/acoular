@@ -138,7 +138,7 @@ for res in cacht.result(1):
     plt.subplot(4, 4, i)
     mx = ac.L_p(res0.max())
     plt.imshow(
-        ac.L_p(np.transpose(res0)), vmax=mx, vmin=mx - 10, interpolation='nearest', extent=g.extend(), origin='lower'
+        ac.L_p(np.transpose(res0)), vmax=mx, vmin=mx - 10, interpolation='nearest', extent=g.extent, origin='lower'
     )
     plt.colorbar()
 map2 /= i
@@ -203,7 +203,7 @@ for res in cachts.result(1):
     plt.subplot(4, 4, i)
     mx = ac.L_p(res0.max())
     plt.imshow(
-        ac.L_p(np.transpose(res0)), vmax=mx, vmin=mx - 10, interpolation='nearest', extent=g1.extend(), origin='lower'
+        ac.L_p(np.transpose(res0)), vmax=mx, vmin=mx - 10, interpolation='nearest', extent=g1.extent, origin='lower'
     )
     plt.colorbar()
 map3 /= i
@@ -235,7 +235,7 @@ for res in cachct.result(1):
     plt.subplot(4, 4, i)
     mx = ac.L_p(res0.max())
     plt.imshow(
-        ac.L_p(np.transpose(res0)), vmax=mx, vmin=mx - 10, interpolation='nearest', extent=g1.extend(), origin='lower'
+        ac.L_p(np.transpose(res0)), vmax=mx, vmin=mx - 10, interpolation='nearest', extent=g1.extent, origin='lower'
     )
     plt.colorbar()
 map4 /= i
@@ -276,7 +276,7 @@ for i, map, tit in zip(
     plt.subplot(1, 4, i)
     mx = ac.L_p(map.max())
     plt.imshow(
-        ac.L_p(np.transpose(map)), vmax=mx, vmin=mx - 10, interpolation='nearest', extent=g.extend(), origin='lower'
+        ac.L_p(np.transpose(map)), vmax=mx, vmin=mx - 10, interpolation='nearest', extent=g.extent, origin='lower'
     )
     plt.colorbar(shrink=0.4)
     plt.title(tit)

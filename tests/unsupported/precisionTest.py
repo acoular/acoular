@@ -144,7 +144,7 @@ for b in (bb32, bd3232, bc3232, bdp3232, bd3264, bc3264, bdp3264,
     res = b.synthetic(cfreq,1)
     mx = L_p(res.max())
     imshow(L_p(res.T), vmax=mx, vmin=mx-15,
-           interpolation='nearest', extent=g.extend())
+           interpolation='nearest', extent=g.extent)
     print(b.steer)
     colorbar()
     title(b.__class__.__name__ + b.precision,fontsize='small')
