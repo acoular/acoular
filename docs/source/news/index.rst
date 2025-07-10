@@ -16,6 +16,10 @@ Upcoming Release
         * fixes :class:`~acoular.tbeamform.BeamformerTime` crashing if buffer exceeds processing block size
         * fixes deprecation issue for output parameters of scipy.optimize.fmin_l_bfgs_b solver
         * excludes `scipy` version 1.16 from the dependencies due to bug affecting the `scipy.signal.tf2sos` function
+        * adds the :func:`~acoular.tools.helpers.get_data_file` helper function for ensuring that a file is available locally
+
+    **Documentation**
+        * generalizes data import in the airfoil examples using the :func:`~acoular.tools.helpers.get_data_file` helper function
 
 25.04
 ------------------------

@@ -12,23 +12,18 @@ Loads the example data set, sets diffrent Sectors for intergration.
 Shows Acoular's Sector und Sound Pressure level Integration functionality.
 """
 
-import urllib.request
 from pathlib import Path
 
 import acoular as ac
 import matplotlib.pyplot as plt
 import numpy as np
+from acoular.tools.helpers import get_data_file
 from matplotlib.patches import Polygon, Rectangle
 
-time_data_file = Path('../data/example_data.h5')
-if not time_data_file.exists():
-    time_data_file = Path().cwd() / 'example_data.h5'
-    if not time_data_file.exists():
-        print('Cannot find example_data.h5 file. Downloading...')
-        url = 'https://github.com/acoular/acoular/tree/master/examples/data/example_data.h5'
-        time_data_file, _ = urllib.request.urlretrieve(url, time_data_file)
-    print(f'Time data file location: {time_data_file}')
+# %%
+# Obtain necessary data
 
+time_data_file = get_data_file('example_data.h5')
 
 # %%
 # Define the necessary objects
