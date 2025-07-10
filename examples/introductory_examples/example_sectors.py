@@ -103,7 +103,7 @@ plt.show()
 # =======================
 #
 # Acoular uses sector classes to define regions of interest in the grid. Each sector
-# class provides a method called :meth:`~acoular.grids.Sector.contains` that takes a
+# class provides a :meth:`~acoular.grids.Sector.contains` method that takes a
 # grid's :attr:`~acoular.grids.Grid.pos` attribute as parameter and checks which grid
 # points are inside the sector.
 #
