@@ -67,7 +67,7 @@ circsector = ac.CircSector(x=-0.4, y=0.0, r=0.07)
 # Let us see how the two sectros look on the source map.
 
 plt.figure(figsize=(8, 5))
-plt.imshow(spl_map.T, origin='lower', vmin=spl_map.max() - 10, extent=grid.extend(), interpolation='bicubic')
+plt.imshow(spl_map.T, origin='lower', vmin=spl_map.max() - 10, extent=grid.extent, interpolation='bicubic')
 plt.fill_between([sector.x_min, sector.x_max], sector.y_min, sector.y_max, alpha=0.4, label='RectSector')
 circ = plt.Circle((circsector.x, circsector.y), circsector.r, color='orange', alpha=0.4, label='CircSector')
 plt.gca().add_patch(circ)
