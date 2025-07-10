@@ -417,7 +417,7 @@ def get_data_file(file):
     :class:`pathlib.Path`
         Path to the file.
     """
-    data_file = Path('../data/' + file)
+    data_file = Path('../data') / file
     if not data_file.exists():
         data_file = Path().cwd() / file
         if not data_file.exists():
