@@ -170,7 +170,7 @@ spl_sector = np.where(spl_sector > 0, spl_sector, 0)  # Keep positive entries on
 
 plt.figure(figsize=(8, 5))
 
-plt.plot(freqs / 1000, spl_sector)
+plt.semilogx(freqs / 1000, spl_sector)
 
 plt.xlabel('Frequency / kHz')
 plt.ylabel('$L_p$ / dB')
