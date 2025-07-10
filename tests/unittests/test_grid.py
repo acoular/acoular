@@ -94,24 +94,6 @@ def test_load_xml():
     assert grid.pos.shape == (3, 56)
 
 
-def test_export_gpos(tmp_path, import_grid):
-    """Test if the grid positions are exported correctly to an XML file.
-
-    Parameters
-    ----------
-    tmp_path : pathlib.Path
-        Temporary directory to store the exported file (fixture).
-    import_grid : acoular.grids.ImportGrid
-        Grid instance to be exported.
-    """
-    # Export the grid positions to a temporary file
-    export_file = tmp_path / 'test_gpos.xml'
-    import_grid.export_gpos(export_file)
-    # Load and check if the digests match
-    new_grid = ac.ImportGrid(file=export_file)
-    assert import_grid.digest == new_grid.digest
-
-
 @parametrize_with_cases('grid', cases=Grids)
 def test_export_gpos_all_grids(grid, tmp_path):
     """Test export_gpos and import for all Grid-derived classes."""
