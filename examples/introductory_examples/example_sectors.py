@@ -80,7 +80,7 @@ map = bb.synthetic(4000)
 spl_map = ac.L_p(map)
 
 # Display beamforming results for 4000 Hz
-plt.imshow(spl_map.T, origin='lower', vmin=spl_map.max() - 10, extent=grid.extend(), interpolation='bicubic')
+plt.imshow(spl_map.T, origin='lower', vmin=spl_map.max() - 10, extent=grid.extent, interpolation='bicubic')
 # Plot airfoil's edges as dashed lines (we is they are at x = -0.33 and x = -0.29)
 plt.vlines([-0.33, -0.29], ymin=-0.3, ymax=0.3, linestyles='--', label='Airfoil edges')
 # Plot sector as a filled rectangle
