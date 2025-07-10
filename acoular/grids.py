@@ -505,9 +505,13 @@ class RectGrid(Grid):
         """
         import warnings
 
-        warnings.warn(
-            "Deprecated use of 'extend' method. Please use the 'extent' trait instead.", DeprecationWarning, stacklevel=2
+        msg = ' '.join(
+            [
+                "Deprecated use of 'extend' method (will be removed in version 26.07).",
+                "Please use the 'extent' trait instead."
+            ]
         )
+        warnings.warn(msg, DeprecationWarning, stacklevel=2)
         return self.extent
 
     def index(self, x, y):
