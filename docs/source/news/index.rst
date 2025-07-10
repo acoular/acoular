@@ -4,15 +4,15 @@ What's new
 
 Upcoming Release
 ------------------------
-
     **New features**
-        * add :meth:`~acoular.grids.ImportGrid`.export_gpos` to :class:`~acoular.grids.ImportGrid`
+        * add :meth:`~acoular.grids.Grid`.export_gpos` to :class:`~acoular.grids.Grid`
 
     **Documentation**
-        * add example for grids
+        * generalizes data import in the airfoil examples using the :func:`~acoular.tools.helpers.get_data_file` helper function
+        * add a new example for grids
 
     **Tests**
-        * add tests for export and load XML functionalities of :class:`~acoular.grids.ImportGrid`
+        * add tests for export and load XML functionalities of :class:`~acoular.grids.Grid`
 
     **Internal**
         * add `three_sources_1d.h5`, `three_sources_2d.h5`, and `three_sources_3d.h5`
@@ -22,6 +22,11 @@ Upcoming Release
         * fixes :class:`~acoular.tbeamform.BeamformerTime` crashing if buffer exceeds processing block size
         * fixes deprecation issue for output parameters of scipy.optimize.fmin_l_bfgs_b solver
         * excludes `scipy` version 1.16 from the dependencies due to bug affecting the `scipy.signal.tf2sos` function
+        * adds the :func:`~acoular.tools.helpers.get_data_file` helper function for ensuring that a file is available locally
+        * add `three_sources_1d.h5`, `three_sources_2d.h5`, and `three_sources_3d.h5`
+        * add functions `_create_three_sources`, `create_three_sources_1d`, `create_three_sources_2d`, and `create_three_sources_3d` to create the test data
+        * change `create_three_sources` function to an alias of `create_three_sources_2d`
+
 25.04
 ------------------------
 
