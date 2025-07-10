@@ -115,7 +115,7 @@ def test_export_gpos(tmp_path, import_grid):
 @parametrize_with_cases('grid', cases=Grids)
 def test_export_gpos_all_grids(grid, tmp_path):
     """Test export_gpos and import for all Grid-derived classes."""
-    export_file = tmp_path / f'test_gpos_{grid.__name__}.xml'
+    export_file = tmp_path / f'test_gpos_{grid.digest}.xml'
     grid.export_gpos(export_file)
     new_grid = ac.ImportGrid(file=export_file)
     assert grid.pos == new_grid.pos
