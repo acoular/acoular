@@ -100,4 +100,4 @@ def test_export_gpos_all_grids(grid, tmp_path):
     export_file = tmp_path / f'test_gpos_{grid.digest}.xml'
     grid.export_gpos(export_file)
     new_grid = ac.ImportGrid(file=export_file)
-    assert (grid.pos == new_grid.pos).all()
+    assert array_equal(grid.pos, new_grid.pos)
