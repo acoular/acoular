@@ -82,15 +82,9 @@ print(f'Grid size: {rg.size}')  # Total number of grid points
 print(f'Number of x steps: {rg.nxsteps}')  # Grid points along the x axis
 print(f'Number of y steps: {rg.nysteps}')  # Grid points along the y axis
 print(f'Grid shape: {rg.shape}')  # (nxsteps, nysteps)
+print(f'Grid extent: {rg.extent}')  # Grid boundaries in a format suitable for matplotlib.pyplot's 'imshow' function.
 print(f'Grid positions:\n{rg.pos[:, :5]}')  # First 5 grid point positions
 
-# %%
-# **Grid Extent**
-#
-# The ``extend`` method returns the grid boundaries in a format suitable for
-# matplotlib's :func:`~matplotlib.pyplot.imshow` function.
-
-print(f'Grid extent: {rg.extend()}')
 
 # %%
 # **Beamforming with Rectangular Grids**
@@ -116,7 +110,7 @@ for i in range(2):
         Lm.T,
         origin='lower',
         vmin=Lm.max() - 10,
-        extent=rg.extend(),
+        extent=rg.extent,
     )
     ax.set_title(f'Beamforming Results\n(grid increment: {rg.increment})')
     ax.set_xlabel('x / m')
