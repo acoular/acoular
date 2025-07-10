@@ -115,7 +115,7 @@ print('x: {}, y: {}'.format(*grid.pos[:2, mask]))
 print(mask)
 
 # %%
-# We see that the one grid point represented as ``True`` in the mask corresponds to the
+# We can see that the single grid point marked as ``True`` in the mask corresponds to the
 # ``(-0.3, 0.0)`` point in the x-y plane. From looking at the figure above and at the sector's
 # definition, we know that this grid point does not lie `inside` the sector but on its border.
 # To prevent this inclusion of the bordering points, we may change the sector's
