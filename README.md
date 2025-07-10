@@ -118,7 +118,7 @@ pm = bb.synthetic( 8000, 3 )
 # compute the sound pressure level
 Lm = ac.L_p( pm )
 # plot the map
-plt.imshow( Lm.T, origin='lower', vmin=Lm.max()-10, extent=rg.extend(), \
+plt.imshow( Lm.T, origin='lower', vmin=Lm.max()-10, extent=rg.extent, \
 interpolation='bicubic')
 plt.title('Beamformer (base) for 3 sources measured for 8000 Hz')
 plt.xlabel('x in m')
