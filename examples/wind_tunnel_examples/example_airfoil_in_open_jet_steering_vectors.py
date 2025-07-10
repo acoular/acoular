@@ -110,7 +110,7 @@ for r_diag in (True, False):
             b.r_diag = r_diag
             map = b.synthetic(cfreq, num)
             mx = ac.L_p(map.max())
-            plt.imshow(ac.L_p(map.T), vmax=mx, vmin=mx - 15, origin='lower', interpolation='nearest', extent=g.extend())
+            plt.imshow(ac.L_p(map.T), vmax=mx, vmin=mx - 15, origin='lower', interpolation='nearest', extent=g.extent)
             plt.colorbar()
             plt.title(b.__class__.__name__, fontsize='small')
 

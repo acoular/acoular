@@ -6,10 +6,12 @@ Upcoming Release
 ------------------------
     **New features**
         * add :meth:`~acoular.grids.Grid`.export_gpos` to :class:`~acoular.grids.Grid`
+        * deprecates :meth:`~acoular.grids.RectGrid.extend` method in favor of :attr:`~acoular.grids.RectGrid.extent` property
 
     **Documentation**
         * generalizes data import in the airfoil examples using the :func:`~acoular.tools.helpers.get_data_file` helper function
         * add a new example for grids
+        * changes all appearances of :meth:`~acoular.grids.RectGrid.extend` to :attr:`~acoular.grids.RectGrid.extent`
 
     **Tests**
         * add tests for export and load XML functionalities of :class:`~acoular.grids.Grid`
