@@ -140,9 +140,9 @@ print('x: {}, y: {}'.format(*grid.pos[:2, mask]))
 # Also, the tolerance for deciding whether a grid point lies on a sector's border can be
 # changed by varying the sector's :attr:`~acoular.grids.SingleSector.abs_tol` attribute.
 #
-# By defining which grid points lie inside the sector this way, we determine which points
-# the beamformer's :meth:`~acoular.fbeamform.BeamformerBase.integrate` method and Acoular's
-# :func:`~acoular.fbeamform.integrate` function sum over.
+# By specifying which grid points lie inside the sector, the subset of points which are integrated over 
+# with the beamformer's :meth:`~acoular.fbeamform.BeamformerBase.integrate` method and Acoular's
+# :func:`~acoular.fbeamform.integrate` function is defined.
 
 # %%
 # =====================
