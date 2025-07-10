@@ -508,7 +508,7 @@ class RectGrid(Grid):
         msg = ' '.join(
             [
                 "Deprecated use of 'extend' method (will be removed in version 26.07).",
-                "Please use the 'extent' trait instead."
+                "Please use the 'extent' trait instead.",
             ]
         )
         warnings.warn(msg, DeprecationWarning, stacklevel=2)
