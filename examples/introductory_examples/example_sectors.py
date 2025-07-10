@@ -7,9 +7,9 @@ Sectors
 =======
 
 This example demonstrates how to use a sector for spatial integration in Acoular.
-It uses the airfoil-in-open-jet dataset, places a rectangular sector on the trailing edge of the airfoil,
-integrates the beamforming result over this sector, and plots the normal and the third-octave
-spectra using the :func:`~acoular.tools.helpers.barspectrum` function.
+It uses the airfoil-in-open-jet dataset, places a rectangular sector on the trailing edge of the
+airfoil, integrates the beamforming result over this sector, and plots the normal and the
+third-octave spectra using the :func:`~acoular.tools.helpers.barspectrum` function.
 """
 
 
@@ -140,9 +140,9 @@ print('x: {}, y: {}'.format(*grid.pos[:2, mask]))
 # Also, the tolerance for deciding whether a grid point lies on a sector's border can be
 # changed by varying the sector's :attr:`~acoular.grids.SingleSector.abs_tol` attribute.
 #
-# By specifying which grid points lie inside the sector, the subset of points which are integrated over 
-# with the beamformer's :meth:`~acoular.fbeamform.BeamformerBase.integrate` method and Acoular's
-# :func:`~acoular.fbeamform.integrate` function is defined.
+# By specifying which grid points lie inside the sector, the subset of points which are integrated
+# over with the beamformer's :meth:`~acoular.fbeamform.BeamformerBase.integrate` method and
+# Acoular's :func:`~acoular.fbeamform.integrate` function is defined.
 
 # %%
 # =====================
@@ -187,14 +187,16 @@ plt.show()
 # Using Acoular's :func:`~acoular.tools.helpers.barspectrum` function
 # we can easily convert our integrated spectrum into third-octave bands.
 
-f_borders, spl_bars, f_center = barspectrum(spl_sector, freqs, 3, bar=True)
+f_borders, bars, f_center = barspectrum(bf_sector, freqs, 3, bar=True)
+spl_bars = ac.L_p(bars)
+spl_bars = np.where(spl_bars > 0, spl_bars, 0)
 
 plt.figure(figsize=(8, 5))
 
-plt.fill_between(f_borders, spl_bars)
+plt.fill_between(f_borders / 1000, spl_bars)
 
 plt.xscale('log')
-plt.xlabel('Frequency / Hz')
+plt.xlabel('Frequency / kHz')
 plt.ylabel('$L_p$ / dB')
 plt.title('Integrated spectrum over sector (third octave)')
 plt.grid()
