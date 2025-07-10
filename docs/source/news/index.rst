@@ -13,6 +13,7 @@ Upcoming Release
 
     **Documentation**
         * generalizes data import in the airfoil examples using the :func:`~acoular.tools.helpers.get_data_file` helper function
+        * adds example for :class:`~acoular.grids.MultiSector`
 
 25.04
 ------------------------
