@@ -7,7 +7,7 @@ Sectors
 =======
 
 This example demonstrates how to use a sector for spatial integration in Acoular.
-It uses the airfoil-in-open-jet dataset, places a rectangular sector behind the airfoil,
+It uses the airfoil-in-open-jet dataset, places a rectangular sector on the trailing edge of the airfoil,
 integrates the beamforming result over this sector, and plots the normal and the third-octave
 spectra using the :func:`~acoular.tools.helpers.barspectrum` function.
 """
@@ -60,10 +60,10 @@ bb = ac.BeamformerBase(freq_data=f, steer=st)
 #
 # Let us start by defining a sector.
 #
-# Think of a sector as a region in the sound map where you want to focus your analysis.
+# One can think of a sector as a region in the sound map to which the analysis is constrained.
 #
 # Here, we will create a rectangular sector that covers the trailing edge of the airfoil.
-# This is often where interesting noise sources are found in aeroacoustic measurements.
+# Oftentimes, this is where interesting noise sources reside in practice.
 
 sector = ac.RectSector(x_min=-0.3, x_max=-0.25, y_min=-0.05, y_max=0.05)
 
@@ -102,8 +102,8 @@ plt.show()
 # Grid Points of Interest
 # =======================
 #
-# Acoular uses sector classes to define regions of interest in your grid. Each sector
-# class provides a method called :meth:`~acoular.grids.Sector.contains` that takes a
+# Acoular uses sector classes to define regions of interest in the grid. Each sector
+# class provides a :meth:`~acoular.grids.Sector.contains` method that takes a
 # grid's :attr:`~acoular.grids.Grid.pos` attribute as parameter and checks which grid
 # points are inside the sector.
 #
@@ -115,7 +115,7 @@ print('x: {}, y: {}'.format(*grid.pos[:2, mask]))
 print(mask)
 
 # %%
-# We see that the one grid point represented as ``True`` in the mask corresponds to the
+# We can see that the single grid point marked as ``True`` in the mask corresponds to the
 # ``(-0.3, 0.0)`` point in the x-y plane. From looking at the figure above and at the sector's
 # definition, we know that this grid point does not lie `inside` the sector but on its border.
 # To prevent this inclusion of the bordering points, we may change the sector's
@@ -140,9 +140,9 @@ print('x: {}, y: {}'.format(*grid.pos[:2, mask]))
 # Also, the tolerance for deciding whether a grid point lies on a sector's border can be
 # changed by varying the sector's :attr:`~acoular.grids.SingleSector.abs_tol` attribute.
 #
-# By defining which grid points lie inside the sector this way, we determine which points
-# the beamformer's :meth:`~acoular.fbeamform.BeamformerBase.integrate` method and Acoular's
-# :func:`~acoular.fbeamform.integrate` function sum over.
+# By specifying which grid points lie inside the sector, the subset of points which are integrated over 
+# with the beamformer's :meth:`~acoular.fbeamform.BeamformerBase.integrate` method and Acoular's
+# :func:`~acoular.fbeamform.integrate` function is defined.
 
 # %%
 # =====================
@@ -170,7 +170,7 @@ spl_sector = np.where(spl_sector > 0, spl_sector, 0)  # Keep positive entries on
 
 plt.figure(figsize=(8, 5))
 
-plt.plot(freqs / 1000, spl_sector)
+plt.semilogx(freqs / 1000, spl_sector)
 
 plt.xlabel('Frequency / kHz')
 plt.ylabel('$L_p$ / dB')
