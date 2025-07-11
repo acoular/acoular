@@ -31,7 +31,7 @@ pm = bb.synthetic(8000, 3)
 Lm = ac.L_p(pm)
 
 plt.figure(1)
-plt.imshow(Lm.T, origin='lower', vmin=Lm.max() - 10, extent=rg.extend(), interpolation='bicubic')
+plt.imshow(Lm.T, origin='lower', vmin=Lm.max() - 10, extent=rg.extent, interpolation='bicubic')
 plt.colorbar()
 
 plt.figure(2)

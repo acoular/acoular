@@ -114,7 +114,7 @@ for r_diag in (True,False):
             map = b.synthetic(cfreq,1)
             mx = L_p(map.max())
             imshow(L_p(map.T), vmax=mx, vmin=mx-15,
-                   interpolation='nearest', extent=g.extend())
+                   interpolation='nearest', extent=g.extent)
             print(b.steer)
             colorbar()
             title(b.__class__.__name__,fontsize='small')
