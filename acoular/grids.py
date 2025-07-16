@@ -28,6 +28,7 @@ Implement support for multidimensional grids and integration sectors.
 # imports from other packages
 import xml.dom.minidom
 from abc import abstractmethod
+from pathlib import Path
 
 from numpy import (
     absolute,
@@ -386,6 +387,75 @@ class Grid(ABCHasStrictTraits):
         # return indices of "True" entries
         return where(xyi)
 
+    def export_gpos(self, filename):
+        """
+        Export the grid positions to an XML file.
+
+        This method generates an XML file containing the positions of all grid points.
+        Each point is represented by a ``<pos>`` element with ``Name``, ``x``, ``y``, and ``z``
+        attributes. The generated XML is formatted to match the structure required for importing
+        into the :class:`ImportGrid` class.
+
+        Parameters
+        ----------
+        filename : :class:`str`
+            The path to the file to which the grid positions will be written. The file
+            extension must be ``.xml``.
+
+        Raises
+        ------
+        :obj:`OSError`
+            If the file cannot be written due to permissions issues or invalid file paths.
+
+        Notes
+        -----
+        - The file will be saved in UTF-8 encoding.
+        - The ``Name`` attribute for each point is set as ``"Point {i+1}"``, where ``i`` is the
+          index of the grid point.
+        - If subgrids are defined, they will be included as the ``subgrid`` attribute.
+
+        Examples
+        --------
+        Export a grid with 100 points to an XML file:
+
+        >>> import acoular as ac
+        >>> import numpy as np
+        >>> grid = ac.ImportGrid()
+        >>> # Create some grid points
+        >>> points = np.arange(9).reshape(3, 3)
+        >>> grid.pos = points
+        >>> grid.export_gpos('grid_points.xml')  # doctest: +SKIP
+
+        The generated ``grid_points.xml`` file will look like this:
+
+        .. code-block:: xml
+
+            <?xml version="1.1" encoding="utf-8"?><Grid name="grid_points">
+              <pos Name="Point 1" x="0" y="1" z="2"/>
+              <pos Name="Point 2" x="3" y="4" z="5"/>
+              <pos Name="Point 3" x="6" y="7" z="8"/>
+            </Grid>
+        """
+        filepath = Path(filename)
+        basename = filepath.stem
+        with filepath.open('w', encoding='utf-8') as f:
+            f.write(f'<?xml version="1.1" encoding="utf-8"?><Grid name="{basename}">\n')
+            for i in range(self.pos.shape[-1]):
+                has_subgrids = hasattr(self, 'subgrids') and len(self.subgrids) > i
+                subgrid_attr = f'subgrid="{self.subgrids[i]}"' if has_subgrids else ''
+                pos_str = ' '.join(
+                    [
+                        '  <pos',
+                        f'Name="Point {i+1}"',
+                        f'x="{self.pos[0, i]}"',
+                        f'y="{self.pos[1, i]}"',
+                        f'z="{self.pos[2, i]}"',
+                        f'{subgrid_attr}/>\n',
+                    ]
+                )
+                f.write(pos_str)
+            f.write('</Grid>')
+
 
 @deprecated_alias({'gpos': 'pos'}, read_only=True)
 class RectGrid(Grid):
@@ -611,10 +681,10 @@ class RectGrid3D(RectGrid):
     The grid has cubic or nearly cubic cells. It is defined by lower and upper x-, y- and  z-limits.
     """
 
-    #: The lower z-limit that defines the grid. Default is ``-1``.
+    #: The lower z-limit that defines the grid. Default is ``-1.0``.
     z_min = Float(-1.0, desc='minimum  z-value')
 
-    #: The upper z-limit that defines the grid. Default is ``1``.
+    #: The upper z-limit that defines the grid. Default is ``1.0``.
     z_max = Float(1.0, desc='maximum  z-value')
 
     #: Number of grid points along x-axis. (read-only)
