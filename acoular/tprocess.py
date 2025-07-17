@@ -1860,7 +1860,7 @@ class WriteWAV(TimeOut):
                 mx = self.max_val
 
                 def result(num):
-                    yield self.source.result(num)
+                    yield from self.source.result(num)
             else:
                 # compute maximum and remember result to avoid calling source twice
                 data = return_result(self.source, num)
