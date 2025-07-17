@@ -38,6 +38,7 @@ from os import path
 from warnings import warn
 
 import numba as nb
+import numpy as np
 from numpy import (
     append,
     arange,
@@ -58,7 +59,6 @@ from numpy import (
     float64,
     identity,
     inf,
-    int16,
     interp,
     linspace,
     mean,
@@ -88,6 +88,7 @@ from traits.api import (
     Constant,
     Delegate,
     Dict,
+    Either,
     Enum,
     File,
     Float,
@@ -111,6 +112,7 @@ from .environments import cartToCyl, cylToCart
 from .h5files import _get_h5file_class
 from .internal import digest, ldigest
 from .microphones import MicGeom
+from .tools.helpers import return_result
 from .tools.utils import find_basename
 
 
@@ -1788,6 +1790,12 @@ class WriteWAV(TimeOut):
     # Channel(s) to save. List can only contain one or two channels.
     channels = List(int, desc='channel to save')
 
+    # Bit depth of the output file.
+    encoding = Enum('uint8', 'int16', 'int32', desc='bit depth of the output file')
+
+    # Maximum value to scale the output to. If `None`, the maximum value of the data is used.
+    max_val = Either(None, Float, desc='Maximum value to scale the output to.')
+
     # internal identifier
     digest = Property(depends_on=['source.digest', 'channels'])
 
@@ -1807,14 +1815,34 @@ class WriteWAV(TimeOut):
         )
         return find_basename(self.source)
 
-    def save(self):
-        """Saves source output to one- or multiple-channel `*.wav` file."""
+    def _type_info(self):
+        dtype = np.dtype(self.encoding)
+        info = np.iinfo(dtype)
+        return dtype, info.min, info.max, int(info.bits / 8)
+
+    def _encode(self, data):
+        """Encodes the data according to self.encoding."""
+        dtype, min_val, max_val, _ = self._type_info()
+        if dtype == np.dtype('uint8'):
+            data = (data + 1) / 2 * max_val
+        else:
+            data *= -min_val
+        return np.round(data).clip(min_val, max_val).astype(dtype).tobytes()
+
+    def result(self, num):
         nc = len(self.channels)
         if nc == 0:
             msg = 'No channels given for output.'
             raise ValueError(msg)
-        if nc > 2:
+        elif nc > 2:
             warn(f'More than two channels given for output, exported file will have {nc:d} channels', stacklevel=1)
+        if self.sample_freq.is_integer():
+            fs = self.sample_freq
+        else:
+            fs = int(round(self.sample_freq))
+            msg = f'Sample frequency {self.sample_freq} is not a whole number. Proceeding with sampling frequency {fs}.'
+            warn(msg, Warning, stacklevel=1)
+        sw = self._type_info()[3]
         if self.file == '':
             name = self.basename
             for nr in self.channels:
@@ -1822,23 +1850,36 @@ class WriteWAV(TimeOut):
             name += '.wav'
         else:
             name = self.file
+
         with wave.open(name, 'w') as wf:
             wf.setnchannels(nc)
-            wf.setsampwidth(2)
-            wf.setframerate(self.source.sample_freq)
-            wf.setnframes(self.source.num_samples)
-            mx = 0.0
+            wf.setsampwidth(sw)
+            wf.setframerate(fs)
             ind = array(self.channels)
-            for data in self.source.result(1024):
-                mx = max(abs(data[:, ind]).max(), mx)
-            scale = 0.9 * 2**15 / mx
-            for data in self.source.result(1024):
-                wf.writeframesraw(array(data[:, ind] * scale, dtype=int16).tostring())
+            if self.max_val is not None:
+                mx = self.max_val
 
-    def result(self, num):
-        msg = 'result method not implemented yet! Data from source will be passed without transformation.'
-        warn(msg, Warning, stacklevel=2)
-        yield from self.source.result(num)
+                def result(num):
+                    yield self.source.result(num)
+            else:
+                # compute maximum and remember result to avoid calling source twice
+                data = return_result(self.source, num)
+                mx = abs(data[:, ind]).max()
+
+                def result(num):
+                    for i in range(0, self.num_samples, num):
+                        yield data[i : i + num]
+
+            # write to file
+            for data in result(num):
+                frames = self._encode(data[:, ind] / mx)
+                wf.writeframes(frames)
+                yield data
+
+    def save(self):
+        """Saves source output to one- or multiple-channel `*.wav` file."""
+        for _ in self.result(1024):
+            pass
 
 
 @deprecated_alias({'name': 'file', 'numsamples_write': 'num_samples_write', 'writeflag': 'write_flag'})
