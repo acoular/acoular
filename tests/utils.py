@@ -68,6 +68,20 @@ def get_result(obj, num):
     return next(obj.result(num))
 
 
+def get_result_list(obj, num):
+    """For classes with no explicit result method a warning is expected and is catched here to
+    prevent test failure.
+    See https://github.com/acoular/acoular/issues/382 for details.
+    """
+    missing_result = {'WriteWAV', 'Trigger', 'SpatialInterpolator'}
+    if obj.__class__.__name__ in missing_result:
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', Warning)
+            with pytest.warns(Warning):
+                return list(obj.result(num))
+    return list(obj.result(num))
+
+
 class SetupStationarySourceCase:
     def __init__(self, grid, num_samples, blocksize, invalid_channels):
         module_dir = Path(__file__).parent.parent
