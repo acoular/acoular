@@ -7,6 +7,7 @@ Upcoming Release
     **New features**
         * add :meth:`~acoular.grids.Grid`.export_gpos` to :class:`~acoular.grids.Grid`
         * deprecates :meth:`~acoular.grids.RectGrid.extend` method in favor of :attr:`~acoular.grids.RectGrid.extent` property
+        * reworked `WriteWAV` class that now also supports `uint8` and `int32` encoding, adds a `max_val` attribute for normalization purposes, and avoids unnecessary double calculations
 
     **Documentation**
         * generalizes data import in the airfoil examples using the :func:`~acoular.tools.helpers.get_data_file` helper function
