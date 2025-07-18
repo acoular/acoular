@@ -16,7 +16,6 @@ to be used directly, but to be subclassed by classes that implement the actual s
     InOut
     TimeOut
     SpectraOut
-    TimeInOut
 """
 
 from abc import abstractmethod
@@ -308,25 +307,3 @@ class InOut(SamplesGenerator, SpectraGenerator):
         numpy.ndarray
             Two-dimensional output data block of shape (num, ...)
         """
-
-
-class TimeInOut(TimeOut):
-    """Deprecated alias for :class:`~acoular.base.TimeOut`.
-
-    .. deprecated:: 24.10
-        Using :class:`~acoular.base.TimeInOut` is deprecated and will be removed in Acoular 25.07.
-        Use :class:`~acoular.base.TimeOut` instead.
-    """
-
-    #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
-    source = Instance(SamplesGenerator)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        import warnings
-
-        warnings.warn(
-            'TimeInOut is deprecated and will be removed in Acoular 25.07. Use TimeOut instead.',
-            DeprecationWarning,
-            stacklevel=2,
-        )

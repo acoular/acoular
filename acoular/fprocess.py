@@ -11,7 +11,6 @@ Implements blockwise processing methods in the frequency domain.
     IRFFT
     AutoPowerSpectra
     CrossPowerSpectra
-    FFTSpectra
 """
 
 from warnings import warn
@@ -450,29 +449,3 @@ class CrossPowerSpectra(AutoPowerSpectra):
                     csm_flat[i] = csm_lower[:, :nc].reshape(-1)
                 csm_upper[...] = 0  # calcCSM adds cumulative
             yield csm_flat[: i + 1] * scale
-
-
-class FFTSpectra(RFFT):
-    """
-    Provide the one-sided Fast Fourier Transform (FFT) for multichannel time data.
-
-    .. deprecated:: 24.10
-        The :class:`~acoular.fprocess.FFTSpectra` class is deprecated and will be removed
-        in Acoular version 25.07. Please use :class:`~acoular.fprocess.RFFT` instead.
-
-    Alias for the :class:`~acoular.fprocess.RFFT` class, which computes the one-sided
-    Fast Fourier Transform (FFT) for multichannel time data.
-
-    Warnings
-    --------
-    This class remains temporarily available for backward compatibility but should not be used in
-    new implementations.
-    """
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        warn(
-            'Using FFTSpectra is deprecated and will be removed in Acoular version 25.07. Use class RFFT instead.',
-            DeprecationWarning,
-            stacklevel=2,
-        )

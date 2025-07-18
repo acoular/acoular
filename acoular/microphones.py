@@ -47,7 +47,7 @@ class MicGeom(HasStrictTraits):
       attribute is updated.
     - Small numerical values in the computed :attr:`center` are set to zero for numerical stability.
 
-    .. _units_note_micophones:
+    .. _units_note_microphones:
 
     Unit System
     ----------
