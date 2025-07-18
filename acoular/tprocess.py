@@ -112,7 +112,7 @@ from .environments import cartToCyl, cylToCart
 from .h5files import _get_h5file_class
 from .internal import digest, ldigest
 from .microphones import MicGeom
-from .tools.helpers import return_result
+from .process import Cache
 from .tools.utils import find_basename
 
 
@@ -1836,16 +1836,6 @@ class WriteWAV(TimeOut):
             )
         return data.clip(dmin, dmax).astype(dtype).tobytes()
 
-    def _compute_max_val(self, res):
-        """Computes the maximum value from the result data such that maximal scaling is achieved."""
-        dtype, _, dmax, _ = self._type_info()
-        if dtype == np.dtype('uint8'):
-            mx = abs(res).max()
-        elif dtype in (np.dtype('int16'), np.dtype('int32')):
-            negmax, posmax = abs(res.min()), res.max()
-            mx = negmax if negmax > posmax else posmax + 1 / dmax  # correction for asymmetry of signed integers
-        return mx
-
     def result(self, num):
         nc = len(self.channels)
         if nc == 0:
@@ -1859,7 +1849,7 @@ class WriteWAV(TimeOut):
             fs = int(round(self.sample_freq))
             msg = f'Sample frequency {self.sample_freq} is not a whole number. Proceeding with sampling frequency {fs}.'
             warn(msg, Warning, stacklevel=1)
-        sw = self._type_info()[3]
+        dtype, _, dmax, sw = self._type_info()
         if self.file == '':
             name = self.basename
             for nr in self.channels:
@@ -1873,24 +1863,27 @@ class WriteWAV(TimeOut):
             wf.setsampwidth(sw)
             wf.setframerate(fs)
             ind = array(self.channels)
-            if self.max_val is not None:
-
-                def result(num):
-                    yield from self.source.result(num)
-
-                mx = self.max_val
-            else:
+            if self.max_val is None:
                 # compute maximum and remember result to avoid calling source twice
-                res = return_result(self.source, num=num)
+                if not isinstance(self.source, Cache):
+                    self.source = Cache(source=self.source)
 
-                def result(num):
-                    for i in range(0, self.num_samples, num):
-                        yield res[i : i + num]
+                # distinguish cases to use full dynamic range of dtype
+                if dtype == np.dtype('uint8'):
+                    mx = 0
+                    for data in self.source.result(num):
+                        mx = max(abs(data).max(), mx)
+                elif dtype in (np.dtype('int16'), np.dtype('int32')):
+                    # for signed integers, we need special treatment because of asymmetry
+                    negmax, posmax = 0, 0
+                    for data in self.source.result(num):
+                        negmax, posmax = max(abs(data.min()), negmax), max(data.max(), posmax)
+                    mx = negmax if negmax > posmax else posmax + 1 / dmax  # correction for asymmetry
+            else:
+                mx = self.max_val
 
-                mx = self._compute_max_val(res[:, ind])
-
-            # write to file
-            for data in result(num):
+            # write scaled data to file
+            for data in self.source.result(num):
                 frames = self._encode(data[:, ind] / mx)
                 wf.writeframes(frames)
                 yield data
