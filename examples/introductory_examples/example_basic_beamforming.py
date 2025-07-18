@@ -9,7 +9,7 @@ Loads the simulated signals from the `three_sources.h5` file, analyzes them with
 Beamforming and generates a map of the three sources.
 
 .. note:: The `three_sources.h5` file must be generated first by running the
-:doc:`example_three_sources` example.
+    :doc:`example_three_sources` example.
 """
 
 from pathlib import Path

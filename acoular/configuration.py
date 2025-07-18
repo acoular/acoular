@@ -68,7 +68,7 @@ class Config(HasStrictTraits):
     The package used to read and write .h5 files can be specified
     by :attr:`h5library`.
 
-    Example:
+    Examples
     --------
         For using Acoular with h5py package and overwrite existing cache:
 
