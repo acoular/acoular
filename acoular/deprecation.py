@@ -1,6 +1,13 @@
 # ------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
+"""Implements helper functions for deprecation handling.
+
+.. autosummary::
+    :toctree: generated/
+
+    deprecated_alias
+"""
 
 from warnings import warn
 

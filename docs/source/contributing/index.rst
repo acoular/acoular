@@ -19,6 +19,7 @@ Contribution Guidelines
     quality.rst
     documentation.rst
     release.rst
+    deprecation.rst
     pull_request.rst
     checklist.rst
 
