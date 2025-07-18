@@ -1144,6 +1144,7 @@ class BeamformerDamas(BeamformerBase):
 
     See :cite:`Brooks2006` for details.
     """
+
     #: The floating-number-precision of the PSFs. Default is 64 bit.
     psf_precision = Enum('float64', 'float32', desc='precision of PSF')
 
@@ -1330,6 +1331,7 @@ class BeamformerOrth(BeamformerBase):
     See :cite:`Sarradj2010` for details.
     New faster implementation without explicit (:class:`BeamformerEig`).
     """
+
     #: List of components to consider, use this to directly set the eigenvalues
     #: used in the beamformer. Alternatively, set :attr:`n`.
     eva_list = CArray(dtype=int, value=array([-1]), desc='components')
@@ -1488,6 +1490,7 @@ class BeamformerClean(BeamformerBase):
 
     See :cite:`Hoegbom1974` for details.
     """
+
     #: The floating-number-precision of the PSFs. Default is 64 bit.
     psf_precision = Enum('float64', 'float32', desc='precision of PSF.')
 

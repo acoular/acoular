@@ -113,7 +113,9 @@ from .microphones import MicGeom
 from .tools.utils import find_basename
 
 
-@deprecated_alias({'numchannels_total': 'num_channels_total', 'numsamples_total': 'num_samples_total'}, removal_version='25.10')
+@deprecated_alias(
+    {'numchannels_total': 'num_channels_total', 'numsamples_total': 'num_samples_total'}, removal_version='25.10'
+)
 class MaskedTimeOut(TimeOut):
     """Signal processing block for channel and sample selection.
 
@@ -1840,7 +1842,9 @@ class WriteWAV(TimeOut):
         yield from self.source.result(num)
 
 
-@deprecated_alias({'name': 'file', 'numsamples_write': 'num_samples_write', 'writeflag': 'write_flag'}, removal_version='25.10')
+@deprecated_alias(
+    {'name': 'file', 'numsamples_write': 'num_samples_write', 'writeflag': 'write_flag'}, removal_version='25.10'
+)
 class WriteH5(TimeOut):
     """Saves time signal as `*.h5` file."""
 

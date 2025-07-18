@@ -21,8 +21,10 @@ if config.have_sounddevice:
     import sounddevice as sd
 
 
-@deprecated_alias({'numchannels': 'num_channels', 'numsamples': 'num_samples', 'collectsamples': 'collect_samples'},
-                  removal_version='25.10')
+@deprecated_alias(
+    {'numchannels': 'num_channels', 'numsamples': 'num_samples', 'collectsamples': 'collect_samples'},
+    removal_version='25.10',
+)
 class SoundDeviceSamplesGenerator(SamplesGenerator):
     """Controller for sound card hardware using sounddevice library.
 

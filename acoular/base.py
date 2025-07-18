@@ -204,7 +204,11 @@ class TimeOut(SamplesGenerator):
         """
 
 
-@deprecated_alias({'numchannels': 'num_channels', 'numsamples': 'num_samples', 'numfreqs': 'num_freqs'}, read_only=True, removal_version='25.10')
+@deprecated_alias(
+    {'numchannels': 'num_channels', 'numsamples': 'num_samples', 'numfreqs': 'num_freqs'},
+    read_only=True,
+    removal_version='25.10',
+)
 class SpectraOut(SpectraGenerator):
     """Abstract base class for any signal processing block that receives data from any
     :attr:`source` domain and returns frequency domain signals.
