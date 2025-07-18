@@ -13,8 +13,6 @@ Implements blockwise processing methods in the frequency domain.
     CrossPowerSpectra
 """
 
-from warnings import warn
-
 import numpy as np
 from scipy import fft
 from traits.api import Bool, CArray, Enum, Instance, Int, Property, Union, cached_property

@@ -32,8 +32,9 @@ from .deprecation import deprecated_alias
 from .internal import digest
 
 
-@deprecated_alias({'mpos_tot': 'pos_total', 'mpos': 'pos', 'from_file': 'file'},
-                  read_only=['mpos'], removal_version='25.10')
+@deprecated_alias(
+    {'mpos_tot': 'pos_total', 'mpos': 'pos', 'from_file': 'file'}, read_only=['mpos'], removal_version='25.10'
+)
 class MicGeom(HasStrictTraits):
     """
     Provide the geometric arrangement of microphones in an array.
