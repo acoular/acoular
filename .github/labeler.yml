@@ -3,6 +3,9 @@ docs:
   - changed-files:
     - any-glob-to-any-file: ['docs/**', 'README.md', 'AUTHORS.rst', 'CITATION.cff']
     - all-globs-to-all-files: ['!docs/source/news/index.rst']
+examples:
+- changed-files:
+  - any-glob-to-any-file: 'examples/**'
 tests:
 - changed-files:
   - any-glob-to-any-file: 'tests/**'
