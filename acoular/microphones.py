@@ -52,7 +52,7 @@ class MicGeom(HasStrictTraits):
     .. _units_note_microphones:
 
     Unit System
-    ----------
+    -----------
     The source code is agnostic to the unit of length. The microphone positions' coordinates are
     assumed to be in meters. This is consistent with the standard
     :class:`~acoular.environments.Environment` class which uses the speed of sound at 20°C at sea
