@@ -12,6 +12,7 @@ Upcoming Release
         * generalizes data import in the airfoil examples using the :func:`~acoular.tools.helpers.get_data_file` helper function
         * add a new example for grids
         * changes all appearances of :meth:`~acoular.grids.RectGrid.extend` to :attr:`~acoular.grids.RectGrid.extent`
+        * adds example for sectors
 
     **Tests**
         * add tests for export and load XML functionalities of :class:`~acoular.grids.Grid`
