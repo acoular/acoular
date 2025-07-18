@@ -24,7 +24,7 @@ from .deprecation import deprecated_alias
 from .internal import digest
 
 
-@deprecated_alias({'from_file': 'file'})
+@deprecated_alias({'from_file': 'file'}, removal_version='25.10')
 class Calib(InOut):
     """Processing block for handling calibration data in `*.xml` or NumPy format.
 

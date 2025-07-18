@@ -85,7 +85,7 @@ class TriggerAIAABenchmark(TimeSamplesAIAABenchmark):
         (self.num_samples, self.num_channels) = self.data.shape
 
 
-@deprecated_alias({'name': 'file'})
+@deprecated_alias({'name': 'file'}, removal_version='25.10')
 class CsmAIAABenchmark(PowerSpectraImport):
     """Class to load the CSM that is stored in AIAA Benchmark HDF5 file."""
 

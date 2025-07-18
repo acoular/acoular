@@ -115,7 +115,7 @@ from .process import Cache
 from .tools.utils import find_basename
 
 
-@deprecated_alias({'numchannels_total': 'num_channels_total', 'numsamples_total': 'num_samples_total'})
+@deprecated_alias({'numchannels_total': 'num_channels_total', 'numsamples_total': 'num_samples_total'}, removal_version='25.10')
 class MaskedTimeOut(TimeOut):
     """Signal processing block for channel and sample selection.
 
@@ -172,7 +172,7 @@ class MaskedTimeOut(TimeOut):
         warn(
             (
                 f'The basename attribute of a {self.__class__.__name__} object is deprecated'
-                ' and will be removed in a future release!'
+                ' and will be removed in Acoular 26.01!'
             ),
             DeprecationWarning,
             stacklevel=2,
@@ -1658,7 +1658,7 @@ class FiltFreqWeight(Filter):
         return tf2sos(b, a)
 
 
-@deprecated_alias({'numbands': 'num_bands'}, read_only=True)
+@deprecated_alias({'numbands': 'num_bands'}, read_only=True, removal_version='25.10')
 class FilterBank(TimeOut):
     """Abstract base class for IIR filter banks based on scipy lfilter
     implements a bank of parallel filters.
@@ -1770,7 +1770,7 @@ class OctaveFilterBank(FilterBank):
         return sos
 
 
-@deprecated_alias({'name': 'file'})
+@deprecated_alias({'name': 'file'}, removal_version='25.10')
 class WriteWAV(TimeOut):
     """Saves time signal from one or more channels as mono/stereo/multi-channel
     `*.wav` file.
@@ -1807,7 +1807,7 @@ class WriteWAV(TimeOut):
         warn(
             (
                 f'The basename attribute of a {self.__class__.__name__} object is deprecated'
-                ' and will be removed in a future release!'
+                ' and will be removed in Acoular 26.01!'
             ),
             DeprecationWarning,
             stacklevel=2,
@@ -1893,7 +1893,7 @@ class WriteWAV(TimeOut):
             pass
 
 
-@deprecated_alias({'name': 'file', 'numsamples_write': 'num_samples_write', 'writeflag': 'write_flag'})
+@deprecated_alias({'name': 'file', 'numsamples_write': 'num_samples_write', 'writeflag': 'write_flag'}, removal_version='25.10')
 class WriteH5(TimeOut):
     """Saves time signal as `*.h5` file."""
 

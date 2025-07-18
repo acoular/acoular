@@ -28,7 +28,7 @@ from .process import SamplesBuffer
 from .spectra import BaseSpectra
 
 
-@deprecated_alias({'numfreqs': 'num_freqs', 'numsamples': 'num_samples'}, read_only=True)
+@deprecated_alias({'numfreqs': 'num_freqs', 'numsamples': 'num_samples'}, read_only=True, removal_version='25.10')
 class RFFT(BaseSpectra, SpectraOut):
     """
     Compute the one-sided Fast Fourier Transform (FFT) for real-valued multichannel time data.
@@ -169,7 +169,7 @@ class RFFT(BaseSpectra, SpectraOut):
             yield fftdata[: j + 1]
 
 
-@deprecated_alias({'numsamples': 'num_samples'}, read_only=True)
+@deprecated_alias({'numsamples': 'num_samples'}, read_only=True, removal_version='25.10')
 class IRFFT(TimeOut):
     """
     Perform the inverse Fast Fourier Transform (IFFT) for one-sided multi-channel spectra.
@@ -349,7 +349,7 @@ class AutoPowerSpectra(SpectraOut):
             yield ((temp * temp.conjugate()).real * scale).astype(self.precision)
 
 
-@deprecated_alias({'numchannels': 'num_channels'}, read_only=True)
+@deprecated_alias({'numchannels': 'num_channels'}, read_only=True, removal_version='25.10')
 class CrossPowerSpectra(AutoPowerSpectra):
     """
     Compute the complex-valued auto- and cross-power spectra from frequency-domain data.
