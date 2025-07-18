@@ -595,7 +595,8 @@ class RotatingFlow(FlowField):
 
     def _get_rpm(self):
         warn(
-            'Deprecated use of "rpm" trait. Please use the "rps" trait instead.',
+            'Deprecated use of "rpm" trait (will be removed in version 26.01). \
+            Please use the "rps" trait instead.',
             DeprecationWarning,
             stacklevel=2,
         )
@@ -603,7 +604,8 @@ class RotatingFlow(FlowField):
 
     def _set_rpm(self, rpm):
         warn(
-            'Deprecated use of "rpm" trait. Please use the "rps" trait instead (divide rpm value by -60).',
+            'Deprecated use of "rpm" trait (will be removed in version 26.01). \
+            Please use the "rps" trait instead (divide rpm value by -60).',
             DeprecationWarning,
             stacklevel=2,
         )

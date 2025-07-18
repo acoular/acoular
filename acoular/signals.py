@@ -43,7 +43,7 @@ from .deprecation import deprecated_alias
 from .internal import digest
 
 
-@deprecated_alias({'numsamples': 'num_samples'})
+@deprecated_alias({'numsamples': 'num_samples'}, removal_version='25.10')
 class SignalGenerator(ABCHasStrictTraits):
     """
     ABC for a simple one-channel signal generator.
@@ -556,7 +556,7 @@ class SineGenerator(PeriodicSignalGenerator):
         return self.amplitude * sin(2 * pi * self.freq * t + self.phase)
 
 
-@deprecated_alias({'rms': 'amplitude'})
+@deprecated_alias({'rms': 'amplitude'}, removal_version='25.10')
 class GenericSignalGenerator(SignalGenerator):
     """
     Generate signals from a :class:`~acoular.base.SamplesGenerator` or derived object.

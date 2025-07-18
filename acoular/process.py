@@ -10,8 +10,6 @@ General purpose blockwise processing methods independent of the domain (time or 
     Average
     Cache
     SampleSplitter
-    TimeAverage
-    TimeCache
     SamplesBuffer
 """
 
@@ -65,7 +63,9 @@ class LockedGenerator:
             return self.it.__next__()
 
 
-@deprecated_alias({'naverage': 'num_per_average', 'numsamples': 'num_samples'}, read_only=['numsamples'])
+@deprecated_alias(
+    {'naverage': 'num_per_average', 'numsamples': 'num_samples'}, read_only=['numsamples'], removal_version='25.10'
+)
 class Average(InOut):
     """
     Calculate the average across consecutive time samples or frequency snapshots.
@@ -673,48 +673,6 @@ class SampleSplitter(InOut):
         else:
             msg = 'Maximum size of block buffer is reached!'
             raise OSError(msg)
-
-
-class TimeAverage(Average):
-    """
-    Calculate the average of the signal.
-
-    .. deprecated:: 24.10
-        The use of :class:`~acoular.process.TimeAverage` is deprecated
-        and will be removed in Acoular version 25.07.
-        Please use :class:`~acoular.process.Average` instead for future compatibility.
-
-    Alias for :class:`~acoular.process.Average`.
-    """
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        warn(
-            'Using TimeAverage is deprecated and will be removed in Acoular version 25.07. Use Average instead.',
-            DeprecationWarning,
-            stacklevel=2,
-        )
-
-
-class TimeCache(Cache):
-    """
-    Cache source signals in cache file.
-
-    .. deprecated:: 24.10
-        The use of :class:`~acoular.process.TimeCache` is deprecated
-        and will be removed in Acoular version 25.07.
-        Please use :class:`~acoular.process.Cache` instead for future compatibility.
-
-    Alias for :class:`~acoular.process.Cache`.
-    """
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        warn(
-            'Using TimeCache is deprecated and will be removed in Acoular version 25.07. Use Cache instead.',
-            DeprecationWarning,
-            stacklevel=2,
-        )
 
 
 class SamplesBuffer(InOut):
