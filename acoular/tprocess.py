@@ -1822,12 +1822,29 @@ class WriteWAV(TimeOut):
 
     def _encode(self, data):
         """Encodes the data according to self.encoding."""
-        dtype, min_val, max_val, _ = self._type_info()
+        dtype, dmin, dmax, _ = self._type_info()
         if dtype == np.dtype('uint8'):
-            data = (data + 1) / 2 * max_val
+            data = (data + 1) / 2 * dmax
         else:
-            data *= -min_val
-        return np.round(data).clip(min_val, max_val).astype(dtype).tobytes()
+            data *= -dmin
+        data = np.round(data)
+        if data.min() < dmin or data.max() > dmax:
+            warn(
+                f'Clipping occured in WAV export. Data type {dtype} cannot represent all values in data. \
+            Consider raising max_val.',
+                stacklevel=1,
+            )
+        return data.clip(dmin, dmax).astype(dtype).tobytes()
+
+    def _compute_max_val(self, res):
+        """Computes the maximum value from the result data such that maximal scaling is achieved."""
+        dtype, _, dmax, _ = self._type_info()
+        if dtype == np.dtype('uint8'):
+            mx = abs(res).max()
+        elif dtype in (np.dtype('int16'), np.dtype('int32')):
+            negmax, posmax = abs(res.min()), res.max()
+            mx = negmax if negmax > posmax else posmax + 1 / dmax  # correction for asymmetry of signed integers
+        return mx
 
     def result(self, num):
         nc = len(self.channels)
@@ -1857,18 +1874,20 @@ class WriteWAV(TimeOut):
             wf.setframerate(fs)
             ind = array(self.channels)
             if self.max_val is not None:
-                mx = self.max_val
 
                 def result(num):
                     yield from self.source.result(num)
+
+                mx = self.max_val
             else:
                 # compute maximum and remember result to avoid calling source twice
-                data = return_result(self.source, num=num)
-                mx = abs(data[:, ind]).max()
+                res = return_result(self.source, num=num)
 
                 def result(num):
                     for i in range(0, self.num_samples, num):
-                        yield data[i : i + num]
+                        yield res[i : i + num]
+
+                mx = self._compute_max_val(res[:, ind])
 
             # write to file
             for data in result(num):
