@@ -27,7 +27,6 @@
     WriteWAV
     WriteH5
     TimeConvolve
-    MaskedTimeInOut
 """
 
 # imports from other packages
@@ -2150,21 +2149,3 @@ def _spectral_sum(out, fdl, kb):  # pragma: no cover
                 out[b, n] += fdl[i, b, n] * kb[i, b, n]
 
     return out
-
-
-class MaskedTimeInOut(MaskedTimeOut):
-    """Signal processing block for channel and sample selection.
-
-    .. deprecated:: 24.10
-        Using :class:`~acoular.tprocess.MaskedTimeInOut` is deprecated and will be removed in
-        Acoular version 25.07. Use :class:`~acoular.tprocess.MaskedTimeOut` instead.
-    """
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        warn(
-            'Using MaskedTimeInOut is deprecated and will be removed in Acoular version 25.07. \
-            Use class MaskedTimeOut instead.',
-            DeprecationWarning,
-            stacklevel=2,
-        )
