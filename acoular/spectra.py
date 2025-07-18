@@ -61,8 +61,7 @@ from .internal import digest
 from .tools.utils import find_basename
 
 
-@deprecated_alias({'numchannels': 'num_channels'}, read_only=True)
-@deprecated_alias({'time_data': 'source'}, read_only=False)
+@deprecated_alias({'numchannels': 'num_channels', 'time_data': 'source'}, read_only=['numchannels',], removal_version='25.10')
 class BaseSpectra(ABCHasStrictTraits):
     """
     Base class for handling spectral data in Acoular.

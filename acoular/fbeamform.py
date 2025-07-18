@@ -1208,7 +1208,7 @@ class BeamformerDamas(BeamformerBase):
             self._fr[i] = 1
 
 
-@deprecated_alias({'max_iter': 'n_iter'})
+@deprecated_alias({'max_iter': 'n_iter'}, removal_version='25.10')
 class BeamformerDamasPlus(BeamformerDamas):
     """DAMAS deconvolution :cite:`Brooks2006` for solving the system of equations, instead of the
     original Gauss-Seidel iterations, this class employs the NNLS or linear programming solvers from
@@ -1391,7 +1391,7 @@ class BeamformerOrth(BeamformerBase):
             self._fr[i] = 1
 
 
-@deprecated_alias({'n': 'n_iter'})
+@deprecated_alias({'n': 'n_iter'}, removal_version='25.10')
 class BeamformerCleansc(BeamformerBase):
     """CLEAN-SC deconvolution algorithm.
 
@@ -1572,7 +1572,7 @@ class BeamformerClean(BeamformerBase):
             self._fr[i] = 1
 
 
-@deprecated_alias({'max_iter': 'n_iter'})
+@deprecated_alias({'max_iter': 'n_iter'}, removal_version='25.10')
 class BeamformerCMF(BeamformerBase):
     """Covariance Matrix Fitting algorithm.
 
@@ -1799,7 +1799,7 @@ class BeamformerCMF(BeamformerBase):
             self._fr[i] = 1
 
 
-@deprecated_alias({'max_iter': 'n_iter'})
+@deprecated_alias({'max_iter': 'n_iter'}, removal_version='25.10')
 class BeamformerSODIX(BeamformerBase):
     """Source directivity modeling in the cross-spectral matrix (SODIX) algorithm.
 
@@ -1956,7 +1956,7 @@ class BeamformerSODIX(BeamformerBase):
                 self._fr[i] = 1
 
 
-@deprecated_alias({'max_iter': 'n_iter'})
+@deprecated_alias({'max_iter': 'n_iter'}, removal_version='25.10')
 class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
     """Beamforming GIB methods with different normalizations.
 

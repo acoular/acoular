@@ -63,7 +63,8 @@ class LockedGenerator:
             return self.it.__next__()
 
 
-@deprecated_alias({'naverage': 'num_per_average', 'numsamples': 'num_samples'}, read_only=['numsamples'])
+@deprecated_alias({'naverage': 'num_per_average', 'numsamples': 'num_samples'}, read_only=['numsamples'],
+                  removal_version='25.10')
 class Average(InOut):
     """
     Calculate the average across consecutive time samples or frequency snapshots.
