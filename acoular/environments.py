@@ -552,7 +552,7 @@ class RotatingFlow(FlowField):
     >>> import numpy as np
     >>>
     >>> flow = RotatingFlow(rps=1, v0=1.0)
-    >>> velocity, jacobian = flow.v(array((1.0, 1.0, 0.0)))
+    >>> velocity, jacobian = flow.v(np.array((1.0, 1.0, 0.0)))
     >>> velocity
     array([-6.28318531,  6.28318531,  1.        ])
     >>> jacobian
@@ -718,13 +718,13 @@ def spiral_sphere(N, Om=None, b=None):  # noqa: N803 # change to 4*np.pi
     Generate 50 points over half a hemisphere with the z-axis as the center direction:
 
     >>> import numpy as np
-    >>> points = spiral_sphere(50, Om=np.pi, b=array((0, 0, 1)))
+    >>> points = spiral_sphere(50, Om=np.pi, b=np.array((0, 0, 1)))
     >>> points.shape
     (3, 50)
 
     Generate 200 points with a different direction vector:
 
-    >>> points = spiral_sphere(200, b=array((1, 0, 0)))
+    >>> points = spiral_sphere(200, b=np.array((1, 0, 0)))
     >>> points.shape
     (3, 200)
     """
