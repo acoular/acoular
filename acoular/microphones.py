@@ -190,7 +190,7 @@ class MicGeom(HasStrictTraits):
     @cached_property
     def _get_center(self):
         if self.pos.any():
-            center = np.array(self.pos, axis=1)
+            center = np.average(self.pos, axis=1)
             # set very small values to zero
             center[abs(center) < 1e-16] = 0.0
             return center
