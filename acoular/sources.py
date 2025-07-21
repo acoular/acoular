@@ -31,30 +31,8 @@ from os import path
 from warnings import warn
 
 import numba as nb
-from numpy import any as npany
-from numpy import (
-    arange,
-    arctan2,
-    array,
-    ceil,
-    complex128,
-    cross,
-    dot,
-    empty,
-    int64,
-    mod,
-    newaxis,
-    ones,
-    ones_like,
-    pi,
-    real,
-    repeat,
-    sqrt,
-    tile,
-    uint32,
-    zeros,
-)
-from numpy import min as npmin
+import numpy as np
+
 from numpy.fft import fft, ifft
 from scipy.linalg import norm
 from scipy.special import sph_harm, spherical_jn, spherical_yn
@@ -228,21 +206,21 @@ def get_radiation_angles(direction, mpos, sourceposition):
     array([4.71238898, 4.71238898])
     """
     # direction of the Spherical Harmonics
-    direc = array(direction, dtype=float)
+    direc = np.array(direction, dtype=float)
     direc = direc / norm(direc)
     # distances
-    source_to_mic_vecs = mpos - array(sourceposition).reshape((3, 1))
+    source_to_mic_vecs = mpos - np.array(sourceposition).reshape((3, 1))
     source_to_mic_vecs[2] *= -1  # invert z-axis (acoular)    #-1
     # z-axis (acoular) -> y-axis (spherical)
     # y-axis (acoular) -> z-axis (spherical)
     # theta
-    ele = arctan2(sqrt(source_to_mic_vecs[0] ** 2 + source_to_mic_vecs[2] ** 2), source_to_mic_vecs[1])
-    ele += arctan2(sqrt(direc[0] ** 2 + direc[2] ** 2), direc[1])
-    ele += pi * 0.5  # convert from [-pi/2, pi/2] to [0,pi] range
+    ele = np.arctan2(np.sqrt(source_to_mic_vecs[0] ** 2 + source_to_mic_vecs[2] ** 2), source_to_mic_vecs[1])
+    ele += np.arctan2(np.sqrt(direc[0] ** 2 + direc[2] ** 2), direc[1])
+    ele += np.pi * 0.5  # convert from [-pi/2, pi/2] to [0,pi] range
     # phi
-    azi = arctan2(source_to_mic_vecs[2], source_to_mic_vecs[0])
-    azi += arctan2(direc[2], direc[0])
-    azi = mod(azi, 2 * pi)
+    azi = np.arctan2(source_to_mic_vecs[2], source_to_mic_vecs[0])
+    azi += np.arctan2(direc[2], direc[0])
+    azi = np.mod(azi, 2 * np.pi)
     return azi, ele
 
 
@@ -305,9 +283,9 @@ def get_modes(lOrder, direction, mpos, sourceposition=None):  # noqa: N803
     >>> modes.shape
     (2, 9)
     """
-    sourceposition = sourceposition if sourceposition is not None else array([0, 0, 0])
+    sourceposition = sourceposition if sourceposition is not None else np.array([0, 0, 0])
     azi, ele = get_radiation_angles(direction, mpos, sourceposition)  # angles between source and mics
-    modes = zeros((azi.shape[0], (lOrder + 1) ** 2), dtype=complex128)
+    modes = np.zeros((azi.shape[0], (lOrder + 1) ** 2), dtype=np.complex128)
     i = 0
     for lidx in range(lOrder + 1):
         for m in range(-lidx, lidx + 1):
@@ -509,7 +487,7 @@ class TimeSamples(SamplesGenerator):
                 stacklevel=2,
             )
             if self.calib.num_mics == self.num_channels:
-                cal_factor = self.calib.data[newaxis]
+                cal_factor = self.calib.data[np.newaxis]
             else:
                 msg = f'calibration data not compatible: {self.calib.num_mics:d}, {self.num_channels:d}'
                 raise ValueError(msg)
@@ -621,7 +599,7 @@ class MaskedTimeSamples(TimeSamples):
         if len(self.invalid_channels) == 0:
             return slice(0, None, None)
         allr = [i for i in range(self.num_channels_total) if i not in self.invalid_channels]
-        return array(allr)
+        return np.array(allr)
 
     @cached_property
     def _get_num_channels(self):
@@ -734,9 +712,9 @@ class MaskedTimeSamples(TimeSamples):
                 stacklevel=2,
             )
             if self.calib.num_mics == self.num_channels_total:
-                cal_factor = self.calib.data[self.channels][newaxis]
+                cal_factor = self.calib.data[self.channels][np.newaxis]
             elif self.calib.num_mics == self.num_channels:
-                cal_factor = self.calib.data[newaxis]
+                cal_factor = self.calib.data[np.newaxis]
             elif self.calib.num_mics == 0:
                 warn('No calibration data used.', Warning, stacklevel=2)
             else:
@@ -826,8 +804,8 @@ class PointSource(SamplesGenerator):
     mics = Instance(MicGeom, desc='microphone geometry')
 
     def _validate_locations(self):
-        dist = self.env._r(array(self.loc).reshape((3, 1)), self.mics.pos)
-        if npany(dist < 1e-7):
+        dist = self.env._r(np.array(self.loc).reshape((3, 1)), self.mics.pos)
+        if np.any(dist < 1e-7):
             warn('Source and microphone locations are identical.', Warning, stacklevel=2)
 
     #: An :class:`~acoular.environments.Environment` or derived object providing sound propagation
@@ -905,17 +883,17 @@ class PointSource(SamplesGenerator):
             If signal processing or propagation cannot be performed.
         """
         self._validate_locations()
-        N = int(ceil(self.num_samples / num))  # number of output blocks
+        N = int(np.ceil(self.num_samples / num))  # number of output blocks
         signal = self.signal.usignal(self.up)
-        out = empty((num, self.num_channels))
+        out = np.empty((num, self.num_channels))
         # distances
-        rm = self.env._r(array(self.loc).reshape((3, 1)), self.mics.pos).reshape(1, -1)
+        rm = self.env._r(np.array(self.loc).reshape((3, 1)), self.mics.pos).reshape(1, -1)
         # emission time relative to start_t (in samples) for first sample
         ind = (-rm / self.env.c - self.start_t + self.start) * self.sample_freq * self.up
 
         if self.prepadding == 'zeros':
             # number of blocks where signal behaviour is amended
-            pre = -int(npmin(ind[0]) // (self.up * num))
+            pre = -int(np.min(ind[0]) // (self.up * num))
             # amend signal for first blocks
             # if signal stops during prepadding, terminate
             if pre >= N:
@@ -1026,9 +1004,9 @@ class SphericalHarmonicSource(PointSource):
             lOrder=self.lOrder,
             direction=self.direction,
             mpos=self.mics.pos,
-            sourceposition=array(self.loc),
+            sourceposition=np.array(self.loc),
         )
-        return real(ifft(fft(signals, axis=0) * (Y_lm @ self.alpha), axis=0))
+        return np.real(ifft(fft(signals, axis=0) * (Y_lm @ self.alpha), axis=0))
 
     def result(self, num=128):
         """
@@ -1060,15 +1038,15 @@ class SphericalHarmonicSource(PointSource):
 
         signal = self.signal.usignal(self.up)
         # emission time relative to start_t (in samples) for first sample
-        rm = self.env._r(array(self.loc).reshape((3, 1)), self.mics.pos)
-        ind = (-rm / self.env.c - self.start_t + self.start) * self.sample_freq + pi / 30
+        rm = self.env._r(np.array(self.loc).reshape((3, 1)), self.mics.pos)
+        ind = (-rm / self.env.c - self.start_t + self.start) * self.sample_freq + np.pi / 30
         i = 0
         n = self.num_samples
-        out = empty((num, self.num_channels))
+        out = np.empty((num, self.num_channels))
         while n:
             n -= 1
             try:
-                out[i] = signal[array(0.5 + ind * self.up, dtype=int64)] / rm
+                out[i] = signal[np.array(0.5 + ind * self.up, dtype=np.int64)] / rm
                 ind += 1
                 i += 1
                 if i == num:
@@ -1167,23 +1145,23 @@ class MovingPointSource(PointSource):
         signal = self.signal.usignal(self.up)
         # shortcuts and initial values
         num_mics = self.num_channels
-        mpos = self.mics.pos[:, :, newaxis]
-        t = self.start + ones(num_mics)[:, newaxis] * arange(num) / self.sample_freq
+        mpos = self.mics.pos[:, :, np.newaxis]
+        t = self.start + np.ones(num_mics)[:, np.newaxis] * np.arange(num) / self.sample_freq
         epslim = 0.1 / self.up / self.sample_freq
         c0 = self.env.c
         tr = self.trajectory
         n = self.num_samples
         while n > 0:
-            eps = ones_like(t)  # init discrepancy in time
+            eps = np.ones_like(t)  # init discrepancy in time
             te = t.copy()  # init emission time = receiving time
             j = 0
             # Newton-Rhapson iteration
             while abs(eps).max() > epslim and j < 100:
-                loc = array(tr.location(te.flatten())).reshape((3, num_mics, -1))
+                loc = np.array(tr.location(te.flatten())).reshape((3, num_mics, -1))
                 rm = loc - mpos  # distance vectors to microphones
-                rm = sqrt((rm * rm).sum(0))  # absolute distance
-                loc /= sqrt((loc * loc).sum(0))  # distance unit vector
-                der = array(tr.location(te.flatten(), der=1)).reshape((3, num_mics, -1))
+                rm = np.sqrt((rm * rm).sum(0))  # absolute distance
+                loc /= np.sqrt((loc * loc).sum(0))  # distance unit vector
+                der = np.array(tr.location(te.flatten(), der=1)).reshape((3, num_mics, -1))
                 Mr = (der * loc).sum(0) / c0  # radial Mach number
                 eps[:] = (te + rm / c0 - t) / (1 + Mr)  # discrepancy in time
                 te -= eps
@@ -1194,7 +1172,7 @@ class MovingPointSource(PointSource):
             if self.conv_amp:
                 rm *= (1 - Mr) ** 2
             try:
-                ind = array(0.5 + ind * self.up, dtype=int64)
+                ind = np.array(0.5 + ind * self.up, dtype=np.int64)
                 out = (signal[ind] / rm).T
                 yield out[:n]
             except IndexError:  # last incomplete frame
@@ -1296,10 +1274,10 @@ class PointSourceDipole(PointSource):
 
         mpos = self.mics.pos
         # position of the dipole as (3,1) vector
-        loc = array(self.loc, dtype=float).reshape((3, 1))
+        loc = np.array(self.loc, dtype=float).reshape((3, 1))
         # direction vector from tuple
-        direc = array(self.direction, dtype=float) * 1e-5
-        direc_mag = sqrt(dot(direc, direc))
+        direc = np.array(self.direction, dtype=float) * 1e-5
+        direc_mag = np.sqrt(np.dot(direc, direc))
 
         # normed direction vector
         direc_n = direc / direc_mag
@@ -1313,7 +1291,7 @@ class PointSourceDipole(PointSource):
         dir2 = (direc_n * dist / 2.0).reshape((3, 1))
 
         signal = self.signal.usignal(self.up)
-        out = empty((num, self.num_channels))
+        out = np.empty((num, self.num_channels))
 
         # distance from dipole center to microphones
         rm = self.env._r(loc, mpos)
@@ -1336,8 +1314,8 @@ class PointSourceDipole(PointSource):
                     rm
                     / dist
                     * (
-                        signal[array(0.5 + ind1 * self.up, dtype=int64)] / rm1
-                        - signal[array(0.5 + ind2 * self.up, dtype=int64)] / rm2
+                        signal[np.array(0.5 + ind1 * self.up, dtype=np.int64)] / rm1
+                        - signal[np.array(0.5 + ind2 * self.up, dtype=np.int64)] / rm2
                     )
                 )
                 ind1 += 1.0
@@ -1392,7 +1370,7 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
     #: A reference vector, perpendicular to the x and y-axis of moving source, defining the axis of
     #: rotation for the dipole directivity. If set to ``(0, 0, 0)``, the dipole is only translated
     #: along the :attr:`~MovingPointSource.trajectory` without rotation. Default is ``(0, 0, 0)``.
-    rvec = CArray(dtype=float, shape=(3,), value=array((0, 0, 0)), desc='reference vector')
+    rvec = CArray(dtype=float, shape=(3,), value=np.array((0, 0, 0)), desc='reference vector')
 
     @cached_property
     def _get_digest(self):
@@ -1434,19 +1412,19 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
         terminates when the time discrepancy (``eps``) is below a threshold (``epslim``)
         or after 100 iterations.
         """
-        eps = ones(self.mics.num_mics)
+        eps = np.ones(self.mics.num_mics)
         epslim = 0.1 / self.up / self.sample_freq
         te = t.copy()  # init emission time = receiving time
         j = 0
         # Newton-Rhapson iteration
         while abs(eps).max() > epslim and j < 100:
-            xs = array(self.trajectory.location(te))
+            xs = np.array(self.trajectory.location(te))
             loc = xs.copy()
             loc += direction
-            rm = loc - self.mics.pos  # distance vectors to microphones
-            rm = sqrt((rm * rm).sum(0))  # absolute distance
-            loc /= sqrt((loc * loc).sum(0))  # distance unit vector
-            der = array(self.trajectory.location(te, der=1))
+            rm = loc - self.mics.pos  # distance vectors to microphnp.ones
+            rm = np.sqrt((rm * rm).sum(0))  # absolute distance
+            loc /= np.sqrt((loc * loc).sum(0))  # distance unit vector
+            der = np.array(self.trajectory.location(te, der=1))
             Mr = (der * loc).sum(0) / self.env.c  # radial Mach number
             eps = (te + rm / self.env.c - t) / (1 + Mr)  # discrepancy in time
             te -= eps
@@ -1486,17 +1464,17 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
         - The rotation matrix ensures that the new dipole orientation adheres
           to the right-hand rule and remains orthogonal.
         """
-        trajg1 = array(self.trajectory.location(time, der=1))[:, 0][:, newaxis]
+        trajg1 = np.array(self.trajectory.location(time, der=1))[:, 0][:, np.newaxis]
         rflag = (self.rvec == 0).all()  # flag translation vs. rotation
         if rflag:
             return direction
-        dx = array(trajg1.T)  # direction vector (new x-axis)
-        dy = cross(self.rvec, dx)  # new y-axis
-        dz = cross(dx, dy)  # new z-axis
-        RM = array((dx, dy, dz)).T  # rotation matrix
-        RM /= sqrt((RM * RM).sum(0))  # column normalized
-        newdir = dot(RM, direction)
-        return cross(newdir[:, 0].T, self.rvec.T).T
+        dx = np.array(trajg1.T)  # direction vector (new x-axis)
+        dy = np.cross(self.rvec, dx)  # new y-axis
+        dz = np.cross(dx, dy)  # new z-axis
+        RM = np.array((dx, dy, dz)).T  # rotation matrix
+        RM /= np.sqrt((RM * RM).sum(0))  # column normalized
+        newdir = np.dot(RM, direction)
+        return np.cross(newdir[:, 0].T, self.rvec.T).T
 
     def result(self, num=128):
         """
@@ -1524,8 +1502,8 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
         mpos = self.mics.pos
 
         # direction vector from tuple
-        direc = array(self.direction, dtype=float) * 1e-5
-        direc_mag = sqrt(dot(direc, direc))
+        direc = np.array(self.direction, dtype=float) * 1e-5
+        direc_mag = np.sqrt(np.dot(direc, direc))
         # normed direction vector
         direc_n = direc / direc_mag
         c = self.env.c
@@ -1536,10 +1514,10 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
         dir2 = (direc_n * dist / 2.0).reshape((3, 1))
 
         signal = self.signal.usignal(self.up)
-        out = empty((num, self.num_channels))
+        out = np.empty((num, self.num_channels))
         # shortcuts and initial values
         m = self.mics
-        t = self.start * ones(m.num_mics)
+        t = self.start * np.ones(m.num_mics)
 
         i = 0
         n = self.num_samples
@@ -1548,7 +1526,7 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
             te, rm, Mr, locs = self.get_emission_time(t, 0)
             t += 1.0 / self.sample_freq
             # location of the center
-            loc = array(self.trajectory.location(te), dtype=float)[:, 0][:, newaxis]
+            loc = np.array(self.trajectory.location(te), dtype=float)[:, 0][:, np.newaxis]
             # distance of the dipoles from the center
             diff = self.get_moving_direction(dir2, te)
 
@@ -1567,8 +1545,8 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
                     rm
                     / dist
                     * (
-                        signal[array(0.5 + ind * self.up, dtype=int64)] / rm1
-                        - signal[array(0.5 + ind * self.up, dtype=int64)] / rm2
+                        signal[np.array(0.5 + ind * self.up, dtype=np.int64)] / rm1
+                        - signal[np.array(0.5 + ind * self.up, dtype=np.int64)] / rm2
                     )
                 )
                 i += 1
@@ -1662,7 +1640,7 @@ class LineSource(PointSource):
         mpos = self.mics.pos
 
         # direction vector from tuple
-        direc = array(self.direction, dtype=float)
+        direc = np.array(self.direction, dtype=float)
         # normed direction vector
         direc_n = direc / norm(direc)
         c = self.env.c
@@ -1671,15 +1649,15 @@ class LineSource(PointSource):
         dist = self.length / self.num_sources
 
         # blocwise output
-        out = zeros((num, self.num_channels))
+        out = np.zeros((num, self.num_channels))
 
         # distance from line start position to microphones
-        loc = array(self.loc, dtype=float).reshape((3, 1))
+        loc = np.array(self.loc, dtype=float).reshape((3, 1))
 
         # distances from monopoles in the line to microphones
-        rms = empty((self.num_channels, self.num_sources))
-        inds = empty((self.num_channels, self.num_sources))
-        signals = empty((self.num_sources, len(self.signal.usignal(self.up))))
+        rms = np.empty((self.num_channels, self.num_sources))
+        inds = np.empty((self.num_channels, self.num_sources))
+        signals = np.empty((self.num_sources, len(self.signal.usignal(self.up))))
         # for every source - distances
         for s in range(self.num_sources):
             rms[:, s] = self.env._r((loc.T + direc_n * dist * s).T, mpos)
@@ -1696,13 +1674,13 @@ class LineSource(PointSource):
             try:
                 for s in range(self.num_sources):
                     # sum sources
-                    out[i] += signals[s, array(0.5 + inds[:, s].T * self.up, dtype=int64)] / rms[:, s]
+                    out[i] += signals[s, np.array(0.5 + inds[:, s].T * self.up, dtype=np.int64)] / rms[:, s]
 
                 inds += 1.0
                 i += 1
                 if i == num:
                     yield out
-                    out = zeros((num, self.num_channels))
+                    out = np.zeros((num, self.num_channels))
                     i = 0
             except IndexError:
                 break
@@ -1752,7 +1730,7 @@ class MovingLineSource(LineSource, MovingPointSource):
     #: rotation for the line source directivity. If set to ``(0, 0, 0)``, the line source is only
     #: translated along the :attr:`~MovingPointSource.trajectory` without rotation. Default is
     #: ``(0, 0, 0)``.
-    rvec = CArray(dtype=float, shape=(3,), value=array((0, 0, 0)), desc='reference vector')
+    rvec = CArray(dtype=float, shape=(3,), value=np.array((0, 0, 0)), desc='reference vector')
 
     @cached_property
     def _get_digest(self):
@@ -1793,17 +1771,17 @@ class MovingLineSource(LineSource, MovingPointSource):
         - The rotation matrix ensures that the new orientation adheres to the
           right-hand rule and remains orthogonal.
         """
-        trajg1 = array(self.trajectory.location(time, der=1))[:, 0][:, newaxis]
+        trajg1 = np.array(self.trajectory.location(time, der=1))[:, 0][:, np.newaxis]
         rflag = (self.rvec == 0).all()  # flag translation vs. rotation
         if rflag:
             return direction
-        dx = array(trajg1.T)  # direction vector (new x-axis)
-        dy = cross(self.rvec, dx)  # new y-axis
-        dz = cross(dx, dy)  # new z-axis
-        RM = array((dx, dy, dz)).T  # rotation matrix
-        RM /= sqrt((RM * RM).sum(0))  # column normalized
-        newdir = dot(RM, direction)
-        return cross(newdir[:, 0].T, self.rvec.T).T
+        dx = np.array(trajg1.T)  # direction vector (new x-axis)
+        dy = np.cross(self.rvec, dx)  # new y-axis
+        dz = np.cross(dx, dy)  # new z-axis
+        RM = np.array((dx, dy, dz)).T  # rotation matrix
+        RM /= np.sqrt((RM * RM).sum(0))  # column normalized
+        newdir = np.dot(RM, direction)
+        return np.cross(newdir[:, 0].T, self.rvec.T).T
 
     def get_emission_time(self, t, direction):
         """
@@ -1847,19 +1825,19 @@ class MovingLineSource(LineSource, MovingPointSource):
         - The method iterates until the difference between the computed emission time and
           the current time is sufficiently small (within a defined threshold).
         """
-        eps = ones(self.mics.num_mics)
+        eps = np.ones(self.mics.num_mics)
         epslim = 0.1 / self.up / self.sample_freq
         te = t.copy()  # init emission time = receiving time
         j = 0
         # Newton-Rhapson iteration
         while abs(eps).max() > epslim and j < 100:
-            xs = array(self.trajectory.location(te))
+            xs = np.array(self.trajectory.location(te))
             loc = xs.copy()
             loc += direction
             rm = loc - self.mics.pos  # distance vectors to microphones
-            rm = sqrt((rm * rm).sum(0))  # absolute distance
-            loc /= sqrt((loc * loc).sum(0))  # distance unit vector
-            der = array(self.trajectory.location(te, der=1))
+            rm = np.sqrt((rm * rm).sum(0))  # absolute distance
+            loc /= np.sqrt((loc * loc).sum(0))  # distance unit vector
+            der = np.array(self.trajectory.location(te, der=1))
             Mr = (der * loc).sum(0) / self.env.c  # radial Mach number
             eps = (te + rm / self.env.c - t) / (1 + Mr)  # discrepancy in time
             te -= eps
@@ -1887,7 +1865,7 @@ class MovingLineSource(LineSource, MovingPointSource):
         mpos = self.mics.pos
 
         # direction vector from tuple
-        direc = array(self.direction, dtype=float)
+        direc = np.array(self.direction, dtype=float)
         # normed direction vector
         direc_n = direc / norm(direc)
 
@@ -1896,12 +1874,12 @@ class MovingLineSource(LineSource, MovingPointSource):
         dir2 = (direc_n * dist).reshape((3, 1))
 
         # blocwise output
-        out = zeros((num, self.num_channels))
+        out = np.zeros((num, self.num_channels))
 
         # distances from monopoles in the line to microphones
-        rms = empty((self.num_channels, self.num_sources))
-        inds = empty((self.num_channels, self.num_sources))
-        signals = empty((self.num_sources, len(self.signal.usignal(self.up))))
+        rms = np.empty((self.num_channels, self.num_sources))
+        inds = np.empty((self.num_channels, self.num_sources))
+        signals = np.empty((self.num_sources, len(self.signal.usignal(self.up))))
         # coherence
         for s in range(self.num_sources):
             # new seed for every source
@@ -1913,20 +1891,20 @@ class MovingLineSource(LineSource, MovingPointSource):
 
         # shortcuts and initial values
         m = self.mics
-        t = self.start * ones(m.num_mics)
+        t = self.start * np.ones(m.num_mics)
         i = 0
         n = self.num_samples
         while n:
             n -= 1
             t += 1.0 / self.sample_freq
             te1, rm1, Mr1, locs1 = self.get_emission_time(t, 0)
-            # trajg1 = array(self.trajectory.location( te1, der=1))[:,0][:,newaxis]
+            # trajg1 = np.array(self.trajectory.location( te1, der=1))[:,0][:,np.newaxis]
 
             # get distance and ind for every source in the line
             for s in range(self.num_sources):
                 diff = self.get_moving_direction(dir2, te1)
-                te, rm, Mr, locs = self.get_emission_time(t, tile((diff * s).T, (self.num_channels, 1)).T)
-                loc = array(self.trajectory.location(te), dtype=float)[:, 0][:, newaxis]
+                te, rm, Mr, locs = self.get_emission_time(t, np.tile((diff * s).T, (self.num_channels, 1)).T)
+                loc = np.array(self.trajectory.location(te), dtype=float)[:, 0][:, np.newaxis]
                 diff = self.get_moving_direction(dir2, te)
                 rms[:, s] = self.env._r((loc + diff * s), mpos)
                 inds[:, s] = (te - self.start_t + self.start) * self.sample_freq
@@ -1938,12 +1916,12 @@ class MovingLineSource(LineSource, MovingPointSource):
                 # subtract the second signal b/c of phase inversion
                 for s in range(self.num_sources):
                     # sum sources
-                    out[i] += signals[s, array(0.5 + inds[:, s].T * self.up, dtype=int64)] / rms[:, s]
+                    out[i] += signals[s, np.array(0.5 + inds[:, s].T * self.up, dtype=np.int64)] / rms[:, s]
 
                 i += 1
                 if i == num:
                     yield out
-                    out = zeros((num, self.num_channels))
+                    out = np.zeros((num, self.num_channels))
                     i = 0
             except IndexError:
                 break
@@ -2011,7 +1989,7 @@ class UncorrelatedNoiseSource(SamplesGenerator):
     #: Array of random seed values for generating uncorrelated noise at each channel. If left empty,
     #: seeds will be automatically generated as ``np.arange(self.num_channels) + signal.seed``. The
     #: size of the array must match the :attr:`number of output channels<num_channels>`.
-    seed = CArray(dtype=uint32, desc='random seed values')
+    seed = CArray(dtype=np.uint32, desc='random seed values')
 
     #: Number of output channels, automatically determined by the number of microphones
     #: defined in the :attr:`mics` attribute. Corresponds to the number of uncorrelated noise
@@ -2089,14 +2067,14 @@ class UncorrelatedNoiseSource(SamplesGenerator):
         Noise = self.signal.__class__
         # create or get the array of random seeds
         if not self.seed.size > 0:
-            seed = arange(self.num_channels) + self.signal.seed
+            seed = np.arange(self.num_channels) + self.signal.seed
         elif self.seed.shape == (self.num_channels,):
             seed = self.seed
         else:
             msg = f'Seed array expected to be of shape ({self.num_channels:d},), but has shape {self.seed.shape}.'
             raise ValueError(msg)
         # create array with [num_channels] noise signal tracks
-        signal = array(
+        signal = np.array(
             [
                 Noise(seed=s, num_samples=self.num_samples, sample_freq=self.sample_freq, rms=self.signal.rms).signal()
                 for s in seed
@@ -2316,7 +2294,7 @@ class SourceMixer(SamplesGenerator):
         gens = [i.result(num) for i in self.sources[1:]]
         weights = self.weights.copy()
         if weights.size == 0:
-            weights = array([1.0 for j in range(len(self.sources))])
+            weights = np.array([1.0 for j in range(len(self.sources))])
         assert weights.shape[0] == len(self.sources)
         for temp in self.sources[0].result(num):
             temp *= weights[0]
@@ -2444,7 +2422,7 @@ class PointSourceConvolve(PointSource):
         - Convolution is performed using the :class:`~acoular.tprocess.TimeConvolve` class
           to ensure efficiency.
         """
-        data = repeat(self.signal.signal()[:, newaxis], self.mics.num_mics, axis=1)
+        data = np.repeat(self.signal.signal()[:, np.newaxis], self.mics.num_mics, axis=1)
         source = TimeSamples(
             data=data,
             sample_freq=self.sample_freq,

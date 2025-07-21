@@ -14,7 +14,7 @@ Implements support for array microphone arrangements.
 import xml.dom.minidom
 from pathlib import Path
 
-from numpy import array, average
+import numpy as np
 from scipy.spatial.distance import cdist
 from traits.api import (
     CArray,
@@ -181,7 +181,7 @@ class MicGeom(HasStrictTraits):
         if len(self.invalid_channels) == 0:
             return self.pos_total
         allr = [i for i in range(self.pos_total.shape[-1]) if i not in self.invalid_channels]
-        return self.pos_total[:, array(allr)]
+        return self.pos_total[:, np.array(allr)]
 
     @cached_property
     def _get_num_mics(self):
@@ -190,7 +190,7 @@ class MicGeom(HasStrictTraits):
     @cached_property
     def _get_center(self):
         if self.pos.any():
-            center = average(self.pos, axis=1)
+            center = np.array(self.pos, axis=1)
             # set very small values to zero
             center[abs(center) < 1e-16] = 0.0
             return center
@@ -237,7 +237,7 @@ class MicGeom(HasStrictTraits):
         for el in doc.getElementsByTagName('pos'):
             names.append(el.getAttribute('Name'))
             xyz.append([float(el.getAttribute(a)) for a in 'xyz'])
-        self.pos_total = array(xyz, 'd').swapaxes(0, 1)
+        self.pos_total = np.array(xyz, 'd').swapaxes(0, 1)
 
     def export_mpos(self, filename):
         """

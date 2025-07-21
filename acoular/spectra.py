@@ -13,26 +13,7 @@
 
 from abc import abstractmethod
 
-from numpy import (
-    arange,
-    array,
-    bartlett,
-    blackman,
-    dot,
-    empty,
-    fill_diagonal,
-    hamming,
-    hanning,
-    imag,
-    linalg,
-    ndarray,
-    newaxis,
-    ones,
-    real,
-    searchsorted,
-    sum,  # noqa A004
-    zeros,
-)
+import numpy as np
 from scipy import fft
 from traits.api import (
     ABCHasStrictTraits,
@@ -94,7 +75,7 @@ class BaseSpectra(ABCHasStrictTraits):
     #:
     #: - ``'Blackman'``
     window = Map(
-        {'Rectangular': ones, 'Hanning': hanning, 'Hamming': hamming, 'Bartlett': bartlett, 'Blackman': blackman},
+        {'Rectangular': np.ones, 'Hanning': np.hanning, 'Hamming': np.hamming, 'Bartlett': np.bartlett, 'Blackman': np.blackman},
         default_value='Rectangular',
         desc='type of window for FFT',
     )
@@ -181,7 +162,7 @@ class BaseSpectra(ABCHasStrictTraits):
     # generator that yields the time data blocks for every channel (with optional overlap)
     def _get_source_data(self):
         bs = self.block_size
-        temp = empty((2 * bs, self.num_channels))
+        temp = np.empty((2 * bs, self.num_channels))
         pos = bs
         posinc = bs / self.overlap_
         for data_block in self.source.result(bs):
@@ -293,7 +274,7 @@ class PowerSpectra(BaseSpectra):
         fftfreq = self.fftfreq()
         if fftfreq is not None:
             if self._ind_high is None:
-                return array([fftfreq[self.ind_low], None])
+                return np.array([fftfreq[self.ind_low], None])
             return fftfreq[[self.ind_low, self.ind_high]]
         return None
 
@@ -309,7 +290,7 @@ class PowerSpectra(BaseSpectra):
         if fftfreq is not None:
             if self._index_set_last:
                 return min(self._ind_low, fftfreq.shape[0] - 1)
-            return searchsorted(fftfreq[:-1], self._freqlc)
+            return np.searchsorted(fftfreq[:-1], self._freqlc)
         return 0
 
     @property_depends_on(['source.sample_freq', 'block_size', '_ind_high', '_freqhc'])
@@ -322,7 +303,7 @@ class PowerSpectra(BaseSpectra):
                 return min(self._ind_high, fftfreq.shape[0] - 1)
             if self._freqhc is None:
                 return None
-            return searchsorted(fftfreq[:-1], self._freqhc)
+            return np.searchsorted(fftfreq[:-1], self._freqhc)
         return None
 
     def _set_ind_high(self, ind_high):  # by setting this the user sets the lower index
@@ -338,7 +319,7 @@ class PowerSpectra(BaseSpectra):
         fftfreq = self.fftfreq()
         if fftfreq is not None:
             try:
-                indices = arange(fftfreq.shape[0], dtype=int)
+                indices = np.arange(fftfreq.shape[0], dtype=int)
                 if self.ind_high is None:
                     return indices[self.ind_low :]
                 return indices[self.ind_low : self.ind_high]
@@ -385,18 +366,18 @@ class PowerSpectra(BaseSpectra):
         """
         t = self.source
         wind = self.window_(self.block_size)
-        weight = dot(wind, wind)
-        wind = wind[newaxis, :].swapaxes(0, 1)
+        weight = np.dot(wind, wind)
+        wind = wind[np.newaxis, :].swapaxes(0, 1)
         numfreq = int(self.block_size / 2 + 1)
         csm_shape = (numfreq, t.num_channels, t.num_channels)
-        csm_upper = zeros(csm_shape, dtype=self.precision)
+        csm_upper = np.zeros(csm_shape, dtype=self.precision)
         # get time data blockwise
         for data in self._get_source_data():
             ft = fft.rfft(data * wind, None, 0).astype(self.precision)
             calcCSM(csm_upper, ft)  # only upper triangular part of matrix is calculated (for speed reasons)
         # create the full csm matrix via transposing and complex conj.
         csm_lower = csm_upper.conj().transpose(0, 2, 1)
-        [fill_diagonal(csm_lower[cntFreq, :, :], 0) for cntFreq in range(csm_lower.shape[0])]
+        [np.fill_diagonal(csm_lower[cntFreq, :, :], 0) for cntFreq in range(csm_lower.shape[0])]
         csm = csm_lower + csm_upper
         # onesided spectrum: multiplication by 2.0=sqrt(2)^2
         return csm * (2.0 / self.block_size / weight / self.num_blocks)
@@ -445,10 +426,10 @@ class PowerSpectra(BaseSpectra):
             eva_dtype = 'float32'
         #        csm = self.csm #trigger calculation
         csm_shape = self.csm.shape
-        eva = empty(csm_shape[0:2], dtype=eva_dtype)
-        eve = empty(csm_shape, dtype=self.precision)
+        eva = np.empty(csm_shape[0:2], dtype=eva_dtype)
+        eve = np.empty(csm_shape, dtype=self.precision)
         for i in range(csm_shape[0]):
-            (eva[i], eve[i]) = linalg.eigh(self.csm[i])
+            (eva[i], eve[i]) = np.linalg.eigh(self.csm[i])
         return (eva, eve)
 
     def calc_eva(self):
@@ -605,12 +586,12 @@ class PowerSpectra(BaseSpectra):
         f = self.fftfreq()
         if num == 0:
             # single frequency line
-            return self.eva[searchsorted(f, freq)]
-        f1 = searchsorted(f, freq * 2.0 ** (-0.5 / num))
-        f2 = searchsorted(f, freq * 2.0 ** (0.5 / num))
+            return self.eva[np.searchsorted(f, freq)]
+        f1 = np.searchsorted(f, freq * 2.0 ** (-0.5 / num))
+        f2 = np.searchsorted(f, freq * 2.0 ** (0.5 / num))
         if f1 == f2:
             return self.eva[f1]
-        return sum(self.eva[f1:f2], 0)
+        return np.sum(self.eva[f1:f2], 0)
 
 
 class PowerSpectraImport(PowerSpectra):
@@ -696,7 +677,7 @@ class PowerSpectraImport(PowerSpectra):
                 (number of frequencies, num_channels, num_channels)!'
                 raise ValueError(msg)
             self._csm = csm
-            self._csmsum = real(self._csm).sum() + (imag(self._csm) ** 2).sum()  # to trigger new digest creation
+            self._csmsum = np.real(self._csm).sum() + (np.imag(self._csm) ** 2).sum()  # to trigger new digest creation
 
     @property_depends_on(['digest'])
     def _get_eva(self):
@@ -719,7 +700,7 @@ class PowerSpectraImport(PowerSpectra):
             Array containing the frequencies.
         """
         if isinstance(self.frequencies, float):
-            return array([self.frequencies])
-        if isinstance(self.frequencies, ndarray):
+            return np.array([self.frequencies])
+        if isinstance(self.frequencies, np.ndarray):
             return self.frequencies
         return self.frequencies
