@@ -12,7 +12,7 @@
 # imports from other packages
 import xml.dom.minidom
 
-from numpy import array, newaxis
+import numpy as np
 from traits.api import CArray, CInt, File, List, Property, Union, cached_property, on_trait_change
 
 import acoular as ac
@@ -109,7 +109,7 @@ class Calib(InOut):
         if len(self.invalid_channels) == 0:
             return slice(0, None, None)
         allr = [i for i in range(self.num_mics) if i not in self.invalid_channels]
-        return array(allr)
+        return np.array(allr)
 
     @cached_property
     def _get_digest(self):
@@ -124,7 +124,7 @@ class Calib(InOut):
         for element in doc.getElementsByTagName('pos'):
             names.append(element.getAttribute('Name'))
             data.append(float(element.getAttribute('factor')))
-        self.data = array(data, 'd')
+        self.data = np.array(data, 'd')
         self.num_mics = self.data.shape[0]
 
     def __validate_data(self):
@@ -170,4 +170,4 @@ class Calib(InOut):
         """
         self.__validate_data()
         for block in self.source.result(num):
-            yield block * self.data[self.channels][newaxis]
+            yield block * self.data[self.channels][np.newaxis]

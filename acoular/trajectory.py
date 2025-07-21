@@ -10,7 +10,7 @@
 """
 
 # imports from other packages
-from numpy import arange, array, r_, sort
+import numpy as np
 from scipy.interpolate import splev, splprep
 from traits.api import Dict, Float, HasStrictTraits, Property, Tuple, cached_property, property_depends_on
 
@@ -101,12 +101,12 @@ class Trajectory(HasStrictTraits):
 
     @property_depends_on(['points[]'])
     def _get_interval(self):
-        return sort(list(self.points.keys()))[r_[0, -1]]
+        return np.sort(list(self.points.keys()))[np.r_[0, -1]]
 
     @property_depends_on(['points[]'])
     def _get_tck(self):
-        t = sort(list(self.points.keys()))
-        xp = array([self.points[i] for i in t]).T
+        t = np.sort(list(self.points.keys()))
+        xp = np.array([self.points[i] for i in t]).T
         k = min(3, len(self.points) - 1)
         tcku = splprep(xp, u=t, s=0, k=k)
         return tcku[0]
@@ -194,4 +194,4 @@ class Trajectory(HasStrictTraits):
             t_end = self.interval[1]
         # all locations are fetched in one go because that is much faster further improvement could
         # be possible if interpolated locations are fetched in blocks
-        yield from zip(*self.location(arange(t_start, t_end, delta_t), der))
+        yield from zip(*self.location(np.arange(t_start, t_end, delta_t), der))

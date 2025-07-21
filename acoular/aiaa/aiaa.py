@@ -27,7 +27,7 @@ Examples
 
 import contextlib
 
-from numpy import array
+import numpy as np
 from traits.api import (
     File,
     Instance,
@@ -156,7 +156,7 @@ class CsmAIAABenchmark(PowerSpectraImport):
         ndarray
             Array of length *block_size/2+1* containing the sample frequencies.
         """
-        return array(self.h5f.get_data_by_reference('/CsmData/binCenterFrequenciesHz')[:].flatten(), dtype=float)
+        return np.array(self.h5f.get_data_by_reference('/CsmData/binCenterFrequenciesHz')[:].flatten(), dtype=float)
 
 
 class MicAIAABenchmark(MicGeom):
