@@ -1870,7 +1870,7 @@ class BeamformerSODIX(BeamformerBase):
                         Q = csm - csm_mod
                         func = np.sum((np.abs(Q)) ** 2)
 
-                        # subscripts and operands for numpy np.einsum and np.einsum_path
+                        # subscripts and operands for numpy einsum and einsum_path
                         subscripts = 'rl,rm,ml->rl'
                         operands = (h.T, h.T.conj() * Djm, Q)
                         es_path = np.einsum_path(subscripts, *operands, optimize='greedy')[0]
