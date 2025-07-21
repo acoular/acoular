@@ -1420,7 +1420,7 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
             xs = np.array(self.trajectory.location(te))
             loc = xs.copy()
             loc += direction
-            rm = loc - self.mics.pos  # distance vectors to microphnp.ones
+            rm = loc - self.mics.pos  # distance vectors to microphones
             rm = np.sqrt((rm * rm).sum(0))  # absolute distance
             loc /= np.sqrt((loc * loc).sum(0))  # distance unit vector
             der = np.array(self.trajectory.location(te, der=1))
