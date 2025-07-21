@@ -209,7 +209,7 @@ class SteeringVector(HasStrictTraits):
         if ind is None:
             trans = calcTransfer(self.r0, self.rm, np.array(2 * np.pi * f / self.env.c))
         elif not isinstance(ind, np.ndarray):
-            trans = calcTransfer(self.r0[ind], self.rm[ind, :][np.newaxis], np.array(2 * np.pi * f / self.env.c))  # [0, :]
+            trans = calcTransfer(self.r0[ind], self.rm[ind, :][np.newaxis], np.array(2 * np.pi * f / self.env.c))
         else:
             trans = calcTransfer(self.r0[ind], self.rm[ind, :], np.array(2 * np.pi * f / self.env.c))
         return trans
@@ -1886,7 +1886,10 @@ class BeamformerSODIX(BeamformerBase):
                     else:
                         D0 = np.sqrt(
                             self._ac[(i - 1)]
-                            * np.real(np.trace(csm) / np.trace(np.array(self.freq_data.csm[i - 1], dtype='complex128', copy=True))),
+                            * np.real(
+                                np.trace(csm)
+                                / np.trace(np.array(self.freq_data.csm[i - 1], dtype='complex128', copy=True))
+                            ),
                         )
 
                     # boundaries - set to non negative [2*(num_points*num_mics)]
@@ -2107,7 +2110,9 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
                                 weights = weights / np.sum(np.abs(weights))
                             elif num_channels > num_points:
                                 wtw = np.dot(weights.T, weights)
-                                qi[s, :] = np.dot(np.dot(inv(np.dot(np.dot(A.conj.T, wtw), A)), np.dot(A.conj().T, wtw)), emode)
+                                qi[s, :] = np.dot(
+                                    np.dot(inv(np.dot(np.dot(A.conj.T, wtw), A)), np.dot(A.conj().T, wtw)), emode
+                                )
                                 weights = np.diag(np.abs(qi[s, :]) ** ((2 - self.pnorm) / 2))
                                 weights = weights / np.sum(np.abs(weights))
                     else:

@@ -1080,7 +1080,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
             # for rotation add phi_delay
             if not np.array_equal(phi_delay, []):
                 xInterpHelp = np.tile(virtNewCoord[0, :], (nTime, 1)) + np.tile(phi_delay, (virtNewCoord.shape[1], 1)).T
-                xInterp = ((xInterpHelp + np.pi) % (2 * np.pi)) - np.pi  #  shifting phi cootrdinate into feasible area [-pi, pi]
+                xInterp = ((xInterpHelp + np.pi) % (2 * np.pi)) - np.pi  #  shifting phi into feasible area [-pi, pi]
             # if no rotation given
             else:
                 xInterp = np.tile(virtNewCoord[0, :], (nTime, 1))
@@ -1138,14 +1138,16 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
             # check rotation
             if not np.array_equal(phi_delay, []):
                 xInterpHelp = np.tile(virtNewCoord[0, :], (nTime, 1)) + np.tile(phi_delay, (virtNewCoord.shape[1], 1)).T
-                xInterp = ((xInterpHelp + np.pi) % (2 * np.pi)) - np.pi  # shifting phi cootrdinate into feasible area [-pi, pi]
+                xInterp = ((xInterpHelp + np.pi) % (2 * np.pi)) - np.pi  # shifting phi into feasible area [-pi, pi]
             else:
                 xInterp = np.tile(virtNewCoord[0, :], (nTime, 1))
 
             mesh = meshList[0][0]
             for cntTime in range(nTime):
                 # points for interpolation
-                newPoint = np.concatenate((xInterp[cntTime, :][:, np.newaxis], virtNewCoord[1, :][:, np.newaxis]), axis=1)
+                newPoint = np.concatenate(
+                    (xInterp[cntTime, :][:, np.newaxis], virtNewCoord[1, :][:, np.newaxis]), axis=1
+                )
                 # scipy 1D interpolation
                 if self.method == 'linear':
                     interpolater = LinearNDInterpolator(mesh, pHelp[cntTime, :], fill_value=0)
@@ -1217,7 +1219,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
             # check rotation
             if not np.array_equal(phi_delay, []):
                 xInterpHelp = np.tile(virtNewCoord[0, :], (nTime, 1)) + np.tile(phi_delay, (virtNewCoord.shape[1], 1)).T
-                xInterp = ((xInterpHelp + np.pi) % (2 * np.pi)) - np.pi  # shifting phi cootrdinate into feasible area [-pi, pi]
+                xInterp = ((xInterpHelp + np.pi) % (2 * np.pi)) - np.pi  # shifting phi into feasible area [-pi, pi]
             else:
                 xInterp = np.tile(virtNewCoord[0, :], (nTime, 1))
 

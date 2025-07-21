@@ -75,7 +75,13 @@ class BaseSpectra(ABCHasStrictTraits):
     #:
     #: - ``'Blackman'``
     window = Map(
-        {'Rectangular': np.ones, 'Hanning': np.hanning, 'Hamming': np.hamming, 'Bartlett': np.bartlett, 'Blackman': np.blackman},
+        {
+            'Rectangular': np.ones,
+            'Hanning': np.hanning,
+            'Hamming': np.hamming,
+            'Bartlett': np.bartlett,
+            'Blackman': np.blackman,
+        },
         default_value='Rectangular',
         desc='type of window for FFT',
     )
