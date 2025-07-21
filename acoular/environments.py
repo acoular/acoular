@@ -231,7 +231,7 @@ class UniformFlowEnvironment(Environment):
     Notes
     -----
     The effective distance is adjusted by solving a flow-dependent relationship that accounts
-    for the np.cosine of the angle between the flow direction and the propagation path.
+    for the cosine of the angle between the flow direction and the propagation path.
     """
 
     #: The Mach number of the flow, defined as the ratio of the flow velocity to the speed of sound.
