@@ -32,7 +32,6 @@ from warnings import warn
 
 import numba as nb
 import numpy as np
-
 from numpy.fft import fft, ifft
 from scipy.linalg import norm
 from scipy.special import sph_harm, spherical_jn, spherical_yn

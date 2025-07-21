@@ -13,9 +13,11 @@
     c_air
     get_data_file
 """
-import numpy as np
+
 from pathlib import Path
 from warnings import warn
+
+import numpy as np
 
 from acoular.tools.utils import mole_fraction_of_water_vapor
 
@@ -270,7 +272,9 @@ def bardata(data, fc, num=3, bar=True, xoffset=0.0, masked=-360):
         # upper and lower band borders
         flu = np.concatenate((fc[:1] * 2**-ep, (fc[:-1] * 2**ep + fc[1:] * 2**-ep) / 2.0, fc[-1:] * 2**ep))
         # band borders as coordinates for bar plotting
-        flulist = 2 ** (xoffset * 1.0 / num) * (np.array([1, 1])[:, np.newaxis] * flu[np.newaxis, :]).T.reshape(-1)[1:-1]
+        flulist = (
+            2 ** (xoffset * 1.0 / num) * (np.array([1, 1])[:, np.newaxis] * flu[np.newaxis, :]).T.reshape(-1)[1:-1]
+        )
         # sound pressures as list for bar plotting
         plist = (np.array([1, 1])[:, np.newaxis] * data[np.newaxis, :]).T.reshape(-1)
     else:

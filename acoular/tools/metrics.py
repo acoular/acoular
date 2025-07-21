@@ -10,6 +10,7 @@
 """
 
 from copy import copy
+
 import numpy as np
 from scipy.spatial.distance import cdist
 from traits.api import Bool, CArray, HasStrictTraits, Instance, Property
