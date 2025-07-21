@@ -1830,7 +1830,7 @@ class WriteWAV(TimeOut):
         data = np.round(data)
         if data.min() < dmin or data.max() > dmax:
             warn(
-                f'Clipping occured in WAV export. Data type {dtype} cannot represent all values in data. \
+                f'Clipping occurred in WAV export. Data type {dtype} cannot represent all values in data. \
             Consider raising max_val.',
                 stacklevel=1,
             )
