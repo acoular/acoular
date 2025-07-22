@@ -23,7 +23,6 @@ ignore = [
     "D401", # first line should be in imperative mood -> TBD
     "D205", # 1 blank line required between summary line and description -> should be fixed by issue #216
     "D102", # missing docstring in public method -> should be fixed by issue #216
-    "D107", # missing docstring in __init__ -> should be fixed by issue #216
     "D417", # missing argument descriptions in the docstring -> should be fixed by issue #216
     # Others
     "T20", # will be fixed when logging is implemented
