@@ -11,8 +11,10 @@
     barspectrum
     bardata
     c_air
+    get_data_file
 """
 
+from pathlib import Path
 from warnings import warn
 
 from numpy import (
@@ -401,3 +403,28 @@ def c_air(t, h, p=101325, co2=0.04):
         + a14 * x_c**2
         + a15 * x_w * p * x_c
     )
+
+
+def get_data_file(file):
+    """
+    Ensures a file is available locally.
+
+    If the file does not exist in ``'../data/'`` or the current directory,
+    it is downloaded from the Acoular GitHub repository.
+
+    Returns
+    -------
+    :class:`pathlib.Path`
+        Path to the file.
+    """
+    data_file = Path('../data') / file
+    if not data_file.exists():
+        data_file = Path().cwd() / file
+        if not data_file.exists():
+            import urllib.request
+
+            url = 'https://github.com/acoular/acoular/raw/master/examples/data/' + file
+            urllib.request.urlretrieve(url, data_file)
+        print(f'Calibration file location: {data_file}')
+
+    return data_file

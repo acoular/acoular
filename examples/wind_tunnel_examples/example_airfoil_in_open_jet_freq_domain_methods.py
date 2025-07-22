@@ -12,36 +12,22 @@ microphone geometry in array_56.xml (part of Acoular).
 
 """
 
-import urllib
 from pathlib import Path
 
 import acoular as ac
-
-# %% Obtain necessary data
-
-calib_file = Path('../data/example_calib.xml')
-if not calib_file.exists():
-    calib_file = Path().cwd() / 'example_calib.xml'
-    if not calib_file.exists():
-        print('Cannot find calibration file. Downloading...')
-        url = 'https://github.com/acoular/acoular/tree/master/examples/data/example_calib.xml'
-        urllib.request.urlretrieve(url, calib_file)
-    print(f'Calibration file location: {calib_file}')
-
-time_data_file = Path('../data/example_data.h5')
-if not time_data_file.exists():
-    time_data_file = Path().cwd() / 'example_data.h5'
-    if not time_data_file.exists():
-        print('Cannot find example_data.h5 file. Downloading...')
-        url = 'https://github.com/acoular/acoular/tree/master/examples/data/example_data.h5'
-        time_data_file, _ = urllib.request.urlretrieve(url, time_data_file)
-    print(f'Time data file location: {time_data_file}')
+from acoular.tools.helpers import get_data_file
 
 # %%
 # The 4 kHz third-octave band is used for the example.
 
 cfreq = 4000
 num = 3
+
+# %%
+# Obtain necessary data
+
+time_data_file = get_data_file('example_data.h5')
+calib_file = get_data_file('example_calib.xml')
 
 # %%
 # Setting up the processing chain for the frequency domain methods.
@@ -97,7 +83,7 @@ for b in (bb, bc, be, bm, bl, bo, bs, bd, bcmf, bf, bdp, bgib):
     i1 += 1
     map = b.synthetic(cfreq, num)
     mx = ac.L_p(map.max())
-    plt.imshow(ac.L_p(map.T), origin='lower', vmin=mx - 15, interpolation='nearest', extent=grid.extend())
+    plt.imshow(ac.L_p(map.T), origin='lower', vmin=mx - 15, interpolation='nearest', extent=grid.extent)
     plt.colorbar()
     plt.title(b.__class__.__name__)
     plt.tight_layout()

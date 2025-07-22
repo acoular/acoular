@@ -11,11 +11,11 @@ Uses measured data in file example_data.h5, calibration in file example_calib.xm
 microphone geometry in array_56.xml (part of Acoular).
 """
 
-import urllib
 from pathlib import Path
 
 import acoular as ac
 import numpy as np
+from acoular.tools.helpers import get_data_file
 
 # %%
 # The 4 kHz third-octave band is used for the example.
@@ -23,26 +23,11 @@ import numpy as np
 cfreq = 4000
 num = 3
 
+# %%
+# Obtain necessary data
 
-# %% Obtain necessary data
-
-calib_file = Path('../data/example_calib.xml')
-if not calib_file.exists():
-    calib_file = Path().cwd() / 'example_calib.xml'
-    if not calib_file.exists():
-        print('Cannot find calibration file. Downloading...')
-        url = 'https://github.com/acoular/acoular/tree/master/examples/data/example_calib.xml'
-        urllib.request.urlretrieve(url, calib_file)
-    print(f'Calibration file location: {calib_file}')
-
-time_data_file = Path('../data/example_data.h5')
-if not time_data_file.exists():
-    time_data_file = Path().cwd() / 'example_data.h5'
-    if not time_data_file.exists():
-        print('Cannot find example_data.h5 file. Downloading...')
-        url = 'https://github.com/acoular/acoular/tree/master/examples/data/example_data.h5'
-        time_data_file, _ = urllib.request.urlretrieve(url, time_data_file)
-    print(f'Time data file location: {time_data_file}')
+time_data_file = get_data_file('example_data.h5')
+calib_file = get_data_file('example_calib.xml')
 
 
 # %%
@@ -125,7 +110,7 @@ for b in (cacht, cachts, cachct, cachcts):
         res += r[0]  # average accum.
         map = r[0].reshape(grid.shape)
         mx = ac.L_p(map.max())
-        plt.imshow(ac.L_p(map.T), vmax=mx, vmin=mx - 15, origin='lower', interpolation='nearest', extent=grid.extend())
+        plt.imshow(ac.L_p(map.T), vmax=mx, vmin=mx - 15, origin='lower', interpolation='nearest', extent=grid.extent)
         plt.title(f'{(i3 - 1) * 1024}')
     res /= i3 - 1  # average
     plt.tight_layout()
@@ -137,7 +122,7 @@ for b in (cacht, cachts, cachct, cachcts):
     i1 += 1
     map = res.reshape(grid.shape)
     mx = ac.L_p(map.max())
-    plt.imshow(ac.L_p(map.T), vmax=mx, vmin=mx - 15, origin='lower', interpolation='nearest', extent=grid.extend())
+    plt.imshow(ac.L_p(map.T), vmax=mx, vmin=mx - 15, origin='lower', interpolation='nearest', extent=grid.extent)
     plt.colorbar(shrink=0.5)
     plt.title(('BeamformerTime', 'BeamformerTimeSq', 'BeamformerCleant', 'BeamformerCleantSq')[i2 - 2])
 plt.tight_layout()

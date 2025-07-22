@@ -4,14 +4,35 @@ What's new
 
 Upcoming Release
 ------------------------
+    **New features**
+        * add :meth:`~acoular.grids.Grid`.export_gpos` to :class:`~acoular.grids.Grid`
+        * deprecates :meth:`~acoular.grids.RectGrid.extend` method in favor of :attr:`~acoular.grids.RectGrid.extent` property
+        * reworked `WriteWAV` class that now also supports `uint8` and `int32` encoding, adds a `max_val` attribute for normalization purposes, and avoids unnecessary double calculations
+
     **Documentation**
+        * generalizes data import in the airfoil examples using the :func:`~acoular.tools.helpers.get_data_file` helper function
+        * add a new example for grids
+        * changes all appearances of :meth:`~acoular.grids.RectGrid.extend` to :attr:`~acoular.grids.RectGrid.extent`
+        * introduces a deprecation policy in the contributing guidelines
         * adds new docstrings to submodule :mod:`acoular.tprocess`
 
+    **Tests**
+        * add tests for export and load XML functionalities of :class:`~acoular.grids.Grid`
+
     **Internal**
+        * add `three_sources_1d.h5`, `three_sources_2d.h5`, and `three_sources_3d.h5`
+        * add functions `_create_three_sources`, `create_three_sources_1d`, `create_three_sources_2d`, and `create_three_sources_3d` to create the test data
+        * change `create_three_sources` function to an alias of `create_three_sources_2d`
         * introduces speedup for :class:'~acoular.sources.MovingPointSource' by using block-wise processing
         * fixes :class:`~acoular.tbeamform.BeamformerTime` crashing if buffer exceeds processing block size
         * fixes deprecation issue for output parameters of scipy.optimize.fmin_l_bfgs_b solver
+        * fixes :class:`~acoular.fbeamform.BeamformerBase.integrate` return an empty result sometimes
         * excludes `scipy` version 1.16 from the dependencies due to bug affecting the `scipy.signal.tf2sos` function
+        * adds the :func:`~acoular.tools.helpers.get_data_file` helper function for ensuring that a file is available locally
+        * add `three_sources_1d.h5`, `three_sources_2d.h5`, and `three_sources_3d.h5`
+        * add functions `_create_three_sources`, `create_three_sources_1d`, `create_three_sources_2d`, and `create_three_sources_3d` to create the test data
+        * change `create_three_sources` function to an alias of `create_three_sources_2d`
+        * removal of deprecated classes `TimeInOut`, `FFTSpectra`, `TimeAverage`, `TimeCache`, `MaskedTimeInOut` and the `beamformer` attribute of frequency domain beamformers
 
 25.04
 ------------------------

@@ -16,6 +16,7 @@ The following modules are part of Acoular:
     calib
     configuration
     demo
+    deprecation
     environments
     fbeamform
     fprocess

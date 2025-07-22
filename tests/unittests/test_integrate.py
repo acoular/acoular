@@ -39,7 +39,7 @@ def setup_power_spectra_integrate(setup_mics_integrate, f):
     return ac.PowerSpectraImport(csm=csm, frequencies=f)
 
 
-@fixture(scope='session')
+@fixture(scope='function')
 @parametrize_with_cases('grid', cases=Grids)
 def setup_beamformer_integrate(setup_power_spectra_integrate, setup_mics_integrate, grid):
     """
@@ -111,7 +111,7 @@ def test_sector_integration(setup_beamformer_integrate, sector):
     bf, grid = setup_beamformer_integrate
     skip_or_fail(grid, sector)
     f = bf.freq_data.frequencies
-    bf_res = bf.synthetic(f)
     integration_res = bf.integrate(sector)
+    bf_res = bf.synthetic(f)
     assert integration_res.shape == (1,)
     assert integration_res[0] == bf_res.max()

@@ -11,10 +11,10 @@ Uses measured data in file example_data.h5, calibration in file example_calib.xm
 microphone geometry in array_56.xml (part of Acoular).
 """
 
-import urllib
 from pathlib import Path
 
 import acoular as ac
+from acoular.tools.helpers import get_data_file
 
 # %%
 # The 4 kHz third-octave band is used for the example.
@@ -22,25 +22,11 @@ import acoular as ac
 cfreq = 4000
 num = 3
 
-# %% Obtain necessary data
+# %%
+# Obtain necessary data
 
-calib_file = Path('../data/example_calib.xml')
-if not calib_file.exists():
-    calib_file = Path().cwd() / 'example_calib.xml'
-    if not calib_file.exists():
-        print('Cannot find calibration file. Downloading...')
-        url = 'https://github.com/acoular/acoular/tree/master/examples/data/example_calib.xml'
-        urllib.request.urlretrieve(url, calib_file)
-    print(f'Calibration file location: {calib_file}')
-
-time_data_file = Path('../data/example_data.h5')
-if not time_data_file.exists():
-    time_data_file = Path().cwd() / 'example_data.h5'
-    if not time_data_file.exists():
-        print('Cannot find example_data.h5 file. Downloading...')
-        url = 'https://github.com/acoular/acoular/tree/master/examples/data/example_data.h5'
-        time_data_file, _ = urllib.request.urlretrieve(url, time_data_file)
-    print(f'Time data file location: {time_data_file}')
+time_data_file = get_data_file('example_data.h5')
+calib_file = get_data_file('example_calib.xml')
 
 # %%
 # First, we define the time samples using the :class:`acoular.sources.MaskedTimeSamples` class that
@@ -124,7 +110,7 @@ for r_diag in (True, False):
             b.r_diag = r_diag
             map = b.synthetic(cfreq, num)
             mx = ac.L_p(map.max())
-            plt.imshow(ac.L_p(map.T), vmax=mx, vmin=mx - 15, origin='lower', interpolation='nearest', extent=g.extend())
+            plt.imshow(ac.L_p(map.T), vmax=mx, vmin=mx - 15, origin='lower', interpolation='nearest', extent=g.extent)
             plt.colorbar()
             plt.title(b.__class__.__name__, fontsize='small')
 

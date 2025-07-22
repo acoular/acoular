@@ -136,7 +136,7 @@ Now let us plot the result:
 
     In [1]: plt.figure() # open new figure
 
-    In [1]: plt.imshow( Lm.T, origin='lower', vmin=Lm.max()-10, extent=rg.extend(), interpolation='bicubic')
+    In [1]: plt.imshow( Lm.T, origin='lower', vmin=Lm.max()-10, extent=rg.extent, interpolation='bicubic')
 
     In [1]: plt.colorbar()
 

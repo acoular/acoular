@@ -662,18 +662,15 @@ class BeamformerBase(HasStrictTraits):
                 msg,
             )
         gshape = self.steer.grid.shape
+        num_freqs = self.freq_data.fftfreq().shape[0]
         if num == 0 or frange is None:
             if frange is None:
                 ind_low = self.freq_data.ind_low
                 ind_high = self.freq_data.ind_high
                 if ind_low is None:
                     ind_low = 0
-                if ind_low < 0:
-                    ind_low += self._numfreq
                 if ind_high is None:
-                    ind_high = self._numfreq
-                if ind_high < 0:
-                    ind_high += self._numfreq
+                    ind_high = num_freqs
                 irange = (ind_low, ind_high)
                 num = 0
             elif len(frange) == 2:
@@ -683,10 +680,10 @@ class BeamformerBase(HasStrictTraits):
                 raise TypeError(
                     msg,
                 )
-            h = zeros(self._numfreq, dtype=float)
+            h = zeros(num_freqs, dtype=float)
             sl = slice(*irange)
             r = self.result[sl]
-            for i in range(*irange):
+            for i in range(num_freqs)[sl]:
                 # we do this per frequency because r might not have fancy indexing
                 h[i] = r[i - sl.start].reshape(gshape)[ind].sum()
             if frange is None:
@@ -1148,14 +1145,6 @@ class BeamformerDamas(BeamformerBase):
     See :cite:`Brooks2006` for details.
     """
 
-    #: (only for backward compatibility) :class:`BeamformerBase` object
-    #: if set, provides :attr:`freq_data`, :attr:`steer`, :attr:`r_diag`
-    #: if not set, these have to be set explicitly.
-    beamformer = Property(transient=True)
-
-    # private storage of beamformer instance
-    _beamformer = Instance(BeamformerBase)
-
     #: The floating-number-precision of the PSFs. Default is 64 bit.
     psf_precision = Enum('float64', 'float32', desc='precision of PSF')
 
@@ -1174,31 +1163,9 @@ class BeamformerDamas(BeamformerBase):
         depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['n_iter', 'damp', 'psf_precision'],
     )
 
-    def _get_beamformer(self):
-        return self._beamformer
-
-    def _set_beamformer(self, beamformer):
-        msg = (
-            f"Deprecated use of 'beamformer' trait in class {self.__class__.__name__}. "
-            'Please set :attr:`freq_data`, :attr:`steer`, :attr:`r_diag` directly. '
-            "Using the 'beamformer' trait will be removed in version 25.07."
-        )
-        warn(
-            msg,
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        self._beamformer = beamformer
-
     @cached_property
     def _get_digest(self):
         return digest(self)
-
-    @on_trait_change('_beamformer.digest')
-    def delegate_beamformer_traits(self):
-        self.freq_data = self.beamformer.freq_data
-        self.r_diag = self.beamformer.r_diag
-        self.steer = self.beamformer.steer
 
     def _calc(self, ind):
         """Calculates the result for the frequencies defined by :attr:`freq_data`.
@@ -1242,7 +1209,7 @@ class BeamformerDamas(BeamformerBase):
             self._fr[i] = 1
 
 
-@deprecated_alias({'max_iter': 'n_iter'})
+@deprecated_alias({'max_iter': 'n_iter'}, removal_version='25.10')
 class BeamformerDamasPlus(BeamformerDamas):
     """DAMAS deconvolution :cite:`Brooks2006` for solving the system of equations, instead of the
     original Gauss-Seidel iterations, this class employs the NNLS or linear programming solvers from
@@ -1365,14 +1332,6 @@ class BeamformerOrth(BeamformerBase):
     New faster implementation without explicit (:class:`BeamformerEig`).
     """
 
-    #: (only for backward compatibility) :class:`BeamformerEig` object
-    #: if set, provides :attr:`freq_data`, :attr:`steer`, :attr:`r_diag`
-    #: if not set, these have to be set explicitly.
-    beamformer = Property(transient=True)
-
-    # private storage of beamformer instance
-    _beamformer = Instance(BeamformerEig)
-
     #: List of components to consider, use this to directly set the eigenvalues
     #: used in the beamformer. Alternatively, set :attr:`n`.
     eva_list = CArray(dtype=int, value=array([-1]), desc='components')
@@ -1388,31 +1347,9 @@ class BeamformerOrth(BeamformerBase):
         depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['eva_list'],
     )
 
-    def _get_beamformer(self):
-        return self._beamformer
-
-    def _set_beamformer(self, beamformer):
-        msg = (
-            f"Deprecated use of 'beamformer' trait in class {self.__class__.__name__}. "
-            'Please set :attr:`freq_data`, :attr:`steer`, :attr:`r_diag` directly. '
-            "Using the 'beamformer' trait will be removed in version 25.07."
-        )
-        warn(
-            msg,
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        self._beamformer = beamformer
-
     @cached_property
     def _get_digest(self):
         return digest(self)
-
-    @on_trait_change('_beamformer.digest')
-    def delegate_beamformer_traits(self):
-        self.freq_data = self.beamformer.freq_data
-        self.r_diag = self.beamformer.r_diag
-        self.steer = self.beamformer.steer
 
     @on_trait_change('n')
     def set_eva_list(self):
@@ -1456,7 +1393,7 @@ class BeamformerOrth(BeamformerBase):
             self._fr[i] = 1
 
 
-@deprecated_alias({'n': 'n_iter'})
+@deprecated_alias({'n': 'n_iter'}, removal_version='25.10')
 class BeamformerCleansc(BeamformerBase):
     """CLEAN-SC deconvolution algorithm.
 
@@ -1554,14 +1491,6 @@ class BeamformerClean(BeamformerBase):
     See :cite:`Hoegbom1974` for details.
     """
 
-    #: (only for backward compatibility) :class:`BeamformerBase` object
-    #: if set, provides :attr:`freq_data`, :attr:`steer`, :attr:`r_diag`
-    #: if not set, these have to be set explicitly.
-    beamformer = Property(transient=True)
-
-    # private storage of beamformer instance
-    _beamformer = Instance(BeamformerBase)
-
     #: The floating-number-precision of the PSFs. Default is 64 bit.
     psf_precision = Enum('float64', 'float32', desc='precision of PSF.')
 
@@ -1583,28 +1512,6 @@ class BeamformerClean(BeamformerBase):
     @cached_property
     def _get_digest(self):
         return digest(self)
-
-    def _get_beamformer(self):
-        return self._beamformer
-
-    def _set_beamformer(self, beamformer):
-        msg = (
-            f"Deprecated use of 'beamformer' trait in class {self.__class__.__name__}. "
-            'Please set :attr:`freq_data`, :attr:`steer`, :attr:`r_diag` directly. '
-            "Using the 'beamformer' trait will be removed in version 25.07."
-        )
-        warn(
-            msg,
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        self._beamformer = beamformer
-
-    @on_trait_change('_beamformer.digest')
-    def delegate_beamformer_traits(self):
-        self.freq_data = self.beamformer.freq_data
-        self.r_diag = self.beamformer.r_diag
-        self.steer = self.beamformer.steer
 
     def _calc(self, ind):
         """Calculates the result for the frequencies defined by :attr:`freq_data`.
@@ -1668,7 +1575,7 @@ class BeamformerClean(BeamformerBase):
             self._fr[i] = 1
 
 
-@deprecated_alias({'max_iter': 'n_iter'})
+@deprecated_alias({'max_iter': 'n_iter'}, removal_version='25.10')
 class BeamformerCMF(BeamformerBase):
     """Covariance Matrix Fitting algorithm.
 
@@ -1895,7 +1802,7 @@ class BeamformerCMF(BeamformerBase):
             self._fr[i] = 1
 
 
-@deprecated_alias({'max_iter': 'n_iter'})
+@deprecated_alias({'max_iter': 'n_iter'}, removal_version='25.10')
 class BeamformerSODIX(BeamformerBase):
     """Source directivity modeling in the cross-spectral matrix (SODIX) algorithm.
 
@@ -2052,7 +1959,7 @@ class BeamformerSODIX(BeamformerBase):
                 self._fr[i] = 1
 
 
-@deprecated_alias({'max_iter': 'n_iter'})
+@deprecated_alias({'max_iter': 'n_iter'}, removal_version='25.10')
 class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
     """Beamforming GIB methods with different normalizations.
 

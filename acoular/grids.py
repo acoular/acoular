@@ -28,6 +28,7 @@ Implement support for multidimensional grids and integration sectors.
 # imports from other packages
 import xml.dom.minidom
 from abc import abstractmethod
+from pathlib import Path
 
 from numpy import (
     absolute,
@@ -301,7 +302,7 @@ class Polygon:
         return mindst
 
 
-@deprecated_alias({'gpos': 'pos'})
+@deprecated_alias({'gpos': 'pos'}, removal_version='25.10')
 class Grid(ABCHasStrictTraits):
     """
     Abstract base class for grid geometries.
@@ -313,7 +314,7 @@ class Grid(ABCHasStrictTraits):
     .. _units_note_grids:
 
     Unit System
-    ----------
+    -----------
     The source code is agnostic to the unit of length. The positions' coordinates are assumed to be
     in meters. This is consistent with the standard :class:`~acoular.environments.Environment` class
     which uses the speed of sound at 20°C at sea level under standard atmosphere pressure in m/s.
@@ -386,8 +387,77 @@ class Grid(ABCHasStrictTraits):
         # return indices of "True" entries
         return where(xyi)
 
+    def export_gpos(self, filename):
+        """
+        Export the grid positions to an XML file.
 
-@deprecated_alias({'gpos': 'pos'}, read_only=True)
+        This method generates an XML file containing the positions of all grid points.
+        Each point is represented by a ``<pos>`` element with ``Name``, ``x``, ``y``, and ``z``
+        attributes. The generated XML is formatted to match the structure required for importing
+        into the :class:`ImportGrid` class.
+
+        Parameters
+        ----------
+        filename : :class:`str`
+            The path to the file to which the grid positions will be written. The file
+            extension must be ``.xml``.
+
+        Raises
+        ------
+        :obj:`OSError`
+            If the file cannot be written due to permissions issues or invalid file paths.
+
+        Notes
+        -----
+        - The file will be saved in UTF-8 encoding.
+        - The ``Name`` attribute for each point is set as ``"Point {i+1}"``, where ``i`` is the
+          index of the grid point.
+        - If subgrids are defined, they will be included as the ``subgrid`` attribute.
+
+        Examples
+        --------
+        Export a grid with 100 points to an XML file:
+
+        >>> import acoular as ac
+        >>> import numpy as np
+        >>> grid = ac.ImportGrid()
+        >>> # Create some grid points
+        >>> points = np.arange(9).reshape(3, 3)
+        >>> grid.pos = points
+        >>> grid.export_gpos('grid_points.xml')  # doctest: +SKIP
+
+        The generated ``grid_points.xml`` file will look like this:
+
+        .. code-block:: xml
+
+            <?xml version="1.1" encoding="utf-8"?><Grid name="grid_points">
+              <pos Name="Point 1" x="0" y="1" z="2"/>
+              <pos Name="Point 2" x="3" y="4" z="5"/>
+              <pos Name="Point 3" x="6" y="7" z="8"/>
+            </Grid>
+        """
+        filepath = Path(filename)
+        basename = filepath.stem
+        with filepath.open('w', encoding='utf-8') as f:
+            f.write(f'<?xml version="1.1" encoding="utf-8"?><Grid name="{basename}">\n')
+            for i in range(self.pos.shape[-1]):
+                has_subgrids = hasattr(self, 'subgrids') and len(self.subgrids) > i
+                subgrid_attr = f'subgrid="{self.subgrids[i]}"' if has_subgrids else ''
+                pos_str = ' '.join(
+                    [
+                        '  <pos',
+                        f'Name="Point {i+1}"',
+                        f'x="{self.pos[0, i]}"',
+                        f'y="{self.pos[1, i]}"',
+                        f'z="{self.pos[2, i]}"',
+                        f'{subgrid_attr}/>\n',
+                    ]
+                )
+                f.write(pos_str)
+            f.write('</Grid>')
+
+
+@deprecated_alias({'gpos': 'pos'}, read_only=True, removal_version='25.10')
 class RectGrid(Grid):
     """
     Provides a 2D Cartesian grid for beamforming results.
@@ -419,6 +489,9 @@ class RectGrid(Grid):
 
     #: Number of grid points along y-axis. (read-only)
     nysteps = Property(desc='number of grid points along y-axis')
+
+    #: The grid's extension in :obj:`matplotlib.pyplot.imshow` compatible form. (read-only)
+    extent = Property(desc='grid extent as (x_min, x_max, y_min, y_max)')
 
     #: A unique identifier for the grid, based on its properties. (read-only)
     digest = Property(
@@ -460,6 +533,56 @@ class RectGrid(Grid):
         ]
         bpos.resize((3, self.size))
         return bpos
+
+    @property_depends_on(['x_min', 'x_max', 'y_min', 'y_max'])
+    def _get_extent(self):
+        # Return the grid's extension in :obj:`matplotlib.pyplot.imshow` compatible form.
+        #
+        # Returns
+        # -------
+        # :class:`tuple` of :class:`floats<float>`
+        #     (:attr:`x_min`, :attr:`x_max`, :attr:`y_min`, :attr:`y_max`) representing the grid's
+        #     extent.
+        #
+        # Notes
+        # -----
+        # This property is intended for use with the ``extent`` parameter of
+        # :obj:`matplotlib.pyplot.imshow`.
+        #
+        # Examples
+        # --------
+        # >>> from acoular import RectGrid
+        # >>> grid = RectGrid()
+        # >>> grid.y_min = -5
+        # >>> grid.y_max = 5
+        # >>> grid.extent
+        # (-1.0, 1.0, -5.0, 5.0)
+        return (self.x_min, self.x_max, self.y_min, self.y_max)
+
+    def extend(self):
+        """
+        Return the grid's extension in :obj:`matplotlib.pyplot.imshow` compatible form.
+
+        Returns
+        -------
+        :class:`tuple` of :class:`floats<float>`
+            (:attr:`x_min`, :attr:`x_max`, :attr:`y_min`, :attr:`y_max`) representing the grid's
+            extent.
+
+        Notes
+        -----
+        This method is deprecated. Use the :attr:`extent` property instead.
+        """
+        import warnings
+
+        msg = ' '.join(
+            [
+                "Deprecated use of 'extend' method (will be removed in version 26.04).",
+                "Please use the 'extent' trait instead.",
+            ]
+        )
+        warnings.warn(msg, DeprecationWarning, stacklevel=2)
+        return self.extent
 
     def index(self, x, y):
         """
@@ -550,34 +673,6 @@ class RectGrid(Grid):
         return array(xis), array(yis)
         # return arange(self.size)[inds]
 
-    def extend(self):
-        """
-        Return the grid's extension in :obj:`matplotlib.pyplot.imshow` compatible form.
-
-        Returns
-        -------
-        :class:`tuple` of :class:`floats<float>`
-            (:attr:`x_min`, :attr:`x_max`, :attr:`y_min`, :attr:`y_max`) representing the grid's
-            extent.
-
-        Notes
-        -----
-        - ``pylab.imhow`` is the same as :obj:`matplotlib.pyplot.imshow`. It's only using a
-          different namespace.
-        - The return of the method is ment for the ``extent`` parameter of
-          :obj:`matplotlib.pyplot.imshow`.
-
-        Examples
-        --------
-        >>> from acoular import RectGrid
-        >>> grid = RectGrid()
-        >>> grid.y_min = -5
-        >>> grid.y_max = 5
-        >>> grid.extend()
-        (-1.0, 1.0, -5.0, 5.0)
-        """
-        return (self.x_min, self.x_max, self.y_min, self.y_max)
-
 
 class RectGrid3D(RectGrid):
     """
@@ -586,10 +681,10 @@ class RectGrid3D(RectGrid):
     The grid has cubic or nearly cubic cells. It is defined by lower and upper x-, y- and  z-limits.
     """
 
-    #: The lower z-limit that defines the grid. Default is ``-1``.
+    #: The lower z-limit that defines the grid. Default is ``-1.0``.
     z_min = Float(-1.0, desc='minimum  z-value')
 
-    #: The upper z-limit that defines the grid. Default is ``1``.
+    #: The upper z-limit that defines the grid. Default is ``1.0``.
     z_max = Float(1.0, desc='maximum  z-value')
 
     #: Number of grid points along x-axis. (read-only)
@@ -771,7 +866,7 @@ class RectGrid3D(RectGrid):
         return s_[xi1 : xi2 + 1], s_[yi1 : yi2 + 1], s_[zi1 : zi2 + 1]
 
 
-@deprecated_alias({'from_file': 'file', 'gpos_file': 'pos'})
+@deprecated_alias({'from_file': 'file', 'gpos_file': 'pos'}, removal_version='25.10')
 class ImportGrid(Grid):
     """
     Load a 3D grid from an XML file.
@@ -939,7 +1034,7 @@ class ImportGrid(Grid):
         self.subgrids = array(names)
 
 
-@deprecated_alias({'gpos': 'pos', 'numpoints': 'num_points'}, read_only=['gpos'])
+@deprecated_alias({'gpos': 'pos', 'numpoints': 'num_points'}, read_only=['gpos'], removal_version='25.10')
 class LineGrid(Grid):
     """
     Define a 3D grid for a line geometry.
@@ -1020,7 +1115,7 @@ class LineGrid(Grid):
         return pos.T
 
 
-@deprecated_alias({'gpos': 'pos'}, read_only=True)
+@deprecated_alias({'gpos': 'pos'}, read_only=True, removal_version='25.10')
 class MergeGrid(Grid):
     """
     Base class for merging multiple grid geometries.

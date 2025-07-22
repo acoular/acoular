@@ -87,7 +87,7 @@ mv = MetricEvaluator(
 
 plt.figure()
 # show map
-plt.imshow(Lm.T, origin='lower', vmin=Lm.max() - 10, extent=rg.extend(), interpolation='none')
+plt.imshow(Lm.T, origin='lower', vmin=Lm.max() - 10, extent=rg.extent, interpolation='none')
 # plot sectors
 ax = plt.gca()
 for j, sector in enumerate(mv.sectors):
