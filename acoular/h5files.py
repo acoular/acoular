@@ -59,6 +59,8 @@ if config.have_tables:
     }
 
     class H5FileTables(H5FileBase, tables.File):
+        """Hdf5 File based on PyTables."""
+
         def create_extendable_array(self, nodename, shape, precision, group=None):
             if not group:
                 group = self.root
@@ -108,6 +110,8 @@ if config.have_tables:
             return result
 
     class H5CacheFileTables(H5FileTables, H5CacheFileBase):
+        """Hdf5 Cache File based on PyTables."""
+
         compression_filter = tables.Filters(complevel=5, complib='blosc')
 
         def is_cached(self, nodename, group=None):
@@ -126,6 +130,8 @@ if config.have_h5py:
     import h5py
 
     class H5FileH5py(H5FileBase, h5py.File):
+        """Hdf5 File based on h5py."""
+
         def _get_in_file_path(self, nodename, group=None):
             if not group:
                 return '/' + nodename
@@ -184,6 +190,8 @@ if config.have_h5py:
             return result
 
     class H5CacheFileH5py(H5CacheFileBase, H5FileH5py):
+        """Hdf5 Cache File based on h5py."""
+
         compression_filter = 'lzf'
         #        compression_filter = 'blosc' # unavailable...
 
