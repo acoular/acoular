@@ -2,6 +2,8 @@
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
 
+"""Implements a digest function for caching of traits based on a unique identifier."""
+
 from hashlib import md5
 
 

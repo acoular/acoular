@@ -2,6 +2,8 @@
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
 
+"""Implements base classes for handling HDF5 files."""
+
 from .configuration import config
 
 
