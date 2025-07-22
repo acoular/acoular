@@ -32,7 +32,9 @@ from .deprecation import deprecated_alias
 from .internal import digest
 
 
-@deprecated_alias({'mpos_tot': 'pos_total', 'mpos': 'pos', 'from_file': 'file'}, read_only=['mpos'])
+@deprecated_alias(
+    {'mpos_tot': 'pos_total', 'mpos': 'pos', 'from_file': 'file'}, read_only=['mpos'], removal_version='25.10'
+)
 class MicGeom(HasStrictTraits):
     """
     Provide the geometric arrangement of microphones in an array.
@@ -47,10 +49,10 @@ class MicGeom(HasStrictTraits):
       attribute is updated.
     - Small numerical values in the computed :attr:`center` are set to zero for numerical stability.
 
-    .. _units_note_micophones:
+    .. _units_note_microphones:
 
     Unit System
-    ----------
+    -----------
     The source code is agnostic to the unit of length. The microphone positions' coordinates are
     assumed to be in meters. This is consistent with the standard
     :class:`~acoular.environments.Environment` class which uses the speed of sound at 20°C at sea

@@ -19,7 +19,6 @@ SKIP_DEFAULT = [
     ac.SamplesGenerator,
     ac.SpectraGenerator,
     ac.SpectraOut,
-    ac.TimeInOut,
     ac.TimeOut,
     ac.SourceMixer,
     ac.TimeConvolve,
@@ -39,7 +38,6 @@ SKIP_DEFAULT = [
     ac.BeamformerTimeSqTraj,
     ac.BeamformerCleantTraj,
     ac.BeamformerCleantSqTraj,
-    ac.FFTSpectra,
     ac.IntegratorSectorTime,
     ac.MovingPointSource,
     ac.MovingLineSource,
@@ -56,10 +54,6 @@ SKIP_DEFAULT = [
     ac.WriteH5,
     ac.WriteWAV,
     ac.Calib,
-    # deprecated:
-    ac.TimeAverage,
-    ac.MaskedTimeInOut,
-    ac.TimeCache,
 ]
 
 DEFAULT = [cls for cls in get_subclasses(ac.Generator) if cls not in SKIP_DEFAULT]
@@ -218,7 +212,7 @@ class Generators:
         cal = np.abs(np.zeros(shape))
         return ac.Calib(source=data, data=cal)
 
-    @parametrize('acoular_cls', [ac.TimeAverage, ac.MaskedTimeInOut, ac.TimeCache])
+    @parametrize('acoular_cls', [])
     def case_deprecated(self, time_data_source, acoular_cls):
         args = {'num_per_average': 2} if acoular_cls is ac.TimeAverage else {}
         with warnings.catch_warnings():

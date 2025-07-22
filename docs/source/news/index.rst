@@ -13,6 +13,7 @@ Upcoming Release
         * generalizes data import in the airfoil examples using the :func:`~acoular.tools.helpers.get_data_file` helper function
         * add a new example for grids
         * changes all appearances of :meth:`~acoular.grids.RectGrid.extend` to :attr:`~acoular.grids.RectGrid.extent`
+        * introduces a deprecation policy in the contributing guidelines
 
     **Tests**
         * add tests for export and load XML functionalities of :class:`~acoular.grids.Grid`
@@ -30,6 +31,7 @@ Upcoming Release
         * add `three_sources_1d.h5`, `three_sources_2d.h5`, and `three_sources_3d.h5`
         * add functions `_create_three_sources`, `create_three_sources_1d`, `create_three_sources_2d`, and `create_three_sources_3d` to create the test data
         * change `create_three_sources` function to an alias of `create_three_sources_2d`
+        * removal of deprecated classes `TimeInOut`, `FFTSpectra`, `TimeAverage`, `TimeCache`, `MaskedTimeInOut` and the `beamformer` attribute of frequency domain beamformers
 
 25.04
 ------------------------
