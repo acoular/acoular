@@ -25,7 +25,6 @@ ignore = [
     "D102", # missing docstring in public method -> should be fixed by issue #216
     "D103", # missing docstring in public function -> should be fixed by issue #216
     "D104", # missing docstring in public package -> should be fixed by issue #216
-    "D105", # missing docstring in magic method -> should be fixed by issue #216
     "D107", # missing docstring in __init__ -> should be fixed by issue #216
     "D417", # missing argument descriptions in the docstring -> should be fixed by issue #216
     # Others
