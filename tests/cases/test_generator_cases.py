@@ -199,7 +199,7 @@ class Generators:
         return ac.WriteH5(source=time_data_source, file=tmp_path / 'test.h5')
 
     def case_WriteWAV(self, time_data_source, tmp_path):
-        return ac.WriteWAV(source=time_data_source, file=tmp_path / 'test.wav')
+        return ac.WriteWAV(source=time_data_source, file=tmp_path / 'test.wav', channels=[0])
 
     def case_TimeSamplesAIAABenchmark(self, aiaa_bechmark_time_data_file):
         return ac.aiaa.TimeSamplesAIAABenchmark(file=aiaa_bechmark_time_data_file)
