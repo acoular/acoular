@@ -557,8 +557,7 @@ class OpenJet(FlowField):
 
 class RotatingFlow(FlowField):
     """
-    Analytical approximation of a rotating flow field with additional velocity component
-    in z-direction.
+    Analytical approximation of a rotating flow field with velocity component in z-direction.
 
     This class provides an analytical model for a fluid flow field with a
     rigid-body-like rotation about the z-axis. The flow combines rotational motion

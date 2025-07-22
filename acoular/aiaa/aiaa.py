@@ -175,6 +175,7 @@ class MicAIAABenchmark(MicGeom):
     @on_trait_change('file')
     def _import_mpos(self):
         """Import the microphone positions from .h5 file.
+
         Called when :attr:`basename` changes.
         """
         file = _get_h5file_class()

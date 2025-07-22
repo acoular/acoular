@@ -21,7 +21,6 @@ ignore = [
     "ISC001", # conflict with ruff formatter
     # D
     "D401", # first line should be in imperative mood -> TBD
-    "D205", # 1 blank line required between summary line and description -> should be fixed by issue #216
     "D102", # missing docstring in public method -> should be fixed by issue #216
     # Others
     "T20", # will be fixed when logging is implemented
@@ -65,11 +64,12 @@ docstring-code-line-length = "dynamic"
 "acoular/demo/__init__.py" = ["F401"] 
 "acoular/tools/__init__.py" = ["F401"] 
 "acoular/aiaa/__init__.py" = ["F401"]
-"acoular/fastFuncs.py" = ["N802", "N803","N806","N999"] # allow different naming convention
-"acoular/environments.py" = ["N806"] 
-"acoular/sources.py" = ["N806"] 
-"acoular/tbeamform.py" = ["F841","N806"] 
-"acoular/tprocess.py" = ["N806"] #
-"acoular/fbeamform.py" = ["N806","B023"] 
+"acoular/environments.py" = ["N806"]
+"acoular/fastFuncs.py" = ["N802", "N803", "N806", "N999"] # allow different naming convention
+"acoular/fbeamform.py" = ["N806", "B023", "D205"]
+"acoular/sources.py" = ["N806"]
+"acoular/tbeamform.py" = ["F841", "N806", "D205"]
+"acoular/tools/helpers.py" = ["D205"]
+"acoular/tprocess.py" = ["N806", "D205"]
 "tests/cases/*" = ["N802"]
-"examples/*" = ["A001", "B007", "D4", "E4", "E701", "F4", "UP036", "SIM108","SLF001", "INP001"]
+"examples/*" = ["A001", "B007", "D4", "E4", "E701", "F4", "UP036", "SIM108", "SLF001", "INP001"]
