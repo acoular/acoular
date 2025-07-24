@@ -302,7 +302,7 @@ class Polygon:
         return mindst
 
 
-@deprecated_alias({'gpos': 'pos'})
+@deprecated_alias({'gpos': 'pos'}, removal_version='25.10')
 class Grid(ABCHasStrictTraits):
     """
     Abstract base class for grid geometries.
@@ -314,7 +314,7 @@ class Grid(ABCHasStrictTraits):
     .. _units_note_grids:
 
     Unit System
-    ----------
+    -----------
     The source code is agnostic to the unit of length. The positions' coordinates are assumed to be
     in meters. This is consistent with the standard :class:`~acoular.environments.Environment` class
     which uses the speed of sound at 20°C at sea level under standard atmosphere pressure in m/s.
@@ -457,7 +457,7 @@ class Grid(ABCHasStrictTraits):
             f.write('</Grid>')
 
 
-@deprecated_alias({'gpos': 'pos'}, read_only=True)
+@deprecated_alias({'gpos': 'pos'}, read_only=True, removal_version='25.10')
 class RectGrid(Grid):
     """
     Provides a 2D Cartesian grid for beamforming results.
@@ -577,7 +577,7 @@ class RectGrid(Grid):
 
         msg = ' '.join(
             [
-                "Deprecated use of 'extend' method (will be removed in version 26.07).",
+                "Deprecated use of 'extend' method (will be removed in version 26.04).",
                 "Please use the 'extent' trait instead.",
             ]
         )
@@ -866,7 +866,7 @@ class RectGrid3D(RectGrid):
         return s_[xi1 : xi2 + 1], s_[yi1 : yi2 + 1], s_[zi1 : zi2 + 1]
 
 
-@deprecated_alias({'from_file': 'file', 'gpos_file': 'pos'})
+@deprecated_alias({'from_file': 'file', 'gpos_file': 'pos'}, removal_version='25.10')
 class ImportGrid(Grid):
     """
     Load a 3D grid from an XML file.
@@ -1034,7 +1034,7 @@ class ImportGrid(Grid):
         self.subgrids = array(names)
 
 
-@deprecated_alias({'gpos': 'pos', 'numpoints': 'num_points'}, read_only=['gpos'])
+@deprecated_alias({'gpos': 'pos', 'numpoints': 'num_points'}, read_only=['gpos'], removal_version='25.10')
 class LineGrid(Grid):
     """
     Define a 3D grid for a line geometry.
@@ -1115,7 +1115,7 @@ class LineGrid(Grid):
         return pos.T
 
 
-@deprecated_alias({'gpos': 'pos'}, read_only=True)
+@deprecated_alias({'gpos': 'pos'}, read_only=True, removal_version='25.10')
 class MergeGrid(Grid):
     """
     Base class for merging multiple grid geometries.
