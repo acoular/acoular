@@ -292,7 +292,7 @@ class LazyBfResult:
         self.bf = bf
 
     def __getitem__(self, key):
-        # 'intelligent' [] operator checks if results are available and triggers calculation
+        """'intelligent' [] operator, checks if results are available and triggers calculation."""
         sl = index_exp[key][0]
         if isinstance(sl, (int, integer)):
             sl = slice(sl, sl + 1)

@@ -2,7 +2,8 @@
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
 
-# imports from other packages
+"""Implements a cache for HDF5 files used in Acoular."""
+
 import gc
 from pathlib import Path
 from weakref import WeakValueDictionary

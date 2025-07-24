@@ -101,6 +101,7 @@ class Calib(InOut):
 
     @on_trait_change('data')
     def set_num_mics(self):
+        """Sets the number of microphones based on the shape of the data array."""
         self.num_mics = self.data.shape[0]
 
     @cached_property
