@@ -228,18 +228,17 @@ class MaskedTimeOut(TimeOut):
         Yields
         ------
         :class:`numpy.ndarray`
-            An array of shape (``num``, :attr:`~acoular.base.TimeOut.num_channels`), where
-            :attr:`~acoular.base.TimeOut.num_channels` is inherited from the :attr:`source`,
-            contatining blocks of a filtered time-domain signal.
-            The last block may contain fewer samples if the total number of samples is not
-            a multiple of ``num``.
+            An array of shape (``num``, :attr:`MaskedTimeOut.num_channels`), contatining blocks of
+            a filtered time-domain signal. The last block may contain fewer samples if the total
+            number of samples is not a multiple of ``num``. `MaskedTimeOut.num_channels` is not
+            inherited directly and may be smaller than the :attr:`source`'s number of channels.
 
         Raises
         ------
         :obj:`OSError`
             If no valid samples are available within the defined :attr:`start` and :attr:`stop`
             range. This can occur if :attr:`start` is greater than or equal to :attr:`stop` or if
-            the source does not contain any valid samples in the given range.
+            the :attr:`source` is not containing any valid samples in the given range.
         """
         sli = slice(self.start, self.stop).indices(self.num_samples_total)
         start = sli[0]
@@ -298,7 +297,7 @@ class ChannelMixer(TimeOut):
     signal.
 
     This class is particularly useful for cases where a combined signal representation is needed,
-    such as beamforming, array signal processing, or when reducing the dimensionality of
+    such as beamforming, array signal processing, or for reducing the dimensionality of
     multi-channel time signal data.
     """
 
@@ -404,13 +403,13 @@ class Trigger(TimeOut):  # pragma: no cover
     #: :math:`0.75 \cdot (-800) = -600`.
     threshold = Union(None, Float)
 
-    #: The maximum allowable variation in revolution duration. If any revolution exceeds this
-    #: variation threshold, a warning is issued. Default is ``0.02``.
+    #: The maximum allowable variation in duration between two trigger instances. If any revolution
+    #: exceeds this variation threshold, a warning is issued. Default is ``0.02``.
     max_variation_of_duration = Float(0.02)
 
-    #: Defines the length of "hunks" as a fraction of the estimated revolution duration. If multiple
-    #: peaks occur within a hunk, only one is retained based on :attr:`multiple_peaks_in_hunk`.
-    #: Default is ``0.1``.
+    #: Defines the length of "hunks" as a fraction of the estimated duration between two trigger
+    #: instances. If multiple peaks occur within a hunk, only one is retained based on
+    #: :attr:`multiple_peaks_in_hunk`. Default is ``0.1``.
     hunk_length = Float(0.1)
 
     #: Specifies the type of trigger detection:
@@ -636,8 +635,7 @@ class AngleTracker(MaskedTimeOut):
     #: Default is ``-1``.
     rot_direction = Int(-1, desc='mathematical direction of rotation')
 
-    #: Number of points used for spline interpolation. A higher number results in smoother
-    #: interpolation but may introduce overfitting. Default is ``4``.
+    #: Number of points used for spline interpolation. Default is ``4``.
     interp_points = Int(4, desc='Points of interpolation used for spline')
 
     #: Initial rotation angle (in radians) corresponding to the first trigger event. This allows
@@ -645,15 +643,15 @@ class AngleTracker(MaskedTimeOut):
     start_angle = Float(0, desc='rotation angle for trigger position')
 
     #: Revolutions per minute (RPM) computed for each sample.
-    #: Its updated dynamically based on the trigger data. (read-only)
+    #: It is based on the trigger data. (read-only)
     rpm = Property(depends_on=['digest'], desc='revolutions per minute for each sample')
 
     #: Average revolutions per minute over the entire dataset.
-    #: Its computed based on the trigger intervals. (read-only)
+    #: It is computed based on the trigger intervals. (read-only)
     average_rpm = Property(depends_on=['digest'], desc='average revolutions per minute')
 
     #: Computed rotation angle (in radians) for each sample.
-    #: Its interpolated from the trigger data. (read-only)
+    #: It is interpolated from the trigger data. (read-only)
     angle = Property(depends_on=['digest'], desc='rotation angle for each sample')
 
     # Internal flag to determine whether rpm and angle calculation has been processed,
@@ -783,7 +781,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
 
     #: The virtual microphone geometry. This property defines the positions
     #: of virtual microphones where interpolated pressure values are computed.
-    #: Defaultis the physical microphone geometry (:attr:`mics`).
+    #: Default is the physical microphone geometry (:attr:`mics`).
     mics_virtual = Property(desc='microphone geometry')
 
     _mics_virtual = Instance(MicGeom, desc='internal microphone geometry;internal usage, read only')
@@ -801,7 +799,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
     #: Options:
     #:
     #: - ``'linear'``: Uses NumPy linear interpolation.
-    #: - ``'spline'``: Uses SciPy's Clough-Tocher algorithm for smooth interpolation.
+    #: - ``'spline'``: Uses SciPy's CubicSpline interpolator
     #: - ``'rbf-multiquadric'``: Radial basis function (RBF) interpolation with a multiquadric
     #:   kernel.
     #: - ``'rbf-cubic'``: RBF interpolation with a cubic kernel.
@@ -835,18 +833,15 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
     sample_freq = Delegate('source', 'sample_freq')
 
     #: Number of channels in the output data. This corresponds to the number of virtual microphone
-    #: positions where interpolated pressure values are computed. The value is dynamically
-    #: determined based on the :attr:`mics_virtual` geometry.
+    #: positions where interpolated pressure values are computed. The value is ´determined based on
+    #: the :attr:`mics_virtual` geometry.
     num_channels = Property()
 
-    #: Number of time-domain samples in the output signal, inherited from the :attr:`source`. This
-    #: value determines the length of the time-series data available for each microphone channel and
-    #: is essential for time-domain processing and frequency analysis.
+    #: Number of time-domain samples in the output signal, inherited from the :attr:`source`.
     num_samples = Delegate('source', 'num_samples')
 
     #: Whether to interpolate a virtual microphone at the origin. If set to ``True``, an additional
-    #: virtual microphone position at the coordinate origin :math:`(0,0,0)` will be interpolated,
-    #: useful for certain symmetric configurations.
+    #: virtual microphone position at the coordinate origin :math:`(0,0,0)` will be interpolated.
     interp_at_zero = Bool(False)
 
     #: Transformation matrix for coordinate system alignment.
@@ -1504,10 +1499,10 @@ class Mixer(TimeOut):
     #: The sampling frequency of the primary time signal, delegated from :attr:`source`.
     sample_freq = Delegate('source')
 
-    #: The number of primary source channels in the output, delegated from :attr:`source`.
+    #: The number of channels in the output, delegated from :attr:`source`.
     num_channels = Delegate('source')
 
-    #: The total number of samples in the output, delegated from :attr:`source`.
+    #: The number of samples in the output, delegated from :attr:`source`.
     num_samples = Delegate('source')
 
     #: Internal identifier that tracks changes in the :attr:`sources` list.
