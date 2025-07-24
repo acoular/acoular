@@ -15,7 +15,8 @@ from traits.api import Property
 
 
 def deprecated_alias(old2new, read_only=False, removal_version=''):
-    """Decorator function for deprecating renamed class traits.
+    """
+    Decorator function for deprecating renamed class traits.
 
     Replaced traits should no longer be part of the class definition
     and only mentioned in this decorator's parameter list.

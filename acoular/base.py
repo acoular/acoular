@@ -158,7 +158,8 @@ class SpectraGenerator(Generator):
 
 @deprecated_alias({'numchannels': 'num_channels', 'numsamples': 'num_samples'}, read_only=True, removal_version='25.10')
 class TimeOut(SamplesGenerator):
-    """Abstract base class receiving from a :attr:`source` and returning time domain signals.
+    """
+    Abstract base class receiving from a :attr:`source` and returning time domain signals.
 
     It provides a base class that can be used to create signal processing blocks that receive data
     from any generating :attr:`source` and generates a time signal output via the generator
@@ -209,7 +210,8 @@ class TimeOut(SamplesGenerator):
     removal_version='25.10',
 )
 class SpectraOut(SpectraGenerator):
-    """Abstract base class receiving from a :attr:`source` and returning frequency domain signals.
+    """
+    Abstract base class receiving from a :attr:`source` and returning frequency domain signals.
 
     It provides a base class that can be used to create signal processing blocks that receive data
     from any generating :attr:`source` domain and generates a frequency domain output via the
@@ -263,7 +265,8 @@ class SpectraOut(SpectraGenerator):
 
 @deprecated_alias({'numchannels': 'num_channels', 'numsamples': 'num_samples'}, read_only=True, removal_version='25.10')
 class InOut(SamplesGenerator, SpectraGenerator):
-    """Abstract base class receiving from a :attr:`source` and returning signals in the same domain.
+    """
+    Abstract base class receiving from a :attr:`source` and returning signals in the same domain.
 
     It provides a base class that can be used to create signal processing blocks that receive data
     from any generating :attr:`source` and generates an output via the generator :meth:`result` in

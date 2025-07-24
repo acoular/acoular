@@ -100,7 +100,8 @@ class SoundDeviceSamplesGenerator(SamplesGenerator):
         return sd.query_devices(self.device)
 
     def result(self, num):
-        """Python generator that yields the output block-wise.
+        """
+        Python generator that yields the output block-wise.
 
         Use at least a block-size of one ring cache block.
 

@@ -55,7 +55,8 @@ def calcCSM(csm, SpecAllMics):
 
 
 def beamformerFreq(steerVecType, boolRemovedDiagOfCSM, normFactor, inputTupleSteer, inputTupleCsm):
-    r"""Conventional beamformer in frequency domain.
+    r"""
+    Conventional beamformer in frequency domain.
 
     Use either a predefined steering vector formulation (see Sarradj 2012) or pass your own steering
     vector.
@@ -545,7 +546,8 @@ def _freqBeamformer_EigValProb_SpecificSteerVec_CsmRemovedDiag(
 
 # %% Point - Spread - Function
 def calcPointSpreadFunction(steerVecType, distGridToArrayCenter, distGridToAllMics, waveNumber, indSource, dtype):
-    r"""Calculates the Point-Spread-Functions.
+    r"""
+    Calculates the Point-Spread-Functions.
 
     Use either a predefined steering vector formulation (see :ref:`Sarradj, 2012<Sarradj2012>`) or
     pass it your own steering vector.
@@ -791,7 +793,8 @@ def _psf_Formulation4AkaTrueLocation(
     fastmath=FAST_OPTION,
 )
 def damasSolverGaussSeidel(A, dirtyMap, nIterations, relax, damasSolution):
-    """Solves the DAMAS inverse problem via modified gauss seidel.
+    """
+    Solves the DAMAS inverse problem via modified gauss seidel.
 
     This is the original formulation from :ref:`Brooks and Humphreys, 2006<BrooksHumphreys2006>`.
 
