@@ -17,17 +17,7 @@
 from pathlib import Path
 from warnings import warn
 
-from numpy import (
-    array,
-    concatenate,
-    isscalar,
-    newaxis,
-    searchsorted,
-    sum,  # noqa A004
-    where,
-    zeros_like,
-)
-from numpy.ma import masked_where
+import numpy as np
 
 from acoular.tools.utils import mole_fraction_of_water_vapor
 
@@ -79,20 +69,20 @@ def synthetic(data, freqs, f, num=3):
         and used :attr:`FFT block size<acoular.spectra.PowerSpectra.block_size>`.
 
     """
-    if isscalar(f):
+    if np.isscalar(f):
         f = (f,)
     if num == 0:
         # single frequency lines
         res = []
         for i in f:
-            ind = searchsorted(freqs, i)
+            ind = np.searchsorted(freqs, i)
             if ind >= len(freqs):
                 warn(
                     f'Queried frequency ({i:g} Hz) not in resolved frequency range. Returning zeros.',
                     Warning,
                     stacklevel=2,
                 )
-                h = zeros_like(data[0])
+                h = np.zeros_like(data[0])
             else:
                 if freqs[ind] != i:
                     warn(
@@ -110,8 +100,8 @@ def synthetic(data, freqs, f, num=3):
         for i in f:
             f1 = i * 2.0 ** (-0.5 / num)
             f2 = i * 2.0 ** (+0.5 / num)
-            ind1 = searchsorted(freqs, f1)
-            ind2 = searchsorted(freqs, f2)
+            ind1 = np.searchsorted(freqs, f1)
+            ind2 = np.searchsorted(freqs, f2)
             if ind1 == ind2:
                 warn(
                     f'Queried frequency band ({f1:g} to {f2:g} Hz) does not '
@@ -120,11 +110,11 @@ def synthetic(data, freqs, f, num=3):
                     Warning,
                     stacklevel=2,
                 )
-                h = zeros_like(data[0])
+                h = np.zeros_like(data[0])
             else:
-                h = sum(data[ind1:ind2], 0)
+                h = np.sum(data[ind1:ind2], 0)
             res += [h]
-    return array(res)
+    return np.array(res)
 
 
 def return_result(source, nmax=-1, num=128):
@@ -154,8 +144,8 @@ def return_result(source, nmax=-1, num=128):
 
     if nmax > 0:
         nblocks = (nmax - 1) // num + 1
-        return concatenate([res for _, res in zip(range(nblocks), resulter)])[:nmax]
-    return concatenate(list(resulter))
+        return np.concatenate([res for _, res in zip(range(nblocks), resulter)])[:nmax]
+    return np.concatenate(list(resulter))
 
 
 def barspectrum(data, fftfreqs, num=3, bar=True, xoffset=0.0):
@@ -203,9 +193,9 @@ def barspectrum(data, fftfreqs, num=3, bar=True, xoffset=0.0):
         return (0, 0, 0)
 
     # preferred center freqs after din en iso 266 for third-octave bands
-    fcbase = array([31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250])
+    fcbase = np.array([31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250])
     # DIN band center frequencies from 31.5 Hz to 25 kHz
-    fc = concatenate((fcbase, fcbase * 10.0, fcbase[:] * 100.0))[:: (3 // num)]
+    fc = np.concatenate((fcbase, fcbase * 10.0, fcbase[:] * 100.0))[:: (3 // num)]
 
     # exponent for band width calculation
     ep = 1.0 / (2.0 * num)
@@ -215,16 +205,16 @@ def barspectrum(data, fftfreqs, num=3, bar=True, xoffset=0.0):
     f_low = fftfreqs[1] * 2**ep
     f_high = fftfreqs[-1] * 2**-ep
     # get possible index range
-    i_low = 0 if fc[0] >= f_low else where(fc < f_low)[0][-1]
+    i_low = 0 if fc[0] >= f_low else np.where(fc < f_low)[0][-1]
 
-    i_high = fc.shape[0] if fc[-1] <= f_high else where(fc > f_high)[0][0]
+    i_high = fc.shape[0] if fc[-1] <= f_high else np.where(fc > f_high)[0][0]
 
     # synthesize sound pressure values
-    p = array([synthetic(data, fftfreqs, list(fc[i_low:i_high]), num)])
+    p = np.array([synthetic(data, fftfreqs, list(fc[i_low:i_high]), num)])
 
     if bar:
         # upper and lower band borders
-        flu = concatenate(
+        flu = np.concatenate(
             (
                 fc[i_low : i_low + 1] * 2**-ep,
                 (fc[i_low : i_high - 1] * 2**ep + fc[i_low + 1 : i_high] * 2**-ep) / 2.0,
@@ -232,9 +222,9 @@ def barspectrum(data, fftfreqs, num=3, bar=True, xoffset=0.0):
             ),
         )
         # band borders as coordinates for bar plotting
-        flulist = 2 ** (2 * xoffset * ep) * (array([1, 1])[:, newaxis] * flu[newaxis, :]).T.reshape(-1)[1:-1]
+        flulist = 2 ** (2 * xoffset * ep) * (np.array([1, 1])[:, np.newaxis] * flu[np.newaxis, :]).T.reshape(-1)[1:-1]
         # sound pressures as list for bar plotting
-        plist = (array([1, 1])[:, newaxis] * p[newaxis, :]).T.reshape(-1)
+        plist = (np.array([1, 1])[:, np.newaxis] * p[np.newaxis, :]).T.reshape(-1)
     else:
         flulist = fc[i_low:i_high]
         plist = p[0, :]
@@ -280,17 +270,19 @@ def bardata(data, fc, num=3, bar=True, xoffset=0.0, masked=-360):
 
     if bar:
         # upper and lower band borders
-        flu = concatenate((fc[:1] * 2**-ep, (fc[:-1] * 2**ep + fc[1:] * 2**-ep) / 2.0, fc[-1:] * 2**ep))
+        flu = np.concatenate((fc[:1] * 2**-ep, (fc[:-1] * 2**ep + fc[1:] * 2**-ep) / 2.0, fc[-1:] * 2**ep))
         # band borders as coordinates for bar plotting
-        flulist = 2 ** (xoffset * 1.0 / num) * (array([1, 1])[:, newaxis] * flu[newaxis, :]).T.reshape(-1)[1:-1]
+        flulist = (
+            2 ** (xoffset * 1.0 / num) * (np.array([1, 1])[:, np.newaxis] * flu[np.newaxis, :]).T.reshape(-1)[1:-1]
+        )
         # sound pressures as list for bar plotting
-        plist = (array([1, 1])[:, newaxis] * data[newaxis, :]).T.reshape(-1)
+        plist = (np.array([1, 1])[:, np.newaxis] * data[np.newaxis, :]).T.reshape(-1)
     else:
         flulist = fc
         plist = data
     # print(flulist.shape, plist.shape)
     if masked > -360:
-        plist = masked_where(plist <= masked, plist)
+        plist = np.ma.masked_where(plist <= masked, plist)
     return (flulist, plist)
 
 

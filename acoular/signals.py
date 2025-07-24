@@ -21,8 +21,7 @@ Implements signal generators for the simulation of acoustic sources.
 from abc import abstractmethod
 from warnings import warn
 
-from numpy import arange, array, log, pi, repeat, sin, sqrt, tile, zeros
-from numpy.random import RandomState
+import numpy as np
 from scipy.signal import resample, sosfilt, tf2sos
 from traits.api import (
     ABCHasStrictTraits,
@@ -260,7 +259,7 @@ class WNoiseGenerator(NoiseGenerator):
             A 1D array of floats containing the generated white noise signal.
             The length of the array is equal to :attr:`~SignalGenerator.num_samples`.
         """
-        rnd_gen = RandomState(self.seed)
+        rnd_gen = np.random.RandomState(self.seed)
         return self.rms * rnd_gen.standard_normal(self.num_samples)
 
 
@@ -320,26 +319,26 @@ class PNoiseGenerator(NoiseGenerator):
           simulation. If the specified depth exceeds the maximum possible value based on
           the number of samples, it is automatically adjusted, and a warning is printed.
         - The output signal is scaled to have the same overall level as white noise by dividing
-          the result by ``sqrt(depth + 1.5)``.
+          the result by ``np.sqrt(depth + 1.5)``.
         """
         nums = self.num_samples
         depth = self.depth
         # maximum depth depending on number of samples
-        max_depth = int(log(nums) / log(2))
+        max_depth = int(np.log(nums) / np.log(2))
 
         if depth > max_depth:
             depth = max_depth
             print(f'Pink noise filter depth set to maximum possible value of {max_depth:d}.')
 
-        rnd_gen = RandomState(self.seed)
+        rnd_gen = np.random.RandomState(self.seed)
         s = rnd_gen.standard_normal(nums)
         for _ in range(depth):
             ind = 2**_ - 1
             lind = nums - ind
             dind = 2 ** (_ + 1)
-            s[ind:] += repeat(rnd_gen.standard_normal(nums // dind + 1), dind)[:lind]
-        # divide by sqrt(depth+1.5) to get same overall level as white noise
-        return self.rms / sqrt(depth + 1.5) * s
+            s[ind:] += np.repeat(rnd_gen.standard_normal(nums // dind + 1), dind)[:lind]
+        # divide by np.sqrt(depth+1.5) to get same overall level as white noise
+        return self.rms / np.sqrt(depth + 1.5) * s
 
 
 class FiltWNoiseGenerator(WNoiseGenerator):
@@ -399,11 +398,11 @@ class FiltWNoiseGenerator(WNoiseGenerator):
 
     #: A :class:`numpy.ndarray` of autoregressive coefficients (denominator). Default is ``[]``,
     #: which results in no AR filtering (i.e., all-pole filter is ``[1.0]``).
-    ar = CArray(value=array([]), dtype=float, desc='autoregressive coefficients (coefficients of the denominator)')
+    ar = CArray(value=np.array([]), dtype=float, desc='autoregressive coefficients (coefficients of the denominator)')
 
     #: A :class:`numpy.ndarray` of moving-average coefficients (numerator). Default is ``[]``,
     #: which results in no MA filtering (i.e., all-zero filter is ``[1.0]``).
-    ma = CArray(value=array([]), dtype=float, desc='moving-average coefficients (coefficients of the numerator)')
+    ma = CArray(value=np.array([]), dtype=float, desc='moving-average coefficients (coefficients of the numerator)')
 
     #: A unique checksum identifier based on the object properties. (read-only)
     digest = Property(depends_on=['rms', 'seed', 'sample_freq', 'num_samples', 'ar', 'ma'])
@@ -432,7 +431,7 @@ class FiltWNoiseGenerator(WNoiseGenerator):
             if the input array is empty.
         """
         if coefficients.size == 0:
-            return array([1.0])
+            return np.array([1.0])
         return coefficients
 
     def signal(self):
@@ -450,7 +449,7 @@ class FiltWNoiseGenerator(WNoiseGenerator):
             An array representing the filtered white noise signal. The length of the returned array
             is equal to :attr:`the number of samples<SignalGenerator.num_samples>`.
         """
-        rnd_gen = RandomState(self.seed)
+        rnd_gen = np.random.RandomState(self.seed)
         ma = self.handle_empty_coefficients(self.ma)
         ar = self.handle_empty_coefficients(self.ar)
         sos = tf2sos(ma, ar)
@@ -552,8 +551,8 @@ class SineGenerator(PeriodicSignalGenerator):
         The generator supports high-frequency and high-resolution signals,
         limited by the Nyquist criterion.
         """
-        t = arange(self.num_samples, dtype=float) / self.sample_freq
-        return self.amplitude * sin(2 * pi * self.freq * t + self.phase)
+        t = np.arange(self.num_samples, dtype=float) / self.sample_freq
+        return self.amplitude * np.sin(2 * np.pi * self.freq * t + self.phase)
 
 
 @deprecated_alias({'rms': 'amplitude'}, removal_version='25.10')
@@ -648,7 +647,7 @@ class GenericSignalGenerator(SignalGenerator):
                 stacklevel=2,
             )
         nums = self.num_samples
-        track = zeros(nums)
+        track = np.zeros(nums)
 
         # iterate through source generator to fill signal track
         for i, temp in enumerate(self.source.result(block)):
@@ -665,7 +664,7 @@ class GenericSignalGenerator(SignalGenerator):
             # fill up empty track with as many full source signals as possible
             nloops = nums // stop
             if nloops > 1:
-                track[stop : stop * nloops] = tile(track[:stop], nloops - 1)
+                track[stop : stop * nloops] = np.tile(track[:stop], nloops - 1)
             # fill up remaining empty track
             res = nums % stop  # last part of unfinished loop
             if res > 0:
