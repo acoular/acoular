@@ -43,22 +43,19 @@ class MicGeom(HasStrictTraits):
     microphone array. The positions can be read from an XML file or set programmatically. Invalid
     microphones can be excluded by specifying their indices via :attr:`invalid_channels`.
 
+    .. _units_note_microphones:
+    
     Notes
     -----
     - The microphone geometry as in :attr:`total_pos` is automatically changed if the :attr:`file`
       attribute is updated.
     - Small numerical values in the computed :attr:`center` are set to zero for numerical stability.
-
-    .. _units_note_microphones:
-
-    Unit System
-    -----------
-    The source code is agnostic to the unit of length. The microphone positions' coordinates are
-    assumed to be in meters. This is consistent with the standard
-    :class:`~acoular.environments.Environment` class which uses the speed of sound at 20°C at sea
-    level under standard atmosphere pressure in m/s. If the microphone positions' coordinates are
-    provided in a unit other than meter, it is advisable to change the
-    :attr:`~acoular.environments.Environment.c` attribute to match the given unit.
+    - The source code is agnostic to the unit of length. The microphone positions' coordinates are
+      assumed to be in meters. This is consistent with the standard
+      :class:`~acoular.environments.Environment` class which uses the speed of sound at 20°C at sea
+      level under standard atmosphere pressure in m/s. If the microphone positions' coordinates are
+      provided in a unit other than meter, it is advisable to change the
+      :attr:`~acoular.environments.Environment.c` attribute to match the given unit.
 
     Examples
     --------

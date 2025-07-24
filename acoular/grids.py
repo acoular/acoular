@@ -313,8 +313,8 @@ class Grid(ABCHasStrictTraits):
 
     .. _units_note_grids:
 
-    Unit System
-    -----------
+    Notes
+    -----
     The source code is agnostic to the unit of length. The positions' coordinates are assumed to be
     in meters. This is consistent with the standard :class:`~acoular.environments.Environment` class
     which uses the speed of sound at 20°C at sea level under standard atmosphere pressure in m/s.
