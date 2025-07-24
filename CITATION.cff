@@ -47,7 +47,10 @@ authors:
 identifiers:
   - description: "acoular: all versions"
     type: "doi"
-    value: "10.5281/zenodo.15019298"
+    value: "10.5281/zenodo.3690794"
+  - description: "acoular: v25.04"
+    type: "doi"
+    value: 10.5281/zenodo.15303156
   - description: "acoular: v25.03"
     type: "doi"
     value: 10.5281/zenodo.15019298
