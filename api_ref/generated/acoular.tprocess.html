@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>tprocess &#8212; Acoular 25.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../_static/documentation_options.js?v=0b392bf7"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="MaskedTimeOut" href="generated/acoular.tprocess.MaskedTimeOut.html" />
+    <link rel="prev" title="acoular.tools.utils.mole_fraction_of_water_vapor" href="generated/generated/acoular.tools.utils.mole_fraction_of_water_vapor.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../index.html">
+          <span>Acoular 25.07 documentation</span></a></h1>
+        <h2 class="heading"><span>tprocess</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="generated/generated/acoular.tools.utils.mole_fraction_of_water_vapor.html">acoular.tools.utils.mole_fraction_of_water_vapor</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Reference Manual</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="generated/acoular.tprocess.MaskedTimeOut.html">MaskedTimeOut</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="module-acoular.tprocess">
+<span id="tprocess"></span><h1>tprocess<a class="headerlink" href="#module-acoular.tprocess" title="Link to this heading">¶</a></h1>
+<p>Implement blockwise processing in the time domain.</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.tprocess.MaskedTimeOut.html#acoular.tprocess.MaskedTimeOut" title="acoular.tprocess.MaskedTimeOut"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MaskedTimeOut</span></code></a></p></td>
+<td><p>A signal processing block that allows for the selection of specific channels and time samples.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/acoular.tprocess.Trigger.html#acoular.tprocess.Trigger" title="acoular.tprocess.Trigger"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Trigger</span></code></a></p></td>
+<td><p>A signal processing class for detecting and analyzing trigger signals in time-series data.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.tprocess.AngleTracker.html#acoular.tprocess.AngleTracker" title="acoular.tprocess.AngleTracker"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AngleTracker</span></code></a></p></td>
+<td><p>Compute the rotational angle and RPM per sample from a trigger signal in the time domain.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/acoular.tprocess.ChannelMixer.html#acoular.tprocess.ChannelMixer" title="acoular.tprocess.ChannelMixer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ChannelMixer</span></code></a></p></td>
+<td><p>A signal processing block that mixes multiple input channels into a single output channel.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.tprocess.SpatialInterpolator.html#acoular.tprocess.SpatialInterpolator" title="acoular.tprocess.SpatialInterpolator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SpatialInterpolator</span></code></a></p></td>
+<td><p>Base class for spatial interpolation of microphone data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/acoular.tprocess.SpatialInterpolatorRotation.html#acoular.tprocess.SpatialInterpolatorRotation" title="acoular.tprocess.SpatialInterpolatorRotation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SpatialInterpolatorRotation</span></code></a></p></td>
+<td><p>Spatial interpolation class for rotating sound sources.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.tprocess.SpatialInterpolatorConstantRotation.html#acoular.tprocess.SpatialInterpolatorConstantRotation" title="acoular.tprocess.SpatialInterpolatorConstantRotation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SpatialInterpolatorConstantRotation</span></code></a></p></td>
+<td><p>Performs spatial linear interpolation for sources undergoing constant rotation.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/acoular.tprocess.Mixer.html#acoular.tprocess.Mixer" title="acoular.tprocess.Mixer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Mixer</span></code></a></p></td>
+<td><p>Mix signals from multiple sources into a single output.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.tprocess.TimePower.html#acoular.tprocess.TimePower" title="acoular.tprocess.TimePower"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimePower</span></code></a></p></td>
+<td><p>Calculate the time-dependent power of a signal by squaring its samples.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/acoular.tprocess.TimeCumAverage.html#acoular.tprocess.TimeCumAverage" title="acoular.tprocess.TimeCumAverage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeCumAverage</span></code></a></p></td>
+<td><p>Calculates the cumulative average of the signal.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.tprocess.TimeReverse.html#acoular.tprocess.TimeReverse" title="acoular.tprocess.TimeReverse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeReverse</span></code></a></p></td>
+<td><p>Calculates the time-reversed signal of a source.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/acoular.tprocess.Filter.html#acoular.tprocess.Filter" title="acoular.tprocess.Filter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Filter</span></code></a></p></td>
+<td><p>Abstract base class for IIR filters using SciPy's <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.lfilter.html#scipy.signal.lfilter" title="(in SciPy v1.16.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">lfilter()</span></code></a>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.tprocess.FilterBank.html#acoular.tprocess.FilterBank" title="acoular.tprocess.FilterBank"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FilterBank</span></code></a></p></td>
+<td><p>Abstract base class for IIR filter banks based on <code class="xref py py-mod docutils literal notranslate"><span class="pre">scipy.signal.lfilter</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/acoular.tprocess.FiltFiltOctave.html#acoular.tprocess.FiltFiltOctave" title="acoular.tprocess.FiltFiltOctave"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FiltFiltOctave</span></code></a></p></td>
+<td><p>Octave or third-octave bandpass filter with zero-phase distortion.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.tprocess.FiltOctave.html#acoular.tprocess.FiltOctave" title="acoular.tprocess.FiltOctave"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FiltOctave</span></code></a></p></td>
+<td><p>Octave or third-octave bandpass filter (causal, with non-zero phase delay).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/acoular.tprocess.TimeExpAverage.html#acoular.tprocess.TimeExpAverage" title="acoular.tprocess.TimeExpAverage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeExpAverage</span></code></a></p></td>
+<td><p>Compute an exponentially weighted moving average of the input signal.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.tprocess.FiltFreqWeight.html#acoular.tprocess.FiltFreqWeight" title="acoular.tprocess.FiltFreqWeight"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FiltFreqWeight</span></code></a></p></td>
+<td><p>Apply frequency weighting according to IEC 61672-1.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/acoular.tprocess.OctaveFilterBank.html#acoular.tprocess.OctaveFilterBank" title="acoular.tprocess.OctaveFilterBank"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OctaveFilterBank</span></code></a></p></td>
+<td><p>Octave or third-octave filter bank.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.tprocess.WriteWAV.html#acoular.tprocess.WriteWAV" title="acoular.tprocess.WriteWAV"><code class="xref py py-obj docutils literal notranslate"><span class="pre">WriteWAV</span></code></a></p></td>
+<td><p>Saves time signal from one or more channels as mono, stereo, or multi-channel <code class="docutils literal notranslate"><span class="pre">.wav</span></code> file.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/acoular.tprocess.WriteH5.html#acoular.tprocess.WriteH5" title="acoular.tprocess.WriteH5"><code class="xref py py-obj docutils literal notranslate"><span class="pre">WriteH5</span></code></a></p></td>
+<td><p>Saves time signal data as a <code class="docutils literal notranslate"><span class="pre">.h5</span></code> (HDF5) file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.tprocess.TimeConvolve.html#acoular.tprocess.TimeConvolve" title="acoular.tprocess.TimeConvolve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeConvolve</span></code></a></p></td>
+<td><p>Perform frequency domain convolution with the uniformly partitioned overlap-save (UPOLS) method.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="generated/generated/acoular.tools.utils.mole_fraction_of_water_vapor.html">acoular.tools.utils.mole_fraction_of_water_vapor</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Reference Manual</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="generated/acoular.tprocess.MaskedTimeOut.html">MaskedTimeOut</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Jul 24, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Trigger &#8212; Acoular 25.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=0b392bf7"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="AngleTracker" href="acoular.tprocess.AngleTracker.html" />
+    <link rel="prev" title="MaskedTimeOut" href="acoular.tprocess.MaskedTimeOut.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.07 documentation</span></a></h1>
+        <h2 class="heading"><span>Trigger</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tprocess.MaskedTimeOut.html">MaskedTimeOut</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tprocess.html">tprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tprocess.AngleTracker.html">AngleTracker</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="trigger">
+<h1>Trigger<a class="headerlink" href="#trigger" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.tprocess.Trigger">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.tprocess.</span></span><span class="sig-name descname"><span class="pre">Trigger</span></span><a class="headerlink" href="#acoular.tprocess.Trigger" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.base.TimeOut.html#acoular.base.TimeOut" title="acoular.base.TimeOut"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeOut</span></code></a></p>
+<p>A signal processing class for detecting and analyzing trigger signals in time-series data.</p>
+<p>The <a class="reference internal" href="#acoular.tprocess.Trigger" title="acoular.tprocess.Trigger"><code class="xref py py-class docutils literal notranslate"><span class="pre">Trigger</span></code></a> class identifies trigger events in a single-channel signal provided by a
+<a class="reference internal" href="acoular.base.SamplesGenerator.html#acoular.base.SamplesGenerator" title="acoular.base.SamplesGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplesGenerator</span></code></a> source. The detection process involves:</p>
+<ol class="arabic simple">
+<li><p>Identifying peaks that exceed a specified positive or negative threshold.</p></li>
+<li><p>Estimating the approximate duration of one revolution based on the largest
+sample distance between consecutive peaks.</p></li>
+<li><p>Dividing the estimated revolution duration into segments called “hunks,”
+allowing only one peak per hunk.</p></li>
+<li><p>Selecting the most appropriate peak per hunk based on a chosen criterion
+(e.g., first occurrence or extremum value).</p></li>
+<li><p>Validating the consistency of the detected peaks by ensuring the revolutions
+have a stable duration with minimal variation.</p></li>
+</ol>
+<p>This class is typically used for rotational speed analysis, where trigger events
+correspond to periodic markers in a signal (e.g., TDC signals in engine diagnostics).</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.Trigger.source">
+<span class="sig-name descname"><span class="pre">source</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Instance(SamplesGenerator)</span></em><a class="headerlink" href="#acoular.tprocess.Trigger.source" title="Link to this definition">¶</a></dt>
+<dd><p>The input data source. It must be an instance of a
+<a class="reference internal" href="acoular.base.SamplesGenerator.html#acoular.base.SamplesGenerator" title="acoular.base.SamplesGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplesGenerator</span></code></a>-derived class.
+The signal must be single-channel.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.Trigger.threshold">
+<span class="sig-name descname"><span class="pre">threshold</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Union(None,</span> <span class="pre">Float)</span></em><a class="headerlink" href="#acoular.tprocess.Trigger.threshold" title="Link to this definition">¶</a></dt>
+<dd><p>The threshold value for detecting trigger peaks. The meaning of this threshold depends
+on the trigger type (:attr;`trigger_type`). The sign is relevant:</p>
+<ul class="simple">
+<li><p>A positive threshold detects peaks above this value.</p></li>
+<li><p>A negative threshold detects peaks below this value.</p></li>
+</ul>
+<p>If <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>, an estimated threshold is used, calculated as 75% of the extreme deviation
+from the mean signal value. Default is <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>.</p>
+<p>E.g: If the mean value is <span class="math notranslate nohighlight">\(0\)</span> and there are positive extrema at <span class="math notranslate nohighlight">\(400\)</span> and
+negative extrema at <span class="math notranslate nohighlight">\(-800\)</span>. Then the estimated threshold would be
+<span class="math notranslate nohighlight">\(0.75 \cdot (-800) = -600\)</span>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.Trigger.max_variation_of_duration">
+<span class="sig-name descname"><span class="pre">max_variation_of_duration</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(0.02)</span></em><a class="headerlink" href="#acoular.tprocess.Trigger.max_variation_of_duration" title="Link to this definition">¶</a></dt>
+<dd><p>The maximum allowable variation in duration between two trigger instances. If any revolution
+exceeds this variation threshold, a warning is issued. Default is <code class="docutils literal notranslate"><span class="pre">0.02</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.Trigger.hunk_length">
+<span class="sig-name descname"><span class="pre">hunk_length</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(0.1)</span></em><a class="headerlink" href="#acoular.tprocess.Trigger.hunk_length" title="Link to this definition">¶</a></dt>
+<dd><p>Defines the length of “hunks” as a fraction of the estimated duration between two trigger
+instances. If multiple peaks occur within a hunk, only one is retained based on
+<a class="reference internal" href="#acoular.tprocess.Trigger.multiple_peaks_in_hunk" title="acoular.tprocess.Trigger.multiple_peaks_in_hunk"><code class="xref py py-attr docutils literal notranslate"><span class="pre">multiple_peaks_in_hunk</span></code></a>. Default is <code class="docutils literal notranslate"><span class="pre">0.1</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.Trigger.trigger_type">
+<span class="sig-name descname"><span class="pre">trigger_type</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum('dirac',</span> <span class="pre">'rect')</span></em><a class="headerlink" href="#acoular.tprocess.Trigger.trigger_type" title="Link to this definition">¶</a></dt>
+<dd><p>Specifies the type of trigger detection:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'dirac'</span></code>: A single impulse is considered a trigger. The sign of <a class="reference internal" href="#acoular.tprocess.Trigger.threshold" title="acoular.tprocess.Trigger.threshold"><code class="xref py py-attr docutils literal notranslate"><span class="pre">threshold</span></code></a>
+determines whether positive or negative peaks are detected.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'rect'</span></code>: A repeating rectangular waveform is assumed. Only every second edge is
+considered a trigger. The sign of <a class="reference internal" href="#acoular.tprocess.Trigger.threshold" title="acoular.tprocess.Trigger.threshold"><code class="xref py py-attr docutils literal notranslate"><span class="pre">threshold</span></code></a> determines whether rising (<code class="docutils literal notranslate"><span class="pre">+</span></code>) or
+falling (<code class="docutils literal notranslate"><span class="pre">-</span></code>) edges are used.</p></li>
+</ul>
+<p>Default is <code class="docutils literal notranslate"><span class="pre">'dirac'</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.Trigger.multiple_peaks_in_hunk">
+<span class="sig-name descname"><span class="pre">multiple_peaks_in_hunk</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum('extremum',</span> <span class="pre">'first')</span></em><a class="headerlink" href="#acoular.tprocess.Trigger.multiple_peaks_in_hunk" title="Link to this definition">¶</a></dt>
+<dd><p>Defines the criterion for selecting a peak when multiple occur within a hunk (see
+<a class="reference internal" href="#acoular.tprocess.Trigger.hunk_length" title="acoular.tprocess.Trigger.hunk_length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">hunk_length</span></code></a>):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'extremum'</span></code>: Selects the most extreme peak.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'first'</span></code>: Selects the first peak encountered.</p></li>
+</ul>
+<p>Default is <code class="docutils literal notranslate"><span class="pre">'extremum'</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.Trigger.trigger_data">
+<span class="sig-name descname"><span class="pre">trigger_data</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.tprocess.Trigger.trigger_data" title="Link to this definition">¶</a></dt>
+<dd><p>A tuple containing:</p>
+<ul class="simple">
+<li><p>A <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of sample indices corresponding to detected trigger events.</p></li>
+<li><p>The maximum number of samples between consecutive trigger peaks.</p></li>
+<li><p>The minimum number of samples between consecutive trigger peaks.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.Trigger.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.tprocess.Trigger.digest" title="Link to this definition">¶</a></dt>
+<dd><p>A unique identifier for the trigger, based on its properties. (read-only)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.tprocess.Trigger.result">
+<span class="sig-name descname"><span class="pre">result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.tprocess.Trigger.result" title="Link to this definition">¶</a></dt>
+<dd><p>Generate signal data from the source without modification.</p>
+<p>This method acts as a pass-through, providing data blocks directly from the <a class="reference internal" href="#acoular.tprocess.Trigger.source" title="acoular.tprocess.Trigger.source"><code class="xref py py-attr docutils literal notranslate"><span class="pre">source</span></code></a>
+generator. It is included for interface consistency but does not apply trigger-based
+transformations to the data.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>num</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a></span></dt><dd><p>Number of samples per block.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p>An array containing <code class="docutils literal notranslate"><span class="pre">num</span></code> samples from the source signal.
+The last block may contain fewer samples if the total number of samples is not
+a multiple of <code class="docutils literal notranslate"><span class="pre">num</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This method is not implemented for trigger-based transformations.
+A warning is issued, indicating that data is passed unprocessed.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tprocess.MaskedTimeOut.html">MaskedTimeOut</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tprocess.html">tprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tprocess.AngleTracker.html">AngleTracker</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Jul 24, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

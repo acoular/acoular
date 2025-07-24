@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>sources &#8212; Acoular 25.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../_static/documentation_options.js?v=0b392bf7"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="TimeSamples" href="generated/acoular.sources.TimeSamples.html" />
+    <link rel="prev" title="GenericSignalGenerator" href="generated/acoular.signals.GenericSignalGenerator.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../index.html">
+          <span>Acoular 25.07 documentation</span></a></h1>
+        <h2 class="heading"><span>sources</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="generated/acoular.signals.GenericSignalGenerator.html">GenericSignalGenerator</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Reference Manual</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="generated/acoular.sources.TimeSamples.html">TimeSamples</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="module-acoular.sources">
+<span id="sources"></span><h1>sources<a class="headerlink" href="#module-acoular.sources" title="Link to this heading">¶</a></h1>
+<p>Measured multichannel data management and simulation of acoustic sources.</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.sources.TimeSamples.html#acoular.sources.TimeSamples" title="acoular.sources.TimeSamples"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeSamples</span></code></a></p></td>
+<td><p>Container for processing time data in <code class="docutils literal notranslate"><span class="pre">*.h5</span></code> or NumPy array format.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/acoular.sources.MaskedTimeSamples.html#acoular.sources.MaskedTimeSamples" title="acoular.sources.MaskedTimeSamples"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MaskedTimeSamples</span></code></a></p></td>
+<td><p>Container to process and manage time-domain data with support for masking samples and channels.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.sources.PointSource.html#acoular.sources.PointSource" title="acoular.sources.PointSource"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointSource</span></code></a></p></td>
+<td><p>Define a fixed point source emitting a signal, intended for simulations.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/acoular.sources.PointSourceDipole.html#acoular.sources.PointSourceDipole" title="acoular.sources.PointSourceDipole"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointSourceDipole</span></code></a></p></td>
+<td><p>Define a fixed point source with dipole characteristics.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.sources.SphericalHarmonicSource.html#acoular.sources.SphericalHarmonicSource" title="acoular.sources.SphericalHarmonicSource"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SphericalHarmonicSource</span></code></a></p></td>
+<td><p>Define a fixed spherical harmonic source emitting a signal.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/acoular.sources.LineSource.html#acoular.sources.LineSource" title="acoular.sources.LineSource"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LineSource</span></code></a></p></td>
+<td><p>Define a fixed line source with a signal.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.sources.MovingPointSource.html#acoular.sources.MovingPointSource" title="acoular.sources.MovingPointSource"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MovingPointSource</span></code></a></p></td>
+<td><p>Define a moving <a class="reference internal" href="generated/acoular.sources.PointSource.html#acoular.sources.PointSource" title="acoular.sources.PointSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">point</span> <span class="pre">source</span></code></a> emitting a <a class="reference internal" href="generated/acoular.sources.PointSource.html#acoular.sources.PointSource.signal" title="acoular.sources.PointSource.signal"><code class="xref py py-attr docutils literal notranslate"><span class="pre">signal</span></code></a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/acoular.sources.MovingPointSourceDipole.html#acoular.sources.MovingPointSourceDipole" title="acoular.sources.MovingPointSourceDipole"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MovingPointSourceDipole</span></code></a></p></td>
+<td><p>Define a moving point source with dipole characteristics.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.sources.MovingLineSource.html#acoular.sources.MovingLineSource" title="acoular.sources.MovingLineSource"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MovingLineSource</span></code></a></p></td>
+<td><p>A moving <a class="reference internal" href="generated/acoular.sources.LineSource.html#acoular.sources.LineSource" title="acoular.sources.LineSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">line</span> <span class="pre">source</span></code></a> with an arbitrary signal.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/acoular.sources.UncorrelatedNoiseSource.html#acoular.sources.UncorrelatedNoiseSource" title="acoular.sources.UncorrelatedNoiseSource"><code class="xref py py-obj docutils literal notranslate"><span class="pre">UncorrelatedNoiseSource</span></code></a></p></td>
+<td><p>Simulate uncorrelated white or pink noise signals at multiple channels.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.sources.SourceMixer.html#acoular.sources.SourceMixer" title="acoular.sources.SourceMixer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SourceMixer</span></code></a></p></td>
+<td><p>Combine signals from multiple sources by mixing their outputs.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/acoular.sources.PointSourceConvolve.html#acoular.sources.PointSourceConvolve" title="acoular.sources.PointSourceConvolve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointSourceConvolve</span></code></a></p></td>
+<td><p>Blockwise convolution of a source signal with an impulse response (IR).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.sources.spherical_hn1.html#acoular.sources.spherical_hn1" title="acoular.sources.spherical_hn1"><code class="xref py py-obj docutils literal notranslate"><span class="pre">spherical_hn1</span></code></a>(n, z)</p></td>
+<td><p>Compute the spherical Hankel function of the first kind.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/acoular.sources.get_radiation_angles.html#acoular.sources.get_radiation_angles" title="acoular.sources.get_radiation_angles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_radiation_angles</span></code></a>(direction, mpos, ...)</p></td>
+<td><p>Calculate the azimuthal and elevation angles between the microphones and the source.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.sources.get_modes.html#acoular.sources.get_modes" title="acoular.sources.get_modes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_modes</span></code></a>(lOrder, direction, mpos[, ...])</p></td>
+<td><p>Calculate the spherical harmonic radiation pattern at microphone positions.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="generated/acoular.signals.GenericSignalGenerator.html">GenericSignalGenerator</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Reference Manual</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="generated/acoular.sources.TimeSamples.html">TimeSamples</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Jul 24, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

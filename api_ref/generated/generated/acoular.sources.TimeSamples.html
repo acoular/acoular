@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>TimeSamples &#8212; Acoular 25.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=0b392bf7"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="MaskedTimeSamples" href="acoular.sources.MaskedTimeSamples.html" />
+    <link rel="prev" title="sources" href="../acoular.sources.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.07 documentation</span></a></h1>
+        <h2 class="heading"><span>TimeSamples</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.sources.html">sources</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.sources.html">sources</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.sources.MaskedTimeSamples.html">MaskedTimeSamples</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="timesamples">
+<h1>TimeSamples<a class="headerlink" href="#timesamples" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.sources.TimeSamples">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.sources.</span></span><span class="sig-name descname"><span class="pre">TimeSamples</span></span><a class="headerlink" href="#acoular.sources.TimeSamples" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.base.SamplesGenerator.html#acoular.base.SamplesGenerator" title="acoular.base.SamplesGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplesGenerator</span></code></a></p>
+<p>Container for processing time data in <code class="docutils literal notranslate"><span class="pre">*.h5</span></code> or NumPy array format.</p>
+<p>The <a class="reference internal" href="#acoular.sources.TimeSamples" title="acoular.sources.TimeSamples"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSamples</span></code></a> class provides functionality for loading, managing, and accessing
+time-domain data stored in HDF5 files or directly provided as a NumPy array. This data can be
+accessed iteratively through the <a class="reference internal" href="#acoular.sources.TimeSamples.result" title="acoular.sources.TimeSamples.result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">result()</span></code></a> method, which returns chunks of the time data
+for further processing.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="acoular.sources.MaskedTimeSamples.html#acoular.sources.MaskedTimeSamples" title="acoular.sources.MaskedTimeSamples"><code class="xref py py-class docutils literal notranslate"><span class="pre">acoular.sources.MaskedTimeSamples</span></code></a></dt><dd><p>Extends the functionality of class <a class="reference internal" href="#acoular.sources.TimeSamples" title="acoular.sources.TimeSamples"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSamples</span></code></a> by enabling the definition of start and stop samples as well as the specification of invalid channels.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>If a calibration object is provided, calibrated time-domain data will be returned.</p></li>
+<li><p>Metadata from the <a class="reference internal" href="#acoular.sources.TimeSamples.file" title="acoular.sources.TimeSamples.file"><code class="xref py py-attr docutils literal notranslate"><span class="pre">HDF5</span> <span class="pre">file</span></code></a> can be accessed through the <a class="reference internal" href="#acoular.sources.TimeSamples.metadata" title="acoular.sources.TimeSamples.metadata"><code class="xref py py-attr docutils literal notranslate"><span class="pre">metadata</span></code></a>
+attribute.</p></li>
+</ul>
+<p class="rubric">Examples</p>
+<p>Data can be loaded from a HDF5 file as follows:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">acoular</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeSamples</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">file</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">some_h5_file</span><span class="o">.</span><span class="n">h5</span><span class="o">&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ts</span> <span class="o">=</span> <span class="n">TimeSamples</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="n">file</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;number of channels: </span><span class="si">{</span><span class="n">ts</span><span class="o">.</span><span class="n">num_channels</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="go">number of channels: 56</span>
+</pre></div>
+</div>
+<p>Alternatively, the time data can be specified directly as a NumPy array. In this case, the
+<a class="reference internal" href="#acoular.sources.TimeSamples.data" title="acoular.sources.TimeSamples.data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">data</span></code></a> and <a class="reference internal" href="acoular.base.Generator.html#acoular.base.Generator.sample_freq" title="acoular.base.Generator.sample_freq"><code class="xref py py-attr docutils literal notranslate"><span class="pre">sample_freq</span></code></a> attributes must be set manually.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ts</span> <span class="o">=</span> <span class="n">TimeSamples</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">sample_freq</span><span class="o">=</span><span class="mi">51200</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Chunks of the time data can be accessed iteratively via the <a class="reference internal" href="#acoular.sources.TimeSamples.result" title="acoular.sources.TimeSamples.result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">result()</span></code></a> generator. The last
+block will be shorter than the block size if the number of samples is not a multiple of the
+block size.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">blocksize</span> <span class="o">=</span> <span class="mi">512</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">generator</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="n">blocksize</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">generator</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="go">(512, 4)</span>
+<span class="go">(488, 4)</span>
+</pre></div>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.TimeSamples.file">
+<span class="sig-name descname"><span class="pre">file</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Union(None,</span> <span class="pre">File(filter=['*.h5'],</span> <span class="pre">exists=True),</span> <span class="pre">desc='name</span> <span class="pre">of</span> <span class="pre">data</span> <span class="pre">file')</span></em><a class="headerlink" href="#acoular.sources.TimeSamples.file" title="Link to this definition">¶</a></dt>
+<dd><p>Full path to the <code class="docutils literal notranslate"><span class="pre">.h5</span></code> file containing time-domain data.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.TimeSamples.basename">
+<span class="sig-name descname"><span class="pre">basename</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['file'],</span> <span class="pre">desc='basename</span> <span class="pre">of</span> <span class="pre">data</span> <span class="pre">file')</span></em><a class="headerlink" href="#acoular.sources.TimeSamples.basename" title="Link to this definition">¶</a></dt>
+<dd><p>Basename of the <code class="docutils literal notranslate"><span class="pre">.h5</span></code> file, set automatically from the <a class="reference internal" href="#acoular.sources.TimeSamples.file" title="acoular.sources.TimeSamples.file"><code class="xref py py-attr docutils literal notranslate"><span class="pre">file</span></code></a> attribute.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.TimeSamples.calib">
+<span class="sig-name descname"><span class="pre">calib</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Instance(Calib,</span> <span class="pre">desc='Calibration</span> <span class="pre">data')</span></em><a class="headerlink" href="#acoular.sources.TimeSamples.calib" title="Link to this definition">¶</a></dt>
+<dd><p>Calibration data, an instance of the <a class="reference internal" href="acoular.calib.Calib.html#acoular.calib.Calib" title="acoular.calib.Calib"><code class="xref py py-class docutils literal notranslate"><span class="pre">Calib</span></code></a> class.
+(optional; if provided, the time data will be calibrated.)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.TimeSamples.num_channels">
+<span class="sig-name descname"><span class="pre">num_channels</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CInt(0,</span> <span class="pre">desc='number</span> <span class="pre">of</span> <span class="pre">input</span> <span class="pre">channels')</span></em><a class="headerlink" href="#acoular.sources.TimeSamples.num_channels" title="Link to this definition">¶</a></dt>
+<dd><p>Number of input channels in the time data, set automatically based on the
+<a class="reference internal" href="#acoular.sources.TimeSamples.file" title="acoular.sources.TimeSamples.file"><code class="xref py py-attr docutils literal notranslate"><span class="pre">loaded</span> <span class="pre">data</span></code></a> or <a class="reference internal" href="#acoular.sources.TimeSamples.data" title="acoular.sources.TimeSamples.data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">specified</span> <span class="pre">array</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.TimeSamples.num_samples">
+<span class="sig-name descname"><span class="pre">num_samples</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CInt(0,</span> <span class="pre">desc='number</span> <span class="pre">of</span> <span class="pre">samples')</span></em><a class="headerlink" href="#acoular.sources.TimeSamples.num_samples" title="Link to this definition">¶</a></dt>
+<dd><p>Total number of time-domain samples, set automatically based on the <a class="reference internal" href="#acoular.sources.TimeSamples.file" title="acoular.sources.TimeSamples.file"><code class="xref py py-attr docutils literal notranslate"><span class="pre">loaded</span> <span class="pre">data</span></code></a>
+or <a class="reference internal" href="#acoular.sources.TimeSamples.data" title="acoular.sources.TimeSamples.data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">specified</span> <span class="pre">array</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.TimeSamples.data">
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Any(transient=True,</span> <span class="pre">desc='the</span> <span class="pre">actual</span> <span class="pre">time</span> <span class="pre">data</span> <span class="pre">array')</span></em><a class="headerlink" href="#acoular.sources.TimeSamples.data" title="Link to this definition">¶</a></dt>
+<dd><p>A 2D NumPy array containing the time-domain data, shape (<a class="reference internal" href="#acoular.sources.TimeSamples.num_samples" title="acoular.sources.TimeSamples.num_samples"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_samples</span></code></a>,
+<a class="reference internal" href="#acoular.sources.TimeSamples.num_channels" title="acoular.sources.TimeSamples.num_channels"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_channels</span></code></a>).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.TimeSamples.h5f">
+<span class="sig-name descname"><span class="pre">h5f</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Instance(H5FileBase,</span> <span class="pre">transient=True)</span></em><a class="headerlink" href="#acoular.sources.TimeSamples.h5f" title="Link to this definition">¶</a></dt>
+<dd><p>HDF5 file object.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.TimeSamples.metadata">
+<span class="sig-name descname"><span class="pre">metadata</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Dict(desc='metadata</span> <span class="pre">contained</span> <span class="pre">in</span> <span class="pre">.h5</span> <span class="pre">file')</span></em><a class="headerlink" href="#acoular.sources.TimeSamples.metadata" title="Link to this definition">¶</a></dt>
+<dd><p>Metadata loaded from the HDF5 file, if available.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.TimeSamples.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.sources.TimeSamples.digest" title="Link to this definition">¶</a></dt>
+<dd><p>A unique identifier for the samples, based on its properties. (read-only)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.sources.TimeSamples.result">
+<span class="sig-name descname"><span class="pre">result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">128</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.sources.TimeSamples.result" title="Link to this definition">¶</a></dt>
+<dd><p>Generate blocks of time-domain data iteratively.</p>
+<p>The <a class="reference internal" href="#acoular.sources.TimeSamples.result" title="acoular.sources.TimeSamples.result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">result()</span></code></a> method is a Python generator that yields blocks of time-domain data
+of the specified size. Data is either read from an HDF5 file (if <a class="reference internal" href="#acoular.sources.TimeSamples.file" title="acoular.sources.TimeSamples.file"><code class="xref py py-attr docutils literal notranslate"><span class="pre">file</span></code></a> is set)
+or from a NumPy array (if <a class="reference internal" href="#acoular.sources.TimeSamples.data" title="acoular.sources.TimeSamples.data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">data</span></code></a> is directly provided). If a calibration object
+is specified, the returned data is calibrated.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>num</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, optional</span></dt><dd><p>The size of each block to be yielded, representing the number of time-domain
+samples per block.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p>A 2D array of shape (<code class="docutils literal notranslate"><span class="pre">num</span></code>, <a class="reference internal" href="#acoular.sources.TimeSamples.num_channels" title="acoular.sources.TimeSamples.num_channels"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_channels</span></code></a>) representing a block of
+time-domain data. The last block may have fewer than <code class="docutils literal notranslate"><span class="pre">num</span></code> samples if the total number
+of samples is not a multiple of <code class="docutils literal notranslate"><span class="pre">num</span></code>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#OSError" title="(in Python v3.13)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OSError</span></code></a></dt><dd><p>If no samples are available (i.e., <a class="reference internal" href="#acoular.sources.TimeSamples.num_samples" title="acoular.sources.TimeSamples.num_samples"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_samples</span></code></a> is <code class="docutils literal notranslate"><span class="pre">0</span></code>).</p>
+</dd>
+<dt><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ValueError</span></code></a></dt><dd><p>If the calibration data does not match the number of channels.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>A deprecation warning is raised if the calibration functionality is used directly in
+<a class="reference internal" href="#acoular.sources.TimeSamples" title="acoular.sources.TimeSamples"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSamples</span></code></a>. Instead, the <a class="reference internal" href="acoular.calib.Calib.html#acoular.calib.Calib" title="acoular.calib.Calib"><code class="xref py py-class docutils literal notranslate"><span class="pre">Calib</span></code></a> class should be used as a
+separate processing block.</p>
+</div>
+<p class="rubric">Examples</p>
+<p>Create a generator and access blocks of data:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">acoular.sources</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeSamples</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ts</span> <span class="o">=</span> <span class="n">TimeSamples</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">sample_freq</span><span class="o">=</span><span class="mi">51200</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">generator</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="mi">256</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">generator</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="go">(256, 4)</span>
+<span class="go">(256, 4)</span>
+<span class="go">(256, 4)</span>
+<span class="go">(232, 4)</span>
+</pre></div>
+</div>
+<p>Note that the last block may have fewer that <code class="docutils literal notranslate"><span class="pre">num</span></code> samples.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.sources.html">sources</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.sources.html">sources</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.sources.MaskedTimeSamples.html">MaskedTimeSamples</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Jul 24, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

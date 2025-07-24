@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Sector &#8212; Acoular 25.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=0b392bf7"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="SingleSector" href="acoular.grids.SingleSector.html" />
+    <link rel="prev" title="MergeGrid" href="acoular.grids.MergeGrid.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.07 documentation</span></a></h1>
+        <h2 class="heading"><span>Sector</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.grids.MergeGrid.html">MergeGrid</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.grids.html">grids</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.grids.SingleSector.html">SingleSector</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="sector">
+<h1>Sector<a class="headerlink" href="#sector" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.grids.Sector">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.grids.</span></span><span class="sig-name descname"><span class="pre">Sector</span></span><a class="headerlink" href="#acoular.grids.Sector" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABCHasStrictTraits</span></code></p>
+<p>Abstract base class for all sector types.</p>
+<p>The <a class="reference internal" href="#acoular.grids.Sector" title="acoular.grids.Sector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sector</span></code></a> class defines the common interface for all sector implementations. It serves
+as the base class for creating diverse sector geometries, each capable of determining whether
+specific grid points fall within its bounds.</p>
+<p>When used directly, this class represents a sector encompassing the entire grid, meaning all
+positions are considered valid.</p>
+<p class="rubric">Notes</p>
+<p>This class is designed to be subclassed. Derived classes should override the <a class="reference internal" href="#acoular.grids.Sector.contains" title="acoular.grids.Sector.contains"><code class="xref py py-meth docutils literal notranslate"><span class="pre">contains()</span></code></a>
+method to implement specific sector geometries (e.g., circular, rectangular, or polygon shapes).</p>
+<p class="rubric">Examples</p>
+<p>Load example data and set different Sectors for integration in the
+<a class="reference internal" href="../../../auto_examples/wind_tunnel_examples/example_sectors_and_integration.html#sector-integration-example"><span class="std std-ref">sector integration example</span></a>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.grids.Sector.contains">
+<span class="sig-name descname"><span class="pre">contains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.grids.Sector.contains" title="Link to this definition">¶</a></dt>
+<dd><p>Check whether the given coordinates lie within the sector’s bounds.</p>
+<p>This method determines if each column of the input array <code class="xref py py-attr docutils literal notranslate"><span class="pre">pos</span></code> corresponds to a point
+that falls within the sector. For this base class, all points are considered within the
+sector.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>pos</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></span></dt><dd><p>A 2D array with shape <cite>(3, N)</cite>, where <cite>N</cite> is the number of grid points. Each column
+represents the <code class="docutils literal notranslate"><span class="pre">x,</span> <span class="pre">y,</span> <span class="pre">z</span></code> coordinates of a grid point.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bools</span></code></a></dt><dd><p>A 1D array of length <cite>N</cite>, where each entry indicates whether the corresponding
+column in <code class="xref py py-attr docutils literal notranslate"><span class="pre">pos</span></code> lies within the sector’s bounds.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">acoular</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ac</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sector</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">Sector</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>  <span class="c1"># Two grid points</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sector</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">positions</span><span class="p">)</span>
+<span class="go">array([ True,  True])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.grids.MergeGrid.html">MergeGrid</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.grids.html">grids</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.grids.SingleSector.html">SingleSector</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Jul 24, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

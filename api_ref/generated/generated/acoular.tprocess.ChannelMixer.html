@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>ChannelMixer &#8212; Acoular 25.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=0b392bf7"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="SpatialInterpolator" href="acoular.tprocess.SpatialInterpolator.html" />
+    <link rel="prev" title="AngleTracker" href="acoular.tprocess.AngleTracker.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.07 documentation</span></a></h1>
+        <h2 class="heading"><span>ChannelMixer</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tprocess.AngleTracker.html">AngleTracker</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tprocess.html">tprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tprocess.SpatialInterpolator.html">SpatialInterpolator</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="channelmixer">
+<h1>ChannelMixer<a class="headerlink" href="#channelmixer" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.tprocess.ChannelMixer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.tprocess.</span></span><span class="sig-name descname"><span class="pre">ChannelMixer</span></span><a class="headerlink" href="#acoular.tprocess.ChannelMixer" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.base.TimeOut.html#acoular.base.TimeOut" title="acoular.base.TimeOut"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeOut</span></code></a></p>
+<p>A signal processing block that mixes multiple input channels into a single output channel.</p>
+<p>The <a class="reference internal" href="#acoular.tprocess.ChannelMixer" title="acoular.tprocess.ChannelMixer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChannelMixer</span></code></a> class takes a multi-channel signal from a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">SamplesGenerator</span></code> (or a derived object) and applies an optional set of
+amplitude weights to each channel. The resulting weighted sum is then output as a single-channel
+signal.</p>
+<p>This class is particularly useful for cases where a combined signal representation is needed,
+such as beamforming, array signal processing, or for reducing the dimensionality of
+multi-channel time signal data.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.ChannelMixer.source">
+<span class="sig-name descname"><span class="pre">source</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Instance(SamplesGenerator)</span></em><a class="headerlink" href="#acoular.tprocess.ChannelMixer.source" title="Link to this definition">¶</a></dt>
+<dd><p>The input data source. It must be an instance of a
+<a class="reference internal" href="acoular.base.SamplesGenerator.html#acoular.base.SamplesGenerator" title="acoular.base.SamplesGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplesGenerator</span></code></a>-derived class.
+It provides the multi-channel time-domain signals that will be mixed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.ChannelMixer.weights">
+<span class="sig-name descname"><span class="pre">weights</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CArray(desc='channel</span> <span class="pre">weights')</span></em><a class="headerlink" href="#acoular.tprocess.ChannelMixer.weights" title="Link to this definition">¶</a></dt>
+<dd><p>An array of amplitude weight factors applied to each input channel before summation.
+If not explicitly set, all channels are weighted equally (delault is <code class="docutils literal notranslate"><span class="pre">1</span></code>).
+The shape of <a class="reference internal" href="#acoular.tprocess.ChannelMixer.weights" title="acoular.tprocess.ChannelMixer.weights"><code class="xref py py-attr docutils literal notranslate"><span class="pre">weights</span></code></a> must match the <a class="reference internal" href="#acoular.tprocess.ChannelMixer.num_channels" title="acoular.tprocess.ChannelMixer.num_channels"><code class="xref py py-attr docutils literal notranslate"><span class="pre">number</span> <span class="pre">of</span> <span class="pre">input</span> <span class="pre">channels</span></code></a>.
+If an incompatible shape is provided, a <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ValueError</span></code></a> will be raised.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.ChannelMixer.num_channels">
+<span class="sig-name descname"><span class="pre">num_channels</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Constant(1)</span></em><a class="headerlink" href="#acoular.tprocess.ChannelMixer.num_channels" title="Link to this definition">¶</a></dt>
+<dd><p>The number of output channels, which is always <code class="docutils literal notranslate"><span class="pre">1</span></code> for this class since it produces a
+single mixed output. (read-only)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.ChannelMixer.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['source.digest',</span> <span class="pre">'weights'])</span></em><a class="headerlink" href="#acoular.tprocess.ChannelMixer.digest" title="Link to this definition">¶</a></dt>
+<dd><p>A unique identifier for the object, based on its properties. (read-only)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.tprocess.ChannelMixer.result">
+<span class="sig-name descname"><span class="pre">result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.tprocess.ChannelMixer.result" title="Link to this definition">¶</a></dt>
+<dd><p>Generate the mixed output signal in blocks.</p>
+<p>This method retrieves data from the <a class="reference internal" href="#acoular.tprocess.ChannelMixer.source" title="acoular.tprocess.ChannelMixer.source"><code class="xref py py-attr docutils literal notranslate"><span class="pre">source</span></code></a> object, applies the specified amplitude
+<a class="reference internal" href="#acoular.tprocess.ChannelMixer.weights" title="acoular.tprocess.ChannelMixer.weights"><code class="xref py py-attr docutils literal notranslate"><span class="pre">weights</span></code></a> to each channel, and sums them to produce a single-channel output. The data
+is processed and yielded in block-wise fashion for efficient memory handling.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>num</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a></span></dt><dd><p>Number of samples per block.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p>An array of shape <code class="docutils literal notranslate"><span class="pre">(num,</span> <span class="pre">1)</span></code> containing blocks a of single-channel mixed signal.
+The last block may contain fewer samples if the total number of samples is not
+a multiple of <code class="docutils literal notranslate"><span class="pre">num</span></code>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ValueError</span></code></a></dt><dd><p>If the <a class="reference internal" href="#acoular.tprocess.ChannelMixer.weights" title="acoular.tprocess.ChannelMixer.weights"><code class="xref py py-attr docutils literal notranslate"><span class="pre">weights</span></code></a> array is provided but its shape does not match the expected shape
+(<a class="reference internal" href="#acoular.tprocess.ChannelMixer.num_channels" title="acoular.tprocess.ChannelMixer.num_channels"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_channels</span></code></a>,) or (<code class="docutils literal notranslate"><span class="pre">1</span></code>,), a <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ValueError</span></code></a> is raised indicating that the
+weights cannot be broadcasted properly.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tprocess.AngleTracker.html">AngleTracker</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tprocess.html">tprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tprocess.SpatialInterpolator.html">SpatialInterpolator</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Jul 24, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

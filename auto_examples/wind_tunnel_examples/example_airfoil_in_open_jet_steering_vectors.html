@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Airfoil in open jet – steering vectors. &#8212; Acoular 25.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../_static/documentation_options.js?v=0b392bf7"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Airfoil in open jet – Frequency domain beamforming methods." href="example_airfoil_in_open_jet_freq_domain_methods.html" />
+    <link rel="prev" title="Airfoil in open jet – Covariance matrix fitting (CMF)." href="example_airfoil_in_open_jet_cmf.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../index.html">
+          <span>Acoular 25.07 documentation</span></a></h1>
+        <h2 class="heading"><span>Airfoil in open jet – steering vectors.</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="example_airfoil_in_open_jet_cmf.html">Airfoil in open jet – Covariance matrix fitting (CMF).</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Wind tunnel examples</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="example_airfoil_in_open_jet_freq_domain_methods.html">Airfoil in open jet – Frequency domain beamforming methods.</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-wind-tunnel-examples-example-airfoil-in-open-jet-steering-vectors-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code.</p>
+</div>
+<section class="sphx-glr-example-title" id="airfoil-in-open-jet-steering-vectors">
+<span id="sphx-glr-auto-examples-wind-tunnel-examples-example-airfoil-in-open-jet-steering-vectors-py"></span><h1>Airfoil in open jet – steering vectors.<a class="headerlink" href="#airfoil-in-open-jet-steering-vectors" title="Link to this heading">¶</a></h1>
+<p>Demonstrates different steering vectors in Acoular and CSM diagonal removal.
+Uses measured data in file example_data.h5, calibration in file example_calib.xml,
+microphone geometry in array_56.xml (part of Acoular).</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <a href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="pathlib.Path" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class"><span class="n">Path</span></a>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">acoular</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ac</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">acoular.tools.helpers</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_data_file</span>
+</pre></div>
+</div>
+<p>The 4 kHz third-octave band is used for the example.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">cfreq</span></a> <span class="o">=</span> <span class="mi">4000</span>
+<a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">num</span></a> <span class="o">=</span> <span class="mi">3</span>
+</pre></div>
+</div>
+<p>Obtain necessary data</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">time_data_file</span></a> <span class="o">=</span> <span class="n">get_data_file</span><span class="p">(</span><span class="s1">&#39;example_data.h5&#39;</span><span class="p">)</span>
+<a href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">calib_file</span></a> <span class="o">=</span> <span class="n">get_data_file</span><span class="p">(</span><span class="s1">&#39;example_calib.xml&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>First, we define the time samples using the <a class="reference internal" href="../../api_ref/generated/generated/acoular.sources.MaskedTimeSamples.html#acoular.sources.MaskedTimeSamples" title="acoular.sources.MaskedTimeSamples"><code class="xref py py-class docutils literal notranslate"><span class="pre">acoular.sources.MaskedTimeSamples</span></code></a> class that
+provides masking of channels and samples. Here, we exclude the channels with index 1 and 7 and
+only process the first 16000 samples of the time signals. Alternatively, we could use the
+<a class="reference internal" href="../../api_ref/generated/generated/acoular.sources.TimeSamples.html#acoular.sources.TimeSamples" title="acoular.sources.TimeSamples"><code class="xref py py-class docutils literal notranslate"><span class="pre">acoular.sources.TimeSamples</span></code></a> class that provides no masking at all.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">t1</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">MaskedTimeSamples</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><a href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">time_data_file</span></a><span class="p">)</span>
+<a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">t1</span><span class="o">.</span><span class="n">start</span></a> <span class="o">=</span> <span class="mi">0</span>
+<a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">t1</span><span class="o">.</span><span class="n">stop</span></a> <span class="o">=</span> <span class="mi">16000</span>
+<a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">invalid</span></a> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">]</span>
+<span class="n">t1</span><span class="o">.</span><span class="n">invalid_channels</span> <span class="o">=</span> <a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">invalid</span></a>
+</pre></div>
+</div>
+<p>Calibration is usually needed and can be set as a separate processing block with the
+<code class="xref py py-class docutils literal notranslate"><span class="pre">acoular.Calib</span></code> object. Invalid channels can be set here as well, by setting the
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">invalid_channels</span></code> attribute.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">calib</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">Calib</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">t1</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><a href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">calib_file</span></a><span class="p">,</span> <span class="n">invalid_channels</span><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">invalid</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<p>The microphone geometry must have the same number of valid channels as the
+<a class="reference internal" href="../../api_ref/generated/generated/acoular.sources.MaskedTimeSamples.html#acoular.sources.MaskedTimeSamples" title="acoular.sources.MaskedTimeSamples"><code class="xref py py-class docutils literal notranslate"><span class="pre">acoular.sources.MaskedTimeSamples</span></code></a> object has. It also must be defined, which channels are
+invalid.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">micgeofile</span></a> <span class="o">=</span> <a href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="pathlib.Path" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class"><span class="n">Path</span></a><span class="p">(</span><span class="n">ac</span><span class="o">.</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s1">&#39;xml&#39;</span> <span class="o">/</span> <span class="s1">&#39;array_56.xml&#39;</span>
+<span class="n">m</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">MicGeom</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><a href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">micgeofile</span></a><span class="p">)</span>
+<span class="n">m</span><span class="o">.</span><span class="n">invalid_channels</span> <span class="o">=</span> <a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">invalid</span></a>
+</pre></div>
+</div>
+<p>Next, we define a planar rectangular grid for calculating the beamforming map (the example grid is
+very coarse for computational efficiency). A 3D grid is also available via the
+<a class="reference internal" href="../../api_ref/generated/generated/acoular.grids.RectGrid3D.html#acoular.grids.RectGrid3D" title="acoular.grids.RectGrid3D"><code class="xref py py-class docutils literal notranslate"><span class="pre">acoular.grids.RectGrid3D</span></code></a> class.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">g</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">RectGrid</span><span class="p">(</span><span class="n">x_min</span><span class="o">=-</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">x_max</span><span class="o">=-</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">y_min</span><span class="o">=-</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">y_max</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">z</span><span class="o">=-</span><span class="mf">0.68</span><span class="p">,</span> <span class="n">increment</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For frequency domain methods, <a class="reference internal" href="../../api_ref/generated/generated/acoular.spectra.PowerSpectra.html#acoular.spectra.PowerSpectra" title="acoular.spectra.PowerSpectra"><code class="xref py py-class docutils literal notranslate"><span class="pre">acoular.spectra.PowerSpectra</span></code></a> provides the cross spectral
+matrix (and its eigenvalues and eigenvectors). Here, we use the Welch’s method with a block size
+of 128 samples, Hanning window and 50% overlap.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">PowerSpectra</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">calib</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="s1">&#39;Hanning&#39;</span><span class="p">,</span> <span class="n">overlap</span><span class="o">=</span><span class="s1">&#39;50%&#39;</span><span class="p">,</span> <span class="n">block_size</span><span class="o">=</span><span class="mi">128</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To define the measurement environment, i.e. medium characteristics, the
+<code class="xref py py-class docutils literal notranslate"><span class="pre">acoular.environment.Environment</span></code> class is used. (in this case, only the speed of sound is
+set)</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">env</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">Environment</span><span class="p">(</span><span class="n">c</span><span class="o">=</span><span class="mf">346.04</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The <a class="reference internal" href="../../api_ref/generated/generated/acoular.fbeamform.SteeringVector.html#acoular.fbeamform.SteeringVector" title="acoular.fbeamform.SteeringVector"><code class="xref py py-class docutils literal notranslate"><span class="pre">acoular.fbeamform.SteeringVector</span></code></a> class provides the standard freefield sound
+propagation model in the steering vectors.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">st</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">SteeringVector</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="n">g</span><span class="p">,</span> <span class="n">mics</span><span class="o">=</span><span class="n">m</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Finally, we define two different beamformers and subsequently calculate the maps for different
+steering vector formulations. Diagonal removal for the CSM can be performed via the <code class="xref py py-attr docutils literal notranslate"><span class="pre">r_diag</span></code>
+parameter.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">bb</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">BeamformerBase</span><span class="p">(</span><span class="n">freq_data</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">steer</span></a><span class="o">=</span><span class="n">st</span><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#bool" title="builtins.bool" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">r_diag</span></a><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">bs</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">BeamformerCleansc</span><span class="p">(</span><span class="n">freq_data</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">steer</span></a><span class="o">=</span><span class="n">st</span><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#bool" title="builtins.bool" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">r_diag</span></a><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Plot result maps for different beamformers in frequency domain (left: with diagonal removal,
+right: without diagonal removal).</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fi</span></a> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># no of figure</span>
+<span class="k">for</span> <a href="https://docs.python.org/3/library/functions.html#bool" title="builtins.bool" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">r_diag</span></a> <span class="ow">in</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+    <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.figure.html#matplotlib.pyplot.figure" title="matplotlib.pyplot.figure" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">figure</span></a><span class="p">(</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fi</span></a><span class="p">,</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+    <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fi</span></a> <span class="o">+=</span> <span class="mi">1</span>
+    <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">i1</span></a> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># no of subplot</span>
+    <span class="k">for</span> <a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">steer</span></a> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;true level&#39;</span><span class="p">,</span> <span class="s1">&#39;true location&#39;</span><span class="p">,</span> <span class="s1">&#39;classic&#39;</span><span class="p">,</span> <span class="s1">&#39;inverse&#39;</span><span class="p">):</span>
+        <a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">st</span><span class="o">.</span><span class="n">steer_type</span></a> <span class="o">=</span> <a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">steer</span></a>
+        <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="p">(</span><span class="n">bb</span><span class="p">,</span> <span class="n">bs</span><span class="p">):</span>
+            <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.subplot.html#matplotlib.pyplot.subplot" title="matplotlib.pyplot.subplot" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">subplot</span></a><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">i1</span></a><span class="p">)</span>
+            <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">i1</span></a> <span class="o">+=</span> <span class="mi">1</span>
+            <a href="https://docs.python.org/3/library/functions.html#bool" title="builtins.bool" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">b</span><span class="o">.</span><span class="n">r_diag</span></a> <span class="o">=</span> <a href="https://docs.python.org/3/library/functions.html#bool" title="builtins.bool" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">r_diag</span></a>
+            <span class="nb">map</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">synthetic</span><span class="p">(</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">cfreq</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">num</span></a><span class="p">)</span>
+            <a href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float64" title="numpy.float64" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute"><span class="n">mx</span></a> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">L_p</span><span class="p">(</span><span class="nb">map</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+            <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.imshow.html#matplotlib.pyplot.imshow" title="matplotlib.pyplot.imshow" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">imshow</span></a><span class="p">(</span><span class="n">ac</span><span class="o">.</span><span class="n">L_p</span><span class="p">(</span><span class="nb">map</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">vmax</span><span class="o">=</span><a href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float64" title="numpy.float64" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute"><span class="n">mx</span></a><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><a href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float64" title="numpy.float64" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute"><span class="n">mx</span></a> <span class="o">-</span> <span class="mi">15</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">g</span><span class="o">.</span><span class="n">extent</span></a><span class="p">)</span>
+            <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.colorbar.html#matplotlib.pyplot.colorbar" title="matplotlib.pyplot.colorbar" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span></a><span class="p">()</span>
+            <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.title.html#matplotlib.pyplot.title" title="matplotlib.pyplot.title" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">title</span></a><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;small&#39;</span><span class="p">)</span>
+
+    <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.tight_layout.html#matplotlib.pyplot.tight_layout" title="matplotlib.pyplot.tight_layout" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span></a><span class="p">()</span>
+    <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.show.html#matplotlib.pyplot.show" title="matplotlib.pyplot.show" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">show</span></a><span class="p">()</span>
+</pre></div>
+</div>
+<ul class="sphx-glr-horizontal">
+<li><img src="../../_images/sphx_glr_example_airfoil_in_open_jet_steering_vectors_001.png" srcset="../../_images/sphx_glr_example_airfoil_in_open_jet_steering_vectors_001.png" alt="BeamformerBase, BeamformerCleansc, BeamformerBase, BeamformerCleansc, BeamformerBase, BeamformerCleansc, BeamformerBase, BeamformerCleansc" class = "sphx-glr-multi-img"/></li>
+<li><img src="../../_images/sphx_glr_example_airfoil_in_open_jet_steering_vectors_002.png" srcset="../../_images/sphx_glr_example_airfoil_in_open_jet_steering_vectors_002.png" alt="BeamformerBase, BeamformerCleansc, BeamformerBase, BeamformerCleansc, BeamformerBase, BeamformerCleansc, BeamformerBase, BeamformerCleansc" class = "sphx-glr-multi-img"/></li>
+</ul>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[(&#39;example_data_cache.h5&#39;, 3)]
+[(&#39;example_data_cache.h5&#39;, 4)]
+[(&#39;example_data_cache.h5&#39;, 5)]
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="example_airfoil_in_open_jet_freq_domain_methods.html"><span class="doc">Airfoil in open jet – Frequency domain beamforming methods.</span></a> for an application of further frequency
+domain methods on the same data.</p>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 2.379 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-wind-tunnel-examples-example-airfoil-in-open-jet-steering-vectors-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/e9a0796bb062ad21e78e0981550336fc/example_airfoil_in_open_jet_steering_vectors.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">example_airfoil_in_open_jet_steering_vectors.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/c6add8c1d4916878595d504f1841fa63/example_airfoil_in_open_jet_steering_vectors.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">example_airfoil_in_open_jet_steering_vectors.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/3e584cc8b7bb6e9993713b85b65d047f/example_airfoil_in_open_jet_steering_vectors.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">example_airfoil_in_open_jet_steering_vectors.zip</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="example_airfoil_in_open_jet_cmf.html">Airfoil in open jet – Covariance matrix fitting (CMF).</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Wind tunnel examples</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="example_airfoil_in_open_jet_freq_domain_methods.html">Airfoil in open jet – Frequency domain beamforming methods.</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Jul 24, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

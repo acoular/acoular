@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>OctaveFilterBank &#8212; Acoular 25.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=0b392bf7"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="WriteWAV" href="acoular.tprocess.WriteWAV.html" />
+    <link rel="prev" title="FiltFreqWeight" href="acoular.tprocess.FiltFreqWeight.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.07 documentation</span></a></h1>
+        <h2 class="heading"><span>OctaveFilterBank</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tprocess.FiltFreqWeight.html">FiltFreqWeight</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tprocess.html">tprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tprocess.WriteWAV.html">WriteWAV</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="octavefilterbank">
+<h1>OctaveFilterBank<a class="headerlink" href="#octavefilterbank" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.tprocess.OctaveFilterBank">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.tprocess.</span></span><span class="sig-name descname"><span class="pre">OctaveFilterBank</span></span><a class="headerlink" href="#acoular.tprocess.OctaveFilterBank" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.tprocess.FilterBank.html#acoular.tprocess.FilterBank" title="acoular.tprocess.FilterBank"><code class="xref py py-class docutils literal notranslate"><span class="pre">FilterBank</span></code></a></p>
+<p>Octave or third-octave filter bank.</p>
+<p>Inherits from <a class="reference internal" href="acoular.tprocess.FilterBank.html#acoular.tprocess.FilterBank" title="acoular.tprocess.FilterBank"><code class="xref py py-class docutils literal notranslate"><span class="pre">FilterBank</span></code></a> and implements an octave or third-octave filter bank.
+This class is used for filtering multi-channel time series data, such as time signal signals,
+using bandpass filters with center frequencies at octave or third-octave intervals.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="acoular.tprocess.FilterBank.html#acoular.tprocess.FilterBank" title="acoular.tprocess.FilterBank"><code class="xref py py-class docutils literal notranslate"><span class="pre">FilterBank</span></code></a></dt><dd><p>The base class for implementing IIR filter banks.</p>
+</dd>
+<dt><a class="reference internal" href="acoular.base.SamplesGenerator.html#acoular.base.SamplesGenerator" title="acoular.base.SamplesGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">acoular.base.SamplesGenerator</span></code></a></dt><dd><p>Interface for generating multi-channel time domain signal processing blocks.</p>
+</dd>
+<dt><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/signal.html#module-scipy.signal" title="(in SciPy v1.16.0)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scipy.signal</span></code></a></dt><dd><p>SciPy module for signal processing.</p>
+</dd>
+</dl>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.OctaveFilterBank.lband">
+<span class="sig-name descname"><span class="pre">lband</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Int(21,</span> <span class="pre">desc='lowest</span> <span class="pre">band</span> <span class="pre">center</span> <span class="pre">frequency</span> <span class="pre">index')</span></em><a class="headerlink" href="#acoular.tprocess.OctaveFilterBank.lband" title="Link to this definition">¶</a></dt>
+<dd><p>The lowest band center frequency index. Default is <code class="docutils literal notranslate"><span class="pre">21</span></code>.
+This index refers to the position in the scale of octave or third-octave bands.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.OctaveFilterBank.hband">
+<span class="sig-name descname"><span class="pre">hband</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Int(40,</span> <span class="pre">desc='highest</span> <span class="pre">band</span> <span class="pre">center</span> <span class="pre">frequency</span> <span class="pre">index</span> <span class="pre">+</span> <span class="pre">1')</span></em><a class="headerlink" href="#acoular.tprocess.OctaveFilterBank.hband" title="Link to this definition">¶</a></dt>
+<dd><p>The highest band center frequency index + 1. Default is <code class="docutils literal notranslate"><span class="pre">40</span></code>.
+This is the position in the scale of octave or third-octave bands.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.OctaveFilterBank.fraction">
+<span class="sig-name descname"><span class="pre">fraction</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Map({'Octave':</span> <span class="pre">1,</span> <span class="pre">'Third</span> <span class="pre">octave':</span> <span class="pre">3},</span> <span class="pre">default_value='Octave',</span> <span class="pre">desc='fraction</span> <span class="pre">of</span> <span class="pre">octave')</span></em><a class="headerlink" href="#acoular.tprocess.OctaveFilterBank.fraction" title="Link to this definition">¶</a></dt>
+<dd><p>The fraction of an octave, either <code class="docutils literal notranslate"><span class="pre">'Octave'</span></code> or <code class="docutils literal notranslate"><span class="pre">'Third</span> <span class="pre">octave'</span></code>.
+Default is <code class="docutils literal notranslate"><span class="pre">'Octave'</span></code>.
+Determines the width of the frequency bands. ‘Octave’ refers to full octaves,
+and <code class="docutils literal notranslate"><span class="pre">'Third</span> <span class="pre">octave'</span></code> refers to third-octave bands.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.OctaveFilterBank.ba">
+<span class="sig-name descname"><span class="pre">ba</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['lband',</span> <span class="pre">'hband',</span> <span class="pre">'fraction',</span> <span class="pre">'source.digest'])</span></em><a class="headerlink" href="#acoular.tprocess.OctaveFilterBank.ba" title="Link to this definition">¶</a></dt>
+<dd><p>The list of filter coefficients for all filters in the filter bank.
+The coefficients are computed based on the <a class="reference internal" href="#acoular.tprocess.OctaveFilterBank.lband" title="acoular.tprocess.OctaveFilterBank.lband"><code class="xref py py-attr docutils literal notranslate"><span class="pre">lband</span></code></a>, <a class="reference internal" href="#acoular.tprocess.OctaveFilterBank.hband" title="acoular.tprocess.OctaveFilterBank.hband"><code class="xref py py-attr docutils literal notranslate"><span class="pre">hband</span></code></a>,
+and <a class="reference internal" href="#acoular.tprocess.OctaveFilterBank.fraction" title="acoular.tprocess.OctaveFilterBank.fraction"><code class="xref py py-attr docutils literal notranslate"><span class="pre">fraction</span></code></a> attributes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.OctaveFilterBank.bands">
+<span class="sig-name descname"><span class="pre">bands</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['lband',</span> <span class="pre">'hband',</span> <span class="pre">'fraction'])</span></em><a class="headerlink" href="#acoular.tprocess.OctaveFilterBank.bands" title="Link to this definition">¶</a></dt>
+<dd><p>The list of labels describing the frequency bands in the filter bank.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.OctaveFilterBank.num_bands">
+<span class="sig-name descname"><span class="pre">num_bands</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['lband',</span> <span class="pre">'hband',</span> <span class="pre">'fraction'])</span></em><a class="headerlink" href="#acoular.tprocess.OctaveFilterBank.num_bands" title="Link to this definition">¶</a></dt>
+<dd><p>The total number of bands in the filter bank.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.OctaveFilterBank.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['source.digest',</span> <span class="pre">'lband',</span> <span class="pre">'hband',</span> <span class="pre">'fraction',</span> <span class="pre">'order'])</span></em><a class="headerlink" href="#acoular.tprocess.OctaveFilterBank.digest" title="Link to this definition">¶</a></dt>
+<dd><p>A unique identifier for the filter, based on its properties. (read-only)</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tprocess.FiltFreqWeight.html">FiltFreqWeight</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tprocess.html">tprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tprocess.WriteWAV.html">WriteWAV</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Jul 24, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

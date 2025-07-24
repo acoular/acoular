@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>SineGenerator &#8212; Acoular 25.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=0b392bf7"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="GenericSignalGenerator" href="acoular.signals.GenericSignalGenerator.html" />
+    <link rel="prev" title="FiltWNoiseGenerator" href="acoular.signals.FiltWNoiseGenerator.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.07 documentation</span></a></h1>
+        <h2 class="heading"><span>SineGenerator</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.signals.FiltWNoiseGenerator.html">FiltWNoiseGenerator</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.signals.html">signals</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.signals.GenericSignalGenerator.html">GenericSignalGenerator</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="sinegenerator">
+<h1>SineGenerator<a class="headerlink" href="#sinegenerator" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.signals.SineGenerator">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.signals.</span></span><span class="sig-name descname"><span class="pre">SineGenerator</span></span><a class="headerlink" href="#acoular.signals.SineGenerator" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.signals.PeriodicSignalGenerator.html#acoular.signals.PeriodicSignalGenerator" title="acoular.signals.PeriodicSignalGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">PeriodicSignalGenerator</span></code></a></p>
+<p>Generate a sine signal.</p>
+<p>The <a class="reference internal" href="#acoular.signals.SineGenerator" title="acoular.signals.SineGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SineGenerator</span></code></a> class extends the <a class="reference internal" href="acoular.signals.PeriodicSignalGenerator.html#acoular.signals.PeriodicSignalGenerator" title="acoular.signals.PeriodicSignalGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">PeriodicSignalGenerator</span></code></a> class and
+generates a sinusoidal signal based on specified <a class="reference internal" href="acoular.signals.PeriodicSignalGenerator.html#acoular.signals.PeriodicSignalGenerator.amplitude" title="acoular.signals.PeriodicSignalGenerator.amplitude"><code class="xref py py-attr docutils literal notranslate"><span class="pre">amplitude</span></code></a>,
+<a class="reference internal" href="acoular.signals.PeriodicSignalGenerator.html#acoular.signals.PeriodicSignalGenerator.freq" title="acoular.signals.PeriodicSignalGenerator.freq"><code class="xref py py-attr docutils literal notranslate"><span class="pre">frequency</span></code></a>, and <a class="reference internal" href="acoular.signals.PeriodicSignalGenerator.html#acoular.signals.PeriodicSignalGenerator.phase" title="acoular.signals.PeriodicSignalGenerator.phase"><code class="xref py py-attr docutils literal notranslate"><span class="pre">phase</span></code></a>.</p>
+<p>This generator is commonly used for creating test signals in signal processing, acoustics,
+and control systems.</p>
+<p>The signal is defined as</p>
+<div class="math notranslate nohighlight">
+\[s(t) = A \sin(2 \pi f t + \phi)\]</div>
+<dl class="simple">
+<dt>where:</dt><dd><ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(A\)</span> is the amplitude,</p></li>
+<li><p><span class="math notranslate nohighlight">\(f\)</span> is the frequency,</p></li>
+<li><p><span class="math notranslate nohighlight">\(\phi\)</span> is the phase,</p></li>
+<li><p><span class="math notranslate nohighlight">\(t\)</span> is the time (computed from the
+<a class="reference internal" href="acoular.signals.SignalGenerator.html#acoular.signals.SignalGenerator.sample_freq" title="acoular.signals.SignalGenerator.sample_freq"><code class="xref py py-attr docutils literal notranslate"><span class="pre">sampling</span> <span class="pre">frequency</span></code></a> and the
+<a class="reference internal" href="acoular.signals.SignalGenerator.html#acoular.signals.SignalGenerator.num_samples" title="acoular.signals.SignalGenerator.num_samples"><code class="xref py py-attr docutils literal notranslate"><span class="pre">number</span> <span class="pre">of</span> <span class="pre">samples</span></code></a>).</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="acoular.signals.PeriodicSignalGenerator.html#acoular.signals.PeriodicSignalGenerator" title="acoular.signals.PeriodicSignalGenerator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PeriodicSignalGenerator</span></code></a></dt><dd><p>Base class for periodic signal generators.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<p>Generate a sine wave signal:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">acoular</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ac</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gen</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">SineGenerator</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">amplitude</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">freq</span><span class="o">=</span><span class="mf">50.0</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">phase</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">num_samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">sample_freq</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">signal</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">signal</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">signal</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span>  <span class="c1"># The first 5 samples</span>
+<span class="go">array([0.        , 0.61803399, 1.1755705 , 1.61803399, 1.90211303])</span>
+</pre></div>
+</div>
+<p>Generate a sine wave with a phase shift (arguably a cosine wave):</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gen</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">SineGenerator</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">amplitude</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">freq</span><span class="o">=</span><span class="mf">100.0</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">phase</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">num_samples</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">sample_freq</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">signal</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">signal</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">signal</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span>  <span class="c1"># The first 5 samples</span>
+<span class="go">array([1.        , 0.95105652, 0.80901699, 0.58778525, 0.30901699])</span>
+</pre></div>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.signals.SineGenerator.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['num_samples',</span> <span class="pre">'sample_freq',</span> <span class="pre">'amplitude',</span> <span class="pre">'freq',</span> <span class="pre">'phase'])</span></em><a class="headerlink" href="#acoular.signals.SineGenerator.digest" title="Link to this definition">¶</a></dt>
+<dd><p>A unique checksum identifier based on the object properties. (read-only)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.signals.SineGenerator.signal">
+<span class="sig-name descname"><span class="pre">signal</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#acoular.signals.SineGenerator.signal" title="Link to this definition">¶</a></dt>
+<dd><p>Generate and return the sine wave signal.</p>
+<p>The method computes the sine wave based on the specified
+<a class="reference internal" href="acoular.signals.PeriodicSignalGenerator.html#acoular.signals.PeriodicSignalGenerator.amplitude" title="acoular.signals.PeriodicSignalGenerator.amplitude"><code class="xref py py-attr docutils literal notranslate"><span class="pre">amplitude</span></code></a>, <a class="reference internal" href="acoular.signals.PeriodicSignalGenerator.html#acoular.signals.PeriodicSignalGenerator.freq" title="acoular.signals.PeriodicSignalGenerator.freq"><code class="xref py py-attr docutils literal notranslate"><span class="pre">frequency</span></code></a>,
+and <a class="reference internal" href="acoular.signals.PeriodicSignalGenerator.html#acoular.signals.PeriodicSignalGenerator.phase" title="acoular.signals.PeriodicSignalGenerator.phase"><code class="xref py py-attr docutils literal notranslate"><span class="pre">phase</span></code></a>. The time values are determined by the
+<a class="reference internal" href="acoular.signals.SignalGenerator.html#acoular.signals.SignalGenerator.sample_freq" title="acoular.signals.SignalGenerator.sample_freq"><code class="xref py py-attr docutils literal notranslate"><span class="pre">sampling</span> <span class="pre">frequency</span></code></a> and the
+<a class="reference internal" href="acoular.signals.SignalGenerator.html#acoular.signals.SignalGenerator.num_samples" title="acoular.signals.SignalGenerator.num_samples"><code class="xref py py-attr docutils literal notranslate"><span class="pre">number</span> <span class="pre">of</span> <span class="pre">samples</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floats</span></code></a></dt><dd><p>A 1D array representing the sine wave signal.
+The length of the array is equal to <a class="reference internal" href="acoular.signals.SignalGenerator.html#acoular.signals.SignalGenerator.num_samples" title="acoular.signals.SignalGenerator.num_samples"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_samples</span></code></a>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The generator supports high-frequency and high-resolution signals,
+limited by the Nyquist criterion.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.signals.FiltWNoiseGenerator.html">FiltWNoiseGenerator</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.signals.html">signals</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.signals.GenericSignalGenerator.html">GenericSignalGenerator</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Jul 24, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

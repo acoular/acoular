@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>SpatialInterpolatorConstantRotation &#8212; Acoular 25.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=0b392bf7"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Mixer" href="acoular.tprocess.Mixer.html" />
+    <link rel="prev" title="SpatialInterpolatorRotation" href="acoular.tprocess.SpatialInterpolatorRotation.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.07 documentation</span></a></h1>
+        <h2 class="heading"><span>SpatialInterpolatorConstantRotation</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tprocess.SpatialInterpolatorRotation.html">SpatialInterpolatorRotation</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tprocess.html">tprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tprocess.Mixer.html">Mixer</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="spatialinterpolatorconstantrotation">
+<h1>SpatialInterpolatorConstantRotation<a class="headerlink" href="#spatialinterpolatorconstantrotation" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.tprocess.SpatialInterpolatorConstantRotation">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.tprocess.</span></span><span class="sig-name descname"><span class="pre">SpatialInterpolatorConstantRotation</span></span><a class="headerlink" href="#acoular.tprocess.SpatialInterpolatorConstantRotation" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.tprocess.SpatialInterpolator.html#acoular.tprocess.SpatialInterpolator" title="acoular.tprocess.SpatialInterpolator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpatialInterpolator</span></code></a></p>
+<p>Performs spatial linear interpolation for sources undergoing constant rotation.</p>
+<p>This class interpolates signals from a rotating sound source based on a constant rotational
+speed. It retrieves samples from the <code class="xref py py-attr docutils literal notranslate"><span class="pre">source</span></code> and applies interpolation before
+generating output through the <a class="reference internal" href="#acoular.tprocess.SpatialInterpolatorConstantRotation.result" title="acoular.tprocess.SpatialInterpolatorConstantRotation.result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">result()</span></code></a> generator.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="acoular.tprocess.SpatialInterpolator.html#acoular.tprocess.SpatialInterpolator" title="acoular.tprocess.SpatialInterpolator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpatialInterpolator</span></code></a></dt><dd><p>Base class for spatial interpolation of microphone data.</p>
+</dd>
+<dt><a class="reference internal" href="acoular.tprocess.SpatialInterpolatorRotation.html#acoular.tprocess.SpatialInterpolatorRotation" title="acoular.tprocess.SpatialInterpolatorRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpatialInterpolatorRotation</span></code></a></dt><dd><p>Spatial interpolation class for rotating sound sources.</p>
+</dd>
+</dl>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.SpatialInterpolatorConstantRotation.rotational_speed">
+<span class="sig-name descname"><span class="pre">rotational_speed</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(0.0)</span></em><a class="headerlink" href="#acoular.tprocess.SpatialInterpolatorConstantRotation.rotational_speed" title="Link to this definition">¶</a></dt>
+<dd><p>Rotational speed of the source in revolutions per second (rps). A positive value indicates
+counterclockwise rotation around the positive z-axis, meaning motion from the x-axis toward
+the y-axis.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.SpatialInterpolatorConstantRotation.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.tprocess.SpatialInterpolatorConstantRotation.digest" title="Link to this definition">¶</a></dt>
+<dd><p>Unique identifier for the current configuration of the interpolator. (read-only)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.tprocess.SpatialInterpolatorConstantRotation.result">
+<span class="sig-name descname"><span class="pre">result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.tprocess.SpatialInterpolatorConstantRotation.result" title="Link to this definition">¶</a></dt>
+<dd><p>Generate interpolated time signal data in blocks of size <code class="docutils literal notranslate"><span class="pre">num</span></code>.</p>
+<p>This generator method continuously processes incoming time signal data while applying
+rotational interpolation. The phase delay is computed based on the rotational speed and
+applied to the signal.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>num</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>, optional</span></dt><dd><p>Number of samples per block.
+Default is <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p>An array containing the interpolated time signal samples in blocks of shape
+(<code class="docutils literal notranslate"><span class="pre">num</span></code>, <a class="reference internal" href="acoular.tprocess.SpatialInterpolator.html#acoular.tprocess.SpatialInterpolator.num_channels" title="acoular.tprocess.SpatialInterpolator.num_channels"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_channels</span></code></a>), where
+<a class="reference internal" href="acoular.tprocess.SpatialInterpolator.html#acoular.tprocess.SpatialInterpolator.num_channels" title="acoular.tprocess.SpatialInterpolator.num_channels"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_channels</span></code></a> is inherited from the
+<a class="reference internal" href="acoular.tprocess.SpatialInterpolator.html#acoular.tprocess.SpatialInterpolator" title="acoular.tprocess.SpatialInterpolator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpatialInterpolator</span></code></a> base class.
+The last block may contain fewer samples if the total number of samples is not
+a multiple of <code class="docutils literal notranslate"><span class="pre">num</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tprocess.SpatialInterpolatorRotation.html">SpatialInterpolatorRotation</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tprocess.html">tprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tprocess.Mixer.html">Mixer</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Jul 24, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

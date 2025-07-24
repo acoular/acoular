@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>acoular.configuration.config &#8212; Acoular 25.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=0b392bf7"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="demo" href="../acoular.demo.html" />
+    <link rel="prev" title="Config" href="acoular.configuration.Config.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.07 documentation</span></a></h1>
+        <h2 class="heading"><span>acoular.configuration.config</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.configuration.Config.html">Config</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.configuration.html">configuration</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../acoular.demo.html">demo</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="acoular-configuration-config">
+<h1>acoular.configuration.config<a class="headerlink" href="#acoular-configuration-config" title="Link to this heading">¶</a></h1>
+<dl class="py data">
+<dt class="sig sig-object py" id="acoular.configuration.config">
+<span class="sig-prename descclassname"><span class="pre">acoular.configuration.</span></span><span class="sig-name descname"><span class="pre">config</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;acoular.configuration.Config</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#acoular.configuration.config" title="Link to this definition">¶</a></dt>
+<dd><p>This instance implements the global configuration of the Acoular package.</p>
+<p>General caching behaviour can be controlled by the <code class="xref py py-attr docutils literal notranslate"><span class="pre">global_caching</span></code> attribute:
+* ‘individual’: Acoular classes handle caching behavior individually.
+* ‘all’: Acoular classes cache everything and read from cache if possible.
+* ‘none’: Acoular classes do not cache results. Cachefiles are not created.
+* ‘readonly’: Acoular classes do not actively cache, but read from cache if existing.
+* ‘overwrite’: Acoular classes replace existing cachefile content with new data.</p>
+<p>The package used to read and write .h5 files can be specified
+by <code class="xref py py-attr docutils literal notranslate"><span class="pre">h5library</span></code>:
+* ‘PyTables’: Use ‘tables’ (or ‘pytables’, depending on python distribution).
+* ‘H5py’: Use ‘h5py’.</p>
+<p>Some Acoular classes support GUI elements for usage with tools from the TraitsUI package.
+If desired, this package has to be installed manually, as it is not a prerequisite for
+installing Acoular.
+To enable the functionality, the flag attribute <code class="xref py py-attr docutils literal notranslate"><span class="pre">use_traitsui</span></code> has to be set to True (default:
+False). Note: this is independent from the GUI tools implemented in the spectAcoular package.</p>
+<dl>
+<dt>Example:</dt><dd><p>For using Acoular with h5py package and overwrite existing cache:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">acoular</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">acoular</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">h5library</span> <span class="o">=</span> <span class="s2">&quot;h5py&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">acoular</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">global_caching</span> <span class="o">=</span> <span class="s2">&quot;overwrite&quot;</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.configuration.Config.html">Config</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.configuration.html">configuration</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../acoular.demo.html">demo</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Jul 24, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

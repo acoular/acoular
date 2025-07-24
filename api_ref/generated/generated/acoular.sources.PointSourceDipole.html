@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>PointSourceDipole &#8212; Acoular 25.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=0b392bf7"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="SphericalHarmonicSource" href="acoular.sources.SphericalHarmonicSource.html" />
+    <link rel="prev" title="PointSource" href="acoular.sources.PointSource.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.07 documentation</span></a></h1>
+        <h2 class="heading"><span>PointSourceDipole</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.sources.PointSource.html">PointSource</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.sources.html">sources</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.sources.SphericalHarmonicSource.html">SphericalHarmonicSource</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="pointsourcedipole">
+<h1>PointSourceDipole<a class="headerlink" href="#pointsourcedipole" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.sources.PointSourceDipole">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.sources.</span></span><span class="sig-name descname"><span class="pre">PointSourceDipole</span></span><a class="headerlink" href="#acoular.sources.PointSourceDipole" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.sources.PointSource.html#acoular.sources.PointSource" title="acoular.sources.PointSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">PointSource</span></code></a></p>
+<p>Define a fixed point source with dipole characteristics.</p>
+<p>The <a class="reference internal" href="#acoular.sources.PointSourceDipole" title="acoular.sources.PointSourceDipole"><code class="xref py py-class docutils literal notranslate"><span class="pre">PointSourceDipole</span></code></a> class simulates a fixed point source with dipole characteristics
+by superimposing two nearby inversely phased monopoles. This is particularly useful for
+acoustic simulations where dipole sources are required.</p>
+<p>The generated output is available via the <a class="reference internal" href="#acoular.sources.PointSourceDipole.result" title="acoular.sources.PointSourceDipole.result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">result()</span></code></a> generator.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="acoular.sources.PointSource.html#acoular.sources.PointSource" title="acoular.sources.PointSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">acoular.sources.PointSource</span></code></a></dt><dd><p>For modeling stationary point sources.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>The dipole’s output is calculated as the superposition of two monopoles: one shifted forward and
+the other backward along the <a class="reference internal" href="#acoular.sources.PointSourceDipole.direction" title="acoular.sources.PointSourceDipole.direction"><code class="xref py py-attr docutils literal notranslate"><span class="pre">direction</span></code></a> vector, with inverse phases. This creates the
+characteristic dipole radiation pattern.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.PointSourceDipole.direction">
+<span class="sig-name descname"><span class="pre">direction</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Tuple((0.0,</span> <span class="pre">0.0,</span> <span class="pre">1.0),</span> <span class="pre">desc='dipole</span> <span class="pre">orientation</span> <span class="pre">and</span> <span class="pre">distance</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">inversely</span> <span class="pre">phased</span> <span class="pre">monopoles')</span></em><a class="headerlink" href="#acoular.sources.PointSourceDipole.direction" title="Link to this definition">¶</a></dt>
+<dd><p>Vector defining the orientation of the dipole lobes and the distance between the inversely
+phased monopoles. The magnitude of the vector determines the monopoles’ separation:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">distance</span> <span class="pre">=</span> <span class="pre">[lowest</span> <span class="pre">wavelength</span> <span class="pre">in</span> <span class="pre">spectrum]</span> <span class="pre">*</span> <span class="pre">[magnitude]</span> <span class="pre">*</span> <span class="pre">1e-5</span></code></p></li>
+</ul>
+<p>Use vectors with magnitudes on the order of <code class="docutils literal notranslate"><span class="pre">1.0</span></code> or smaller for best results.
+Default is <code class="docutils literal notranslate"><span class="pre">(0.0,</span> <span class="pre">0.0,</span> <span class="pre">1.0)</span></code> (z-axis orientation).</p>
+<p><strong>Note:</strong> Use vectors with order of magnitude around <code class="docutils literal notranslate"><span class="pre">1.0</span></code> or less for good results.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.PointSourceDipole.prepadding">
+<span class="sig-name descname"><span class="pre">prepadding</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum('loop',</span> <span class="pre">desc='Behaviour</span> <span class="pre">for</span> <span class="pre">negative</span> <span class="pre">time</span> <span class="pre">indices.')</span></em><a class="headerlink" href="#acoular.sources.PointSourceDipole.prepadding" title="Link to this definition">¶</a></dt>
+<dd><p>Behavior of the signal for negative time indices. Currently only supports <code class="docutils literal notranslate"><span class="pre">'loop'</span></code>.
+Default is <code class="docutils literal notranslate"><span class="pre">'loop'</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.PointSourceDipole.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.sources.PointSourceDipole.digest" title="Link to this definition">¶</a></dt>
+<dd><p>A unique identifier for the current state of the source, based on its properties. (read-only)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.sources.PointSourceDipole.result">
+<span class="sig-name descname"><span class="pre">result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">128</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.sources.PointSourceDipole.result" title="Link to this definition">¶</a></dt>
+<dd><p>Generate output signal at microphones in blocks.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>num</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, optional</span></dt><dd><p>Number of samples per block to yield. Default is <code class="docutils literal notranslate"><span class="pre">128</span></code>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p>A 2D array of shape (<code class="docutils literal notranslate"><span class="pre">num</span></code>, <a class="reference internal" href="acoular.sources.PointSource.html#acoular.sources.PointSource.num_channels" title="acoular.sources.PointSource.num_channels"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_channels</span></code></a>) containing the signal
+detected at the microphones. The last block may have fewer samples if
+<a class="reference internal" href="acoular.sources.PointSource.html#acoular.sources.PointSource.num_samples" title="acoular.sources.PointSource.num_samples"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_samples</span></code></a> is not a multiple of <code class="docutils literal notranslate"><span class="pre">num</span></code>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#IndexError" title="(in Python v3.13)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IndexError</span></code></a></dt><dd><p>If no more samples are available from the source.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>If samples are needed for times earlier than the source’s <a class="reference internal" href="acoular.sources.PointSource.html#acoular.sources.PointSource.start_t" title="acoular.sources.PointSource.start_t"><code class="xref py py-attr docutils literal notranslate"><span class="pre">start_t</span></code></a>, the
+signal is taken from the end of the signal array, effectively looping the signal for
+negative indices.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.sources.PointSource.html">PointSource</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.sources.html">sources</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.sources.SphericalHarmonicSource.html">SphericalHarmonicSource</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Jul 24, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

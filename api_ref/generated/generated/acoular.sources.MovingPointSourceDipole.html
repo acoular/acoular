@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>MovingPointSourceDipole &#8212; Acoular 25.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=0b392bf7"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="MovingLineSource" href="acoular.sources.MovingLineSource.html" />
+    <link rel="prev" title="MovingPointSource" href="acoular.sources.MovingPointSource.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.07 documentation</span></a></h1>
+        <h2 class="heading"><span>MovingPointSourceDipole</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.sources.MovingPointSource.html">MovingPointSource</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.sources.html">sources</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.sources.MovingLineSource.html">MovingLineSource</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="movingpointsourcedipole">
+<h1>MovingPointSourceDipole<a class="headerlink" href="#movingpointsourcedipole" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.sources.MovingPointSourceDipole">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.sources.</span></span><span class="sig-name descname"><span class="pre">MovingPointSourceDipole</span></span><a class="headerlink" href="#acoular.sources.MovingPointSourceDipole" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.sources.PointSourceDipole.html#acoular.sources.PointSourceDipole" title="acoular.sources.PointSourceDipole"><code class="xref py py-class docutils literal notranslate"><span class="pre">PointSourceDipole</span></code></a>, <a class="reference internal" href="acoular.sources.MovingPointSource.html#acoular.sources.MovingPointSource" title="acoular.sources.MovingPointSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">MovingPointSource</span></code></a></p>
+<p>Define a moving point source with dipole characteristics.</p>
+<p>This class extends the functionalities of <a class="reference internal" href="acoular.sources.PointSourceDipole.html#acoular.sources.PointSourceDipole" title="acoular.sources.PointSourceDipole"><code class="xref py py-class docutils literal notranslate"><span class="pre">PointSourceDipole</span></code></a> and
+<a class="reference internal" href="acoular.sources.MovingPointSource.html#acoular.sources.MovingPointSource" title="acoular.sources.MovingPointSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">MovingPointSource</span></code></a> to simulate a dipole source that moves along a
+<a class="reference internal" href="acoular.sources.MovingPointSource.html#acoular.sources.MovingPointSource.trajectory" title="acoular.sources.MovingPointSource.trajectory"><code class="xref py py-attr docutils literal notranslate"><span class="pre">defined</span> <span class="pre">trajectory</span></code></a>. It incorporates both rotational and
+translational dynamics for the dipole lobes, allowing simulation of complex directional sound
+sources.</p>
+<dl class="simple">
+<dt>Key Features:</dt><dd><ul class="simple">
+<li><p>Combines dipole characteristics with source motion.</p></li>
+<li><p>Supports rotation of the dipole directivity via the <a class="reference internal" href="#acoular.sources.MovingPointSourceDipole.rvec" title="acoular.sources.MovingPointSourceDipole.rvec"><code class="xref py py-attr docutils literal notranslate"><span class="pre">rvec</span></code></a> attribute.</p></li>
+<li><p>Calculates emission times using Newton-Raphson iteration.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="acoular.sources.PointSourceDipole.html#acoular.sources.PointSourceDipole" title="acoular.sources.PointSourceDipole"><code class="xref py py-class docutils literal notranslate"><span class="pre">acoular.sources.PointSourceDipole</span></code></a></dt><dd><p>For stationary dipole sources.</p>
+</dd>
+<dt><a class="reference internal" href="acoular.sources.MovingPointSource.html#acoular.sources.MovingPointSource" title="acoular.sources.MovingPointSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">acoular.sources.MovingPointSource</span></code></a></dt><dd><p>For moving point sources without dipole characteristics.</p>
+</dd>
+</dl>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.MovingPointSourceDipole.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.sources.MovingPointSourceDipole.digest" title="Link to this definition">¶</a></dt>
+<dd><p>A unique identifier for the current state of the source, based on its properties. (read-only)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.sources.MovingPointSourceDipole.rvec">
+<span class="sig-name descname"><span class="pre">rvec</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CArray(dtype=float,</span> <span class="pre">shape=(3,),</span> <span class="pre">value=array((0,</span> <span class="pre">0,</span> <span class="pre">0)),</span> <span class="pre">desc='reference</span> <span class="pre">vector')</span></em><a class="headerlink" href="#acoular.sources.MovingPointSourceDipole.rvec" title="Link to this definition">¶</a></dt>
+<dd><p>A reference vector, perpendicular to the x and y-axis of moving source, defining the axis of
+rotation for the dipole directivity. If set to <code class="docutils literal notranslate"><span class="pre">(0,</span> <span class="pre">0,</span> <span class="pre">0)</span></code>, the dipole is only translated
+along the <a class="reference internal" href="acoular.sources.MovingPointSource.html#acoular.sources.MovingPointSource.trajectory" title="acoular.sources.MovingPointSource.trajectory"><code class="xref py py-attr docutils literal notranslate"><span class="pre">trajectory</span></code></a> without rotation. Default is <code class="docutils literal notranslate"><span class="pre">(0,</span> <span class="pre">0,</span> <span class="pre">0)</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.sources.MovingPointSourceDipole.get_emission_time">
+<span class="sig-name descname"><span class="pre">get_emission_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.sources.MovingPointSourceDipole.get_emission_time" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the emission time and related properties for a moving source.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>t</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></span></dt><dd><p>The current receiving time at the microphones.</p>
+</dd>
+<dt><strong>direction</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a> or <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></span></dt><dd><p>Direction vector for the source’s dipole directivity.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt>tuple</dt><dd><p>A tuple containing:</p>
+<ul>
+<li><dl>
+<dt>te<span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></span></dt><dd><p>Emission times for each microphone.</p>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>rm<span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></span></dt><dd><p>Distances from the source to each microphone.</p>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>Mr<span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></span></dt><dd><p>Radial Mach numbers for the source’s motion.</p>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>xs<span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></span></dt><dd><p>Source coordinates at the calculated emission times.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Ensure that the maximum iteration count (<code class="docutils literal notranslate"><span class="pre">100</span></code>) is sufficient for convergence in all
+scenarios, especially for high Mach numbers or long trajectories.</p>
+</div>
+<p class="rubric">Notes</p>
+<p>The emission times are computed iteratively using the Newton-Raphson method. The iteration
+terminates when the time discrepancy (<code class="docutils literal notranslate"><span class="pre">eps</span></code>) is below a threshold (<code class="docutils literal notranslate"><span class="pre">epslim</span></code>)
+or after 100 iterations.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.sources.MovingPointSourceDipole.get_moving_direction">
+<span class="sig-name descname"><span class="pre">get_moving_direction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">direction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.sources.MovingPointSourceDipole.get_moving_direction" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the moving direction of the dipole source along its trajectory.</p>
+<p>This method computes the updated direction vector for the dipole source, considering both
+translation along the trajectory and rotation defined by the <a class="reference internal" href="#acoular.sources.MovingPointSourceDipole.rvec" title="acoular.sources.MovingPointSourceDipole.rvec"><code class="xref py py-attr docutils literal notranslate"><span class="pre">reference</span> <span class="pre">vector</span></code></a>.
+If the reference vector is <code class="docutils literal notranslate"><span class="pre">(0,</span> <span class="pre">0,</span> <span class="pre">0)</span></code>, only translation is applied. Otherwise, the method
+incorporates rotation into the calculation.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>direction</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></span></dt><dd><p>The initial direction vector of the dipole, specified as a 3-element
+array representing the orientation of the dipole lobes.</p>
+</dd>
+<dt><strong>time</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, optional</span></dt><dd><p>The time at which the trajectory position and velocity are evaluated. Defaults to <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p>The updated direction vector of the dipole source after translation
+and, if applicable, rotation. The output is a 3-element array.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The method computes the translation direction vector based on the trajectory’s velocity at
+the specified time.</p></li>
+<li><p>If the <a class="reference internal" href="#acoular.sources.MovingPointSourceDipole.rvec" title="acoular.sources.MovingPointSourceDipole.rvec"><code class="xref py py-attr docutils literal notranslate"><span class="pre">reference</span> <span class="pre">vector</span></code></a> is non-zero, the method constructs a rotation matrix
+to compute the new dipole direction based on the trajectory’s motion and the
+reference vector.</p></li>
+<li><p>The rotation matrix ensures that the new dipole orientation adheres
+to the right-hand rule and remains orthogonal.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.sources.MovingPointSourceDipole.result">
+<span class="sig-name descname"><span class="pre">result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">128</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.sources.MovingPointSourceDipole.result" title="Link to this definition">¶</a></dt>
+<dd><p>Generate the output signal at microphones in blocks.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>num</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, optional</span></dt><dd><p>Number of samples per block to yield. Default is <code class="docutils literal notranslate"><span class="pre">128</span></code>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p>A 2D array of shape (<code class="docutils literal notranslate"><span class="pre">num</span></code>, <a class="reference internal" href="acoular.sources.PointSource.html#acoular.sources.PointSource.num_channels" title="acoular.sources.PointSource.num_channels"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_channels</span></code></a>) containing the signal
+detected at the microphones. The last block may have fewer samples if
+<a class="reference internal" href="acoular.sources.PointSource.html#acoular.sources.PointSource.num_samples" title="acoular.sources.PointSource.num_samples"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_samples</span></code></a> is not a multiple of <code class="docutils literal notranslate"><span class="pre">num</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Radial Mach number adjustments are applied if <a class="reference internal" href="acoular.sources.MovingPointSource.html#acoular.sources.MovingPointSource.conv_amp" title="acoular.sources.MovingPointSource.conv_amp"><code class="xref py py-attr docutils literal notranslate"><span class="pre">conv_amp</span></code></a> is
+enabled.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.sources.MovingPointSource.html">MovingPointSource</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.sources.html">sources</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.sources.MovingLineSource.html">MovingLineSource</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Jul 24, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

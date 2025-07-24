@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>WriteWAV &#8212; Acoular 25.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=0b392bf7"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="WriteH5" href="acoular.tprocess.WriteH5.html" />
+    <link rel="prev" title="OctaveFilterBank" href="acoular.tprocess.OctaveFilterBank.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.07 documentation</span></a></h1>
+        <h2 class="heading"><span>WriteWAV</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tprocess.OctaveFilterBank.html">OctaveFilterBank</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tprocess.html">tprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tprocess.WriteH5.html">WriteH5</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="writewav">
+<h1>WriteWAV<a class="headerlink" href="#writewav" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.tprocess.WriteWAV">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.tprocess.</span></span><span class="sig-name descname"><span class="pre">WriteWAV</span></span><a class="headerlink" href="#acoular.tprocess.WriteWAV" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.base.TimeOut.html#acoular.base.TimeOut" title="acoular.base.TimeOut"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeOut</span></code></a></p>
+<p>Saves time signal from one or more channels as mono, stereo, or multi-channel <code class="docutils literal notranslate"><span class="pre">.wav</span></code> file.</p>
+<p>Inherits from <a class="reference internal" href="acoular.base.TimeOut.html#acoular.base.TimeOut" title="acoular.base.TimeOut"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeOut</span></code></a> and allows for exporting time-series data from one
+or more channels to a WAV file. Supports saving mono, stereo, or multi-channel signals to disk
+with automatic or user-defined file naming.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="acoular.base.TimeOut.html#acoular.base.TimeOut" title="acoular.base.TimeOut"><code class="xref py py-class docutils literal notranslate"><span class="pre">acoular.base.TimeOut</span></code></a></dt><dd><p>ABC for signal processing blocks that interact with data from a source.</p>
+</dd>
+<dt><a class="reference internal" href="acoular.base.SamplesGenerator.html#acoular.base.SamplesGenerator" title="acoular.base.SamplesGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">acoular.base.SamplesGenerator</span></code></a></dt><dd><p>Interface for generating multi-channel time domain signal processing blocks.</p>
+</dd>
+<dt><a class="reference external" href="https://docs.python.org/3/library/wave.html#module-wave" title="(in Python v3.13)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">wave</span></code></a></dt><dd><p>Python module for handling WAV files.</p>
+</dd>
+</dl>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.WriteWAV.source">
+<span class="sig-name descname"><span class="pre">source</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Instance(SamplesGenerator)</span></em><a class="headerlink" href="#acoular.tprocess.WriteWAV.source" title="Link to this definition">¶</a></dt>
+<dd><p>The input data source. It must be an instance of a
+<a class="reference internal" href="acoular.base.SamplesGenerator.html#acoular.base.SamplesGenerator" title="acoular.base.SamplesGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplesGenerator</span></code></a>-derived class.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.WriteWAV.file">
+<span class="sig-name descname"><span class="pre">file</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">File(filter=['*.wav'],</span> <span class="pre">desc='name</span> <span class="pre">of</span> <span class="pre">wave</span> <span class="pre">file')</span></em><a class="headerlink" href="#acoular.tprocess.WriteWAV.file" title="Link to this definition">¶</a></dt>
+<dd><p>The name of the file to be saved. If none is given, the name will be automatically
+generated from the source.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.WriteWAV.basename">
+<span class="sig-name descname"><span class="pre">basename</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['digest'])</span></em><a class="headerlink" href="#acoular.tprocess.WriteWAV.basename" title="Link to this definition">¶</a></dt>
+<dd><p>The name of the cache file (without extension). It serves as an internal reference for data
+caching and tracking processed files. (automatically generated)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.WriteWAV.channels">
+<span class="sig-name descname"><span class="pre">channels</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">List(int,</span> <span class="pre">desc='channels</span> <span class="pre">to</span> <span class="pre">save')</span></em><a class="headerlink" href="#acoular.tprocess.WriteWAV.channels" title="Link to this definition">¶</a></dt>
+<dd><p>The list of channels to save. Can only contain one or two channels.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.WriteWAV.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['source.digest',</span> <span class="pre">'channels'])</span></em><a class="headerlink" href="#acoular.tprocess.WriteWAV.digest" title="Link to this definition">¶</a></dt>
+<dd><p>A unique identifier for the filter, based on its properties. (read-only)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.tprocess.WriteWAV.result">
+<span class="sig-name descname"><span class="pre">result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.tprocess.WriteWAV.result" title="Link to this definition">¶</a></dt>
+<dd><p>Generate and save time signal data as a WAV file in blocks.</p>
+<p>This generator method retrieves time signal data from the <a class="reference internal" href="#acoular.tprocess.WriteWAV.source" title="acoular.tprocess.WriteWAV.source"><code class="xref py py-attr docutils literal notranslate"><span class="pre">source</span></code></a> and writes it to a
+WAV file in blocks of size <code class="docutils literal notranslate"><span class="pre">num</span></code>. The data is scaled and encoded according to the selected
+bit depth and channel configuration. If no file name is specified, a name is generated
+automatically. The method yields each block of data after it is written to the file,
+allowing for streaming or real-time processing.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>num</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></dt><dd><p>Number of samples per block to write and yield.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p>The block of time signal data that was written to the WAV file, with shape
+(<code class="docutils literal notranslate"><span class="pre">num</span></code>, number of channels).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValueError</span></code></a></dt><dd><p>If no channels are specified for output.</p>
+</dd>
+<dt><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Warning" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Warning</span></code></a></dt><dd><p>If more than two channels are specified, or if the sample frequency is not an integer.
+Also warns if clipping occurs due to data range limitations.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#acoular.tprocess.WriteWAV.save" title="acoular.tprocess.WriteWAV.save"><code class="xref py py-meth docutils literal notranslate"><span class="pre">save()</span></code></a></dt><dd><p>Save the entire source output to a WAV file in one call.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.tprocess.WriteWAV.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#acoular.tprocess.WriteWAV.save" title="Link to this definition">¶</a></dt>
+<dd><p>Save the entire source output to a WAV file.</p>
+<p>This method writes all available time signal data from the <a class="reference internal" href="#acoular.tprocess.WriteWAV.source" title="acoular.tprocess.WriteWAV.source"><code class="xref py py-attr docutils literal notranslate"><span class="pre">source</span></code></a> to the specified
+WAV file in blocks. It calls the <a class="reference internal" href="#acoular.tprocess.WriteWAV.result" title="acoular.tprocess.WriteWAV.result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">result()</span></code></a> method internally and discards the yielded
+data. The file is written according to the current <a class="reference internal" href="#acoular.tprocess.WriteWAV.channels" title="acoular.tprocess.WriteWAV.channels"><code class="xref py py-attr docutils literal notranslate"><span class="pre">channels</span></code></a>, <code class="xref py py-attr docutils literal notranslate"><span class="pre">encoding</span></code>, and
+scaling settings. If no file name is specified, a name is generated automatically.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#acoular.tprocess.WriteWAV.result" title="acoular.tprocess.WriteWAV.result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">result()</span></code></a></dt><dd><p>Generator for writing and yielding data block-wise.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tprocess.OctaveFilterBank.html">OctaveFilterBank</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tprocess.html">tprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tprocess.WriteH5.html">WriteH5</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Jul 24, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>FiltFiltOctave &#8212; Acoular 25.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=0b392bf7"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="FiltOctave" href="acoular.tprocess.FiltOctave.html" />
+    <link rel="prev" title="FilterBank" href="acoular.tprocess.FilterBank.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.07 documentation</span></a></h1>
+        <h2 class="heading"><span>FiltFiltOctave</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tprocess.FilterBank.html">FilterBank</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tprocess.html">tprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tprocess.FiltOctave.html">FiltOctave</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="filtfiltoctave">
+<h1>FiltFiltOctave<a class="headerlink" href="#filtfiltoctave" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.tprocess.FiltFiltOctave">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.tprocess.</span></span><span class="sig-name descname"><span class="pre">FiltFiltOctave</span></span><a class="headerlink" href="#acoular.tprocess.FiltFiltOctave" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.tprocess.FiltOctave.html#acoular.tprocess.FiltOctave" title="acoular.tprocess.FiltOctave"><code class="xref py py-class docutils literal notranslate"><span class="pre">FiltOctave</span></code></a></p>
+<p>Octave or third-octave bandpass filter with zero-phase distortion.</p>
+<p>This filter applies an IIR bandpass filter in both forward and reverse directions, effectively
+eliminating phase distortion. It provides zero-phase filtering but requires significantly more
+memory compared to causal filtering.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="acoular.tprocess.Filter.html#acoular.tprocess.Filter" title="acoular.tprocess.Filter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Filter</span></code></a></dt><dd><p>The base class implementing a general IIR filter.</p>
+</dd>
+<dt><a class="reference internal" href="acoular.tprocess.FiltOctave.html#acoular.tprocess.FiltOctave" title="acoular.tprocess.FiltOctave"><code class="xref py py-class docutils literal notranslate"><span class="pre">FiltOctave</span></code></a></dt><dd><p>The standard octave or third-octave filter with causal filtering.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>Due to the double-pass filtering, additional bandwidth correction is applied to maintain
+accurate frequency response.</p></li>
+<li><p>This approach requires storing the entire signal in memory before processing, making it
+unsuitable for real-time applications with large datasets.</p></li>
+</ul>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.FiltFiltOctave.order">
+<span class="sig-name descname"><span class="pre">order</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Int(2,</span> <span class="pre">desc='IIR</span> <span class="pre">filter</span> <span class="pre">half</span> <span class="pre">order')</span></em><a class="headerlink" href="#acoular.tprocess.FiltFiltOctave.order" title="Link to this definition">¶</a></dt>
+<dd><p>The half-order of the IIR filter, applied twice (once forward and once backward). This
+results in a final filter order twice as large as the specified value. Default is <code class="docutils literal notranslate"><span class="pre">2</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.FiltFiltOctave.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['source.digest',</span> <span class="pre">'band',</span> <span class="pre">'fraction',</span> <span class="pre">'order'])</span></em><a class="headerlink" href="#acoular.tprocess.FiltFiltOctave.digest" title="Link to this definition">¶</a></dt>
+<dd><p>A unique identifier for the filter, based on its properties. (read-only)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.tprocess.FiltFiltOctave.result">
+<span class="sig-name descname"><span class="pre">result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.tprocess.FiltFiltOctave.result" title="Link to this definition">¶</a></dt>
+<dd><p>Apply the filter to the input signal and yields filtered data block-wise.</p>
+<p>The input signal is first stored in memory, then filtered in both forward and reverse
+directions to achieve zero-phase distortion. The processed signal is yielded in blocks.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>num</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a></span></dt><dd><p>Number of samples per block.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p>An array containing the filtered signal for the current block. Each block has shape
+(<code class="docutils literal notranslate"><span class="pre">num</span></code>, <a class="reference internal" href="acoular.base.TimeOut.html#acoular.base.TimeOut.num_channels" title="acoular.base.TimeOut.num_channels"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_channels</span></code></a>), where
+<a class="reference internal" href="acoular.base.TimeOut.html#acoular.base.TimeOut.num_channels" title="acoular.base.TimeOut.num_channels"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_channels</span></code></a> is inherited from the <code class="xref py py-attr docutils literal notranslate"><span class="pre">source</span></code>.
+The last block may contain fewer samples if the total number of samples is not
+a multiple of <code class="docutils literal notranslate"><span class="pre">num</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>This method requires the entire signal to be stored in memory, making it unsuitable for
+streaming or real-time applications.</p></li>
+<li><p>Filtering is performed separately for each channel to optimize memory usage.</p></li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tprocess.FilterBank.html">FilterBank</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tprocess.html">tprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tprocess.FiltOctave.html">FiltOctave</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Jul 24, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

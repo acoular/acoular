@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>acoular.sources.spherical_hn1 &#8212; Acoular 25.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=0b392bf7"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="acoular.sources.get_radiation_angles" href="acoular.sources.get_radiation_angles.html" />
+    <link rel="prev" title="PointSourceConvolve" href="acoular.sources.PointSourceConvolve.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.07 documentation</span></a></h1>
+        <h2 class="heading"><span>acoular.sources.spherical_hn1</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.sources.PointSourceConvolve.html">PointSourceConvolve</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.sources.html">sources</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.sources.get_radiation_angles.html">acoular.sources.get_radiation_angles</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="acoular-sources-spherical-hn1">
+<h1>acoular.sources.spherical_hn1<a class="headerlink" href="#acoular-sources-spherical-hn1" title="Link to this heading">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="acoular.sources.spherical_hn1">
+<span class="sig-prename descclassname"><span class="pre">acoular.sources.</span></span><span class="sig-name descname"><span class="pre">spherical_hn1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.sources.spherical_hn1" title="Link to this definition">¶</a></dt>
+<dd><p>Compute the spherical Hankel function of the first kind.</p>
+<p>The spherical Hankel function of the first kind, <span class="math notranslate nohighlight">\(h_n^{(1)}(z)\)</span>, is defined as</p>
+<div class="math notranslate nohighlight">
+\[h_n^{(1)}(z) = j_n(z) + i \cdot y_n(z)\]</div>
+<p>with the complex unit <span class="math notranslate nohighlight">\(i\)</span>, the spherical Bessel function of the first kind as</p>
+<div class="math notranslate nohighlight">
+\[j_n(z) = \sqrt{\frac{\pi}{2z}} J_{n + 1/2}(z),\]</div>
+<p>and the spherical Bessel function of the second kind as</p>
+<div class="math notranslate nohighlight">
+\[y_n(z) = \sqrt{\frac{\pi}{2z}} Y_{n + 1/2}(z),\]</div>
+<p>where <span class="math notranslate nohighlight">\(Y_n\)</span> is the Bessel function of the second kind.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>n</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, array_like</span></dt><dd><p>Order of the spherical Hankel function. Must be a non-negative integer.</p>
+</dd>
+<dt><strong>z</strong><span class="classifier">complex or <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, array_like</span></dt><dd><p>Argument of the spherical Hankel function. Can be real or complex.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>complex or <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p>Value of the spherical Hankel function of the first kind for the
+given order <code class="docutils literal notranslate"><span class="pre">n</span></code> and argument <code class="docutils literal notranslate"><span class="pre">z</span></code>. If <code class="docutils literal notranslate"><span class="pre">z</span></code> is array-like, an array
+of the same shape is returned.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.spherical_jn.html#scipy.special.spherical_jn" title="(in SciPy v1.16.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.special.spherical_jn()</span></code></a></dt><dd><p>Computes the spherical Bessel function of the first kind.</p>
+</dd>
+<dt><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.spherical_yn.html#scipy.special.spherical_yn" title="(in SciPy v1.16.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.special.spherical_yn()</span></code></a></dt><dd><p>Computes the spherical Bessel function of the second kind.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The function relies on <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.spherical_jn.html#scipy.special.spherical_jn" title="(in SciPy v1.16.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.special.spherical_jn()</span></code></a> for the spherical Bessel function of
+the first kind and <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.spherical_yn.html#scipy.special.spherical_yn" title="(in SciPy v1.16.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.special.spherical_yn()</span></code></a> for the spherical Bessel function of the
+second kind.</p></li>
+<li><p>The input <code class="docutils literal notranslate"><span class="pre">n</span></code> must be a non-negative integer; otherwise, the behavior is undefined.</p></li>
+</ul>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">acoular</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ac</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ac</span><span class="o">.</span><span class="n">sources</span><span class="o">.</span><span class="n">spherical_hn1</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="go">np.complex128(0.8414709848078965-0.5403023058681398j)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ac</span><span class="o">.</span><span class="n">sources</span><span class="o">.</span><span class="n">spherical_hn1</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">])</span>
+<span class="go">array([0.30116868-1.38177329j, 0.43539777-0.350612j  ])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.sources.PointSourceConvolve.html">PointSourceConvolve</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.sources.html">sources</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.sources.get_radiation_angles.html">acoular.sources.get_radiation_angles</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Jul 24, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

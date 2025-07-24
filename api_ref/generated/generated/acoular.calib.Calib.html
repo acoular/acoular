@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Calib &#8212; Acoular 25.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=0b392bf7"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="configuration" href="../acoular.configuration.html" />
+    <link rel="prev" title="calib" href="../acoular.calib.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.07 documentation</span></a></h1>
+        <h2 class="heading"><span>Calib</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.calib.html">calib</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.calib.html">calib</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../acoular.configuration.html">configuration</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="calib">
+<h1>Calib<a class="headerlink" href="#calib" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.calib.Calib">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.calib.</span></span><span class="sig-name descname"><span class="pre">Calib</span></span><a class="headerlink" href="#acoular.calib.Calib" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.base.InOut.html#acoular.base.InOut" title="acoular.base.InOut"><code class="xref py py-class docutils literal notranslate"><span class="pre">InOut</span></code></a></p>
+<p>Processing block for handling calibration data in <cite>*.xml</cite> or NumPy format.</p>
+<p>This class implements the application of calibration factors to the data obtained from its
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">source</span></code>. The calibrated data can be accessed (e.g. for use in a block chain) via the
+<a class="reference internal" href="#acoular.calib.Calib.result" title="acoular.calib.Calib.result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">result()</span></code></a> generator. Depending on the source type, calibration can be performed in the
+time or frequency domain.</p>
+<p class="rubric">Examples</p>
+<p>Consider calibrating a time signal by specifying the calibration factors in NumPy format.
+Assume that the following white noise signal is in Volt and the sensitivity of the virtual
+sensor is 1e-2 V/Pa. Then, the voltage signal can be converted to a calibrated sound
+pressure signal by multiplying it with a calibration factor of  100 Pa/V.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">acoular</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ac</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">signal</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">WNoiseGenerator</span><span class="p">(</span><span class="n">sample_freq</span><span class="o">=</span><span class="mi">51200</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                            <span class="n">num_samples</span><span class="o">=</span><span class="mi">51200</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                            <span class="n">rms</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span><span class="o">.</span><span class="n">signal</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ts</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">TimeSamples</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">signal</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span> <span class="n">sample_freq</span><span class="o">=</span><span class="mi">51200</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">calib</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">Calib</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">ts</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">calib</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">100</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">calib</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="mi">1</span><span class="p">)))</span>
+<span class="go">[[1.76405235]]</span>
+</pre></div>
+</div>
+<p>The calibrated data can then be further processed, e.g. by calculating the FFT of the
+calibrated data.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fft</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">RFFT</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">calib</span><span class="p">,</span> <span class="n">block_size</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">fft</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="mi">1</span><span class="p">)))</span>
+<span class="go">[[10.63879909+0.j          3.25957562-1.57652611j -2.27342854-3.39108312j</span>
+<span class="go">0.07458428+0.49657939j  1.772696  +3.92233098j  3.19543248+0.17988554j</span>
+<span class="go">0.3379041 -3.93342331j  0.93949242+2.5328611j   2.97352574+0.j        ]]</span>
+</pre></div>
+</div>
+<p>One could also apply the calibration after the FFT calculation.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fft</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">RFFT</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">ts</span><span class="p">,</span> <span class="n">block_size</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">calib</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">Calib</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">fft</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">calib</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">ts</span><span class="o">.</span><span class="n">num_channels</span> <span class="o">*</span> <span class="n">fft</span><span class="o">.</span><span class="n">num_freqs</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">calib</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="mi">1</span><span class="p">)))</span>
+<span class="go">[[10.63879909+0.j          3.25957562-1.57652611j -2.27342854-3.39108312j</span>
+<span class="go">0.07458428+0.49657939j  1.772696  +3.92233098j  3.19543248+0.17988554j</span>
+<span class="go">0.3379041 -3.93342331j  0.93949242+2.5328611j   2.97352574+0.j        ]]</span>
+</pre></div>
+</div>
+<p>This class serves as interface to load calibration data for the used
+microphone array. The calibration factors are stored as [Pa/unit].</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.calib.Calib.file">
+<span class="sig-name descname"><span class="pre">file</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Union(None,</span> <span class="pre">File(filter=['*.xml'],</span> <span class="pre">exists=True),</span> <span class="pre">desc='name</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">xml</span> <span class="pre">file</span> <span class="pre">to</span> <span class="pre">import')</span></em><a class="headerlink" href="#acoular.calib.Calib.file" title="Link to this definition">¶</a></dt>
+<dd><p>Name of the .xml file to be imported.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.calib.Calib.num_mics">
+<span class="sig-name descname"><span class="pre">num_mics</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CInt(0,</span> <span class="pre">desc='number</span> <span class="pre">of</span> <span class="pre">microphones</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">geometry')</span></em><a class="headerlink" href="#acoular.calib.Calib.num_mics" title="Link to this definition">¶</a></dt>
+<dd><p>Number of microphones in the calibration data,
+is set automatically when read from file or when data is set.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.calib.Calib.data">
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CArray(desc='calibration</span> <span class="pre">data')</span></em><a class="headerlink" href="#acoular.calib.Calib.data" title="Link to this definition">¶</a></dt>
+<dd><p>Array of calibration factors,
+is set automatically when read from file.
+Can be set manually by specifying a NumPy array with shape (num_channels, ) if
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">source</span></code> yields time domain signals. For frequency domain signals, the expected
+shape is (num_channels * num_freqs).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.calib.Calib.invalid_channels">
+<span class="sig-name descname"><span class="pre">invalid_channels</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">List(int,</span> <span class="pre">desc='list</span> <span class="pre">of</span> <span class="pre">invalid</span> <span class="pre">channels')</span></em><a class="headerlink" href="#acoular.calib.Calib.invalid_channels" title="Link to this definition">¶</a></dt>
+<dd><p>Channels that are to be treated as invalid.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.calib.Calib.channels">
+<span class="sig-name descname"><span class="pre">channels</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['invalid_channels',</span> <span class="pre">'num_mics'],</span> <span class="pre">desc='channel</span> <span class="pre">mask')</span></em><a class="headerlink" href="#acoular.calib.Calib.channels" title="Link to this definition">¶</a></dt>
+<dd><p>Channel mask to serve as an index for all valid channels, is set automatically.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.calib.Calib.set_num_mics">
+<span class="sig-name descname"><span class="pre">set_num_mics</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#acoular.calib.Calib.set_num_mics" title="Link to this definition">¶</a></dt>
+<dd><p>Sets the number of microphones based on the shape of the data array.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.calib.Calib.import_data">
+<span class="sig-name descname"><span class="pre">import_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#acoular.calib.Calib.import_data" title="Link to this definition">¶</a></dt>
+<dd><p>Loads the calibration data from <cite>*.xml</cite> file .</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.calib.Calib.result">
+<span class="sig-name descname"><span class="pre">result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.calib.Calib.result" title="Link to this definition">¶</a></dt>
+<dd><p>Python generator that processes the source data and yields the time-signal block-wise.</p>
+<p>This method needs to be implemented by the derived classes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>num</strong><span class="classifier">int</span></dt><dd><p>This parameter defines the size of the blocks to be yielded
+(i.e. the number of samples per block)</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>numpy.ndarray</dt><dd><p>Two-dimensional output data block of shape (num, sourcechannels)
+where sourcechannels is num_channels if the source data is in the time domain
+or sourcechannels is num_channels*num_freqs if the source data is in the frequency
+domain.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.calib.html">calib</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.calib.html">calib</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../acoular.configuration.html">configuration</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Jul 24, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>MaskedTimeOut &#8212; Acoular 25.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=0b392bf7"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Trigger" href="acoular.tprocess.Trigger.html" />
+    <link rel="prev" title="tprocess" href="../acoular.tprocess.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.07 documentation</span></a></h1>
+        <h2 class="heading"><span>MaskedTimeOut</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.tprocess.html">tprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tprocess.html">tprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tprocess.Trigger.html">Trigger</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="maskedtimeout">
+<h1>MaskedTimeOut<a class="headerlink" href="#maskedtimeout" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.tprocess.MaskedTimeOut">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.tprocess.</span></span><span class="sig-name descname"><span class="pre">MaskedTimeOut</span></span><a class="headerlink" href="#acoular.tprocess.MaskedTimeOut" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.base.TimeOut.html#acoular.base.TimeOut" title="acoular.base.TimeOut"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeOut</span></code></a></p>
+<p>A signal processing block that allows for the selection of specific channels and time samples.</p>
+<p>The <a class="reference internal" href="#acoular.tprocess.MaskedTimeOut" title="acoular.tprocess.MaskedTimeOut"><code class="xref py py-class docutils literal notranslate"><span class="pre">MaskedTimeOut</span></code></a> class is designed to filter data from a given
+<code class="xref py py-class docutils literal notranslate"><span class="pre">SamplesGenerator</span></code> (or a derived object) by defining valid time samples
+and excluding specific channels. It acts as an intermediary between the data source and
+subsequent processing steps, ensuring that only the selected portion of the data is passed
+along.</p>
+<p>This class is useful for selecting specific portions of data for analysis. The processed data is
+accessed through the generator method <a class="reference internal" href="#acoular.tprocess.MaskedTimeOut.result" title="acoular.tprocess.MaskedTimeOut.result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">result()</span></code></a>, which returns data in block-wise fashion
+for efficient streaming.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.MaskedTimeOut.source">
+<span class="sig-name descname"><span class="pre">source</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Instance(SamplesGenerator)</span></em><a class="headerlink" href="#acoular.tprocess.MaskedTimeOut.source" title="Link to this definition">¶</a></dt>
+<dd><p>The input data source. It must be an instance of a
+<a class="reference internal" href="acoular.base.SamplesGenerator.html#acoular.base.SamplesGenerator" title="acoular.base.SamplesGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplesGenerator</span></code></a>-derived class.
+This object provides the raw time-domain signals that will be filtered based on the
+<a class="reference internal" href="#acoular.tprocess.MaskedTimeOut.start" title="acoular.tprocess.MaskedTimeOut.start"><code class="xref py py-attr docutils literal notranslate"><span class="pre">start</span></code></a>, <a class="reference internal" href="#acoular.tprocess.MaskedTimeOut.stop" title="acoular.tprocess.MaskedTimeOut.stop"><code class="xref py py-attr docutils literal notranslate"><span class="pre">stop</span></code></a>, and <a class="reference internal" href="#acoular.tprocess.MaskedTimeOut.invalid_channels" title="acoular.tprocess.MaskedTimeOut.invalid_channels"><code class="xref py py-attr docutils literal notranslate"><span class="pre">invalid_channels</span></code></a> attributes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.MaskedTimeOut.start">
+<span class="sig-name descname"><span class="pre">start</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CInt(0,</span> <span class="pre">desc='start</span> <span class="pre">of</span> <span class="pre">valid</span> <span class="pre">samples')</span></em><a class="headerlink" href="#acoular.tprocess.MaskedTimeOut.start" title="Link to this definition">¶</a></dt>
+<dd><p>The index of the first valid sample. Default is <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.MaskedTimeOut.stop">
+<span class="sig-name descname"><span class="pre">stop</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Union(None,</span> <span class="pre">CInt,</span> <span class="pre">desc='stop</span> <span class="pre">of</span> <span class="pre">valid</span> <span class="pre">samples')</span></em><a class="headerlink" href="#acoular.tprocess.MaskedTimeOut.stop" title="Link to this definition">¶</a></dt>
+<dd><p>The index of the last valid sample (exclusive).
+If set to <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>, the selection continues until the end of the available data.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.MaskedTimeOut.invalid_channels">
+<span class="sig-name descname"><span class="pre">invalid_channels</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">List(int,</span> <span class="pre">desc='list</span> <span class="pre">of</span> <span class="pre">invalid</span> <span class="pre">channels')</span></em><a class="headerlink" href="#acoular.tprocess.MaskedTimeOut.invalid_channels" title="Link to this definition">¶</a></dt>
+<dd><p>List of channel indices to be excluded from processing.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.MaskedTimeOut.channels">
+<span class="sig-name descname"><span class="pre">channels</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['invalid_channels',</span> <span class="pre">'source.num_channels'],</span> <span class="pre">desc='channel</span> <span class="pre">mask')</span></em><a class="headerlink" href="#acoular.tprocess.MaskedTimeOut.channels" title="Link to this definition">¶</a></dt>
+<dd><p>A mask or index array representing valid channels. (automatically updated)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.MaskedTimeOut.num_channels_total">
+<span class="sig-name descname"><span class="pre">num_channels_total</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Delegate('source',</span> <span class="pre">'num_channels')</span></em><a class="headerlink" href="#acoular.tprocess.MaskedTimeOut.num_channels_total" title="Link to this definition">¶</a></dt>
+<dd><p>Total number of input channels, including invalid channels, as given by
+<a class="reference internal" href="acoular.base.TimeOut.html#acoular.base.TimeOut.source" title="acoular.base.TimeOut.source"><code class="xref py py-attr docutils literal notranslate"><span class="pre">source</span></code></a>. (read-only).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.MaskedTimeOut.num_samples_total">
+<span class="sig-name descname"><span class="pre">num_samples_total</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Delegate('source',</span> <span class="pre">'num_samples')</span></em><a class="headerlink" href="#acoular.tprocess.MaskedTimeOut.num_samples_total" title="Link to this definition">¶</a></dt>
+<dd><p>Total number of input channels, including invalid channels. (read-only).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.MaskedTimeOut.num_channels">
+<span class="sig-name descname"><span class="pre">num_channels</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.tprocess.MaskedTimeOut.num_channels" title="Link to this definition">¶</a></dt>
+<dd><p>Number of valid input channels after excluding <a class="reference internal" href="#acoular.tprocess.MaskedTimeOut.invalid_channels" title="acoular.tprocess.MaskedTimeOut.invalid_channels"><code class="xref py py-attr docutils literal notranslate"><span class="pre">invalid_channels</span></code></a>. (read-only)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.MaskedTimeOut.num_samples">
+<span class="sig-name descname"><span class="pre">num_samples</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.tprocess.MaskedTimeOut.num_samples" title="Link to this definition">¶</a></dt>
+<dd><p>Number of valid time-domain samples, based on <a class="reference internal" href="#acoular.tprocess.MaskedTimeOut.start" title="acoular.tprocess.MaskedTimeOut.start"><code class="xref py py-attr docutils literal notranslate"><span class="pre">start</span></code></a> and <a class="reference internal" href="#acoular.tprocess.MaskedTimeOut.stop" title="acoular.tprocess.MaskedTimeOut.stop"><code class="xref py py-attr docutils literal notranslate"><span class="pre">stop</span></code></a> indices.
+(read-only)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.MaskedTimeOut.basename">
+<span class="sig-name descname"><span class="pre">basename</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['source.digest'],</span> <span class="pre">desc='basename</span> <span class="pre">for</span> <span class="pre">cache</span> <span class="pre">file')</span></em><a class="headerlink" href="#acoular.tprocess.MaskedTimeOut.basename" title="Link to this definition">¶</a></dt>
+<dd><p>The name of the cache file (without extension). It serves as an internal reference for data
+caching and tracking processed files. (automatically generated)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.MaskedTimeOut.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['source.digest',</span> <span class="pre">'start',</span> <span class="pre">'stop',</span> <span class="pre">'invalid_channels'])</span></em><a class="headerlink" href="#acoular.tprocess.MaskedTimeOut.digest" title="Link to this definition">¶</a></dt>
+<dd><p>A unique identifier for the object, based on its properties. (read-only)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.tprocess.MaskedTimeOut.result">
+<span class="sig-name descname"><span class="pre">result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.tprocess.MaskedTimeOut.result" title="Link to this definition">¶</a></dt>
+<dd><p>Generate blocks of processed data, selecting only valid samples and channels.</p>
+<p>This method fetches data from the <a class="reference internal" href="#acoular.tprocess.MaskedTimeOut.source" title="acoular.tprocess.MaskedTimeOut.source"><code class="xref py py-attr docutils literal notranslate"><span class="pre">source</span></code></a> object, applies the defined <a class="reference internal" href="#acoular.tprocess.MaskedTimeOut.start" title="acoular.tprocess.MaskedTimeOut.start"><code class="xref py py-attr docutils literal notranslate"><span class="pre">start</span></code></a>
+and <a class="reference internal" href="#acoular.tprocess.MaskedTimeOut.stop" title="acoular.tprocess.MaskedTimeOut.stop"><code class="xref py py-attr docutils literal notranslate"><span class="pre">stop</span></code></a> constraints on time samples, and filters out <a class="reference internal" href="#acoular.tprocess.MaskedTimeOut.invalid_channels" title="acoular.tprocess.MaskedTimeOut.invalid_channels"><code class="xref py py-attr docutils literal notranslate"><span class="pre">invalid_channels</span></code></a>. The
+data is then yielded in block-wise fashion to facilitate efficient streaming.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>num</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a></span></dt><dd><p>Number of samples per block.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p>An array of shape (<code class="docutils literal notranslate"><span class="pre">num</span></code>, <a class="reference internal" href="#acoular.tprocess.MaskedTimeOut.num_channels" title="acoular.tprocess.MaskedTimeOut.num_channels"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MaskedTimeOut.num_channels</span></code></a>), contatining blocks of
+a filtered time-domain signal. The last block may contain fewer samples if the total
+number of samples is not a multiple of <code class="docutils literal notranslate"><span class="pre">num</span></code>. <cite>MaskedTimeOut.num_channels</cite> is not
+inherited directly and may be smaller than the <a class="reference internal" href="#acoular.tprocess.MaskedTimeOut.source" title="acoular.tprocess.MaskedTimeOut.source"><code class="xref py py-attr docutils literal notranslate"><span class="pre">source</span></code></a>’s number of channels.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#OSError" title="(in Python v3.13)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OSError</span></code></a></dt><dd><p>If no valid samples are available within the defined <a class="reference internal" href="#acoular.tprocess.MaskedTimeOut.start" title="acoular.tprocess.MaskedTimeOut.start"><code class="xref py py-attr docutils literal notranslate"><span class="pre">start</span></code></a> and <a class="reference internal" href="#acoular.tprocess.MaskedTimeOut.stop" title="acoular.tprocess.MaskedTimeOut.stop"><code class="xref py py-attr docutils literal notranslate"><span class="pre">stop</span></code></a>
+range. This can occur if <a class="reference internal" href="#acoular.tprocess.MaskedTimeOut.start" title="acoular.tprocess.MaskedTimeOut.start"><code class="xref py py-attr docutils literal notranslate"><span class="pre">start</span></code></a> is greater than or equal to <a class="reference internal" href="#acoular.tprocess.MaskedTimeOut.stop" title="acoular.tprocess.MaskedTimeOut.stop"><code class="xref py py-attr docutils literal notranslate"><span class="pre">stop</span></code></a> or if
+the <a class="reference internal" href="#acoular.tprocess.MaskedTimeOut.source" title="acoular.tprocess.MaskedTimeOut.source"><code class="xref py py-attr docutils literal notranslate"><span class="pre">source</span></code></a> is not containing any valid samples in the given range.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.tprocess.html">tprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tprocess.html">tprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tprocess.Trigger.html">Trigger</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Jul 24, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

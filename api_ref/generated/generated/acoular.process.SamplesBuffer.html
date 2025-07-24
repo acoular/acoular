@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>SamplesBuffer &#8212; Acoular 25.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=0b392bf7"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="sdinput" href="../acoular.sdinput.html" />
+    <link rel="prev" title="SampleSplitter" href="acoular.process.SampleSplitter.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.07 documentation</span></a></h1>
+        <h2 class="heading"><span>SamplesBuffer</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.process.SampleSplitter.html">SampleSplitter</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.process.html">process</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../acoular.sdinput.html">sdinput</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="samplesbuffer">
+<h1>SamplesBuffer<a class="headerlink" href="#samplesbuffer" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.process.SamplesBuffer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.process.</span></span><span class="sig-name descname"><span class="pre">SamplesBuffer</span></span><a class="headerlink" href="#acoular.process.SamplesBuffer" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.base.InOut.html#acoular.base.InOut" title="acoular.base.InOut"><code class="xref py py-class docutils literal notranslate"><span class="pre">InOut</span></code></a></p>
+<p>Handle buffering of samples from a source.</p>
+<p>The <a class="reference internal" href="#acoular.process.SamplesBuffer" title="acoular.process.SamplesBuffer"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplesBuffer</span></code></a> class buffers samples from a source and provides them in blocks of a
+specified size. It supports various use cases for efficient handling of sample data.
+Below is an example demonstrating its functionality.</p>
+<p class="rubric">Examples</p>
+<p>Suppose we want to draw blocks of 16 samples from the source, while ensuring that the buffer
+always holds twice that number (32 samples). The following code achieves this behavior:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">acoular</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ac</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># create a white noise source with 512 samples</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">source</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">TimeSamples</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">data</span><span class="o">=</span><span class="n">ac</span><span class="o">.</span><span class="n">WNoiseGenerator</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="n">sample_freq</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">num_samples</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="p">)</span><span class="o">.</span><span class="n">signal</span><span class="p">()[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="n">sample_freq</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># create a buffer with a size of 32 samples</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">buffer</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">SamplesBuffer</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># get the first block of 16 samples</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">block</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">buffer</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="mi">16</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">source</span><span class="o">.</span><span class="n">data</span><span class="p">[:</span><span class="mi">16</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>In the example above, the buffer initially collects blocks of the specified size from the
+source. It then returns the first block of 16 samples. With subsequent calls to the
+<a class="reference internal" href="#acoular.process.SamplesBuffer.result" title="acoular.process.SamplesBuffer.result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">result()</span></code></a> method, the buffer refills and returns additional blocks of 16 samples.</p>
+<p>In some cases, you may wish to retrieve a different number of samples from the source than you
+want to return. This can be achieved by setting the <a class="reference internal" href="#acoular.process.SamplesBuffer.source_num" title="acoular.process.SamplesBuffer.source_num"><code class="xref py py-attr docutils literal notranslate"><span class="pre">source_num</span></code></a> attribute. For example,
+in the <a class="reference internal" href="acoular.tbeamform.BeamformerTimeTraj.html#acoular.tbeamform.BeamformerTimeTraj" title="acoular.tbeamform.BeamformerTimeTraj"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerTimeTraj</span></code></a> class, the number of time samples varies
+based on the expected delay for moving sources, while still adhering to the desired block size
+for the buffer.</p>
+<p>The <a class="reference internal" href="#acoular.process.SamplesBuffer.shift_index_by" title="acoular.process.SamplesBuffer.shift_index_by"><code class="xref py py-attr docutils literal notranslate"><span class="pre">shift_index_by</span></code></a> attribute controls how the buffer updates its index when retrieving
+data. If set to <code class="docutils literal notranslate"><span class="pre">'num'</span></code>, the buffer returns <a class="reference internal" href="#acoular.process.SamplesBuffer.result_num" title="acoular.process.SamplesBuffer.result_num"><code class="xref py py-attr docutils literal notranslate"><span class="pre">result_num</span></code></a> samples but forgets <code class="docutils literal notranslate"><span class="pre">'num'</span></code>
+samples from the buffer.
+If set to <a class="reference internal" href="#acoular.process.SamplesBuffer.result_num" title="acoular.process.SamplesBuffer.result_num"><code class="xref py py-attr docutils literal notranslate"><span class="pre">result_num</span></code></a>, the buffer will return and forget the same number of samples.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">buffer</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">SamplesBuffer</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">result_num</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">shift_index_by</span><span class="o">=</span><span class="s1">&#39;num&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">block_sizes</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">block_sizes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="nb">next</span><span class="p">(</span><span class="n">buffer</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="mi">16</span><span class="p">))</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">... </span><span class="p">)</span>  <span class="c1"># this time, the buffer will return 20 samples, but the buffer will only forget the first 16 samples</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">buffer</span><span class="o">.</span><span class="n">result_num</span> <span class="o">=</span> <span class="mi">24</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">block_sizes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="nb">next</span><span class="p">(</span><span class="n">buffer</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="mi">16</span><span class="p">))</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">... </span><span class="p">)</span>  <span class="c1"># this time, the buffer will return 24 samples, but the buffer will only forget the first 16 samples</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">block_sizes</span><span class="p">,</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">24</span><span class="p">])</span>
+</pre></div>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.process.SamplesBuffer.length">
+<span class="sig-name descname"><span class="pre">length</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Int(desc='number</span> <span class="pre">of</span> <span class="pre">samples</span> <span class="pre">that</span> <span class="pre">fit</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">buffer')</span></em><a class="headerlink" href="#acoular.process.SamplesBuffer.length" title="Link to this definition">¶</a></dt>
+<dd><p>The number of samples that the buffer can hold.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.process.SamplesBuffer.source_num">
+<span class="sig-name descname"><span class="pre">source_num</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Union(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.process.SamplesBuffer.source_num" title="Link to this definition">¶</a></dt>
+<dd><p>The number of samples per block to obtain from the source. If set to <code class="docutils literal notranslate"><span class="pre">None</span></code>, the number of
+samples will be determined by the <code class="docutils literal notranslate"><span class="pre">num</span></code> argument of the <a class="reference internal" href="#acoular.process.SamplesBuffer.result" title="acoular.process.SamplesBuffer.result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">result()</span></code></a> method.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.process.SamplesBuffer.result_num">
+<span class="sig-name descname"><span class="pre">result_num</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Union(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.process.SamplesBuffer.result_num" title="Link to this definition">¶</a></dt>
+<dd><p>The number of samples to return from the buffer. If set to <code class="docutils literal notranslate"><span class="pre">None</span></code>, the number of
+samples will be determined by the <code class="docutils literal notranslate"><span class="pre">num</span></code> argument of the <a class="reference internal" href="#acoular.process.SamplesBuffer.result" title="acoular.process.SamplesBuffer.result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">result()</span></code></a> method.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.process.SamplesBuffer.shift_index_by">
+<span class="sig-name descname"><span class="pre">shift_index_by</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.process.SamplesBuffer.shift_index_by" title="Link to this definition">¶</a></dt>
+<dd><p>Index shift value for the buffer.</p>
+<ul class="simple">
+<li><p>If set to <code class="docutils literal notranslate"><span class="pre">'result_num'</span></code>, the buffer will return and forget <a class="reference internal" href="#acoular.process.SamplesBuffer.result_num" title="acoular.process.SamplesBuffer.result_num"><code class="xref py py-attr docutils literal notranslate"><span class="pre">result_num</span></code></a> samples.</p></li>
+<li><p>If set to <code class="docutils literal notranslate"><span class="pre">'num'</span></code>, the buffer will return <a class="reference internal" href="#acoular.process.SamplesBuffer.result_num" title="acoular.process.SamplesBuffer.result_num"><code class="xref py py-attr docutils literal notranslate"><span class="pre">result_num</span></code></a> samples but forget <code class="docutils literal notranslate"><span class="pre">num</span></code>
+samples.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.process.SamplesBuffer.level">
+<span class="sig-name descname"><span class="pre">level</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(desc='current</span> <span class="pre">filling</span> <span class="pre">level</span> <span class="pre">of</span> <span class="pre">buffer')</span></em><a class="headerlink" href="#acoular.process.SamplesBuffer.level" title="Link to this definition">¶</a></dt>
+<dd><p>The current filling level of the buffer, i.e., how many samples are currently available.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.process.SamplesBuffer.dtype">
+<span class="sig-name descname"><span class="pre">dtype</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Any(desc='data</span> <span class="pre">type</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">buffer')</span></em><a class="headerlink" href="#acoular.process.SamplesBuffer.dtype" title="Link to this definition">¶</a></dt>
+<dd><p>The data type of the elements in the buffer.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.process.SamplesBuffer.increase_buffer">
+<span class="sig-name descname"><span class="pre">increase_buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.process.SamplesBuffer.increase_buffer" title="Link to this definition">¶</a></dt>
+<dd><p>Increase the size of the buffer by a specified number of samples.</p>
+<p>This method expands the buffer by appending additional samples, effectively increasing
+its capacity. The new samples are initialized to zero. The index of the buffer is adjusted
+accordingly to accommodate the increase.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>num</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></dt><dd><p>The number of samples by which to increase the buffer size.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.process.SamplesBuffer.read_from_buffer">
+<span class="sig-name descname"><span class="pre">read_from_buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.process.SamplesBuffer.read_from_buffer" title="Link to this definition">¶</a></dt>
+<dd><p>Read a specified number of samples from the buffer.</p>
+<p>This method retrieves samples from the buffer, ensuring that the requested number of samples
+is returned. If the buffer contains fewer samples than requested, the method will return all
+available samples. The index of the buffer is updated based on the <a class="reference internal" href="#acoular.process.SamplesBuffer.shift_index_by" title="acoular.process.SamplesBuffer.shift_index_by"><code class="xref py py-attr docutils literal notranslate"><span class="pre">shift_index_by</span></code></a>
+setting.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>num</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></dt><dd><p>The number of samples to read from the buffer.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p>A block of samples (array) from the buffer.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul>
+<li><p>If the <a class="reference internal" href="#acoular.process.SamplesBuffer.result_num" title="acoular.process.SamplesBuffer.result_num"><code class="xref py py-attr docutils literal notranslate"><span class="pre">result_num</span></code></a> attribute is set, it determines the number of samples to return.</p></li>
+<li><p>The method ensures the buffer index is adjusted according to the <a class="reference internal" href="#acoular.process.SamplesBuffer.shift_index_by" title="acoular.process.SamplesBuffer.shift_index_by"><code class="xref py py-attr docutils literal notranslate"><span class="pre">shift_index_by</span></code></a>
+setting. Options are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'result_num'</span></code>: The index will shift by the number of samples returned.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'num'</span></code>: The index will shift by the number of samples requested (<code class="docutils literal notranslate"><span class="pre">num</span></code>).</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.process.SamplesBuffer.fill_buffer">
+<span class="sig-name descname"><span class="pre">fill_buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snum</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.process.SamplesBuffer.fill_buffer" title="Link to this definition">¶</a></dt>
+<dd><p>Fill the buffer with samples from the source.</p>
+<p>The <a class="reference internal" href="#acoular.process.SamplesBuffer.fill_buffer" title="acoular.process.SamplesBuffer.fill_buffer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">fill_buffer()</span></code></a> method collects samples from the source and writes them to the
+buffer. It continues to fill the buffer until there are enough samples available, or the
+source runs out of data. If the buffer reaches its maximum capacity, additional samples are
+discarded. The buffer will only contain the most recent data, and its index will be updated
+accordingly.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>snum</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></dt><dd><p>The number of samples to retrieve from the source in each iteration.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></dt><dd><p>This method is a generator and yields control back after filling the buffer.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The method ensures that the buffer is filled with the required number of samples,
+adjusting the buffer size if necessary (via the <a class="reference internal" href="#acoular.process.SamplesBuffer.increase_buffer" title="acoular.process.SamplesBuffer.increase_buffer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">increase_buffer()</span></code></a> method) when more
+space is needed.</p></li>
+<li><p>Once the buffer is filled, it yields control and resumes only when the buffer is ready for
+more data.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.process.SamplesBuffer.result">
+<span class="sig-name descname"><span class="pre">result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.process.SamplesBuffer.result" title="Link to this definition">¶</a></dt>
+<dd><p>Return blocks of samples from the buffer.</p>
+<p>The <a class="reference internal" href="#acoular.process.SamplesBuffer.result" title="acoular.process.SamplesBuffer.result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">result()</span></code></a> method retrieves blocks of samples from the buffer and yields them to the
+calling process. The number of samples per block is determined by the <code class="docutils literal notranslate"><span class="pre">num</span></code> argument, but
+can also be influenced by other attributes like <cite>result_num</cite> (if set). If the buffer is not
+yet filled, it will continue to collect samples from the source until the buffer contains
+enough data. Once the buffer is full, it will return the requested blocks of samples.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>num</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></dt><dd><p>The number of samples to return in each block.
+This value specifies the size of the blocks to be yielded from the buffer.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p>A block of samples from the buffer. The size of the block is determined by the <code class="docutils literal notranslate"><span class="pre">num</span></code>
+parameter or the <a class="reference internal" href="#acoular.process.SamplesBuffer.result_num" title="acoular.process.SamplesBuffer.result_num"><code class="xref py py-attr docutils literal notranslate"><span class="pre">result_num</span></code></a> attribute, depending on the buffer’s configuration.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>If <a class="reference internal" href="#acoular.process.SamplesBuffer.result_num" title="acoular.process.SamplesBuffer.result_num"><code class="xref py py-attr docutils literal notranslate"><span class="pre">result_num</span></code></a> is set, the method will use it to determine the number of samples
+returned instead of the <code class="docutils literal notranslate"><span class="pre">num</span></code> parameter.</p></li>
+<li><p>If the buffer is empty or does not have enough samples, it will attempt to fill the buffer
+by collecting data from the source. If there are not enough samples available from the
+source, the method will yield whatever samples are left in the buffer.</p></li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.process.SampleSplitter.html">SampleSplitter</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.process.html">process</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../acoular.sdinput.html">sdinput</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Jul 24, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

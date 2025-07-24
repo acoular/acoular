@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>acoular.sources.get_modes &#8212; Acoular 25.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=0b392bf7"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="spectra" href="../acoular.spectra.html" />
+    <link rel="prev" title="acoular.sources.get_radiation_angles" href="acoular.sources.get_radiation_angles.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.07 documentation</span></a></h1>
+        <h2 class="heading"><span>acoular.sources.get_modes</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.sources.get_radiation_angles.html">acoular.sources.get_radiation_angles</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.sources.html">sources</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../acoular.spectra.html">spectra</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="acoular-sources-get-modes">
+<h1>acoular.sources.get_modes<a class="headerlink" href="#acoular-sources-get-modes" title="Link to this heading">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="acoular.sources.get_modes">
+<span class="sig-prename descclassname"><span class="pre">acoular.sources.</span></span><span class="sig-name descname"><span class="pre">get_modes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lOrder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mpos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sourceposition</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.sources.get_modes" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the spherical harmonic radiation pattern at microphone positions.</p>
+<p>This function computes the spherical harmonic radiation pattern values at each
+microphone position for a given maximum spherical harmonic order (<code class="docutils literal notranslate"><span class="pre">lOrder</span></code>),
+orientation (<code class="docutils literal notranslate"><span class="pre">direction</span></code>), and optional source position (<code class="docutils literal notranslate"><span class="pre">sourceposition</span></code>).</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>lOrder</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></dt><dd><p>The maximum order of spherical harmonics to compute. The resulting modes will include all
+orders up to and including <code class="docutils literal notranslate"><span class="pre">lOrder</span></code>.</p>
+</dd>
+<dt><strong>direction</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of shape <code class="docutils literal notranslate"><span class="pre">(3,)</span></code></span></dt><dd><p>Unit vector representing the orientation of the spherical harmonics. Should contain the
+<code class="docutils literal notranslate"><span class="pre">x</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code>, and <code class="docutils literal notranslate"><span class="pre">z</span></code> components of the direction.</p>
+</dd>
+<dt><strong>mpos</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of shape <code class="docutils literal notranslate"><span class="pre">(3,</span> <span class="pre">N)</span></code></span></dt><dd><p>Microphone positions in a 3D Cartesian coordinate system. The array should have 3 rows (the
+<code class="docutils literal notranslate"><span class="pre">x</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code> and <code class="docutils literal notranslate"><span class="pre">z</span></code> coordinates) and <code class="docutils literal notranslate"><span class="pre">N</span></code> columns (one for each microphone).</p>
+</dd>
+<dt><strong>sourceposition</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of shape <code class="docutils literal notranslate"><span class="pre">(3,)</span></code>, optional</span></dt><dd><p>Position of the source in a 3D Cartesian coordinate system. If not provided, it defaults to
+the origin <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0]</span></code>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">(lOrder+1)</span> <span class="pre">**</span> <span class="pre">2)</span></code></dt><dd><p>Complex values representing the spherical harmonic radiation pattern at each microphone
+position (<code class="docutils literal notranslate"><span class="pre">N</span></code> microphones) for each spherical harmonic mode.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="acoular.sources.get_radiation_angles.html#acoular.sources.get_radiation_angles" title="acoular.sources.get_radiation_angles"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_radiation_angles()</span></code></a></dt><dd><p>Computes azimuth and elevation angles between microphones and the source.</p>
+</dd>
+<dt><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.sph_harm.html#scipy.special.sph_harm" title="(in SciPy v1.16.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scipy.special.sph_harm</span></code></a></dt><dd><p>Computes spherical harmonic values.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The azimuth (<code class="docutils literal notranslate"><span class="pre">azi</span></code>) and elevation (<code class="docutils literal notranslate"><span class="pre">ele</span></code>) angles between the microphones and the source
+are calculated using the <a class="reference internal" href="acoular.sources.get_radiation_angles.html#acoular.sources.get_radiation_angles" title="acoular.sources.get_radiation_angles"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_radiation_angles()</span></code></a> function.</p></li>
+<li><p>Spherical harmonics (<code class="docutils literal notranslate"><span class="pre">sph_harm</span></code>) are computed for each mode <code class="docutils literal notranslate"><span class="pre">(l,</span> <span class="pre">m)</span></code>, where <code class="docutils literal notranslate"><span class="pre">l</span></code> is the
+degree (ranging from <code class="docutils literal notranslate"><span class="pre">0</span></code> to <code class="docutils literal notranslate"><span class="pre">lOrder</span></code>) and <code class="docutils literal notranslate"><span class="pre">m</span></code> is the order
+(ranging from <code class="docutils literal notranslate"><span class="pre">-l</span></code> to <code class="docutils literal notranslate"><span class="pre">+l</span></code>).</p></li>
+<li><p>For negative orders (<cite>m &lt; 0</cite>), the conjugate of the spherical harmonic is computed and scaled
+by the imaginary unit <code class="docutils literal notranslate"><span class="pre">1j</span></code>.</p></li>
+</ul>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">acoular</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ac</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lOrder</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">direction</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>  <span class="c1"># Orientation along z-axis</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mpos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>  <span class="c1"># Two microphones</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sourcepos</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>  <span class="c1"># Source at origin</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">modes</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">sources</span><span class="o">.</span><span class="n">get_modes</span><span class="p">(</span><span class="n">lOrder</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">mpos</span><span class="p">,</span> <span class="n">sourcepos</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">modes</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(2, 9)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.sources.get_radiation_angles.html">acoular.sources.get_radiation_angles</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.sources.html">sources</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../acoular.spectra.html">spectra</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Jul 24, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

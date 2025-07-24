@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>FiltFreqWeight &#8212; Acoular 25.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=0b392bf7"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="OctaveFilterBank" href="acoular.tprocess.OctaveFilterBank.html" />
+    <link rel="prev" title="TimeExpAverage" href="acoular.tprocess.TimeExpAverage.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.07 documentation</span></a></h1>
+        <h2 class="heading"><span>FiltFreqWeight</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tprocess.TimeExpAverage.html">TimeExpAverage</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tprocess.html">tprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tprocess.OctaveFilterBank.html">OctaveFilterBank</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="filtfreqweight">
+<h1>FiltFreqWeight<a class="headerlink" href="#filtfreqweight" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.tprocess.FiltFreqWeight">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.tprocess.</span></span><span class="sig-name descname"><span class="pre">FiltFreqWeight</span></span><a class="headerlink" href="#acoular.tprocess.FiltFreqWeight" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.tprocess.Filter.html#acoular.tprocess.Filter" title="acoular.tprocess.Filter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Filter</span></code></a></p>
+<p>Apply frequency weighting according to IEC 61672-1.</p>
+<p>This filter implements frequency weighting curves commonly used in sound level meters for noise
+measurement. It provides A-weighting, C-weighting, and Z-weighting options.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="acoular.tprocess.Filter.html#acoular.tprocess.Filter" title="acoular.tprocess.Filter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Filter</span></code></a></dt><dd><p>Base class for implementing IIR filters.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The filter is designed following IEC 61672-1:2002, the standard for sound level meters.</p></li>
+<li><p>The weighting curves are implemented using bilinear transformation of analog filter
+coefficients to the discrete domain.</p></li>
+</ul>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.FiltFreqWeight.weight">
+<span class="sig-name descname"><span class="pre">weight</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum('A',</span> <span class="pre">'C',</span> <span class="pre">'Z',</span> <span class="pre">desc='frequency</span> <span class="pre">weighting')</span></em><a class="headerlink" href="#acoular.tprocess.FiltFreqWeight.weight" title="Link to this definition">¶</a></dt>
+<dd><p>Defines the frequency weighting curve:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'A'</span></code>: Mimics human hearing sensitivity at low sound levels.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'C'</span></code>: Used for high-level sound measurements with less attenuation at low frequencies.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'Z'</span></code>: A flat response with no frequency weighting.</p></li>
+</ul>
+<p>Default is <code class="docutils literal notranslate"><span class="pre">'A'</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.FiltFreqWeight.sos">
+<span class="sig-name descname"><span class="pre">sos</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['weight',</span> <span class="pre">'source.digest'])</span></em><a class="headerlink" href="#acoular.tprocess.FiltFreqWeight.sos" title="Link to this definition">¶</a></dt>
+<dd><p>Second-order sections (SOS) representation of the filter coefficients. This property is
+dynamically computed based on <a class="reference internal" href="#acoular.tprocess.FiltFreqWeight.weight" title="acoular.tprocess.FiltFreqWeight.weight"><code class="xref py py-attr docutils literal notranslate"><span class="pre">weight</span></code></a> and the <a class="reference internal" href="acoular.tprocess.Filter.html#acoular.tprocess.Filter.source" title="acoular.tprocess.Filter.source"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Filter.source</span></code></a>’s digest.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.FiltFreqWeight.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['source.digest',</span> <span class="pre">'weight'])</span></em><a class="headerlink" href="#acoular.tprocess.FiltFreqWeight.digest" title="Link to this definition">¶</a></dt>
+<dd><p>A unique identifier for the filter, based on its properties. (read-only)</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tprocess.TimeExpAverage.html">TimeExpAverage</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tprocess.html">tprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tprocess.OctaveFilterBank.html">OctaveFilterBank</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Jul 24, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>acoular.deprecation.deprecated_alias &#8212; Acoular 25.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=0b392bf7"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="environments" href="../acoular.environments.html" />
+    <link rel="prev" title="deprecation" href="../acoular.deprecation.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.07 documentation</span></a></h1>
+        <h2 class="heading"><span>acoular.deprecation.deprecated_alias</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.deprecation.html">deprecation</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.deprecation.html">deprecation</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../acoular.environments.html">environments</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="acoular-deprecation-deprecated-alias">
+<h1>acoular.deprecation.deprecated_alias<a class="headerlink" href="#acoular-deprecation-deprecated-alias" title="Link to this heading">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="acoular.deprecation.deprecated_alias">
+<span class="sig-prename descclassname"><span class="pre">acoular.deprecation.</span></span><span class="sig-name descname"><span class="pre">deprecated_alias</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">old2new</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">read_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">removal_version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.deprecation.deprecated_alias" title="Link to this definition">¶</a></dt>
+<dd><p>Decorator function for deprecating renamed class traits.</p>
+<p>Replaced traits should no longer be part of the class definition
+and only mentioned in this decorator’s parameter list.
+The replacement trait has to be defined in the updated class and
+will be mapped to the deprecated name via this function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>old2new: dict</strong></dt><dd><p>Dictionary containing the deprecated trait names as keys and
+their new names as values.</p>
+</dd>
+<dt><strong>read_only: bool or list</strong></dt><dd><p>If True, all deprecated traits will be “read only”.
+If False (default), all deprecated traits can be read and set.
+If list, traits whose names are in list will be “read only”.</p>
+</dd>
+<dt><strong>removal_version: string or dict</strong></dt><dd><p>Adds the acoular version of trait removal to the deprecation message.
+If a non-empty string, it will be interpreted as the acoular version when
+all traits in the list will be deprecated.
+If a dictionary, the keys are expected to be trait names and the values
+are the removal version as strings.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="../acoular.deprecation.html">deprecation</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.deprecation.html">deprecation</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../acoular.environments.html">environments</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Jul 24, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

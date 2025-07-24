@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>FiltWNoiseGenerator &#8212; Acoular 25.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=0b392bf7"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="SineGenerator" href="acoular.signals.SineGenerator.html" />
+    <link rel="prev" title="PNoiseGenerator" href="acoular.signals.PNoiseGenerator.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.07 documentation</span></a></h1>
+        <h2 class="heading"><span>FiltWNoiseGenerator</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.signals.PNoiseGenerator.html">PNoiseGenerator</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.signals.html">signals</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.signals.SineGenerator.html">SineGenerator</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="filtwnoisegenerator">
+<h1>FiltWNoiseGenerator<a class="headerlink" href="#filtwnoisegenerator" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.signals.FiltWNoiseGenerator">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.signals.</span></span><span class="sig-name descname"><span class="pre">FiltWNoiseGenerator</span></span><a class="headerlink" href="#acoular.signals.FiltWNoiseGenerator" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.signals.WNoiseGenerator.html#acoular.signals.WNoiseGenerator" title="acoular.signals.WNoiseGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">WNoiseGenerator</span></code></a></p>
+<p>Generate filtered white noise using an <strong>AR</strong>, <strong>MA</strong>, or <strong>ARMA</strong> process.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>AR:</strong> autoregressive (<a class="reference internal" href="#acoular.signals.FiltWNoiseGenerator.ar" title="acoular.signals.FiltWNoiseGenerator.ar"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ar</span></code></a>)</p></li>
+<li><p><strong>MA:</strong> moving-average (<a class="reference internal" href="#acoular.signals.FiltWNoiseGenerator.ma" title="acoular.signals.FiltWNoiseGenerator.ma"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ma</span></code></a>)</p></li>
+<li><p><strong>ARMA:</strong> autoregressive moving-average</p></li>
+</ul>
+</div></blockquote>
+<p>This class extends the <a class="reference internal" href="acoular.signals.WNoiseGenerator.html#acoular.signals.WNoiseGenerator" title="acoular.signals.WNoiseGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">WNoiseGenerator</span></code></a> class to apply a digital filter to white noise,
+producing a signal with specific characteristics based on the provided filter coefficients.
+The desired filter is defined using the autoregressive coefficients (<a class="reference internal" href="#acoular.signals.FiltWNoiseGenerator.ar" title="acoular.signals.FiltWNoiseGenerator.ar"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ar</span></code></a>) and
+moving-average coefficients (<a class="reference internal" href="#acoular.signals.FiltWNoiseGenerator.ma" title="acoular.signals.FiltWNoiseGenerator.ma"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ma</span></code></a>).</p>
+<p>The filter is implemented as a series of second-order sections (sos) for numerical stability,
+especially at high filter orders.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="acoular.signals.WNoiseGenerator.html#acoular.signals.WNoiseGenerator" title="acoular.signals.WNoiseGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">WNoiseGenerator</span></code></a></dt><dd><p>For white noise generation.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The output signal is adjusted for the group delay introduced by the filter, ensuring
+proper alignment of the filtered signal.</p></li>
+<li><p>The RMS value specified in the <a class="reference internal" href="acoular.signals.NoiseGenerator.html#acoular.signals.NoiseGenerator.rms" title="acoular.signals.NoiseGenerator.rms"><code class="xref py py-attr docutils literal notranslate"><span class="pre">rms</span></code></a> attribute corresponds to the
+original white noise signal and not the filtered output.</p></li>
+</ul>
+<p class="rubric">Examples</p>
+<p>Generate filtered white noise using <a class="reference internal" href="#acoular.signals.FiltWNoiseGenerator.ar" title="acoular.signals.FiltWNoiseGenerator.ar"><code class="xref py py-attr docutils literal notranslate"><span class="pre">AR</span></code></a> and <a class="reference internal" href="#acoular.signals.FiltWNoiseGenerator.ma" title="acoular.signals.FiltWNoiseGenerator.ma"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MA</span></code></a> coefficients:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">acoular</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ac</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Define AR and MA coefficients</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create generator</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gen</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">FiltWNoiseGenerator</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">rms</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">sample_freq</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">num_samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">ar</span><span class="o">=</span><span class="n">ar</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">ma</span><span class="o">=</span><span class="n">ma</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Generate signal</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">signal</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">signal</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">signal</span><span class="p">[:</span><span class="mi">10</span><span class="p">])</span>  <span class="c1"># Print the first 10 samples</span>
+<span class="go">[0.24835708 0.30340346 0.40641385 1.28856612 1.2887213  0.41021549</span>
+<span class="go"> 0.87764567 1.61214661 0.95505348 0.51406957]</span>
+</pre></div>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.signals.FiltWNoiseGenerator.ar">
+<span class="sig-name descname"><span class="pre">ar</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CArray(value=array([]),</span> <span class="pre">dtype=float,</span> <span class="pre">desc='autoregressive</span> <span class="pre">coefficients</span> <span class="pre">(coefficients</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">denominator)')</span></em><a class="headerlink" href="#acoular.signals.FiltWNoiseGenerator.ar" title="Link to this definition">¶</a></dt>
+<dd><p>A <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of autoregressive coefficients (denominator). Default is <code class="docutils literal notranslate"><span class="pre">[]</span></code>,
+which results in no AR filtering (i.e., all-pole filter is <code class="docutils literal notranslate"><span class="pre">[1.0]</span></code>).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.signals.FiltWNoiseGenerator.ma">
+<span class="sig-name descname"><span class="pre">ma</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CArray(value=array([]),</span> <span class="pre">dtype=float,</span> <span class="pre">desc='moving-average</span> <span class="pre">coefficients</span> <span class="pre">(coefficients</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">numerator)')</span></em><a class="headerlink" href="#acoular.signals.FiltWNoiseGenerator.ma" title="Link to this definition">¶</a></dt>
+<dd><p>A <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of moving-average coefficients (numerator). Default is <code class="docutils literal notranslate"><span class="pre">[]</span></code>,
+which results in no MA filtering (i.e., all-zero filter is <code class="docutils literal notranslate"><span class="pre">[1.0]</span></code>).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.signals.FiltWNoiseGenerator.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['rms',</span> <span class="pre">'seed',</span> <span class="pre">'sample_freq',</span> <span class="pre">'num_samples',</span> <span class="pre">'ar',</span> <span class="pre">'ma'])</span></em><a class="headerlink" href="#acoular.signals.FiltWNoiseGenerator.digest" title="Link to this definition">¶</a></dt>
+<dd><p>A unique checksum identifier based on the object properties. (read-only)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.signals.FiltWNoiseGenerator.handle_empty_coefficients">
+<span class="sig-name descname"><span class="pre">handle_empty_coefficients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coefficients</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.signals.FiltWNoiseGenerator.handle_empty_coefficients" title="Link to this definition">¶</a></dt>
+<dd><p>Handle empty filter coefficient arrays by returning a default value.</p>
+<p>This method ensures that both the autoregressive (<a class="reference internal" href="#acoular.signals.FiltWNoiseGenerator.ar" title="acoular.signals.FiltWNoiseGenerator.ar"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ar</span></code></a>) and moving-average
+(<a class="reference internal" href="#acoular.signals.FiltWNoiseGenerator.ma" title="acoular.signals.FiltWNoiseGenerator.ma"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ma</span></code></a>) coefficients are non-empty before filtering. If a coefficient array is empty,
+it is replaced with a default array containing a single value of <code class="docutils literal notranslate"><span class="pre">1.0</span></code>.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>coefficients</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></span></dt><dd><p>Array of filter coefficients to check.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p>The original array if it is non-empty, or a default array containing <code class="docutils literal notranslate"><span class="pre">[1.0]</span></code>
+if the input array is empty.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.signals.FiltWNoiseGenerator.signal">
+<span class="sig-name descname"><span class="pre">signal</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#acoular.signals.FiltWNoiseGenerator.signal" title="Link to this definition">¶</a></dt>
+<dd><p>Generate and return the filtered white noise signal.</p>
+<p>This method creates a white noise signal with the specified
+<a class="reference internal" href="acoular.signals.NoiseGenerator.html#acoular.signals.NoiseGenerator.rms" title="acoular.signals.NoiseGenerator.rms"><code class="xref py py-attr docutils literal notranslate"><span class="pre">RMS</span> <span class="pre">value</span></code></a> and <a class="reference internal" href="acoular.signals.NoiseGenerator.html#acoular.signals.NoiseGenerator.seed" title="acoular.signals.NoiseGenerator.seed"><code class="xref py py-attr docutils literal notranslate"><span class="pre">seed</span></code></a>, then filters it
+using the autoregressive (<a class="reference internal" href="#acoular.signals.FiltWNoiseGenerator.ar" title="acoular.signals.FiltWNoiseGenerator.ar"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ar</span></code></a>) and moving-average (<a class="reference internal" href="#acoular.signals.FiltWNoiseGenerator.ma" title="acoular.signals.FiltWNoiseGenerator.ma"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ma</span></code></a>) coefficients.
+The filtering process compensates for group delay introduced by the filter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floats</span></code></a></dt><dd><p>An array representing the filtered white noise signal. The length of the returned array
+is equal to <a class="reference internal" href="acoular.signals.SignalGenerator.html#acoular.signals.SignalGenerator.num_samples" title="acoular.signals.SignalGenerator.num_samples"><code class="xref py py-attr docutils literal notranslate"><span class="pre">the</span> <span class="pre">number</span> <span class="pre">of</span> <span class="pre">samples</span></code></a>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.signals.PNoiseGenerator.html">PNoiseGenerator</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.signals.html">signals</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.signals.SineGenerator.html">SineGenerator</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Jul 24, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

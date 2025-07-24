@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>FilterBank &#8212; Acoular 25.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=0b392bf7"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="FiltFiltOctave" href="acoular.tprocess.FiltFiltOctave.html" />
+    <link rel="prev" title="Filter" href="acoular.tprocess.Filter.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.07 documentation</span></a></h1>
+        <h2 class="heading"><span>FilterBank</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tprocess.Filter.html">Filter</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tprocess.html">tprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tprocess.FiltFiltOctave.html">FiltFiltOctave</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="filterbank">
+<h1>FilterBank<a class="headerlink" href="#filterbank" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.tprocess.FilterBank">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.tprocess.</span></span><span class="sig-name descname"><span class="pre">FilterBank</span></span><a class="headerlink" href="#acoular.tprocess.FilterBank" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.base.TimeOut.html#acoular.base.TimeOut" title="acoular.base.TimeOut"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeOut</span></code></a></p>
+<p>Abstract base class for IIR filter banks based on <code class="xref py py-mod docutils literal notranslate"><span class="pre">scipy.signal.lfilter</span></code>.</p>
+<p>Implements a bank of parallel filters. This class should not be instantiated by itself.</p>
+<p>Inherits from <a class="reference internal" href="acoular.base.TimeOut.html#acoular.base.TimeOut" title="acoular.base.TimeOut"><code class="xref py py-class docutils literal notranslate"><span class="pre">acoular.base.TimeOut</span></code></a>, and defines the structure for working with filter
+banks for processing multi-channel time series data, such as time signal signals.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="acoular.base.TimeOut.html#acoular.base.TimeOut" title="acoular.base.TimeOut"><code class="xref py py-class docutils literal notranslate"><span class="pre">acoular.base.TimeOut</span></code></a></dt><dd><p>ABC for signal processing blocks that interact with data from a source.</p>
+</dd>
+<dt><a class="reference internal" href="acoular.base.SamplesGenerator.html#acoular.base.SamplesGenerator" title="acoular.base.SamplesGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">acoular.base.SamplesGenerator</span></code></a></dt><dd><p>Interface for any generating multi-channel time domain signal processing block.</p>
+</dd>
+<dt><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/signal.html#module-scipy.signal" title="(in SciPy v1.16.0)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scipy.signal</span></code></a></dt><dd><p>SciPy module for signal processing.</p>
+</dd>
+</dl>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.FilterBank.source">
+<span class="sig-name descname"><span class="pre">source</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Instance(SamplesGenerator)</span></em><a class="headerlink" href="#acoular.tprocess.FilterBank.source" title="Link to this definition">¶</a></dt>
+<dd><p>The input data source. It must be an instance of a
+<a class="reference internal" href="acoular.base.SamplesGenerator.html#acoular.base.SamplesGenerator" title="acoular.base.SamplesGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplesGenerator</span></code></a>-derived class.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.FilterBank.sos">
+<span class="sig-name descname"><span class="pre">sos</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property()</span></em><a class="headerlink" href="#acoular.tprocess.FilterBank.sos" title="Link to this definition">¶</a></dt>
+<dd><p>The list containing second order section (SOS) coefficients for the filters in the filter
+bank.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.FilterBank.bands">
+<span class="sig-name descname"><span class="pre">bands</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property()</span></em><a class="headerlink" href="#acoular.tprocess.FilterBank.bands" title="Link to this definition">¶</a></dt>
+<dd><p>A list of labels describing the different frequency bands of the filter bank.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.FilterBank.num_bands">
+<span class="sig-name descname"><span class="pre">num_bands</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property()</span></em><a class="headerlink" href="#acoular.tprocess.FilterBank.num_bands" title="Link to this definition">¶</a></dt>
+<dd><p>The total number of bands in the filter bank.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.FilterBank.num_channels">
+<span class="sig-name descname"><span class="pre">num_channels</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property()</span></em><a class="headerlink" href="#acoular.tprocess.FilterBank.num_channels" title="Link to this definition">¶</a></dt>
+<dd><p>The total number of output channels resulting from the filter bank operation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.tprocess.FilterBank.result">
+<span class="sig-name descname"><span class="pre">result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.tprocess.FilterBank.result" title="Link to this definition">¶</a></dt>
+<dd><p>Yield the bandpass filtered output of the source in blocks of samples.</p>
+<p>This method uses the second order section coefficients (<a class="reference internal" href="#acoular.tprocess.FilterBank.sos" title="acoular.tprocess.FilterBank.sos"><code class="xref py py-attr docutils literal notranslate"><span class="pre">sos</span></code></a>) to filter the input
+samples provided by the source in blocks. The result is returned as a generator.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>num</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a></span></dt><dd><p>Number of samples per block.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p>An array of shape (<code class="docutils literal notranslate"><span class="pre">num</span></code>, <a class="reference internal" href="#acoular.tprocess.FilterBank.num_channels" title="acoular.tprocess.FilterBank.num_channels"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_channels</span></code></a>), delivering the filtered
+samples for each band.
+The last block may contain fewer samples if the total number of samples is not
+a multiple of <code class="docutils literal notranslate"><span class="pre">num</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The returned samples are bandpass filtered according to the coefficients in
+<a class="reference internal" href="#acoular.tprocess.FilterBank.sos" title="acoular.tprocess.FilterBank.sos"><code class="xref py py-attr docutils literal notranslate"><span class="pre">sos</span></code></a>. Each block corresponds to the filtered samples for each frequency band.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tprocess.Filter.html">Filter</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tprocess.html">tprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tprocess.FiltFiltOctave.html">FiltFiltOctave</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Jul 24, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>MergeGrid &#8212; Acoular 25.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=0b392bf7"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Sector" href="acoular.grids.Sector.html" />
+    <link rel="prev" title="LineGrid" href="acoular.grids.LineGrid.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.07 documentation</span></a></h1>
+        <h2 class="heading"><span>MergeGrid</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.grids.LineGrid.html">LineGrid</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.grids.html">grids</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.grids.Sector.html">Sector</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="mergegrid">
+<h1>MergeGrid<a class="headerlink" href="#mergegrid" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.grids.MergeGrid">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.grids.</span></span><span class="sig-name descname"><span class="pre">MergeGrid</span></span><a class="headerlink" href="#acoular.grids.MergeGrid" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.grids.Grid.html#acoular.grids.Grid" title="acoular.grids.Grid"><code class="xref py py-class docutils literal notranslate"><span class="pre">Grid</span></code></a></p>
+<p>Base class for merging multiple grid geometries.</p>
+<p>The <cite>MergeGrid</cite> class allows the combination of multiple grid geometries into a single unified
+grid. Each input grid is assigned a subdomain in the resulting grid, and all properties, such as
+positions and identifiers, are appropriately merged.</p>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The merged grid eliminates duplicate points based on their positions.</p></li>
+<li><p>Each subgrid retains its original grid properties, such as digest and size.</p></li>
+</ul>
+<p class="rubric">Examples</p>
+<p>Merging two simple grids:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">acoular</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ac</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">grid1</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">LineGrid</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">direction</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_points</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">grid2</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">LineGrid</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">direction</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_points</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">merged_grid</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">MergeGrid</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">merged_grid</span><span class="o">.</span><span class="n">grids</span> <span class="o">=</span> <span class="p">[</span><span class="n">grid1</span><span class="p">,</span> <span class="n">grid2</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">merged_grid</span><span class="o">.</span><span class="n">size</span>
+<span class="go">5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">merged_grid</span><span class="o">.</span><span class="n">pos</span>
+<span class="go">array([[0. , 0. , 0. , 0.5, 1. ],</span>
+<span class="go">       [0. , 0.5, 1. , 0. , 0. ],</span>
+<span class="go">       [0. , 0. , 0. , 0. , 0. ]])</span>
+</pre></div>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.grids.MergeGrid.grids">
+<span class="sig-name descname"><span class="pre">grids</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">List(desc='list</span> <span class="pre">of</span> <span class="pre">grids')</span></em><a class="headerlink" href="#acoular.grids.MergeGrid.grids" title="Link to this definition">¶</a></dt>
+<dd><p>A list of <a class="reference internal" href="acoular.grids.Grid.html#acoular.grids.Grid" title="acoular.grids.Grid"><code class="xref py py-class docutils literal notranslate"><span class="pre">Grid</span></code></a> objects to be merged. Each grid is treated as a subdomain in the
+resulting merged grid.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.grids.MergeGrid.grid_digest">
+<span class="sig-name descname"><span class="pre">grid_digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Str(desc='digest</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">merged</span> <span class="pre">grids')</span></em><a class="headerlink" href="#acoular.grids.MergeGrid.grid_digest" title="Link to this definition">¶</a></dt>
+<dd><p>A list of unique digests for each grid being merged. (read-only)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.grids.MergeGrid.subgrids">
+<span class="sig-name descname"><span class="pre">subgrids</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(desc='names</span> <span class="pre">of</span> <span class="pre">subgrids</span> <span class="pre">for</span> <span class="pre">each</span> <span class="pre">point')</span></em><a class="headerlink" href="#acoular.grids.MergeGrid.subgrids" title="Link to this definition">¶</a></dt>
+<dd><p>Names of subgrids corresponding to each point in the merged grid. (read-only)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.grids.MergeGrid.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['grids',</span> <span class="pre">'grid_digest'])</span></em><a class="headerlink" href="#acoular.grids.MergeGrid.digest" title="Link to this definition">¶</a></dt>
+<dd><p>A unique identifier for the grid, based on its properties. (read-only)</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.grids.LineGrid.html">LineGrid</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.grids.html">grids</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.grids.Sector.html">Sector</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Jul 24, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

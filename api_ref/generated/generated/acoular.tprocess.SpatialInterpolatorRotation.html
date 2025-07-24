@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>SpatialInterpolatorRotation &#8212; Acoular 25.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=0b392bf7"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="SpatialInterpolatorConstantRotation" href="acoular.tprocess.SpatialInterpolatorConstantRotation.html" />
+    <link rel="prev" title="SpatialInterpolator" href="acoular.tprocess.SpatialInterpolator.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.07 documentation</span></a></h1>
+        <h2 class="heading"><span>SpatialInterpolatorRotation</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tprocess.SpatialInterpolator.html">SpatialInterpolator</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tprocess.html">tprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tprocess.SpatialInterpolatorConstantRotation.html">SpatialInterpolatorConstantRotation</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="spatialinterpolatorrotation">
+<h1>SpatialInterpolatorRotation<a class="headerlink" href="#spatialinterpolatorrotation" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.tprocess.SpatialInterpolatorRotation">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.tprocess.</span></span><span class="sig-name descname"><span class="pre">SpatialInterpolatorRotation</span></span><a class="headerlink" href="#acoular.tprocess.SpatialInterpolatorRotation" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.tprocess.SpatialInterpolator.html#acoular.tprocess.SpatialInterpolator" title="acoular.tprocess.SpatialInterpolator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpatialInterpolator</span></code></a></p>
+<p>Spatial interpolation class for rotating sound sources.</p>
+<p>This class extends <a class="reference internal" href="acoular.tprocess.SpatialInterpolator.html#acoular.tprocess.SpatialInterpolator" title="acoular.tprocess.SpatialInterpolator"><code class="xref py py-attr docutils literal notranslate"><span class="pre">SpatialInterpolator</span></code></a> to handle sources that undergo rotational
+movement. It retrieves samples from the <code class="xref py py-attr docutils literal notranslate"><span class="pre">source</span></code> attribute and angle data from the
+<a class="reference internal" href="acoular.tprocess.AngleTracker.html#acoular.tprocess.AngleTracker" title="acoular.tprocess.AngleTracker"><code class="xref py py-attr docutils literal notranslate"><span class="pre">AngleTracker</span></code></a> instance (<a class="reference internal" href="#acoular.tprocess.SpatialInterpolatorRotation.angle_source" title="acoular.tprocess.SpatialInterpolatorRotation.angle_source"><code class="xref py py-attr docutils literal notranslate"><span class="pre">angle_source</span></code></a>). Using these inputs, it computes
+interpolated outputs through the <a class="reference internal" href="#acoular.tprocess.SpatialInterpolatorRotation.result" title="acoular.tprocess.SpatialInterpolatorRotation.result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">result()</span></code></a> generator method.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="acoular.tprocess.SpatialInterpolator.html#acoular.tprocess.SpatialInterpolator" title="acoular.tprocess.SpatialInterpolator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpatialInterpolator</span></code></a></dt><dd><p>Base class for spatial interpolation of microphone data.</p>
+</dd>
+</dl>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.SpatialInterpolatorRotation.angle_source">
+<span class="sig-name descname"><span class="pre">angle_source</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Instance(AngleTracker)</span></em><a class="headerlink" href="#acoular.tprocess.SpatialInterpolatorRotation.angle_source" title="Link to this definition">¶</a></dt>
+<dd><p>Provides real-time tracking of the source’s rotation angles,
+instance of <a class="reference internal" href="acoular.tprocess.AngleTracker.html#acoular.tprocess.AngleTracker" title="acoular.tprocess.AngleTracker"><code class="xref py py-attr docutils literal notranslate"><span class="pre">AngleTracker</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.tprocess.SpatialInterpolatorRotation.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.tprocess.SpatialInterpolatorRotation.digest" title="Link to this definition">¶</a></dt>
+<dd><p>Unique identifier for the current configuration of the interpolator. (read-only)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.tprocess.SpatialInterpolatorRotation.result">
+<span class="sig-name descname"><span class="pre">result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">128</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.tprocess.SpatialInterpolatorRotation.result" title="Link to this definition">¶</a></dt>
+<dd><p>Generate interpolated output samples in block-wise fashion.</p>
+<p>This method acts as a generator, yielding time-domain time signal samples that have been
+spatially interpolated based on rotational movement.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>num</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>, optional</span></dt><dd><p>Number of samples per block. Default is <code class="docutils literal notranslate"><span class="pre">128</span></code>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p>Interpolated time signal samples in blocks of shape
+(<code class="docutils literal notranslate"><span class="pre">num</span></code>, <a class="reference internal" href="acoular.tprocess.SpatialInterpolator.html#acoular.tprocess.SpatialInterpolator.num_channels" title="acoular.tprocess.SpatialInterpolator.num_channels"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_channels</span></code></a>), where
+<a class="reference internal" href="acoular.tprocess.SpatialInterpolator.html#acoular.tprocess.SpatialInterpolator.num_channels" title="acoular.tprocess.SpatialInterpolator.num_channels"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_channels</span></code></a> is inherited from the
+<a class="reference internal" href="acoular.tprocess.SpatialInterpolator.html#acoular.tprocess.SpatialInterpolator" title="acoular.tprocess.SpatialInterpolator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpatialInterpolator</span></code></a> base class.
+The last block may contain fewer samples if the total number of samples is not
+a multiple of <code class="docutils literal notranslate"><span class="pre">num</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tprocess.SpatialInterpolator.html">SpatialInterpolator</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tprocess.html">tprocess</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.tprocess.SpatialInterpolatorConstantRotation.html">SpatialInterpolatorConstantRotation</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Jul 24, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>acoular.tools.utils.mole_fraction_of_water_vapor &#8212; Acoular 25.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../../_static/documentation_options.js?v=0b392bf7"></script>
+    <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="icon" href="../../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="tprocess" href="../../acoular.tprocess.html" />
+    <link rel="prev" title="acoular.tools.utils.find_basename" href="acoular.tools.utils.find_basename.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../../index.html">
+          <span>Acoular 25.07 documentation</span></a></h1>
+        <h2 class="heading"><span>acoular.tools.utils.mole_fraction_of_water_vapor</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tools.utils.find_basename.html">acoular.tools.utils.find_basename</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tools.utils.html">utils</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../../acoular.tprocess.html">tprocess</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="acoular-tools-utils-mole-fraction-of-water-vapor">
+<h1>acoular.tools.utils.mole_fraction_of_water_vapor<a class="headerlink" href="#acoular-tools-utils-mole-fraction-of-water-vapor" title="Link to this heading">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="acoular.tools.utils.mole_fraction_of_water_vapor">
+<span class="sig-prename descclassname"><span class="pre">acoular.tools.utils.</span></span><span class="sig-name descname"><span class="pre">mole_fraction_of_water_vapor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">h</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">101325</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.tools.utils.mole_fraction_of_water_vapor" title="Link to this definition">¶</a></dt>
+<dd><p>Mole fraction of water vapor in the air for real gases.</p>
+<p>Calculates the mole fraction of water vapor in air from the relative humidity,
+based on the equations provided in the appendix of <span id="id1">[<a class="reference internal" href="../../../../literature/index.html#id3" title="Owen Cramer. The variation of the specific heat ratio and the speed of sound in air with temperature, pressure, humidity, and CO2 concentration. The Journal of the Acoustical Society of America, 93(5):2510–2516, May 1993. doi:10.1121/1.405827.">22</a>]</span> and
+the enhancement factors from <span id="id2">[<a class="reference internal" href="../../../../literature/index.html#id2" title="R S Davis. Equation for the determination of the density of moist air (1981/91). Metrologia, 29(1):67–70, 1992. doi:10.1088/0026-1394/29/1/008.">23</a>]</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>h</strong><span class="classifier">float</span></dt><dd><p>Relative humidity as a fraction [0,1].</p>
+</dd>
+<dt><strong>t</strong><span class="classifier">float</span></dt><dd><p>Thermodynamic temperature in K.</p>
+</dd>
+<dt><strong>p</strong><span class="classifier">float</span></dt><dd><p>Atmospheric pressure in Pa (default is the standard pressure 101325 Pa).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>float</dt><dd><p>Mole fraction of water vapor.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The mole fraction is calculated as:</p>
+<div class="math notranslate nohighlight">
+\[x_w = h \cdot f \cdot \frac{p_{sv}}{p},\]</div>
+<dl>
+<dt>where:</dt><dd><ul>
+<li><p><span class="math notranslate nohighlight">\(h\)</span> is the relative humidity as a fraction [0,1].</p></li>
+<li><p><span class="math notranslate nohighlight">\(f\)</span> is the enhancement factor:</p>
+<div class="math notranslate nohighlight">
+\[f = 1.00062 + 3.14 \times 10^{-8} \cdot p + 5.6 \times 10^{-7} \cdot t^2.\]</div>
+</li>
+<li><p><span class="math notranslate nohighlight">\(p_{sv}\)</span> is the saturation vapor pressure of water vapor in air:</p>
+<div class="math notranslate nohighlight">
+\[p_{sv} = \exp(A \cdot t^2 + B \cdot t + C + \frac{D}{t}),\]</div>
+<p>with the updated coefficients from <span id="id3">[<a class="reference internal" href="../../../../literature/index.html#id2" title="R S Davis. Equation for the determination of the density of moist air (1981/91). Metrologia, 29(1):67–70, 1992. doi:10.1088/0026-1394/29/1/008.">23</a>]</span>:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}A = 1.2378847 \times 10^{-5}, \\
+B = -1.9121316 \times 10^{-2}, \\
+C = 33.93711047, \\
+D = -6.3431645 \times 10^3.\end{split}\]</div>
+</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.tools.utils.find_basename.html">acoular.tools.utils.find_basename</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.tools.utils.html">utils</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../../acoular.tprocess.html">tprocess</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Jul 24, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

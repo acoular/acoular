@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>WNoiseGenerator &#8212; Acoular 25.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=0b392bf7"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="PNoiseGenerator" href="acoular.signals.PNoiseGenerator.html" />
+    <link rel="prev" title="NoiseGenerator" href="acoular.signals.NoiseGenerator.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.07 documentation</span></a></h1>
+        <h2 class="heading"><span>WNoiseGenerator</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.signals.NoiseGenerator.html">NoiseGenerator</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.signals.html">signals</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.signals.PNoiseGenerator.html">PNoiseGenerator</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="wnoisegenerator">
+<h1>WNoiseGenerator<a class="headerlink" href="#wnoisegenerator" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.signals.WNoiseGenerator">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.signals.</span></span><span class="sig-name descname"><span class="pre">WNoiseGenerator</span></span><a class="headerlink" href="#acoular.signals.WNoiseGenerator" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.signals.NoiseGenerator.html#acoular.signals.NoiseGenerator" title="acoular.signals.NoiseGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoiseGenerator</span></code></a></p>
+<p>White noise signal generator.</p>
+<p>This class generates white noise signals with a specified
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">root</span> <span class="pre">mean</span> <span class="pre">square</span> <span class="pre">(RMS)</span></code> amplitude,
+<a class="reference internal" href="acoular.signals.SignalGenerator.html#acoular.signals.SignalGenerator.num_samples" title="acoular.signals.SignalGenerator.num_samples"><code class="xref py py-attr docutils literal notranslate"><span class="pre">number</span> <span class="pre">of</span> <span class="pre">samples</span></code></a>, and
+<a class="reference internal" href="acoular.signals.SignalGenerator.html#acoular.signals.SignalGenerator.sample_freq" title="acoular.signals.SignalGenerator.sample_freq"><code class="xref py py-attr docutils literal notranslate"><span class="pre">sampling</span> <span class="pre">frequency</span></code></a>. The white noise is generated using a
+<a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.RandomState.standard_normal.html#numpy.random.RandomState.standard_normal" title="(in NumPy v2.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">random</span> <span class="pre">number</span> <span class="pre">generator</span></code></a> initialized with a
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">user-defined</span> <span class="pre">seed</span></code> for reproducibility.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.RandomState.standard_normal.html#numpy.random.RandomState.standard_normal" title="(in NumPy v2.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.random.RandomState.standard_normal</span></code></a></dt><dd><p>Used here to generate normally distributed noise.</p>
+</dd>
+<dt><a class="reference internal" href="acoular.signals.PNoiseGenerator.html#acoular.signals.PNoiseGenerator" title="acoular.signals.PNoiseGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">acoular.signals.PNoiseGenerator</span></code></a></dt><dd><p>For pink noise generation.</p>
+</dd>
+<dt><a class="reference internal" href="acoular.sources.UncorrelatedNoiseSource.html#acoular.sources.UncorrelatedNoiseSource" title="acoular.sources.UncorrelatedNoiseSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">acoular.sources.UncorrelatedNoiseSource</span></code></a></dt><dd><p>For per-channel noise generation.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<p>Generate white noise with an RMS amplitude of 1.0 and 0.5:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">acoular</span><span class="w"> </span><span class="kn">import</span> <span class="n">WNoiseGenerator</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">mean</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># White noise with RMS of 1.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gen1</span> <span class="o">=</span> <span class="n">WNoiseGenerator</span><span class="p">(</span><span class="n">rms</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">signal1</span> <span class="o">=</span> <span class="n">gen1</span><span class="o">.</span><span class="n">signal</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># White noise with RMS of 0.5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gen2</span> <span class="o">=</span> <span class="n">WNoiseGenerator</span><span class="p">(</span><span class="n">rms</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">signal2</span> <span class="o">=</span> <span class="n">gen2</span><span class="o">.</span><span class="n">signal</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mean</span><span class="p">(</span><span class="n">signal1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">mean</span><span class="p">(</span><span class="n">signal2</span><span class="p">)</span>
+<span class="go">np.True_</span>
+</pre></div>
+</div>
+<p>Ensure different outputs with different seeds:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">gen1</span> <span class="o">=</span> <span class="n">WNoiseGenerator</span><span class="p">(</span><span class="n">num_samples</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gen2</span> <span class="o">=</span> <span class="n">WNoiseGenerator</span><span class="p">(</span><span class="n">num_samples</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">73</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gen1</span><span class="o">.</span><span class="n">signal</span><span class="p">()</span> <span class="o">==</span> <span class="n">gen2</span><span class="o">.</span><span class="n">signal</span><span class="p">()</span>
+<span class="go">array([False, False, False])</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.signals.WNoiseGenerator.signal">
+<span class="sig-name descname"><span class="pre">signal</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#acoular.signals.WNoiseGenerator.signal" title="Link to this definition">¶</a></dt>
+<dd><p>Generate and deliver the white noise signal.</p>
+<p>The signal is created using a Gaussian distribution with mean 0 and variance 1,
+scaled by the <code class="xref py py-attr docutils literal notranslate"><span class="pre">RMS</span></code> amplitude of the object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p>A 1D array of floats containing the generated white noise signal.
+The length of the array is equal to <a class="reference internal" href="acoular.signals.SignalGenerator.html#acoular.signals.SignalGenerator.num_samples" title="acoular.signals.SignalGenerator.num_samples"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_samples</span></code></a>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.signals.NoiseGenerator.html">NoiseGenerator</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.signals.html">signals</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.signals.PNoiseGenerator.html">PNoiseGenerator</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Jul 24, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

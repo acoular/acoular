@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>BeamformerCleansc &#8212; Acoular 25.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=0b392bf7"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="BeamformerCMF" href="acoular.fbeamform.BeamformerCMF.html" />
+    <link rel="prev" title="BeamformerOrth" href="acoular.fbeamform.BeamformerOrth.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.07 documentation</span></a></h1>
+        <h2 class="heading"><span>BeamformerCleansc</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.fbeamform.BeamformerOrth.html">BeamformerOrth</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.fbeamform.html">fbeamform</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.fbeamform.BeamformerCMF.html">BeamformerCMF</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="beamformercleansc">
+<h1>BeamformerCleansc<a class="headerlink" href="#beamformercleansc" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerCleansc">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.fbeamform.</span></span><span class="sig-name descname"><span class="pre">BeamformerCleansc</span></span><a class="headerlink" href="#acoular.fbeamform.BeamformerCleansc" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.fbeamform.BeamformerBase.html#acoular.fbeamform.BeamformerBase" title="acoular.fbeamform.BeamformerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerBase</span></code></a></p>
+<p>CLEAN-SC deconvolution algorithm.</p>
+<p>See <span id="id1">[<a class="reference internal" href="../../../literature/index.html#id19" title="P. Sijtsma. Clean based on spatial source coherence. International Journal of Aeroacoustics, 6(4):357-374, 2007. doi:10.1260/147547207783359459.">11</a>]</span> for details.
+Classic delay-and-sum beamforming is already included.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerCleansc.n_iter">
+<span class="sig-name descname"><span class="pre">n_iter</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Int(0,</span> <span class="pre">desc='no</span> <span class="pre">of</span> <span class="pre">iterations')</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerCleansc.n_iter" title="Link to this definition">¶</a></dt>
+<dd><p>no of CLEAN-SC iterations
+defaults to 0, i.e. automatic (max 2*num_channels)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerCleansc.damp">
+<span class="sig-name descname"><span class="pre">damp</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Range(0.01,</span> <span class="pre">1.0,</span> <span class="pre">0.6,</span> <span class="pre">desc='damping</span> <span class="pre">factor')</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerCleansc.damp" title="Link to this definition">¶</a></dt>
+<dd><p>iteration damping factor
+defaults to 0.6</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerCleansc.stopn">
+<span class="sig-name descname"><span class="pre">stopn</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Int(3,</span> <span class="pre">desc='stop</span> <span class="pre">criterion</span> <span class="pre">index')</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerCleansc.stopn" title="Link to this definition">¶</a></dt>
+<dd><p>iteration stop criterion for automatic detection
+iteration stops if power[i]&gt;power[i-stopn]
+defaults to 3</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.fbeamform.BeamformerOrth.html">BeamformerOrth</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.fbeamform.html">fbeamform</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.fbeamform.BeamformerCMF.html">BeamformerCMF</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Jul 24, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

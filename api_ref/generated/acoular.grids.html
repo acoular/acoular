@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>grids &#8212; Acoular 25.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../_static/documentation_options.js?v=0b392bf7"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Grid" href="generated/acoular.grids.Grid.html" />
+    <link rel="prev" title="CrossPowerSpectra" href="generated/acoular.fprocess.CrossPowerSpectra.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../index.html">
+          <span>Acoular 25.07 documentation</span></a></h1>
+        <h2 class="heading"><span>grids</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="generated/acoular.fprocess.CrossPowerSpectra.html">CrossPowerSpectra</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Reference Manual</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="generated/acoular.grids.Grid.html">Grid</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="module-acoular.grids">
+<span id="grids"></span><h1>grids<a class="headerlink" href="#module-acoular.grids" title="Link to this heading">¶</a></h1>
+<p>Implement support for multidimensional grids and integration sectors.</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.grids.Grid.html#acoular.grids.Grid" title="acoular.grids.Grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Grid</span></code></a></p></td>
+<td><p>Abstract base class for grid geometries.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/acoular.grids.RectGrid.html#acoular.grids.RectGrid" title="acoular.grids.RectGrid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RectGrid</span></code></a></p></td>
+<td><p>Provides a 2D Cartesian grid for beamforming results.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.grids.RectGrid3D.html#acoular.grids.RectGrid3D" title="acoular.grids.RectGrid3D"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RectGrid3D</span></code></a></p></td>
+<td><p>Provide a cartesian 3D grid for the beamforming results.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/acoular.grids.ImportGrid.html#acoular.grids.ImportGrid" title="acoular.grids.ImportGrid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ImportGrid</span></code></a></p></td>
+<td><p>Load a 3D grid from an XML file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.grids.LineGrid.html#acoular.grids.LineGrid" title="acoular.grids.LineGrid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LineGrid</span></code></a></p></td>
+<td><p>Define a 3D grid for a line geometry.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/acoular.grids.MergeGrid.html#acoular.grids.MergeGrid" title="acoular.grids.MergeGrid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MergeGrid</span></code></a></p></td>
+<td><p>Base class for merging multiple grid geometries.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.grids.Sector.html#acoular.grids.Sector" title="acoular.grids.Sector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Sector</span></code></a></p></td>
+<td><p>Abstract base class for all sector types.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/acoular.grids.SingleSector.html#acoular.grids.SingleSector" title="acoular.grids.SingleSector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SingleSector</span></code></a></p></td>
+<td><p>Base class for single sector types.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.grids.RectSector.html#acoular.grids.RectSector" title="acoular.grids.RectSector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RectSector</span></code></a></p></td>
+<td><p>Class for defining a rectangular sector.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/acoular.grids.RectSector3D.html#acoular.grids.RectSector3D" title="acoular.grids.RectSector3D"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RectSector3D</span></code></a></p></td>
+<td><p>Class for defining a cuboid sector.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.grids.CircSector.html#acoular.grids.CircSector" title="acoular.grids.CircSector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CircSector</span></code></a></p></td>
+<td><p>Class for defining a circular sector.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/acoular.grids.PolySector.html#acoular.grids.PolySector" title="acoular.grids.PolySector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PolySector</span></code></a></p></td>
+<td><p>Class for defining a polygon sector.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.grids.ConvexSector.html#acoular.grids.ConvexSector" title="acoular.grids.ConvexSector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConvexSector</span></code></a></p></td>
+<td><p>Class for defining a convex hull sector.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/acoular.grids.MultiSector.html#acoular.grids.MultiSector" title="acoular.grids.MultiSector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MultiSector</span></code></a></p></td>
+<td><p>Class for defining a sector consisting of multiple sectors.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/acoular.grids.Polygon.html#acoular.grids.Polygon" title="acoular.grids.Polygon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Polygon</span></code></a>(x, y)</p></td>
+<td><p>Create an object representing a general polygon in a 2D plane.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/acoular.grids.in_hull.html#acoular.grids.in_hull" title="acoular.grids.in_hull"><code class="xref py py-obj docutils literal notranslate"><span class="pre">in_hull</span></code></a>(p, hull[, border, tol])</p></td>
+<td><p>Test if points in <code class="docutils literal notranslate"><span class="pre">p</span></code> are in <code class="docutils literal notranslate"><span class="pre">hull</span></code>, in- or excluding the border.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="generated/acoular.fprocess.CrossPowerSpectra.html">CrossPowerSpectra</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Reference Manual</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="generated/acoular.grids.Grid.html">Grid</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Jul 24, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

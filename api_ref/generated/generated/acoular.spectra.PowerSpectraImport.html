@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>PowerSpectraImport &#8212; Acoular 25.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=0b392bf7"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="tbeamform" href="../acoular.tbeamform.html" />
+    <link rel="prev" title="PowerSpectra" href="acoular.spectra.PowerSpectra.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.07 documentation</span></a></h1>
+        <h2 class="heading"><span>PowerSpectraImport</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.spectra.PowerSpectra.html">PowerSpectra</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.spectra.html">spectra</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../acoular.tbeamform.html">tbeamform</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="powerspectraimport">
+<h1>PowerSpectraImport<a class="headerlink" href="#powerspectraimport" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.spectra.PowerSpectraImport">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.spectra.</span></span><span class="sig-name descname"><span class="pre">PowerSpectraImport</span></span><a class="headerlink" href="#acoular.spectra.PowerSpectraImport" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.spectra.PowerSpectra.html#acoular.spectra.PowerSpectra" title="acoular.spectra.PowerSpectra"><code class="xref py py-class docutils literal notranslate"><span class="pre">PowerSpectra</span></code></a></p>
+<p>Provides a dummy class for using pre-calculated CSMs.</p>
+<p>This class does not calculate the CSM. Instead, the user can inject one or multiple existing
+CSMs by setting the <a class="reference internal" href="#acoular.spectra.PowerSpectraImport.csm" title="acoular.spectra.PowerSpectraImport.csm"><code class="xref py py-attr docutils literal notranslate"><span class="pre">csm</span></code></a> attribute. This can be useful when algorithms shall be
+evaluated with existing CSMs. The frequency or frequencies contained by the CSM must be set via
+the <a class="reference internal" href="#acoular.spectra.PowerSpectraImport.frequencies" title="acoular.spectra.PowerSpectraImport.frequencies"><code class="xref py py-attr docutils literal notranslate"><span class="pre">frequencies</span></code></a> attribute. The attr:<cite>num_channels</cite> attributes is determined on the basis
+of the CSM shape. In contrast to the <a class="reference internal" href="acoular.spectra.PowerSpectra.html#acoular.spectra.PowerSpectra" title="acoular.spectra.PowerSpectra"><code class="xref py py-class docutils literal notranslate"><span class="pre">PowerSpectra</span></code></a> object, the attributes
+<a class="reference internal" href="#acoular.spectra.PowerSpectraImport.sample_freq" title="acoular.spectra.PowerSpectraImport.sample_freq"><code class="xref py py-attr docutils literal notranslate"><span class="pre">sample_freq</span></code></a>, <a class="reference internal" href="#acoular.spectra.PowerSpectraImport.source" title="acoular.spectra.PowerSpectraImport.source"><code class="xref py py-attr docutils literal notranslate"><span class="pre">source</span></code></a>, <a class="reference internal" href="#acoular.spectra.PowerSpectraImport.block_size" title="acoular.spectra.PowerSpectraImport.block_size"><code class="xref py py-attr docutils literal notranslate"><span class="pre">block_size</span></code></a>, <a class="reference internal" href="#acoular.spectra.PowerSpectraImport.window" title="acoular.spectra.PowerSpectraImport.window"><code class="xref py py-attr docutils literal notranslate"><span class="pre">window</span></code></a>, <a class="reference internal" href="#acoular.spectra.PowerSpectraImport.overlap" title="acoular.spectra.PowerSpectraImport.overlap"><code class="xref py py-attr docutils literal notranslate"><span class="pre">overlap</span></code></a>,
+<a class="reference internal" href="#acoular.spectra.PowerSpectraImport.cached" title="acoular.spectra.PowerSpectraImport.cached"><code class="xref py py-attr docutils literal notranslate"><span class="pre">cached</span></code></a>, and <a class="reference internal" href="#acoular.spectra.PowerSpectraImport.num_blocks" title="acoular.spectra.PowerSpectraImport.num_blocks"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_blocks</span></code></a> have no functionality.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.spectra.PowerSpectraImport.csm">
+<span class="sig-name descname"><span class="pre">csm</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(desc='cross</span> <span class="pre">spectral</span> <span class="pre">matrix')</span></em><a class="headerlink" href="#acoular.spectra.PowerSpectraImport.csm" title="Link to this definition">¶</a></dt>
+<dd><p>The cross-spectral matrix stored in an array of shape <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">m,</span> <span class="pre">m)</span></code> of complex for <code class="docutils literal notranslate"><span class="pre">n</span></code>
+frequencies and <code class="docutils literal notranslate"><span class="pre">m</span></code> channels.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.spectra.PowerSpectraImport.frequencies">
+<span class="sig-name descname"><span class="pre">frequencies</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Union(None,</span> <span class="pre">CArray,</span> <span class="pre">Float,</span> <span class="pre">desc='frequencies</span> <span class="pre">included</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">cross-spectral</span> <span class="pre">matrix')</span></em><a class="headerlink" href="#acoular.spectra.PowerSpectraImport.frequencies" title="Link to this definition">¶</a></dt>
+<dd><p>The frequencies included in the CSM in ascending order. Accepts list, array, or a single
+float value.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.spectra.PowerSpectraImport.num_channels">
+<span class="sig-name descname"><span class="pre">num_channels</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['digest'])</span></em><a class="headerlink" href="#acoular.spectra.PowerSpectraImport.num_channels" title="Link to this definition">¶</a></dt>
+<dd><p>Number of time data channels, inferred from the shape of the CSM.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.spectra.PowerSpectraImport.source">
+<span class="sig-name descname"><span class="pre">source</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum(None,</span> <span class="pre">desc='PowerSpectraImport</span> <span class="pre">cannot</span> <span class="pre">consume</span> <span class="pre">time</span> <span class="pre">data')</span></em><a class="headerlink" href="#acoular.spectra.PowerSpectraImport.source" title="Link to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#acoular.spectra.PowerSpectraImport" title="acoular.spectra.PowerSpectraImport"><code class="xref py py-class docutils literal notranslate"><span class="pre">PowerSpectraImport</span></code></a> does not consume time data; source is always <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.spectra.PowerSpectraImport.sample_freq">
+<span class="sig-name descname"><span class="pre">sample_freq</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum(None,</span> <span class="pre">desc='sampling</span> <span class="pre">frequency')</span></em><a class="headerlink" href="#acoular.spectra.PowerSpectraImport.sample_freq" title="Link to this definition">¶</a></dt>
+<dd><p>Sampling frequency of the signal. Default is <code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.spectra.PowerSpectraImport.block_size">
+<span class="sig-name descname"><span class="pre">block_size</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum(None,</span> <span class="pre">desc='PowerSpectraImport</span> <span class="pre">does</span> <span class="pre">not</span> <span class="pre">operate</span> <span class="pre">on</span> <span class="pre">blocks</span> <span class="pre">of</span> <span class="pre">time</span> <span class="pre">data')</span></em><a class="headerlink" href="#acoular.spectra.PowerSpectraImport.block_size" title="Link to this definition">¶</a></dt>
+<dd><p>Block size for FFT, non-functional in this class.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.spectra.PowerSpectraImport.window">
+<span class="sig-name descname"><span class="pre">window</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum(None,</span> <span class="pre">desc='PowerSpectraImport</span> <span class="pre">does</span> <span class="pre">not</span> <span class="pre">perform</span> <span class="pre">windowing')</span></em><a class="headerlink" href="#acoular.spectra.PowerSpectraImport.window" title="Link to this definition">¶</a></dt>
+<dd><p>Windowing method, non-functional in this class.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.spectra.PowerSpectraImport.overlap">
+<span class="sig-name descname"><span class="pre">overlap</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum(None,</span> <span class="pre">desc='PowerSpectraImport</span> <span class="pre">does</span> <span class="pre">not</span> <span class="pre">consume</span> <span class="pre">time</span> <span class="pre">data')</span></em><a class="headerlink" href="#acoular.spectra.PowerSpectraImport.overlap" title="Link to this definition">¶</a></dt>
+<dd><p>Overlap between blocks, non-functional in this class.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.spectra.PowerSpectraImport.cached">
+<span class="sig-name descname"><span class="pre">cached</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum(False,</span> <span class="pre">desc='PowerSpectraImport</span> <span class="pre">has</span> <span class="pre">no</span> <span class="pre">caching</span> <span class="pre">capabilities')</span></em><a class="headerlink" href="#acoular.spectra.PowerSpectraImport.cached" title="Link to this definition">¶</a></dt>
+<dd><p>Caching capability, always disabled.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.spectra.PowerSpectraImport.num_blocks">
+<span class="sig-name descname"><span class="pre">num_blocks</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum(None,</span> <span class="pre">desc='PowerSpectraImport</span> <span class="pre">cannot</span> <span class="pre">determine</span> <span class="pre">the</span> <span class="pre">number</span> <span class="pre">of</span> <span class="pre">blocks')</span></em><a class="headerlink" href="#acoular.spectra.PowerSpectraImport.num_blocks" title="Link to this definition">¶</a></dt>
+<dd><p>Number of FFT blocks, always <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.spectra.PowerSpectraImport.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['_csmsum'])</span></em><a class="headerlink" href="#acoular.spectra.PowerSpectraImport.digest" title="Link to this definition">¶</a></dt>
+<dd><p>A unique identifier for the spectra, based on its properties. (read-only)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.spectra.PowerSpectraImport.basename">
+<span class="sig-name descname"><span class="pre">basename</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['digest'],</span> <span class="pre">desc='basename</span> <span class="pre">for</span> <span class="pre">cache</span> <span class="pre">file')</span></em><a class="headerlink" href="#acoular.spectra.PowerSpectraImport.basename" title="Link to this definition">¶</a></dt>
+<dd><p>Name of the cache file without extension. (read-only)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.spectra.PowerSpectraImport.fftfreq">
+<span class="sig-name descname"><span class="pre">fftfreq</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#acoular.spectra.PowerSpectraImport.fftfreq" title="Link to this definition">¶</a></dt>
+<dd><p>Return the Discrete Fourier Transform sample frequencies.</p>
+<p>The method checks the type of <a class="reference internal" href="#acoular.spectra.PowerSpectraImport.frequencies" title="acoular.spectra.PowerSpectraImport.frequencies"><code class="xref py py-attr docutils literal notranslate"><span class="pre">frequencies</span></code></a> and returns the corresponding frequency
+array. If <a class="reference internal" href="#acoular.spectra.PowerSpectraImport.frequencies" title="acoular.spectra.PowerSpectraImport.frequencies"><code class="xref py py-attr docutils literal notranslate"><span class="pre">frequencies</span></code></a> is not defined, a warning is raised.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p>Array containing the frequencies.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.spectra.PowerSpectra.html">PowerSpectra</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.spectra.html">spectra</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../acoular.tbeamform.html">tbeamform</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Jul 24, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

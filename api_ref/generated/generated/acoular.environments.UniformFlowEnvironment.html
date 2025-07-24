@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>UniformFlowEnvironment &#8212; Acoular 25.07 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haikuac.css?v=41595bc8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_gallery.css?v=f3715e10" />
+    <script src="../../../_static/documentation_options.js?v=0b392bf7"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="GeneralFlowEnvironment" href="acoular.environments.GeneralFlowEnvironment.html" />
+    <link rel="prev" title="Environment" href="acoular.environments.Environment.html" /> 
+  </head><body>
+      <div class="header"><img class="rightlogo" src="../../../_static/Acoular_logo.png" alt="Logo"/><h1 class="heading"><a href="../../../index.html">
+          <span>Acoular 25.07 documentation</span></a></h1>
+        <h2 class="heading"><span>UniformFlowEnvironment</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.environments.Environment.html">Environment</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.environments.html">environments</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.environments.GeneralFlowEnvironment.html">GeneralFlowEnvironment</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <section id="uniformflowenvironment">
+<h1>UniformFlowEnvironment<a class="headerlink" href="#uniformflowenvironment" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.environments.UniformFlowEnvironment">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.environments.</span></span><span class="sig-name descname"><span class="pre">UniformFlowEnvironment</span></span><a class="headerlink" href="#acoular.environments.UniformFlowEnvironment" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.environments.Environment.html#acoular.environments.Environment" title="acoular.environments.Environment"><code class="xref py py-class docutils literal notranslate"><span class="pre">Environment</span></code></a></p>
+<p>An acoustic environment with uniform flow.</p>
+<p>This class models an acoustic environment where sound propagates in a medium with uniform flow.
+It extends the <a class="reference internal" href="acoular.environments.Environment.html#acoular.environments.Environment" title="acoular.environments.Environment"><code class="xref py py-class docutils literal notranslate"><span class="pre">Environment</span></code></a> class to account for the effects of flow on sound
+propagation, such as changes in travel times and distances due to advection by the flow field.</p>
+<p>The flow is assumed to be uniform and steady, characterized by its Mach number (<a class="reference internal" href="#acoular.environments.UniformFlowEnvironment.ma" title="acoular.environments.UniformFlowEnvironment.ma"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ma</span></code></a>)
+and direction (<a class="reference internal" href="#acoular.environments.UniformFlowEnvironment.fdv" title="acoular.environments.UniformFlowEnvironment.fdv"><code class="xref py py-attr docutils literal notranslate"><span class="pre">fdv</span></code></a>).</p>
+<p class="rubric">Notes</p>
+<p>The effective distance is adjusted by solving a flow-dependent relationship that accounts
+for the cosine of the angle between the flow direction and the propagation path.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.UniformFlowEnvironment.ma">
+<span class="sig-name descname"><span class="pre">ma</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(0.0,</span> <span class="pre">desc='flow</span> <span class="pre">mach</span> <span class="pre">number')</span></em><a class="headerlink" href="#acoular.environments.UniformFlowEnvironment.ma" title="Link to this definition">¶</a></dt>
+<dd><p>The Mach number of the flow, defined as the ratio of the flow velocity to the speed of sound.
+Default is <code class="docutils literal notranslate"><span class="pre">0.0</span></code>, which corresponds to no flow.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.UniformFlowEnvironment.fdv">
+<span class="sig-name descname"><span class="pre">fdv</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CArray(dtype=float64,</span> <span class="pre">shape=(3,),</span> <span class="pre">value=array((1.0,</span> <span class="pre">0,</span> <span class="pre">0)),</span> <span class="pre">desc='flow</span> <span class="pre">direction')</span></em><a class="headerlink" href="#acoular.environments.UniformFlowEnvironment.fdv" title="Link to this definition">¶</a></dt>
+<dd><p>A unit vector specifying the direction of the flow in 3D Cartesian coordinates.
+Default is <code class="docutils literal notranslate"><span class="pre">(1.0,</span> <span class="pre">0,</span> <span class="pre">0)</span></code>, which corresponds to flow in the x-direction.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.UniformFlowEnvironment.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.environments.UniformFlowEnvironment.digest" title="Link to this definition">¶</a></dt>
+<dd><p>A unique identifier based on the environment properties. (read-only)</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="acoular.environments.Environment.html">Environment</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../acoular.environments.html">environments</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="acoular.environments.GeneralFlowEnvironment.html">GeneralFlowEnvironment</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Acoular Development Team.
+      Last updated on Jul 24, 2025.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>
