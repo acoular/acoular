@@ -14,6 +14,7 @@ Upcoming Release
         * add a new example for grids
         * changes all appearances of :meth:`~acoular.grids.RectGrid.extend` to :attr:`~acoular.grids.RectGrid.extent`
         * introduces a deprecation policy in the contributing guidelines
+        * adds new docstrings to submodule :mod:`acoular.tprocess`
 
     **Tests**
         * add tests for export and load XML functionalities of :class:`~acoular.grids.Grid`
