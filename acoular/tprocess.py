@@ -2433,6 +2433,38 @@ class WriteWAV(TimeOut):
         return data.clip(dmin, dmax).astype(dtype).tobytes()
 
     def result(self, num):
+        """
+        Generate and save time signal data as a WAV file in blocks.
+
+        This generator method retrieves time signal data from the :attr:`source` and writes it to a
+        WAV file in blocks of size ``num``. The data is scaled and encoded according to the selected
+        bit depth and channel configuration. If no file name is specified, a name is generated
+        automatically. The method yields each block of data after it is written to the file,
+        allowing for streaming or real-time processing.
+
+        Parameters
+        ----------
+        num : :class:`int`
+            Number of samples per block to write and yield.
+
+        Yields
+        ------
+        :class:`numpy.ndarray`
+            The block of time signal data that was written to the WAV file, with shape
+            (``num``, number of channels).
+
+        Raises
+        ------
+        :class:`ValueError`
+            If no channels are specified for output.
+        :class:`Warning`
+            If more than two channels are specified, or if the sample frequency is not an integer.
+            Also warns if clipping occurs due to data range limitations.
+
+        See Also
+        --------
+        :meth:`save` : Save the entire source output to a WAV file in one call.
+        """
         nc = len(self.channels)
         if nc == 0:
             msg = 'No channels given for output.'
@@ -2485,7 +2517,18 @@ class WriteWAV(TimeOut):
                 yield data
 
     def save(self):
-        """Saves source output to one- or multiple-channel `*.wav` file."""
+        """
+        Save the entire source output to a WAV file.
+
+        This method writes all available time signal data from the :attr:`source` to the specified
+        WAV file in blocks. It calls the :meth:`result` method internally and discards the yielded
+        data. The file is written according to the current :attr:`channels`, :attr:`encoding`, and
+        scaling settings. If no file name is specified, a name is generated automatically.
+
+        See Also
+        --------
+        :meth:`result` : Generator for writing and yielding data block-wise.
+        """
         for _ in self.result(1024):
             pass
 
