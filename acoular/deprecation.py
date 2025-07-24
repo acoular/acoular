@@ -1,6 +1,13 @@
 # ------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
+"""Implements helper functions for deprecation handling.
+
+.. autosummary::
+    :toctree: generated/
+
+    deprecated_alias
+"""
 
 from warnings import warn
 
@@ -8,7 +15,9 @@ from traits.api import Property
 
 
 def deprecated_alias(old2new, read_only=False, removal_version=''):
-    """Decorator function for deprecating renamed class traits.
+    """
+    Decorator function for deprecating renamed class traits.
+
     Replaced traits should no longer be part of the class definition
     and only mentioned in this decorator's parameter list.
     The replacement trait has to be defined in the updated class and

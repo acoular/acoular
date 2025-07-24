@@ -16,7 +16,6 @@ to be used directly, but to be subclassed by classes that implement the actual s
     InOut
     TimeOut
     SpectraOut
-    TimeInOut
 """
 
 from abc import abstractmethod
@@ -37,7 +36,7 @@ from .deprecation import deprecated_alias
 from .internal import digest
 
 
-@deprecated_alias({'numchannels': 'num_channels', 'numsamples': 'num_samples'})
+@deprecated_alias({'numchannels': 'num_channels', 'numsamples': 'num_samples'}, removal_version='25.10')
 class Generator(ABCHasStrictTraits):
     """Interface for any generating signal processing block.
 
@@ -157,10 +156,10 @@ class SpectraGenerator(Generator):
         """
 
 
-@deprecated_alias({'numchannels': 'num_channels', 'numsamples': 'num_samples'}, read_only=True)
+@deprecated_alias({'numchannels': 'num_channels', 'numsamples': 'num_samples'}, read_only=True, removal_version='25.10')
 class TimeOut(SamplesGenerator):
-    """Abstract base class for any signal processing block that receives data from any
-    :attr:`source` domain and returns time domain signals.
+    """
+    Abstract base class receiving from a :attr:`source` and returning time domain signals.
 
     It provides a base class that can be used to create signal processing blocks that receive data
     from any generating :attr:`source` and generates a time signal output via the generator
@@ -205,10 +204,14 @@ class TimeOut(SamplesGenerator):
         """
 
 
-@deprecated_alias({'numchannels': 'num_channels', 'numsamples': 'num_samples', 'numfreqs': 'num_freqs'}, read_only=True)
+@deprecated_alias(
+    {'numchannels': 'num_channels', 'numsamples': 'num_samples', 'numfreqs': 'num_freqs'},
+    read_only=True,
+    removal_version='25.10',
+)
 class SpectraOut(SpectraGenerator):
-    """Abstract base class for any signal processing block that receives data from any
-    :attr:`source` domain and returns frequency domain signals.
+    """
+    Abstract base class receiving from a :attr:`source` and returning frequency domain signals.
 
     It provides a base class that can be used to create signal processing blocks that receive data
     from any generating :attr:`source` domain and generates a frequency domain output via the
@@ -260,10 +263,10 @@ class SpectraOut(SpectraGenerator):
         """
 
 
-@deprecated_alias({'numchannels': 'num_channels', 'numsamples': 'num_samples'}, read_only=True)
+@deprecated_alias({'numchannels': 'num_channels', 'numsamples': 'num_samples'}, read_only=True, removal_version='25.10')
 class InOut(SamplesGenerator, SpectraGenerator):
-    """Abstract base class for any signal processing block that receives data from any
-    :attr:`source` domain and returns signals in the same domain.
+    """
+    Abstract base class receiving from a :attr:`source` and returning signals in the same domain.
 
     It provides a base class that can be used to create signal processing blocks that receive data
     from any generating :attr:`source` and generates an output via the generator :meth:`result` in
@@ -308,25 +311,3 @@ class InOut(SamplesGenerator, SpectraGenerator):
         numpy.ndarray
             Two-dimensional output data block of shape (num, ...)
         """
-
-
-class TimeInOut(TimeOut):
-    """Deprecated alias for :class:`~acoular.base.TimeOut`.
-
-    .. deprecated:: 24.10
-        Using :class:`~acoular.base.TimeInOut` is deprecated and will be removed in Acoular 25.07.
-        Use :class:`~acoular.base.TimeOut` instead.
-    """
-
-    #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
-    source = Instance(SamplesGenerator)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        import warnings
-
-        warnings.warn(
-            'TimeInOut is deprecated and will be removed in Acoular 25.07. Use TimeOut instead.',
-            DeprecationWarning,
-            stacklevel=2,
-        )

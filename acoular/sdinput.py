@@ -21,7 +21,10 @@ if config.have_sounddevice:
     import sounddevice as sd
 
 
-@deprecated_alias({'numchannels': 'num_channels', 'numsamples': 'num_samples', 'collectsamples': 'collect_samples'})
+@deprecated_alias(
+    {'numchannels': 'num_channels', 'numsamples': 'num_samples', 'collectsamples': 'collect_samples'},
+    removal_version='25.10',
+)
 class SoundDeviceSamplesGenerator(SamplesGenerator):
     """Controller for sound card hardware using sounddevice library.
 
@@ -87,15 +90,20 @@ class SoundDeviceSamplesGenerator(SamplesGenerator):
         self._sample_freq = f
 
     def device_properties(self):
-        """Returns
+        """
+        Display the properties of the sounddevice input device.
+
+        Returns
         -------
         Dictionary of device properties according to sounddevice
         """
         return sd.query_devices(self.device)
 
     def result(self, num):
-        """Python generator that yields the output block-wise. Use at least a
-        block-size of one ring cache block.
+        """
+        Python generator that yields the output block-wise.
+
+        Use at least a block-size of one ring cache block.
 
         Parameters
         ----------

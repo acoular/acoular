@@ -1,9 +1,7 @@
 # ------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
-"""Implements support separate traits_view definitions for all relevant
-classes to lift the traitsui requirement for the Acoular package.
-"""
+"""Implements separate traits_view definitions to lift the traitsui requirement for acoular."""
 
 # imports from other packages
 from traitsui.api import Item, View

@@ -16,7 +16,6 @@ from .base import (
     SamplesGenerator,
     SpectraGenerator,
     SpectraOut,
-    TimeInOut,
     TimeOut,
 )
 from .calib import Calib
@@ -52,7 +51,7 @@ from .fbeamform import (
     SteeringVector,
     integrate,
 )
-from .fprocess import IRFFT, RFFT, AutoPowerSpectra, CrossPowerSpectra, FFTSpectra
+from .fprocess import IRFFT, RFFT, AutoPowerSpectra, CrossPowerSpectra
 from .grids import (
     CircSector,
     ConvexSector,
@@ -69,7 +68,7 @@ from .grids import (
     Sector,
 )
 from .microphones import MicGeom
-from .process import Average, Cache, SampleSplitter, TimeAverage, TimeCache
+from .process import Average, Cache, SampleSplitter
 from .sdinput import SoundDeviceSamplesGenerator
 from .signals import (
     FiltWNoiseGenerator,
@@ -117,7 +116,6 @@ from .tprocess import (
     FiltFiltOctave,
     FiltFreqWeight,
     FiltOctave,
-    MaskedTimeInOut,
     MaskedTimeOut,
     Mixer,
     OctaveFilterBank,

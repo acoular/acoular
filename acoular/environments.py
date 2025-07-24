@@ -557,8 +557,7 @@ class OpenJet(FlowField):
 
 class RotatingFlow(FlowField):
     """
-    Analytical approximation of a rotating flow field with additional velocity component
-    in z-direction.
+    Analytical approximation of a rotating flow field with velocity component in z-direction.
 
     This class provides an analytical model for a fluid flow field with a
     rigid-body-like rotation about the z-axis. The flow combines rotational motion
@@ -595,7 +594,8 @@ class RotatingFlow(FlowField):
 
     def _get_rpm(self):
         warn(
-            'Deprecated use of "rpm" trait. Please use the "rps" trait instead.',
+            'Deprecated use of "rpm" trait (will be removed in version 26.01). \
+            Please use the "rps" trait instead.',
             DeprecationWarning,
             stacklevel=2,
         )
@@ -603,7 +603,8 @@ class RotatingFlow(FlowField):
 
     def _set_rpm(self, rpm):
         warn(
-            'Deprecated use of "rpm" trait. Please use the "rps" trait instead (divide rpm value by -60).',
+            'Deprecated use of "rpm" trait (will be removed in version 26.01). \
+            Please use the "rps" trait instead (divide rpm value by -60).',
             DeprecationWarning,
             stacklevel=2,
         )

@@ -24,7 +24,7 @@ from .deprecation import deprecated_alias
 from .internal import digest
 
 
-@deprecated_alias({'from_file': 'file'})
+@deprecated_alias({'from_file': 'file'}, removal_version='25.10')
 class Calib(InOut):
     """Processing block for handling calibration data in `*.xml` or NumPy format.
 
@@ -72,7 +72,6 @@ class Calib(InOut):
     0.07458428+0.49657939j  1.772696  +3.92233098j  3.19543248+0.17988554j
     0.3379041 -3.93342331j  0.93949242+2.5328611j   2.97352574+0.j        ]]
 
-    Deprecated and will be removed in Acoular 25.10:
     This class serves as interface to load calibration data for the used
     microphone array. The calibration factors are stored as [Pa/unit].
     """
@@ -102,6 +101,7 @@ class Calib(InOut):
 
     @on_trait_change('data')
     def set_num_mics(self):
+        """Sets the number of microphones based on the shape of the data array."""
         self.num_mics = self.data.shape[0]
 
     @cached_property

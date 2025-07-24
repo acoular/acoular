@@ -85,7 +85,7 @@ class TriggerAIAABenchmark(TimeSamplesAIAABenchmark):
         (self.num_samples, self.num_channels) = self.data.shape
 
 
-@deprecated_alias({'name': 'file'})
+@deprecated_alias({'name': 'file'}, removal_version='25.10')
 class CsmAIAABenchmark(PowerSpectraImport):
     """Class to load the CSM that is stored in AIAA Benchmark HDF5 file."""
 
@@ -174,7 +174,9 @@ class MicAIAABenchmark(MicGeom):
 
     @on_trait_change('file')
     def _import_mpos(self):
-        """Import the microphone positions from .h5 file.
+        """
+        Import the microphone positions from .h5 file.
+
         Called when :attr:`basename` changes.
         """
         file = _get_h5file_class()
