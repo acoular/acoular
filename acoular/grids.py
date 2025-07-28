@@ -908,7 +908,7 @@ class ImportGrid(Grid):
         >>> z1 = np.zeros_like(x1)
         >>> grid1 = np.vstack([x1, y1, z1]).T
         >>>
-        >>> # Grid 2: nine points arranged in a mesh grid the the x-y plane at z=1
+        >>> # Grid 2: nine points arranged in a mesh grid in the x-y plane at z=1
         >>> a = np.linspace(-1, 1, 3)
         >>> x2, y2 = np.meshgrid(a, a)
         >>> z2 = np.ones_like(x2)
