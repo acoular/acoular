@@ -2106,7 +2106,8 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
                                 wtwi = spla.inv(np.dot(weights.T, weights))
                                 aH = A.conj().T
                                 qi[s, :] = np.dot(
-                                    np.dot(wtwi, aH), np.dot(spla.inv(np.dot(A, np.dot(wtwi, aH))), emode))
+                                    np.dot(wtwi, aH), np.dot(spla.inv(np.dot(A, np.dot(wtwi, aH))), emode)
+                                )
                                 weights = np.diag(np.abs(qi[s, :]) ** ((2 - self.pnorm) / 2))
                                 weights = weights / np.sum(np.abs(weights))
                             elif num_channels > num_points:
