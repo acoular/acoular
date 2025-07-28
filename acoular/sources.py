@@ -77,7 +77,6 @@ from traits.api import (
     Union,
     cached_property,
     observe,
-    on_trait_change,
 )
 
 from .base import SamplesGenerator
@@ -416,8 +415,8 @@ class TimeSamples(SamplesGenerator):
     def _get_basename(self):
         return get_file_basename(self.file)
 
-    @on_trait_change('basename')
-    def _load_data(self):
+    @observe('basename')
+    def _load_data(self, event):  # noqa ARG002
         # Open the .h5 file and set attributes.
         if self.h5f is not None:
             with contextlib.suppress(OSError):
@@ -427,8 +426,8 @@ class TimeSamples(SamplesGenerator):
         self._load_timedata()
         self._load_metadata()
 
-    @on_trait_change('data')
-    def _load_shapes(self):
+    @observe('data')
+    def _load_shapes(self, event):  # noqa ARG002
         # Set :attr:`num_channels` and :attr:`num_samples` from data.
         if self.data is not None:
             self.num_samples, self.num_channels = self.data.shape
@@ -634,8 +633,8 @@ class MaskedTimeSamples(TimeSamples):
         sli = slice(self.start, self.stop).indices(self.num_samples_total)
         return sli[1] - sli[0]
 
-    @on_trait_change('basename')
-    def _load_data(self):
+    @observe('basename')
+    def _load_data(self, event):  # noqa ARG002
         # Open the .h5 file and set attributes.
         if not path.isfile(self.file):
             # no file there
@@ -650,8 +649,8 @@ class MaskedTimeSamples(TimeSamples):
         self._load_timedata()
         self._load_metadata()
 
-    @on_trait_change('data')
-    def _load_shapes(self):
+    @observe('data')
+    def _load_shapes(self, event):  # noqa ARG002
         # Set :attr:`num_channels` and num_samples from :attr:`~acoular.sources.TimeSamples.data`.
         if self.data is not None:
             self.num_samples_total, self.num_channels_total = self.data.shape
