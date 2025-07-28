@@ -101,7 +101,6 @@ from traits.api import (
     Union,
     cached_property,
     observe,
-    on_trait_change,
 )
 
 # acoular imports
@@ -727,8 +726,8 @@ class AngleTracker(MaskedTimeOut):
         self._calc_flag = True
 
     # reset calc flag if something has changed
-    @on_trait_change('digest')
-    def _reset_calc_flag(self):
+    @observe('digest')
+    def _reset_calc_flag(self, event):  # noqa ARG002
         self._calc_flag = False
 
     # calc rpm from trigger data
