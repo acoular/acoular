@@ -24,7 +24,7 @@ from traits.api import (
     Property,
     Union,
     cached_property,
-    on_trait_change,
+    observe,
 )
 
 # acoular imports
@@ -199,8 +199,8 @@ class MicGeom(HasStrictTraits):
             return cdist(self.pos.T, self.pos.T).max()
         return None
 
-    @on_trait_change('file')
-    def _import_mpos(self):
+    @observe('file')
+    def _import_mpos(self, event):  # noqa ARG002
         # Import the microphone positions from an XML file.
         #
         # This method parses the XML file specified in :attr:`file` and extracts the ``x``, ``y``,
