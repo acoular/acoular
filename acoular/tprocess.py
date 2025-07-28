@@ -39,9 +39,9 @@ from warnings import warn
 
 import numba as nb
 import numpy as np
+import scipy.linalg as spla
 from scipy.fft import irfft, rfft
 from scipy.interpolate import CloughTocher2DInterpolator, CubicSpline, LinearNDInterpolator, Rbf, splev, splrep
-from scipy.linalg import norm
 from scipy.signal import bilinear, butter, sosfilt, sosfiltfilt, tf2sos
 from scipy.spatial import Delaunay
 from traits.api import (
@@ -1203,7 +1203,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
                     for ind in np.arange(len(newPoint[:, 0])):
                         newPoint_Rep = np.tile(newPointCart[:, ind], (len(newPoint[:, 0]), 1)).T
                         subtract = newPoint_Rep - newCoordCart
-                        normDistance = norm(subtract, axis=0)
+                        normDistance = spla.norm(subtract, axis=0)
                         index_norm = np.argsort(normDistance)[: self.num_IDW]
                         pHelpNew = pHelp[cntTime, index_norm]
                         normNew = normDistance[index_norm]

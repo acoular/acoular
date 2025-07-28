@@ -25,9 +25,9 @@ from warnings import warn
 
 import numba as nb
 import numpy as np
+import scipy.linalg as spla
 from scipy.integrate import ode
 from scipy.interpolate import LinearNDInterpolator
-from scipy.linalg import norm
 from scipy.spatial import ConvexHull
 from traits.api import (
     ABCHasStrictTraits,
@@ -390,8 +390,8 @@ class SlotJet(FlowField):
           with respect to the spatial coordinates.
         """
         # normalize
-        flow = self.flow / norm(self.flow)
-        plane = self.plane / norm(self.plane)
+        flow = self.flow / spla.norm(self.flow)
+        plane = self.plane / spla.norm(self.plane)
         # additional axes of global coordinate system
         yy = -np.cross(flow, plane)
         zz = np.cross(flow, yy)
@@ -741,9 +741,9 @@ def spiral_sphere(N, Om=None, b=None):  # noqa: N803 # change to 4*np.pi
     xyz = np.vstack((np.sin(theta) * np.cos(phi), np.sin(theta) * np.sin(phi), np.cos(theta)))
     # mirror everything on a plane so that b points into the center
     a = xyz[:, 0]
-    b = b / norm(b)
+    b = b / spla.norm(b)
     ab = (a - b)[:, np.newaxis]
-    if norm(ab) < 1e-10:
+    if spla.norm(ab) < 1e-10:
         return xyz
     # this is the Householder matrix for mirroring
     H = np.identity(3) - np.dot(ab, ab.T) / np.dot(ab.T, a)
@@ -884,7 +884,7 @@ class GeneralFlowEnvironment(Environment):
             while oo.successful():
                 xyz.append(oo.y[0:3])
                 t.append(oo.t)
-                if norm(oo.y[0:3] - x0) > rmax:
+                if spla.norm(oo.y[0:3] - x0) > rmax:
                     break
                 oo.integrate(oo.t + dt)
 

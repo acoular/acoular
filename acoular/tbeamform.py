@@ -18,7 +18,7 @@
 """
 
 import numpy as np
-from scipy.linalg import norm
+import scipy.linalg as spla
 from traits.api import Bool, CArray, Enum, Float, Instance, Int, List, Map, Property, Range, cached_property
 
 from .base import SamplesGenerator, TimeOut
@@ -321,7 +321,7 @@ class BeamformerTimeTraj(BeamformerTime):
 
     def _get_macostheta(self, g1, tpos, rm):
         vvec = np.array(g1)  # velocity vector
-        ma = norm(vvec) / self.steer.env.c  # machnumber
+        ma = spla.norm(vvec) / self.steer.env.c  # machnumber
         fdv = (vvec / np.sqrt((vvec * vvec).sum()))[:, np.newaxis]  # unit vecor velocity
         mpos = self.steer.mics.pos[:, np.newaxis, :]
         rmv = tpos[:, :, np.newaxis] - mpos

@@ -32,8 +32,8 @@ from warnings import warn
 
 import numba as nb
 import numpy as np
+import scipy.linalg as spla
 from numpy.fft import fft, ifft
-from scipy.linalg import norm
 from scipy.special import sph_harm, spherical_jn, spherical_yn
 from traits.api import (
     Any,
@@ -206,7 +206,7 @@ def get_radiation_angles(direction, mpos, sourceposition):
     """
     # direction of the Spherical Harmonics
     direc = np.array(direction, dtype=float)
-    direc = direc / norm(direc)
+    direc = direc / spla.norm(direc)
     # distances
     source_to_mic_vecs = mpos - np.array(sourceposition).reshape((3, 1))
     source_to_mic_vecs[2] *= -1  # invert z-axis (acoular)    #-1
@@ -1641,7 +1641,7 @@ class LineSource(PointSource):
         # direction vector from tuple
         direc = np.array(self.direction, dtype=float)
         # normed direction vector
-        direc_n = direc / norm(direc)
+        direc_n = direc / spla.norm(direc)
         c = self.env.c
 
         # distance between monopoles in the line
@@ -1866,7 +1866,7 @@ class MovingLineSource(LineSource, MovingPointSource):
         # direction vector from tuple
         direc = np.array(self.direction, dtype=float)
         # normed direction vector
-        direc_n = direc / norm(direc)
+        direc_n = direc / spla.norm(direc)
 
         # distance between monopoles in the line
         dist = self.length / self.num_sources

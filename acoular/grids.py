@@ -31,7 +31,7 @@ from abc import abstractmethod
 from pathlib import Path
 
 import numpy as np
-from scipy.linalg import norm
+import scipy.linalg as spla
 
 # from matplotlib.path import Path
 from scipy.spatial import Delaunay
@@ -1085,7 +1085,7 @@ class LineGrid(Grid):
     def _get_pos(self):
         dist = self.length / (self.num_points - 1)
         loc = np.array(self.loc, dtype=float).reshape((3, 1))
-        direc_n = np.array(self.direction) / norm(self.direction)
+        direc_n = np.array(self.direction) / spla.norm(self.direction)
         pos = np.zeros((self.num_points, 3))
         for s in range(self.num_points):
             pos[s] = loc.T + direc_n * dist * s

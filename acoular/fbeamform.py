@@ -37,11 +37,11 @@ import warnings
 from warnings import warn
 
 import numpy as np
+import scipy.linalg as spla
 
 # check for sklearn version to account for incompatible behavior
 import sklearn
 from packaging.version import parse
-from scipy.linalg import eigh, eigvals, fractional_matrix_power, inv, norm
 from scipy.optimize import fmin_l_bfgs_b, linprog, nnls, shgo
 from sklearn.linear_model import LassoLars, LassoLarsCV, LassoLarsIC, LinearRegression, OrthogonalMatchingPursuitCV
 from traits.api import (
@@ -716,7 +716,7 @@ class BeamformerFunctional(BeamformerBase):
                 # ==============================================================================
                 csm = self.freq_data.csm[i]
                 np.fill_diagonal(csm, 0)
-                csmRoot = fractional_matrix_power(csm, 1.0 / self.gamma)
+                csmRoot = spla.fractional_matrix_power(csm, 1.0 / self.gamma)
                 beamformerOutput, steerNorm = beamformerFreq(
                     param_steer_type,
                     self.r_diag,
@@ -786,7 +786,7 @@ class BeamformerCapon(BeamformerBase):
         normfactor = self.sig_loss_norm() * nMics**2
         param_steer_type, steer_vector = self._beamformer_params()
         for i in ind:
-            csm = np.array(inv(np.array(self.freq_data.csm[i], dtype='complex128')), order='C')
+            csm = np.array(spla.inv(np.array(self.freq_data.csm[i], dtype='complex128')), order='C')
             beamformerOutput = beamformerFreq(param_steer_type, self.r_diag, normfactor, steer_vector(f[i]), csm)[0]
             self._ac[i] = 1.0 / beamformerOutput
             self._fr[i] = 1
@@ -1272,7 +1272,7 @@ class BeamformerDamasPlus(BeamformerDamas):
                 # pipeline approach with StandardScaler does scale in a different way, thus we
                 # monkeypatch the code and normalize ourselves to make results the same over
                 # different sklearn versions
-                norms = norm(psf, axis=0)
+                norms = spla.norm(psf, axis=0)
                 # get rid of annoying sklearn warnings that appear
                 # for sklearn<1.2 despite any settings
                 with warnings.catch_warnings():
@@ -1750,7 +1750,7 @@ class BeamformerCMF(BeamformerBase):
                 # pipeline approach with StandardScaler does scale in a different way, thus we
                 # monkeypatch the code and normalize ourselves to make results the same over
                 # different sklearn versions
-                norms = norm(A, axis=0)
+                norms = spla.norm(A, axis=0)
                 # get rid of sklearn warnings that appear for sklearn<1.2 despite any settings
                 with warnings.catch_warnings():
                     warnings.simplefilter('ignore', category=FutureWarning)
@@ -2046,7 +2046,7 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
             A = hh.T
             # eigenvalues and vectors
             csm = np.array(self.freq_data.csm[i], dtype='complex128', copy=True)
-            eva, eve = eigh(csm)
+            eva, eve = spla.eigh(csm)
             eva = eva[::-1]
             eve = eve[:, ::-1]
             # set small values zo 0, lowers numerical errors in simulated data
@@ -2068,19 +2068,19 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
                         for it in np.arange(self.n_iter):
                             if num_channels <= leftpoints:
                                 AWA = np.dot(np.dot(A[:, locpoints], weights), A[:, locpoints].conj().T)
-                                epsilon[it] = max(np.abs(eigvals(AWA))) * self.eps_perc
+                                epsilon[it] = max(np.abs(spla.eigvals(AWA))) * self.eps_perc
                                 qi[s, locpoints] = np.dot(
                                     np.dot(
                                         np.dot(weights, A[:, locpoints].conj().T),
-                                        inv(AWA + np.eye(num_channels) * epsilon[it]),
+                                        spla.inv(AWA + np.eye(num_channels) * epsilon[it]),
                                     ),
                                     emode,
                                 )
                             elif num_channels > leftpoints:
                                 AA = np.dot(A[:, locpoints].conj().T, A[:, locpoints])
-                                epsilon[it] = max(np.abs(eigvals(AA))) * self.eps_perc
+                                epsilon[it] = max(np.abs(spla.eigvals(AA))) * self.eps_perc
                                 qi[s, locpoints] = np.dot(
-                                    np.dot(inv(AA + inv(weights) * epsilon[it]), A[:, locpoints].conj().T),
+                                    np.dot(spla.inv(AA + spla.inv(weights) * epsilon[it]), A[:, locpoints].conj().T),
                                     emode,
                                 )
                             if self.beta < 1 and it > 1:
@@ -2103,15 +2103,16 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
                         locpoints = np.arange(num_points)
                         for _it in np.arange(self.n_iter):
                             if num_channels <= num_points:
-                                wtwi = inv(np.dot(weights.T, weights))
+                                wtwi = spla.inv(np.dot(weights.T, weights))
                                 aH = A.conj().T
-                                qi[s, :] = np.dot(np.dot(wtwi, aH), np.dot(inv(np.dot(A, np.dot(wtwi, aH))), emode))
+                                qi[s, :] = np.dot(
+                                    np.dot(wtwi, aH), np.dot(spla.inv(np.dot(A, np.dot(wtwi, aH))), emode))
                                 weights = np.diag(np.abs(qi[s, :]) ** ((2 - self.pnorm) / 2))
                                 weights = weights / np.sum(np.abs(weights))
                             elif num_channels > num_points:
                                 wtw = np.dot(weights.T, weights)
                                 qi[s, :] = np.dot(
-                                    np.dot(inv(np.dot(np.dot(A.conj.T, wtw), A)), np.dot(A.conj().T, wtw)), emode
+                                    np.dot(spla.inv(np.dot(np.dot(A.conj.T, wtw), A)), np.dot(A.conj().T, wtw)), emode
                                 )
                                 weights = np.diag(np.abs(qi[s, :]) ** ((2 - self.pnorm) / 2))
                                 weights = weights / np.sum(np.abs(weights))
@@ -2137,7 +2138,7 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
                         # way, thus we monkeypatch the code and normalize
                         # ourselves to make results the same over different
                         # sklearn versions
-                        norms = norm(AB, axis=0)
+                        norms = spla.norm(AB, axis=0)
                         # get rid of annoying sklearn warnings that appear
                         # for sklearn<1.2 despite any settings
                         with warnings.catch_warnings():
