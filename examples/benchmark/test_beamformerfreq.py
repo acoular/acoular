@@ -4,10 +4,10 @@
 from os.path import join
 
 # acoular imports
-import acoular
+import acoular as ac
 import numpy as np
 
-acoular.config.global_caching = 'none'  # to make sure that nothing is cached
+ac.config.global_caching = 'none'  # to make sure that nothing is cached
 
 from acoular import BeamformerBase, Environment, MaskedTimeSamples, MicGeom, PowerSpectra, RectGrid, SteeringVector
 
@@ -41,11 +41,11 @@ eve = b.freq_data.eve[20]
 
 
 def test_beamformer_freq():
-    acoular.fastFuncs.beamformerFreq(param_steer_type, False, sln, svt, csm)
+    ac.fastFuncs.beamformerFreq(param_steer_type, False, sln, svt, csm)
 
 
 def test_beamformer_freq_eig():
-    acoular.fastFuncs.beamformerFreq(param_steer_type, False, sln, svt, (eva[30:], eve[:, 30:]))
+    ac.fastFuncs.beamformerFreq(param_steer_type, False, sln, svt, (eva[30:], eve[:, 30:]))
 
 
 def test_csm():

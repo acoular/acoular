@@ -2,7 +2,7 @@
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
 
-import acoular
+import acoular as ac
 import numpy as np
 
 # assume 64 microphones and 2048 grid points
@@ -15,8 +15,8 @@ m64 = m32.astype(np.float64)
 
 
 def test_dist_mat32():
-    acoular.environments.dist_mat(g32, m32)
+    ac.environments.dist_mat(g32, m32)
 
 
 def test_dist_mat64():
-    acoular.environments.dist_mat(g64, m64)
+    ac.environments.dist_mat(g64, m64)
