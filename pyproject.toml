@@ -53,6 +53,7 @@ full = [
 ]
 
 docs = [
+    "pydata-sphinx-theme",
     "ipython",
     "graphviz",
     "matplotlib",
