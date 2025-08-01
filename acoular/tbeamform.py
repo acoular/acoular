@@ -409,7 +409,6 @@ class BeamformerTimeTraj(BeamformerTime):
         else:
             fdtype = float32
             idtype = int32
-        self._get_weights()
         c = self.steer.env.c / self.source.sample_freq
         num_mics = self.steer.mics.num_mics
         mpos = self.steer.mics.pos.astype(fdtype)
