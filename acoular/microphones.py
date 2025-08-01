@@ -44,7 +44,7 @@ class MicGeom(HasStrictTraits):
     microphones can be excluded by specifying their indices via :attr:`invalid_channels`.
 
     .. _units_note_microphones:
-    
+
     Notes
     -----
     - The microphone geometry as in :attr:`total_pos` is automatically changed if the :attr:`file`
