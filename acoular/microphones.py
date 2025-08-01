@@ -144,12 +144,12 @@ class MicGeom(HasStrictTraits):
     #: Array containing the ``x, y, z`` positions of all microphones, including invalid ones, shape
     #: ``(3,`` :attr:`num_mics` ``)``. This is set automatically when :attr:`file` changes or
     #: explicitly by assigning an array of floats. All coordinates are in meters by default (see
-    #: :ref:`notes <units_note_micophones>`).
+    #: :ref:`notes <units_note_microphones>`).
     pos_total = CArray(dtype=float, shape=(3, None), desc='x, y, z position of all microphones')
 
     #: Array containing the ``x, y, z`` positions of valid microphones (i.e., excluding those in
     #: :attr:`invalid_channels`), shape ``(3,`` :attr:`num_mics` ``)``. (read-only)
-    #: All coordinates are in meters by default (see :ref:`notes <units_note>`).
+    #: All coordinates are in meters by default (see :ref:`notes <units_note_microphones>`).
     pos = Property(depends_on=['pos_total', 'invalid_channels'], desc='x, y, z position of used microphones')
 
     #: List of indices indicating microphones to be excluded from calculations and results.
@@ -264,7 +264,7 @@ class MicGeom(HasStrictTraits):
         - This method only exports the positions of the valid microphones (those not listed in
           :attr:`invalid_channels`).
         - All coordinates (x, y, z) are exported in meters by default (see
-          :ref:`notes <units_note_micophones>`).
+          :ref:`notes <units_note_microphones>`).
         """
         filepath = Path(filename)
         basename = filepath.stem
