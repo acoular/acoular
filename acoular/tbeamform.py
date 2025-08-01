@@ -798,7 +798,7 @@ class IntegratorSectorTime(TimeOut):
     def result(self, num=1):
         """
         Python generator that yields the source output integrated over specified grid sectors.
-        
+
         Parameters
         ----------
         num : :class:`int`
