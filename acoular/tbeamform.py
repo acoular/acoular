@@ -112,17 +112,17 @@ class BeamformerTime(TimeOut):
 
         Parameters
         ----------
-        num : int
+        num : :class:`int`
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block). Defaults to 2048.
 
         Yields
         ------
-        numpy.ndarray
-            Samples in blocks of shape (num, :attr:`~BeamformerTime.num_channels`).
+        :class:`numpy.ndarray`
+            Samples in blocks of shape (``num``, :attr:`~BeamformerTime.num_channels`).
                 :attr:`~BeamformerTime.num_channels` is usually very \
                 large (number of grid points).
-                The last block returned by the generator may be shorter than num.
+                The last block returned by the generator may be shorter than ``num``.
         """
         # initialize values
         steer_func = self.steer._steer_funcs_time[self.steer.steer_type]
@@ -245,17 +245,17 @@ class BeamformerTimeSq(BeamformerTime):
 
         Parameters
         ----------
-        num : int
+        num : :class:`int`
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block). Defaults to 2048.
 
         Yields
         ------
-        numpy.ndarray
-            Samples in blocks of shape (num, :attr:`~BeamformerTime.num_channels`).
+        :class:`numpy.ndarray`
+            Samples in blocks of shape (``num``, :attr:`~BeamformerTime.num_channels`).
                 :attr:`~BeamformerTime.num_channels` is usually very \
                 large (number of grid points).
-                The last block returned by the generator may be shorter than num.
+                The last block returned by the generator may be shorter than ``num``.
         """
         return super().result(num)
 
@@ -345,12 +345,12 @@ class BeamformerTimeTraj(BeamformerTime):
 
         Parameters
         ----------
-        tpos : :class:`ndarray`
+        tpos : :class:`numpy.ndarray`
             Grid positions.
 
         Returns
         -------
-        :class:`float` or :class:`ndarray`
+        :class:`float` or :class:`numpy.ndarray`
             Reference distance(s).
         """
         if np.isscalar(self.steer.ref) and self.steer.ref > 0:
@@ -366,17 +366,17 @@ class BeamformerTimeTraj(BeamformerTime):
 
         Parameters
         ----------
-        num : int
+        num : :class:`int`
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block). Defaults to 2048.
 
         Yields
         ------
-        numpy.ndarray
-            Samples in blocks of shape (num, :attr:`~BeamformerTime.num_channels`).
+        :class:`numpy.ndarray`
+            Samples in blocks of shape (``num``, :attr:`~BeamformerTime.num_channels`).
                 :attr:`~BeamformerTime.num_channels` is usually very \
                 large (number of grid points).
-                The last block returned by the generator may be shorter than num.
+                The last block returned by the generator may be shorter than ``num``.
         """
         # initialize values
         if self.precision == 64:
@@ -542,17 +542,17 @@ class BeamformerTimeSqTraj(BeamformerTimeSq, BeamformerTimeTraj):
 
         Parameters
         ----------
-        num : int
+        num : :class:`int`
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block). Defaults to 2048.
 
         Yields
         ------
-        numpy.ndarray
-            Samples in blocks of shape (num, :attr:`~BeamformerTime.num_channels`).
+        :class:`numpy.ndarray`
+            Samples in blocks of shape (``num``, :attr:`~BeamformerTime.num_channels`).
                 :attr:`~BeamformerTime.num_channels` is usually very \
                 large (number of grid points).
-                The last block returned by the generator may be shorter than num.
+                The last block returned by the generator may be shorter than ``num``.
         """
         return super().result(num)
 
@@ -593,17 +593,17 @@ class BeamformerCleant(BeamformerTime):
 
         Parameters
         ----------
-        num : int
+        num : :class:`int`
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block). Defaults to 2048.
 
         Yields
         ------
-        numpy.ndarray
-            Samples in blocks of shape (num, :attr:`~BeamformerTime.num_channels`).
+        :class:`numpy.ndarray`
+            Samples in blocks of shape (``num``, :attr:`~BeamformerTime.num_channels`).
                 :attr:`~BeamformerTime.num_channels` is usually very \
                 large (number of grid points).
-                The last block returned by the generator may be shorter than num.
+                The last block returned by the generator may be shorter than ``num``.
         """
         return super().result(num)
 
@@ -639,17 +639,17 @@ class BeamformerCleantSq(BeamformerCleant):
 
         Parameters
         ----------
-        num : int
+        num : :class:`int`
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block). Defaults to 2048.
 
         Yields
         ------
-        numpy.ndarray
-            Samples in blocks of shape (num, :attr:`~BeamformerTime.num_channels`).
+        :class:`numpy.ndarray`
+            Samples in blocks of shape (``num``, :attr:`~BeamformerTime.num_channels`).
                 :attr:`~BeamformerTime.num_channels` is usually very \
                 large (number of grid points).
-                The last block returned by the generator may be shorter than num.
+                The last block returned by the generator may be shorter than ``num``.
         """
         return super().result(num)
 
@@ -693,17 +693,17 @@ class BeamformerCleantTraj(BeamformerCleant, BeamformerTimeTraj):
 
         Parameters
         ----------
-        num : int
+        num : :class:`int`
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block). Defaults to 2048.
 
         Yields
         ------
-        numpy.ndarray
-            Samples in blocks of shape (num, :attr:`~BeamformerTime.num_channels`).
+        :class:`numpy.ndarray`
+            Samples in blocks of shape (``num``, :attr:`~BeamformerTime.num_channels`).
                 :attr:`~BeamformerTime.num_channels` is usually very \
                 large (number of grid points).
-                The last block returned by the generator may be shorter than num.
+                The last block returned by the generator may be shorter than ``num``.
         """
         return super().result(num)
 
@@ -750,17 +750,17 @@ class BeamformerCleantSqTraj(BeamformerCleantTraj, BeamformerTimeSq):
 
         Parameters
         ----------
-        num : int
+        num : :class:`int`
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block). Defaults to 2048.
 
         Yields
         ------
-        numpy.ndarray
-            Samples in blocks of shape (num, :attr:`~BeamformerTime.num_channels`).
+        :class:`numpy.ndarray`
+            Samples in blocks of shape (``num``, :attr:`~BeamformerTime.num_channels`).
                 :attr:`~BeamformerTime.num_channels` is usually very \
                 large (number of grid points).
-                The last block returned by the generator may be shorter than num.
+                The last block returned by the generator may be shorter than ``num``.
         """
         return super().result(num)
 
@@ -810,7 +810,7 @@ class IntegratorSectorTime(TimeOut):
 
         Returns
         -------
-        Samples in blocks of shape (num, :attr:`num_channels`).
+        Samples in blocks of shape (``num``, :attr:`num_channels`).
         :attr:`num_channels` is the number of sectors.
         The last block may be shorter than num.
         """
