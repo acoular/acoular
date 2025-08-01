@@ -69,7 +69,6 @@ docstring-code-line-length = "dynamic"
 "acoular/h5cache.py" = ["D102"]
 "acoular/h5files.py" = ["D102"]
 "acoular/sources.py" = ["N806"]
-"acoular/tbeamform.py" = ["F841", "N806", "D102", "D205"]
 "acoular/tools/helpers.py" = ["D205"]
 "acoular/tprocess.py" = ["N806", "D102", "D205"]
 "tests/cases/*" = ["N802"]
