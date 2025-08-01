@@ -30,6 +30,15 @@ ignore = [
 fixable = ["ALL"]
 unfixable = []
 
+[lint.flake8-import-conventions]
+banned-from  = ["numba", "numpy", "scipy.linalg"]
+[lint.flake8-import-conventions.aliases]
+acoular = "ac"
+numba = "nb"
+numpy = "np"
+"scipy.linalg" = "spla"
+"matplotlib.pyplot" = "plt"
+
 [lint.pycodestyle]
 ignore-overlong-task-comments = true
 max-doc-length = 100

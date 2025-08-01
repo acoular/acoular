@@ -17,32 +17,8 @@
     IntegratorSectorTime
 """
 
-# imports from other packages
-
-from numpy import (
-    arange,
-    argmax,
-    array,
-    ceil,
-    dot,
-    empty,
-    float32,
-    float64,
-    histogram,
-    int32,
-    int64,
-    interp,
-    isscalar,
-    newaxis,
-    r_,
-    s_,
-    sqrt,
-    sum,  # noqa: A004
-    unique,
-    where,
-    zeros,
-)
-from scipy.linalg import norm
+import numpy as np
+import scipy.linalg as spla
 from traits.api import Bool, CArray, Enum, Float, Instance, Int, List, Map, Property, Range, cached_property
 
 from .base import SamplesGenerator, TimeOut
@@ -73,14 +49,14 @@ def const_power_weight(bf):
     array of floats
         The weight factors.
     """
-    r = bf.steer.env._r(zeros((3, 1)), bf.steer.mics.pos)  # distances to center
+    r = bf.steer.env._r(np.zeros((3, 1)), bf.steer.mics.pos)  # distances to center
     # round the relative distances to one decimal place
     r = (r / r.max()).round(decimals=1)
-    ru, ind = unique(r, return_inverse=True)
+    ru, ind = np.unique(r, return_inverse=True)
     ru = (ru[1:] + ru[:-1]) / 2
-    count, bins = histogram(r, r_[0, ru, 1.5 * r.max() - 0.5 * ru[-1]])
+    count, bins = np.histogram(r, np.r_[0, ru, 1.5 * r.max() - 0.5 * ru[-1]])
     bins *= bins
-    weights = sqrt((bins[1:] - bins[:-1]) / count)
+    weights = np.sqrt((bins[1:] - bins[:-1]) / count)
     weights /= weights.mean()
     return weights[ind]
 
@@ -121,7 +97,7 @@ class BeamformerTime(TimeOut):
         return digest(self)
 
     def _get_weights(self):
-        return self.weights_(self)[newaxis] if self.weights_ else 1.0
+        return self.weights_(self)[np.newaxis] if self.weights_ else 1.0
 
     def result(self, num=2048):
         """Python generator that yields the time-domain beamformer output.
@@ -145,17 +121,17 @@ class BeamformerTime(TimeOut):
         """
         # initialize values
         steer_func = self.steer._steer_funcs_time[self.steer.steer_type]
-        fdtype = float64
-        idtype = int64
+        fdtype = np.float64
+        idtype = np.int64
         num_mics = self.steer.mics.num_mics
-        n_index = arange(0, num + 1)[:, newaxis]
+        n_index = np.arange(0, num + 1)[:, np.newaxis]
         c = self.steer.env.c / self.source.sample_freq
-        amp = empty((1, self.steer.grid.size, num_mics), dtype=fdtype)
-        # delays = empty((1,self.steer.grid.size,num_mics),dtype=fdtype)
-        d_index = empty((1, self.steer.grid.size, num_mics), dtype=idtype)
-        d_interp2 = empty((1, self.steer.grid.size, num_mics), dtype=fdtype)
-        steer_func(self.steer.rm[newaxis, :, :], self.steer.r0[newaxis, :], amp)
-        _delays(self.steer.rm[newaxis, :, :], c, d_interp2, d_index)
+        amp = np.empty((1, self.steer.grid.size, num_mics), dtype=fdtype)
+        # delays = np.empty((1,self.steer.grid.size,num_mics),dtype=fdtype)
+        d_index = np.empty((1, self.steer.grid.size, num_mics), dtype=idtype)
+        d_interp2 = np.empty((1, self.steer.grid.size, num_mics), dtype=fdtype)
+        steer_func(self.steer.rm[np.newaxis, :, :], self.steer.r0[np.newaxis, :], amp)
+        _delays(self.steer.rm[np.newaxis, :, :], c, d_interp2, d_index)
         amp.shape = amp.shape[1:]
         # delays.shape = delays.shape[1:]
         d_index.shape = d_index.shape[1:]
@@ -165,7 +141,7 @@ class BeamformerTime(TimeOut):
 
         buffer = SamplesBuffer(
             source=self.source,
-            length=int(ceil((num + max_sample_delay) / num)) * num,
+            length=int(np.ceil((num + max_sample_delay) / num)) * num,
             result_num=num + max_sample_delay,
             shift_index_by='num',
             dtype=fdtype,
@@ -177,7 +153,7 @@ class BeamformerTime(TimeOut):
                 # exit loop if there is not enough data left to be processed
                 if num <= 0:
                     break
-                n_index = arange(0, num + 1)[:, newaxis]
+                n_index = np.arange(0, num + 1)[:, np.newaxis]
             # init step
             Phi, autopow = self._delay_and_sum(num, p_res, d_interp2, d_index, amp)
             if 'Cleant' not in self.__class__.__name__:
@@ -189,18 +165,18 @@ class BeamformerTime(TimeOut):
                     yield Phi[:num] ** 2
             else:
                 p_res_copy = p_res.copy()
-                Gamma = zeros(Phi.shape)
-                Gamma_autopow = zeros(Phi.shape)
+                Gamma = np.zeros(Phi.shape)
+                Gamma_autopow = np.zeros(Phi.shape)
                 J = 0
                 # deconvolution
                 while self.n_iter > J:
                     # print(f"start clean iteration {J+1} of max {self.n_iter}")
                     powPhi = (Phi[:num] ** 2 - autopow).sum(0).clip(min=0) if self.r_diag else (Phi[:num] ** 2).sum(0)
-                    imax = argmax(powPhi)
+                    imax = np.argmax(powPhi)
                     t_float = d_interp2[imax] + d_index[imax] + n_index
-                    t_ind = t_float.astype(int64)
+                    t_ind = t_float.astype(np.int64)
                     for m in range(num_mics):
-                        p_res_copy[t_ind[: num + 1, m], m] -= self.damp * interp(
+                        p_res_copy[t_ind[: num + 1, m], m] -= self.damp * np.interp(
                             t_ind[: num + 1, m],
                             t_float[:num, m],
                             Phi[:num, imax] * self.steer.r0[imax] / self.steer.rm[imax, m],
@@ -229,8 +205,8 @@ class BeamformerTime(TimeOut):
 
     def _delay_and_sum(self, num, p_res, d_interp2, d_index, amp):
         """Standard delay-and-sum method."""
-        result = empty((num, self.steer.grid.size), dtype=float)  # output array
-        autopow = empty((num, self.steer.grid.size), dtype=float)  # output array
+        result = np.empty((num, self.steer.grid.size), dtype=float)  # output array
+        autopow = np.empty((num, self.steer.grid.size), dtype=float)  # output array
         _delayandsum4(p_res, d_index, d_interp2, amp, result, autopow)
         return result, autopow
 
@@ -286,7 +262,7 @@ class BeamformerTimeTraj(BeamformerTime):
     trajectory = Instance(Trajectory, desc='trajectory of the grid center')
 
     #: Reference vector, perpendicular to the y-axis of moving grid.
-    rvec = CArray(dtype=float, shape=(3,), value=array((0, 0, 0)), desc='reference vector')
+    rvec = CArray(dtype=float, shape=(3,), value=np.array((0, 0, 0)), desc='reference vector')
 
     #: Considering of convective amplification in beamforming formula.
     conv_amp = Bool(False, desc='determines if convective amplification of source is considered')
@@ -318,7 +294,7 @@ class BeamformerTimeTraj(BeamformerTime):
             """Cross product for fast computation
             because numpy.cross is ultra slow in this case.
             """
-            return array([a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]])
+            return np.array([a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]])
 
         start_t = 0.0
         gpos = self.steer.grid.pos
@@ -328,31 +304,31 @@ class BeamformerTimeTraj(BeamformerTime):
         if rflag:
             for g in trajg:
                 # grid is only translated, not rotated
-                tpos = gpos + array(g)[:, newaxis]
+                tpos = gpos + np.array(g)[:, np.newaxis]
                 yield tpos
         else:
             for g, g1 in zip(trajg, trajg1):
                 # grid is both translated and rotated
-                loc = array(g)  # translation array([0., 0.4, 1.])
-                dx = array(g1)  # direction vector (new x-axis)
+                loc = np.array(g)  # translation array([0., 0.4, 1.])
+                dx = np.array(g1)  # direction vector (new x-axis)
                 dy = cross(self.rvec, dx)  # new y-axis
                 dz = cross(dx, dy)  # new z-axis
-                RM = array((dx, dy, dz)).T  # rotation matrix
-                RM /= sqrt((RM * RM).sum(0))  # column normalized
-                tpos = dot(RM, gpos) + loc[:, newaxis]  # rotation+translation
+                RM = np.array((dx, dy, dz)).T  # rotation matrix
+                RM /= np.sqrt((RM * RM).sum(0))  # column normalized
+                tpos = np.dot(RM, gpos) + loc[:, np.newaxis]  # rotation+translation
                 #                print(loc[:])
                 yield tpos
 
     def _get_macostheta(self, g1, tpos, rm):
-        vvec = array(g1)  # velocity vector
-        ma = norm(vvec) / self.steer.env.c  # machnumber
-        fdv = (vvec / sqrt((vvec * vvec).sum()))[:, newaxis]  # unit vecor velocity
-        mpos = self.steer.mics.pos[:, newaxis, :]
-        rmv = tpos[:, :, newaxis] - mpos
-        return (ma * sum(rmv.reshape((3, -1)) * fdv, 0) / rm.reshape(-1)).reshape(rm.shape)
+        vvec = np.array(g1)  # velocity vector
+        ma = spla.norm(vvec) / self.steer.env.c  # machnumber
+        fdv = (vvec / np.sqrt((vvec * vvec).sum()))[:, np.newaxis]  # unit vecor velocity
+        mpos = self.steer.mics.pos[:, np.newaxis, :]
+        rmv = tpos[:, :, np.newaxis] - mpos
+        return (ma * np.sum(rmv.reshape((3, -1)) * fdv, 0) / rm.reshape(-1)).reshape(rm.shape)
 
     def get_r0(self, tpos):
-        if isscalar(self.steer.ref) and self.steer.ref > 0:
+        if np.isscalar(self.steer.ref) and self.steer.ref > 0:
             return self.steer.ref  # full((self.steer.grid.size,), self.steer.ref)
         return self.steer.env._r(tpos)
 
@@ -378,24 +354,24 @@ class BeamformerTimeTraj(BeamformerTime):
         """
         # initialize values
         if self.precision == 64:
-            fdtype = float64
-            idtype = int64
+            fdtype = np.float64
+            idtype = np.int64
         else:
-            fdtype = float32
-            idtype = int32
+            fdtype = np.float32
+            idtype = np.int32
         w = self._get_weights()
         c = self.steer.env.c / self.source.sample_freq
         num_mics = self.steer.mics.num_mics
         mpos = self.steer.mics.pos.astype(fdtype)
-        m_index = arange(num_mics, dtype=idtype)
-        n_index = arange(num, dtype=idtype)[:, newaxis]
-        blockrm = empty((num, self.steer.grid.size, num_mics), dtype=fdtype)
-        blockrmconv = empty((num, self.steer.grid.size, num_mics), dtype=fdtype)
-        amp = empty((num, self.steer.grid.size, num_mics), dtype=fdtype)
-        # delays = empty((num,self.steer.grid.size,num_mics),dtype=fdtype)
-        d_index = empty((num, self.steer.grid.size, num_mics), dtype=idtype)
-        d_interp2 = empty((num, self.steer.grid.size, num_mics), dtype=fdtype)
-        blockr0 = empty((num, self.steer.grid.size), dtype=fdtype)
+        m_index = np.arange(num_mics, dtype=idtype)
+        n_index = np.arange(num, dtype=idtype)[:, np.newaxis]
+        blockrm = np.empty((num, self.steer.grid.size, num_mics), dtype=fdtype)
+        blockrmconv = np.empty((num, self.steer.grid.size, num_mics), dtype=fdtype)
+        amp = np.empty((num, self.steer.grid.size, num_mics), dtype=fdtype)
+        # delays = np.empty((num,self.steer.grid.size,num_mics),dtype=fdtype)
+        d_index = np.empty((num, self.steer.grid.size, num_mics), dtype=idtype)
+        d_interp2 = np.empty((num, self.steer.grid.size, num_mics), dtype=fdtype)
+        blockr0 = np.empty((num, self.steer.grid.size), dtype=fdtype)
         movgpos = self._get_moving_gpos()  # create moving grid pos generator
         movgspeed = self.trajectory.traj(0.0, delta_t=1 / self.source.sample_freq, der=1)
         weights = self._get_weights()
@@ -430,8 +406,8 @@ class BeamformerTimeTraj(BeamformerTime):
             except StopIteration:
                 break
             if time_block.shape[0] < buffer.result_num:  # last block shorter
-                num = sum((d_index.max((1, 2)) + 1 + arange(0, num)) < time_block.shape[0])
-                n_index = arange(num, dtype=idtype)[:, newaxis]
+                num = np.sum((d_index.max((1, 2)) + 1 + np.arange(0, num)) < time_block.shape[0])
+                n_index = np.arange(num, dtype=idtype)[:, np.newaxis]
                 flag = False
             # init step
             p_res = time_block.copy()
@@ -446,10 +422,10 @@ class BeamformerTimeTraj(BeamformerTime):
             else:
                 # choose correct distance
                 blockrm1 = blockrmconv if self.conv_amp else blockrm
-                Gamma = zeros(Phi.shape, dtype=fdtype)
-                Gamma_autopow = zeros(Phi.shape, dtype=fdtype)
+                Gamma = np.zeros(Phi.shape, dtype=fdtype)
+                Gamma_autopow = np.zeros(Phi.shape, dtype=fdtype)
                 J = 0
-                t_ind = arange(p_res.shape[0], dtype=idtype)
+                t_ind = np.arange(p_res.shape[0], dtype=idtype)
                 # deconvolution
                 while self.n_iter > J:
                     # print(f"start clean iteration {J+1} of max {self.n_iter}")
@@ -458,7 +434,7 @@ class BeamformerTimeTraj(BeamformerTime):
                     else:
                         powPhi = (Phi[:num] * Phi[:num]).sum(0)
                     # find index of max power focus point
-                    imax = argmax(powPhi)
+                    imax = np.argmax(powPhi)
                     # find backward delays
                     t_float = (d_interp2[:num, imax, m_index] + d_index[:num, imax, m_index] + n_index).astype(fdtype)
                     # determine max/min delays in sample units
@@ -469,7 +445,7 @@ class BeamformerTimeTraj(BeamformerTime):
                     h = Phi[:num, imax] * blockr0[:num, imax]
                     for m in range(num_mics):
                         # subtract interpolated time history from microphone signals
-                        p_res[ind_min[m] : ind_max[m], m] -= self.damp * interp(
+                        p_res[ind_min[m] : ind_max[m], m] -= self.damp * np.interp(
                             t_ind[ind_min[m] : ind_max[m]],
                             t_float[:num, m],
                             h / blockrm1[:num, imax, m],
@@ -498,9 +474,9 @@ class BeamformerTimeTraj(BeamformerTime):
 
     def _delay_and_sum(self, num, p_res, d_interp2, d_index, amp):
         """Standard delay-and-sum method."""
-        fdtype = float64 if self.precision == 64 else float32
-        result = empty((num, self.steer.grid.size), dtype=fdtype)  # output array
-        autopow = empty((num, self.steer.grid.size), dtype=fdtype)  # output array
+        fdtype = np.float64 if self.precision == 64 else np.float32
+        result = np.empty((num, self.steer.grid.size), dtype=fdtype)  # output array
+        autopow = np.empty((num, self.steer.grid.size), dtype=fdtype)  # output array
         _delayandsum5(p_res, d_index, d_interp2, amp, result, autopow)
         return result, autopow
 
@@ -801,15 +777,15 @@ class IntegratorSectorTime(TimeOut):
         """
         inds = [self.grid.indices(*sector) for sector in self.sectors]
         gshape = self.grid.shape
-        o = empty((num, self.num_channels), dtype=float)  # output array
+        o = np.empty((num, self.num_channels), dtype=float)  # output array
         for r in self.source.result(num):
             ns = r.shape[0]
             mapshape = (ns,) + gshape
             rmax = r.max()
             rmin = rmax * 10 ** (self.clip / 10.0)
-            r = where(r > rmin, r, 0.0)
+            r = np.where(r > rmin, r, 0.0)
             for i, ind in enumerate(inds):
-                h = r[:].reshape(mapshape)[(s_[:],) + ind]
+                h = r[:].reshape(mapshape)[(np.s_[:],) + ind]
                 o[:ns, i] = h.reshape(h.shape[0], -1).sum(axis=1)
                 i += 1
             yield o[:ns]
