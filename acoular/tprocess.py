@@ -39,46 +39,9 @@ from warnings import warn
 
 import numba as nb
 import numpy as np
-from numpy import (
-    append,
-    arange,
-    argmax,
-    argmin,
-    argsort,
-    array,
-    array_equal,
-    asarray,
-    ceil,
-    concatenate,
-    cumsum,
-    delete,
-    empty,
-    empty_like,
-    exp,
-    flatnonzero,
-    float64,
-    identity,
-    inf,
-    interp,
-    linspace,
-    mean,
-    nan,
-    newaxis,
-    pi,
-    polymul,
-    sin,
-    sinc,
-    split,
-    sqrt,
-    stack,
-    sum,  # noqa: A004
-    tile,
-    unique,
-    zeros,
-)
+import scipy.linalg as spla
 from scipy.fft import irfft, rfft
 from scipy.interpolate import CloughTocher2DInterpolator, CubicSpline, LinearNDInterpolator, Rbf, splev, splrep
-from scipy.linalg import norm
 from scipy.signal import bilinear, butter, sosfilt, sosfiltfilt, tf2sos
 from scipy.spatial import Delaunay
 from traits.api import (
@@ -199,7 +162,7 @@ class MaskedTimeOut(TimeOut):
         if len(self.invalid_channels) == 0:
             return slice(0, None, None)
         allr = [i for i in range(self.num_channels_total) if i not in self.invalid_channels]
-        return array(allr)
+        return np.array(allr)
 
     @cached_property
     def _get_num_channels(self):
@@ -251,7 +214,7 @@ class MaskedTimeOut(TimeOut):
             offset = -start % num
             if offset == 0:
                 offset = num
-            buf = empty((num + offset, self.num_channels), dtype=float)
+            buf = np.empty((num + offset, self.num_channels), dtype=float)
             bsize = 0
             i = 0
             fblock = True
@@ -360,7 +323,7 @@ class ChannelMixer(TimeOut):
             weights = 1
 
         for block in self.source.result(num):
-            yield sum(weights * block, 1, keepdims=True)
+            yield np.sum(weights * block, 1, keepdims=True)
 
 
 class Trigger(TimeOut):  # pragma: no cover
@@ -472,15 +435,15 @@ class Trigger(TimeOut):  # pragma: no cover
         threshold = self._threshold(num)
 
         # get all samples which surpasse the threshold
-        peakLoc = array([], dtype='int')  # all indices which surpasse the threshold
-        trigger_data = array([])
+        peakLoc = np.array([], dtype='int')  # all indices which surpasse the threshold
+        trigger_data = np.array([])
         x0 = []
         dSamples = 0
         for triggerSignal in self.source.result(num):
-            localTrigger = flatnonzero(triggerFunc(x0, triggerSignal, threshold))
+            localTrigger = np.flatnonzero(triggerFunc(x0, triggerSignal, threshold))
             if len(localTrigger) != 0:
-                peakLoc = append(peakLoc, localTrigger + dSamples)
-                trigger_data = append(trigger_data, triggerSignal[localTrigger])
+                peakLoc = np.append(peakLoc, localTrigger + dSamples)
+                trigger_data = np.append(trigger_data, triggerSignal[localTrigger])
             dSamples += num
             x0 = triggerSignal[-1]
         if len(peakLoc) <= 1:
@@ -494,24 +457,24 @@ class Trigger(TimeOut):  # pragma: no cover
         # which peak is the correct one -> delete the other one.
         # if there are no multiple peaks in any hunk left -> leave the while
         # loop and continue with program
-        multiplePeaksWithinHunk = flatnonzero(peakDist < self.hunk_length * maxPeakDist)
+        multiplePeaksWithinHunk = np.flatnonzero(peakDist < self.hunk_length * maxPeakDist)
         while len(multiplePeaksWithinHunk) > 0:
             peakLocHelp = multiplePeaksWithinHunk[0]
             indHelp = [peakLocHelp, peakLocHelp + 1]
             if self.multiple_peaks_in_hunk == 'extremum':
                 values = trigger_data[indHelp]
-                deleteInd = indHelp[argmin(abs(values))]
+                deleteInd = indHelp[np.argmin(abs(values))]
             elif self.multiple_peaks_in_hunk == 'first':
                 deleteInd = indHelp[1]
-            peakLoc = delete(peakLoc, deleteInd)
-            trigger_data = delete(trigger_data, deleteInd)
+            peakLoc = np.delete(peakLoc, deleteInd)
+            trigger_data = np.delete(trigger_data, deleteInd)
             peakDist = peakLoc[1:] - peakLoc[:-1]
-            multiplePeaksWithinHunk = flatnonzero(peakDist < self.hunk_length * maxPeakDist)
+            multiplePeaksWithinHunk = np.flatnonzero(peakDist < self.hunk_length * maxPeakDist)
 
         # check whether distances between peaks are evenly distributed
-        meanDist = mean(peakDist)
+        meanDist = np.mean(peakDist)
         diffDist = abs(peakDist - meanDist)
-        faultyInd = flatnonzero(diffDist > self.max_variation_of_duration * meanDist)
+        faultyInd = np.flatnonzero(diffDist > self.max_variation_of_duration * meanDist)
         if faultyInd.size != 0:
             warn(
                 f'In Trigger-Identification: The distances between the peaks (and therefore the lengths of the \
@@ -527,7 +490,7 @@ class Trigger(TimeOut):  # pragma: no cover
 
     def _trigger_rect(self, x0, x, threshold):
         # x0 stores the last value of the the last generator cycle
-        xNew = append(x0, x)
+        xNew = np.append(x0, x)
         # indPeakHunk = abs(xNew[1:] - xNew[:-1]) > abs(threshold)
         # with above line, every edge would be located
         return self._trigger_value_comp(xNew[1:] - xNew[:-1], threshold)
@@ -538,8 +501,8 @@ class Trigger(TimeOut):  # pragma: no cover
     def _threshold(self, num):
         if self.threshold is None:  # take a guessed threshold
             # get max and min values of whole trigger signal
-            maxVal = -inf
-            minVal = inf
+            maxVal = -np.inf
+            minVal = np.inf
             meanVal = 0
             cntMean = 0
             for trigger_data in self.source.result(num):
@@ -551,7 +514,7 @@ class Trigger(TimeOut):  # pragma: no cover
 
             # get 75% of maximum absolute value of trigger signal
             maxTriggerHelp = [minVal, maxVal] - meanVal
-            argInd = argmax(abs(maxTriggerHelp))
+            argInd = np.argmax(abs(maxTriggerHelp))
             thresh = maxTriggerHelp[argInd] * 0.75  # 0.75 for 75% of max trigger signal
             warn(f'No threshold was passed. An estimated threshold of {thresh} is assumed.', Warning, stacklevel=2)
         else:  # take user defined  threshold
@@ -670,7 +633,7 @@ class AngleTracker(MaskedTimeOut):
 
     # helperfunction for trigger index detection
     def _find_nearest_idx(self, peakarray, value):
-        peakarray = asarray(peakarray)
+        peakarray = np.asarray(peakarray)
         return (abs(peakarray - value)).argmin()
 
     def _to_rpm_and_angle(self):
@@ -688,8 +651,8 @@ class AngleTracker(MaskedTimeOut):
         rotDirection = self.rot_direction
         num = self.source.num_samples
         samplerate = self.source.sample_freq
-        self._rpm = zeros(num)
-        self._angle = zeros(num)
+        self._rpm = np.zeros(num)
+        self._angle = np.zeros(num)
         # number of spline points
         InterpPoints = self.interp_points
 
@@ -701,7 +664,7 @@ class AngleTracker(MaskedTimeOut):
                     peakloc[self._find_nearest_idx(peakarray=peakloc, value=ind) + 1]
                     - peakloc[self._find_nearest_idx(peakarray=peakloc, value=ind)]
                 )
-                splineData = stack(
+                splineData = np.stack(
                     (range(InterpPoints), peakloc[ind // peakdist : ind // peakdist + InterpPoints]),
                     axis=0,
                 )
@@ -711,7 +674,7 @@ class AngleTracker(MaskedTimeOut):
                     peakloc[self._find_nearest_idx(peakarray=peakloc, value=ind)]
                     - peakloc[self._find_nearest_idx(peakarray=peakloc, value=ind) - 1]
                 )
-                splineData = stack(
+                splineData = np.stack(
                     (range(InterpPoints), peakloc[ind // peakdist - InterpPoints : ind // peakdist]),
                     axis=0,
                 )
@@ -719,8 +682,8 @@ class AngleTracker(MaskedTimeOut):
             Spline = splrep(splineData[:, :][1], splineData[:, :][0], k=3)
             self._rpm[ind] = splev(ind, Spline, der=1, ext=0) * 60 * samplerate
             self._angle[ind] = (
-                splev(ind, Spline, der=0, ext=0) * 2 * pi * rotDirection / TriggerPerRevo + self.start_angle
-            ) % (2 * pi)
+                splev(ind, Spline, der=0, ext=0) * 2 * np.pi * rotDirection / TriggerPerRevo + self.start_angle
+            ) % (2 * np.pi)
             # next sample
             ind += 1
         # calculation complete
@@ -856,7 +819,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
     #:
     #: where :math:`Q` is the transformation matrix and :math:`(x', y', z')` are the modified
     #: coordinates. If no transformation is needed, :math:`Q` defaults to the identity matrix.
-    Q = CArray(dtype=float64, shape=(3, 3), value=identity(3))
+    Q = CArray(dtype=np.float64, shape=(3, 3), value=np.identity(3))
 
     #: Number of neighboring microphones used in IDW interpolation. This parameter determines how
     #: many physical microphones contribute to the weighted sum in inverse distance weighting (IDW)
@@ -919,7 +882,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
         :class:`numpy.ndarray`
             Evaluated sinc function values at the given radial distances.
         """
-        return sinc((r * self.mics_virtual.mpos.shape[1]) / (pi))
+        return np.sinc((r * self.mics_virtual.mpos.shape[1]) / (np.pi))
 
     def _virtNewCoord_func(self, mpos, mpos_virt, method, array_dimension):  # noqa N802
         # Core functionality for getting the interpolation.
@@ -966,23 +929,23 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
 
         # init positions of virtual mics in cyl coordinates
         nVirtMics = mpos_virt.shape[1]
-        virtNewCoord = zeros((3, nVirtMics))
-        virtNewCoord.fill(nan)
+        virtNewCoord = np.zeros((3, nVirtMics))
+        virtNewCoord.fill(np.nan)
         # init real positions in cyl coordinates
         nMics = mpos.shape[1]
-        newCoord = zeros((3, nMics))
-        newCoord.fill(nan)
+        newCoord = np.zeros((3, nMics))
+        newCoord.fill(np.nan)
         # empty mesh object
         mesh = []
 
         if self.array_dimension == '1D' or self.array_dimension == 'ring':
             # get projections onto new coordinate, for real mics
             projectionOnNewAxis = cartToCyl(mpos, self.Q)[0]
-            indReorderHelp = argsort(projectionOnNewAxis)
+            indReorderHelp = np.argsort(projectionOnNewAxis)
             mesh.append([projectionOnNewAxis[indReorderHelp], indReorderHelp])
 
             # new coordinates of real mics
-            indReorderHelp = argsort(cartToCyl(mpos, self.Q)[0])
+            indReorderHelp = np.argsort(cartToCyl(mpos, self.Q)[0])
             newCoord = (cartToCyl(mpos, self.Q).T)[indReorderHelp].T
 
             # and for virtual mics
@@ -993,7 +956,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
             virtNewCoord = cartToCyl(mpos_virt, self.Q)
 
             # new coordinates of real mics
-            indReorderHelp = argsort(cartToCyl(mpos, self.Q)[0])
+            indReorderHelp = np.argsort(cartToCyl(mpos, self.Q)[0])
             newCoord = cartToCyl(mpos, self.Q)
 
             # scipy delauney triangulation
@@ -1002,29 +965,29 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
 
             if self.interp_at_zero:
                 # add a point at zero
-                tri.add_points(array([[0], [0]]).T)
+                tri.add_points(np.array([[0], [0]]).T)
 
             # extend mesh with closest boundary points of repeating mesh
-            pointsOriginal = arange(tri.points.shape[0])
+            pointsOriginal = np.arange(tri.points.shape[0])
             hull = tri.convex_hull
-            hullPoints = unique(hull)
+            hullPoints = np.unique(hull)
 
             addRight = tri.points[hullPoints]
-            addRight[:, 0] += 2 * pi
+            addRight[:, 0] += 2 * np.pi
             addLeft = tri.points[hullPoints]
-            addLeft[:, 0] -= 2 * pi
+            addLeft[:, 0] -= 2 * np.pi
 
-            indOrigPoints = concatenate((pointsOriginal, pointsOriginal[hullPoints], pointsOriginal[hullPoints]))
+            indOrigPoints = np.concatenate((pointsOriginal, pointsOriginal[hullPoints], pointsOriginal[hullPoints]))
             # add all hull vertices to original mesh and check which of those
             # are actual neighbors of the original array. Cancel out all others.
-            tri.add_points(concatenate([addLeft, addRight]))
+            tri.add_points(np.concatenate([addLeft, addRight]))
             indices, indptr = tri.vertex_neighbor_vertices
-            hullNeighbor = empty((0), dtype='int32')
+            hullNeighbor = np.empty((0), dtype='int32')
             for currHull in hullPoints:
                 neighborOfHull = indptr[indices[currHull] : indices[currHull + 1]]
-                hullNeighbor = append(hullNeighbor, neighborOfHull)
-            hullNeighborUnique = unique(hullNeighbor)
-            pointsNew = unique(append(pointsOriginal, hullNeighborUnique))
+                hullNeighbor = np.append(hullNeighbor, neighborOfHull)
+            hullNeighborUnique = np.unique(hullNeighbor)
+            pointsNew = np.unique(np.append(pointsOriginal, hullNeighborUnique))
             tri = Delaunay(tri.points[pointsNew])  # re-meshing
             mesh.append([tri, indOrigPoints[pointsNew]])
 
@@ -1032,36 +995,36 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
             # get virtual mic projections on new coord system
             virtNewCoord = cartToCyl(mpos_virt, self.Q)
             # get real mic projections on new coord system
-            indReorderHelp = argsort(cartToCyl(mpos, self.Q)[0])
+            indReorderHelp = np.argsort(cartToCyl(mpos, self.Q)[0])
             newCoord = cartToCyl(mpos, self.Q)
             # Delaunay
             tri = Delaunay(newCoord.T, incremental=True)  # , incremental=True,qhull_options =  "Qc QJ Q12"
 
             if self.interp_at_zero:
                 # add a point at zero
-                tri.add_points(array([[0], [0], [0]]).T)
+                tri.add_points(np.array([[0], [0], [0]]).T)
 
             # extend mesh with closest boundary points of repeating mesh
-            pointsOriginal = arange(tri.points.shape[0])
+            pointsOriginal = np.arange(tri.points.shape[0])
             hull = tri.convex_hull
-            hullPoints = unique(hull)
+            hullPoints = np.unique(hull)
 
             addRight = tri.points[hullPoints]
-            addRight[:, 0] += 2 * pi
+            addRight[:, 0] += 2 * np.pi
             addLeft = tri.points[hullPoints]
-            addLeft[:, 0] -= 2 * pi
+            addLeft[:, 0] -= 2 * np.pi
 
-            indOrigPoints = concatenate((pointsOriginal, pointsOriginal[hullPoints], pointsOriginal[hullPoints]))
+            indOrigPoints = np.concatenate((pointsOriginal, pointsOriginal[hullPoints], pointsOriginal[hullPoints]))
             # add all hull vertices to original mesh and check which of those
             # are actual neighbors of the original array. Cancel out all others.
-            tri.add_points(concatenate([addLeft, addRight]))
+            tri.add_points(np.concatenate([addLeft, addRight]))
             indices, indptr = tri.vertex_neighbor_vertices
-            hullNeighbor = empty((0), dtype='int32')
+            hullNeighbor = np.empty((0), dtype='int32')
             for currHull in hullPoints:
                 neighborOfHull = indptr[indices[currHull] : indices[currHull + 1]]
-                hullNeighbor = append(hullNeighbor, neighborOfHull)
-            hullNeighborUnique = unique(hullNeighbor)
-            pointsNew = unique(append(pointsOriginal, hullNeighborUnique))
+                hullNeighbor = np.append(hullNeighbor, neighborOfHull)
+            hullNeighborUnique = np.unique(hullNeighbor)
+            pointsNew = np.unique(np.append(pointsOriginal, hullNeighborUnique))
             tri = Delaunay(tri.points[pointsNew])  # re-meshing
             mesh.append([tri, indOrigPoints[pointsNew]])
 
@@ -1094,20 +1057,20 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
         # mesh and projection onto polar Coordinates
         meshList, virtNewCoord, newCoord = self._get_virtNewCoord()
         # pressure interpolation init
-        pInterp = zeros((nTime, nVirtMics))
+        pInterp = np.zeros((nTime, nVirtMics))
         # Coordinates in cartesian CO - for IDW interpolation
         newCoordCart = cylToCart(newCoord)
 
         if self.interp_at_zero:
             # interpolate point at 0 in Kartesian CO
             interpolater = LinearNDInterpolator(
-                cylToCart(newCoord[:, argsort(newCoord[0])])[:2, :].T,
-                p[:, (argsort(newCoord[0]))].T,
+                cylToCart(newCoord[:, np.argsort(newCoord[0])])[:2, :].T,
+                p[:, (np.argsort(newCoord[0]))].T,
                 fill_value=0,
             )
             pZero = interpolater((0, 0))
             # add the interpolated pressure at origin to pressure channels
-            p = concatenate((p, pZero[:, newaxis]), axis=1)
+            p = np.concatenate((p, pZero[:, np.newaxis]), axis=1)
 
         # helpfunction reordered for reordered pressure values
         pHelp = p[:, meshList[0][1]]
@@ -1115,31 +1078,31 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
         # Interpolation for 1D Arrays
         if self.array_dimension == '1D' or self.array_dimension == 'ring':
             # for rotation add phi_delay
-            if not array_equal(phi_delay, []):
-                xInterpHelp = tile(virtNewCoord[0, :], (nTime, 1)) + tile(phi_delay, (virtNewCoord.shape[1], 1)).T
-                xInterp = ((xInterpHelp + pi) % (2 * pi)) - pi  #  shifting phi cootrdinate into feasible area [-pi, pi]
+            if not np.array_equal(phi_delay, []):
+                xInterpHelp = np.tile(virtNewCoord[0, :], (nTime, 1)) + np.tile(phi_delay, (virtNewCoord.shape[1], 1)).T
+                xInterp = ((xInterpHelp + np.pi) % (2 * np.pi)) - np.pi  #  shifting phi into feasible area [-pi, pi]
             # if no rotation given
             else:
-                xInterp = tile(virtNewCoord[0, :], (nTime, 1))
+                xInterp = np.tile(virtNewCoord[0, :], (nTime, 1))
             # get ordered microphone positions in radiant
             x = newCoord[0]
             for cntTime in range(nTime):
                 if self.method == 'linear':
                     # numpy 1-d interpolation
-                    pInterp[cntTime] = interp(
+                    pInterp[cntTime] = np.interp(
                         xInterp[cntTime, :],
                         x,
                         pHelp[cntTime, :],
                         period=period,
-                        left=nan,
-                        right=nan,
+                        left=np.nan,
+                        right=np.nan,
                     )
 
                 elif self.method == 'spline':
                     # scipy cubic spline interpolation
                     SplineInterp = CubicSpline(
-                        append(x, (2 * pi) + x[0]),
-                        append(pHelp[cntTime, :], pHelp[cntTime, :][0]),
+                        np.append(x, (2 * np.pi) + x[0]),
+                        np.append(pHelp[cntTime, :], pHelp[cntTime, :][0]),
                         axis=0,
                         bc_type='periodic',
                         extrapolate=None,
@@ -1173,16 +1136,18 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
         # Interpolation for arbitrary 2D Arrays
         elif self.array_dimension == '2D':
             # check rotation
-            if not array_equal(phi_delay, []):
-                xInterpHelp = tile(virtNewCoord[0, :], (nTime, 1)) + tile(phi_delay, (virtNewCoord.shape[1], 1)).T
-                xInterp = ((xInterpHelp + pi) % (2 * pi)) - pi  # shifting phi cootrdinate into feasible area [-pi, pi]
+            if not np.array_equal(phi_delay, []):
+                xInterpHelp = np.tile(virtNewCoord[0, :], (nTime, 1)) + np.tile(phi_delay, (virtNewCoord.shape[1], 1)).T
+                xInterp = ((xInterpHelp + np.pi) % (2 * np.pi)) - np.pi  # shifting phi into feasible area [-pi, pi]
             else:
-                xInterp = tile(virtNewCoord[0, :], (nTime, 1))
+                xInterp = np.tile(virtNewCoord[0, :], (nTime, 1))
 
             mesh = meshList[0][0]
             for cntTime in range(nTime):
                 # points for interpolation
-                newPoint = concatenate((xInterp[cntTime, :][:, newaxis], virtNewCoord[1, :][:, newaxis]), axis=1)
+                newPoint = np.concatenate(
+                    (xInterp[cntTime, :][:, np.newaxis], virtNewCoord[1, :][:, np.newaxis]), axis=1
+                )
                 # scipy 1D interpolation
                 if self.method == 'linear':
                     interpolater = LinearNDInterpolator(mesh, pHelp[cntTime, :], fill_value=0)
@@ -1215,7 +1180,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
                         function='cubic',
                     )  # radial basis function interpolator instance
 
-                    virtshiftcoord = array([xInterp[cntTime, :], virtNewCoord[1], virtNewCoord[2]])
+                    virtshiftcoord = np.array([xInterp[cntTime, :], virtNewCoord[1], virtNewCoord[2]])
                     pInterp[cntTime] = rbfi(virtshiftcoord[0], virtshiftcoord[1], virtshiftcoord[2])
 
                 elif self.method == 'rbf-multiquadric':
@@ -1228,40 +1193,40 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
                         function='multiquadric',
                     )  # radial basis function interpolator instance
 
-                    virtshiftcoord = array([xInterp[cntTime, :], virtNewCoord[1], virtNewCoord[2]])
+                    virtshiftcoord = np.array([xInterp[cntTime, :], virtNewCoord[1], virtNewCoord[2]])
                     pInterp[cntTime] = rbfi(virtshiftcoord[0], virtshiftcoord[1], virtshiftcoord[2])
                 # using inverse distance weighting
                 elif self.method == 'IDW':
                     newPoint2_M = newPoint.T
-                    newPoint3_M = append(newPoint2_M, zeros([1, self.num_channels]), axis=0)
+                    newPoint3_M = np.append(newPoint2_M, np.zeros([1, self.num_channels]), axis=0)
                     newPointCart = cylToCart(newPoint3_M)
-                    for ind in arange(len(newPoint[:, 0])):
-                        newPoint_Rep = tile(newPointCart[:, ind], (len(newPoint[:, 0]), 1)).T
+                    for ind in np.arange(len(newPoint[:, 0])):
+                        newPoint_Rep = np.tile(newPointCart[:, ind], (len(newPoint[:, 0]), 1)).T
                         subtract = newPoint_Rep - newCoordCart
-                        normDistance = norm(subtract, axis=0)
-                        index_norm = argsort(normDistance)[: self.num_IDW]
+                        normDistance = spla.norm(subtract, axis=0)
+                        index_norm = np.argsort(normDistance)[: self.num_IDW]
                         pHelpNew = pHelp[cntTime, index_norm]
                         normNew = normDistance[index_norm]
                         if normNew[0] < 1e-3:
                             pInterp[cntTime, ind] = pHelpNew[0]
                         else:
-                            wholeD = sum(1 / normNew**self.p_weight)
+                            wholeD = np.sum(1 / normNew**self.p_weight)
                             weight = (1 / normNew**self.p_weight) / wholeD
-                            pInterp[cntTime, ind] = sum(pHelpNew * weight)
+                            pInterp[cntTime, ind] = np.sum(pHelpNew * weight)
 
         # Interpolation for arbitrary 3D Arrays
         elif self.array_dimension == '3D':
             # check rotation
-            if not array_equal(phi_delay, []):
-                xInterpHelp = tile(virtNewCoord[0, :], (nTime, 1)) + tile(phi_delay, (virtNewCoord.shape[1], 1)).T
-                xInterp = ((xInterpHelp + pi) % (2 * pi)) - pi  # shifting phi cootrdinate into feasible area [-pi, pi]
+            if not np.array_equal(phi_delay, []):
+                xInterpHelp = np.tile(virtNewCoord[0, :], (nTime, 1)) + np.tile(phi_delay, (virtNewCoord.shape[1], 1)).T
+                xInterp = ((xInterpHelp + np.pi) % (2 * np.pi)) - np.pi  # shifting phi into feasible area [-pi, pi]
             else:
-                xInterp = tile(virtNewCoord[0, :], (nTime, 1))
+                xInterp = np.tile(virtNewCoord[0, :], (nTime, 1))
 
             mesh = meshList[0][0]
             for cntTime in range(nTime):
                 # points for interpolation
-                newPoint = concatenate((xInterp[cntTime, :][:, newaxis], virtNewCoord[1:, :].T), axis=1)
+                newPoint = np.concatenate((xInterp[cntTime, :][:, np.newaxis], virtNewCoord[1:, :].T), axis=1)
 
                 if self.method == 'linear':
                     interpolater = LinearNDInterpolator(mesh, pHelp[cntTime, :], fill_value=0)
@@ -1391,7 +1356,7 @@ class SpatialInterpolatorRotation(SpatialInterpolator):  # pragma: no cover
             a multiple of ``num``.
         """
         # period for rotation
-        period = 2 * pi
+        period = 2 * np.pi
         # get angle
         angle = self.angle_source.angle()
         # counter to track angle position in time for each block
@@ -1464,12 +1429,12 @@ class SpatialInterpolatorConstantRotation(SpatialInterpolator):  # pragma: no co
             The last block may contain fewer samples if the total number of samples is not
             a multiple of ``num``.
         """
-        omega = 2 * pi * self.rotational_speed
-        period = 2 * pi
+        omega = 2 * np.pi * self.rotational_speed
+        period = 2 * np.pi
         phiOffset = 0.0
         for timeData in self.source.result(num):
             nTime = timeData.shape[0]
-            phi_delay = phiOffset + linspace(0, nTime / self.sample_freq * omega, nTime, endpoint=False)
+            phi_delay = phiOffset + np.linspace(0, nTime / self.sample_freq * omega, nTime, endpoint=False)
             interpVal = self._result_core_func(timeData, phi_delay, period, self.Q, interp_at_zero=False)
             phiOffset = phi_delay[-1] + omega / self.sample_freq
             yield interpVal
@@ -1681,12 +1646,12 @@ class TimeCumAverage(TimeOut):
         recalculated by summing the previous cumulative value and the new samples, then dividing by
         the total number of samples up to that point.
         """
-        count = (arange(num) + 1)[:, newaxis]
+        count = (np.arange(num) + 1)[:, np.newaxis]
         for i, temp in enumerate(self.source.result(num)):
             ns, nc = temp.shape
             if not i:
-                accu = zeros((1, nc))
-            temp = (accu * (count[0] - 1) + cumsum(temp, axis=0)) / count[:ns]
+                accu = np.zeros((1, nc))
+            temp = (accu * (count[0] - 1) + np.cumsum(temp, axis=0)) / count[:ns]
             accu = temp[-1]
             count += ns
             yield temp
@@ -1739,7 +1704,7 @@ class TimeReverse(TimeOut):
         """
         result_list = []
         result_list.extend(self.source.result(num))
-        temp = empty_like(result_list[0])
+        temp = np.empty_like(result_list[0])
         h = result_list.pop()
         nsh = h.shape[0]
         temp[:nsh] = h[::-1]
@@ -1803,7 +1768,7 @@ class Filter(TimeOut):
             a multiple of ``num``.
         """
         sos = self.sos
-        zi = zeros((sos.shape[0], 2, self.source.num_channels))
+        zi = np.zeros((sos.shape[0], 2, self.source.num_channels))
         for block in self.source.result(num):
             sos = self.sos  # this line is useful in case of changes
             # to self.sos during generator lifetime
@@ -1880,12 +1845,12 @@ class FiltOctave(Filter):
         # adjust filter edge frequencies for correct power bandwidth (see ANSI 1.11 1987
         # and Kalb,J.T.: "A thirty channel real time audio analyzer and its applications",
         # PhD Thesis: Georgia Inst. of Techn., 1975
-        beta = pi / (2 * self.order)
+        beta = np.pi / (2 * self.order)
         alpha = pow(2.0, 1.0 / (2.0 * self.fraction_))
-        beta = 2 * beta / sin(beta) / (alpha - 1 / alpha)
-        alpha = (1 + sqrt(1 + beta * beta)) / beta
+        beta = 2 * beta / np.sin(beta) / (alpha - 1 / alpha)
+        alpha = (1 + np.sqrt(1 + beta * beta)) / beta
         fr = 2 * self.band / fs
-        if fr > 1 / sqrt(2):
+        if fr > 1 / np.sqrt(2):
             msg = f'band frequency too high:{self.band:f},{fs:f}'
             raise ValueError(msg)
         om1 = fr / alpha
@@ -1946,16 +1911,16 @@ class FiltFiltOctave(FiltOctave):
         # filter design
         fs = self.sample_freq
         # adjust filter edge frequencies for correct power bandwidth (see FiltOctave)
-        beta = pi / (2 * self.order)
+        beta = np.pi / (2 * self.order)
         alpha = pow(2.0, 1.0 / (2.0 * self.fraction_))
-        beta = 2 * beta / sin(beta) / (alpha - 1 / alpha)
-        alpha = (1 + sqrt(1 + beta * beta)) / beta
+        beta = 2 * beta / np.sin(beta) / (alpha - 1 / alpha)
+        alpha = (1 + np.sqrt(1 + beta * beta)) / beta
         # additional bandwidth correction for double-pass
         alpha = alpha * {6: 1.01, 5: 1.012, 4: 1.016, 3: 1.022, 2: 1.036, 1: 1.083}.get(self.order, 1.0) ** (
             3 / self.fraction_
         )
         fr = 2 * self.band / fs
-        if fr > 1 / sqrt(2):
+        if fr > 1 / np.sqrt(2):
             msg = f'band frequency too high:{self.band:f},{fs:f}'
             raise ValueError(msg)
         om1 = fr / alpha
@@ -1990,7 +1955,7 @@ class FiltFiltOctave(FiltOctave):
         - Filtering is performed separately for each channel to optimize memory usage.
         """
         sos = self.sos
-        data = empty((self.source.num_samples, self.source.num_channels))
+        data = np.empty((self.source.num_samples, self.source.num_channels))
         j = 0
         for block in self.source.result(num):
             ns, nc = block.shape
@@ -2073,7 +2038,7 @@ class TimeExpAverage(Filter):
         #
         # This implementation ensures that the filter adapts dynamically
         # based on the source's sampling frequency.
-        alpha = 1 - exp(-1 / self.weight_ / self.sample_freq)
+        alpha = 1 - np.exp(-1 / self.weight_ / self.sample_freq)
         a = [1, alpha - 1]
         b = [alpha]
         return tf2sos(b, a)
@@ -2163,18 +2128,18 @@ class FiltFreqWeight(Filter):
         f2 = 107.65265
         f3 = 737.86223
         f4 = 12194.217
-        a = polymul([1, 4 * pi * f4, (2 * pi * f4) ** 2], [1, 4 * pi * f1, (2 * pi * f1) ** 2])
+        a = np.polymul([1, 4 * np.pi * f4, (2 * np.pi * f4) ** 2], [1, 4 * np.pi * f1, (2 * np.pi * f1) ** 2])
         if self.weight == 'A':
-            a = polymul(polymul(a, [1, 2 * pi * f3]), [1, 2 * pi * f2])
-            b = [(2 * pi * f4) ** 2 * 10 ** (1.9997 / 20), 0, 0, 0, 0]
+            a = np.polymul(np.polymul(a, [1, 2 * np.pi * f3]), [1, 2 * np.pi * f2])
+            b = [(2 * np.pi * f4) ** 2 * 10 ** (1.9997 / 20), 0, 0, 0, 0]
             b, a = bilinear(b, a, self.sample_freq)
         elif self.weight == 'C':
-            b = [(2 * pi * f4) ** 2 * 10 ** (0.0619 / 20), 0, 0]
+            b = [(2 * np.pi * f4) ** 2 * 10 ** (0.0619 / 20), 0, 0]
             b, a = bilinear(b, a, self.sample_freq)
-            b = append(b, zeros(2))  # make 6th order
-            a = append(a, zeros(2))
+            b = np.append(b, np.zeros(2))  # make 6th order
+            a = np.append(a, np.zeros(2))
         else:
-            b = zeros(7)
+            b = np.zeros(7)
             b[0] = 1.0
             a = b  # 6th order flat response
         return tf2sos(b, a)
@@ -2260,8 +2225,8 @@ class FilterBank(TimeOut):
         numbands = self.num_bands
         snumch = self.source.num_channels
         sos = self.sos
-        zi = [zeros((sos[0].shape[0], 2, snumch)) for _ in range(numbands)]
-        res = zeros((num, self.num_channels), dtype='float')
+        zi = [np.zeros((sos[0].shape[0], 2, snumch)) for _ in range(numbands)]
+        res = np.zeros((num, self.num_channels), dtype='float')
         for block in self.source.result(num):
             for i in range(numbands):
                 res[:, i * snumch : (i + 1) * snumch], zi[i] = sosfilt(sos[i], block, axis=0, zi=zi[i])
@@ -2485,7 +2450,7 @@ class WriteWAV(TimeOut):
             wf.setnchannels(nc)
             wf.setsampwidth(sw)
             wf.setframerate(fs)
-            ind = array(self.channels)
+            ind = np.array(self.channels)
             if self.max_val is None:
                 # compute maximum and remember result to avoid calling source twice
                 if not isinstance(self.source, Cache):
@@ -2495,7 +2460,7 @@ class WriteWAV(TimeOut):
                 if dtype == np.dtype('uint8'):
                     mx = 0
                     for data in self.source.result(num):
-                        mx = max(abs(data).max(), mx)
+                        mx = max(np.abs(data).max(), mx)
                 elif dtype in (np.dtype('int16'), np.dtype('int32')):
                     # for signed integers, we need special treatment because of asymmetry
                     negmax, posmax = 0, 0
@@ -2646,7 +2611,7 @@ class WriteH5(TimeOut):
             f5h.create_new_group('metadata', '/')
             for key, value in self.metadata.items():
                 if isinstance(value, str):
-                    value = array(value, dtype='S')
+                    value = np.array(value, dtype='S')
                 f5h.create_array('/metadata', key, value)
 
     def result(self, num):
@@ -2786,16 +2751,16 @@ class TimeConvolve(TimeOut):
         #     A 3D array of complex values representing the frequency-domain blocks of the kernel.
         [L, N] = self.kernel.shape
         num = self._block_size
-        P = int(ceil(L / num))
+        P = int(np.ceil(L / num))
         trim = num * (P - 1)
-        blocks = zeros([P, num + 1, N], dtype='complex128')
+        blocks = np.zeros([P, num + 1, N], dtype='complex128')
 
         if P > 1:
-            for i, block in enumerate(split(self.kernel[:trim], P - 1, axis=0)):
-                blocks[i] = rfft(concatenate([block, zeros([num, N])], axis=0), axis=0)
+            for i, block in enumerate(np.split(self.kernel[:trim], P - 1, axis=0)):
+                blocks[i] = rfft(np.concatenate([block, np.zeros([num, N])], axis=0), axis=0)
 
         blocks[-1] = rfft(
-            concatenate([self.kernel[trim:], zeros([2 * num - L + trim, N])], axis=0),
+            np.concatenate([self.kernel[trim:], np.zeros([2 * num - L + trim, N])], axis=0),
             axis=0,
         )
         return blocks
@@ -2832,15 +2797,15 @@ class TimeConvolve(TimeOut):
         L = self.kernel.shape[0]
         N = self.source.num_channels
         M = self.source.num_samples
-        numblocks_kernel = int(ceil(L / num))  # number of kernel blocks
-        Q = int(ceil(M / num))  # number of signal blocks
-        R = int(ceil((L + M - 1) / num))  # number of output blocks
+        numblocks_kernel = int(np.ceil(L / num))  # number of kernel blocks
+        Q = int(np.ceil(M / num))  # number of signal blocks
+        R = int(np.ceil((L + M - 1) / num))  # number of output blocks
         last_size = (L + M - 1) % num  # size of final block
 
         idx = 0
-        fdl = zeros([numblocks_kernel, num + 1, N], dtype='complex128')
-        buff = zeros([2 * num, N])  # time-domain input buffer
-        spec_sum = zeros([num + 1, N], dtype='complex128')
+        fdl = np.zeros([numblocks_kernel, num + 1, N], dtype='complex128')
+        buff = np.zeros([2 * num, N])  # time-domain input buffer
+        spec_sum = np.zeros([num + 1, N], dtype='complex128')
 
         signal_blocks = self.source.result(num)
         temp = next(signal_blocks)
@@ -2859,8 +2824,8 @@ class TimeConvolve(TimeOut):
             _append_to_fdl(fdl, idx, numblocks_kernel, rfft(buff, axis=0))
             spec_sum = _spectral_sum(spec_sum, fdl, self._kernel_blocks)
             yield irfft(spec_sum, axis=0)[num:]
-            buff = concatenate(
-                [buff[num:], zeros([num, N])],
+            buff = np.concatenate(
+                [buff[num:], np.zeros([num, N])],
                 axis=0,
             )  # shift input buffer to the left
             buff[num : num + temp.shape[0]] = temp  # append new time-data
@@ -2869,8 +2834,8 @@ class TimeConvolve(TimeOut):
             _append_to_fdl(fdl, idx, numblocks_kernel, rfft(buff, axis=0))
             spec_sum = _spectral_sum(spec_sum, fdl, self._kernel_blocks)
             yield irfft(spec_sum, axis=0)[num:]
-            buff = concatenate(
-                [buff[num:], zeros([num, N])],
+            buff = np.concatenate(
+                [buff[num:], np.zeros([num, N])],
                 axis=0,
             )  # shift input buffer to the left
 
