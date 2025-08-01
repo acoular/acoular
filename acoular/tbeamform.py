@@ -218,10 +218,9 @@ class BeamformerTime(TimeOut):
 
 class BeamformerTimeSq(BeamformerTime):
     """
-    Provides a time domain beamformer with time-dependent.
+    Provides a time domain beamformer with squared output and optional autopower removal.
 
-    power signal output and possible autopower removal
-    for a spatially fixed grid.
+    Power signal output and possible autopower removal for a spatially fixed grid.
     """
 
     #: Boolean flag, if 'True' (default), the main diagonal is removed before beamforming.
@@ -508,10 +507,9 @@ class BeamformerTimeTraj(BeamformerTime):
 
 class BeamformerTimeSqTraj(BeamformerTimeSq, BeamformerTimeTraj):
     """
-    Provides a time domain beamformer with time-dependent.
+    Provides a time domain beamformer with squared output for a grid moving along a trajectory.
 
-    power signal output and possible autopower removal
-    for a grid moving along a trajectory.
+    Power signal output and optional autopower removal for a grid moving along a trajectory.
     """
 
     # internal identifier
@@ -797,19 +795,17 @@ class IntegratorSectorTime(TimeOut):
 
     def result(self, num=1):
         """
-        Python generator that yields the source output integrated over the given.
-
-        sectors, block-wise.
-
+        Python generator that yields the source output integrated over specified grid sectors.
+        
         Parameters
         ----------
-        num : integer, defaults to 1
-            This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block).
+        num : :class:`int`
+            Size of the blocks to be yielded (number of samples per block). Default is ``1``.
 
         Returns
         -------
-        Samples in blocks of shape (``num``, :attr:`num_channels`).
+        :class:`numpy.ndarray`
+            Samples in blocks of shape (``num``, :attr:`num_channels`).
         :attr:`num_channels` is the number of sectors.
         The last block may be shorter than num.
         """
