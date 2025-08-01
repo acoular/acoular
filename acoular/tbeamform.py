@@ -218,9 +218,10 @@ class BeamformerTime(TimeOut):
 
 class BeamformerTimeSq(BeamformerTime):
     """
-    Provides a time domain beamformer with squared output and optional autopower removal.
+    Time domain beamformer with squared output and optional autopower removal.
 
-    Power signal output and possible autopower removal for a spatially fixed grid.
+    Provides a time domain beamformer with time-dependend power signal output and possible autopower
+    removal for a spatially fixed grid.
     """
 
     #: Boolean flag, if 'True' (default), the main diagonal is removed before beamforming.
@@ -507,9 +508,10 @@ class BeamformerTimeTraj(BeamformerTime):
 
 class BeamformerTimeSqTraj(BeamformerTimeSq, BeamformerTimeTraj):
     """
-    Provides a time domain beamformer with squared output for a grid moving along a trajectory.
+    Time domain beamformer with squared output for a grid moving along a trajectory.
 
-    Power signal output and optional autopower removal for a grid moving along a trajectory.
+    Provides a time domain beamformer with time-dependent power signal output and possible autopower
+    removal for a grid moving along a trajectory.
     """
 
     # internal identifier
