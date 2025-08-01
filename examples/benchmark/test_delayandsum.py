@@ -2,9 +2,8 @@
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
 
-import acoular
-import numpy.random as random
-from numpy import empty, float32, int32
+import acoular as ac
+import numpy as np
 
 # set_num_threads(1)
 
@@ -14,23 +13,23 @@ NUM_SAMPLES = 2048
 GRIDSIZE = 2048
 NUM = 512
 
-data = random.normal(size=(NUM_SAMPLES, NUM_MICS))
-offsets = random.randint(low=0, high=NUM_SAMPLES / 2, size=(GRIDSIZE, NUM_MICS))
-ifactor2 = random.uniform(low=0, high=1.0, size=(GRIDSIZE, NUM_MICS))
-steeramp = random.uniform(low=0, high=1.0, size=(GRIDSIZE, NUM_MICS))
-offsets5 = random.randint(low=0, high=NUM_SAMPLES / 2, size=(NUM, GRIDSIZE, NUM_MICS))
-ifactor25 = random.uniform(low=0, high=1.0, size=(NUM, GRIDSIZE, NUM_MICS))
-steeramp5 = random.uniform(low=0, high=1.0, size=(NUM, GRIDSIZE, NUM_MICS))
-out = empty((NUM, GRIDSIZE))
-autopower = empty((NUM, GRIDSIZE))
+data = np.random.normal(size=(NUM_SAMPLES, NUM_MICS))
+offsets = np.random.randint(low=0, high=NUM_SAMPLES / 2, size=(GRIDSIZE, NUM_MICS))
+ifactor2 = np.random.uniform(low=0, high=1.0, size=(GRIDSIZE, NUM_MICS))
+steeramp = np.random.uniform(low=0, high=1.0, size=(GRIDSIZE, NUM_MICS))
+offsets5 = np.random.randint(low=0, high=NUM_SAMPLES / 2, size=(NUM, GRIDSIZE, NUM_MICS))
+ifactor25 = np.random.uniform(low=0, high=1.0, size=(NUM, GRIDSIZE, NUM_MICS))
+steeramp5 = np.random.uniform(low=0, high=1.0, size=(NUM, GRIDSIZE, NUM_MICS))
+out = np.empty((NUM, GRIDSIZE))
+autopower = np.empty((NUM, GRIDSIZE))
 
 
 def test_delayandsum4():
-    acoular.tfastfuncs._delayandsum4(data, offsets, ifactor2, steeramp, out, autopower)
+    ac.tfastfuncs._delayandsum4(data, offsets, ifactor2, steeramp, out, autopower)
 
 
 def test_delayandsum5():
-    acoular.tfastfuncs._delayandsum5(
+    ac.tfastfuncs._delayandsum5(
         data,
         offsets5,
         ifactor25,
@@ -40,16 +39,16 @@ def test_delayandsum5():
     )
 
 
-data32 = data.astype(float32)
-offsets532 = offsets5.astype(int32)
-ifactor2532 = ifactor25.astype(float32)
-steeramp532 = steeramp5.astype(float32)
-out32 = out.astype(float32)
-autopower32 = autopower.astype(float32)
+data32 = data.astype(np.float32)
+offsets532 = offsets5.astype(np.int32)
+ifactor2532 = ifactor25.astype(np.float32)
+steeramp532 = steeramp5.astype(np.float32)
+out32 = out.astype(np.float32)
+autopower32 = autopower.astype(np.float32)
 
 
 def test_delayandsum532():
-    acoular.tfastfuncs._delayandsum5(
+    ac.tfastfuncs._delayandsum5(
         data32,
         offsets532,
         ifactor2532,
@@ -66,7 +65,7 @@ index = offsets5.copy()
 
 
 def test_delays():
-    acoular.tfastfuncs._delays(
+    ac.tfastfuncs._delays(
         rm,
         343.0,
         interp,
@@ -74,25 +73,25 @@ def test_delays():
     )
 
 
-rm32 = rm.astype(float32)
-interp32 = interp.astype(float32)
-index32 = index.astype(int32)
+rm32 = rm.astype(np.float32)
+interp32 = interp.astype(np.float32)
+index32 = index.astype(np.int32)
 
 
 def test_delays32():
-    acoular.tfastfuncs._delays(
+    ac.tfastfuncs._delays(
         rm32,
-        float32(343.0),
+        np.float32(343.0),
         interp32,
         index32,
     )
 
 
-r0 = random.uniform(low=0, high=1.0, size=(NUM, GRIDSIZE))
+r0 = np.random.uniform(low=0, high=1.0, size=(NUM, GRIDSIZE))
 
 
 def test_steer_I():  # noqa: N802
-    acoular.tfastfuncs._steer_I(
+    ac.tfastfuncs._steer_I(
         rm,
         r0,
         steeramp5,
@@ -100,7 +99,7 @@ def test_steer_I():  # noqa: N802
 
 
 def test_steer_II():  # noqa: N802
-    acoular.tfastfuncs._steer_II(
+    ac.tfastfuncs._steer_II(
         rm,
         r0,
         steeramp5,
@@ -108,7 +107,7 @@ def test_steer_II():  # noqa: N802
 
 
 def test_steer_III():  # noqa: N802
-    acoular.tfastfuncs._steer_III(
+    ac.tfastfuncs._steer_III(
         rm,
         r0,
         steeramp5,
@@ -116,7 +115,7 @@ def test_steer_III():  # noqa: N802
 
 
 def test_steer_IV():  # noqa: N802
-    acoular.tfastfuncs._steer_IV(
+    ac.tfastfuncs._steer_IV(
         rm,
         r0,
         steeramp5,

@@ -7,8 +7,8 @@ from functools import partial
 from pathlib import Path
 
 import acoular as ac
+import numpy as np
 import pytest
-from numpy import array, array_equal
 from pytest_cases import fixture, get_case_id, parametrize_with_cases
 
 from tests.cases.test_grid_cases import Grids, Sectors
@@ -81,7 +81,7 @@ def test_empty_subdomain(grid, sector):
 def import_grid():
     """Fixture for creating a rectangular ImportGrid object with 4 grid points."""
     # Create 4 points with center at (0, 0, 0) and aperture of 2
-    pos_total = array([[0, 1, 0, -1], [1, 0, -1, 0], [0, 0, 0, 0]])
+    pos_total = np.array([[0, 1, 0, -1], [1, 0, -1, 0], [0, 0, 0, 0]])
     return ac.ImportGrid(pos=pos_total)
 
 
@@ -100,4 +100,4 @@ def test_export_gpos_all_grids(grid, tmp_path):
     export_file = tmp_path / f'test_gpos_{grid.digest}.xml'
     grid.export_gpos(export_file)
     new_grid = ac.ImportGrid(file=export_file)
-    assert array_equal(grid.pos, new_grid.pos)
+    assert np.array_equal(grid.pos, new_grid.pos)

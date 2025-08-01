@@ -1,6 +1,11 @@
 What's new
 ============
 
+Upcoming Release
+------------------------
+    **Internal**
+        * refactored import statements and input aliases
+
 25.07
 ------------------------
     **New features**
