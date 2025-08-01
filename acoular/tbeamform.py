@@ -1,7 +1,8 @@
 # ------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
-"""Implements beamformers in the time domain.
+"""
+Implements beamformers in the time domain.
 
 .. autosummary::
     :toctree: generated/
@@ -33,7 +34,8 @@ from .trajectory import Trajectory
 
 
 def const_power_weight(bf):
-    """Internal helper function for :class:`BeamformerTime`.
+    """
+    Internal helper function for :class:`BeamformerTime`.
 
     Provides microphone weighting
     to make the power per unit area of the
@@ -66,7 +68,9 @@ possible_weights = {'none': None, 'power': const_power_weight}
 
 
 class BeamformerTime(TimeOut):
-    """Provides a basic time domain beamformer with time signal output
+    """
+    Provides a basic time domain beamformer with time signal output.
+
     for a spatially fixed grid.
     """
 
@@ -100,7 +104,8 @@ class BeamformerTime(TimeOut):
         return self.weights_(self)[np.newaxis] if self.weights_ else 1.0
 
     def result(self, num=2048):
-        """Python generator that yields the time-domain beamformer output.
+        """
+        Python generator that yields the time-domain beamformer output.
 
         The output time signal starts for source signals that were emitted from
         the :class:`~acoular.grids.Grid` at `t=0`.
@@ -155,53 +160,53 @@ class BeamformerTime(TimeOut):
                     break
                 n_index = np.arange(0, num + 1)[:, np.newaxis]
             # init step
-            Phi, autopow = self._delay_and_sum(num, p_res, d_interp2, d_index, amp)
+            phi, autopow = self._delay_and_sum(num, p_res, d_interp2, d_index, amp)
             if 'Cleant' not in self.__class__.__name__:
                 if 'Sq' not in self.__class__.__name__:
-                    yield Phi[:num]
+                    yield phi[:num]
                 elif self.r_diag:
-                    yield (Phi[:num] ** 2 - autopow[:num]).clip(min=0)
+                    yield (phi[:num] ** 2 - autopow[:num]).clip(min=0)
                 else:
-                    yield Phi[:num] ** 2
+                    yield phi[:num] ** 2
             else:
                 p_res_copy = p_res.copy()
-                Gamma = np.zeros(Phi.shape)
-                Gamma_autopow = np.zeros(Phi.shape)
-                J = 0
+                gamma = np.zeros(phi.shape)
+                gamma_autopow = np.zeros(phi.shape)
+                j = 0
                 # deconvolution
-                while self.n_iter > J:
-                    # print(f"start clean iteration {J+1} of max {self.n_iter}")
-                    powPhi = (Phi[:num] ** 2 - autopow).sum(0).clip(min=0) if self.r_diag else (Phi[:num] ** 2).sum(0)
-                    imax = np.argmax(powPhi)
+                while self.n_iter > j:
+                    # print(f"start clean iteration {j+1} of max {self.n_iter}")
+                    pow_phi = (phi[:num] ** 2 - autopow).sum(0).clip(min=0) if self.r_diag else (phi[:num] ** 2).sum(0)
+                    imax = np.argmax(pow_phi)
                     t_float = d_interp2[imax] + d_index[imax] + n_index
                     t_ind = t_float.astype(np.int64)
                     for m in range(num_mics):
                         p_res_copy[t_ind[: num + 1, m], m] -= self.damp * np.interp(
                             t_ind[: num + 1, m],
                             t_float[:num, m],
-                            Phi[:num, imax] * self.steer.r0[imax] / self.steer.rm[imax, m],
+                            phi[:num, imax] * self.steer.r0[imax] / self.steer.rm[imax, m],
                         )
-                    nextPhi, nextAutopow = self._delay_and_sum(num, p_res_copy, d_interp2, d_index, amp)
+                    next_phi, next_autopow = self._delay_and_sum(num, p_res_copy, d_interp2, d_index, amp)
                     if self.r_diag:
-                        pownextPhi = (nextPhi[:num] ** 2 - nextAutopow).sum(0).clip(min=0)
+                        pow_next_phi = (next_phi[:num] ** 2 - next_autopow).sum(0).clip(min=0)
                     else:
-                        pownextPhi = (nextPhi[:num] ** 2).sum(0)
-                    # print(f"total signal power: {powPhi.sum()}")
-                    if pownextPhi.sum() < powPhi.sum():  # stopping criterion
-                        Gamma[:num, imax] += self.damp * Phi[:num, imax]
-                        Gamma_autopow[:num, imax] = autopow[:num, imax].copy()
-                        Phi = nextPhi
-                        autopow = nextAutopow
-                        # print(f"clean max: {L_p((Gamma**2).sum(0)/num).max()} dB")
-                        J += 1
+                        pow_next_phi = (next_phi[:num] ** 2).sum(0)
+                    # print(f"total signal power: {pow_phi.sum()}")
+                    if pow_next_phi.sum() < pow_phi.sum():  # stopping criterion
+                        gamma[:num, imax] += self.damp * phi[:num, imax]
+                        gamma_autopow[:num, imax] = autopow[:num, imax].copy()
+                        phi = next_phi
+                        autopow = next_autopow
+                        # print(f"clean max: {L_p((gamma**2).sum(0)/num).max()} dB")
+                        j += 1
                     else:
                         break
                 if 'Sq' not in self.__class__.__name__:
-                    yield Gamma[:num]
+                    yield gamma[:num]
                 elif self.r_diag:
-                    yield Gamma[:num] ** 2 - (self.damp**2) * Gamma_autopow[:num]
+                    yield gamma[:num] ** 2 - (self.damp**2) * gamma_autopow[:num]
                 else:
-                    yield Gamma[:num] ** 2
+                    yield gamma[:num] ** 2
 
     def _delay_and_sum(self, num, p_res, d_interp2, d_index, amp):
         """Standard delay-and-sum method."""
@@ -212,7 +217,9 @@ class BeamformerTime(TimeOut):
 
 
 class BeamformerTimeSq(BeamformerTime):
-    """Provides a time domain beamformer with time-dependend
+    """
+    Provides a time domain beamformer with time-dependent.
+
     power signal output and possible autopower removal
     for a spatially fixed grid.
     """
@@ -230,7 +237,8 @@ class BeamformerTimeSq(BeamformerTime):
         return digest(self)
 
     def result(self, num=2048):
-        """Python generator that yields the **squared** time-domain beamformer output.
+        """
+        Python generator that yields the **squared** time-domain beamformer output.
 
         The squared output time signal starts for source signals that were emitted from
         the :class:`~acoular.grids.Grid` at `t=0`.
@@ -253,7 +261,9 @@ class BeamformerTimeSq(BeamformerTime):
 
 
 class BeamformerTimeTraj(BeamformerTime):
-    """Provides a basic time domain beamformer with time signal output
+    """
+    Provides a basic time domain beamformer with time signal output.
+
     for a grid moving along a trajectory.
     """
 
@@ -291,7 +301,9 @@ class BeamformerTimeTraj(BeamformerTime):
         """Python generator that yields the moving grid coordinates samplewise."""
 
         def cross(a, b):
-            """Cross product for fast computation
+            """
+            Cross product for fast computation.
+
             because numpy.cross is ultra slow in this case.
             """
             return np.array([a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]])
@@ -313,9 +325,9 @@ class BeamformerTimeTraj(BeamformerTime):
                 dx = np.array(g1)  # direction vector (new x-axis)
                 dy = cross(self.rvec, dx)  # new y-axis
                 dz = cross(dx, dy)  # new z-axis
-                RM = np.array((dx, dy, dz)).T  # rotation matrix
-                RM /= np.sqrt((RM * RM).sum(0))  # column normalized
-                tpos = np.dot(RM, gpos) + loc[:, np.newaxis]  # rotation+translation
+                rm = np.array((dx, dy, dz)).T  # rotation matrix
+                rm /= np.sqrt((rm * rm).sum(0))  # column normalized
+                tpos = np.dot(rm, gpos) + loc[:, np.newaxis]  # rotation+translation
                 #                print(loc[:])
                 yield tpos
 
@@ -328,12 +340,26 @@ class BeamformerTimeTraj(BeamformerTime):
         return (ma * np.sum(rmv.reshape((3, -1)) * fdv, 0) / rm.reshape(-1)).reshape(rm.shape)
 
     def get_r0(self, tpos):
+        """
+        Get reference distance for grid positions.
+
+        Parameters
+        ----------
+        tpos : :class:`ndarray`
+            Grid positions.
+
+        Returns
+        -------
+        :class:`float` or :class:`ndarray`
+            Reference distance(s).
+        """
         if np.isscalar(self.steer.ref) and self.steer.ref > 0:
             return self.steer.ref  # full((self.steer.grid.size,), self.steer.ref)
         return self.steer.env._r(tpos)
 
     def result(self, num=2048):
-        """Python generator that yields the time-domain beamformer output.
+        """
+        Python generator that yields the time-domain beamformer output.
 
         The output time signal starts for source signals that were emitted from
         the :class:`~acoular.grids.Grid` at `t=0`.
@@ -411,30 +437,30 @@ class BeamformerTimeTraj(BeamformerTime):
                 flag = False
             # init step
             p_res = time_block.copy()
-            Phi, autopow = self._delay_and_sum(num, p_res, d_interp2, d_index, amp)
+            phi, autopow = self._delay_and_sum(num, p_res, d_interp2, d_index, amp)
             if 'Cleant' not in self.__class__.__name__:
                 if 'Sq' not in self.__class__.__name__:
-                    yield Phi[:num]
+                    yield phi[:num]
                 elif self.r_diag:
-                    yield (Phi[:num] ** 2 - autopow[:num]).clip(min=0)
+                    yield (phi[:num] ** 2 - autopow[:num]).clip(min=0)
                 else:
-                    yield Phi[:num] ** 2
+                    yield phi[:num] ** 2
             else:
                 # choose correct distance
                 blockrm1 = blockrmconv if self.conv_amp else blockrm
-                Gamma = np.zeros(Phi.shape, dtype=fdtype)
-                Gamma_autopow = np.zeros(Phi.shape, dtype=fdtype)
-                J = 0
+                gamma = np.zeros(phi.shape, dtype=fdtype)
+                gamma_autopow = np.zeros(phi.shape, dtype=fdtype)
+                j = 0
                 t_ind = np.arange(p_res.shape[0], dtype=idtype)
                 # deconvolution
-                while self.n_iter > J:
-                    # print(f"start clean iteration {J+1} of max {self.n_iter}")
+                while self.n_iter > j:
+                    # print(f"start clean iteration {j+1} of max {self.n_iter}")
                     if self.r_diag:
-                        powPhi = (Phi[:num] * Phi[:num] - autopow).sum(0).clip(min=0)
+                        pow_phi = (phi[:num] * phi[:num] - autopow).sum(0).clip(min=0)
                     else:
-                        powPhi = (Phi[:num] * Phi[:num]).sum(0)
+                        pow_phi = (phi[:num] * phi[:num]).sum(0)
                     # find index of max power focus point
-                    imax = np.argmax(powPhi)
+                    imax = np.argmax(pow_phi)
                     # find backward delays
                     t_float = (d_interp2[:num, imax, m_index] + d_index[:num, imax, m_index] + n_index).astype(fdtype)
                     # determine max/min delays in sample units
@@ -442,7 +468,7 @@ class BeamformerTimeTraj(BeamformerTime):
                     ind_max = t_float.max(0).astype(idtype) + 2
                     ind_min = t_float.min(0).astype(idtype)
                     # store time history at max power focus point
-                    h = Phi[:num, imax] * blockr0[:num, imax]
+                    h = phi[:num, imax] * blockr0[:num, imax]
                     for m in range(num_mics):
                         # subtract interpolated time history from microphone signals
                         p_res[ind_min[m] : ind_max[m], m] -= self.damp * np.interp(
@@ -450,27 +476,27 @@ class BeamformerTimeTraj(BeamformerTime):
                             t_float[:num, m],
                             h / blockrm1[:num, imax, m],
                         )
-                    nextPhi, nextAutopow = self._delay_and_sum(num, p_res, d_interp2, d_index, amp)
+                    next_phi, next_autopow = self._delay_and_sum(num, p_res, d_interp2, d_index, amp)
                     if self.r_diag:
-                        pownextPhi = (nextPhi[:num] * nextPhi[:num] - nextAutopow).sum(0).clip(min=0)
+                        pow_next_phi = (next_phi[:num] * next_phi[:num] - next_autopow).sum(0).clip(min=0)
                     else:
-                        pownextPhi = (nextPhi[:num] * nextPhi[:num]).sum(0)
-                    # print(f"total signal power: {powPhi.sum()}")
-                    if pownextPhi.sum() < powPhi.sum():  # stopping criterion
-                        Gamma[:num, imax] += self.damp * Phi[:num, imax]
-                        Gamma_autopow[:num, imax] = autopow[:num, imax].copy()
-                        Phi = nextPhi
-                        autopow = nextAutopow
-                        # print(f"clean max: {L_p((Gamma**2).sum(0)/num).max()} dB")
-                        J += 1
+                        pow_next_phi = (next_phi[:num] * next_phi[:num]).sum(0)
+                    # print(f"total signal power: {pow_phi.sum()}")
+                    if pow_next_phi.sum() < pow_phi.sum():  # stopping criterion
+                        gamma[:num, imax] += self.damp * phi[:num, imax]
+                        gamma_autopow[:num, imax] = autopow[:num, imax].copy()
+                        phi = next_phi
+                        autopow = next_autopow
+                        # print(f"clean max: {L_p((gamma**2).sum(0)/num).max()} dB")
+                        j += 1
                     else:
                         break
                 if 'Sq' not in self.__class__.__name__:
-                    yield Gamma[:num]
+                    yield gamma[:num]
                 elif self.r_diag:
-                    yield Gamma[:num] ** 2 - (self.damp**2) * Gamma_autopow[:num]
+                    yield gamma[:num] ** 2 - (self.damp**2) * gamma_autopow[:num]
                 else:
-                    yield Gamma[:num] ** 2
+                    yield gamma[:num] ** 2
 
     def _delay_and_sum(self, num, p_res, d_interp2, d_index, amp):
         """Standard delay-and-sum method."""
@@ -482,7 +508,9 @@ class BeamformerTimeTraj(BeamformerTime):
 
 
 class BeamformerTimeSqTraj(BeamformerTimeSq, BeamformerTimeTraj):
-    """Provides a time domain beamformer with time-dependent
+    """
+    Provides a time domain beamformer with time-dependent.
+
     power signal output and possible autopower removal
     for a grid moving along a trajectory.
     """
@@ -506,7 +534,8 @@ class BeamformerTimeSqTraj(BeamformerTimeSq, BeamformerTimeTraj):
         return digest(self)
 
     def result(self, num=2048):
-        """Python generator that yields the **squared** time-domain beamformer output.
+        """
+        Python generator that yields the **squared** time-domain beamformer output.
 
         The squared output time signal starts for source signals that were emitted from
         the :class:`~acoular.grids.Grid` at `t=0`.
@@ -529,7 +558,8 @@ class BeamformerTimeSqTraj(BeamformerTimeSq, BeamformerTimeTraj):
 
 
 class BeamformerCleant(BeamformerTime):
-    """CLEANT deconvolution method.
+    """
+    CLEANT deconvolution method.
 
     An implementation of the CLEAN method in time domain. This class can only
     be used for static sources. See :cite:`Cousson2019` for details.
@@ -555,7 +585,8 @@ class BeamformerCleant(BeamformerTime):
         return digest(self)
 
     def result(self, num=2048):
-        """Python generator that yields the deconvolved time-domain beamformer output.
+        """
+        Python generator that yields the deconvolved time-domain beamformer output.
 
         The output starts for signals that were emitted from the :class:`~acoular.grids.Grid` at
         `t=0`.
@@ -578,7 +609,8 @@ class BeamformerCleant(BeamformerTime):
 
 
 class BeamformerCleantSq(BeamformerCleant):
-    """CLEANT deconvolution method with optional removal of autocorrelation.
+    """
+    CLEANT deconvolution method with optional removal of autocorrelation.
 
     An implementation of the CLEAN method in time domain. This class can only
     be used for static sources. See :cite:`Cousson2019` for details on the method
@@ -598,7 +630,8 @@ class BeamformerCleantSq(BeamformerCleant):
         return digest(self)
 
     def result(self, num=2048):
-        """Python generator that yields the *squared* deconvolved time-domain beamformer output.
+        """
+        Python generator that yields the *squared* deconvolved time-domain beamformer output.
 
         The output starts for signals that were emitted from the :class:`~acoular.grids.Grid` at
         `t=0`. Per default, block-wise removal of autocorrelation is performed, which can be turned
@@ -622,7 +655,8 @@ class BeamformerCleantSq(BeamformerCleant):
 
 
 class BeamformerCleantTraj(BeamformerCleant, BeamformerTimeTraj):
-    """CLEANT deconvolution method.
+    """
+    CLEANT deconvolution method.
 
     An implementation of the CLEAN method in time domain for moving sources
     with known trajectory. See :cite:`Cousson2019` for details.
@@ -651,7 +685,8 @@ class BeamformerCleantTraj(BeamformerCleant, BeamformerTimeTraj):
         return digest(self)
 
     def result(self, num=2048):
-        """Python generator that yields the deconvolved time-domain beamformer output.
+        """
+        Python generator that yields the deconvolved time-domain beamformer output.
 
         The output starts for signals that were emitted from the :class:`~acoular.grids.Grid` at
         `t=0`.
@@ -674,7 +709,8 @@ class BeamformerCleantTraj(BeamformerCleant, BeamformerTimeTraj):
 
 
 class BeamformerCleantSqTraj(BeamformerCleantTraj, BeamformerTimeSq):
-    """CLEANT deconvolution method with optional removal of autocorrelation.
+    """
+    CLEANT deconvolution method with optional removal of autocorrelation.
 
     An implementation of the CLEAN method in time domain for moving sources
     with known trajectory. See :cite:`Cousson2019` for details on the method and
@@ -705,7 +741,8 @@ class BeamformerCleantSqTraj(BeamformerCleantTraj, BeamformerTimeSq):
         return digest(self)
 
     def result(self, num=2048):
-        """Python generator that yields the *squared* deconvolved time-domain beamformer output.
+        """
+        Python generator that yields the *squared* deconvolved time-domain beamformer output.
 
         The output starts for signals that were emitted from the :class:`~acoular.grids.Grid` at
         `t=0`. Per default, block-wise removal of autocorrelation is performed, which can be turned
@@ -760,7 +797,9 @@ class IntegratorSectorTime(TimeOut):
         return len(self.sectors)
 
     def result(self, num=1):
-        """Python generator that yields the source output integrated over the given
+        """
+        Python generator that yields the source output integrated over the given.
+
         sectors, block-wise.
 
         Parameters
