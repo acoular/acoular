@@ -17,13 +17,14 @@ from tests.utils import get_result_list
 @parametrize('num', [1, 32], ids=['num=1', 'num=32'])
 @parametrize_with_cases('obj', cases=Generators)
 def test_result_generator(obj, num):  # don't use default value if @parametrize is used
-    """Thorough test for result generators: checks block sizes and total sample count.
+    """
+    Thorough test for result generators: checks block sizes and total sample count.
 
     Parameters
     ----------
-    obj : instance of acoular.base.Generator
+    obj : instance of :class:`~acoular.base.Generator`
         Generator instance to be tested (cases from Generators)
-    num : int
+    num : :class:`int`
         Number of samples to return by the generator
     """
     blocks = get_result_list(obj, num=num)

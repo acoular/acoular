@@ -73,7 +73,7 @@ def get_result_list(obj, num):
     prevent test failure.
     See https://github.com/acoular/acoular/issues/382 for details.
     """
-    missing_result = {'WriteWAV', 'Trigger', 'SpatialInterpolator'}
+    missing_result = {'Trigger', 'SpatialInterpolator'}
     if obj.__class__.__name__ in missing_result:
         with warnings.catch_warnings():
             warnings.simplefilter('ignore', Warning)
