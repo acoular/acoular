@@ -9,6 +9,8 @@ Upcoming Release
 
     **Internal**
         * refactored import statements and input aliases
+        * migrate from traits `on_trait_change` to `observe`
+
 25.07
 ------------------------
     **New features**
