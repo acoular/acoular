@@ -75,7 +75,6 @@ docstring-code-line-length = "dynamic"
 "acoular/environments.py" = ["N806"]
 "acoular/fastFuncs.py" = ["N802", "N803", "N806", "N999"] # allow different naming convention
 "acoular/fbeamform.py" = ["N806", "B023"]
-"acoular/h5files.py" = ["D102"]
 "acoular/sources.py" = ["N806"]
 "acoular/tools/helpers.py" = ["D205"]
 "acoular/tprocess.py" = ["N806"]
