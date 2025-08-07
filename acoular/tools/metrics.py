@@ -11,12 +11,7 @@
 
 from copy import copy
 
-from numpy import (
-    empty,
-    inf,
-    minimum,
-    ones,
-)
+import numpy as np
 from scipy.spatial.distance import cdist
 from traits.api import Bool, CArray, HasStrictTraits, Instance, Property
 
@@ -82,13 +77,13 @@ class MetricEvaluator(HasStrictTraits):
 
     def _get_sector_radii(self):
         ns = self.target_data.shape[1]
-        radii = ones(ns) * self.sector.r
+        radii = np.ones(ns) * self.sector.r
         if self.adaptive_sector_size:
             locs = self.target_grid.pos.T
             intersrcdist = cdist(locs, locs)
-            intersrcdist[intersrcdist == 0] = inf
+            intersrcdist[intersrcdist == 0] = np.inf
             intersrcdist = intersrcdist.min(0) / 2
-            radii = minimum(radii, intersrcdist)
+            radii = np.minimum(radii, intersrcdist)
         return radii
 
     def _get_sectors(self):
@@ -115,7 +110,7 @@ class MetricEvaluator(HasStrictTraits):
 
         """
         sectors = self.sectors
-        results = empty(shape=self.target_data.shape)
+        results = np.empty(shape=self.target_data.shape)
         for f in range(self.target_data.shape[0]):
             data = self.data[f]
             for i in range(self.target_data.shape[1]):

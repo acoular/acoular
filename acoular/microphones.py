@@ -14,7 +14,7 @@ Implements support for array microphone arrangements.
 import xml.dom.minidom
 from pathlib import Path
 
-from numpy import array, average
+import numpy as np
 from scipy.spatial.distance import cdist
 from traits.api import (
     CArray,
@@ -43,22 +43,19 @@ class MicGeom(HasStrictTraits):
     microphone array. The positions can be read from an XML file or set programmatically. Invalid
     microphones can be excluded by specifying their indices via :attr:`invalid_channels`.
 
+    .. _units_note_microphones:
+
     Notes
     -----
     - The microphone geometry as in :attr:`total_pos` is automatically changed if the :attr:`file`
       attribute is updated.
     - Small numerical values in the computed :attr:`center` are set to zero for numerical stability.
-
-    .. _units_note_microphones:
-
-    Unit System
-    -----------
-    The source code is agnostic to the unit of length. The microphone positions' coordinates are
-    assumed to be in meters. This is consistent with the standard
-    :class:`~acoular.environments.Environment` class which uses the speed of sound at 20°C at sea
-    level under standard atmosphere pressure in m/s. If the microphone positions' coordinates are
-    provided in a unit other than meter, it is advisable to change the
-    :attr:`~acoular.environments.Environment.c` attribute to match the given unit.
+    - The source code is agnostic to the unit of length. The microphone positions' coordinates are
+      assumed to be in meters. This is consistent with the standard
+      :class:`~acoular.environments.Environment` class which uses the speed of sound at 20°C at sea
+      level under standard atmosphere pressure in m/s. If the microphone positions' coordinates are
+      provided in a unit other than meter, it is advisable to change the
+      :attr:`~acoular.environments.Environment.c` attribute to match the given unit.
 
     Examples
     --------
@@ -147,12 +144,12 @@ class MicGeom(HasStrictTraits):
     #: Array containing the ``x, y, z`` positions of all microphones, including invalid ones, shape
     #: ``(3,`` :attr:`num_mics` ``)``. This is set automatically when :attr:`file` changes or
     #: explicitly by assigning an array of floats. All coordinates are in meters by default (see
-    #: :ref:`notes <units_note_micophones>`).
+    #: :ref:`notes <units_note_microphones>`).
     pos_total = CArray(dtype=float, shape=(3, None), desc='x, y, z position of all microphones')
 
     #: Array containing the ``x, y, z`` positions of valid microphones (i.e., excluding those in
     #: :attr:`invalid_channels`), shape ``(3,`` :attr:`num_mics` ``)``. (read-only)
-    #: All coordinates are in meters by default (see :ref:`notes <units_note>`).
+    #: All coordinates are in meters by default (see :ref:`notes <units_note_microphones>`).
     pos = Property(depends_on=['pos_total', 'invalid_channels'], desc='x, y, z position of used microphones')
 
     #: List of indices indicating microphones to be excluded from calculations and results.
@@ -181,7 +178,7 @@ class MicGeom(HasStrictTraits):
         if len(self.invalid_channels) == 0:
             return self.pos_total
         allr = [i for i in range(self.pos_total.shape[-1]) if i not in self.invalid_channels]
-        return self.pos_total[:, array(allr)]
+        return self.pos_total[:, np.array(allr)]
 
     @cached_property
     def _get_num_mics(self):
@@ -190,7 +187,7 @@ class MicGeom(HasStrictTraits):
     @cached_property
     def _get_center(self):
         if self.pos.any():
-            center = average(self.pos, axis=1)
+            center = np.average(self.pos, axis=1)
             # set very small values to zero
             center[abs(center) < 1e-16] = 0.0
             return center
@@ -237,7 +234,7 @@ class MicGeom(HasStrictTraits):
         for el in doc.getElementsByTagName('pos'):
             names.append(el.getAttribute('Name'))
             xyz.append([float(el.getAttribute(a)) for a in 'xyz'])
-        self.pos_total = array(xyz, 'd').swapaxes(0, 1)
+        self.pos_total = np.array(xyz, 'd').swapaxes(0, 1)
 
     def export_mpos(self, filename):
         """
@@ -267,7 +264,7 @@ class MicGeom(HasStrictTraits):
         - This method only exports the positions of the valid microphones (those not listed in
           :attr:`invalid_channels`).
         - All coordinates (x, y, z) are exported in meters by default (see
-          :ref:`notes <units_note_micophones>`).
+          :ref:`notes <units_note_microphones>`).
         """
         filepath = Path(filename)
         basename = filepath.stem

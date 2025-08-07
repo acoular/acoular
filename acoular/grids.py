@@ -30,31 +30,8 @@ import xml.dom.minidom
 from abc import abstractmethod
 from pathlib import Path
 
-from numpy import (
-    absolute,
-    append,
-    arange,
-    argmin,
-    array,
-    asarray,
-    concatenate,
-    copysign,
-    fabs,
-    inf,
-    isscalar,
-    ma,
-    mgrid,
-    newaxis,
-    ones,
-    ones_like,
-    s_,
-    sum,  # noqa: A004
-    tile,
-    unique,
-    where,
-    zeros,
-)
-from scipy.linalg import norm
+import numpy as np
+import scipy.linalg as spla
 
 # from matplotlib.path import Path
 from scipy.spatial import Delaunay
@@ -136,11 +113,11 @@ def in_hull(p, hull, border=True, tol=0):
 
 
 def _det(xvert, yvert):
-    xvert = asarray(xvert, dtype=float)
-    yvert = asarray(yvert, dtype=float)
-    x_prev = concatenate(([xvert[-1]], xvert[:-1]))
-    y_prev = concatenate(([yvert[-1]], yvert[:-1]))
-    return sum(yvert * x_prev - xvert * y_prev, axis=0)
+    xvert = np.asarray(xvert, dtype=float)
+    yvert = np.asarray(yvert, dtype=float)
+    x_prev = np.concatenate(([xvert[-1]], xvert[:-1]))
+    y_prev = np.concatenate(([yvert[-1]], yvert[:-1]))
+    return np.sum(yvert * x_prev - xvert * y_prev, axis=0)
 
 
 class Polygon:
@@ -174,14 +151,14 @@ class Polygon:
         if len(x) != len(y):
             msg = 'x and y must be equally sized.'
             raise IndexError(msg)
-        self.x = asarray(x, dtype=float)
-        self.y = asarray(y, dtype=float)
+        self.x = np.asarray(x, dtype=float)
+        self.y = np.asarray(y, dtype=float)
         # Closes the polygon if were open
         x1, y1 = x[0], y[0]
         xn, yn = x[-1], y[-1]
         if x1 != xn or y1 != yn:
-            self.x = concatenate((self.x, [x1]))
-            self.y = concatenate((self.y, [y1]))
+            self.x = np.concatenate((self.x, [x1]))
+            self.y = np.concatenate((self.y, [y1]))
         # Anti-clockwise coordinates
         if _det(self.x, self.y) < 0:
             self.x = self.x[::-1]
@@ -217,12 +194,12 @@ class Polygon:
         The method uses an improved algorithm based on Nordbeck and Rydstedt for determining
         whether a point is inside a polygon :cite:`SLOAN198545`.
         """
-        xpoint = asarray(xpoint, dtype=float)
-        ypoint = asarray(ypoint, dtype=float)
+        xpoint = np.asarray(xpoint, dtype=float)
+        ypoint = np.asarray(ypoint, dtype=float)
         # Scalar to array
         if xpoint.shape == ():
-            xpoint = array([xpoint], dtype=float)
-            ypoint = array([ypoint], dtype=float)
+            xpoint = np.array([xpoint], dtype=float)
+            ypoint = np.array([ypoint], dtype=float)
             scalar = True
         else:
             scalar = False
@@ -232,16 +209,16 @@ class Polygon:
             raise IndexError(msg)
         # If snear = True: Dist to nearest side < nearest vertex
         # If snear = False: Dist to nearest vertex < nearest side
-        snear = ma.masked_all(xpoint.shape, dtype=bool)
+        snear = np.ma.masked_all(xpoint.shape, dtype=bool)
         # Initialize arrays
-        mindst = ones_like(xpoint, dtype=float) * inf
-        j = ma.masked_all(xpoint.shape, dtype=int)
+        mindst = np.ones_like(xpoint, dtype=float) * np.inf
+        j = np.ma.masked_all(xpoint.shape, dtype=int)
         x = self.x
         y = self.y
         n = len(x) - 1  # Number of sides/vertices defining the polygon
         # Loop over each side defining polygon
         for i in range(n):
-            d = ones_like(xpoint, dtype=float) * inf
+            d = np.ones_like(xpoint, dtype=float) * np.inf
             # Start of side has coords (x1, y1)
             # End of side has coords (x2, y2)
             # Point has coords (xpoint, ypoint)
@@ -276,7 +253,7 @@ class Polygon:
             snear[mask & tlt0] = False
             # Point is closer to this side than to any other side or vertex
             snear[mask & tle1] = True
-        if ma.count(snear) != snear.size:
+        if np.ma.count(snear) != snear.size:
             msg = 'Error computing distances'
             raise IndexError(msg)
         mindst **= 0.5
@@ -287,15 +264,15 @@ class Polygon:
         jo = j.copy()
         jo[j == 0] -= 1
         area = _det([x[j + 1], x[j], x[jo - 1]], [y[j + 1], y[j], y[jo - 1]])
-        mindst[~snear] = copysign(mindst, area)[~snear]
+        mindst[~snear] = np.copysign(mindst, area)[~snear]
         # Point is closer to its nearest side than to its nearest vertex, check
         # if point is to left or right of this side.
         # If point is to left of side it is inside polygon, else point is
         # outside polygon.
         area = _det([x[j], x[j + 1], xpoint], [y[j], y[j + 1], ypoint])
-        mindst[snear] = copysign(mindst, area)[snear]
+        mindst[snear] = np.copysign(mindst, area)[snear]
         # Point is on side of polygon
-        mindst[fabs(mindst) < smalld] = 0
+        mindst[np.fabs(mindst) < smalld] = 0
         # If input values were scalar then the output should be too
         if scalar:
             mindst = float(mindst)
@@ -313,8 +290,8 @@ class Grid(ABCHasStrictTraits):
 
     .. _units_note_grids:
 
-    Unit System
-    -----------
+    Notes
+    -----
     The source code is agnostic to the unit of length. The positions' coordinates are assumed to be
     in meters. This is consistent with the standard :class:`~acoular.environments.Environment` class
     which uses the speed of sound at 20°C at sea level under standard atmosphere pressure in m/s.
@@ -385,7 +362,7 @@ class Grid(ABCHasStrictTraits):
         # construct grid-shaped array with "True" entries where sector is
         xyi = sector.contains(xpos).reshape(self.shape)
         # return indices of "True" entries
-        return where(xyi)
+        return np.where(xyi)
 
     def export_gpos(self, filename):
         """
@@ -526,7 +503,7 @@ class RectGrid(Grid):
 
     @property_depends_on(['x_min', 'x_max', 'y_min', 'y_max', 'increment'])
     def _get_pos(self):
-        bpos = mgrid[
+        bpos = np.mgrid[
             self.x_min : self.x_max : self.nxsteps * 1j,
             self.y_min : self.y_max : self.nysteps * 1j,
             self.z : self.z + 0.1,
@@ -642,36 +619,36 @@ class RectGrid(Grid):
             dr2 = (xpos[0, :] - r[0]) ** 2 + (xpos[1, :] - r[1]) ** 2
             # array with true/false entries
             inds = dr2 <= r[2] ** 2
-            for np in arange(self.size)[inds]:  # np -- points in x2-circle
-                xi, yi = self.index(xpos[0, np], xpos[1, np])
+            for n_p in np.arange(self.size)[inds]:  # n_p -- points in x2-circle
+                xi, yi = self.index(xpos[0, n_p], xpos[1, n_p])
                 xis += [xi]
                 yis += [yi]
             if not (xis and yis):  # if no points in circle, take nearest one
                 return self.index(r[0], r[1])
-            return array(xis), array(yis)
+            return np.array(xis), np.array(yis)
         if len(r) == 4:  # rectangular subdomain - old functionality
             xi1, yi1 = self.index(min(r[0], r[2]), min(r[1], r[3]))
             xi2, yi2 = self.index(max(r[0], r[2]), max(r[1], r[3]))
-            return s_[xi1 : xi2 + 1], s_[yi1 : yi2 + 1]
+            return np.s_[xi1 : xi2 + 1], np.s_[yi1 : yi2 + 1]
         xpos = self.pos
         xis = []
         yis = []
         # replaced matplotlib Path by numpy
-        # p = Path(array(r).reshape(-1,2))
+        # p = Path(np.array(r).reshape(-1,2))
         # inds = p.contains_points()
-        # inds = in_poly(xpos[:2,:].T,array(r).reshape(-1,2))
-        poly = Polygon(array(r).reshape(-1, 2)[:, 0], array(r).reshape(-1, 2)[:, 1])
+        # inds = in_poly(xpos[:2,:].T,np.array(r).reshape(-1,2))
+        poly = Polygon(np.array(r).reshape(-1, 2)[:, 0], np.array(r).reshape(-1, 2)[:, 1])
         dists = poly.is_inside(xpos[0, :], xpos[1, :])
         inds = dists >= 0
-        for np in arange(self.size)[inds]:  # np -- points in x2-circle
-            xi, yi = self.index(xpos[0, np], xpos[1, np])
+        for n_p in np.arange(self.size)[inds]:  # n_p -- points in x2-circle
+            xi, yi = self.index(xpos[0, n_p], xpos[1, n_p])
             xis += [xi]
             yis += [yi]
         if not (xis and yis):  # if no points inside, take nearest to center
-            center = array(r).reshape(-1, 2).mean(0)
+            center = np.array(r).reshape(-1, 2).mean(0)
             return self.index(center[0], center[1])
-        return array(xis), array(yis)
-        # return arange(self.size)[inds]
+        return np.array(xis), np.array(yis)
+        # return np.arange(self.size)[inds]
 
 
 class RectGrid3D(RectGrid):
@@ -708,13 +685,13 @@ class RectGrid3D(RectGrid):
         return self._increment
 
     def _set_increment(self, increment):
-        if isscalar(increment):
+        if np.isscalar(increment):
             try:
-                self._increment = absolute(float(increment))
+                self._increment = np.abs(float(increment))
             except ValueError as ve:
                 raise TraitError(args=self, name='increment', info='Float or CArray(3,)', value=increment) from ve
         elif len(increment) == 3:
-            self._increment = array(increment, dtype=float)
+            self._increment = np.array(increment, dtype=float)
         else:
             raise (TraitError(args=self, name='increment', info='Float or CArray(3,)', value=increment))
 
@@ -733,28 +710,28 @@ class RectGrid3D(RectGrid):
 
     @property_depends_on(['x_min', 'x_max', '_increment'])
     def _get_nxsteps(self):
-        i = abs(self.increment) if isscalar(self.increment) else abs(self.increment[0])
+        i = abs(self.increment) if np.isscalar(self.increment) else abs(self.increment[0])
         if i != 0:
             return int(round((abs(self.x_max - self.x_min) + i) / i))
         return 1
 
     @property_depends_on(['y_min', 'y_max', '_increment'])
     def _get_nysteps(self):
-        i = abs(self.increment) if isscalar(self.increment) else abs(self.increment[1])
+        i = abs(self.increment) if np.isscalar(self.increment) else abs(self.increment[1])
         if i != 0:
             return int(round((abs(self.y_max - self.y_min) + i) / i))
         return 1
 
     @property_depends_on(['z_min', 'z_max', '_increment'])
     def _get_nzsteps(self):
-        i = abs(self.increment) if isscalar(self.increment) else abs(self.increment[2])
+        i = abs(self.increment) if np.isscalar(self.increment) else abs(self.increment[2])
         if i != 0:
             return int(round((abs(self.z_max - self.z_min) + i) / i))
         return 1
 
     @property_depends_on('digest')
     def _get_pos(self):
-        bpos = mgrid[
+        bpos = np.mgrid[
             self.x_min : self.x_max : self.nxsteps * 1j,
             self.y_min : self.y_max : self.nysteps * 1j,
             self.z_min : self.z_max : self.nzsteps * 1j,
@@ -810,7 +787,7 @@ class RectGrid3D(RectGrid):
         if z < self.z_min or z > self.z_max:
             msg = f'z-value out of range {z:f} ({self.z_min:f}, {self.z_max:f})'
             raise ValueError(msg)
-        if isscalar(self.increment):
+        if np.isscalar(self.increment):
             incx = incy = incz = self.increment
         else:
             incx, incy, incz = self.increment
@@ -863,7 +840,7 @@ class RectGrid3D(RectGrid):
         """
         xi1, yi1, zi1 = self.index(min(x1, x2), min(y1, y2), min(z1, z2))
         xi2, yi2, zi2 = self.index(max(x1, x2), max(y1, y2), max(z1, z2))
-        return s_[xi1 : xi2 + 1], s_[yi1 : yi2 + 1], s_[zi1 : zi2 + 1]
+        return np.s_[xi1 : xi2 + 1], np.s_[yi1 : yi2 + 1], np.s_[zi1 : zi2 + 1]
 
 
 @deprecated_alias({'from_file': 'file', 'gpos_file': 'pos'}, removal_version='25.10')
@@ -924,14 +901,14 @@ class ImportGrid(Grid):
 
         >>> import numpy as np
         >>>
-        >>> # Grid 1: ten points aranged in a circle in the x-y plane at z=0
+        >>> # Grid 1: ten points arranged in a circle in the x-y plane at z=0
         >>> args = 2 * np.pi * np.arange(10) / 10
         >>> x1 = np.cos(args)
         >>> y1 = np.sin(args)
         >>> z1 = np.zeros_like(x1)
         >>> grid1 = np.vstack([x1, y1, z1]).T
         >>>
-        >>> # Grid 2: nine points aranged in a mesh grid the the x-y plane at z=1
+        >>> # Grid 2: nine points arranged in a mesh grid in the x-y plane at z=1
         >>> a = np.linspace(-1, 1, 3)
         >>> x2, y2 = np.meshgrid(a, a)
         >>> z2 = np.ones_like(x2)
@@ -1030,8 +1007,8 @@ class ImportGrid(Grid):
         for el in doc.getElementsByTagName('pos'):
             names.append(el.getAttribute('subgrid'))
             xyz.append([float(el.getAttribute(a)) for a in 'xyz'])
-        self._gpos = array(xyz, 'd').swapaxes(0, 1)
-        self.subgrids = array(names)
+        self._gpos = np.array(xyz, 'd').swapaxes(0, 1)
+        self.subgrids = np.array(names)
 
 
 @deprecated_alias({'gpos': 'pos', 'numpoints': 'num_points'}, read_only=['gpos'], removal_version='25.10')
@@ -1107,9 +1084,9 @@ class LineGrid(Grid):
     @property_depends_on(['num_points', 'length', 'direction', 'loc'])
     def _get_pos(self):
         dist = self.length / (self.num_points - 1)
-        loc = array(self.loc, dtype=float).reshape((3, 1))
-        direc_n = array(self.direction) / norm(self.direction)
-        pos = zeros((self.num_points, 3))
+        loc = np.array(self.loc, dtype=float).reshape((3, 1))
+        direc_n = np.array(self.direction) / spla.norm(self.direction)
+        pos = np.zeros((self.num_points, 3))
         for s in range(self.num_points):
             pos[s] = loc.T + direc_n * dist * s
         return pos.T
@@ -1177,17 +1154,17 @@ class MergeGrid(Grid):
 
     @property_depends_on(['digest'])
     def _get_subgrids(self):
-        subgrids = zeros((1, 0), dtype=str)
+        subgrids = np.zeros((1, 0), dtype=str)
         for grid in self.grids:
-            subgrids = append(subgrids, tile(grid.__class__.__name__ + grid.digest, grid.size))
-        return subgrids[:, newaxis].T
+            subgrids = np.append(subgrids, np.tile(grid.__class__.__name__ + grid.digest, grid.size))
+        return subgrids[:, np.newaxis].T
 
     @property_depends_on(['digest'])
     def _get_pos(self):
-        bpos = zeros((3, 0))
+        bpos = np.zeros((3, 0))
         for grid in self.grids:
-            bpos = append(bpos, grid.pos, axis=1)
-        return unique(bpos, axis=1)
+            bpos = np.append(bpos, grid.pos, axis=1)
+        return np.unique(bpos, axis=1)
 
 
 class Sector(ABCHasStrictTraits):
@@ -1241,7 +1218,7 @@ class Sector(ABCHasStrictTraits):
         >>> sector.contains(positions)
         array([ True,  True])
         """
-        return ones(pos.shape[1], dtype=bool)
+        return np.ones(pos.shape[1], dtype=bool)
 
 
 class SingleSector(Sector):
@@ -1354,7 +1331,7 @@ class RectSector(SingleSector):
             x = (xmin + xmax) / 2.0
             y = (ymin + ymax) / 2.0
             dr2 = (pos[0, :] - x) ** 2 + (pos[1, :] - y) ** 2
-            inds[argmin(dr2)] = True
+            inds[np.argmin(dr2)] = True
 
         return inds.astype(bool)
 
@@ -1442,7 +1419,7 @@ class RectSector3D(RectSector):
             x = (xmin + xmax) / 2.0
             y = (ymin + ymax) / 2.0
             dr2 = (pos[0, :] - x) ** 2 + (pos[1, :] - y) ** 2
-            inds[argmin(dr2)] = True
+            inds[np.argmin(dr2)] = True
 
         return inds.astype(bool)
 
@@ -1510,7 +1487,7 @@ class CircSector(SingleSector):
 
         # if there's no point inside
         if ~inds.any() and self.default_nearest:
-            inds[argmin(dr2)] = True
+            inds[np.argmin(dr2)] = True
 
         return inds
 
@@ -1567,14 +1544,14 @@ class PolySector(SingleSector):
         >>> sec.contains(grid.pos)
         array([False, False, False, False,  True,  True, False,  True,  True])
         """
-        poly = Polygon(array(self.edges).reshape(-1, 2)[:, 0], array(self.edges).reshape(-1, 2)[:, 1])
+        poly = Polygon(np.array(self.edges).reshape(-1, 2)[:, 0], np.array(self.edges).reshape(-1, 2)[:, 1])
         dists = poly.is_inside(pos[0, :], pos[1, :])
         inds = dists >= -self.abs_tol if self.include_border else dists > 0
 
         # if none inside, take nearest
         if ~inds.any() and self.default_nearest:
-            dr2 = array(self.edges).reshape(-1, 2).mean(0)
-            inds[argmin(dr2)] = True
+            dr2 = np.array(self.edges).reshape(-1, 2).mean(0)
+            inds[np.argmin(dr2)] = True
 
         return inds
 
@@ -1627,12 +1604,12 @@ class ConvexSector(SingleSector):
         >>> sec.contains(grid.pos)
         array([False, False, False, False,  True,  True, False,  True,  True])
         """
-        inds = in_hull(pos[:2, :].T, array(self.edges).reshape(-1, 2), border=self.include_border, tol=self.abs_tol)
+        inds = in_hull(pos[:2, :].T, np.array(self.edges).reshape(-1, 2), border=self.include_border, tol=self.abs_tol)
 
         # if none inside, take nearest
         if ~inds.any() and self.default_nearest:
-            dr2 = array(self.edges).reshape(-1, 2).mean(0)  # Use the centroid of the polygon as the "center"
-            inds[argmin(dr2)] = True
+            dr2 = np.array(self.edges).reshape(-1, 2).mean(0)  # Use the centroid of the polygon as the "center"
+            inds[np.argmin(dr2)] = True
 
         return inds
 
@@ -1687,7 +1664,7 @@ class MultiSector(Sector):
         array([False, False, False, False,  True,  True, False,  True,  True])
         """
         # initialize with only "False" entries
-        inds = zeros(pos.shape[1], dtype=bool)
+        inds = np.zeros(pos.shape[1], dtype=bool)
 
         # add points contained in each sector
         for sec in self.sectors:
