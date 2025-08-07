@@ -1,7 +1,8 @@
 # ------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
-"""Implements beamformers in the frequency domain.
+"""
+Implements beamformers in the frequency domain.
 
 .. autosummary::
     :toctree: generated/
@@ -28,7 +29,6 @@
     PointSpreadFunction
     L_p
     integrate
-
 """
 
 # imports from other packages
@@ -85,7 +85,8 @@ BEAMFORMER_BASE_DIGEST_DEPENDENCIES = ['freq_data.digest', 'r_diag', 'r_diag_nor
 
 
 class SteeringVector(HasStrictTraits):
-    """Basic class for implementing steering vectors with monopole source transfer models.
+    """
+    Basic class for implementing steering vectors with monopole source transfer models.
 
     Handles four different steering vector formulations. See :cite:`Sarradj2012` for details.
     """
@@ -185,7 +186,8 @@ class SteeringVector(HasStrictTraits):
         return digest(self)
 
     def transfer(self, f, ind=None):
-        """Calculates the transfer matrix for one frequency.
+        """
+        Calculates the transfer matrix for one frequency.
 
         Parameters
         ----------
@@ -200,7 +202,6 @@ class SteeringVector(HasStrictTraits):
         -------
         array of complex128
             array of shape (ngridpts, nmics) containing the transfer matrix for the given frequency
-
         """
         # if self.cached:
         #    warn('Caching of transfer function is not yet supported!', Warning)
@@ -215,7 +216,8 @@ class SteeringVector(HasStrictTraits):
         return trans
 
     def steer_vector(self, f, ind=None):
-        """Calculates the steering vectors based on the transfer function.
+        """
+        Calculates the steering vectors based on the transfer function.
 
         See also :cite:`Sarradj2012`.
 
@@ -232,7 +234,6 @@ class SteeringVector(HasStrictTraits):
         -------
         array of complex128
             array of shape (ngridpts, nmics) containing the steering vectors for the given frequency
-
         """
         func = self._steer_funcs_freq[self.steer_type]
         return func(self.transfer(f, ind))
@@ -321,9 +322,10 @@ class BeamformerBase(HasStrictTraits):
         return digest(self)
 
     def _get_filecache(self):
-        """Function collects cached results from file depending on
-        global/local caching behaviour. Returns (None, None) if no cachefile/data
-        exist and global caching mode is 'readonly'.
+        """
+        Function collects cached results from file depending on global/local caching behaviour.
+
+        Returns (None, None) if no cachefile/data exist and global caching mode is 'readonly'.
         """
         #        print("get cachefile:", self.freq_data.basename)
         H5cache.get_cache_file(self, self.freq_data.basename)
@@ -378,7 +380,9 @@ class BeamformerBase(HasStrictTraits):
 
     @property_depends_on(['digest'])
     def _get_result(self):
-        """Implements the :attr:`result` getter routine.
+        """
+        Implements the :attr:`result` getter routine.
+
         The beamforming result is either loaded or calculated.
         """
         # store locally for performance
@@ -410,8 +414,10 @@ class BeamformerBase(HasStrictTraits):
         return LazyBfResult(self)
 
     def sig_loss_norm(self):
-        """If the diagonal of the CSM is removed one has to handle the loss
-        of signal energy --> Done via a normalization factor.
+        """
+        If the diagonal of the CSM is removed one has to handle the loss of signal energy.
+
+        Done via a normalization factor.
         """
         if not self.r_diag:  # Full CSM --> no normalization needed
             normfactor = 1.0
@@ -423,15 +429,15 @@ class BeamformerBase(HasStrictTraits):
         return normfactor
 
     def _beamformer_params(self):
-        """Manages the parameters for calling of the core beamformer functionality.
-        This is a workaround to allow faster calculation and may change in the
-        future.
+        """
+        Manages the parameters for calling of the core beamformer functionality.
+
+        This is a workaround to allow faster calculation and may change in the future.
 
         Returns
         -------
             - String containing the steering vector type
             - Function for frequency-dependent steering vector calculation
-
         """
         if type(self.steer) is SteeringVector:  # for simple steering vector, use faster method
             param_type = self.steer.steer_type
@@ -444,7 +450,8 @@ class BeamformerBase(HasStrictTraits):
         return param_type, param_steer_func
 
     def _calc(self, ind):
-        """Calculates the result for the frequencies defined by :attr:`freq_data`.
+        """
+        Calculates the result for the frequencies defined by :attr:`freq_data`.
 
         This is an internal helper function that is automatically called when
         accessing the beamformer's :attr:`result` or calling
@@ -459,7 +466,6 @@ class BeamformerBase(HasStrictTraits):
         Returns
         -------
         This method only returns values through :attr:`_ac` and :attr:`_fr`
-
         """
         f = self._f
         normfactor = self.sig_loss_norm()
@@ -481,7 +487,8 @@ class BeamformerBase(HasStrictTraits):
             self._fr[i] = 1
 
     def synthetic(self, f, num=0):
-        """Evaluates the beamforming result for an arbitrary frequency band.
+        """
+        Evaluates the beamforming result for an arbitrary frequency band.
 
         Parameters
         ----------
@@ -509,7 +516,6 @@ class BeamformerBase(HasStrictTraits):
             represented by a single frequency line depends on
             the :attr:`sampling frequency<acoular.base.SamplesGenerator.sample_freq>` and
             used :attr:`FFT block size<acoular.spectra.PowerSpectra.block_size>`.
-
         """
         res = self.result  # trigger calculation
         freq = self.freq_data.fftfreq()
@@ -564,7 +570,8 @@ class BeamformerBase(HasStrictTraits):
         return h.reshape(self.steer.grid.shape)
 
     def integrate(self, sector, frange=None, num=0):
-        """Integrates result map over a given sector.
+        """
+        Integrates result map over a given sector.
 
         Parameters
         ----------
@@ -656,7 +663,8 @@ class BeamformerBase(HasStrictTraits):
 
 
 class BeamformerFunctional(BeamformerBase):
-    """Functional beamforming algorithm.
+    """
+    Functional beamforming algorithm.
 
     See :cite:`Dougherty2014` for details.
     """
@@ -682,7 +690,8 @@ class BeamformerFunctional(BeamformerBase):
         return digest(self)
 
     def _calc(self, ind):
-        """Calculates the result for the frequencies defined by :attr:`freq_data`.
+        """
+        Calculates the result for the frequencies defined by :attr:`freq_data`.
 
         This is an internal helper function that is automatically called when
         accessing the beamformer's :attr:`result` or calling
@@ -697,7 +706,6 @@ class BeamformerFunctional(BeamformerBase):
         Returns
         -------
         This method only returns values through :attr:`_ac` and :attr:`_fr`
-
         """
         f = self._f
         normfactor = self.sig_loss_norm()
@@ -747,7 +755,8 @@ class BeamformerFunctional(BeamformerBase):
 
 
 class BeamformerCapon(BeamformerBase):
-    """Beamforming using the Capon (Mininimum Variance) algorithm.
+    """
+    Beamforming using the Capon (Mininimum Variance) algorithm.
 
     See :cite:`Capon1969` for details.
     """
@@ -764,7 +773,8 @@ class BeamformerCapon(BeamformerBase):
     )
 
     def _calc(self, ind):
-        """Calculates the result for the frequencies defined by :attr:`freq_data`.
+        """
+        Calculates the result for the frequencies defined by :attr:`freq_data`.
 
         This is an internal helper function that is automatically called when
         accessing the beamformer's :attr:`result` or calling
@@ -779,7 +789,6 @@ class BeamformerCapon(BeamformerBase):
         Returns
         -------
         This method only returns values through :attr:`_ac` and :attr:`_fr`
-
         """
         f = self._f
         nMics = self.freq_data.num_channels
@@ -793,7 +802,8 @@ class BeamformerCapon(BeamformerBase):
 
 
 class BeamformerEig(BeamformerBase):
-    """Beamforming using eigenvalue and eigenvector techniques.
+    """
+    Beamforming using eigenvalue and eigenvector techniques.
 
     See :cite:`Sarradj2005` for details.
     """
@@ -822,7 +832,8 @@ class BeamformerEig(BeamformerBase):
         return min(nm - 1, na)
 
     def _calc(self, ind):
-        """Calculates the result for the frequencies defined by :attr:`freq_data`.
+        """
+        Calculates the result for the frequencies defined by :attr:`freq_data`.
 
         This is an internal helper function that is automatically called when
         accessing the beamformer's :attr:`result` or calling
@@ -837,7 +848,6 @@ class BeamformerEig(BeamformerBase):
         Returns
         -------
         This method only returns values through :attr:`_ac` and :attr:`_fr`
-
         """
         f = self._f
         na = int(self.na)  # eigenvalue taken into account
@@ -861,7 +871,8 @@ class BeamformerEig(BeamformerBase):
 
 
 class BeamformerMusic(BeamformerEig):
-    """Beamforming using the MUSIC algorithm.
+    """
+    Beamforming using the MUSIC algorithm.
 
     See :cite:`Schmidt1986` for details.
     """
@@ -882,7 +893,8 @@ class BeamformerMusic(BeamformerEig):
     n = Int(1, desc='assumed number of sources')
 
     def _calc(self, ind):
-        """Calculates the result for the frequencies defined by :attr:`freq_data`.
+        """
+        Calculates the result for the frequencies defined by :attr:`freq_data`.
 
         This is an internal helper function that is automatically called when
         accessing the beamformer's :attr:`result` or calling
@@ -897,7 +909,6 @@ class BeamformerMusic(BeamformerEig):
         Returns
         -------
         This method only returns values through :attr:`_ac` and :attr:`_fr`
-
         """
         f = self._f
         nMics = self.freq_data.num_channels
@@ -919,7 +930,8 @@ class BeamformerMusic(BeamformerEig):
 
 
 class PointSpreadFunction(HasStrictTraits):
-    """The point spread function.
+    """
+    The point spread function.
 
     This class provides tools to calculate the PSF depending on the used
     microphone geometry, focus grid, flow environment, etc.
@@ -972,9 +984,10 @@ class PointSpreadFunction(HasStrictTraits):
         return digest(self)
 
     def _get_filecache(self):
-        """Function collects cached results from file depending on
-        global/local caching behaviour. Returns (None, None) if no cachefile/data
-        exist and global caching mode is 'readonly'.
+        """
+        Function collects cached results from file depending on global/local caching behaviour.
+
+        Returns (None, None) if no cachefile/data exist and global caching mode is 'readonly'.
         """
         filename = 'psf' + self.digest
         nodename = (f'Hz_{self.freq:.2f}').replace('.', '_')
@@ -1006,7 +1019,9 @@ class PointSpreadFunction(HasStrictTraits):
         return (ac, gp)
 
     def _get_psf(self):
-        """Implements the :attr:`psf` getter routine.
+        """
+        Implements the :attr:`psf` getter routine.
+
         The point spread function is either loaded or calculated.
         """
         gs = self.steer.grid.size
@@ -1069,7 +1084,8 @@ class PointSpreadFunction(HasStrictTraits):
                 indh += 1
 
     def _psf_call(self, ind):
-        """Manages the calling of the core psf functionality.
+        """
+        Manages the calling of the core psf functionality.
 
         Parameters
         ----------
@@ -1099,7 +1115,8 @@ class PointSpreadFunction(HasStrictTraits):
 
 
 class BeamformerDamas(BeamformerBase):
-    """DAMAS deconvolution algorithm.
+    """
+    DAMAS deconvolution algorithm.
 
     See :cite:`Brooks2006` for details.
     """
@@ -1127,7 +1144,8 @@ class BeamformerDamas(BeamformerBase):
         return digest(self)
 
     def _calc(self, ind):
-        """Calculates the result for the frequencies defined by :attr:`freq_data`.
+        """
+        Calculates the result for the frequencies defined by :attr:`freq_data`.
 
         This is an internal helper function that is automatically called when
         accessing the beamformer's :attr:`result` or calling
@@ -1142,7 +1160,6 @@ class BeamformerDamas(BeamformerBase):
         Returns
         -------
         This method only returns values through :attr:`_ac` and :attr:`_fr`
-
         """
         f = self._f
         normfactor = self.sig_loss_norm()
@@ -1170,10 +1187,12 @@ class BeamformerDamas(BeamformerBase):
 
 @deprecated_alias({'max_iter': 'n_iter'}, removal_version='25.10')
 class BeamformerDamasPlus(BeamformerDamas):
-    """DAMAS deconvolution :cite:`Brooks2006` for solving the system of equations, instead of the
-    original Gauss-Seidel iterations, this class employs the NNLS or linear programming solvers from
-    scipy.optimize or one of several optimization algorithms from the scikit-learn module. Needs
-    a-priori delay-and-sum beamforming (:class:`BeamformerBase`).
+    """
+    DAMAS deconvolution :cite:`Brooks2006` for solving the system of equations.
+
+    Instead of the original Gauss-Seidel iterations, this class employs the NNLS or linear
+    programming solvers from scipy.optimize or one of several optimization algorithms from the
+    scikit-learn module. Needs a-priori delay-and-sum beamforming (:class:`BeamformerBase`).
     """
 
     #: Type of fit method to be used ('LassoLars',
@@ -1209,7 +1228,8 @@ class BeamformerDamasPlus(BeamformerDamas):
         return digest(self)
 
     def _calc(self, ind):
-        """Calculates the result for the frequencies defined by :attr:`freq_data`.
+        """
+        Calculates the result for the frequencies defined by :attr:`freq_data`.
 
         This is an internal helper function that is automatically called when
         accessing the beamformer's :attr:`result` or calling
@@ -1224,7 +1244,6 @@ class BeamformerDamasPlus(BeamformerDamas):
         Returns
         -------
         This method only returns values through :attr:`_ac` and :attr:`_fr`
-
         """
         f = self._f
         p = PointSpreadFunction(steer=self.steer, calcmode=self.calcmode, precision=self.psf_precision)
@@ -1285,7 +1304,8 @@ class BeamformerDamasPlus(BeamformerDamas):
 
 
 class BeamformerOrth(BeamformerBase):
-    """Orthogonal deconvolution algorithm.
+    """
+    Orthogonal deconvolution algorithm.
 
     See :cite:`Sarradj2010` for details.
     New faster implementation without explicit (:class:`BeamformerEig`).
@@ -1316,7 +1336,8 @@ class BeamformerOrth(BeamformerBase):
         self.eva_list = np.arange(-1, -1 - self.n, -1)
 
     def _calc(self, ind):
-        """Calculates the result for the frequencies defined by :attr:`freq_data`.
+        """
+        Calculates the result for the frequencies defined by :attr:`freq_data`.
 
         This is an internal helper function that is automatically called when
         accessing the beamformer's :attr:`result` or calling
@@ -1331,7 +1352,6 @@ class BeamformerOrth(BeamformerBase):
         Returns
         -------
         This method only returns values through :attr:`_ac` and :attr:`_fr`
-
         """
         f = self._f
         num_channels = self.freq_data.num_channels
@@ -1354,7 +1374,8 @@ class BeamformerOrth(BeamformerBase):
 
 @deprecated_alias({'n': 'n_iter'}, removal_version='25.10')
 class BeamformerCleansc(BeamformerBase):
-    """CLEAN-SC deconvolution algorithm.
+    """
+    CLEAN-SC deconvolution algorithm.
 
     See :cite:`Sijtsma2007` for details.
     Classic delay-and-sum beamforming is already included.
@@ -1381,7 +1402,8 @@ class BeamformerCleansc(BeamformerBase):
         return digest(self)
 
     def _calc(self, ind):
-        """Calculates the result for the frequencies defined by :attr:`freq_data`.
+        """
+        Calculates the result for the frequencies defined by :attr:`freq_data`.
 
         This is an internal helper function that is automatically called when
         accessing the beamformer's :attr:`result` or calling
@@ -1396,7 +1418,6 @@ class BeamformerCleansc(BeamformerBase):
         Returns
         -------
         This method only returns values through :attr:`_ac` and :attr:`_fr`
-
         """
         f = self._f
         normfactor = self.sig_loss_norm()
@@ -1445,7 +1466,8 @@ class BeamformerCleansc(BeamformerBase):
 
 
 class BeamformerClean(BeamformerBase):
-    """CLEAN deconvolution algorithm.
+    """
+    CLEAN deconvolution algorithm.
 
     See :cite:`Hoegbom1974` for details.
     """
@@ -1488,7 +1510,6 @@ class BeamformerClean(BeamformerBase):
         Returns
         -------
         This method only returns values through :attr:`_ac` and :attr:`_fr`
-
         """
         f = self._f
         gs = self.steer.grid.size
@@ -1536,7 +1557,8 @@ class BeamformerClean(BeamformerBase):
 
 @deprecated_alias({'max_iter': 'n_iter'}, removal_version='25.10')
 class BeamformerCMF(BeamformerBase):
-    """Covariance Matrix Fitting algorithm.
+    """
+    Covariance Matrix Fitting algorithm.
 
     This is not really a beamformer, but an inverse method.
     See :cite:`Yardibi2008` for details.
@@ -1613,7 +1635,8 @@ class BeamformerCMF(BeamformerBase):
             raise ImportError(msg)
 
     def _calc(self, ind):
-        """Calculates the result for the frequencies defined by :attr:`freq_data`.
+        """
+        Calculates the result for the frequencies defined by :attr:`freq_data`.
 
         This is an internal helper function that is automatically called when
         accessing the beamformer's :attr:`result` or calling
@@ -1628,7 +1651,6 @@ class BeamformerCMF(BeamformerBase):
         Returns
         -------
         This method only returns values through :attr:`_ac` and :attr:`_fr`
-
         """
         f = self._f
 
@@ -1763,7 +1785,8 @@ class BeamformerCMF(BeamformerBase):
 
 @deprecated_alias({'max_iter': 'n_iter'}, removal_version='25.10')
 class BeamformerSODIX(BeamformerBase):
-    """Source directivity modeling in the cross-spectral matrix (SODIX) algorithm.
+    """
+    Source directivity modeling in the cross-spectral matrix (SODIX) algorithm.
 
     See :cite:`Funke2017` and :cite:`Oertwig2019` for details.
     """
@@ -1813,7 +1836,8 @@ class BeamformerSODIX(BeamformerBase):
         return digest(self)
 
     def _calc(self, ind):
-        """Calculates the result for the frequencies defined by :attr:`freq_data`.
+        """
+        Calculates the result for the frequencies defined by :attr:`freq_data`.
 
         This is an internal helper function that is automatically called when
         accessing the beamformer's :attr:`result` or calling
@@ -1828,7 +1852,6 @@ class BeamformerSODIX(BeamformerBase):
         Returns
         -------
         This method only returns values through :attr:`_ac` and :attr:`_fr`
-
         """
         # prepare calculation
         f = self._f
@@ -1850,7 +1873,10 @@ class BeamformerSODIX(BeamformerBase):
                 if self.method == 'fmin_l_bfgs_b':
                     # function to minimize
                     def function(directions):
-                        """Parameters
+                        """
+                        Calculates SODIX objective function and derivatives for optimization.
+
+                        Parameters
                         ----------
                         directions
                         [num_points*num_mics]
@@ -1861,7 +1887,6 @@ class BeamformerSODIX(BeamformerBase):
                              [1]
                         derdrl - derivitaives in direction of D
                             [num_mics*num_points].
-
                         """
                         #### the sodix function ####
                         Djm = directions.reshape([num_points, num_mics])
@@ -1923,7 +1948,8 @@ class BeamformerSODIX(BeamformerBase):
 
 @deprecated_alias({'max_iter': 'n_iter'}, removal_version='25.10')
 class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
-    """Beamforming GIB methods with different normalizations.
+    """
+    Beamforming GIB methods with different normalizations.
 
     See :cite:`Suzuki2011` for details.
     """
@@ -2014,7 +2040,8 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
         return min(nm - 1, na)
 
     def _calc(self, ind):
-        """Calculates the result for the frequencies defined by :attr:`freq_data`.
+        """
+        Calculates the result for the frequencies defined by :attr:`freq_data`.
 
         This is an internal helper function that is automatically called when
         accessing the beamformer's :attr:`result` or calling
@@ -2029,7 +2056,6 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
         Returns
         -------
         This method only returns values through :attr:`_ac` and :attr:`_fr`
-
         """
         f = self._f
         n = int(self.na)  # number of eigenvalues
@@ -2177,7 +2203,8 @@ class BeamformerAdaptiveGrid(BeamformerBase, Grid):
         return self._gpos
 
     def integrate(self, sector):
-        """Integrates result map over a given sector.
+        """
+        Integrates result map over a given sector.
 
         Parameters
         ----------
@@ -2188,7 +2215,6 @@ class BeamformerAdaptiveGrid(BeamformerBase, Grid):
         -------
         array of floats
             The spectrum (all calculated frequency bands) for the integrated sector.
-
         """
         if not isinstance(sector, Sector):
             msg = (
@@ -2208,7 +2234,8 @@ class BeamformerAdaptiveGrid(BeamformerBase, Grid):
 
 
 class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
-    """Orthogonal beamforming without predefined grid.
+    """
+    Orthogonal beamforming without predefined grid.
 
     See :cite:`Sarradj2022` for details.
     """
@@ -2262,7 +2289,8 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
         return self.n * self.freq_data.fftfreq().shape[0]
 
     def _calc(self, ind):
-        """Calculates the result for the frequencies defined by :attr:`freq_data`.
+        """
+        Calculates the result for the frequencies defined by :attr:`freq_data`.
 
         This is an internal helper function that is automatically called when
         accessing the beamformer's :attr:`result` or calling
@@ -2277,7 +2305,6 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
         Returns
         -------
         This method only returns values through :attr:`_ac` and :attr:`_fr`
-
         """
         f = self._f
         normfactor = self.sig_loss_norm()
@@ -2338,7 +2365,8 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
 
 
 def L_p(x):  # noqa: N802
-    r"""Calculates the sound pressure level from the squared sound pressure.
+    r"""
+    Calculates the sound pressure level from the squared sound pressure.
 
     :math:`L_p = 10 \lg ( x / 4\cdot 10^{-10})`
 
@@ -2352,7 +2380,6 @@ def L_p(x):  # noqa: N802
     array of floats
         The corresponding sound pressure levels in dB.
         If `x<0`, -350.0 dB is returned.
-
     """
     # new version to prevent division by zero warning for float32 arguments
     return 10 * np.log10(np.clip(x / 4e-10, 1e-35, None))
@@ -2362,7 +2389,8 @@ def L_p(x):  # noqa: N802
 
 
 def integrate(data, grid, sector):
-    """Integrates a sound pressure map over a given sector.
+    """
+    Integrates a sound pressure map over a given sector.
 
     This function can be applied on beamforming results to
     quantitatively analyze the sound pressure in a given sector.
@@ -2399,7 +2427,6 @@ def integrate(data, grid, sector):
     -------
     array of floats
         The spectrum (all calculated frequency bands) for the integrated sector.
-
     """
     if isinstance(sector, Sector):
         ind = grid.subdomain(sector)
