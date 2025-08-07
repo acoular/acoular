@@ -22,7 +22,7 @@ Upcoming Release
         * changes all appearances of :meth:`~acoular.grids.RectGrid.extend` to :attr:`~acoular.grids.RectGrid.extent`
         * introduces a deprecation policy in the contributing guidelines
         * adds new docstrings to submodule :mod:`acoular.tprocess`
-        * adds new docstrings to submodule :mod:`acoular.h5cache`
+        * adds new docstrings to submodule :mod:`acoular.h5cache` and :mod:`acoular.h5files`
         * fix docstrings in submodule :mod:`acoular.fbeamform` to fulfill linting rules
 
     **Tests**
