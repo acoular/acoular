@@ -52,7 +52,7 @@ class HDF5Cache(HasStrictTraits):
     def is_reference_existent(self, file):
         """Check if a file object still has active references."""
         exist_flag = False
-        # inspect all refererres to the file object
+        # inspect all referrers to the file object
         gc.collect()  # clear garbage before collecting referrers
         for ref in gc.get_referrers(file):
             # does the file object have a referrer that has a 'h5f'
