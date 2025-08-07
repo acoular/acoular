@@ -11,20 +11,78 @@ class H5FileBase:
     """Base class for File objects that handle writing and reading of .h5 files."""
 
     def create_extendable_array(self, nodename, shape, precision, group=None):
-        """Create an extendable array in the HDF5 file."""
+        """
+        Create an extendable array in the HDF5 file.
 
+        Parameters
+        ----------
+        nodename : :class:`str`
+            Name of the node (dataset) to create in the HDF5 file.
+        shape : :class:`tuple` of :class:`int`
+            Shape of the array to be created.
+        precision : :class:`str`
+            Data type/precision of the array (e.g., 'float32', 'int16').
+        group : :class:`pytables.Group`, optional
+            Group in which to create the array. If None, the root group is used.
+        """
     def get_data_by_reference(self, nodename, group=None):
-        """Get data by reference from the HDF5 file."""
+        """
+        Get data by reference from the HDF5 file.
 
+        Parameters
+        ----------
+        nodename : :class:`str`
+            Name of the node (dataset or group) to retrieve from the HDF5 file.
+        group : object, optional
+            The parent group in which to look for the node. If None, the root group is used.
+
+        Returns
+        -------
+        object
+            A reference to the requested node (e.g., a dataset or group object) in the HDF5 file.
+        """
     def set_node_attribute(self, node, attrname, value):
-        """Set an attribute on a node."""
+        """
+        Set an attribute on a node.
 
+        Parameters
+        ----------
+        node : object
+            The node (e.g., group or dataset) to which the attribute will be set.
+        attrname : :class:`str`
+            The name of the attribute to set.
+        value : any
+            The value to assign to the attribute.
+        """
     def get_node_attribute(self, node, attrname):
-        """Get an attribute from a node."""
+        """
+        Get an attribute from a node.
 
+        Parameters
+        ----------
+        node : object
+            The node (e.g., group or dataset) from which to retrieve the attribute.
+        attrname : :class:`str`
+            The name of the attribute to retrieve.
+
+        Returns
+        -------
+        object
+            The value of the specified attribute.
+        """
     def append_data(self, node, data):
-        """Append data to an existing node."""
+        """
+        Append data to an existing node.
 
+        Parameters
+        ----------
+        node : object
+            The node (e.g., array or dataset) in the HDF5 file to which data will be appended.
+            The expected type depends on the backend (e.g., PyTables node or h5py dataset).
+        data : array-like
+            The data to append. Should be compatible in shape and type with the existing node.
+            The format and type must match the node's requirements.
+        """
     def remove_data(self, nodename):
         """Remove data from the HDF5 file."""
 
