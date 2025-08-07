@@ -22,9 +22,10 @@ class H5FileBase:
             Shape of the array to be created.
         precision : :class:`str`
             Data type/precision of the array (e.g., 'float32', 'int16').
-        group : :class:`pytables.Group`, optional
+        group : object, optional
             Group in which to create the array. If None, the root group is used.
         """
+
     def get_data_by_reference(self, nodename, group=None):
         """
         Get data by reference from the HDF5 file.
@@ -41,6 +42,7 @@ class H5FileBase:
         object
             A reference to the requested node (e.g., a dataset or group object) in the HDF5 file.
         """
+
     def set_node_attribute(self, node, attrname, value):
         """
         Set an attribute on a node.
@@ -70,6 +72,7 @@ class H5FileBase:
         object
             The value of the specified attribute.
         """
+
     def append_data(self, node, data):
         """
         Append data to an existing node.
@@ -83,6 +86,7 @@ class H5FileBase:
             The data to append. Should be compatible in shape and type with the existing node.
             The format and type must match the node's requirements.
         """
+
     def remove_data(self, nodename):
         """Remove data from the HDF5 file."""
 
