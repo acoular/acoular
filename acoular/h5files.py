@@ -56,6 +56,7 @@ class H5FileBase:
         value : any
             The value to assign to the attribute.
         """
+
     def get_node_attribute(self, node, attrname):
         """
         Get an attribute from a node.
