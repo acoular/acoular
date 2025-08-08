@@ -13,7 +13,7 @@
 import xml.dom.minidom
 
 import numpy as np
-from traits.api import CArray, CInt, File, List, Property, Union, cached_property, on_trait_change
+from traits.api import CArray, CInt, File, List, Property, Union, cached_property, observe
 
 # acoular imports
 from .base import InOut, SamplesGenerator, SpectraGenerator
@@ -96,8 +96,8 @@ class Calib(InOut):
     # Internal identifier
     digest = Property(depends_on=['source.digest', 'data'])
 
-    @on_trait_change('data')
-    def set_num_mics(self):
+    @observe('data')
+    def _update_num_mics(self, event):  # noqa ARG002
         """Sets the number of microphones based on the shape of the data array."""
         self.num_mics = self.data.shape[0]
 
@@ -112,8 +112,8 @@ class Calib(InOut):
     def _get_digest(self):
         return digest(self)
 
-    @on_trait_change('file')
-    def import_data(self):
+    @observe('file')
+    def _import_data(self, event):  # noqa ARG002
         """Loads the calibration data from `*.xml` file ."""
         doc = xml.dom.minidom.parse(self.file)
         names = []

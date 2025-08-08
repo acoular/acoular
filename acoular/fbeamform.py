@@ -59,7 +59,7 @@ from traits.api import (
     Range,
     Tuple,
     cached_property,
-    on_trait_change,
+    observe,
     property_depends_on,
 )
 from traits.trait_errors import TraitError
@@ -1330,8 +1330,8 @@ class BeamformerOrth(BeamformerBase):
     def _get_digest(self):
         return digest(self)
 
-    @on_trait_change('n')
-    def set_eva_list(self):
+    @observe('n')
+    def _update_eva_list(self, event):  # noqa ARG002
         """Sets the list of eigenvalues to consider."""
         self.eva_list = np.arange(-1, -1 - self.n, -1)
 
@@ -1625,8 +1625,8 @@ class BeamformerCMF(BeamformerBase):
     def _get_digest(self):
         return digest(self)
 
-    @on_trait_change('method')
-    def _validate(self):
+    @observe('method')
+    def _validate(self, event):  # noqa ARG002
         if self.method in ['FISTA', 'Split_Bregman'] and not config.have_pylops:
             msg = (
                 'Cannot import Pylops package. No Pylops installed.'
@@ -2279,8 +2279,8 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
     def _get_digest(self):
         return digest(self)
 
-    @on_trait_change('n')
-    def set_eva_list(self):
+    @observe('n')
+    def _update_eva_list(self, event):  # noqa ARG002
         """Sets the list of eigenvalues to consider."""
         self.eva_list = np.arange(-1, -1 - self.n, -1)
 

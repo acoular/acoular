@@ -34,7 +34,7 @@ from traits.api import (
     Property,
     Union,
     cached_property,
-    on_trait_change,
+    observe,
     property_depends_on,
 )
 
@@ -115,8 +115,8 @@ class CsmAIAABenchmark(PowerSpectraImport):
     def _get_basename(self):
         return get_file_basename(self.file)
 
-    @on_trait_change('basename')
-    def load_data(self):
+    @observe('basename')
+    def _load_data(self, event):  # noqa ARG002
         """Open the .h5 file and set attributes."""
         if self.h5f is not None:
             with contextlib.suppress(OSError):
@@ -172,8 +172,8 @@ class MicAIAABenchmark(MicGeom):
         None, File(filter=['*.h5'], exists=True), desc='name of the h5 file containing the microphone geometry'
     )
 
-    @on_trait_change('file')
-    def _import_mpos(self):
+    @observe('file')
+    def _import_mpos(self, event):  # noqa ARG002
         """
         Import the microphone positions from .h5 file.
 

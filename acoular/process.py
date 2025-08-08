@@ -19,7 +19,7 @@ from inspect import currentframe
 from warnings import warn
 
 import numpy as np
-from traits.api import Any, Array, Bool, Dict, Enum, Instance, Int, Property, Union, cached_property, on_trait_change
+from traits.api import Any, Array, Bool, Dict, Enum, Instance, Int, Property, Union, cached_property, observe
 
 # acoular imports
 from .base import Generator, InOut
@@ -542,8 +542,8 @@ class SampleSplitter(InOut):
         next_block = next(self._source_generator)
         [self.block_buffer[obj].appendleft(next_block) for obj in self.block_buffer]
 
-    @on_trait_change('buffer_size')
-    def _change_buffer_size(self):  #
+    @observe('buffer_size')
+    def _change_buffer_size(self, event):  # noqa: ARG002
         for obj in self.block_buffer:
             self._remove_block_buffer(obj)
             self._create_block_buffer(obj)
