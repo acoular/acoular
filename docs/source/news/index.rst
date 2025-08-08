@@ -23,6 +23,7 @@ Upcoming Release
         * introduces a deprecation policy in the contributing guidelines
         * adds new docstrings to submodule :mod:`acoular.tprocess`
         * adds new docstrings to submodule :mod:`acoular.h5cache`
+        * fix docstrings in submodule :mod:`acoular.fbeamform` to fulfill linting rules
 
     **Tests**
         * add tests for export and load XML functionalities of :class:`~acoular.grids.Grid`
