@@ -1331,7 +1331,7 @@ class BeamformerOrth(BeamformerBase):
         return digest(self)
 
     @observe('n')
-    def set_eva_list(self, event):  # noqa ARG002
+    def _update_eva_list(self, event):  # noqa ARG002
         """Sets the list of eigenvalues to consider."""
         self.eva_list = np.arange(-1, -1 - self.n, -1)
 
@@ -2280,7 +2280,7 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
         return digest(self)
 
     @observe('n')
-    def set_eva_list(self, event):  # noqa ARG002
+    def _update_eva_list(self, event):  # noqa ARG002
         """Sets the list of eigenvalues to consider."""
         self.eva_list = np.arange(-1, -1 - self.n, -1)
 
