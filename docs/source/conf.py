@@ -50,8 +50,8 @@ templates_path = ['_templates']
 # -----------------------
 # see https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output for details
 
-html_theme = 'haikuac'
-html_theme_path = ['_themes/']
+html_theme = 'pydata_sphinx_theme'
+#html_theme_path = ['_themes/']
 html_static_path = ['_static']
 html_favicon = '_static/acoular_logo.ico'
 html_context = {
