@@ -883,7 +883,7 @@ class ImportGrid(Grid):
         self._gpos = pos
 
     @observe('file')
-    def import_gpos(self, event):  # noqa ARG002
+    def _import_pos(self, event):  # noqa ARG002
         """
         Import the grid point locations and subgrid names from an XML file.
 

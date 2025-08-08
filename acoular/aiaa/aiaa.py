@@ -116,7 +116,7 @@ class CsmAIAABenchmark(PowerSpectraImport):
         return get_file_basename(self.file)
 
     @observe('basename')
-    def load_data(self, event):  # noqa ARG002
+    def _load_data(self, event):  # noqa ARG002
         """Open the .h5 file and set attributes."""
         if self.h5f is not None:
             with contextlib.suppress(OSError):

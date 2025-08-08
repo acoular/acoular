@@ -97,7 +97,7 @@ class Calib(InOut):
     digest = Property(depends_on=['source.digest', 'data'])
 
     @observe('data')
-    def set_num_mics(self, event):  # noqa ARG002
+    def _update_num_mics(self, event):  # noqa ARG002
         """Sets the number of microphones based on the shape of the data array."""
         self.num_mics = self.data.shape[0]
 
@@ -113,7 +113,7 @@ class Calib(InOut):
         return digest(self)
 
     @observe('file')
-    def import_data(self, event):  # noqa ARG002
+    def _import_data(self, event):  # noqa ARG002
         """Loads the calibration data from `*.xml` file ."""
         doc = xml.dom.minidom.parse(self.file)
         names = []
