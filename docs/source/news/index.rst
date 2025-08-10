@@ -9,6 +9,8 @@ Upcoming Release
 
     **Internal**
         * refactored import statements and input aliases
+        * removed duplicate code in `MovingPointSource`-derived classes
+
 25.07
 ------------------------
     **New features**
