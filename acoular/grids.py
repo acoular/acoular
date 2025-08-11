@@ -50,7 +50,6 @@ from traits.api import (
     Union,
     cached_property,
     observe,
-    on_trait_change,
     property_depends_on,
 )
 from traits.trait_errors import TraitError
@@ -883,8 +882,8 @@ class ImportGrid(Grid):
     def _set_pos(self, pos):
         self._gpos = pos
 
-    @on_trait_change('file')
-    def import_gpos(self):
+    @observe('file')
+    def _import_pos(self, event):  # noqa ARG002
         """
         Import the grid point locations and subgrid names from an XML file.
 

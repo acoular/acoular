@@ -10,6 +10,7 @@ Upcoming Release
     **Internal**
         * refactored import statements and input aliases
         * removed duplicate code in `MovingPointSource`-derived classes
+        * migrate from traits `on_trait_change` to `observe`
 
 25.07
 ------------------------
