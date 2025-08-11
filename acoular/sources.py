@@ -1104,6 +1104,51 @@ class MovingPointSource(PointSource):
     def _get_digest(self):
         return digest(self)
 
+    def get_moving_direction(self, direction, time=0):
+        """
+        Calculate the moving direction of the source along its trajectory.
+
+        This method computes the updated direction vector for the moving source, considering both
+        translation along the :attr:`~MovingPointSource.trajectory` and rotation defined by the
+        :attr:`reference vector<rvec>`. If the :attr:`reference vector<rvec>` is `(0, 0, 0)`, only
+        translation is applied. Otherwise, the method incorporates rotation into the calculation.
+
+        Parameters
+        ----------
+        direction : :class:`numpy.ndarray`
+            The initial orientation of the source, specified as a three-dimensional array.
+        time : :class:`float`, optional
+            The time at which the :attr:`~MovingPointSource.trajectory` position and velocity are
+            evaluated. Defaults to ``0``.
+
+        Returns
+        -------
+        :class:`numpy.ndarray`
+            The updated direction vector of the moving source after translation and, if applicable,
+            rotation. The output is a three-dimensional array.
+
+        Notes
+        -----
+        - The method computes the translation direction vector based on the
+          :attr:`~MovingPointSource.trajectory`'s velocity at the specified time.
+        - If the :attr:`reference vector<rvec>` is non-zero, the method constructs a rotation matrix
+          to compute the new source direction based on the
+          :attr:`~MovingPointSource.trajectory`'s motion and the :attr:`reference vector<rvec>`.
+        - The rotation matrix ensures that the new orientation adheres to the right-hand rule and
+          remains orthogonal.
+        """
+        trajg1 = np.array(self.trajectory.location(time, der=1))[:, 0][:, np.newaxis]
+        rflag = (self.rvec == 0).all()  # flag translation vs. rotation
+        if rflag:
+            return direction
+        dx = np.array(trajg1.T)  # direction vector (new x-axis)
+        dy = np.cross(self.rvec, dx)  # new y-axis
+        dz = np.cross(dx, dy)  # new z-axis
+        RM = np.array((dx, dy, dz)).T  # rotation matrix
+        RM /= np.sqrt((RM * RM).sum(0))  # column normalized
+        newdir = np.dot(RM, direction)
+        return np.cross(newdir[:, 0].T, self.rvec.T).T
+
     def result(self, num=128):
         """
         Generate the output signal at microphones in blocks, accounting for source motion.
@@ -1430,51 +1475,6 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
             j += 1  # iteration count
         return te, rm, Mr, xs
 
-    def get_moving_direction(self, direction, time=0):
-        """
-        Calculate the moving direction of the dipole source along its trajectory.
-
-        This method computes the updated direction vector for the dipole source, considering both
-        translation along the trajectory and rotation defined by the :attr:`reference vector<rvec>`.
-        If the reference vector is ``(0, 0, 0)``, only translation is applied. Otherwise, the method
-        incorporates rotation into the calculation.
-
-        Parameters
-        ----------
-        direction : :class:`numpy.ndarray`
-            The initial direction vector of the dipole, specified as a 3-element
-            array representing the orientation of the dipole lobes.
-        time : :class:`float`, optional
-            The time at which the trajectory position and velocity are evaluated. Defaults to ``0``.
-
-        Returns
-        -------
-        :class:`numpy.ndarray`
-            The updated direction vector of the dipole source after translation
-            and, if applicable, rotation. The output is a 3-element array.
-
-        Notes
-        -----
-        - The method computes the translation direction vector based on the trajectory's velocity at
-          the specified time.
-        - If the :attr:`reference vector<rvec>` is non-zero, the method constructs a rotation matrix
-          to compute the new dipole direction based on the trajectory's motion and the
-          reference vector.
-        - The rotation matrix ensures that the new dipole orientation adheres
-          to the right-hand rule and remains orthogonal.
-        """
-        trajg1 = np.array(self.trajectory.location(time, der=1))[:, 0][:, np.newaxis]
-        rflag = (self.rvec == 0).all()  # flag translation vs. rotation
-        if rflag:
-            return direction
-        dx = np.array(trajg1.T)  # direction vector (new x-axis)
-        dy = np.cross(self.rvec, dx)  # new y-axis
-        dz = np.cross(dx, dy)  # new z-axis
-        RM = np.array((dx, dy, dz)).T  # rotation matrix
-        RM /= np.sqrt((RM * RM).sum(0))  # column normalized
-        newdir = np.dot(RM, direction)
-        return np.cross(newdir[:, 0].T, self.rvec.T).T
-
     def result(self, num=128):
         """
         Generate the output signal at microphones in blocks.
@@ -1734,53 +1734,6 @@ class MovingLineSource(LineSource, MovingPointSource):
     @cached_property
     def _get_digest(self):
         return digest(self)
-
-    def get_moving_direction(self, direction, time=0):
-        """
-        Calculate the moving direction of the line source along its trajectory.
-
-        This method computes the updated direction vector for the line source,
-        considering both translation along the :attr:`~MovingPointSource.trajectory` and rotation
-        defined by the :attr:`reference vector<rvec>`. If the :attr:`reference vector<rvec>` is
-        `(0, 0, 0)`, only translation is applied. Otherwise, the method incorporates rotation
-        into the calculation.
-
-        Parameters
-        ----------
-        direction : :class:`numpy.ndarray`
-            The initial direction vector of the line source, specified as a
-            3-element array representing the orientation of the line.
-        time : :class:`float`, optional
-            The time at which the :attr:`~MovingPointSource.trajectory` position and velocity
-            are evaluated. Defaults to ``0``.
-
-        Returns
-        -------
-        :class:`numpy.ndarray`
-            The updated direction vector of the line source after translation and,
-            if applicable, rotation. The output is a 3-element array.
-
-        Notes
-        -----
-        - The method computes the translation direction vector based on the
-          :attr:`~MovingPointSource.trajectory`'s velocity at the specified time.
-        - If the :attr:`reference vector<rvec>` is non-zero, the method constructs a
-          rotation matrix to compute the new line source direction based on the
-          :attr:`~MovingPointSource.trajectory`'s motion and the :attr:`reference vector<rvec>`.
-        - The rotation matrix ensures that the new orientation adheres to the
-          right-hand rule and remains orthogonal.
-        """
-        trajg1 = np.array(self.trajectory.location(time, der=1))[:, 0][:, np.newaxis]
-        rflag = (self.rvec == 0).all()  # flag translation vs. rotation
-        if rflag:
-            return direction
-        dx = np.array(trajg1.T)  # direction vector (new x-axis)
-        dy = np.cross(self.rvec, dx)  # new y-axis
-        dz = np.cross(dx, dy)  # new z-axis
-        RM = np.array((dx, dy, dz)).T  # rotation matrix
-        RM /= np.sqrt((RM * RM).sum(0))  # column normalized
-        newdir = np.dot(RM, direction)
-        return np.cross(newdir[:, 0].T, self.rvec.T).T
 
     def get_emission_time(self, t, direction):
         """
