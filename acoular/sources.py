@@ -1230,6 +1230,185 @@ class MovingPointSource(PointSource):
             n -= num
 
 
+class PointSourceDirectional(PointSource):
+    """
+    Define a fixed point source with directivity.
+
+    The :class:`PointSourceDirectional` class simulates a fixed point source with directivity.
+
+    The generated output is available via the :meth:`result` generator.
+
+    See Also
+    --------
+    :class:`acoular.sources.PointSource` : For modeling stationary point sources.
+
+    Notes
+    -----
+    - Directivity of the sources to be simulated later on, currently this class just
+      calculates directions between sources and recievers.
+    - Currently direction of the microphones are hardcoded.
+    """
+
+    #: Vectors defining the local orientation of the source relative to global space
+    #: These vectors must be orthogonal to each other
+    forward_vec = Tuple((0.0, 0.0, 1.0), desc='source forward direction')
+    up_vec = Tuple((0.0, 1.0, 0.0), desc='source upward direction')
+    right_vec = Tuple((1.0, 0.0, 0.0), desc='source right direction')
+
+    #: Behavior of the signal for negative time indices. Currently only supports `loop`. Default is
+    #: ``'loop'``.
+    prepadding = Enum('loop', desc='Behaviour for negative time indices.')
+
+    #: A unique identifier for the current state of the source, based on its properties. (read-only)
+    digest = Property(
+        depends_on=[
+            'mics.digest',
+            'signal.digest',
+            'loc',
+            'env.digest',
+            'start_t',
+            'start',
+            'up',
+            'forward_vec',
+            'up_vec',
+            'right_vec',
+            'prepadding',
+        ],
+    )
+
+    @cached_property
+    def _get_digest(self):
+        return digest(self)
+
+    def result(self, num=128):
+        """
+        Generate output signal at microphones in blocks.
+
+        Parameters
+        ----------
+        num : :class:`int`, optional
+            Number of samples per block to yield. Default is ``128``.
+
+        Yields
+        ------
+        :class:`numpy.ndarray`
+            A 2D array of shape (``num``, :attr:`~PointSource.num_channels`) containing the signal
+            detected at the microphones. The last block may have fewer samples if
+            :attr:`~PointSource.num_samples` is not a multiple of ``num``.
+
+        Raises
+        ------
+        :obj:`IndexError`
+            If no more samples are available from the source.
+
+        Notes
+        -----
+        If samples are needed for times earlier than the source's :attr:`~PointSource.start_t`, the
+        signal is taken from the end of the signal array, effectively looping the signal for
+        negative indices.
+        """
+
+        # calculate directions between source and recievers
+        mpos = self.mics.pos
+
+        # normalise local direction vectors
+        forward_n = np.array(self.forward_vec, dtype=float)
+        forward_n /= np.linalg.norm(forward_n)
+
+        up_n = np.array(self.up_vec, dtype=float)
+        up_n /= np.linalg.norm(up_n)
+
+        right_n = np.array(self.right_vec, dtype=float)
+        right_n /= np.linalg.norm(right_n)
+
+        # check orthagonality
+        assert(np.dot(up_n, forward_n) < 1e-12)
+        assert(np.dot(up_n, right_n) < 1e-12)
+        # @TODO check right-hand rule
+
+        # calculate directions in global space
+        gdirs_to_source = []
+
+        for i in range(0, self.mics.num_mics):
+            # get mic positiion
+            x = mpos[0][i]
+            y = mpos[1][i]
+            z = mpos[2][i]
+
+            mic_point = np.array([x, y, z])
+
+            # This is the direction of the source in relation to the mics
+            gdirs_to_source.append(np.array(self.loc, dtype=float) - mic_point)
+
+        # create transformation matrix for the local coordinate space of the source
+        source_trans_mat = np.vstack([right_n, up_n, forward_n]).T
+
+        # directions of microphones relative to sources ref and up vector
+        rdirs_to_mic = []
+
+        for i in range(0, self.mics.num_mics):
+            gdir_to_mic = gdirs_to_source[i] * (-1)
+            rdirs_to_mic.append(source_trans_mat @ gdir_to_mic)
+
+        # direction of sources in relative to microphones
+        rdirs_to_source = []
+        for i in range(0, self.mics.num_mics):
+            # @TODO set these values somewhere - later microphone in its own class?
+            mic_up = np.array((0, 1, 0), dtype=float)
+            mic_forward = np.array((0, 0, 1), dtype=float)
+            mic_right = np.array((1, 0, 0), dtype=float)
+
+            assert(np.dot(mic_up, mic_forward) < 1e-12)
+            assert(np.dot(mic_up, mic_right) < 1e-12)
+
+            mic_trans_mat = np.vstack([mic_right, mic_up, mic_forward]).T
+            rdirs_to_source.append(mic_trans_mat @ gdirs_to_source[i])
+
+        # @TODO do something with the directions, store these as an attribute?
+
+        # generate output signal
+        self._validate_locations()
+        N = int(np.ceil(self.num_samples / num))  # number of output blocks
+        signal = self.signal.usignal(self.up)
+        out = np.empty((num, self.num_channels))
+        # distances
+        rm = self.env._r(np.array(self.loc).reshape((3, 1)), self.mics.pos).reshape(1, -1)
+        # emission time relative to start_t (in samples) for first sample
+        ind = (-rm / self.env.c - self.start_t + self.start) * self.sample_freq * self.up
+
+        if self.prepadding == 'zeros':
+            # number of blocks where signal behaviour is amended
+            pre = -int(np.min(ind[0]) // (self.up * num))
+            # amend signal for first blocks
+            # if signal stops during prepadding, terminate
+            if pre >= N:
+                for _nb in range(N - 1):
+                    out = _fill_mic_signal_block(out, signal, rm, ind, num, self.num_channels, self.up, True)
+                    yield out
+
+                blocksize = self.num_samples % num or num
+                out = _fill_mic_signal_block(out, signal, rm, ind, blocksize, self.num_channels, self.up, True)
+                yield out[:blocksize]
+                return
+            else:
+                for _nb in range(pre):
+                    out = _fill_mic_signal_block(out, signal, rm, ind, num, self.num_channels, self.up, True)
+                    yield out
+
+        else:
+            pre = 0
+
+        # main generator
+        for _nb in range(N - pre - 1):
+            out = _fill_mic_signal_block(out, signal, rm, ind, num, self.num_channels, self.up, False)
+            yield out
+
+        # last block of variable size
+        blocksize = self.num_samples % num or num
+        out = _fill_mic_signal_block(out, signal, rm, ind, blocksize, self.num_channels, self.up, False)
+        yield out[:blocksize]
+
+
 class PointSourceDipole(PointSource):
     """
     Define a fixed point source with dipole characteristics.
