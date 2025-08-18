@@ -1324,7 +1324,7 @@ class PointSourceDirectional(PointSource):
         # check orthagonality
         assert(np.dot(up_n, forward_n) < 1e-12)
         assert(np.dot(up_n, right_n) < 1e-12)
-        # @TODO check right-hand rule
+        assert(np.allclose(np.cross(up_n, forward_n), right_n))
 
         # calculate directions in global space
         gdirs_to_source = []
@@ -1441,8 +1441,6 @@ class PointSourceDipole(PointSource):
     #: **Note:** Use vectors with order of magnitude around ``1.0`` or less for good results.
     direction = Tuple((0.0, 0.0, 1.0), desc='dipole orientation and distance of the inversely phased monopoles')
 
-    up_vec = Tuple((0.0, 1.0, 0.0), desc='dipole upward orientation')
-
     #: Behavior of the signal for negative time indices. Currently only supports ``'loop'``.
     #: Default is ``'loop'``.
     prepadding = Enum('loop', desc='Behaviour for negative time indices.')
@@ -1505,70 +1503,6 @@ class PointSourceDipole(PointSource):
 
         # normed direction vector
         direc_n = direc / direc_mag
-
-        # normed up vector
-        up_n = np.array(self.up_vec, dtype=float) / np.linalg.norm(np.array(self.up_vec, dtype=float))
-        assert(np.dot(up_n, direc_n) < 1e-12)
-
-        ##################################################################################
-        # Compute relative directions of source and recievers.
-        ##################################################################################
-
-        # First calculate directions in global space
-
-        directions = []
-
-        for i in range(0, self.mics.num_mics):
-
-            # get mic positiion
-            x = mpos[0][i]
-            y = mpos[1][i]
-            z = mpos[2][i]
-
-            mic_point = np.array([x, y, z])
-
-            # This is the direction of the source in relation to the reciever
-            directions.append(np.array(self.loc, dtype=float) - mic_point)
-
-        # Create transformation matrix for the local space relative to the source
-        right_n = np.cross(up_n, direc_n)
-        right_n /= np.linalg.norm(right_n)
-
-        print(f'forward: {direc_n} up: {up_n} right: {right_n}')
-
-        transformation_matrix = np.vstack([right_n, up_n, direc_n]).T
-        print(transformation_matrix)
-
-        # directions of microphones relative to sources ref and up vector
-        direction_from_sources = []
-
-        for i in range(0, self.mics.num_mics):
-            reversed_direction = directions[i] * (-1)
-            print(f'direction of mic{i} from source: {reversed_direction}')
-            relative_direction = transformation_matrix @ reversed_direction
-            print(f'direction relative to source: {relative_direction}')
-            direction_from_sources.append(relative_direction)
-
-        # direction of sources in relation to microphones
-        direction_from_mics = []
-        for i in range(0, self.mics.num_mics):
-            # @TODO set these values somewhere - later microphone in its own class?
-            mic_up = np.array((0, 1, 0), dtype=float)
-            mic_forward = np.array((0, 0, 1), dtype=float)
-            mic_right = np.array((1, 0, 0), dtype=float)
-
-            assert(np.dot(mic_up, mic_forward) < 1e-12)
-            assert(np.dot(mic_up, mic_right) < 1e-12)
-
-            mic_transformation_matrix = np.vstack([mic_right, mic_up, mic_forward]).T
-            print(mic_transformation_matrix)
-
-            mic_rel_direct = mic_transformation_matrix @ directions[i]
-            print(f'direction relative to mic{i}: {mic_rel_direct}')
-
-            direction_from_mics.append(mic_rel_direct)
-
-        ##################################################################################
 
         c = self.env.c
 
