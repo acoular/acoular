@@ -89,6 +89,7 @@ from .sources import (
     PointSource,
     PointSourceConvolve,
     PointSourceDipole,
+    PointSourceDirectional,
     SourceMixer,
     SphericalHarmonicSource,
     TimeSamples,
