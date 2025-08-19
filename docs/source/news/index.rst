@@ -11,7 +11,7 @@ Upcoming Release
         * refactored import statements and input aliases
         * removed duplicate code in `MovingPointSource`-derived classes
         * migrate from traits `on_trait_change` to `observe`
-
+        * fixes bug in :class:`~acoular.sources.PointSource` that could cause a silent crash when the `start` attribute was set to a nonzero value 
 25.07
 ------------------------
     **New features**

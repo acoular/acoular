@@ -86,7 +86,6 @@ def _fill_mic_signal_block(out, signal, rm, ind, blocksize, num_channels, up, pr
             for m in range(num_channels):
                 out[b, m] = signal[int(0.5 + ind[0, m])] / rm[0, m]
             ind += up
-    return out
 
 
 def spherical_hn1(n, z):
@@ -881,7 +880,8 @@ class PointSource(SamplesGenerator):
             If signal processing or propagation cannot be performed.
         """
         self._validate_locations()
-        N = int(np.ceil(self.num_samples / num))  # number of output blocks
+        num_samples_estimate = self.num_samples + (self.start_t - self.start) * self.sample_freq
+        N = int(np.ceil(num_samples_estimate / num))  # number of output blocks
         signal = self.signal.usignal(self.up)
         out = np.empty((num, self.num_channels))
         # distances
@@ -896,16 +896,16 @@ class PointSource(SamplesGenerator):
             # if signal stops during prepadding, terminate
             if pre >= N:
                 for _nb in range(N - 1):
-                    out = _fill_mic_signal_block(out, signal, rm, ind, num, self.num_channels, self.up, True)
+                    _fill_mic_signal_block(out, signal, rm, ind, num, self.num_channels, self.up, True)
                     yield out
 
                 blocksize = self.num_samples % num or num
-                out = _fill_mic_signal_block(out, signal, rm, ind, blocksize, self.num_channels, self.up, True)
+                _fill_mic_signal_block(out, signal, rm, ind, blocksize, self.num_channels, self.up, True)
                 yield out[:blocksize]
                 return
             else:
                 for _nb in range(pre):
-                    out = _fill_mic_signal_block(out, signal, rm, ind, num, self.num_channels, self.up, True)
+                    _fill_mic_signal_block(out, signal, rm, ind, num, self.num_channels, self.up, True)
                     yield out
 
         else:
@@ -913,12 +913,12 @@ class PointSource(SamplesGenerator):
 
         # main generator
         for _nb in range(N - pre - 1):
-            out = _fill_mic_signal_block(out, signal, rm, ind, num, self.num_channels, self.up, False)
+            _fill_mic_signal_block(out, signal, rm, ind, num, self.num_channels, self.up, False)
             yield out
 
         # last block of variable size
         blocksize = self.num_samples % num or num
-        out = _fill_mic_signal_block(out, signal, rm, ind, blocksize, self.num_channels, self.up, False)
+        _fill_mic_signal_block(out, signal, rm, ind, blocksize, self.num_channels, self.up, False)
         yield out[:blocksize]
 
 
