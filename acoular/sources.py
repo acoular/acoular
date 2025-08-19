@@ -881,7 +881,8 @@ class PointSource(SamplesGenerator):
             If signal processing or propagation cannot be performed.
         """
         self._validate_locations()
-        N = int(np.ceil(self.num_samples / num))  # number of output blocks
+        num_samples_estimate = self.num_samples + (self.start_t - self.start) * self.sample_freq
+        N = int(np.ceil(num_samples_estimate / num))  # number of output blocks
         signal = self.signal.usignal(self.up)
         out = np.empty((num, self.num_channels))
         # distances
