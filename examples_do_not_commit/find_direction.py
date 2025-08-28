@@ -88,7 +88,7 @@ def main():
 
     m = ac.MicGeom()
     m.pos_total = np.array([[-1, 1], # x positions, all values in m
-                            [-2, 2], # y
+                            [2, 2], # y
                             [0, 0]]) # z
 
     # # Lets try to determine direction of source and reciever. Lets first do this by using a stationary source
@@ -104,9 +104,12 @@ def main():
     # Define point source
     static_drone = ac.PointSourceDirectional(signal = drone_signal, # the signal of the source
                                 mics = m,              # set the "array" with which to measure the sound field
-                                start = 0.5,           # observation starts 0.5 seconds after signal starts at drone
-                                loc = (0, 10, 20),    # location of the source
-                                #forward_vec = (0, 0, -1),
+                                #start = 0.5,           # observation starts 0.5 seconds after signal starts at drone
+                                loc = (0, 10, -20),    # location of the source
+                                # forward_vec = (0, 0, -1),
+                                # up_vec = (0, 1, 0),
+                                # right_vec = (-1, 0, 0),
+                                rot_speed = np.deg2rad(30),
                                 env = e)               # the environment the source is moving in
 
     # Prepare wav output.
@@ -117,6 +120,7 @@ def main():
 
     print('before output save')
 
+    #output.max_val = 2
     output.save()
 
     print('done')

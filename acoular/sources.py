@@ -1255,6 +1255,9 @@ class PointSourceDirectional(PointSource):
     up_vec = Tuple((0.0, 1.0, 0.0), desc='source upward direction')
     right_vec = Tuple((1.0, 0.0, 0.0), desc='source right direction')
 
+    # Rotation speed in radians/sec - default is 0
+    rot_speed = Float(0.0)
+
     #: Behavior of the signal for negative time indices. Currently only supports `loop`. Default is
     #: ``'loop'``.
     prepadding = Enum('loop', desc='Behaviour for negative time indices.')
@@ -1272,6 +1275,7 @@ class PointSourceDirectional(PointSource):
             'forward_vec',
             'up_vec',
             'right_vec',
+            'rot_speed'
             'prepadding',
         ],
     )
@@ -1279,6 +1283,23 @@ class PointSourceDirectional(PointSource):
     @cached_property
     def _get_digest(self):
         return digest(self)
+    
+    def directivity_coeff(source_forward_dir, mic_dir):
+        # based on Lambertian reflectance
+        dir_n = source_forward_dir / np.linalg.norm(source_forward_dir)
+        mic_n = mic_dir / np.linalg.norm(mic_dir)
+
+        return (np.dot(dir_n, mic_n) + 1) / 2
+
+    def __rotation_matrix_for_sample(self, sample_index):
+        # Calculates the 3D rotation matrix for a specific audio sample assuming the rotation is constant
+        # TODO: ensure this works with large numbers
+        time = sample_index / self.sample_freq
+        rot_angle = self.rot_speed * time
+
+        # build rotation matrix around the y axis
+        rot_mat = np.array([[np.cos(rot_angle), 0, np.sin(rot_angle)], [0, 1, 0], [-np.sin(rot_angle), 0, np.cos(rot_angle)]])
+        return rot_mat
 
     def result(self, num=128):
         """
@@ -1366,9 +1387,37 @@ class PointSourceDirectional(PointSource):
 
         # @TODO do something with the directions, store these as an attribute?
 
-        # generate output signal
+        def fill_block_with_directivity(out, signal, rm, ind, blocksize, num_channels, up, prepadding, src_fwd, dirs_to_source):
+
+            if prepadding:
+                for b in range(blocksize):
+                # only need to rotate forward vec as using direction in global space
+                    for m in range(num_channels):
+                        rot_mat = self.__rotation_matrix_for_sample(ind[0, m])
+                        rotated_forward_vec = src_fwd
+                        rotated_forward_vec = rot_mat @ rotated_forward_vec
+                        coeff = PointSourceDirectional.directivity_coeff(rotated_forward_vec, dirs_to_source[m] * -1)
+                        #print(f'coeff: {coeff}')
+                        if ind[0, m] < 0:
+                            out[b, m] = 0
+                        else:
+                            out[b, m] = (signal[int(0.5 + ind[0, m])] * coeff) / rm[0, m]
+                    ind += up
+            else:
+                for b in range(blocksize):
+                    for m in range(num_channels):
+                        rot_mat = self.__rotation_matrix_for_sample(ind[0, m])
+                        rotated_forward_vec = src_fwd
+                        rotated_forward_vec = rot_mat @ rotated_forward_vec
+                        coeff = PointSourceDirectional.directivity_coeff(rotated_forward_vec, dirs_to_source[m] * -1)
+                        #print(f'coeff: {coeff}')
+                        out[b, m] = (signal[int(0.5 + ind[0, m])] * coeff) / rm[0, m]
+                    ind += up
+
+        # generate output
         self._validate_locations()
-        N = int(np.ceil(self.num_samples / num))  # number of output blocks
+        num_samples_estimate = self.num_samples + (self.start_t - self.start) * self.sample_freq
+        N = int(np.ceil(num_samples_estimate / num))  # number of output blocks
         signal = self.signal.usignal(self.up)
         out = np.empty((num, self.num_channels))
         # distances
@@ -1383,16 +1432,16 @@ class PointSourceDirectional(PointSource):
             # if signal stops during prepadding, terminate
             if pre >= N:
                 for _nb in range(N - 1):
-                    out = _fill_mic_signal_block(out, signal, rm, ind, num, self.num_channels, self.up, True)
+                    fill_block_with_directivity(out, signal, rm, ind, num, self.num_channels, self.up, True, forward_n, gdirs_to_source)
                     yield out
 
                 blocksize = self.num_samples % num or num
-                out = _fill_mic_signal_block(out, signal, rm, ind, blocksize, self.num_channels, self.up, True)
+                fill_block_with_directivity(out, signal, rm, ind, blocksize, self.num_channels, self.up, True, forward_n, gdirs_to_source)
                 yield out[:blocksize]
                 return
             else:
                 for _nb in range(pre):
-                    out = _fill_mic_signal_block(out, signal, rm, ind, num, self.num_channels, self.up, True)
+                    fill_block_with_directivity(out, signal, rm, ind, num, self.num_channels, self.up, True, forward_n, gdirs_to_source)
                     yield out
 
         else:
@@ -1400,12 +1449,12 @@ class PointSourceDirectional(PointSource):
 
         # main generator
         for _nb in range(N - pre - 1):
-            out = _fill_mic_signal_block(out, signal, rm, ind, num, self.num_channels, self.up, False)
+            fill_block_with_directivity(out, signal, rm, ind, num, self.num_channels, self.up, False, forward_n, gdirs_to_source)
             yield out
 
         # last block of variable size
         blocksize = self.num_samples % num or num
-        out = _fill_mic_signal_block(out, signal, rm, ind, blocksize, self.num_channels, self.up, False)
+        fill_block_with_directivity(out, signal, rm, ind, blocksize, self.num_channels, self.up, False, forward_n, gdirs_to_source)
         yield out[:blocksize]
 
 
