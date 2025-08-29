@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: check links
         id: lychee
-        uses: lycheeverse/lychee-action@v1
+        uses: lycheeverse/lychee-action@v2.0.2
         with:
           # Check all markdown, html and reStructuredText files in repo (default)
           args: --base . --verbose --no-progress './**/*.md' './**/*.html' './**/*.rst' --exclude file:///home/runner/work/acoular/acoular/docs/source/_themes/*
