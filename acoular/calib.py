@@ -12,14 +12,11 @@
 # imports from other packages
 import xml.dom.minidom
 
-from numpy import array, newaxis
-from traits.api import CArray, CInt, File, List, Property, Union, cached_property, on_trait_change
-
-import acoular as ac
-
-from .base import InOut
+import numpy as np
+from traits.api import CArray, CInt, File, List, Property, Union, cached_property, observe
 
 # acoular imports
+from .base import InOut, SamplesGenerator, SpectraGenerator
 from .deprecation import deprecated_alias
 from .internal import digest
 
@@ -99,8 +96,8 @@ class Calib(InOut):
     # Internal identifier
     digest = Property(depends_on=['source.digest', 'data'])
 
-    @on_trait_change('data')
-    def set_num_mics(self):
+    @observe('data')
+    def _update_num_mics(self, event):  # noqa ARG002
         """Sets the number of microphones based on the shape of the data array."""
         self.num_mics = self.data.shape[0]
 
@@ -109,14 +106,14 @@ class Calib(InOut):
         if len(self.invalid_channels) == 0:
             return slice(0, None, None)
         allr = [i for i in range(self.num_mics) if i not in self.invalid_channels]
-        return array(allr)
+        return np.array(allr)
 
     @cached_property
     def _get_digest(self):
         return digest(self)
 
-    @on_trait_change('file')
-    def import_data(self):
+    @observe('file')
+    def _import_data(self, event):  # noqa ARG002
         """Loads the calibration data from `*.xml` file ."""
         doc = xml.dom.minidom.parse(self.file)
         names = []
@@ -124,7 +121,7 @@ class Calib(InOut):
         for element in doc.getElementsByTagName('pos'):
             names.append(element.getAttribute('Name'))
             data.append(float(element.getAttribute('factor')))
-        self.data = array(data, 'd')
+        self.data = np.array(data, 'd')
         self.num_mics = self.data.shape[0]
 
     def __validate_data(self):
@@ -136,13 +133,13 @@ class Calib(InOut):
             msg = 'No source data available.'
             raise ValueError(msg)
         tobj = self.source
-        while isinstance(tobj, ac.InOut):
+        while isinstance(tobj, InOut):
             tobj = tobj.source
-        if isinstance(tobj, ac.SamplesGenerator) and (self.data[self.channels].shape[0] != tobj.num_channels):
+        if isinstance(tobj, SamplesGenerator) and (self.data[self.channels].shape[0] != tobj.num_channels):
             msg = f'calibration data shape {self.data[self.channels].shape[0]} does not match \
                 source data shape {tobj.num_channels}'
             raise ValueError(msg)
-        if isinstance(tobj, ac.SpectraGenerator) and (
+        if isinstance(tobj, SpectraGenerator) and (
             self.data[self.channels].shape[0] != tobj.num_channels * tobj.num_freqs
         ):
             msg = f'calibration data shape {self.data[self.channels].shape[0]} does not match \
@@ -170,4 +167,4 @@ class Calib(InOut):
         """
         self.__validate_data()
         for block in self.source.result(num):
-            yield block * self.data[self.channels][newaxis]
+            yield block * self.data[self.channels][np.newaxis]

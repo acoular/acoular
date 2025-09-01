@@ -1,7 +1,8 @@
 # ------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
-"""Implements beamformers in the time domain.
+"""
+Implements beamformers in the time domain.
 
 .. autosummary::
     :toctree: generated/
@@ -17,32 +18,8 @@
     IntegratorSectorTime
 """
 
-# imports from other packages
-
-from numpy import (
-    arange,
-    argmax,
-    array,
-    ceil,
-    dot,
-    empty,
-    float32,
-    float64,
-    histogram,
-    int32,
-    int64,
-    interp,
-    isscalar,
-    newaxis,
-    r_,
-    s_,
-    sqrt,
-    sum,  # noqa: A004
-    unique,
-    where,
-    zeros,
-)
-from scipy.linalg import norm
+import numpy as np
+import scipy.linalg as spla
 from traits.api import Bool, CArray, Enum, Float, Instance, Int, List, Map, Property, Range, cached_property
 
 from .base import SamplesGenerator, TimeOut
@@ -57,7 +34,8 @@ from .trajectory import Trajectory
 
 
 def const_power_weight(bf):
-    """Internal helper function for :class:`BeamformerTime`.
+    """
+    Internal helper function for :class:`BeamformerTime`.
 
     Provides microphone weighting
     to make the power per unit area of the
@@ -73,14 +51,14 @@ def const_power_weight(bf):
     array of floats
         The weight factors.
     """
-    r = bf.steer.env._r(zeros((3, 1)), bf.steer.mics.pos)  # distances to center
+    r = bf.steer.env._r(np.zeros((3, 1)), bf.steer.mics.pos)  # distances to center
     # round the relative distances to one decimal place
     r = (r / r.max()).round(decimals=1)
-    ru, ind = unique(r, return_inverse=True)
+    ru, ind = np.unique(r, return_inverse=True)
     ru = (ru[1:] + ru[:-1]) / 2
-    count, bins = histogram(r, r_[0, ru, 1.5 * r.max() - 0.5 * ru[-1]])
+    count, bins = np.histogram(r, np.r_[0, ru, 1.5 * r.max() - 0.5 * ru[-1]])
     bins *= bins
-    weights = sqrt((bins[1:] - bins[:-1]) / count)
+    weights = np.sqrt((bins[1:] - bins[:-1]) / count)
     weights /= weights.mean()
     return weights[ind]
 
@@ -90,7 +68,9 @@ possible_weights = {'none': None, 'power': const_power_weight}
 
 
 class BeamformerTime(TimeOut):
-    """Provides a basic time domain beamformer with time signal output
+    """
+    Provides a basic time domain beamformer with time signal output.
+
     for a spatially fixed grid.
     """
 
@@ -121,41 +101,42 @@ class BeamformerTime(TimeOut):
         return digest(self)
 
     def _get_weights(self):
-        return self.weights_(self)[newaxis] if self.weights_ else 1.0
+        return self.weights_(self)[np.newaxis] if self.weights_ else 1.0
 
     def result(self, num=2048):
-        """Python generator that yields the time-domain beamformer output.
+        """
+        Python generator that yields the time-domain beamformer output.
 
         The output time signal starts for source signals that were emitted from
         the :class:`~acoular.grids.Grid` at `t=0`.
 
         Parameters
         ----------
-        num : int
+        num : :class:`int`
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block). Defaults to 2048.
 
         Yields
         ------
-        numpy.ndarray
-            Samples in blocks of shape (num, :attr:`~BeamformerTime.num_channels`).
+        :class:`numpy.ndarray`
+            Samples in blocks of shape (``num``, :attr:`~BeamformerTime.num_channels`).
                 :attr:`~BeamformerTime.num_channels` is usually very \
                 large (number of grid points).
-                The last block returned by the generator may be shorter than num.
+                The last block returned by the generator may be shorter than ``num``.
         """
         # initialize values
         steer_func = self.steer._steer_funcs_time[self.steer.steer_type]
-        fdtype = float64
-        idtype = int64
+        fdtype = np.float64
+        idtype = np.int64
         num_mics = self.steer.mics.num_mics
-        n_index = arange(0, num + 1)[:, newaxis]
+        n_index = np.arange(0, num + 1)[:, np.newaxis]
         c = self.steer.env.c / self.source.sample_freq
-        amp = empty((1, self.steer.grid.size, num_mics), dtype=fdtype)
-        # delays = empty((1,self.steer.grid.size,num_mics),dtype=fdtype)
-        d_index = empty((1, self.steer.grid.size, num_mics), dtype=idtype)
-        d_interp2 = empty((1, self.steer.grid.size, num_mics), dtype=fdtype)
-        steer_func(self.steer.rm[newaxis, :, :], self.steer.r0[newaxis, :], amp)
-        _delays(self.steer.rm[newaxis, :, :], c, d_interp2, d_index)
+        amp = np.empty((1, self.steer.grid.size, num_mics), dtype=fdtype)
+        # delays = np.empty((1,self.steer.grid.size,num_mics),dtype=fdtype)
+        d_index = np.empty((1, self.steer.grid.size, num_mics), dtype=idtype)
+        d_interp2 = np.empty((1, self.steer.grid.size, num_mics), dtype=fdtype)
+        steer_func(self.steer.rm[np.newaxis, :, :], self.steer.r0[np.newaxis, :], amp)
+        _delays(self.steer.rm[np.newaxis, :, :], c, d_interp2, d_index)
         amp.shape = amp.shape[1:]
         # delays.shape = delays.shape[1:]
         d_index.shape = d_index.shape[1:]
@@ -165,7 +146,7 @@ class BeamformerTime(TimeOut):
 
         buffer = SamplesBuffer(
             source=self.source,
-            length=int(ceil((num + max_sample_delay) / num)) * num,
+            length=int(np.ceil((num + max_sample_delay) / num)) * num,
             result_num=num + max_sample_delay,
             shift_index_by='num',
             dtype=fdtype,
@@ -177,68 +158,70 @@ class BeamformerTime(TimeOut):
                 # exit loop if there is not enough data left to be processed
                 if num <= 0:
                     break
-                n_index = arange(0, num + 1)[:, newaxis]
+                n_index = np.arange(0, num + 1)[:, np.newaxis]
             # init step
-            Phi, autopow = self._delay_and_sum(num, p_res, d_interp2, d_index, amp)
+            phi, autopow = self._delay_and_sum(num, p_res, d_interp2, d_index, amp)
             if 'Cleant' not in self.__class__.__name__:
                 if 'Sq' not in self.__class__.__name__:
-                    yield Phi[:num]
+                    yield phi[:num]
                 elif self.r_diag:
-                    yield (Phi[:num] ** 2 - autopow[:num]).clip(min=0)
+                    yield (phi[:num] ** 2 - autopow[:num]).clip(min=0)
                 else:
-                    yield Phi[:num] ** 2
+                    yield phi[:num] ** 2
             else:
                 p_res_copy = p_res.copy()
-                Gamma = zeros(Phi.shape)
-                Gamma_autopow = zeros(Phi.shape)
-                J = 0
+                gamma = np.zeros(phi.shape)
+                gamma_autopow = np.zeros(phi.shape)
+                j = 0
                 # deconvolution
-                while self.n_iter > J:
-                    # print(f"start clean iteration {J+1} of max {self.n_iter}")
-                    powPhi = (Phi[:num] ** 2 - autopow).sum(0).clip(min=0) if self.r_diag else (Phi[:num] ** 2).sum(0)
-                    imax = argmax(powPhi)
+                while self.n_iter > j:
+                    # print(f"start clean iteration {j+1} of max {self.n_iter}")
+                    pow_phi = (phi[:num] ** 2 - autopow).sum(0).clip(min=0) if self.r_diag else (phi[:num] ** 2).sum(0)
+                    imax = np.argmax(pow_phi)
                     t_float = d_interp2[imax] + d_index[imax] + n_index
-                    t_ind = t_float.astype(int64)
+                    t_ind = t_float.astype(np.int64)
                     for m in range(num_mics):
-                        p_res_copy[t_ind[: num + 1, m], m] -= self.damp * interp(
+                        p_res_copy[t_ind[: num + 1, m], m] -= self.damp * np.interp(
                             t_ind[: num + 1, m],
                             t_float[:num, m],
-                            Phi[:num, imax] * self.steer.r0[imax] / self.steer.rm[imax, m],
+                            phi[:num, imax] * self.steer.r0[imax] / self.steer.rm[imax, m],
                         )
-                    nextPhi, nextAutopow = self._delay_and_sum(num, p_res_copy, d_interp2, d_index, amp)
+                    next_phi, next_autopow = self._delay_and_sum(num, p_res_copy, d_interp2, d_index, amp)
                     if self.r_diag:
-                        pownextPhi = (nextPhi[:num] ** 2 - nextAutopow).sum(0).clip(min=0)
+                        pow_next_phi = (next_phi[:num] ** 2 - next_autopow).sum(0).clip(min=0)
                     else:
-                        pownextPhi = (nextPhi[:num] ** 2).sum(0)
-                    # print(f"total signal power: {powPhi.sum()}")
-                    if pownextPhi.sum() < powPhi.sum():  # stopping criterion
-                        Gamma[:num, imax] += self.damp * Phi[:num, imax]
-                        Gamma_autopow[:num, imax] = autopow[:num, imax].copy()
-                        Phi = nextPhi
-                        autopow = nextAutopow
-                        # print(f"clean max: {L_p((Gamma**2).sum(0)/num).max()} dB")
-                        J += 1
+                        pow_next_phi = (next_phi[:num] ** 2).sum(0)
+                    # print(f"total signal power: {pow_phi.sum()}")
+                    if pow_next_phi.sum() < pow_phi.sum():  # stopping criterion
+                        gamma[:num, imax] += self.damp * phi[:num, imax]
+                        gamma_autopow[:num, imax] = autopow[:num, imax].copy()
+                        phi = next_phi
+                        autopow = next_autopow
+                        # print(f"clean max: {L_p((gamma**2).sum(0)/num).max()} dB")
+                        j += 1
                     else:
                         break
                 if 'Sq' not in self.__class__.__name__:
-                    yield Gamma[:num]
+                    yield gamma[:num]
                 elif self.r_diag:
-                    yield Gamma[:num] ** 2 - (self.damp**2) * Gamma_autopow[:num]
+                    yield gamma[:num] ** 2 - (self.damp**2) * gamma_autopow[:num]
                 else:
-                    yield Gamma[:num] ** 2
+                    yield gamma[:num] ** 2
 
     def _delay_and_sum(self, num, p_res, d_interp2, d_index, amp):
         """Standard delay-and-sum method."""
-        result = empty((num, self.steer.grid.size), dtype=float)  # output array
-        autopow = empty((num, self.steer.grid.size), dtype=float)  # output array
+        result = np.empty((num, self.steer.grid.size), dtype=float)  # output array
+        autopow = np.empty((num, self.steer.grid.size), dtype=float)  # output array
         _delayandsum4(p_res, d_index, d_interp2, amp, result, autopow)
         return result, autopow
 
 
 class BeamformerTimeSq(BeamformerTime):
-    """Provides a time domain beamformer with time-dependend
-    power signal output and possible autopower removal
-    for a spatially fixed grid.
+    """
+    Time domain beamformer with squared output and optional autopower removal.
+
+    Provides a time domain beamformer with time-dependend power signal output and possible autopower
+    removal for a spatially fixed grid.
     """
 
     #: Boolean flag, if 'True' (default), the main diagonal is removed before beamforming.
@@ -254,30 +237,33 @@ class BeamformerTimeSq(BeamformerTime):
         return digest(self)
 
     def result(self, num=2048):
-        """Python generator that yields the **squared** time-domain beamformer output.
+        """
+        Python generator that yields the **squared** time-domain beamformer output.
 
         The squared output time signal starts for source signals that were emitted from
         the :class:`~acoular.grids.Grid` at `t=0`.
 
         Parameters
         ----------
-        num : int
+        num : :class:`int`
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block). Defaults to 2048.
 
         Yields
         ------
-        numpy.ndarray
-            Samples in blocks of shape (num, :attr:`~BeamformerTime.num_channels`).
+        :class:`numpy.ndarray`
+            Samples in blocks of shape (``num``, :attr:`~BeamformerTime.num_channels`).
                 :attr:`~BeamformerTime.num_channels` is usually very \
                 large (number of grid points).
-                The last block returned by the generator may be shorter than num.
+                The last block returned by the generator may be shorter than ``num``.
         """
         return super().result(num)
 
 
 class BeamformerTimeTraj(BeamformerTime):
-    """Provides a basic time domain beamformer with time signal output
+    """
+    Provides a basic time domain beamformer with time signal output.
+
     for a grid moving along a trajectory.
     """
 
@@ -286,7 +272,7 @@ class BeamformerTimeTraj(BeamformerTime):
     trajectory = Instance(Trajectory, desc='trajectory of the grid center')
 
     #: Reference vector, perpendicular to the y-axis of moving grid.
-    rvec = CArray(dtype=float, shape=(3,), value=array((0, 0, 0)), desc='reference vector')
+    rvec = CArray(dtype=float, shape=(3,), value=np.array((0, 0, 0)), desc='reference vector')
 
     #: Considering of convective amplification in beamforming formula.
     conv_amp = Bool(False, desc='determines if convective amplification of source is considered')
@@ -315,10 +301,12 @@ class BeamformerTimeTraj(BeamformerTime):
         """Python generator that yields the moving grid coordinates samplewise."""
 
         def cross(a, b):
-            """Cross product for fast computation
+            """
+            Cross product for fast computation.
+
             because numpy.cross is ultra slow in this case.
             """
-            return array([a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]])
+            return np.array([a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]])
 
         start_t = 0.0
         gpos = self.steer.grid.pos
@@ -328,74 +316,87 @@ class BeamformerTimeTraj(BeamformerTime):
         if rflag:
             for g in trajg:
                 # grid is only translated, not rotated
-                tpos = gpos + array(g)[:, newaxis]
+                tpos = gpos + np.array(g)[:, np.newaxis]
                 yield tpos
         else:
             for g, g1 in zip(trajg, trajg1):
                 # grid is both translated and rotated
-                loc = array(g)  # translation array([0., 0.4, 1.])
-                dx = array(g1)  # direction vector (new x-axis)
+                loc = np.array(g)  # translation array([0., 0.4, 1.])
+                dx = np.array(g1)  # direction vector (new x-axis)
                 dy = cross(self.rvec, dx)  # new y-axis
                 dz = cross(dx, dy)  # new z-axis
-                RM = array((dx, dy, dz)).T  # rotation matrix
-                RM /= sqrt((RM * RM).sum(0))  # column normalized
-                tpos = dot(RM, gpos) + loc[:, newaxis]  # rotation+translation
+                rm = np.array((dx, dy, dz)).T  # rotation matrix
+                rm /= np.sqrt((rm * rm).sum(0))  # column normalized
+                tpos = np.dot(rm, gpos) + loc[:, np.newaxis]  # rotation+translation
                 #                print(loc[:])
                 yield tpos
 
     def _get_macostheta(self, g1, tpos, rm):
-        vvec = array(g1)  # velocity vector
-        ma = norm(vvec) / self.steer.env.c  # machnumber
-        fdv = (vvec / sqrt((vvec * vvec).sum()))[:, newaxis]  # unit vecor velocity
-        mpos = self.steer.mics.pos[:, newaxis, :]
-        rmv = tpos[:, :, newaxis] - mpos
-        return (ma * sum(rmv.reshape((3, -1)) * fdv, 0) / rm.reshape(-1)).reshape(rm.shape)
+        vvec = np.array(g1)  # velocity vector
+        ma = spla.norm(vvec) / self.steer.env.c  # machnumber
+        fdv = (vvec / np.sqrt((vvec * vvec).sum()))[:, np.newaxis]  # unit vecor velocity
+        mpos = self.steer.mics.pos[:, np.newaxis, :]
+        rmv = tpos[:, :, np.newaxis] - mpos
+        return (ma * np.sum(rmv.reshape((3, -1)) * fdv, 0) / rm.reshape(-1)).reshape(rm.shape)
 
     def get_r0(self, tpos):
-        if isscalar(self.steer.ref) and self.steer.ref > 0:
+        """
+        Get reference distance for grid positions.
+
+        Parameters
+        ----------
+        tpos : :class:`numpy.ndarray`
+            Grid positions.
+
+        Returns
+        -------
+        :class:`float` or :class:`numpy.ndarray`
+            Reference distance(s).
+        """
+        if np.isscalar(self.steer.ref) and self.steer.ref > 0:
             return self.steer.ref  # full((self.steer.grid.size,), self.steer.ref)
         return self.steer.env._r(tpos)
 
     def result(self, num=2048):
-        """Python generator that yields the time-domain beamformer output.
+        """
+        Python generator that yields the time-domain beamformer output.
 
         The output time signal starts for source signals that were emitted from
         the :class:`~acoular.grids.Grid` at `t=0`.
 
         Parameters
         ----------
-        num : int
+        num : :class:`int`
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block). Defaults to 2048.
 
         Yields
         ------
-        numpy.ndarray
-            Samples in blocks of shape (num, :attr:`~BeamformerTime.num_channels`).
+        :class:`numpy.ndarray`
+            Samples in blocks of shape (``num``, :attr:`~BeamformerTime.num_channels`).
                 :attr:`~BeamformerTime.num_channels` is usually very \
                 large (number of grid points).
-                The last block returned by the generator may be shorter than num.
+                The last block returned by the generator may be shorter than ``num``.
         """
         # initialize values
         if self.precision == 64:
-            fdtype = float64
-            idtype = int64
+            fdtype = np.float64
+            idtype = np.int64
         else:
-            fdtype = float32
-            idtype = int32
-        w = self._get_weights()
+            fdtype = np.float32
+            idtype = np.int32
         c = self.steer.env.c / self.source.sample_freq
         num_mics = self.steer.mics.num_mics
         mpos = self.steer.mics.pos.astype(fdtype)
-        m_index = arange(num_mics, dtype=idtype)
-        n_index = arange(num, dtype=idtype)[:, newaxis]
-        blockrm = empty((num, self.steer.grid.size, num_mics), dtype=fdtype)
-        blockrmconv = empty((num, self.steer.grid.size, num_mics), dtype=fdtype)
-        amp = empty((num, self.steer.grid.size, num_mics), dtype=fdtype)
-        # delays = empty((num,self.steer.grid.size,num_mics),dtype=fdtype)
-        d_index = empty((num, self.steer.grid.size, num_mics), dtype=idtype)
-        d_interp2 = empty((num, self.steer.grid.size, num_mics), dtype=fdtype)
-        blockr0 = empty((num, self.steer.grid.size), dtype=fdtype)
+        m_index = np.arange(num_mics, dtype=idtype)
+        n_index = np.arange(num, dtype=idtype)[:, np.newaxis]
+        blockrm = np.empty((num, self.steer.grid.size, num_mics), dtype=fdtype)
+        blockrmconv = np.empty((num, self.steer.grid.size, num_mics), dtype=fdtype)
+        amp = np.empty((num, self.steer.grid.size, num_mics), dtype=fdtype)
+        # delays = np.empty((num,self.steer.grid.size,num_mics),dtype=fdtype)
+        d_index = np.empty((num, self.steer.grid.size, num_mics), dtype=idtype)
+        d_interp2 = np.empty((num, self.steer.grid.size, num_mics), dtype=fdtype)
+        blockr0 = np.empty((num, self.steer.grid.size), dtype=fdtype)
         movgpos = self._get_moving_gpos()  # create moving grid pos generator
         movgspeed = self.trajectory.traj(0.0, delta_t=1 / self.source.sample_freq, der=1)
         weights = self._get_weights()
@@ -430,35 +431,35 @@ class BeamformerTimeTraj(BeamformerTime):
             except StopIteration:
                 break
             if time_block.shape[0] < buffer.result_num:  # last block shorter
-                num = sum((d_index.max((1, 2)) + 1 + arange(0, num)) < time_block.shape[0])
-                n_index = arange(num, dtype=idtype)[:, newaxis]
+                num = np.sum((d_index.max((1, 2)) + 1 + np.arange(0, num)) < time_block.shape[0])
+                n_index = np.arange(num, dtype=idtype)[:, np.newaxis]
                 flag = False
             # init step
             p_res = time_block.copy()
-            Phi, autopow = self._delay_and_sum(num, p_res, d_interp2, d_index, amp)
+            phi, autopow = self._delay_and_sum(num, p_res, d_interp2, d_index, amp)
             if 'Cleant' not in self.__class__.__name__:
                 if 'Sq' not in self.__class__.__name__:
-                    yield Phi[:num]
+                    yield phi[:num]
                 elif self.r_diag:
-                    yield (Phi[:num] ** 2 - autopow[:num]).clip(min=0)
+                    yield (phi[:num] ** 2 - autopow[:num]).clip(min=0)
                 else:
-                    yield Phi[:num] ** 2
+                    yield phi[:num] ** 2
             else:
                 # choose correct distance
                 blockrm1 = blockrmconv if self.conv_amp else blockrm
-                Gamma = zeros(Phi.shape, dtype=fdtype)
-                Gamma_autopow = zeros(Phi.shape, dtype=fdtype)
-                J = 0
-                t_ind = arange(p_res.shape[0], dtype=idtype)
+                gamma = np.zeros(phi.shape, dtype=fdtype)
+                gamma_autopow = np.zeros(phi.shape, dtype=fdtype)
+                j = 0
+                t_ind = np.arange(p_res.shape[0], dtype=idtype)
                 # deconvolution
-                while self.n_iter > J:
-                    # print(f"start clean iteration {J+1} of max {self.n_iter}")
+                while self.n_iter > j:
+                    # print(f"start clean iteration {j+1} of max {self.n_iter}")
                     if self.r_diag:
-                        powPhi = (Phi[:num] * Phi[:num] - autopow).sum(0).clip(min=0)
+                        pow_phi = (phi[:num] * phi[:num] - autopow).sum(0).clip(min=0)
                     else:
-                        powPhi = (Phi[:num] * Phi[:num]).sum(0)
+                        pow_phi = (phi[:num] * phi[:num]).sum(0)
                     # find index of max power focus point
-                    imax = argmax(powPhi)
+                    imax = np.argmax(pow_phi)
                     # find backward delays
                     t_float = (d_interp2[:num, imax, m_index] + d_index[:num, imax, m_index] + n_index).astype(fdtype)
                     # determine max/min delays in sample units
@@ -466,49 +467,51 @@ class BeamformerTimeTraj(BeamformerTime):
                     ind_max = t_float.max(0).astype(idtype) + 2
                     ind_min = t_float.min(0).astype(idtype)
                     # store time history at max power focus point
-                    h = Phi[:num, imax] * blockr0[:num, imax]
+                    h = phi[:num, imax] * blockr0[:num, imax]
                     for m in range(num_mics):
                         # subtract interpolated time history from microphone signals
-                        p_res[ind_min[m] : ind_max[m], m] -= self.damp * interp(
+                        p_res[ind_min[m] : ind_max[m], m] -= self.damp * np.interp(
                             t_ind[ind_min[m] : ind_max[m]],
                             t_float[:num, m],
                             h / blockrm1[:num, imax, m],
                         )
-                    nextPhi, nextAutopow = self._delay_and_sum(num, p_res, d_interp2, d_index, amp)
+                    next_phi, next_autopow = self._delay_and_sum(num, p_res, d_interp2, d_index, amp)
                     if self.r_diag:
-                        pownextPhi = (nextPhi[:num] * nextPhi[:num] - nextAutopow).sum(0).clip(min=0)
+                        pow_next_phi = (next_phi[:num] * next_phi[:num] - next_autopow).sum(0).clip(min=0)
                     else:
-                        pownextPhi = (nextPhi[:num] * nextPhi[:num]).sum(0)
-                    # print(f"total signal power: {powPhi.sum()}")
-                    if pownextPhi.sum() < powPhi.sum():  # stopping criterion
-                        Gamma[:num, imax] += self.damp * Phi[:num, imax]
-                        Gamma_autopow[:num, imax] = autopow[:num, imax].copy()
-                        Phi = nextPhi
-                        autopow = nextAutopow
-                        # print(f"clean max: {L_p((Gamma**2).sum(0)/num).max()} dB")
-                        J += 1
+                        pow_next_phi = (next_phi[:num] * next_phi[:num]).sum(0)
+                    # print(f"total signal power: {pow_phi.sum()}")
+                    if pow_next_phi.sum() < pow_phi.sum():  # stopping criterion
+                        gamma[:num, imax] += self.damp * phi[:num, imax]
+                        gamma_autopow[:num, imax] = autopow[:num, imax].copy()
+                        phi = next_phi
+                        autopow = next_autopow
+                        # print(f"clean max: {L_p((gamma**2).sum(0)/num).max()} dB")
+                        j += 1
                     else:
                         break
                 if 'Sq' not in self.__class__.__name__:
-                    yield Gamma[:num]
+                    yield gamma[:num]
                 elif self.r_diag:
-                    yield Gamma[:num] ** 2 - (self.damp**2) * Gamma_autopow[:num]
+                    yield gamma[:num] ** 2 - (self.damp**2) * gamma_autopow[:num]
                 else:
-                    yield Gamma[:num] ** 2
+                    yield gamma[:num] ** 2
 
     def _delay_and_sum(self, num, p_res, d_interp2, d_index, amp):
         """Standard delay-and-sum method."""
-        fdtype = float64 if self.precision == 64 else float32
-        result = empty((num, self.steer.grid.size), dtype=fdtype)  # output array
-        autopow = empty((num, self.steer.grid.size), dtype=fdtype)  # output array
+        fdtype = np.float64 if self.precision == 64 else np.float32
+        result = np.empty((num, self.steer.grid.size), dtype=fdtype)  # output array
+        autopow = np.empty((num, self.steer.grid.size), dtype=fdtype)  # output array
         _delayandsum5(p_res, d_index, d_interp2, amp, result, autopow)
         return result, autopow
 
 
 class BeamformerTimeSqTraj(BeamformerTimeSq, BeamformerTimeTraj):
-    """Provides a time domain beamformer with time-dependent
-    power signal output and possible autopower removal
-    for a grid moving along a trajectory.
+    """
+    Time domain beamformer with squared output for a grid moving along a trajectory.
+
+    Provides a time domain beamformer with time-dependent power signal output and possible autopower
+    removal for a grid moving along a trajectory.
     """
 
     # internal identifier
@@ -530,30 +533,32 @@ class BeamformerTimeSqTraj(BeamformerTimeSq, BeamformerTimeTraj):
         return digest(self)
 
     def result(self, num=2048):
-        """Python generator that yields the **squared** time-domain beamformer output.
+        """
+        Python generator that yields the **squared** time-domain beamformer output.
 
         The squared output time signal starts for source signals that were emitted from
         the :class:`~acoular.grids.Grid` at `t=0`.
 
         Parameters
         ----------
-        num : int
+        num : :class:`int`
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block). Defaults to 2048.
 
         Yields
         ------
-        numpy.ndarray
-            Samples in blocks of shape (num, :attr:`~BeamformerTime.num_channels`).
+        :class:`numpy.ndarray`
+            Samples in blocks of shape (``num``, :attr:`~BeamformerTime.num_channels`).
                 :attr:`~BeamformerTime.num_channels` is usually very \
                 large (number of grid points).
-                The last block returned by the generator may be shorter than num.
+                The last block returned by the generator may be shorter than ``num``.
         """
         return super().result(num)
 
 
 class BeamformerCleant(BeamformerTime):
-    """CLEANT deconvolution method.
+    """
+    CLEANT deconvolution method.
 
     An implementation of the CLEAN method in time domain. This class can only
     be used for static sources. See :cite:`Cousson2019` for details.
@@ -579,30 +584,32 @@ class BeamformerCleant(BeamformerTime):
         return digest(self)
 
     def result(self, num=2048):
-        """Python generator that yields the deconvolved time-domain beamformer output.
+        """
+        Python generator that yields the deconvolved time-domain beamformer output.
 
         The output starts for signals that were emitted from the :class:`~acoular.grids.Grid` at
         `t=0`.
 
         Parameters
         ----------
-        num : int
+        num : :class:`int`
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block). Defaults to 2048.
 
         Yields
         ------
-        numpy.ndarray
-            Samples in blocks of shape (num, :attr:`~BeamformerTime.num_channels`).
+        :class:`numpy.ndarray`
+            Samples in blocks of shape (``num``, :attr:`~BeamformerTime.num_channels`).
                 :attr:`~BeamformerTime.num_channels` is usually very \
                 large (number of grid points).
-                The last block returned by the generator may be shorter than num.
+                The last block returned by the generator may be shorter than ``num``.
         """
         return super().result(num)
 
 
 class BeamformerCleantSq(BeamformerCleant):
-    """CLEANT deconvolution method with optional removal of autocorrelation.
+    """
+    CLEANT deconvolution method with optional removal of autocorrelation.
 
     An implementation of the CLEAN method in time domain. This class can only
     be used for static sources. See :cite:`Cousson2019` for details on the method
@@ -622,7 +629,8 @@ class BeamformerCleantSq(BeamformerCleant):
         return digest(self)
 
     def result(self, num=2048):
-        """Python generator that yields the *squared* deconvolved time-domain beamformer output.
+        """
+        Python generator that yields the *squared* deconvolved time-domain beamformer output.
 
         The output starts for signals that were emitted from the :class:`~acoular.grids.Grid` at
         `t=0`. Per default, block-wise removal of autocorrelation is performed, which can be turned
@@ -630,23 +638,24 @@ class BeamformerCleantSq(BeamformerCleant):
 
         Parameters
         ----------
-        num : int
+        num : :class:`int`
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block). Defaults to 2048.
 
         Yields
         ------
-        numpy.ndarray
-            Samples in blocks of shape (num, :attr:`~BeamformerTime.num_channels`).
+        :class:`numpy.ndarray`
+            Samples in blocks of shape (``num``, :attr:`~BeamformerTime.num_channels`).
                 :attr:`~BeamformerTime.num_channels` is usually very \
                 large (number of grid points).
-                The last block returned by the generator may be shorter than num.
+                The last block returned by the generator may be shorter than ``num``.
         """
         return super().result(num)
 
 
 class BeamformerCleantTraj(BeamformerCleant, BeamformerTimeTraj):
-    """CLEANT deconvolution method.
+    """
+    CLEANT deconvolution method.
 
     An implementation of the CLEAN method in time domain for moving sources
     with known trajectory. See :cite:`Cousson2019` for details.
@@ -675,30 +684,32 @@ class BeamformerCleantTraj(BeamformerCleant, BeamformerTimeTraj):
         return digest(self)
 
     def result(self, num=2048):
-        """Python generator that yields the deconvolved time-domain beamformer output.
+        """
+        Python generator that yields the deconvolved time-domain beamformer output.
 
         The output starts for signals that were emitted from the :class:`~acoular.grids.Grid` at
         `t=0`.
 
         Parameters
         ----------
-        num : int
+        num : :class:`int`
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block). Defaults to 2048.
 
         Yields
         ------
-        numpy.ndarray
-            Samples in blocks of shape (num, :attr:`~BeamformerTime.num_channels`).
+        :class:`numpy.ndarray`
+            Samples in blocks of shape (``num``, :attr:`~BeamformerTime.num_channels`).
                 :attr:`~BeamformerTime.num_channels` is usually very \
                 large (number of grid points).
-                The last block returned by the generator may be shorter than num.
+                The last block returned by the generator may be shorter than ``num``.
         """
         return super().result(num)
 
 
 class BeamformerCleantSqTraj(BeamformerCleantTraj, BeamformerTimeSq):
-    """CLEANT deconvolution method with optional removal of autocorrelation.
+    """
+    CLEANT deconvolution method with optional removal of autocorrelation.
 
     An implementation of the CLEAN method in time domain for moving sources
     with known trajectory. See :cite:`Cousson2019` for details on the method and
@@ -729,7 +740,8 @@ class BeamformerCleantSqTraj(BeamformerCleantTraj, BeamformerTimeSq):
         return digest(self)
 
     def result(self, num=2048):
-        """Python generator that yields the *squared* deconvolved time-domain beamformer output.
+        """
+        Python generator that yields the *squared* deconvolved time-domain beamformer output.
 
         The output starts for signals that were emitted from the :class:`~acoular.grids.Grid` at
         `t=0`. Per default, block-wise removal of autocorrelation is performed, which can be turned
@@ -737,17 +749,17 @@ class BeamformerCleantSqTraj(BeamformerCleantTraj, BeamformerTimeSq):
 
         Parameters
         ----------
-        num : int
+        num : :class:`int`
             This parameter defines the size of the blocks to be yielded
             (i.e. the number of samples per block). Defaults to 2048.
 
         Yields
         ------
-        numpy.ndarray
-            Samples in blocks of shape (num, :attr:`~BeamformerTime.num_channels`).
+        :class:`numpy.ndarray`
+            Samples in blocks of shape (``num``, :attr:`~BeamformerTime.num_channels`).
                 :attr:`~BeamformerTime.num_channels` is usually very \
                 large (number of grid points).
-                The last block returned by the generator may be shorter than num.
+                The last block returned by the generator may be shorter than ``num``.
         """
         return super().result(num)
 
@@ -784,32 +796,32 @@ class IntegratorSectorTime(TimeOut):
         return len(self.sectors)
 
     def result(self, num=1):
-        """Python generator that yields the source output integrated over the given
-        sectors, block-wise.
+        """
+        Python generator that yields the source output integrated over specified grid sectors.
 
         Parameters
         ----------
-        num : integer, defaults to 1
-            This parameter defines the size of the blocks to be yielded
-            (i.e. the number of samples per block).
+        num : :class:`int`
+            Size of the blocks to be yielded (number of samples per block). Default is ``1``.
 
         Returns
         -------
-        Samples in blocks of shape (num, :attr:`num_channels`).
+        :class:`numpy.ndarray`
+            Samples in blocks of shape (``num``, :attr:`num_channels`).
         :attr:`num_channels` is the number of sectors.
         The last block may be shorter than num.
         """
         inds = [self.grid.indices(*sector) for sector in self.sectors]
         gshape = self.grid.shape
-        o = empty((num, self.num_channels), dtype=float)  # output array
+        o = np.empty((num, self.num_channels), dtype=float)  # output array
         for r in self.source.result(num):
             ns = r.shape[0]
             mapshape = (ns,) + gshape
             rmax = r.max()
             rmin = rmax * 10 ** (self.clip / 10.0)
-            r = where(r > rmin, r, 0.0)
+            r = np.where(r > rmin, r, 0.0)
             for i, ind in enumerate(inds):
-                h = r[:].reshape(mapshape)[(s_[:],) + ind]
+                h = r[:].reshape(mapshape)[(np.s_[:],) + ind]
                 o[:ns, i] = h.reshape(h.shape[0], -1).sum(axis=1)
                 i += 1
             yield o[:ns]

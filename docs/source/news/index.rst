@@ -1,6 +1,17 @@
 What's new
 ============
 
+Upcoming Release
+------------------------
+    **Documentation**
+        * fix docstrings in submodule :mod:`acoular.tbeamform`
+        * move unit system notes to the notes sections
+
+    **Internal**
+        * refactored import statements and input aliases
+        * removed duplicate code in `MovingPointSource`-derived classes
+        * migrate from traits `on_trait_change` to `observe`
+        * fixes bug in :class:`~acoular.sources.PointSource` that could cause a silent crash when the `start` attribute was set to a nonzero value 
 25.07
 ------------------------
     **New features**
@@ -14,6 +25,8 @@ What's new
         * changes all appearances of :meth:`~acoular.grids.RectGrid.extend` to :attr:`~acoular.grids.RectGrid.extent`
         * introduces a deprecation policy in the contributing guidelines
         * adds new docstrings to submodule :mod:`acoular.tprocess`
+        * adds new docstrings to submodule :mod:`acoular.h5cache` and :mod:`acoular.h5files`
+        * fix docstrings in submodule :mod:`acoular.fbeamform` to fulfill linting rules
 
     **Tests**
         * add tests for export and load XML functionalities of :class:`~acoular.grids.Grid`
