@@ -2694,7 +2694,7 @@ class TimeConvolve(TimeOut):
 
     #: Convolution kernel in the time domain.
     #: The second dimension of the kernel array has to be either ``1`` or match
-    #: the :attr:`source`'s :attr:`~acoular.base.SamplesGenerator.num_channels` attribute.
+    #: the :attr:`source`'s :attr:`~acoular.base.Generator.num_channels` attribute.
     #: If only a single kernel is supplied, it is applied to all channels.
     kernel = CArray(dtype=float, desc='Convolution kernel.')
 
@@ -2766,25 +2766,36 @@ class TimeConvolve(TimeOut):
         )
         return blocks
 
-    def result(self, num=128):
+    def result(self, num=128, mode='same'):
         """
         Convolve the source signal with the kernel and yield the result in blocks.
 
-        The method generates the convolution of the source signal with the kernel by processing the
-        signal in small blocks, performing the convolution in the frequency domain, and yielding the
-        results block by block.
+        The method generates the convolution of the source signal (length :math:`M`) with the kernel
+        (length :math:`L`) by processing the signal in small blocks, performing the convolution in
+        the frequency domain, and yielding the results block by block.
 
         Parameters
         ----------
         num : :obj:`int`, optional
             Number of samples per block.
             Default is ``128``.
+        mode : :obj:`str`, optional
+            Convolution mode, determines the length of the output signal:
+
+            - ``'full'``: Returns the convolution at each overlap point. Boundary effect might
+              appear at the end-points where the signals do not overlap completely.
+              Output length: :math:`L + M - 1`.
+            - ``'same'``: Output is determined by the longest input.
+              Output length: :math:`\\max(L, M)`
+              Boundary effect still come into play at the end-points.
+            - ``'valid'``: Returns only those parts of the convolution where signal and kernel
+              overlap completely. Output length: :math:`\\max(L, M) - \\min(L, M) + 1`.
 
         Yields
         ------
         :obj:`numpy.ndarray`
-            A array of shape (``num``, :attr:`~acoular.base.SamplesGenerator.num_channels`),
-            where :attr:`~acoular.base.SamplesGenerator.num_channels` is inhereted from the
+            An array of shape (``num``, :attr:`~acoular.base.Generator.num_channels`),
+            where :attr:`~acoular.base.Generator.num_channels` is inherited from the
             :attr:`source`, representing the convolution result in blocks.
 
         Notes
@@ -2798,10 +2809,20 @@ class TimeConvolve(TimeOut):
         L = self.kernel.shape[0]
         N = self.source.num_channels
         M = self.source.num_samples
+
+        if mode == 'full':
+            output_size = L + M - 1
+        if mode == 'same':
+            output_size = max(L, M)
+        if mode == 'valid':
+            output_size = max(L, M) - min(L, M) + 1
+        else:
+            return ValueError('Invalid mode {}'.format(mode))
+
         numblocks_kernel = int(np.ceil(L / num))  # number of kernel blocks
         Q = int(np.ceil(M / num))  # number of signal blocks
-        R = int(np.ceil((L + M - 1) / num))  # number of output blocks
-        last_size = (L + M - 1) % num  # size of final block
+        R = int(np.ceil(output_size / num))  # number of output blocks
+        last_size = output_size % num  # size of final output block
 
         idx = 0
         fdl = np.zeros([numblocks_kernel, num + 1, N], dtype='complex128')
