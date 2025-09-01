@@ -90,15 +90,20 @@ class SoundDeviceSamplesGenerator(SamplesGenerator):
         self._sample_freq = f
 
     def device_properties(self):
-        """Returns
+        """
+        Display the properties of the sounddevice input device.
+
+        Returns
         -------
         Dictionary of device properties according to sounddevice
         """
         return sd.query_devices(self.device)
 
     def result(self, num):
-        """Python generator that yields the output block-wise. Use at least a
-        block-size of one ring cache block.
+        """
+        Python generator that yields the output block-wise.
+
+        Use at least a block-size of one ring cache block.
 
         Parameters
         ----------

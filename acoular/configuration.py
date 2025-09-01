@@ -39,9 +39,9 @@ if 'numpy' in sys.modules:
     # check if it uses OpenBLAS or another library
     if 'openblas' in temp_stdout.getvalue().lower() and environ.get('OPENBLAS_NUM_THREADS') != '1':
         # it's OpenBLAS, set numba threads=1 to avoid overcommittment
-        import numba
+        import numba as nb
 
-        numba.set_num_threads(1)
+        nb.set_num_threads(1)
         warn(
             'We detected that Numpy is already loaded and uses OpenBLAS. Because '
             'this conflicts with Numba parallel execution, we disable parallel '

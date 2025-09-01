@@ -47,19 +47,22 @@ authors:
 identifiers:
   - description: "acoular: all versions"
     type: "doi"
-    value: "10.5281/zenodo.15019298"
+    value: "10.5281/zenodo.3690794"
+  - description: "acoular: v25.04"
+    type: "doi"
+    value: "10.5281/zenodo.15303156"
   - description: "acoular: v25.03"
     type: "doi"
-    value: 10.5281/zenodo.15019298
+    value: "10.5281/zenodo.15019298"
   - description: "acoular: v25.01"
     type: "doi"
-    value: 10.5281/zenodo.14780740
+    value: "10.5281/zenodo.14780740"
   - description: "acoular: v24.10"
     type: "doi"
-    value: 10.5281/zenodo.13971849
+    value: "10.5281/zenodo.13971849"
   - description: "acoular: v24.07"
     type: "doi"
-    value: 10.5281/zenodo.12794155
+    value: "10.5281/zenodo.12794155"
   - description: "acoular: v24.05"
     type: "doi"
     value: "10.5281/zenodo.11234980"
