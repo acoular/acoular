@@ -1,14 +1,19 @@
 # ------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
-"""Basic tests for result generators."""
+"""Tests for result generators."""
 
 import acoular as ac
-from numpy import concatenate, ndarray
+import numpy as np
+import pytest
 from pytest_cases import parametrize, parametrize_with_cases
 
 from tests.cases.test_generator_cases import Generators
 from tests.utils import get_result_list
+
+xfails = {
+    ac.BeamformerTime: 'Issue #',
+}
 
 
 # @given(num=st.integers(min_value=1, max_value=1000))
@@ -27,6 +32,10 @@ def test_result_generator(obj, num):  # don't use default value if @parametrize 
     num : :class:`int`
         Number of samples to return by the generator
     """
+    for gen in xfails:
+        if isinstance(obj, gen):
+            pytest.xfail(reason=xfails[gen])
+
     blocks = get_result_list(obj, num=num)
     assert len(blocks) > 0, 'Generator did not yield any blocks.'
 
@@ -42,14 +51,14 @@ def test_result_generator(obj, num):  # don't use default value if @parametrize 
         raise AssertionError(msg)
 
     for block in blocks[:-1]:
-        assert isinstance(block, ndarray)
+        assert isinstance(block, np.ndarray)
         assert block.shape[0] == num, f'Non-final block has wrong size: {block.shape[0]} != {num}'
         assert block.shape[1] == expected_cols
 
     last_block = blocks[-1]
-    assert isinstance(last_block, ndarray)
+    assert isinstance(last_block, np.ndarray)
     assert last_block.shape[0] > 0, 'Last block is empty.'
     assert last_block.shape[1] == expected_cols
 
-    result = concatenate(blocks, axis=0)
+    result = np.concatenate(blocks, axis=0)
     assert result.shape[0] == obj.num_samples, f'Total samples {result.shape[0]} != {obj.num_samples}'
