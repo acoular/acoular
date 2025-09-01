@@ -54,7 +54,6 @@ from traits.api import (
     Union,
     cached_property,
     observe,
-    on_trait_change,
 )
 
 from .base import SamplesGenerator
@@ -87,7 +86,6 @@ def _fill_mic_signal_block(out, signal, rm, ind, blocksize, num_channels, up, pr
             for m in range(num_channels):
                 out[b, m] = signal[int(0.5 + ind[0, m])] / rm[0, m]
             ind += up
-    return out
 
 
 def spherical_hn1(n, z):
@@ -393,8 +391,8 @@ class TimeSamples(SamplesGenerator):
     def _get_basename(self):
         return get_file_basename(self.file)
 
-    @on_trait_change('basename')
-    def _load_data(self):
+    @observe('basename')
+    def _load_data(self, event):  # noqa ARG002
         # Open the .h5 file and set attributes.
         if self.h5f is not None:
             with contextlib.suppress(OSError):
@@ -404,8 +402,8 @@ class TimeSamples(SamplesGenerator):
         self._load_timedata()
         self._load_metadata()
 
-    @on_trait_change('data')
-    def _load_shapes(self):
+    @observe('data')
+    def _load_shapes(self, event):  # noqa ARG002
         # Set :attr:`num_channels` and :attr:`num_samples` from data.
         if self.data is not None:
             self.num_samples, self.num_channels = self.data.shape
@@ -611,8 +609,8 @@ class MaskedTimeSamples(TimeSamples):
         sli = slice(self.start, self.stop).indices(self.num_samples_total)
         return sli[1] - sli[0]
 
-    @on_trait_change('basename')
-    def _load_data(self):
+    @observe('basename')
+    def _load_data(self, event):  # noqa ARG002
         # Open the .h5 file and set attributes.
         if not path.isfile(self.file):
             # no file there
@@ -627,8 +625,8 @@ class MaskedTimeSamples(TimeSamples):
         self._load_timedata()
         self._load_metadata()
 
-    @on_trait_change('data')
-    def _load_shapes(self):
+    @observe('data')
+    def _load_shapes(self, event):  # noqa ARG002
         # Set :attr:`num_channels` and num_samples from :attr:`~acoular.sources.TimeSamples.data`.
         if self.data is not None:
             self.num_samples_total, self.num_channels_total = self.data.shape
@@ -882,7 +880,8 @@ class PointSource(SamplesGenerator):
             If signal processing or propagation cannot be performed.
         """
         self._validate_locations()
-        N = int(np.ceil(self.num_samples / num))  # number of output blocks
+        num_samples_estimate = self.num_samples + (self.start_t - self.start) * self.sample_freq
+        N = int(np.ceil(num_samples_estimate / num))  # number of output blocks
         signal = self.signal.usignal(self.up)
         out = np.empty((num, self.num_channels))
         # distances
@@ -897,16 +896,16 @@ class PointSource(SamplesGenerator):
             # if signal stops during prepadding, terminate
             if pre >= N:
                 for _nb in range(N - 1):
-                    out = _fill_mic_signal_block(out, signal, rm, ind, num, self.num_channels, self.up, True)
+                    _fill_mic_signal_block(out, signal, rm, ind, num, self.num_channels, self.up, True)
                     yield out
 
                 blocksize = self.num_samples % num or num
-                out = _fill_mic_signal_block(out, signal, rm, ind, blocksize, self.num_channels, self.up, True)
+                _fill_mic_signal_block(out, signal, rm, ind, blocksize, self.num_channels, self.up, True)
                 yield out[:blocksize]
                 return
             else:
                 for _nb in range(pre):
-                    out = _fill_mic_signal_block(out, signal, rm, ind, num, self.num_channels, self.up, True)
+                    _fill_mic_signal_block(out, signal, rm, ind, num, self.num_channels, self.up, True)
                     yield out
 
         else:
@@ -914,12 +913,12 @@ class PointSource(SamplesGenerator):
 
         # main generator
         for _nb in range(N - pre - 1):
-            out = _fill_mic_signal_block(out, signal, rm, ind, num, self.num_channels, self.up, False)
+            _fill_mic_signal_block(out, signal, rm, ind, num, self.num_channels, self.up, False)
             yield out
 
         # last block of variable size
         blocksize = self.num_samples % num or num
-        out = _fill_mic_signal_block(out, signal, rm, ind, blocksize, self.num_channels, self.up, False)
+        _fill_mic_signal_block(out, signal, rm, ind, blocksize, self.num_channels, self.up, False)
         yield out[:blocksize]
 
 
@@ -1103,6 +1102,51 @@ class MovingPointSource(PointSource):
     @cached_property
     def _get_digest(self):
         return digest(self)
+
+    def get_moving_direction(self, direction, time=0):
+        """
+        Calculate the moving direction of the source along its trajectory.
+
+        This method computes the updated direction vector for the moving source, considering both
+        translation along the :attr:`~MovingPointSource.trajectory` and rotation defined by the
+        :attr:`reference vector<rvec>`. If the :attr:`reference vector<rvec>` is `(0, 0, 0)`, only
+        translation is applied. Otherwise, the method incorporates rotation into the calculation.
+
+        Parameters
+        ----------
+        direction : :class:`numpy.ndarray`
+            The initial orientation of the source, specified as a three-dimensional array.
+        time : :class:`float`, optional
+            The time at which the :attr:`~MovingPointSource.trajectory` position and velocity are
+            evaluated. Defaults to ``0``.
+
+        Returns
+        -------
+        :class:`numpy.ndarray`
+            The updated direction vector of the moving source after translation and, if applicable,
+            rotation. The output is a three-dimensional array.
+
+        Notes
+        -----
+        - The method computes the translation direction vector based on the
+          :attr:`~MovingPointSource.trajectory`'s velocity at the specified time.
+        - If the :attr:`reference vector<rvec>` is non-zero, the method constructs a rotation matrix
+          to compute the new source direction based on the
+          :attr:`~MovingPointSource.trajectory`'s motion and the :attr:`reference vector<rvec>`.
+        - The rotation matrix ensures that the new orientation adheres to the right-hand rule and
+          remains orthogonal.
+        """
+        trajg1 = np.array(self.trajectory.location(time, der=1))[:, 0][:, np.newaxis]
+        rflag = (self.rvec == 0).all()  # flag translation vs. rotation
+        if rflag:
+            return direction
+        dx = np.array(trajg1.T)  # direction vector (new x-axis)
+        dy = np.cross(self.rvec, dx)  # new y-axis
+        dz = np.cross(dx, dy)  # new z-axis
+        RM = np.array((dx, dy, dz)).T  # rotation matrix
+        RM /= np.sqrt((RM * RM).sum(0))  # column normalized
+        newdir = np.dot(RM, direction)
+        return np.cross(newdir[:, 0].T, self.rvec.T).T
 
     def result(self, num=128):
         """
@@ -1430,51 +1474,6 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
             j += 1  # iteration count
         return te, rm, Mr, xs
 
-    def get_moving_direction(self, direction, time=0):
-        """
-        Calculate the moving direction of the dipole source along its trajectory.
-
-        This method computes the updated direction vector for the dipole source, considering both
-        translation along the trajectory and rotation defined by the :attr:`reference vector<rvec>`.
-        If the reference vector is ``(0, 0, 0)``, only translation is applied. Otherwise, the method
-        incorporates rotation into the calculation.
-
-        Parameters
-        ----------
-        direction : :class:`numpy.ndarray`
-            The initial direction vector of the dipole, specified as a 3-element
-            array representing the orientation of the dipole lobes.
-        time : :class:`float`, optional
-            The time at which the trajectory position and velocity are evaluated. Defaults to ``0``.
-
-        Returns
-        -------
-        :class:`numpy.ndarray`
-            The updated direction vector of the dipole source after translation
-            and, if applicable, rotation. The output is a 3-element array.
-
-        Notes
-        -----
-        - The method computes the translation direction vector based on the trajectory's velocity at
-          the specified time.
-        - If the :attr:`reference vector<rvec>` is non-zero, the method constructs a rotation matrix
-          to compute the new dipole direction based on the trajectory's motion and the
-          reference vector.
-        - The rotation matrix ensures that the new dipole orientation adheres
-          to the right-hand rule and remains orthogonal.
-        """
-        trajg1 = np.array(self.trajectory.location(time, der=1))[:, 0][:, np.newaxis]
-        rflag = (self.rvec == 0).all()  # flag translation vs. rotation
-        if rflag:
-            return direction
-        dx = np.array(trajg1.T)  # direction vector (new x-axis)
-        dy = np.cross(self.rvec, dx)  # new y-axis
-        dz = np.cross(dx, dy)  # new z-axis
-        RM = np.array((dx, dy, dz)).T  # rotation matrix
-        RM /= np.sqrt((RM * RM).sum(0))  # column normalized
-        newdir = np.dot(RM, direction)
-        return np.cross(newdir[:, 0].T, self.rvec.T).T
-
     def result(self, num=128):
         """
         Generate the output signal at microphones in blocks.
@@ -1734,53 +1733,6 @@ class MovingLineSource(LineSource, MovingPointSource):
     @cached_property
     def _get_digest(self):
         return digest(self)
-
-    def get_moving_direction(self, direction, time=0):
-        """
-        Calculate the moving direction of the line source along its trajectory.
-
-        This method computes the updated direction vector for the line source,
-        considering both translation along the :attr:`~MovingPointSource.trajectory` and rotation
-        defined by the :attr:`reference vector<rvec>`. If the :attr:`reference vector<rvec>` is
-        `(0, 0, 0)`, only translation is applied. Otherwise, the method incorporates rotation
-        into the calculation.
-
-        Parameters
-        ----------
-        direction : :class:`numpy.ndarray`
-            The initial direction vector of the line source, specified as a
-            3-element array representing the orientation of the line.
-        time : :class:`float`, optional
-            The time at which the :attr:`~MovingPointSource.trajectory` position and velocity
-            are evaluated. Defaults to ``0``.
-
-        Returns
-        -------
-        :class:`numpy.ndarray`
-            The updated direction vector of the line source after translation and,
-            if applicable, rotation. The output is a 3-element array.
-
-        Notes
-        -----
-        - The method computes the translation direction vector based on the
-          :attr:`~MovingPointSource.trajectory`'s velocity at the specified time.
-        - If the :attr:`reference vector<rvec>` is non-zero, the method constructs a
-          rotation matrix to compute the new line source direction based on the
-          :attr:`~MovingPointSource.trajectory`'s motion and the :attr:`reference vector<rvec>`.
-        - The rotation matrix ensures that the new orientation adheres to the
-          right-hand rule and remains orthogonal.
-        """
-        trajg1 = np.array(self.trajectory.location(time, der=1))[:, 0][:, np.newaxis]
-        rflag = (self.rvec == 0).all()  # flag translation vs. rotation
-        if rflag:
-            return direction
-        dx = np.array(trajg1.T)  # direction vector (new x-axis)
-        dy = np.cross(self.rvec, dx)  # new y-axis
-        dz = np.cross(dx, dy)  # new z-axis
-        RM = np.array((dx, dy, dz)).T  # rotation matrix
-        RM /= np.sqrt((RM * RM).sum(0))  # column normalized
-        newdir = np.dot(RM, direction)
-        return np.cross(newdir[:, 0].T, self.rvec.T).T
 
     def get_emission_time(self, t, direction):
         """

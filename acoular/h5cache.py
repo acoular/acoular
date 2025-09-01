@@ -32,23 +32,27 @@ class HDF5Cache(HasStrictTraits):
             pass
 
     def close_cachefile(self, cachefile):
+        """Close a cache file and remove it from the reference counter."""
         self.open_file_reference.pop(Path(cachefile.filename))
         cachefile.close()
 
     def get_open_cachefiles(self):
+        """Get an iterator over all open cache files."""
         try:
             return self.open_files.itervalues()
         except AttributeError:
             return iter(self.open_files.values())
 
     def close_unreferenced_cachefiles(self):
+        """Close cache files that are no longer referenced by any objects."""
         for cachefile in self.get_open_cachefiles():
             if not self.is_reference_existent(cachefile):
                 self.close_cachefile(cachefile)
 
     def is_reference_existent(self, file):
+        """Check if a file object still has active references."""
         exist_flag = False
-        # inspect all refererres to the file object
+        # inspect all referrers to the file object
         gc.collect()  # clear garbage before collecting referrers
         for ref in gc.get_referrers(file):
             # does the file object have a referrer that has a 'h5f'
