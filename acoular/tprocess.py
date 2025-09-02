@@ -2782,14 +2782,16 @@ class TimeConvolve(TimeOut):
         mode : :obj:`str`, optional
             Convolution mode, determines the length of the output signal:
 
-            - ``'full'``: Returns the convolution at each overlap point. Boundary effect might
-              appear at the end-points where the signals do not overlap completely.
+            - ``'full'``: Returns the convolution at each overlap point.
+              Boundary effect might appear at the end-points where the
+              signals do not overlap completely.
               Output length: :math:`L + M - 1`.
             - ``'same'``: Output is determined by the longest input.
-              Output length: :math:`\\max(L, M)`
               Boundary effect still come into play at the end-points.
-            - ``'valid'``: Returns only those parts of the convolution where signal and kernel
-              overlap completely. Output length: :math:`\\max(L, M) - \\min(L, M) + 1`.
+              Output length: :math:`\\max(L, M)`
+            - ``'valid'``: Returns only those parts of the convolution
+              where signal and kernel overlap completely.
+              Output length: :math:`\\max(L, M) - \\min(L, M) + 1`.
 
         Yields
         ------
