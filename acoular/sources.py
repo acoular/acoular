@@ -45,12 +45,14 @@ from traits.api import (
     Enum,
     File,
     Float,
+    HasTraits,
     Instance,
     Int,
     List,
     Property,
     Str,
     Tuple,
+    Type,
     Union,
     cached_property,
     observe,
@@ -1229,6 +1231,23 @@ class MovingPointSource(PointSource):
                 break
             n -= num
 
+class DirectivityCalculator(HasTraits):
+    """
+    A baseclass with an execute method which calculates the directivity based on directions of source and recievers
+
+    TODO: This would only work with directivity which needs only a fwd and direction vector at the moment
+          - Need to rethink the interface to allow for more complex directivity which may vary between dimensions
+    """
+    #: Vector defining the forward direction of the object we are working out directivity from. Default is (0, 0, 1)
+    fwd_direction = Tuple((0.0, 0.0, 1.0), desc='Spherical Harmonic orientation')
+
+    #: Vector defining the direction of the object we are working out direction to. Default is (0, 0, 1)
+    object_direction = Tuple((0.0, 0.0, 1.0), desc='Spherical Harmonic orientation')
+
+    # Method which returns a scalar value to be used to attenuate the signal
+    def execute(self):
+        return 1
+
 
 class PointSourceDirectional(PointSource):
     """
@@ -1262,6 +1281,9 @@ class PointSourceDirectional(PointSource):
     #: ``'loop'``.
     prepadding = Enum('loop', desc='Behaviour for negative time indices.')
 
+    # Type of DirecetivityCalculator used to calculate directivity which will be instantiated later
+    src_directivity_calc = Type(DirectivityCalculator)
+
     #: A unique identifier for the current state of the source, based on its properties. (read-only)
     digest = Property(
         depends_on=[
@@ -1277,6 +1299,7 @@ class PointSourceDirectional(PointSource):
             'right_vec',
             'rot_speed'
             'prepadding',
+            'src_directivity_calc',
         ],
     )
 
@@ -1387,75 +1410,38 @@ class PointSourceDirectional(PointSource):
 
         # @TODO do something with the directions, store these as an attribute?
 
-        def fill_block_with_directivity(out, signal, rm, ind, blocksize, num_channels, up, prepadding, src_fwd, dirs_to_source):
-
-            if prepadding:
-                for b in range(blocksize):
-                # only need to rotate forward vec as using direction in global space
-                    for m in range(num_channels):
-                        rot_mat = self.__rotation_matrix_for_sample(ind[0, m])
-                        rotated_forward_vec = src_fwd
-                        rotated_forward_vec = rot_mat @ rotated_forward_vec
-                        coeff = PointSourceDirectional.directivity_coeff(rotated_forward_vec, dirs_to_source[m] * -1)
-                        #print(f'coeff: {coeff}')
-                        if ind[0, m] < 0:
-                            out[b, m] = 0
-                        else:
-                            out[b, m] = (signal[int(0.5 + ind[0, m])] * coeff) / rm[0, m]
-                    ind += up
-            else:
-                for b in range(blocksize):
-                    for m in range(num_channels):
-                        rot_mat = self.__rotation_matrix_for_sample(ind[0, m])
-                        rotated_forward_vec = src_fwd
-                        rotated_forward_vec = rot_mat @ rotated_forward_vec
-                        coeff = PointSourceDirectional.directivity_coeff(rotated_forward_vec, dirs_to_source[m] * -1)
-                        #print(f'coeff: {coeff}')
-                        out[b, m] = (signal[int(0.5 + ind[0, m])] * coeff) / rm[0, m]
-                    ind += up
-
         # generate output
         self._validate_locations()
-        num_samples_estimate = self.num_samples + (self.start_t - self.start) * self.sample_freq
-        N = int(np.ceil(num_samples_estimate / num))  # number of output blocks
         signal = self.signal.usignal(self.up)
         out = np.empty((num, self.num_channels))
         # distances
         rm = self.env._r(np.array(self.loc).reshape((3, 1)), self.mics.pos).reshape(1, -1)
-        # emission time relative to start_t (in samples) for first sample
         ind = (-rm / self.env.c - self.start_t + self.start) * self.sample_freq * self.up
 
-        if self.prepadding == 'zeros':
-            # number of blocks where signal behaviour is amended
-            pre = -int(np.min(ind[0]) // (self.up * num))
-            # amend signal for first blocks
-            # if signal stops during prepadding, terminate
-            if pre >= N:
-                for _nb in range(N - 1):
-                    fill_block_with_directivity(out, signal, rm, ind, num, self.num_channels, self.up, True, forward_n, gdirs_to_source)
+        i = 0
+        n = self.num_samples
+
+        while n:
+            n -= 1
+            try:
+                coeffs = np.empty(self.mics.num_mics)
+                for m in range(self.mics.num_mics):
+                    rot_mat = self.__rotation_matrix_for_sample(ind[0, m])
+                    rotated_forward_vec = forward_n
+                    rotated_forward_vec = rot_mat @ rotated_forward_vec
+                    src_directivity_calculator = self.src_directivity_calc(fwd_direction = tuple(rotated_forward_vec), object_direction=tuple(gdirs_to_source[m] * -1))
+                    coeffs[m] = src_directivity_calculator.execute()
+                out[i] = (signal[np.array(0.5 + ind * self.up, dtype=np.int64)] * coeffs) / rm
+                ind += 1.0
+                i += 1
+                if i == num:
                     yield out
+                    out = np.zeros((num, self.num_channels))
+                    i = 0
+            except IndexError:
+                break
 
-                blocksize = self.num_samples % num or num
-                fill_block_with_directivity(out, signal, rm, ind, blocksize, self.num_channels, self.up, True, forward_n, gdirs_to_source)
-                yield out[:blocksize]
-                return
-            else:
-                for _nb in range(pre):
-                    fill_block_with_directivity(out, signal, rm, ind, num, self.num_channels, self.up, True, forward_n, gdirs_to_source)
-                    yield out
-
-        else:
-            pre = 0
-
-        # main generator
-        for _nb in range(N - pre - 1):
-            fill_block_with_directivity(out, signal, rm, ind, num, self.num_channels, self.up, False, forward_n, gdirs_to_source)
-            yield out
-
-        # last block of variable size
-        blocksize = self.num_samples % num or num
-        fill_block_with_directivity(out, signal, rm, ind, blocksize, self.num_channels, self.up, False, forward_n, gdirs_to_source)
-        yield out[:blocksize]
+        yield out[:i]
 
 
 class PointSourceDipole(PointSource):

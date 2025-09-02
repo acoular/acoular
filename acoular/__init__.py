@@ -81,6 +81,7 @@ from .signals import (
     WNoiseGenerator,
 )
 from .sources import (
+    DirectivityCalculator,
     LineSource,
     MaskedTimeSamples,
     MovingLineSource,

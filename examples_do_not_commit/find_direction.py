@@ -1,6 +1,7 @@
 import acoular as ac
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.io import wavfile
 
 ac.config.global_caching = 'none'
 
@@ -10,8 +11,8 @@ from traits.api import List, Int
 # class from getting started blog
 class DroneSignalGenerator( ac.SignalGenerator ):
     """
-    Class for generating a synthetic multicopter drone signal. 
-    This is just a basic example class for demonstration purposes 
+    Class for generating a synthetic multicopter drone signal.
+    This is just a basic example class for demonstration purposes
     with only few settable and some arbitrary fixed parameters.
     It is not intended to create perfectly realistic signals.
     """
@@ -19,7 +20,7 @@ class DroneSignalGenerator( ac.SignalGenerator ):
     rpm_list = List([15000])
     num_blades_per_rotor = Int
 
-    def __init__(self, rpm_list = None, 
+    def __init__(self, rpm_list = None,
                  num_blades_per_rotor = None,
                  sample_freq = None,
                  num_samples = None):
@@ -53,7 +54,7 @@ class DroneSignalGenerator( ac.SignalGenerator ):
 
             # randomly set phase of rotor
             phase = rng.uniform() * 2*np.pi
-            
+
             # calculate higher harmonics up to 50 times the rotor speed
             for n in np.arange(50)+1:
                 # if we're looking at a blade passing frequency, make it louder
@@ -64,24 +65,29 @@ class DroneSignalGenerator( ac.SignalGenerator ):
 
                 # exponentially decrease amplitude for higher freqs with arbitrary factor
                 amp *= np.exp(-n/10)
-                
+
                 # add harmonic signal component to existing signal
-                sig += amp * np.sin(2*np.pi*n * f_base * t + phase) 
+                sig += amp * np.sin(2*np.pi*n * f_base * t + phase)
 
         # return signal normalized to given RMS value
         return sig * np.std(sig)
 
 
-def main():
-    # length of signal
-    t_msm = 10.5 # s
-    # sampling frequency
-    f_sample = 44100 # Hz
+# Defining a Directivity to be used in within PointSourceDirectional
+class CardioidDirectivity(ac.DirectivityCalculator):
 
-    drone_signal = DroneSignalGenerator(rpm_list = [15010,14962,13536,13007], 
-                                        num_blades_per_rotor = 2, 
-                                        sample_freq = f_sample, 
-                                        num_samples = f_sample*t_msm)
+    def execute(self):
+        dir_n = self.fwd_direction / np.linalg.norm(self.fwd_direction)
+        mic_n = self.object_direction / np.linalg.norm(self.object_direction)
+
+        return (np.dot(dir_n, mic_n) + 1) / 2
+
+def main():
+
+    freq = 440
+    repititions = 1000
+
+    sine_signal = ac.SineGenerator(freq = freq, sample_freq=f_sample, num_samples = freq*repititions)
 
     # We'll keep the environment simple for now: just air at standard conditions with speed of sound 343 m/s
     e = ac.Environment(c=343.)
@@ -91,31 +97,22 @@ def main():
                             [2, 2], # y
                             [0, 0]]) # z
 
-    # # Lets try to determine direction of source and reciever. Lets first do this by using a stationary source
-    # # Define point source
-    # static_drone = ac.PointSourceDipole(signal = drone_signal, # the signal of the source
-    #                                     mics = m,              # set the "array" with which to measure the sound field
-    #                                     start = 0.5,           # observation starts 0.5 seconds after signal starts at drone
-    #                                     loc = (0, 10, 20),    # location of the source
-    #                                     direction = (0, 0, -1),
-    #                                     env = e)               # the environment the source is moving in
-
     # Lets try to determine direction of source and reciever. Lets first do this by using a stationary source
     # Define point source
-    static_drone = ac.PointSourceDirectional(signal = drone_signal, # the signal of the source
+    sine_gen = ac.PointSourceDirectional(signal = sine_signal, # the signal of the source
                                 mics = m,              # set the "array" with which to measure the sound field
-                                #start = 0.5,           # observation starts 0.5 seconds after signal starts at drone
                                 loc = (0, 10, -20),    # location of the source
                                 # forward_vec = (0, 0, -1),
                                 # up_vec = (0, 1, 0),
                                 # right_vec = (-1, 0, 0),
-                                rot_speed = np.deg2rad(30),
+                                rot_speed = np.deg2rad(360 * 5),
+                                src_directivity_calc = CardioidDirectivity,
                                 env = e)               # the environment the source is moving in
 
     # Prepare wav output.
     # If you don't need caching, you can directly put "source = drone_above_ground" here.
-    output = ac.WriteWAV(file = 'drone_static_script.wav',
-                        source = static_drone,
+    output = ac.WriteWAV(file = 'sine_rotation.wav',
+                        source = sine_gen,
                         channels = [0,1]) # export both channels as stereo
 
     print('before output save')
@@ -124,6 +121,30 @@ def main():
     output.save()
 
     print('done')
+
+
+    # Load the WAV file
+    sample_rate, data = wavfile.read('sine_rotation.wav')  # Replace with your actual file name
+
+    # If stereo, take only one channel
+    if len(data.shape) == 2:
+        data = data[:, 0]
+
+    # Create time axis in seconds
+    duration = len(data) / sample_rate
+    time = np.linspace(0., duration, len(data))
+
+    # Plot the time-domain signal
+    plt.figure(figsize=(12, 6))
+    plt.plot(time, data)
+    plt.title('Time-Domain Signal of WAV File')
+    plt.xlabel('Time (seconds)')
+    plt.ylabel('Amplitude')
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
+
+
 
 if __name__ == '__main__':
     main()
