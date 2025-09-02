@@ -23,7 +23,7 @@ xfails = {
 @parametrize_with_cases('obj', cases=Generators)
 def test_result_generator(obj, num):  # don't use default value if @parametrize is used
     """
-    Thorough test for result generators: checks block sizes and total sample count.
+    Test for result generators: checks block sizes and total sample count.
 
     Parameters
     ----------
