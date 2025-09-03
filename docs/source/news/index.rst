@@ -12,6 +12,9 @@ Upcoming Release
         * removed duplicate code in `MovingPointSource`-derived classes
         * migrate from traits `on_trait_change` to `observe`
         * fixes bug in :class:`~acoular.sources.PointSource` that could cause a silent crash when the `start` attribute was set to a nonzero value 
+
+    **Bugfixes**
+        * fixes bug in :class:`~acoular.tprocess.FilterBank`'s :meth:`~acoular.tprocess.FilterBank.result` method that failed if the last block in the generator is not of the the specified block size
 25.07
 ------------------------
     **New features**
