@@ -101,9 +101,7 @@ def main():
     sine_gen = ac.PointSourceDirectional(signal = sine_signal, # the signal of the source
                                 mics = m,              # set the "array" with which to measure the sound field
                                 loc = (0, 10, -20),    # location of the source
-                                # forward_vec = (0, 0, -1),
-                                # up_vec = (0, 1, 0),
-                                # right_vec = (-1, 0, 0),
+                                orientation=np.eye(3),
                                 rot_speed = np.deg2rad(360 * 3),
                                 dir_calc = CardioidDirectivity(),
                                 env = e)               # the environment the source is moving in

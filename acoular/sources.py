@@ -1270,9 +1270,14 @@ class PointSourceDirectional(PointSource):
 
     #: Vectors defining the local orientation of the source relative to global space
     #: These vectors must be orthogonal to each other
-    forward_vec = Tuple((0.0, 0.0, 1.0), desc='source forward direction')
-    up_vec = Tuple((0.0, 1.0, 0.0), desc='source upward direction')
-    right_vec = Tuple((1.0, 0.0, 0.0), desc='source right direction')
+    #: self.orientation[0] = right_vec
+    #: self.orientation[1] = up_vec
+    #: self.orientation[2] = forward_vec
+    orientation = CArray(shape=(3, 3), desc='source orientation matrix')
+
+    def _validate_orientation(self):
+        if not np.allclose(np.dot(self.orientation, self.orientation.T), np.eye(3), atol=1e-12):
+            raise ValueError('Orientation matrix must be orthogonal.')
 
     # Rotation speed in radians/sec - default is 0
     rot_speed = Float(0.0)
@@ -1344,33 +1349,14 @@ class PointSourceDirectional(PointSource):
         signal is taken from the end of the signal array, effectively looping the signal for
         negative indices.
         """
-
-        # calculate directions between source and recievers
-        mpos = self.mics.pos
-
-        # normalise local direction vectors
-        forward_n = np.array(self.forward_vec, dtype=float)
-        forward_n /= np.linalg.norm(forward_n)
-
-        up_n = np.array(self.up_vec, dtype=float)
-        up_n /= np.linalg.norm(up_n)
-
-        right_n = np.array(self.right_vec, dtype=float)
-        right_n /= np.linalg.norm(right_n)
-
-        # check orthagonality
-        assert(np.dot(up_n, forward_n) < 1e-12)
-        assert(np.dot(up_n, right_n) < 1e-12)
-        assert(np.allclose(np.cross(up_n, forward_n), right_n))
+        self._validate_orientation()
+        self._validate_locations()
 
         # calculate directions in global space
         gdirs_to_source = np.array(self.loc).reshape((3, 1)) - self.mics.pos
 
-        # create transformation matrix for the local coordinate space of the source
-        source_trans_mat = np.vstack([right_n, up_n, forward_n]).T
-
         # directions of microphones relative to sources ref and up vector
-        rdirs_to_mic = source_trans_mat @ -gdirs_to_source
+        rdirs_to_mic = self.orientation @ -gdirs_to_source
 
         # direction of sources in relative to microphones
         # @TODO set these values somewhere - later microphone in its own class?
@@ -1381,7 +1367,6 @@ class PointSourceDirectional(PointSource):
         # @TODO do something with the directions, store these as an attribute?
 
         # generate output
-        self._validate_locations()
         signal = self.signal.usignal(self.up)
         out = np.empty((num, self.num_channels))
         # distances
@@ -1398,7 +1383,7 @@ class PointSourceDirectional(PointSource):
             try:
                 coeffs = np.empty(self.mics.num_mics)
                 for m in range(self.mics.num_mics):
-                    rotated_forward_vec = self._calc_rotation_matrix(ind[0, m]) @ forward_n
+                    rotated_forward_vec = self._calc_rotation_matrix(ind[0, m]) @ self.orientation[2]
                     self.dir_calc.fwd_direction, self.dir_calc.object_direction = tuple(rotated_forward_vec), tuple(gdirs_to_source[:, m] * -1)
                     coeffs[m] = self.dir_calc()
                 out[i] = (signal[np.array(0.5 + ind * self.up, dtype=np.int64)] * coeffs) / rm
