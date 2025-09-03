@@ -2767,7 +2767,7 @@ class TimeConvolve(TimeOut):
         )
         return blocks
 
-    def result(self, num=128, mode='same'):
+    def result(self, num=128, mode='valid'):
         """
         Convolve the source signal with the kernel and yield the result in blocks.
 
