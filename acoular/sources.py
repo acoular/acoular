@@ -1239,10 +1239,10 @@ class DirectivityCalculator(HasTraits):
           - Need to rethink the interface to allow for more complex directivity which may vary between dimensions
     """
     #: Vector defining the forward direction of the object we are working out directivity from. Default is (0, 0, 1)
-    fwd_direction = Tuple((0.0, 0.0, 1.0), desc='Spherical Harmonic orientation')
+    fwd_direction = CArray(shape=(3,), default=np.array((0.0, 0.0, 1.0)), desc='Spherical Harmonic orientation')
 
     #: Vector defining the direction of the object we are working out direction to. Default is (0, 0, 1)
-    object_direction = Tuple((0.0, 0.0, 1.0), desc='Spherical Harmonic orientation')
+    object_direction = CArray(shape=(3,), default=np.array((0.0, 0.0, 1.0)), desc='Spherical Harmonic orientation')
 
     # Method which returns a scalar value to be used to attenuate the signal
     def __call__(self):
@@ -1382,9 +1382,11 @@ class PointSourceDirectional(PointSource):
             n -= 1
             try:
                 coeffs = np.empty(self.mics.num_mics)
+                # @TODO: looping over mics is inefficient. DirectivityCalculator should be able to handle arrays
+                # note that self.dir_calc.object_direction does not change over time
                 for m in range(self.mics.num_mics):
                     rotated_forward_vec = self._calc_rotation_matrix(ind[0, m]) @ self.orientation[2]
-                    self.dir_calc.fwd_direction, self.dir_calc.object_direction = tuple(rotated_forward_vec), tuple(gdirs_to_source[:, m] * -1)
+                    self.dir_calc.fwd_direction, self.dir_calc.object_direction = rotated_forward_vec, -gdirs_to_source[:, m]
                     coeffs[m] = self.dir_calc()
                 out[i] = (signal[np.array(0.5 + ind * self.up, dtype=np.int64)] * coeffs) / rm
                 ind += 1.0
