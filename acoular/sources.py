@@ -1364,42 +1364,19 @@ class PointSourceDirectional(PointSource):
         assert(np.allclose(np.cross(up_n, forward_n), right_n))
 
         # calculate directions in global space
-        gdirs_to_source = []
-
-        for i in range(0, self.mics.num_mics):
-            # get mic positiion
-            x = mpos[0][i]
-            y = mpos[1][i]
-            z = mpos[2][i]
-
-            mic_point = np.array([x, y, z])
-
-            # This is the direction of the source in relation to the mics
-            gdirs_to_source.append(np.array(self.loc, dtype=float) - mic_point)
+        gdirs_to_source = np.array(self.loc).reshape((3, 1)) - self.mics.pos
 
         # create transformation matrix for the local coordinate space of the source
         source_trans_mat = np.vstack([right_n, up_n, forward_n]).T
 
         # directions of microphones relative to sources ref and up vector
-        rdirs_to_mic = []
-
-        for i in range(0, self.mics.num_mics):
-            gdir_to_mic = gdirs_to_source[i] * (-1)
-            rdirs_to_mic.append(source_trans_mat @ gdir_to_mic)
+        rdirs_to_mic = source_trans_mat @ -gdirs_to_source
 
         # direction of sources in relative to microphones
-        rdirs_to_source = []
-        for i in range(0, self.mics.num_mics):
-            # @TODO set these values somewhere - later microphone in its own class?
-            mic_up = np.array((0, 1, 0), dtype=float)
-            mic_forward = np.array((0, 0, 1), dtype=float)
-            mic_right = np.array((1, 0, 0), dtype=float)
-
-            assert(np.dot(mic_up, mic_forward) < 1e-12)
-            assert(np.dot(mic_up, mic_right) < 1e-12)
-
-            mic_trans_mat = np.vstack([mic_right, mic_up, mic_forward]).T
-            rdirs_to_source.append(mic_trans_mat @ gdirs_to_source[i])
+        # @TODO set these values somewhere - later microphone in its own class?
+        # @TODO currently all microphones have the same orientation
+        mic_trans_mat = np.eye(3)
+        rdirs_to_source = mic_trans_mat @ gdirs_to_source
 
         # @TODO do something with the directions, store these as an attribute?
 
@@ -1422,7 +1399,7 @@ class PointSourceDirectional(PointSource):
                 coeffs = np.empty(self.mics.num_mics)
                 for m in range(self.mics.num_mics):
                     rotated_forward_vec = self._calc_rotation_matrix(ind[0, m]) @ forward_n
-                    self.dir_calc.fwd_direction, self.dir_calc.object_direction = tuple(rotated_forward_vec), tuple(gdirs_to_source[m] * -1)
+                    self.dir_calc.fwd_direction, self.dir_calc.object_direction = tuple(rotated_forward_vec), tuple(gdirs_to_source[:, m] * -1)
                     coeffs[m] = self.dir_calc()
                 out[i] = (signal[np.array(0.5 + ind * self.up, dtype=np.int64)] * coeffs) / rm
                 ind += 1.0
