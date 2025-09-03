@@ -2229,9 +2229,10 @@ class FilterBank(TimeOut):
         zi = [np.zeros((sos[0].shape[0], 2, snumch)) for _ in range(numbands)]
         res = np.zeros((num, self.num_channels), dtype='float')
         for block in self.source.result(num):
+            len_block = block.shape[0]
             for i in range(numbands):
-                res[:, i * snumch : (i + 1) * snumch], zi[i] = sosfilt(sos[i], block, axis=0, zi=zi[i])
-            yield res
+                res[:len_block, i * snumch : (i + 1) * snumch], zi[i] = sosfilt(sos[i], block, axis=0, zi=zi[i])
+            yield res[:len_block]
 
 
 class OctaveFilterBank(FilterBank):
