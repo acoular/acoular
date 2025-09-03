@@ -1245,7 +1245,7 @@ class DirectivityCalculator(HasTraits):
     object_direction = Tuple((0.0, 0.0, 1.0), desc='Spherical Harmonic orientation')
 
     # Method which returns a scalar value to be used to attenuate the signal
-    def execute(self):
+    def __call__(self):
         return 1
 
 
@@ -1282,7 +1282,7 @@ class PointSourceDirectional(PointSource):
     prepadding = Enum('loop', desc='Behaviour for negative time indices.')
 
     # Type of DirecetivityCalculator used to calculate directivity which will be instantiated later
-    src_directivity_calc = Type(DirectivityCalculator)
+    dir_calc = Instance(DirectivityCalculator)
 
     #: A unique identifier for the current state of the source, based on its properties. (read-only)
     digest = Property(
@@ -1306,15 +1306,8 @@ class PointSourceDirectional(PointSource):
     @cached_property
     def _get_digest(self):
         return digest(self)
-    
-    def directivity_coeff(source_forward_dir, mic_dir):
-        # based on Lambertian reflectance
-        dir_n = source_forward_dir / np.linalg.norm(source_forward_dir)
-        mic_n = mic_dir / np.linalg.norm(mic_dir)
 
-        return (np.dot(dir_n, mic_n) + 1) / 2
-
-    def __rotation_matrix_for_sample(self, sample_index):
+    def _calc_rotation_matrix(self, sample_index):
         # Calculates the 3D rotation matrix for a specific audio sample assuming the rotation is constant
         # TODO: ensure this works with large numbers
         time = sample_index / self.sample_freq
@@ -1419,6 +1412,8 @@ class PointSourceDirectional(PointSource):
         ind = (-rm / self.env.c - self.start_t + self.start) * self.sample_freq * self.up
 
         i = 0
+
+        # TODO: this only yields a single block
         n = self.num_samples
 
         while n:
@@ -1426,11 +1421,9 @@ class PointSourceDirectional(PointSource):
             try:
                 coeffs = np.empty(self.mics.num_mics)
                 for m in range(self.mics.num_mics):
-                    rot_mat = self.__rotation_matrix_for_sample(ind[0, m])
-                    rotated_forward_vec = forward_n
-                    rotated_forward_vec = rot_mat @ rotated_forward_vec
-                    src_directivity_calculator = self.src_directivity_calc(fwd_direction = tuple(rotated_forward_vec), object_direction=tuple(gdirs_to_source[m] * -1))
-                    coeffs[m] = src_directivity_calculator.execute()
+                    rotated_forward_vec = self._calc_rotation_matrix(ind[0, m]) @ forward_n
+                    self.dir_calc.fwd_direction, self.dir_calc.object_direction = tuple(rotated_forward_vec), tuple(gdirs_to_source[m] * -1)
+                    coeffs[m] = self.dir_calc()
                 out[i] = (signal[np.array(0.5 + ind * self.up, dtype=np.int64)] * coeffs) / rm
                 ind += 1.0
                 i += 1
@@ -1440,7 +1433,6 @@ class PointSourceDirectional(PointSource):
                     i = 0
             except IndexError:
                 break
-
         yield out[:i]
 
 
