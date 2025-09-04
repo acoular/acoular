@@ -13,6 +13,8 @@ from tests.utils import get_result_list
 
 xfails = {
     ac.BeamformerTime: 'Issue #',
+    ac.IntegratorSectorTime: 'Issue #',  # test case relies on BeamformerTime as source
+    ac.PointSourceConvolve: 'Issue #',  # test case relies on TimeConvolve as generator
 }
 
 
@@ -32,9 +34,9 @@ def test_result_generator(obj, num):  # don't use default value if @parametrize 
     num : :class:`int`
         Number of samples to return by the generator
     """
-    for gen in xfails:
+    for gen, reason in xfails.items():
         if isinstance(obj, gen):
-            pytest.xfail(reason=xfails[gen])
+            pytest.xfail(reason)
 
     blocks = get_result_list(obj, num=num)
     assert len(blocks) > 0, 'Generator did not yield any blocks.'
