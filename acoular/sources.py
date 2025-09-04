@@ -1374,8 +1374,6 @@ class PointSourceDirectional(PointSource):
         ind = (-rm / self.env.c - self.start_t + self.start) * self.sample_freq * self.up
 
         i = 0
-
-        # TODO: this only yields a single block
         n = self.num_samples
 
         while n:
