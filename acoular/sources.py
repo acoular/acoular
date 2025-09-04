@@ -1370,7 +1370,7 @@ class PointSourceDipole(PointSource):
                     i = 0
             except IndexError:
                 break
-        
+
         if i > 0:
             yield out[:i]
 
@@ -1685,7 +1685,7 @@ class LineSource(PointSource):
                     i = 0
             except IndexError:
                 break
-        
+
         if i > 0:
             yield out[:i]
 
