@@ -1370,8 +1370,9 @@ class PointSourceDipole(PointSource):
                     i = 0
             except IndexError:
                 break
-
-        yield out[:i]
+        
+        if i > 0:
+            yield out[:i]
 
 
 class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
@@ -1553,7 +1554,9 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
                     i = 0
             except IndexError:
                 break
-        yield out[:i]
+
+        if i > 0:
+            yield out[:i]
 
 
 class LineSource(PointSource):
@@ -1682,8 +1685,9 @@ class LineSource(PointSource):
                     i = 0
             except IndexError:
                 break
-
-        yield out[:i]
+        
+        if i > 0:
+            yield out[:i]
 
 
 class MovingLineSource(LineSource, MovingPointSource):
@@ -1876,7 +1880,9 @@ class MovingLineSource(LineSource, MovingPointSource):
                     i = 0
             except IndexError:
                 break
-        yield out[:i]
+
+        if i > 0:
+            yield out[:i]
 
 
 @deprecated_alias({'numchannels': 'num_channels'}, read_only=True, removal_version='25.10')
