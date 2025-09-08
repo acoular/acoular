@@ -2820,7 +2820,7 @@ class TimeConvolve(TimeOut):
         elif mode == 'valid':
             output_size = max(L, M) - min(L, M) + 1
         else:
-            return ValueError('Invalid mode {}'.format(mode))
+            raise ValueError('Invalid mode {}'.format(mode))
 
         numblocks_kernel = int(np.ceil(L / num))  # number of kernel blocks
         Q = int(np.ceil(M / num))  # number of signal blocks
