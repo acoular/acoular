@@ -1239,13 +1239,13 @@ class DirectivityCalculator(HasTraits):
           - Need to rethink the interface to allow for more complex directivity which may vary between dimensions
     """
     #: Vector defining the forward direction of the object we are working out directivity from. Default is (0, 0, 1)
-    fwd_direction = Tuple((0.0, 0.0, 1.0), desc='Spherical Harmonic orientation')
+    fwd_direction = CArray(shape=(3,), default=np.array((0.0, 0.0, 1.0)), desc='Spherical Harmonic orientation')
 
     #: Vector defining the direction of the object we are working out direction to. Default is (0, 0, 1)
-    object_direction = Tuple((0.0, 0.0, 1.0), desc='Spherical Harmonic orientation')
+    object_direction = CArray(shape=(3,), default=np.array((0.0, 0.0, 1.0)), desc='Spherical Harmonic orientation')
 
     # Method which returns a scalar value to be used to attenuate the signal
-    def execute(self):
+    def __call__(self):
         return 1
 
 
@@ -1270,9 +1270,14 @@ class PointSourceDirectional(PointSource):
 
     #: Vectors defining the local orientation of the source relative to global space
     #: These vectors must be orthogonal to each other
-    forward_vec = Tuple((0.0, 0.0, 1.0), desc='source forward direction')
-    up_vec = Tuple((0.0, 1.0, 0.0), desc='source upward direction')
-    right_vec = Tuple((1.0, 0.0, 0.0), desc='source right direction')
+    #: self.orientation[0] = right_vec
+    #: self.orientation[1] = up_vec
+    #: self.orientation[2] = forward_vec
+    orientation = CArray(shape=(3, 3), desc='source orientation matrix')
+
+    def _validate_orientation(self):
+        if not np.allclose(np.dot(self.orientation, self.orientation.T), np.eye(3), atol=1e-12):
+            raise ValueError('Orientation matrix must be orthogonal.')
 
     # Rotation speed in radians/sec - default is 0
     rot_speed = Float(0.0)
@@ -1282,7 +1287,7 @@ class PointSourceDirectional(PointSource):
     prepadding = Enum('loop', desc='Behaviour for negative time indices.')
 
     # Type of DirecetivityCalculator used to calculate directivity which will be instantiated later
-    src_directivity_calc = Type(DirectivityCalculator)
+    dir_calc = Instance(DirectivityCalculator)
 
     #: A unique identifier for the current state of the source, based on its properties. (read-only)
     digest = Property(
@@ -1306,15 +1311,8 @@ class PointSourceDirectional(PointSource):
     @cached_property
     def _get_digest(self):
         return digest(self)
-    
-    def directivity_coeff(source_forward_dir, mic_dir):
-        # based on Lambertian reflectance
-        dir_n = source_forward_dir / np.linalg.norm(source_forward_dir)
-        mic_n = mic_dir / np.linalg.norm(mic_dir)
 
-        return (np.dot(dir_n, mic_n) + 1) / 2
-
-    def __rotation_matrix_for_sample(self, sample_index):
+    def _calc_rotation_matrix(self, sample_index):
         # Calculates the 3D rotation matrix for a specific audio sample assuming the rotation is constant
         # TODO: ensure this works with large numbers
         time = sample_index / self.sample_freq
@@ -1351,67 +1349,24 @@ class PointSourceDirectional(PointSource):
         signal is taken from the end of the signal array, effectively looping the signal for
         negative indices.
         """
-
-        # calculate directions between source and recievers
-        mpos = self.mics.pos
-
-        # normalise local direction vectors
-        forward_n = np.array(self.forward_vec, dtype=float)
-        forward_n /= np.linalg.norm(forward_n)
-
-        up_n = np.array(self.up_vec, dtype=float)
-        up_n /= np.linalg.norm(up_n)
-
-        right_n = np.array(self.right_vec, dtype=float)
-        right_n /= np.linalg.norm(right_n)
-
-        # check orthagonality
-        assert(np.dot(up_n, forward_n) < 1e-12)
-        assert(np.dot(up_n, right_n) < 1e-12)
-        assert(np.allclose(np.cross(up_n, forward_n), right_n))
+        self._validate_orientation()
+        self._validate_locations()
 
         # calculate directions in global space
-        gdirs_to_source = []
-
-        for i in range(0, self.mics.num_mics):
-            # get mic positiion
-            x = mpos[0][i]
-            y = mpos[1][i]
-            z = mpos[2][i]
-
-            mic_point = np.array([x, y, z])
-
-            # This is the direction of the source in relation to the mics
-            gdirs_to_source.append(np.array(self.loc, dtype=float) - mic_point)
-
-        # create transformation matrix for the local coordinate space of the source
-        source_trans_mat = np.vstack([right_n, up_n, forward_n]).T
+        gdirs_to_source = np.array(self.loc).reshape((3, 1)) - self.mics.pos
 
         # directions of microphones relative to sources ref and up vector
-        rdirs_to_mic = []
-
-        for i in range(0, self.mics.num_mics):
-            gdir_to_mic = gdirs_to_source[i] * (-1)
-            rdirs_to_mic.append(source_trans_mat @ gdir_to_mic)
+        rdirs_to_mic = self.orientation @ -gdirs_to_source
 
         # direction of sources in relative to microphones
-        rdirs_to_source = []
-        for i in range(0, self.mics.num_mics):
-            # @TODO set these values somewhere - later microphone in its own class?
-            mic_up = np.array((0, 1, 0), dtype=float)
-            mic_forward = np.array((0, 0, 1), dtype=float)
-            mic_right = np.array((1, 0, 0), dtype=float)
-
-            assert(np.dot(mic_up, mic_forward) < 1e-12)
-            assert(np.dot(mic_up, mic_right) < 1e-12)
-
-            mic_trans_mat = np.vstack([mic_right, mic_up, mic_forward]).T
-            rdirs_to_source.append(mic_trans_mat @ gdirs_to_source[i])
+        # @TODO set these values somewhere - later microphone in its own class?
+        # @TODO currently all microphones have the same orientation
+        mic_trans_mat = np.eye(3)
+        rdirs_to_source = mic_trans_mat @ gdirs_to_source
 
         # @TODO do something with the directions, store these as an attribute?
 
         # generate output
-        self._validate_locations()
         signal = self.signal.usignal(self.up)
         out = np.empty((num, self.num_channels))
         # distances
@@ -1425,12 +1380,12 @@ class PointSourceDirectional(PointSource):
             n -= 1
             try:
                 coeffs = np.empty(self.mics.num_mics)
+                # @TODO: looping over mics is inefficient. DirectivityCalculator should be able to handle arrays
+                # note that self.dir_calc.object_direction does not change over time
                 for m in range(self.mics.num_mics):
-                    rot_mat = self.__rotation_matrix_for_sample(ind[0, m])
-                    rotated_forward_vec = forward_n
-                    rotated_forward_vec = rot_mat @ rotated_forward_vec
-                    src_directivity_calculator = self.src_directivity_calc(fwd_direction = tuple(rotated_forward_vec), object_direction=tuple(gdirs_to_source[m] * -1))
-                    coeffs[m] = src_directivity_calculator.execute()
+                    rotated_forward_vec = self._calc_rotation_matrix(ind[0, m]) @ self.orientation[2]
+                    self.dir_calc.fwd_direction, self.dir_calc.object_direction = rotated_forward_vec, -gdirs_to_source[:, m]
+                    coeffs[m] = self.dir_calc()
                 out[i] = (signal[np.array(0.5 + ind * self.up, dtype=np.int64)] * coeffs) / rm
                 ind += 1.0
                 i += 1
@@ -1440,7 +1395,6 @@ class PointSourceDirectional(PointSource):
                     i = 0
             except IndexError:
                 break
-
         yield out[:i]
 
 

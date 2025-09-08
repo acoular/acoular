@@ -1,7 +1,5 @@
 import acoular as ac
 import numpy as np
-import matplotlib.pyplot as plt
-from scipy.io import wavfile
 
 ac.config.global_caching = 'none'
 
@@ -76,7 +74,7 @@ class DroneSignalGenerator( ac.SignalGenerator ):
 # Defining a Directivity to be used in within PointSourceDirectional
 class CardioidDirectivity(ac.DirectivityCalculator):
 
-    def execute(self):
+    def __call__(self):
         dir_n = self.fwd_direction / np.linalg.norm(self.fwd_direction)
         mic_n = self.object_direction / np.linalg.norm(self.object_direction)
 
@@ -85,9 +83,10 @@ class CardioidDirectivity(ac.DirectivityCalculator):
 def main():
 
     freq = 440
-    repititions = 1000
+    repetitions = 200
+    f_sample = 44100
 
-    sine_signal = ac.SineGenerator(freq = freq, sample_freq=f_sample, num_samples = freq*repititions)
+    sine_signal = ac.SineGenerator(freq = freq, sample_freq=f_sample, num_samples = freq*repetitions)
 
     # We'll keep the environment simple for now: just air at standard conditions with speed of sound 343 m/s
     e = ac.Environment(c=343.)
@@ -102,11 +101,9 @@ def main():
     sine_gen = ac.PointSourceDirectional(signal = sine_signal, # the signal of the source
                                 mics = m,              # set the "array" with which to measure the sound field
                                 loc = (0, 10, -20),    # location of the source
-                                # forward_vec = (0, 0, -1),
-                                # up_vec = (0, 1, 0),
-                                # right_vec = (-1, 0, 0),
-                                rot_speed = np.deg2rad(360 * 5),
-                                src_directivity_calc = CardioidDirectivity,
+                                orientation=np.eye(3),
+                                rot_speed = np.deg2rad(360 * 3),
+                                dir_calc = CardioidDirectivity(),
                                 env = e)               # the environment the source is moving in
 
     # Prepare wav output.
@@ -115,34 +112,10 @@ def main():
                         source = sine_gen,
                         channels = [0,1]) # export both channels as stereo
 
-    print('before output save')
-
-    #output.max_val = 2
+    from time import perf_counter
+    tic = perf_counter()
     output.save()
-
-    print('done')
-
-
-    # Load the WAV file
-    sample_rate, data = wavfile.read('sine_rotation.wav')  # Replace with your actual file name
-
-    # If stereo, take only one channel
-    if len(data.shape) == 2:
-        data = data[:, 0]
-
-    # Create time axis in seconds
-    duration = len(data) / sample_rate
-    time = np.linspace(0., duration, len(data))
-
-    # Plot the time-domain signal
-    plt.figure(figsize=(12, 6))
-    plt.plot(time, data)
-    plt.title('Time-Domain Signal of WAV File')
-    plt.xlabel('Time (seconds)')
-    plt.ylabel('Amplitude')
-    plt.grid(True)
-    plt.tight_layout()
-    plt.show()
+    print('Computation time: ', perf_counter()-tic)
 
 
 
