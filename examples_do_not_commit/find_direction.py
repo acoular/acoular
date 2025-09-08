@@ -75,10 +75,10 @@ class DroneSignalGenerator( ac.SignalGenerator ):
 class CardioidDirectivity(ac.DirectivityCalculator):
 
     def __call__(self):
-        dir_n = self.fwd_direction / np.linalg.norm(self.fwd_direction)
-        mic_n = self.object_direction / np.linalg.norm(self.object_direction)
-
-        return (np.dot(dir_n, mic_n) + 1) / 2
+        fwd_norm = self.fwd_directions / np.linalg.norm(self.fwd_directions, axis=0, keepdims=True)
+        obj_dir_norm = self.object_directions / np.linalg.norm(self.object_directions, axis=0, keepdims=True)
+        dot_products = np.sum(fwd_norm * obj_dir_norm, axis=0)
+        return (dot_products + 1) / 2
 
 def main():
 
