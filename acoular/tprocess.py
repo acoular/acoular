@@ -2815,9 +2815,9 @@ class TimeConvolve(TimeOut):
 
         if mode == 'full':
             output_size = L + M - 1
-        if mode == 'same':
+        elif mode == 'same':
             output_size = max(L, M)
-        if mode == 'valid':
+        elif mode == 'valid':
             output_size = max(L, M) - min(L, M) + 1
         else:
             return ValueError('Invalid mode {}'.format(mode))
