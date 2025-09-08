@@ -1318,9 +1318,18 @@ class PointSourceDirectional(PointSource):
         time = sample_index / self.sample_freq
         rot_angle = self.rot_speed * time
 
+        cos_a = np.cos(rot_angle)
+        sin_a = np.sin(rot_angle)
+
         # build rotation matrix around the y axis
-        rot_mat = np.array([[np.cos(rot_angle), 0, np.sin(rot_angle)], [0, 1, 0], [-np.sin(rot_angle), 0, np.cos(rot_angle)]])
-        return rot_mat
+        rot_mats = np.array([[cos_a,                np.zeros_like(cos_a),   sin_a],
+                             [np.zeros_like(cos_a), np.ones_like(cos_a),    np.zeros_like(cos_a)],
+                             [-sin_a,               np.zeros_like(cos_a),   cos_a]])
+
+        if rot_mats.ndim == 3:
+            rot_mats = rot_mats.transpose(2, 0, 1)
+
+        return rot_mats
 
     def result(self, num=128):
         """
@@ -1380,12 +1389,18 @@ class PointSourceDirectional(PointSource):
             n -= 1
             try:
                 coeffs = np.empty(self.mics.num_mics)
+
                 # @TODO: looping over mics is inefficient. DirectivityCalculator should be able to handle arrays
                 # note that self.dir_calc.object_direction does not change over time
-                for m in range(self.mics.num_mics):
-                    rotated_forward_vec = self._calc_rotation_matrix(ind[0, m]) @ self.orientation[2]
-                    self.dir_calc.fwd_direction, self.dir_calc.object_direction = rotated_forward_vec, -gdirs_to_source[:, m]
-                    coeffs[m] = self.dir_calc()
+
+                # for m in range(self.mics.num_mics):
+                #     print(f'ind: {ind}')
+                #     rotated_forward_vec = self._calc_rotation_matrix(ind[0,:]) @ self.orientation[2]
+                #     self.dir_calc.fwd_direction, self.dir_calc.object_direction = rotated_forward_vec, -gdirs_to_source[:, m]
+                #     coeffs[m] = self.dir_calc()
+
+                print(f'rot mats: {self._calc_rotation_matrix(ind[0,:]) @ self.orientation[2]}')
+
                 out[i] = (signal[np.array(0.5 + ind * self.up, dtype=np.int64)] * coeffs) / rm
                 ind += 1.0
                 i += 1
