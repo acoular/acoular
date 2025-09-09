@@ -6,10 +6,6 @@ from scipy.io import wavfile
 # Load the WAV file
 sample_rate, data = wavfile.read('sine_rotation.wav')  # Replace with your actual file name
 
-# If stereo, take only one channel
-if len(data.shape) == 2:
-    data = data[:, 0]
-
 # Create time axis in seconds
 duration = len(data) / sample_rate
 time = np.linspace(0., duration, len(data))
