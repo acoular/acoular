@@ -17,6 +17,9 @@ Upcoming Release
         * fixes bug in :class:`~acoular.tprocess.FilterBank`'s :meth:`~acoular.tprocess.FilterBank.result` method that failed if the last block in the generator is not of the the specified block size
         * fixes bug in the ``result()`` methods of the classes :class:`~acoular.sources.PointSourceDipole`, :class:`~acoular.sources.MovingPointSourceDipole`, :class:`~acoular.sources.LineSource`, and :class:`~acoular.sources.MovingLineSource`, that yielded empty last blocks if ``num=1``
 
+    **Tests**
+        * adds thorough test for result generators
+
 25.07
 ------------------------
     **New features**
