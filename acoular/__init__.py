@@ -19,6 +19,7 @@ from .base import (
     TimeOut,
 )
 from .calib import Calib
+from .directivity import MicGeomDirectional
 from .environments import (
     Environment,
     FlowField,
