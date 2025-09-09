@@ -75,34 +75,39 @@ class DroneSignalGenerator( ac.SignalGenerator ):
 class CardioidDirectivity(ac.DirectivityCalculator):
 
     def __call__(self):
-        dir_n = self.fwd_direction / np.linalg.norm(self.fwd_direction)
-        mic_n = self.object_direction / np.linalg.norm(self.object_direction)
-
-        return (np.dot(dir_n, mic_n) + 1) / 2
+        fwd_norm = self.fwd_directions / np.linalg.norm(self.fwd_directions, axis=0, keepdims=True)
+        obj_dir_norm = self.object_directions / np.linalg.norm(self.object_directions, axis=0, keepdims=True)
+        dot_products = np.sum(fwd_norm * obj_dir_norm, axis=0)
+        return (dot_products + 1) / 2
 
 def main():
 
     freq = 440
-    repetitions = 200
+    repetitions = 400
     f_sample = 44100
 
     sine_signal = ac.SineGenerator(freq = freq, sample_freq=f_sample, num_samples = freq*repetitions)
 
     # We'll keep the environment simple for now: just air at standard conditions with speed of sound 343 m/s
-    e = ac.Environment(c=343.)
+    c = 343.
+    e = ac.Environment(c=c)
+
+    rotations_per_s = 3
+    opp_phase_offset = c / rotations_per_s / 2
+    init_dist = 20
 
     m = ac.MicGeom()
-    m.pos_total = np.array([[-1, 1], # x positions, all values in m
-                            [2, 2], # y
-                            [0, 0]]) # z
+    m.pos_total = np.array([[0, 0], # x positions, all values in m
+                            [0, 0], # y
+                            [init_dist, init_dist + opp_phase_offset]]) # z
 
     # Lets try to determine direction of source and reciever. Lets first do this by using a stationary source
     # Define point source
     sine_gen = ac.PointSourceDirectional(signal = sine_signal, # the signal of the source
                                 mics = m,              # set the "array" with which to measure the sound field
-                                loc = (0, 10, -20),    # location of the source
+                                loc = (0, 0, 0),    # location of the source
                                 orientation=np.eye(3),
-                                rot_speed = np.deg2rad(360 * 3),
+                                rot_speed = np.deg2rad(360 * rotations_per_s),
                                 dir_calc = CardioidDirectivity(),
                                 env = e)               # the environment the source is moving in
 

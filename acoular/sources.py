@@ -1239,10 +1239,10 @@ class DirectivityCalculator(HasTraits):
           - Need to rethink the interface to allow for more complex directivity which may vary between dimensions
     """
     #: Vector defining the forward direction of the object we are working out directivity from. Default is (0, 0, 1)
-    fwd_direction = CArray(shape=(3,), default=np.array((0.0, 0.0, 1.0)), desc='Spherical Harmonic orientation')
+    fwd_directions = CArray(shape=(3, None), default=np.array([[0.0], [0.0], [1.0]]), desc='Forward directions of object we are calulating directivity for')
 
     #: Vector defining the direction of the object we are working out direction to. Default is (0, 0, 1)
-    object_direction = CArray(shape=(3,), default=np.array((0.0, 0.0, 1.0)), desc='Spherical Harmonic orientation')
+    object_directions = CArray(shape=(3, None), default=np.array([[0.0], [0.0], [1.0]]), desc='Directions of the other objects to which we are calculating the directivity')
 
     # Method which returns a scalar value to be used to attenuate the signal
     def __call__(self):
@@ -1318,9 +1318,18 @@ class PointSourceDirectional(PointSource):
         time = sample_index / self.sample_freq
         rot_angle = self.rot_speed * time
 
+        cos_a = np.cos(rot_angle)
+        sin_a = np.sin(rot_angle)
+
         # build rotation matrix around the y axis
-        rot_mat = np.array([[np.cos(rot_angle), 0, np.sin(rot_angle)], [0, 1, 0], [-np.sin(rot_angle), 0, np.cos(rot_angle)]])
-        return rot_mat
+        rot_mats = np.array([[cos_a,                np.zeros_like(cos_a),   sin_a],
+                             [np.zeros_like(cos_a), np.ones_like(cos_a),    np.zeros_like(cos_a)],
+                             [-sin_a,               np.zeros_like(cos_a),   cos_a]])
+
+        if rot_mats.ndim == 3:
+            rot_mats = rot_mats.transpose(2, 0, 1)
+
+        return rot_mats
 
     def result(self, num=128):
         """
@@ -1371,21 +1380,20 @@ class PointSourceDirectional(PointSource):
         out = np.empty((num, self.num_channels))
         # distances
         rm = self.env._r(np.array(self.loc).reshape((3, 1)), self.mics.pos).reshape(1, -1)
-        ind = (-rm / self.env.c - self.start_t + self.start) * self.sample_freq * self.up
+        ind = (-rm / self.env.c - self.start_t + self.start) * self.sample_freq
 
         i = 0
         n = self.num_samples
 
+        # object directions do not change once set
+        self.dir_calc.object_directions = -gdirs_to_source
+
         while n:
             n -= 1
             try:
-                coeffs = np.empty(self.mics.num_mics)
-                # @TODO: looping over mics is inefficient. DirectivityCalculator should be able to handle arrays
-                # note that self.dir_calc.object_direction does not change over time
-                for m in range(self.mics.num_mics):
-                    rotated_forward_vec = self._calc_rotation_matrix(ind[0, m]) @ self.orientation[2]
-                    self.dir_calc.fwd_direction, self.dir_calc.object_direction = rotated_forward_vec, -gdirs_to_source[:, m]
-                    coeffs[m] = self.dir_calc()
+                self.dir_calc.fwd_directions = (self._calc_rotation_matrix(ind[0,:]) @ self.orientation[2]).T
+                coeffs = self.dir_calc()
+
                 out[i] = (signal[np.array(0.5 + ind * self.up, dtype=np.int64)] * coeffs) / rm
                 ind += 1.0
                 i += 1
