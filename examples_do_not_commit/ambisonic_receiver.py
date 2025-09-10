@@ -23,7 +23,7 @@ def main():
         ]
     )  # z
 
-    m.directivities_total = np.array(['omni', 'cardioid'])
+    m.directivities_total = ['omni', 'cardioid']
     m.orientations_total = np.array([np.eye(3), np.eye(3).T])
 
     # Lets try to determine direction of source and reciever. Lets first do this by using a stationary source

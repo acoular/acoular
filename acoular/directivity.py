@@ -8,7 +8,7 @@ Implements methods required for directivity shared by source
 
 import numpy as np
 import scipy.linalg as spla
-from traits.api import CArray, Enum, Float, HasTraits, Instance, Property, Str, cached_property
+from traits.api import CArray, Enum, Float, HasTraits, Instance, List, Property, Str, cached_property
 
 # acoular imports
 from .internal import digest
@@ -279,7 +279,7 @@ class MicGeomDirectional(MicGeom):
 
     # @TODO don't store these as strings
     #: Array containing directivity for each microphone, including invalid ones
-    directivities_total = CArray(dtype=Str, desc='directivity for each microphone')
+    directivities_total = List(Enum('omni', 'cardioid'), desc='directivity for each microphone')
 
     # @TODO don't store these as strings
     #: Array containing directivity for each microphone, excluding those in invalid_channels (read-only)
