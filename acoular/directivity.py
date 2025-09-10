@@ -9,12 +9,18 @@ Implements methods required for directivity shared by source
 import numpy as np
 from traits.api import (
     CArray,
+    Enum,
+    Float,
+    HasTraits,
+    Instance,
     Property,
     Str,
+    cached_property
 )
 
 # acoular imports
 from .microphones import MicGeom
+from .sources import PointSource
 
 def get_radiation_angles(direction, mpos, sourceposition):
     r"""
@@ -92,6 +98,181 @@ def get_radiation_angles(direction, mpos, sourceposition):
     azi = np.mod(azi, 2 * np.pi)
     return azi, ele
 
+class DirectivityCalculator(HasTraits):
+    """
+    A baseclass with an execute method which calculates the directivity based on directions of source and recievers
+
+    TODO: This would only work with directivity which needs only a fwd and direction vector at the moment
+          - Need to rethink the interface to allow for more complex directivity which may vary between dimensions
+    """
+    #: Vector defining the forward direction of the object we are working out directivity from. Default is (0, 0, 1)
+    fwd_directions = CArray(shape=(3, None), default=np.array([[0.0], [0.0], [1.0]]), desc='Forward directions of object we are calulating directivity for')
+
+    #: Vector defining the direction of the object we are working out direction to. Default is (0, 0, 1)
+    object_directions = CArray(shape=(3, None), default=np.array([[0.0], [0.0], [1.0]]), desc='Directions of the other objects to which we are calculating the directivity')
+
+    # Method which returns a scalar value to be used to attenuate the signal
+    def __call__(self):
+        return 1
+
+
+class PointSourceDirectional(PointSource):
+    """
+    Define a fixed point source with directivity.
+
+    The :class:`PointSourceDirectional` class simulates a fixed point source with directivity.
+
+    The generated output is available via the :meth:`result` generator.
+
+    See Also
+    --------
+    :class:`acoular.sources.PointSource` : For modeling stationary point sources.
+
+    Notes
+    -----
+    - Directivity of the sources to be simulated later on, currently this class just
+      calculates directions between sources and recievers.
+    - Currently direction of the microphones are hardcoded.
+    """
+
+    #: Vectors defining the local orientation of the source relative to global space
+    #: These vectors must be orthogonal to each other
+    #: self.orientation[0] = right_vec
+    #: self.orientation[1] = up_vec
+    #: self.orientation[2] = forward_vec
+    orientation = CArray(shape=(3, 3), desc='source orientation matrix')
+
+    def _validate_orientation(self):
+        if not np.allclose(np.dot(self.orientation, self.orientation.T), np.eye(3), atol=1e-12):
+            raise ValueError('Orientation matrix must be orthogonal.')
+
+    # Rotation speed in radians/sec - default is 0
+    rot_speed = Float(0.0)
+
+    #: Behavior of the signal for negative time indices. Currently only supports `loop`. Default is
+    #: ``'loop'``.
+    prepadding = Enum('loop', desc='Behaviour for negative time indices.')
+
+    # Type of DirecetivityCalculator used to calculate directivity which will be instantiated later
+    dir_calc = Instance(DirectivityCalculator)
+
+    #: A unique identifier for the current state of the source, based on its properties. (read-only)
+    digest = Property(
+        depends_on=[
+            'mics.digest',
+            'signal.digest',
+            'loc',
+            'env.digest',
+            'start_t',
+            'start',
+            'up',
+            'forward_vec',
+            'up_vec',
+            'right_vec',
+            'rot_speed'
+            'prepadding',
+            'src_directivity_calc',
+        ],
+    )
+
+    @cached_property
+    def _get_digest(self):
+        return digest(self)
+
+    def _calc_rotation_matrix(self, sample_index):
+        # Calculates the 3D rotation matrix for a specific audio sample assuming the rotation is constant
+        # TODO: ensure this works with large numbers
+        time = sample_index / self.sample_freq
+        rot_angle = self.rot_speed * time
+
+        cos_a = np.cos(rot_angle)
+        sin_a = np.sin(rot_angle)
+
+        # build rotation matrix around the y axis
+        rot_mats = np.array([[cos_a,                np.zeros_like(cos_a),   sin_a],
+                             [np.zeros_like(cos_a), np.ones_like(cos_a),    np.zeros_like(cos_a)],
+                             [-sin_a,               np.zeros_like(cos_a),   cos_a]])
+
+        if rot_mats.ndim == 3:
+            rot_mats = rot_mats.transpose(2, 0, 1)
+
+        return rot_mats
+
+    def result(self, num=128):
+        """
+        Generate output signal at microphones in blocks.
+
+        Parameters
+        ----------
+        num : :class:`int`, optional
+            Number of samples per block to yield. Default is ``128``.
+
+        Yields
+        ------
+        :class:`numpy.ndarray`
+            A 2D array of shape (``num``, :attr:`~PointSource.num_channels`) containing the signal
+            detected at the microphones. The last block may have fewer samples if
+            :attr:`~PointSource.num_samples` is not a multiple of ``num``.
+
+        Raises
+        ------
+        :obj:`IndexError`
+            If no more samples are available from the source.
+
+        Notes
+        -----
+        If samples are needed for times earlier than the source's :attr:`~PointSource.start_t`, the
+        signal is taken from the end of the signal array, effectively looping the signal for
+        negative indices.
+        """
+        self._validate_orientation()
+        self._validate_locations()
+
+        # calculate directions in global space
+        gdirs_to_source = np.array(self.loc).reshape((3, 1)) - self.mics.pos
+
+        # directions of microphones relative to sources ref and up vector
+        rdirs_to_mic = self.orientation @ -gdirs_to_source
+
+        # direction of sources in relative to microphones
+        # @TODO set these values somewhere - later microphone in its own class?
+        # @TODO currently all microphones have the same orientation
+        mic_trans_mat = np.eye(3)
+        rdirs_to_source = mic_trans_mat @ gdirs_to_source
+
+        # @TODO do something with the directions, store these as an attribute?
+
+        # generate output
+        signal = self.signal.usignal(self.up)
+        out = np.empty((num, self.num_channels))
+        # distances
+        rm = self.env._r(np.array(self.loc).reshape((3, 1)), self.mics.pos).reshape(1, -1)
+        ind = (-rm / self.env.c - self.start_t + self.start) * self.sample_freq
+
+        i = 0
+        n = self.num_samples
+
+        # object directions do not change once set
+        self.dir_calc.object_directions = -gdirs_to_source
+
+        while n:
+            n -= 1
+            try:
+                self.dir_calc.fwd_directions = (self._calc_rotation_matrix(ind[0,:]) @ self.orientation[2]).T
+                coeffs = self.dir_calc()
+
+                out[i] = (signal[np.array(0.5 + ind * self.up, dtype=np.int64)] * coeffs) / rm
+                ind += 1.0
+                i += 1
+                if i == num:
+                    yield out
+                    out = np.zeros((num, self.num_channels))
+                    i = 0
+            except IndexError:
+                break
+        yield out[:i]
+
+
 class MicGeomDirectional(MicGeom):
     """
     Extension of MicGeom where directivity can be specified for each microphone
@@ -112,6 +293,6 @@ class MicGeomDirectional(MicGeom):
     #: self.orientation[0] = right_vec
     #: self.orientation[1] = up_vec
     #: self.orientation[2] = forward_vec
-    orientations_total = CArray(dtype=CArray(3,3), desc='orientations for each microphone')
+    orientations_total = CArray(dtype=float, shape=(None,3,3), desc='orientations for each microphone')
 
     orientations = Property(depends_on=['orientations_total', 'invalid_channels'], desc='orientation for each microphone')

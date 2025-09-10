@@ -19,7 +19,7 @@ from .base import (
     TimeOut,
 )
 from .calib import Calib
-from .directivity import MicGeomDirectional
+from .directivity import (MicGeomDirectional, DirectivityCalculator, PointSourceDirectional)
 from .environments import (
     Environment,
     FlowField,
@@ -82,7 +82,6 @@ from .signals import (
     WNoiseGenerator,
 )
 from .sources import (
-    DirectivityCalculator,
     LineSource,
     MaskedTimeSamples,
     MovingLineSource,
@@ -91,7 +90,6 @@ from .sources import (
     PointSource,
     PointSourceConvolve,
     PointSourceDipole,
-    PointSourceDirectional,
     SourceMixer,
     SphericalHarmonicSource,
     TimeSamples,
