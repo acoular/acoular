@@ -55,7 +55,7 @@ def sector_case_filter(case, t='empty'):
 
 
 def get_result(obj, num):
-    """For classes with no explicit result method a warning is expected and is catched here to
+    """For classes with no explicit result method a warning is expected and is caught here to
     prevent test failure.
     See https://github.com/acoular/acoular/issues/382 for details.
     """
@@ -69,7 +69,7 @@ def get_result(obj, num):
 
 
 def get_result_list(obj, num):
-    """For classes with no explicit result method a warning is expected and is catched here to
+    """For classes with no explicit result method a warning is expected and is caught here to
     prevent test failure.
     See https://github.com/acoular/acoular/issues/382 for details.
     """

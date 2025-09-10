@@ -12,9 +12,9 @@ from tests.cases.test_generator_cases import Generators
 from tests.utils import get_result_list
 
 xfails = {
-    ac.BeamformerTime: 'Issue #',
-    ac.IntegratorSectorTime: 'Issue #',  # test case relies on BeamformerTime as source
-    ac.PointSourceConvolve: 'Issue #',  # test case relies on TimeConvolve as generator
+    ac.BeamformerTime: 'Issue #525',
+    ac.IntegratorSectorTime: 'Issue #525',  # test case relies on BeamformerTime as source
+    ac.PointSourceConvolve: 'Issue #530',  # test case relies on TimeConvolve as generator
 }
 
 
