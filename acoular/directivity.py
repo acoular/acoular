@@ -285,6 +285,9 @@ class MicGeomDirectional(MicGeom):
     #: Array containing directivity for each microphone, excluding those in invalid_channels (read-only)
     directivities = Property(depends_on=['pos_total', 'invalid_channels'], desc='directivity for each microphone')
 
+    def _get_directivities(self):
+        return [self.directivities_total[i] for i in self._valid_channels]
+
     #: Vectors defining the local orientation of the microphones relative to global space
     #: These vectors must be orthogonal to each other
     #: self.orientation[0] = right_vec
@@ -294,3 +297,6 @@ class MicGeomDirectional(MicGeom):
 
     orientations = Property(depends_on=['orientations_total', 'invalid_channels'],
                             desc='orientation for each microphone')
+
+    def _get_orientations(self):
+        return self.orientations_total[self._valid_channels]
