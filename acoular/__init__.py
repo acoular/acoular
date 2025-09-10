@@ -19,7 +19,7 @@ from .base import (
     TimeOut,
 )
 from .calib import Calib
-from .directivity import (MicGeomDirectional, DirectivityCalculator, PointSourceDirectional)
+from .directivity import (MicGeomDirectional, OmniDirectivity, CardioidDirectivity, PointSourceDirectional)
 from .environments import (
     Environment,
     FlowField,

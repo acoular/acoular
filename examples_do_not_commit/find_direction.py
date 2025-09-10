@@ -71,15 +71,6 @@ class DroneSignalGenerator( ac.SignalGenerator ):
         return sig * np.std(sig)
 
 
-# Defining a Directivity to be used in within PointSourceDirectional
-class CardioidDirectivity(ac.DirectivityCalculator):
-
-    def __call__(self):
-        fwd_norm = self.fwd_directions / np.linalg.norm(self.fwd_directions, axis=0, keepdims=True)
-        obj_dir_norm = self.object_directions / np.linalg.norm(self.object_directions, axis=0, keepdims=True)
-        dot_products = np.sum(fwd_norm * obj_dir_norm, axis=0)
-        return (dot_products + 1) / 2
-
 def main():
 
     freq = 440
@@ -108,7 +99,7 @@ def main():
                                 loc = (0, 0, 0),    # location of the source
                                 orientation=np.eye(3),
                                 rot_speed = np.deg2rad(360 * rotations_per_s),
-                                dir_calc = CardioidDirectivity(),
+                                dir_calc = ac.CardioidDirectivity(),
                                 env = e)               # the environment the source is moving in
 
     # Prepare wav output.

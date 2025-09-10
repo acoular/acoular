@@ -6,9 +6,10 @@
 Implements methods required for directivity shared by source
 """
 
+from abc import abstractmethod
 import numpy as np
 import scipy.linalg as spla
-from traits.api import CArray, Enum, Float, HasTraits, Instance, List, Property, Str, cached_property
+from traits.api import CArray, Enum, Float, ABCHasStrictTraits, Instance, List, Property, Str, cached_property
 
 # acoular imports
 from .internal import digest
@@ -93,7 +94,7 @@ def get_radiation_angles(direction, mpos, sourceposition):
     return azi, ele
 
 
-class DirectivityCalculator(HasTraits):
+class Directivity(ABCHasStrictTraits):
     """
     A baseclass with an execute method which calculates the directivity based on directions of source and recievers
 
@@ -108,8 +109,22 @@ class DirectivityCalculator(HasTraits):
     object_directions = CArray(shape=(3, None), default=np.array([[0.0], [0.0], [1.0]]), desc='Directions of the other objects to which we are calculating the directivity')
 
     # Method which returns a scalar value to be used to attenuate the signal
+    @abstractmethod
     def __call__(self):
-        return 1
+        pass
+
+
+class OmniDirectivity(Directivity):
+    def __call__(self):
+        return np.ones(self.fwd_directions.shape[1])
+
+
+class CardioidDirectivity(Directivity):
+    def __call__(self):
+        fwd_norm = self.fwd_directions / np.linalg.norm(self.fwd_directions, axis=0, keepdims=True)
+        obj_dir_norm = self.object_directions / np.linalg.norm(self.object_directions, axis=0, keepdims=True)
+        dot_products = np.sum(fwd_norm * obj_dir_norm, axis=0)
+        return (dot_products + 1) / 2
 
 
 class PointSourceDirectional(PointSource):
@@ -150,7 +165,7 @@ class PointSourceDirectional(PointSource):
     prepadding = Enum('loop', desc='Behaviour for negative time indices.')
 
     # Type of DirecetivityCalculator used to calculate directivity which will be instantiated later
-    dir_calc = Instance(DirectivityCalculator)
+    dir_calc = Instance(Directivity)
 
     #: A unique identifier for the current state of the source, based on its properties. (read-only)
     digest = Property(
@@ -224,19 +239,8 @@ class PointSourceDirectional(PointSource):
         self._validate_orientation()
         self._validate_locations()
 
-        # calculate directions in global space
-        gdirs_to_source = np.array(self.loc).reshape((3, 1)) - self.mics.pos
-
-        # directions of microphones relative to sources ref and up vector
-        rdirs_to_mic = self.orientation @ -gdirs_to_source
-
-        # direction of sources in relative to microphones
-        # @TODO set these values somewhere - later microphone in its own class?
-        # @TODO currently all microphones have the same orientation
-        mic_trans_mat = np.eye(3)
-        rdirs_to_source = mic_trans_mat @ gdirs_to_source
-
-        # @TODO do something with the directions, store these as an attribute?
+        # object directions do not change once set
+        self.dir_calc.object_directions = self.mics.pos - np.array(self.loc).reshape(3, 1)
 
         # generate output
         signal = self.signal.usignal(self.up)
@@ -247,9 +251,6 @@ class PointSourceDirectional(PointSource):
 
         i = 0
         n = self.num_samples
-
-        # object directions do not change once set
-        self.dir_calc.object_directions = -gdirs_to_source
 
         while n:
             n -= 1

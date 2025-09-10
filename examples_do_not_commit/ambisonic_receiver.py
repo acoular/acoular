@@ -33,7 +33,7 @@ def main():
         mics=m,  # set the "array" with which to measure the sound field
         loc=(0, 0, 0),  # location of the source
         orientation=np.eye(3),
-        dir_calc=ac.DirectivityCalculator(),
+        dir_calc=ac.OmniDirectivity(),
         env=e,
     )
 
