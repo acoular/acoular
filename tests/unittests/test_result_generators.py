@@ -9,7 +9,7 @@ import pytest
 from pytest_cases import parametrize, parametrize_with_cases
 
 from tests.cases.test_generator_cases import Generators
-from tests.utils import get_result_list
+from tests.utils import get_result
 
 xfails = {
     ac.BeamformerTime: 'Issue #525',
@@ -38,7 +38,7 @@ def test_result_generator(obj, num):  # don't use default value if @parametrize 
         if isinstance(obj, gen):
             pytest.xfail(reason)
 
-    blocks = get_result_list(obj, num=num)
+    blocks = get_result(obj, num=num, f=list)
     assert len(blocks) > 0, 'Generator did not yield any blocks.'
 
     obj_copy = obj
