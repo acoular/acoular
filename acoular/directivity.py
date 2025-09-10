@@ -7,20 +7,14 @@ Implements methods required for directivity shared by source
 """
 
 import numpy as np
-from traits.api import (
-    CArray,
-    Enum,
-    Float,
-    HasTraits,
-    Instance,
-    Property,
-    Str,
-    cached_property
-)
+import scipy.linalg as spla
+from traits.api import CArray, Enum, Float, HasTraits, Instance, Property, Str, cached_property
 
 # acoular imports
+from .internal import digest
 from .microphones import MicGeom
 from .sources import PointSource
+
 
 def get_radiation_angles(direction, mpos, sourceposition):
     r"""
@@ -98,6 +92,7 @@ def get_radiation_angles(direction, mpos, sourceposition):
     azi = np.mod(azi, 2 * np.pi)
     return azi, ele
 
+
 class DirectivityCalculator(HasTraits):
     """
     A baseclass with an execute method which calculates the directivity based on directions of source and recievers
@@ -105,6 +100,7 @@ class DirectivityCalculator(HasTraits):
     TODO: This would only work with directivity which needs only a fwd and direction vector at the moment
           - Need to rethink the interface to allow for more complex directivity which may vary between dimensions
     """
+
     #: Vector defining the forward direction of the object we are working out directivity from. Default is (0, 0, 1)
     fwd_directions = CArray(shape=(3, None), default=np.array([[0.0], [0.0], [1.0]]), desc='Forward directions of object we are calulating directivity for')
 
@@ -277,6 +273,7 @@ class MicGeomDirectional(MicGeom):
     """
     Extension of MicGeom where directivity can be specified for each microphone
     """
+
     # @TODO none of the XML parsing mechanics has been implemented
     # @TODO decide how to store/represent each directivity
 
@@ -295,4 +292,5 @@ class MicGeomDirectional(MicGeom):
     #: self.orientation[2] = forward_vec
     orientations_total = CArray(dtype=float, shape=(None,3,3), desc='orientations for each microphone')
 
-    orientations = Property(depends_on=['orientations_total', 'invalid_channels'], desc='orientation for each microphone')
+    orientations = Property(depends_on=['orientations_total', 'invalid_channels'],
+                            desc='orientation for each microphone')
