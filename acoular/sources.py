@@ -58,6 +58,7 @@ from traits.api import (
     observe,
 )
 
+
 from .base import SamplesGenerator
 
 # acoular imports
