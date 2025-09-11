@@ -97,9 +97,8 @@ def main():
     sine_gen = ac.PointSourceDirectional(signal = sine_signal, # the signal of the source
                                 mics = m,              # set the "array" with which to measure the sound field
                                 loc = (0, 0, 0),    # location of the source
-                                orientation=np.eye(3),
                                 rot_speed = np.deg2rad(360 * rotations_per_s),
-                                dir_calc = ac.CardioidDirectivity(),
+                                dir_calc = ac.OmniDirectivity(orientation=np.eye(3)),
                                 env = e)               # the environment the source is moving in
 
     # Prepare wav output.
