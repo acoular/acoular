@@ -721,8 +721,8 @@ class PointSource(SamplesGenerator):
     signal = Instance(SignalGenerator)
 
     #: Coordinates ``(x, y, z)`` of the source in a left-oriented system. Default is
-    #: ``(0.0, 0.0, 1.0)``.
-    loc = Tuple((0.0, 0.0, 1.0))
+    #: ``np.array([[0.0], [0.0], [1.0]])``.
+    loc = CArray(shape=(3, 1), value=np.array([[0.], [0.], [1.]]), dtype=float, desc='source location')
 
     #: Number of output channels, automatically set based on the :attr:`microphone geometry<mics>`.
     num_channels = Delegate('mics', 'num_mics')
@@ -731,7 +731,7 @@ class PointSource(SamplesGenerator):
     mics = Instance(MicGeom)
 
     def _validate_locations(self):
-        dist = self.env._r(np.array(self.loc).reshape((3, 1)), self.mics.pos)
+        dist = self.env._r(self.loc, self.mics.pos)
         if np.any(dist < 1e-7):
             warn('Source and microphone locations are identical.', Warning, stacklevel=2)
 
@@ -815,7 +815,7 @@ class PointSource(SamplesGenerator):
         signal = self.signal.usignal(self.up)
         out = np.empty((num, self.num_channels))
         # distances
-        rm = self.env._r(np.array(self.loc).reshape((3, 1)), self.mics.pos).reshape(1, -1)
+        rm = self.env._r(self.loc, self.mics.pos).reshape(1, -1)
         # emission time relative to start_t (in samples) for first sample
         ind = (-rm / self.env.c - self.start_t + self.start) * self.sample_freq * self.up
 
@@ -966,7 +966,7 @@ class SphericalHarmonicSource(PointSource):
 
         signal = self.signal.usignal(self.up)
         # emission time relative to start_t (in samples) for first sample
-        rm = self.env._r(np.array(self.loc).reshape((3, 1)), self.mics.pos)
+        rm = self.env._r(self.loc, self.mics.pos)
         ind = (-rm / self.env.c - self.start_t + self.start) * self.sample_freq + np.pi / 30
         i = 0
         n = self.num_samples
@@ -1247,7 +1247,7 @@ class PointSourceDipole(PointSource):
 
         mpos = self.mics.pos
         # position of the dipole as (3,1) vector
-        loc = np.array(self.loc, dtype=float).reshape((3, 1))
+        loc = self.loc
         # direction vector from tuple
         direc = np.array(self.direction, dtype=float) * 1e-5
         direc_mag = np.sqrt(np.dot(direc, direc))
@@ -1583,7 +1583,7 @@ class LineSource(PointSource):
         out = np.zeros((num, self.num_channels))
 
         # distance from line start position to microphones
-        loc = np.array(self.loc, dtype=float).reshape((3, 1))
+        loc = self.loc
 
         # distances from monopoles in the line to microphones
         rms = np.empty((self.num_channels, self.num_sources))
