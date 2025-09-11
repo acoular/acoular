@@ -17,14 +17,15 @@ def main():
     m = ac.MicGeomDirectional()
     m.pos_total = np.array(
         [
-            [1, 1],  # x positions, all values in m
-            [1, 1],  # y
-            [1, 1],
+            [0, 0, 1, 0],  # x positions, all values in m
+            [0, 1, 0, 0],  # y
+            [1, 0, 0, 0],  # z
         ]
-    )  # z
+    )
 
     m.directivities_total = ['omni', 'cardioid']
-    m.orientations_total = np.array([np.eye(3), np.eye(3).T])
+    fwd_mat = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+    m.orientations_total = np.array([fwd_mat, fwd_mat, fwd_mat, fwd_mat])
 
     # Lets try to determine direction of source and reciever. Lets first do this by using a stationary source
     # Define point source

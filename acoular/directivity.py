@@ -17,81 +17,49 @@ from .microphones import MicGeom
 from .sources import PointSource
 
 
-def get_radiation_angles(direction, mpos, sourceposition):
-    r"""
-    Calculate the azimuthal and elevation angles between the microphones and the source.
-
-    The function computes the azimuth (``azi``) and elevation (``ele``) angles between each
-    microphone position and the source position, taking into account the orientation of the
-    spherical harmonics provided by the parameter ``direction``.
+def get_angle_to_target(src_locs, src_orientations, target_locs):
+    """
+    This function computes the azimuths and elevations of target points to the source points
+    relative to the sources orientation.
 
     Parameters
     ----------
-    direction : :class:`numpy.ndarray` of shape ``(3,)``
-        Unit vector representing the spherical harmonic orientation. It should be a 3-element array
-        corresponding to the ``x``, ``y``, and ``z`` components of the direction.
-    mpos : :class:`numpy.ndarray` of shape ``(3, N)``
-        Microphone positions in a 3D Cartesian coordinate system. The array should have 3 rows (the
-        ``x``, ``y`` and ``z`` coordinates) and ``N`` columns (one for each microphone).
-    sourceposition : :class:`numpy.ndarray` of shape ``(3,)``
-        Position of the source in a 3D Cartesian coordinate system. It should be a 3-element array
-        corresponding to the ``x``, ``y``, and ``z`` coordinates of the source.
+    src_locs : :class:`np.array`
+        These are the (x, y, z) coordinates of the sources - this array must be supplied as shape
+        (N, 3) where N is the number of sources.
 
-    Returns
-    -------
-    azi : :class:`numpy.ndarray` of shape ``(N,)``
-        Azimuth angles in radians between the microphones and the source. The range of the values is
-        :math:`[0, 2\pi)`.
-    ele : :class:`numpy.ndarray` of shape ``(N,)``
-        Elevation angles in radians between the microphones and the source. The range of the values
-        is :math:`[0, \pi]`.
+    src_orientation : :class:`np.array`
+        These are the right, up and forward vectors of the sources - these vectors must be orthogonal
+        and normalised. The layout of the matrix is shown below. The shape of the array must be (N,3,3) where N is the number of sources.
+        [
+            [
+                [right_x,  right_y,    right_z],
+                [up_x,     up_y,       up_z],
+                [fwd_x,    fwd_y,      fwd_z]
+            ],
+            [...], [...]
+        ]
 
-    See Also
-    --------
-    :func:`numpy.linalg.norm` :
-        Computes the norm of a vector.
-    :func:`numpy.arctan2` :
-        Computes the arctangent of two variables, preserving quadrant information.
+    target_locs : :class:`np.array`
+        These are the (x, y, z) coordinates of the targets the angles are calculated for - this array must be
+        supplied as shape(M,3) where M is the number of targets.
 
-    Notes
-    -----
-    - The function accounts for a coordinate system transformation where the ``z``-axis in Acoular
-      corresponds to the ``y``-axis in spherical coordinates, and the ``y``-axis in Acoular
-      corresponds to the ``z``-axis in spherical coordinates.
-    - The elevation angle (``ele``) is adjusted to the range :math:`[0, \pi]` by adding
-      :math:`\pi/2` after the initial calculation.
+    Yields
+    ------
+    :class:`Tuple(np.ndarray, np.ndarray)`
+        A returns a tuple of two np.ndarrays. The first array returns the azimuths of targets relative to the sources,
+        the second tuple returns the elevation of the targets to the sources.
 
-    Examples
-    --------
-    >>> import acoular as ac
-    >>> import numpy as np
-    >>>
-    >>> direction = [1, 0, 0]
-    >>> mpos = np.array([[1, 2], [0, 0], [0, 1]])  # Two microphones
-    >>> sourceposition = [0, 0, 0]
-    >>> azi, ele = ac.sources.get_radiation_angles(direction, mpos, sourceposition)
-    >>> azi
-    array([0.       , 5.8195377])
-    >>> ele
-    array([4.71238898, 4.71238898])
     """
-    # direction of the Spherical Harmonics
-    direc = np.array(direction, dtype=float)
-    direc = direc / spla.norm(direc)
-    # distances
-    source_to_mic_vecs = mpos - np.array(sourceposition).reshape((3, 1))
-    source_to_mic_vecs[2] *= -1  # invert z-axis (acoular)    #-1
-    # z-axis (acoular) -> y-axis (spherical)
-    # y-axis (acoular) -> z-axis (spherical)
-    # theta
-    ele = np.arctan2(np.sqrt(source_to_mic_vecs[0] ** 2 + source_to_mic_vecs[2] ** 2), source_to_mic_vecs[1])
-    ele += np.arctan2(np.sqrt(direc[0] ** 2 + direc[2] ** 2), direc[1])
-    ele += np.pi * 0.5  # convert from [-pi/2, pi/2] to [0,pi] range
-    # phi
-    azi = np.arctan2(source_to_mic_vecs[2], source_to_mic_vecs[0])
-    azi += np.arctan2(direc[2], direc[0])
-    azi = np.mod(azi, 2 * np.pi)
-    return azi, ele
+
+    directions = target_locs - src_locs # in global space
+    # Convert these directions to local coordinate space of the src
+    # @TODO check this logic - 3x3 orientation matrix should be the transformation matrix if each dimension is normalised?
+    directions = np.matvec(src_orientations, directions)
+    azimuth = np.arctan2(directions[:,0], directions[:,2])
+    elevation = np.arctan2(directions[:,1], np.hypot(directions[:,0], directions[:,2]))
+
+    return azimuth, elevation
 
 
 class Directivity(ABCHasStrictTraits):
@@ -183,6 +151,33 @@ class PointSourceDirectional(PointSource):
         # object directions do not change once set
         self.dir_calc.target_directions = self.mics.pos - np.array(self.loc).reshape(3, 1)
 
+        # -----------------------------------------------------------------------------------------
+        # For now lets do speherical harmonic stuff in here and we will move it
+        # later to somewhere more sensible.
+        # We need to:
+        # - Work out angle of the source from the mics (also the inverse for directional sources
+        #   but for now will assume omnidirectional source)
+        # - calculate spherical harmonics for the modes (need to specify number of order somewhere
+        #   with 1st until we clean and move this)
+        # - based on source direction work out the attenuation for each mode and output to a channel
+        #
+        # Later on:
+        # - clean up - move this somewhere else work out tidy way to do this
+        # - frequency dependant directionality
+        # -----------------------------------------------------------------------------------------
+
+        if isinstance(self.mics, MicGeomDirectional):
+            # @TODO change from lists and speed up by vectorising and to not iterate over each mic
+            azimuths = np.empty(shape=self.mics.num_mics)
+            elevations = np.empty(shape=self.mics.num_mics)
+
+            mic_pos = self.mics.pos.T
+            src_pos = np.array(self.loc).reshape(1, 3)
+
+            azimuths, elevations = get_angle_to_target(mic_pos, self.mics.orientations, src_pos)
+
+            print(azimuths, elevations)
+
         # generate output
         signal = self.signal.usignal(self.up)
         out = np.empty((num, self.num_channels))
@@ -199,6 +194,7 @@ class PointSourceDirectional(PointSource):
                 print(self._calc_rotation_matrix(ind[0,:]).shape)
                 self.dir_calc.orientation = (self._calc_rotation_matrix(ind[0,:]) @ self.dir_calc.orientation).T
                 coeffs = self.dir_calc()
+                #coeffs = np.ones(self.mics.num_mics)
 
                 out[i] = (signal[np.array(0.5 + ind * self.up, dtype=np.int64)] * coeffs) / rm
                 ind += 1.0
