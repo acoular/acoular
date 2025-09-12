@@ -71,16 +71,31 @@ class Directivity(ABCHasStrictTraits):
     #: self.orientation[0] = right_vec
     #: self.orientation[1] = up_vec
     #: self.orientation[2] = forward_vec
-    orientation = CArray(shape=(3, 3), desc='source orientation matrix', default=np.eye(3))
+    orientation = CArray(shape=(3, 3), desc='source orientation matrix', value=np.eye(3))
 
     def _validate_orientation(self):
         if not np.allclose(np.dot(self.orientation, self.orientation.T), np.eye(3), atol=1e-12):
             raise ValueError('Orientation matrix must be orthogonal.')
 
     #: Vector defining the direction of the object we are working out direction to. Default is (0, 0, 1)
-    target_directions = CArray(shape=(3, None), default=np.array([[0.0], [0.0], [1.0]]), desc='Directions of the other objects to which the directivity is to be calculated.')
+    target_directions = Property(desc='Directions of the other objects to which the directivity is to be calculated.')
 
-    coefficients = Property(desc='Directivity coefficients', depends_on=['orientation', 'object_directions'])
+    _target_directions = CArray(shape=(3, None), default=np.array([[0.0], [0.0], [1.0]]))
+
+    def _set_target_directions(self, value):
+        self._target_directions = value / spla.norm(value, axis=0, keepdims=True)
+
+    def _get_target_directions(self):
+        return self._target_directions
+
+    coefficients = Property(desc='Directivity coefficients', depends_on=['orientation', 'target_directions'])
+
+    @abstractmethod
+    def _get_coefficients(self):
+        """
+        Abstract method to calculate directivity coefficients.
+        """
+        pass
 
 
 class OmniDirectivity(Directivity):
@@ -92,8 +107,7 @@ class OmniDirectivity(Directivity):
 class CardioidDirectivity(Directivity):
     @cached_property
     def _get_coefficients(self):
-        obj_dir_norm = self.target_directions / spla.norm(self.target_directions, axis=0, keepdims=True)
-        return (self.orientation[2].reshape(3) @ obj_dir_norm + 1) / 2
+        return 0.5 * (1.0 + np.dot(self.orientation[2], self.target_directions))
 
 
 class PointSourceDirectional(PointSource):
