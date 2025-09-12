@@ -93,7 +93,7 @@ class CardioidDirectivity(Directivity):
     @cached_property
     def _get_coefficients(self):
         obj_dir_norm = self.target_directions / spla.norm(self.target_directions, axis=0, keepdims=True)
-        return (self.orientation[2].reshape(3, 1).T @ obj_dir_norm + 1) / 2
+        return (self.orientation[2].reshape(3) @ obj_dir_norm + 1) / 2
 
 
 class PointSourceDirectional(PointSource):
