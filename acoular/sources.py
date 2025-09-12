@@ -722,7 +722,16 @@ class PointSource(SamplesGenerator):
 
     #: Coordinates ``(x, y, z)`` of the source in a left-oriented system. Default is
     #: ``np.array([[0.0], [0.0], [1.0]])``.
-    loc = CArray(shape=(3, 1), value=np.array([[0.], [0.], [1.]]), dtype=float, desc='source location')
+    loc = Property(CArray, desc='source location')
+
+    _loc = CArray(shape=(3, 1), value=np.array([[0.0], [0.0], [1.0]]), dtype=float)
+
+    def _get_loc(self):
+        return self._loc
+
+    def _set_loc(self, value):
+        value = np.asarray(value, dtype=float).reshape((3, 1))
+        self._loc = value
 
     #: Number of output channels, automatically set based on the :attr:`microphone geometry<mics>`.
     num_channels = Delegate('mics', 'num_mics')
