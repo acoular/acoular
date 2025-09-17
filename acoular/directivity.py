@@ -9,7 +9,7 @@ Implements methods required for directivity shared by source
 from abc import abstractmethod
 import numpy as np
 import scipy.linalg as spla
-from scipy.special import sph_harm_y_all
+from scipy.special import factorial, sph_harm_y_all
 from traits.api import CArray, Enum, Float, Int, ABCHasStrictTraits, Instance, List, Property, Str, cached_property
 
 # acoular imports
@@ -34,6 +34,20 @@ def cart2sph(coordinates):
 def num_channels_for_sph_degree(n):
     return (n+1)**2
 
+def sph_harm_complex_to_real(n, m, harm_array):
+    result = None
+    if m == 0:
+        result = harm_array[n, m]
+    elif m < 0:
+        result = np.sqrt(2) * (-1 ** m) * harm_array[n, -m].imag
+    elif m > 0:
+        result = np.sqrt(2) * (-1 ** m) * harm_array[n, m].real
+    return result
+
+def sn3n_norm_factor(n, m):
+    delta = 1 if m == 0 else 0
+    return np.sqrt((2 - delta) * (factorial(n - np.abs(m)) / factorial(n + np.abs(m))))
+
 def squash_sph_harm_array(harm_array):
     original_shape = harm_array.shape
     n_max = original_shape[0] - 1
@@ -48,15 +62,8 @@ def squash_sph_harm_array(harm_array):
     i = 0
     for n in range(n_max + 1):
         for m in range(-n, n+1):
-            complex_harmonics = harm_array[n, m]
-            if m == 0:
-                result[i] = np.real(complex_harmonics)
-            elif m > 0:
-                result[i] = np.real(complex_harmonics) * np.sqrt(2)
-            elif m < 0:
-                result[i] = np.imag(complex_harmonics) * np.sqrt(2) * float(-1)**(m+1)
-
-            result[i] *= float(-1)**(m)
+            result[i] = sph_harm_complex_to_real(n, m, harm_array)
+            result *= sn3n_norm_factor(n, m)
             i+=1
 
     return result
