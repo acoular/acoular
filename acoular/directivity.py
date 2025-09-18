@@ -63,7 +63,7 @@ def squash_sph_harm_array(harm_array):
     for n in range(n_max + 1):
         for m in range(-n, n+1):
             result[i] = sph_harm_complex_to_real(n, m, harm_array)
-            result *= sn3n_norm_factor(n, m)
+            result[i] *= sn3n_norm_factor(n, m)
             i+=1
 
     return result
@@ -123,8 +123,11 @@ class SphericalHarmonicDirectivity(Directivity):
     """
     n = Int(1)
 
-    @cached_property
     def _get_coefficients(self):
+        # Note: This is output in ACN ordering, as each coefficient is output in the incremental order by degree
+        # and order. ACN is output in the order of YZX, however in ambisonics X points forward, Y points to the left
+        # and Z points up. So by leaving it as it is we are outputting in ACN order - @TODO - maybe need to tweak
+        # directions later.
         target_directions_local = np.matvec(self.orientation.reshape(-1, 3, 3), self.target_directions.T.reshape(-1, 3))
         azimuth, elevation, _ = cart2sph(target_directions_local)
         sph_harms = sph_harm_y_all(self.n, self.n, elevation, azimuth)
