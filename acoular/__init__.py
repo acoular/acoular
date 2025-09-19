@@ -3,7 +3,7 @@
 # ------------------------------------------------------------------------------
 
 """The Acoular library: several classes for the implementation of acoustic beamforming."""
-print("hi Sean")
+
 import os  # noqa: I001
 
 # config must be imported before any submodules containing numpy, see #322.
