@@ -2767,8 +2767,8 @@ class TimeConvolve(TimeOut):
         )
         return blocks
 
-    def result(self, num=128, mode='valid'):
-        """
+    def result(self, num=128, mode='full'):
+        r"""
         Convolve the source signal with the kernel and yield the result in blocks.
 
         The method generates the convolution of the source signal (length :math:`M`) with the kernel
@@ -2820,7 +2820,8 @@ class TimeConvolve(TimeOut):
         elif mode == 'valid':
             output_size = max(L, M) - min(L, M) + 1
         else:
-            raise ValueError('Invalid mode {}'.format(mode))
+            msg = f'Invalid mode {mode}'
+            raise ValueError(msg)
 
         numblocks_kernel = int(np.ceil(L / num))  # number of kernel blocks
         Q = int(np.ceil(M / num))  # number of signal blocks
