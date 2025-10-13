@@ -111,21 +111,12 @@ numpydoc_show_class_members = False
 # sphinx.ext.autodoc extension settings
 # -------------------------------------
 
-autodoc_member_order = 'bysource' # sort members by the order in the source code
-
-# skips all traits references in autoclass
-# https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#skipping-members
-def traits_skip_member(app, what, name, obj, skip, options):
-    if not skip and what=='class':
-        try:
-            if not obj.__module__.startswith(project):
-                return True
-        except:
-            pass
-#            if obj.__class__.__name__ == 'method_descriptor':
-#                return True
-    return skip
-
+autodoc_default_options = {
+    'members': True,
+    'member-order': 'bysource',
+    'inherit-members': 'ABCHasStrictTraits',
+    'show-inheritance': True, # False does not work, need to delete this line to deactivate!
+}
 
 #%%
 # sphinx_gallery.gen_gallery extension settings
