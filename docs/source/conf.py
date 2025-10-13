@@ -51,12 +51,32 @@ templates_path = ['_templates']
 # see https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output for details
 
 html_theme = 'pydata_sphinx_theme'
-#html_theme_path = ['_themes/']
 html_static_path = ['_static']
-html_favicon = '_static/acoular_logo.ico'
 html_context = {
-    'logo': 'Acoular_logo.png',  # Filename in _static folder
+    # "github_url": "https://github.com", # or your GitHub Enterprise site
+    "github_user": "acoular",
+    "github_repo": "acoular",
+    "github_version": "master",
+    "doc_path": "docs/source",
 }
+html_theme_options = {
+    "logo": {
+        "alt_text": "Acoular - Home",
+        "text": "Acoular",
+        "image_light": "_static/Acoular_logo.png",
+        "image_dark": "_static/Acoular_logo.png",
+    },
+    "icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/acoular/acoular",
+            "icon": "fa-brands fa-square-github",
+        },
+    ],
+    "header_links_before_dropdown": 6,
+    "use_edit_page_button": True,
+}
+html_favicon = '_static/acoular_logo.ico'
 html_last_updated_fmt = '%b %d, %Y'
 # If true, the reST sources are included in the HTML build as _sources/<name>.
 html_copy_source = False
