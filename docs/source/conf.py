@@ -19,9 +19,6 @@ version = release =  acoular.__version__
 # see: https://www.sphinx-doc.org/en/master/usage/configuration.html for details
 
 extensions = [
-    'sphinx_gallery.gen_gallery',
-    'sphinx.ext.duration',
-    'sphinx.ext.autodoc',
     'IPython.sphinxext.ipython_directive',
     'IPython.sphinxext.ipython_console_highlighting',
     'traits.util.trait_documenter',
