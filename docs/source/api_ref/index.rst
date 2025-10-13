@@ -33,8 +33,6 @@ The following modules are part of Acoular:
     trajectory
 
 
-
-
 Classes in Acoular and their inheritance
 ----------------------------------------
 **Depending on the resolution of your browser window the cross links may not be positioned correctly!**
@@ -75,13 +73,3 @@ Classes in Acoular and their inheritance
                 acoular.spectra.BaseSpectra,
                 acoular.trajectory.Trajectory
     :parts: 1
-
-:mod:`acoular` Package
-----------------------
-
-.. automodule:: acoular.__init__
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
