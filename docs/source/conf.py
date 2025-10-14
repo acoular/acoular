@@ -69,6 +69,12 @@ html_theme_options = {
             "url": "https://github.com/acoular/acoular",
             "icon": "fa-brands fa-square-github",
         },
+        {
+            "name": "PyPI",
+            "url": "https://pypi.org/project/acoular",
+            "icon": "_static/pypi.svg",
+            "type": "local",
+        },        
     ],
     "header_links_before_dropdown": 6,
     "use_edit_page_button": True,
