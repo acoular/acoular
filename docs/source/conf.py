@@ -50,7 +50,6 @@ templates_path = ['_templates']
 html_theme = 'pydata_sphinx_theme'
 html_static_path = ['_static']
 html_context = {
-    # "github_url": "https://github.com", # or your GitHub Enterprise site
     "github_user": "acoular",
     "github_repo": "acoular",
     "github_version": "master",
@@ -72,6 +71,11 @@ html_theme_options = {
     ],
     "header_links_before_dropdown": 6,
     "use_edit_page_button": True,
+}
+html_sidebars = {
+    "install/*": [],
+    "news/*": [],
+    "literature/*": [],
 }
 html_favicon = '_static/acoular_logo.ico'
 html_last_updated_fmt = '%b %d, %Y'
