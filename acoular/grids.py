@@ -55,7 +55,6 @@ from traits.api import (
 from traits.trait_errors import TraitError
 
 # acoular imports
-from .deprecation import deprecated_alias
 from .internal import digest, ldigest
 
 
@@ -278,7 +277,6 @@ class Polygon:
         return mindst
 
 
-@deprecated_alias({'gpos': 'pos'}, removal_version='25.10')
 class Grid(ABCHasStrictTraits):
     """
     Abstract base class for grid geometries.
@@ -433,7 +431,6 @@ class Grid(ABCHasStrictTraits):
             f.write('</Grid>')
 
 
-@deprecated_alias({'gpos': 'pos'}, read_only=True, removal_version='25.10')
 class RectGrid(Grid):
     """
     Provides a 2D Cartesian grid for beamforming results.
@@ -842,7 +839,6 @@ class RectGrid3D(RectGrid):
         return np.s_[xi1 : xi2 + 1], np.s_[yi1 : yi2 + 1], np.s_[zi1 : zi2 + 1]
 
 
-@deprecated_alias({'from_file': 'file', 'gpos_file': 'pos'}, removal_version='25.10')
 class ImportGrid(Grid):
     """
     Load a 3D grid from an XML file.
@@ -1010,7 +1006,6 @@ class ImportGrid(Grid):
         self.subgrids = np.array(names)
 
 
-@deprecated_alias({'gpos': 'pos', 'numpoints': 'num_points'}, read_only=['gpos'], removal_version='25.10')
 class LineGrid(Grid):
     """
     Define a 3D grid for a line geometry.
@@ -1091,7 +1086,6 @@ class LineGrid(Grid):
         return pos.T
 
 
-@deprecated_alias({'gpos': 'pos'}, read_only=True, removal_version='25.10')
 class MergeGrid(Grid):
     """
     Base class for merging multiple grid geometries.

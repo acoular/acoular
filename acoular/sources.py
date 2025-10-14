@@ -59,8 +59,6 @@ from traits.api import (
 from .base import SamplesGenerator
 
 # acoular imports
-from .calib import Calib
-from .deprecation import deprecated_alias
 from .environments import Environment
 from .h5files import H5FileBase, _get_h5file_class
 from .internal import digest, ldigest
@@ -293,7 +291,6 @@ def get_modes(lOrder, direction, mpos, sourceposition=None):  # noqa: N803
     return modes
 
 
-@deprecated_alias({'name': 'file'}, removal_version='25.10')
 class TimeSamples(SamplesGenerator):
     """
     Container for processing time data in ``*.h5`` or NumPy array format.
@@ -497,15 +494,6 @@ class TimeSamples(SamplesGenerator):
                 i += num
 
 
-@deprecated_alias(
-    {
-        'numchannels_total': 'num_channels_total',
-        'numsamples_total': 'num_samples_total',
-        'numchannels': 'num_channels',
-        'numsamples': 'num_samples',
-    },
-    read_only=['numchannels', 'numsamples'],
-)
 class MaskedTimeSamples(TimeSamples):
     """
     Container to process and manage time-domain data with support for masking samples and channels.
@@ -722,7 +710,6 @@ class MaskedTimeSamples(TimeSamples):
             i += num
 
 
-@deprecated_alias({'numchannels': 'num_channels', 'numsamples': 'num_samples'}, read_only=True, removal_version='25.10')
 class PointSource(SamplesGenerator):
     """
     Define a fixed point source emitting a signal, intended for simulations.
@@ -1885,7 +1872,6 @@ class MovingLineSource(LineSource, MovingPointSource):
             yield out[:i]
 
 
-@deprecated_alias({'numchannels': 'num_channels'}, read_only=True, removal_version='25.10')
 class UncorrelatedNoiseSource(SamplesGenerator):
     """
     Simulate uncorrelated white or pink noise signals at multiple channels.
@@ -2049,7 +2035,6 @@ class UncorrelatedNoiseSource(SamplesGenerator):
                 return
 
 
-@deprecated_alias({'numchannels': 'num_channels', 'numsamples': 'num_samples'}, read_only=True, removal_version='25.10')
 class SourceMixer(SamplesGenerator):
     """
     Combine signals from multiple sources by mixing their outputs.
