@@ -5,7 +5,7 @@ Acoular -- Acoustic testing and source mapping software
 
 Acoular is a framework for acoustic beamforming that is written in the Python programming language. It is aimed at applications in acoustic testing. Multichannel data recorded by a microphone array can be processed and analyzed in order to generate mappings of sound source distributions. The maps (acoustic photographs) can then be used to  locate sources of interest and to characterize them using their spectra. 
 
-.. image:: get_started/three_source_py3_colormap.png
+.. image:: user_guide/three_source_py3_colormap.png
     :width: 33%
     :alt: Three different point sources
 .. image:: _static/Airfoil_selfnoise_3d.png
@@ -37,7 +37,7 @@ Contents:
     :hidden:
     
     Installation <install/index>
-    Getting Started <get_started/index>
+    User Guide <user_guide/index>
     Examples <auto_examples/index>
     API Reference <api_ref/index>
     What's new <news/index>
@@ -53,7 +53,7 @@ Contents:
       - Description of the different download and installation options to get 
         Acoular running on your system.
 
-    * - :doc:`get_started/index` 
+    * - :doc:`user_guide/get_started` 
 
       - The basics for using Acoular, explained with a simple example.
 
