@@ -21,18 +21,18 @@ version = release =  acoular.__version__
 extensions = [
     'IPython.sphinxext.ipython_directive',
     'IPython.sphinxext.ipython_console_highlighting',
-    'traits.util.trait_documenter',
+    'matplotlib.sphinxext.plot_directive',
+    'numpydoc',
     'sphinx_copybutton',
     'sphinx_gallery.gen_gallery',
-    'sphinx.ext.duration',
     'sphinx.ext.autodoc', 
-    'sphinx.ext.mathjax',
-    'sphinx.ext.inheritance_diagram',
     'sphinx.ext.autosummary',
+    'sphinx.ext.duration',
+    'sphinx.ext.inheritance_diagram',
     'sphinx.ext.intersphinx',
+    'sphinx.ext.mathjax',
     'sphinxcontrib.bibtex',
-    'numpydoc',
-    'matplotlib.sphinxext.plot_directive',
+    'traits.util.trait_documenter',
     ] # Sphinx extension modules
 
 # the current time is formatted using time.strftime() and the format given in today_fmt.
