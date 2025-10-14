@@ -368,9 +368,7 @@ class TimeSamples(SamplesGenerator):
     _datachecksum = Property(depends_on=['data'])
 
     #: A unique identifier for the samples, based on its properties. (read-only)
-    digest = Property(
-        depends_on=['basename', '_datachecksum', 'sample_freq', 'num_channels', 'num_samples']
-    )
+    digest = Property(depends_on=['basename', '_datachecksum', 'sample_freq', 'num_channels', 'num_samples'])
 
     def _get__datachecksum(self):
         return self.data[0, :].sum()
