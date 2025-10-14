@@ -10,7 +10,7 @@ Acoular runs under 64bit Windows, Linux and MacOS, and needs Python 3.10, 3.11, 
 
 Upon installation using options 1 or 2 below, all necessary dependencies will also be installed.
 
-Optional dependencies are only required in some circumsstances and must be installed seperately when needed:
+Optional dependencies are only required in some circumstances and must be installed seperately when needed:
     1. In order to run the demo and examples you will also need  `matplotlib <http://matplotlib.org>`_.
     2. If you want to use input from a soundcard hardware, you will also need to install `sounddevice <https://python-sounddevice.readthedocs.io/en/0.3.12/installation.html>`_.
     3. Some solvers for the CMF method need `Pylops <https://pylops.readthedocs.io/en/stable/installation.html>`_.
