@@ -22,6 +22,7 @@ extensions = [
     'IPython.sphinxext.ipython_directive',
     'IPython.sphinxext.ipython_console_highlighting',
     'traits.util.trait_documenter',
+    'sphinx_copybutton',
     'sphinx_gallery.gen_gallery',
     'sphinx.ext.duration',
     'sphinx.ext.autodoc', 
@@ -168,6 +169,12 @@ sphinx_gallery_conf = {
         "../../examples/tools",
     ]),
 }
+
+# sphinx_copybutton config
+# ------------------------
+
+copybutton_prompt_text = r">>> |\.\.\. |\$ |In \[\d*\]: | {2,5}\.\.\.: | {5,8}: "  # strips prompts
+copybutton_prompt_is_regexp = True
 
 #%% 
 # sphinxcontrib-bibtex extension settings
