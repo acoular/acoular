@@ -365,7 +365,7 @@ class TimeSamples(SamplesGenerator):
     metadata = Dict(desc='metadata contained in .h5 file')
 
     # Checksum over first data entries of all channels
-    _datachecksum = Property()
+    _datachecksum = Property(depends_on=['data'])
 
     #: A unique identifier for the samples, based on its properties. (read-only)
     digest = Property(
