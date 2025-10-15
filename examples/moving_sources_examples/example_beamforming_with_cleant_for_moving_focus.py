@@ -49,10 +49,11 @@ tr0 = ac.Trajectory(points={0: (-LX, 0, LZ), T_PASS: (LX, 0, LZ)})  # moving foc
 # Next, we define parameters for the microphone array, the processing blocks,
 # and the frequency band of interest.
 #
-# The example uses a Vogel 64-microphone array, which is a common configuration
-# for acoustic measurements.
+# The example uses a 64-microphone array.
 
 mics = ac.MicGeom(file=Path(ac.__file__).parent / 'xml' / 'tub_vogel64.xml')
+plt.scatter(*mics.pos[:2])
+plt.grid()
 
 # %%
 # The sampling frequency is set to 12.8 kHz, and the total
@@ -93,9 +94,11 @@ st = ac.SteeringVector(grid=rgm, mics=mics)
 # Each source has a different root mean square (RMS) value, which is set to
 # 0.564 multiplied by a factor that decreases with each source.
 
+
 def wngen(nseed):
     rms = 0.564 * 10 ** (-0.5 * (nseed - 1))
     return ac.WNoiseGenerator(sample_freq=SFREQ, num_samples=NUM_SAMPLES, seed=nseed, rms=rms)
+
 
 sigs = [wngen(1 + i) for i in range(4)]
 
@@ -107,9 +110,11 @@ sigs = [wngen(1 + i) for i in range(4)]
 
 source_pos = [(1, 1, 0), (1, -1, 0), (-1, -1, 0), (-1, 1, 0)]
 
+
 def create_trajectory(x, y, z):
     # Linear trajectory offset by source position
     return ac.Trajectory(points={0: (-LX + x, y, LZ + z), T_PASS: (LX + x, y, LZ + z)})
+
 
 trs = [create_trajectory(*sp) for sp in source_pos]
 
@@ -118,62 +123,110 @@ trs = [create_trajectory(*sp) for sp in source_pos]
 # `MovingPointSource` class. The `conv_amp` parameter is set to `True`
 # to account for amplitude changes due to distance variations.
 
+
 def mpsgen(sig, tr):
     return ac.MovingPointSource(signal=sig, mics=mics, trajectory=tr, conv_amp=True)
+
 
 mps = [mpsgen(sig, tr) for sig, tr in zip(sigs, trs)]
 
 # %%
 # Finally, the sources are mixed together using the `SourceMixer` class.
+# This class combines the individual source signals into a single mixed signal
+# that can be processed further down the chain.
 
 source_mixer = ac.SourceMixer(sources=mps)
 
 # %%
-# Build and return the processing pipeline for the CLEANT example.
-# Returns an object suitable for ac.tools.return_result.
+# =============================
+# Building the processing chain
+# =============================
+#
+# We now connect the processing blocks into a chain that can be executed by
+# Acoular. The chain is:
+#   SourceMixer → FiltFiltOctave → BeamformerCleantSqTraj → Average → Cache
+#
+# - **FiltFiltOctave:** zero-phase third-octave filtering around `FREQ`.
+# - **BeamformerCleantSqTraj:** computes (squared) beamforming along the provided
+#   moving-focus trajectory and applies CLEANT deconvolution to improve
+#   spatial resolution.
+# - **Average:** groups frames into blocks of `BLOCK_SIZE` samples to produce one
+#   map per block.
+# - **Cache:** stores the averaged maps so that repeated access is fast and
+#   deterministic.
 
-# Filter the mixed signal into the desired third-octave band. The
-# FiltFiltOctave block applies a zero-phase two-pass IIR filtering.
 fi = ac.FiltFiltOctave(source=source_mixer, band=FREQ, fraction='Third octave')
-
-# Beamformer that computes time-domain squared beamforming along the
-# provided trajectory, followed by CLEANT-style deconvolution (CLEAN-SC
-# variant that is integrated into the trajectory beamformer).
-# Use the moving-focus trajectory `tr0` (single trajectory for the focus path).
 bt = ac.BeamformerCleantSqTraj(source=fi, steer=st, trajectory=tr0, conv_amp=True)
-
-# Average frames into larger blocks for stable plotting and performance.
 avgt = ac.Average(source=bt, num_per_average=BLOCK_SIZE)
-
-# Cache the averaged blocks so that repeated calls to return_result are fast
-# and deterministic.
 cacht = ac.Cache(source=avgt)
 
-
-# Run the processing chain and obtain results. We ask for the cached averages
-# to be returned as a list of maps.
+# %%
+# In the following step, we execute the processing chain and retrieve
+# a small number of averaged beamforming maps for visualization.
+#
+# The `num` argument controls how many averaged blocks to return. Use `num=None`
+# to return all cached blocks, or set `num` to an integer to limit the number of
+# returned maps (useful for quick visual checks).
 res = ac.tools.return_result(cacht, num=1)
 
-# Determine subplot layout and display each time-slice.
-n = len(res)
-nsize = int(np.ceil(np.sqrt(n))) if n > 0 else 1
-plt.figure(figsize=(8, 7))
+# %%
+# -----------------------------
+# Plotting the time-series maps
+# -----------------------------
+#
+# Each element in `res` is a flattened array containing the beamforming map for
+# a single averaged block. We reshape it to the grid shape and convert to sound
+# pressure level (dB) via `ac.L_p` for display.
+#
+# We choose a dynamic colormap range per frame: [max-15 dB, max] to emphasize
+# peaks while preserving local contrast. The extent for `imshow` is taken from
+# the grid so the axes are in meters.
 
-for i, r in enumerate(res):
-    r0 = r.reshape(rgm.shape)
-    plt.subplot(nsize, nsize, i + 1)
-    mx = ac.L_p(r0.max())
-    plt.imshow(
-        ac.L_p(np.transpose(r0)),
-        vmax=mx,
-        vmin=mx - 15,
-        interpolation='nearest',
-        extent=rgm.extent,
-        origin='lower',
-        cmap='viridis',
+if not np.any(res):
+    print(
+        'No results returned by the processing chain. Try increasing `num` or '
+        'ensure the processing chain produced cached averages.'
     )
-    plt.title(f't = {(i) * BLOCK_SIZE / SFREQ:.2f}s')
-    plt.colorbar()
+else:
+    n = len(res)
+    ncols = int(np.ceil(np.sqrt(n)))
+    nrows = int(np.ceil(n / ncols))  # Execute the processing chain and return a (small) sequence of averaged maps.
 
-plt.tight_layout()
-plt.show()
+    fig, axes = plt.subplots(nrows, ncols, figsize=(4 * ncols, 3 * nrows), squeeze=False)
+
+    # compute a time label for each averaged block (start time of block)
+    times = [(i * BLOCK_SIZE) / SFREQ for i in range(n)]
+
+    for idx, r in enumerate(res):
+        r0 = r.reshape(rgm.shape)
+        row = idx // ncols
+        col = idx % ncols
+        ax = axes[row][col]
+
+        level = ac.L_p(r0)
+        mx = level.max()
+
+        im = ax.imshow(
+            np.transpose(level),
+            origin='lower',
+            vmax=mx,
+            vmin=mx - 15,
+            interpolation='nearest',
+            extent=rgm.extent,
+            cmap='viridis',
+        )
+
+        ax.set_title(f't = {times[idx]:.2f} s')
+        ax.set_xlabel('x / m')
+        ax.set_ylabel('y / m')
+        fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04, label='$L_p$ / dB')
+
+    # Hide any unused subplots
+    total_axes = nrows * ncols
+    for i in range(n, total_axes):
+        row = i // ncols
+        col = i % ncols
+        axes[row][col].axis('off')
+
+    plt.tight_layout()
+    plt.show()
