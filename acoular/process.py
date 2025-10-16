@@ -210,8 +210,8 @@ class Cache(InOut):
 
     See Also
     --------
-    :class:`~acoular.base.InOut` : Receive data from any source domain and return signals in the same
-                                  domain.
+    :class:`~acoular.base.InOut` : Receive data from any source domain and return signals in the
+                                   same domain.
 
     Examples
     --------

@@ -49,8 +49,8 @@ calib = ac.Calib(source=t1, file=calib_file, invalid_channels=invalid)
 
 # %%
 # The microphone geometry must have the same number of valid channels as the
-# :class:`~acoular.sources.MaskedTimeSamples` object has. It also must be defined, which channels are
-# invalid.
+# :class:`~acoular.sources.MaskedTimeSamples` object has. It also must be defined, which channels
+# are invalid.
 
 micgeofile = Path(ac.__file__).parent / 'xml' / 'array_56.xml'
 m = ac.MicGeom(file=micgeofile)
@@ -72,8 +72,8 @@ f = ac.PowerSpectra(source=calib, window='Hanning', overlap='50%', block_size=12
 
 # %%
 # To define the measurement environment, i.e. medium characteristics, the
-# :class:`~acoular.environments.Environment` class is used. (in this case, only the speed of sound is
-# set)
+# :class:`~acoular.environments.Environment` class is used. (in this case, only the speed of sound
+# is set)
 
 env = ac.Environment(c=346.04)
 
@@ -85,8 +85,8 @@ st = ac.SteeringVector(grid=g, mics=m, env=env)
 
 # %%
 # Finally, we define two different beamformers and subsequently calculate the maps for different
-# steering vector formulations. Diagonal removal for the CSM can be performed via the :attr:`~acoular.fbeamform.BeamformerBase.r_diag`
-# parameter.
+# steering vector formulations. Diagonal removal for the CSM can be performed via the
+# :attr:`~acoular.fbeamform.BeamformerBase.r_diag` parameter.
 
 bb = ac.BeamformerBase(freq_data=f, steer=st, r_diag=True)
 bs = ac.BeamformerCleansc(freq_data=f, steer=st, r_diag=True)
