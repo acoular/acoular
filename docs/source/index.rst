@@ -38,8 +38,8 @@ Contents:
     
     Installation <install/index>
     User Guide <user_guide/index>
-    Examples <auto_examples/index>
     API Reference <api_ref/index>
+    Examples <auto_examples/index>
     What's new <news/index>
     Contributing <contributing/index>
     Literature <literature/index>
@@ -57,22 +57,22 @@ Contents:
 
       - The basics for using Acoular, explained with a simple example.
 
-    * - :doc:`auto_examples/index` 
+    * - :doc:`api_ref/index`
+
+      - All modules, classes and methods featured in Acoular are described in detail
+        here. They can easily be browsed through an inheritance tree and cross links.
+
+    * - :doc:`auto_examples/index`
 
       - Example scripts covering different use cases.
 
-    * - :doc:`news/index` 
+    * - :doc:`news/index`
 
-      - Release notes for the current version of Acoular.
+      - Release notes for all versions of Acoular.
 
     * - :doc:`contributing/index`
 
       - Information on how to contribute to the development of Acoular.
-
-    * - :doc:`api_ref/index` 
-
-      - All modules, classes and methods featured in Acoular are described in detail
-        here. They can easily be browsed through an inheritance tree and cross links.
 
     * - :doc:`literature/index` 
 

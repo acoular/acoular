@@ -175,7 +175,7 @@ def get_radiation_angles(direction, mpos, sourceposition):
     --------
     :func:`numpy.linalg.norm` :
         Computes the norm of a vector.
-    :func:`numpy.arctan2` :
+    :obj:`numpy.arctan2` :
         Computes the arctangent of two variables, preserving quadrant information.
 
     Notes
