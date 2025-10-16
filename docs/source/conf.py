@@ -25,7 +25,7 @@ extensions = [
     'numpydoc',
     'sphinx_copybutton',
     'sphinx_gallery.gen_gallery',
-    'sphinx.ext.autodoc', 
+    'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.duration',
     'sphinx.ext.inheritance_diagram',
@@ -209,4 +209,5 @@ intersphinx_mapping = {
     "scipy": ("https://docs.scipy.org/doc/scipy/", None),
     "matplotlib": ("https://matplotlib.org/stable", None),
     "h5py": ("https://docs.h5py.org/en/stable/", None),
+    "traits": ("https://docs.enthought.com/traits", None)
 }
