@@ -391,12 +391,10 @@ plt.show()
 # %%
 # We see that the sound pressure level is highest in the area between the microphones.
 #
-# ========
-# See Also
-# ========
-# - :doc:`example_basic_beamforming`:
-#   For basic beamforming concepts
-# - :doc:`example_3D_beamforming`:
-#   For more advanced 3D beamforming applications
-# - :doc:`../wind_tunnel_examples/example_sectors_and_integration`:
-#   For working with grid sectors and integration
+# .. seealso::
+#    - :doc:`example_basic_beamforming`:
+#      For basic beamforming concepts
+#    - :doc:`example_3D_beamforming`:
+#      For more advanced 3D beamforming applications
+#    - :doc:`../wind_tunnel_examples/example_sectors_and_integration`:
+#      For working with grid sectors and integration

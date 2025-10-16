@@ -52,9 +52,9 @@ f = ac.PowerSpectra(source=calib, window='Hanning', overlap='50%', block_size=12
 
 
 # %%
-# Here, different frequency domain beamformers defined in the module :mod:`acoular.fbeamform` are
+# Here, different frequency domain beamformers defined in the module :mod:`~acoular.fbeamform` are
 # used and the corresponding result maps are calculated by evaluating the
-# :meth:`acoular.fbeamform.BeamformerBase.synthetic` method with the desired frequency and
+# :meth:`~acoular.fbeamform.BeamformerBase.synthetic` method with the desired frequency and
 # bandwidth.
 
 bb = ac.BeamformerBase(freq_data=f, steer=st, r_diag=True)

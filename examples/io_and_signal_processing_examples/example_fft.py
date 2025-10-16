@@ -35,7 +35,7 @@ print(ts.num_samples, ts.num_channels)
 # Create a spectrogram of the signal
 # ----------------------------------
 # Therefore we want to process the FFT spectra of the signal blockwise. To do so, we use the
-# :class:`acoular.fprocess.RFFT` class, which calculates the FFT spectra of the signal blockwise.
+# :class:`~acoular.fprocess.RFFT` class, which calculates the FFT spectra of the signal blockwise.
 
 block_size = 512
 
@@ -104,7 +104,7 @@ plt.show()
 # Create an averaged power spectral density of the signal
 # --------------------------------------------------------
 # To calculate the time averaged power spectral density of the signal, we use the
-# :class:`acoular.fprocess.AutoPowerSpectra` class.
+# :class:`~acoular.fprocess.AutoPowerSpectra` class.
 
 fft.scaling = 'none'
 ap = ac.AutoPowerSpectra(source=fft, scaling='psd')  # results in the power spectrum
@@ -132,7 +132,7 @@ for block_size in [256, 1024]:
 # Create a cross-spectral matrix for multichannel signals
 # --------------------------------------------------------
 # To calculate the cross-spectral matrix of the signal, we use the
-# :class:`acoular.fprocess.CrossPowerSpectra` class. First, we create a TimeSamples object with two
+# :class:`~acoular.fprocess.CrossPowerSpectra` class. First, we create a TimeSamples object with two
 # channels. Then, we calculate the cross-spectral matrix of the signal blockwise. We choose a
 # normalization method of 'psd' (Power Spectral Density) for the cross-spectral matrix.
 

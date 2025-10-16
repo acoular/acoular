@@ -302,7 +302,7 @@ class TimeSamples(SamplesGenerator):
 
     See Also
     --------
-    :class:`acoular.sources.MaskedTimeSamples` :
+    :class:`~acoular.sources.MaskedTimeSamples` :
         Extends the functionality of class :class:`TimeSamples` by enabling the definition of start
         and stop samples as well as the specification of invalid channels.
 
@@ -474,7 +474,7 @@ class MaskedTimeSamples(TimeSamples):
 
     See Also
     --------
-    :class:`acoular.sources.TimeSamples` : The parent class for managing unmasked time-domain data.
+    :class:`~acoular.sources.TimeSamples` : The parent class for managing unmasked time-domain data.
 
     Notes
     -----
@@ -662,9 +662,9 @@ class PointSource(SamplesGenerator):
 
     See Also
     --------
-    :class:`acoular.signals.SignalGenerator` : For defining custom emitted signals.
-    :class:`acoular.microphones.MicGeom` : For specifying microphone geometries.
-    :class:`acoular.environments.Environment` : For modeling sound propagation effects.
+    :class:`~acoular.signals.SignalGenerator` : For defining custom emitted signals.
+    :class:`~acoular.microphones.MicGeom` : For specifying microphone geometries.
+    :class:`~acoular.environments.Environment` : For modeling sound propagation effects.
 
     Notes
     -----
@@ -995,8 +995,8 @@ class MovingPointSource(PointSource):
 
     See Also
     --------
-    :class:`acoular.sources.PointSource` : For modeling stationary point sources.
-    :class:`acoular.trajectory.Trajectory` : For specifying source motion paths.
+    :class:`~acoular.sources.PointSource` : For modeling stationary point sources.
+    :class:`~acoular.trajectory.Trajectory` : For specifying source motion paths.
     """
 
     #: Determines whether convective amplification is considered. When ``True``, the amplitude of
@@ -1170,7 +1170,7 @@ class PointSourceDipole(PointSource):
 
     See Also
     --------
-    :class:`acoular.sources.PointSource` : For modeling stationary point sources.
+    :class:`~acoular.sources.PointSource` : For modeling stationary point sources.
 
     Notes
     -----
@@ -1320,8 +1320,8 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
 
     See Also
     --------
-    :class:`acoular.sources.PointSourceDipole` : For stationary dipole sources.
-    :class:`acoular.sources.MovingPointSource` :
+    :class:`~acoular.sources.PointSourceDipole` : For stationary dipole sources.
+    :class:`~acoular.sources.MovingPointSource` :
         For moving point sources without dipole characteristics.
     """
 
@@ -1505,7 +1505,7 @@ class LineSource(PointSource):
 
     See Also
     --------
-    :class:`acoular.sources.PointSource` : For modeling stationary point sources.
+    :class:`~acoular.sources.PointSource` : For modeling stationary point sources.
 
     Notes
     -----
@@ -1635,10 +1635,10 @@ class MovingLineSource(LineSource, MovingPointSource):
 
     See Also
     --------
-    :class:`acoular.sources.LineSource` :
+    :class:`~acoular.sources.LineSource` :
         For :class:`line sources<LineSource>` consisting of
         :attr:`coherent or incoherent<LineSource.coherence>` monopoles.
-    :class:`acoular.sources.MovingPointSource` :
+    :class:`~acoular.sources.MovingPointSource` :
         For moving point sources without dipole characteristics.
     """
 
@@ -1824,8 +1824,8 @@ class UncorrelatedNoiseSource(SamplesGenerator):
 
     See Also
     --------
-    :class:`acoular.signals.SignalGenerator` : For defining noise types and properties.
-    :class:`acoular.microphones.MicGeom` : For specifying microphone geometries.
+    :class:`~acoular.signals.SignalGenerator` : For defining noise types and properties.
+    :class:`~acoular.microphones.MicGeom` : For specifying microphone geometries.
 
     Notes
     -----
@@ -1987,7 +1987,7 @@ class SourceMixer(SamplesGenerator):
 
     See Also
     --------
-    :class:`acoular.base.SamplesGenerator` : Base class for signal generators.
+    :class:`~acoular.base.SamplesGenerator` : Base class for signal generators.
 
     Notes
     -----
@@ -2206,7 +2206,7 @@ class PointSourceConvolve(PointSource):
     See Also
     --------
     :class:`PointSource` : Base class for point sources.
-    :class:`acoular.tprocess.TimeConvolve` : Class used for performing time-domain convolution.
+    :class:`~acoular.tprocess.TimeConvolve` : Class used for performing time-domain convolution.
 
     Notes
     -----
