@@ -69,7 +69,6 @@ from traits.api import (
 # acoular imports
 from .base import SamplesGenerator, TimeOut
 from .configuration import config
-from .deprecation import deprecated_alias
 from .environments import cartToCyl, cylToCart
 from .h5files import _get_h5file_class
 from .internal import digest, ldigest
@@ -78,9 +77,6 @@ from .process import Cache
 from .tools.utils import find_basename
 
 
-@deprecated_alias(
-    {'numchannels_total': 'num_channels_total', 'numsamples_total': 'num_samples_total'}, removal_version='25.10'
-)
 class MaskedTimeOut(TimeOut):
     """
     A signal processing block that allows for the selection of specific channels and time samples.
@@ -2146,7 +2142,6 @@ class FiltFreqWeight(Filter):
         return tf2sos(b, a)
 
 
-@deprecated_alias({'numbands': 'num_bands'}, read_only=True, removal_version='25.10')
 class FilterBank(TimeOut):
     """
     Abstract base class for IIR filter banks based on :mod:`scipy.signal.lfilter`.
@@ -2314,7 +2309,6 @@ class OctaveFilterBank(FilterBank):
         return sos
 
 
-@deprecated_alias({'name': 'file'}, removal_version='25.10')
 class WriteWAV(TimeOut):
     """
     Saves time signal from one or more channels as mono, stereo, or multi-channel ``.wav`` file.
@@ -2495,9 +2489,6 @@ class WriteWAV(TimeOut):
             pass
 
 
-@deprecated_alias(
-    {'name': 'file', 'numsamples_write': 'num_samples_write', 'writeflag': 'write_flag'}, removal_version='25.10'
-)
 class WriteH5(TimeOut):
     """
     Saves time signal data as a ``.h5`` (HDF5) file.
