@@ -6,6 +6,7 @@ Upcoming Release
     **Documentation**
         * fix docstrings in submodule :mod:`acoular.tbeamform`
         * move unit system notes to the notes sections
+        * new website with improved API reference
 
     **Internal**
         * refactored import statements and input aliases
