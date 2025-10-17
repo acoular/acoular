@@ -6,6 +6,7 @@ Upcoming Release
     **Documentation**
         * fix docstrings in submodule :mod:`acoular.tbeamform`
         * move unit system notes to the notes sections
+        * reworks :doc:`/examples/moving_sources_examples/example_beamforming_with_moving_focus`
 
     **Internal**
         * refactored import statements and input aliases
