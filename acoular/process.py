@@ -24,7 +24,6 @@ from traits.api import Any, Array, Bool, Dict, Enum, Instance, Int, Property, Un
 # acoular imports
 from .base import Generator, InOut
 from .configuration import config
-from .deprecation import deprecated_alias
 from .h5cache import H5cache
 from .h5files import H5CacheFileBase
 from .internal import digest
@@ -63,9 +62,6 @@ class LockedGenerator:
             return self.it.__next__()
 
 
-@deprecated_alias(
-    {'naverage': 'num_per_average', 'numsamples': 'num_samples'}, read_only=['numsamples'], removal_version='25.10'
-)
 class Average(InOut):
     """
     Calculate the average across consecutive time samples or frequency snapshots.

@@ -108,7 +108,7 @@ plt.show()
 
 fft.scaling = 'none'
 ap = ac.AutoPowerSpectra(source=fft, scaling='psd')  # results in the power spectrum
-avg = ac.Average(source=ap, naverage=64)  # results in the time averaged power spectrum
+avg = ac.Average(source=ap, num_per_average=64)  # results in the time averaged power spectrum
 
 # %%
 # Plot the resulting power spectrum for different number of averages.
@@ -117,7 +117,7 @@ for block_size in [256, 1024]:
     plt.figure()
     fft.block_size = block_size
     for navg in [1, 100]:
-        avg.naverage = navg
+        avg.num_per_average = navg
         spectrum = next(avg.result(num=1))
         levels = ac.L_p(spectrum)
         plt.plot(fft.freqs, levels[0], label=f'navg = {navg}, block_size = {block_size}')
@@ -147,11 +147,11 @@ csm_comp = ps1.csm[:, :, :]
 
 fft.source = ts  # we need to change the source of the fft object to the new TimeSamples object
 ps = ac.CrossPowerSpectra(source=fft)
-avg = ac.Average(source=ps, naverage=int(ps1.num_blocks))
+avg = ac.Average(source=ps, num_per_average=int(ps1.num_blocks))
 csm = next(avg.result(num=1))
 
 # reshape the cross-spectral matrix to a 3D array of shape (numfreq, num_channels, num_channels)
-csm = csm.reshape(fft.numfreqs, ts.num_channels, ts.num_channels)
+csm = csm.reshape(fft.num_freqs, ts.num_channels, ts.num_channels)
 
 # %%
 # Plot both spectra

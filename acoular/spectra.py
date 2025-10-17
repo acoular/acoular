@@ -34,7 +34,6 @@ from traits.api import (
 # acoular imports
 from .base import SamplesGenerator
 from .configuration import config
-from .deprecation import deprecated_alias
 from .fastFuncs import calcCSM
 from .h5cache import H5cache
 from .h5files import H5CacheFileBase
@@ -42,9 +41,6 @@ from .internal import digest
 from .tools.utils import find_basename
 
 
-@deprecated_alias(
-    {'numchannels': 'num_channels', 'time_data': 'source'}, read_only=['numchannels'], removal_version='25.10'
-)
 class BaseSpectra(ABCHasStrictTraits):
     """
     Base class for handling spectral data in Acoular.
