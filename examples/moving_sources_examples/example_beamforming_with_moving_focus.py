@@ -70,7 +70,7 @@ NUM_SAMPLES = int(T_PASS * SFREQ)  # total number of samples
 BLOCK_SIZE = int(NUM_SAMPLES / 4)  # number of samples per processing block
 
 # %%
-# The frequency band of interest is set to 4000 Hz, which
+# The frequency band of interest is set to 2000 Hz, which
 # corresponds to a third-octave band used for analysis.
 
 FREQ = 2000  # Hz, third-octave band used for analysis
