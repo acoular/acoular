@@ -25,7 +25,7 @@ is evaluated using three different beamforming approaches:
 # Setting up the example
 # =======================
 #
-# At the beginning of this examples, we make the necessary imports
+# At the beginning of this example, we make the necessary imports
 # and define the simulation parameters.
 
 from pathlib import Path
