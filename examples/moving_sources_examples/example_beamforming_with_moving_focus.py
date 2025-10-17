@@ -58,7 +58,7 @@ plt.scatter(*mics.pos[:2])
 plt.grid()
 
 # %%
-# The sampling frequency is set to 12.8 kHz, and the total
+# The sampling frequency is set to 6.4 kHz, and the total
 # number of samples is calculated based on the pass duration.
 
 SFREQ = 6400  # Hz, sampling frequency
@@ -145,7 +145,7 @@ source_mixer = ac.SourceMixer(sources=mps)
 
 
 def plot_maps(res, grid, figure_title):
-    n = len(res)
+    n = 3
     fig, axes = plt.subplots(1, n, figsize=(12, 4))
     times = [(i * BLOCK_SIZE) / SFREQ for i in range(n)]
 
@@ -183,8 +183,8 @@ def plot_maps(res, grid, figure_title):
 # This serves as a baseline to compare against the moving-focus results.
 #
 # For the fixed-focus case, the grid is placed at *z* = ``LZ``, i.e.,
-# in the plane of the microphones, while the moving-focus grid follows
-# the trajectory ``tr0`` at *z* = 0, i.e., in the plane of the sources.
+# in the plane of the sources, while the moving-focus grid follows
+# the trajectory ``tr0`` at *z* = 0 (in the plane of the microphones).
 # It is also wider in the *x* direction to account for the source
 # movement during the pass-by.
 
