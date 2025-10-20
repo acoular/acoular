@@ -7,7 +7,7 @@ Evaluate source characterization performance.
 =============================================
 
 This example demonstrates how to evaluate the performance of a beamforming algorithm using
-the :class:`acoular.tools.metrics.MetricEvaluator` class to calculate the metrics introduced in
+the :class:`~acoular.tools.metrics.MetricEvaluator` class to calculate the metrics introduced in
 :cite:`Herold2017`.
 """
 
@@ -70,7 +70,7 @@ target_data = np.array([[n1.rms**2 / nfft], [n2.rms**2 / nfft], [n3.rms**2 / nff
 
 
 # %%
-# Finally, we use the :class:`acoular.tools.metrics.MetricEvaluator` class to evaluate the
+# Finally, we use the :class:`~acoular.tools.metrics.MetricEvaluator` class to evaluate the
 # reconstruction accuracy of the beamforming algorithm with three different metrics. A circular
 # sector with a radius of 5% of the aperture is used to define the sectors for the evaluation.
 

@@ -58,14 +58,18 @@ docs = [
     "matplotlib",
     "numpydoc",
     "pickleshare",
+    "pydata-sphinx-theme",
     "sounddevice",
     "sphinx",
+    "sphinx-copybutton",
     "sphinx_gallery",
     "sphinxcontrib-bibtex",
     "setuptools", # unfortunately still needed for sphinxcontrib-bibtex (https://github.com/mcmtroffaes/sphinxcontrib-bibtex/issues/345)
 ]
 
 tests = [
+    "h5py",
+    "pylops",
     "pytest",
     "pytest-mock",
     "pytest-cov",
@@ -73,11 +77,9 @@ tests = [
     "pytest-cases",
     "pytest-env",
     "pytest-profiling",
-    "sounddevice",
-    "pylops",
-    "traitsui",
-    "h5py<3.15",
     "PyYAML",
+    "sounddevice",
+    "traitsui",
 ]
 
 dev = [

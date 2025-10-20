@@ -1686,7 +1686,7 @@ class TimeReverse(TimeOut):
         ------
         :class:`numpy.ndarray`
             An array containing the time-reversed version of the signal for the current block.
-            Each block will have the shape (``num``, :attr:`acoular.base.TimeOut.num_channels`),
+            Each block will have the shape (``num``, :attr:`~acoular.base.TimeOut.num_channels`),
             where :attr:`~acoular.base.TimeOut.num_channels` is inherited from the :attr:`source`.
             The last block may contain fewer samples if the total number of samples is not
             a multiple of ``num``.
@@ -2148,14 +2148,14 @@ class FilterBank(TimeOut):
 
     Implements a bank of parallel filters. This class should not be instantiated by itself.
 
-    Inherits from :class:`acoular.base.TimeOut`, and defines the structure for working with filter
+    Inherits from :class:`~acoular.base.TimeOut`, and defines the structure for working with filter
     banks for processing multi-channel time series data, such as time signal signals.
 
     See Also
     --------
-    :class:`acoular.base.TimeOut` :
+    :class:`~acoular.base.TimeOut` :
         ABC for signal processing blocks that interact with data from a source.
-    :class:`acoular.base.SamplesGenerator` :
+    :class:`~acoular.base.SamplesGenerator` :
         Interface for any generating multi-channel time domain signal processing block.
     :mod:`scipy.signal` :
         SciPy module for signal processing.
@@ -2242,7 +2242,7 @@ class OctaveFilterBank(FilterBank):
     --------
     :class:`FilterBank` :
         The base class for implementing IIR filter banks.
-    :class:`acoular.base.SamplesGenerator` :
+    :class:`~acoular.base.SamplesGenerator` :
         Interface for generating multi-channel time domain signal processing blocks.
     :mod:`scipy.signal` :
         SciPy module for signal processing.
@@ -2319,9 +2319,9 @@ class WriteWAV(TimeOut):
 
     See Also
     --------
-    :class:`acoular.base.TimeOut` :
+    :class:`~acoular.base.TimeOut` :
         ABC for signal processing blocks that interact with data from a source.
-    :class:`acoular.base.SamplesGenerator` :
+    :class:`~acoular.base.SamplesGenerator` :
         Interface for generating multi-channel time domain signal processing blocks.
     :mod:`wave` :
         Python module for handling WAV files.
@@ -2499,9 +2499,9 @@ class WriteH5(TimeOut):
 
     See Also
     --------
-    :class:`acoular.base.TimeOut` :
+    :class:`~acoular.base.TimeOut` :
         ABC for signal processing blocks interacting with data from a source.
-    :class:`acoular.base.SamplesGenerator` :
+    :class:`~acoular.base.SamplesGenerator` :
         Interface for generating multi-channel time-domain signal processing blocks.
     h5py :
         Python library for reading and writing HDF5 files.
@@ -2674,9 +2674,9 @@ class TimeConvolve(TimeOut):
 
     See Also
     --------
-    :class:`acoular.base.TimeOut` :
+    :class:`~acoular.base.TimeOut` :
         The parent class for signal processing blocks.
-    :class:`acoular.base.SamplesGenerator` :
+    :class:`~acoular.base.SamplesGenerator` :
         The interface for generating multi-channel time-domain signals.
     """
 

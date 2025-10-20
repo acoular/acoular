@@ -3,5 +3,5 @@
 
 .. currentmodule:: {{ module }}
 
-.. autoclass:: {{ objname }}
-    :no-index:
+.. automethod:: {{ fullname }}
+   :no-index:
