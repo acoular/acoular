@@ -4,6 +4,12 @@
 """
 Implement blockwise processing in the time domain.
 
+.. inheritance-diagram::
+                acoular.tprocess
+    :top-classes:
+                acoular.base.TimeOut
+    :parts: 1
+
 .. autosummary::
     :toctree: generated/
 

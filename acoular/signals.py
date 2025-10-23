@@ -4,6 +4,12 @@
 """
 Implements signal generators for the simulation of acoustic sources.
 
+.. inheritance-diagram::
+                acoular.signals
+    :top-classes:
+                acoular.signals.SignalGenerator
+    :parts: 1
+
 .. autosummary::
     :toctree: generated/
 
