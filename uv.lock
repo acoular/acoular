@@ -33,6 +33,13 @@ dependencies = [
 ]
 
 [package.optional-dependencies]
+full = [
+    { name = "matplotlib" },
+    { name = "pylops" },
+    { name = "sounddevice" },
+]
+
+[package.dev-dependencies]
 dev = [
     { name = "graphviz" },
     { name = "h5py" },
@@ -78,11 +85,6 @@ docs = [
     { name = "sphinx-gallery" },
     { name = "sphinxcontrib-bibtex" },
 ]
-full = [
-    { name = "matplotlib" },
-    { name = "pylops" },
-    { name = "sounddevice" },
-]
 tests = [
     { name = "h5py" },
     { name = "pylops" },
@@ -100,66 +102,74 @@ tests = [
 
 [package.metadata]
 requires-dist = [
-    { name = "graphviz", marker = "extra == 'dev'" },
-    { name = "graphviz", marker = "extra == 'docs'" },
-    { name = "h5py", marker = "extra == 'dev'" },
-    { name = "h5py", marker = "extra == 'tests'" },
-    { name = "hatch", marker = "extra == 'dev'" },
-    { name = "ipython", marker = "extra == 'dev'" },
-    { name = "ipython", marker = "extra == 'docs'" },
-    { name = "matplotlib", marker = "extra == 'dev'" },
-    { name = "matplotlib", marker = "extra == 'docs'" },
     { name = "matplotlib", marker = "extra == 'full'" },
     { name = "numba" },
     { name = "numpy" },
-    { name = "numpydoc", marker = "extra == 'dev'" },
-    { name = "numpydoc", marker = "extra == 'docs'" },
-    { name = "pickleshare", marker = "extra == 'dev'" },
-    { name = "pickleshare", marker = "extra == 'docs'" },
-    { name = "pydata-sphinx-theme", marker = "extra == 'dev'" },
-    { name = "pydata-sphinx-theme", marker = "extra == 'docs'" },
-    { name = "pylops", marker = "extra == 'dev'" },
     { name = "pylops", marker = "extra == 'full'" },
-    { name = "pylops", marker = "extra == 'tests'" },
-    { name = "pytest", marker = "extra == 'dev'" },
-    { name = "pytest", marker = "extra == 'tests'" },
-    { name = "pytest-cases", marker = "extra == 'dev'" },
-    { name = "pytest-cases", marker = "extra == 'tests'" },
-    { name = "pytest-cov", marker = "extra == 'dev'" },
-    { name = "pytest-cov", marker = "extra == 'tests'" },
-    { name = "pytest-env", marker = "extra == 'dev'" },
-    { name = "pytest-env", marker = "extra == 'tests'" },
-    { name = "pytest-mock", marker = "extra == 'dev'" },
-    { name = "pytest-mock", marker = "extra == 'tests'" },
-    { name = "pytest-profiling", marker = "extra == 'dev'" },
-    { name = "pytest-profiling", marker = "extra == 'tests'" },
-    { name = "pytest-regtest", marker = "extra == 'dev'" },
-    { name = "pytest-regtest", marker = "extra == 'tests'" },
-    { name = "pyyaml", marker = "extra == 'dev'" },
-    { name = "pyyaml", marker = "extra == 'tests'" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = "==0.8.1" },
     { name = "scikit-learn" },
     { name = "scipy", specifier = ">=1.1.0,!=1.16.*" },
-    { name = "setuptools", marker = "extra == 'dev'" },
-    { name = "setuptools", marker = "extra == 'docs'" },
-    { name = "sounddevice", marker = "extra == 'dev'" },
-    { name = "sounddevice", marker = "extra == 'docs'" },
     { name = "sounddevice", marker = "extra == 'full'" },
-    { name = "sounddevice", marker = "extra == 'tests'" },
-    { name = "sphinx", marker = "extra == 'dev'" },
-    { name = "sphinx", marker = "extra == 'docs'" },
-    { name = "sphinx-copybutton", marker = "extra == 'dev'" },
-    { name = "sphinx-copybutton", marker = "extra == 'docs'" },
-    { name = "sphinx-gallery", marker = "extra == 'dev'" },
-    { name = "sphinx-gallery", marker = "extra == 'docs'" },
-    { name = "sphinxcontrib-bibtex", marker = "extra == 'dev'" },
-    { name = "sphinxcontrib-bibtex", marker = "extra == 'docs'" },
     { name = "tables" },
     { name = "traits", specifier = ">=6.0" },
-    { name = "traitsui", marker = "extra == 'dev'" },
-    { name = "traitsui", marker = "extra == 'tests'" },
 ]
-provides-extras = ["dev", "docs", "full", "tests"]
+provides-extras = ["full"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "graphviz" },
+    { name = "h5py" },
+    { name = "hatch" },
+    { name = "ipython" },
+    { name = "matplotlib" },
+    { name = "numpydoc" },
+    { name = "pickleshare" },
+    { name = "pydata-sphinx-theme" },
+    { name = "pylops" },
+    { name = "pytest" },
+    { name = "pytest-cases" },
+    { name = "pytest-cov" },
+    { name = "pytest-env" },
+    { name = "pytest-mock" },
+    { name = "pytest-profiling" },
+    { name = "pytest-regtest" },
+    { name = "pyyaml" },
+    { name = "ruff", specifier = "==0.8.1" },
+    { name = "setuptools" },
+    { name = "sounddevice" },
+    { name = "sphinx" },
+    { name = "sphinx-copybutton" },
+    { name = "sphinx-gallery" },
+    { name = "sphinxcontrib-bibtex" },
+    { name = "traitsui" },
+]
+docs = [
+    { name = "graphviz" },
+    { name = "ipython" },
+    { name = "matplotlib" },
+    { name = "numpydoc" },
+    { name = "pickleshare" },
+    { name = "pydata-sphinx-theme" },
+    { name = "setuptools" },
+    { name = "sounddevice" },
+    { name = "sphinx" },
+    { name = "sphinx-copybutton" },
+    { name = "sphinx-gallery" },
+    { name = "sphinxcontrib-bibtex" },
+]
+tests = [
+    { name = "h5py" },
+    { name = "pylops" },
+    { name = "pytest" },
+    { name = "pytest-cases" },
+    { name = "pytest-cov" },
+    { name = "pytest-env" },
+    { name = "pytest-mock" },
+    { name = "pytest-profiling" },
+    { name = "pytest-regtest" },
+    { name = "pyyaml" },
+    { name = "sounddevice" },
+    { name = "traitsui" },
+]
 
 [[package]]
 name = "alabaster"

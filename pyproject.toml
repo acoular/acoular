@@ -52,6 +52,7 @@ full = [
     "sounddevice",
 ]
 
+[dependency-groups]
 docs = [
     "ipython",
     "graphviz",
@@ -83,9 +84,9 @@ tests = [
 ]
 
 dev = [
-    "acoular[docs,full,tests]",
-    "hatch",
     "ruff==0.8.1", # remember to change version pin in docs/source/contributing/install.rst
+    {include-group = "docs"},
+    {include-group = "tests"},
 ]
 
 [project.urls]
@@ -99,37 +100,6 @@ build-backend = "hatchling.build"
 
 [tool.hatch.version]
 path = "acoular/version.py"
-
-[tool.hatch.envs.hatch-static-analysis]
-dependencies = ["ruff==0.8.1"]
-config-path = [".ruff.toml"]
-
-[tool.hatch.envs.docs]
-python = "3.13"
-dependencies = [
-    "acoular[docs]"
-]
-
-[tool.hatch.envs.docs.scripts]
-build = ["cd docs && make html"]
-
-[tool.hatch.envs.tests]
-dependencies = [
-    "acoular[tests]"
-]
-
-[[tool.hatch.envs.tests.matrix]]
-python = ["3.10", "3.11", "3.12", "3.13"]
-
-[tool.hatch.envs.tests.scripts]
-reset_regtest = ["python -m pytest -v --regtest-reset tests/regression"]
-profile = ["test --profile-svg"]
-
-
-[tool.hatch.envs.tests.overrides]
-platform.linux.pre-install-commands = ['cat /proc/cpuinfo']
-platform.macos.pre-install-commands = ['sysctl -a machdep.cpu']
-platform.windows.pre-install-commands = ['systeminfo']
 
 
 [tool.hatch.build.targets.sdist]
