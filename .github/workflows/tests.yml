@@ -22,9 +22,9 @@ jobs:
         python-version: ['3.10','3.11','3.12', '3.13']
     steps:
       - name: Check out a copy of the repository
-        uses: actions/checkout@v4
-      - name: Set up hatch
-        uses: ./.github/actions/setup-hatch
+        uses: actions/checkout@v5
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
         with:
           python-version: ${{ matrix.python-version }}
       - name: Set up PortAudio
@@ -32,25 +32,27 @@ jobs:
         with:
           os: ${{ matrix.os }}
       - name: Check import
-        run: hatch -v run +py=${{ matrix.python-version }} tests:import
+        run: uv run --frozen python -c "import acoular"
       - name: Check demo
-        run: hatch -v run +py=${{ matrix.python-version }} tests:demo
+        run: uv run --frozen python -c "import acoular; acoular.demo.acoular_demo.run()"
       - name: Run tests
-        run: hatch -v run +py=${{ matrix.python-version }} tests:test
+        run: uv run --frozen --extra tests python -m pytest -v --durations=10 tests
       - name: Run doctests
-        run: hatch -v run +py=${{ matrix.python-version }} tests:doctest
+        run: uv run --frozen --extra tests python -m pytest --doctest-modules acoular
 
   coverage:
     runs-on: ubuntu-latest
     steps:
       - name: Check out a copy of the repository
-        uses: actions/checkout@v4
-      - name: Set up hatch
-        uses: ./.github/actions/setup-hatch
+        uses: actions/checkout@v5
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
       - name: Set up PortAudio
         uses: ./.github/actions/setup-portaudio
       - name: Generate coverage report
-        run: hatch -v run +py=3.13 tests:coverage
+        run: |
+          uv run --frozen --extra tests python -m pytest -v tests --durations=10 --cov=acoular --cov-report html --cov-report term-missing --cov-report markdown-append:$GITHUB_STEP_SUMMARY
+          uv run --frozen --extra tests python -m pytest -v --doctest-modules acoular --cov=acoular --cov-report html --cov-report term-missing --cov-append
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
         with:
