@@ -11,6 +11,7 @@ Upcoming Release
         * move unit system notes to the notes sections
         * new website with improved API reference
         * split large dependency graph into submodule graphs for clarity
+        * fix link in README
 
     **Internal**
         * refactored import statements and input aliases
