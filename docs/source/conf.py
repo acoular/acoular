@@ -106,6 +106,7 @@ latex_documents = [
 # sphinx.ext.inheritance_diagram extension settings
 # ------------------------------------------------
 
+graphviz_output_format = 'svg'  # make graph match light/dark theme
 inheritance_graph_attrs = {'rankdir': "LR", 'size': '"11.0,24.0"',
                                'fontsize': 18, 'ratio': 'compress'}
 
