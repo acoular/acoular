@@ -3,6 +3,9 @@ What's new
 
 Upcoming Release
 ------------------------
+
+25.10
+------------------------
     **Documentation**
         * fix docstrings in submodule :mod:`acoular.tbeamform`
         * move unit system notes to the notes sections
