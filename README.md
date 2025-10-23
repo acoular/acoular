@@ -71,7 +71,7 @@ For more detailed installation instructions, see the [documentation](https://aco
 
 # Documentation and help
 Documentation is available [here](https://acoular.org) with a
-[getting started](https://acoular.org/get_started/index.html) section and
+[getting started](https://www.acoular.org/user_guide/get_started.html) section and
 [examples](https://acoular.org/auto_examples/index.html).
 
 The Acoular [blog](https://acoular.github.io/blog/) contains some tutorials.
