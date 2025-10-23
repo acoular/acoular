@@ -7,7 +7,7 @@ Cross-spectral matrix import
 ============================
 
 This example demonstrates how to import a cross-spectral matrix from a external source by means of
-the :class:`acoular.spectra.PowerSpectraImport` class. The CSM is created numerically for a
+the :class:`~acoular.spectra.PowerSpectraImport` class. The CSM is created numerically for a
 frequency of 8 kHz.
 """
 

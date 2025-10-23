@@ -7,6 +7,12 @@ The classes in this module are abstract base classes that provide a common inter
 that generate an output via the generator :meth:`result` in block-wise manner. They are not intended
 to be used directly, but to be subclassed by classes that implement the actual signal processing.
 
+.. inheritance-diagram::
+                acoular.base
+    :top-classes:
+                acoular.base.Generator
+    :parts: 1
+
 .. autosummary::
     :toctree: generated/
 

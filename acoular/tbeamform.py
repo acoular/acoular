@@ -4,6 +4,12 @@
 """
 Implements beamformers in the time domain.
 
+.. inheritance-diagram::
+                acoular.tbeamform
+    :top-classes:
+                acoular.base.TimeOut
+    :parts: 1
+
 .. autosummary::
     :toctree: generated/
 

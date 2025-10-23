@@ -48,7 +48,7 @@ class LockedGenerator:
 
     See Also
     --------
-    :class:`acoular.process.SampleSplitter` :
+    :class:`~acoular.process.SampleSplitter` :
         Distribute data from a source to several following objects in a block-wise manner.
     """
 
@@ -76,7 +76,7 @@ class Average(InOut):
 
     See Also
     --------
-    :class:`acoular.base.InOut` :
+    :class:`~acoular.base.InOut` :
         Receive data from any source domain and return signals in the same domain.
 
     Examples
@@ -210,8 +210,8 @@ class Cache(InOut):
 
     See Also
     --------
-    :class:`acoular.base.InOut` : Receive data from any source domain and return signals in the same
-                                  domain.
+    :class:`~acoular.base.InOut` : Receive data from any source domain and return signals in the
+                                   same domain.
 
     Examples
     --------

@@ -4,6 +4,12 @@
 """
 Implements signal generators for the simulation of acoustic sources.
 
+.. inheritance-diagram::
+                acoular.signals
+    :top-classes:
+                acoular.signals.SignalGenerator
+    :parts: 1
+
 .. autosummary::
     :toctree: generated/
 
@@ -167,9 +173,9 @@ class NoiseGenerator(SignalGenerator):
 
     See Also
     --------
-    :class:`acoular.signals.PNoiseGenerator` : For pink noise generation.
-    :class:`acoular.signals.WNoiseGenerator` : For pink white generation.
-    :class:`acoular.sources.UncorrelatedNoiseSource` : For per-channel noise generation.
+    :class:`~acoular.signals.PNoiseGenerator` : For pink noise generation.
+    :class:`~acoular.signals.WNoiseGenerator` : For pink white generation.
+    :class:`~acoular.sources.UncorrelatedNoiseSource` : For per-channel noise generation.
     """
 
     #: Root mean square (RMS) amplitude of the signal. For a point source,
@@ -208,8 +214,8 @@ class WNoiseGenerator(NoiseGenerator):
     --------
     :obj:`numpy.random.RandomState.standard_normal` :
         Used here to generate normally distributed noise.
-    :class:`acoular.signals.PNoiseGenerator` : For pink noise generation.
-    :class:`acoular.sources.UncorrelatedNoiseSource` : For per-channel noise generation.
+    :class:`~acoular.signals.PNoiseGenerator` : For pink noise generation.
+    :class:`~acoular.sources.UncorrelatedNoiseSource` : For per-channel noise generation.
 
     Examples
     --------
@@ -275,8 +281,8 @@ class PNoiseGenerator(NoiseGenerator):
 
     See Also
     --------
-    :class:`acoular.signals.WNoiseGenerator` : For white noise generation.
-    :class:`acoular.sources.UncorrelatedNoiseSource` : For per-channel noise generation.
+    :class:`~acoular.signals.WNoiseGenerator` : For white noise generation.
+    :class:`~acoular.sources.UncorrelatedNoiseSource` : For per-channel noise generation.
 
     References
     ----------
