@@ -29,6 +29,25 @@ def test_load_csm(aiaa_bechmark_csm_file):
     assert csm.csm.shape == (csm.fftfreq().shape[0], csm.num_channels, csm.num_channels)
 
 
+def test_load_csm_invalid_file(tmp_path):
+    """Test CsmAIAABenchmark with invalid/incomplete file returns 0 channels.
+
+    Parameters
+    ----------
+    tmp_path : pathlib.Path
+        Temporary directory path (pytest fixture).
+    """
+    import h5py
+
+    # Create a minimal HDF5 file without the required MetaData/ArrayAttributes structure
+    invalid_file = tmp_path / 'invalid_csm.h5'
+    with h5py.File(invalid_file, 'w') as f:
+        f.create_dataset('dummy', data=[1, 2, 3])
+
+    csm = ac.aiaa.CsmAIAABenchmark(file=str(invalid_file))
+    assert csm.num_channels == 0
+
+
 def test_load_time(aiaa_bechmark_time_data_file):
     """Test if time data is loaded correctly from an AIAA benchmark file.
 
