@@ -122,16 +122,9 @@ dependencies = [
 python = ["3.10", "3.11", "3.12", "3.13"]
 
 [tool.hatch.envs.tests.scripts]
-import = ["python -c \"import acoular\""]
-test = ["python -m pytest -v --durations=10 tests"]
 reset_regtest = ["python -m pytest -v --regtest-reset tests/regression"]
-profile = ["test --profile-svg"] 
-demo = ["python -m acoular.demo"]
-coverage = [
-    "test --cov=acoular --cov-report html --cov-report term-missing --cov-report markdown-append:$GITHUB_STEP_SUMMARY",
-    "python -m pytest -v --cov=acoular --cov-report html --cov-report term-missing --cov-append --doctest-modules acoular",
-    ]
-doctest = ["python -m pytest --doctest-modules acoular"]
+profile = ["test --profile-svg"]
+
 
 [tool.hatch.envs.tests.overrides]
 platform.linux.pre-install-commands = ['cat /proc/cpuinfo']
@@ -149,6 +142,8 @@ packages = ["acoular"]
 
 
 [tool.pytest.ini_options]
+testpaths = "tests"
+addopts = "-v --durations=10 --cov-report=html --cov-report=term-missing --cov-report=markdown-append:$GITHUB_STEP_SUMMARY"
 filterwarnings = [
     "error", # treat warnings as errors
     "ignore::pluggy.PluggyTeardownRaisedWarning", # raised internally by pytest-regtest
