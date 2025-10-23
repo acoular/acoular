@@ -1,0 +1,206 @@
+<ns0:svg xmlns:ns0="http://www.w3.org/2000/svg" xmlns:ns1="http://www.w3.org/1999/xlink" width="647pt" height="230pt" viewBox="0.00 0.00 647.00 230.00">
+<ns0:g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 226)">
+<ns0:title>inheritance855182f4ee</ns0:title>
+
+<ns0:g id="node1" class="node">
+<ns0:title>LineSource</ns0:title>
+<ns0:g id="a_node1"><ns0:a ns1:href="../api_ref/generated/acoular.sources.html#acoular.sources.LineSource" ns1:title="Define a fixed line source with a signal." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="425,-222 355,-222 355,-203 425,-203 425,-222" />
+<ns0:text text-anchor="middle" x="390" y="-210" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">LineSource</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node5" class="node">
+<ns0:title>MovingLineSource</ns0:title>
+<ns0:g id="a_node5"><ns0:a ns1:href="../api_ref/generated/acoular.sources.html#acoular.sources.MovingLineSource" ns1:title="A moving :class:`line source&lt;LineSource&gt;` with an arbitrary signal." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="621,-212 515,-212 515,-193 621,-193 621,-212" />
+<ns0:text text-anchor="middle" x="568" y="-200" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">MovingLineSource</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge3" class="edge">
+<ns0:title>LineSource-&gt;MovingLineSource</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M425.35,-210.55C449.27,-209.19 481.75,-207.34 509.57,-205.76" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="509.81,-207.5 514.7,-205.47 509.61,-204.01 509.81,-207.5" />
+</ns0:g>
+
+<ns0:g id="node2" class="node">
+<ns0:title>PointSource</ns0:title>
+<ns0:g id="a_node2"><ns0:a ns1:href="../api_ref/generated/acoular.sources.html#acoular.sources.PointSource" ns1:title="Define a fixed point source emitting a signal, intended for simulations." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="250,-130 176,-130 176,-111 250,-111 250,-130" />
+<ns0:text text-anchor="middle" x="213" y="-118" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">PointSource</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge1" class="edge">
+<ns0:title>PointSource-&gt;LineSource</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M224.81,-130.17C242.98,-145.92 281.34,-177.1 319,-194.5 328.59,-198.93 339.45,-202.4 349.7,-205.05" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="349.4,-206.78 354.68,-206.29 350.25,-203.38 349.4,-206.78" />
+</ns0:g>
+
+<ns0:g id="node6" class="node">
+<ns0:title>MovingPointSource</ns0:title>
+<ns0:g id="a_node6"><ns0:a ns1:href="../api_ref/generated/acoular.sources.html#acoular.sources.MovingPointSource" ns1:title="Define a moving :class:`point source&lt;PointSource&gt;` emitting a :attr:`~PointSource.signal`." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="445,-185 335,-185 335,-166 445,-166 445,-185" />
+<ns0:text text-anchor="middle" x="390" y="-173" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">MovingPointSource</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge5" class="edge">
+<ns0:title>PointSource-&gt;MovingPointSource</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M239.26,-130.1C260.4,-137.96 291.45,-149.12 319,-157.5 327.05,-159.95 335.69,-162.35 344.06,-164.56" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="343.94,-166.34 349.22,-165.91 344.83,-162.95 343.94,-166.34" />
+</ns0:g>
+
+<ns0:g id="node8" class="node">
+<ns0:title>PointSourceDipole</ns0:title>
+<ns0:g id="a_node8"><ns0:a ns1:href="../api_ref/generated/acoular.sources.html#acoular.sources.PointSourceDipole" ns1:title="Define a fixed point source with dipole characteristics." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="443,-148 337,-148 337,-129 443,-129 443,-148" />
+<ns0:text text-anchor="middle" x="390" y="-136" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">PointSourceDipole</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge10" class="edge">
+<ns0:title>PointSource-&gt;PointSourceDipole</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M250.26,-124.23C273.72,-126.64 304.78,-129.84 331.56,-132.59" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="331.7,-134.37 336.85,-133.14 332.06,-130.88 331.7,-134.37" />
+</ns0:g>
+
+<ns0:g id="node10" class="node">
+<ns0:title>PointSourceConvolve</ns0:title>
+<ns0:g id="a_node10"><ns0:a ns1:href="../api_ref/generated/acoular.sources.html#acoular.sources.PointSourceConvolve" ns1:title="Blockwise convolution of a source signal with an impulse response (IR)." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="450,-111 330,-111 330,-92 450,-92 450,-111" />
+<ns0:text text-anchor="middle" x="390" y="-99" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">PointSourceConvolve</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge9" class="edge">
+<ns0:title>PointSource-&gt;PointSourceConvolve</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M250.26,-116.56C271.75,-114.23 299.62,-111.2 324.73,-108.48" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="324.93,-110.22 329.71,-107.94 324.55,-106.74 324.93,-110.22" />
+</ns0:g>
+
+<ns0:g id="node12" class="node">
+<ns0:title>SphericalHarmonicSource</ns0:title>
+<ns0:g id="a_node12"><ns0:a ns1:href="../api_ref/generated/acoular.sources.html#acoular.sources.SphericalHarmonicSource" ns1:title="Define a fixed spherical harmonic source emitting a signal." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="461,-74 319,-74 319,-55 461,-55 461,-74" />
+<ns0:text text-anchor="middle" x="390" y="-62" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">SphericalHarmonicSource</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge12" class="edge">
+<ns0:title>PointSource-&gt;SphericalHarmonicSource</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M250.31,-112.7C261,-109.96 272.61,-106.53 283,-102.5 299.86,-95.95 302.17,-90.13 319,-83.5 326.57,-80.52 334.77,-77.83 342.81,-75.48" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="343.46,-77.12 347.79,-74.06 342.5,-73.75 343.46,-77.12" />
+</ns0:g>
+
+<ns0:g id="node3" class="node">
+<ns0:title>MaskedTimeSamples</ns0:title>
+<ns0:g id="a_node3"><ns0:a ns1:href="../api_ref/generated/acoular.sources.html#acoular.sources.MaskedTimeSamples" ns1:title="Container to process and manage time-domain data with support for masking samples and channels." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="450.5,-37 329.5,-37 329.5,-18 450.5,-18 450.5,-37" />
+<ns0:text text-anchor="middle" x="390" y="-25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">MaskedTimeSamples</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node4" class="node">
+<ns0:title>TimeSamples</ns0:title>
+<ns0:g id="a_node4"><ns0:a ns1:href="../api_ref/generated/acoular.sources.html#acoular.sources.TimeSamples" ns1:title="Container for processing time data in ``*.h5`` or NumPy array format." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="254.5,-93 171.5,-93 171.5,-74 254.5,-74 254.5,-93" />
+<ns0:text text-anchor="middle" x="213" y="-81" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">TimeSamples</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge2" class="edge">
+<ns0:title>TimeSamples-&gt;MaskedTimeSamples</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M254.63,-74.56C264.08,-72.03 274,-69 283,-65.5 299.86,-58.95 302.17,-53.13 319,-46.5 326.57,-43.52 334.77,-40.83 342.81,-38.48" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="343.46,-40.12 347.79,-37.06 342.5,-36.75 343.46,-40.12" />
+</ns0:g>
+
+<ns0:g id="edge4" class="edge">
+<ns0:title>MovingPointSource-&gt;MovingLineSource</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M445.24,-183.82C465.63,-186.95 488.87,-190.51 509.55,-193.69" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="509.54,-195.46 514.75,-194.48 510.07,-192 509.54,-195.46" />
+</ns0:g>
+
+<ns0:g id="node7" class="node">
+<ns0:title>MovingPointSourceDipole</ns0:title>
+<ns0:g id="a_node7"><ns0:a ns1:href="../api_ref/generated/acoular.sources.html#acoular.sources.MovingPointSourceDipole" ns1:title="Define a moving point source with dipole characteristics." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="639,-157 497,-157 497,-138 639,-138 639,-157" />
+<ns0:text text-anchor="middle" x="568" y="-145" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">MovingPointSourceDipole</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge7" class="edge">
+<ns0:title>MovingPointSource-&gt;MovingPointSourceDipole</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M445.24,-166.87C463.15,-164.02 483.26,-160.82 501.9,-157.86" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="502.45,-159.54 507.11,-157.03 501.9,-156.08 502.45,-159.54" />
+</ns0:g>
+
+<ns0:g id="edge6" class="edge">
+<ns0:title>PointSourceDipole-&gt;MovingPointSourceDipole</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M443.33,-141.18C458.57,-141.96 475.54,-142.82 491.89,-143.66" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="491.86,-145.41 496.94,-143.92 492.04,-141.91 491.86,-145.41" />
+</ns0:g>
+
+<ns0:g id="node9" class="node">
+<ns0:title>SamplesGenerator</ns0:title>
+<ns0:g id="a_node9"><ns0:a ns1:href="../api_ref/generated/acoular.base.html#acoular.base.SamplesGenerator" ns1:title="Interface for any generating multi-channel time domain signal processing block." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="107,-74 0,-74 0,-55 107,-55 107,-74" />
+<ns0:text text-anchor="middle" x="53.5" y="-62" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">SamplesGenerator</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge8" class="edge">
+<ns0:title>SamplesGenerator-&gt;PointSource</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M74.55,-74.14C92.27,-82.4 118.96,-94.26 143,-102.5 151.89,-105.55 161.58,-108.37 170.81,-110.84" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="170.6,-112.59 175.88,-112.17 171.49,-109.21 170.6,-112.59" />
+</ns0:g>
+
+<ns0:g id="edge13" class="edge">
+<ns0:title>SamplesGenerator-&gt;TimeSamples</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M107.38,-70.88C126.5,-73.19 147.9,-75.77 166.34,-77.99" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="166.29,-79.75 171.46,-78.61 166.71,-76.27 166.29,-79.75" />
+</ns0:g>
+
+<ns0:g id="node11" class="node">
+<ns0:title>SourceMixer</ns0:title>
+<ns0:g id="a_node11"><ns0:a ns1:href="../api_ref/generated/acoular.sources.html#acoular.sources.SourceMixer" ns1:title="Combine signals from multiple sources by mixing their outputs." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="251.5,-56 174.5,-56 174.5,-37 251.5,-37 251.5,-56" />
+<ns0:text text-anchor="middle" x="213" y="-44" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">SourceMixer</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge11" class="edge">
+<ns0:title>SamplesGenerator-&gt;SourceMixer</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M107.38,-58.46C127.48,-56.16 150.1,-53.57 169.16,-51.4" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="169.66,-53.1 174.43,-50.79 169.26,-49.62 169.66,-53.1" />
+</ns0:g>
+
+<ns0:g id="node13" class="node">
+<ns0:title>UncorrelatedNoiseSource</ns0:title>
+<ns0:g id="a_node13"><ns0:a ns1:href="../api_ref/generated/acoular.sources.html#acoular.sources.UncorrelatedNoiseSource" ns1:title="Simulate uncorrelated white or pink noise signals at multiple channels." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="283,-19 143,-19 143,0 283,0 283,-19" />
+<ns0:text text-anchor="middle" x="213" y="-7" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">UncorrelatedNoiseSource</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge14" class="edge">
+<ns0:title>SamplesGenerator-&gt;UncorrelatedNoiseSource</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M76.05,-54.9C93.81,-47.2 119.76,-36.4 143,-28.5 151.44,-25.63 160.56,-22.88 169.33,-20.41" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="169.81,-22.09 174.15,-19.06 168.87,-18.72 169.81,-22.09" />
+</ns0:g>
+</ns0:g>
+</ns0:svg>

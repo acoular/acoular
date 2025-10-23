@@ -1,0 +1,239 @@
+<ns0:svg xmlns:ns0="http://www.w3.org/2000/svg" xmlns:ns1="http://www.w3.org/1999/xlink" width="463pt" height="360pt" viewBox="0.00 0.00 463.00 360.00">
+<ns0:g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 356)">
+<ns0:title>inheritanced3414070b9</ns0:title>
+
+<ns0:g id="node1" class="node">
+<ns0:title>BeamformerAdaptiveGrid</ns0:title>
+<ns0:g id="a_node1"><ns0:a ns1:href="../api_ref/generated/acoular.fbeamform.html#acoular.fbeamform.BeamformerAdaptiveGrid" ns1:title="Abstract base class for array methods without predefined grid." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="280,-352 138,-352 138,-333 280,-333 280,-352" />
+<ns0:text text-anchor="middle" x="209" y="-340" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">BeamformerAdaptiveGrid</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node13" class="node">
+<ns0:title>BeamformerGridlessOrth</ns0:title>
+<ns0:g id="a_node13"><ns0:a ns1:href="../api_ref/generated/acoular.fbeamform.html#acoular.fbeamform.BeamformerGridlessOrth" ns1:title="Orthogonal beamforming without predefined grid." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="455,-352 316,-352 316,-333 455,-333 455,-352" />
+<ns0:text text-anchor="middle" x="385.5" y="-340" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">BeamformerGridlessOrth</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge12" class="edge">
+<ns0:title>BeamformerAdaptiveGrid-&gt;BeamformerGridlessOrth</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M280.22,-342.5C290.22,-342.5 300.53,-342.5 310.6,-342.5" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="310.84,-344.25 315.84,-342.5 310.84,-340.75 310.84,-344.25" />
+</ns0:g>
+
+<ns0:g id="node2" class="node">
+<ns0:title>BeamformerBase</ns0:title>
+<ns0:g id="a_node2"><ns0:a ns1:href="../api_ref/generated/acoular.fbeamform.html#acoular.fbeamform.BeamformerBase" ns1:title="Beamforming using the basic delay-and-sum algorithm in the frequency domain." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="102,-185 0,-185 0,-166 102,-166 102,-185" />
+<ns0:text text-anchor="middle" x="51" y="-173" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">BeamformerBase</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge1" class="edge">
+<ns0:title>BeamformerBase-&gt;BeamformerAdaptiveGrid</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M54.72,-185.29C62.67,-212.05 88.52,-286.93 138,-324.5 141.09,-326.85 144.46,-328.89 147.99,-330.67" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="147.62,-332.43 152.89,-332.93 149.09,-329.25 147.62,-332.43" />
+</ns0:g>
+
+<ns0:g id="node4" class="node">
+<ns0:title>BeamformerCMF</ns0:title>
+<ns0:g id="a_node4"><ns0:a ns1:href="../api_ref/generated/acoular.fbeamform.html#acoular.fbeamform.BeamformerCMF" ns1:title="Covariance Matrix Fitting algorithm." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="259,-315 159,-315 159,-296 259,-296 259,-315" />
+<ns0:text text-anchor="middle" x="209" y="-303" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">BeamformerCMF</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge3" class="edge">
+<ns0:title>BeamformerBase-&gt;BeamformerCMF</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M56.51,-185.03C67.32,-206.78 96.89,-260.34 138,-287.5 142.91,-290.74 148.36,-293.4 154.01,-295.58" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="153.48,-297.25 158.78,-297.3 154.67,-293.96 153.48,-297.25" />
+</ns0:g>
+
+<ns0:g id="node5" class="node">
+<ns0:title>BeamformerCapon</ns0:title>
+<ns0:g id="a_node5"><ns0:a ns1:href="../api_ref/generated/acoular.fbeamform.html#acoular.fbeamform.BeamformerCapon" ns1:title="Beamforming using the Capon (Mininimum Variance) algorithm." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="263.5,-278 154.5,-278 154.5,-259 263.5,-259 263.5,-278" />
+<ns0:text text-anchor="middle" x="209" y="-266" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">BeamformerCapon</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge4" class="edge">
+<ns0:title>BeamformerBase-&gt;BeamformerCapon</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M60.23,-185.15C74.44,-201.18 105.22,-233.25 138,-250.5 142.93,-253.1 148.26,-255.33 153.69,-257.26" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="153.41,-259.01 158.71,-258.94 154.52,-255.69 153.41,-259.01" />
+</ns0:g>
+
+<ns0:g id="node6" class="node">
+<ns0:title>BeamformerClean</ns0:title>
+<ns0:g id="a_node6"><ns0:a ns1:href="../api_ref/generated/acoular.fbeamform.html#acoular.fbeamform.BeamformerClean" ns1:title="CLEAN deconvolution algorithm." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="262,-241 156,-241 156,-222 262,-222 262,-241" />
+<ns0:text text-anchor="middle" x="209" y="-229" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">BeamformerClean</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge5" class="edge">
+<ns0:title>BeamformerBase-&gt;BeamformerClean</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M71.1,-185.03C88.29,-193.34 114.4,-205.32 138,-213.5 145.46,-216.09 153.48,-218.49 161.34,-220.64" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="160.93,-222.34 166.21,-221.95 161.83,-218.96 160.93,-222.34" />
+</ns0:g>
+
+<ns0:g id="node7" class="node">
+<ns0:title>BeamformerCleansc</ns0:title>
+<ns0:g id="a_node7"><ns0:a ns1:href="../api_ref/generated/acoular.fbeamform.html#acoular.fbeamform.BeamformerCleansc" ns1:title="CLEAN-SC deconvolution algorithm." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="267,-204 151,-204 151,-185 267,-185 267,-204" />
+<ns0:text text-anchor="middle" x="209" y="-192" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">BeamformerCleansc</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge6" class="edge">
+<ns0:title>BeamformerBase-&gt;BeamformerCleansc</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M102.22,-181.62C116.02,-183.3 131.16,-185.14 145.56,-186.9" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="145.65,-188.67 150.83,-187.54 146.08,-185.2 145.65,-188.67" />
+</ns0:g>
+
+<ns0:g id="node8" class="node">
+<ns0:title>BeamformerDamas</ns0:title>
+<ns0:g id="a_node8"><ns0:a ns1:href="../api_ref/generated/acoular.fbeamform.html#acoular.fbeamform.BeamformerDamas" ns1:title="DAMAS deconvolution algorithm." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="265.5,-167 152.5,-167 152.5,-148 265.5,-148 265.5,-167" />
+<ns0:text text-anchor="middle" x="209" y="-155" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">BeamformerDamas</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge7" class="edge">
+<ns0:title>BeamformerBase-&gt;BeamformerDamas</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M102.22,-169.71C116.62,-168.04 132.48,-166.21 147.44,-164.49" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="147.71,-166.22 152.47,-163.91 147.3,-162.74 147.71,-166.22" />
+</ns0:g>
+
+<ns0:g id="node10" class="node">
+<ns0:title>BeamformerEig</ns0:title>
+<ns0:g id="a_node10"><ns0:a ns1:href="../api_ref/generated/acoular.fbeamform.html#acoular.fbeamform.BeamformerEig" ns1:title="Beamforming using eigenvalue and eigenvector techniques." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="255.5,-130 162.5,-130 162.5,-111 255.5,-111 255.5,-130" />
+<ns0:text text-anchor="middle" x="209" y="-118" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">BeamformerEig</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge9" class="edge">
+<ns0:title>BeamformerBase-&gt;BeamformerEig</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M72.56,-165.99C89.8,-158.24 115.19,-147.33 138,-139.5 146.44,-136.6 155.57,-133.85 164.37,-131.39" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="164.86,-133.07 169.21,-130.05 163.93,-129.7 164.86,-133.07" />
+</ns0:g>
+
+<ns0:g id="node11" class="node">
+<ns0:title>BeamformerFunctional</ns0:title>
+<ns0:g id="a_node11"><ns0:a ns1:href="../api_ref/generated/acoular.fbeamform.html#acoular.fbeamform.BeamformerFunctional" ns1:title="Functional beamforming algorithm." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="273,-93 145,-93 145,-74 273,-74 273,-93" />
+<ns0:text text-anchor="middle" x="209" y="-81" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">BeamformerFunctional</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge10" class="edge">
+<ns0:title>BeamformerBase-&gt;BeamformerFunctional</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M60.54,-165.92C74.97,-150.31 105.76,-119.46 138,-102.5 143.77,-99.46 150.07,-96.88 156.46,-94.68" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="157.14,-96.3 161.34,-93.08 156.05,-92.98 157.14,-96.3" />
+</ns0:g>
+
+<ns0:g id="node15" class="node">
+<ns0:title>BeamformerOrth</ns0:title>
+<ns0:g id="a_node15"><ns0:a ns1:href="../api_ref/generated/acoular.fbeamform.html#acoular.fbeamform.BeamformerOrth" ns1:title="Orthogonal deconvolution algorithm." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="258.5,-56 159.5,-56 159.5,-37 258.5,-37 258.5,-56" />
+<ns0:text text-anchor="middle" x="209" y="-44" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">BeamformerOrth</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge14" class="edge">
+<ns0:title>BeamformerBase-&gt;BeamformerOrth</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M56.75,-165.86C67.84,-144.37 97.61,-92.32 138,-65.5 143,-62.18 148.56,-59.44 154.31,-57.17" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="155.08,-58.75 159.17,-55.38 153.87,-55.47 155.08,-58.75" />
+</ns0:g>
+
+<ns0:g id="node16" class="node">
+<ns0:title>BeamformerSODIX</ns0:title>
+<ns0:g id="a_node16"><ns0:a ns1:href="../api_ref/generated/acoular.fbeamform.html#acoular.fbeamform.BeamformerSODIX" ns1:title="Source directivity modeling in the cross-spectral matrix (SODIX) algorithm." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="263.5,-19 154.5,-19 154.5,0 263.5,0 263.5,-19" />
+<ns0:text text-anchor="middle" x="209" y="-7" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">BeamformerSODIX</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge15" class="edge">
+<ns0:title>BeamformerBase-&gt;BeamformerSODIX</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M54.79,-165.88C62.91,-139.56 89.16,-65.88 138,-28.5 141.75,-25.63 145.89,-23.2 150.25,-21.13" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="151.16,-22.64 155.04,-19.03 149.76,-19.44 151.16,-22.64" />
+</ns0:g>
+
+<ns0:g id="node3" class="node">
+<ns0:title>Grid</ns0:title>
+<ns0:g id="a_node3"><ns0:a ns1:href="../api_ref/generated/acoular.grids.html#acoular.grids.Grid" ns1:title="Abstract base class for grid geometries." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="78,-352 24,-352 24,-333 78,-333 78,-352" />
+<ns0:text text-anchor="middle" x="51" y="-340" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">Grid</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge2" class="edge">
+<ns0:title>Grid-&gt;BeamformerAdaptiveGrid</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M78.11,-342.5C93.1,-342.5 112.76,-342.5 132.23,-342.5" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="132.71,-344.25 137.71,-342.5 132.71,-340.75 132.71,-344.25" />
+</ns0:g>
+
+<ns0:g id="node9" class="node">
+<ns0:title>BeamformerDamasPlus</ns0:title>
+<ns0:g id="a_node9"><ns0:a ns1:href="../api_ref/generated/acoular.fbeamform.html#acoular.fbeamform.BeamformerDamasPlus" ns1:title="DAMAS deconvolution :cite:`Brooks2006` for solving the system of equations." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="452,-167 319,-167 319,-148 452,-148 452,-167" />
+<ns0:text text-anchor="middle" x="385.5" y="-155" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">BeamformerDamasPlus</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge8" class="edge">
+<ns0:title>BeamformerDamas-&gt;BeamformerDamasPlus</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M265.69,-157.5C280.93,-157.5 297.64,-157.5 313.61,-157.5" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="313.99,-159.25 318.99,-157.5 313.99,-155.75 313.99,-159.25" />
+</ns0:g>
+
+<ns0:g id="node12" class="node">
+<ns0:title>BeamformerGIB</ns0:title>
+<ns0:g id="a_node12"><ns0:a ns1:href="../api_ref/generated/acoular.fbeamform.html#acoular.fbeamform.BeamformerGIB" ns1:title="Beamforming GIB methods with different normalizations." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="433,-130 338,-130 338,-111 433,-111 433,-130" />
+<ns0:text text-anchor="middle" x="385.5" y="-118" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">BeamformerGIB</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge11" class="edge">
+<ns0:title>BeamformerEig-&gt;BeamformerGIB</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M255.85,-120.5C279.42,-120.5 308.23,-120.5 332.61,-120.5" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="332.74,-122.25 337.74,-120.5 332.74,-118.75 332.74,-122.25" />
+</ns0:g>
+
+<ns0:g id="node14" class="node">
+<ns0:title>BeamformerMusic</ns0:title>
+<ns0:g id="a_node14"><ns0:a ns1:href="../api_ref/generated/acoular.fbeamform.html#acoular.fbeamform.BeamformerMusic" ns1:title="Beamforming using the MUSIC algorithm." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="439,-93 332,-93 332,-74 439,-74 439,-93" />
+<ns0:text text-anchor="middle" x="385.5" y="-81" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">BeamformerMusic</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge13" class="edge">
+<ns0:title>BeamformerEig-&gt;BeamformerMusic</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M254.94,-110.97C279.27,-105.81 309.39,-99.43 334.47,-94.11" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="334.88,-95.81 339.41,-93.06 334.16,-92.39 334.88,-95.81" />
+</ns0:g>
+</ns0:g>
+</ns0:svg>

@@ -1,0 +1,89 @@
+<ns0:svg xmlns:ns0="http://www.w3.org/2000/svg" xmlns:ns1="http://www.w3.org/1999/xlink" width="275pt" height="138pt" viewBox="0.00 0.00 275.00 138.00">
+<ns0:g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 134)">
+<ns0:title>inheritancee9e9cfdf8e</ns0:title>
+
+<ns0:g id="node1" class="node">
+<ns0:title>Grid</ns0:title>
+<ns0:g id="a_node1"><ns0:a ns1:href="../api_ref/generated/acoular.grids.html#acoular.grids.Grid" ns1:title="Abstract base class for grid geometries." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="54,-74 0,-74 0,-55 54,-55 54,-74" />
+<ns0:text text-anchor="middle" x="27" y="-62" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">Grid</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node2" class="node">
+<ns0:title>ImportGrid</ns0:title>
+<ns0:g id="a_node2"><ns0:a ns1:href="../api_ref/generated/acoular.grids.html#acoular.grids.ImportGrid" ns1:title="Load a 3D grid from an XML file." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="159,-130 90,-130 90,-111 159,-111 159,-130" />
+<ns0:text text-anchor="middle" x="124.5" y="-118" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">ImportGrid</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge1" class="edge">
+<ns0:title>Grid-&gt;ImportGrid</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M43.14,-74.11C55.61,-81.95 73.8,-93.19 90,-102.5 93.38,-104.44 96.99,-106.45 100.54,-108.39" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="100.08,-110.13 105.32,-110.97 101.75,-107.05 100.08,-110.13" />
+</ns0:g>
+
+<ns0:g id="node3" class="node">
+<ns0:title>LineGrid</ns0:title>
+<ns0:g id="a_node3"><ns0:a ns1:href="../api_ref/generated/acoular.grids.html#acoular.grids.LineGrid" ns1:title="Define a 3D grid for a line geometry." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="153,-93 96,-93 96,-74 153,-74 153,-93" />
+<ns0:text text-anchor="middle" x="124.5" y="-81" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">LineGrid</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge2" class="edge">
+<ns0:title>Grid-&gt;LineGrid</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M54.1,-69.69C65.4,-71.94 78.77,-74.6 90.73,-76.98" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="90.52,-78.72 95.77,-77.98 91.2,-75.29 90.52,-78.72" />
+</ns0:g>
+
+<ns0:g id="node4" class="node">
+<ns0:title>MergeGrid</ns0:title>
+<ns0:g id="a_node4"><ns0:a ns1:href="../api_ref/generated/acoular.grids.html#acoular.grids.MergeGrid" ns1:title="Base class for merging multiple grid geometries." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="158.5,-56 90.5,-56 90.5,-37 158.5,-37 158.5,-56" />
+<ns0:text text-anchor="middle" x="124.5" y="-44" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">MergeGrid</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge3" class="edge">
+<ns0:title>Grid-&gt;MergeGrid</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M54.1,-59.58C63.68,-57.77 74.75,-55.69 85.19,-53.72" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="85.66,-55.41 90.25,-52.77 85.01,-51.97 85.66,-55.41" />
+</ns0:g>
+
+<ns0:g id="node5" class="node">
+<ns0:title>RectGrid</ns0:title>
+<ns0:g id="a_node5"><ns0:a ns1:href="../api_ref/generated/acoular.grids.html#acoular.grids.RectGrid" ns1:title="Provides a 2D Cartesian grid for beamforming results." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="154,-19 95,-19 95,0 154,0 154,-19" />
+<ns0:text text-anchor="middle" x="124.5" y="-7" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">RectGrid</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge4" class="edge">
+<ns0:title>Grid-&gt;RectGrid</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M44.29,-54.98C56.78,-47.7 74.45,-37.42 90,-28.5 93.83,-26.3 97.92,-23.97 101.88,-21.72" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="102.95,-23.12 106.44,-19.13 101.23,-20.08 102.95,-23.12" />
+</ns0:g>
+
+<ns0:g id="node6" class="node">
+<ns0:title>RectGrid3D</ns0:title>
+<ns0:g id="a_node6"><ns0:a ns1:href="../api_ref/generated/acoular.grids.html#acoular.grids.RectGrid3D" ns1:title="Provide a cartesian 3D grid for the beamforming results." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="267,-19 195,-19 195,0 267,0 267,-19" />
+<ns0:text text-anchor="middle" x="231" y="-7" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">RectGrid3D</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge5" class="edge">
+<ns0:title>RectGrid-&gt;RectGrid3D</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M154.06,-9.5C165.05,-9.5 177.83,-9.5 189.73,-9.5" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="189.77,-11.25 194.77,-9.5 189.77,-7.75 189.77,-11.25" />
+</ns0:g>
+</ns0:g>
+</ns0:svg>
