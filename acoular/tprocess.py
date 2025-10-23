@@ -4,6 +4,12 @@
 """
 Implement blockwise processing in the time domain.
 
+.. inheritance-diagram::
+                acoular.tprocess
+    :top-classes:
+                acoular.base.TimeOut
+    :parts: 1
+
 .. autosummary::
     :toctree: generated/
 
@@ -69,7 +75,6 @@ from traits.api import (
 # acoular imports
 from .base import SamplesGenerator, TimeOut
 from .configuration import config
-from .deprecation import deprecated_alias
 from .environments import cartToCyl, cylToCart
 from .h5files import _get_h5file_class
 from .internal import digest, ldigest
@@ -78,9 +83,6 @@ from .process import Cache
 from .tools.utils import find_basename
 
 
-@deprecated_alias(
-    {'numchannels_total': 'num_channels_total', 'numsamples_total': 'num_samples_total'}, removal_version='25.10'
-)
 class MaskedTimeOut(TimeOut):
     """
     A signal processing block that allows for the selection of specific channels and time samples.
@@ -1690,7 +1692,7 @@ class TimeReverse(TimeOut):
         ------
         :class:`numpy.ndarray`
             An array containing the time-reversed version of the signal for the current block.
-            Each block will have the shape (``num``, :attr:`acoular.base.TimeOut.num_channels`),
+            Each block will have the shape (``num``, :attr:`~acoular.base.TimeOut.num_channels`),
             where :attr:`~acoular.base.TimeOut.num_channels` is inherited from the :attr:`source`.
             The last block may contain fewer samples if the total number of samples is not
             a multiple of ``num``.
@@ -2146,21 +2148,20 @@ class FiltFreqWeight(Filter):
         return tf2sos(b, a)
 
 
-@deprecated_alias({'numbands': 'num_bands'}, read_only=True, removal_version='25.10')
 class FilterBank(TimeOut):
     """
     Abstract base class for IIR filter banks based on :mod:`scipy.signal.lfilter`.
 
     Implements a bank of parallel filters. This class should not be instantiated by itself.
 
-    Inherits from :class:`acoular.base.TimeOut`, and defines the structure for working with filter
+    Inherits from :class:`~acoular.base.TimeOut`, and defines the structure for working with filter
     banks for processing multi-channel time series data, such as time signal signals.
 
     See Also
     --------
-    :class:`acoular.base.TimeOut` :
+    :class:`~acoular.base.TimeOut` :
         ABC for signal processing blocks that interact with data from a source.
-    :class:`acoular.base.SamplesGenerator` :
+    :class:`~acoular.base.SamplesGenerator` :
         Interface for any generating multi-channel time domain signal processing block.
     :mod:`scipy.signal` :
         SciPy module for signal processing.
@@ -2247,7 +2248,7 @@ class OctaveFilterBank(FilterBank):
     --------
     :class:`FilterBank` :
         The base class for implementing IIR filter banks.
-    :class:`acoular.base.SamplesGenerator` :
+    :class:`~acoular.base.SamplesGenerator` :
         Interface for generating multi-channel time domain signal processing blocks.
     :mod:`scipy.signal` :
         SciPy module for signal processing.
@@ -2314,7 +2315,6 @@ class OctaveFilterBank(FilterBank):
         return sos
 
 
-@deprecated_alias({'name': 'file'}, removal_version='25.10')
 class WriteWAV(TimeOut):
     """
     Saves time signal from one or more channels as mono, stereo, or multi-channel ``.wav`` file.
@@ -2325,9 +2325,9 @@ class WriteWAV(TimeOut):
 
     See Also
     --------
-    :class:`acoular.base.TimeOut` :
+    :class:`~acoular.base.TimeOut` :
         ABC for signal processing blocks that interact with data from a source.
-    :class:`acoular.base.SamplesGenerator` :
+    :class:`~acoular.base.SamplesGenerator` :
         Interface for generating multi-channel time domain signal processing blocks.
     :mod:`wave` :
         Python module for handling WAV files.
@@ -2495,9 +2495,6 @@ class WriteWAV(TimeOut):
             pass
 
 
-@deprecated_alias(
-    {'name': 'file', 'numsamples_write': 'num_samples_write', 'writeflag': 'write_flag'}, removal_version='25.10'
-)
 class WriteH5(TimeOut):
     """
     Saves time signal data as a ``.h5`` (HDF5) file.
@@ -2508,9 +2505,9 @@ class WriteH5(TimeOut):
 
     See Also
     --------
-    :class:`acoular.base.TimeOut` :
+    :class:`~acoular.base.TimeOut` :
         ABC for signal processing blocks interacting with data from a source.
-    :class:`acoular.base.SamplesGenerator` :
+    :class:`~acoular.base.SamplesGenerator` :
         Interface for generating multi-channel time-domain signal processing blocks.
     h5py :
         Python library for reading and writing HDF5 files.
@@ -2683,9 +2680,9 @@ class TimeConvolve(TimeOut):
 
     See Also
     --------
-    :class:`acoular.base.TimeOut` :
+    :class:`~acoular.base.TimeOut` :
         The parent class for signal processing blocks.
-    :class:`acoular.base.SamplesGenerator` :
+    :class:`~acoular.base.SamplesGenerator` :
         The interface for generating multi-channel time-domain signals.
     """
 

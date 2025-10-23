@@ -3,9 +3,14 @@ What's new
 
 Upcoming Release
 ------------------------
+
+25.10
+------------------------
     **Documentation**
         * fix docstrings in submodule :mod:`acoular.tbeamform`
         * move unit system notes to the notes sections
+        * new website with improved API reference
+        * split large dependency graph into submodule graphs for clarity
 
     **Internal**
         * refactored import statements and input aliases
@@ -316,7 +321,7 @@ Upcoming Release
     * Supports Python 3.6, 3.7, 3.8
     * New base classes for time signal processing: :class:`~acoular.tprocess.Filter`, :class:`~acoular.tprocess.FilterBank`
         * New filter classes: :class:`~acoular.tprocess.TimeExpAverage`, :class:`~acoular.tprocess.FiltFreqWeight`, :class:`~acoular.tprocess.OctaveFilterBank`
-        * Demo script is now part of module (see :doc:`../get_started/index` for usage)
+        * Demo script is now part of module (see :doc:`../user_guide/get_started` for usage)
     * New class for processing sound card input: :class:`~acoular.sdinput.SoundDeviceSamplesGenerator`
     * New class for cumulative averaging: :class:`~acoular.tprocess.TimeCumAverage`
     * New grid classes :class:`~acoular.grids.ImportGrid`, :class:`~acoular.grids.LineGrid`, :class:`~acoular.grids.MergeGrid`
@@ -373,7 +378,7 @@ Upcoming Release
 ------------
 
     * Adds support for Python 3.7
-    * Introduces new :class:`~acoular.fbeamform.SteeringVector` class (see :doc:`../get_started/index` and `../examples/index` for usage). With this, some of the Beamformer and PointSource traits are deprecated and should no longer be used. While the current version is intended to be fully compatible with older scripts, deprecation warnings will be raised if necessary.
+    * Introduces new :class:`~acoular.fbeamform.SteeringVector` class (see :doc:`../user_guide/get_started` and `../examples/index` for usage). With this, some of the Beamformer and PointSource traits are deprecated and should no longer be used. While the current version is intended to be fully compatible with older scripts, deprecation warnings will be raised if necessary.
     * Introduces optional use of reference distance for SPL evaluation (current default: reference position at (x,y,z)=(0,0,0) )
     * Introduces some basic Unit tests to evaluate the beamformer results
     * Bugfix: CLEAN algorithm now uses correct PSFs

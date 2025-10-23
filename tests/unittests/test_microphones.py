@@ -2,7 +2,6 @@ from pathlib import Path
 
 import acoular as ac
 import numpy as np
-import pytest
 from pytest_cases import fixture, parametrize
 
 
@@ -16,14 +15,8 @@ def micgeom(invalid_channels):
 
 
 def test_load_xml():
-    """Test if calibration data is loaded correctly from an XML file.
-
-    Test for deprecation warning when using from_file attribute
-    """
+    """Test if calibration data is loaded correctly from an XML file."""
     xml_file_path = Path(ac.__file__).parent / 'xml' / 'tub_vogel64.xml'
-    # Test for deprecation warning when using from_file attribute
-    with pytest.deprecated_call():
-        mic_geom = ac.MicGeom(from_file=xml_file_path)
     # Test for correct number of microphones and shapes
     mic_geom = ac.MicGeom(file=xml_file_path)
     assert mic_geom.num_mics == 64

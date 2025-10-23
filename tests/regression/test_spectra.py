@@ -18,7 +18,7 @@ import pytest
 )
 def freq_data(request, regression_source_case):
     """
-    Fixture to create a :class:`acoular.freq_data.PowerSpectra` instance for testing.
+    Fixture to create a :class:`~acoular.freq_data.PowerSpectra` instance for testing.
 
     The fixture is parametrized to test the object with default and custom configuration.
 

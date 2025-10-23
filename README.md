@@ -128,6 +128,6 @@ plt.savefig('three_sources.png', dpi=300, bbox_inches='tight')
 plt.show()
 ```
 
-![result](https://github.com/acoular/acoular/blob/master/docs/source/get_started/three_source_py3_colormap.png?raw=true)
+![result](https://github.com/acoular/acoular/blob/master/docs/source/user_guide/three_source_py3_colormap.png?raw=true)
 
 

@@ -58,12 +58,12 @@ circle_sector = ac.CircSector(x=-0.3, y=-0.1, r=0.05)
 rect_sector = ac.RectSector(x_min=-0.5, x_max=-0.4, y_min=-0.15, y_max=0.15)
 
 # %%
-# :class:`acoular.grids.PolySector` is a class that takes a list of points as input
+# :class:`~acoular.grids.PolySector` is a class that takes a list of points as input
 # list of points containing x1,y1,x2,y2,...,xi,yi
 poly_sector = ac.PolySector(edges=[-0.25, -0.1, -0.1, -0.1, -0.1, -0.2, -0.2, -0.25, -0.3, -0.2])
 
 # %%
-# The :class:`acoular.grids.MultiSector` class allows to sum over multiple different sectors
+# The :class:`~acoular.grids.MultiSector` class allows to sum over multiple different sectors
 multi_sector = ac.MultiSector(sectors=[circle_sector, rect_sector, poly_sector])
 
 # %%

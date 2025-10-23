@@ -7,6 +7,12 @@ The classes in this module are abstract base classes that provide a common inter
 that generate an output via the generator :meth:`result` in block-wise manner. They are not intended
 to be used directly, but to be subclassed by classes that implement the actual signal processing.
 
+.. inheritance-diagram::
+                acoular.base
+    :top-classes:
+                acoular.base.Generator
+    :parts: 1
+
 .. autosummary::
     :toctree: generated/
 
@@ -32,11 +38,9 @@ from traits.api import (
 )
 
 # acoular imports
-from .deprecation import deprecated_alias
 from .internal import digest
 
 
-@deprecated_alias({'numchannels': 'num_channels', 'numsamples': 'num_samples'}, removal_version='25.10')
 class Generator(ABCHasStrictTraits):
     """Interface for any generating signal processing block.
 
@@ -156,7 +160,6 @@ class SpectraGenerator(Generator):
         """
 
 
-@deprecated_alias({'numchannels': 'num_channels', 'numsamples': 'num_samples'}, read_only=True, removal_version='25.10')
 class TimeOut(SamplesGenerator):
     """
     Abstract base class receiving from a :attr:`source` and returning time domain signals.
@@ -204,11 +207,6 @@ class TimeOut(SamplesGenerator):
         """
 
 
-@deprecated_alias(
-    {'numchannels': 'num_channels', 'numsamples': 'num_samples', 'numfreqs': 'num_freqs'},
-    read_only=True,
-    removal_version='25.10',
-)
 class SpectraOut(SpectraGenerator):
     """
     Abstract base class receiving from a :attr:`source` and returning frequency domain signals.
@@ -263,7 +261,6 @@ class SpectraOut(SpectraGenerator):
         """
 
 
-@deprecated_alias({'numchannels': 'num_channels', 'numsamples': 'num_samples'}, read_only=True, removal_version='25.10')
 class InOut(SamplesGenerator, SpectraGenerator):
     """
     Abstract base class receiving from a :attr:`source` and returning signals in the same domain.
