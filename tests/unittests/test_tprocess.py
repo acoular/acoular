@@ -44,7 +44,7 @@ def test_mixer_validation_errors(create_time_data_source, mismatch_type):
     if mismatch_type == 'sample_freq':
         secondary_source = ac.TimeSamples(sample_freq=44100, data=np.random.randn(100, 2))
         error_match = 'Sample frequency.*does not fit'
-    else:  # num_channels
+    else:
         secondary_source = create_time_data_source(num_channels=3, num_samples=100)
         error_match = 'Channel count.*does not fit'
 
@@ -57,8 +57,9 @@ def test_mixer_validation_errors(create_time_data_source, mismatch_type):
 @parametrize(
     'primary_samples,secondary_samples,block_size,expected_samples',
     [
-        (200, 50, 64, 50),  # Test StopIteration handling
-        (75, 60, 64, 60),  # Test shape truncation
+        (200, 50, 64, 50),  # Test StopIteration handling - secondary ends early
+        (75, 60, 64, 60),  # Test shape truncation - non-aligned lengths
+        (500, 100, 64, 100),  # Test early termination with larger difference
     ],
 )
 def test_mixer_result_handling(
@@ -75,6 +76,8 @@ def test_mixer_result_handling(
 
     total_samples = sum(block.shape[0] for block in results)
     assert total_samples == expected_samples
+
+    assert all(b.shape[0] > 0 for b in results), 'All blocks should have samples'
 
 
 def test_mixer_addition_correctness():
