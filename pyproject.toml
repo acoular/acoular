@@ -68,7 +68,9 @@ docs = [
     "setuptools", # unfortunately still needed for sphinxcontrib-bibtex (https://github.com/mcmtroffaes/sphinxcontrib-bibtex/issues/345)
 ]
 
-tests = [
+lint = ["ruff==0.14.2"]  # remember to change version pin in docs/source/contributing/install.rst
+
+test = [
     "h5py",
     "pylops",
     "pytest",
@@ -84,9 +86,9 @@ tests = [
 ]
 
 dev = [
-    "ruff==0.8.1", # remember to change version pin in docs/source/contributing/install.rst
     {include-group = "docs"},
-    {include-group = "tests"},
+    {include-group = "lint"},
+    {include-group = "test"},
 ]
 
 [project.urls]
@@ -97,6 +99,9 @@ repository = "https://github.com/acoular/acoular"
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.uv]
+default-groups = ["lint"]  # needed until https://github.com/astral-sh/uv/issues/16396 is fixed
 
 [tool.hatch.version]
 path = "acoular/version.py"
@@ -127,7 +132,7 @@ filterwarnings = [
     "ignore:Closing remaining open file*:tables.exceptions.UnclosedFileWarning",
 ]
 env = [
-    "OPENBLAS_NUM_THREADS=1"
+    "OPENBLAS_NUM_THREADS=1",
 ]
 
 [tool.coverage.run]

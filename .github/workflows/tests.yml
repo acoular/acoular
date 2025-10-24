@@ -36,9 +36,9 @@ jobs:
       - name: Check demo
         run: uv run --frozen python -c "import acoular; acoular.demo.acoular_demo.run()"
       - name: Run tests
-        run: uv run --frozen --group tests python -m pytest
+        run: uv run --frozen --group test python -m pytest
       - name: Run doctests
-        run: uv run --frozen --group tests python -m pytest --doctest-modules acoular
+        run: uv run --frozen --group test python -m pytest --doctest-modules acoular
 
   coverage:
     runs-on: ubuntu-latest
@@ -51,8 +51,8 @@ jobs:
         uses: ./.github/actions/setup-portaudio
       - name: Generate coverage report
         run: |
-          uv run --frozen --group tests python -m pytest --cov=acoular
-          uv run --frozen --group tests python -m pytest --cov=acoular --cov-append --doctest-modules acoular
+          uv run --frozen --group test python -m pytest --cov=acoular
+          uv run --frozen --group test python -m pytest --cov=acoular --cov-append --doctest-modules acoular
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
         with:
