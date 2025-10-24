@@ -36,136 +36,101 @@ def test_metadata(tmp_path, create_time_data_source, acoular_cls, h5library, dat
         np.testing.assert_allclose(ts.metadata['test'][()], data)
 
 
-def test_mixer_sample_freq_mismatch(create_time_data_source):
-    """Test Mixer raises ValueError when sources have different sample frequencies.
-
-    Parameters
-    ----------
-    create_time_data_source : callable
-        Fixture factory for creating time data sources.
-    """
-    # Create primary source with sample_freq=51200
+@parametrize('mismatch_type', ['sample_freq', 'num_channels'])
+def test_mixer_validation_errors(create_time_data_source, mismatch_type):
+    """Test Mixer raises ValueError when sources have incompatible properties."""
     primary_source = create_time_data_source(num_channels=2, num_samples=100)
-    
-    # Create secondary source with different sample_freq
-    secondary_source = ac.TimeSamples(sample_freq=44100, data=np.random.randn(100, 2))
-    
-    # Create Mixer and expect ValueError
+
+    if mismatch_type == 'sample_freq':
+        secondary_source = ac.TimeSamples(sample_freq=44100, data=np.random.randn(100, 2))
+        error_match = 'Sample frequency.*does not fit'
+    else:  # num_channels
+        secondary_source = create_time_data_source(num_channels=3, num_samples=100)
+        error_match = 'Channel count.*does not fit'
+
     mixer = ac.Mixer(source=primary_source, sources=[secondary_source])
-    
-    with pytest.raises(ValueError, match='Sample frequency.*does not fit'):
+
+    with pytest.raises(ValueError, match=error_match):
         mixer.validate_sources()
 
 
-def test_mixer_channel_count_mismatch(create_time_data_source):
-    """Test Mixer raises ValueError when sources have different channel counts.
-
-    This test covers lines 1498-1503 of tprocess.py by verifying that validate_sources
-    raises a ValueError when additional sources have a different number of channels
-    than the primary source.
-
-    Parameters
-    ----------
-    create_time_data_source : callable
-        Fixture factory for creating time data sources.
-    """
-    # Create primary source with 2 channels
-    primary_source = create_time_data_source(num_channels=2, num_samples=100)
-    
-    # Create secondary source with 3 channels
-    secondary_source = create_time_data_source(num_channels=3, num_samples=100)
-    
-    # Create Mixer and expect ValueError
+@parametrize(
+    'primary_samples,secondary_samples,block_size,expected_samples',
+    [
+        (200, 50, 64, 50),  # Test StopIteration handling
+        (75, 60, 64, 60),  # Test shape truncation
+    ],
+)
+def test_mixer_result_handling(
+    create_time_data_source, primary_samples, secondary_samples, block_size, expected_samples
+):
+    """Test Mixer handles different source lengths and shape mismatches."""
+    primary_source = create_time_data_source(num_channels=2, num_samples=primary_samples)
+    secondary_source = create_time_data_source(num_channels=2, num_samples=secondary_samples)
     mixer = ac.Mixer(source=primary_source, sources=[secondary_source])
-    
-    with pytest.raises(ValueError, match='Channel count.*does not fit'):
-        mixer.validate_sources()
 
-
-def test_mixer_stop_iteration_handling(create_time_data_source):
-    """Test Mixer stops when one of the additional sources ends early.
-
-    Parameters
-    ----------
-    create_time_data_source : callable
-        Fixture factory for creating time data sources.
-    """
-    # Create primary source with 200 samples
-    primary_source = create_time_data_source(num_channels=2, num_samples=200)
-    
-    # Create secondary source with only 50 samples (shorter)
-    secondary_source = create_time_data_source(num_channels=2, num_samples=50)
-    
-    # Create Mixer
-    mixer = ac.Mixer(source=primary_source, sources=[secondary_source])
-    
-    # Collect all results
     results = []
-    for block in mixer.result(num=64):
+    for block in mixer.result(num=block_size):
         results.append(block)
-    
-    # Total samples should be limited by the shorter source (50 samples)
+
     total_samples = sum(block.shape[0] for block in results)
-    assert total_samples == 50
-
-
-def test_mixer_shape_handling_with_truncation(create_time_data_source):
-    """Test Mixer handles shape mismatches and truncates appropriately.
-
-    Parameters
-    ----------
-    create_time_data_source : callable
-        Fixture factory for creating time data sources.
-    """
-    # Create primary source with 75 samples (not a multiple of block size)
-    primary_source = create_time_data_source(num_channels=2, num_samples=75)
-    
-    # Create secondary source with 60 samples (shorter, also not a multiple)
-    secondary_source = create_time_data_source(num_channels=2, num_samples=60)
-    
-    # Create Mixer
-    mixer = ac.Mixer(source=primary_source, sources=[secondary_source])
-    
-    # Process with block size of 64
-    results = []
-    for block in mixer.result(num=64):
-        results.append(block)
-    
-    # Should get 1 block with 60 samples (limited by secondary_source)
-    assert len(results) == 1
-    assert results[0].shape[0] == 60
+    assert total_samples == expected_samples
 
 
 def test_mixer_addition_correctness():
-    """Test that Mixer correctly adds signals from multiple sources.
-
-    Parameters
-    ----------
-    create_time_data_source : callable
-        Fixture factory for creating time data sources.
-    """
-    # Create sources with known data
-    # Need to make a copy since Mixer modifies arrays in-place
+    """Test that Mixer correctly adds signals from multiple sources."""
     rng = np.random.RandomState(42)
     data1 = rng.randn(100, 2)
     data2 = rng.randn(100, 2)
-    
-    # Store expected result before creating sources (as Mixer modifies in-place)
     expected = data1 + data2
-    
+
     source1 = ac.TimeSamples(sample_freq=51200, data=data1.copy())
     source2 = ac.TimeSamples(sample_freq=51200, data=data2.copy())
-    
-    # Create Mixer
     mixer = ac.Mixer(source=source1, sources=[source2])
-    
-    # Get mixed result
+
     mixed_data = []
     for block in mixer.result(num=100):
-        mixed_data.append(block.copy())  # Copy to avoid modification after yield
-    
+        mixed_data.append(block.copy())
     mixed_data = np.vstack(mixed_data)
-    
-    # Verify the sum is correct
+
     np.testing.assert_allclose(mixed_data, expected)
 
+
+@parametrize('filter_cls', [ac.FiltOctave, ac.FiltFiltOctave])
+def test_filt_octave_band_frequency_too_high(create_time_data_source, filter_cls):
+    """Test octave filters raise ValueError when band frequency is too high."""
+    source = create_time_data_source(num_channels=2, num_samples=100)
+    filt = filter_cls(source=source, band=20000.0)
+
+    with pytest.raises(ValueError, match='band frequency too high'):
+        _ = filt.sos
+
+
+@parametrize('weight', ['A', 'C', 'Z'])
+def test_filt_freq_weight_types(create_time_data_source, weight):
+    """Test FiltFreqWeight correctly generates SOS coefficients for different weight types."""
+    source = create_time_data_source(num_channels=2, num_samples=100)
+    filt = ac.FiltFreqWeight(source=source, weight=weight)
+    sos = filt.sos
+
+    assert sos is not None
+    assert isinstance(sos, np.ndarray)
+    assert sos.ndim == 2
+    assert sos.shape[1] == 6
+    assert sos.shape[0] >= 1
+
+
+def test_filt_freq_weight_z_flat_response():
+    """Test that Z-weighting produces a flat frequency response."""
+    rng = np.random.RandomState(42)
+    data = rng.randn(100, 1)
+    source = ac.TimeSamples(sample_freq=51200, data=data.copy())
+    filt = ac.FiltFreqWeight(source=source, weight='Z')
+
+    output = []
+    for block in filt.result(num=100):
+        output.append(block)
+    output = np.vstack(output)
+
+    # Z-weighting should pass signal unchanged (flat response)
+    np.testing.assert_allclose(output, data, rtol=1e-3, atol=1e-6)
