@@ -63,6 +63,6 @@ def test_mpos_aperture(micgeom):
         MicGeom object with 4 microphones (fixture).
     """
     expected_aperture = 2.0
-    assert np.allclose(
-        micgeom.aperture, expected_aperture
-    ), f'Expected aperture {expected_aperture}, but got {micgeom.aperture}'
+    assert np.allclose(micgeom.aperture, expected_aperture), (
+        f'Expected aperture {expected_aperture}, but got {micgeom.aperture}'
+    )

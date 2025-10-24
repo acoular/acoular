@@ -325,7 +325,7 @@ class BeamformerTimeTraj(BeamformerTime):
                 tpos = gpos + np.array(g)[:, np.newaxis]
                 yield tpos
         else:
-            for g, g1 in zip(trajg, trajg1):
+            for g, g1 in zip(trajg, trajg1, strict=True):
                 # grid is both translated and rotated
                 loc = np.array(g)  # translation array([0., 0.4, 1.])
                 dx = np.array(g1)  # direction vector (new x-axis)

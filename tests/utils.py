@@ -61,10 +61,8 @@ def get_result(obj, num, f=next):
     """
     missing_result = {'Trigger', 'SpatialInterpolator'}
     if obj.__class__.__name__ in missing_result:
-        with warnings.catch_warnings():
-            warnings.simplefilter('ignore', Warning)
-            with pytest.warns(Warning):
-                return f(obj.result(num))
+        with pytest.warns(Warning, match='result method not implemented yet!'):
+            return f(obj.result(num))
     return f(obj.result(num))
 
 
