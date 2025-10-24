@@ -53,15 +53,7 @@ Lm = ac.L_p(pm)
 # Evaluate the results:
 # Therefore, we define a custom grid containing the source locations.
 
-target_grid = ac.ImportGrid(
-    pos=np.array(
-        [
-            list(p1.loc),
-            list(p2.loc),
-            list(p3.loc),
-        ],
-    ).T,
-)
+target_grid = ac.ImportGrid(pos=np.hstack((p1.loc, p2.loc, p3.loc)))
 
 # %%
 # Next, we define the target squared sound pressure values for each source.
