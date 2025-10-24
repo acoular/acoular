@@ -54,7 +54,7 @@ def print_number_of_blocks_in_block_buffers():
     """
     buffers = list(ss.block_buffer.values())
     elements = [len(buf) for buf in buffers]
-    print(f"num blocks in buffers: {dict(zip(['tp1','tp2','tp3'], elements))}")
+    print(f'num blocks in buffers: {dict(zip(["tp1", "tp2", "tp3"], elements, strict=True))}')
 
 
 def get_data_fast(obj):  # not time consuming function
