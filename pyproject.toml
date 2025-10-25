@@ -29,10 +29,10 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
-    "numpy",
     "numba",
-    "scipy >= 1.1.0, != 1.16.*", # scipy 1.16 has a bug in signal that causes issues with Acoular
+    "numpy",
     "scikit-learn",
+    "scipy >= 1.1.0, != 1.16.*", # scipy 1.16 has a bug in signal that causes issues with Acoular
     "tables",
     "traits >= 6.0",
 ]
@@ -63,7 +63,8 @@ docs = [
     "sounddevice",
     "sphinx",
     "sphinx-copybutton",
-    "sphinx_gallery",
+    "sphinx-design",
+    "sphinx-gallery",
     "sphinxcontrib-bibtex",
     "setuptools", # unfortunately still needed for sphinxcontrib-bibtex (https://github.com/mcmtroffaes/sphinxcontrib-bibtex/issues/345)
 ]
