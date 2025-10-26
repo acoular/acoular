@@ -162,7 +162,7 @@ Package                                                           Needed for
 ================================================================= ========
 `Matplotlib <https:/matplotlib.org>`_                             Running the examples and to generate output in the demo.
 `python-sounddevice <https://python-sounddevice.readthedocs.io>`_ Using input from physical soundcard hardware.
-`PyLops <https://pylops.readthedocs.io>`_                         Some solvers of the CMF method.
+`PyLops <https://pylops.readthedocs.io>`_                         Some solvers of :class:`~acoular.fbeamform.BeamformerCMF`.
 ================================================================= ========
 
 When installing Acoular from PyPI, Acoular and all optional dependencies can be installed with the ``acoular[full]`` extra. Otherwise, the dependencies need to be installed manually:
