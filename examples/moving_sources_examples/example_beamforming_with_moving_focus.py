@@ -146,7 +146,7 @@ source_mixer = ac.SourceMixer(sources=mps)
 
 def plot_maps(res, grid, figure_title):
     n = 3
-    fig, axes = plt.subplots(1, n, figsize=(12, 4), sharey=True)
+    fig, axes = plt.subplots(1, n, figsize=(12, 4), sharey=True, layout='constrained')
     times = [(i * BLOCK_SIZE) / SFREQ for i in range(n)]
     res = ac.L_p(res)
     mx = res.max()
