@@ -33,6 +33,6 @@ jobs:
         run: |
           eval "$(conda shell.bash hook)"
           conda activate base
-          anaconda login --username ${{ secrets.ANACONDA_USERNAME }} --password ${{ secrets.ANACONDA_PASSWORD }}
+          anaconda login -at anaconda.org --username ${{ secrets.ANACONDA_USERNAME }} --password ${{ secrets.ANACONDA_PASSWORD }}
           anaconda upload ./conda_package/noarch/*.conda
 
