@@ -1,3 +1,6 @@
+ci:
+- changed-files:
+  - any-glob-to-any-file: '.github/**'
 docs:
 - all:
   - changed-files:
@@ -6,12 +9,8 @@ docs:
 examples:
 - changed-files:
   - any-glob-to-any-file: 'examples/**'
-tests:
-- changed-files:
-  - any-glob-to-any-file: 'tests/**'
-ci:
-- changed-files:
-  - any-glob-to-any-file: '.github/**'
+fix:
+ - head-branch: ['^fix', 'fix']
 linting:
 - changed-files:
   - any-glob-to-any-file: '.ruff.toml'
@@ -20,7 +19,6 @@ maintenance:
   - any-glob-to-any-file: ['pyproject.toml', 'CONTRIBUTING.md', 'CODE_OF_CONDUCT.md', 'LICENSE']
 new feature:
  - head-branch: ['^feature', 'feature']
-sinus:
- - head-branch: ['^sinus', 'sinus']
-fix:
- - head-branch: ['^fix', 'fix']
+tests:
+- changed-files:
+  - any-glob-to-any-file: 'tests/**'

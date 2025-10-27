@@ -28,13 +28,9 @@ from traits.api import (
 )
 
 # acoular imports
-from .deprecation import deprecated_alias
 from .internal import digest
 
 
-@deprecated_alias(
-    {'mpos_tot': 'pos_total', 'mpos': 'pos', 'from_file': 'file'}, read_only=['mpos'], removal_version='25.10'
-)
 class MicGeom(HasStrictTraits):
     """
     Provide the geometric arrangement of microphones in an array.
@@ -44,18 +40,20 @@ class MicGeom(HasStrictTraits):
     microphones can be excluded by specifying their indices via :attr:`invalid_channels`.
 
     .. _units_note_microphones:
+    .. admonition:: Unit of length
+
+      The source code is agnostic to the unit of length. The microphone positions' coordinates are
+      assumed to be in meters. This is consistent with the standard
+      :class:`~acoular.environments.Environment` class which uses the speed of sound at 20°C at sea
+      level under standard atmosphere pressure in m/s. If the microphone positions' coordinates are
+      provided in a unit other than meter, it is advisable to change the
+      :attr:`~acoular.environments.Environment.c` attribute to match the given unit.
 
     Notes
     -----
     - The microphone geometry as in :attr:`total_pos` is automatically changed if the :attr:`file`
       attribute is updated.
     - Small numerical values in the computed :attr:`center` are set to zero for numerical stability.
-    - The source code is agnostic to the unit of length. The microphone positions' coordinates are
-      assumed to be in meters. This is consistent with the standard
-      :class:`~acoular.environments.Environment` class which uses the speed of sound at 20°C at sea
-      level under standard atmosphere pressure in m/s. If the microphone positions' coordinates are
-      provided in a unit other than meter, it is advisable to change the
-      :attr:`~acoular.environments.Environment.c` attribute to match the given unit.
 
     Examples
     --------
@@ -143,13 +141,13 @@ class MicGeom(HasStrictTraits):
 
     #: Array containing the ``x, y, z`` positions of all microphones, including invalid ones, shape
     #: ``(3,`` :attr:`num_mics` ``)``. This is set automatically when :attr:`file` changes or
-    #: explicitly by assigning an array of floats. All coordinates are in meters by default (see
-    #: :ref:`notes <units_note_microphones>`).
+    #: explicitly by assigning an array of floats. All coordinates are in meters by default
+    #: (:ref:`see here <units_note_microphones>`).
     pos_total = CArray(dtype=float, shape=(3, None), desc='x, y, z position of all microphones')
 
     #: Array containing the ``x, y, z`` positions of valid microphones (i.e., excluding those in
     #: :attr:`invalid_channels`), shape ``(3,`` :attr:`num_mics` ``)``. (read-only)
-    #: All coordinates are in meters by default (see :ref:`notes <units_note_microphones>`).
+    #: All coordinates are in meters by default (:ref:`see here <units_note_microphones>`).
     pos = Property(depends_on=['pos_total', 'invalid_channels'], desc='x, y, z position of used microphones')
 
     #: List of indices indicating microphones to be excluded from calculations and results.
@@ -263,8 +261,8 @@ class MicGeom(HasStrictTraits):
           index of the microphone.
         - This method only exports the positions of the valid microphones (those not listed in
           :attr:`invalid_channels`).
-        - All coordinates (x, y, z) are exported in meters by default (see
-          :ref:`notes <units_note_microphones>`).
+        - All coordinates (x, y, z) are exported in meters by default (:ref:`see here
+          <units_note_microphones>`).
         """
         filepath = Path(filename)
         basename = filepath.stem

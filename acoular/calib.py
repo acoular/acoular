@@ -3,6 +3,12 @@
 # ------------------------------------------------------------------------------
 """Implements calibration of multichannel time signals.
 
+.. inheritance-diagram::
+                acoular.calib
+    :top-classes:
+                acoular.base.InOut
+    :parts: 1
+
 .. autosummary::
     :toctree: generated/
 
@@ -17,11 +23,9 @@ from traits.api import CArray, CInt, File, List, Property, Union, cached_propert
 
 # acoular imports
 from .base import InOut, SamplesGenerator, SpectraGenerator
-from .deprecation import deprecated_alias
 from .internal import digest
 
 
-@deprecated_alias({'from_file': 'file'}, removal_version='25.10')
 class Calib(InOut):
     """Processing block for handling calibration data in `*.xml` or NumPy format.
 

@@ -1,14 +1,21 @@
 # ------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
-"""Basic tests for result generators."""
+"""Tests for result generators."""
 
 import acoular as ac
 import numpy as np
+import pytest
 from pytest_cases import parametrize, parametrize_with_cases
 
 from tests.cases.test_generator_cases import Generators
 from tests.utils import get_result
+
+xfails = {
+    ac.BeamformerTime: 'Issue #525',
+    ac.IntegratorSectorTime: 'Issue #525',  # test case relies on BeamformerTime as source
+    ac.PointSourceConvolve: 'Issue #530',  # test case relies on TimeConvolve as generator
+}
 
 
 # @given(num=st.integers(min_value=1, max_value=1000))
@@ -17,22 +24,43 @@ from tests.utils import get_result
 @parametrize('num', [1, 32], ids=['num=1', 'num=32'])
 @parametrize_with_cases('obj', cases=Generators)
 def test_result_generator(obj, num):  # don't use default value if @parametrize is used
-    """Basic test for result generators if they return numpy arrays with correct shape.
+    """
+    Test for result generators: checks block sizes and total sample count.
 
     Parameters
     ----------
-    obj : instance of acoular.base.Generator
+    obj : instance of :class:`~acoular.base.Generator`
         Generator instance to be tested (cases from Generators)
-    num : int
+    num : :class:`int`
         Number of samples to return by the generator
     """
-    result = get_result(obj, num=num)
-    assert isinstance(result, np.ndarray)
-    assert result.shape[0] == min(obj.num_samples, num)
+    for gen, reason in xfails.items():
+        if isinstance(obj, gen):
+            pytest.xfail(reason)
+
+    blocks = get_result(obj, num=num, f=list)
+    assert len(blocks) > 0, 'Generator did not yield any blocks.'
+
     obj_copy = obj
     while isinstance(obj_copy, ac.InOut):
         obj_copy = obj_copy.source
     if isinstance(obj_copy, ac.SamplesGenerator):
-        assert result.shape[1] == obj.num_channels
+        expected_cols = obj.num_channels
     elif isinstance(obj_copy, ac.SpectraGenerator):
-        assert result.shape[1] == obj.num_channels * obj.num_freqs
+        expected_cols = obj.num_channels * obj.num_freqs
+    else:
+        msg = 'Unknown generator type for shape check.'
+        raise AssertionError(msg)
+
+    for block in blocks[:-1]:
+        assert isinstance(block, np.ndarray)
+        assert block.shape[0] == num, f'Non-final block has wrong size: {block.shape[0]} != {num}'
+        assert block.shape[1] == expected_cols
+
+    last_block = blocks[-1]
+    assert isinstance(last_block, np.ndarray)
+    assert last_block.shape[0] > 0, 'Last block is empty.'
+    assert last_block.shape[1] == expected_cols
+
+    result = np.concatenate(blocks, axis=0)
+    assert result.shape[0] == obj.num_samples, f'Total samples {result.shape[0]} != {obj.num_samples}'

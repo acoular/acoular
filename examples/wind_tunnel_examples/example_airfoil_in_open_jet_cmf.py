@@ -29,7 +29,7 @@ time_data_file = get_data_file('example_data.h5')
 calib_file = get_data_file('example_calib.xml')
 
 # %%
-# Setting up the processing chain for :class:`acoular.fbeamform.BeamformerCMF` methods.
+# Setting up the processing chain for :class:`~acoular.fbeamform.BeamformerCMF` methods.
 #
 # .. hint::
 #    A step-by-step explanation for setting up the processing chain is given in the example

@@ -35,7 +35,7 @@ print(ts.num_samples, ts.num_channels)
 # Create a spectrogram of the signal
 # ----------------------------------
 # Therefore we want to process the FFT spectra of the signal blockwise. To do so, we use the
-# :class:`acoular.fprocess.RFFT` class, which calculates the FFT spectra of the signal blockwise.
+# :class:`~acoular.fprocess.RFFT` class, which calculates the FFT spectra of the signal blockwise.
 
 block_size = 512
 
@@ -104,11 +104,11 @@ plt.show()
 # Create an averaged power spectral density of the signal
 # --------------------------------------------------------
 # To calculate the time averaged power spectral density of the signal, we use the
-# :class:`acoular.fprocess.AutoPowerSpectra` class.
+# :class:`~acoular.fprocess.AutoPowerSpectra` class.
 
 fft.scaling = 'none'
 ap = ac.AutoPowerSpectra(source=fft, scaling='psd')  # results in the power spectrum
-avg = ac.Average(source=ap, naverage=64)  # results in the time averaged power spectrum
+avg = ac.Average(source=ap, num_per_average=64)  # results in the time averaged power spectrum
 
 # %%
 # Plot the resulting power spectrum for different number of averages.
@@ -117,7 +117,7 @@ for block_size in [256, 1024]:
     plt.figure()
     fft.block_size = block_size
     for navg in [1, 100]:
-        avg.naverage = navg
+        avg.num_per_average = navg
         spectrum = next(avg.result(num=1))
         levels = ac.L_p(spectrum)
         plt.plot(fft.freqs, levels[0], label=f'navg = {navg}, block_size = {block_size}')
@@ -132,7 +132,7 @@ for block_size in [256, 1024]:
 # Create a cross-spectral matrix for multichannel signals
 # --------------------------------------------------------
 # To calculate the cross-spectral matrix of the signal, we use the
-# :class:`acoular.fprocess.CrossPowerSpectra` class. First, we create a TimeSamples object with two
+# :class:`~acoular.fprocess.CrossPowerSpectra` class. First, we create a TimeSamples object with two
 # channels. Then, we calculate the cross-spectral matrix of the signal blockwise. We choose a
 # normalization method of 'psd' (Power Spectral Density) for the cross-spectral matrix.
 
@@ -147,11 +147,11 @@ csm_comp = ps1.csm[:, :, :]
 
 fft.source = ts  # we need to change the source of the fft object to the new TimeSamples object
 ps = ac.CrossPowerSpectra(source=fft)
-avg = ac.Average(source=ps, naverage=int(ps1.num_blocks))
+avg = ac.Average(source=ps, num_per_average=int(ps1.num_blocks))
 csm = next(avg.result(num=1))
 
 # reshape the cross-spectral matrix to a 3D array of shape (numfreq, num_channels, num_channels)
-csm = csm.reshape(fft.numfreqs, ts.num_channels, ts.num_channels)
+csm = csm.reshape(fft.num_freqs, ts.num_channels, ts.num_channels)
 
 # %%
 # Plot both spectra

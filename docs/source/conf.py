@@ -19,22 +19,20 @@ version = release =  acoular.__version__
 # see: https://www.sphinx-doc.org/en/master/usage/configuration.html for details
 
 extensions = [
-    'sphinx_gallery.gen_gallery',
-    'sphinx.ext.duration',
-    'sphinx.ext.autodoc',
     'IPython.sphinxext.ipython_directive',
     'IPython.sphinxext.ipython_console_highlighting',
-    'traits.util.trait_documenter',
-    'sphinx_gallery.gen_gallery',
-    'sphinx.ext.duration',
-    'sphinx.ext.autodoc', 
-    'sphinx.ext.mathjax',
-    'sphinx.ext.inheritance_diagram',
-    'sphinx.ext.autosummary',
-    'sphinx.ext.intersphinx',
-    'sphinxcontrib.bibtex',
-    'numpydoc',
     'matplotlib.sphinxext.plot_directive',
+    'numpydoc',
+    'sphinx_copybutton',
+    'sphinx_gallery.gen_gallery',
+    'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.duration',
+    'sphinx.ext.inheritance_diagram',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.mathjax',
+    'sphinxcontrib.bibtex',
+    'traits.util.trait_documenter',
     ] # Sphinx extension modules
 
 # the current time is formatted using time.strftime() and the format given in today_fmt.
@@ -50,13 +48,45 @@ templates_path = ['_templates']
 # -----------------------
 # see https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output for details
 
-html_theme = 'haikuac'
-html_theme_path = ['_themes/']
+html_theme = 'pydata_sphinx_theme'
 html_static_path = ['_static']
-html_favicon = '_static/acoular_logo.ico'
 html_context = {
-    'logo': 'Acoular_logo.png',  # Filename in _static folder
+    "github_user": "acoular",
+    "github_repo": "acoular",
+    "github_version": "master",
+    "doc_path": "docs/source",
 }
+html_theme_options = {
+    "logo": {
+        "alt_text": "Acoular - Home",
+        "text": "Acoular",
+        "image_light": "_static/Acoular_logo.png",
+        "image_dark": "_static/Acoular_logo.png",
+    },
+    "icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/acoular/acoular",
+            "icon": "fa-brands fa-square-github",
+        },
+        {
+            "name": "PyPI",
+            "url": "https://pypi.org/project/acoular",
+            "icon": "_static/pypi.svg",
+            "type": "local",
+        },        
+    ],
+    "pygments_light_style": "tango",
+    "pygments_dark_style": "monokai",
+    "header_links_before_dropdown": 6,
+    "use_edit_page_button": True,
+}
+html_sidebars = {
+    "install/*": [],
+    "news/*": [],
+    "literature/*": [],
+}
+html_favicon = '_static/acoular_logo.ico'
 html_last_updated_fmt = '%b %d, %Y'
 # If true, the reST sources are included in the HTML build as _sources/<name>.
 html_copy_source = False
@@ -76,6 +106,7 @@ latex_documents = [
 # sphinx.ext.inheritance_diagram extension settings
 # ------------------------------------------------
 
+graphviz_output_format = 'svg'  # make graph match light/dark theme
 inheritance_graph_attrs = {'rankdir': "LR", 'size': '"11.0,24.0"',
                                'fontsize': 18, 'ratio': 'compress'}
 
@@ -94,21 +125,13 @@ numpydoc_show_class_members = False
 # sphinx.ext.autodoc extension settings
 # -------------------------------------
 
-autodoc_member_order = 'bysource' # sort members by the order in the source code
-
-# skips all traits references in autoclass
-# https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#skipping-members
-def traits_skip_member(app, what, name, obj, skip, options):
-    if not skip and what=='class':
-        try:
-            if not obj.__module__.startswith(project):
-                return True
-        except:
-            pass
-#            if obj.__class__.__name__ == 'method_descriptor':
-#                return True
-    return skip
-
+autodoc_default_options = {
+    'members': True,
+    'member-order': 'bysource',
+    'exclude-members': 'trait_added,trait_modified',
+    #'inherited-members': 'ABCHasStrictTraits,HasStrictTraits,HasTraits,CHasTraits',
+    'show-inheritance': True, # False does not work, need to delete this line to deactivate!
+}
 
 #%%
 # sphinx_gallery.gen_gallery extension settings
@@ -157,6 +180,12 @@ sphinx_gallery_conf = {
     ]),
 }
 
+# sphinx_copybutton config
+# ------------------------
+
+copybutton_prompt_text = r">>> |\.\.\. |\$ |In \[\d*\]: | {2,5}\.\.\.: | {5,8}: "  # strips prompts
+copybutton_prompt_is_regexp = True
+
 #%% 
 # sphinxcontrib-bibtex extension settings
 # ---------------------------------------
@@ -182,4 +211,5 @@ intersphinx_mapping = {
     "scipy": ("https://docs.scipy.org/doc/scipy/", None),
     "matplotlib": ("https://matplotlib.org/stable", None),
     "h5py": ("https://docs.h5py.org/en/stable/", None),
+    "traits": ("https://docs.enthought.com/traits", None)
 }

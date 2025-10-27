@@ -1,3 +1,5 @@
+.. _get_started:
+
 Getting Started
 ===============
 
@@ -16,7 +18,7 @@ This "Getting started" tutorial assumes that the Acoular library is :doc:`instal
 
 This should, after some seconds, produce two pictures (a 64 microphone arrangement and a beamforming map with three sources). You may close the pictures in order to continue. 
 
-Apart from showing that everything works well, the demo also produced some data to work on. You should now have a **file 'three_sources.h5' (13MB)** in your working directory.
+Apart from showing that everything works well, the demo also produced some data to work on. You should now have a ***file 'three_sources.h5' (13MB)** in your working directory.
 
 Beamforming example step-by-step 
 --------------------------------

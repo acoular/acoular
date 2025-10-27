@@ -58,14 +58,18 @@ docs = [
     "matplotlib",
     "numpydoc",
     "pickleshare",
+    "pydata-sphinx-theme",
     "sounddevice",
     "sphinx",
+    "sphinx-copybutton",
     "sphinx_gallery",
     "sphinxcontrib-bibtex",
     "setuptools", # unfortunately still needed for sphinxcontrib-bibtex (https://github.com/mcmtroffaes/sphinxcontrib-bibtex/issues/345)
 ]
 
 tests = [
+    "h5py",
+    "pylops",
     "pytest",
     "pytest-mock",
     "pytest-cov",
@@ -73,11 +77,9 @@ tests = [
     "pytest-cases",
     "pytest-env",
     "pytest-profiling",
-    "sounddevice",
-    "pylops",
-    "traitsui",
-    "h5py",
     "PyYAML",
+    "sounddevice",
+    "traitsui",
 ]
 
 dev = [
@@ -126,7 +128,7 @@ reset_regtest = ["python -m pytest -v --regtest-reset tests/regression"]
 profile = ["test --profile-svg"] 
 demo = ["python -c \"import acoular; acoular.demo.acoular_demo.run()\""]
 coverage = [
-    "test --cov=acoular --cov-report html --cov-report term-missing",
+    "test --cov=acoular --cov-report html --cov-report term-missing --cov-report markdown-append:$GITHUB_STEP_SUMMARY",
     "python -m pytest -v --cov=acoular --cov-report html --cov-report term-missing --cov-append --doctest-modules acoular",
     ]
 doctest = ["python -m pytest --doctest-modules acoular"]
