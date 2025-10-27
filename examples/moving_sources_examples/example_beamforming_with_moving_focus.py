@@ -146,15 +146,14 @@ source_mixer = ac.SourceMixer(sources=mps)
 
 def plot_maps(res, grid, figure_title):
     n = 3
-    fig, axes = plt.subplots(1, n, figsize=(12, 4))
+    fig, axes = plt.subplots(1, n, figsize=(12, 4), sharey=True)
     times = [(i * BLOCK_SIZE) / SFREQ for i in range(n)]
-
+    res = ac.L_p(res)
+    mx = res.max()
     for ax, r, t in zip(axes, res, times):
-        r0 = r.reshape(grid.shape)
-        level = ac.L_p(r0)
-        mx = level.max()
+        r0 = r.reshape(grid.shape).T
         im = ax.imshow(
-            np.transpose(level),
+            r0,
             origin='lower',
             vmax=mx,
             vmin=mx - 15,
@@ -164,12 +163,13 @@ def plot_maps(res, grid, figure_title):
         )
         ax.set_title(f'$t$ = {t:.2f} s')
         ax.set_xlabel('$x$ in m')
-        ax.set_ylabel('$y$ in m')
-        fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04, label='$L_p$ in dB')
+
+    axes[0].set_ylabel('$y$ in m')
+    fig.subplots_adjust(wspace=0.075)
+    fig.colorbar(im, ax=axes.ravel(), pad=0.04, label='$L_p$ in dB')
 
     if figure_title:
         fig.suptitle(figure_title)
-    plt.tight_layout()
     plt.show()
 
 
