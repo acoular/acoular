@@ -14,17 +14,12 @@ from traits.api import Any, Bool, Enum, Float, Int, Property, cached_property, o
 # acoular imports
 from .base import SamplesGenerator
 from .configuration import config
-from .deprecation import deprecated_alias
 from .internal import digest
 
 if config.have_sounddevice:
     import sounddevice as sd
 
 
-@deprecated_alias(
-    {'numchannels': 'num_channels', 'numsamples': 'num_samples', 'collectsamples': 'collect_samples'},
-    removal_version='25.10',
-)
 class SoundDeviceSamplesGenerator(SamplesGenerator):
     """Controller for sound card hardware using sounddevice library.
 

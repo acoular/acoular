@@ -4,6 +4,14 @@
 """
 Implements beamformers in the frequency domain.
 
+.. inheritance-diagram::
+                acoular.fbeamform.BeamformerBase
+    :include-subclasses:
+    :top-classes:
+                acoular.grids.Grid,
+                acoular.fbeamform.BeamformerBase
+    :parts: 1
+
 .. autosummary::
     :toctree: generated/
 
@@ -66,7 +74,6 @@ from traits.trait_errors import TraitError
 
 # acoular imports
 from .configuration import config
-from .deprecation import deprecated_alias
 from .environments import Environment
 from .fastFuncs import beamformerFreq, calcPointSpreadFunction, calcTransfer, damasSolverGaussSeidel
 from .grids import Grid, Sector
@@ -1185,7 +1192,6 @@ class BeamformerDamas(BeamformerBase):
             self._fr[i] = 1
 
 
-@deprecated_alias({'max_iter': 'n_iter'}, removal_version='25.10')
 class BeamformerDamasPlus(BeamformerDamas):
     """
     DAMAS deconvolution :cite:`Brooks2006` for solving the system of equations.
@@ -1372,7 +1378,6 @@ class BeamformerOrth(BeamformerBase):
             self._fr[i] = 1
 
 
-@deprecated_alias({'n': 'n_iter'}, removal_version='25.10')
 class BeamformerCleansc(BeamformerBase):
     """
     CLEAN-SC deconvolution algorithm.
@@ -1555,7 +1560,6 @@ class BeamformerClean(BeamformerBase):
             self._fr[i] = 1
 
 
-@deprecated_alias({'max_iter': 'n_iter'}, removal_version='25.10')
 class BeamformerCMF(BeamformerBase):
     """
     Covariance Matrix Fitting algorithm.
@@ -1783,7 +1787,6 @@ class BeamformerCMF(BeamformerBase):
             self._fr[i] = 1
 
 
-@deprecated_alias({'max_iter': 'n_iter'}, removal_version='25.10')
 class BeamformerSODIX(BeamformerBase):
     """
     Source directivity modeling in the cross-spectral matrix (SODIX) algorithm.
@@ -1946,7 +1949,6 @@ class BeamformerSODIX(BeamformerBase):
                 self._fr[i] = 1
 
 
-@deprecated_alias({'max_iter': 'n_iter'}, removal_version='25.10')
 class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
     """
     Beamforming GIB methods with different normalizations.

@@ -51,7 +51,7 @@ st = ac.SteeringVector(grid=grid, mics=mics, env=env)
 
 # %%
 # First, classic delay-and-sum beamforming in time domain is set up using
-# the :class:`acoular.tbeamform.BeamformerTime` class.
+# the :class:`~acoular.tbeamform.BeamformerTime` class.
 # To produce an image of the sound sources, the beamformer time signal output for each grid-point
 # is zero-phase filtered, squared and block-wise averaged over time.
 # The result is cached to disk to prevent recalculation.
@@ -63,7 +63,7 @@ avgt = ac.Average(source=pt, num_per_average=1024)
 cacht = ac.Cache(source=avgt)  # cache to prevent recalculation
 
 # %%
-# Second, by using the :class:`acoular.tbeamform.BeamformerTimeSq` class, the squared output of the
+# Second, by using the :class:`~acoular.tbeamform.BeamformerTimeSq` class, the squared output of the
 # beamformer is calculated directly. It also allows for the removal of the autocorrelation, which is
 # similar to the removal of the cross spectral matrix diagonal.
 
@@ -74,7 +74,7 @@ cachts = ac.Cache(source=avgts)  # cache to prevent recalculation
 
 # %%
 # Third, CLEAN deconvolution in the time domain (CLEAN-T) is applied, using the
-# :class:`acoular.tbeamform.BeamformerCleant` class.
+# :class:`~acoular.tbeamform.BeamformerCleant` class.
 fct = ac.FiltFiltOctave(source=calib, band=cfreq)
 bct = ac.BeamformerCleant(source=fct, steer=st, n_iter=20, damp=0.7)
 ptct = ac.TimePower(source=bct)
@@ -83,7 +83,7 @@ cachct = ac.Cache(source=avgct)  # cache to prevent recalculation
 
 # %%
 # Finally, squared signals with autocorrelation removal can be obtained by using the
-# :class:`acoular.tbeamform.BeamformerCleantSq` class.
+# :class:`~acoular.tbeamform.BeamformerCleantSq` class.
 fcts = ac.FiltFiltOctave(source=calib, band=cfreq)
 bcts = ac.BeamformerCleantSq(source=fcts, steer=st, n_iter=20, damp=0.7, r_diag=True)
 avgcts = ac.Average(source=bcts, num_per_average=1024)

@@ -4,6 +4,12 @@
 """
 Measured multichannel data management and simulation of acoustic sources.
 
+.. inheritance-diagram::
+                acoular.sources
+    :top-classes:
+                acoular.base.SamplesGenerator
+    :parts: 1
+
 .. autosummary::
     :toctree: generated/
 
@@ -59,8 +65,6 @@ from traits.api import (
 from .base import SamplesGenerator
 
 # acoular imports
-from .calib import Calib
-from .deprecation import deprecated_alias
 from .environments import Environment
 from .h5files import H5FileBase, _get_h5file_class
 from .internal import digest, ldigest
@@ -177,7 +181,7 @@ def get_radiation_angles(direction, mpos, sourceposition):
     --------
     :func:`numpy.linalg.norm` :
         Computes the norm of a vector.
-    :func:`numpy.arctan2` :
+    :obj:`numpy.arctan2` :
         Computes the arctangent of two variables, preserving quadrant information.
 
     Notes
@@ -293,7 +297,6 @@ def get_modes(lOrder, direction, mpos, sourceposition=None):  # noqa: N803
     return modes
 
 
-@deprecated_alias({'name': 'file'}, removal_version='25.10')
 class TimeSamples(SamplesGenerator):
     """
     Container for processing time data in ``*.h5`` or NumPy array format.
@@ -305,13 +308,12 @@ class TimeSamples(SamplesGenerator):
 
     See Also
     --------
-    :class:`acoular.sources.MaskedTimeSamples` :
+    :class:`~acoular.sources.MaskedTimeSamples` :
         Extends the functionality of class :class:`TimeSamples` by enabling the definition of start
         and stop samples as well as the specification of invalid channels.
 
     Notes
     -----
-    - If a calibration object is provided, calibrated time-domain data will be returned.
     - Metadata from the :attr:`HDF5 file<file>` can be accessed through the :attr:`metadata`
       attribute.
 
@@ -350,10 +352,6 @@ class TimeSamples(SamplesGenerator):
     #: Basename of the ``.h5`` file, set automatically from the :attr:`file` attribute.
     basename = Property(depends_on=['file'], desc='basename of data file')
 
-    #: Calibration data, an instance of the :class:`~acoular.calib.Calib` class.
-    #: (optional; if provided, the time data will be calibrated.)
-    calib = Instance(Calib, desc='Calibration data')
-
     #: Number of input channels in the time data, set automatically based on the
     #: :attr:`loaded data<file>` or :attr:`specified array<data>`.
     num_channels = CInt(0, desc='number of input channels')
@@ -373,12 +371,10 @@ class TimeSamples(SamplesGenerator):
     metadata = Dict(desc='metadata contained in .h5 file')
 
     # Checksum over first data entries of all channels
-    _datachecksum = Property()
+    _datachecksum = Property(depends_on=['data'])
 
     #: A unique identifier for the samples, based on its properties. (read-only)
-    digest = Property(
-        depends_on=['basename', 'calib.digest', '_datachecksum', 'sample_freq', 'num_channels', 'num_samples']
-    )
+    digest = Property(depends_on=['basename', '_datachecksum', 'sample_freq', 'num_channels', 'num_samples'])
 
     def _get__datachecksum(self):
         return self.data[0, :].sum()
@@ -425,8 +421,7 @@ class TimeSamples(SamplesGenerator):
 
         The :meth:`result` method is a Python generator that yields blocks of time-domain data
         of the specified size. Data is either read from an HDF5 file (if :attr:`file` is set)
-        or from a NumPy array (if :attr:`data` is directly provided). If a calibration object
-        is specified, the returned data is calibrated.
+        or from a NumPy array (if :attr:`data` is directly provided).
 
         Parameters
         ----------
@@ -445,14 +440,6 @@ class TimeSamples(SamplesGenerator):
         ------
         :obj:`OSError`
             If no samples are available (i.e., :attr:`num_samples` is ``0``).
-        :obj:`ValueError`
-            If the calibration data does not match the number of channels.
-
-        Warnings
-        --------
-        A deprecation warning is raised if the calibration functionality is used directly in
-        :class:`TimeSamples`. Instead, the :class:`~acoular.calib.Calib` class should be used as a
-        separate processing block.
 
         Examples
         --------
@@ -476,36 +463,11 @@ class TimeSamples(SamplesGenerator):
             raise OSError(msg)
         self._datachecksum  # trigger checksum calculation # noqa: B018
         i = 0
-        if self.calib:
-            warn(
-                'The use of the calibration functionality in TimeSamples is deprecated and will be removed in \
-                       Acoular 25.10. Use the Calib class as an additional processing block instead.',
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            if self.calib.num_mics == self.num_channels:
-                cal_factor = self.calib.data[np.newaxis]
-            else:
-                msg = f'calibration data not compatible: {self.calib.num_mics:d}, {self.num_channels:d}'
-                raise ValueError(msg)
-            while i < self.num_samples:
-                yield self.data[i : i + num] * cal_factor
-                i += num
-        else:
-            while i < self.num_samples:
-                yield self.data[i : i + num]
-                i += num
+        while i < self.num_samples:
+            yield self.data[i : num + i]
+            i += num
 
 
-@deprecated_alias(
-    {
-        'numchannels_total': 'num_channels_total',
-        'numsamples_total': 'num_samples_total',
-        'numchannels': 'num_channels',
-        'numsamples': 'num_samples',
-    },
-    read_only=['numchannels', 'numsamples'],
-)
 class MaskedTimeSamples(TimeSamples):
     """
     Container to process and manage time-domain data with support for masking samples and channels.
@@ -518,7 +480,7 @@ class MaskedTimeSamples(TimeSamples):
 
     See Also
     --------
-    :class:`acoular.sources.TimeSamples` : The parent class for managing unmasked time-domain data.
+    :class:`~acoular.sources.TimeSamples` : The parent class for managing unmasked time-domain data.
 
     Notes
     -----
@@ -585,7 +547,7 @@ class MaskedTimeSamples(TimeSamples):
     )
 
     #: A unique identifier for the samples, based on its properties. (read-only)
-    digest = Property(depends_on=['basename', 'start', 'stop', 'calib.digest', 'invalid_channels', '_datachecksum'])
+    digest = Property(depends_on=['basename', 'start', 'stop', 'invalid_channels', '_datachecksum'])
 
     @cached_property
     def _get_digest(self):
@@ -642,8 +604,7 @@ class MaskedTimeSamples(TimeSamples):
         Generate blocks of valid time-domain data iteratively.
 
         The :meth:`result` method is a Python generator that yields blocks of valid time-domain data
-        based on the specified :attr:`start` and :attr:`stop` indices and the valid channels. Data
-        can be calibrated if a calibration object, given by :attr:`calib`, is provided.
+        based on the specified :attr:`start` and :attr:`stop` indices and the valid channels.
 
         Parameters
         ----------
@@ -663,15 +624,6 @@ class MaskedTimeSamples(TimeSamples):
         :obj:`OSError`
             If no valid samples are available (i.e., :attr:`start` and :attr:`stop` indices result
             in an empty range).
-        :obj:`ValueError`
-            If the :attr:`calibration data<calib>` is incompatible with the
-            :attr:`number of valid channels<num_channels>`.
-
-        Warnings
-        --------
-        A deprecation warning is raised if the calibration functionality is used directly in
-        :class:`MaskedTimeSamples`. Instead, the :class:`acoular.calib.Calib` class should be used
-        as a separate processing block.
 
         Examples
         --------
@@ -696,33 +648,15 @@ class MaskedTimeSamples(TimeSamples):
         sli = slice(self.start, self.stop).indices(self.num_samples_total)
         i = sli[0]
         stop = sli[1]
-        cal_factor = 1.0
         if i >= stop:
             msg = 'no samples available'
             raise OSError(msg)
         self._datachecksum  # trigger checksum calculation # noqa: B018
-        if self.calib:
-            warn(
-                'The use of the calibration functionality in MaskedTimeSamples is deprecated and will be removed in \
-                       Acoular 25.10. Use the Calib class as an additional processing block instead.',
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            if self.calib.num_mics == self.num_channels_total:
-                cal_factor = self.calib.data[self.channels][np.newaxis]
-            elif self.calib.num_mics == self.num_channels:
-                cal_factor = self.calib.data[np.newaxis]
-            elif self.calib.num_mics == 0:
-                warn('No calibration data used.', Warning, stacklevel=2)
-            else:
-                msg = f'calibration data not compatible: {self.calib.num_mics:d}, {self.num_channels:d}'
-                raise ValueError(msg)
         while i < stop:
-            yield self.data[i : min(i + num, stop)][:, self.channels] * cal_factor
+            yield self.data[i : min(i + num, stop)][:, self.channels]
             i += num
 
 
-@deprecated_alias({'numchannels': 'num_channels', 'numsamples': 'num_samples'}, read_only=True, removal_version='25.10')
 class PointSource(SamplesGenerator):
     """
     Define a fixed point source emitting a signal, intended for simulations.
@@ -734,9 +668,9 @@ class PointSource(SamplesGenerator):
 
     See Also
     --------
-    :class:`acoular.signals.SignalGenerator` : For defining custom emitted signals.
-    :class:`acoular.microphones.MicGeom` : For specifying microphone geometries.
-    :class:`acoular.environments.Environment` : For modeling sound propagation effects.
+    :class:`~acoular.signals.SignalGenerator` : For defining custom emitted signals.
+    :class:`~acoular.microphones.MicGeom` : For specifying microphone geometries.
+    :class:`~acoular.environments.Environment` : For modeling sound propagation effects.
 
     Notes
     -----
@@ -1067,8 +1001,8 @@ class MovingPointSource(PointSource):
 
     See Also
     --------
-    :class:`acoular.sources.PointSource` : For modeling stationary point sources.
-    :class:`acoular.trajectory.Trajectory` : For specifying source motion paths.
+    :class:`~acoular.sources.PointSource` : For modeling stationary point sources.
+    :class:`~acoular.trajectory.Trajectory` : For specifying source motion paths.
     """
 
     #: Determines whether convective amplification is considered. When ``True``, the amplitude of
@@ -1242,7 +1176,7 @@ class PointSourceDipole(PointSource):
 
     See Also
     --------
-    :class:`acoular.sources.PointSource` : For modeling stationary point sources.
+    :class:`~acoular.sources.PointSource` : For modeling stationary point sources.
 
     Notes
     -----
@@ -1371,7 +1305,8 @@ class PointSourceDipole(PointSource):
             except IndexError:
                 break
 
-        yield out[:i]
+        if i > 0:
+            yield out[:i]
 
 
 class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
@@ -1391,8 +1326,8 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
 
     See Also
     --------
-    :class:`acoular.sources.PointSourceDipole` : For stationary dipole sources.
-    :class:`acoular.sources.MovingPointSource` :
+    :class:`~acoular.sources.PointSourceDipole` : For stationary dipole sources.
+    :class:`~acoular.sources.MovingPointSource` :
         For moving point sources without dipole characteristics.
     """
 
@@ -1553,7 +1488,9 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
                     i = 0
             except IndexError:
                 break
-        yield out[:i]
+
+        if i > 0:
+            yield out[:i]
 
 
 class LineSource(PointSource):
@@ -1574,7 +1511,7 @@ class LineSource(PointSource):
 
     See Also
     --------
-    :class:`acoular.sources.PointSource` : For modeling stationary point sources.
+    :class:`~acoular.sources.PointSource` : For modeling stationary point sources.
 
     Notes
     -----
@@ -1683,7 +1620,8 @@ class LineSource(PointSource):
             except IndexError:
                 break
 
-        yield out[:i]
+        if i > 0:
+            yield out[:i]
 
 
 class MovingLineSource(LineSource, MovingPointSource):
@@ -1703,10 +1641,10 @@ class MovingLineSource(LineSource, MovingPointSource):
 
     See Also
     --------
-    :class:`acoular.sources.LineSource` :
+    :class:`~acoular.sources.LineSource` :
         For :class:`line sources<LineSource>` consisting of
         :attr:`coherent or incoherent<LineSource.coherence>` monopoles.
-    :class:`acoular.sources.MovingPointSource` :
+    :class:`~acoular.sources.MovingPointSource` :
         For moving point sources without dipole characteristics.
     """
 
@@ -1876,10 +1814,11 @@ class MovingLineSource(LineSource, MovingPointSource):
                     i = 0
             except IndexError:
                 break
-        yield out[:i]
+
+        if i > 0:
+            yield out[:i]
 
 
-@deprecated_alias({'numchannels': 'num_channels'}, read_only=True, removal_version='25.10')
 class UncorrelatedNoiseSource(SamplesGenerator):
     """
     Simulate uncorrelated white or pink noise signals at multiple channels.
@@ -1891,8 +1830,8 @@ class UncorrelatedNoiseSource(SamplesGenerator):
 
     See Also
     --------
-    :class:`acoular.signals.SignalGenerator` : For defining noise types and properties.
-    :class:`acoular.microphones.MicGeom` : For specifying microphone geometries.
+    :class:`~acoular.signals.SignalGenerator` : For defining noise types and properties.
+    :class:`~acoular.microphones.MicGeom` : For specifying microphone geometries.
 
     Notes
     -----
@@ -2043,7 +1982,6 @@ class UncorrelatedNoiseSource(SamplesGenerator):
                 return
 
 
-@deprecated_alias({'numchannels': 'num_channels', 'numsamples': 'num_samples'}, read_only=True, removal_version='25.10')
 class SourceMixer(SamplesGenerator):
     """
     Combine signals from multiple sources by mixing their outputs.
@@ -2055,7 +1993,7 @@ class SourceMixer(SamplesGenerator):
 
     See Also
     --------
-    :class:`acoular.base.SamplesGenerator` : Base class for signal generators.
+    :class:`~acoular.base.SamplesGenerator` : Base class for signal generators.
 
     Notes
     -----
@@ -2274,7 +2212,7 @@ class PointSourceConvolve(PointSource):
     See Also
     --------
     :class:`PointSource` : Base class for point sources.
-    :class:`acoular.tprocess.TimeConvolve` : Class used for performing time-domain convolution.
+    :class:`~acoular.tprocess.TimeConvolve` : Class used for performing time-domain convolution.
 
     Notes
     -----

@@ -24,7 +24,6 @@ from traits.api import Any, Array, Bool, Dict, Enum, Instance, Int, Property, Un
 # acoular imports
 from .base import Generator, InOut
 from .configuration import config
-from .deprecation import deprecated_alias
 from .h5cache import H5cache
 from .h5files import H5CacheFileBase
 from .internal import digest
@@ -49,7 +48,7 @@ class LockedGenerator:
 
     See Also
     --------
-    :class:`acoular.process.SampleSplitter` :
+    :class:`~acoular.process.SampleSplitter` :
         Distribute data from a source to several following objects in a block-wise manner.
     """
 
@@ -63,9 +62,6 @@ class LockedGenerator:
             return self.it.__next__()
 
 
-@deprecated_alias(
-    {'naverage': 'num_per_average', 'numsamples': 'num_samples'}, read_only=['numsamples'], removal_version='25.10'
-)
 class Average(InOut):
     """
     Calculate the average across consecutive time samples or frequency snapshots.
@@ -80,7 +76,7 @@ class Average(InOut):
 
     See Also
     --------
-    :class:`acoular.base.InOut` :
+    :class:`~acoular.base.InOut` :
         Receive data from any source domain and return signals in the same domain.
 
     Examples
@@ -214,8 +210,8 @@ class Cache(InOut):
 
     See Also
     --------
-    :class:`acoular.base.InOut` : Receive data from any source domain and return signals in the same
-                                  domain.
+    :class:`~acoular.base.InOut` : Receive data from any source domain and return signals in the
+                                   same domain.
 
     Examples
     --------

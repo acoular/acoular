@@ -4,6 +4,12 @@
 """
 Implements signal generators for the simulation of acoustic sources.
 
+.. inheritance-diagram::
+                acoular.signals
+    :top-classes:
+                acoular.signals.SignalGenerator
+    :parts: 1
+
 .. autosummary::
     :toctree: generated/
 
@@ -38,11 +44,9 @@ from traits.api import (
 
 # acoular imports
 from .base import SamplesGenerator
-from .deprecation import deprecated_alias
 from .internal import digest
 
 
-@deprecated_alias({'numsamples': 'num_samples'}, removal_version='25.10')
 class SignalGenerator(ABCHasStrictTraits):
     """
     ABC for a simple one-channel signal generator.
@@ -169,9 +173,9 @@ class NoiseGenerator(SignalGenerator):
 
     See Also
     --------
-    :class:`acoular.signals.PNoiseGenerator` : For pink noise generation.
-    :class:`acoular.signals.WNoiseGenerator` : For pink white generation.
-    :class:`acoular.sources.UncorrelatedNoiseSource` : For per-channel noise generation.
+    :class:`~acoular.signals.PNoiseGenerator` : For pink noise generation.
+    :class:`~acoular.signals.WNoiseGenerator` : For pink white generation.
+    :class:`~acoular.sources.UncorrelatedNoiseSource` : For per-channel noise generation.
     """
 
     #: Root mean square (RMS) amplitude of the signal. For a point source,
@@ -210,8 +214,8 @@ class WNoiseGenerator(NoiseGenerator):
     --------
     :obj:`numpy.random.RandomState.standard_normal` :
         Used here to generate normally distributed noise.
-    :class:`acoular.signals.PNoiseGenerator` : For pink noise generation.
-    :class:`acoular.sources.UncorrelatedNoiseSource` : For per-channel noise generation.
+    :class:`~acoular.signals.PNoiseGenerator` : For pink noise generation.
+    :class:`~acoular.sources.UncorrelatedNoiseSource` : For per-channel noise generation.
 
     Examples
     --------
@@ -277,8 +281,8 @@ class PNoiseGenerator(NoiseGenerator):
 
     See Also
     --------
-    :class:`acoular.signals.WNoiseGenerator` : For white noise generation.
-    :class:`acoular.sources.UncorrelatedNoiseSource` : For per-channel noise generation.
+    :class:`~acoular.signals.WNoiseGenerator` : For white noise generation.
+    :class:`~acoular.sources.UncorrelatedNoiseSource` : For per-channel noise generation.
 
     References
     ----------
@@ -555,7 +559,6 @@ class SineGenerator(PeriodicSignalGenerator):
         return self.amplitude * np.sin(2 * np.pi * self.freq * t + self.phase)
 
 
-@deprecated_alias({'rms': 'amplitude'}, removal_version='25.10')
 class GenericSignalGenerator(SignalGenerator):
     """
     Generate signals from a :class:`~acoular.base.SamplesGenerator` or derived object.

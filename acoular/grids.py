@@ -4,6 +4,24 @@
 """
 Implement support for multidimensional grids and integration sectors.
 
+.. inheritance-diagram::
+                acoular.grids.Grid
+                acoular.grids.RectGrid
+                acoular.grids.RectGrid3D
+                acoular.grids.ImportGrid
+                acoular.grids.LineGrid
+                acoular.grids.MergeGrid
+    :top-classes:
+                acoular.grids.Grid
+    :parts: 1
+
+.. inheritance-diagram::
+                acoular.grids.Sector
+    :include-subclasses:
+    :top-classes:
+                acoular.grids.Sector
+    :parts: 1
+
 .. autosummary::
     :toctree: generated/
 
@@ -55,7 +73,6 @@ from traits.api import (
 from traits.trait_errors import TraitError
 
 # acoular imports
-from .deprecation import deprecated_alias
 from .internal import digest, ldigest
 
 
@@ -278,7 +295,6 @@ class Polygon:
         return mindst
 
 
-@deprecated_alias({'gpos': 'pos'}, removal_version='25.10')
 class Grid(ABCHasStrictTraits):
     """
     Abstract base class for grid geometries.
@@ -288,14 +304,13 @@ class Grid(ABCHasStrictTraits):
     implementations and should not be instantiated directly as it lacks concrete functionality.
 
     .. _units_note_grids:
+    .. admonition:: Unit of length
 
-    Notes
-    -----
-    The source code is agnostic to the unit of length. The positions' coordinates are assumed to be
-    in meters. This is consistent with the standard :class:`~acoular.environments.Environment` class
-    which uses the speed of sound at 20°C at sea level under standard atmosphere pressure in m/s.
-    If the positions' coordinates are provided in a unit other than meter, it is advisable to change
-    the :attr:`~acoular.environments.Environment.c` attribute to match the given unit.
+      The source code is agnostic to the unit of length. The positions' coordinates are assumed to
+      be in meters. This is consistent with the standard :class:`~acoular.environments.Environment`
+      class which uses the speed of sound at 20°C at sea level under standard atmosphere pressure in
+      m/s. If the positions' coordinates are provided in a unit other than meter, it is advisable to
+      change the :attr:`~acoular.environments.Environment.c` attribute to match the given unit.
     """
 
     #: The total number of grid points. This property is automatically calculated based on other
@@ -308,7 +323,7 @@ class Grid(ABCHasStrictTraits):
 
     #: The grid positions represented as a (3, :attr:`size`) array of :class:`floats<float>`.
     #: (read-only)
-    #: All positions' coordinates are in meters by default (see :ref:`notes <units_note_grids>`).
+    #: All positions' coordinates are in meters by default (:ref:`see here <units_note_grids>`).
     pos = Property(desc='x, y, z positions of grid points')
 
     #: A unique identifier for the grid, based on its properties. (read-only)
@@ -433,7 +448,6 @@ class Grid(ABCHasStrictTraits):
             f.write('</Grid>')
 
 
-@deprecated_alias({'gpos': 'pos'}, read_only=True, removal_version='25.10')
 class RectGrid(Grid):
     """
     Provides a 2D Cartesian grid for beamforming results.
@@ -842,7 +856,6 @@ class RectGrid3D(RectGrid):
         return np.s_[xi1 : xi2 + 1], np.s_[yi1 : yi2 + 1], np.s_[zi1 : zi2 + 1]
 
 
-@deprecated_alias({'from_file': 'file', 'gpos_file': 'pos'}, removal_version='25.10')
 class ImportGrid(Grid):
     """
     Load a 3D grid from an XML file.
@@ -1010,7 +1023,6 @@ class ImportGrid(Grid):
         self.subgrids = np.array(names)
 
 
-@deprecated_alias({'gpos': 'pos', 'numpoints': 'num_points'}, read_only=['gpos'], removal_version='25.10')
 class LineGrid(Grid):
     """
     Define a 3D grid for a line geometry.
@@ -1060,7 +1072,7 @@ class LineGrid(Grid):
 
     #: A (3, :attr:`size`) array containing the x, y, and z positions of the grid points.
     #: (read-only)
-    #: All positions' coordinates are in meters by default (see :ref:`notes <units_note_grids>`).
+    #: All positions' coordinates are in meters by default (:ref:`see here <units_note_grids>`).
     pos = Property(desc='x, y, z positions of grid points')
 
     #: A unique identifier for the grid, based on its properties. (read-only)
@@ -1091,7 +1103,6 @@ class LineGrid(Grid):
         return pos.T
 
 
-@deprecated_alias({'gpos': 'pos'}, read_only=True, removal_version='25.10')
 class MergeGrid(Grid):
     """
     Base class for merging multiple grid geometries.
