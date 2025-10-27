@@ -12,6 +12,7 @@ Upcoming Release
         * reworks *Beamforming with moving focus* example 
         * new website with improved API reference
         * split large dependency graph into submodule graphs for clarity
+        * fix link in README
 
     **Internal**
         * refactored import statements and input aliases
