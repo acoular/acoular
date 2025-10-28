@@ -243,9 +243,9 @@ class Environment(HasStrictTraits):
         """
         Compute the apparent distance (sound travel path length) between two sets of points.
 
-        .. deprecated::
-            This method has been renamed to :meth:`apparent_r` and will be removed in a future
-            version. Please use :meth:`apparent_r` instead.
+        .. deprecated:: 25.10
+            This method has been renamed to :meth:`apparent_r` and will be removed in version 26.07.
+            Please use :meth:`apparent_r` instead.
 
         Parameters
         ----------
@@ -267,7 +267,8 @@ class Environment(HasStrictTraits):
         :meth:`apparent_r` : The new method name.
         """
         warn(
-            "Deprecated use of '_r' method. Please use the 'apparent_r' method instead.",
+            "Deprecated use of '_r' method (will be removed in version 26.07). "
+            "Please use the 'apparent_r' method instead.",
             DeprecationWarning,
             stacklevel=2,
         )
@@ -359,9 +360,9 @@ class UniformFlowEnvironment(Environment):
         """
         Compute the apparent distance (sound travel path length) between two sets of points.
 
-        .. deprecated::
-            This method has been renamed to :meth:`apparent_r` and will be removed in a future
-            version. Please use :meth:`apparent_r` instead.
+        .. deprecated:: 25.10
+            This method has been renamed to :meth:`apparent_r` and will be removed in version 26.07.
+            Please use :meth:`apparent_r` instead.
 
         Parameters
         ----------
@@ -383,7 +384,8 @@ class UniformFlowEnvironment(Environment):
         :meth:`apparent_r` : The new method name.
         """
         warn(
-            "Deprecated use of '_r' method. Please use the 'apparent_r' method instead.",
+            "Deprecated use of '_r' method (will be removed in version 26.07). "
+            "Please use the 'apparent_r' method instead.",
             DeprecationWarning,
             stacklevel=2,
         )
@@ -967,9 +969,9 @@ class GeneralFlowEnvironment(Environment):
         """
         Compute the apparent distance (sound travel path length) between two sets of points.
 
-        .. deprecated::
-            This method has been renamed to :meth:`apparent_r` and will be removed in a future
-            version. Please use :meth:`apparent_r` instead.
+        .. deprecated:: 25.10
+            This method has been renamed to :meth:`apparent_r` and will be removed in version 26.07.
+            Please use :meth:`apparent_r` instead.
 
         Parameters
         ----------
@@ -991,7 +993,8 @@ class GeneralFlowEnvironment(Environment):
         :meth:`apparent_r` : The new method name.
         """
         warn(
-            "Deprecated use of '_r' method. Please use the 'apparent_r' method instead.",
+            "Deprecated use of '_r' method (will be removed in version 26.07). "
+            "Please use the 'apparent_r' method instead.",
             DeprecationWarning,
             stacklevel=2,
         )
