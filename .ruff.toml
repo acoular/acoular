@@ -23,7 +23,6 @@ ignore = [
     "D401", # first line should be in imperative mood -> TBD
     # Others
     "T20", # will be fixed when logging is implemented
-    "SLF001", # should be fixed with issue: #225
 ]
 
 # Allow fix for all enabled rules (when `--fix`) is provided.

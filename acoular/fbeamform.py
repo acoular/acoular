@@ -177,12 +177,12 @@ class SteeringVector(HasStrictTraits):
         if np.isscalar(self.ref):
             if self.ref > 0:
                 return np.full((self.grid.size,), self.ref)
-            return self.env._r(self.grid.pos())
-        return self.env._r(self.grid.pos, self.ref[:, np.newaxis])
+            return self.env.apparent_r(self.grid.pos())
+        return self.env.apparent_r(self.grid.pos, self.ref[:, np.newaxis])
 
     @property_depends_on(['grid.digest', 'mics.digest', 'env.digest'])
     def _get_rm(self):
-        return np.atleast_2d(self.env._r(self.grid.pos, self.mics.pos))
+        return np.atleast_2d(self.env.apparent_r(self.grid.pos, self.mics.pos))
 
     @cached_property
     def _get_digest(self):
@@ -2344,8 +2344,8 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
                 def func(xy):
                     # function to minimize globally
                     xy = np.clip(xy, bmin, bmax)
-                    r0 = env._r(xy[:, np.newaxis])
-                    rm = env._r(xy[:, np.newaxis], mpos)
+                    r0 = env.apparent_r(xy[:, np.newaxis])
+                    rm = env.apparent_r(xy[:, np.newaxis], mpos)
                     return -beamformerFreq(
                         steer_type,
                         self.r_diag,
