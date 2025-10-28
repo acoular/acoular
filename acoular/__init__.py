@@ -133,3 +133,4 @@ from .tprocess import (
 )
 from .trajectory import Trajectory
 from .version import __author__, __date__, __version__
+from .plot_utils import set_plot_style
