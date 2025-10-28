@@ -148,14 +148,16 @@ def reset_cache_dir(gallery_conf, fname):
     from acoular import config
     config.cache_dir = str(Path(__file__).parent / 'auto_examples' / 'cache')
 
-def reset_matplotlib(gallery_conf, fname):
+def reset_matplotlib(gallery_conf, fname):  # noqa: ARG001
     """
     Apply the Acoular matplotlib style to ensure consistent plot appearance
     across all gallery examples.
     """
     import matplotlib.pyplot as plt
-    import acoular
-    style_path = Path(acoular.__file__).parent / 'plots.mplstyle'
+
+    import acoular as ac
+
+    style_path = Path(ac.__file__).parent / 'plots.mplstyle'
     plt.style.use(str(style_path))
 
 suppress_warnings = [
