@@ -13,16 +13,20 @@ jobs:
     name: Test conda deployment of package with the latest supported Python
     runs-on: ubuntu-latest
     steps:
+      - name: Set up conda
+        run: |
+          conda update -n base -c defaults conda
+          conda install -n base anaconda-client conda-build
+          conda remove -n base anaconda-auth
+          conda run -n base anaconda login --help
       - name: Check out a copy of the repository
-        uses: actions/checkout@v4
-      - name: Conda environment creation and activation
-        uses: ./.github/actions/setup-conda
+        uses: actions/checkout@v5
       - name: Set up hatch
         uses: ./.github/actions/setup-hatch
       - name: Build package
         run: |
           export VERSION=$(hatch version)
-          conda build --channel conda-forge --no-anaconda-upload --no-copy-test-source-files recipe.local --output-folder ./conda_package
+          conda run -n base conda build --channel conda-forge --no-anaconda-upload --no-copy-test-source-files recipe.local --output-folder ./conda_package
       - name: Upload conda package artifact
         uses: actions/upload-artifact@v4
         with:
@@ -31,8 +35,5 @@ jobs:
       - name: Upload conda package to Anaconda Cloud
         if: ${{ github.event_name =='workflow_dispatch' && github.ref == 'refs/heads/master' }}
         run: |
-          eval "$(conda shell.bash hook)"
-          conda activate base
-          anaconda login -at anaconda.org --username ${{ secrets.ANACONDA_USERNAME }} --password ${{ secrets.ANACONDA_PASSWORD }}
-          anaconda upload ./conda_package/noarch/*.conda
-
+          conda run -n base anaconda login --username ${{ secrets.ANACONDA_USERNAME }} --password ${{ secrets.ANACONDA_PASSWORD }}
+          conda run -n base anaconda upload ./conda_package/noarch/*.conda
