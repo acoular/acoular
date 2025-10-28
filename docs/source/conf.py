@@ -155,9 +155,8 @@ def reset_matplotlib(gallery_conf, fname):  # noqa: ARG001
     """
     import matplotlib.pyplot as plt
 
-    import acoular as ac
-
-    style_path = Path(ac.__file__).parent / 'plots.mplstyle'
+    # Get the path to the acoular package's plots.mplstyle file
+    style_path = Path(__file__).parent.parent.parent / 'acoular' / 'plots.mplstyle'
     plt.style.use(str(style_path))
 
 suppress_warnings = [

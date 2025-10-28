@@ -28,7 +28,5 @@ def set_plot_style():
     """
     import matplotlib.pyplot as plt
 
-    import acoular as ac
-
-    style_path = Path(ac.__file__).parent / 'plots.mplstyle'
+    style_path = Path(__file__).parent / 'plots.mplstyle'
     plt.style.use(str(style_path))
