@@ -100,7 +100,7 @@ class TestDeprecatedAPI:
 
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter('always')
-            result = env._r(gpos, mpos)
+            _ = env._r(gpos, mpos)
             assert len(w) == 1
             assert issubclass(w[0].category, DeprecationWarning)
             assert 'apparent_r' in str(w[0].message)
@@ -137,7 +137,7 @@ class TestDeprecatedAPI:
 
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter('always')
-            result = env._r(gpos, mpos)
+            _ = env._r(gpos, mpos)
             assert len(w) == 1
             assert issubclass(w[0].category, DeprecationWarning)
 

@@ -78,4 +78,5 @@ docstring-code-line-length = "dynamic"
 "acoular/tools/helpers.py" = ["D205"]
 "acoular/tprocess.py" = ["N806"]
 "tests/cases/*" = ["N802"]
+"tests/unittests/test_environments.py" = ["SLF001"]  # tests deprecated _r method
 "examples/*" = ["A001", "B007", "D4", "E4", "E701", "F4", "UP036", "SIM108", "SLF001", "INP001"]
