@@ -720,8 +720,7 @@ class PointSource(SamplesGenerator):
     #: Instance of the :class:`~acoular.signals.SignalGenerator` class defining the emitted signal.
     signal = Instance(SignalGenerator)
 
-    #: Coordinates ``(x, y, z)`` of the source in a left-oriented system. Default is
-    #: ``np.array([[0.0], [0.0], [1.0]])``.
+    #: Coordinates ``(x, y, z)`` of the source. Default is ``np.array([[0.0], [0.0], [1.0]])``.
     loc = Property(CArray, desc='source location')
 
     _loc = CArray(shape=(3, 1), value=np.array([[0.0], [0.0], [1.0]]), dtype=float)
