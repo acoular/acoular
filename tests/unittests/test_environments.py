@@ -79,3 +79,72 @@ class TestEnvironmentPublicAPI:
         )
 
         np.testing.assert_allclose(result_apparent, result_distmat, rtol=1e-10)
+
+
+class TestDeprecatedAPI:
+    """Test the deprecated _r method for backward compatibility."""
+
+    def test_environment_deprecated_r_exists(self):
+        """Test that deprecated _r method still exists."""
+        env = ac.Environment()
+        assert hasattr(env, '_r')
+        assert callable(env._r)
+
+    def test_environment_deprecated_r_warns(self):
+        """Test that deprecated _r method raises DeprecationWarning."""
+        import warnings
+
+        env = ac.Environment()
+        gpos = np.array([[1.0], [0.0], [0.0]])
+        mpos = np.array([[0.0], [0.0], [0.0]])
+
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter('always')
+            result = env._r(gpos, mpos)
+            assert len(w) == 1
+            assert issubclass(w[0].category, DeprecationWarning)
+            assert 'apparent_r' in str(w[0].message)
+
+    def test_environment_deprecated_r_returns_same_as_apparent_r(self):
+        """Test that deprecated _r returns same result as apparent_r."""
+        import warnings
+
+        env = ac.Environment()
+        gpos = np.array([[1.0, 2.0], [0.0, 1.0], [0.0, 0.0]])
+        mpos = np.array([[0.0], [0.0], [0.0]])
+
+        result_apparent = env.apparent_r(gpos, mpos)
+
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            result_deprecated = env._r(gpos, mpos)
+
+        np.testing.assert_allclose(result_deprecated, result_apparent, rtol=1e-10)
+
+    def test_uniformflow_deprecated_r_exists(self):
+        """Test that deprecated _r method exists in UniformFlowEnvironment."""
+        env = ac.UniformFlowEnvironment(ma=0.3)
+        assert hasattr(env, '_r')
+        assert callable(env._r)
+
+    def test_uniformflow_deprecated_r_warns(self):
+        """Test that deprecated _r method in UniformFlowEnvironment raises warning."""
+        import warnings
+
+        env = ac.UniformFlowEnvironment(ma=0.3)
+        gpos = np.array([[1.0], [0.0], [0.0]])
+        mpos = np.array([[0.0], [0.0], [0.0]])
+
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter('always')
+            result = env._r(gpos, mpos)
+            assert len(w) == 1
+            assert issubclass(w[0].category, DeprecationWarning)
+
+    def test_generalflow_deprecated_r_exists(self):
+        """Test that deprecated _r method exists in GeneralFlowEnvironment."""
+        flow_field = ac.OpenJet(v0=70.0, origin=(-0.7, 0, 0.7))
+        env = ac.GeneralFlowEnvironment(ff=flow_field)
+        assert hasattr(env, '_r')
+        assert callable(env._r)
+

@@ -239,6 +239,40 @@ class Environment(HasStrictTraits):
             rm = rm[:, 0]
         return rm
 
+    def _r(self, gpos, mpos=0.0):
+        """
+        Compute the apparent distance (sound travel path length) between two sets of points.
+
+        .. deprecated::
+            This method has been renamed to :meth:`apparent_r` and will be removed in a future
+            version. Please use :meth:`apparent_r` instead.
+
+        Parameters
+        ----------
+        gpos : :class:`numpy.ndarray` of :class:`floats<float>`
+            The coordinates of the first set of points (e.g., grid points). Should be of shape
+            `(3, N)`, where `N` is the number of points and each row represents x, y, z coordinates.
+
+        mpos : :class:`float` or :class:`numpy.ndarray` of :class:`floats<float>`, optional
+            The coordinates of the second set of points (e.g., microphone positions).
+            Default is ``0.0``.
+
+        Returns
+        -------
+        :class:`numpy.ndarray` of :class:`floats<float>`
+            The apparent distances (sound travel path lengths).
+
+        See Also
+        --------
+        :meth:`apparent_r` : The new method name.
+        """
+        warn(
+            "Deprecated use of '_r' method. Please use the 'apparent_r' method instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.apparent_r(gpos, mpos)
+
 
 class UniformFlowEnvironment(Environment):
     """
@@ -320,6 +354,40 @@ class UniformFlowEnvironment(Environment):
         if rm.shape[1] == 1:
             rm = rm[:, 0]
         return rm
+
+    def _r(self, gpos, mpos=0.0):
+        """
+        Compute the apparent distance (sound travel path length) between two sets of points.
+
+        .. deprecated::
+            This method has been renamed to :meth:`apparent_r` and will be removed in a future
+            version. Please use :meth:`apparent_r` instead.
+
+        Parameters
+        ----------
+        gpos : :class:`numpy.ndarray` of :class:`floats<float>`
+            The coordinates of the first set of points (e.g., grid points). Should be of shape
+            `(3, N)`, where `N` is the number of points and each row represents x, y, z coordinates.
+
+        mpos : :class:`float` or :class:`numpy.ndarray` of :class:`floats<float>`, optional
+            The coordinates of the second set of points (e.g., microphone positions).
+            Default is ``0.0``.
+
+        Returns
+        -------
+        :class:`numpy.ndarray` of :class:`floats<float>`
+            The apparent distances (sound travel path lengths).
+
+        See Also
+        --------
+        :meth:`apparent_r` : The new method name.
+        """
+        warn(
+            "Deprecated use of '_r' method. Please use the 'apparent_r' method instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.apparent_r(gpos, mpos)
 
 
 class FlowField(ABCHasStrictTraits):
@@ -894,6 +962,40 @@ class GeneralFlowEnvironment(Environment):
         if gt.shape[1] == 1:
             gt = gt[:, 0]
         return c * gt  # return distance along ray
+
+    def _r(self, gpos, mpos=0.0):
+        """
+        Compute the apparent distance (sound travel path length) between two sets of points.
+
+        .. deprecated::
+            This method has been renamed to :meth:`apparent_r` and will be removed in a future
+            version. Please use :meth:`apparent_r` instead.
+
+        Parameters
+        ----------
+        gpos : :class:`numpy.ndarray` of :class:`floats<float>`
+            The coordinates of the first set of points (e.g., grid points). Should be of shape
+            `(3, N)`, where `N` is the number of points and each row represents x, y, z coordinates.
+
+        mpos : :class:`float` or :class:`numpy.ndarray` of :class:`floats<float>`, optional
+            The coordinates of the second set of points (e.g., microphone positions).
+            Default is ``0.0``.
+
+        Returns
+        -------
+        :class:`numpy.ndarray` of :class:`floats<float>`
+            The apparent distances (sound travel path lengths).
+
+        See Also
+        --------
+        :meth:`apparent_r` : The new method name.
+        """
+        warn(
+            "Deprecated use of '_r' method. Please use the 'apparent_r' method instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.apparent_r(gpos, mpos)
 
     def get_interpolator(self, roi, x0):
         """
