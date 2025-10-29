@@ -39,7 +39,7 @@ jobs:
         with:
           os: ${{ matrix.os }}
       - name: Run sphinx
-        run: uv run --group docs make -C docs html
+        run: uv run make -C docs html
       - name: Upload artifacts
         if: ${{ matrix.os == 'ubuntu-latest' }}
         uses: actions/upload-artifact@v4
