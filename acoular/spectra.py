@@ -85,8 +85,7 @@ class BaseSpectra(ABCHasStrictTraits):
             'Blackman': np.blackman,
         },
         default_value='Rectangular',
-        #: type of window for FFT
-            )
+    )
 
     #: Overlap factor for FFT block averaging. One of:
     #:
@@ -112,8 +111,7 @@ class BaseSpectra(ABCHasStrictTraits):
         16384,
         32768,
         65536,
-        #: number of samples per FFT block
-            )
+    )
 
     #: Precision of the FFT, corresponding to NumPy dtypes. Default is ``'complex128'``.
     precision = Enum('complex128', 'complex64')

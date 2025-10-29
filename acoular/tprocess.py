@@ -126,14 +126,12 @@ class MaskedTimeOut(TimeOut):
 
     #: Number of valid input channels after excluding :attr:`invalid_channels`. (read-only)
     num_channels = Property(
-        #: number of valid input channels
         depends_on=['invalid_channels', 'source.num_channels']
     )
 
     #: Number of valid time-domain samples, based on :attr:`start` and :attr:`stop` indices.
     #: (read-only)
     num_samples = Property(
-        #: number of valid samples per channel
         depends_on=['start', 'stop', 'source.num_samples']
     )
 
@@ -781,8 +779,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
         'IDW',
         'custom',
         'sinc',
-        #: method for interpolation used
-            )
+    )
 
     #: Defines the spatial dimensionality of the microphone array.
     #:
@@ -832,10 +829,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
 
     #: Weighting exponent for IDW interpolation. This parameter controls the influence of distance
     #: in inverse distance weighting (IDW). A higher value gives more weight to closer microphones.
-    p_weight = Float(
-        2,
-        #: used in interpolation for virtual microphone, weighting power exponent for IDW
-            )
+    p_weight = Float(2)
 
     # Stores the output of :meth:`_virtNewCoord_func`; Read-Only
     _virtNewCoord_func = Property(  # noqa: N815
@@ -2709,8 +2703,7 @@ class TimeConvolve(TimeOut):
     # Computed using Fast Fourier Transform (FFT).
     _kernel_blocks = Property(
         depends_on=['kernel', '_block_size'],
-        #: Frequency domain Kernel blocks
-            )
+    )
 
     #: A unique identifier for the object, based on its properties. (read-only)
     digest = Property(depends_on=['source.digest', 'kernel'])

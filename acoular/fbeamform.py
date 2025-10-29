@@ -133,6 +133,7 @@ class SteeringVector(HasStrictTraits):
     #: Defaults to [0.,0.,0.].
     ref = Property()
 
+    #: dictionary of frequency domain steering vector functions
     _steer_funcs_freq = Dict(
         {
             'classic': lambda x: x / np.abs(x) / x.shape[-1],
@@ -141,9 +142,9 @@ class SteeringVector(HasStrictTraits):
             'true location': lambda x: x / np.sqrt(np.einsum('ij,ij->i', x, x.conj()) * x.shape[-1])[:, np.newaxis],
         },
         transient=True,
-        #: dictionary of frequency domain steering vector functions
-            )
+    )
 
+    #: dictionary of time domain steering vector functions
     _steer_funcs_time = Dict(
         {
             'classic': _steer_I,
@@ -152,8 +153,7 @@ class SteeringVector(HasStrictTraits):
             'true location': _steer_IV,
         },
         transient=True,
-        #: dictionary of time domain steering vector functions
-            )
+    )
 
     def _set_ref(self, ref):
         if np.isscalar(ref):
@@ -292,16 +292,15 @@ class BeamformerBase(HasStrictTraits):
     #: Boolean flag, if 'True' (default), the main diagonal is removed before beamforming.
     r_diag = Bool(True)
 
+    #: If diagonal of the csm is removed, some signal energy is lost.
+    #: This is handled via this normalization factor.
+    #: Internally, the default is: num_mics / (num_mics - 1).
+    #:
     #: If r_diag==True: if r_diag_norm==0.0, the standard
     #: normalization = num_mics/(num_mics-1) is used.
     #: If r_diag_norm !=0.0, the user input is used instead.
     #: If r_diag==False, the normalization is 1.0 either way.
-    r_diag_norm = Float(
-        0.0,
-        #: If diagonal of the csm is removed, some signal energy is lost.
-                'This is handled via this normalization factor.'
-        'Internally, the default is: num_mics / (num_mics - 1).',
-    )
+    r_diag_norm = Float(0.0)
 
     #: Floating point precision of property result. Corresponding to numpy dtypes. Default = 64 Bit.
     precision = Enum('float64', 'float32')
@@ -691,10 +690,7 @@ class BeamformerFunctional(BeamformerBase):
 
     #: Normalization factor in case of CSM diagonal removal. Defaults to 1.0 since Functional
     #: Beamforming is only well defined for full CSM.
-    r_diag_norm = Enum(
-        1.0,
-        #: No normalization needed. Functional Beamforming is only well defined for full CSM.
-            )
+    r_diag_norm = Enum(1.0)
 
     # internal identifier
     digest = Property(depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['gamma'])
@@ -782,10 +778,7 @@ class BeamformerCapon(BeamformerBase):
 
     #: Normalization factor in case of CSM diagonal removal. Defaults to 1.0 since Beamformer Capon
     #: is only well defined for full CSM.
-    r_diag_norm = Enum(
-        1.0,
-        #: No normalization. BeamformerCapon is only well defined for full CSM.
-            )
+    r_diag_norm = Enum(1.0)
 
     def _calc(self, ind):
         """
@@ -900,10 +893,7 @@ class BeamformerMusic(BeamformerEig):
 
     #: Normalization factor in case of CSM diagonal removal. Defaults to 1.0 since BeamformerMusic
     #: is only well defined for full CSM.
-    r_diag_norm = Enum(
-        1.0,
-        #: No normalization. BeamformerMusic is only well defined for full CSM.
-            )
+    r_diag_norm = Enum(1.0)
 
     # assumed number of sources, should be set to a value not too small
     # defaults to 1
@@ -966,8 +956,7 @@ class PointSpreadFunction(HasStrictTraits):
     grid_indices = CArray(
         dtype=int,
         value=np.array([]),
-        #: indices of grid points for psf
-            )  # value=array([]), value=self.steer.grid.pos(),
+    )  # value=array([]), value=self.steer.grid.pos(),
 
     #: Flag that defines how to calculate and store the point spread function
     #: defaults to 'single'.
@@ -1595,8 +1584,7 @@ class BeamformerCMF(BeamformerBase):
         'fmin_l_bfgs_b',
         'Split_Bregman',
         'FISTA',
-        #: fit method used
-            )
+    )
 
     #: Weight factor for LassoLars method,
     #: defaults to 0.0.
@@ -1620,10 +1608,7 @@ class BeamformerCMF(BeamformerBase):
     show = Bool(False)
 
     #: Energy normalization in case of diagonal removal not implemented for inverse methods.
-    r_diag_norm = Enum(
-        None,
-        #: Energy normalization in case of diagonal removal not implemented for inverse methods
-            )
+    r_diag_norm = Enum(None)
 
     # internal identifier
     digest = Property(
@@ -1829,10 +1814,7 @@ class BeamformerSODIX(BeamformerBase):
     unit_mult = Float(1e9)
 
     #: Energy normalization in case of diagonal removal not implemented for inverse methods.
-    r_diag_norm = Enum(
-        None,
-        #: Energy normalization in case of diagonal removal not implemented for inverse methods
-            )
+    r_diag_norm = Enum(None)
 
     # internal identifier
     digest = Property(
@@ -1995,8 +1977,7 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
         'LassoLarsCV',
         'OMPCV',
         'NNLS',
-        #: fit method used
-            )
+    )
 
     #: Weight factor for LassoLars method,
     #: defaults to 0.0.
@@ -2021,10 +2002,7 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
     m = Int(0)
 
     #: Energy normalization in case of diagonal removal not implemented for inverse methods.
-    r_diag_norm = Enum(
-        None,
-        #: Energy normalization in case of diagonal removal not implemented for inverse methods
-            )
+    r_diag_norm = Enum(None)
 
     # internal identifier
     digest = Property(
@@ -2279,13 +2257,10 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
     #: and 1 iteration
     shgo = Dict
 
-    #: No normalization implemented. Defaults to 1.0.
-    r_diag_norm = Enum(
-        1.0,
-        #: If diagonal of the csm is removed, some signal energy is lost.
-                'This is handled via this normalization factor.'
-        'For this class, normalization is not implemented. Defaults to 1.0.',
-    )
+    #: If diagonal of the csm is removed, some signal energy is lost.
+    #: This is handled via this normalization factor.
+    #: For this class, normalization is not implemented. Defaults to 1.0.
+    r_diag_norm = Enum(1.0)
 
     # internal identifier
     digest = Property(
