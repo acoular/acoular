@@ -1,8 +1,3 @@
-.. _installation of uv: https://docs.astral.sh/uv/#installation
-.. _installation of pip: https://pip.pypa.io/en/stable/installation
-.. _installation of conda: https://docs.conda.io/projects/conda/en/stable/user-guide/install/index.html
-.. _installation of mamba: https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html
-
 Install Acoular
 ===============
 Acoular runs under 64-bit Linux, MacOS and Windows. It currently supports Python 3.10, 3.11, 3.12 and 3.13.
@@ -12,131 +7,19 @@ Tools
 There are many different tools for Python environment management and package installation.
 Select your preferred method by clicking on one of the tabs below.
 
-.. tab-set::
-    :sync-group: tool
-
-    .. tab-item:: ``uv``
-        :sync: uv
-
-        `"An extremely fast Python package and project manager, written in Rust."`
-
-        This method only requires an `installation of uv`_ itself.
-        Choose this for a beginner-friendly and streamlined experience.
-
-    .. tab-item:: ``pip``
-        :sync: pip
-
-        `"The PyPA recommended tool for installing Python packages."`
-
-        This method requires Python and an `installation of pip`_.
-        Choose this for a traditional Python experience.
-
-    .. tab-item:: ``mamba``
-        :sync: mamba
-
-        `"The fast cross-platform package manager."`
-
-        This method only requires an `installation of mamba`_ itself.
-        Choose this if you rely on Anaconda and want a fast experience.
-
-    .. tab-item:: ``conda``
-        :sync: conda
-
-        `"OS-agnostic, system-level binary package and environment manager."`
-
-        This method only requires an `installation of conda`_ itself.
-        Choose this if you rely on Anaconda.
+.. include:: tools.rst
 
 Virtual environment
 -------------------
-We strongly encourage the use of virtual environments. An environment can be created with:
-
-.. tab-set::
-    :sync-group: tool
-
-    .. tab-item:: ``uv``
-        :sync: uv
-
-        .. code-block:: console
-
-            $ uv venv
-
-        .. note::
-           ``uv`` will handle environment activation implicitly.
-
-    .. tab-item:: ``pip``
-        :sync: pip
-
-        .. code-block:: console
-
-            $ python3 -m venv my-env
-
-        and activate the environment with:
-
-        .. code-block:: console
-
-            $ source my-env/bin/activate
-
-    .. tab-item:: ``mamba``
-        :sync: mamba
-
-        .. code-block:: console
-
-            $ mamba create -n my-env
-
-        and activate the environment with:
-
-        .. code-block:: console
-
-            $ mamba activate my-env
-
-    .. tab-item:: ``conda``
-        :sync: conda
-
-        .. code-block:: console
-
-            $ conda create -n my-env
-
-        and activate the environment with:
-
-        .. code-block:: console
-
-            $ conda activate my-env
+We strongly encourage the use of virtual environments. An environment ``my-env`` can be created with:
+        
+.. include:: environment-commands.rst
 
 Installation
 ------------
 Then, install Acoular with:
 
-.. tab-set::
-    :sync-group: tool
-
-    .. tab-item:: ``uv``
-        :sync: uv
-
-        .. code-block:: console
-
-            $ uv pip install acoular
-
-    .. tab-item:: ``pip``
-        :sync: pip
-
-        .. code-block:: console
-
-            $ pip3 install -U acoular
-
-    .. tab-item:: ``mamba``
-        :sync: mamba
-
-        .. code-block:: console
-
-            $ mamba install -c acoular acoular
-
-    .. tab-item:: ```conda``
-        :sync: conda
-
-        .. code-block:: console
-
-            $ conda install -c acoular acoular
+.. include:: install-commands.rst
 
 Dependencies
 ------------
@@ -165,38 +48,15 @@ Package                                                           Needed for
 `PyLops <https://pylops.readthedocs.io>`_                         Some solvers of :class:`~acoular.fbeamform.BeamformerCMF`.
 ================================================================= ========
 
-When installing Acoular from PyPI, Acoular and all optional dependencies can be installed with the ``acoular[full]`` extra. Otherwise, the dependencies need to be installed manually:
+When installing Acoular from PyPI, Acoular and all optional dependencies can be installed with the ``full`` extra:
 
-.. tab-set::
-    :sync-group: tool
+.. literalinclude:: /../../pyproject.toml
+    :start-at: [project.optional-dependencies]
+    :end-before: [dependency-groups]
+                 
+Otherwise, the dependencies need to be installed manually:
 
-    .. tab-item:: ``uv``
-        :sync: uv
-
-        .. code-block:: console
-
-            $ uv pip install 'acoular[full]'
-
-    .. tab-item:: ``pip``
-        :sync: pip
-
-        .. code-block:: console
-
-            $ pip3 install -U 'acoular[full]'
-
-    .. tab-item:: ``mamba``
-        :sync: mamba
-
-        .. code-block:: console
-
-            $ mamba install -c acoular acoular matplotlib pylops python-sounddevice
-
-    .. tab-item:: ``conda``
-        :sync: conda
-
-        .. code-block:: console
-
-            $ conda install -c acoular acoular matplotlib pylops python-sounddevice
+.. include:: full-install-commands.rst
 
 Verify your installation
 ------------------------
