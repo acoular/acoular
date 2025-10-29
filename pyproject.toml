@@ -167,7 +167,7 @@ env = [
 
 [tool.coverage.run]
 omit = [
-    "acoular/demo/acoular_demo.py",
+    "acoular/demo",
     "acoular/base.py",
     "acoular/tfastfuncs.py",
     "acoular/fastFuncs.py",
