@@ -69,7 +69,7 @@ docs = [
     "setuptools", # unfortunately still needed for sphinxcontrib-bibtex (https://github.com/mcmtroffaes/sphinxcontrib-bibtex/issues/345)
 ]
 
-lint = ["ruff==0.14.2"]  # remember to change version pin in docs/source/contributing/install.rst
+lint = ["ruff==0.14.2"]
 
 test = [
     "h5py",

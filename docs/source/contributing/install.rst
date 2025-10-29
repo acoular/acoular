@@ -13,62 +13,33 @@ Before you can start contributing to Acoular
 
 .. code-block:: bash
 
-    git clone <https://your_fork/acoular>
+    git clone <https://your_fork>
     cd acoular
 
+We encourage using the latest compatible Python version, which is currently 3.13.
 
-If you don't already have an existing virtual environment, you have the choice to create one with a package distribution of your choice.
-The Acoular development team had good experience with the following distributions: 
+Creating a development environment
+----------------------------------
 
-    * `conda <https://docs.conda.io/en/latest/>`_ 
-    * `mamba <https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html>`_
-    * `micromamba <https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html>`_ 
-    * `virtualenv <https://virtualenv.pypa.io/en/latest/>`_ 
+For development, a virtual environment is needed. Create one with your preferred tool:
 
+.. include:: ../install/environment-commands.rst
 
-Create a fresh environment
---------------------------
+Editable installation
+---------------------
 
-We recommend using the latest compatible version of Python, which is currently 3.13.
-If you are using the anaconda distribution, you can create a new environment, for example named `dev`, with
+Next, we need to make an editable installation of Acoular with:
 
-.. code-block:: bash
+.. include:: ../install/editable-install-commands.rst
 
-    conda create -n dev python=3.13
-    conda activate dev
+An editable installation allows you to make changes to the source code and see the effects immediately without having to reinstall the package.
 
-The same command can be used with mamba or micromamba by simply replacing `conda` with `mamba` or `micromamba`.
-
-
-Equally, you can create a new environment with virtualenv:
-
-.. code-block:: bash
-
-    virtualenv -p python3.13 dev
-    source dev/bin/activate
-
-
-
-Install dependencies
---------------------
-
-Then, make an editable installation of Acoular with:
-
-.. code-block:: bash
-
-    pip install -e ".[dev]"
-
-The editable installation allows you to make changes to the source code and see the effects immediately without having to reinstall the package.
 
 The ``".[dev]"`` argument is responsible for installing the right dependencies as defined in ``pyproject.toml``:
 
-.. code-block:: toml
-
-    dev = [
-        "acoular[docs,full,tests]",
-        "hatch",
-        "ruff==0.8.1",
-    ]
+.. literalinclude:: /../../pyproject.toml
+    :start-at: [dependency-groups]
+    :end-before: [project.urls]
 
 If not included, the dependencies have to be installed manually.
 
