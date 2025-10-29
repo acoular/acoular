@@ -99,13 +99,13 @@ class SteeringVector(HasStrictTraits):
     """
 
     #: :class:`~acoular.grids.Grid`-derived object that provides the grid locations.
-    grid = Instance(Grid, desc='beamforming grid')
+    grid = Instance(Grid)
 
     #: :class:`~acoular.microphones.MicGeom` object that provides the microphone locations.
-    mics = Instance(MicGeom, desc='microphone geometry')
+    mics = Instance(MicGeom)
 
     #: Type of steering vectors, see also :cite:`Sarradj2012`. Defaults to 'true level'.
-    steer_type = Enum('true level', 'true location', 'classic', 'inverse', desc='type of steering vectors used')
+    steer_type = Enum('true level', 'true location', 'classic', 'inverse')
 
     #: :class:`~acoular.environments.Environment` or derived object,
     #: which provides information about the sound propagation in the medium.
@@ -114,21 +114,24 @@ class SteeringVector(HasStrictTraits):
 
     # Sound travel distances from microphone array center to grid
     # points or reference position (readonly). Feature may change.
-    r0 = Property(desc='array center to grid distances')
+    #: array center to grid distances
+    r0 = Property()
 
     # Sound travel distances from array microphones to grid
     # points (readonly). Feature may change.
-    rm = Property(desc='all array mics to grid distances')
+    #: all array mics to grid distances
+    rm = Property()
 
     # mirror trait for ref
-    _ref = Any(np.array([0.0, 0.0, 0.0]), desc='reference position or distance')
+    #: reference position or distance
+    _ref = Any(np.array([0.0, 0.0, 0.0]))
 
     #: Reference position or distance at which to evaluate the sound pressure
     #: of a grid point.
     #: If set to a scalar, this is used as reference distance to the grid points.
     #: If set to a vector, this is interpreted as x,y,z coordinates of the reference position.
     #: Defaults to [0.,0.,0.].
-    ref = Property(desc='reference position or distance')
+    ref = Property()
 
     _steer_funcs_freq = Dict(
         {
@@ -138,8 +141,8 @@ class SteeringVector(HasStrictTraits):
             'true location': lambda x: x / np.sqrt(np.einsum('ij,ij->i', x, x.conj()) * x.shape[-1])[:, np.newaxis],
         },
         transient=True,
-        desc='dictionary of frequency domain steering vector functions',
-    )
+        #: dictionary of frequency domain steering vector functions
+            )
 
     _steer_funcs_time = Dict(
         {
@@ -149,8 +152,8 @@ class SteeringVector(HasStrictTraits):
             'true location': _steer_IV,
         },
         transient=True,
-        desc='dictionary of time domain steering vector functions',
-    )
+        #: dictionary of time domain steering vector functions
+            )
 
     def _set_ref(self, ref):
         if np.isscalar(ref):
@@ -284,10 +287,10 @@ class BeamformerBase(HasStrictTraits):
 
     #: :class:`~acoular.spectra.PowerSpectra` object that provides the
     #: cross spectral matrix and eigenvalues
-    freq_data = Instance(PowerSpectra, desc='freq data object')
+    freq_data = Instance(PowerSpectra)
 
     #: Boolean flag, if 'True' (default), the main diagonal is removed before beamforming.
-    r_diag = Bool(True, desc='removal of diagonal')
+    r_diag = Bool(True)
 
     #: If r_diag==True: if r_diag_norm==0.0, the standard
     #: normalization = num_mics/(num_mics-1) is used.
@@ -295,16 +298,16 @@ class BeamformerBase(HasStrictTraits):
     #: If r_diag==False, the normalization is 1.0 either way.
     r_diag_norm = Float(
         0.0,
-        desc='If diagonal of the csm is removed, some signal energy is lost.'
-        'This is handled via this normalization factor.'
+        #: If diagonal of the csm is removed, some signal energy is lost.
+                'This is handled via this normalization factor.'
         'Internally, the default is: num_mics / (num_mics - 1).',
     )
 
     #: Floating point precision of property result. Corresponding to numpy dtypes. Default = 64 Bit.
-    precision = Enum('float64', 'float32', desc='precision (32/64 Bit) of result, corresponding to numpy dtypes')
+    precision = Enum('float64', 'float32')
 
     #: Boolean flag, if 'True' (default), the result is cached in h5 files.
-    cached = Bool(True, desc='cached flag')
+    cached = Bool(True)
 
     # hdf5 cache file
     h5f = Instance(H5CacheFileBase, transient=True)
@@ -313,16 +316,20 @@ class BeamformerBase(HasStrictTraits):
     #: at all grid point locations (readonly).
     #: Returns a (number of frequencies, number of gridpoints) array-like
     #: of floats. Values can only be accessed via the index operator [].
-    result = Property(desc='beamforming result')
+    result = Property()
 
     # internal identifier
     digest = Property(depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES)
 
     # private traits
-    _ac = Any(desc='beamforming result')
-    _fr = Any(desc='flag for beamforming result at frequency index')
-    _f = CArray(dtype='float64', desc='frequencies')
-    _numfreq = Int(desc='number of frequencies')
+    #: beamforming result
+    _ac = Any()
+    #: flag for beamforming result at frequency index
+    _fr = Any()
+    #: frequencies
+    _f = CArray(dtype='float64')
+    #: number of frequencies
+    _numfreq = Int()
 
     @cached_property
     def _get_digest(self):
@@ -677,17 +684,17 @@ class BeamformerFunctional(BeamformerBase):
     """
 
     #: Functional exponent, defaults to 1 (= Classic Beamforming).
-    gamma = Float(1, desc='functional exponent')
+    gamma = Float(1)
 
     #: Functional Beamforming is only well defined for full CSM
-    r_diag = Enum(False, desc='False, as Functional Beamformer is only well defined for the full CSM')
+    r_diag = Enum(False)
 
     #: Normalization factor in case of CSM diagonal removal. Defaults to 1.0 since Functional
     #: Beamforming is only well defined for full CSM.
     r_diag_norm = Enum(
         1.0,
-        desc='No normalization needed. Functional Beamforming is only well defined for full CSM.',
-    )
+        #: No normalization needed. Functional Beamforming is only well defined for full CSM.
+            )
 
     # internal identifier
     digest = Property(depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['gamma'])
@@ -770,14 +777,15 @@ class BeamformerCapon(BeamformerBase):
 
     # Boolean flag, if 'True', the main diagonal is removed before beamforming;
     # for Capon beamforming r_diag is set to 'False'.
-    r_diag = Enum(False, desc='removal of diagonal')
+    #: removal of diagonal
+    r_diag = Enum(False)
 
     #: Normalization factor in case of CSM diagonal removal. Defaults to 1.0 since Beamformer Capon
     #: is only well defined for full CSM.
     r_diag_norm = Enum(
         1.0,
-        desc='No normalization. BeamformerCapon is only well defined for full CSM.',
-    )
+        #: No normalization. BeamformerCapon is only well defined for full CSM.
+            )
 
     def _calc(self, ind):
         """
@@ -818,10 +826,11 @@ class BeamformerEig(BeamformerBase):
     #: Number of component to calculate:
     #: 0 (smallest) ... :attr:`~acoular.base.SamplesGenerator.num_channels`-1;
     #: defaults to -1, i.e. num_channels-1
-    n = Int(-1, desc='No. of eigenvalue')
+    n = Int(-1)
 
     # Actual component to calculate, internal, readonly.
-    na = Property(desc='No. of eigenvalue')
+    #: No. of eigenvalue
+    na = Property()
 
     # internal identifier
     digest = Property(depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['n'])
@@ -886,18 +895,20 @@ class BeamformerMusic(BeamformerEig):
 
     # Boolean flag, if 'True', the main diagonal is removed before beamforming;
     # for MUSIC beamforming r_diag is set to 'False'.
-    r_diag = Enum(False, desc='removal of diagonal')
+    #: removal of diagonal
+    r_diag = Enum(False)
 
     #: Normalization factor in case of CSM diagonal removal. Defaults to 1.0 since BeamformerMusic
     #: is only well defined for full CSM.
     r_diag_norm = Enum(
         1.0,
-        desc='No normalization. BeamformerMusic is only well defined for full CSM.',
-    )
+        #: No normalization. BeamformerMusic is only well defined for full CSM.
+            )
 
     # assumed number of sources, should be set to a value not too small
     # defaults to 1
-    n = Int(1, desc='assumed number of sources')
+    #: assumed number of sources
+    n = Int(1)
 
     def _calc(self, ind):
         """
@@ -955,8 +966,8 @@ class PointSpreadFunction(HasStrictTraits):
     grid_indices = CArray(
         dtype=int,
         value=np.array([]),
-        desc='indices of grid points for psf',
-    )  # value=array([]), value=self.steer.grid.pos(),
+        #: indices of grid points for psf
+            )  # value=array([]), value=self.steer.grid.pos(),
 
     #: Flag that defines how to calculate and store the point spread function
     #: defaults to 'single'.
@@ -969,16 +980,16 @@ class PointSpreadFunction(HasStrictTraits):
     #:            (useful if not all PSFs are needed, as with :class:`CLEAN<BeamformerClean>`)
     #: * 'readonly': Do not attempt to calculate the PSF since it should already be cached (useful
     #:               if multiple processes have to access the cache file)
-    calcmode = Enum('single', 'block', 'full', 'readonly', desc='mode of calculation / storage')
+    calcmode = Enum('single', 'block', 'full', 'readonly')
 
     #: Floating point precision of property psf. Corresponding to numpy dtypes. Default = 64 Bit.
-    precision = Enum('float64', 'float32', desc='precision (32/64 Bit) of result, corresponding to numpy dtypes')
+    precision = Enum('float64', 'float32')
 
     #: The actual point spread function.
-    psf = Property(desc='point spread function')
+    psf = Property()
 
     #: Frequency to evaluate the PSF for; defaults to 1.0.
-    freq = Float(1.0, desc='frequency')
+    freq = Float(1.0)
 
     # hdf5 cache file
     h5f = Instance(H5CacheFileBase, transient=True)
@@ -1129,17 +1140,17 @@ class BeamformerDamas(BeamformerBase):
     """
 
     #: The floating-number-precision of the PSFs. Default is 64 bit.
-    psf_precision = Enum('float64', 'float32', desc='precision of PSF')
+    psf_precision = Enum('float64', 'float32')
 
     #: Number of iterations, defaults to 100.
-    n_iter = Int(100, desc='number of iterations')
+    n_iter = Int(100)
 
     #: Damping factor in modified gauss-seidel
-    damp = Float(1.0, desc='damping factor in modified gauss-seidel-DAMAS-approach')
+    damp = Float(1.0)
 
     #: Flag that defines how to calculate and store the point spread function,
     #: defaults to 'full'. See :attr:`PointSpreadFunction.calcmode` for details.
-    calcmode = Enum('full', 'single', 'block', 'readonly', desc='mode of psf calculation / storage')
+    calcmode = Enum('full', 'single', 'block', 'readonly')
 
     # internal identifier
     digest = Property(
@@ -1206,23 +1217,23 @@ class BeamformerDamasPlus(BeamformerDamas):
     #: These methods are implemented in
     #: the `scikit-learn <http://scikit-learn.org/stable/user_guide.html>`_
     #: module or within scipy.optimize respectively.
-    method = Enum('NNLS', 'LP', 'LassoLars', 'OMPCV', desc='method used for solving deconvolution problem')
+    method = Enum('NNLS', 'LP', 'LassoLars', 'OMPCV')
 
     #: Weight factor for LassoLars method,
     #: defaults to 0.0.
     # (Values in the order of 10^⁻9 should produce good results.)
-    alpha = Range(0.0, 1.0, 0.0, desc='Lasso weight factor')
+    alpha = Range(0.0, 1.0, 0.0)
 
     #: Maximum number of iterations,
     #: tradeoff between speed and precision;
     #: defaults to 500
-    n_iter = Int(500, desc='maximum number of iterations')
+    n_iter = Int(500)
 
     #: Unit multiplier for evaluating, e.g., nPa instead of Pa.
     #: Values are converted back before returning.
     #: Temporary conversion may be necessary to not reach machine epsilon
     #: within fitting method algorithms. Defaults to 1e9.
-    unit_mult = Float(1e9, desc='unit multiplier')
+    unit_mult = Float(1e9)
 
     # internal identifier
     digest = Property(
@@ -1319,7 +1330,7 @@ class BeamformerOrth(BeamformerBase):
 
     #: List of components to consider, use this to directly set the eigenvalues
     #: used in the beamformer. Alternatively, set :attr:`n`.
-    eva_list = CArray(dtype=int, value=np.array([-1]), desc='components')
+    eva_list = CArray(dtype=int, value=np.array([-1]))
 
     #: Number of components to consider, defaults to 1. If set,
     #: :attr:`eva_list` will contain
@@ -1388,16 +1399,16 @@ class BeamformerCleansc(BeamformerBase):
 
     #: no of CLEAN-SC iterations
     #: defaults to 0, i.e. automatic (max 2*num_channels)
-    n_iter = Int(0, desc='no of iterations')
+    n_iter = Int(0)
 
     #: iteration damping factor
     #: defaults to 0.6
-    damp = Range(0.01, 1.0, 0.6, desc='damping factor')
+    damp = Range(0.01, 1.0, 0.6)
 
     #: iteration stop criterion for automatic detection
     #: iteration stops if power[i]>power[i-stopn]
     #: defaults to 3
-    stopn = Int(3, desc='stop criterion index')
+    stopn = Int(3)
 
     # internal identifier
     digest = Property(depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['n_iter', 'damp', 'stopn'])
@@ -1478,17 +1489,20 @@ class BeamformerClean(BeamformerBase):
     """
 
     #: The floating-number-precision of the PSFs. Default is 64 bit.
-    psf_precision = Enum('float64', 'float32', desc='precision of PSF.')
+    psf_precision = Enum('float64', 'float32')
 
     # iteration damping factor
     # defaults to 0.6
-    damp = Range(0.01, 1.0, 0.6, desc='damping factor')
+    #: damping factor
+    damp = Range(0.01, 1.0, 0.6)
 
     # max number of iterations
-    n_iter = Int(100, desc='maximum number of iterations')
+    #: maximum number of iterations
+    n_iter = Int(100)
 
     # how to calculate and store the psf
-    calcmode = Enum('block', 'full', 'single', 'readonly', desc='mode of psf calculation / storage')
+    #: mode of psf calculation / storage
+    calcmode = Enum('block', 'full', 'single', 'readonly')
 
     # internal identifier
     digest = Property(
@@ -1581,35 +1595,35 @@ class BeamformerCMF(BeamformerBase):
         'fmin_l_bfgs_b',
         'Split_Bregman',
         'FISTA',
-        desc='fit method used',
-    )
+        #: fit method used
+            )
 
     #: Weight factor for LassoLars method,
     #: defaults to 0.0.
     #: (Use values in the order of 10^⁻9 for good results.)
-    alpha = Range(0.0, 1.0, 0.0, desc='Lasso weight factor')
+    alpha = Range(0.0, 1.0, 0.0)
 
     #: Total or maximum number of iterations
     #: (depending on :attr:`method`),
     #: tradeoff between speed and precision;
     #: defaults to 500
-    n_iter = Int(500, desc='maximum number of iterations')
+    n_iter = Int(500)
 
     #: Unit multiplier for evaluating, e.g., nPa instead of Pa.
     #: Values are converted back before returning.
     #: Temporary conversion may be necessary to not reach machine epsilon
     #: within fitting method algorithms. Defaults to 1e9.
-    unit_mult = Float(1e9, desc='unit multiplier')
+    unit_mult = Float(1e9)
 
     #: If True, shows the status of the PyLops solver. Only relevant in case of FISTA or
     #: Split_Bregman
-    show = Bool(False, desc='show output of PyLops solvers')
+    show = Bool(False)
 
     #: Energy normalization in case of diagonal removal not implemented for inverse methods.
     r_diag_norm = Enum(
         None,
-        desc='Energy normalization in case of diagonal removal not implemented for inverse methods',
-    )
+        #: Energy normalization in case of diagonal removal not implemented for inverse methods
+            )
 
     # internal identifier
     digest = Property(
@@ -1797,28 +1811,28 @@ class BeamformerSODIX(BeamformerBase):
     #: Type of fit method to be used ('fmin_l_bfgs_b').
     #: These methods are implemented in
     #: the scipy module.
-    method = Enum('fmin_l_bfgs_b', desc='fit method used')
+    method = Enum('fmin_l_bfgs_b')
 
     #: Maximum number of iterations,
     #: tradeoff between speed and precision;
     #: defaults to 200
-    n_iter = Int(200, desc='maximum number of iterations')
+    n_iter = Int(200)
 
     #: Weight factor for regularization,
     #: defaults to 0.0.
-    alpha = Range(0.0, 1.0, 0.0, desc='regularization factor')
+    alpha = Range(0.0, 1.0, 0.0)
 
     #: Unit multiplier for evaluating, e.g., nPa instead of Pa.
     #: Values are converted back before returning.
     #: Temporary conversion may be necessary to not reach machine epsilon
     #: within fitting method algorithms. Defaults to 1e9.
-    unit_mult = Float(1e9, desc='unit multiplier')
+    unit_mult = Float(1e9)
 
     #: Energy normalization in case of diagonal removal not implemented for inverse methods.
     r_diag_norm = Enum(
         None,
-        desc='Energy normalization in case of diagonal removal not implemented for inverse methods',
-    )
+        #: Energy normalization in case of diagonal removal not implemented for inverse methods
+            )
 
     # internal identifier
     digest = Property(
@@ -1960,13 +1974,13 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
     #: Values are converted back before returning.
     #: Temporary conversion may be necessary to not reach machine epsilon
     #: within fitting method algorithms. Defaults to 1e9.
-    unit_mult = Float(1e9, desc='unit multiplier')
+    unit_mult = Float(1e9)
 
     #: Total or maximum number of iterations
     #: (depending on :attr:`method`),
     #: tradeoff between speed and precision;
     #: defaults to 10
-    n_iter = Int(10, desc='maximum number of iterations')
+    n_iter = Int(10)
 
     #: Type of fit method to be used ('Suzuki', 'LassoLars', 'LassoLarsCV', 'LassoLarsBIC',
     #: 'OMPCV' or 'NNLS', defaults to 'Suzuki').
@@ -1981,35 +1995,36 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
         'LassoLarsCV',
         'OMPCV',
         'NNLS',
-        desc='fit method used',
-    )
+        #: fit method used
+            )
 
     #: Weight factor for LassoLars method,
     #: defaults to 0.0.
-    alpha = Range(0.0, 1.0, 0.0, desc='Lasso weight factor')
+    alpha = Range(0.0, 1.0, 0.0)
     # (use values in the order of 10^⁻9 for good results)
 
     #: Norm to consider for the regularization in InverseIRLS and Suzuki methods
     #: defaults to L-1 Norm
-    pnorm = Float(1, desc='Norm for regularization')
+    pnorm = Float(1)
 
     #: Beta - Fraction of sources maintained after each iteration
     #: defaults to 0.9
-    beta = Float(0.9, desc='fraction of sources maintained')
+    beta = Float(0.9)
 
     #: eps - Regularization parameter for Suzuki algorithm
     #: defaults to 0.05.
-    eps_perc = Float(0.05, desc='regularization parameter')
+    eps_perc = Float(0.05)
 
     # This feature is not fully supported may be changed in the next release
     # First eigenvalue to consider. Defaults to 0.
-    m = Int(0, desc='First eigenvalue to consider')
+    #: First eigenvalue to consider
+    m = Int(0)
 
     #: Energy normalization in case of diagonal removal not implemented for inverse methods.
     r_diag_norm = Enum(
         None,
-        desc='Energy normalization in case of diagonal removal not implemented for inverse methods',
-    )
+        #: Energy normalization in case of diagonal removal not implemented for inverse methods
+            )
 
     # internal identifier
     digest = Property(
@@ -2244,7 +2259,7 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
 
     #: List of components to consider, use this to directly set the eigenvalues
     #: used in the beamformer. Alternatively, set :attr:`n`.
-    eva_list = CArray(dtype=int, value=np.array([-1]), desc='components')
+    eva_list = CArray(dtype=int, value=np.array([-1]))
 
     #: Number of components to consider, defaults to 1. If set,
     #: :attr:`eva_list` will contain
@@ -2267,8 +2282,8 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
     #: No normalization implemented. Defaults to 1.0.
     r_diag_norm = Enum(
         1.0,
-        desc='If diagonal of the csm is removed, some signal energy is lost.'
-        'This is handled via this normalization factor.'
+        #: If diagonal of the csm is removed, some signal energy is lost.
+                'This is handled via this normalization factor.'
         'For this class, normalization is not implemented. Defaults to 1.0.',
     )
 

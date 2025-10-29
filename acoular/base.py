@@ -55,7 +55,7 @@ class Generator(ABCHasStrictTraits):
     """
 
     #: Sampling frequency of the signal, defaults to 1.0
-    sample_freq = Float(1.0, desc='sampling frequency')
+    sample_freq = Float(1.0)
 
     #: Number of signal samples
     num_samples = CInt

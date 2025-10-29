@@ -92,7 +92,7 @@ class BeamformerTime(TimeOut):
     num_channels = Property()
 
     #: Spatial weighting function.
-    weights = Map(possible_weights, default_value='none', desc='spatial weighting function')
+    weights = Map(possible_weights, default_value='none')
     # (from timedomain.possible_weights)
 
     # internal identifier
@@ -231,7 +231,7 @@ class BeamformerTimeSq(BeamformerTime):
     """
 
     #: Boolean flag, if 'True' (default), the main diagonal is removed before beamforming.
-    r_diag = Bool(True, desc='removal of diagonal')
+    r_diag = Bool(True)
 
     # internal identifier
     digest = Property(
@@ -275,16 +275,16 @@ class BeamformerTimeTraj(BeamformerTime):
 
     #: :class:`~acoular.trajectory.Trajectory` or derived object.
     #: Start time is assumed to be the same as for the samples.
-    trajectory = Instance(Trajectory, desc='trajectory of the grid center')
+    trajectory = Instance(Trajectory)
 
     #: Reference vector, perpendicular to the y-axis of moving grid.
-    rvec = CArray(dtype=float, shape=(3,), value=np.array((0, 0, 0)), desc='reference vector')
+    rvec = CArray(dtype=float, shape=(3), value=np.array((0, 0, 0)))
 
     #: Considering of convective amplification in beamforming formula.
-    conv_amp = Bool(False, desc='determines if convective amplification of source is considered')
+    conv_amp = Bool(False)
 
     #: Floating point and integer precision
-    precision = Enum(64, 32, desc='numeric precision')
+    precision = Enum(64, 32)
 
     # internal identifier
     digest = Property(
@@ -571,14 +571,14 @@ class BeamformerCleant(BeamformerTime):
     """
 
     #: Boolean flag, always False
-    r_diag = Enum(False, desc='False, as we do not remove autopower in this beamformer')
+    r_diag = Enum(False)
 
     #: iteration damping factor also referred as loop gain in Cousson et al.
     #: defaults to 0.6
-    damp = Range(0.01, 1.0, 0.6, desc='damping factor (loop gain)')
+    damp = Range(0.01, 1.0, 0.6)
 
     #: max number of iterations
-    n_iter = Int(100, desc='maximum number of iterations')
+    n_iter = Int(100)
 
     # internal identifier
     digest = Property(
@@ -623,7 +623,7 @@ class BeamformerCleantSq(BeamformerCleant):
     """
 
     #: Boolean flag, if 'True' (default), the main diagonal is removed before beamforming.
-    r_diag = Bool(True, desc='removal of diagonal')
+    r_diag = Bool(True)
 
     # internal identifier
     digest = Property(
@@ -668,7 +668,7 @@ class BeamformerCleantTraj(BeamformerCleant, BeamformerTimeTraj):
     """
 
     #: Floating point and integer precision
-    precision = Enum(32, 64, desc='numeric precision')
+    precision = Enum(32, 64)
 
     # internal identifier
     digest = Property(
@@ -723,7 +723,7 @@ class BeamformerCleantSqTraj(BeamformerCleantTraj, BeamformerTimeSq):
     """
 
     #: Boolean flag, if 'True' (default), the main diagonal is removed before beamforming.
-    r_diag = Bool(True, desc='removal of diagonal')
+    r_diag = Bool(True)
 
     # internal identifier
     digest = Property(
@@ -777,7 +777,7 @@ class IntegratorSectorTime(TimeOut):
     source = Instance(SamplesGenerator)
 
     #: :class:`~acoular.grids.RectGrid` object that provides the grid locations.
-    grid = Instance(RectGrid, desc='beamforming grid')
+    grid = Instance(RectGrid)
 
     #: List of sectors in grid
     sectors = List()

@@ -315,16 +315,16 @@ class Grid(ABCHasStrictTraits):
 
     #: The total number of grid points. This property is automatically calculated based on other
     #: defining attributes of the grid. (read-only)
-    size = Property(desc='overall number of grid points')
+    size = Property()
 
     #: The shape of the grid, represented as a tuple. Primarily useful for Cartesian grids.
     #: (read-only)
-    shape = Property(desc='grid shape as tuple')
+    shape = Property()
 
     #: The grid positions represented as a (3, :attr:`size`) array of :class:`floats<float>`.
     #: (read-only)
     #: All positions' coordinates are in meters by default (:ref:`see here <units_note_grids>`).
-    pos = Property(desc='x, y, z positions of grid points')
+    pos = Property()
 
     #: A unique identifier for the grid, based on its properties. (read-only)
     digest = Property
@@ -457,31 +457,31 @@ class RectGrid(Grid):
     """
 
     #: The lower x-limit that defines the grid. Default is ``-1``.
-    x_min = Float(-1.0, desc='minimum  x-value')
+    x_min = Float(-1.0)
 
     #: The upper x-limit that defines the grid. Default is ``1``.
-    x_max = Float(1.0, desc='maximum  x-value')
+    x_max = Float(1.0)
 
     #: The lower y-limit that defines the grid. Default is ``-1``.
-    y_min = Float(-1.0, desc='minimum  y-value')
+    y_min = Float(-1.0)
 
     #: The upper y-limit that defines the grid. Default is ``1``.
-    y_max = Float(1.0, desc='maximum  y-value')
+    y_max = Float(1.0)
 
     #: The constant z-coordinate of the grid plane. Default is ``1.0``.
-    z = Float(1.0, desc='position on z-axis')
+    z = Float(1.0)
 
     #: The side length of each cell. Default is ``0.1``.
-    increment = Float(0.1, desc='step size')
+    increment = Float(0.1)
 
     #: Number of grid points along x-axis. (read-only)
-    nxsteps = Property(desc='number of grid points along x-axis')
+    nxsteps = Property()
 
     #: Number of grid points along y-axis. (read-only)
-    nysteps = Property(desc='number of grid points along y-axis')
+    nysteps = Property()
 
     #: The grid's extension in :obj:`matplotlib.pyplot.imshow` compatible form. (read-only)
-    extent = Property(desc='grid extent as (x_min, x_max, y_min, y_max)')
+    extent = Property()
 
     #: A unique identifier for the grid, based on its properties. (read-only)
     digest = Property(
@@ -672,27 +672,28 @@ class RectGrid3D(RectGrid):
     """
 
     #: The lower z-limit that defines the grid. Default is ``-1.0``.
-    z_min = Float(-1.0, desc='minimum  z-value')
+    z_min = Float(-1.0)
 
     #: The upper z-limit that defines the grid. Default is ``1.0``.
-    z_max = Float(1.0, desc='maximum  z-value')
+    z_max = Float(1.0)
 
     #: Number of grid points along x-axis. (read-only)
-    nxsteps = Property(desc='number of grid points along x-axis')
+    nxsteps = Property()
 
     #: Number of grid points along y-axis. (read-only)
-    nysteps = Property(desc='number of grid points along y-axis')
+    nysteps = Property()
 
     #: Number of grid points along z-axis. (read-only)
-    nzsteps = Property(desc='number of grid points along z-axis')
+    nzsteps = Property()
 
     # Private trait for increment handling
-    _increment = Union(Float(), CArray(shape=(3,), dtype=float), default_value=0.1, desc='step size')
+    #: step size
+    _increment = Union(Float(), CArray(shape=(3), dtype=float), default_value=0.1)
 
     #: The cell side length for the grid. This can either be a scalar (same increments in all 3
     #: dimensions) or a (3,) array of :class:`tuple` of :class:`floats<float>` with respective
     #: increments in x-, y-, and z-direction. Default is ``0.1``.
-    increment = Property(desc='step size')
+    increment = Property()
 
     def _get_increment(self):
         return self._increment
@@ -865,13 +866,14 @@ class ImportGrid(Grid):
     """
 
     #: Name of the .xml-file from which to read the data.
-    file = Union(None, File(filter=['*.xml'], exists=True), desc='name of the xml file to import')
+    file = Union(None, File(filter=['*.xml'], exists=True))
 
-    _gpos = CArray(dtype=float, desc='x, y, z position of all Grid Points')
+    #: x, y, z position of all Grid Points
+    _gpos = CArray(dtype=float)
 
     #: Names of subgrids for each point.
     #: This is an optional property, typically used when grids are divided into named subregions.
-    subgrids = CArray(desc='names of subgrids for each point')
+    subgrids = CArray()
 
     #: A unique identifier for the grid, based on its properties. (read-only)
     digest = Property(depends_on=['_gpos'])
@@ -1058,22 +1060,22 @@ class LineGrid(Grid):
     loc = Tuple((0.0, 0.0, 0.0))
 
     #: A vector defining the orientation of the line in 3D space. Default is ``(1.0, 0.0, 0.0)``.
-    direction = Tuple((1.0, 0.0, 0.0), desc='Line orientation ')
+    direction = Tuple((1.0, 0.0, 0.0))
 
     #: Total length of the line. Default is ``1.0``.
-    length = Float(1, desc='length of the line source')
+    length = Float(1)
 
     #: Number of grid points along the line. Default is ``1``.
-    num_points = Int(1, desc='length of the line source')
+    num_points = Int(1)
 
     #: The total number of grid points. Automatically updated when other grid-defining attributes
     #: are set. (read-only)
-    size = Property(desc='overall number of grid points')
+    size = Property()
 
     #: A (3, :attr:`size`) array containing the x, y, and z positions of the grid points.
     #: (read-only)
     #: All positions' coordinates are in meters by default (:ref:`see here <units_note_grids>`).
-    pos = Property(desc='x, y, z positions of grid points')
+    pos = Property()
 
     #: A unique identifier for the grid, based on its properties. (read-only)
     digest = Property(
@@ -1135,13 +1137,13 @@ class MergeGrid(Grid):
 
     #: A list of :class:`Grid` objects to be merged. Each grid is treated as a subdomain in the
     #: resulting merged grid.
-    grids = List(desc='list of grids')
+    grids = List()
 
     #: A list of unique digests for each grid being merged. (read-only)
-    grid_digest = Str(desc='digest of the merged grids')
+    grid_digest = Str()
 
     #: Names of subgrids corresponding to each point in the merged grid. (read-only)
-    subgrids = Property(desc='names of subgrids for each point')
+    subgrids = Property()
 
     #: A unique identifier for the grid, based on its properties. (read-only)
     digest = Property(depends_on=['grids', 'grid_digest'])
@@ -1248,16 +1250,16 @@ class SingleSector(Sector):
 
     #: If ``True``, grid points lying on the sector border are included in the sector. Default is
     #: ``True``.
-    include_border = Bool(True, desc='include points on the border')
+    include_border = Bool(True)
 
     #: The absolute tolerance to apply when determining if a grid point lies on the sector border.
     #: Default is ``1e-12``.
-    abs_tol = Float(1e-12, desc='absolute tolerance for sector border')
+    abs_tol = Float(1e-12)
 
     #: If ``True``, the ``contains`` method (as in :meth:`RectSector.contains`,
     #: :meth:`RectSector3D.contains`, :meth:`CircSector.contains`, and :meth:`PolySector.contains`)
     #: returns the nearest grid point if no grid points are inside the sector. Default is ``True``.
-    default_nearest = Bool(True, desc='``contains`` method return nearest grid point to center if none inside sector')
+    default_nearest = Bool(True)
 
 
 class RectSector(SingleSector):
@@ -1276,16 +1278,16 @@ class RectSector(SingleSector):
     """
 
     #: The minimum x position of the rectangle. Default is ``-1.0``.
-    x_min = Float(-1.0, desc='minimum x position of the rectangle')
+    x_min = Float(-1.0)
 
     #: The maximum x position of the rectangle. Default is ``1.0``.
-    x_max = Float(1.0, desc='maximum x position of the rectangle')
+    x_max = Float(1.0)
 
     #: The minimum y position of the rectangle. Default is ``-1.0``.
-    y_min = Float(-1.0, desc='minimum y position of the rectangle')
+    y_min = Float(-1.0)
 
     #: The maximum y position of the rectangle. Default is ``1.0``.
-    y_max = Float(1.0, desc='maximum y position of the rectangle')
+    y_max = Float(1.0)
 
     def contains(self, pos):
         """
@@ -1360,10 +1362,10 @@ class RectSector3D(RectSector):
     """
 
     #: The lower z position of the cuboid. Default is ``-1.0``.
-    z_min = Float(-1.0, desc='minimum z position of the cuboid')
+    z_min = Float(-1.0)
 
     #: The upper z position of the cuboid.  Default is ``1.0``.
-    z_max = Float(1.0, desc='maximum z position of the cuboid')
+    z_max = Float(1.0)
 
     def contains(self, pos):
         """
@@ -1449,13 +1451,13 @@ class CircSector(SingleSector):
     """
 
     #: The x position of the circle center. Default is ``0.0``.
-    x = Float(0.0, desc='x position of the circle center')
+    x = Float(0.0)
 
     #: The y position of the circle center. Default is ``0.0``.
-    y = Float(0.0, desc='y position of the circle center')
+    y = Float(0.0)
 
     #: Radius of the circle. Default is ``1.0``.
-    r = Float(1.0, desc='radius of the circle')
+    r = Float(1.0)
 
     def contains(self, pos):
         """

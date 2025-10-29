@@ -347,28 +347,28 @@ class TimeSamples(SamplesGenerator):
     """
 
     #: Full path to the ``.h5`` file containing time-domain data.
-    file = Union(None, File(filter=['*.h5'], exists=True), desc='name of data file')
+    file = Union(None, File(filter=['*.h5'], exists=True))
 
     #: Basename of the ``.h5`` file, set automatically from the :attr:`file` attribute.
-    basename = Property(depends_on=['file'], desc='basename of data file')
+    basename = Property(depends_on=['file'])
 
     #: Number of input channels in the time data, set automatically based on the
     #: :attr:`loaded data<file>` or :attr:`specified array<data>`.
-    num_channels = CInt(0, desc='number of input channels')
+    num_channels = CInt(0)
 
     #: Total number of time-domain samples, set automatically based on the :attr:`loaded data<file>`
     #: or :attr:`specified array<data>`.
-    num_samples = CInt(0, desc='number of samples')
+    num_samples = CInt(0)
 
     #: A 2D NumPy array containing the time-domain data, shape (:attr:`num_samples`,
     #: :attr:`num_channels`).
-    data = Any(transient=True, desc='the actual time data array')
+    data = Any(transient=True)
 
     #: HDF5 file object.
     h5f = Instance(H5FileBase, transient=True)
 
     #: Metadata loaded from the HDF5 file, if available.
-    metadata = Dict(desc='metadata contained in .h5 file')
+    metadata = Dict()
 
     # Checksum over first data entries of all channels
     _datachecksum = Property(depends_on=['data'])
@@ -516,34 +516,36 @@ class MaskedTimeSamples(TimeSamples):
     """
 
     #: Index of the first sample to be considered valid. Default is ``0``.
-    start = CInt(0, desc='start of valid samples')
+    start = CInt(0)
 
     #: Index of the last sample to be considered valid. If ``None``, all remaining samples from the
     #: :attr:`start` index onward are considered valid. Default is ``None``.
-    stop = Union(None, CInt, desc='stop of valid samples')
+    stop = Union(None, CInt)
 
     #: List of channel indices to be excluded from processing. Default is ``[]``.
-    invalid_channels = List(int, desc='list of invalid channels')
+    invalid_channels = List(int)
 
     #: A mask or index array representing valid channels. Automatically updated based on the
     #: :attr:`invalid_channels` and :attr:`num_channels_total` attributes.
-    channels = Property(depends_on=['invalid_channels', 'num_channels_total'], desc='channel mask')
+    channels = Property(depends_on=['invalid_channels', 'num_channels_total'])
 
     #: Total number of input channels, including invalid channels. (read-only).
-    num_channels_total = CInt(0, desc='total number of input channels')
+    num_channels_total = CInt(0)
 
     #: Total number of samples, including invalid samples. (read-only).
-    num_samples_total = CInt(0, desc='total number of samples per channel')
+    num_samples_total = CInt(0)
 
     #: Number of valid input channels after excluding :attr:`invalid_channels`. (read-only)
     num_channels = Property(
-        depends_on=['invalid_channels', 'num_channels_total'], desc='number of valid input channels'
+        #: number of valid input channels
+        depends_on=['invalid_channels', 'num_channels_total']
     )
 
     #: Number of valid time-domain samples, based on :attr:`start` and :attr:`stop` indices.
     #: (read-only)
     num_samples = Property(
-        depends_on=['start', 'stop', 'num_samples_total'], desc='number of valid samples per channel'
+        #: number of valid samples per channel
+        depends_on=['start', 'stop', 'num_samples_total']
     )
 
     #: A unique identifier for the samples, based on its properties. (read-only)
@@ -726,13 +728,13 @@ class PointSource(SamplesGenerator):
 
     #: Coordinates ``(x, y, z)`` of the source in a left-oriented system. Default is
     #: ``(0.0, 0.0, 1.0)``.
-    loc = Tuple((0.0, 0.0, 1.0), desc='source location')
+    loc = Tuple((0.0, 0.0, 1.0))
 
     #: Number of output channels, automatically set based on the :attr:`microphone geometry<mics>`.
     num_channels = Delegate('mics', 'num_mics')
 
     #: :class:`~acoular.microphones.MicGeom` object defining the positions of the microphones.
-    mics = Instance(MicGeom, desc='microphone geometry')
+    mics = Instance(MicGeom)
 
     def _validate_locations(self):
         dist = self.env._r(np.array(self.loc).reshape((3, 1)), self.mics.pos)
@@ -745,10 +747,10 @@ class PointSource(SamplesGenerator):
     env = Instance(Environment, args=())
 
     #: Start time of the signal in seconds. Default is ``0.0``.
-    start_t = Float(0.0, desc='signal start time')
+    start_t = Float(0.0)
 
     #: Start time of data acquisition at the microphones in seconds. Default is ``0.0``.
-    start = Float(0.0, desc='sample start time')
+    start = Float(0.0)
 
     #: Behavior of the signal for negative time indices,
     #: i.e. if (:attr:`start` ``<`` :attr:`start_t`):
@@ -757,10 +759,10 @@ class PointSource(SamplesGenerator):
     #: - ``'zeros'``: Use zeros, recommended for deterministic signals.
     #:
     #: Default is ``'loop'``.
-    prepadding = Enum('loop', 'zeros', desc='Behaviour for negative time indices.')
+    prepadding = Enum('loop', 'zeros')
 
     #: Internal upsampling factor for finer signal resolution. Default is ``16``.
-    up = Int(16, desc='upsampling factor')
+    up = Int(16)
 
     #: Total number of samples in the emitted signal, derived from the :attr:`signal` generator.
     num_samples = Delegate('signal')
@@ -869,18 +871,18 @@ class SphericalHarmonicSource(PointSource):
     """
 
     #: Order of the spherical harmonic representation. Default is ``0``.
-    lOrder = Int(0, desc='Order of spherical harmonic')  # noqa: N815
+    lOrder = Int(0)  # noqa: N815
 
     #: Coefficients of the spherical harmonic modes for the given :attr:`lOrder`.
-    alpha = CArray(desc='coefficients of the (lOrder,) spherical harmonic mode')
+    alpha = CArray()
 
     #: Vector defining the orientation of the spherical harmonic source. Default is
     #: ``(1.0, 0.0, 0.0)``.
-    direction = Tuple((1.0, 0.0, 0.0), desc='Spherical Harmonic orientation')
+    direction = Tuple((1.0, 0.0, 0.0))
 
     #: Behavior of the signal for negative time indices. Currently only supports `loop`. Default is
     #: ``'loop'``.
-    prepadding = Enum('loop', desc='Behaviour for negative time indices.')
+    prepadding = Enum('loop')
 
     # Unique identifier for the current state of the source, based on its properties. (read-only)
     digest = Property(
@@ -1008,15 +1010,15 @@ class MovingPointSource(PointSource):
     #: Determines whether convective amplification is considered. When ``True``, the amplitude of
     #: the signal is adjusted based on the relative motion between the source and microphones.
     #: Default is ``False``.
-    conv_amp = Bool(False, desc='determines if convective amplification is considered')
+    conv_amp = Bool(False)
 
     #: Instance of the :class:`~acoular.trajectory.Trajectory` class specifying the source's motion.
     #: The trajectory defines the source's position and velocity at any given time.
-    trajectory = Instance(Trajectory, desc='trajectory of the source')
+    trajectory = Instance(Trajectory)
 
     #: Behavior of the signal for negative time indices. Currently only supports ``'loop'``.
     #: Default is ``'loop'``.
-    prepadding = Enum('loop', desc='Behaviour for negative time indices.')
+    prepadding = Enum('loop')
 
     #: A unique identifier for the current state of the source, based on its properties. (read-only)
     digest = Property(
@@ -1194,11 +1196,11 @@ class PointSourceDipole(PointSource):
     #: Default is ``(0.0, 0.0, 1.0)`` (z-axis orientation).
     #:
     #: **Note:** Use vectors with order of magnitude around ``1.0`` or less for good results.
-    direction = Tuple((0.0, 0.0, 1.0), desc='dipole orientation and distance of the inversely phased monopoles')
+    direction = Tuple((0.0, 0.0, 1.0))
 
     #: Behavior of the signal for negative time indices. Currently only supports ``'loop'``.
     #: Default is ``'loop'``.
-    prepadding = Enum('loop', desc='Behaviour for negative time indices.')
+    prepadding = Enum('loop')
 
     #: A unique identifier for the current state of the source, based on its properties. (read-only)
     digest = Property(
@@ -1348,7 +1350,7 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
     #: A reference vector, perpendicular to the x and y-axis of moving source, defining the axis of
     #: rotation for the dipole directivity. If set to ``(0, 0, 0)``, the dipole is only translated
     #: along the :attr:`~MovingPointSource.trajectory` without rotation. Default is ``(0, 0, 0)``.
-    rvec = CArray(dtype=float, shape=(3,), value=np.array((0, 0, 0)), desc='reference vector')
+    rvec = CArray(dtype=float, shape=(3), value=np.array((0, 0, 0)))
 
     @cached_property
     def _get_digest(self):
@@ -1519,19 +1521,19 @@ class LineSource(PointSource):
     """
 
     #: Vector to define the orientation of the line source. Default is ``(0.0, 0.0, 1.0)``.
-    direction = Tuple((0.0, 0.0, 1.0), desc='Line orientation ')
+    direction = Tuple((0.0, 0.0, 1.0))
 
     #: Vector to define the length of the line source in meters. Default is ``1.0``.
-    length = Float(1, desc='length of the line source')
+    length = Float(1)
 
     #: Number of monopole sources in the line source. Default is ``1``.
     num_sources = Int(1)
 
     #: Strength coefficients for each monopole source.
-    source_strength = CArray(desc='coefficients of the source strength')
+    source_strength = CArray()
 
     #: Coherence mode for the monopoles (``'coherent'`` or ``'incoherent'``).
-    coherence = Enum('coherent', 'incoherent', desc='coherence mode')
+    coherence = Enum('coherent', 'incoherent')
 
     #: A unique identifier for the current state of the source, based on its properties. (read-only)
     digest = Property(
@@ -1666,7 +1668,7 @@ class MovingLineSource(LineSource, MovingPointSource):
     #: rotation for the line source directivity. If set to ``(0, 0, 0)``, the line source is only
     #: translated along the :attr:`~MovingPointSource.trajectory` without rotation. Default is
     #: ``(0, 0, 0)``.
-    rvec = CArray(dtype=float, shape=(3,), value=np.array((0, 0, 0)), desc='reference vector')
+    rvec = CArray(dtype=float, shape=(3), value=np.array((0, 0, 0)))
 
     @cached_property
     def _get_digest(self):
@@ -1874,12 +1876,12 @@ class UncorrelatedNoiseSource(SamplesGenerator):
     #: Instance of a :class:`~acoular.signals.NoiseGenerator`-derived class. For example:
     #:    - :class:`~acoular.signals.WNoiseGenerator` for white noise.
     #:    - :class:`~acoular.signals.PNoiseGenerator` for pink noise.
-    signal = Instance(NoiseGenerator, desc='type of noise')
+    signal = Instance(NoiseGenerator)
 
     #: Array of random seed values for generating uncorrelated noise at each channel. If left empty,
     #: seeds will be automatically generated as ``np.arange(self.num_channels) + signal.seed``. The
     #: size of the array must match the :attr:`number of output channels<num_channels>`.
-    seed = CArray(dtype=np.uint32, desc='random seed values')
+    seed = CArray(dtype=np.uint32)
 
     #: Number of output channels, automatically determined by the number of microphones
     #: defined in the :attr:`mics` attribute. Corresponds to the number of uncorrelated noise
@@ -1889,15 +1891,15 @@ class UncorrelatedNoiseSource(SamplesGenerator):
     #: :class:`~acoular.microphones.MicGeom` object specifying the positions of microphones.
     #: This attribute is used to define the microphone geometry and the
     #: :attr:`number of channels<num_channels>`.
-    mics = Instance(MicGeom, desc='microphone geometry')
+    mics = Instance(MicGeom)
 
     #: Start time of the generated noise signal in seconds. Determines the time offset for the noise
     #: output relative to the start of data acquisition. Default is ``0.0``.
-    start_t = Float(0.0, desc='signal start time')
+    start_t = Float(0.0)
 
     #: Start time of data acquisition at the microphones in seconds. This value determines when the
     #: generated noise begins relative to the acquisition process.  Default is ``0.0``.
-    start = Float(0.0, desc='sample start time')
+    start = Float(0.0)
 
     #: Total number of samples in the noise signal, derived from the :attr:`signal` generator.
     #: This value determines the length of the output signal for all channels.
@@ -2095,7 +2097,7 @@ class SourceMixer(SamplesGenerator):
     #: The size of the weights array must match the number of sources in :attr:`sources`.
     #: For example, with two sources, ``weights = [1.0, 0.5]`` would mix the first source at
     #: full amplitude and the second source at half amplitude.
-    weights = CArray(desc='channel weights')
+    weights = CArray()
 
     #: Internal identifier for the combined state of all sources, used to track
     #: changes in the sources for reproducibility and caching.
@@ -2262,19 +2264,19 @@ class PointSourceConvolve(PointSource):
     #: Convolution kernel in the time domain.
     #: The array must either have one column (a single kernel applied to all channels)
     #: or match the number of output channels in its second dimension.
-    kernel = CArray(dtype=float, desc='Convolution kernel.')
+    kernel = CArray(dtype=float)
 
     #: Start time of the signal in seconds. Default is ``0.0``.
-    start_t = Enum(0.0, desc='signal start time')
+    start_t = Enum(0.0)
 
     #: Start time of the data acquisition the the microphones in seconds. Default is ``0.0``.
-    start = Enum(0.0, desc='sample start time')
+    start = Enum(0.0)
 
     #: Behavior for negative time indices. Default is ``None``.
-    prepadding = Enum(None, desc='Behavior for negative time indices.')
+    prepadding = Enum(None)
 
     #: Upsampling factor for internal use. Default is ``None``.
-    up = Enum(None, desc='upsampling factor')
+    up = Enum(None)
 
     #: Unique identifier for the current state of the source,
     #: based on microphone geometry, input signal, source location, and kernel. (read-only)
