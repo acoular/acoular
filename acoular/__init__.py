@@ -133,4 +133,22 @@ from .tprocess import (
 )
 from .trajectory import Trajectory
 from .version import __author__, __date__, __version__
-from .plot_utils import set_plot_style
+
+# Register the Acoular matplotlib style
+def _register_plot_style():
+    """Register the Acoular matplotlib style with matplotlib's style library."""
+    try:
+        from pathlib import Path
+
+        from matplotlib import rc_params_from_file, style
+
+        style_path = Path(__file__).parent / 'plots.mplstyle'
+        if style_path.exists():
+            style_dict = rc_params_from_file(str(style_path), use_default_template=False)
+            style.library['acoular.plots'] = style_dict
+    except ImportError:
+        # matplotlib is not installed, skip style registration
+        pass
+
+_register_plot_style()
+del _register_plot_style  # Clean up namespace

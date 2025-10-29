@@ -155,9 +155,7 @@ def reset_matplotlib(gallery_conf, fname):  # noqa: ARG001
     """
     import matplotlib.pyplot as plt
 
-    # Get the path to the acoular package's plots.mplstyle file
-    style_path = Path(__file__).parent.parent.parent / 'acoular' / 'plots.mplstyle'
-    plt.style.use(str(style_path))
+    plt.style.use('acoular.plots')
 
 suppress_warnings = [
     #   Sphinx 7.3.0: Suppressing the warning:
@@ -181,8 +179,8 @@ sphinx_gallery_conf = {
     'reset_modules': (reset_cache_dir, reset_matplotlib, 'matplotlib', 'seaborn'),
     'first_notebook_cell': (
         "# This cell is added by sphinx-gallery to apply the Acoular plot style\n"
-        "import acoular as ac\n"
-        "ac.set_plot_style()"
+        "import matplotlib.pyplot as plt\n"
+        "plt.style.use('acoular.plots')"
     ),
     'examples_dirs': [
         '../../examples',
