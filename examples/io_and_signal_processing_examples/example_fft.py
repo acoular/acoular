@@ -79,7 +79,6 @@ print('reconstructed signal energy in time domain', np.round(np.sum(time_block_r
 import matplotlib.pyplot as plt
 
 
-# Apply Acoular's matplotlib style
 plt.style.use('acoular.plots')
 fft.scaling = 'amplitude'
 spectrogram = ac.tools.return_result(fft)

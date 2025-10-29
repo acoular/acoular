@@ -77,7 +77,6 @@ bgib = ac.BeamformerGIB(freq_data=f, steer=st, method='LassoLars', n=10)
 import matplotlib.pyplot as plt
 
 
-# Apply Acoular's matplotlib style
 plt.style.use('acoular.plots')
 plt.figure(1, (10, 6))
 i1 = 1  # no of subplot

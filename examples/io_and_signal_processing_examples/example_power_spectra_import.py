@@ -57,7 +57,6 @@ Lm = ac.L_p(pm)
 import matplotlib.pyplot as plt
 
 
-# Apply Acoular's matplotlib style
 plt.style.use('acoular.plots')
 plt.figure()
 plt.imshow(Lm.T, origin='lower', vmin=Lm.max() - 10, extent=rg.extent, interpolation='bicubic')

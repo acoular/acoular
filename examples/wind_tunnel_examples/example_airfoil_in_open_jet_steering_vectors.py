@@ -98,7 +98,6 @@ bs = ac.BeamformerCleansc(freq_data=f, steer=st, r_diag=True)
 import matplotlib.pyplot as plt
 
 
-# Apply Acoular's matplotlib style
 plt.style.use('acoular.plots')
 fi = 1  # no of figure
 for r_diag in (True, False):

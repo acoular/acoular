@@ -17,7 +17,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-# Apply Acoular's matplotlib style
 plt.style.use('acoular.plots')
 # %%
 # First, we define the microphone geometry.

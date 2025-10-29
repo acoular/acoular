@@ -62,7 +62,6 @@ b = ac.BeamformerCMF(freq_data=f, steer=st, alpha=1e-8)
 import matplotlib.pyplot as plt
 
 
-# Apply Acoular's matplotlib style
 plt.style.use('acoular.plots')
 plt.figure(1, (10, 7))  # no of figure
 i1 = 1  # no of subplot

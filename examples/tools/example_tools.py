@@ -43,7 +43,6 @@ band = 3  # octave: 1 ;   1/3-octave: 3 (for plotting)
 import matplotlib.pyplot as plt
 
 
-# Apply Acoular's matplotlib style
 plt.style.use('acoular.plots')
 plt.figure(figsize=(20, 6))
 plt.title('Powerspectrum')
