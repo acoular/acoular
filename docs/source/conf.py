@@ -177,11 +177,6 @@ sphinx_gallery_conf = {
     'thumbnail_size': (250, 250),
     #'run_stale_examples': True,
     'reset_modules': (reset_cache_dir, reset_matplotlib, 'matplotlib', 'seaborn'),
-    'first_notebook_cell': (
-        "# This cell is added by sphinx-gallery to apply the Acoular plot style\n"
-        "import matplotlib.pyplot as plt\n"
-        "plt.style.use('acoular.plots')"
-    ),
     'examples_dirs': [
         '../../examples',
         ],   # path to your example scripts
