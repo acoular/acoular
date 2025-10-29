@@ -18,7 +18,7 @@ import acoular as ac
 import matplotlib.pyplot as plt
 
 # Apply Acoular's matplotlib style
-plt.style.use(Path(ac.__file__).parent / 'plots.mplstyle')
+plt.style.use('acoular.plots')
 
 micgeofile = Path(ac.__file__).parent / 'xml' / 'array_64.xml'
 datafile = Path('three_sources.h5')

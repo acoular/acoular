@@ -78,7 +78,7 @@ import matplotlib.pyplot as plt
 
 
 # Apply Acoular's matplotlib style
-plt.style.use(Path(ac.__file__).parent / 'plots.mplstyle')
+plt.style.use('acoular.plots')
 plt.figure(1, (10, 6))
 i1 = 1  # no of subplot
 for b in (bb, bc, be, bm, bl, bo, bs, bd, bcmf, bf, bdp, bgib):

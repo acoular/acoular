@@ -99,7 +99,7 @@ import matplotlib.pyplot as plt
 
 
 # Apply Acoular's matplotlib style
-plt.style.use(Path(ac.__file__).parent / 'plots.mplstyle')
+plt.style.use('acoular.plots')
 fi = 1  # no of figure
 for r_diag in (True, False):
     plt.figure(fi, (5, 6))
