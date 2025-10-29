@@ -176,7 +176,7 @@ cachts = ac.Cache(source=avgts)  # cache to prevent recalculation
 fig, ax = plt.subplots(subplot_kw={'projection': '3d'}, num=3)
 ax.plot(m.pos[0], m.pos[1], m.pos[2], 'o', label='mics')
 # translation and direction of trajectory
-for loc, dx, co in zip(tr.traj(0, 1.3, 0.6), tr.traj(0, 1.3, 0.6, der=1), 'krg'):
+for loc, dx, co in zip(tr.traj(0, 1.3, 0.6), tr.traj(0, 1.3, 0.6, der=1), 'krg', strict=True):
     dy = np.cross(bts.rvec, dx)  # new y-axis
     dz = np.cross(dx, dy)  # new z-axis
     RM = np.array((dx, dy, dz)).T  # rotation matrix
@@ -272,6 +272,7 @@ for i, map, tit in zip(
         'time domain\n fixed focus',
         'time domain\n deconvolution (moving focus)',
     ),
+    strict=True,
 ):
     plt.subplot(1, 4, i)
     mx = ac.L_p(map.max())

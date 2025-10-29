@@ -144,7 +144,7 @@ def return_result(source, nmax=-1, num=128):
 
     if nmax > 0:
         nblocks = (nmax - 1) // num + 1
-        return np.concatenate([res for _, res in zip(range(nblocks), resulter)])[:nmax]
+        return np.concatenate([res for _, res in zip(range(nblocks), resulter, strict=True)])[:nmax]
     return np.concatenate(list(resulter))
 
 
