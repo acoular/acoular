@@ -17,6 +17,9 @@ from pathlib import Path
 import acoular as ac
 import matplotlib.pyplot as plt
 import numpy as np
+
+# Apply Acoular's matplotlib style
+plt.style.use('acoular.plots')
 from acoular.tools.helpers import get_data_file
 from matplotlib.patches import Polygon, Rectangle
 

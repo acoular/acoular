@@ -17,6 +17,9 @@ from pathlib import Path
 import acoular as ac
 import matplotlib.pyplot as plt
 
+# Apply Acoular's matplotlib style
+plt.style.use('acoular.plots')
+
 micgeofile = Path(ac.__file__).parent / 'xml' / 'array_64.xml'
 datafile = Path('three_sources.h5')
 assert datafile.exists(), 'Data file not found, run example_three_sources.py first'
@@ -30,11 +33,21 @@ bb = ac.BeamformerBase(freq_data=ps, steer=st)
 pm = bb.synthetic(8000, 3)
 Lm = ac.L_p(pm)
 
-plt.figure(1)
-plt.imshow(Lm.T, origin='lower', vmin=Lm.max() - 10, extent=rg.extent, interpolation='bicubic')
-plt.colorbar()
+# %%
+# Plot the beamforming map
+fig, ax = plt.subplots()
+im = ax.imshow(Lm.T, origin='lower', vmin=Lm.max() - 10, extent=rg.extent, interpolation='bicubic')
+plt.colorbar(im, ax=ax, label='$L_p$ / dB')
+ax.set_xlabel('x / m')
+ax.set_ylabel('y / m')
+ax.set_title('Beamforming Map')
 
-plt.figure(2)
-plt.plot(mg.pos[0], mg.pos[1], 'o')
-plt.axis('equal')
+# %%
+# Plot the microphone geometry
+fig, ax = plt.subplots()
+ax.plot(mg.pos[0], mg.pos[1], 'o')
+ax.axis('equal')
+ax.set_xlabel('x / m')
+ax.set_ylabel('y / m')
+ax.set_title('Microphone Array Geometry')
 plt.show()

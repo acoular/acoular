@@ -40,6 +40,9 @@ band = 3  # octave: 1 ;   1/3-octave: 3 (for plotting)
 # create figure with barspectra
 import matplotlib.pyplot as plt
 
+
+# Apply Acoular's matplotlib style
+plt.style.use('acoular.plots')
 plt.figure(figsize=(20, 6))
 plt.title('Powerspectrum')
 plt.plot(f_borders, ac.L_p(p), label='bar=True')

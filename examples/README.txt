@@ -8,27 +8,18 @@ A gallery of showcase examples suitable for first-time and advanced users.
 Plot Style
 ----------
 
-The Acoular matplotlib style is automatically applied when you import the
-acoular package. This ensures consistent plot appearance across all examples,
-scripts, and notebooks.
-
-The style is applied when you import acoular:
+For consistent plot appearance, all examples use the Acoular matplotlib style.
+The style is applied at the beginning of each example:
 
 .. code-block:: python
 
-   import acoular as ac
    import matplotlib.pyplot as plt
    
-   # Style is already applied automatically
+   # Apply Acoular plot style
+   plt.style.use('acoular.plots')
+   
    # Now create your plots
    # ...
 
-If you want to explicitly use the style (e.g., after changing to a different
-style), you can call:
-
-.. code-block:: python
-
-   plt.style.use('acoular.plots')
-
-This style is used when building the documentation with Sphinx Gallery and
-in Jupyter notebooks.
+You can also use this style in your own scripts by calling
+``plt.style.use('acoular.plots')`` after importing matplotlib.
