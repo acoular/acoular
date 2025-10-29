@@ -3,6 +3,8 @@ What's new
 
 Upcoming Release
 ------------------------
+    **Bugfixes**
+        * fix a typo in :class:`~acoular.tprocess.SpatialInterpolator` that lead to a property being incorrectly accessed
 
 25.10
 ------------------------
