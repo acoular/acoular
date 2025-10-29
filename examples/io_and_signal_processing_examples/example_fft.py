@@ -8,6 +8,8 @@ Demonstrates how to calculate the blockwise FFT and spectrogram of the signal.
 # %%
 # Imports
 
+from pathlib import Path
+
 import acoular as ac
 import numpy as np
 
@@ -78,7 +80,7 @@ import matplotlib.pyplot as plt
 
 
 # Apply Acoular's matplotlib style
-plt.style.use('acoular.plots')
+plt.style.use(Path(ac.__file__).parent / 'plots.mplstyle')
 fft.scaling = 'amplitude'
 spectrogram = ac.tools.return_result(fft)
 

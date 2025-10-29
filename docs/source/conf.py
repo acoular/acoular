@@ -153,9 +153,12 @@ def reset_matplotlib(gallery_conf, fname):  # noqa: ARG001
     Apply the Acoular matplotlib style to ensure consistent plot appearance
     across all gallery examples.
     """
+    from pathlib import Path
     import matplotlib.pyplot as plt
+    import acoular
 
-    plt.style.use('acoular.plots')
+    style_path = Path(acoular.__file__).parent / 'plots.mplstyle'
+    plt.style.use(str(style_path))
 
 suppress_warnings = [
     #   Sphinx 7.3.0: Suppressing the warning:

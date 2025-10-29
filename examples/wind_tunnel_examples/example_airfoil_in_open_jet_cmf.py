@@ -63,7 +63,7 @@ import matplotlib.pyplot as plt
 
 
 # Apply Acoular's matplotlib style
-plt.style.use('acoular.plots')
+plt.style.use(Path(ac.__file__).parent / 'plots.mplstyle')
 plt.figure(1, (10, 7))  # no of figure
 i1 = 1  # no of subplot
 

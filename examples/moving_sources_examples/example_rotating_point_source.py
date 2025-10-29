@@ -19,13 +19,15 @@ Four different methods are compared:
 * moving focus time domain deconvolution
 """
 
+from pathlib import Path
+
 import acoular as ac
 import matplotlib.pyplot as plt
 import numpy as np
 
 
 # Apply Acoular's matplotlib style
-plt.style.use('acoular.plots')
+plt.style.use(Path(ac.__file__).parent / 'plots.mplstyle')
 # %%
 # First, we make some important definitions:
 #

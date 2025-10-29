@@ -96,7 +96,7 @@ import matplotlib.pyplot as plt
 
 
 # Apply Acoular's matplotlib style
-plt.style.use('acoular.plots')
+plt.style.use(Path(ac.__file__).parent / 'plots.mplstyle')
 ftitles = ['BeamformerTime', 'BeamformerTimeSq', 'BeamformerCleant', 'BeamformerCleantSq']
 i2 = 1  # no of figure
 i1 = 1  # no of subplot
