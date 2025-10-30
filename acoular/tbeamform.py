@@ -278,7 +278,7 @@ class BeamformerTimeTraj(BeamformerTime):
     trajectory = Instance(Trajectory)
 
     #: Reference vector, perpendicular to the y-axis of moving grid.
-    rvec = CArray(dtype=float, shape=(3), value=np.array((0, 0, 0)))
+    rvec = CArray(dtype=float, shape=(3,), value=np.array((0, 0, 0)))
 
     #: Considering of convective amplification in beamforming formula.
     conv_amp = Bool(False)

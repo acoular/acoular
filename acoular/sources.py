@@ -1348,7 +1348,7 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
     #: A reference vector, perpendicular to the x and y-axis of moving source, defining the axis of
     #: rotation for the dipole directivity. If set to ``(0, 0, 0)``, the dipole is only translated
     #: along the :attr:`~MovingPointSource.trajectory` without rotation. Default is ``(0, 0, 0)``.
-    rvec = CArray(dtype=float, shape=(3), value=np.array((0, 0, 0)))
+    rvec = CArray(dtype=float, shape=(3,), value=np.array((0, 0, 0)))
 
     @cached_property
     def _get_digest(self):
@@ -1666,7 +1666,7 @@ class MovingLineSource(LineSource, MovingPointSource):
     #: rotation for the line source directivity. If set to ``(0, 0, 0)``, the line source is only
     #: translated along the :attr:`~MovingPointSource.trajectory` without rotation. Default is
     #: ``(0, 0, 0)``.
-    rvec = CArray(dtype=float, shape=(3), value=np.array((0, 0, 0)))
+    rvec = CArray(dtype=float, shape=(3,), value=np.array((0, 0, 0)))
 
     @cached_property
     def _get_digest(self):

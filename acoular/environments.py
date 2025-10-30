@@ -254,7 +254,7 @@ class UniformFlowEnvironment(Environment):
 
     #: A unit vector specifying the direction of the flow in 3D Cartesian coordinates.
     #: Default is ``(1.0, 0, 0)``, which corresponds to flow in the x-direction.
-    fdv = CArray(dtype=np.float64, shape=(3), value=np.array((1.0, 0, 0)))
+    fdv = CArray(dtype=np.float64, shape=(3,), value=np.array((1.0, 0, 0)))
 
     #: A unique identifier based on the environment properties. (read-only)
     digest = Property(
@@ -347,14 +347,14 @@ class SlotJet(FlowField):
     v0 = Float(0.0)
 
     #: The location of the slot nozzle center. Default is ``(0.0, 0.0, 0.0)``.
-    origin = CArray(dtype=np.float64, shape=(3), value=np.array((0.0, 0.0, 0.0)))
+    origin = CArray(dtype=np.float64, shape=(3,), value=np.array((0.0, 0.0, 0.0)))
 
     #: Unit vector representing the flow direction. Default is ``(1.0, 0.0, 0.0)``.
-    flow = CArray(dtype=np.float64, shape=(3), value=np.array((1.0, 0.0, 0.0)))
+    flow = CArray(dtype=np.float64, shape=(3,), value=np.array((1.0, 0.0, 0.0)))
 
     #: Unit vector parallel to the slot center plane, used to define the slot orientation.
     #: Default is ``(0.0, 1.0, 0.0)``.
-    plane = CArray(dtype=np.float64, shape=(3), value=np.array((0.0, 1.0, 0.0)))
+    plane = CArray(dtype=np.float64, shape=(3,), value=np.array((0.0, 1.0, 0.0)))
 
     #: Width of the slot (slot diameter). Default is ``0.2``.
     B = Float(0.2)
@@ -468,7 +468,7 @@ class OpenJet(FlowField):
     v0 = Float(0.0)
 
     #: The location of the nozzle center. Default is ``(0.0, 0.0, 0.0)``.
-    origin = CArray(dtype=np.float64, shape=(3), value=np.array((0.0, 0.0, 0.0)))
+    origin = CArray(dtype=np.float64, shape=(3,), value=np.array((0.0, 0.0, 0.0)))
 
     #: Diameter of the nozzle. Default is ``0.2``.
     D = Float(0.2)
@@ -609,7 +609,7 @@ class RotatingFlow(FlowField):
 
     #: The location of the center of rotation.
     #: Default is ``(0.0, 0.0, 0.0)``.
-    origin = CArray(dtype=np.float64, shape=(3), value=np.array((0.0, 0.0, 0.0)))
+    origin = CArray(dtype=np.float64, shape=(3,), value=np.array((0.0, 0.0, 0.0)))
 
     #: A unique identifier based on the field properties. (read-only)
     digest = Property(
