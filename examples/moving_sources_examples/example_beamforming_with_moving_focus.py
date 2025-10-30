@@ -11,7 +11,7 @@ Beamforming with moving focus
 This example demonstrates how to use Acoular to perform moving-focus beamforming
 with and without CLEANT-based deconvolution for moving sources.
 
-A constellation of four moving white-noise sources passing over a microphone array,
+A constellation of four moving white-noise sources passing over a microphone array
 is evaluated using three different beamforming approaches:
 
     1. Fixed-focus beamforming on a static grid
