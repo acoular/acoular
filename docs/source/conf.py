@@ -148,6 +148,15 @@ def reset_cache_dir(gallery_conf, fname):
     from acoular import config
     config.cache_dir = str(Path(__file__).parent / 'auto_examples' / 'cache')
 
+def reset_matplotlib(gallery_conf, fname):  # noqa: ARG001
+    """
+    Apply the Acoular matplotlib style to ensure consistent plot appearance
+    across all gallery examples.
+    """
+    import matplotlib.pyplot as plt
+
+    plt.style.use('acoular.plots')
+
 suppress_warnings = [
     #   Sphinx 7.3.0: Suppressing the warning:
     # WARNING: cannot cache unpickable configuration value: 'sphinx_gallery_conf'
@@ -167,7 +176,7 @@ sphinx_gallery_conf = {
     'default_thumb_file': 'source/_static/Acoular_logo',
     'thumbnail_size': (250, 250),
     #'run_stale_examples': True,
-    'reset_modules': (reset_cache_dir, 'matplotlib', 'seaborn'),
+    'reset_modules': (reset_cache_dir, reset_matplotlib, 'matplotlib', 'seaborn'),
     'examples_dirs': [
         '../../examples',
         ],   # path to your example scripts

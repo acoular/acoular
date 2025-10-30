@@ -16,6 +16,8 @@ from pathlib import Path
 import acoular as ac
 import matplotlib.pyplot as plt
 import numpy as np
+
+plt.style.use('acoular.plots')
 from acoular.tools import MetricEvaluator
 
 # %%

@@ -12,10 +12,14 @@ Demonstrates band pass filter characteristics and shows
 * sum of all octave band spectra
 """
 
+from pathlib import Path
+
 import acoular as ac
 import matplotlib.pyplot as plt
 import numpy as np
 
+
+plt.style.use('acoular.plots')
 ac.config.global_caching = 'none'
 num_samples = 51200 * 10
 n1 = ac.WNoiseGenerator(sample_freq=51200, num_samples=num_samples, seed=1)

@@ -1,0 +1,67 @@
+# Matplotlib style for Acoular examples and documentation
+# This style ensures consistent appearance across sphinx-gallery examples,
+# standalone scripts, and Jupyter notebooks.
+
+# Figure properties
+figure.figsize: 8, 6
+figure.dpi: 100
+figure.autolayout: False
+figure.titlesize: large
+figure.titleweight: normal
+
+# Font properties  
+font.size: 10
+font.family: sans-serif
+
+# Axes properties
+axes.labelsize: medium
+axes.titlesize: large
+axes.titleweight: normal
+axes.labelweight: normal
+axes.grid: False
+axes.axisbelow: True
+axes.edgecolor: black
+axes.linewidth: 0.8
+axes.spines.top: True
+axes.spines.right: True
+axes.spines.left: True
+axes.spines.bottom: True
+
+# Tick properties
+xtick.labelsize: medium
+xtick.direction: out
+xtick.major.size: 3.5
+xtick.minor.size: 2
+ytick.labelsize: medium
+ytick.direction: out
+ytick.major.size: 3.5
+ytick.minor.size: 2
+
+# Grid properties
+grid.color: gray
+grid.alpha: 0.3
+grid.linestyle: --
+grid.linewidth: 0.5
+
+# Legend properties
+legend.fontsize: medium
+legend.frameon: True
+legend.framealpha: 0.8
+legend.fancybox: False
+legend.edgecolor: black
+
+# Line properties
+lines.linewidth: 1.5
+lines.markersize: 6
+lines.markeredgewidth: 0.5
+
+# Image properties
+image.cmap: viridis
+image.aspect: auto
+image.interpolation: nearest
+
+# Saving properties
+savefig.dpi: 150
+savefig.bbox: tight
+savefig.pad_inches: 0.1
+savefig.format: png
