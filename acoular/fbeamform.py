@@ -112,17 +112,14 @@ class SteeringVector(HasStrictTraits):
     #: Defaults to standard :class:`~acoular.environments.Environment` object.
     env = Instance(Environment(), Environment)
 
-    # Sound travel distances from microphone array center to grid
-    # points or reference position (readonly). Feature may change.
-    #: array center to grid distances
+    #: Sound travel distances from microphone array center to grid : points or reference position
+    #: (readonly). Feature may change.
     r0 = Property()
 
-    # Sound travel distances from array microphones to grid
-    # points (readonly). Feature may change.
-    #: all array mics to grid distances
+    #: Sound travel distances from array microphones to grid : points (readonly). Feature may
+    #: change.
     rm = Property()
 
-    # mirror trait for ref
     #: reference position or distance
     _ref = Any(np.array([0.0, 0.0, 0.0]))
 
@@ -292,11 +289,11 @@ class BeamformerBase(HasStrictTraits):
     #: Boolean flag, if 'True' (default), the main diagonal is removed before beamforming.
     r_diag = Bool(True)
 
-    #: If diagonal of the csm is removed, some signal energy is lost.
+    #: If diagonal of the CSM is removed, some signal energy is lost.
     #: This is handled via this normalization factor.
     #: Internally, the default is: num_mics / (num_mics - 1).
     #:
-    #: If r_diag==True: if r_diag_norm==0.0, the standard
+    #: If r_diag==True: if r_diag_norm==0.0, the default
     #: normalization = num_mics/(num_mics-1) is used.
     #: If r_diag_norm !=0.0, the user input is used instead.
     #: If r_diag==False, the normalization is 1.0 either way.
@@ -1137,8 +1134,17 @@ class BeamformerDamas(BeamformerBase):
     #: Damping factor in modified gauss-seidel
     damp = Float(1.0)
 
-    #: Flag that defines how to calculate and store the point spread function,
-    #: defaults to 'full'. See :attr:`PointSpreadFunction.calcmode` for details.
+    #: Flag that defines how to calculate and store the point spread function
+    #: defaults to 'single'.
+    #:
+    #: * 'full': Calculate the full PSF (for all grid points) in one go (should be used if the PSF
+    #:           at all grid points is needed, as with :class:`DAMAS<BeamformerDamas>`)
+    #: * 'single': Calculate the PSF for the grid points defined by :attr:`grid_indices`, one by one
+    #:             (useful if not all PSFs are needed, as with :class:`CLEAN<BeamformerClean>`)
+    #: * 'block': Calculate the PSF for the grid points defined by :attr:`grid_indices`, in one go
+    #:            (useful if not all PSFs are needed, as with :class:`CLEAN<BeamformerClean>`)
+    #: * 'readonly': Do not attempt to calculate the PSF since it should already be cached (useful
+    #:               if multiple processes have to access the cache file)
     calcmode = Enum('full', 'single', 'block', 'readonly')
 
     # internal identifier
@@ -1489,8 +1495,17 @@ class BeamformerClean(BeamformerBase):
     #: maximum number of iterations
     n_iter = Int(100)
 
-    # how to calculate and store the psf
-    #: mode of psf calculation / storage
+    #: Flag that defines how to calculate and store the point spread function
+    #: defaults to 'single'.
+    #:
+    #: * 'full': Calculate the full PSF (for all grid points) in one go (should be used if the PSF
+    #:           at all grid points is needed, as with :class:`DAMAS<BeamformerDamas>`)
+    #: * 'single': Calculate the PSF for the grid points defined by :attr:`grid_indices`, one by one
+    #:             (useful if not all PSFs are needed, as with :class:`CLEAN<BeamformerClean>`)
+    #: * 'block': Calculate the PSF for the grid points defined by :attr:`grid_indices`, in one go
+    #:            (useful if not all PSFs are needed, as with :class:`CLEAN<BeamformerClean>`)
+    #: * 'readonly': Do not attempt to calculate the PSF since it should already be cached (useful
+    #:               if multiple processes have to access the cache file)
     calcmode = Enum('block', 'full', 'single', 'readonly')
 
     # internal identifier
@@ -1997,8 +2012,7 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
     eps_perc = Float(0.05)
 
     # This feature is not fully supported may be changed in the next release
-    # First eigenvalue to consider. Defaults to 0.
-    #: First eigenvalue to consider
+    #: First eigenvalue to consider. Defaults to 0.
     m = Int(0)
 
     #: Energy normalization in case of diagonal removal not implemented for inverse methods.

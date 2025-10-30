@@ -205,12 +205,7 @@ class PowerSpectra(BaseSpectra):
     #: :class:`SamplesGenerator<acoular.base.SamplesGenerator>` or a derived class.
     source = Instance(SamplesGenerator)
 
-    # Shadow trait, should not be set directly, for internal use.
-    #: index of lowest frequency line
     _ind_low = Int(1)
-
-    # Shadow trait, should not be set directly, for internal use.
-    #: index of highest frequency line
     _ind_high = Union(Int(-1), None)
 
     #: Index of lowest frequency line to compute. Default is ``1``. Only used by objects that fetch
@@ -647,12 +642,7 @@ class PowerSpectraImport(PowerSpectra):
     #: Number of FFT blocks, always ``None``.
     num_blocks = Enum(None)
 
-    # Shadow trait, should not be set directly, for internal use.
-    #: index of lowest frequency line
     _ind_low = Int(0)
-
-    # Shadow trait, should not be set directly, for internal use.
-    #: index of highest frequency line
     _ind_high = Union(None, Int)
 
     #: A unique identifier for the spectra, based on its properties. (read-only)
@@ -661,8 +651,6 @@ class PowerSpectraImport(PowerSpectra):
     #: Name of the cache file without extension. (read-only)
     basename = Property(depends_on=['digest'])
 
-    # Shadow trait for storing the CSM, for internal use only.
-    #: cross spectral matrix
     _csm = Union(None, CArray(shape=(None, None, None)))
 
     # Checksum for the CSM to trigger digest calculation, for internal use only.
