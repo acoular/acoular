@@ -2696,6 +2696,22 @@ class TimeConvolve(TimeOut):
     #: If only a single kernel is supplied, it is applied to all channels.
     kernel = CArray(dtype=float, desc='Convolution kernel.')
 
+    #: Convolution mode, determines the length of the output signal:
+    #:
+    #: - ``'full'``: Returns the convolution at each overlap point.
+    #:   Boundary effect might appear at the end-points where the
+    #:   signals do not overlap completely.
+    #:   Output length: :math:`L + M - 1`.
+    #: - ``'same'``: Output is determined by the longest input.
+    #:   Boundary effect still come into play at the end-points.
+    #:   Output length: :math:`\\max(L, M)`
+    #: - ``'valid'``: Returns only those parts of the convolution
+    #:   where signal and kernel overlap completely.
+    #:   Output length: :math:`\\max(L, M) - \\min(L, M) + 1`.
+    #:
+    #: Default is ``'same'``.
+    mode = Enum('same', 'full', 'valid', desc='convolution mode')
+
     # Internal block size for partitioning signals into smaller segments during processing.
     _block_size = Int(desc='Block size')
 
@@ -2707,7 +2723,7 @@ class TimeConvolve(TimeOut):
     )
 
     #: A unique identifier for the object, based on its properties. (read-only)
-    digest = Property(depends_on=['source.digest', 'kernel'])
+    digest = Property(depends_on=['source.digest', 'kernel', 'mode'])
 
     @cached_property
     def _get_digest(self):
@@ -2764,7 +2780,7 @@ class TimeConvolve(TimeOut):
         )
         return blocks
 
-    def result(self, num=128, mode='same'):
+    def result(self, num=128):
         r"""
         Convolve the source signal with the kernel and yield the result in blocks.
 
@@ -2777,19 +2793,6 @@ class TimeConvolve(TimeOut):
         num : :obj:`int`, optional
             Number of samples per block.
             Default is ``128``.
-        mode : :obj:`str`, optional
-            Convolution mode, determines the length of the output signal:
-
-            - ``'full'``: Returns the convolution at each overlap point.
-              Boundary effect might appear at the end-points where the
-              signals do not overlap completely.
-              Output length: :math:`L + M - 1`.
-            - ``'same'``: Output is determined by the longest input.
-              Boundary effect still come into play at the end-points.
-              Output length: :math:`\\max(L, M)`
-            - ``'valid'``: Returns only those parts of the convolution
-              where signal and kernel overlap completely.
-              Output length: :math:`\\max(L, M) - \\min(L, M) + 1`.
 
         Yields
         ------
@@ -2802,6 +2805,7 @@ class TimeConvolve(TimeOut):
         -----
         - The kernel is first validated and reshaped if necessary.
         - The convolution is computed efficiently using the FFT in the frequency domain.
+        - The output length is determined by the :attr:`mode` property.
         """
         self._validate_kernel()
         # initialize variables
@@ -2810,14 +2814,14 @@ class TimeConvolve(TimeOut):
         N = self.source.num_channels
         M = self.source.num_samples
 
-        if mode == 'full':
+        if self.mode == 'full':
             output_size = L + M - 1
-        elif mode == 'same':
+        elif self.mode == 'same':
             output_size = max(L, M)
-        elif mode == 'valid':
+        elif self.mode == 'valid':
             output_size = max(L, M) - min(L, M) + 1
         else:
-            msg = f'Invalid mode {mode}'
+            msg = f'Invalid mode {self.mode}'
             raise ValueError(msg)
 
         numblocks_kernel = int(np.ceil(L / num))  # number of kernel blocks
