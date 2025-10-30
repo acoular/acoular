@@ -686,7 +686,7 @@ class RectGrid3D(RectGrid):
     #: Number of grid points along z-axis. (read-only)
     nzsteps = Property()
 
-    _increment = Union(Float(), CArray(shape=(3), dtype=float), default_value=0.1)
+    _increment = Union(Float(), CArray(shape=(3,), dtype=float), default_value=0.1)
 
     #: The cell side length for the grid. This can either be a scalar (same increments in all 3
     #: dimensions) or a (3,) array of :class:`tuple` of :class:`floats<float>` with respective
