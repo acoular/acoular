@@ -61,5 +61,5 @@ def test_environment(snapshot, grid, mics, env):
     env : instance of acoular.environment.Environment
         Environment to test (cases from Environments)
     """
-    result = np.vstack((env._r(grid, mics).T, env._r(grid).T))
+    result = np.vstack((env.apparent_r(grid, mics).T, env.apparent_r(grid).T))
     snapshot.check(result, rtol=1e-5, atol=1e-8)

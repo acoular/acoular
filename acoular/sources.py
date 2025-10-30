@@ -731,7 +731,7 @@ class PointSource(SamplesGenerator):
     mics = Instance(MicGeom)
 
     def _validate_locations(self):
-        dist = self.env._r(np.array(self.loc).reshape((3, 1)), self.mics.pos)
+        dist = self.env.apparent_r(np.array(self.loc).reshape((3, 1)), self.mics.pos)
         if np.any(dist < 1e-7):
             warn('Source and microphone locations are identical.', Warning, stacklevel=2)
 
@@ -815,7 +815,7 @@ class PointSource(SamplesGenerator):
         signal = self.signal.usignal(self.up)
         out = np.empty((num, self.num_channels))
         # distances
-        rm = self.env._r(np.array(self.loc).reshape((3, 1)), self.mics.pos).reshape(1, -1)
+        rm = self.env.apparent_r(np.array(self.loc).reshape((3, 1)), self.mics.pos).reshape(1, -1)
         # emission time relative to start_t (in samples) for first sample
         ind = (-rm / self.env.c - self.start_t + self.start) * self.sample_freq * self.up
 
@@ -966,7 +966,7 @@ class SphericalHarmonicSource(PointSource):
 
         signal = self.signal.usignal(self.up)
         # emission time relative to start_t (in samples) for first sample
-        rm = self.env._r(np.array(self.loc).reshape((3, 1)), self.mics.pos)
+        rm = self.env.apparent_r(np.array(self.loc).reshape((3, 1)), self.mics.pos)
         ind = (-rm / self.env.c - self.start_t + self.start) * self.sample_freq + np.pi / 30
         i = 0
         n = self.num_samples
@@ -1267,11 +1267,11 @@ class PointSourceDipole(PointSource):
         out = np.empty((num, self.num_channels))
 
         # distance from dipole center to microphones
-        rm = self.env._r(loc, mpos)
+        rm = self.env.apparent_r(loc, mpos)
 
         # distances from monopoles to microphones
-        rm1 = self.env._r(loc + dir2, mpos)
-        rm2 = self.env._r(loc - dir2, mpos)
+        rm1 = self.env.apparent_r(loc + dir2, mpos)
+        rm2 = self.env.apparent_r(loc - dir2, mpos)
 
         # emission time relative to start_t (in samples) for first sample
         ind1 = (-rm1 / c - self.start_t + self.start) * self.sample_freq
@@ -1460,8 +1460,8 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
             diff = self.get_moving_direction(dir2, te)
 
             # distance of sources
-            rm1 = self.env._r(loc + diff, mpos)
-            rm2 = self.env._r(loc - diff, mpos)
+            rm1 = self.env.apparent_r(loc + diff, mpos)
+            rm2 = self.env.apparent_r(loc - diff, mpos)
 
             ind = (te - self.start_t + self.start) * self.sample_freq
             if self.conv_amp:
@@ -1591,7 +1591,7 @@ class LineSource(PointSource):
         signals = np.empty((self.num_sources, len(self.signal.usignal(self.up))))
         # for every source - distances
         for s in range(self.num_sources):
-            rms[:, s] = self.env._r((loc.T + direc_n * dist * s).T, mpos)
+            rms[:, s] = self.env.apparent_r((loc.T + direc_n * dist * s).T, mpos)
             inds[:, s] = (-rms[:, s] / c - self.start_t + self.start) * self.sample_freq
             # new seed for every source
             if self.coherence == 'incoherent':
@@ -1791,7 +1791,7 @@ class MovingLineSource(LineSource, MovingPointSource):
                 te, rm, Mr, locs = self.get_emission_time(t, np.tile((diff * s).T, (self.num_channels, 1)).T)
                 loc = np.array(self.trajectory.location(te), dtype=float)[:, 0][:, np.newaxis]
                 diff = self.get_moving_direction(dir2, te)
-                rms[:, s] = self.env._r((loc + diff * s), mpos)
+                rms[:, s] = self.env.apparent_r((loc + diff * s), mpos)
                 inds[:, s] = (te - self.start_t + self.start) * self.sample_freq
 
             if self.conv_amp:
