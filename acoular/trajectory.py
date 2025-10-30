@@ -81,7 +81,6 @@ class Trajectory(HasStrictTraits):
     points = Dict(
         key_trait=Float,
         value_trait=Tuple(Float, Float, Float),
-        desc='sampled positions along the trajectory',
     )
 
     #: Automatically determined tuple ``(t_min, t_max)`` representing the start and end times of the
