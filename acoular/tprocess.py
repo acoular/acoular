@@ -125,15 +125,11 @@ class MaskedTimeOut(TimeOut):
     num_samples_total = Delegate('source', 'num_samples')
 
     #: Number of valid input channels after excluding :attr:`invalid_channels`. (read-only)
-    num_channels = Property(
-        depends_on=['invalid_channels', 'source.num_channels']
-    )
+    num_channels = Property(depends_on=['invalid_channels', 'source.num_channels'])
 
     #: Number of valid time-domain samples, based on :attr:`start` and :attr:`stop` indices.
     #: (read-only)
-    num_samples = Property(
-        depends_on=['start', 'stop', 'source.num_samples']
-    )
+    num_samples = Property(depends_on=['start', 'stop', 'source.num_samples'])
 
     #: The name of the cache file (without extension). It serves as an internal reference for data
     #: caching and tracking processed files. (automatically generated)

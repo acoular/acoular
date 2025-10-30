@@ -536,15 +536,11 @@ class MaskedTimeSamples(TimeSamples):
     num_samples_total = CInt(0)
 
     #: Number of valid input channels after excluding :attr:`invalid_channels`. (read-only)
-    num_channels = Property(
-        depends_on=['invalid_channels', 'num_channels_total']
-    )
+    num_channels = Property(depends_on=['invalid_channels', 'num_channels_total'])
 
     #: Number of valid time-domain samples, based on :attr:`start` and :attr:`stop` indices.
     #: (read-only)
-    num_samples = Property(
-        depends_on=['start', 'stop', 'num_samples_total']
-    )
+    num_samples = Property(depends_on=['start', 'stop', 'num_samples_total'])
 
     #: A unique identifier for the samples, based on its properties. (read-only)
     digest = Property(depends_on=['basename', 'start', 'stop', 'invalid_channels', '_datachecksum'])
