@@ -3,6 +3,9 @@ What's new
 
 Upcoming Release
 ------------------------
+    **New features**
+        * adds :attr:`~acoular.tprocess.TimeConvolve.extend_sample` property to control the result length
+
     **Bugfixes**
         * fix a typo in :class:`~acoular.tprocess.SpatialInterpolator` that lead to a property being incorrectly accessed
 

@@ -2801,7 +2801,7 @@ class TimeConvolve(TimeOut):
         -----
         - The kernel is first validated and reshaped if necessary.
         - The convolution is computed efficiently using the FFT in the frequency domain.
-        - The output length is determined by the :attr:`mode` property.
+        - The output length is determined by the :attr:`extend_sample` property.
         """
         self._validate_kernel()
         # initialize variables
