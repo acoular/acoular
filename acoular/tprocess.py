@@ -858,7 +858,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
 
     @cached_property
     def _get_virtNewCoord(self):  # noqa N802
-        return self._virtNewCoord_func(self.mics.mpos, self.mics_virtual.mpos, self.method, self.array_dimension)
+        return self._virtNewCoord_func(self.mics.pos, self.mics_virtual.pos, self.method, self.array_dimension)
 
     def sinc_mic(self, r):
         """
@@ -1051,7 +1051,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
         # number of time samples
         nTime = p.shape[0]
         # number of virtual mixcs
-        nVirtMics = self.mics_virtual.mpos.shape[1]
+        nVirtMics = self.mics_virtual.pos.shape[1]
         # mesh and projection onto polar Coordinates
         meshList, virtNewCoord, newCoord = self._get_virtNewCoord()
         # pressure interpolation init
