@@ -2253,8 +2253,7 @@ class PointSourceConvolve(PointSource):
     (256, 4)
     (256, 4)
     (256, 4)
-    (256, 4)
-    (75, 4)
+    (232, 4)
 
     The last block has fewer samples.
     """
