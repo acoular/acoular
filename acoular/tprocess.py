@@ -2696,21 +2696,17 @@ class TimeConvolve(TimeOut):
     #: If only a single kernel is supplied, it is applied to all channels.
     kernel = CArray(dtype=float, desc='Convolution kernel.')
 
-    #: Convolution mode, determines the length of the output signal:
+    #: Controls whether to extend the output to include the full convolution result.
     #:
-    #: - ``'full'``: Returns the convolution at each overlap point.
-    #:   Boundary effect might appear at the end-points where the
-    #:   signals do not overlap completely.
-    #:   Output length: :math:`L + M - 1`.
-    #: - ``'same'``: Output is determined by the longest input.
-    #:   Boundary effect still come into play at the end-points.
-    #:   Output length: :math:`\\max(L, M)`
-    #: - ``'valid'``: Returns only those parts of the convolution
-    #:   where signal and kernel overlap completely.
-    #:   Output length: :math:`\\max(L, M) - \\min(L, M) + 1`.
+    #: - If ``False`` (default): Output length is :math:`\\max(L, M)`, where :math:`L` is the
+    #:   kernel length and :math:`M` is the signal length. This mode keeps the output length
+    #:   equal to the longest input (different from NumPy's ``mode='same'``, since it does not
+    #:   pad the output).
+    #: - If ``True``: Output length is :math:`L + M - 1`, returning the full convolution at
+    #:   each overlap point (similar to NumPy's ``mode='full'``).
     #:
-    #: Default is ``'same'``.
-    mode = Enum('same', 'full', 'valid', desc='convolution mode')
+    #: Default is ``False``.
+    extend_sample = Bool(False, desc='Extend result sample')
 
     # Internal block size for partitioning signals into smaller segments during processing.
     _block_size = Int(desc='Block size')
@@ -2723,7 +2719,7 @@ class TimeConvolve(TimeOut):
     )
 
     #: A unique identifier for the object, based on its properties. (read-only)
-    digest = Property(depends_on=['source.digest', 'kernel', 'mode'])
+    digest = Property(depends_on=['source.digest', 'kernel', 'extend_sample'])
 
     @cached_property
     def _get_digest(self):
@@ -2814,15 +2810,7 @@ class TimeConvolve(TimeOut):
         N = self.source.num_channels
         M = self.source.num_samples
 
-        if self.mode == 'full':
-            output_size = L + M - 1
-        elif self.mode == 'same':
-            output_size = max(L, M)
-        elif self.mode == 'valid':
-            output_size = max(L, M) - min(L, M) + 1
-        else:
-            msg = f'Invalid mode {self.mode}'
-            raise ValueError(msg)
+        output_size = max(L, M) if not self.extend_sample else L + M - 1
 
         numblocks_kernel = int(np.ceil(L / num))  # number of kernel blocks
         Q = int(np.ceil(M / num))  # number of signal blocks
