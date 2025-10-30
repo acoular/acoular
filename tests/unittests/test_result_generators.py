@@ -14,7 +14,6 @@ from tests.utils import get_result
 xfails = {
     ac.BeamformerTime: 'Issue #525',
     ac.IntegratorSectorTime: 'Issue #525',  # test case relies on BeamformerTime as source
-    ac.PointSourceConvolve: 'Issue #530',  # test case relies on TimeConvolve as generator
 }
 
 
