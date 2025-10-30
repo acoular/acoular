@@ -116,7 +116,7 @@ class Average(InOut):
 
     #: The number of samples (time domain source) or snapshots (frequency domain source)
     #: to average over. Default is ``64``.
-    num_per_average = Int(64, desc='number of samples/snapshots to average over')
+    num_per_average = Int(64)
 
     #: The sampling frequency of the output signal. It is set automatically as
     #: (:attr:`~acoular.base.Generator.sample_freq` ``/`` :attr:`num_per_average`).
@@ -479,7 +479,6 @@ class SampleSplitter(InOut):
     buffer_overflow_treatment = Dict(
         key_trait=Instance(Generator),
         value_trait=Enum('error', 'warning', 'none'),
-        desc='defines buffer overflow behaviour.',
     )
 
     # A shadow trait to monitor if source deliver samples or is empty.
@@ -728,7 +727,7 @@ class SamplesBuffer(InOut):
     """  # noqa: W505
 
     #: The number of samples that the buffer can hold.
-    length = Int(desc='number of samples that fit in the buffer')
+    length = Int()
 
     #: The number of samples per block to obtain from the source. If set to ``None``, the number of
     #: samples will be determined by the ``num`` argument of the :meth:`result` method.
@@ -736,7 +735,6 @@ class SamplesBuffer(InOut):
         None,
         Int(),
         default_value=None,
-        desc='number of samples to return from the source. If "None", use "num" argument of result method',
     )
 
     #: The number of samples to return from the buffer. If set to ``None``, the number of
@@ -745,7 +743,6 @@ class SamplesBuffer(InOut):
         None,
         Int(),
         default_value=None,
-        desc="number of samples to return from the buffer. If 'None', use 'num' argument of result method",
     )
 
     #: Index shift value for the buffer.
@@ -755,26 +752,22 @@ class SamplesBuffer(InOut):
     #:   samples.
     shift_index_by = Enum(
         ('result_num', 'num'),
-        desc=(
-            'index shift value for the buffer. If "result_num", use "result_num" trait.'
-            ' If "num", use "num" argument of result method'
-        ),
     )
 
     #: The current filling level of the buffer, i.e., how many samples are currently available.
-    level = Property(desc='current filling level of buffer')
+    level = Property()
 
     #: The data type of the elements in the buffer.
-    dtype = Any(desc='data type of the buffer')
+    dtype = Any()
 
     # Flag indicating if the source is empty (for internal use).
-    _empty_source = Bool(False, desc='flag to indicate that the source is empty')
+    _empty_source = Bool(False)
 
     # The actual buffer holding the samples for processing.
-    _buffer = Array(shape=(None, None), desc='buffer for block processing')
+    _buffer = Array(shape=(None, None))
 
     # The current index position in the buffer.
-    _index = Int(desc='current index in buffer')
+    _index = Int()
 
     def _get_level(self):
         return self._buffer.shape[0] - self._index

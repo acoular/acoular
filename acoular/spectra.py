@@ -85,7 +85,6 @@ class BaseSpectra(ABCHasStrictTraits):
             'Blackman': np.blackman,
         },
         default_value='Rectangular',
-        desc='type of window for FFT',
     )
 
     #: Overlap factor for FFT block averaging. One of:
@@ -97,7 +96,7 @@ class BaseSpectra(ABCHasStrictTraits):
     #: - ``'75%'``
     #:
     #: - ``'87.5%'``
-    overlap = Map({'None': 1, '50%': 2, '75%': 4, '87.5%': 8}, default_value='None', desc='overlap of FFT blocks')
+    overlap = Map({'None': 1, '50%': 2, '75%': 4, '87.5%': 8}, default_value='None')
 
     #: FFT block size. Must be one of: ``128``, ``256``, ``512``, ``1024``, ... ``65536``.
     #: Default is ``1024``.
@@ -112,11 +111,10 @@ class BaseSpectra(ABCHasStrictTraits):
         16384,
         32768,
         65536,
-        desc='number of samples per FFT block',
     )
 
     #: Precision of the FFT, corresponding to NumPy dtypes. Default is ``'complex128'``.
-    precision = Enum('complex128', 'complex64', desc='precision of the fft')
+    precision = Enum('complex128', 'complex64')
 
     #: A unique identifier for the spectra, based on its properties. (read-only)
     digest = Property(depends_on=['precision', 'block_size', 'window', 'overlap'])
@@ -207,19 +205,16 @@ class PowerSpectra(BaseSpectra):
     #: :class:`SamplesGenerator<acoular.base.SamplesGenerator>` or a derived class.
     source = Instance(SamplesGenerator)
 
-    # Shadow trait, should not be set directly, for internal use.
-    _ind_low = Int(1, desc='index of lowest frequency line')
-
-    # Shadow trait, should not be set directly, for internal use.
-    _ind_high = Union(Int(-1), None, desc='index of highest frequency line')
+    _ind_low = Int(1)
+    _ind_high = Union(Int(-1), None)
 
     #: Index of lowest frequency line to compute. Default is ``1``. Only used by objects that fetch
     #: the CSM. PowerSpectra computes every frequency line.
-    ind_low = Property(_ind_low, desc='index of lowest frequency line')
+    ind_low = Property(_ind_low)
 
     #: Index of highest frequency line to compute. Default is ``-1``
     #: (last possible line for default :attr:`~BaseSpectra.block_size`).
-    ind_high = Property(_ind_high, desc='index of lowest frequency line')
+    ind_high = Property(_ind_high)
 
     # Stores the set lower frequency, for internal use, should not be set directly.
     _freqlc = Float(0)
@@ -233,37 +228,37 @@ class PowerSpectra(BaseSpectra):
     _index_set_last = Bool(True)
 
     #: A flag indicating whether the result should be cached in HDF5 files. Default is ``True``.
-    cached = Bool(True, desc='cached flag')
+    cached = Bool(True)
 
     #: The number of FFT blocks used for averaging. This is derived from the
     #: :attr:`~BaseSpectra.block_size` and :attr:`~BaseSpectra.overlap` parameters. (read-only)
-    num_blocks = Property(desc='overall number of FFT blocks')
+    num_blocks = Property()
 
     #: 2-element array with the lowest and highest frequency. If the higher frequency is larger than
     #: the max frequency, the max frequency will be the upper bound.
-    freq_range = Property(desc='frequency range')
+    freq_range = Property()
     # If set, will overwrite :attr:`_freqlc`  and :attr:`_freqhc` according to the range. The
     # freq_range interval will be the smallest discrete frequency inside the half-open interval
     # [_freqlc, _freqhc[ and the smallest upper frequency outside of the interval.
 
     #: The sequence of frequency indices between :attr:`ind_low` and :attr:`ind_high`. (read-only)
-    indices = Property(desc='index range')
+    indices = Property()
 
     #: The name of the cache file (without the file extension) used for storing results. (read-only)
-    basename = Property(depends_on=['source.digest'], desc='basename for cache file')
+    basename = Property(depends_on=['source.digest'])
 
     #: The cross-spectral matrix, represented as an array of shape ``(n, m, m)`` of complex values
     #: for ``n`` frequencies and ``m`` channels as in :attr:`~BaseSpectra.num_channels`. (read-only)
-    csm = Property(desc='cross spectral matrix')
+    csm = Property()
 
     #: The eigenvalues of the CSM, stored as an array of shape ``(n,)`` of floats for ``n``
     #: frequencies. (read-only)
-    eva = Property(desc='eigenvalues of cross spectral matrix')
+    eva = Property()
 
     #: The eigenvectors of the cross spectral matrix, stored as an array of shape ``(n, m, m)`` of
     #: floats for ``n`` frequencies and ``m`` channels as in :attr:`~BaseSpectra.num_channels`.
     #: (read-only)
-    eve = Property(desc='eigenvectors of cross spectral matrix')
+    eve = Property()
 
     #: A unique identifier for the spectra, based on its properties.  (read-only)
     digest = Property(
@@ -617,50 +612,46 @@ class PowerSpectraImport(PowerSpectra):
 
     #: The cross-spectral matrix stored in an array of shape ``(n, m, m)`` of complex for ``n``
     #: frequencies and ``m`` channels.
-    csm = Property(desc='cross spectral matrix')
+    csm = Property()
 
     #: The frequencies included in the CSM in ascending order. Accepts list, array, or a single
     #: float value.
-    frequencies = Union(None, CArray, Float, desc='frequencies included in the cross-spectral matrix')
+    frequencies = Union(None, CArray, Float)
 
     #: Number of time data channels, inferred from the shape of the CSM.
     num_channels = Property(depends_on=['digest'])
 
     #: :class:`PowerSpectraImport` does not consume time data; source is always ``None``.
-    source = Enum(None, desc='PowerSpectraImport cannot consume time data')
+    source = Enum(None)
 
     #: Sampling frequency of the signal. Default is ``None``
-    sample_freq = Enum(None, desc='sampling frequency')
+    sample_freq = Enum(None)
 
     #: Block size for FFT, non-functional in this class.
-    block_size = Enum(None, desc='PowerSpectraImport does not operate on blocks of time data')
+    block_size = Enum(None)
 
     #: Windowing method, non-functional in this class.
-    window = Enum(None, desc='PowerSpectraImport does not perform windowing')
+    window = Enum(None)
 
     #: Overlap between blocks, non-functional in this class.
-    overlap = Enum(None, desc='PowerSpectraImport does not consume time data')
+    overlap = Enum(None)
 
     #: Caching capability, always disabled.
-    cached = Enum(False, desc='PowerSpectraImport has no caching capabilities')
+    cached = Enum(False)
 
     #: Number of FFT blocks, always ``None``.
-    num_blocks = Enum(None, desc='PowerSpectraImport cannot determine the number of blocks')
+    num_blocks = Enum(None)
 
-    # Shadow trait, should not be set directly, for internal use.
-    _ind_low = Int(0, desc='index of lowest frequency line')
-
-    # Shadow trait, should not be set directly, for internal use.
-    _ind_high = Union(None, Int, desc='index of highest frequency line')
+    _ind_low = Int(0)
+    _ind_high = Union(None, Int)
 
     #: A unique identifier for the spectra, based on its properties. (read-only)
     digest = Property(depends_on=['_csmsum'])
 
     #: Name of the cache file without extension. (read-only)
-    basename = Property(depends_on=['digest'], desc='basename for cache file')
+    basename = Property(depends_on=['digest'])
 
-    # Shadow trait for storing the CSM, for internal use only.
-    _csm = Union(None, CArray(shape=(None, None, None)), desc='cross spectral matrix')
+    _csm = Union(None, CArray(shape=(None, None, None)))
 
     # Checksum for the CSM to trigger digest calculation, for internal use only.
     _csmsum = Float()

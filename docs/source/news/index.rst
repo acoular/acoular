@@ -6,6 +6,9 @@ Upcoming Release
     **New features**
         * adds :attr:`~acoular.tprocess.TimeConvolve.extend_sample` property to control the result length
 
+    **Documentation**
+        * remove `desc=...` descriptions in trait documentations, reducing clutter in the API reference
+
     **Bugfixes**
         * fix a typo in :class:`~acoular.tprocess.SpatialInterpolator` that lead to a property being incorrectly accessed
 
