@@ -4,6 +4,12 @@
 """
 Measured multichannel data management and simulation of acoustic sources.
 
+.. inheritance-diagram::
+                acoular.sources
+    :top-classes:
+                acoular.base.SamplesGenerator
+    :parts: 1
+
 .. autosummary::
     :toctree: generated/
 

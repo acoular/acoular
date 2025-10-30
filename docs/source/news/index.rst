@@ -3,10 +3,17 @@ What's new
 
 Upcoming Release
 ------------------------
+    **Bugfixes**
+        * fix a typo in :class:`~acoular.tprocess.SpatialInterpolator` that lead to a property being incorrectly accessed
+
+25.10
+------------------------
     **Documentation**
         * fix docstrings in submodule :mod:`acoular.tbeamform`
         * move unit system notes to the notes sections
         * new website with improved API reference
+        * split large dependency graph into submodule graphs for clarity
+        * fix link in README
 
     **Internal**
         * refactored import statements and input aliases

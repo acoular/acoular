@@ -4,6 +4,24 @@
 """
 Implement support for multidimensional grids and integration sectors.
 
+.. inheritance-diagram::
+                acoular.grids.Grid
+                acoular.grids.RectGrid
+                acoular.grids.RectGrid3D
+                acoular.grids.ImportGrid
+                acoular.grids.LineGrid
+                acoular.grids.MergeGrid
+    :top-classes:
+                acoular.grids.Grid
+    :parts: 1
+
+.. inheritance-diagram::
+                acoular.grids.Sector
+    :include-subclasses:
+    :top-classes:
+                acoular.grids.Sector
+    :parts: 1
+
 .. autosummary::
     :toctree: generated/
 

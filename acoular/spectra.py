@@ -3,6 +3,12 @@
 # ------------------------------------------------------------------------------
 """Estimation of power spectra and related tools.
 
+.. inheritance-diagram::
+                acoular.spectra
+    :top-classes:
+                acoular.spectra.BaseSpectra
+    :parts: 1
+
 .. autosummary::
     :toctree: generated/
 

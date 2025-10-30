@@ -4,6 +4,12 @@
 """
 Implement blockwise processing in the time domain.
 
+.. inheritance-diagram::
+                acoular.tprocess
+    :top-classes:
+                acoular.base.TimeOut
+    :parts: 1
+
 .. autosummary::
     :toctree: generated/
 
@@ -1353,7 +1359,7 @@ class SpatialInterpolatorRotation(SpatialInterpolator):  # pragma: no cover
         # period for rotation
         period = 2 * np.pi
         # get angle
-        angle = self.angle_source.angle()
+        angle = self.angle_source.angle
         # counter to track angle position in time for each block
         count = 0
         for timeData in self.source.result(num):

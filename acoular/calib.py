@@ -3,6 +3,12 @@
 # ------------------------------------------------------------------------------
 """Implements calibration of multichannel time signals.
 
+.. inheritance-diagram::
+                acoular.calib
+    :top-classes:
+                acoular.base.InOut
+    :parts: 1
+
 .. autosummary::
     :toctree: generated/
 

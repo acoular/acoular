@@ -4,6 +4,13 @@
 """
 Implements blockwise processing methods in the frequency domain.
 
+.. inheritance-diagram::
+                acoular.fprocess
+    :top-classes:
+                acoular.base.Generator,
+                acoular.spectra.BaseSpectra
+    :parts: 1
+
 .. autosummary::
     :toctree: generated/
 

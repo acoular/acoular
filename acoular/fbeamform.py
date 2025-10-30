@@ -4,6 +4,14 @@
 """
 Implements beamformers in the frequency domain.
 
+.. inheritance-diagram::
+                acoular.fbeamform.BeamformerBase
+    :include-subclasses:
+    :top-classes:
+                acoular.grids.Grid,
+                acoular.fbeamform.BeamformerBase
+    :parts: 1
+
 .. autosummary::
     :toctree: generated/
 

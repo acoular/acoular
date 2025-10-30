@@ -4,6 +4,20 @@
 """
 Implements acoustic environments with and without flow.
 
+.. inheritance-diagram::
+                acoular.environments.Environment
+    :include-subclasses:
+    :top-classes:
+                acoular.environments.Environment
+    :parts: 1
+
+.. inheritance-diagram::
+                acoular.environments.FlowField
+    :include-subclasses:
+    :top-classes:
+                acoular.environments.FlowField
+    :parts: 1
+
 .. autosummary::
     :toctree: generated/
 
