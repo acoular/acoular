@@ -2764,7 +2764,7 @@ class TimeConvolve(TimeOut):
         )
         return blocks
 
-    def result(self, num=128, mode='full'):
+    def result(self, num=128, mode='same'):
         r"""
         Convolve the source signal with the kernel and yield the result in blocks.
 
@@ -2839,7 +2839,8 @@ class TimeConvolve(TimeOut):
             _append_to_fdl(fdl, idx, numblocks_kernel, rfft(buff, axis=0))
             spec_sum = _spectral_sum(spec_sum, fdl, self._kernel_blocks)
             # truncate s.t. total length is L+M-1 (like numpy convolve w/ mode="full")
-            yield irfft(spec_sum, axis=0)[num : last_size + num]
+            final_len = last_size if last_size != 0 else num
+            yield irfft(spec_sum, axis=0)[num : final_len + num]
             return
 
         # stream processing of source signal
@@ -2865,7 +2866,8 @@ class TimeConvolve(TimeOut):
         _append_to_fdl(fdl, idx, numblocks_kernel, rfft(buff, axis=0))
         spec_sum = _spectral_sum(spec_sum, fdl, self._kernel_blocks)
         # truncate s.t. total length is L+M-1 (like numpy convolve w/ mode="full")
-        yield irfft(spec_sum, axis=0)[num : last_size + num]
+        final_len = last_size if last_size != 0 else num
+        yield irfft(spec_sum, axis=0)[num : final_len + num]
 
 
 @nb.jit(nopython=True, cache=True)
