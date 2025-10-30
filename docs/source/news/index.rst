@@ -17,6 +17,7 @@ Upcoming Release
     **Documentation**
         * fix docstrings in submodule :mod:`acoular.tbeamform`
         * move unit system notes to the notes sections
+        * reworks *Beamforming with moving focus* example 
         * new website with improved API reference
         * split large dependency graph into submodule graphs for clarity
         * fix link in README
