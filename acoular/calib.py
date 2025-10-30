@@ -78,24 +78,24 @@ class Calib(InOut):
     """
 
     #: Name of the .xml file to be imported.
-    file = Union(None, File(filter=['*.xml'], exists=True), desc='name of the xml file to import')
+    file = Union(None, File(filter=['*.xml'], exists=True))
 
     #: Number of microphones in the calibration data,
     #: is set automatically when read from file or when data is set.
-    num_mics = CInt(0, desc='number of microphones in the geometry')
+    num_mics = CInt(0)
 
     #: Array of calibration factors,
     #: is set automatically when read from file.
     #: Can be set manually by specifying a NumPy array with shape (num_channels, ) if
     #: :attr:`source` yields time domain signals. For frequency domain signals, the expected
     #: shape is (num_channels * num_freqs).
-    data = CArray(desc='calibration data')
+    data = CArray()
 
     #: Channels that are to be treated as invalid.
-    invalid_channels = List(int, desc='list of invalid channels')
+    invalid_channels = List(int)
 
     #: Channel mask to serve as an index for all valid channels, is set automatically.
-    channels = Property(depends_on=['invalid_channels', 'num_mics'], desc='channel mask')
+    channels = Property(depends_on=['invalid_channels', 'num_mics'])
 
     # Internal identifier
     digest = Property(depends_on=['source.digest', 'data'])

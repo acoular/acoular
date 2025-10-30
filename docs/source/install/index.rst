@@ -85,7 +85,7 @@ The Acoular demo script needs `matplotlib <http://matplotlib.org>`_ installed to
 .. code-block:: python
 
     >>> import acoular
-    >>> acoular.demo.acoular_demo.run()
+    >>> acoular.demo.run()
 
 After some seconds, this should produce two pictures (a 64 microphone arrangement and a beamforming map with three sources).
 
