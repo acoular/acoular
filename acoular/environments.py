@@ -182,7 +182,7 @@ class Environment(HasStrictTraits):
 
     #: The speed of sound in the environment. Default is ``343.0``, which corresponds to the
     #: approximate speed of sound at 20°C in dry air at sea level, if the unit is m/s.
-    c = Float(343.0, desc='speed of sound')
+    c = Float(343.0)
 
     #: The region of interest (ROI) for calculations. (Not needed for most types of environment.)
     #: Default is :obj:`None`.
@@ -294,11 +294,11 @@ class UniformFlowEnvironment(Environment):
 
     #: The Mach number of the flow, defined as the ratio of the flow velocity to the speed of sound.
     #: Default is ``0.0``, which corresponds to no flow.
-    ma = Float(0.0, desc='flow mach number')
+    ma = Float(0.0)
 
     #: A unit vector specifying the direction of the flow in 3D Cartesian coordinates.
     #: Default is ``(1.0, 0, 0)``, which corresponds to flow in the x-direction.
-    fdv = CArray(dtype=np.float64, shape=(3,), value=np.array((1.0, 0, 0)), desc='flow direction')
+    fdv = CArray(dtype=np.float64, shape=(3,), value=np.array((1.0, 0, 0)))
 
     #: A unique identifier based on the environment properties. (read-only)
     digest = Property(
@@ -433,24 +433,24 @@ class SlotJet(FlowField):
     """
 
     #: Exit velocity at the :attr:`slot jet origin<origin>` (nozzle). Default is ``0.0``.
-    v0 = Float(0.0, desc='exit velocity')
+    v0 = Float(0.0)
 
     #: The location of the slot nozzle center. Default is ``(0.0, 0.0, 0.0)``.
-    origin = CArray(dtype=np.float64, shape=(3,), value=np.array((0.0, 0.0, 0.0)), desc='center of nozzle')
+    origin = CArray(dtype=np.float64, shape=(3,), value=np.array((0.0, 0.0, 0.0)))
 
     #: Unit vector representing the flow direction. Default is ``(1.0, 0.0, 0.0)``.
-    flow = CArray(dtype=np.float64, shape=(3,), value=np.array((1.0, 0.0, 0.0)), desc='flow direction')
+    flow = CArray(dtype=np.float64, shape=(3,), value=np.array((1.0, 0.0, 0.0)))
 
     #: Unit vector parallel to the slot center plane, used to define the slot orientation.
     #: Default is ``(0.0, 1.0, 0.0)``.
-    plane = CArray(dtype=np.float64, shape=(3,), value=np.array((0.0, 1.0, 0.0)), desc='slot center line direction')
+    plane = CArray(dtype=np.float64, shape=(3,), value=np.array((0.0, 1.0, 0.0)))
 
     #: Width of the slot (slot diameter). Default is ``0.2``.
-    B = Float(0.2, desc='nozzle diameter')
+    B = Float(0.2)
 
     #: Non-dimensional length of the zone of flow establishment (jet core length).
     #: Default is ``5.2``.
-    l = Float(5.2, desc='flow establishment length')  # noqa: E741
+    l = Float(5.2)  # noqa: E741
 
     #: A unique identifier based on the field properties. (read-only)
     digest = Property(
@@ -554,17 +554,17 @@ class OpenJet(FlowField):
     """
 
     #: Exit velocity at the jet origin (nozzle). Default is ``0.0``.
-    v0 = Float(0.0, desc='exit velocity')
+    v0 = Float(0.0)
 
     #: The location of the nozzle center. Default is ``(0.0, 0.0, 0.0)``.
-    origin = CArray(dtype=np.float64, shape=(3,), value=np.array((0.0, 0.0, 0.0)), desc='center of nozzle')
+    origin = CArray(dtype=np.float64, shape=(3,), value=np.array((0.0, 0.0, 0.0)))
 
     #: Diameter of the nozzle. Default is ``0.2``.
-    D = Float(0.2, desc='nozzle diameter')
+    D = Float(0.2)
 
     #: Non-dimensional length of the zone of flow establishment (jet core length).
     #: Default is ``6.2``. :cite:`Albertson1950`
-    l = Float(6.2, desc='flow establishment length')  # noqa: E741
+    l = Float(6.2)  # noqa: E741
 
     #: A unique identifier based on the field properties. (read-only)
     digest = Property(
@@ -664,11 +664,11 @@ class RotatingFlow(FlowField):
            [ 0.        ,  0.        ,  0.        ]])
     """
 
-    # Revolutions per minute (RPM). Default is ``0.0``.
-    # Positive values indicate clockwise rotation of the flow.
-    # This is contrary to the usual definition of the direction of rotation.
-    # Deprecated! Please use the differently defined :attr:`rps` attribute instead.
-    rpm = Property(transient=True, desc='revolutions per minute of the flow; positive values for clockwise rotation')
+    #: Revolutions per minute (RPM). Default is ``0.0``.
+    #: Positive values indicate clockwise rotation of the flow.
+    #: This is contrary to the usual definition of the direction of rotation.
+    #: Deprecated! Please use the differently defined :attr:`rps` attribute instead.
+    rpm = Property(transient=True)
 
     def _get_rpm(self):
         warn(
@@ -690,14 +690,14 @@ class RotatingFlow(FlowField):
 
     #: Rotational speed in revolutions per second. Negative values indicate clockwise
     #: rigid-body-like rotation of the flow. Default is ``0.0``.
-    rps = Float(0.0, desc='rotational speed of the flow in Hz')
+    rps = Float(0.0)
 
     #: Constant flow velocity in the z-direction. Default is ``0.0``.
-    v0 = Float(0.0, desc='flow velocity')
+    v0 = Float(0.0)
 
     #: The location of the center of rotation.
     #: Default is ``(0.0, 0.0, 0.0)``.
-    origin = CArray(dtype=np.float64, shape=(3,), value=np.array((0.0, 0.0, 0.0)), desc='center of rotation')
+    origin = CArray(dtype=np.float64, shape=(3,), value=np.array((0.0, 0.0, 0.0)))
 
     #: A unique identifier based on the field properties. (read-only)
     digest = Property(
@@ -887,14 +887,14 @@ class GeneralFlowEnvironment(Environment):
 
     #: The flow field object describing the velocity field,
     #: which must be an instance of :class:`~acoular.environments.FlowField`.
-    ff = Instance(FlowField, desc='flow field')
+    ff = Instance(FlowField)
 
     #: The number of rays used per solid angle :math:`\Omega`. Defaults to ``200``.
-    N = Int(200, desc='number of rays per Om')
+    N = Int(200)
 
     #: The maximum solid angle (in steradians) used in the ray-tracing algorithm.
     #: Default is :obj:`numpy.pi`.
-    Om = Float(np.pi, desc='maximum solid angle')
+    Om = Float(np.pi)
 
     #: A unique identifier based on the environment properties. (read-only)
     digest = Property(

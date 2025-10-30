@@ -105,17 +105,17 @@ class MaskedTimeOut(TimeOut):
     source = Instance(SamplesGenerator)
 
     #: The index of the first valid sample. Default is ``0``.
-    start = CInt(0, desc='start of valid samples')
+    start = CInt(0)
 
     #: The index of the last valid sample (exclusive).
     #: If set to :obj:`None`, the selection continues until the end of the available data.
-    stop = Union(None, CInt, desc='stop of valid samples')
+    stop = Union(None, CInt)
 
     #: List of channel indices to be excluded from processing.
-    invalid_channels = List(int, desc='list of invalid channels')
+    invalid_channels = List(int)
 
     #: A mask or index array representing valid channels. (automatically updated)
-    channels = Property(depends_on=['invalid_channels', 'source.num_channels'], desc='channel mask')
+    channels = Property(depends_on=['invalid_channels', 'source.num_channels'])
 
     #: Total number of input channels, including invalid channels, as given by
     #: :attr:`~acoular.base.TimeOut.source`. (read-only).
@@ -125,19 +125,15 @@ class MaskedTimeOut(TimeOut):
     num_samples_total = Delegate('source', 'num_samples')
 
     #: Number of valid input channels after excluding :attr:`invalid_channels`. (read-only)
-    num_channels = Property(
-        depends_on=['invalid_channels', 'source.num_channels'], desc='number of valid input channels'
-    )
+    num_channels = Property(depends_on=['invalid_channels', 'source.num_channels'])
 
     #: Number of valid time-domain samples, based on :attr:`start` and :attr:`stop` indices.
     #: (read-only)
-    num_samples = Property(
-        depends_on=['start', 'stop', 'source.num_samples'], desc='number of valid samples per channel'
-    )
+    num_samples = Property(depends_on=['start', 'stop', 'source.num_samples'])
 
     #: The name of the cache file (without extension). It serves as an internal reference for data
     #: caching and tracking processed files. (automatically generated)
-    basename = Property(depends_on=['source.digest'], desc='basename for cache file')
+    basename = Property(depends_on=['source.digest'])
 
     #: A unique identifier for the object, based on its properties. (read-only)
     digest = Property(depends_on=['source.digest', 'start', 'stop', 'invalid_channels'])
@@ -274,7 +270,7 @@ class ChannelMixer(TimeOut):
     #: If not explicitly set, all channels are weighted equally (delault is ``1``).
     #: The shape of :attr:`weights` must match the :attr:`number of input channels<num_channels>`.
     #: If an incompatible shape is provided, a :obj:`ValueError` will be raised.
-    weights = CArray(desc='channel weights')
+    weights = CArray()
 
     #: The number of output channels, which is always ``1`` for this class since it produces a
     #: single mixed output. (read-only)
@@ -589,7 +585,7 @@ class AngleTracker(MaskedTimeOut):
 
     #: Number of trigger signals per revolution. This allows tracking scenarios where multiple
     #: trigger pulses occur per rotation. Default is ``1``, meaning a single trigger per revolution.
-    trigger_per_revo = Int(1, desc='trigger signals per revolution')
+    trigger_per_revo = Int(1)
 
     #: Rotation direction flag:
     #:
@@ -597,26 +593,26 @@ class AngleTracker(MaskedTimeOut):
     #: - ``-1``: clockwise rotation.
     #:
     #: Default is ``-1``.
-    rot_direction = Int(-1, desc='mathematical direction of rotation')
+    rot_direction = Int(-1)
 
     #: Number of points used for spline interpolation. Default is ``4``.
-    interp_points = Int(4, desc='Points of interpolation used for spline')
+    interp_points = Int(4)
 
     #: Initial rotation angle (in radians) corresponding to the first trigger event. This allows
     #: defining a custom starting reference angle. Default is ``0``.
-    start_angle = Float(0, desc='rotation angle for trigger position')
+    start_angle = Float(0)
 
     #: Revolutions per minute (RPM) computed for each sample.
     #: It is based on the trigger data. (read-only)
-    rpm = Property(depends_on=['digest'], desc='revolutions per minute for each sample')
+    rpm = Property(depends_on=['digest'])
 
     #: Average revolutions per minute over the entire dataset.
     #: It is computed based on the trigger intervals. (read-only)
-    average_rpm = Property(depends_on=['digest'], desc='average revolutions per minute')
+    average_rpm = Property(depends_on=['digest'])
 
     #: Computed rotation angle (in radians) for each sample.
     #: It is interpolated from the trigger data. (read-only)
-    angle = Property(depends_on=['digest'], desc='rotation angle for each sample')
+    angle = Property(depends_on=['digest'])
 
     # Internal flag to determine whether rpm and angle calculation has been processed,
     # prevents recalculation
@@ -741,14 +737,15 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
 
     #: The physical microphone geometry. An instance of :class:`~acoular.microphones.MicGeom` that
     #: defines the positions of the real microphones used for measurement.
-    mics = Instance(MicGeom(), desc='microphone geometry')
+    mics = Instance(MicGeom())
 
     #: The virtual microphone geometry. This property defines the positions
     #: of virtual microphones where interpolated pressure values are computed.
     #: Default is the physical microphone geometry (:attr:`mics`).
-    mics_virtual = Property(desc='microphone geometry')
+    mics_virtual = Property()
 
-    _mics_virtual = Instance(MicGeom, desc='internal microphone geometry;internal usage, read only')
+    #: internal microphone geometry;internal usage, read only
+    _mics_virtual = Instance(MicGeom)
 
     def _get_mics_virtual(self):
         if not self._mics_virtual and self.mics:
@@ -778,7 +775,6 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
         'IDW',
         'custom',
         'sinc',
-        desc='method for interpolation used',
     )
 
     #: Defines the spatial dimensionality of the microphone array.
@@ -790,7 +786,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
     #: - ``'ring'``: Circular arrays where rotation needs to be considered.
     #: - ``'3D'``: Three-dimensional microphone distributions.
     #: - ``'custom'``: User-defined microphone arrangements.
-    array_dimension = Enum('1D', '2D', 'ring', '3D', 'custom', desc='spatial dimensionality of the array geometry')
+    array_dimension = Enum('1D', '2D', 'ring', '3D', 'custom')
 
     #: Sampling frequency of the output signal, inherited from the :attr:`source`. This defines the
     #: rate at which microphone pressure samples are acquired and processed.
@@ -825,14 +821,11 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
     #: Number of neighboring microphones used in IDW interpolation. This parameter determines how
     #: many physical microphones contribute to the weighted sum in inverse distance weighting (IDW)
     #: interpolation.
-    num_IDW = Int(3, desc='number of neighboring microphones, DEFAULT=3')  # noqa: N815
+    num_IDW = Int(3)  # noqa: N815
 
     #: Weighting exponent for IDW interpolation. This parameter controls the influence of distance
     #: in inverse distance weighting (IDW). A higher value gives more weight to closer microphones.
-    p_weight = Float(
-        2,
-        desc='used in interpolation for virtual microphone, weighting power exponent for IDW',
-    )
+    p_weight = Float(2)
 
     # Stores the output of :meth:`_virtNewCoord_func`; Read-Only
     _virtNewCoord_func = Property(  # noqa: N815
@@ -1797,7 +1790,7 @@ class FiltOctave(Filter):
     """
 
     #: The center frequency of the octave or third-octave band. Default is ``1000``.
-    band = Float(1000.0, desc='band center frequency')
+    band = Float(1000.0)
 
     #: Defines whether the filter is an octave-band or third-octave-band filter.
     #:
@@ -1805,11 +1798,11 @@ class FiltOctave(Filter):
     #: - ``'Third octave'``: Third-octave band filter.
     #:
     #: Default is ``'Octave'``.
-    fraction = Map({'Octave': 1, 'Third octave': 3}, default_value='Octave', desc='fraction of octave')
+    fraction = Map({'Octave': 1, 'Third octave': 3}, default_value='Octave')
 
     #: The order of the IIR filter, which affects the steepness of the filter's roll-off.
     #: Default is ``3``.
-    order = Int(3, desc='IIR filter order')
+    order = Int(3)
 
     #: Second-order sections representation of the filter coefficients. This property depends on
     #: :attr:`band`, :attr:`fraction`, :attr:`order`, and the source's digest.
@@ -1884,7 +1877,7 @@ class FiltFiltOctave(FiltOctave):
 
     #: The half-order of the IIR filter, applied twice (once forward and once backward). This
     #: results in a final filter order twice as large as the specified value. Default is ``2``.
-    order = Int(2, desc='IIR filter half order')
+    order = Int(2)
 
     #: A unique identifier for the filter, based on its properties. (read-only)
     digest = Property(depends_on=['source.digest', 'band', 'fraction', 'order'])
@@ -1999,7 +1992,7 @@ class TimeExpAverage(Filter):
     #: - ``'I'`` (Impulse) → 0.035 (non-standard)
     #:
     #: Default is ``'F'``.
-    weight = Map({'F': 0.125, 'S': 1.0, 'I': 0.035}, default_value='F', desc='time weighting')
+    weight = Map({'F': 0.125, 'S': 1.0, 'I': 0.035}, default_value='F')
 
     #: Filter coefficients in second-order section (SOS) format.
     sos = Property(depends_on=['weight', 'source.digest'])
@@ -2072,7 +2065,7 @@ class FiltFreqWeight(Filter):
     #: - ``'Z'``: A flat response with no frequency weighting.
     #:
     #: Default is ``'A'``.
-    weight = Enum('A', 'C', 'Z', desc='frequency weighting')
+    weight = Enum('A', 'C', 'Z')
 
     #: Second-order sections (SOS) representation of the filter coefficients. This property is
     #: dynamically computed based on :attr:`weight` and the :attr:`Filter.source`'s digest.
@@ -2256,17 +2249,17 @@ class OctaveFilterBank(FilterBank):
 
     #: The lowest band center frequency index. Default is ``21``.
     #: This index refers to the position in the scale of octave or third-octave bands.
-    lband = Int(21, desc='lowest band center frequency index')
+    lband = Int(21)
 
     #: The highest band center frequency index + 1. Default is ``40``.
     #: This is the position in the scale of octave or third-octave bands.
-    hband = Int(40, desc='highest band center frequency index + 1')
+    hband = Int(40)
 
     #: The fraction of an octave, either ``'Octave'`` or ``'Third octave'``.
     #: Default is ``'Octave'``.
     #: Determines the width of the frequency bands. 'Octave' refers to full octaves,
     #: and ``'Third octave'`` refers to third-octave bands.
-    fraction = Map({'Octave': 1, 'Third octave': 3}, default_value='Octave', desc='fraction of octave')
+    fraction = Map({'Octave': 1, 'Third octave': 3}, default_value='Octave')
 
     #: The list of filter coefficients for all filters in the filter bank.
     #: The coefficients are computed based on the :attr:`lband`, :attr:`hband`,
@@ -2339,20 +2332,22 @@ class WriteWAV(TimeOut):
 
     #: The name of the file to be saved. If none is given, the name will be automatically
     #: generated from the source.
-    file = File(filter=['*.wav'], desc='name of wave file')
+    file = File(filter=['*.wav'])
 
     #: The name of the cache file (without extension). It serves as an internal reference for data
     #: caching and tracking processed files. (automatically generated)
     basename = Property(depends_on=['digest'])
 
     #: The list of channels to save. Can only contain one or two channels.
-    channels = List(int, desc='channels to save')
+    channels = List(int)
 
     # Bit depth of the output file.
-    encoding = Enum('uint8', 'int16', 'int32', desc='bit depth of the output file')
+    #: bit depth of the output file
+    encoding = Enum('uint8', 'int16', 'int32')
 
     # Maximum value to scale the output to. If `None`, the maximum value of the data is used.
-    max_val = Either(None, Float, desc='Maximum value to scale the output to.')
+    #: Maximum value to scale the output to.
+    max_val = Either(None, Float)
 
     #: A unique identifier for the filter, based on its properties. (read-only)
     digest = Property(depends_on=['source.digest', 'channels'])
@@ -2519,7 +2514,7 @@ class WriteH5(TimeOut):
 
     #: The name of the file to be saved. If none is given, the name is automatically
     #: generated based on the current timestamp.
-    file = File(filter=['*.h5'], desc='name of data file')
+    file = File(filter=['*.h5'])
 
     #: The number of samples to write to file per call to `result` method.
     #: Default is ``-1``, meaning all available data from the source will be written.
@@ -2533,10 +2528,10 @@ class WriteH5(TimeOut):
 
     #: Precision of the entries in the HDF5 file, represented as numpy data types.
     #: Default is ``'float32'``.
-    precision = Enum('float32', 'float64', desc='precision of H5 File')
+    precision = Enum('float32', 'float64')
 
     #: Metadata to be stored in the HDF5 file.
-    metadata = Dict(desc='metadata to be stored in .h5 file')
+    metadata = Dict()
 
     @cached_property
     def _get_digest(self):
@@ -2694,16 +2689,16 @@ class TimeConvolve(TimeOut):
     #: The second dimension of the kernel array has to be either ``1`` or match
     #: the :attr:`source`'s :attr:`~acoular.base.SamplesGenerator.num_channels` attribute.
     #: If only a single kernel is supplied, it is applied to all channels.
-    kernel = CArray(dtype=float, desc='Convolution kernel.')
+    kernel = CArray(dtype=float)
 
     # Internal block size for partitioning signals into smaller segments during processing.
-    _block_size = Int(desc='Block size')
+    #: Block size
+    _block_size = Int()
 
     # Blocks of the convolution kernel in the frequency domain.
     # Computed using Fast Fourier Transform (FFT).
     _kernel_blocks = Property(
         depends_on=['kernel', '_block_size'],
-        desc='Frequency domain Kernel blocks',
     )
 
     #: A unique identifier for the object, based on its properties. (read-only)
