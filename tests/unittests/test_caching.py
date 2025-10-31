@@ -126,3 +126,57 @@ def test_filecache_created(case, file_cache_options):
         ac.config.global_caching = 'none'
         result_uncache = calc(obj2)
         np.testing.assert_allclose(result, result_uncache)
+
+
+def test_timesamples_file_change(tmp_path, aiaa_bechmark_time_data_file, aiaa_bechmark_trigger_file):
+    """Test that changing the file attribute of a TimeSamples object works correctly.
+
+    This test verifies the fix for issue #474, where changing the file attribute
+    of a TimeSamples object that already had a file set would throw a KeyError.
+    The bug was that _decrease_file_reference_counter expected a Path object but
+    received a string when the file reference counter was being decreased for a
+    cached object whose source's file changed.
+
+    Parameters
+    ----------
+    tmp_path : pytest.fixture
+        Temporary directory for cache files (built-in pytest fixture).
+    aiaa_bechmark_time_data_file : pytest.fixture
+        Path to the first HDF5 file for testing.
+    aiaa_bechmark_trigger_file : pytest.fixture
+        Path to the second HDF5 file for testing.
+    """
+    # Configure caching
+    ac.config.cache_dir = str(tmp_path)
+    ac.config.global_caching = 'all'
+
+    # Create a TimeSamples object with the first file
+    ts = ac.TimeSamples(file=str(aiaa_bechmark_time_data_file))
+
+    # Create a PowerSpectra object that uses the TimeSamples and has caching enabled
+    ps = ac.PowerSpectra(source=ts, cached=True, block_size=128)
+
+    # Trigger calculation to create cache file
+    _ = ps.csm[:]
+
+    # Verify cache file was created
+    assert ps.h5f is not None
+    first_cache_file = Path(ps.h5f.filename)
+    assert first_cache_file.exists()
+
+    # Change the TimeSamples file attribute
+    # This changes the source's digest, which should cause PowerSpectra to need a new cache file
+    # This should not raise a KeyError (the bug from issue #474)
+    ts.file = str(aiaa_bechmark_trigger_file)
+
+    # Trigger calculation again with the new file
+    # This should open a new cache file and properly decrease the reference counter for the old one
+    _ = ps.csm[:]
+
+    # Verify that a new cache file was created (different basename due to different source digest)
+    assert ps.h5f is not None
+    second_cache_file = Path(ps.h5f.filename)
+    assert second_cache_file.exists()
+
+    # The cache files should be different because the source digest changed
+    assert first_cache_file != second_cache_file, 'Cache file should have changed when source file changed'
