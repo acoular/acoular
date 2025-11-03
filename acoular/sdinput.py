@@ -35,31 +35,31 @@ class SoundDeviceSamplesGenerator(SamplesGenerator):
             raise ImportError(msg)
 
     #: input device index, refers to sounddevice list
-    device = Int(0, desc='input device index')
+    device = Int(0)
 
     #: Number of input channels, maximum depends on device
-    num_channels = Int(1, desc='number of analog input channels that collects data')
+    num_channels = Int(1)
 
     #: Number of samples to collect; defaults to -1. If is set to -1 device collects until user
     # breaks streaming by setting Trait: collect_samples = False.
-    num_samples = Int(-1, desc='number of samples to collect')
+    num_samples = Int(-1)
 
     #: Indicates if samples are collected, helper trait to break result loop
-    collect_samples = Bool(True, desc='Indicates if samples are collected')
+    collect_samples = Bool(True)
 
     #: Sampling frequency of the signal, changes with sinusdevices
-    sample_freq = Property(desc='sampling frequency')
+    sample_freq = Property()
 
     _sample_freq = Float(default_value=None)
 
     #: Datatype (resolution) of the signal, used as `dtype` in a sd `Stream` object
-    precision = Enum('float32', 'float16', 'int32', 'int16', 'int8', 'uint8', desc='precision (resolution) of signal')
+    precision = Enum('float32', 'float16', 'int32', 'int16', 'int8', 'uint8')
 
     #: Indicates that the sounddevice buffer has overflown
-    overflow = Bool(False, desc='Indicates if sounddevice buffer overflow')
+    overflow = Bool(False)
 
     #: Indicates that the stream is collecting samples
-    running = Bool(False, desc='Indicates that the stream is collecting samples')
+    running = Bool(False)
 
     #: The sounddevice InputStream object for inspection
     stream = Any

@@ -67,7 +67,7 @@ class SignalGenerator(ABCHasStrictTraits):
     """
 
     #: Sampling frequency of the signal in Hz. Default is ``1.0``.
-    sample_freq = Float(1.0, desc='sampling frequency')
+    sample_freq = Float(1.0)
 
     #: The number of samples to generate for the signal.
     num_samples = CInt
@@ -141,10 +141,10 @@ class PeriodicSignalGenerator(SignalGenerator):
     """
 
     #: The frequency of the signal. Default is ``1000.0``.
-    freq = Float(1000.0, desc='Frequency')
+    freq = Float(1000.0)
 
     #: The phase of the signal (in radians). Default is ``0.0``.
-    phase = Float(0.0, desc='Phase')
+    phase = Float(0.0)
 
     #: The amplitude of the signal. Default is ``1.0``.
     amplitude = Float(1.0)
@@ -180,12 +180,12 @@ class NoiseGenerator(SignalGenerator):
 
     #: Root mean square (RMS) amplitude of the signal. For a point source,
     #: this corresponds to the RMS amplitude at a distance of 1 meter. Default is ``1.0``.
-    rms = Float(1.0, desc='rms amplitude')
+    rms = Float(1.0)
 
     #: Seed for random number generator. Default is ``0``.
     #: This parameter should be set differently for different instances
     #: to guarantee statistically independent (non-correlated) outputs.
-    seed = Int(0, desc='random seed value')
+    seed = Int(0)
 
     #: Internal identifier based on generator properties. (read-only)
     digest = Property(depends_on=['rms', 'seed', 'sample_freq', 'num_samples'])
@@ -294,7 +294,7 @@ class PNoiseGenerator(NoiseGenerator):
     #: of the :math:`1/f` spectrum at low frequencies but increase computation time. The  maximum
     #: allowable value depends on the :attr:`number of samples<SignalGenerator.num_samples>`.
     #: Default is ``16``.
-    depth = Int(16, desc='octave depth')
+    depth = Int(16)
 
     #: A unique checksum identifier based on the object properties. (read-only)
     digest = Property(depends_on=['rms', 'seed', 'sample_freq', 'num_samples', 'depth'])
@@ -402,11 +402,11 @@ class FiltWNoiseGenerator(WNoiseGenerator):
 
     #: A :class:`numpy.ndarray` of autoregressive coefficients (denominator). Default is ``[]``,
     #: which results in no AR filtering (i.e., all-pole filter is ``[1.0]``).
-    ar = CArray(value=np.array([]), dtype=float, desc='autoregressive coefficients (coefficients of the denominator)')
+    ar = CArray(value=np.array([]), dtype=float)
 
     #: A :class:`numpy.ndarray` of moving-average coefficients (numerator). Default is ``[]``,
     #: which results in no MA filtering (i.e., all-zero filter is ``[1.0]``).
-    ma = CArray(value=np.array([]), dtype=float, desc='moving-average coefficients (coefficients of the numerator)')
+    ma = CArray(value=np.array([]), dtype=float)
 
     #: A unique checksum identifier based on the object properties. (read-only)
     digest = Property(depends_on=['rms', 'seed', 'sample_freq', 'num_samples', 'ar', 'ma'])
