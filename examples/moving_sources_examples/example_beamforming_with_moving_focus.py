@@ -125,12 +125,7 @@ trs = [create_trajectory(*sp) for sp in source_pos]
 # The :attr:`~acoular.sources.MovingPointSource.conv_amp` parameter is
 # set to ``True`` to account for amplitude changes due to distance variations.
 
-
-def mpsgen(sig, tr):
-    return ac.MovingPointSource(signal=sig, mics=mics, trajectory=tr, conv_amp=True)
-
-
-mps = [mpsgen(sig, tr) for sig, tr in zip(sigs, trs)]
+mps = [ac.MovingPointSource(signal=sig, mics=mics, trajectory=tr, conv_amp=True) for sig, tr in zip(sigs, trs)]
 
 # %%
 # Finally, the sources are mixed together using the :class:`~acoular.sources.SourceMixer` class.
@@ -192,19 +187,34 @@ rg_fixed = ac.RectGrid(x_min=-3, x_max=3, y_min=-2, y_max=2, z=LZ, increment=0.2
 st_fixed = ac.SteeringVector(grid=rg_fixed, mics=mics)
 
 # %%
+# We now connect the processing blocks into a chain that can be executed by Acoular.
+# The chain is:
 #
-# We now connect the processing blocks into a chain that can be executed by
-# Acoular. The chain is:
-#   SourceMixer → FiltFiltOctave → BeamformerTimeSq → Average → Cache
+# .. digraph:: beamforming_pipeline
+#    :align: center
 #
-# - :class:`~acoular.tprocess.FiltFiltOctave`:
-#   zero-phase third-octave filtering around ``FREQ``.
-# - :class:`~acoular.tbeamform.BeamformerTimeSq`:
-#   computes (squared) beamforming.
-# - :class:`~acoular.process.Average`:
-#   groups frames into blocks of ``BLOCK_SIZE`` samples to produce one map per block.
-# - :class:`~acoular.process.Cache`:
-#   stores the averaged maps so that repeated access is fast and deterministic.
+#    graph [rankdir=LR];
+#    node [shape=box, style="rounded,filled", fillcolor="#f0f8ff"];
+#
+#    SM [label="SourceMixer"];
+#    FF [label="FiltFiltOctave"];
+#    BT [label="BeamformerTimeSq"];
+#    AVG [label="Average"];
+#    CACHE [label="Cache"];
+#
+#    SM -> FF -> BT -> AVG -> CACHE;
+#
+# We already have the first block, :class:`~acoular.sources.SourceMixer`,
+# defined as ``source_mixer``. The subsequent blocks are:
+#
+#   1. :class:`~acoular.tprocess.FiltFiltOctave`:
+#      zero-phase third-octave filtering around ``FREQ``.
+#   2. :class:`~acoular.tbeamform.BeamformerTimeSq`:
+#      computes (squared) beamforming.
+#   3. :class:`~acoular.process.Average`:
+#      groups frames into blocks of ``BLOCK_SIZE`` samples to produce one map per block.
+#   4. :class:`~acoular.process.Cache`:
+#      stores the averaged maps so that repeated access is fast and deterministic.
 #
 # This processing chain is similar to the one used later for moving-focus beamforming.
 
@@ -241,9 +251,22 @@ plot_maps(res_fixed, rg_fixed, figure_title='Beamforming maps with fixed focus')
 # along a moving focus trajectory ``tr0``. The focus follows the provided
 # trajectory while beamforming on the grid ``rg``.
 #
-# We now connect the processing blocks into a chain that can be executed by
-# Acoular. The chain is:
-#   SourceMixer → FiltFiltOctave → BeamformerTimeSqTraj → Average → Cache
+# We now connect the processing blocks into a chain that can be executed by Acoular.
+# The chain is:
+#
+# .. digraph:: beamforming_pipeline
+#    :align: center
+#
+#    graph [rankdir=LR];
+#    node [shape=box, style="rounded,filled", fillcolor="#f0f8ff"];
+#
+#    SM [label="SourceMixer"];
+#    FF [label="FiltFiltOctave"];
+#    BT [label="BeamformerTimeSqTraj"];
+#    AVG [label="Average"];
+#    CACHE [label="Cache"];
+#
+#    SM -> FF -> BT -> AVG -> CACHE;
 
 fi_mov = ac.FiltFiltOctave(source=source_mixer, band=FREQ, fraction='Third octave')
 bt_mov = ac.BeamformerTimeSqTraj(source=fi_mov, steer=st, trajectory=tr0, r_diag=True)

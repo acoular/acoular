@@ -5,6 +5,7 @@ Upcoming Release
 ------------------------
     **Documentation**
         * remove `desc=...` descriptions in trait documentations, reducing clutter in the API reference
+        * reworks *Beamforming with moving focus* example 
 
     **Internal**
         * Restructured the :py:mod:`acoular.demo` module to allow an easier execution of the Acoular demo.
@@ -17,7 +18,6 @@ Upcoming Release
     **Documentation**
         * fix docstrings in submodule :mod:`acoular.tbeamform`
         * move unit system notes to the notes sections
-        * reworks *Beamforming with moving focus* example 
         * new website with improved API reference
         * split large dependency graph into submodule graphs for clarity
         * fix link in README
