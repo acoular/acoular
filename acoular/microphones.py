@@ -137,32 +137,32 @@ class MicGeom(HasStrictTraits):
 
     #: Path to the XML file containing microphone positions. The XML file should have elements with
     #: the tag ``pos`` and attributes ``Name``, ``x``, ``y``, and ``z``.
-    file = Union(None, File(filter=['*.xml'], exists=True), desc='name of the xml file to import')
+    file = Union(None, File(filter=['*.xml'], exists=True))
 
     #: Array containing the ``x, y, z`` positions of all microphones, including invalid ones, shape
     #: ``(3,`` :attr:`num_mics` ``)``. This is set automatically when :attr:`file` changes or
     #: explicitly by assigning an array of floats. All coordinates are in meters by default
     #: (:ref:`see here <units_note_microphones>`).
-    pos_total = CArray(dtype=float, shape=(3, None), desc='x, y, z position of all microphones')
+    pos_total = CArray(dtype=float, shape=(3, None))
 
     #: Array containing the ``x, y, z`` positions of valid microphones (i.e., excluding those in
     #: :attr:`invalid_channels`), shape ``(3,`` :attr:`num_mics` ``)``. (read-only)
     #: All coordinates are in meters by default (:ref:`see here <units_note_microphones>`).
-    pos = Property(depends_on=['pos_total', 'invalid_channels'], desc='x, y, z position of used microphones')
+    pos = Property(depends_on=['pos_total', 'invalid_channels'])
 
     #: List of indices indicating microphones to be excluded from calculations and results.
     #: Default is ``[]``.
-    invalid_channels = List(int, desc='list of invalid channels')
+    invalid_channels = List(int)
 
     #: Number of valid microphones in the array. (read-only)
-    num_mics = Property(depends_on=['pos'], desc='number of microphones in the geometry')
+    num_mics = Property(depends_on=['pos'])
 
     #: The geometric center of the array, calculated as the arithmetic mean of the positions of all
     #: valid microphones. (read-only)
-    center = Property(depends_on=['pos'], desc='array center')
+    center = Property(depends_on=['pos'])
 
     #: The maximum distance between any two valid microphones in the array. (read-only)
-    aperture = Property(depends_on=['pos'], desc='array aperture')
+    aperture = Property(depends_on=['pos'])
 
     #: A unique identifier for the geometry, based on its properties. (read-only)
     digest = Property(depends_on=['pos'])

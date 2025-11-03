@@ -3,6 +3,14 @@ What's new
 
 Upcoming Release
 ------------------------
+    **Documentation**
+        * remove `desc=...` descriptions in trait documentations, reducing clutter in the API reference
+
+    **Internal**
+        * Restructured the :py:mod:`acoular.demo` module to allow an easier execution of the Acoular demo.
+
+    **Bugfixes**
+        * fix a typo in :class:`~acoular.tprocess.SpatialInterpolator` that lead to a property being incorrectly accessed
 
 25.10
 ------------------------
@@ -17,7 +25,7 @@ Upcoming Release
         * refactored import statements and input aliases
         * removed duplicate code in `MovingPointSource`-derived classes
         * migrate from traits `on_trait_change` to `observe`
-        * fixes bug in :class:`~acoular.sources.PointSource` that could cause a silent crash when the `start` attribute was set to a nonzero value 
+        * fixes bug in :class:`~acoular.sources.PointSource` that could cause a silent crash when the `start` attribute was set to a nonzero value
 
     **Bugfixes**
         * fixes bug in :class:`~acoular.tprocess.FilterBank`'s :meth:`~acoular.tprocess.FilterBank.result` method that failed if the last block in the generator is not of the the specified block size
