@@ -51,7 +51,7 @@ class RFFT(BaseSpectra, SpectraOut):
     #: The number of workers to use for FFT calculation.
     #: If set to a negative value, all available logical CPUs are used.
     #: Default is ``None``, which relies on the :func:`scipy.fft.rfft` implementation.
-    workers = Union(Int(), None, default_value=None, desc='number of workers to use')
+    workers = Union(Int(), None, default_value=None)
 
     #: Defines the scaling method for the FFT result. Options are:
     #:
@@ -79,7 +79,8 @@ class RFFT(BaseSpectra, SpectraOut):
 
     # Internal representation of the block size for FFT processing.
     # Used for validation and property management.
-    _block_size = Int(1024, desc='block size of the FFT')
+    #: block size of the FFT
+    _block_size = Int(1024)
 
     #: A unique identifier based on the process properties.
     digest = Property(depends_on=['source.digest', 'scaling', 'precision', '_block_size', 'window', 'overlap'])
@@ -189,12 +190,12 @@ class IRFFT(TimeOut):
     #: The number of workers (threads) to use for the IFFT calculation.
     #: A negative value utilizes all available logical CPUs.
     #: Default is ``None``, which relies on the :func:`scipy.fft.irfft` implementation.
-    workers = Union(Int(), None, default_value=None, desc='number of workers to use')
+    workers = Union(Int(), None, default_value=None)
 
     #: Determines the floating-point precision of the resulting time-domain signals.
     #: Options include ``'float64'`` and ``'float32'``.
     #: Default is ``'float64'``, ensuring high precision.
-    precision = Enum('float64', 'float32', desc='precision of the time signal after the ifft')
+    precision = Enum('float64', 'float32')
 
     #: The total number of time-domain samples in the output.
     #: Computed as the product of the number of input samples and the block size.
@@ -203,7 +204,8 @@ class IRFFT(TimeOut):
 
     # Internal signal buffer used for handling arbitrary output block sizes. Optimizes
     # processing when the requested output block size does not match the source block size.
-    _buffer = CArray(desc='signal buffer')
+    #: signal buffer
+    _buffer = CArray()
 
     #: A unique identifier based on the process properties.
     digest = Property(depends_on=['source.digest', 'scaling', 'precision', '_block_size', 'window', 'overlap'])
@@ -297,11 +299,11 @@ class AutoPowerSpectra(SpectraOut):
     scaling = Enum('power', 'psd')
 
     #: A Boolean flag indicating whether the input spectra are single-sided. Default is ``True``.
-    single_sided = Bool(True, desc='single sided spectrum')
+    single_sided = Bool(True)
 
     #: Specifies the floating-point precision of the computed auto-power spectra.
     #: Options are ``'float64'`` and ``'float32'``. Default is ``'float64'``.
-    precision = Enum('float64', 'float32', desc='floating-number-precision')
+    precision = Enum('float64', 'float32')
 
     #: A unique identifier based on the computation properties.
     digest = Property(depends_on=['source.digest', 'precision', 'scaling', 'single_sided'])
@@ -372,7 +374,7 @@ class CrossPowerSpectra(AutoPowerSpectra):
 
     #: Specifies the floating-point precision of the computed cross-spectral matrix (CSM).
     #: Options are ``'complex128'`` and ``'complex64'``. Default is ``'complex128'``.
-    precision = Enum('complex128', 'complex64', desc='precision of the fft')
+    precision = Enum('complex128', 'complex64')
 
     #: Defines the calculation mode for the cross-spectral matrix:
     #:
@@ -383,7 +385,7 @@ class CrossPowerSpectra(AutoPowerSpectra):
     #:       excluding redundant upper-triangle elements.
     #:
     #: Default is ``'full'``.
-    calc_mode = Enum('full', 'upper', 'lower', desc='calculation mode')
+    calc_mode = Enum('full', 'upper', 'lower')
 
     #: The number of channels in the output data. The value depends on the number of input channels
     #: :math:`n` and the selected :attr:`calc_mode`:
