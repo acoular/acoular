@@ -3,6 +3,9 @@ What's new
 
 Upcoming Release
 ------------------------
+    **New features**
+        * adds :attr:`~acoular.tprocess.TimeConvolve.extend_signal` property to control the result length
+
     **Documentation**
         * remove `desc=...` descriptions in trait documentations, reducing clutter in the API reference
 
