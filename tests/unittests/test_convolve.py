@@ -8,8 +8,8 @@ from acoular import TimeConvolve, tools
 from pytest_cases import parametrize
 
 
-@parametrize('extend_sample', [True, False], ids=['extend_sample-True', 'extend_sample-False'])
-def test_time_convolve(time_data_source, extend_sample):
+@parametrize('extend_signal', [True, False], ids=['extend_signal-True', 'extend_signal-False'])
+def test_time_convolve(time_data_source, extend_signal):
     """Compare results of timeconvolve with numpy convolve.
 
     Parameters
@@ -20,7 +20,7 @@ def test_time_convolve(time_data_source, extend_sample):
     sig = tools.return_result(time_data_source)
     nc = time_data_source.num_channels
     kernel = np.random.rand(20 * nc).reshape(20, nc)
-    conv = TimeConvolve(kernel=kernel, source=time_data_source, extend_sample=extend_sample)
+    conv = TimeConvolve(kernel=kernel, source=time_data_source, extend_signal=extend_signal)
     res = tools.return_result(conv)
     for i in range(time_data_source.num_channels):
         ref = np.convolve(np.squeeze(conv.kernel[:, i]), np.squeeze(sig[:, i]))

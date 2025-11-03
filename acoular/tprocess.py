@@ -2701,7 +2701,7 @@ class TimeConvolve(TimeOut):
     #:   each overlap point (similar to NumPy's ``mode='full'``).
     #:
     #: Default is ``False``.
-    extend_sample = Bool(False, desc='Extend result sample')
+    extend_signal = Bool(False)
 
     # Internal block size for partitioning signals into smaller segments during processing.
     #: Block size
@@ -2714,7 +2714,7 @@ class TimeConvolve(TimeOut):
     )
 
     #: A unique identifier for the object, based on its properties. (read-only)
-    digest = Property(depends_on=['source.digest', 'kernel', 'extend_sample'])
+    digest = Property(depends_on=['source.digest', 'kernel', 'extend_signal'])
 
     @cached_property
     def _get_digest(self):
@@ -2796,7 +2796,7 @@ class TimeConvolve(TimeOut):
         -----
         - The kernel is first validated and reshaped if necessary.
         - The convolution is computed efficiently using the FFT in the frequency domain.
-        - The output length is determined by the :attr:`extend_sample` property.
+        - The output length is determined by the :attr:`extend_signal` property.
         """
         self._validate_kernel()
         # initialize variables
@@ -2805,7 +2805,7 @@ class TimeConvolve(TimeOut):
         N = self.source.num_channels
         M = self.source.num_samples
 
-        output_size = max(L, M) if not self.extend_sample else L + M - 1
+        output_size = max(L, M) if not self.extend_signal else L + M - 1
 
         numblocks_kernel = int(np.ceil(L / num))  # number of kernel blocks
         Q = int(np.ceil(M / num))  # number of signal blocks
