@@ -2687,9 +2687,21 @@ class TimeConvolve(TimeOut):
 
     #: Convolution kernel in the time domain.
     #: The second dimension of the kernel array has to be either ``1`` or match
-    #: the :attr:`source`'s :attr:`~acoular.base.SamplesGenerator.num_channels` attribute.
+    #: the :attr:`source`'s :attr:`~acoular.base.Generator.num_channels` attribute.
     #: If only a single kernel is supplied, it is applied to all channels.
     kernel = CArray(dtype=float)
+
+    #: Controls whether to extend the output to include the full convolution result.
+    #:
+    #: - If ``False`` (default): Output length is :math:`\\max(L, M)`, where :math:`L` is the
+    #:   kernel length and :math:`M` is the signal length. This mode keeps the output length
+    #:   equal to the longest input (different from NumPy's ``mode='same'``, since it does not
+    #:   pad the output).
+    #: - If ``True``: Output length is :math:`L + M - 1`, returning the full convolution at
+    #:   each overlap point (similar to NumPy's ``mode='full'``).
+    #:
+    #: Default is ``False``.
+    extend_signal = Bool(False)
 
     # Internal block size for partitioning signals into smaller segments during processing.
     #: Block size
@@ -2702,7 +2714,7 @@ class TimeConvolve(TimeOut):
     )
 
     #: A unique identifier for the object, based on its properties. (read-only)
-    digest = Property(depends_on=['source.digest', 'kernel'])
+    digest = Property(depends_on=['source.digest', 'kernel', 'extend_signal'])
 
     @cached_property
     def _get_digest(self):
@@ -2760,12 +2772,12 @@ class TimeConvolve(TimeOut):
         return blocks
 
     def result(self, num=128):
-        """
+        r"""
         Convolve the source signal with the kernel and yield the result in blocks.
 
-        The method generates the convolution of the source signal with the kernel by processing the
-        signal in small blocks, performing the convolution in the frequency domain, and yielding the
-        results block by block.
+        The method generates the convolution of the source signal (length :math:`M`) with the kernel
+        (length :math:`L`) by processing the signal in small blocks, performing the convolution in
+        the frequency domain, and yielding the results block by block.
 
         Parameters
         ----------
@@ -2776,14 +2788,15 @@ class TimeConvolve(TimeOut):
         Yields
         ------
         :obj:`numpy.ndarray`
-            A array of shape (``num``, :attr:`~acoular.base.SamplesGenerator.num_channels`),
-            where :attr:`~acoular.base.SamplesGenerator.num_channels` is inhereted from the
+            An array of shape (``num``, :attr:`~acoular.base.Generator.num_channels`),
+            where :attr:`~acoular.base.Generator.num_channels` is inherited from the
             :attr:`source`, representing the convolution result in blocks.
 
         Notes
         -----
         - The kernel is first validated and reshaped if necessary.
         - The convolution is computed efficiently using the FFT in the frequency domain.
+        - The output length is determined by the :attr:`extend_signal` property.
         """
         self._validate_kernel()
         # initialize variables
@@ -2791,10 +2804,13 @@ class TimeConvolve(TimeOut):
         L = self.kernel.shape[0]
         N = self.source.num_channels
         M = self.source.num_samples
+
+        output_size = max(L, M) if not self.extend_signal else L + M - 1
+
         numblocks_kernel = int(np.ceil(L / num))  # number of kernel blocks
         Q = int(np.ceil(M / num))  # number of signal blocks
-        R = int(np.ceil((L + M - 1) / num))  # number of output blocks
-        last_size = (L + M - 1) % num  # size of final block
+        R = int(np.ceil(output_size / num))  # number of output blocks
+        last_size = output_size % num  # size of final output block
 
         idx = 0
         fdl = np.zeros([numblocks_kernel, num + 1, N], dtype='complex128')
@@ -2810,7 +2826,8 @@ class TimeConvolve(TimeOut):
             _append_to_fdl(fdl, idx, numblocks_kernel, rfft(buff, axis=0))
             spec_sum = _spectral_sum(spec_sum, fdl, self._kernel_blocks)
             # truncate s.t. total length is L+M-1 (like numpy convolve w/ mode="full")
-            yield irfft(spec_sum, axis=0)[num : last_size + num]
+            final_len = last_size if last_size != 0 else num
+            yield irfft(spec_sum, axis=0)[num : final_len + num]
             return
 
         # stream processing of source signal
@@ -2836,7 +2853,8 @@ class TimeConvolve(TimeOut):
         _append_to_fdl(fdl, idx, numblocks_kernel, rfft(buff, axis=0))
         spec_sum = _spectral_sum(spec_sum, fdl, self._kernel_blocks)
         # truncate s.t. total length is L+M-1 (like numpy convolve w/ mode="full")
-        yield irfft(spec_sum, axis=0)[num : last_size + num]
+        final_len = last_size if last_size != 0 else num
+        yield irfft(spec_sum, axis=0)[num : final_len + num]
 
 
 @nb.jit(nopython=True, cache=True)

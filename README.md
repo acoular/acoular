@@ -41,7 +41,7 @@ If you use Acoular for academic work, please consider citing both our
     Sarradj, E., & Herold, G. (2017). 
     A Python framework for microphone array data processing.
     Applied Acoustics, 116, 50–58. 
-    https://doi.org/10.1016/j.apacoust.2016.09
+    https://doi.org/10.1016/j.apacoust.2016.09.015
 
 and our [software](https://zenodo.org/doi/10.5281/zenodo.3690794):
 

@@ -104,7 +104,7 @@ contact:
 preferred-citation:
     type: "article"
     title: "A Python framework for microphone array data processing"
-    doi: "10.1016/j.apacoust.2016.09"
+    doi: "10.1016/j.apacoust.2016.09.015"
     authors:
       - family-names: "Sarradj"
         given-names: "Ennes"
