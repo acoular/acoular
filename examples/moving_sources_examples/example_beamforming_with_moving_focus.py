@@ -231,7 +231,7 @@ cacht_fixed = ac.Cache(source=avgt_fixed)
 # Use ``num=None`` to return all cached blocks, or set ``num`` to
 # an integer to limit the number of returned maps.
 
-res_fixed = ac.tools.return_result(cacht_fixed, num=1)
+res_fixed = next(cacht_fixed.result(num=3))
 plot_maps(res_fixed, rg_fixed, figure_title='Beamforming maps with fixed focus')
 
 # %%
@@ -273,7 +273,7 @@ bt_mov = ac.BeamformerTimeSqTraj(source=fi_mov, steer=st, trajectory=tr0, r_diag
 avgt_mov = ac.Average(source=bt_mov, num_per_average=BLOCK_SIZE)
 cacht_mov = ac.Cache(source=avgt_mov)
 
-res_mov = ac.tools.return_result(cacht_mov, num=1)
+res_mov = next(cacht_mov.result(num=3))
 plot_maps(res_mov, rg, figure_title='Beamforming maps with moving focus')
 
 # %%
@@ -298,7 +298,7 @@ bt_cleant = ac.BeamformerCleantSqTraj(source=fi_cleant, steer=st, trajectory=tr0
 avgt_cleant = ac.Average(source=bt_cleant, num_per_average=BLOCK_SIZE)
 cacht_cleant = ac.Cache(source=avgt_cleant)
 
-res_cleant = ac.tools.return_result(cacht_cleant, num=1)
+res_cleant = next(cacht_cleant.result(num=3))
 plot_maps(res_cleant, rg, figure_title='Beamforming maps with moving focus and CLEANT')
 
 # %%
