@@ -104,12 +104,16 @@ latex_documents = [
 
 
 #%%
-# sphinx.ext.inheritance_diagram extension settings
+# sphinx.ext.graphviz extension settings
 # ------------------------------------------------
 
+# do not use sphinx.ext.inheritance_diagram's graphviz settings because they clash
+graphviz_dot_args = [
+    '-Grankdir=LR', '-Gsize="11.0,24.0"', '-Gbgcolor=transparent', '-Gratio=compress',
+    '-Nstyle=setlinewidth(0.5),filled', '-Nshape=box', '-Nfontsize=18', '-Nfillcolor=white', '-Nheight=0.5',
+    '-Nfontname=Vera Sans, Dejavu Sans, Liberation Sans, Arial, Helvetica, sans',
+]
 graphviz_output_format = 'svg'  # make graph match light/dark theme
-inheritance_graph_attrs = {'rankdir': "LR", 'size': '"11.0,24.0"',
-                               'fontsize': 18, 'ratio': 'compress'}
 
 #%%
 # sphinx.ext.autosummary extension settings
@@ -158,7 +162,7 @@ suppress_warnings = [
 
 # Custom CSS paths should either relative to html_static_path
 # or fully qualified paths (eg. https://...)
-html_css_files = ['sphinx_gallery.css']
+html_css_files = ['css/sphinx_gallery.css', 'css/graphviz_dark_theme_fix.css']
 
 # sphinx_gallery.gen_gallery extension configuration
 sphinx_gallery_conf = {

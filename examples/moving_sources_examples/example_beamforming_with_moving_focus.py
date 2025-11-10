@@ -193,9 +193,6 @@ st_fixed = ac.SteeringVector(grid=rg_fixed, mics=mics)
 # .. digraph:: beamforming_pipeline
 #    :align: center
 #
-#    graph [rankdir=LR];
-#    node [shape=box, style="rounded,filled", fillcolor="#f0f8ff"];
-#
 #    SM [label="SourceMixer"];
 #    FF [label="FiltFiltOctave"];
 #    BT [label="BeamformerTimeSq"];
@@ -256,9 +253,6 @@ plot_maps(res_fixed, rg_fixed, figure_title='Beamforming maps with fixed focus')
 #
 # .. digraph:: beamforming_pipeline
 #    :align: center
-#
-#    graph [rankdir=LR];
-#    node [shape=box, style="rounded,filled", fillcolor="#f0f8ff"];
 #
 #    SM [label="SourceMixer"];
 #    FF [label="FiltFiltOctave"];
