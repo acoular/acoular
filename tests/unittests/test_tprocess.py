@@ -132,10 +132,8 @@ def test_filt_octave_band_frequency_too_high(create_time_data_source, filter_cls
 def test_filt_freq_weight_types(create_time_data_source, weight):
     """Test FiltFreqWeight correctly generates SOS coefficients for different weight types.
     
-    NEW TEST: Tests the FiltFreqWeight class (tprocess.py lines 2043-2150).
-    This is the first test coverage for frequency weighting filters. Tests the _get_sos() method
-    (lines 2082-2148) for all three weighting types (A, C, and Z), ensuring valid SOS filter
-    coefficients are generated according to IEC 61672-1 standard.
+    Tests the FiltFreqWeight class.
+    Tests the _get_sos() method for all three weighting types (A, C, and Z).
     """
     source = create_time_data_source(num_channels=2, num_samples=100)
     filt = ac.FiltFreqWeight(source=source, weight=weight)
