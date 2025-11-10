@@ -6,25 +6,25 @@
 
         .. code-block:: console
 
-            $ uv pip install 'acoular[full]'
+            $ uv pip install acoular
 
     .. tab-item:: ``pip``
         :sync: pip
 
         .. code-block:: console
 
-            $ pip3 install -U 'acoular[full]'
+            $ pip install -U acoular
 
     .. tab-item:: ``mamba``
         :sync: mamba
 
         .. code-block:: console
 
-            $ mamba install -c acoular acoular matplotlib pylops python-sounddevice
+            $ mamba install -c acoular acoular
 
     .. tab-item:: ``conda``
         :sync: conda
 
         .. code-block:: console
 
-            $ conda install -c acoular acoular matplotlib pylops python-sounddevice
+            $ conda install -c acoular acoular

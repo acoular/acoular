@@ -125,7 +125,9 @@ trs = [create_trajectory(*sp) for sp in source_pos]
 # The :attr:`~acoular.sources.MovingPointSource.conv_amp` parameter is
 # set to ``True`` to account for amplitude changes due to distance variations.
 
-mps = [ac.MovingPointSource(signal=sig, mics=mics, trajectory=tr, conv_amp=True) for sig, tr in zip(sigs, trs, strict=True)]
+mps = [
+    ac.MovingPointSource(signal=sig, mics=mics, trajectory=tr, conv_amp=True) for sig, tr in zip(sigs, trs, strict=True)
+]
 
 # %%
 # Finally, the sources are mixed together using the :class:`~acoular.sources.SourceMixer` class.

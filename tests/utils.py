@@ -12,7 +12,6 @@ import pytest
 from pytest_cases import get_case_id
 from traits.api import HasTraits
 
-
 def get_all_classes(hastraits_only=False):
     classes = []
     package = importlib.import_module('acoular')

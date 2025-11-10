@@ -13,13 +13,13 @@ Virtual environment
 -------------------
 We strongly encourage the use of virtual environments. An environment ``my-env`` can be created with:
         
-.. include:: environment-commands.rst
+.. include:: ../commands/environment.rst
 
 Installation
 ------------
 Then, install Acoular with:
 
-.. include:: install-commands.rst
+.. include:: ../commands/install.rst
 
 Dependencies
 ------------
@@ -56,14 +56,14 @@ When installing Acoular from PyPI, Acoular and all optional dependencies can be 
                  
 Otherwise, the dependencies need to be installed manually:
 
-.. include:: full-install-commands.rst
+.. include:: ../commands/full-install.rst
 
 Verify your installation
 ------------------------
 After installation, you may verify your Acoular installation by importing the module and running the Acoular demo script in a Python console.
 In order to render the graphical output, the Acoular demo script requires ``matplotlib``.
 
-.. include:: verify-commands.rst
+.. include:: ../commands/demo.rst
 
 After a couple of seconds, this should produce two pictures (a 64 microphone arrangement and a beamforming map with three sources). If ``matplotlib`` is not found, the beamforming map will be printed in ASCII format.
 

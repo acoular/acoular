@@ -1,7 +1,5 @@
-
-Setting up a development environment
-====================================
-
+Developer Installation
+======================
 
 Prerequisites
 -------------
@@ -23,25 +21,25 @@ Creating a development environment
 
 For development, a virtual environment is needed. Create one with your preferred tool:
 
-.. include:: ../install/environment-commands.rst
+.. include:: ../commands/environment.rst
 
 Editable installation
 ---------------------
 
 Next, we need to make an editable installation of Acoular with:
 
-.. include:: ../install/editable-install-commands.rst
+.. include:: ../commands/editable-install.rst
 
 An editable installation allows you to make changes to the source code and see the effects immediately without having to reinstall the package.
 
 
-The ``".[dev]"`` argument is responsible for installing the right dependencies as defined in ``pyproject.toml``:
+The ``--group dev`` argument is responsible for installing the corresponding dependency group as defined in ``pyproject.toml``:
 
 .. literalinclude:: /../../pyproject.toml
     :start-at: [dependency-groups]
     :end-before: [project.urls]
 
-If not included, the dependencies have to be installed manually.
+If omitted, the dependencies have to be installed manually.
 
 System dependencies
 -------------------
