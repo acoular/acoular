@@ -39,8 +39,7 @@ def test_metadata(tmp_path, create_time_data_source, acoular_cls, h5library, dat
 @parametrize('mismatch_type', ['sample_freq', 'num_channels'])
 def test_mixer_validation_errors(create_time_data_source, mismatch_type):
     """Test Mixer raises ValueError when sources have incompatible properties.
-    
-    Tests the Mixer.validate_sources() method.
+
     Specifically tests error handling for incompatible sample frequencies and channel counts.
     """
     primary_source = create_time_data_source(num_channels=2, num_samples=100)
@@ -70,7 +69,7 @@ def test_mixer_result_handling(
     create_time_data_source, primary_samples, secondary_samples, block_size, expected_samples
 ):
     """Test Mixer handles different source lengths and shape mismatches.
-    
+
     Tests the Mixer.result() generator method.
     Covers edge cases when sources have different lengths, including:
     - StopIteration handling when secondary source ends early
@@ -92,7 +91,7 @@ def test_mixer_result_handling(
 
 def test_mixer_addition_correctness():
     """Test that Mixer correctly adds signals from multiple sources.
-    
+
     Tests the core mixing functionality in Mixer.result().
     Verifies that the Mixer correctly adds signals element-wise (temp += ...).
     This is a functional test ensuring the mathematical correctness of the mixing operation.
@@ -106,10 +105,7 @@ def test_mixer_addition_correctness():
     source2 = ac.TimeSamples(sample_freq=51200, data=data2.copy())
     mixer = ac.Mixer(source=source1, sources=[source2])
 
-    mixed_data = []
-    for block in mixer.result(num=100):
-        mixed_data.append(block.copy())
-    mixed_data = np.vstack(mixed_data)
+    mixed_data = np.vstack([block.copy() for block in mixer.result(num=100)])
 
     np.testing.assert_allclose(mixed_data, expected)
 
@@ -117,7 +113,7 @@ def test_mixer_addition_correctness():
 @parametrize('filter_cls', [ac.FiltOctave, ac.FiltFiltOctave])
 def test_filt_octave_band_frequency_too_high(create_time_data_source, filter_cls):
     """Test octave filters raise ValueError when band frequency is too high.
-    
+
     Tests FiltOctave and FiltFiltOctave classes.
     Specifically tests the frequency validation in the _get_sos() methods.
     """
@@ -131,7 +127,7 @@ def test_filt_octave_band_frequency_too_high(create_time_data_source, filter_cls
 @parametrize('weight', ['A', 'C', 'Z'])
 def test_filt_freq_weight_types(create_time_data_source, weight):
     """Test FiltFreqWeight correctly generates SOS coefficients for different weight types.
-    
+
     Tests the FiltFreqWeight class.
     Tests the _get_sos() method for all three weighting types (A, C, and Z).
     """
@@ -148,11 +144,12 @@ def test_filt_freq_weight_types(create_time_data_source, weight):
 
 def test_filt_freq_weight_z_flat_response():
     """Test that Z-weighting produces a flat frequency response.
-    
+
     Tests FiltFreqWeight functional behavior for Z-weighting.
     Z-weighting should have unity gain across all frequencies (flat response),
-    as implemented in _get_sos(). This functional test verifies that Z-weighting passes
-    signals unchanged, distinguishing it from A and C weightings which apply frequency-dependent gains.
+    as implemented in _get_sos(). This functional test verifies that Z-weighting
+    passes signals unchanged, distinguishing it from A and C weightings which
+    apply frequency-dependent gains.
     """
     rng = np.random.RandomState(42)
     data = rng.randn(100, 1)
