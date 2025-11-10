@@ -22,7 +22,7 @@
 
             $ mamba install -c acoular acoular
 
-    .. tab-item:: ```conda``
+    .. tab-item:: ``conda``
         :sync: conda
 
         .. code-block:: console

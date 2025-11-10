@@ -63,36 +63,7 @@ Verify your installation
 After installation, you may verify your Acoular installation by importing the module and running the Acoular demo script in a Python console.
 In order to render the graphical output, the Acoular demo script requires ``matplotlib``.
 
-.. tab-set::
-    :sync-group: tool
-
-    .. tab-item:: ``uv``
-        :sync: uv
-
-        .. code-block:: console
-
-            $ uv run python -c "import acoular; acoular.demo.acoular_demo.run()"
-
-    .. tab-item:: ``pip``
-        :sync: pip
-
-        .. code-block:: console
-
-            $ python -c "import acoular; acoular.demo.acoular_demo.run()"
-
-    .. tab-item:: ``mamba``
-        :sync: mamba
-
-        .. code-block:: console
-
-            $ python -c "import acoular; acoular.demo.acoular_demo.run()"
-
-    .. tab-item:: ``conda``
-        :sync: conda
-
-        .. code-block:: console
-
-            $ python -c "import acoular; acoular.demo.acoular_demo.run()"
+.. include:: verify-commands.rst
 
 After a couple of seconds, this should produce two pictures (a 64 microphone arrangement and a beamforming map with three sources). If ``matplotlib`` is not found, the beamforming map will be printed in ASCII format.
 
@@ -114,19 +85,6 @@ Alternatively, install the ``traits`` package from the ``conda-forge`` channel t
 .. code-block:: console
 
     $ conda update -c conda-forge traits
-
-Verify Acoular installation
----------------------------
-
-If the installation has finished, you may try out Acoular by importing the module and running the Acoular demo script in a Python console.
-The Acoular demo script needs `matplotlib <http://matplotlib.org>`_ installed to render the graphical output.
-
-.. code-block:: python
-
-    >>> import acoular
-    >>> acoular.demo.run()
-
-After some seconds, this should produce two pictures (a 64 microphone arrangement and a beamforming map with three sources).
 
 Missing PortAudio on Linux
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
