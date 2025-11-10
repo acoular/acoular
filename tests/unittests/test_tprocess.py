@@ -149,9 +149,9 @@ def test_filt_freq_weight_types(create_time_data_source, weight):
 def test_filt_freq_weight_z_flat_response():
     """Test that Z-weighting produces a flat frequency response.
     
-    NEW TEST: Tests FiltFreqWeight functional behavior for Z-weighting (tprocess.py lines 2043-2150).
-    Z-weighting should have unity gain across all frequencies (flat response), as implemented
-    in _get_sos() lines 2139-2140. This functional test verifies that Z-weighting passes
+    Tests FiltFreqWeight functional behavior for Z-weighting.
+    Z-weighting should have unity gain across all frequencies (flat response),
+    as implemented in _get_sos(). This functional test verifies that Z-weighting passes
     signals unchanged, distinguishing it from A and C weightings which apply frequency-dependent gains.
     """
     rng = np.random.RandomState(42)
