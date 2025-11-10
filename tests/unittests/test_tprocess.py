@@ -42,7 +42,7 @@ def test_mixer_validation_errors(create_time_data_source, mismatch_type):
     primary_source = create_time_data_source(num_channels=2, num_samples=100)
 
     if mismatch_type == 'sample_freq':
-        secondary_source = ac.TimeSamples(sample_freq=44100, data=np.random.randn(100, 2))
+        secondary_source = ac.TimeSamples(sample_freq=44100, data=np.random.RandomState(1).randn(100, 2))
         error_match = 'Sample frequency.*does not fit'
     else:
         secondary_source = create_time_data_source(num_channels=3, num_samples=100)
