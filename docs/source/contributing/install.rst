@@ -11,10 +11,10 @@ Before you can start contributing to Acoular
 * Create a fork of the `Acoular repository <https://github.com/acoular/acoular>`_ on GitHub
 * Clone your fork to your local machine via 
 
-.. code-block:: bash
+.. code-block:: console
 
-    git clone <https://your_fork>
-    cd acoular
+    $ git clone <https://your_fork>
+    $ cd acoular
 
 We encourage using the latest compatible Python version, which is currently 3.13.
 
@@ -46,11 +46,9 @@ If not included, the dependencies have to be installed manually.
 System dependencies
 -------------------
 
-Some of the Acoular dependencies require system packages to be installed. On Ubuntu, we frequently encounter that the portaudio library is missing, which is required by the sounddevice package. In addition, the graphviz package is required for the documentation. 
+Some of the Acoular dependencies require system packages to be installed. On Ubuntu, we frequently encounter that PortAudio is missing, which is required by the ``sounddevice`` library. In addition, Graphviz is required for the Acoular documentation.
 You can install both with:
 
-.. code-block:: bash
+.. code-block:: console
 
-    sudo apt install graphviz libportaudio2
-
-
+    $ sudo apt install graphviz libportaudio2
