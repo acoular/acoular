@@ -11,7 +11,7 @@ jobs:
   
     steps:
     - name: Check out a copy of the repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
     - name: Set up hatch
       uses: ./.github/actions/setup-hatch
     - name: Build a binary wheel and a source tarball
