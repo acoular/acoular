@@ -118,10 +118,8 @@ def test_mixer_addition_correctness():
 def test_filt_octave_band_frequency_too_high(create_time_data_source, filter_cls):
     """Test octave filters raise ValueError when band frequency is too high.
     
-    NEW TEST: Tests FiltOctave and FiltFiltOctave classes (tprocess.py lines 1775-1890).
-    Specifically tests the frequency validation in the _get_sos() method (line 1849-1851).
-    This is the first test coverage for these octave filter classes, ensuring they properly
-    reject invalid band frequencies that exceed the Nyquist limit.
+    Tests FiltOctave and FiltFiltOctave classes.
+    Specifically tests the frequency validation in the _get_sos() methods.
     """
     source = create_time_data_source(num_channels=2, num_samples=100)
     filt = filter_cls(source=source, band=20000.0)
