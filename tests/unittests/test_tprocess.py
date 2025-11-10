@@ -38,7 +38,11 @@ def test_metadata(tmp_path, create_time_data_source, acoular_cls, h5library, dat
 
 @parametrize('mismatch_type', ['sample_freq', 'num_channels'])
 def test_mixer_validation_errors(create_time_data_source, mismatch_type):
-    """Test Mixer raises ValueError when sources have incompatible properties."""
+    """Test Mixer raises ValueError when sources have incompatible properties.
+    
+    Tests the Mixer.validate_sources() method.
+    Specifically tests error handling for incompatible sample frequencies and channel counts.
+    """
     primary_source = create_time_data_source(num_channels=2, num_samples=100)
 
     if mismatch_type == 'sample_freq':
@@ -65,7 +69,13 @@ def test_mixer_validation_errors(create_time_data_source, mismatch_type):
 def test_mixer_result_handling(
     create_time_data_source, primary_samples, secondary_samples, block_size, expected_samples
 ):
-    """Test Mixer handles different source lengths and shape mismatches."""
+    """Test Mixer handles different source lengths and shape mismatches.
+    
+    Tests the Mixer.result() generator method.
+    Covers edge cases when sources have different lengths, including:
+    - StopIteration handling when secondary source ends early
+    - Shape truncation for non-block-aligned sample counts
+    """
     primary_source = create_time_data_source(num_channels=2, num_samples=primary_samples)
     secondary_source = create_time_data_source(num_channels=2, num_samples=secondary_samples)
     mixer = ac.Mixer(source=primary_source, sources=[secondary_source])
@@ -81,7 +91,12 @@ def test_mixer_result_handling(
 
 
 def test_mixer_addition_correctness():
-    """Test that Mixer correctly adds signals from multiple sources."""
+    """Test that Mixer correctly adds signals from multiple sources.
+    
+    Tests the core mixing functionality in Mixer.result().
+    Verifies that the Mixer correctly adds signals element-wise (temp += ...).
+    This is a functional test ensuring the mathematical correctness of the mixing operation.
+    """
     rng = np.random.RandomState(42)
     data1 = rng.randn(100, 2)
     data2 = rng.randn(100, 2)
@@ -101,7 +116,11 @@ def test_mixer_addition_correctness():
 
 @parametrize('filter_cls', [ac.FiltOctave, ac.FiltFiltOctave])
 def test_filt_octave_band_frequency_too_high(create_time_data_source, filter_cls):
-    """Test octave filters raise ValueError when band frequency is too high."""
+    """Test octave filters raise ValueError when band frequency is too high.
+    
+    Tests FiltOctave and FiltFiltOctave classes.
+    Specifically tests the frequency validation in the _get_sos() methods.
+    """
     source = create_time_data_source(num_channels=2, num_samples=100)
     filt = filter_cls(source=source, band=20000.0)
 
@@ -111,7 +130,11 @@ def test_filt_octave_band_frequency_too_high(create_time_data_source, filter_cls
 
 @parametrize('weight', ['A', 'C', 'Z'])
 def test_filt_freq_weight_types(create_time_data_source, weight):
-    """Test FiltFreqWeight correctly generates SOS coefficients for different weight types."""
+    """Test FiltFreqWeight correctly generates SOS coefficients for different weight types.
+    
+    Tests the FiltFreqWeight class.
+    Tests the _get_sos() method for all three weighting types (A, C, and Z).
+    """
     source = create_time_data_source(num_channels=2, num_samples=100)
     filt = ac.FiltFreqWeight(source=source, weight=weight)
     sos = filt.sos
@@ -124,7 +147,13 @@ def test_filt_freq_weight_types(create_time_data_source, weight):
 
 
 def test_filt_freq_weight_z_flat_response():
-    """Test that Z-weighting produces a flat frequency response."""
+    """Test that Z-weighting produces a flat frequency response.
+    
+    Tests FiltFreqWeight functional behavior for Z-weighting.
+    Z-weighting should have unity gain across all frequencies (flat response),
+    as implemented in _get_sos(). This functional test verifies that Z-weighting passes
+    signals unchanged, distinguishing it from A and C weightings which apply frequency-dependent gains.
+    """
     rng = np.random.RandomState(42)
     data = rng.randn(100, 1)
     source = ac.TimeSamples(sample_freq=51200, data=data.copy())
