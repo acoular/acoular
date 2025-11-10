@@ -93,8 +93,8 @@ def test_mixer_result_handling(
 def test_mixer_addition_correctness():
     """Test that Mixer correctly adds signals from multiple sources.
     
-    NEW TEST: Tests the core mixing functionality in Mixer.result() (tprocess.py lines 1504-1530).
-    Verifies that the Mixer correctly adds signals element-wise (line 1528: temp += ...).
+    Tests the core mixing functionality in Mixer.result().
+    Verifies that the Mixer correctly adds signals element-wise (temp += ...).
     This is a functional test ensuring the mathematical correctness of the mixing operation.
     """
     rng = np.random.RandomState(42)
