@@ -34,7 +34,7 @@ jobs:
       - name: Check import
         run: uv run --frozen python -c "import acoular"
       - name: Check demo
-        run: uv run --frozen --exact --no-dev python -c "import acoular; acoular.demo.acoular_demo.run()"
+        run: uv run --frozen --exact --no-dev python -m acoular.demo
       - name: Run tests
         run: uv run --frozen python -m pytest
       - name: Run doctests
