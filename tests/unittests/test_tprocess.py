@@ -71,10 +71,10 @@ def test_mixer_result_handling(
 ):
     """Test Mixer handles different source lengths and shape mismatches.
     
-    NEW TEST: Tests the Mixer.result() generator method (tprocess.py lines 1504-1530).
+    Tests the Mixer.result() generator method.
     Covers edge cases when sources have different lengths, including:
-    - StopIteration handling when secondary source ends early (line 1522)
-    - Shape truncation for non-block-aligned sample counts (lines 1524-1526)
+    - StopIteration handling when secondary source ends early
+    - Shape truncation for non-block-aligned sample counts
     """
     primary_source = create_time_data_source(num_channels=2, num_samples=primary_samples)
     secondary_source = create_time_data_source(num_channels=2, num_samples=secondary_samples)
