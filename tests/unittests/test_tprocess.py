@@ -40,8 +40,7 @@ def test_metadata(tmp_path, create_time_data_source, acoular_cls, h5library, dat
 def test_mixer_validation_errors(create_time_data_source, mismatch_type):
     """Test Mixer raises ValueError when sources have incompatible properties.
     
-    NEW TEST: Tests the Mixer.validate_sources() method (tprocess.py lines 1482-1502).
-    This is the first test coverage for the Mixer class (lines 1437-1530).
+    Tests the Mixer.validate_sources() method.
     Specifically tests error handling for incompatible sample frequencies and channel counts.
     """
     primary_source = create_time_data_source(num_channels=2, num_samples=100)
