@@ -12,14 +12,14 @@ jobs:
     steps:
     - name: Check out a copy of the repository
       uses: actions/checkout@v5
-    - name: Set up hatch
-      uses: ./.github/actions/setup-hatch
+    - name: Set up uv
+      uses: astral-sh/setup-uv@v7      
     - name: Build a binary wheel and a source tarball
-      run: hatch build 
+      run: uv build 
     - name: Store the distribution packages
       uses: actions/upload-artifact@v4
       with:
         name: python-package-distributions
         path: dist/        
     - name: Publish distribution 📦 to TestPyPI
-      run: hatch publish -r test -u __token__ -a ${{ secrets.HATCH_PUBLISH_TESTPYPI_API_TOKEN }}
+      run: uv publish --index testpypi
