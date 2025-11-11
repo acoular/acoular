@@ -1,4 +1,4 @@
-name: Publish Python 🐍 distribution 📦 TestPyPI
+name: TestPyPI 👩🏻‍🔬: Build 🛠️ & Publish 📦
 
 on: 
   workflow_dispatch
@@ -32,5 +32,5 @@ jobs:
       with:
         name: python-package-distributions
         path: dist/        
-    - name: Publish distribution 📦 to TestPyPI
+    - name: Publish distribution to TestPyPI
       run: uv publish --index testpypi
