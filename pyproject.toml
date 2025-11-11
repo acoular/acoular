@@ -101,10 +101,14 @@ repository = "https://github.com/acoular/acoular"
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-
 [tool.hatch.version]
 path = "acoular/version.py"
 
+[tool.hatch.build.targets.sdist]
+include = ["acoular"]
+
+[tool.hatch.build.targets.wheel]
+include = ["acoular"]
 
 [[tool.uv.index]]
 name = "testpypi"
