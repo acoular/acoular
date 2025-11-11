@@ -1,14 +1,17 @@
 name: Publish Python 🐍 distribution 📦 TestPyPI
 
 on: 
-  workflow_dispatch:
-    branches: [ master ]
+  workflow_dispatch
 
 jobs:
   build_and_publish_distribution:
     name: Build and publish distribution 📦
     runs-on: ubuntu-latest
-  
+    environment:
+      name: testpypi
+    permissions:
+      id-token: write
+      contents: read    
     steps:
     - name: Check out a copy of the repository
       uses: actions/checkout@v5
