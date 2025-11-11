@@ -1,4 +1,4 @@
-name: Linting and Formatting
+name: Link Checking (Cron Job)
 
 on:
   schedule:
