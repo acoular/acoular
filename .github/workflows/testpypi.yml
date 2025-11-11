@@ -15,8 +15,16 @@ jobs:
     - name: Set up uv
       uses: astral-sh/setup-uv@v7      
     - name: Build a binary wheel and a source tarball
-      run: uv build 
-    - name: Store the distribution packages
+      run: uv build
+    - name: Run smoke tests (wheel)
+      uses: ./.github/actions/smoke-tests
+      with:
+        command: uv run --isolated --no-project --with dist/*.whl
+    - name: Run smoke tests (sdist)
+      uses: ./.github/actions/smoke-tests
+      with:
+        command: uv run --isolated --no-project --with dist/*.tar.gz        
+    - name: Store the distribution packages 
       uses: actions/upload-artifact@v4
       with:
         name: python-package-distributions
