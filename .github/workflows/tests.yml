@@ -31,11 +31,11 @@ jobs:
         uses: ./.github/actions/setup-portaudio
         with:
           os: ${{ matrix.os }}
-      - name: Check import
-        run: uv run --frozen python -c "import acoular"
-      - name: Check demo
-        run: uv run --frozen --exact --no-dev python -m acoular.demo
-      - name: Run tests
+      - name: Run smoke tests
+        uses: ./.github/actions/smoke-tests
+        with:
+          command: uv run --frozen --no-dev --exact
+      - name: Run unit tests
         run: uv run --frozen python -m pytest
       - name: Run doctests
         run: uv run --frozen python -m pytest --doctest-modules acoular
