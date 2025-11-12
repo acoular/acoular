@@ -32,12 +32,13 @@ Next, we need to make an editable installation of Acoular with:
 
 An editable installation allows you to make changes to the source code and see the effects immediately without having to reinstall the package.
 
+The ``--group dev`` argument is responsible for installing the corresponding dependency group as defined in:
 
-The ``--group dev`` argument is responsible for installing the corresponding dependency group as defined in ``pyproject.toml``:
+.. dropdown:: ``pyproject.toml`` (click to expand)
 
-.. literalinclude:: /../../pyproject.toml
-    :start-at: [dependency-groups]
-    :end-before: [project.urls]
+  .. literalinclude:: /../../pyproject.toml
+      :start-at: [dependency-groups]
+      :end-before: [project.urls]
 
 If omitted, the dependencies have to be installed manually.
 

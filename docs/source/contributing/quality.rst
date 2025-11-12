@@ -31,9 +31,12 @@ In case there are any reported errors, you can either fix them manually or try t
 
 .. include:: ../commands/ruff-fix.rst
 
-The ``ruff`` configuration can be found in the ``.ruff.toml`` file:
+The ``ruff`` configuration can be found in:
 
-.. literalinclude:: /../../.ruff.toml
+.. dropdown::  ``.ruff.toml`` (click to expand)
+
+  .. literalinclude:: /../../.ruff.toml
+
 .. _Documentation Build:
 
 .. include:: build-docs.rst
