@@ -34,6 +34,7 @@ In case there are any reported errors, you can either fix them manually or try t
 The ``ruff`` configuration can be found in the ``.ruff.toml`` file:
 
 .. literalinclude:: /../../.ruff.toml
+.. _Documentation Build:
 
 .. include:: build-docs.rst
 

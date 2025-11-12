@@ -1,5 +1,3 @@
-.. _Documentation Build:
-
 Documentation Compilation
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
