@@ -9,7 +9,7 @@
             $ uv venv
 
         .. note::
-           ``uv`` will handle environment activation implicitly (the environment is a created at ``.venv``).
+           ``uv`` will handle environment activation implicitly (the environment is created at ``.venv``).
 
     .. tab-item:: ``venv``
         :sync: pip

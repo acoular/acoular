@@ -27,4 +27,4 @@
 
         .. code-block:: console
 
-            $  python -m acoular.demo
+            $ python -m acoular.demo
