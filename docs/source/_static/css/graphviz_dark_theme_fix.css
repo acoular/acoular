@@ -1,4 +1,0 @@
-html[data-theme="dark"] div.graphviz>object.graphviz {
-  filter: brightness(0.8) invert(0.82) contrast(1.2);
-  color-scheme: normal;
-}

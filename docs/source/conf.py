@@ -79,7 +79,7 @@ html_theme_options = {
     ],
     "pygments_light_style": "tango",
     "pygments_dark_style": "monokai",
-    "header_links_before_dropdown": 6,
+    "header_links_before_dropdown": 5,
     "use_edit_page_button": True,
 }
 html_sidebars = {
@@ -162,7 +162,7 @@ suppress_warnings = [
 
 # Custom CSS paths should either relative to html_static_path
 # or fully qualified paths (eg. https://...)
-html_css_files = ['css/sphinx_gallery.css', 'css/graphviz_dark_theme_fix.css']
+html_css_files = ['css/sphinx_gallery.css', 'css/custom_pydata_sphinx_theme.css']
 
 # sphinx_gallery.gen_gallery extension configuration
 sphinx_gallery_conf = {
