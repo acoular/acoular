@@ -19,8 +19,8 @@ jobs:
     steps:
       - name: Check out a copy of the repository
         uses: actions/checkout@v5
-      - name: Set up hatch
-        uses: ./.github/actions/setup-hatch
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
         with:
           python-version: ${{ matrix.python-version }}
       - name: Set up PortAudio
@@ -28,7 +28,7 @@ jobs:
         with:
           os: ${{ matrix.os }}
       - name: Run tests
-        run: hatch -v run +py=${{ matrix.python-version }} tests:reset_regtest
+        run: uv run python -m pytest -v --regtest-reset tests/regression
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
