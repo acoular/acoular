@@ -26,10 +26,6 @@ ignore = [
     "SLF001", # should be fixed with issue: #225
 ]
 
-# Allow fix for all enabled rules (when `--fix`) is provided.
-fixable = ["ALL"]
-unfixable = []
-
 [lint.flake8-import-conventions]
 banned-from  = ["numba", "numpy", "scipy.linalg"]
 [lint.flake8-import-conventions.aliases]
@@ -48,23 +44,8 @@ convention = "numpy"  # Accepts: "google", "numpy", or "pep257".
 
 [format]
 quote-style = "single"
-indent-style = "space"
-skip-magic-trailing-comma = false
-
-# Enable auto-formatting of code examples in docstrings. Markdown,
-# reStructuredText code/literal blocks and doctests are all supported.
-#
-# This is currently disabled by default, but it is planned for this
-# to be opt-out in the future.
 docstring-code-format = true
-
-# Set the line length limit used when formatting code snippets in
-# docstrings.
-#
-# This only has an effect when the `docstring-code-format` setting is
-# enabled.
-docstring-code-line-length = "dynamic"
-
+docstring-code-line-length = 120
 
 [lint.per-file-ignores]
 "!acoular/*" = ["D"]

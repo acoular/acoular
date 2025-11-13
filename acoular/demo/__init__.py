@@ -28,7 +28,7 @@ def _create_three_sources(mg, locs, h5savefile='', sfreq=51200, duration=1):
     n3 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=nsamples, seed=3, rms=0.5)
 
     noises = [n1, n2, n3]
-    ps = [ac.PointSource(signal=n, mics=mg, loc=loc) for n, loc in list(zip(noises, locs))]
+    ps = [ac.PointSource(signal=n, mics=mg, loc=loc) for n, loc in list(zip(noises, locs, strict=True))]
     pa = ac.Mixer(source=ps[0], sources=ps[1:])
 
     if h5savefile:
@@ -104,4 +104,4 @@ def run():
         ind = ((spl.T - spl.max() + 9).clip(0, 9)).astype(int)[::-1]
         print(78 * '-')
         print('|\n'.join([' '.join(['|'] + [grayscale[i] for i in row[2:-1]]) for row in ind]) + '|')
-        print(7 * '-', ''.join([f'{grayscale[i]}={int(spl.max())-9+i}dB ' for i in range(1, 10)]), 6 * '-')
+        print(7 * '-', ''.join([f'{grayscale[i]}={int(spl.max()) - 9 + i}dB ' for i in range(1, 10)]), 6 * '-')

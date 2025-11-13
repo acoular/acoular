@@ -437,7 +437,7 @@ class Grid(ABCHasStrictTraits):
                 pos_str = ' '.join(
                     [
                         '  <pos',
-                        f'Name="Point {i+1}"',
+                        f'Name="Point {i + 1}"',
                         f'x="{self.pos[0, i]}"',
                         f'y="{self.pos[1, i]}"',
                         f'z="{self.pos[2, i]}"',

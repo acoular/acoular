@@ -125,7 +125,9 @@ trs = [create_trajectory(*sp) for sp in source_pos]
 # The :attr:`~acoular.sources.MovingPointSource.conv_amp` parameter is
 # set to ``True`` to account for amplitude changes due to distance variations.
 
-mps = [ac.MovingPointSource(signal=sig, mics=mics, trajectory=tr, conv_amp=True) for sig, tr in zip(sigs, trs)]
+mps = [
+    ac.MovingPointSource(signal=sig, mics=mics, trajectory=tr, conv_amp=True) for sig, tr in zip(sigs, trs, strict=True)
+]
 
 # %%
 # Finally, the sources are mixed together using the :class:`~acoular.sources.SourceMixer` class.
@@ -145,7 +147,7 @@ def plot_maps(res, grid, figure_title):
     times = [(i * BLOCK_SIZE) / SFREQ for i in range(n)]
     res = ac.L_p(res)
     mx = res.max()
-    for ax, r, t in zip(axes, res, times):
+    for ax, r, t in zip(axes, res, times, strict=True):
         r0 = r.reshape(grid.shape).T
         im = ax.imshow(
             r0,
@@ -192,9 +194,6 @@ st_fixed = ac.SteeringVector(grid=rg_fixed, mics=mics)
 #
 # .. digraph:: beamforming_pipeline
 #    :align: center
-#
-#    graph [rankdir=LR];
-#    node [shape=box, style="rounded,filled", fillcolor="#f0f8ff"];
 #
 #    SM [label="SourceMixer"];
 #    FF [label="FiltFiltOctave"];
@@ -256,9 +255,6 @@ plot_maps(res_fixed, rg_fixed, figure_title='Beamforming maps with fixed focus')
 #
 # .. digraph:: beamforming_pipeline
 #    :align: center
-#
-#    graph [rankdir=LR];
-#    node [shape=box, style="rounded,filled", fillcolor="#f0f8ff"];
 #
 #    SM [label="SourceMixer"];
 #    FF [label="FiltFiltOctave"];

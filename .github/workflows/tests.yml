@@ -22,35 +22,37 @@ jobs:
         python-version: ['3.10','3.11','3.12', '3.13']
     steps:
       - name: Check out a copy of the repository
-        uses: actions/checkout@v4
-      - name: Set up hatch
-        uses: ./.github/actions/setup-hatch
+        uses: actions/checkout@v5
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
         with:
           python-version: ${{ matrix.python-version }}
       - name: Set up PortAudio
         uses: ./.github/actions/setup-portaudio
         with:
           os: ${{ matrix.os }}
-      - name: Check import
-        run: hatch -v run +py=${{ matrix.python-version }} tests:import
-      - name: Check demo
-        run: hatch -v run +py=${{ matrix.python-version }} tests:demo
-      - name: Run tests
-        run: hatch -v run +py=${{ matrix.python-version }} tests:test
+      - name: Run smoke tests
+        uses: ./.github/actions/smoke-tests
+        with:
+          command: uv run --frozen --no-dev --exact
+      - name: Run unit tests
+        run: uv run --frozen python -m pytest
       - name: Run doctests
-        run: hatch -v run +py=${{ matrix.python-version }} tests:doctest
+        run: uv run --frozen python -m pytest --doctest-modules acoular
 
   coverage:
     runs-on: ubuntu-latest
     steps:
       - name: Check out a copy of the repository
-        uses: actions/checkout@v4
-      - name: Set up hatch
-        uses: ./.github/actions/setup-hatch
+        uses: actions/checkout@v5
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
       - name: Set up PortAudio
         uses: ./.github/actions/setup-portaudio
       - name: Generate coverage report
-        run: hatch -v run +py=3.13 tests:coverage
+        run: |
+          uv run --frozen python -m pytest --cov=acoular
+          uv run --frozen python -m pytest --cov=acoular --cov-append --doctest-modules acoular
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
         with:

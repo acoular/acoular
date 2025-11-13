@@ -1,0 +1,15 @@
+name: 'Smoke Tests'
+description: 'Test Acoular import and demo'
+inputs:
+  command:
+    description: 'The uv command to invoke the smoke tests.'
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Test Import
+      run: ${{ inputs.command }} python -c "import acoular"
+      shell: bash
+    - name: Install graphviz (on MacOs)
+      run: ${{ inputs.command }} python -m acoular.demo
+      shell: bash
