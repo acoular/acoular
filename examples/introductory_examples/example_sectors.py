@@ -32,7 +32,6 @@ from acoular.tools.helpers import get_data_file
 # Also, we make sure we have the example data we need.
 #
 # If the calibration or measurement files aren't present, we will download them automatically.
-# This way, you can run the example out of the box!
 
 # Download example data if necessary
 time_data_file = get_data_file('example_data.h5')
