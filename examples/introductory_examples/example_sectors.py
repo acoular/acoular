@@ -29,9 +29,10 @@ from acoular.tools import barspectrum
 from acoular.tools.helpers import get_data_file
 
 # %%
-# Also, we make sure we have the example data we need.
+# Next, let's ensure we have the necessary example data available.
 #
-# If the calibration or measurement files aren't present, we will download them automatically.
+# The calibration and measurement files will be downloaded automatically
+# if they are not already present.
 
 # Download example data if necessary
 time_data_file = get_data_file('example_data.h5')
@@ -49,7 +50,32 @@ grid = ac.RectGrid(x_min=-0.6, x_max=0.0, y_min=-0.3, y_max=0.3, z=-0.68, increm
 env = ac.Environment(c=346.04)
 st = ac.SteeringVector(grid=grid, mics=mics, env=env)
 f = ac.PowerSpectra(source=calib, window='Hanning', overlap='50%', block_size=128)
-bb = ac.BeamformerBase(freq_data=f, steer=st)
+bb = ac.BeamformerCleansc(freq_data=f, steer=st)
+
+# %%
+# The microphone array captures the acoustic signature of an airfoil positioned in an open jet.
+# The resulting source map, computed via source mapping at 4 kHz, is displayed below.
+
+# Calculate the power map for 4 kHz
+pm = bb.synthetic(4000)
+spl_pm = ac.L_p(pm)
+
+# Display source mapping results for 4 kHz
+plt.imshow(spl_pm.T, origin='lower', extent=grid.extent, interpolation='bicubic')
+# Scatter the grid points
+plt.scatter(*grid.pos[0:2], c='lightgray', s=10, label='Grid Points')
+
+cbar = plt.colorbar()
+cbar.set_label('$L_p$ / dB')
+plt.xlabel('x / m')
+plt.ylabel('y / m')
+plt.title('Source map')
+plt.legend()
+plt.show()
+
+# %%
+# The trailing edge of an airfoil is often a region of particular acoustic interest.
+# To investigate this area more closely, we will utilize Acoular's sector classes.
 
 
 # %%
@@ -59,39 +85,29 @@ bb = ac.BeamformerBase(freq_data=f, steer=st)
 #
 # Let us start by defining a sector.
 #
-# One can think of a sector as a region in the sound map to which the analysis is constrained.
-#
+# With a sector, spatial integrations of the individual source contributions
+# of interest can be performed after calculating the full source map.
 # Here, we will create a rectangular sector that covers the trailing edge of the airfoil.
-# Oftentimes, this is where interesting noise sources reside in practice.
 
-sector = ac.RectSector(x_min=-0.3, x_max=-0.25, y_min=-0.05, y_max=0.05)
+sector = ac.RectSector(x_min=-0.25, x_max=-0.1, y_min=-0.2, y_max=0.2)
 
 # %%
 # To see how our sector and airfoil look together, we visulaize the airfoil's front and trailing
 # edges (as dashed lines), the sector (as a light blue rectangle), and the grid points (where the
 # sound field is calculated). This helps us see exactly what region we are integrating over later.
-#
-# Also we calculate the beamforming results for a frequency of 4000 Hz
-# to see why the airfoil's trailing edge is of such interest.
 
-# Calculate beamforming results for 4000 Hz
-map = bb.synthetic(4000)
-spl_map = ac.L_p(map)
-
-# Display beamforming results for 4000 Hz
-plt.imshow(spl_map.T, origin='lower', vmin=spl_map.max() - 10, extent=grid.extent, interpolation='bicubic')
+plt.imshow(spl_pm.T, origin='lower', extent=grid.extent, interpolation='bicubic')
+plt.scatter(*grid.pos[0:2], c='lightgray', s=10, label='Grid Points')
 # Plot airfoil's edges as dashed lines (we is they are at x = -0.33 and x = -0.29)
 plt.vlines([-0.33, -0.29], ymin=-0.3, ymax=0.3, linestyles='--', label='Airfoil edges')
 # Plot sector as a filled rectangle
 plt.fill_between([sector.x_min, sector.x_max], sector.y_min, sector.y_max, alpha=0.5, label='Sector')
-# Scatter the grid points.
-plt.scatter(*grid.pos[0:2], c='lightgray', s=10, label='Grid Points')
 
 cbar = plt.colorbar()
 cbar.set_label('$L_p$ / dB')
 plt.xlabel('x / m')
 plt.ylabel('y / m')
-plt.title('Airfoil, sector, grid, and beamforming map')
+plt.title('Airfoil, sector, grid, and source map')
 plt.legend()
 plt.show()
 
@@ -101,47 +117,43 @@ plt.show()
 # Grid Points of Interest
 # =======================
 #
-# Acoular uses sector classes to define regions of interest in the grid. Each sector
-# class provides a :meth:`~acoular.grids.Sector.contains` method that takes a
-# grid's :attr:`~acoular.grids.Grid.pos` attribute as parameter and checks which grid
-# points are inside the sector.
+# Acoular's sector classes define regions of interest on the grid. Each sector
+# provides a :meth:`~acoular.grids.Sector.contains` method that accepts a
+# grid's :attr:`~acoular.grids.Grid.pos` attribute and determines which grid
+# points fall within the sector.
 #
-# For `N` grids points the :meth:`~acoular.grids.Sector.contains` method returns a
-# boolean mask of length `N`. Grid points inside the sector are represented as ``True``.
+# For a grid with `N` points, the :meth:`~acoular.grids.Sector.contains` method returns a
+# boolean mask of length `N`, where ``True`` indicates points inside the sector.
 
 mask = sector.contains(grid.pos)
-print('x: {}, y: {}'.format(*grid.pos[:2, mask]))
+print('x: {}\ny: {}'.format(*grid.pos[:2, mask]))
 print(mask)
 
 # %%
-# We can see that the single grid point marked as ``True`` in the mask corresponds to the
-# ``(-0.3, 0.0)`` point in the x-y plane. From looking at the figure above and at the sector's
-# definition, we know that this grid point does not lie `inside` the sector but on its border.
-# To prevent this inclusion of the bordering points, we may change the sector's
+# We observe ten grid points marked as ``True`` in the mask: three points enclosed within
+# the sector and seven points located on its borders.
+# To exclude points on the border, we can set the sector's
 # :attr:`~acoular.grids.SingleSector.include_border` attribute to ``False``.
+#
+# Additionally, the tolerance for determining whether a grid point lies on the sector's border
+# can be adjusted via the :attr:`~acoular.grids.SingleSector.abs_tol` attribute.
 
 sector.include_border = False
 mask = sector.contains(grid.pos)
-print('x: {}, y: {}'.format(*grid.pos[:2, mask]))
+print('x: {}\ny: {}'.format(*grid.pos[:2, mask]))
 
 # %%
-# Note that the same point is still contained by the sector. This is because of the
-# :attr:`~acoular.grids.SingleSector.default_nearest` attribute, which – if no grid
-# points lie inside the sector – picks the grid point closest to the sector's center.
-# By setting it to ``False`` we can use only points that definitely lie `inside` the
-# sector – which are none in this case.
-
-sector.default_nearest = False
-mask = sector.contains(grid.pos)
-print('x: {}, y: {}'.format(*grid.pos[:2, mask]))
-
-# %%
-# Also, the tolerance for deciding whether a grid point lies on a sector's border can be
-# changed by varying the sector's :attr:`~acoular.grids.SingleSector.abs_tol` attribute.
+# Now only the three points strictly inside the sector remain: ``(-0.2, -0.1)``,
+# ``(-0.2, 0.0)``, and ``(-0.2, 0.1)``.
 #
-# By specifying which grid points lie inside the sector, the subset of points which are integrated
-# over with the beamformer's :meth:`~acoular.fbeamform.BeamformerBase.integrate` method and
-# Acoular's :func:`~acoular.fbeamform.integrate` function is defined.
+# For sectors that contain no grid points (neither inside nor on the borders), the
+# :attr:`~acoular.grids.SingleSector.default_nearest` attribute can be used. When set to ``True``,
+# as it is by default, and if the sector contains no grid points, it selects the grid point closest
+# to the sector's center. When set to ``False``, no points will be selected.
+#
+# The grid points identified by the sector determine which points are integrated over using
+# the beamformer's :meth:`~acoular.fbeamform.BeamformerBase.integrate` method or
+# Acoular's :func:`~acoular.fbeamform.integrate` function.
 
 # %%
 # =====================
@@ -153,25 +165,25 @@ print('x: {}, y: {}'.format(*grid.pos[:2, mask]))
 # the beamformer's :meth:`~acoular.fbeamform.BeamformerBase.integrate` method or Acoular's
 # :func:`~acoular.fbeamform.L_p` function to get the sector's SPL.
 #
-# Right now, the sector does not contain any grid points and therefore the SPL will be zero for
-# all frequencies. To reinsert the ``(-0.3, 0.0)`` point into the sector and get beamforming
-# results, we need to change either the :attr:`~acoular.grids.SingleSector.default_nearest`
-# attribute or the :attr:`~acoular.grids.SingleSector.include_border` attribute back to ``True``.
+# Calculation the result for all frequencies can be computationally expensive and highly
+# inefficient, especially for large datasets. Instead of using all FFT frequencies provided by the
+# :class:`~acoular.spectra.PowerSpectra` object, we can limit the frequency range to focus on a
+# specific band of interest.
 #
-# We look at the spectrum of the SPL over the power spectrum's FFT frequencies.
+# This can be achieved either by setting the :attr:`~acoular.spectra.PowerSpectra.ind_low` and
+# :attr:`~acoular.spectra.PowerSpectra.ind_high` attributes, or by passing a frequency range
+# directly to the :meth:`~acoular.fbeamform.BeamformerBase.integrate` method or
+# :func:`~acoular.fbeamform.integrate` function. Here, we will use the latter approach to
+# integrate over the frequency range from 4 kHz to 10 kHz.
 
-sector.default_nearest = True
-
-freqs = f.fftfreq()
-bf_sector = bb.integrate(sector)
+freqs, bf_sector = bb.integrate(sector, frange=(4000, 10000))
 spl_sector = ac.L_p(bf_sector)
 spl_sector = np.where(spl_sector > 0, spl_sector, 0)  # Keep positive entries only
 
 plt.figure(figsize=(8, 5))
+plt.semilogx(freqs, spl_sector)
 
-plt.semilogx(freqs / 1000, spl_sector)
-
-plt.xlabel('Frequency / kHz')
+plt.xlabel('Frequency / Hz')
 plt.ylabel('$L_p$ / dB')
 plt.title('Integrated spectrum over sector')
 plt.grid()
@@ -188,14 +200,12 @@ plt.show()
 
 f_borders, bars, f_center = barspectrum(bf_sector, freqs, 3, bar=True)
 spl_bars = ac.L_p(bars)
-spl_bars = np.where(spl_bars > 0, spl_bars, 0)
 
 plt.figure(figsize=(8, 5))
-
-plt.fill_between(f_borders / 1000, spl_bars)
+plt.fill_between(f_borders, spl_bars)
 
 plt.xscale('log')
-plt.xlabel('Frequency / kHz')
+plt.xlabel('Frequency / Hz')
 plt.ylabel('$L_p$ / dB')
 plt.title('Integrated spectrum over sector (third octave)')
 plt.grid()
