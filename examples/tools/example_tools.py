@@ -10,6 +10,8 @@ A noise source emitting white noise is simulated. Its spectrum at a single
 microphone is plotted by using functions from acoular.tools.
 """
 
+from pathlib import Path
+
 import acoular as ac
 import numpy as np
 from acoular.tools import barspectrum
@@ -40,6 +42,8 @@ band = 3  # octave: 1 ;   1/3-octave: 3 (for plotting)
 # create figure with barspectra
 import matplotlib.pyplot as plt
 
+
+plt.style.use('acoular.plots')
 plt.figure(figsize=(20, 6))
 plt.title('Powerspectrum')
 plt.plot(f_borders, ac.L_p(p), label='bar=True')

@@ -8,6 +8,8 @@ Demonstrates how to calculate the blockwise FFT and spectrogram of the signal.
 # %%
 # Imports
 
+from pathlib import Path
+
 import acoular as ac
 import numpy as np
 
@@ -76,6 +78,8 @@ print('reconstructed signal energy in time domain', np.round(np.sum(time_block_r
 
 import matplotlib.pyplot as plt
 
+
+plt.style.use('acoular.plots')
 fft.scaling = 'amplitude'
 spectrogram = ac.tools.return_result(fft)
 
