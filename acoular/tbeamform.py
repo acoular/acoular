@@ -83,9 +83,9 @@ class BeamformerTime(TimeOut):
     #: Data source; :class:`~acoular.base.SamplesGenerator` or derived object.
     source = Instance(SamplesGenerator)
 
-    # Instance of :class:`~acoular.fbeamform.SteeringVector` or its derived classes
-    # that contains information about the steering vector. This is a private trait.
-    # Do not set this directly, use `steer` trait instead.
+    #: Instance of :class:`~acoular.fbeamform.SteeringVector` or its derived classes
+    #: that contains information about the steering vector. This is a private trait.
+    #: Do not set this directly, use :attr:`steer` trait instead.
     steer = Instance(SteeringVector, args=())
 
     #: Number of channels in output (=number of grid points).
@@ -95,7 +95,7 @@ class BeamformerTime(TimeOut):
     weights = Map(possible_weights, default_value='none')
     # (from timedomain.possible_weights)
 
-    # internal identifier
+    #: A unique identifier for the beamformer, based on its properties. (read-only)
     digest = Property(
         depends_on=['steer.digest', 'source.digest', 'weights'],
     )
@@ -233,7 +233,7 @@ class BeamformerTimeSq(BeamformerTime):
     #: Boolean flag, if 'True' (default), the main diagonal is removed before beamforming.
     r_diag = Bool(True)
 
-    # internal identifier
+    #: A unique identifier for the beamformer, based on its properties. (read-only)
     digest = Property(
         depends_on=['steer.digest', 'source.digest', 'r_diag', 'weights'],
     )
@@ -286,7 +286,7 @@ class BeamformerTimeTraj(BeamformerTime):
     #: Floating point and integer precision
     precision = Enum(64, 32)
 
-    # internal identifier
+    #: A unique identifier for the beamformer, based on its properties. (read-only)
     digest = Property(
         depends_on=[
             'steer.digest',
@@ -520,7 +520,7 @@ class BeamformerTimeSqTraj(BeamformerTimeSq, BeamformerTimeTraj):
     removal for a grid moving along a trajectory.
     """
 
-    # internal identifier
+    #: A unique identifier for the beamformer, based on its properties. (read-only)
     digest = Property(
         depends_on=[
             'steer.digest',
@@ -580,7 +580,7 @@ class BeamformerCleant(BeamformerTime):
     #: max number of iterations
     n_iter = Int(100)
 
-    # internal identifier
+    #: A unique identifier for the beamformer, based on its properties. (read-only)
     digest = Property(
         depends_on=['steer.digest', 'source.digest', 'weights', 'damp', 'n_iter'],
     )
@@ -625,7 +625,7 @@ class BeamformerCleantSq(BeamformerCleant):
     #: Boolean flag, if 'True' (default), the main diagonal is removed before beamforming.
     r_diag = Bool(True)
 
-    # internal identifier
+    #: A unique identifier for the beamformer, based on its properties. (read-only)
     digest = Property(
         depends_on=['steer.digest', 'source.digest', 'weights', 'damp', 'n_iter', 'r_diag'],
     )
@@ -670,7 +670,7 @@ class BeamformerCleantTraj(BeamformerCleant, BeamformerTimeTraj):
     #: Floating point and integer precision
     precision = Enum(32, 64)
 
-    # internal identifier
+    #: A unique identifier for the beamformer, based on its properties. (read-only)
     digest = Property(
         depends_on=[
             'steer.digest',
@@ -725,7 +725,7 @@ class BeamformerCleantSqTraj(BeamformerCleantTraj, BeamformerTimeSq):
     #: Boolean flag, if 'True' (default), the main diagonal is removed before beamforming.
     r_diag = Bool(True)
 
-    # internal identifier
+    #: A unique identifier for the beamformer, based on its properties. (read-only)
     digest = Property(
         depends_on=[
             'steer.digest',
@@ -788,7 +788,7 @@ class IntegratorSectorTime(TimeOut):
     #: Number of channels in output (= number of sectors).
     num_channels = Property(depends_on=['sectors'])
 
-    # internal identifier
+    #: A unique identifier for the integrator, based on its properties. (read-only)
     digest = Property(
         depends_on=['sectors', 'clip', 'grid.digest', 'source.digest'],
     )
