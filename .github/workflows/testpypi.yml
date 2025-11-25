@@ -1,4 +1,4 @@
-name: TestPyPI 👩🏻‍🔬: Build 🛠️ & Publish 📦
+name: TestPyPI 👩🏻‍🔬 Build 🛠️ & Publish 📦
 
 on: 
   workflow_dispatch
