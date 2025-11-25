@@ -57,7 +57,7 @@ def const_power_weight(bf):
     array of floats
         The weight factors.
     """
-    r = bf.steer.env._r(np.zeros((3, 1)), bf.steer.mics.pos)  # distances to center
+    r = bf.steer.env.apparent_r(np.zeros((3, 1)), bf.steer.mics.pos)  # distances to center
     # round the relative distances to one decimal place
     r = (r / r.max()).round(decimals=1)
     ru, ind = np.unique(r, return_inverse=True)
@@ -361,7 +361,7 @@ class BeamformerTimeTraj(BeamformerTime):
         """
         if np.isscalar(self.steer.ref) and self.steer.ref > 0:
             return self.steer.ref  # full((self.steer.grid.size,), self.steer.ref)
-        return self.steer.env._r(tpos)
+        return self.steer.env.apparent_r(tpos)
 
     def result(self, num=2048):
         """
@@ -417,7 +417,7 @@ class BeamformerTimeTraj(BeamformerTime):
         while flag:
             for i in range(num):
                 tpos = next(movgpos).astype(fdtype)
-                rm = self.steer.env._r(tpos, mpos)  # .astype(fdtype)
+                rm = self.steer.env.apparent_r(tpos, mpos)  # .astype(fdtype)
                 blockr0[i, :] = self.get_r0(tpos)
                 blockrm[i, :, :] = rm
                 if self.conv_amp:
