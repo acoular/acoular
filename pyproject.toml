@@ -29,10 +29,10 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
-    "numpy",
     "numba",
-    "scipy >= 1.1.0, != 1.16.*", # scipy 1.16 has a bug in signal that causes issues with Acoular
+    "numpy",
     "scikit-learn",
+    "scipy >= 1.1.0, != 1.16.*", # scipy 1.16 has a bug in signal that causes issues with Acoular
     "tables",
     "traits >= 6.0",
 ]
@@ -52,6 +52,7 @@ full = [
     "sounddevice",
 ]
 
+[dependency-groups]
 docs = [
     "ipython",
     "graphviz",
@@ -62,12 +63,15 @@ docs = [
     "sounddevice",
     "sphinx",
     "sphinx-copybutton",
-    "sphinx_gallery",
+    "sphinx-design",
+    "sphinx-gallery",
     "sphinxcontrib-bibtex",
     "setuptools", # unfortunately still needed for sphinxcontrib-bibtex (https://github.com/mcmtroffaes/sphinxcontrib-bibtex/issues/345)
 ]
 
-tests = [
+lint = ["ruff==0.14.2"]
+
+test = [
     "h5py",
     "pylops",
     "pytest",
@@ -83,9 +87,9 @@ tests = [
 ]
 
 dev = [
-    "acoular[docs,full,tests]",
-    "hatch",
-    "ruff==0.8.1", # remember to change version pin in docs/source/contributing/install.rst
+    {include-group = "docs"},
+    {include-group = "lint"},
+    {include-group = "test"},
 ]
 
 [project.urls]
@@ -100,55 +104,28 @@ build-backend = "hatchling.build"
 [tool.hatch.version]
 path = "acoular/version.py"
 
-[tool.hatch.envs.hatch-static-analysis]
-dependencies = ["ruff==0.8.1"]
-config-path = [".ruff.toml"]
-
-[tool.hatch.envs.docs]
-python = "3.13"
-dependencies = [
-    "acoular[docs]"
-]
-
-[tool.hatch.envs.docs.scripts]
-build = ["cd docs && make html"]
-
-[tool.hatch.envs.tests]
-dependencies = [
-    "acoular[tests]"
-]
-
-[[tool.hatch.envs.tests.matrix]]
-python = ["3.10", "3.11", "3.12", "3.13"]
-
-[tool.hatch.envs.tests.scripts]
-import = ["python -c \"import acoular\""]
-test = ["python -m pytest -v --durations=10 tests"]
-reset_regtest = ["python -m pytest -v --regtest-reset tests/regression"]
-profile = ["test --profile-svg"] 
-demo = ["python -m acoular.demo"]
-coverage = [
-    "test --cov=acoular --cov-report html --cov-report term-missing --cov-report markdown-append:$GITHUB_STEP_SUMMARY",
-    "python -m pytest -v --cov=acoular --cov-report html --cov-report term-missing --cov-append --doctest-modules acoular",
-    ]
-doctest = ["python -m pytest --doctest-modules acoular"]
-
-[tool.hatch.envs.tests.overrides]
-platform.linux.pre-install-commands = ['cat /proc/cpuinfo']
-platform.macos.pre-install-commands = ['sysctl -a machdep.cpu']
-platform.windows.pre-install-commands = ['systeminfo']
-
-
 [tool.hatch.build.targets.sdist]
-include = [
-  "/acoular",
-]
+include = ["acoular"]
 
 [tool.hatch.build.targets.wheel]
-packages = ["acoular"]
+include = ["acoular"]
+
+[[tool.uv.index]]
+name = "pypi"
+url = "https://pypi.org/simple/"
+publish-url = "https://pypi.org/legacy/"
+explicit = true
+
+[[tool.uv.index]]
+name = "testpypi"
+url = "https://test.pypi.org/simple/"
+publish-url = "https://test.pypi.org/legacy/"
+explicit = true
 
 
 [tool.pytest.ini_options]
+testpaths = "tests"
+addopts = "-v --durations=10 --cov-report=html --cov-report=term-missing --cov-report markdown-append:$GITHUB_STEP_SUMMARY"
 filterwarnings = [
     "error", # treat warnings as errors
     "ignore::pluggy.PluggyTeardownRaisedWarning", # raised internally by pytest-regtest
@@ -162,7 +139,7 @@ filterwarnings = [
     "ignore:Closing remaining open file*:tables.exceptions.UnclosedFileWarning",
 ]
 env = [
-    "OPENBLAS_NUM_THREADS=1"
+    "OPENBLAS_NUM_THREADS=1",
 ]
 
 [tool.coverage.run]

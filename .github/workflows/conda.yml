@@ -7,7 +7,7 @@ on:
     branches: [ master ]
   workflow_dispatch:
     branches: [ "*" ]
-    
+
 jobs:
   conda_build_install_upload:
     name: Test conda deployment of package with the latest supported Python
@@ -21,11 +21,11 @@ jobs:
           conda run -n base anaconda login --help
       - name: Check out a copy of the repository
         uses: actions/checkout@v5
-      - name: Set up hatch
-        uses: ./.github/actions/setup-hatch
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
       - name: Build package
         run: |
-          export VERSION=$(hatch version)
+          export VERSION=$(uvx hatchling version)  # use hatch-vcs here until uv supports dynamic versions. track: https://github.com/astral-sh/uv/issues/14137
           conda run -n base conda build --channel conda-forge --no-anaconda-upload --no-copy-test-source-files recipe.local --output-folder ./conda_package
       - name: Upload conda package artifact
         uses: actions/upload-artifact@v4

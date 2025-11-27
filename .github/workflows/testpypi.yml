@@ -1,25 +1,36 @@
-name: Publish Python 🐍 distribution 📦 TestPyPI
+name: TestPyPI 👩🏻‍🔬 Build 🛠️ & Publish 📦
 
 on: 
-  workflow_dispatch:
-    branches: [ master ]
+  workflow_dispatch
 
 jobs:
   build_and_publish_distribution:
     name: Build and publish distribution 📦
     runs-on: ubuntu-latest
-  
+    environment:
+      name: testpypi
+    permissions:
+      id-token: write
+      contents: read    
     steps:
     - name: Check out a copy of the repository
-      uses: actions/checkout@v4
-    - name: Set up hatch
-      uses: ./.github/actions/setup-hatch
+      uses: actions/checkout@v5
+    - name: Set up uv
+      uses: astral-sh/setup-uv@v7      
     - name: Build a binary wheel and a source tarball
-      run: hatch build 
-    - name: Store the distribution packages
+      run: uv build
+    - name: Run smoke tests (wheel)
+      uses: ./.github/actions/smoke-tests
+      with:
+        command: uv run --isolated --no-project --with dist/*.whl
+    - name: Run smoke tests (sdist)
+      uses: ./.github/actions/smoke-tests
+      with:
+        command: uv run --isolated --no-project --with dist/*.tar.gz        
+    - name: Store the distribution packages 
       uses: actions/upload-artifact@v4
       with:
         name: python-package-distributions
         path: dist/        
-    - name: Publish distribution 📦 to TestPyPI
-      run: hatch publish -r test -u __token__ -a ${{ secrets.HATCH_PUBLISH_TESTPYPI_API_TOKEN }}
+    - name: Publish distribution to TestPyPI
+      run: uv publish --index testpypi

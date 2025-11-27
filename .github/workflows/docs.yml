@@ -25,9 +25,11 @@ jobs:
         python-version: ['3.13']
     steps:
       - name: Check out a copy of the repository
-        uses: actions/checkout@v4
-      - name: Set up hatch
-        uses: ./.github/actions/setup-hatch
+        uses: actions/checkout@v5
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          python-version: ${{ matrix.python-version }}
       - name: Set up PortAudio
         uses: ./.github/actions/setup-portaudio
         with:
@@ -37,7 +39,7 @@ jobs:
         with:
           os: ${{ matrix.os }}
       - name: Run sphinx
-        run: hatch -v run docs:build
+        run: uv run make -C docs html
       - name: Upload artifacts
         if: ${{ matrix.os == 'ubuntu-latest' }}
         uses: actions/upload-artifact@v4
