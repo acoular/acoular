@@ -38,14 +38,15 @@ from acoular.tools.helpers import get_data_file
 time_data_file = get_data_file('example_data.h5')
 calib_file = get_data_file('example_calib.xml')
 
+invalid = [1, 7]  # Invalid channels for this dataset
 ts = ac.MaskedTimeSamples(
     file=time_data_file,
-    invalid_channels=[1, 7],
+    invalid_channels=invalid,
     start=0,
     stop=16000,
 )
-calib = ac.Calib(source=ts, file=calib_file, invalid_channels=[1, 7])
-mics = ac.MicGeom(file=Path(ac.__file__).parent / 'xml' / 'array_56.xml', invalid_channels=[1, 7])
+calib = ac.Calib(source=ts, file=calib_file, invalid_channels=invalid)
+mics = ac.MicGeom(file=Path(ac.__file__).parent / 'xml' / 'array_56.xml', invalid_channels=invalid)
 grid = ac.RectGrid(x_min=-0.6, x_max=0.0, y_min=-0.3, y_max=0.3, z=-0.68, increment=0.1)
 env = ac.Environment(c=346.04)
 st = ac.SteeringVector(grid=grid, mics=mics, env=env)
@@ -57,13 +58,13 @@ bb = ac.BeamformerCleansc(freq_data=f, steer=st)
 # The resulting source map, computed via source mapping at 4 kHz, is displayed below.
 
 # Calculate the power map for 4 kHz
-pm = bb.synthetic(4000)
+pm = bb.synthetic(4000, 3)
 spl_pm = ac.L_p(pm)
+mx = spl_pm.max()
 
 # Display source mapping results for 4 kHz
-plt.imshow(spl_pm.T, origin='lower', extent=grid.extent, interpolation='bicubic')
-# Scatter the grid points
 plt.scatter(*grid.pos[0:2], c='lightgray', s=10, label='Grid Points')
+plt.imshow(spl_pm.T, vmax=mx, vmin=mx-40, origin='lower', extent=grid.extent, interpolation='bicubic')
 
 cbar = plt.colorbar()
 cbar.set_label('$L_p$ / dB')
@@ -96,12 +97,12 @@ sector = ac.RectSector(x_min=-0.25, x_max=-0.1, y_min=-0.2, y_max=0.2)
 # edges (as dashed lines), the sector (as a light blue rectangle), and the grid points (where the
 # sound field is calculated). This helps us see exactly what region we are integrating over later.
 
-plt.imshow(spl_pm.T, origin='lower', extent=grid.extent, interpolation='bicubic')
 plt.scatter(*grid.pos[0:2], c='lightgray', s=10, label='Grid Points')
-# Plot airfoil's edges as dashed lines (we is they are at x = -0.33 and x = -0.29)
-plt.vlines([-0.33, -0.29], ymin=-0.3, ymax=0.3, linestyles='--', label='Airfoil edges')
+# Plot airfoil's edges as dashed lines (we is they are at x = -0.3 and x = -0.25)
+plt.vlines([-0.3, -0.25], ymin=-0.3, ymax=0.3, linestyles='--', label='Airfoil edges')
 # Plot sector as a filled rectangle
 plt.fill_between([sector.x_min, sector.x_max], sector.y_min, sector.y_max, alpha=0.5, label='Sector')
+plt.imshow(spl_pm.T, vmax=mx, vmin=mx-40, origin='lower', extent=grid.extent, interpolation='bicubic')
 
 cbar = plt.colorbar()
 cbar.set_label('$L_p$ / dB')
