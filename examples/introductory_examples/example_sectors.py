@@ -58,13 +58,12 @@ bb = ac.BeamformerCleansc(freq_data=f, steer=st)
 # The resulting source map, computed via source mapping at 4 kHz, is displayed below.
 
 # Calculate the power map for 4 kHz
-pm = bb.synthetic(4000, 3)
+pm = bb.synthetic(4000)
 spl_pm = ac.L_p(pm)
-mx = spl_pm.max()
 
 # Display source mapping results for 4 kHz
 plt.scatter(*grid.pos[0:2], c='lightgray', s=10, label='Grid Points')
-plt.imshow(spl_pm.T, vmax=mx, vmin=mx - 40, origin='lower', extent=grid.extent, interpolation='bicubic')
+plt.imshow(spl_pm.T, vmin=0, origin='lower', extent=grid.extent, interpolation='bicubic')
 
 cbar = plt.colorbar()
 cbar.set_label('$L_p$ / dB')
@@ -90,7 +89,7 @@ plt.show()
 # of interest can be performed after calculating the full source map.
 # Here, we will create a rectangular sector that covers the trailing edge of the airfoil.
 
-sector = ac.RectSector(x_min=-0.25, x_max=-0.1, y_min=-0.2, y_max=0.2)
+sector = ac.RectSector(x_min=-0.27, x_max=-0.1, y_min=-0.2, y_max=0.2)
 
 # %%
 # To see how our sector and airfoil look together, we visulaize the airfoil's front and trailing
@@ -99,10 +98,10 @@ sector = ac.RectSector(x_min=-0.25, x_max=-0.1, y_min=-0.2, y_max=0.2)
 
 plt.scatter(*grid.pos[0:2], c='lightgray', s=10, label='Grid Points')
 # Plot airfoil's edges as dashed lines (we is they are at x = -0.3 and x = -0.25)
-plt.vlines([-0.3, -0.25], ymin=-0.3, ymax=0.3, linestyles='--', label='Airfoil edges')
+plt.vlines([-0.33, -0.27], ymin=-0.3, ymax=0.3, linestyles='--', label='Airfoil edges')
 # Plot sector as a filled rectangle
 plt.fill_between([sector.x_min, sector.x_max], sector.y_min, sector.y_max, alpha=0.5, label='Sector')
-plt.imshow(spl_pm.T, vmax=mx, vmin=mx - 40, origin='lower', extent=grid.extent, interpolation='bicubic')
+plt.imshow(spl_pm.T, vmin=0, origin='lower', extent=grid.extent, interpolation='bicubic')
 
 cbar = plt.colorbar()
 cbar.set_label('$L_p$ / dB')
