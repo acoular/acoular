@@ -3,11 +3,20 @@ What's new
 
 Upcoming Release
 ------------------------
+    **New features**
+        * adds :attr:`~acoular.tprocess.TimeConvolve.extend_signal` property to control the result length
+
     **Documentation**
-        * remove `desc=...` descriptions in trait documentations, reducing clutter in the API reference
+        * remove ``desc=...`` descriptions in trait documentations, reducing clutter in the API reference
+        * reworks *Beamforming with moving focus* example
+        * updated and improved installation instructions, now also for ``uv`` and ``mamba``
+        * new and revised contributor's documentation
 
     **Internal**
         * Restructured the :py:mod:`acoular.demo` module to allow an easier execution of the Acoular demo.
+        * use ``uv`` for faster CI
+        * revised CI workflow for tests and package build & publishing
+        * use strict tuple unpacking in ``zip``  
 
     **Bugfixes**
         * fix a typo in :class:`~acoular.tprocess.SpatialInterpolator` that lead to a property being incorrectly accessed
@@ -23,9 +32,9 @@ Upcoming Release
 
     **Internal**
         * refactored import statements and input aliases
-        * removed duplicate code in `MovingPointSource`-derived classes
-        * migrate from traits `on_trait_change` to `observe`
-        * fixes bug in :class:`~acoular.sources.PointSource` that could cause a silent crash when the `start` attribute was set to a nonzero value
+        * removed duplicate code in ``MovingPointSource``-derived classes
+        * migrate from traits ``on_trait_change`` to ``observe``
+        * fixes bug in :class:`~acoular.sources.PointSource` that could cause a silent crash when the ``start`` attribute was set to a nonzero value
 
     **Bugfixes**
         * fixes bug in :class:`~acoular.tprocess.FilterBank`'s :meth:`~acoular.tprocess.FilterBank.result` method that failed if the last block in the generator is not of the the specified block size
@@ -39,7 +48,7 @@ Upcoming Release
     **New features**
         * add :meth:`~acoular.grids.Grid`.export_gpos` to :class:`~acoular.grids.Grid`
         * deprecates :meth:`~acoular.grids.RectGrid.extend` method in favour of :attr:`~acoular.grids.RectGrid.extent` property
-        * reworked `WriteWAV` class that now also supports `uint8` and `int32` encoding, adds a `max_val` attribute for normalization purposes, and avoids unnecessary double calculations
+        * reworked ``WriteWAV`` class that now also supports ``uint8`` and ``int32`` encoding, adds a ``max_val`` attribute for normalization purposes, and avoids unnecessary double calculations
 
     **Documentation**
         * generalizes data import in the airfoil examples using the :func:`~acoular.tools.helpers.get_data_file` helper function
