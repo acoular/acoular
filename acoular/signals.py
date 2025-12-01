@@ -243,7 +243,7 @@ class WNoiseGenerator(NoiseGenerator):
     array([False, False, False])
     """
 
-    # internal identifier
+    #: A unique identifier for the generator, based on its properties. (read-only)
     digest = Property(depends_on=['rms', 'seed', 'sample_freq', 'num_samples'])
 
     @cached_property
