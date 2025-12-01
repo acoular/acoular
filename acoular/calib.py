@@ -97,7 +97,7 @@ class Calib(InOut):
     #: Channel mask to serve as an index for all valid channels, is set automatically.
     channels = Property(depends_on=['invalid_channels', 'num_mics'])
 
-    # Internal identifier
+    #: A unique identifier for the object, based on its properties. (read-only)
     digest = Property(depends_on=['source.digest', 'data'])
 
     @observe('data')

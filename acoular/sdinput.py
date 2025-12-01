@@ -64,7 +64,7 @@ class SoundDeviceSamplesGenerator(SamplesGenerator):
     #: The sounddevice InputStream object for inspection
     stream = Any
 
-    # internal identifier
+    #: A unique identifier for the generator, based on its properties. (read-only)
     digest = Property(depends_on=['device', 'num_channels', 'num_samples'])
 
     @cached_property

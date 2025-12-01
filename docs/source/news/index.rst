@@ -11,6 +11,8 @@ Upcoming Release
         * reworks *Beamforming with moving focus* example
         * updated and improved installation instructions, now also for ``uv`` and ``mamba``
         * new and revised contributor's documentation
+        * fixes documentation of the ``steer`` traits in the :class:`~acoular.fbeamform.BeamformerBase`, :class:`~acoular.fbeamform.PointSpreadFunction`, and :class:`~acoular.tbeamform.BeamformerTime` classes
+        * standardizes documentation of digest properties
 
     **Internal**
         * Restructured the :py:mod:`acoular.demo` module to allow an easier execution of the Acoular demo.
