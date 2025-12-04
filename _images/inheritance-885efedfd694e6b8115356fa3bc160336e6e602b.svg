@@ -1,0 +1,59 @@
+<ns0:svg xmlns:ns0="http://www.w3.org/2000/svg" xmlns:ns1="http://www.w3.org/1999/xlink" width="188pt" height="101pt" viewBox="0.00 0.00 188.00 101.00">
+<ns0:g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 97)">
+<ns0:title>inheritance95279682de</ns0:title>
+
+<ns0:g id="node1" class="node">
+<ns0:title>FlowField</ns0:title>
+<ns0:g id="a_node1"><ns0:a ns1:href="../api_ref/generated/acoular.environments.html#acoular.environments.FlowField" ns1:title="An abstract base class for a spatial flow field." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="63,-56 0,-56 0,-37 63,-37 63,-56" />
+<ns0:text text-anchor="middle" x="31.5" y="-44" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">FlowField</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node2" class="node">
+<ns0:title>OpenJet</ns0:title>
+<ns0:g id="a_node2"><ns0:a ns1:href="../api_ref/generated/acoular.environments.html#acoular.environments.OpenJet" ns1:title="Analytical approximation of the flow field of an open jet." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="167,-93 112,-93 112,-74 167,-74 167,-93" />
+<ns0:text text-anchor="middle" x="139.5" y="-81" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">OpenJet</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge1" class="edge">
+<ns0:title>FlowField-&gt;OpenJet</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M59.8,-56.03C74.13,-61.03 91.76,-67.19 106.71,-72.4" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="106.36,-74.14 111.66,-74.13 107.52,-70.83 106.36,-74.14" />
+</ns0:g>
+
+<ns0:g id="node3" class="node">
+<ns0:title>RotatingFlow</ns0:title>
+<ns0:g id="a_node3"><ns0:a ns1:href="../api_ref/generated/acoular.environments.html#acoular.environments.RotatingFlow" ns1:title="Analytical approximation of a rotating flow field with velocity component in z-direction." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="180,-56 99,-56 99,-37 180,-37 180,-56" />
+<ns0:text text-anchor="middle" x="139.5" y="-44" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">RotatingFlow</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge2" class="edge">
+<ns0:title>FlowField-&gt;RotatingFlow</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M63.16,-46.5C72.72,-46.5 83.47,-46.5 93.79,-46.5" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="93.82,-48.25 98.82,-46.5 93.82,-44.75 93.82,-48.25" />
+</ns0:g>
+
+<ns0:g id="node4" class="node">
+<ns0:title>SlotJet</ns0:title>
+<ns0:g id="a_node4"><ns0:a ns1:href="../api_ref/generated/acoular.environments.html#acoular.environments.SlotJet" ns1:title="Analytical approximation of the flow field of a slot jet." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="166.5,-19 112.5,-19 112.5,0 166.5,0 166.5,-19" />
+<ns0:text text-anchor="middle" x="139.5" y="-7" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">SlotJet</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge3" class="edge">
+<ns0:title>FlowField-&gt;SlotJet</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M59.8,-36.97C74.35,-31.89 92.31,-25.62 107.39,-20.36" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="108.25,-21.91 112.39,-18.61 107.09,-18.61 108.25,-21.91" />
+</ns0:g>
+</ns0:g>
+</ns0:svg>
