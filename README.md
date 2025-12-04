@@ -10,6 +10,8 @@ Acoular is a Python module for acoustic beamforming that is distributed under th
 
 It is aimed at (but not limited to) applications in acoustic testing. Multichannel data recorded by microphone arrays can be processed and analyzed to generate mappings of sound source distributions. The maps (acoustic photographs) can then be used to locate sources of interest and to characterize them using their spectra. 
 
+👁️📢 Please consider taking the [**Acoular User Survey**](https://www.soscisurvey.de/acoularsurvey). It only takes 2 minutes.
+
 - **Website:** https://acoular.org
 - **Blog:** https://blog.acoular.org
 - **Installation:** https://acoular.org/install
