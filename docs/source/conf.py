@@ -58,6 +58,7 @@ html_context = {
     "doc_path": "docs/source",
 }
 html_theme_options = {
+    "announcement": "👁️📢 Please consider taking the <a href='https://www.soscisurvey.de/acoularsurvey'>Acoular User Survey</a>. ⏱️ It's only 2 minutes! 三三ᕕ( ᐛ )ᕗ",
     "logo": {
         "alt_text": "Acoular - Home",
         "text": "Acoular",
