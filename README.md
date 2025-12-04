@@ -6,35 +6,45 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/3690794.svg)](https://zenodo.org/doi/10.5281/zenodo.3690794)
 
 # Acoular
-Acoular is a Python module for acoustic beamforming that is distributed under the new BSD license. 
+Acoular is a Python module for acoustic beamforming that is distributed under the [BSD 3-clause license](LICENSE). 
 
-It is aimed at applications in acoustic testing. Multichannel data recorded by a microphone array can be processed and analyzed in order to generate mappings of sound source distributions. The maps (acoustic photographs) can then be used to locate sources of interest and to characterize them using their spectra. 
+It is aimed at (but not limited to) applications in acoustic testing. Multichannel data recorded by microphone arrays can be processed and analyzed to generate mappings of sound source distributions. The maps (acoustic photographs) can then be used to locate sources of interest and to characterize them using their spectra. 
 
-# Features
-- frequency domain beamforming algorithms: delay & sum, Capon (adaptive), MUSIC, functional beamforming, eigenvalue beamforming
-- frequency domain deconvolution algorithms: DAMAS, DAMAS+, Clean, CleanSC, orthogonal deconvolution
-- frequency domain inverse methods: CMF (covariance matrix fitting), general inverse beamforming, SODIX
-- time domain methods: delay & sum beamforming, CleanT deconvolution
-- time domain methods applicable for moving sources with arbitrary trajectory (linear, circular, arbitrarily 3D curved), 
-- frequency domain methods for rotating sources via virtual array rotation for arbitrary arrays and with different interpolation techniques
+- **Website:** https://acoular.org
+- **Blog:** https://blog.acoular.org
+- **Installation:** https://acoular.org/install
+- **Getting Started** https://acoular.org/user_guide/get_started.html
+- **User Guide:** https://acoular.org/user_guide
+- **API Reference:** https://acoular.org/api_ref
+- **Examples:** https://acoular.org/auto_examples
+- **Contributing:** https://acoular.org/contributing
+- **Questions?:** https://github.com/orgs/acoular/discussions
+- **Bug Reports:** https://github.com/acoular/acoular/issues
+- **Report a Security Vulnerability:** https://github.com/acoular/acoular/security/advisories/new
+
+## Highlights
+- frequency domain methods:
+  - **beamforming:** delay & sum, Capon (adaptive), MUSIC, functional and eigenvalue beamforming
+  - **deconvolution:** DAMAS, DAMAS+, Clean, CleanSC, (gridless) orthogonal deconvolution
+  - **inverse methods:** CMF (covariance matrix fitting), general inverse beamforming, SODIX
+- time domain methods:
+  - **beamforming:** delay & sum
+  - **deconvolution:** CleanT
 - 1D, 2D and 3D mapping grids for all methods
-- gridless option for orthogonal deconvolution
-- four different built-in steering vector formulations
-- arbitrary stationary background flow can be considered for all methods
-- efficient cross spectral matrix computation
-- flexible modular time domain processing: n-th octave band filters, fast, slow, and impulse weighting, A-, C-, and Z-weighting, filter bank, zero delay filters
-- time domain simulation of array microphone signals from fixed and arbitrarily moving sources in arbitrary flow
-- fully object-oriented interface
-- lazy evaluation: while processing blocks are set up at any time, (expensive) computations are only performed when needed
-- intelligent and transparent caching: computed results are automatically saved and loaded on the next run to avoid unnecessary re-computation
-- parallel (multithreaded) implementation with Numba for most algorithms
-- easily extendable with new algorithms
+- arbitrary stationary background 🌬️ **flow** can be considered for all methods
+- frequency domain methods for 🌀 **rotating sources** via virtual array rotation for arbitrary arrays
+- all time domain methods can identify 🚂🛩️ **moving sources** with arbitrary trajectory
+- flexible & modular 🧮 **signal processing**:
+  - n-th octave band filters
+  - fast, slow, and impulse weighting
+  - A-, C-, and Z-weighting
+  - filter bank
+  - linear phase filters
+- intelligent and transparent :floppy_disk: **caching**: computed results are automatically saved and loaded on the next run to avoid unnecessary re-computation.
+- 🦥 **lazy** evaluation: while processing blocks are set up at any time, (expensive) computations are only performed when needed.
+- 🏎️ **efficient & parallel** (multithreaded) computation with [Numba](https://numba.pydata.org) for most algorithms.
 
-# License
-Acoular is licensed under the BSD 3-clause. See [LICENSE](LICENSE)
-
-# Citing
-
+## Citing
 If you use Acoular for academic work, please consider citing both our
 [publication](https://doi.org/10.1016/j.apacoust.2016.09.015):
 
@@ -49,41 +59,26 @@ and our [software](https://zenodo.org/doi/10.5281/zenodo.3690794):
     Acoular – Acoustic testing and source mapping software. 
     Zenodo. https://zenodo.org/doi/10.5281/zenodo.3690794
 
-# Dependencies
-Acoular runs under Linux, Windows and MacOS and needs Numpy, Scipy, Traits, scikit-learn, pytables, Numba packages available. 
-Matplotlib is needed for some of the examples.
+## Installation
 
-If you want to use input from a soundcard, you will also need to install the [sounddevice](https://python-sounddevice.readthedocs.io/en/0.3.12/installation.html) package. Some solvers for the CMF method need [Pylops](https://pylops.readthedocs.io/en/stable/installation.html).
+Acoular can be installed from [PyPI](https://pypi.org/project/acoular). It is recommended to use a [virtual environment](https://docs.python.org/3/library/venv.html). Inside the environment, run
 
-# Installation
-
-Acoular can be installed via [conda](https://docs.conda.io/en/latest/), which is also part of the [Anaconda Python distribution](https://www.anaconda.com/). It is recommended to install into a dedicated [conda environment](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html). After activating this environment, run
+    pip install acoular
+    
+A second option is to install Acoular with [conda](https://docs.conda.io/en/latest/). It is recommended to install into a dedicated [conda environment](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html). After activating the environment, run
 
     conda install -c acoular acoular
 
-This will install Acoular in your Anaconda Python environment and make the Acoular library available from Python. In addition, this will install all dependencies (those other packages mentioned above) if they are not already present on your system. 
-
-A second option is to install Acoular via [pip](https://pip.pypa.io/en/stable/). It is recommended to use a dedicated [virtual environment](https://virtualenv.pypa.io/en/latest/) and then run
-
-    pip install acoular
-
 For more detailed installation instructions, see the [documentation](https://acoular.org/install/index.html).
 
-# Documentation and help
+## Documentation and help
 Documentation is available [here](https://acoular.org) with a
 [getting started](https://www.acoular.org/user_guide/get_started.html) section and
 [examples](https://acoular.org/auto_examples/index.html).
 
-The Acoular [blog](https://acoular.github.io/blog2/) contains some tutorials.
-
 If you discover problems with the Acoular software, please report them using the [issue tracker](https://github.com/acoular/acoular/issues) on GitHub. Please use the [Acoular discussions forum](https://github.com/acoular/acoular/discussions) for practical questions, discussions, and demos.
 
-# Contributing
-
-We are always happy to welcome new contributors to the project. 
-If you are interested in contributing, have a look at the [CONTRIBUTING.md](CONTRIBUTING.md) file.
-
-# Example
+## Example
 This reads data from 64 microphone channels and computes a beamforming map for the 8kHz third octave band:
 
 ```python
@@ -129,5 +124,4 @@ plt.show()
 ```
 
 ![result](https://github.com/acoular/acoular/blob/master/docs/source/user_guide/three_source_py3_colormap.png?raw=true)
-
 
