@@ -45,7 +45,8 @@ def create_instance(acoular_cls):
         if acoular_cls.__name__ in ['LockedGenerator', 'LazyBfResult']:
             return acoular_cls(None)
         if acoular_cls.__name__ == 'Polygon':
-            return acoular_cls([0], [1])
+            # Polygon is now in acoular.tools.utils
+            return acoular_cls([0, 1], [1, 0])
         return acoular_cls()
 
 

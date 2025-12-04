@@ -138,6 +138,14 @@ class Sectors:
     def case_PolySector_full(self):
         return ac.PolySector(edges=[0.2, 0.2, -0.2, 0.2, -0.2, -0.2, 0.2, -0.2])
 
+    def case_PolySector_full_ccw(self):
+        # Counter-clockwise defined edges (will be reversed by Polygon class)
+        return ac.PolySector(edges=[0.2, -0.2, -0.2, -0.2, -0.2, 0.2, 0.2, 0.2])
+
+    def case_PolySector_full_open(self):
+        # Open polygon (will be closed by Polygon class) - missing last vertex connection
+        return ac.PolySector(edges=[0.2, 0.2, -0.2, 0.2, -0.2, -0.2])
+
     def case_PolySector_empty(self):
         off = 10  # some offset to make the sector empty
         return ac.PolySector(
@@ -148,6 +156,10 @@ class Sectors:
 
     def case_ConvexSector_full(self):
         return ac.ConvexSector(edges=[0.2, 0.2, -0.2, 0.2, -0.2, -0.2, 0.2, -0.2])
+
+    def case_ConvexSector_full_ccw(self):
+        # Counter-clockwise defined edges
+        return ac.ConvexSector(edges=[0.2, -0.2, -0.2, -0.2, -0.2, 0.2, 0.2, 0.2])
 
     def case_ConvexSector_empty(self):
         off = 10  # some offset to make the sector empty
