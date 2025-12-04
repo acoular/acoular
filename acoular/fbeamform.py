@@ -120,7 +120,7 @@ class SteeringVector(HasStrictTraits):
     #: change.
     rm = Property()
 
-    #: reference position or distance
+    # reference position or distance
     _ref = Any(np.array([0.0, 0.0, 0.0]))
 
     #: Reference position or distance at which to evaluate the sound pressure
@@ -166,10 +166,11 @@ class SteeringVector(HasStrictTraits):
     def _get_ref(self):
         return self._ref
 
-    # internal identifier
+    #: A unique identifier for the steering vector, based on its properties. (read-only)
     digest = Property(depends_on=['steer_type', 'env.digest', 'grid.digest', 'mics.digest', '_ref'])
 
-    # internal identifier, use for inverse methods, excluding steering vector type
+    #: A unique identifier for the grid, excluding :attr:`steer_type`.
+    #: Use for inverse methods. (read-only)
     inv_digest = Property(depends_on=['env.digest', 'grid.digest', 'mics.digest', '_ref'])
 
     @property_depends_on(['grid.digest', 'env.digest', '_ref'])
@@ -277,9 +278,9 @@ class LazyBfResult:
 class BeamformerBase(HasStrictTraits):
     """Beamforming using the basic delay-and-sum algorithm in the frequency domain."""
 
-    # Instance of :class:`~acoular.fbeamform.SteeringVector` or its derived classes
-    # that contains information about the steering vector. This is a private trait.
-    # Do not set this directly, use `steer` trait instead.
+    #: Instance of :class:`~acoular.fbeamform.SteeringVector` or its derived classes
+    #: that contains information about the steering vector. This is a private trait.
+    #: Do not set this directly, use `steer` trait instead.
     steer = Instance(SteeringVector, args=())
 
     #: :class:`~acoular.spectra.PowerSpectra` object that provides the
@@ -305,7 +306,7 @@ class BeamformerBase(HasStrictTraits):
     #: Boolean flag, if 'True' (default), the result is cached in h5 files.
     cached = Bool(True)
 
-    # hdf5 cache file
+    #: hdf5 cache file
     h5f = Instance(H5CacheFileBase, transient=True)
 
     #: The beamforming result as squared sound pressure values
@@ -314,7 +315,7 @@ class BeamformerBase(HasStrictTraits):
     #: of floats. Values can only be accessed via the index operator [].
     result = Property()
 
-    # internal identifier
+    #: A unique identifier for the beamformer, based on its properties. (read-only)
     digest = Property(depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES)
 
     # private traits
@@ -689,7 +690,7 @@ class BeamformerFunctional(BeamformerBase):
     #: Beamforming is only well defined for full CSM.
     r_diag_norm = Enum(1.0)
 
-    # internal identifier
+    #: A unique identifier for the beamformer, based on its properties. (read-only)
     digest = Property(depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['gamma'])
 
     @cached_property
@@ -768,13 +769,12 @@ class BeamformerCapon(BeamformerBase):
     See :cite:`Capon1969` for details.
     """
 
-    # Boolean flag, if 'True', the main diagonal is removed before beamforming;
-    # for Capon beamforming r_diag is set to 'False'.
-    #: removal of diagonal
+    #: Boolean flag, if ``True``, the main diagonal is removed before beamforming;
+    #: for Capon beamforming :attr:`r_diag` is set to ``False``.
     r_diag = Enum(False)
 
-    #: Normalization factor in case of CSM diagonal removal. Defaults to 1.0 since Beamformer Capon
-    #: is only well defined for full CSM.
+    #: Normalization factor in case of CSM diagonal removal.
+    #: Defaults to ``1.0`` since Beamformer Capon is only well defined for full CSM.
     r_diag_norm = Enum(1.0)
 
     def _calc(self, ind):
@@ -814,15 +814,15 @@ class BeamformerEig(BeamformerBase):
     """
 
     #: Number of component to calculate:
-    #: 0 (smallest) ... :attr:`~acoular.base.SamplesGenerator.num_channels`-1;
-    #: defaults to -1, i.e. num_channels-1
+    #: ``0`` (smallest) ... :attr:`~acoular.base.SamplesGenerator.num_channels`-1;
+    #: defaults to ``-1``, i.e. :attr:`~acoular.base.SamplesGenerator.num_channels`-1.
     n = Int(-1)
 
     # Actual component to calculate, internal, readonly.
     #: No. of eigenvalue
     na = Property()
 
-    # internal identifier
+    #: A uniquernal identifier for the beamformer, based on its properties. (read-only)
     digest = Property(depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['n'])
 
     @cached_property
@@ -883,9 +883,8 @@ class BeamformerMusic(BeamformerEig):
     See :cite:`Schmidt1986` for details.
     """
 
-    # Boolean flag, if 'True', the main diagonal is removed before beamforming;
-    # for MUSIC beamforming r_diag is set to 'False'.
-    #: removal of diagonal
+    #: Boolean flag, if ``True``, the main diagonal is removed before beamforming;
+    #: for MUSIC beamforming :attr:`r_diag` is set to ``False``.
     r_diag = Enum(False)
 
     #: Normalization factor in case of CSM diagonal removal. Defaults to 1.0 since BeamformerMusic
@@ -944,9 +943,9 @@ class PointSpreadFunction(HasStrictTraits):
     the aberrations when using simple delay-and-sum beamforming.
     """
 
-    # Instance of :class:`~acoular.fbeamform.SteeringVector` or its derived classes
-    # that contains information about the steering vector. This is a private trait.
-    # Do not set this directly, use `steer` trait instead.
+    #: Instance of :class:`~acoular.fbeamform.SteeringVector` or its derived classes
+    #: that contains information about the steering vector. This is a private trait.
+    #: Do not set this directly, use :attr:`steer` trait instead.
     steer = Instance(SteeringVector, args=())
 
     #: Indices of grid points to calculate the PSF for.
@@ -980,7 +979,7 @@ class PointSpreadFunction(HasStrictTraits):
     # hdf5 cache file
     h5f = Instance(H5CacheFileBase, transient=True)
 
-    # internal identifier
+    #: A unique identifier for the object, based on its properties. (read-only)
     digest = Property(depends_on=['steer.digest', 'precision'], cached=True)
 
     @cached_property
@@ -1147,7 +1146,7 @@ class BeamformerDamas(BeamformerBase):
     #:               if multiple processes have to access the cache file)
     calcmode = Enum('full', 'single', 'block', 'readonly')
 
-    # internal identifier
+    #: A unique identifier for the beamformer, based on its properties. (read-only)
     digest = Property(
         depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['n_iter', 'damp', 'psf_precision'],
     )
@@ -1230,7 +1229,7 @@ class BeamformerDamasPlus(BeamformerDamas):
     #: within fitting method algorithms. Defaults to 1e9.
     unit_mult = Float(1e9)
 
-    # internal identifier
+    #: A unique identifier for the beamformer, based on its properties. (read-only)
     digest = Property(
         depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['alpha', 'method', 'n_iter', 'unit_mult'],
     )
@@ -1327,13 +1326,13 @@ class BeamformerOrth(BeamformerBase):
     #: used in the beamformer. Alternatively, set :attr:`n`.
     eva_list = CArray(dtype=int, value=np.array([-1]))
 
-    #: Number of components to consider, defaults to 1. If set,
+    #: Number of components to consider, defaults to ``1``. If set,
     #: :attr:`eva_list` will contain
     #: the indices of the n largest eigenvalues. Setting :attr:`eva_list`
     #: afterwards will override this value.
     n = Int(1)
 
-    # internal identifier
+    #: A unique identifier for the beamformer, based on its properties. (read-only)
     digest = Property(
         depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['eva_list'],
     )
@@ -1405,7 +1404,7 @@ class BeamformerCleansc(BeamformerBase):
     #: defaults to 3
     stopn = Int(3)
 
-    # internal identifier
+    #: A unique identifier for the beamformer, based on its properties. (read-only)
     digest = Property(depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['n_iter', 'damp', 'stopn'])
 
     @cached_property
@@ -1508,7 +1507,7 @@ class BeamformerClean(BeamformerBase):
     #:               if multiple processes have to access the cache file)
     calcmode = Enum('block', 'full', 'single', 'readonly')
 
-    # internal identifier
+    #: A unique identifier for the beamformer, based on its properties. (read-only)
     digest = Property(
         depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['n_iter', 'damp', 'psf_precision'],
     )
@@ -1625,7 +1624,7 @@ class BeamformerCMF(BeamformerBase):
     #: Energy normalization in case of diagonal removal not implemented for inverse methods.
     r_diag_norm = Enum(None)
 
-    # internal identifier
+    #: A unique identifier for the beamformer, based on its properties. (read-only)
     digest = Property(
         depends_on=[
             'freq_data.digest',
@@ -1831,7 +1830,7 @@ class BeamformerSODIX(BeamformerBase):
     #: Energy normalization in case of diagonal removal not implemented for inverse methods.
     r_diag_norm = Enum(None)
 
-    # internal identifier
+    #: A unique identifier for the beamformer, based on its properties. (read-only)
     digest = Property(
         depends_on=[
             'freq_data.digest',
@@ -2018,7 +2017,7 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
     #: Energy normalization in case of diagonal removal not implemented for inverse methods.
     r_diag_norm = Enum(None)
 
-    # internal identifier
+    #: A unique identifier for the beamformer, based on its properties. (read-only)
     digest = Property(
         depends_on=[
             'steer.inv_digest',
@@ -2276,7 +2275,7 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
     #: For this class, normalization is not implemented. Defaults to 1.0.
     r_diag_norm = Enum(1.0)
 
-    # internal identifier
+    #: A unique identifier for the beamformer, based on its properties. (read-only)
     digest = Property(
         depends_on=['freq_data.digest', 'steer.digest', 'precision', 'r_diag', 'eva_list', 'bounds', 'shgo'],
     )

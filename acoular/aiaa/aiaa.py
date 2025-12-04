@@ -102,7 +102,7 @@ class CsmAIAABenchmark(PowerSpectraImport):
     #: HDF5 file object
     h5f = Instance(H5FileBase, transient=True)
 
-    # internal identifier
+    #: A unique identifier for the CSM importer, based on its properties. (read-only)
     digest = Property(depends_on=['basename', '_csmsum'])
 
     @cached_property
