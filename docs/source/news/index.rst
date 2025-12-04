@@ -22,6 +22,9 @@ Upcoming Release
 
     **Bugfixes**
         * fix a typo in :class:`~acoular.tprocess.SpatialInterpolator` that lead to a property being incorrectly accessed
+    
+    **Tests**
+        * increases test coverage for :func:`~acoular.fbeamform.integrate` function
 
 25.10
 ------------------------
