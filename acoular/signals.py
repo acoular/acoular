@@ -174,7 +174,7 @@ class NoiseGenerator(SignalGenerator):
     See Also
     --------
     :class:`~acoular.signals.PNoiseGenerator` : For pink noise generation.
-    :class:`~acoular.signals.WNoiseGenerator` : For pink white generation.
+    :class:`~acoular.signals.WNoiseGenerator` : For white noise generation.
     :class:`~acoular.sources.UncorrelatedNoiseSource` : For per-channel noise generation.
     """
 
@@ -243,7 +243,7 @@ class WNoiseGenerator(NoiseGenerator):
     array([False, False, False])
     """
 
-    # internal identifier
+    #: A unique identifier for the generator, based on its properties. (read-only)
     digest = Property(depends_on=['rms', 'seed', 'sample_freq', 'num_samples'])
 
     @cached_property

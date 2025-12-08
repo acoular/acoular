@@ -63,7 +63,7 @@ class Generator(ABCHasStrictTraits):
     #: Number of channels
     num_channels = CInt
 
-    # internal identifier
+    #: A unique identifier for the generator, based on its properties. (read-only)
     digest = Property(depends_on=['sample_freq', 'num_samples', 'num_channels'])
 
     def _get_digest(self):
@@ -96,7 +96,7 @@ class SamplesGenerator(Generator):
 
     """
 
-    # internal identifier
+    #: A unique identifier for the generator, based on its properties. (read-only)
     digest = Property(depends_on=['sample_freq', 'num_samples', 'num_channels'])
 
     def _get_digest(self):
@@ -137,7 +137,7 @@ class SpectraGenerator(Generator):
     #: The length of the block used to calculate the spectra
     block_size = CInt
 
-    # internal identifier
+    #: A unique identifier for the generator, based on its properties. (read-only)
     digest = Property(depends_on=['sample_freq', 'num_samples', 'num_channels', 'num_freqs', 'block_size'])
 
     def _get_digest(self):
@@ -181,7 +181,7 @@ class TimeOut(SamplesGenerator):
     #: Number of samples in output, as given by :attr:`source`.
     num_samples = Delegate('source')
 
-    # internal identifier
+    #: A unique identifier for the generator, based on its properties. (read-only)
     digest = Property(depends_on=['source.digest'])
 
     @cached_property
@@ -237,7 +237,7 @@ class SpectraOut(SpectraGenerator):
     #: The size of the block used to calculate the spectra
     block_size = Delegate('source')
 
-    # internal identifier
+    #: A unique identifier for the generator, based on its properties. (read-only)
     digest = Property(depends_on=['source.digest'])
 
     @cached_property
@@ -285,7 +285,7 @@ class InOut(SamplesGenerator, SpectraGenerator):
     #: Number of samples / snapshots in output, as given by :attr:`source`.
     num_samples = Delegate('source')
 
-    # internal identifier
+    #: A unique identifier for the generator, based on its properties. (read-only)
     digest = Property(depends_on=['source.digest'])
 
     @cached_property
