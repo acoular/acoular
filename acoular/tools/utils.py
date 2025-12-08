@@ -177,7 +177,7 @@ class Polygon:
         mindst[np.fabs(mindst) < smalld] = 0
         # If input values were scalar then the output should be too
         if scalar:
-            mindst = float(mindst)
+            mindst = float(mindst[0])
         return mindst
 
 
