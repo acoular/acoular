@@ -94,7 +94,7 @@ class TestPolygon:
 
         poly = Polygon([0, 1, 1, 0], [0, 0, 1, 1])
 
-        with pytest.raises(IndexError, match='x and y has different shapes'):
+        with pytest.raises(IndexError, match='x and y have different shapes'):
             poly.is_inside(np.array([0.5, 0.5, 0.5]), np.array([0.5, 0.5]))
 
     def test_polygon_clockwise_to_counterclockwise(self):

@@ -55,7 +55,7 @@ class Polygon:
             raise IndexError(msg)
         self.x = np.asarray(x, dtype=float)
         self.y = np.asarray(y, dtype=float)
-        # Closes the polygon if were open
+        # Closes the polygon if it were open
         x1, y1 = x[0], y[0]
         xn, yn = x[-1], y[-1]
         if x1 != xn or y1 != yn:
@@ -107,7 +107,7 @@ class Polygon:
             scalar = False
         # Check consistency
         if xpoint.shape != ypoint.shape:
-            msg = 'x and y has different shapes'
+            msg = 'x and y have different shapes'
             raise IndexError(msg)
         # If snear = True: Dist to nearest side < nearest vertex
         # If snear = False: Dist to nearest vertex < nearest side
