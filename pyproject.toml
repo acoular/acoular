@@ -125,7 +125,7 @@ explicit = true
 
 [tool.pytest.ini_options]
 testpaths = "tests"
-addopts = "-v --durations=10 --cov-report=html --cov-report=term-missing --cov-report markdown-append:$GITHUB_STEP_SUMMARY"
+addopts = "-v --durations=10 --cov-report=html --cov-report=term-missing"
 filterwarnings = [
     "error", # treat warnings as errors
     "ignore::pluggy.PluggyTeardownRaisedWarning", # raised internally by pytest-regtest
