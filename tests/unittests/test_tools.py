@@ -72,17 +72,17 @@ class TestPolygon:
 
         # Create a square polygon
         poly = Polygon([0, 1, 1, 0], [0, 0, 1, 1])
-        
+
         # Test point inside (scalar)
         result = poly.is_inside(0.5, 0.5)
         assert isinstance(result, float)
         assert result > 0
-        
+
         # Test point outside (scalar)
         result = poly.is_inside(2.0, 2.0)
         assert isinstance(result, float)
         assert result < 0
-        
+
         # Test point on edge (scalar)
         result = poly.is_inside(0.5, 0.0)
         assert isinstance(result, float)
@@ -93,7 +93,7 @@ class TestPolygon:
         from acoular.tools.utils import Polygon
 
         poly = Polygon([0, 1, 1, 0], [0, 0, 1, 1])
-        
+
         with pytest.raises(IndexError, match='x and y has different shapes'):
             poly.is_inside(np.array([0.5, 0.5, 0.5]), np.array([0.5, 0.5]))
 
@@ -105,17 +105,17 @@ class TestPolygon:
         x_cw = [0, 0, 1, 1]
         y_cw = [0, 1, 1, 0]
         poly_cw = Polygon(x_cw, y_cw)
-        
+
         # Define polygon in counter-clockwise order
         x_ccw = [0, 1, 1, 0]
         y_ccw = [0, 0, 1, 1]
         poly_ccw = Polygon(x_ccw, y_ccw)
-        
+
         # Test that both give same result for a point inside
         test_x, test_y = 0.5, 0.5
         result_cw = poly_cw.is_inside(test_x, test_y)
         result_ccw = poly_ccw.is_inside(test_x, test_y)
-        
+
         assert result_cw > 0
         assert result_ccw > 0
 
@@ -127,7 +127,7 @@ class TestPolygon:
         x_open = [0, 1, 1, 0]
         y_open = [0, 0, 1, 1]
         poly = Polygon(x_open, y_open)
-        
+
         # Check that polygon was closed (first and last points are the same)
         assert poly.x[0] == poly.x[-1]
         assert poly.y[0] == poly.y[-1]
@@ -140,7 +140,7 @@ class TestPolygon:
         x_closed = [0, 1, 1, 0, 0]
         y_closed = [0, 0, 1, 1, 0]
         poly = Polygon(x_closed, y_closed)
-        
+
         # Should remain the same length
         assert len(poly.x) == 5
         assert len(poly.y) == 5
@@ -150,12 +150,12 @@ class TestPolygon:
         from acoular.tools.utils import Polygon
 
         poly = Polygon([0, 1, 1, 0], [0, 0, 1, 1])
-        
+
         # Test multiple points
         xpoints = np.array([0.5, 2.0, 0.5])
         ypoints = np.array([0.5, 2.0, 0.0])
         results = poly.is_inside(xpoints, ypoints)
-        
+
         assert isinstance(results, np.ndarray)
         assert len(results) == 3
         assert results[0] > 0  # inside
@@ -167,7 +167,7 @@ class TestPolygon:
         from acoular.tools.utils import Polygon
 
         poly = Polygon([0, 1, 1, 0], [0, 0, 1, 1])
-        
+
         # Point on edge with larger tolerance
         result = poly.is_inside(0.5, 1e-11, smalld=1e-10)
         assert abs(result) < 1e-9
@@ -177,15 +177,15 @@ class TestPolygon:
         from acoular.tools.utils import Polygon
 
         # Create a pentagon
-        angles = np.linspace(0, 2*np.pi, 6)
+        angles = np.linspace(0, 2 * np.pi, 6)
         x_pentagon = np.cos(angles)
         y_pentagon = np.sin(angles)
         poly = Polygon(x_pentagon, y_pentagon)
-        
+
         # Test center point (should be inside)
         result = poly.is_inside(0.0, 0.0)
         assert result > 0
-        
+
         # Test far point (should be outside)
         result = poly.is_inside(5.0, 5.0)
         assert result < 0
@@ -198,11 +198,11 @@ class TestPolygon:
         x_l = [0, 2, 2, 1, 1, 0]
         y_l = [0, 0, 1, 1, 2, 2]
         poly = Polygon(x_l, y_l)
-        
+
         # Point inside the L
         result = poly.is_inside(0.5, 0.5)
         assert result > 0
-        
+
         # Point in the "notch" (should be outside)
         result = poly.is_inside(1.5, 1.5)
         assert result < 0
