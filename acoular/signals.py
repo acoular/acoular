@@ -174,7 +174,7 @@ class NoiseGenerator(SignalGenerator):
     See Also
     --------
     :class:`~acoular.signals.PNoiseGenerator` : For pink noise generation.
-    :class:`~acoular.signals.WNoiseGenerator` : For pink white generation.
+    :class:`~acoular.signals.WNoiseGenerator` : For white noise generation.
     :class:`~acoular.sources.UncorrelatedNoiseSource` : For per-channel noise generation.
     """
 
