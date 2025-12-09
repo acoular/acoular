@@ -27,6 +27,7 @@ Upcoming Release
 
     **Tests**
         * add tests for :class:`~acoular.tools.utils.Polygon` class
+        * increases test coverage for :mod:`acoular.tprocess`
 
 25.10
 ------------------------
