@@ -26,6 +26,9 @@ Upcoming Release
     **Tests**
         * increases test coverage for :func:`~acoular.fbeamform.integrate` function
 
+    **Tests**
+        * increases test coverage for :mod:`acoular.tprocess`
+
 25.10
 ------------------------
     **Documentation**
