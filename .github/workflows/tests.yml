@@ -45,6 +45,8 @@ jobs:
     steps:
       - name: Check out a copy of the repository
         uses: actions/checkout@v5
+        with:
+          fetch-depth: 2
       - name: Set up uv
         uses: astral-sh/setup-uv@v7
       - name: Set up PortAudio
@@ -52,7 +54,18 @@ jobs:
       - name: Generate coverage report
         run: |
           uv run --frozen python -m pytest --cov=acoular
-          uv run --frozen python -m pytest --cov=acoular --cov-append --doctest-modules acoular
+          uv run --frozen python -m pytest --cov=acoular --cov-report=markdown-append:$GITHUB_STEP_SUMMARY --cov-report=xml --cov-append --doctest-modules acoular
+      - name: Check diff coverage
+        run: |
+          git diff ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} > diff.txt
+          echo -e "Output of \`diff-cover\` :mag::shipit:\n\`\`\`" > diff-cover.txt
+          uv run diff-cover coverage.xml --diff-file=diff.txt >> diff-cover.txt
+          echo -e "\`\`\`" >> diff-cover.txt
+      - name: Add PR Comment
+        uses: thollander/actions-comment-pull-request@v3
+        with:
+          file-path: diff-cover.txt
+          comment-tag: diffcov
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
         with:
