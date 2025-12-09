@@ -270,6 +270,6 @@ class MicGeom(HasStrictTraits):
             f.write(f'<?xml version="1.1" encoding="utf-8"?><MicArray name="{basename}">\n')
             for i in range(self.pos.shape[-1]):
                 f.write(
-                    f'  <pos Name="Point {i+1}" x="{self.pos[0, i]}" y="{self.pos[1, i]}" z="{self.pos[2, i]}"/>\n',
+                    f'  <pos Name="Point {i + 1}" x="{self.pos[0, i]}" y="{self.pos[1, i]}" z="{self.pos[2, i]}"/>\n',
                 )
             f.write('</MicArray>')

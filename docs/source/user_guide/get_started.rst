@@ -7,7 +7,7 @@ The Acoular library is based on the Python programming language. While a basic k
 
 Prerequisites
 -------------
-This "Getting started" tutorial assumes that the Acoular library is :doc:`installed<../install/index>` together with its dependencies and matplotlib, and that the demo finished successfully. If you did not run the demo yet, you should do so by typing into your python console
+This "Getting started" tutorial assumes that the Acoular library is :doc:`installed<../install/index>` together with its dependencies and ``matplotlib``, and that the demo finished successfully. If you did not run the demo yet, you should do so by typing into your python console
 
 .. ipython::
     :okwarning:
@@ -52,7 +52,7 @@ The ts object now provides access to the HDF5 file and information stored in it.
 
 It is important to note that the data in the file is **not read into the memory** for it could be very large (i.e. several GB). Instead, the data is read in small chunks the moment it is needed. Because this is done automatically, the user does not have to take care of that.
 
-The beamforming shall be done in the frequency domain. In this case the cross spectral matrix is the basis. This matrix consists of the cross power spectra of all possible combinations of channels. Here, this gives 64²=4096 cross power spectra. These spectra are computed using Welch's method, i.e. blocks of samples are taken from the signals and fourier-transformed using FFT, used to calculate the power spectra, and then the results are averaged over a number of blocks. The blocks have a certain length and may be overlapping. In addition, a windowing function may be applied to each block prior to the FFT. To provide the facilities to calculate the cross spectral matrix we create an instance of :class:`~acoular.spectra.PowerSpectra` and define the size of the blocks to be 128 samples and a von-Hann ('Hanning') window to be used:  
+The beamforming shall be done in the frequency domain. In this case the cross spectral matrix is the basis. This matrix consists of the cross power spectra of all possible combinations of channels. Here, this gives 64²=4096 cross power spectra. These spectra are computed using Welch's method, i.e. blocks of samples are taken from the signals and Fourier-transformed using FFT, used to calculate the power spectra, and then the results are averaged over a number of blocks. The blocks have a certain length and may be overlapping. In addition, a windowing function may be applied to each block prior to the FFT. To provide the facilities to calculate the cross spectral matrix we create an instance of :class:`~acoular.spectra.PowerSpectra` and define the size of the blocks to be 128 samples and a von-Hann ('Hanning') window to be used:
 
 .. ipython::
 
