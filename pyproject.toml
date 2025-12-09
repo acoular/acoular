@@ -73,6 +73,7 @@ lint = ["ruff==0.14.2"]
 
 test = [
     "h5py",
+    "diff_cover",
     "pylops",
     "pytest",
     "pytest-mock",
