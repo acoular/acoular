@@ -56,12 +56,14 @@ jobs:
           uv run --frozen python -m pytest --cov=acoular
           uv run --frozen python -m pytest --cov=acoular --cov-report=markdown-append:$GITHUB_STEP_SUMMARY --cov-report=xml --cov-append --doctest-modules acoular
       - name: Check diff coverage
+        if: ${{ github.event_name == 'pull_request' }}
         run: |
           git diff ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} > diff.txt
           echo -e "Output of \`diff-cover\` :mag::shipit:\n\`\`\`" > diff-cover.txt
           uv run diff-cover coverage.xml --diff-file=diff.txt >> diff-cover.txt
           echo -e "\`\`\`" >> diff-cover.txt
       - name: Add PR Comment
+        if: ${{ github.event_name == 'pull_request' }}
         uses: thollander/actions-comment-pull-request@v3
         with:
           file-path: diff-cover.txt
