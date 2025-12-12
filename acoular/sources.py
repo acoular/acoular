@@ -1143,8 +1143,8 @@ class MovingPointSource(PointSource):
                 rm = np.sqrt((rm * rm).sum(0))  # absolute distance
                 loc /= np.sqrt((loc * loc).sum(0))  # distance unit vector
                 der = np.array(tr.location(te.flatten(), der=1)).reshape((3, num_mics, -1))
-                Mr = (der * loc).sum(0) / c0  # radial Mach number
-                eps[:] = (te + rm / c0 - t) / (1 + Mr)  # discrepancy in time
+                Mr = -(der * loc).sum(0) / c0  # radial Mach number
+                eps[:] = (te + rm / c0 - t) / (1 - Mr)  # discrepancy in time
                 te -= eps
                 j += 1  # iteration count
             t += num / self.sample_freq
