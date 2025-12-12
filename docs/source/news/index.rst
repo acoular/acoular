@@ -28,6 +28,7 @@ Upcoming Release
     **Tests**
         * add tests for :class:`~acoular.tools.utils.Polygon` class
         * increases test coverage for :mod:`acoular.tprocess`
+        * adds a test for the caching behaviour of the :attr:`acoular.sources.TimeSamples.file` attribute
 
 25.10
 ------------------------
