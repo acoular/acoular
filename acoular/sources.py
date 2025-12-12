@@ -1139,11 +1139,11 @@ class MovingPointSource(PointSource):
             # Newton-Rhapson iteration
             while abs(eps).max() > epslim and j < 100:
                 loc = np.array(tr.location(te.flatten())).reshape((3, num_mics, -1))
-                rm = loc - mpos  # distance vectors to microphones
-                rm = np.sqrt((rm * rm).sum(0))  # absolute distance
-                loc /= np.sqrt((loc * loc).sum(0))  # distance unit vector
                 der = np.array(tr.location(te.flatten(), der=1)).reshape((3, num_mics, -1))
-                Mr = -(der * loc).sum(0) / c0  # radial Mach number
+                dv = mpos - loc  # distance vectors from source to microphones
+                rm = np.sqrt((dv * dv).sum(0))  # absolute distance
+                dv /= rm  # just directions from source to microphones
+                Mr = (der * dv).sum(0) / c0  # radial Mach number
                 eps[:] = (te + rm / c0 - t) / (1 - Mr)  # discrepancy in time
                 te -= eps
                 j += 1  # iteration count
