@@ -2283,6 +2283,18 @@ class PointSourceConvolve(PointSource):
     #: based on microphone geometry, input signal, source location, and kernel. (read-only)
     digest = Property(depends_on=['mics.digest', 'signal.digest', 'loc', 'kernel'])
 
+    #: Controls whether to extend the output to include the full convolution result.
+    #:
+    #: - If ``False`` (default): Output length is :math:`\\max(L, M)`, where :math:`L` is the
+    #:   kernel length and :math:`M` is the signal length. This mode keeps the output length
+    #:   equal to the longest input (different from NumPy's ``mode='same'``, since it does not
+    #:   pad the output).
+    #: - If ``True``: Output length is :math:`L + M - 1`, returning the full convolution at
+    #:   each overlap point (similar to NumPy's ``mode='full'``).
+    #:
+    #: Default is ``False``.
+    extend_signal = Bool(False)
+
     @cached_property
     def _get_digest(self):
         return digest(self)
@@ -2324,5 +2336,6 @@ class PointSourceConvolve(PointSource):
         time_convolve = TimeConvolve(
             source=source,
             kernel=self.kernel,
+            extend_signal=self.extend_signal,
         )
         yield from time_convolve.result(num)
