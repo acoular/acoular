@@ -40,7 +40,7 @@ import numba as nb
 import numpy as np
 import scipy.linalg as spla
 from numpy.fft import fft, ifft
-from scipy.special import sph_harm, spherical_jn, spherical_yn
+from scipy.special import sph_harm_y, spherical_jn, spherical_yn
 from traits.api import (
     Any,
     Bool,
@@ -258,13 +258,13 @@ def get_modes(lOrder, direction, mpos, sourceposition=None):  # noqa: N803
     --------
     :func:`get_radiation_angles` :
         Computes azimuth and elevation angles between microphones and the source.
-    :obj:`scipy.special.sph_harm` : Computes spherical harmonic values.
+    :obj:`scipy.special.sph_harm_y` : Computes spherical harmonic values.
 
     Notes
     -----
     - The azimuth (``azi``) and elevation (``ele``) angles between the microphones and the source
       are calculated using the :func:`get_radiation_angles` function.
-    - Spherical harmonics (``sph_harm``) are computed for each mode ``(l, m)``, where ``l`` is the
+    - Spherical harmonics (``sph_harm_y``) are computed for each mode ``(l, m)``, where ``l`` is the
       degree (ranging from ``0`` to ``lOrder``) and ``m`` is the order
       (ranging from ``-l`` to ``+l``).
     - For negative orders (`m < 0`), the conjugate of the spherical harmonic is computed and scaled
@@ -290,7 +290,7 @@ def get_modes(lOrder, direction, mpos, sourceposition=None):  # noqa: N803
     i = 0
     for lidx in range(lOrder + 1):
         for m in range(-lidx, lidx + 1):
-            modes[:, i] = sph_harm(m, lidx, azi, ele)
+            modes[:, i] = sph_harm_y(m, lidx, ele, azi)
             if m < 0:
                 modes[:, i] = modes[:, i].conj() * 1j
             i += 1
