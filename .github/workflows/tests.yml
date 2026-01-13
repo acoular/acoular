@@ -31,6 +31,9 @@ jobs:
         uses: ./.github/actions/setup-portaudio
         with:
           os: ${{ matrix.os }}
+      - name: List env
+        run: |
+          uv sync --frozen && uv pip list
       - name: Run smoke tests
         uses: ./.github/actions/smoke-tests
         with:
