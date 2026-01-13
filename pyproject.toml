@@ -32,7 +32,8 @@ dependencies = [
     "numba",
     "numpy",
     "scikit-learn",
-    "scipy >= 1.17",
+    "scipy >= 1.15, != 1.16.0; python_version == '3.10'",  # 1.16.0 has a bug in tf2sos
+    "scipy >= 1.16.1; python_version > '3.10'",
     "tables",
     "traits >= 6.0",
 ]
