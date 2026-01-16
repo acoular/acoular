@@ -37,7 +37,7 @@ The ``ruff`` configuration can be found in:
 
   .. literalinclude:: /../../.ruff.toml
 
-.. _Documentation Build:
+.. _Documentation Compilation:
 
 .. include:: build-docs.rst
 

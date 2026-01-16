@@ -74,7 +74,7 @@ Acoular makes use of the `Traits <https://docs.enthought.com/traits/traits_user_
 .. literalinclude:: ../../../acoular/sources.py
     :pyobject: TimeSamples
     :start-at: #:
-    :end-after: metadata
+    :end-at: metadata
 
 .. note::
    The :class:`traits.traits.Trait`-inherited classes have a :attr:`~traits.traits.Trait.desc` attribute for trait description. In order to avoid clutter, this attribute should not be used and the Sphinx comment docstring with ``#:`` should be used instead.
@@ -105,7 +105,7 @@ Module files need a Copyright header and should be documented with a module docs
 
 .. literalinclude:: ../../../acoular/sources.py
     :start-at: #
-    :end-after: get_modes
+    :end-at: get_modes
 
 Writing Python examples
 -----------------------
