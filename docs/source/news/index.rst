@@ -3,6 +3,9 @@ What's new
 
 Upcoming Release
 ------------------------
+
+26.01
+------------------------
     **New features**
         * adds :attr:`~acoular.tprocess.TimeConvolve.extend_signal` property to control the result length
 
@@ -29,7 +32,7 @@ Upcoming Release
     **Tests**
         * add tests for :class:`~acoular.tools.utils.Polygon` class
         * increases test coverage for :mod:`acoular.tprocess`
-        * adds a test for the caching behaviour of the :attr:`acoular.sources.TimeSamples.file` attribute
+        * adds a test for the caching behaviour of the :attr:`~acoular.sources.TimeSamples.file` attribute
 
 25.10
 ------------------------
