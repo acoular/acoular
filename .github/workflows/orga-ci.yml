@@ -1,0 +1,34 @@
+name: Acoular Organizational CI
+
+on:
+  pull_request:
+    branches: [ master ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    uses: acoular/ci/.github/workflows/pypi.yml@main
+    with:
+      index: testpypi
+
+  conda:
+    uses: acoular/ci/.github/workflows/conda.yml@main
+
+  coverage:
+    uses: acoular/ci/.github/workflows/coverage.yml@main
+    permissions:
+      pull-requests: write
+
+  docs:
+    uses: acoular/ci/.github/workflows/docs.yml@main
+
+  github:
+    uses: acoular/ci/.github/workflows/github.yml@main
+
+  linting:
+    uses: acoular/ci/.github/workflows/linting.yml@main
+
+  tests:
+    uses: acoular/ci/.github/workflows/tests.yml@main
