@@ -1,0 +1,22 @@
+name: Release CI
+
+on:
+  release:
+    types: [ published ]
+
+jobs:
+  conda:
+    uses: acoular/ci/.github/workflows/conda.yml@main
+    with:
+      deploy: true
+
+  docs:
+    uses: acoular/ci/.github/workflows/docs.yml@main
+    with:
+      deploy: true
+
+  pypi:
+    uses: acoular/ci/.github/workflows/pypi.yml@main
+    with:
+      deploy: true
+      index: pypi
