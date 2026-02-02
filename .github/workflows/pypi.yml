@@ -17,6 +17,8 @@ on:
 jobs:
   build_and_deploy:
     uses: acoular/ci/.github/workflows/pypi.yml@main
+    permissions:
+      id-token: write
     with:
       index: ${{ inputs.index }}
       deploy: true
