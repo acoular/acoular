@@ -13,6 +13,8 @@ jobs:
 
   docs:
     uses: acoular/ci/.github/workflows/docs.yml@main
+    permissions:
+      contents: write
     with:
       deploy: true
 
