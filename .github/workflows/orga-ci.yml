@@ -4,17 +4,12 @@ on:
   pull_request:
     branches: [ master ]
 
-permissions:
-  contents: read
-
 jobs:
   conda:
     uses: acoular/ci/.github/workflows/conda.yml@main
 
   coverage:
     uses: acoular/ci/.github/workflows/coverage.yml@main
-    permissions:
-      pull-requests: write
 
   docs:
     uses: acoular/ci/.github/workflows/docs.yml@main
