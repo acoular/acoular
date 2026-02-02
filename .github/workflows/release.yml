@@ -19,6 +19,7 @@ jobs:
   pypi:
     uses: acoular/ci/.github/workflows/pypi.yml@main
     permissions:
+      contents: read
       id-token: write
     with:
       deploy: true
