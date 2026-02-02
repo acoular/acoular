@@ -11,7 +11,7 @@ jobs:
   coverage:
     uses: acoular/ci/.github/workflows/coverage.yml@main
     permissions:
-      pull-request: write
+      pull-requests: write
 
   docs:
     uses: acoular/ci/.github/workflows/docs.yml@main
