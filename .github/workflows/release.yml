@@ -1,4 +1,6 @@
 name: Release CI ✴️
+permissions:
+  contents: read
 on:
   release:
     types: [ published ]

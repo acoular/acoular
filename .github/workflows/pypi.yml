@@ -1,5 +1,7 @@
 name: "Manual: PyPI 📦 Build 🛠️ & Deploy"
 run-name: Build Pkg 🛠️ & Publish to ${{ case(inputs.index == 'pypi', 'PyPI', 'TestPyPI') }} 📦
+permissions:
+  contents: read
 on:
   workflow_dispatch:
     inputs:

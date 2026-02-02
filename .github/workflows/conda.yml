@@ -1,5 +1,7 @@
 name: "Manual: Conda 🐍 Build 🛠️ & Deploy"
 run-name: Build Pkg 🛠️ & Publish to Anaconda 🐍
+permissions:
+  contents: read
 on:
   workflow_dispatch:
 
