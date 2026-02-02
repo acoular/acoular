@@ -8,11 +8,6 @@ permissions:
   contents: read
 
 jobs:
-  build:
-    uses: acoular/ci/.github/workflows/pypi.yml@main
-    with:
-      index: testpypi
-
   conda:
     uses: acoular/ci/.github/workflows/conda.yml@main
 
@@ -29,6 +24,11 @@ jobs:
 
   linting:
     uses: acoular/ci/.github/workflows/linting.yml@main
+
+  pypi:
+    uses: acoular/ci/.github/workflows/pypi.yml@main
+    with:
+      index: testpypi
 
   tests:
     uses: acoular/ci/.github/workflows/tests.yml@main
