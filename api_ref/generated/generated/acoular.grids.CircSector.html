@@ -1,0 +1,871 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>CircSector &#8212; Acoular 26.01 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/sphinx_gallery.css?v=f3715e10" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom_pydata_sphinx_theme.css?v=ac99e154" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../../_static/documentation_options.js?v=56098ba5"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=30646c52"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api_ref/generated/generated/acoular.grids.CircSector';</script>
+    <link rel="icon" href="../../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="PolySector" href="acoular.grids.PolySector.html" />
+    <link rel="prev" title="RectSector3D" href="acoular.grids.RectSector3D.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="26.01" />
+    <meta name="docbuild:last-update" content="Feb 03, 2026"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+<aside class="bd-header-announcement" aria-label="Announcement">
+  <div class="bd-header-announcement__content">👁️📢 Please consider taking the <a href='https://www.soscisurvey.de/acoularsurvey'>Acoular User Survey</a>. ⏱️ It's only 2 minutes! 三三ᕕ( ᐛ )ᕗ</div>
+</aside>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/Acoular_logo.png" class="logo__image only-light" alt="Acoular - Home"/>
+    <img src="../../../_static/Acoular_logo.png" class="logo__image only-dark pst-js-only" alt="Acoular - Home"/>
+  
+  
+    <p class="title logo__title">Acoular</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../install/index.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../news/index.html">
+    What's new
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../contributing/index.html">
+    Contributing
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../literature/index.html">
+    Literature
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/acoular/acoular" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/acoular" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../../_static/pypi.svg" class="icon-link-image" alt="PyPI"/></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../install/index.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../news/index.html">
+    What's new
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../contributing/index.html">
+    Contributing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../literature/index.html">
+    Literature
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/acoular/acoular" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/acoular" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../../_static/pypi.svg" class="icon-link-image" alt="PyPI"/></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../acoular.aiaa.html"><code class="docutils literal notranslate"><span class="pre">aiaa</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="acoular.aiaa.aiaa.html"><code class="docutils literal notranslate"><span class="pre">aiaa</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/acoular.aiaa.aiaa.TimeSamplesAIAABenchmark.html"><code class="docutils literal notranslate"><span class="pre">TimeSamplesAIAABenchmark</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/acoular.aiaa.aiaa.TriggerAIAABenchmark.html"><code class="docutils literal notranslate"><span class="pre">TriggerAIAABenchmark</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/acoular.aiaa.aiaa.CsmAIAABenchmark.html"><code class="docutils literal notranslate"><span class="pre">CsmAIAABenchmark</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/acoular.aiaa.aiaa.MicAIAABenchmark.html"><code class="docutils literal notranslate"><span class="pre">MicAIAABenchmark</span></code></a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../acoular.base.html"><code class="docutils literal notranslate"><span class="pre">base</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="acoular.base.Generator.html"><code class="docutils literal notranslate"><span class="pre">Generator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.base.SamplesGenerator.html"><code class="docutils literal notranslate"><span class="pre">SamplesGenerator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.base.SpectraGenerator.html"><code class="docutils literal notranslate"><span class="pre">SpectraGenerator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.base.InOut.html"><code class="docutils literal notranslate"><span class="pre">InOut</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.base.TimeOut.html"><code class="docutils literal notranslate"><span class="pre">TimeOut</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.base.SpectraOut.html"><code class="docutils literal notranslate"><span class="pre">SpectraOut</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../acoular.calib.html"><code class="docutils literal notranslate"><span class="pre">calib</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="acoular.calib.Calib.html"><code class="docutils literal notranslate"><span class="pre">Calib</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../acoular.configuration.html"><code class="docutils literal notranslate"><span class="pre">configuration</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="acoular.configuration.Config.html"><code class="docutils literal notranslate"><span class="pre">Config</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.configuration.config.html"><code class="docutils literal notranslate"><span class="pre">config</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../acoular.demo.html"><code class="docutils literal notranslate"><span class="pre">demo</span></code></a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../acoular.deprecation.html"><code class="docutils literal notranslate"><span class="pre">deprecation</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="acoular.deprecation.deprecated_alias.html"><code class="docutils literal notranslate"><span class="pre">deprecated_alias</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../acoular.environments.html"><code class="docutils literal notranslate"><span class="pre">environments</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="acoular.environments.Environment.html"><code class="docutils literal notranslate"><span class="pre">Environment</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.environments.UniformFlowEnvironment.html"><code class="docutils literal notranslate"><span class="pre">UniformFlowEnvironment</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.environments.GeneralFlowEnvironment.html"><code class="docutils literal notranslate"><span class="pre">GeneralFlowEnvironment</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.environments.FlowField.html"><code class="docutils literal notranslate"><span class="pre">FlowField</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.environments.OpenJet.html"><code class="docutils literal notranslate"><span class="pre">OpenJet</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.environments.RotatingFlow.html"><code class="docutils literal notranslate"><span class="pre">RotatingFlow</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.environments.SlotJet.html"><code class="docutils literal notranslate"><span class="pre">SlotJet</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.environments.dist_mat.html"><code class="docutils literal notranslate"><span class="pre">dist_mat</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.environments.cylToCart.html"><code class="docutils literal notranslate"><span class="pre">cylToCart</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.environments.cartToCyl.html"><code class="docutils literal notranslate"><span class="pre">cartToCyl</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.environments.spiral_sphere.html"><code class="docutils literal notranslate"><span class="pre">spiral_sphere</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../acoular.fbeamform.html"><code class="docutils literal notranslate"><span class="pre">fbeamform</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="acoular.fbeamform.SteeringVector.html"><code class="docutils literal notranslate"><span class="pre">SteeringVector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.fbeamform.BeamformerBase.html"><code class="docutils literal notranslate"><span class="pre">BeamformerBase</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.fbeamform.BeamformerFunctional.html"><code class="docutils literal notranslate"><span class="pre">BeamformerFunctional</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.fbeamform.BeamformerCapon.html"><code class="docutils literal notranslate"><span class="pre">BeamformerCapon</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.fbeamform.BeamformerEig.html"><code class="docutils literal notranslate"><span class="pre">BeamformerEig</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.fbeamform.BeamformerMusic.html"><code class="docutils literal notranslate"><span class="pre">BeamformerMusic</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.fbeamform.BeamformerClean.html"><code class="docutils literal notranslate"><span class="pre">BeamformerClean</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.fbeamform.BeamformerDamas.html"><code class="docutils literal notranslate"><span class="pre">BeamformerDamas</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.fbeamform.BeamformerDamasPlus.html"><code class="docutils literal notranslate"><span class="pre">BeamformerDamasPlus</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.fbeamform.BeamformerOrth.html"><code class="docutils literal notranslate"><span class="pre">BeamformerOrth</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.fbeamform.BeamformerCleansc.html"><code class="docutils literal notranslate"><span class="pre">BeamformerCleansc</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.fbeamform.BeamformerCMF.html"><code class="docutils literal notranslate"><span class="pre">BeamformerCMF</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.fbeamform.BeamformerSODIX.html"><code class="docutils literal notranslate"><span class="pre">BeamformerSODIX</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.fbeamform.BeamformerGIB.html"><code class="docutils literal notranslate"><span class="pre">BeamformerGIB</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.fbeamform.BeamformerAdaptiveGrid.html"><code class="docutils literal notranslate"><span class="pre">BeamformerAdaptiveGrid</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.fbeamform.BeamformerGridlessOrth.html"><code class="docutils literal notranslate"><span class="pre">BeamformerGridlessOrth</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.fbeamform.PointSpreadFunction.html"><code class="docutils literal notranslate"><span class="pre">PointSpreadFunction</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.fbeamform.L_p.html"><code class="docutils literal notranslate"><span class="pre">L_p</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.fbeamform.integrate.html"><code class="docutils literal notranslate"><span class="pre">integrate</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../acoular.fprocess.html"><code class="docutils literal notranslate"><span class="pre">fprocess</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="acoular.fprocess.RFFT.html"><code class="docutils literal notranslate"><span class="pre">RFFT</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.fprocess.IRFFT.html"><code class="docutils literal notranslate"><span class="pre">IRFFT</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.fprocess.AutoPowerSpectra.html"><code class="docutils literal notranslate"><span class="pre">AutoPowerSpectra</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.fprocess.CrossPowerSpectra.html"><code class="docutils literal notranslate"><span class="pre">CrossPowerSpectra</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../acoular.grids.html"><code class="docutils literal notranslate"><span class="pre">grids</span></code></a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="acoular.grids.Grid.html"><code class="docutils literal notranslate"><span class="pre">Grid</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.grids.RectGrid.html"><code class="docutils literal notranslate"><span class="pre">RectGrid</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.grids.RectGrid3D.html"><code class="docutils literal notranslate"><span class="pre">RectGrid3D</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.grids.ImportGrid.html"><code class="docutils literal notranslate"><span class="pre">ImportGrid</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.grids.LineGrid.html"><code class="docutils literal notranslate"><span class="pre">LineGrid</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.grids.MergeGrid.html"><code class="docutils literal notranslate"><span class="pre">MergeGrid</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.grids.Sector.html"><code class="docutils literal notranslate"><span class="pre">Sector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.grids.SingleSector.html"><code class="docutils literal notranslate"><span class="pre">SingleSector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.grids.RectSector.html"><code class="docutils literal notranslate"><span class="pre">RectSector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.grids.RectSector3D.html"><code class="docutils literal notranslate"><span class="pre">RectSector3D</span></code></a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">CircSector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.grids.PolySector.html"><code class="docutils literal notranslate"><span class="pre">PolySector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.grids.ConvexSector.html"><code class="docutils literal notranslate"><span class="pre">ConvexSector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.grids.MultiSector.html"><code class="docutils literal notranslate"><span class="pre">MultiSector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.grids.Polygon.html"><code class="docutils literal notranslate"><span class="pre">Polygon</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.grids.in_hull.html"><code class="docutils literal notranslate"><span class="pre">in_hull</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../acoular.microphones.html"><code class="docutils literal notranslate"><span class="pre">microphones</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="acoular.microphones.MicGeom.html"><code class="docutils literal notranslate"><span class="pre">MicGeom</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../acoular.process.html"><code class="docutils literal notranslate"><span class="pre">process</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="acoular.process.Average.html"><code class="docutils literal notranslate"><span class="pre">Average</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.process.Cache.html"><code class="docutils literal notranslate"><span class="pre">Cache</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.process.SampleSplitter.html"><code class="docutils literal notranslate"><span class="pre">SampleSplitter</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.process.SamplesBuffer.html"><code class="docutils literal notranslate"><span class="pre">SamplesBuffer</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../acoular.sdinput.html"><code class="docutils literal notranslate"><span class="pre">sdinput</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="acoular.sdinput.SoundDeviceSamplesGenerator.html"><code class="docutils literal notranslate"><span class="pre">SoundDeviceSamplesGenerator</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../acoular.signals.html"><code class="docutils literal notranslate"><span class="pre">signals</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="acoular.signals.SignalGenerator.html"><code class="docutils literal notranslate"><span class="pre">SignalGenerator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.signals.PeriodicSignalGenerator.html"><code class="docutils literal notranslate"><span class="pre">PeriodicSignalGenerator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.signals.NoiseGenerator.html"><code class="docutils literal notranslate"><span class="pre">NoiseGenerator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.signals.WNoiseGenerator.html"><code class="docutils literal notranslate"><span class="pre">WNoiseGenerator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.signals.PNoiseGenerator.html"><code class="docutils literal notranslate"><span class="pre">PNoiseGenerator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.signals.FiltWNoiseGenerator.html"><code class="docutils literal notranslate"><span class="pre">FiltWNoiseGenerator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.signals.SineGenerator.html"><code class="docutils literal notranslate"><span class="pre">SineGenerator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.signals.GenericSignalGenerator.html"><code class="docutils literal notranslate"><span class="pre">GenericSignalGenerator</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../acoular.sources.html"><code class="docutils literal notranslate"><span class="pre">sources</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="acoular.sources.TimeSamples.html"><code class="docutils literal notranslate"><span class="pre">TimeSamples</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.sources.MaskedTimeSamples.html"><code class="docutils literal notranslate"><span class="pre">MaskedTimeSamples</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.sources.PointSource.html"><code class="docutils literal notranslate"><span class="pre">PointSource</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.sources.PointSourceDipole.html"><code class="docutils literal notranslate"><span class="pre">PointSourceDipole</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.sources.SphericalHarmonicSource.html"><code class="docutils literal notranslate"><span class="pre">SphericalHarmonicSource</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.sources.LineSource.html"><code class="docutils literal notranslate"><span class="pre">LineSource</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.sources.MovingPointSource.html"><code class="docutils literal notranslate"><span class="pre">MovingPointSource</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.sources.MovingPointSourceDipole.html"><code class="docutils literal notranslate"><span class="pre">MovingPointSourceDipole</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.sources.MovingLineSource.html"><code class="docutils literal notranslate"><span class="pre">MovingLineSource</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.sources.UncorrelatedNoiseSource.html"><code class="docutils literal notranslate"><span class="pre">UncorrelatedNoiseSource</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.sources.SourceMixer.html"><code class="docutils literal notranslate"><span class="pre">SourceMixer</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.sources.PointSourceConvolve.html"><code class="docutils literal notranslate"><span class="pre">PointSourceConvolve</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.sources.spherical_hn1.html"><code class="docutils literal notranslate"><span class="pre">spherical_hn1</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.sources.get_radiation_angles.html"><code class="docutils literal notranslate"><span class="pre">get_radiation_angles</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.sources.get_modes.html"><code class="docutils literal notranslate"><span class="pre">get_modes</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../acoular.spectra.html"><code class="docutils literal notranslate"><span class="pre">spectra</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="acoular.spectra.BaseSpectra.html"><code class="docutils literal notranslate"><span class="pre">BaseSpectra</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.spectra.PowerSpectra.html"><code class="docutils literal notranslate"><span class="pre">PowerSpectra</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.spectra.PowerSpectraImport.html"><code class="docutils literal notranslate"><span class="pre">PowerSpectraImport</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../acoular.tbeamform.html"><code class="docutils literal notranslate"><span class="pre">tbeamform</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="acoular.tbeamform.BeamformerTime.html"><code class="docutils literal notranslate"><span class="pre">BeamformerTime</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.tbeamform.BeamformerTimeTraj.html"><code class="docutils literal notranslate"><span class="pre">BeamformerTimeTraj</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.tbeamform.BeamformerTimeSq.html"><code class="docutils literal notranslate"><span class="pre">BeamformerTimeSq</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.tbeamform.BeamformerTimeSqTraj.html"><code class="docutils literal notranslate"><span class="pre">BeamformerTimeSqTraj</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.tbeamform.BeamformerCleant.html"><code class="docutils literal notranslate"><span class="pre">BeamformerCleant</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.tbeamform.BeamformerCleantTraj.html"><code class="docutils literal notranslate"><span class="pre">BeamformerCleantTraj</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.tbeamform.BeamformerCleantSq.html"><code class="docutils literal notranslate"><span class="pre">BeamformerCleantSq</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.tbeamform.BeamformerCleantSqTraj.html"><code class="docutils literal notranslate"><span class="pre">BeamformerCleantSqTraj</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.tbeamform.IntegratorSectorTime.html"><code class="docutils literal notranslate"><span class="pre">IntegratorSectorTime</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../acoular.tools.html"><code class="docutils literal notranslate"><span class="pre">tools</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="acoular.tools.helpers.html"><code class="docutils literal notranslate"><span class="pre">helpers</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/acoular.tools.helpers.synthetic.html"><code class="docutils literal notranslate"><span class="pre">synthetic</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/acoular.tools.helpers.return_result.html"><code class="docutils literal notranslate"><span class="pre">return_result</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/acoular.tools.helpers.barspectrum.html"><code class="docutils literal notranslate"><span class="pre">barspectrum</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/acoular.tools.helpers.bardata.html"><code class="docutils literal notranslate"><span class="pre">bardata</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/acoular.tools.helpers.c_air.html"><code class="docutils literal notranslate"><span class="pre">c_air</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/acoular.tools.helpers.get_data_file.html"><code class="docutils literal notranslate"><span class="pre">get_data_file</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="acoular.tools.metrics.html"><code class="docutils literal notranslate"><span class="pre">metrics</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/acoular.tools.metrics.MetricEvaluator.html"><code class="docutils literal notranslate"><span class="pre">MetricEvaluator</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="acoular.tools.utils.html"><code class="docutils literal notranslate"><span class="pre">utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/acoular.tools.utils.get_file_basename.html"><code class="docutils literal notranslate"><span class="pre">get_file_basename</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/acoular.tools.utils.find_basename.html"><code class="docutils literal notranslate"><span class="pre">find_basename</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/acoular.tools.utils.mole_fraction_of_water_vapor.html"><code class="docutils literal notranslate"><span class="pre">mole_fraction_of_water_vapor</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/acoular.tools.utils.Polygon.html"><code class="docutils literal notranslate"><span class="pre">Polygon</span></code></a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../acoular.tprocess.html"><code class="docutils literal notranslate"><span class="pre">tprocess</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="acoular.tprocess.MaskedTimeOut.html"><code class="docutils literal notranslate"><span class="pre">MaskedTimeOut</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.tprocess.Trigger.html"><code class="docutils literal notranslate"><span class="pre">Trigger</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.tprocess.AngleTracker.html"><code class="docutils literal notranslate"><span class="pre">AngleTracker</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.tprocess.ChannelMixer.html"><code class="docutils literal notranslate"><span class="pre">ChannelMixer</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.tprocess.SpatialInterpolator.html"><code class="docutils literal notranslate"><span class="pre">SpatialInterpolator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.tprocess.SpatialInterpolatorRotation.html"><code class="docutils literal notranslate"><span class="pre">SpatialInterpolatorRotation</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.tprocess.SpatialInterpolatorConstantRotation.html"><code class="docutils literal notranslate"><span class="pre">SpatialInterpolatorConstantRotation</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.tprocess.Mixer.html"><code class="docutils literal notranslate"><span class="pre">Mixer</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.tprocess.TimePower.html"><code class="docutils literal notranslate"><span class="pre">TimePower</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.tprocess.TimeCumAverage.html"><code class="docutils literal notranslate"><span class="pre">TimeCumAverage</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.tprocess.TimeReverse.html"><code class="docutils literal notranslate"><span class="pre">TimeReverse</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.tprocess.Filter.html"><code class="docutils literal notranslate"><span class="pre">Filter</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.tprocess.FilterBank.html"><code class="docutils literal notranslate"><span class="pre">FilterBank</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.tprocess.FiltFiltOctave.html"><code class="docutils literal notranslate"><span class="pre">FiltFiltOctave</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.tprocess.FiltOctave.html"><code class="docutils literal notranslate"><span class="pre">FiltOctave</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.tprocess.TimeExpAverage.html"><code class="docutils literal notranslate"><span class="pre">TimeExpAverage</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.tprocess.FiltFreqWeight.html"><code class="docutils literal notranslate"><span class="pre">FiltFreqWeight</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.tprocess.OctaveFilterBank.html"><code class="docutils literal notranslate"><span class="pre">OctaveFilterBank</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.tprocess.WriteWAV.html"><code class="docutils literal notranslate"><span class="pre">WriteWAV</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.tprocess.WriteH5.html"><code class="docutils literal notranslate"><span class="pre">WriteH5</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoular.tprocess.TimeConvolve.html"><code class="docutils literal notranslate"><span class="pre">TimeConvolve</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../acoular.trajectory.html"><code class="docutils literal notranslate"><span class="pre">trajectory</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="acoular.trajectory.Trajectory.html"><code class="docutils literal notranslate"><span class="pre">Trajectory</span></code></a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Reference Manual</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="../acoular.grids.html" class="nav-link"><code class="docutils literal notranslate"><span class="pre">grids</span></code></a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis"><code class="docutils literal notranslate"><span class="pre">CircSector</span></code></span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="circsector">
+<h1><code class="docutils literal notranslate"><span class="pre">CircSector</span></code><a class="headerlink" href="#circsector" title="Link to this heading">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.grids.</span></span><span class="sig-name descname"><span class="pre">CircSector</span></span></dt>
+<dd><p>Bases: <a class="reference internal" href="../acoular.grids.html#acoular.grids.SingleSector" title="acoular.grids.SingleSector"><code class="xref py py-class docutils literal notranslate"><span class="pre">SingleSector</span></code></a></p>
+<p>Class for defining a circular sector.</p>
+<p>Defines a circular sector, which can be used for both 2D grids (as a circle in the XY-plane) or
+for 3D grids (as a cylindrical sector parallel to the z-axis). The sector is defined by its
+center position (<a class="reference internal" href="../acoular.grids.html#acoular.grids.CircSector.x" title="acoular.grids.CircSector.x"><code class="xref py py-attr docutils literal notranslate"><span class="pre">x</span></code></a>, <a class="reference internal" href="../acoular.grids.html#acoular.grids.CircSector.y" title="acoular.grids.CircSector.y"><code class="xref py py-attr docutils literal notranslate"><span class="pre">y</span></code></a>) and its radius <a class="reference internal" href="../acoular.grids.html#acoular.grids.CircSector.r" title="acoular.grids.CircSector.r"><code class="xref py py-attr docutils literal notranslate"><span class="pre">r</span></code></a>.</p>
+<p class="rubric">Examples</p>
+<p>Load example data and set diffrent Sectors for intergration in the
+<a class="reference internal" href="../../../auto_examples/wind_tunnel_examples/example_sectors_and_integration.html#sector-integration-example"><span class="std std-ref">sector integration example</span></a>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">x</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(0.0)</span></em></dt>
+<dd><p>The x position of the circle center. Default is <code class="docutils literal notranslate"><span class="pre">0.0</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">y</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(0.0)</span></em></dt>
+<dd><p>The y position of the circle center. Default is <code class="docutils literal notranslate"><span class="pre">0.0</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">r</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(1.0)</span></em></dt>
+<dd><p>Radius of the circle. Default is <code class="docutils literal notranslate"><span class="pre">1.0</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">contains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Check if the coordinates in a given array lie within the circular sector.</p>
+<p>The method calculates the squared distance of each point from the center of the circle and
+checks if it lies within the sector, considering the sector’s radius <a class="reference internal" href="../acoular.grids.html#acoular.grids.CircSector.r" title="acoular.grids.CircSector.r"><code class="xref py py-attr docutils literal notranslate"><span class="pre">r</span></code></a>. If no point
+is inside and <a class="reference internal" href="../acoular.grids.html#acoular.grids.SingleSector.default_nearest" title="acoular.grids.SingleSector.default_nearest"><code class="xref py py-attr docutils literal notranslate"><span class="pre">default_nearest</span></code></a> is <code class="docutils literal notranslate"><span class="pre">True</span></code>, the nearest point outside
+the sector will be returned.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>pos</strong><span class="classifier">array of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floats</span></code></a></span></dt><dd><p>A (3, N) array containing the positions of N grid points, where each point is
+represented by its x, y, and z coordinates.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bools</span></code></a></dt><dd><p>A boolean array of shape shape (N,) indicating which of the given positions lie within
+the circular sector. <code class="docutils literal notranslate"><span class="pre">True</span></code> if the grid point is inside the circular sector,
+otherwise <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">acoular</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ac</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">grid</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">RectGrid</span><span class="p">(</span><span class="n">increment</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">grid</span><span class="o">.</span><span class="n">pos</span>
+<span class="go">array([[-1., -1., -1.,  0.,  0.,  0.,  1.,  1.,  1.],</span>
+<span class="go">       [-1.,  0.,  1., -1.,  0.,  1., -1.,  0.,  1.],</span>
+<span class="go">       [ 1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sec</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">CircSector</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sec</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
+<span class="go">array([False, False, False, False, False, False, False, False,  True])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="acoular.grids.RectSector3D.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">RectSector3D</span></code></p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="acoular.grids.PolySector.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">PolySector</span></code></p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+
+  
+  <div class="tocsection editthispage">
+    <a href="https://github.com/acoular/acoular/edit/master/docs/source/api_ref/generated/generated/acoular.grids.CircSector.rst">
+      <i class="fa-solid fa-pencil"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2026, Acoular Development Team.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

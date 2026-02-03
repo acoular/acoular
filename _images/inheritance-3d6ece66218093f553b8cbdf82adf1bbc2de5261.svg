@@ -1,0 +1,119 @@
+<ns0:svg xmlns:ns0="http://www.w3.org/2000/svg" xmlns:ns1="http://www.w3.org/1999/xlink" width="414pt" height="138pt" viewBox="0.00 0.00 414.00 138.00">
+<ns0:g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 134)">
+<ns0:title>inheritancee2ea0c1ab4</ns0:title>
+
+<ns0:g id="node1" class="node">
+<ns0:title>CircSector</ns0:title>
+<ns0:g id="a_node1"><ns0:a ns1:href="../api_ref/generated/acoular.grids.html#acoular.grids.CircSector" ns1:title="Class for defining a circular sector." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="278,-130 212,-130 212,-111 278,-111 278,-130" />
+<ns0:text text-anchor="middle" x="245" y="-118" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">CircSector</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node2" class="node">
+<ns0:title>SingleSector</ns0:title>
+<ns0:g id="a_node2"><ns0:a ns1:href="../api_ref/generated/acoular.grids.html#acoular.grids.SingleSector" ns1:title="Base class for single sector types." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="167,-74 90,-74 90,-55 167,-55 167,-74" />
+<ns0:text text-anchor="middle" x="128.5" y="-62" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">SingleSector</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge1" class="edge">
+<ns0:title>SingleSector-&gt;CircSector</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M147.16,-74.03C161.95,-81.92 183.68,-93.28 203,-102.5 207.33,-104.57 211.95,-106.68 216.47,-108.7" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="216.05,-110.43 221.33,-110.85 217.46,-107.23 216.05,-110.43" />
+</ns0:g>
+
+<ns0:g id="node3" class="node">
+<ns0:title>ConvexSector</ns0:title>
+<ns0:g id="a_node3"><ns0:a ns1:href="../api_ref/generated/acoular.grids.html#acoular.grids.ConvexSector" ns1:title="Class for defining a convex hull sector." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="287,-93 203,-93 203,-74 287,-74 287,-93" />
+<ns0:text text-anchor="middle" x="245" y="-81" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">ConvexSector</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge2" class="edge">
+<ns0:title>SingleSector-&gt;ConvexSector</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M167.31,-70.77C176.96,-72.38 187.45,-74.12 197.48,-75.78" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="197.46,-77.55 202.68,-76.64 198.03,-74.1 197.46,-77.55" />
+</ns0:g>
+
+<ns0:g id="node6" class="node">
+<ns0:title>PolySector</ns0:title>
+<ns0:g id="a_node6"><ns0:a ns1:href="../api_ref/generated/acoular.grids.html#acoular.grids.PolySector" ns1:title="Class for defining a polygon sector." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="279,-56 211,-56 211,-37 279,-37 279,-56" />
+<ns0:text text-anchor="middle" x="245" y="-44" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">PolySector</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge4" class="edge">
+<ns0:title>SingleSector-&gt;PolySector</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M167.31,-58.56C179.62,-56.62 193.29,-54.47 205.64,-52.53" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="206.18,-54.22 210.85,-51.71 205.64,-50.76 206.18,-54.22" />
+</ns0:g>
+
+<ns0:g id="node7" class="node">
+<ns0:title>RectSector</ns0:title>
+<ns0:g id="a_node7"><ns0:a ns1:href="../api_ref/generated/acoular.grids.html#acoular.grids.RectSector" ns1:title="Class for defining a rectangular sector." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="279.5,-19 210.5,-19 210.5,0 279.5,0 279.5,-19" />
+<ns0:text text-anchor="middle" x="245" y="-7" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">RectSector</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge5" class="edge">
+<ns0:title>SingleSector-&gt;RectSector</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M149.77,-54.84C155.36,-52.16 161.42,-49.23 167,-46.5 183.06,-38.63 186.88,-36.26 203,-28.5 207.98,-26.1 213.32,-23.59 218.45,-21.2" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="219.29,-22.74 223.09,-19.05 217.81,-19.56 219.29,-22.74" />
+</ns0:g>
+
+<ns0:g id="node4" class="node">
+<ns0:title>MultiSector</ns0:title>
+<ns0:g id="a_node4"><ns0:a ns1:href="../api_ref/generated/acoular.grids.html#acoular.grids.MultiSector" ns1:title="Class for defining a sector consisting of multiple sectors." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="164.5,-37 92.5,-37 92.5,-18 164.5,-18 164.5,-37" />
+<ns0:text text-anchor="middle" x="128.5" y="-25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">MultiSector</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node5" class="node">
+<ns0:title>Sector</ns0:title>
+<ns0:g id="a_node5"><ns0:a ns1:href="../api_ref/generated/acoular.grids.html#acoular.grids.Sector" ns1:title="Abstract base class for all sector types." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="54,-55 0,-55 0,-36 54,-36 54,-55" />
+<ns0:text text-anchor="middle" x="27" y="-43" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">Sector</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge7" class="edge">
+<ns0:title>Sector-&gt;SingleSector</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M54.14,-50.49C63.54,-52.29 74.41,-54.36 84.85,-56.36" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="84.69,-58.11 89.93,-57.33 85.35,-54.67 84.69,-58.11" />
+</ns0:g>
+
+<ns0:g id="edge3" class="edge">
+<ns0:title>Sector-&gt;MultiSector</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M54.14,-40.77C64.23,-38.95 76,-36.82 87.12,-34.8" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="87.57,-36.5 92.18,-33.89 86.95,-33.06 87.57,-36.5" />
+</ns0:g>
+
+<ns0:g id="node8" class="node">
+<ns0:title>RectSector3D</ns0:title>
+<ns0:g id="a_node8"><ns0:a ns1:href="../api_ref/generated/acoular.grids.html#acoular.grids.RectSector3D" ns1:title="Class for defining a cuboid sector." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="406,-19 323,-19 323,0 406,0 406,-19" />
+<ns0:text text-anchor="middle" x="364.5" y="-7" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">RectSector3D</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge6" class="edge">
+<ns0:title>RectSector-&gt;RectSector3D</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M279.67,-9.5C291.42,-9.5 304.82,-9.5 317.4,-9.5" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="317.74,-11.25 322.74,-9.5 317.74,-7.75 317.74,-11.25" />
+</ns0:g>
+</ns0:g>
+</ns0:svg>

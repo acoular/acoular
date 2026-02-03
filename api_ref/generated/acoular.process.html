@@ -1,0 +1,1548 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>process &#8212; Acoular 26.01 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/sphinx_gallery.css?v=f3715e10" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom_pydata_sphinx_theme.css?v=ac99e154" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=56098ba5"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=30646c52"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api_ref/generated/acoular.process';</script>
+    <link rel="icon" href="../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Average" href="generated/acoular.process.Average.html" />
+    <link rel="prev" title="MicGeom" href="generated/acoular.microphones.MicGeom.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="26.01" />
+    <meta name="docbuild:last-update" content="Feb 03, 2026"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+<aside class="bd-header-announcement" aria-label="Announcement">
+  <div class="bd-header-announcement__content">👁️📢 Please consider taking the <a href='https://www.soscisurvey.de/acoularsurvey'>Acoular User Survey</a>. ⏱️ It's only 2 minutes! 三三ᕕ( ᐛ )ᕗ</div>
+</aside>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/Acoular_logo.png" class="logo__image only-light" alt="Acoular - Home"/>
+    <img src="../../_static/Acoular_logo.png" class="logo__image only-dark pst-js-only" alt="Acoular - Home"/>
+  
+  
+    <p class="title logo__title">Acoular</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../install/index.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../user_guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../news/index.html">
+    What's new
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../contributing/index.html">
+    Contributing
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../literature/index.html">
+    Literature
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/acoular/acoular" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/acoular" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/pypi.svg" class="icon-link-image" alt="PyPI"/></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../install/index.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../user_guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../news/index.html">
+    What's new
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../contributing/index.html">
+    Contributing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../literature/index.html">
+    Literature
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/acoular/acoular" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/acoular" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/pypi.svg" class="icon-link-image" alt="PyPI"/></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.aiaa.html"><code class="docutils literal notranslate"><span class="pre">aiaa</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/acoular.aiaa.aiaa.html"><code class="docutils literal notranslate"><span class="pre">aiaa</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.aiaa.aiaa.TimeSamplesAIAABenchmark.html"><code class="docutils literal notranslate"><span class="pre">TimeSamplesAIAABenchmark</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.aiaa.aiaa.TriggerAIAABenchmark.html"><code class="docutils literal notranslate"><span class="pre">TriggerAIAABenchmark</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.aiaa.aiaa.CsmAIAABenchmark.html"><code class="docutils literal notranslate"><span class="pre">CsmAIAABenchmark</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.aiaa.aiaa.MicAIAABenchmark.html"><code class="docutils literal notranslate"><span class="pre">MicAIAABenchmark</span></code></a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.base.html"><code class="docutils literal notranslate"><span class="pre">base</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.base.Generator.html"><code class="docutils literal notranslate"><span class="pre">Generator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.base.SamplesGenerator.html"><code class="docutils literal notranslate"><span class="pre">SamplesGenerator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.base.SpectraGenerator.html"><code class="docutils literal notranslate"><span class="pre">SpectraGenerator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.base.InOut.html"><code class="docutils literal notranslate"><span class="pre">InOut</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.base.TimeOut.html"><code class="docutils literal notranslate"><span class="pre">TimeOut</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.base.SpectraOut.html"><code class="docutils literal notranslate"><span class="pre">SpectraOut</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.calib.html"><code class="docutils literal notranslate"><span class="pre">calib</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.calib.Calib.html"><code class="docutils literal notranslate"><span class="pre">Calib</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.configuration.html"><code class="docutils literal notranslate"><span class="pre">configuration</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.configuration.Config.html"><code class="docutils literal notranslate"><span class="pre">Config</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.configuration.config.html"><code class="docutils literal notranslate"><span class="pre">config</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="acoular.demo.html"><code class="docutils literal notranslate"><span class="pre">demo</span></code></a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.deprecation.html"><code class="docutils literal notranslate"><span class="pre">deprecation</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.deprecation.deprecated_alias.html"><code class="docutils literal notranslate"><span class="pre">deprecated_alias</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.environments.html"><code class="docutils literal notranslate"><span class="pre">environments</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.environments.Environment.html"><code class="docutils literal notranslate"><span class="pre">Environment</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.environments.UniformFlowEnvironment.html"><code class="docutils literal notranslate"><span class="pre">UniformFlowEnvironment</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.environments.GeneralFlowEnvironment.html"><code class="docutils literal notranslate"><span class="pre">GeneralFlowEnvironment</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.environments.FlowField.html"><code class="docutils literal notranslate"><span class="pre">FlowField</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.environments.OpenJet.html"><code class="docutils literal notranslate"><span class="pre">OpenJet</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.environments.RotatingFlow.html"><code class="docutils literal notranslate"><span class="pre">RotatingFlow</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.environments.SlotJet.html"><code class="docutils literal notranslate"><span class="pre">SlotJet</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.environments.dist_mat.html"><code class="docutils literal notranslate"><span class="pre">dist_mat</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.environments.cylToCart.html"><code class="docutils literal notranslate"><span class="pre">cylToCart</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.environments.cartToCyl.html"><code class="docutils literal notranslate"><span class="pre">cartToCyl</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.environments.spiral_sphere.html"><code class="docutils literal notranslate"><span class="pre">spiral_sphere</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.fbeamform.html"><code class="docutils literal notranslate"><span class="pre">fbeamform</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.SteeringVector.html"><code class="docutils literal notranslate"><span class="pre">SteeringVector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerBase.html"><code class="docutils literal notranslate"><span class="pre">BeamformerBase</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerFunctional.html"><code class="docutils literal notranslate"><span class="pre">BeamformerFunctional</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerCapon.html"><code class="docutils literal notranslate"><span class="pre">BeamformerCapon</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerEig.html"><code class="docutils literal notranslate"><span class="pre">BeamformerEig</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerMusic.html"><code class="docutils literal notranslate"><span class="pre">BeamformerMusic</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerClean.html"><code class="docutils literal notranslate"><span class="pre">BeamformerClean</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerDamas.html"><code class="docutils literal notranslate"><span class="pre">BeamformerDamas</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerDamasPlus.html"><code class="docutils literal notranslate"><span class="pre">BeamformerDamasPlus</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerOrth.html"><code class="docutils literal notranslate"><span class="pre">BeamformerOrth</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerCleansc.html"><code class="docutils literal notranslate"><span class="pre">BeamformerCleansc</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerCMF.html"><code class="docutils literal notranslate"><span class="pre">BeamformerCMF</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerSODIX.html"><code class="docutils literal notranslate"><span class="pre">BeamformerSODIX</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerGIB.html"><code class="docutils literal notranslate"><span class="pre">BeamformerGIB</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerAdaptiveGrid.html"><code class="docutils literal notranslate"><span class="pre">BeamformerAdaptiveGrid</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerGridlessOrth.html"><code class="docutils literal notranslate"><span class="pre">BeamformerGridlessOrth</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.PointSpreadFunction.html"><code class="docutils literal notranslate"><span class="pre">PointSpreadFunction</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.L_p.html"><code class="docutils literal notranslate"><span class="pre">L_p</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.integrate.html"><code class="docutils literal notranslate"><span class="pre">integrate</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.fprocess.html"><code class="docutils literal notranslate"><span class="pre">fprocess</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fprocess.RFFT.html"><code class="docutils literal notranslate"><span class="pre">RFFT</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fprocess.IRFFT.html"><code class="docutils literal notranslate"><span class="pre">IRFFT</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fprocess.AutoPowerSpectra.html"><code class="docutils literal notranslate"><span class="pre">AutoPowerSpectra</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fprocess.CrossPowerSpectra.html"><code class="docutils literal notranslate"><span class="pre">CrossPowerSpectra</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.grids.html"><code class="docutils literal notranslate"><span class="pre">grids</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.Grid.html"><code class="docutils literal notranslate"><span class="pre">Grid</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.RectGrid.html"><code class="docutils literal notranslate"><span class="pre">RectGrid</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.RectGrid3D.html"><code class="docutils literal notranslate"><span class="pre">RectGrid3D</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.ImportGrid.html"><code class="docutils literal notranslate"><span class="pre">ImportGrid</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.LineGrid.html"><code class="docutils literal notranslate"><span class="pre">LineGrid</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.MergeGrid.html"><code class="docutils literal notranslate"><span class="pre">MergeGrid</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.Sector.html"><code class="docutils literal notranslate"><span class="pre">Sector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.SingleSector.html"><code class="docutils literal notranslate"><span class="pre">SingleSector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.RectSector.html"><code class="docutils literal notranslate"><span class="pre">RectSector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.RectSector3D.html"><code class="docutils literal notranslate"><span class="pre">RectSector3D</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.CircSector.html"><code class="docutils literal notranslate"><span class="pre">CircSector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.PolySector.html"><code class="docutils literal notranslate"><span class="pre">PolySector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.ConvexSector.html"><code class="docutils literal notranslate"><span class="pre">ConvexSector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.MultiSector.html"><code class="docutils literal notranslate"><span class="pre">MultiSector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.Polygon.html"><code class="docutils literal notranslate"><span class="pre">Polygon</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.in_hull.html"><code class="docutils literal notranslate"><span class="pre">in_hull</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.microphones.html"><code class="docutils literal notranslate"><span class="pre">microphones</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.microphones.MicGeom.html"><code class="docutils literal notranslate"><span class="pre">MicGeom</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">process</span></code></a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.process.Average.html"><code class="docutils literal notranslate"><span class="pre">Average</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.process.Cache.html"><code class="docutils literal notranslate"><span class="pre">Cache</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.process.SampleSplitter.html"><code class="docutils literal notranslate"><span class="pre">SampleSplitter</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.process.SamplesBuffer.html"><code class="docutils literal notranslate"><span class="pre">SamplesBuffer</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.sdinput.html"><code class="docutils literal notranslate"><span class="pre">sdinput</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sdinput.SoundDeviceSamplesGenerator.html"><code class="docutils literal notranslate"><span class="pre">SoundDeviceSamplesGenerator</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.signals.html"><code class="docutils literal notranslate"><span class="pre">signals</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.signals.SignalGenerator.html"><code class="docutils literal notranslate"><span class="pre">SignalGenerator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.signals.PeriodicSignalGenerator.html"><code class="docutils literal notranslate"><span class="pre">PeriodicSignalGenerator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.signals.NoiseGenerator.html"><code class="docutils literal notranslate"><span class="pre">NoiseGenerator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.signals.WNoiseGenerator.html"><code class="docutils literal notranslate"><span class="pre">WNoiseGenerator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.signals.PNoiseGenerator.html"><code class="docutils literal notranslate"><span class="pre">PNoiseGenerator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.signals.FiltWNoiseGenerator.html"><code class="docutils literal notranslate"><span class="pre">FiltWNoiseGenerator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.signals.SineGenerator.html"><code class="docutils literal notranslate"><span class="pre">SineGenerator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.signals.GenericSignalGenerator.html"><code class="docutils literal notranslate"><span class="pre">GenericSignalGenerator</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.sources.html"><code class="docutils literal notranslate"><span class="pre">sources</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.TimeSamples.html"><code class="docutils literal notranslate"><span class="pre">TimeSamples</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.MaskedTimeSamples.html"><code class="docutils literal notranslate"><span class="pre">MaskedTimeSamples</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.PointSource.html"><code class="docutils literal notranslate"><span class="pre">PointSource</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.PointSourceDipole.html"><code class="docutils literal notranslate"><span class="pre">PointSourceDipole</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.SphericalHarmonicSource.html"><code class="docutils literal notranslate"><span class="pre">SphericalHarmonicSource</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.LineSource.html"><code class="docutils literal notranslate"><span class="pre">LineSource</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.MovingPointSource.html"><code class="docutils literal notranslate"><span class="pre">MovingPointSource</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.MovingPointSourceDipole.html"><code class="docutils literal notranslate"><span class="pre">MovingPointSourceDipole</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.MovingLineSource.html"><code class="docutils literal notranslate"><span class="pre">MovingLineSource</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.UncorrelatedNoiseSource.html"><code class="docutils literal notranslate"><span class="pre">UncorrelatedNoiseSource</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.SourceMixer.html"><code class="docutils literal notranslate"><span class="pre">SourceMixer</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.PointSourceConvolve.html"><code class="docutils literal notranslate"><span class="pre">PointSourceConvolve</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.spherical_hn1.html"><code class="docutils literal notranslate"><span class="pre">spherical_hn1</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.get_radiation_angles.html"><code class="docutils literal notranslate"><span class="pre">get_radiation_angles</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.get_modes.html"><code class="docutils literal notranslate"><span class="pre">get_modes</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.spectra.html"><code class="docutils literal notranslate"><span class="pre">spectra</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.spectra.BaseSpectra.html"><code class="docutils literal notranslate"><span class="pre">BaseSpectra</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.spectra.PowerSpectra.html"><code class="docutils literal notranslate"><span class="pre">PowerSpectra</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.spectra.PowerSpectraImport.html"><code class="docutils literal notranslate"><span class="pre">PowerSpectraImport</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.tbeamform.html"><code class="docutils literal notranslate"><span class="pre">tbeamform</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tbeamform.BeamformerTime.html"><code class="docutils literal notranslate"><span class="pre">BeamformerTime</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tbeamform.BeamformerTimeTraj.html"><code class="docutils literal notranslate"><span class="pre">BeamformerTimeTraj</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tbeamform.BeamformerTimeSq.html"><code class="docutils literal notranslate"><span class="pre">BeamformerTimeSq</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tbeamform.BeamformerTimeSqTraj.html"><code class="docutils literal notranslate"><span class="pre">BeamformerTimeSqTraj</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tbeamform.BeamformerCleant.html"><code class="docutils literal notranslate"><span class="pre">BeamformerCleant</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tbeamform.BeamformerCleantTraj.html"><code class="docutils literal notranslate"><span class="pre">BeamformerCleantTraj</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tbeamform.BeamformerCleantSq.html"><code class="docutils literal notranslate"><span class="pre">BeamformerCleantSq</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tbeamform.BeamformerCleantSqTraj.html"><code class="docutils literal notranslate"><span class="pre">BeamformerCleantSqTraj</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tbeamform.IntegratorSectorTime.html"><code class="docutils literal notranslate"><span class="pre">IntegratorSectorTime</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.tools.html"><code class="docutils literal notranslate"><span class="pre">tools</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/acoular.tools.helpers.html"><code class="docutils literal notranslate"><span class="pre">helpers</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.tools.helpers.synthetic.html"><code class="docutils literal notranslate"><span class="pre">synthetic</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.tools.helpers.return_result.html"><code class="docutils literal notranslate"><span class="pre">return_result</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.tools.helpers.barspectrum.html"><code class="docutils literal notranslate"><span class="pre">barspectrum</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.tools.helpers.bardata.html"><code class="docutils literal notranslate"><span class="pre">bardata</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.tools.helpers.c_air.html"><code class="docutils literal notranslate"><span class="pre">c_air</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.tools.helpers.get_data_file.html"><code class="docutils literal notranslate"><span class="pre">get_data_file</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/acoular.tools.metrics.html"><code class="docutils literal notranslate"><span class="pre">metrics</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.tools.metrics.MetricEvaluator.html"><code class="docutils literal notranslate"><span class="pre">MetricEvaluator</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/acoular.tools.utils.html"><code class="docutils literal notranslate"><span class="pre">utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.tools.utils.get_file_basename.html"><code class="docutils literal notranslate"><span class="pre">get_file_basename</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.tools.utils.find_basename.html"><code class="docutils literal notranslate"><span class="pre">find_basename</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.tools.utils.mole_fraction_of_water_vapor.html"><code class="docutils literal notranslate"><span class="pre">mole_fraction_of_water_vapor</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.tools.utils.Polygon.html"><code class="docutils literal notranslate"><span class="pre">Polygon</span></code></a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.tprocess.html"><code class="docutils literal notranslate"><span class="pre">tprocess</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.MaskedTimeOut.html"><code class="docutils literal notranslate"><span class="pre">MaskedTimeOut</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.Trigger.html"><code class="docutils literal notranslate"><span class="pre">Trigger</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.AngleTracker.html"><code class="docutils literal notranslate"><span class="pre">AngleTracker</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.ChannelMixer.html"><code class="docutils literal notranslate"><span class="pre">ChannelMixer</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.SpatialInterpolator.html"><code class="docutils literal notranslate"><span class="pre">SpatialInterpolator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.SpatialInterpolatorRotation.html"><code class="docutils literal notranslate"><span class="pre">SpatialInterpolatorRotation</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.SpatialInterpolatorConstantRotation.html"><code class="docutils literal notranslate"><span class="pre">SpatialInterpolatorConstantRotation</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.Mixer.html"><code class="docutils literal notranslate"><span class="pre">Mixer</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.TimePower.html"><code class="docutils literal notranslate"><span class="pre">TimePower</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.TimeCumAverage.html"><code class="docutils literal notranslate"><span class="pre">TimeCumAverage</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.TimeReverse.html"><code class="docutils literal notranslate"><span class="pre">TimeReverse</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.Filter.html"><code class="docutils literal notranslate"><span class="pre">Filter</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.FilterBank.html"><code class="docutils literal notranslate"><span class="pre">FilterBank</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.FiltFiltOctave.html"><code class="docutils literal notranslate"><span class="pre">FiltFiltOctave</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.FiltOctave.html"><code class="docutils literal notranslate"><span class="pre">FiltOctave</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.TimeExpAverage.html"><code class="docutils literal notranslate"><span class="pre">TimeExpAverage</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.FiltFreqWeight.html"><code class="docutils literal notranslate"><span class="pre">FiltFreqWeight</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.OctaveFilterBank.html"><code class="docutils literal notranslate"><span class="pre">OctaveFilterBank</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.WriteWAV.html"><code class="docutils literal notranslate"><span class="pre">WriteWAV</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.WriteH5.html"><code class="docutils literal notranslate"><span class="pre">WriteH5</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.TimeConvolve.html"><code class="docutils literal notranslate"><span class="pre">TimeConvolve</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.trajectory.html"><code class="docutils literal notranslate"><span class="pre">trajectory</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.trajectory.Trajectory.html"><code class="docutils literal notranslate"><span class="pre">Trajectory</span></code></a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Reference Manual</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis"><code class="docutils literal notranslate"><span class="pre">process</span></code></span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="module-acoular.process">
+<span id="process"></span><h1><code class="docutils literal notranslate"><span class="pre">process</span></code><a class="headerlink" href="#module-acoular.process" title="Link to this heading">#</a></h1>
+<p>General purpose blockwise processing methods independent of the domain (time or frequency).</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#acoular.process.Average" title="acoular.process.Average"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Average</span></code></a></p></td>
+<td><p>Calculate the average across consecutive time samples or frequency snapshots.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#acoular.process.Cache" title="acoular.process.Cache"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Cache</span></code></a></p></td>
+<td><p>Cache the output of a source in a file to avoid redundant computations.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#acoular.process.SampleSplitter" title="acoular.process.SampleSplitter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SampleSplitter</span></code></a></p></td>
+<td><p>Distribute data from a source to multiple connected objects in a block-wise manner.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#acoular.process.SamplesBuffer" title="acoular.process.SamplesBuffer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SamplesBuffer</span></code></a></p></td>
+<td><p>Handle buffering of samples from a source.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.process.LockedGenerator">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.process.</span></span><span class="sig-name descname"><span class="pre">LockedGenerator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">it</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.process.LockedGenerator" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Thread-safe wrapper for an iterator or generator.</p>
+<p>The <a class="reference internal" href="#acoular.process.LockedGenerator" title="acoular.process.LockedGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">LockedGenerator</span></code></a> class ensures that calls to the <code class="docutils literal notranslate"><span class="pre">__next__</span></code> method of the
+given iterator or generator are thread-safe, preventing race conditions when accessed by
+multiple threads simultaneously.</p>
+<p>It achieves thread safety by using a lock to serialize access to the underlying
+iterator or generator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>it</strong><span class="classifier">iterator or generator</span></dt><dd><p>The iterator or generator to be made thread-safe.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#acoular.process.SampleSplitter" title="acoular.process.SampleSplitter"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleSplitter</span></code></a></dt><dd><p>Distribute data from a source to several following objects in a block-wise manner.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.process.Average">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.process.</span></span><span class="sig-name descname"><span class="pre">Average</span></span><a class="headerlink" href="#acoular.process.Average" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.base.html#acoular.base.InOut" title="acoular.base.InOut"><code class="xref py py-class docutils literal notranslate"><span class="pre">InOut</span></code></a></p>
+<p>Calculate the average across consecutive time samples or frequency snapshots.</p>
+<p>The average operation is performed differently depending on the source type.
+If the source is a time domain source (e.g. derived from
+<a class="reference internal" href="acoular.base.html#acoular.base.SamplesGenerator" title="acoular.base.SamplesGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplesGenerator</span></code></a>), the average is calculated
+over a certain number of time samples given by <a class="reference internal" href="#acoular.process.Average.num_per_average" title="acoular.process.Average.num_per_average"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_per_average</span></code></a>.
+If the source is a frequency domain source (e.g. derived from
+<a class="reference internal" href="acoular.base.html#acoular.base.SpectraGenerator" title="acoular.base.SpectraGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpectraGenerator</span></code></a>), the average is calculated
+over a certain number of frequency snapshots given by <a class="reference internal" href="#acoular.process.Average.num_per_average" title="acoular.process.Average.num_per_average"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_per_average</span></code></a>.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="acoular.base.html#acoular.base.InOut" title="acoular.base.InOut"><code class="xref py py-class docutils literal notranslate"><span class="pre">InOut</span></code></a></dt><dd><p>Receive data from any source domain and return signals in the same domain.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<p>To estimate the RMS of a white noise (time-domain) signal, the average of the squared
+signal can be calculated:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">acoular</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ac</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">signal</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">WNoiseGenerator</span><span class="p">(</span><span class="n">sample_freq</span><span class="o">=</span><span class="mi">51200</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="mi">51200</span><span class="p">,</span> <span class="n">rms</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span><span class="o">.</span><span class="n">signal</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ts</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">TimeSamples</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">signal</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span> <span class="n">sample_freq</span><span class="o">=</span><span class="mi">51200</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tp</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">TimePower</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">ts</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">avg</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">Average</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">tp</span><span class="p">,</span> <span class="n">num_per_average</span><span class="o">=</span><span class="mi">512</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mean_squared_value</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">avg</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mean_squared_value</span><span class="p">)[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">rms</span><span class="p">)</span>
+<span class="go">1.9985200025816718</span>
+</pre></div>
+</div>
+<p>Here, each evaluation of the generator created by the <a class="reference internal" href="#acoular.process.Average.result" title="acoular.process.Average.result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">result()</span></code></a> method of the
+<a class="reference internal" href="#acoular.process.Average" title="acoular.process.Average"><code class="xref py py-class docutils literal notranslate"><span class="pre">Average</span></code></a> object via the <code class="xref py py-meth docutils literal notranslate"><span class="pre">next()</span></code> function returns <code class="code docutils literal notranslate"><span class="pre">num=1</span></code> average across a
+snapshot of 512 time samples.</p>
+<p>If the source is a frequency domain source, the average is calculated over a certain number
+of frequency snapshots, defined by <a class="reference internal" href="#acoular.process.Average.num_per_average" title="acoular.process.Average.num_per_average"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_per_average</span></code></a>.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fft</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">RFFT</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">ts</span><span class="p">,</span> <span class="n">block_size</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ps</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">AutoPowerSpectra</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">fft</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">avg</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">Average</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">ps</span><span class="p">,</span> <span class="n">num_per_average</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mean_power</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">avg</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mean_power</span><span class="o">.</span><span class="n">sum</span><span class="p">()))</span>
+<span class="go">2.0024960894399295</span>
+</pre></div>
+</div>
+<p>Here, the generator created by the <a class="reference internal" href="#acoular.process.Average.result" title="acoular.process.Average.result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">result()</span></code></a> method of the <a class="reference internal" href="#acoular.process.Average" title="acoular.process.Average"><code class="xref py py-class docutils literal notranslate"><span class="pre">Average</span></code></a> object
+returns the average across 16 snapshots in the frequency domain.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.process.Average.num_per_average">
+<span class="sig-name descname"><span class="pre">num_per_average</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Int(64)</span></em><a class="headerlink" href="#acoular.process.Average.num_per_average" title="Link to this definition">#</a></dt>
+<dd><p>The number of samples (time domain source) or snapshots (frequency domain source)
+to average over. Default is <code class="docutils literal notranslate"><span class="pre">64</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.process.Average.sample_freq">
+<span class="sig-name descname"><span class="pre">sample_freq</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['source.sample_freq',</span> <span class="pre">'num_per_average'])</span></em><a class="headerlink" href="#acoular.process.Average.sample_freq" title="Link to this definition">#</a></dt>
+<dd><p>The sampling frequency of the output signal. It is set automatically as
+(<a class="reference internal" href="acoular.base.html#acoular.base.Generator.sample_freq" title="acoular.base.Generator.sample_freq"><code class="xref py py-attr docutils literal notranslate"><span class="pre">sample_freq</span></code></a> <code class="docutils literal notranslate"><span class="pre">/</span></code> <a class="reference internal" href="#acoular.process.Average.num_per_average" title="acoular.process.Average.num_per_average"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_per_average</span></code></a>).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.process.Average.num_samples">
+<span class="sig-name descname"><span class="pre">num_samples</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['source.num_samples',</span> <span class="pre">'num_per_average'])</span></em><a class="headerlink" href="#acoular.process.Average.num_samples" title="Link to this definition">#</a></dt>
+<dd><p>The number of samples (time domain) or snapshots (frequency domain) of the output signal.
+It is set automatically as
+(<a class="reference internal" href="acoular.base.html#acoular.base.Generator.num_samples" title="acoular.base.Generator.num_samples"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_samples</span></code></a> <code class="docutils literal notranslate"><span class="pre">/</span></code> <a class="reference internal" href="#acoular.process.Average.num_per_average" title="acoular.process.Average.num_per_average"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_per_average</span></code></a>).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.process.Average.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['source.digest',</span> <span class="pre">'num_per_average'])</span></em><a class="headerlink" href="#acoular.process.Average.digest" title="Link to this definition">#</a></dt>
+<dd><p>A unique identifier based on the class properties.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.process.Average.result">
+<span class="sig-name descname"><span class="pre">result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.process.Average.result" title="Link to this definition">#</a></dt>
+<dd><p>Generate averaged output blocks from the source data.</p>
+<p>This method implements a Python generator that yields blocks of averaged data
+from the source. The averaging is performed over <a class="reference internal" href="#acoular.process.Average.num_per_average" title="acoular.process.Average.num_per_average"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_per_average</span></code></a> samples
+(for time-domain sources) or snapshots (for frequency-domain sources).
+The size of the blocks yielded is defined by the <code class="docutils literal notranslate"><span class="pre">num</span></code> parameter.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>num</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></dt><dd><p>The number of averaged blocks to yield at a time. Each block contains the average over
+<a class="reference internal" href="#acoular.process.Average.num_per_average" title="acoular.process.Average.num_per_average"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_per_average</span></code></a> time samples or frequency snapshots. The last block may be
+shorter than the specified size if the remaining data is insufficient.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p>A 2D NumPy array of shape <code class="docutils literal notranslate"><span class="pre">(num,</span> <span class="pre">num_channels)</span></code>, where <code class="docutils literal notranslate"><span class="pre">num</span></code> is the number
+of averaged blocks requested, and <code class="docutils literal notranslate"><span class="pre">num_channels</span></code> corresponds to the number of channels
+in the source, as specified by <a class="reference internal" href="acoular.base.html#acoular.base.Generator.num_channels" title="acoular.base.Generator.num_channels"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_channels</span></code></a>.
+Each entry in the array is the average over <a class="reference internal" href="#acoular.process.Average.num_per_average" title="acoular.process.Average.num_per_average"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_per_average</span></code></a> samples/snapshots.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>The averaging operation depends on the source type:</dt><dd><ul>
+<li><p>For time-domain sources (e.g., derived from <a class="reference internal" href="acoular.base.html#acoular.base.SamplesGenerator" title="acoular.base.SamplesGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplesGenerator</span></code></a>),
+the average is calculated over <a class="reference internal" href="#acoular.process.Average.num_per_average" title="acoular.process.Average.num_per_average"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_per_average</span></code></a> time samples.</p></li>
+<li><p>For frequency-domain sources (e.g., derived from
+<a class="reference internal" href="acoular.base.html#acoular.base.SpectraGenerator" title="acoular.base.SpectraGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpectraGenerator</span></code></a>), the average is calculated over
+<a class="reference internal" href="#acoular.process.Average.num_per_average" title="acoular.process.Average.num_per_average"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_per_average</span></code></a> frequency snapshots.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>The generator will stop yielding when the source data is exhausted.</p></li>
+<li><p>If the source provides fewer than <code class="docutils literal notranslate"><span class="pre">num</span> <span class="pre">*</span> <span class="pre">num_per_average</span></code> samples,
+the final block may be smaller than the requested <code class="docutils literal notranslate"><span class="pre">num</span></code> size.</p></li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.process.Cache">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.process.</span></span><span class="sig-name descname"><span class="pre">Cache</span></span><a class="headerlink" href="#acoular.process.Cache" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.base.html#acoular.base.InOut" title="acoular.base.InOut"><code class="xref py py-class docutils literal notranslate"><span class="pre">InOut</span></code></a></p>
+<p>Cache the output of a source in a file to avoid redundant computations.</p>
+<p>The <a class="reference internal" href="#acoular.process.Cache" title="acoular.process.Cache"><code class="xref py py-class docutils literal notranslate"><span class="pre">Cache</span></code></a> class stores the output of a source (derived from
+<a class="reference internal" href="acoular.base.html#acoular.base.Generator" title="acoular.base.Generator"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a>) in a cache file within the Acoular cache directory.
+This enables faster reuse of precomputed data by avoiding time-consuming recalculations.
+The cache behavior is managed through the <a class="reference internal" href="acoular.configuration.html#acoular.configuration.Config" title="acoular.configuration.Config"><code class="xref py py-class docutils literal notranslate"><span class="pre">Config</span></code></a> class by
+setting the <a class="reference internal" href="acoular.configuration.html#acoular.configuration.Config.global_caching" title="acoular.configuration.Config.global_caching"><code class="xref py py-attr docutils literal notranslate"><span class="pre">global_caching</span></code></a> attribute.</p>
+<p>The class intelligently determines whether to use the cached data, update it,
+or bypass caching based on the global caching configuration and the state of the cache file.
+The caching mechanism supports scenarios such as:</p>
+<ul class="simple">
+<li><p>Reading from a complete or incomplete cache.</p></li>
+<li><p>Overwriting an existing cache.</p></li>
+<li><p>Operating in a read-only or no-cache mode.</p></li>
+</ul>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="acoular.base.html#acoular.base.InOut" title="acoular.base.InOut"><code class="xref py py-class docutils literal notranslate"><span class="pre">InOut</span></code></a></dt><dd><p>Receive data from any source domain and return signals in the same domain.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<p>Caching the output of an FFT computation:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">acoular</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ac</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ac</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">h5library</span> <span class="o">=</span> <span class="s1">&#39;tables&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">1024</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ts</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">TimeSamples</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">sample_freq</span><span class="o">=</span><span class="mi">51200</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fft</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">RFFT</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">ts</span><span class="p">,</span> <span class="n">block_size</span><span class="o">=</span><span class="mi">1024</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cache</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">Cache</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">fft</span><span class="p">)</span>  <span class="c1"># cache the output of the FFT in cache file</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">cache</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>  <span class="c1"># read the cached data block-wise</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="go">[(&#39;void_cache.h5&#39;, 1)]</span>
+<span class="go">(1, 513)</span>
+</pre></div>
+</div>
+<p>Disabling caching globally:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ac</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">global_caching</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+</pre></div>
+</div>
+<p>Changing the cache directory:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ac</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cache_dir</span> <span class="o">=</span> <span class="s1">&#39;/path/to/cache_dir&#39;</span>
+</pre></div>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.process.Cache.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['source.digest'])</span></em><a class="headerlink" href="#acoular.process.Cache.digest" title="Link to this definition">#</a></dt>
+<dd><p>A unique identifier based on the cache properties.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.process.Cache.result">
+<span class="sig-name descname"><span class="pre">result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.process.Cache.result" title="Link to this definition">#</a></dt>
+<dd><p>Generate data blocks from the source, using cache when available.</p>
+<p>This method acts as a Python generator that yields blocks of output data from the source,
+reading from the cache file when possible. The size of the data blocks is determined by the
+<code class="docutils literal notranslate"><span class="pre">num</span></code> parameter. The caching mechanism helps prevent redundant calculations by storing and
+reusing the source’s output.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>num</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></dt><dd><p>The number of time samples or frequency snapshots per block to yield.
+The final block may be smaller if there is insufficient data.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p>A 2D NumPy array of shape <code class="docutils literal notranslate"><span class="pre">(num,</span> <span class="pre">num_channels)</span></code> representing the output data.
+Each block is either retrieved from the cache file or generated by the source
+and cached dynamically during processing.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul>
+<li><p>The behavior of the caching mechanism depends on the
+<a class="reference internal" href="acoular.configuration.html#acoular.configuration.Config.global_caching" title="acoular.configuration.Config.global_caching"><code class="xref py py-attr docutils literal notranslate"><span class="pre">global_caching</span></code></a> setting:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'none'</span></code>: Bypasses caching and directly retrieves data from the source.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'readonly'</span></code>: Reads data from the cache if available; otherwise,
+retrieves data from the source without caching.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'overwrite'</span></code>: Replaces any existing cache with newly computed data.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>If the cache file is incomplete or corrupted, the method may generate new data
+from the source to update the cache unless the caching mode is <code class="docutils literal notranslate"><span class="pre">'readonly'</span></code>.</p></li>
+<li><p>The cache node name is based on the source’s <a class="reference internal" href="#acoular.process.Cache.digest" title="acoular.process.Cache.digest"><code class="xref py py-attr docutils literal notranslate"><span class="pre">digest</span></code></a> attribute.</p></li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.process.SampleSplitter">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.process.</span></span><span class="sig-name descname"><span class="pre">SampleSplitter</span></span><a class="headerlink" href="#acoular.process.SampleSplitter" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.base.html#acoular.base.InOut" title="acoular.base.InOut"><code class="xref py py-class docutils literal notranslate"><span class="pre">InOut</span></code></a></p>
+<p>Distribute data from a source to multiple connected objects in a block-wise manner.</p>
+<p>The <a class="reference internal" href="#acoular.process.SampleSplitter" title="acoular.process.SampleSplitter"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleSplitter</span></code></a> class is designed to manage the distribution of data blocks from a
+single source object, derived from <a class="reference internal" href="acoular.base.html#acoular.base.Generator" title="acoular.base.Generator"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a>, to multiple target
+objects, also derived from <a class="reference internal" href="acoular.base.html#acoular.base.Generator" title="acoular.base.Generator"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a>. Each connected target object
+is assigned a dedicated buffer to hold incoming data blocks. These buffers operate in a
+first-in-first-out (FIFO) manner, ensuring efficient and parallelized data handling.</p>
+<p>This class is particularly useful when distributing data blocks from a streaming source
+to multiple downstream processing objects.</p>
+<p>Each registered target object maintains its own dedicated block buffer, allowing for independent
+data management. The buffer size can be customized per object, and different overflow handling
+strategies can be configured, such as raising an error, issuing a warning, or discarding old
+data. This ensures efficient parallel data processing, making it well-suited for complex
+workflows.</p>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>Buffers are dynamically created and managed for each registered object.</p></li>
+<li><p>Buffer overflow behavior can be set individually for each target object.</p></li>
+</ul>
+<p class="rubric">Examples</p>
+<p>Consider a time-domain signal stream where the FFT spectra and signal power are calculated
+block-by-block and in parallel using the <a class="reference internal" href="acoular.fprocess.html#acoular.fprocess.RFFT" title="acoular.fprocess.RFFT"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFFT</span></code></a>,
+<a class="reference internal" href="acoular.tprocess.html#acoular.tprocess.TimePower" title="acoular.tprocess.TimePower"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimePower</span></code></a>, and <a class="reference internal" href="#acoular.process.Average" title="acoular.process.Average"><code class="xref py py-class docutils literal notranslate"><span class="pre">Average</span></code></a> objects.
+The <a class="reference internal" href="#acoular.process.SampleSplitter" title="acoular.process.SampleSplitter"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleSplitter</span></code></a> is responsible for distributing incoming data blocks to the buffers
+of the <a class="reference internal" href="acoular.fprocess.html#acoular.fprocess.RFFT" title="acoular.fprocess.RFFT"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFFT</span></code></a> and <a class="reference internal" href="acoular.tprocess.html#acoular.tprocess.TimePower" title="acoular.tprocess.TimePower"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimePower</span></code></a> objects whenever
+either object requests data via the <a class="reference internal" href="#acoular.process.SampleSplitter.result" title="acoular.process.SampleSplitter.result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">result()</span></code></a> generator.</p>
+<p>For the <a class="reference internal" href="acoular.tprocess.html#acoular.tprocess.TimePower" title="acoular.tprocess.TimePower"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimePower</span></code></a> object, the buffer size is set to 10 blocks.
+If the buffer is full, an error is raised, as the buffer overflow treatment is set to
+<code class="docutils literal notranslate"><span class="pre">'error'</span></code>. For the <a class="reference internal" href="acoular.fprocess.html#acoular.fprocess.RFFT" title="acoular.fprocess.RFFT"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFFT</span></code></a> object, the buffer size is limited to 1
+block, and the overflow treatment is set to <code class="docutils literal notranslate"><span class="pre">'none'</span></code>. This setup helps reduce latency in FFT
+calculations, which may take longer than signal power calculations. If new data arrives and the
+<a class="reference internal" href="acoular.fprocess.html#acoular.fprocess.RFFT" title="acoular.fprocess.RFFT"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFFT</span></code></a> buffer is full, the <a class="reference internal" href="#acoular.process.SampleSplitter" title="acoular.process.SampleSplitter"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleSplitter</span></code></a> will discard the
+oldest block, ensuring that the <a class="reference internal" href="acoular.fprocess.html#acoular.fprocess.RFFT" title="acoular.fprocess.RFFT"><code class="xref py py-class docutils literal notranslate"><span class="pre">RFFT</span></code></a>
+object always receives the most recent block of data.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">acoular</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ac</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># create a time domain signal source</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ts</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">TimeSamples</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">1024</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">sample_freq</span><span class="o">=</span><span class="mi">51200</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># create the sample splitter object</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ss</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">SampleSplitter</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">ts</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># create the FFT spectra and further objects that receive the data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fft</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">RFFT</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">ss</span><span class="p">,</span> <span class="n">block_size</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">pow</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">TimePower</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">ss</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">avg</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">Average</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="nb">pow</span><span class="p">,</span> <span class="n">num_per_average</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># register the subsequent processing block objects at the sample splitter</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ss</span><span class="o">.</span><span class="n">register_object</span><span class="p">(</span><span class="n">fft</span><span class="p">,</span> <span class="n">buffer_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">buffer_overflow_treatment</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ss</span><span class="o">.</span><span class="n">register_object</span><span class="p">(</span><span class="nb">pow</span><span class="p">,</span> <span class="n">buffer_size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">buffer_overflow_treatment</span><span class="o">=</span><span class="s1">&#39;error&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>After object registration, the <code class="docutils literal notranslate"><span class="pre">SampleSplitter</span></code> object is ready to distribute the data to the
+object buffers. The block buffers can be accessed via the <a class="reference internal" href="#acoular.process.SampleSplitter.block_buffer" title="acoular.process.SampleSplitter.block_buffer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">block_buffer</span></code></a> attribute of the
+<code class="docutils literal notranslate"><span class="pre">SampleSplitter</span></code> object.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ss</span><span class="o">.</span><span class="n">block_buffer</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+<span class="go">dict_values([deque([], maxlen=1), deque([], maxlen=10)])</span>
+</pre></div>
+</div>
+<p>Calling the result method of the FFT object will start the data collection and distribution
+process.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">generator</span> <span class="o">=</span> <span class="n">fft</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fft_res</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">generator</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Although we haven’t called the result method of the signal power object, one data block is
+already available in the buffer.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ss</span><span class="o">.</span><span class="n">block_buffer</span><span class="p">[</span><span class="nb">pow</span><span class="p">]))</span>
+<span class="go">1</span>
+</pre></div>
+</div>
+<p>To remove registered objects from the <a class="reference internal" href="#acoular.process.SampleSplitter" title="acoular.process.SampleSplitter"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleSplitter</span></code></a>, use the <a class="reference internal" href="#acoular.process.SampleSplitter.remove_object" title="acoular.process.SampleSplitter.remove_object"><code class="xref py py-meth docutils literal notranslate"><span class="pre">remove_object()</span></code></a>
+method.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ss</span><span class="o">.</span><span class="n">remove_object</span><span class="p">(</span><span class="nb">pow</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ss</span><span class="o">.</span><span class="n">block_buffer</span><span class="p">))</span>
+<span class="go">1</span>
+</pre></div>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.process.SampleSplitter.block_buffer">
+<span class="sig-name descname"><span class="pre">block_buffer</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Dict(key_trait=Instance(Generator))</span></em><a class="headerlink" href="#acoular.process.SampleSplitter.block_buffer" title="Link to this definition">#</a></dt>
+<dd><p>A dictionary containing block buffers for registered objects.
+Keys are the registered objects, and values are deque structures holding data blocks.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.process.SampleSplitter.buffer_size">
+<span class="sig-name descname"><span class="pre">buffer_size</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Union(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.process.SampleSplitter.buffer_size" title="Link to this definition">#</a></dt>
+<dd><p>The maximum number of blocks each buffer can hold.
+Can be set globally for all objects or individually using a dictionary.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.process.SampleSplitter.buffer_overflow_treatment">
+<span class="sig-name descname"><span class="pre">buffer_overflow_treatment</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Dict(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.process.SampleSplitter.buffer_overflow_treatment" title="Link to this definition">#</a></dt>
+<dd><p>Defines behavior when a buffer exceeds its maximum size.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.process.SampleSplitter.register_object">
+<span class="sig-name descname"><span class="pre">register_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">objects_to_register</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_overflow_treatment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.process.SampleSplitter.register_object" title="Link to this definition">#</a></dt>
+<dd><p>Register one or more target objects to the <a class="reference internal" href="#acoular.process.SampleSplitter" title="acoular.process.SampleSplitter"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleSplitter</span></code></a> object.</p>
+<p>This method creates and configures block buffers for the specified target objects, enabling
+them to receive data blocks from the <a class="reference internal" href="#acoular.process.SampleSplitter" title="acoular.process.SampleSplitter"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleSplitter</span></code></a>. Each registered object is
+assigned a dedicated buffer with customizable size and overflow behavior.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>objects_to_register</strong><span class="classifier"><a class="reference internal" href="acoular.base.html#acoular.base.Generator" title="acoular.base.Generator"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a> or list of <a class="reference internal" href="acoular.base.html#acoular.base.Generator" title="acoular.base.Generator"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a></span></dt><dd><p>A single object or a list of objects derived from <a class="reference internal" href="acoular.base.html#acoular.base.Generator" title="acoular.base.Generator"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a> to be
+registered as targets for data distribution.</p>
+</dd>
+<dt><strong>buffer_size</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, optional</span></dt><dd><p>The maximum number of data blocks each object’s buffer can hold. If not specified,
+the default buffer size (100 blocks) is used, or a globally defined size if
+<code class="docutils literal notranslate"><span class="pre">buffer_size</span></code> is a dictionary.</p>
+</dd>
+<dt><strong>buffer_overflow_treatment</strong><span class="classifier"><code class="xref py py-attr docutils literal notranslate"><span class="pre">str</span></code>, optional</span></dt><dd><p>Defines the behavior when a buffer exceeds its maximum size. Options are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'error'</span></code>: Raises an <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#IOError" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IOError</span></code></a> when the buffer overflows.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'warning'</span></code>: Issues a warning and may result in data loss.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'none'</span></code>: Silently discards the oldest data blocks to make room for new ones.
+If not specified, the default behavior is <code class="docutils literal notranslate"><span class="pre">'error'</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#OSError" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OSError</span></code></a></dt><dd><p>If any of the specified objects is already registered.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.process.SampleSplitter.remove_object">
+<span class="sig-name descname"><span class="pre">remove_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">objects_to_remove</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.process.SampleSplitter.remove_object" title="Link to this definition">#</a></dt>
+<dd><p>Unregister one or more objects from the <a class="reference internal" href="#acoular.process.SampleSplitter" title="acoular.process.SampleSplitter"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleSplitter</span></code></a>.</p>
+<p>This method removes the specified objects and their associated block buffers from the
+<a class="reference internal" href="#acoular.process.SampleSplitter" title="acoular.process.SampleSplitter"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleSplitter</span></code></a>. If no objects are specified, all currently registered objects
+are unregistered, effectively clearing all buffers.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>objects_to_remove</strong><span class="classifier"><a class="reference internal" href="acoular.base.html#acoular.base.Generator" title="acoular.base.Generator"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a> or list of <a class="reference internal" href="acoular.base.html#acoular.base.Generator" title="acoular.base.Generator"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a>, optional</span></dt><dd><p>A single object or a list of objects derived from <a class="reference internal" href="acoular.base.html#acoular.base.Generator" title="acoular.base.Generator"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a> to be
+removed from the <a class="reference internal" href="#acoular.process.SampleSplitter" title="acoular.process.SampleSplitter"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleSplitter</span></code></a>.
+If no objects are provided, all registered objects will be removed.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">KeyError</span></code></a></dt><dd><p>If any of the specified objects are not currently registered.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>Once an object is removed, it will no longer receive data from the
+<a class="reference internal" href="#acoular.process.SampleSplitter" title="acoular.process.SampleSplitter"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleSplitter</span></code></a>.</p></li>
+<li><p>Removing an object also clears its associated buffer.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.process.SampleSplitter.result">
+<span class="sig-name descname"><span class="pre">result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.process.SampleSplitter.result" title="Link to this definition">#</a></dt>
+<dd><p>Yield data blocks from the buffer to the calling object.</p>
+<p>This generator method retrieves blocks of data for the calling object, either
+from its dedicated block buffer or by processing new data from the source.
+If the buffer is empty, new data blocks are generated and distributed to
+all registered objects in a block-wise manner.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>num</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></dt><dd><p>The size of each block to be yielded, defined as the number of samples per block.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p>Blocks of data with shape <code class="docutils literal notranslate"><span class="pre">(num,</span> <span class="pre">num_channels)</span></code>.
+The last block may be shorter than <code class="docutils literal notranslate"><span class="pre">num</span></code> if the source data is exhausted.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#OSError" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OSError</span></code></a></dt><dd><p>If the calling object is not registered with the <a class="reference internal" href="#acoular.process.SampleSplitter" title="acoular.process.SampleSplitter"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleSplitter</span></code></a>.</p>
+</dd>
+<dt><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#OSError" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OSError</span></code></a></dt><dd><p>If the block buffer reaches its maximum size and the overflow handling
+policy is set to <code class="docutils literal notranslate"><span class="pre">'error'</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>If the block buffer is empty, new data is fetched from the source and distributed to all
+registered objects.</p></li>
+<li><p>Buffer overflow behavior is controlled by the <a class="reference internal" href="#acoular.process.SampleSplitter.buffer_overflow_treatment" title="acoular.process.SampleSplitter.buffer_overflow_treatment"><code class="xref py py-attr docutils literal notranslate"><span class="pre">buffer_overflow_treatment</span></code></a> attribute,
+which can be set to <code class="docutils literal notranslate"><span class="pre">'error'</span></code>, <code class="docutils literal notranslate"><span class="pre">'warning'</span></code>, or <code class="docutils literal notranslate"><span class="pre">'none'</span></code>.</p></li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.process.SamplesBuffer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.process.</span></span><span class="sig-name descname"><span class="pre">SamplesBuffer</span></span><a class="headerlink" href="#acoular.process.SamplesBuffer" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="acoular.base.html#acoular.base.InOut" title="acoular.base.InOut"><code class="xref py py-class docutils literal notranslate"><span class="pre">InOut</span></code></a></p>
+<p>Handle buffering of samples from a source.</p>
+<p>The <a class="reference internal" href="#acoular.process.SamplesBuffer" title="acoular.process.SamplesBuffer"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplesBuffer</span></code></a> class buffers samples from a source and provides them in blocks of a
+specified size. It supports various use cases for efficient handling of sample data.
+Below is an example demonstrating its functionality.</p>
+<p class="rubric">Examples</p>
+<p>Suppose we want to draw blocks of 16 samples from the source, while ensuring that the buffer
+always holds twice that number (32 samples). The following code achieves this behavior:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">acoular</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ac</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># create a white noise source with 512 samples</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">source</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">TimeSamples</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">data</span><span class="o">=</span><span class="n">ac</span><span class="o">.</span><span class="n">WNoiseGenerator</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="n">sample_freq</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">num_samples</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="p">)</span><span class="o">.</span><span class="n">signal</span><span class="p">()[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="n">sample_freq</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># create a buffer with a size of 32 samples</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">buffer</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">SamplesBuffer</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># get the first block of 16 samples</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">block</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">buffer</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="mi">16</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">source</span><span class="o">.</span><span class="n">data</span><span class="p">[:</span><span class="mi">16</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>In the example above, the buffer initially collects blocks of the specified size from the
+source. It then returns the first block of 16 samples. With subsequent calls to the
+<a class="reference internal" href="#acoular.process.SamplesBuffer.result" title="acoular.process.SamplesBuffer.result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">result()</span></code></a> method, the buffer refills and returns additional blocks of 16 samples.</p>
+<p>In some cases, you may wish to retrieve a different number of samples from the source than you
+want to return. This can be achieved by setting the <a class="reference internal" href="#acoular.process.SamplesBuffer.source_num" title="acoular.process.SamplesBuffer.source_num"><code class="xref py py-attr docutils literal notranslate"><span class="pre">source_num</span></code></a> attribute. For example,
+in the <a class="reference internal" href="acoular.tbeamform.html#acoular.tbeamform.BeamformerTimeTraj" title="acoular.tbeamform.BeamformerTimeTraj"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerTimeTraj</span></code></a> class, the number of time samples varies
+based on the expected delay for moving sources, while still adhering to the desired block size
+for the buffer.</p>
+<p>The <a class="reference internal" href="#acoular.process.SamplesBuffer.shift_index_by" title="acoular.process.SamplesBuffer.shift_index_by"><code class="xref py py-attr docutils literal notranslate"><span class="pre">shift_index_by</span></code></a> attribute controls how the buffer updates its index when retrieving
+data. If set to <code class="docutils literal notranslate"><span class="pre">'num'</span></code>, the buffer returns <a class="reference internal" href="#acoular.process.SamplesBuffer.result_num" title="acoular.process.SamplesBuffer.result_num"><code class="xref py py-attr docutils literal notranslate"><span class="pre">result_num</span></code></a> samples but forgets <code class="docutils literal notranslate"><span class="pre">'num'</span></code>
+samples from the buffer.
+If set to <a class="reference internal" href="#acoular.process.SamplesBuffer.result_num" title="acoular.process.SamplesBuffer.result_num"><code class="xref py py-attr docutils literal notranslate"><span class="pre">result_num</span></code></a>, the buffer will return and forget the same number of samples.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">buffer</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">SamplesBuffer</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">result_num</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">shift_index_by</span><span class="o">=</span><span class="s1">&#39;num&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">block_sizes</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">block_sizes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="nb">next</span><span class="p">(</span><span class="n">buffer</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="mi">16</span><span class="p">))</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">... </span><span class="p">)</span>  <span class="c1"># this time, the buffer will return 20 samples, but the buffer will only forget the first 16 samples</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">buffer</span><span class="o">.</span><span class="n">result_num</span> <span class="o">=</span> <span class="mi">24</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">block_sizes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="nb">next</span><span class="p">(</span><span class="n">buffer</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="mi">16</span><span class="p">))</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">... </span><span class="p">)</span>  <span class="c1"># this time, the buffer will return 24 samples, but the buffer will only forget the first 16 samples</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_equal</span><span class="p">(</span><span class="n">block_sizes</span><span class="p">,</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">24</span><span class="p">])</span>
+</pre></div>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.process.SamplesBuffer.length">
+<span class="sig-name descname"><span class="pre">length</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Int()</span></em><a class="headerlink" href="#acoular.process.SamplesBuffer.length" title="Link to this definition">#</a></dt>
+<dd><p>The number of samples that the buffer can hold.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.process.SamplesBuffer.source_num">
+<span class="sig-name descname"><span class="pre">source_num</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Union(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.process.SamplesBuffer.source_num" title="Link to this definition">#</a></dt>
+<dd><p>The number of samples per block to obtain from the source. If set to <code class="docutils literal notranslate"><span class="pre">None</span></code>, the number of
+samples will be determined by the <code class="docutils literal notranslate"><span class="pre">num</span></code> argument of the <a class="reference internal" href="#acoular.process.SamplesBuffer.result" title="acoular.process.SamplesBuffer.result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">result()</span></code></a> method.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.process.SamplesBuffer.result_num">
+<span class="sig-name descname"><span class="pre">result_num</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Union(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.process.SamplesBuffer.result_num" title="Link to this definition">#</a></dt>
+<dd><p>The number of samples to return from the buffer. If set to <code class="docutils literal notranslate"><span class="pre">None</span></code>, the number of
+samples will be determined by the <code class="docutils literal notranslate"><span class="pre">num</span></code> argument of the <a class="reference internal" href="#acoular.process.SamplesBuffer.result" title="acoular.process.SamplesBuffer.result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">result()</span></code></a> method.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.process.SamplesBuffer.shift_index_by">
+<span class="sig-name descname"><span class="pre">shift_index_by</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.process.SamplesBuffer.shift_index_by" title="Link to this definition">#</a></dt>
+<dd><p>Index shift value for the buffer.</p>
+<ul class="simple">
+<li><p>If set to <code class="docutils literal notranslate"><span class="pre">'result_num'</span></code>, the buffer will return and forget <a class="reference internal" href="#acoular.process.SamplesBuffer.result_num" title="acoular.process.SamplesBuffer.result_num"><code class="xref py py-attr docutils literal notranslate"><span class="pre">result_num</span></code></a> samples.</p></li>
+<li><p>If set to <code class="docutils literal notranslate"><span class="pre">'num'</span></code>, the buffer will return <a class="reference internal" href="#acoular.process.SamplesBuffer.result_num" title="acoular.process.SamplesBuffer.result_num"><code class="xref py py-attr docutils literal notranslate"><span class="pre">result_num</span></code></a> samples but forget <code class="docutils literal notranslate"><span class="pre">num</span></code>
+samples.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.process.SamplesBuffer.level">
+<span class="sig-name descname"><span class="pre">level</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property()</span></em><a class="headerlink" href="#acoular.process.SamplesBuffer.level" title="Link to this definition">#</a></dt>
+<dd><p>The current filling level of the buffer, i.e., how many samples are currently available.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.process.SamplesBuffer.dtype">
+<span class="sig-name descname"><span class="pre">dtype</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Any()</span></em><a class="headerlink" href="#acoular.process.SamplesBuffer.dtype" title="Link to this definition">#</a></dt>
+<dd><p>The data type of the elements in the buffer.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.process.SamplesBuffer.increase_buffer">
+<span class="sig-name descname"><span class="pre">increase_buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.process.SamplesBuffer.increase_buffer" title="Link to this definition">#</a></dt>
+<dd><p>Increase the size of the buffer by a specified number of samples.</p>
+<p>This method expands the buffer by appending additional samples, effectively increasing
+its capacity. The new samples are initialized to zero. The index of the buffer is adjusted
+accordingly to accommodate the increase.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>num</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></dt><dd><p>The number of samples by which to increase the buffer size.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.process.SamplesBuffer.read_from_buffer">
+<span class="sig-name descname"><span class="pre">read_from_buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.process.SamplesBuffer.read_from_buffer" title="Link to this definition">#</a></dt>
+<dd><p>Read a specified number of samples from the buffer.</p>
+<p>This method retrieves samples from the buffer, ensuring that the requested number of samples
+is returned. If the buffer contains fewer samples than requested, the method will return all
+available samples. The index of the buffer is updated based on the <a class="reference internal" href="#acoular.process.SamplesBuffer.shift_index_by" title="acoular.process.SamplesBuffer.shift_index_by"><code class="xref py py-attr docutils literal notranslate"><span class="pre">shift_index_by</span></code></a>
+setting.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>num</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></dt><dd><p>The number of samples to read from the buffer.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p>A block of samples (array) from the buffer.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul>
+<li><p>If the <a class="reference internal" href="#acoular.process.SamplesBuffer.result_num" title="acoular.process.SamplesBuffer.result_num"><code class="xref py py-attr docutils literal notranslate"><span class="pre">result_num</span></code></a> attribute is set, it determines the number of samples to return.</p></li>
+<li><p>The method ensures the buffer index is adjusted according to the <a class="reference internal" href="#acoular.process.SamplesBuffer.shift_index_by" title="acoular.process.SamplesBuffer.shift_index_by"><code class="xref py py-attr docutils literal notranslate"><span class="pre">shift_index_by</span></code></a>
+setting. Options are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'result_num'</span></code>: The index will shift by the number of samples returned.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'num'</span></code>: The index will shift by the number of samples requested (<code class="docutils literal notranslate"><span class="pre">num</span></code>).</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.process.SamplesBuffer.fill_buffer">
+<span class="sig-name descname"><span class="pre">fill_buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snum</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.process.SamplesBuffer.fill_buffer" title="Link to this definition">#</a></dt>
+<dd><p>Fill the buffer with samples from the source.</p>
+<p>The <a class="reference internal" href="#acoular.process.SamplesBuffer.fill_buffer" title="acoular.process.SamplesBuffer.fill_buffer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">fill_buffer()</span></code></a> method collects samples from the source and writes them to the
+buffer. It continues to fill the buffer until there are enough samples available, or the
+source runs out of data. If the buffer reaches its maximum capacity, additional samples are
+discarded. The buffer will only contain the most recent data, and its index will be updated
+accordingly.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>snum</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></dt><dd><p>The number of samples to retrieve from the source in each iteration.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></dt><dd><p>This method is a generator and yields control back after filling the buffer.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The method ensures that the buffer is filled with the required number of samples,
+adjusting the buffer size if necessary (via the <a class="reference internal" href="#acoular.process.SamplesBuffer.increase_buffer" title="acoular.process.SamplesBuffer.increase_buffer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">increase_buffer()</span></code></a> method) when more
+space is needed.</p></li>
+<li><p>Once the buffer is filled, it yields control and resumes only when the buffer is ready for
+more data.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.process.SamplesBuffer.result">
+<span class="sig-name descname"><span class="pre">result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.process.SamplesBuffer.result" title="Link to this definition">#</a></dt>
+<dd><p>Return blocks of samples from the buffer.</p>
+<p>The <a class="reference internal" href="#acoular.process.SamplesBuffer.result" title="acoular.process.SamplesBuffer.result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">result()</span></code></a> method retrieves blocks of samples from the buffer and yields them to the
+calling process. The number of samples per block is determined by the <code class="docutils literal notranslate"><span class="pre">num</span></code> argument, but
+can also be influenced by other attributes like <cite>result_num</cite> (if set). If the buffer is not
+yet filled, it will continue to collect samples from the source until the buffer contains
+enough data. Once the buffer is full, it will return the requested blocks of samples.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>num</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></dt><dd><p>The number of samples to return in each block.
+This value specifies the size of the blocks to be yielded from the buffer.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p>A block of samples from the buffer. The size of the block is determined by the <code class="docutils literal notranslate"><span class="pre">num</span></code>
+parameter or the <a class="reference internal" href="#acoular.process.SamplesBuffer.result_num" title="acoular.process.SamplesBuffer.result_num"><code class="xref py py-attr docutils literal notranslate"><span class="pre">result_num</span></code></a> attribute, depending on the buffer’s configuration.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>If <a class="reference internal" href="#acoular.process.SamplesBuffer.result_num" title="acoular.process.SamplesBuffer.result_num"><code class="xref py py-attr docutils literal notranslate"><span class="pre">result_num</span></code></a> is set, the method will use it to determine the number of samples
+returned instead of the <code class="docutils literal notranslate"><span class="pre">num</span></code> parameter.</p></li>
+<li><p>If the buffer is empty or does not have enough samples, it will attempt to fill the buffer
+by collecting data from the source. If there are not enough samples available from the
+source, the method will yield whatever samples are left in the buffer.</p></li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="generated/acoular.microphones.MicGeom.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">MicGeom</span></code></p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="generated/acoular.process.Average.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">Average</span></code></p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.process.LockedGenerator"><code class="docutils literal notranslate"><span class="pre">LockedGenerator</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.process.Average"><code class="docutils literal notranslate"><span class="pre">Average</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.process.Average.num_per_average"><code class="docutils literal notranslate"><span class="pre">Average.num_per_average</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.process.Average.sample_freq"><code class="docutils literal notranslate"><span class="pre">Average.sample_freq</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.process.Average.num_samples"><code class="docutils literal notranslate"><span class="pre">Average.num_samples</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.process.Average.digest"><code class="docutils literal notranslate"><span class="pre">Average.digest</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.process.Average.result"><code class="docutils literal notranslate"><span class="pre">Average.result()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.process.Cache"><code class="docutils literal notranslate"><span class="pre">Cache</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.process.Cache.digest"><code class="docutils literal notranslate"><span class="pre">Cache.digest</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.process.Cache.result"><code class="docutils literal notranslate"><span class="pre">Cache.result()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.process.SampleSplitter"><code class="docutils literal notranslate"><span class="pre">SampleSplitter</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.process.SampleSplitter.block_buffer"><code class="docutils literal notranslate"><span class="pre">SampleSplitter.block_buffer</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.process.SampleSplitter.buffer_size"><code class="docutils literal notranslate"><span class="pre">SampleSplitter.buffer_size</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.process.SampleSplitter.buffer_overflow_treatment"><code class="docutils literal notranslate"><span class="pre">SampleSplitter.buffer_overflow_treatment</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.process.SampleSplitter.register_object"><code class="docutils literal notranslate"><span class="pre">SampleSplitter.register_object()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.process.SampleSplitter.remove_object"><code class="docutils literal notranslate"><span class="pre">SampleSplitter.remove_object()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.process.SampleSplitter.result"><code class="docutils literal notranslate"><span class="pre">SampleSplitter.result()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.process.SamplesBuffer"><code class="docutils literal notranslate"><span class="pre">SamplesBuffer</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.process.SamplesBuffer.length"><code class="docutils literal notranslate"><span class="pre">SamplesBuffer.length</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.process.SamplesBuffer.source_num"><code class="docutils literal notranslate"><span class="pre">SamplesBuffer.source_num</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.process.SamplesBuffer.result_num"><code class="docutils literal notranslate"><span class="pre">SamplesBuffer.result_num</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.process.SamplesBuffer.shift_index_by"><code class="docutils literal notranslate"><span class="pre">SamplesBuffer.shift_index_by</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.process.SamplesBuffer.level"><code class="docutils literal notranslate"><span class="pre">SamplesBuffer.level</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.process.SamplesBuffer.dtype"><code class="docutils literal notranslate"><span class="pre">SamplesBuffer.dtype</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.process.SamplesBuffer.increase_buffer"><code class="docutils literal notranslate"><span class="pre">SamplesBuffer.increase_buffer()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.process.SamplesBuffer.read_from_buffer"><code class="docutils literal notranslate"><span class="pre">SamplesBuffer.read_from_buffer()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.process.SamplesBuffer.fill_buffer"><code class="docutils literal notranslate"><span class="pre">SamplesBuffer.fill_buffer()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.process.SamplesBuffer.result"><code class="docutils literal notranslate"><span class="pre">SamplesBuffer.result()</span></code></a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  
+  <div class="tocsection editthispage">
+    <a href="https://github.com/acoular/acoular/edit/master/docs/source/api_ref/generated/acoular.process.rst">
+      <i class="fa-solid fa-pencil"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2026, Acoular Development Team.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,2117 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>fbeamform &#8212; Acoular 26.01 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/sphinx_gallery.css?v=f3715e10" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom_pydata_sphinx_theme.css?v=ac99e154" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=56098ba5"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=30646c52"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api_ref/generated/acoular.fbeamform';</script>
+    <link rel="icon" href="../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="SteeringVector" href="generated/acoular.fbeamform.SteeringVector.html" />
+    <link rel="prev" title="spiral_sphere" href="generated/acoular.environments.spiral_sphere.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="26.01" />
+    <meta name="docbuild:last-update" content="Feb 03, 2026"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+<aside class="bd-header-announcement" aria-label="Announcement">
+  <div class="bd-header-announcement__content">👁️📢 Please consider taking the <a href='https://www.soscisurvey.de/acoularsurvey'>Acoular User Survey</a>. ⏱️ It's only 2 minutes! 三三ᕕ( ᐛ )ᕗ</div>
+</aside>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/Acoular_logo.png" class="logo__image only-light" alt="Acoular - Home"/>
+    <img src="../../_static/Acoular_logo.png" class="logo__image only-dark pst-js-only" alt="Acoular - Home"/>
+  
+  
+    <p class="title logo__title">Acoular</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../install/index.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../user_guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../news/index.html">
+    What's new
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../contributing/index.html">
+    Contributing
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../literature/index.html">
+    Literature
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/acoular/acoular" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/acoular" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/pypi.svg" class="icon-link-image" alt="PyPI"/></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../install/index.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../user_guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../news/index.html">
+    What's new
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../contributing/index.html">
+    Contributing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../literature/index.html">
+    Literature
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/acoular/acoular" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/acoular" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/pypi.svg" class="icon-link-image" alt="PyPI"/></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.aiaa.html"><code class="docutils literal notranslate"><span class="pre">aiaa</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/acoular.aiaa.aiaa.html"><code class="docutils literal notranslate"><span class="pre">aiaa</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.aiaa.aiaa.TimeSamplesAIAABenchmark.html"><code class="docutils literal notranslate"><span class="pre">TimeSamplesAIAABenchmark</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.aiaa.aiaa.TriggerAIAABenchmark.html"><code class="docutils literal notranslate"><span class="pre">TriggerAIAABenchmark</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.aiaa.aiaa.CsmAIAABenchmark.html"><code class="docutils literal notranslate"><span class="pre">CsmAIAABenchmark</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.aiaa.aiaa.MicAIAABenchmark.html"><code class="docutils literal notranslate"><span class="pre">MicAIAABenchmark</span></code></a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.base.html"><code class="docutils literal notranslate"><span class="pre">base</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.base.Generator.html"><code class="docutils literal notranslate"><span class="pre">Generator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.base.SamplesGenerator.html"><code class="docutils literal notranslate"><span class="pre">SamplesGenerator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.base.SpectraGenerator.html"><code class="docutils literal notranslate"><span class="pre">SpectraGenerator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.base.InOut.html"><code class="docutils literal notranslate"><span class="pre">InOut</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.base.TimeOut.html"><code class="docutils literal notranslate"><span class="pre">TimeOut</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.base.SpectraOut.html"><code class="docutils literal notranslate"><span class="pre">SpectraOut</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.calib.html"><code class="docutils literal notranslate"><span class="pre">calib</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.calib.Calib.html"><code class="docutils literal notranslate"><span class="pre">Calib</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.configuration.html"><code class="docutils literal notranslate"><span class="pre">configuration</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.configuration.Config.html"><code class="docutils literal notranslate"><span class="pre">Config</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.configuration.config.html"><code class="docutils literal notranslate"><span class="pre">config</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="acoular.demo.html"><code class="docutils literal notranslate"><span class="pre">demo</span></code></a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.deprecation.html"><code class="docutils literal notranslate"><span class="pre">deprecation</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.deprecation.deprecated_alias.html"><code class="docutils literal notranslate"><span class="pre">deprecated_alias</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.environments.html"><code class="docutils literal notranslate"><span class="pre">environments</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.environments.Environment.html"><code class="docutils literal notranslate"><span class="pre">Environment</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.environments.UniformFlowEnvironment.html"><code class="docutils literal notranslate"><span class="pre">UniformFlowEnvironment</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.environments.GeneralFlowEnvironment.html"><code class="docutils literal notranslate"><span class="pre">GeneralFlowEnvironment</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.environments.FlowField.html"><code class="docutils literal notranslate"><span class="pre">FlowField</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.environments.OpenJet.html"><code class="docutils literal notranslate"><span class="pre">OpenJet</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.environments.RotatingFlow.html"><code class="docutils literal notranslate"><span class="pre">RotatingFlow</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.environments.SlotJet.html"><code class="docutils literal notranslate"><span class="pre">SlotJet</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.environments.dist_mat.html"><code class="docutils literal notranslate"><span class="pre">dist_mat</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.environments.cylToCart.html"><code class="docutils literal notranslate"><span class="pre">cylToCart</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.environments.cartToCyl.html"><code class="docutils literal notranslate"><span class="pre">cartToCyl</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.environments.spiral_sphere.html"><code class="docutils literal notranslate"><span class="pre">spiral_sphere</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">fbeamform</span></code></a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.SteeringVector.html"><code class="docutils literal notranslate"><span class="pre">SteeringVector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerBase.html"><code class="docutils literal notranslate"><span class="pre">BeamformerBase</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerFunctional.html"><code class="docutils literal notranslate"><span class="pre">BeamformerFunctional</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerCapon.html"><code class="docutils literal notranslate"><span class="pre">BeamformerCapon</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerEig.html"><code class="docutils literal notranslate"><span class="pre">BeamformerEig</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerMusic.html"><code class="docutils literal notranslate"><span class="pre">BeamformerMusic</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerClean.html"><code class="docutils literal notranslate"><span class="pre">BeamformerClean</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerDamas.html"><code class="docutils literal notranslate"><span class="pre">BeamformerDamas</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerDamasPlus.html"><code class="docutils literal notranslate"><span class="pre">BeamformerDamasPlus</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerOrth.html"><code class="docutils literal notranslate"><span class="pre">BeamformerOrth</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerCleansc.html"><code class="docutils literal notranslate"><span class="pre">BeamformerCleansc</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerCMF.html"><code class="docutils literal notranslate"><span class="pre">BeamformerCMF</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerSODIX.html"><code class="docutils literal notranslate"><span class="pre">BeamformerSODIX</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerGIB.html"><code class="docutils literal notranslate"><span class="pre">BeamformerGIB</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerAdaptiveGrid.html"><code class="docutils literal notranslate"><span class="pre">BeamformerAdaptiveGrid</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerGridlessOrth.html"><code class="docutils literal notranslate"><span class="pre">BeamformerGridlessOrth</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.PointSpreadFunction.html"><code class="docutils literal notranslate"><span class="pre">PointSpreadFunction</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.L_p.html"><code class="docutils literal notranslate"><span class="pre">L_p</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.integrate.html"><code class="docutils literal notranslate"><span class="pre">integrate</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.fprocess.html"><code class="docutils literal notranslate"><span class="pre">fprocess</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fprocess.RFFT.html"><code class="docutils literal notranslate"><span class="pre">RFFT</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fprocess.IRFFT.html"><code class="docutils literal notranslate"><span class="pre">IRFFT</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fprocess.AutoPowerSpectra.html"><code class="docutils literal notranslate"><span class="pre">AutoPowerSpectra</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fprocess.CrossPowerSpectra.html"><code class="docutils literal notranslate"><span class="pre">CrossPowerSpectra</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.grids.html"><code class="docutils literal notranslate"><span class="pre">grids</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.Grid.html"><code class="docutils literal notranslate"><span class="pre">Grid</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.RectGrid.html"><code class="docutils literal notranslate"><span class="pre">RectGrid</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.RectGrid3D.html"><code class="docutils literal notranslate"><span class="pre">RectGrid3D</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.ImportGrid.html"><code class="docutils literal notranslate"><span class="pre">ImportGrid</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.LineGrid.html"><code class="docutils literal notranslate"><span class="pre">LineGrid</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.MergeGrid.html"><code class="docutils literal notranslate"><span class="pre">MergeGrid</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.Sector.html"><code class="docutils literal notranslate"><span class="pre">Sector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.SingleSector.html"><code class="docutils literal notranslate"><span class="pre">SingleSector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.RectSector.html"><code class="docutils literal notranslate"><span class="pre">RectSector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.RectSector3D.html"><code class="docutils literal notranslate"><span class="pre">RectSector3D</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.CircSector.html"><code class="docutils literal notranslate"><span class="pre">CircSector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.PolySector.html"><code class="docutils literal notranslate"><span class="pre">PolySector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.ConvexSector.html"><code class="docutils literal notranslate"><span class="pre">ConvexSector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.MultiSector.html"><code class="docutils literal notranslate"><span class="pre">MultiSector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.Polygon.html"><code class="docutils literal notranslate"><span class="pre">Polygon</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.in_hull.html"><code class="docutils literal notranslate"><span class="pre">in_hull</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.microphones.html"><code class="docutils literal notranslate"><span class="pre">microphones</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.microphones.MicGeom.html"><code class="docutils literal notranslate"><span class="pre">MicGeom</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.process.html"><code class="docutils literal notranslate"><span class="pre">process</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.process.Average.html"><code class="docutils literal notranslate"><span class="pre">Average</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.process.Cache.html"><code class="docutils literal notranslate"><span class="pre">Cache</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.process.SampleSplitter.html"><code class="docutils literal notranslate"><span class="pre">SampleSplitter</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.process.SamplesBuffer.html"><code class="docutils literal notranslate"><span class="pre">SamplesBuffer</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.sdinput.html"><code class="docutils literal notranslate"><span class="pre">sdinput</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sdinput.SoundDeviceSamplesGenerator.html"><code class="docutils literal notranslate"><span class="pre">SoundDeviceSamplesGenerator</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.signals.html"><code class="docutils literal notranslate"><span class="pre">signals</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.signals.SignalGenerator.html"><code class="docutils literal notranslate"><span class="pre">SignalGenerator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.signals.PeriodicSignalGenerator.html"><code class="docutils literal notranslate"><span class="pre">PeriodicSignalGenerator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.signals.NoiseGenerator.html"><code class="docutils literal notranslate"><span class="pre">NoiseGenerator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.signals.WNoiseGenerator.html"><code class="docutils literal notranslate"><span class="pre">WNoiseGenerator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.signals.PNoiseGenerator.html"><code class="docutils literal notranslate"><span class="pre">PNoiseGenerator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.signals.FiltWNoiseGenerator.html"><code class="docutils literal notranslate"><span class="pre">FiltWNoiseGenerator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.signals.SineGenerator.html"><code class="docutils literal notranslate"><span class="pre">SineGenerator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.signals.GenericSignalGenerator.html"><code class="docutils literal notranslate"><span class="pre">GenericSignalGenerator</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.sources.html"><code class="docutils literal notranslate"><span class="pre">sources</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.TimeSamples.html"><code class="docutils literal notranslate"><span class="pre">TimeSamples</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.MaskedTimeSamples.html"><code class="docutils literal notranslate"><span class="pre">MaskedTimeSamples</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.PointSource.html"><code class="docutils literal notranslate"><span class="pre">PointSource</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.PointSourceDipole.html"><code class="docutils literal notranslate"><span class="pre">PointSourceDipole</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.SphericalHarmonicSource.html"><code class="docutils literal notranslate"><span class="pre">SphericalHarmonicSource</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.LineSource.html"><code class="docutils literal notranslate"><span class="pre">LineSource</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.MovingPointSource.html"><code class="docutils literal notranslate"><span class="pre">MovingPointSource</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.MovingPointSourceDipole.html"><code class="docutils literal notranslate"><span class="pre">MovingPointSourceDipole</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.MovingLineSource.html"><code class="docutils literal notranslate"><span class="pre">MovingLineSource</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.UncorrelatedNoiseSource.html"><code class="docutils literal notranslate"><span class="pre">UncorrelatedNoiseSource</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.SourceMixer.html"><code class="docutils literal notranslate"><span class="pre">SourceMixer</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.PointSourceConvolve.html"><code class="docutils literal notranslate"><span class="pre">PointSourceConvolve</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.spherical_hn1.html"><code class="docutils literal notranslate"><span class="pre">spherical_hn1</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.get_radiation_angles.html"><code class="docutils literal notranslate"><span class="pre">get_radiation_angles</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.get_modes.html"><code class="docutils literal notranslate"><span class="pre">get_modes</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.spectra.html"><code class="docutils literal notranslate"><span class="pre">spectra</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.spectra.BaseSpectra.html"><code class="docutils literal notranslate"><span class="pre">BaseSpectra</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.spectra.PowerSpectra.html"><code class="docutils literal notranslate"><span class="pre">PowerSpectra</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.spectra.PowerSpectraImport.html"><code class="docutils literal notranslate"><span class="pre">PowerSpectraImport</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.tbeamform.html"><code class="docutils literal notranslate"><span class="pre">tbeamform</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tbeamform.BeamformerTime.html"><code class="docutils literal notranslate"><span class="pre">BeamformerTime</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tbeamform.BeamformerTimeTraj.html"><code class="docutils literal notranslate"><span class="pre">BeamformerTimeTraj</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tbeamform.BeamformerTimeSq.html"><code class="docutils literal notranslate"><span class="pre">BeamformerTimeSq</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tbeamform.BeamformerTimeSqTraj.html"><code class="docutils literal notranslate"><span class="pre">BeamformerTimeSqTraj</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tbeamform.BeamformerCleant.html"><code class="docutils literal notranslate"><span class="pre">BeamformerCleant</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tbeamform.BeamformerCleantTraj.html"><code class="docutils literal notranslate"><span class="pre">BeamformerCleantTraj</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tbeamform.BeamformerCleantSq.html"><code class="docutils literal notranslate"><span class="pre">BeamformerCleantSq</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tbeamform.BeamformerCleantSqTraj.html"><code class="docutils literal notranslate"><span class="pre">BeamformerCleantSqTraj</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tbeamform.IntegratorSectorTime.html"><code class="docutils literal notranslate"><span class="pre">IntegratorSectorTime</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.tools.html"><code class="docutils literal notranslate"><span class="pre">tools</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/acoular.tools.helpers.html"><code class="docutils literal notranslate"><span class="pre">helpers</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.tools.helpers.synthetic.html"><code class="docutils literal notranslate"><span class="pre">synthetic</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.tools.helpers.return_result.html"><code class="docutils literal notranslate"><span class="pre">return_result</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.tools.helpers.barspectrum.html"><code class="docutils literal notranslate"><span class="pre">barspectrum</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.tools.helpers.bardata.html"><code class="docutils literal notranslate"><span class="pre">bardata</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.tools.helpers.c_air.html"><code class="docutils literal notranslate"><span class="pre">c_air</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.tools.helpers.get_data_file.html"><code class="docutils literal notranslate"><span class="pre">get_data_file</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/acoular.tools.metrics.html"><code class="docutils literal notranslate"><span class="pre">metrics</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.tools.metrics.MetricEvaluator.html"><code class="docutils literal notranslate"><span class="pre">MetricEvaluator</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/acoular.tools.utils.html"><code class="docutils literal notranslate"><span class="pre">utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.tools.utils.get_file_basename.html"><code class="docutils literal notranslate"><span class="pre">get_file_basename</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.tools.utils.find_basename.html"><code class="docutils literal notranslate"><span class="pre">find_basename</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.tools.utils.mole_fraction_of_water_vapor.html"><code class="docutils literal notranslate"><span class="pre">mole_fraction_of_water_vapor</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.tools.utils.Polygon.html"><code class="docutils literal notranslate"><span class="pre">Polygon</span></code></a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.tprocess.html"><code class="docutils literal notranslate"><span class="pre">tprocess</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.MaskedTimeOut.html"><code class="docutils literal notranslate"><span class="pre">MaskedTimeOut</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.Trigger.html"><code class="docutils literal notranslate"><span class="pre">Trigger</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.AngleTracker.html"><code class="docutils literal notranslate"><span class="pre">AngleTracker</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.ChannelMixer.html"><code class="docutils literal notranslate"><span class="pre">ChannelMixer</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.SpatialInterpolator.html"><code class="docutils literal notranslate"><span class="pre">SpatialInterpolator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.SpatialInterpolatorRotation.html"><code class="docutils literal notranslate"><span class="pre">SpatialInterpolatorRotation</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.SpatialInterpolatorConstantRotation.html"><code class="docutils literal notranslate"><span class="pre">SpatialInterpolatorConstantRotation</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.Mixer.html"><code class="docutils literal notranslate"><span class="pre">Mixer</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.TimePower.html"><code class="docutils literal notranslate"><span class="pre">TimePower</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.TimeCumAverage.html"><code class="docutils literal notranslate"><span class="pre">TimeCumAverage</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.TimeReverse.html"><code class="docutils literal notranslate"><span class="pre">TimeReverse</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.Filter.html"><code class="docutils literal notranslate"><span class="pre">Filter</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.FilterBank.html"><code class="docutils literal notranslate"><span class="pre">FilterBank</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.FiltFiltOctave.html"><code class="docutils literal notranslate"><span class="pre">FiltFiltOctave</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.FiltOctave.html"><code class="docutils literal notranslate"><span class="pre">FiltOctave</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.TimeExpAverage.html"><code class="docutils literal notranslate"><span class="pre">TimeExpAverage</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.FiltFreqWeight.html"><code class="docutils literal notranslate"><span class="pre">FiltFreqWeight</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.OctaveFilterBank.html"><code class="docutils literal notranslate"><span class="pre">OctaveFilterBank</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.WriteWAV.html"><code class="docutils literal notranslate"><span class="pre">WriteWAV</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.WriteH5.html"><code class="docutils literal notranslate"><span class="pre">WriteH5</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.TimeConvolve.html"><code class="docutils literal notranslate"><span class="pre">TimeConvolve</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.trajectory.html"><code class="docutils literal notranslate"><span class="pre">trajectory</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.trajectory.Trajectory.html"><code class="docutils literal notranslate"><span class="pre">Trajectory</span></code></a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Reference Manual</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis"><code class="docutils literal notranslate"><span class="pre">fbeamform</span></code></span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="module-acoular.fbeamform">
+<span id="fbeamform"></span><h1><code class="docutils literal notranslate"><span class="pre">fbeamform</span></code><a class="headerlink" href="#module-acoular.fbeamform" title="Link to this heading">#</a></h1>
+<p>Implements beamformers in the frequency domain.</p>
+<div class="graphviz"><object data="../../_images/inheritance-d2f368f4d52e7243cb9c44dadecb57971858089f.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of acoular.fbeamform.BeamformerBase</p></object></div>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#acoular.fbeamform.SteeringVector" title="acoular.fbeamform.SteeringVector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SteeringVector</span></code></a></p></td>
+<td><p>Basic class for implementing steering vectors with monopole source transfer models.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#acoular.fbeamform.BeamformerBase" title="acoular.fbeamform.BeamformerBase"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BeamformerBase</span></code></a></p></td>
+<td><p>Beamforming using the basic delay-and-sum algorithm in the frequency domain.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#acoular.fbeamform.BeamformerFunctional" title="acoular.fbeamform.BeamformerFunctional"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BeamformerFunctional</span></code></a></p></td>
+<td><p>Functional beamforming algorithm.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#acoular.fbeamform.BeamformerCapon" title="acoular.fbeamform.BeamformerCapon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BeamformerCapon</span></code></a></p></td>
+<td><p>Beamforming using the Capon (Mininimum Variance) algorithm.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#acoular.fbeamform.BeamformerEig" title="acoular.fbeamform.BeamformerEig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BeamformerEig</span></code></a></p></td>
+<td><p>Beamforming using eigenvalue and eigenvector techniques.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#acoular.fbeamform.BeamformerMusic" title="acoular.fbeamform.BeamformerMusic"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BeamformerMusic</span></code></a></p></td>
+<td><p>Beamforming using the MUSIC algorithm.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#acoular.fbeamform.BeamformerClean" title="acoular.fbeamform.BeamformerClean"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BeamformerClean</span></code></a></p></td>
+<td><p>CLEAN deconvolution algorithm.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#acoular.fbeamform.BeamformerDamas" title="acoular.fbeamform.BeamformerDamas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BeamformerDamas</span></code></a></p></td>
+<td><p>DAMAS deconvolution algorithm.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#acoular.fbeamform.BeamformerDamasPlus" title="acoular.fbeamform.BeamformerDamasPlus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BeamformerDamasPlus</span></code></a></p></td>
+<td><p>DAMAS deconvolution <span id="id1">[<a class="reference internal" href="../../literature/index.html#id10" title="T. F. Brooks and W. M. Humphreys. A deconvolution approach for the mapping of acoustic sources (damas) determined from phased microphone arrays. Journal of Sound and Vibration, 294(4-5):856-879, 2006. doi:10.1016/j.jsv.2005.12.046.">2</a>]</span> for solving the system of equations.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#acoular.fbeamform.BeamformerOrth" title="acoular.fbeamform.BeamformerOrth"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BeamformerOrth</span></code></a></p></td>
+<td><p>Orthogonal deconvolution algorithm.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#acoular.fbeamform.BeamformerCleansc" title="acoular.fbeamform.BeamformerCleansc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BeamformerCleansc</span></code></a></p></td>
+<td><p>CLEAN-SC deconvolution algorithm.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#acoular.fbeamform.BeamformerCMF" title="acoular.fbeamform.BeamformerCMF"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BeamformerCMF</span></code></a></p></td>
+<td><p>Covariance Matrix Fitting algorithm.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#acoular.fbeamform.BeamformerSODIX" title="acoular.fbeamform.BeamformerSODIX"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BeamformerSODIX</span></code></a></p></td>
+<td><p>Source directivity modeling in the cross-spectral matrix (SODIX) algorithm.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#acoular.fbeamform.BeamformerGIB" title="acoular.fbeamform.BeamformerGIB"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BeamformerGIB</span></code></a></p></td>
+<td><p>Beamforming GIB methods with different normalizations.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#acoular.fbeamform.BeamformerAdaptiveGrid" title="acoular.fbeamform.BeamformerAdaptiveGrid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BeamformerAdaptiveGrid</span></code></a></p></td>
+<td><p>Abstract base class for array methods without predefined grid.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#acoular.fbeamform.BeamformerGridlessOrth" title="acoular.fbeamform.BeamformerGridlessOrth"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BeamformerGridlessOrth</span></code></a></p></td>
+<td><p>Orthogonal beamforming without predefined grid.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#acoular.fbeamform.PointSpreadFunction" title="acoular.fbeamform.PointSpreadFunction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointSpreadFunction</span></code></a></p></td>
+<td><p>The point spread function.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#acoular.fbeamform.L_p" title="acoular.fbeamform.L_p"><code class="xref py py-obj docutils literal notranslate"><span class="pre">L_p</span></code></a>(x)</p></td>
+<td><p>Calculates the sound pressure level from the squared sound pressure.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#acoular.fbeamform.integrate" title="acoular.fbeamform.integrate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">integrate</span></code></a>(data, grid, sector)</p></td>
+<td><p>Integrates a sound pressure map over a given sector.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.fbeamform.SteeringVector">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.fbeamform.</span></span><span class="sig-name descname"><span class="pre">SteeringVector</span></span><a class="headerlink" href="#acoular.fbeamform.SteeringVector" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.enthought.com/traits/traits_api_reference/has_traits.html#traits.has_traits.HasStrictTraits" title="(in traits v7.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">HasStrictTraits</span></code></a></p>
+<p>Basic class for implementing steering vectors with monopole source transfer models.</p>
+<p>Handles four different steering vector formulations. See <span id="id2">[<a class="reference internal" href="../../literature/index.html#id17" title="E. Sarradj. Three-dimensional acoustic source mapping with different beamforming steering vector formulations. Advances in Acoustics and Vibration, 2012:1-12, 2012. doi:10.1155/2012/292695.">3</a>]</span> for details.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.SteeringVector.grid">
+<span class="sig-name descname"><span class="pre">grid</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Instance(Grid)</span></em><a class="headerlink" href="#acoular.fbeamform.SteeringVector.grid" title="Link to this definition">#</a></dt>
+<dd><p><a class="reference internal" href="acoular.grids.html#acoular.grids.Grid" title="acoular.grids.Grid"><code class="xref py py-class docutils literal notranslate"><span class="pre">Grid</span></code></a>-derived object that provides the grid locations.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.SteeringVector.mics">
+<span class="sig-name descname"><span class="pre">mics</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Instance(MicGeom)</span></em><a class="headerlink" href="#acoular.fbeamform.SteeringVector.mics" title="Link to this definition">#</a></dt>
+<dd><p><a class="reference internal" href="acoular.microphones.html#acoular.microphones.MicGeom" title="acoular.microphones.MicGeom"><code class="xref py py-class docutils literal notranslate"><span class="pre">MicGeom</span></code></a> object that provides the microphone locations.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.SteeringVector.steer_type">
+<span class="sig-name descname"><span class="pre">steer_type</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum('true</span> <span class="pre">level',</span> <span class="pre">'true</span> <span class="pre">location',</span> <span class="pre">'classic',</span> <span class="pre">'inverse')</span></em><a class="headerlink" href="#acoular.fbeamform.SteeringVector.steer_type" title="Link to this definition">#</a></dt>
+<dd><p>Type of steering vectors, see also <span id="id3">[<a class="reference internal" href="../../literature/index.html#id17" title="E. Sarradj. Three-dimensional acoustic source mapping with different beamforming steering vector formulations. Advances in Acoustics and Vibration, 2012:1-12, 2012. doi:10.1155/2012/292695.">3</a>]</span>. Defaults to ‘true level’.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.SteeringVector.env">
+<span class="sig-name descname"><span class="pre">env</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Instance(Environment(),</span> <span class="pre">Environment)</span></em><a class="headerlink" href="#acoular.fbeamform.SteeringVector.env" title="Link to this definition">#</a></dt>
+<dd><p><a class="reference internal" href="acoular.environments.html#acoular.environments.Environment" title="acoular.environments.Environment"><code class="xref py py-class docutils literal notranslate"><span class="pre">Environment</span></code></a> or derived object,
+which provides information about the sound propagation in the medium.
+Defaults to standard <a class="reference internal" href="acoular.environments.html#acoular.environments.Environment" title="acoular.environments.Environment"><code class="xref py py-class docutils literal notranslate"><span class="pre">Environment</span></code></a> object.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.SteeringVector.r0">
+<span class="sig-name descname"><span class="pre">r0</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property()</span></em><a class="headerlink" href="#acoular.fbeamform.SteeringVector.r0" title="Link to this definition">#</a></dt>
+<dd><p>Sound travel distances from microphone array center to grid : points or reference position
+(readonly). Feature may change.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.SteeringVector.rm">
+<span class="sig-name descname"><span class="pre">rm</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property()</span></em><a class="headerlink" href="#acoular.fbeamform.SteeringVector.rm" title="Link to this definition">#</a></dt>
+<dd><p>Sound travel distances from array microphones to grid : points (readonly). Feature may
+change.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.SteeringVector.ref">
+<span class="sig-name descname"><span class="pre">ref</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property()</span></em><a class="headerlink" href="#acoular.fbeamform.SteeringVector.ref" title="Link to this definition">#</a></dt>
+<dd><p>Reference position or distance at which to evaluate the sound pressure
+of a grid point.
+If set to a scalar, this is used as reference distance to the grid points.
+If set to a vector, this is interpreted as x,y,z coordinates of the reference position.
+Defaults to [0.,0.,0.].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.SteeringVector.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['steer_type',</span> <span class="pre">'env.digest',</span> <span class="pre">'grid.digest',</span> <span class="pre">'mics.digest',</span> <span class="pre">'_ref'])</span></em><a class="headerlink" href="#acoular.fbeamform.SteeringVector.digest" title="Link to this definition">#</a></dt>
+<dd><p>A unique identifier for the steering vector, based on its properties. (read-only)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.SteeringVector.inv_digest">
+<span class="sig-name descname"><span class="pre">inv_digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['env.digest',</span> <span class="pre">'grid.digest',</span> <span class="pre">'mics.digest',</span> <span class="pre">'_ref'])</span></em><a class="headerlink" href="#acoular.fbeamform.SteeringVector.inv_digest" title="Link to this definition">#</a></dt>
+<dd><p>A unique identifier for the grid, excluding <a class="reference internal" href="#acoular.fbeamform.SteeringVector.steer_type" title="acoular.fbeamform.SteeringVector.steer_type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">steer_type</span></code></a>.
+Use for inverse methods. (read-only)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.fbeamform.SteeringVector.transfer">
+<span class="sig-name descname"><span class="pre">transfer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.fbeamform.SteeringVector.transfer" title="Link to this definition">#</a></dt>
+<dd><p>Calculates the transfer matrix for one frequency.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>f</strong><span class="classifier">float</span></dt><dd><p>Frequency for which to calculate the transfer matrix</p>
+</dd>
+<dt><strong>ind</strong><span class="classifier">(optional) array of ints</span></dt><dd><p>If set, only the transfer function of the gridpoints addressed by
+the given indices will be calculated. Useful for algorithms like CLEAN-SC,
+where not the full transfer matrix is needed</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>array of complex128</dt><dd><p>array of shape (ngridpts, nmics) containing the transfer matrix for the given frequency</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.fbeamform.SteeringVector.steer_vector">
+<span class="sig-name descname"><span class="pre">steer_vector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.fbeamform.SteeringVector.steer_vector" title="Link to this definition">#</a></dt>
+<dd><p>Calculates the steering vectors based on the transfer function.</p>
+<p>See also <span id="id4">[<a class="reference internal" href="../../literature/index.html#id17" title="E. Sarradj. Three-dimensional acoustic source mapping with different beamforming steering vector formulations. Advances in Acoustics and Vibration, 2012:1-12, 2012. doi:10.1155/2012/292695.">3</a>]</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>f</strong><span class="classifier">float</span></dt><dd><p>Frequency for which to calculate the transfer matrix</p>
+</dd>
+<dt><strong>ind</strong><span class="classifier">(optional) array of ints</span></dt><dd><p>If set, only the steering vectors of the gridpoints addressed by
+the given indices will be calculated. Useful for algorithms like CLEAN-SC,
+where not the full transfer matrix is needed</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>array of complex128</dt><dd><p>array of shape (ngridpts, nmics) containing the steering vectors for the given frequency</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.fbeamform.LazyBfResult">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.fbeamform.</span></span><span class="sig-name descname"><span class="pre">LazyBfResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bf</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.fbeamform.LazyBfResult" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Manages lazy per-frequency evaluation.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerBase">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.fbeamform.</span></span><span class="sig-name descname"><span class="pre">BeamformerBase</span></span><a class="headerlink" href="#acoular.fbeamform.BeamformerBase" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.enthought.com/traits/traits_api_reference/has_traits.html#traits.has_traits.HasStrictTraits" title="(in traits v7.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">HasStrictTraits</span></code></a></p>
+<p>Beamforming using the basic delay-and-sum algorithm in the frequency domain.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerBase.steer">
+<span class="sig-name descname"><span class="pre">steer</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Instance(SteeringVector,</span> <span class="pre">args=())</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerBase.steer" title="Link to this definition">#</a></dt>
+<dd><p>Instance of <a class="reference internal" href="#acoular.fbeamform.SteeringVector" title="acoular.fbeamform.SteeringVector"><code class="xref py py-class docutils literal notranslate"><span class="pre">SteeringVector</span></code></a> or its derived classes
+that contains information about the steering vector. This is a private trait.
+Do not set this directly, use <cite>steer</cite> trait instead.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerBase.freq_data">
+<span class="sig-name descname"><span class="pre">freq_data</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Instance(PowerSpectra)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerBase.freq_data" title="Link to this definition">#</a></dt>
+<dd><p><a class="reference internal" href="acoular.spectra.html#acoular.spectra.PowerSpectra" title="acoular.spectra.PowerSpectra"><code class="xref py py-class docutils literal notranslate"><span class="pre">PowerSpectra</span></code></a> object that provides the
+cross spectral matrix and eigenvalues</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerBase.r_diag">
+<span class="sig-name descname"><span class="pre">r_diag</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Bool(True)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerBase.r_diag" title="Link to this definition">#</a></dt>
+<dd><p>Boolean flag, if ‘True’ (default), the main diagonal is removed before beamforming.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerBase.r_diag_norm">
+<span class="sig-name descname"><span class="pre">r_diag_norm</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(0.0)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerBase.r_diag_norm" title="Link to this definition">#</a></dt>
+<dd><p>If diagonal of the CSM is removed, some signal energy is lost.
+This is handled via this normalization factor.
+Internally, the default is: num_mics / (num_mics - 1).</p>
+<p>If r_diag==True: if r_diag_norm==0.0, the default
+normalization = num_mics/(num_mics-1) is used.
+If r_diag_norm !=0.0, the user input is used instead.
+If r_diag==False, the normalization is 1.0 either way.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerBase.precision">
+<span class="sig-name descname"><span class="pre">precision</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum('float64',</span> <span class="pre">'float32')</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerBase.precision" title="Link to this definition">#</a></dt>
+<dd><p>Floating point precision of property result. Corresponding to numpy dtypes. Default = 64 Bit.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerBase.cached">
+<span class="sig-name descname"><span class="pre">cached</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Bool(True)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerBase.cached" title="Link to this definition">#</a></dt>
+<dd><p>Boolean flag, if ‘True’ (default), the result is cached in h5 files.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerBase.h5f">
+<span class="sig-name descname"><span class="pre">h5f</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Instance(H5CacheFileBase,</span> <span class="pre">transient=True)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerBase.h5f" title="Link to this definition">#</a></dt>
+<dd><p>hdf5 cache file</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerBase.result">
+<span class="sig-name descname"><span class="pre">result</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property()</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerBase.result" title="Link to this definition">#</a></dt>
+<dd><p>The beamforming result as squared sound pressure values
+at all grid point locations (readonly).
+Returns a (number of frequencies, number of gridpoints) array-like
+of floats. Values can only be accessed via the index operator [].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerBase.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerBase.digest" title="Link to this definition">#</a></dt>
+<dd><p>A unique identifier for the beamformer, based on its properties. (read-only)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerBase.sig_loss_norm">
+<span class="sig-name descname"><span class="pre">sig_loss_norm</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#acoular.fbeamform.BeamformerBase.sig_loss_norm" title="Link to this definition">#</a></dt>
+<dd><p>If the diagonal of the CSM is removed one has to handle the loss of signal energy.</p>
+<p>Done via a normalization factor.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerBase.synthetic">
+<span class="sig-name descname"><span class="pre">synthetic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.fbeamform.BeamformerBase.synthetic" title="Link to this definition">#</a></dt>
+<dd><p>Evaluates the beamforming result for an arbitrary frequency band.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>f: float</strong></dt><dd><p>Band center frequency.</p>
+</dd>
+<dt><strong>num</strong><span class="classifier">integer</span></dt><dd><p>Controls the width of the frequency bands considered; defaults to
+0 (single frequency line).</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>num</p></th>
+<th class="head"><p>frequency band width</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>single frequency line</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>octave band</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>third-octave band</p></td>
+</tr>
+<tr class="row-odd"><td><p>n</p></td>
+<td><p>1/n-octave band</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>array of floats</dt><dd><p>The synthesized frequency band values of the beamforming result at
+each grid point .
+Note that the frequency resolution and therefore the bandwidth
+represented by a single frequency line depends on
+the <code class="xref py py-attr docutils literal notranslate"><span class="pre">sampling</span> <span class="pre">frequency</span></code> and
+used <code class="xref py py-attr docutils literal notranslate"><span class="pre">FFT</span> <span class="pre">block</span> <span class="pre">size</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerBase.integrate">
+<span class="sig-name descname"><span class="pre">integrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frange</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.fbeamform.BeamformerBase.integrate" title="Link to this definition">#</a></dt>
+<dd><p>Integrates result map over a given sector.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>sector: array of floats or :class:`~acoular.grids.Sector`</strong></dt><dd><p>either an array, tuple or list with arguments for the ‘indices’
+method of a <a class="reference internal" href="acoular.grids.html#acoular.grids.Grid" title="acoular.grids.Grid"><code class="xref py py-class docutils literal notranslate"><span class="pre">Grid</span></code></a>-derived class
+(e.g. <a class="reference internal" href="acoular.grids.html#acoular.grids.RectGrid.indices" title="acoular.grids.RectGrid.indices"><code class="xref py py-meth docutils literal notranslate"><span class="pre">RectGrid.indices</span></code></a>
+or <a class="reference internal" href="acoular.grids.html#acoular.grids.RectGrid3D.indices" title="acoular.grids.RectGrid3D.indices"><code class="xref py py-meth docutils literal notranslate"><span class="pre">RectGrid3D.indices</span></code></a>).
+Possible sectors would be <em>array([xmin, ymin, xmax, ymax])</em>
+or <em>array([x, y, radius])</em> or an instance of a
+<a class="reference internal" href="acoular.grids.html#acoular.grids.Sector" title="acoular.grids.Sector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sector</span></code></a>-derived class</p>
+</dd>
+<dt><strong>frange: tuple or None</strong></dt><dd><p>a tuple of (fmin,fmax) frequencies to include in the result if <em>num*==0,
+or band center frequency/frequencies for which to return the results
+if *num</em>&gt;0; if None, then the frequency range is determined from
+the settings of the <code class="xref py py-attr docutils literal notranslate"><span class="pre">PowerSpectra.ind_low</span></code> and
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">PowerSpectra.ind_high</span></code> of <a class="reference internal" href="#acoular.fbeamform.BeamformerBase.freq_data" title="acoular.fbeamform.BeamformerBase.freq_data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">freq_data</span></code></a></p>
+</dd>
+<dt><strong>num</strong><span class="classifier">integer</span></dt><dd><p>Controls the width of the frequency bands considered; defaults to
+0 (single frequency line). Only considered if <em>frange</em> is not None.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>num</p></th>
+<th class="head"><p>frequency band width</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>single frequency line</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>octave band</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>third-octave band</p></td>
+</tr>
+<tr class="row-odd"><td><p>n</p></td>
+<td><p>1/n-octave band</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>res or (f, res): array of floats or tuple(array of floats, array of floats)</dt><dd><p>If <em>frange*==None or *num</em>&gt;0, the spectrum (all calculated frequency bands)
+for the integrated sector is returned as <em>res</em>. The dimension of this array is the
+number of frequencies given by <a class="reference internal" href="#acoular.fbeamform.BeamformerBase.freq_data" title="acoular.fbeamform.BeamformerBase.freq_data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">freq_data</span></code></a> and entries not computed are zero.
+If <em>frange</em>!=None and <em>num*==0, then (f, res) is returned where *f</em> are the (band)
+frequencies and the dimension of both arrays is determined from <em>frange</em></p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerFunctional">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.fbeamform.</span></span><span class="sig-name descname"><span class="pre">BeamformerFunctional</span></span><a class="headerlink" href="#acoular.fbeamform.BeamformerFunctional" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#acoular.fbeamform.BeamformerBase" title="acoular.fbeamform.BeamformerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerBase</span></code></a></p>
+<p>Functional beamforming algorithm.</p>
+<p>See <span id="id5">[<a class="reference internal" href="../../literature/index.html#id13" title="R. P. Dougherty. Functional beamforming. In Proceedings on CD of the 5th Berlin Beamforming Conference. Berlin, 2014. Gesellschaft zur Förderung angewandter Informatik (GFaI).">4</a>]</span> for details.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerFunctional.gamma">
+<span class="sig-name descname"><span class="pre">gamma</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(1)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerFunctional.gamma" title="Link to this definition">#</a></dt>
+<dd><p>Functional exponent, defaults to 1 (= Classic Beamforming).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerFunctional.r_diag">
+<span class="sig-name descname"><span class="pre">r_diag</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum(False)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerFunctional.r_diag" title="Link to this definition">#</a></dt>
+<dd><p>Functional Beamforming is only well defined for full CSM</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerFunctional.r_diag_norm">
+<span class="sig-name descname"><span class="pre">r_diag_norm</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum(1.0)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerFunctional.r_diag_norm" title="Link to this definition">#</a></dt>
+<dd><p>Normalization factor in case of CSM diagonal removal. Defaults to 1.0 since Functional
+Beamforming is only well defined for full CSM.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerFunctional.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES</span> <span class="pre">+</span> <span class="pre">['gamma'])</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerFunctional.digest" title="Link to this definition">#</a></dt>
+<dd><p>A unique identifier for the beamformer, based on its properties. (read-only)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerCapon">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.fbeamform.</span></span><span class="sig-name descname"><span class="pre">BeamformerCapon</span></span><a class="headerlink" href="#acoular.fbeamform.BeamformerCapon" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#acoular.fbeamform.BeamformerBase" title="acoular.fbeamform.BeamformerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerBase</span></code></a></p>
+<p>Beamforming using the Capon (Mininimum Variance) algorithm.</p>
+<p>See <span id="id6">[<a class="reference internal" href="../../literature/index.html#id11" title="J. Capon. High-resolution frequency-wavenumber spectrum analysis. Proceedings of the IEEE, 57(8):1408-1418, 1969. doi:10.1109/PROC.1969.7278.">5</a>]</span> for details.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerCapon.r_diag">
+<span class="sig-name descname"><span class="pre">r_diag</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum(False)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerCapon.r_diag" title="Link to this definition">#</a></dt>
+<dd><p>Boolean flag, if <code class="docutils literal notranslate"><span class="pre">True</span></code>, the main diagonal is removed before beamforming;
+for Capon beamforming <a class="reference internal" href="#acoular.fbeamform.BeamformerCapon.r_diag" title="acoular.fbeamform.BeamformerCapon.r_diag"><code class="xref py py-attr docutils literal notranslate"><span class="pre">r_diag</span></code></a> is set to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerCapon.r_diag_norm">
+<span class="sig-name descname"><span class="pre">r_diag_norm</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum(1.0)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerCapon.r_diag_norm" title="Link to this definition">#</a></dt>
+<dd><p>Normalization factor in case of CSM diagonal removal.
+Defaults to <code class="docutils literal notranslate"><span class="pre">1.0</span></code> since Beamformer Capon is only well defined for full CSM.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerEig">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.fbeamform.</span></span><span class="sig-name descname"><span class="pre">BeamformerEig</span></span><a class="headerlink" href="#acoular.fbeamform.BeamformerEig" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#acoular.fbeamform.BeamformerBase" title="acoular.fbeamform.BeamformerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerBase</span></code></a></p>
+<p>Beamforming using eigenvalue and eigenvector techniques.</p>
+<p>See <span id="id7">[<a class="reference internal" href="../../literature/index.html#id15" title="E. Sarradj, C. Schulze, and A. Zeibig. Identification of noise source mechanisms using orthogonal beamforming. In Proceedings of International Congress on Noise and Vibration Emerging Methods (NOVEM 2005). 2005.">6</a>]</span> for details.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerEig.n">
+<span class="sig-name descname"><span class="pre">n</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Int(-1)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerEig.n" title="Link to this definition">#</a></dt>
+<dd><p>Number of component to calculate:
+<code class="docutils literal notranslate"><span class="pre">0</span></code> (smallest) … <code class="xref py py-attr docutils literal notranslate"><span class="pre">num_channels</span></code>-1;
+defaults to <code class="docutils literal notranslate"><span class="pre">-1</span></code>, i.e. <code class="xref py py-attr docutils literal notranslate"><span class="pre">num_channels</span></code>-1.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerEig.na">
+<span class="sig-name descname"><span class="pre">na</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property()</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerEig.na" title="Link to this definition">#</a></dt>
+<dd><p>No. of eigenvalue</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerEig.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES</span> <span class="pre">+</span> <span class="pre">['n'])</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerEig.digest" title="Link to this definition">#</a></dt>
+<dd><p>A uniquernal identifier for the beamformer, based on its properties. (read-only)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerMusic">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.fbeamform.</span></span><span class="sig-name descname"><span class="pre">BeamformerMusic</span></span><a class="headerlink" href="#acoular.fbeamform.BeamformerMusic" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#acoular.fbeamform.BeamformerEig" title="acoular.fbeamform.BeamformerEig"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerEig</span></code></a></p>
+<p>Beamforming using the MUSIC algorithm.</p>
+<p>See <span id="id8">[<a class="reference internal" href="../../literature/index.html#id18" title="R. Schmidt. Multiple emitter location and signal parameter estimation. IEEE Transactions on Antennas and Propagation, 34(3):276-280, 1986. doi:10.1109/TAP.1986.1143830.">7</a>]</span> for details.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerMusic.r_diag">
+<span class="sig-name descname"><span class="pre">r_diag</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum(False)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerMusic.r_diag" title="Link to this definition">#</a></dt>
+<dd><p>Boolean flag, if <code class="docutils literal notranslate"><span class="pre">True</span></code>, the main diagonal is removed before beamforming;
+for MUSIC beamforming <a class="reference internal" href="#acoular.fbeamform.BeamformerMusic.r_diag" title="acoular.fbeamform.BeamformerMusic.r_diag"><code class="xref py py-attr docutils literal notranslate"><span class="pre">r_diag</span></code></a> is set to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerMusic.r_diag_norm">
+<span class="sig-name descname"><span class="pre">r_diag_norm</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum(1.0)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerMusic.r_diag_norm" title="Link to this definition">#</a></dt>
+<dd><p>Normalization factor in case of CSM diagonal removal. Defaults to 1.0 since BeamformerMusic
+is only well defined for full CSM.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerMusic.n">
+<span class="sig-name descname"><span class="pre">n</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Int(1)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerMusic.n" title="Link to this definition">#</a></dt>
+<dd><p>assumed number of sources</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.fbeamform.PointSpreadFunction">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.fbeamform.</span></span><span class="sig-name descname"><span class="pre">PointSpreadFunction</span></span><a class="headerlink" href="#acoular.fbeamform.PointSpreadFunction" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.enthought.com/traits/traits_api_reference/has_traits.html#traits.has_traits.HasStrictTraits" title="(in traits v7.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">HasStrictTraits</span></code></a></p>
+<p>The point spread function.</p>
+<p>This class provides tools to calculate the PSF depending on the used
+microphone geometry, focus grid, flow environment, etc.
+The PSF is needed by several deconvolution algorithms to correct
+the aberrations when using simple delay-and-sum beamforming.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.PointSpreadFunction.steer">
+<span class="sig-name descname"><span class="pre">steer</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Instance(SteeringVector,</span> <span class="pre">args=())</span></em><a class="headerlink" href="#acoular.fbeamform.PointSpreadFunction.steer" title="Link to this definition">#</a></dt>
+<dd><p>Instance of <a class="reference internal" href="#acoular.fbeamform.SteeringVector" title="acoular.fbeamform.SteeringVector"><code class="xref py py-class docutils literal notranslate"><span class="pre">SteeringVector</span></code></a> or its derived classes
+that contains information about the steering vector. This is a private trait.
+Do not set this directly, use <a class="reference internal" href="#acoular.fbeamform.PointSpreadFunction.steer" title="acoular.fbeamform.PointSpreadFunction.steer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">steer</span></code></a> trait instead.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.PointSpreadFunction.grid_indices">
+<span class="sig-name descname"><span class="pre">grid_indices</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CArray(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.fbeamform.PointSpreadFunction.grid_indices" title="Link to this definition">#</a></dt>
+<dd><p>Indices of grid points to calculate the PSF for.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.PointSpreadFunction.calcmode">
+<span class="sig-name descname"><span class="pre">calcmode</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum('single',</span> <span class="pre">'block',</span> <span class="pre">'full',</span> <span class="pre">'readonly')</span></em><a class="headerlink" href="#acoular.fbeamform.PointSpreadFunction.calcmode" title="Link to this definition">#</a></dt>
+<dd><p>Flag that defines how to calculate and store the point spread function
+defaults to ‘single’.</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>‘full’: Calculate the full PSF (for all grid points) in one go (should be used if the PSF</dt><dd><p>at all grid points is needed, as with <a class="reference internal" href="#acoular.fbeamform.BeamformerDamas" title="acoular.fbeamform.BeamformerDamas"><code class="xref py py-class docutils literal notranslate"><span class="pre">DAMAS</span></code></a>)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>‘single’: Calculate the PSF for the grid points defined by <a class="reference internal" href="#acoular.fbeamform.PointSpreadFunction.grid_indices" title="acoular.fbeamform.PointSpreadFunction.grid_indices"><code class="xref py py-attr docutils literal notranslate"><span class="pre">grid_indices</span></code></a>, one by one</dt><dd><p>(useful if not all PSFs are needed, as with <a class="reference internal" href="#acoular.fbeamform.BeamformerClean" title="acoular.fbeamform.BeamformerClean"><code class="xref py py-class docutils literal notranslate"><span class="pre">CLEAN</span></code></a>)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>‘block’: Calculate the PSF for the grid points defined by <a class="reference internal" href="#acoular.fbeamform.PointSpreadFunction.grid_indices" title="acoular.fbeamform.PointSpreadFunction.grid_indices"><code class="xref py py-attr docutils literal notranslate"><span class="pre">grid_indices</span></code></a>, in one go</dt><dd><p>(useful if not all PSFs are needed, as with <a class="reference internal" href="#acoular.fbeamform.BeamformerClean" title="acoular.fbeamform.BeamformerClean"><code class="xref py py-class docutils literal notranslate"><span class="pre">CLEAN</span></code></a>)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>‘readonly’: Do not attempt to calculate the PSF since it should already be cached (useful</dt><dd><p>if multiple processes have to access the cache file)</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.PointSpreadFunction.precision">
+<span class="sig-name descname"><span class="pre">precision</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum('float64',</span> <span class="pre">'float32')</span></em><a class="headerlink" href="#acoular.fbeamform.PointSpreadFunction.precision" title="Link to this definition">#</a></dt>
+<dd><p>Floating point precision of property psf. Corresponding to numpy dtypes. Default = 64 Bit.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.PointSpreadFunction.psf">
+<span class="sig-name descname"><span class="pre">psf</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property()</span></em><a class="headerlink" href="#acoular.fbeamform.PointSpreadFunction.psf" title="Link to this definition">#</a></dt>
+<dd><p>The actual point spread function.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.PointSpreadFunction.freq">
+<span class="sig-name descname"><span class="pre">freq</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(1.0)</span></em><a class="headerlink" href="#acoular.fbeamform.PointSpreadFunction.freq" title="Link to this definition">#</a></dt>
+<dd><p>Frequency to evaluate the PSF for; defaults to 1.0.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.PointSpreadFunction.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['steer.digest',</span> <span class="pre">'precision'],</span> <span class="pre">cached=True)</span></em><a class="headerlink" href="#acoular.fbeamform.PointSpreadFunction.digest" title="Link to this definition">#</a></dt>
+<dd><p>A unique identifier for the object, based on its properties. (read-only)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.fbeamform.PointSpreadFunction.calc_psf">
+<span class="sig-name descname"><span class="pre">calc_psf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ac</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gp</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.fbeamform.PointSpreadFunction.calc_psf" title="Link to this definition">#</a></dt>
+<dd><p>point-spread function calculation.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerDamas">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.fbeamform.</span></span><span class="sig-name descname"><span class="pre">BeamformerDamas</span></span><a class="headerlink" href="#acoular.fbeamform.BeamformerDamas" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#acoular.fbeamform.BeamformerBase" title="acoular.fbeamform.BeamformerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerBase</span></code></a></p>
+<p>DAMAS deconvolution algorithm.</p>
+<p>See <span id="id9">[<a class="reference internal" href="../../literature/index.html#id10" title="T. F. Brooks and W. M. Humphreys. A deconvolution approach for the mapping of acoustic sources (damas) determined from phased microphone arrays. Journal of Sound and Vibration, 294(4-5):856-879, 2006. doi:10.1016/j.jsv.2005.12.046.">2</a>]</span> for details.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerDamas.psf_precision">
+<span class="sig-name descname"><span class="pre">psf_precision</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum('float64',</span> <span class="pre">'float32')</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerDamas.psf_precision" title="Link to this definition">#</a></dt>
+<dd><p>The floating-number-precision of the PSFs. Default is 64 bit.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerDamas.n_iter">
+<span class="sig-name descname"><span class="pre">n_iter</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Int(100)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerDamas.n_iter" title="Link to this definition">#</a></dt>
+<dd><p>Number of iterations, defaults to 100.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerDamas.damp">
+<span class="sig-name descname"><span class="pre">damp</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(1.0)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerDamas.damp" title="Link to this definition">#</a></dt>
+<dd><p>Damping factor in modified gauss-seidel</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerDamas.calcmode">
+<span class="sig-name descname"><span class="pre">calcmode</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum('full',</span> <span class="pre">'single',</span> <span class="pre">'block',</span> <span class="pre">'readonly')</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerDamas.calcmode" title="Link to this definition">#</a></dt>
+<dd><p>Flag that defines how to calculate and store the point spread function
+defaults to ‘single’.</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>‘full’: Calculate the full PSF (for all grid points) in one go (should be used if the PSF</dt><dd><p>at all grid points is needed, as with <a class="reference internal" href="#acoular.fbeamform.BeamformerDamas" title="acoular.fbeamform.BeamformerDamas"><code class="xref py py-class docutils literal notranslate"><span class="pre">DAMAS</span></code></a>)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>‘single’: Calculate the PSF for the grid points defined by <code class="xref py py-attr docutils literal notranslate"><span class="pre">grid_indices</span></code>, one by one</dt><dd><p>(useful if not all PSFs are needed, as with <a class="reference internal" href="#acoular.fbeamform.BeamformerClean" title="acoular.fbeamform.BeamformerClean"><code class="xref py py-class docutils literal notranslate"><span class="pre">CLEAN</span></code></a>)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>‘block’: Calculate the PSF for the grid points defined by <code class="xref py py-attr docutils literal notranslate"><span class="pre">grid_indices</span></code>, in one go</dt><dd><p>(useful if not all PSFs are needed, as with <a class="reference internal" href="#acoular.fbeamform.BeamformerClean" title="acoular.fbeamform.BeamformerClean"><code class="xref py py-class docutils literal notranslate"><span class="pre">CLEAN</span></code></a>)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>‘readonly’: Do not attempt to calculate the PSF since it should already be cached (useful</dt><dd><p>if multiple processes have to access the cache file)</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerDamas.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerDamas.digest" title="Link to this definition">#</a></dt>
+<dd><p>A unique identifier for the beamformer, based on its properties. (read-only)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerDamasPlus">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.fbeamform.</span></span><span class="sig-name descname"><span class="pre">BeamformerDamasPlus</span></span><a class="headerlink" href="#acoular.fbeamform.BeamformerDamasPlus" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#acoular.fbeamform.BeamformerDamas" title="acoular.fbeamform.BeamformerDamas"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerDamas</span></code></a></p>
+<p>DAMAS deconvolution <span id="id10">[<a class="reference internal" href="../../literature/index.html#id10" title="T. F. Brooks and W. M. Humphreys. A deconvolution approach for the mapping of acoustic sources (damas) determined from phased microphone arrays. Journal of Sound and Vibration, 294(4-5):856-879, 2006. doi:10.1016/j.jsv.2005.12.046.">2</a>]</span> for solving the system of equations.</p>
+<p>Instead of the original Gauss-Seidel iterations, this class employs the NNLS or linear
+programming solvers from scipy.optimize or one of several optimization algorithms from the
+scikit-learn module. Needs a-priori delay-and-sum beamforming (<a class="reference internal" href="#acoular.fbeamform.BeamformerBase" title="acoular.fbeamform.BeamformerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerBase</span></code></a>).</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerDamasPlus.method">
+<span class="sig-name descname"><span class="pre">method</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum('NNLS',</span> <span class="pre">'LP',</span> <span class="pre">'LassoLars',</span> <span class="pre">'OMPCV')</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerDamasPlus.method" title="Link to this definition">#</a></dt>
+<dd><p>Type of fit method to be used (‘LassoLars’,
+‘OMPCV’, ‘LP’, or ‘NNLS’, defaults to ‘NNLS’).
+These methods are implemented in
+the <a class="reference external" href="http://scikit-learn.org/stable/user_guide.html">scikit-learn</a>
+module or within scipy.optimize respectively.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerDamasPlus.n_iter">
+<span class="sig-name descname"><span class="pre">n_iter</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Int(500)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerDamasPlus.n_iter" title="Link to this definition">#</a></dt>
+<dd><p>Maximum number of iterations,
+tradeoff between speed and precision;
+defaults to 500</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerDamasPlus.unit_mult">
+<span class="sig-name descname"><span class="pre">unit_mult</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(1e9)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerDamasPlus.unit_mult" title="Link to this definition">#</a></dt>
+<dd><p>Unit multiplier for evaluating, e.g., nPa instead of Pa.
+Values are converted back before returning.
+Temporary conversion may be necessary to not reach machine epsilon
+within fitting method algorithms. Defaults to 1e9.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerDamasPlus.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerDamasPlus.digest" title="Link to this definition">#</a></dt>
+<dd><p>A unique identifier for the beamformer, based on its properties. (read-only)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerOrth">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.fbeamform.</span></span><span class="sig-name descname"><span class="pre">BeamformerOrth</span></span><a class="headerlink" href="#acoular.fbeamform.BeamformerOrth" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#acoular.fbeamform.BeamformerBase" title="acoular.fbeamform.BeamformerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerBase</span></code></a></p>
+<p>Orthogonal deconvolution algorithm.</p>
+<p>See <span id="id11">[<a class="reference internal" href="../../literature/index.html#id16" title="E. Sarradj. A fast signal subspace approach for the determination of absolute levels from phased microphone array measurements. Journal of Sound and Vibration, 329(9):1553-1569, 2010. doi:10.1016/j.jsv.2009.11.009.">8</a>]</span> for details.
+New faster implementation without explicit (<a class="reference internal" href="#acoular.fbeamform.BeamformerEig" title="acoular.fbeamform.BeamformerEig"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerEig</span></code></a>).</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerOrth.eva_list">
+<span class="sig-name descname"><span class="pre">eva_list</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CArray(dtype=int,</span> <span class="pre">value=np.array([-1]))</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerOrth.eva_list" title="Link to this definition">#</a></dt>
+<dd><p>List of components to consider, use this to directly set the eigenvalues
+used in the beamformer. Alternatively, set <a class="reference internal" href="#acoular.fbeamform.BeamformerOrth.n" title="acoular.fbeamform.BeamformerOrth.n"><code class="xref py py-attr docutils literal notranslate"><span class="pre">n</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerOrth.n">
+<span class="sig-name descname"><span class="pre">n</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Int(1)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerOrth.n" title="Link to this definition">#</a></dt>
+<dd><p>Number of components to consider, defaults to <code class="docutils literal notranslate"><span class="pre">1</span></code>. If set,
+<a class="reference internal" href="#acoular.fbeamform.BeamformerOrth.eva_list" title="acoular.fbeamform.BeamformerOrth.eva_list"><code class="xref py py-attr docutils literal notranslate"><span class="pre">eva_list</span></code></a> will contain
+the indices of the n largest eigenvalues. Setting <a class="reference internal" href="#acoular.fbeamform.BeamformerOrth.eva_list" title="acoular.fbeamform.BeamformerOrth.eva_list"><code class="xref py py-attr docutils literal notranslate"><span class="pre">eva_list</span></code></a>
+afterwards will override this value.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerOrth.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerOrth.digest" title="Link to this definition">#</a></dt>
+<dd><p>A unique identifier for the beamformer, based on its properties. (read-only)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerCleansc">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.fbeamform.</span></span><span class="sig-name descname"><span class="pre">BeamformerCleansc</span></span><a class="headerlink" href="#acoular.fbeamform.BeamformerCleansc" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#acoular.fbeamform.BeamformerBase" title="acoular.fbeamform.BeamformerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerBase</span></code></a></p>
+<p>CLEAN-SC deconvolution algorithm.</p>
+<p>See <span id="id12">[<a class="reference internal" href="../../literature/index.html#id19" title="P. Sijtsma. Clean based on spatial source coherence. International Journal of Aeroacoustics, 6(4):357-374, 2007. doi:10.1260/147547207783359459.">9</a>]</span> for details.
+Classic delay-and-sum beamforming is already included.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerCleansc.n_iter">
+<span class="sig-name descname"><span class="pre">n_iter</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Int(0)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerCleansc.n_iter" title="Link to this definition">#</a></dt>
+<dd><p>no of CLEAN-SC iterations
+defaults to 0, i.e. automatic (max 2*num_channels)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerCleansc.damp">
+<span class="sig-name descname"><span class="pre">damp</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Range(0.01,</span> <span class="pre">1.0,</span> <span class="pre">0.6)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerCleansc.damp" title="Link to this definition">#</a></dt>
+<dd><p>iteration damping factor
+defaults to 0.6</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerCleansc.stopn">
+<span class="sig-name descname"><span class="pre">stopn</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Int(3)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerCleansc.stopn" title="Link to this definition">#</a></dt>
+<dd><p>iteration stop criterion for automatic detection
+iteration stops if power[i]&gt;power[i-stopn]
+defaults to 3</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerCleansc.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES</span> <span class="pre">+</span> <span class="pre">['n_iter',</span> <span class="pre">'damp',</span> <span class="pre">'stopn'])</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerCleansc.digest" title="Link to this definition">#</a></dt>
+<dd><p>A unique identifier for the beamformer, based on its properties. (read-only)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerClean">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.fbeamform.</span></span><span class="sig-name descname"><span class="pre">BeamformerClean</span></span><a class="headerlink" href="#acoular.fbeamform.BeamformerClean" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#acoular.fbeamform.BeamformerBase" title="acoular.fbeamform.BeamformerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerBase</span></code></a></p>
+<p>CLEAN deconvolution algorithm.</p>
+<p>See <span id="id13">[<a class="reference internal" href="../../literature/index.html#id14" title="J. A. Högbom. Aperture Synthesis with a Non-Regular Distribution of Interferometer Baselines. Astronomy and Astrophysics Supplement, 15(3):417-426, 1974.">10</a>]</span> for details.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerClean.psf_precision">
+<span class="sig-name descname"><span class="pre">psf_precision</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum('float64',</span> <span class="pre">'float32')</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerClean.psf_precision" title="Link to this definition">#</a></dt>
+<dd><p>The floating-number-precision of the PSFs. Default is 64 bit.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerClean.damp">
+<span class="sig-name descname"><span class="pre">damp</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Range(0.01,</span> <span class="pre">1.0,</span> <span class="pre">0.6)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerClean.damp" title="Link to this definition">#</a></dt>
+<dd><p>damping factor</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerClean.n_iter">
+<span class="sig-name descname"><span class="pre">n_iter</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Int(100)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerClean.n_iter" title="Link to this definition">#</a></dt>
+<dd><p>maximum number of iterations</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerClean.calcmode">
+<span class="sig-name descname"><span class="pre">calcmode</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum('block',</span> <span class="pre">'full',</span> <span class="pre">'single',</span> <span class="pre">'readonly')</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerClean.calcmode" title="Link to this definition">#</a></dt>
+<dd><p>Flag that defines how to calculate and store the point spread function
+defaults to ‘single’.</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>‘full’: Calculate the full PSF (for all grid points) in one go (should be used if the PSF</dt><dd><p>at all grid points is needed, as with <a class="reference internal" href="#acoular.fbeamform.BeamformerDamas" title="acoular.fbeamform.BeamformerDamas"><code class="xref py py-class docutils literal notranslate"><span class="pre">DAMAS</span></code></a>)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>‘single’: Calculate the PSF for the grid points defined by <code class="xref py py-attr docutils literal notranslate"><span class="pre">grid_indices</span></code>, one by one</dt><dd><p>(useful if not all PSFs are needed, as with <a class="reference internal" href="#acoular.fbeamform.BeamformerClean" title="acoular.fbeamform.BeamformerClean"><code class="xref py py-class docutils literal notranslate"><span class="pre">CLEAN</span></code></a>)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>‘block’: Calculate the PSF for the grid points defined by <code class="xref py py-attr docutils literal notranslate"><span class="pre">grid_indices</span></code>, in one go</dt><dd><p>(useful if not all PSFs are needed, as with <a class="reference internal" href="#acoular.fbeamform.BeamformerClean" title="acoular.fbeamform.BeamformerClean"><code class="xref py py-class docutils literal notranslate"><span class="pre">CLEAN</span></code></a>)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>‘readonly’: Do not attempt to calculate the PSF since it should already be cached (useful</dt><dd><p>if multiple processes have to access the cache file)</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerClean.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerClean.digest" title="Link to this definition">#</a></dt>
+<dd><p>A unique identifier for the beamformer, based on its properties. (read-only)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerCMF">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.fbeamform.</span></span><span class="sig-name descname"><span class="pre">BeamformerCMF</span></span><a class="headerlink" href="#acoular.fbeamform.BeamformerCMF" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#acoular.fbeamform.BeamformerBase" title="acoular.fbeamform.BeamformerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerBase</span></code></a></p>
+<p>Covariance Matrix Fitting algorithm.</p>
+<p>This is not really a beamformer, but an inverse method.
+See <span id="id14">[<a class="reference internal" href="../../literature/index.html#id21" title="T. Yardibi, J. Li, P. Stoica, and L. N. Cattafesta. Sparsity constrained deconvolution approaches for acoustic source mapping. The Journal of the Acoustical Society of America, 123(5):2631-2642, 2008. doi:10.1121/1.2896754.">11</a>]</span> for details.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerCMF.method">
+<span class="sig-name descname"><span class="pre">method</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerCMF.method" title="Link to this definition">#</a></dt>
+<dd><p>Type of fit method to be used (‘LassoLars’, ‘LassoLarsBIC’,
+‘OMPCV’ or ‘NNLS’, defaults to ‘LassoLars’).
+These methods are implemented in
+the <a class="reference external" href="http://scikit-learn.org/stable/user_guide.html">scikit-learn</a>
+module.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerCMF.alpha">
+<span class="sig-name descname"><span class="pre">alpha</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Range(0.0,</span> <span class="pre">1.0,</span> <span class="pre">0.0)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerCMF.alpha" title="Link to this definition">#</a></dt>
+<dd><p>Weight factor for LassoLars method,
+defaults to 0.0.
+(Use values in the order of 10^⁻9 for good results.)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerCMF.n_iter">
+<span class="sig-name descname"><span class="pre">n_iter</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Int(500)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerCMF.n_iter" title="Link to this definition">#</a></dt>
+<dd><p>Total or maximum number of iterations
+(depending on <a class="reference internal" href="#acoular.fbeamform.BeamformerCMF.method" title="acoular.fbeamform.BeamformerCMF.method"><code class="xref py py-attr docutils literal notranslate"><span class="pre">method</span></code></a>),
+tradeoff between speed and precision;
+defaults to 500</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerCMF.unit_mult">
+<span class="sig-name descname"><span class="pre">unit_mult</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(1e9)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerCMF.unit_mult" title="Link to this definition">#</a></dt>
+<dd><p>Unit multiplier for evaluating, e.g., nPa instead of Pa.
+Values are converted back before returning.
+Temporary conversion may be necessary to not reach machine epsilon
+within fitting method algorithms. Defaults to 1e9.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerCMF.show">
+<span class="sig-name descname"><span class="pre">show</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Bool(False)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerCMF.show" title="Link to this definition">#</a></dt>
+<dd><p>If True, shows the status of the PyLops solver. Only relevant in case of FISTA or
+Split_Bregman</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerCMF.r_diag_norm">
+<span class="sig-name descname"><span class="pre">r_diag_norm</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum(None)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerCMF.r_diag_norm" title="Link to this definition">#</a></dt>
+<dd><p>Energy normalization in case of diagonal removal not implemented for inverse methods.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerCMF.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerCMF.digest" title="Link to this definition">#</a></dt>
+<dd><p>A unique identifier for the beamformer, based on its properties. (read-only)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerSODIX">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.fbeamform.</span></span><span class="sig-name descname"><span class="pre">BeamformerSODIX</span></span><a class="headerlink" href="#acoular.fbeamform.BeamformerSODIX" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#acoular.fbeamform.BeamformerBase" title="acoular.fbeamform.BeamformerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerBase</span></code></a></p>
+<p>Source directivity modeling in the cross-spectral matrix (SODIX) algorithm.</p>
+<p>See <span id="id16">[<a class="reference internal" href="../../literature/index.html#id7" title="Stefan Funke. Ein Mikrofonarray-Verfahren zur Untersuchung der Schallabstrahlung von Turbofantriebwerken. Dissertation, Inst. Strömungsmechanik und Technische Akustik (ISTA), TU Berlin, 2017. doi:10.14279/depositonce-6076.">12</a>]</span> and <span id="id17">[<a class="reference internal" href="../../literature/index.html#id6" title="Sebastian Oertwig, Henri A. Siller, and Stefan Funke. Advancements in the source localization method SODIX and application to short cowl engine data. American Institute of Aeronautics and Astronautics, Inc., 2019. doi:10.2514/6.2019-2743.">13</a>]</span> for details.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerSODIX.method">
+<span class="sig-name descname"><span class="pre">method</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum('fmin_l_bfgs_b')</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerSODIX.method" title="Link to this definition">#</a></dt>
+<dd><p>Type of fit method to be used (‘fmin_l_bfgs_b’).
+These methods are implemented in
+the scipy module.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerSODIX.n_iter">
+<span class="sig-name descname"><span class="pre">n_iter</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Int(200)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerSODIX.n_iter" title="Link to this definition">#</a></dt>
+<dd><p>Maximum number of iterations,
+tradeoff between speed and precision;
+defaults to 200</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerSODIX.alpha">
+<span class="sig-name descname"><span class="pre">alpha</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Range(0.0,</span> <span class="pre">1.0,</span> <span class="pre">0.0)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerSODIX.alpha" title="Link to this definition">#</a></dt>
+<dd><p>Weight factor for regularization,
+defaults to 0.0.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerSODIX.unit_mult">
+<span class="sig-name descname"><span class="pre">unit_mult</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(1e9)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerSODIX.unit_mult" title="Link to this definition">#</a></dt>
+<dd><p>Unit multiplier for evaluating, e.g., nPa instead of Pa.
+Values are converted back before returning.
+Temporary conversion may be necessary to not reach machine epsilon
+within fitting method algorithms. Defaults to 1e9.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerSODIX.r_diag_norm">
+<span class="sig-name descname"><span class="pre">r_diag_norm</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum(None)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerSODIX.r_diag_norm" title="Link to this definition">#</a></dt>
+<dd><p>Energy normalization in case of diagonal removal not implemented for inverse methods.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerSODIX.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerSODIX.digest" title="Link to this definition">#</a></dt>
+<dd><p>A unique identifier for the beamformer, based on its properties. (read-only)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerGIB">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.fbeamform.</span></span><span class="sig-name descname"><span class="pre">BeamformerGIB</span></span><a class="headerlink" href="#acoular.fbeamform.BeamformerGIB" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#acoular.fbeamform.BeamformerEig" title="acoular.fbeamform.BeamformerEig"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerEig</span></code></a></p>
+<p>Beamforming GIB methods with different normalizations.</p>
+<p>See <span id="id18">[<a class="reference internal" href="../../literature/index.html#id5" title="Takao Suzuki. L1 generalized inverse beam-forming algorithm resolving coherent/incoherent, distributed and multipole sources. Journal of Sound and Vibration, 330(24):5835-5851, 2011. doi:10.1016/j.jsv.2011.05.021.">14</a>]</span> for details.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerGIB.unit_mult">
+<span class="sig-name descname"><span class="pre">unit_mult</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(1e9)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerGIB.unit_mult" title="Link to this definition">#</a></dt>
+<dd><p>Unit multiplier for evaluating, e.g., nPa instead of Pa.
+Values are converted back before returning.
+Temporary conversion may be necessary to not reach machine epsilon
+within fitting method algorithms. Defaults to 1e9.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerGIB.n_iter">
+<span class="sig-name descname"><span class="pre">n_iter</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Int(10)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerGIB.n_iter" title="Link to this definition">#</a></dt>
+<dd><p>Total or maximum number of iterations
+(depending on <a class="reference internal" href="#acoular.fbeamform.BeamformerGIB.method" title="acoular.fbeamform.BeamformerGIB.method"><code class="xref py py-attr docutils literal notranslate"><span class="pre">method</span></code></a>),
+tradeoff between speed and precision;
+defaults to 10</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerGIB.method">
+<span class="sig-name descname"><span class="pre">method</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerGIB.method" title="Link to this definition">#</a></dt>
+<dd><p>Type of fit method to be used (‘Suzuki’, ‘LassoLars’, ‘LassoLarsCV’, ‘LassoLarsBIC’,
+‘OMPCV’ or ‘NNLS’, defaults to ‘Suzuki’).
+These methods are implemented in
+the <a class="reference external" href="http://scikit-learn.org/stable/user_guide.html">scikit-learn</a>
+module.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerGIB.alpha">
+<span class="sig-name descname"><span class="pre">alpha</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Range(0.0,</span> <span class="pre">1.0,</span> <span class="pre">0.0)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerGIB.alpha" title="Link to this definition">#</a></dt>
+<dd><p>Weight factor for LassoLars method,
+defaults to 0.0.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerGIB.pnorm">
+<span class="sig-name descname"><span class="pre">pnorm</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(1)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerGIB.pnorm" title="Link to this definition">#</a></dt>
+<dd><p>Norm to consider for the regularization in InverseIRLS and Suzuki methods
+defaults to L-1 Norm</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerGIB.beta">
+<span class="sig-name descname"><span class="pre">beta</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(0.9)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerGIB.beta" title="Link to this definition">#</a></dt>
+<dd><p>Beta - Fraction of sources maintained after each iteration
+defaults to 0.9</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerGIB.eps_perc">
+<span class="sig-name descname"><span class="pre">eps_perc</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(0.05)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerGIB.eps_perc" title="Link to this definition">#</a></dt>
+<dd><p>eps - Regularization parameter for Suzuki algorithm
+defaults to 0.05.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerGIB.m">
+<span class="sig-name descname"><span class="pre">m</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Int(0)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerGIB.m" title="Link to this definition">#</a></dt>
+<dd><p>First eigenvalue to consider. Defaults to 0.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerGIB.r_diag_norm">
+<span class="sig-name descname"><span class="pre">r_diag_norm</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum(None)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerGIB.r_diag_norm" title="Link to this definition">#</a></dt>
+<dd><p>Energy normalization in case of diagonal removal not implemented for inverse methods.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerGIB.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerGIB.digest" title="Link to this definition">#</a></dt>
+<dd><p>A unique identifier for the beamformer, based on its properties. (read-only)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerAdaptiveGrid">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.fbeamform.</span></span><span class="sig-name descname"><span class="pre">BeamformerAdaptiveGrid</span></span><a class="headerlink" href="#acoular.fbeamform.BeamformerAdaptiveGrid" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#acoular.fbeamform.BeamformerBase" title="acoular.fbeamform.BeamformerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerBase</span></code></a>, <a class="reference internal" href="acoular.grids.html#acoular.grids.Grid" title="acoular.grids.Grid"><code class="xref py py-class docutils literal notranslate"><span class="pre">Grid</span></code></a></p>
+<p>Abstract base class for array methods without predefined grid.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerAdaptiveGrid.integrate">
+<span class="sig-name descname"><span class="pre">integrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sector</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.fbeamform.BeamformerAdaptiveGrid.integrate" title="Link to this definition">#</a></dt>
+<dd><p>Integrates result map over a given sector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>sector: :class:`~acoular.grids.Sector` or derived</strong></dt><dd><p>Gives the sector over which to integrate</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>array of floats</dt><dd><p>The spectrum (all calculated frequency bands) for the integrated sector.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerGridlessOrth">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.fbeamform.</span></span><span class="sig-name descname"><span class="pre">BeamformerGridlessOrth</span></span><a class="headerlink" href="#acoular.fbeamform.BeamformerGridlessOrth" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#acoular.fbeamform.BeamformerAdaptiveGrid" title="acoular.fbeamform.BeamformerAdaptiveGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">BeamformerAdaptiveGrid</span></code></a></p>
+<p>Orthogonal beamforming without predefined grid.</p>
+<p>See <span id="id20">[<a class="reference internal" href="../../literature/index.html#id4" title="Sarradj. Three-Dimensional Gridless Source Mapping Using a Signal Subspace Approach. In Proceedings on CD of the 9th Berlin Beamforming Conference. Berlin, 2022. Gesellschaft zur Förderung angewandter Informatik (GFaI).">15</a>]</span> for details.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerGridlessOrth.eva_list">
+<span class="sig-name descname"><span class="pre">eva_list</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CArray(dtype=int,</span> <span class="pre">value=np.array([-1]))</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerGridlessOrth.eva_list" title="Link to this definition">#</a></dt>
+<dd><p>List of components to consider, use this to directly set the eigenvalues
+used in the beamformer. Alternatively, set <a class="reference internal" href="#acoular.fbeamform.BeamformerGridlessOrth.n" title="acoular.fbeamform.BeamformerGridlessOrth.n"><code class="xref py py-attr docutils literal notranslate"><span class="pre">n</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerGridlessOrth.n">
+<span class="sig-name descname"><span class="pre">n</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Int(1)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerGridlessOrth.n" title="Link to this definition">#</a></dt>
+<dd><p>Number of components to consider, defaults to 1. If set,
+<a class="reference internal" href="#acoular.fbeamform.BeamformerGridlessOrth.eva_list" title="acoular.fbeamform.BeamformerGridlessOrth.eva_list"><code class="xref py py-attr docutils literal notranslate"><span class="pre">eva_list</span></code></a> will contain
+the indices of the n largest eigenvalues. Setting <a class="reference internal" href="#acoular.fbeamform.BeamformerGridlessOrth.eva_list" title="acoular.fbeamform.BeamformerGridlessOrth.eva_list"><code class="xref py py-attr docutils literal notranslate"><span class="pre">eva_list</span></code></a>
+afterwards will override this value.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerGridlessOrth.bounds">
+<span class="sig-name descname"><span class="pre">bounds</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">List(Tuple(Float,</span> <span class="pre">Float),</span> <span class="pre">minlen=3,</span> <span class="pre">maxlen=3,</span> <span class="pre">value=[(-1.0,</span> <span class="pre">1.0),</span> <span class="pre">(-1.0,</span> <span class="pre">1.0),</span> <span class="pre">(0.01,</span> <span class="pre">1.0)])</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerGridlessOrth.bounds" title="Link to this definition">#</a></dt>
+<dd><p>Geometrical bounds of the search domain to consider.
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">bound</span></code> is a list that contains exactly three tuple of
+(min,max) for each of the coordinates x, y, z.
+Defaults to [(-1.,1.),(-1.,1.),(0.01,1.)]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerGridlessOrth.shgo">
+<span class="sig-name descname"><span class="pre">shgo</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Dict</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerGridlessOrth.shgo" title="Link to this definition">#</a></dt>
+<dd><p>options dictionary for the SHGO solver, see
+<a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.shgo.html">scipy docs</a>.
+Default is Sobol sampling Nelder-Mead local minimizer, 256 initial sampling points
+and 1 iteration</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerGridlessOrth.r_diag_norm">
+<span class="sig-name descname"><span class="pre">r_diag_norm</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Enum(1.0)</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerGridlessOrth.r_diag_norm" title="Link to this definition">#</a></dt>
+<dd><p>If diagonal of the csm is removed, some signal energy is lost.
+This is handled via this normalization factor.
+For this class, normalization is not implemented. Defaults to 1.0.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.fbeamform.BeamformerGridlessOrth.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.fbeamform.BeamformerGridlessOrth.digest" title="Link to this definition">#</a></dt>
+<dd><p>A unique identifier for the beamformer, based on its properties. (read-only)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="acoular.fbeamform.L_p">
+<span class="sig-prename descclassname"><span class="pre">acoular.fbeamform.</span></span><span class="sig-name descname"><span class="pre">L_p</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.fbeamform.L_p" title="Link to this definition">#</a></dt>
+<dd><p>Calculates the sound pressure level from the squared sound pressure.</p>
+<p><span class="math notranslate nohighlight">\(L_p = 10 \lg ( x / 4\cdot 10^{-10})\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x: array of floats</strong></dt><dd><p>The squared sound pressure values</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>array of floats</dt><dd><p>The corresponding sound pressure levels in dB.
+If <cite>x&lt;0</cite>, -350.0 dB is returned.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="acoular.fbeamform.integrate">
+<span class="sig-prename descclassname"><span class="pre">acoular.fbeamform.</span></span><span class="sig-name descname"><span class="pre">integrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sector</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.fbeamform.integrate" title="Link to this definition">#</a></dt>
+<dd><p>Integrates a sound pressure map over a given sector.</p>
+<p>This function can be applied on beamforming results to
+quantitatively analyze the sound pressure in a given sector.
+If used with <a class="reference internal" href="#acoular.fbeamform.BeamformerBase.result" title="acoular.fbeamform.BeamformerBase.result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Beamformer.result()</span></code></a>,
+the output is identical to the result of the intrinsic
+<a class="reference internal" href="#acoular.fbeamform.BeamformerBase.integrate" title="acoular.fbeamform.BeamformerBase.integrate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Beamformer.integrate</span></code></a> method.
+It can, however, also be used with the
+<a class="reference internal" href="#acoular.fbeamform.BeamformerBase.synthetic" title="acoular.fbeamform.BeamformerBase.synthetic"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Beamformer.synthetic</span></code></a>
+output.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>data: array of floats</strong></dt><dd><p>Contains the calculated squared sound pressure values in Pa**2.
+If data has the same number of entries than the number of grid points
+only one value is returned.
+In case of a 2-D array with the second dimension identical
+to the number of grid points an array containing as many entries as
+the first dimension is returned.</p>
+</dd>
+<dt><strong>grid: Grid object</strong></dt><dd><p>Object of a <a class="reference internal" href="acoular.grids.html#acoular.grids.Grid" title="acoular.grids.Grid"><code class="xref py py-class docutils literal notranslate"><span class="pre">Grid</span></code></a>-derived class
+that provides the grid locations.</p>
+</dd>
+<dt><strong>sector: array of floats or :class:`~acoular.grids.Sector`-derived object</strong></dt><dd><p>Tuple with arguments for the <cite>indices</cite> method
+of a <a class="reference internal" href="acoular.grids.html#acoular.grids.Grid" title="acoular.grids.Grid"><code class="xref py py-class docutils literal notranslate"><span class="pre">Grid</span></code></a>-derived class
+(e.g. <a class="reference internal" href="acoular.grids.html#acoular.grids.RectGrid.indices" title="acoular.grids.RectGrid.indices"><code class="xref py py-meth docutils literal notranslate"><span class="pre">RectGrid.indices</span></code></a>
+or <a class="reference internal" href="acoular.grids.html#acoular.grids.RectGrid3D.indices" title="acoular.grids.RectGrid3D.indices"><code class="xref py py-meth docutils literal notranslate"><span class="pre">RectGrid3D.indices</span></code></a>).
+Possible sectors would be <cite>np.array([xmin, ymin, xmax, ymax])</cite>
+or <cite>np.array([x, y, radius])</cite>.
+Alternatively, a <a class="reference internal" href="acoular.grids.html#acoular.grids.Sector" title="acoular.grids.Sector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sector</span></code></a>-derived object
+can be used.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>array of floats</dt><dd><p>The spectrum (all calculated frequency bands) for the integrated sector.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="generated/acoular.environments.spiral_sphere.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">spiral_sphere</span></code></p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="generated/acoular.fbeamform.SteeringVector.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">SteeringVector</span></code></p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.SteeringVector"><code class="docutils literal notranslate"><span class="pre">SteeringVector</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.SteeringVector.grid"><code class="docutils literal notranslate"><span class="pre">SteeringVector.grid</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.SteeringVector.mics"><code class="docutils literal notranslate"><span class="pre">SteeringVector.mics</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.SteeringVector.steer_type"><code class="docutils literal notranslate"><span class="pre">SteeringVector.steer_type</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.SteeringVector.env"><code class="docutils literal notranslate"><span class="pre">SteeringVector.env</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.SteeringVector.r0"><code class="docutils literal notranslate"><span class="pre">SteeringVector.r0</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.SteeringVector.rm"><code class="docutils literal notranslate"><span class="pre">SteeringVector.rm</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.SteeringVector.ref"><code class="docutils literal notranslate"><span class="pre">SteeringVector.ref</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.SteeringVector.digest"><code class="docutils literal notranslate"><span class="pre">SteeringVector.digest</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.SteeringVector.inv_digest"><code class="docutils literal notranslate"><span class="pre">SteeringVector.inv_digest</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.SteeringVector.transfer"><code class="docutils literal notranslate"><span class="pre">SteeringVector.transfer()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.SteeringVector.steer_vector"><code class="docutils literal notranslate"><span class="pre">SteeringVector.steer_vector()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.LazyBfResult"><code class="docutils literal notranslate"><span class="pre">LazyBfResult</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerBase"><code class="docutils literal notranslate"><span class="pre">BeamformerBase</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerBase.steer"><code class="docutils literal notranslate"><span class="pre">BeamformerBase.steer</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerBase.freq_data"><code class="docutils literal notranslate"><span class="pre">BeamformerBase.freq_data</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerBase.r_diag"><code class="docutils literal notranslate"><span class="pre">BeamformerBase.r_diag</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerBase.r_diag_norm"><code class="docutils literal notranslate"><span class="pre">BeamformerBase.r_diag_norm</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerBase.precision"><code class="docutils literal notranslate"><span class="pre">BeamformerBase.precision</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerBase.cached"><code class="docutils literal notranslate"><span class="pre">BeamformerBase.cached</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerBase.h5f"><code class="docutils literal notranslate"><span class="pre">BeamformerBase.h5f</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerBase.result"><code class="docutils literal notranslate"><span class="pre">BeamformerBase.result</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerBase.digest"><code class="docutils literal notranslate"><span class="pre">BeamformerBase.digest</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerBase.sig_loss_norm"><code class="docutils literal notranslate"><span class="pre">BeamformerBase.sig_loss_norm()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerBase.synthetic"><code class="docutils literal notranslate"><span class="pre">BeamformerBase.synthetic()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerBase.integrate"><code class="docutils literal notranslate"><span class="pre">BeamformerBase.integrate()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerFunctional"><code class="docutils literal notranslate"><span class="pre">BeamformerFunctional</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerFunctional.gamma"><code class="docutils literal notranslate"><span class="pre">BeamformerFunctional.gamma</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerFunctional.r_diag"><code class="docutils literal notranslate"><span class="pre">BeamformerFunctional.r_diag</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerFunctional.r_diag_norm"><code class="docutils literal notranslate"><span class="pre">BeamformerFunctional.r_diag_norm</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerFunctional.digest"><code class="docutils literal notranslate"><span class="pre">BeamformerFunctional.digest</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerCapon"><code class="docutils literal notranslate"><span class="pre">BeamformerCapon</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerCapon.r_diag"><code class="docutils literal notranslate"><span class="pre">BeamformerCapon.r_diag</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerCapon.r_diag_norm"><code class="docutils literal notranslate"><span class="pre">BeamformerCapon.r_diag_norm</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerEig"><code class="docutils literal notranslate"><span class="pre">BeamformerEig</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerEig.n"><code class="docutils literal notranslate"><span class="pre">BeamformerEig.n</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerEig.na"><code class="docutils literal notranslate"><span class="pre">BeamformerEig.na</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerEig.digest"><code class="docutils literal notranslate"><span class="pre">BeamformerEig.digest</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerMusic"><code class="docutils literal notranslate"><span class="pre">BeamformerMusic</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerMusic.r_diag"><code class="docutils literal notranslate"><span class="pre">BeamformerMusic.r_diag</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerMusic.r_diag_norm"><code class="docutils literal notranslate"><span class="pre">BeamformerMusic.r_diag_norm</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerMusic.n"><code class="docutils literal notranslate"><span class="pre">BeamformerMusic.n</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.PointSpreadFunction"><code class="docutils literal notranslate"><span class="pre">PointSpreadFunction</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.PointSpreadFunction.steer"><code class="docutils literal notranslate"><span class="pre">PointSpreadFunction.steer</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.PointSpreadFunction.grid_indices"><code class="docutils literal notranslate"><span class="pre">PointSpreadFunction.grid_indices</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.PointSpreadFunction.calcmode"><code class="docutils literal notranslate"><span class="pre">PointSpreadFunction.calcmode</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.PointSpreadFunction.precision"><code class="docutils literal notranslate"><span class="pre">PointSpreadFunction.precision</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.PointSpreadFunction.psf"><code class="docutils literal notranslate"><span class="pre">PointSpreadFunction.psf</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.PointSpreadFunction.freq"><code class="docutils literal notranslate"><span class="pre">PointSpreadFunction.freq</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.PointSpreadFunction.digest"><code class="docutils literal notranslate"><span class="pre">PointSpreadFunction.digest</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.PointSpreadFunction.calc_psf"><code class="docutils literal notranslate"><span class="pre">PointSpreadFunction.calc_psf()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerDamas"><code class="docutils literal notranslate"><span class="pre">BeamformerDamas</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerDamas.psf_precision"><code class="docutils literal notranslate"><span class="pre">BeamformerDamas.psf_precision</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerDamas.n_iter"><code class="docutils literal notranslate"><span class="pre">BeamformerDamas.n_iter</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerDamas.damp"><code class="docutils literal notranslate"><span class="pre">BeamformerDamas.damp</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerDamas.calcmode"><code class="docutils literal notranslate"><span class="pre">BeamformerDamas.calcmode</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerDamas.digest"><code class="docutils literal notranslate"><span class="pre">BeamformerDamas.digest</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerDamasPlus"><code class="docutils literal notranslate"><span class="pre">BeamformerDamasPlus</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerDamasPlus.method"><code class="docutils literal notranslate"><span class="pre">BeamformerDamasPlus.method</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerDamasPlus.n_iter"><code class="docutils literal notranslate"><span class="pre">BeamformerDamasPlus.n_iter</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerDamasPlus.unit_mult"><code class="docutils literal notranslate"><span class="pre">BeamformerDamasPlus.unit_mult</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerDamasPlus.digest"><code class="docutils literal notranslate"><span class="pre">BeamformerDamasPlus.digest</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerOrth"><code class="docutils literal notranslate"><span class="pre">BeamformerOrth</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerOrth.eva_list"><code class="docutils literal notranslate"><span class="pre">BeamformerOrth.eva_list</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerOrth.n"><code class="docutils literal notranslate"><span class="pre">BeamformerOrth.n</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerOrth.digest"><code class="docutils literal notranslate"><span class="pre">BeamformerOrth.digest</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerCleansc"><code class="docutils literal notranslate"><span class="pre">BeamformerCleansc</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerCleansc.n_iter"><code class="docutils literal notranslate"><span class="pre">BeamformerCleansc.n_iter</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerCleansc.damp"><code class="docutils literal notranslate"><span class="pre">BeamformerCleansc.damp</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerCleansc.stopn"><code class="docutils literal notranslate"><span class="pre">BeamformerCleansc.stopn</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerCleansc.digest"><code class="docutils literal notranslate"><span class="pre">BeamformerCleansc.digest</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerClean"><code class="docutils literal notranslate"><span class="pre">BeamformerClean</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerClean.psf_precision"><code class="docutils literal notranslate"><span class="pre">BeamformerClean.psf_precision</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerClean.damp"><code class="docutils literal notranslate"><span class="pre">BeamformerClean.damp</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerClean.n_iter"><code class="docutils literal notranslate"><span class="pre">BeamformerClean.n_iter</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerClean.calcmode"><code class="docutils literal notranslate"><span class="pre">BeamformerClean.calcmode</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerClean.digest"><code class="docutils literal notranslate"><span class="pre">BeamformerClean.digest</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerCMF"><code class="docutils literal notranslate"><span class="pre">BeamformerCMF</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerCMF.method"><code class="docutils literal notranslate"><span class="pre">BeamformerCMF.method</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerCMF.alpha"><code class="docutils literal notranslate"><span class="pre">BeamformerCMF.alpha</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerCMF.n_iter"><code class="docutils literal notranslate"><span class="pre">BeamformerCMF.n_iter</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerCMF.unit_mult"><code class="docutils literal notranslate"><span class="pre">BeamformerCMF.unit_mult</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerCMF.show"><code class="docutils literal notranslate"><span class="pre">BeamformerCMF.show</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerCMF.r_diag_norm"><code class="docutils literal notranslate"><span class="pre">BeamformerCMF.r_diag_norm</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerCMF.digest"><code class="docutils literal notranslate"><span class="pre">BeamformerCMF.digest</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerSODIX"><code class="docutils literal notranslate"><span class="pre">BeamformerSODIX</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerSODIX.method"><code class="docutils literal notranslate"><span class="pre">BeamformerSODIX.method</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerSODIX.n_iter"><code class="docutils literal notranslate"><span class="pre">BeamformerSODIX.n_iter</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerSODIX.alpha"><code class="docutils literal notranslate"><span class="pre">BeamformerSODIX.alpha</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerSODIX.unit_mult"><code class="docutils literal notranslate"><span class="pre">BeamformerSODIX.unit_mult</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerSODIX.r_diag_norm"><code class="docutils literal notranslate"><span class="pre">BeamformerSODIX.r_diag_norm</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerSODIX.digest"><code class="docutils literal notranslate"><span class="pre">BeamformerSODIX.digest</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerGIB"><code class="docutils literal notranslate"><span class="pre">BeamformerGIB</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerGIB.unit_mult"><code class="docutils literal notranslate"><span class="pre">BeamformerGIB.unit_mult</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerGIB.n_iter"><code class="docutils literal notranslate"><span class="pre">BeamformerGIB.n_iter</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerGIB.method"><code class="docutils literal notranslate"><span class="pre">BeamformerGIB.method</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerGIB.alpha"><code class="docutils literal notranslate"><span class="pre">BeamformerGIB.alpha</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerGIB.pnorm"><code class="docutils literal notranslate"><span class="pre">BeamformerGIB.pnorm</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerGIB.beta"><code class="docutils literal notranslate"><span class="pre">BeamformerGIB.beta</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerGIB.eps_perc"><code class="docutils literal notranslate"><span class="pre">BeamformerGIB.eps_perc</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerGIB.m"><code class="docutils literal notranslate"><span class="pre">BeamformerGIB.m</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerGIB.r_diag_norm"><code class="docutils literal notranslate"><span class="pre">BeamformerGIB.r_diag_norm</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerGIB.digest"><code class="docutils literal notranslate"><span class="pre">BeamformerGIB.digest</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerAdaptiveGrid"><code class="docutils literal notranslate"><span class="pre">BeamformerAdaptiveGrid</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerAdaptiveGrid.integrate"><code class="docutils literal notranslate"><span class="pre">BeamformerAdaptiveGrid.integrate()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerGridlessOrth"><code class="docutils literal notranslate"><span class="pre">BeamformerGridlessOrth</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerGridlessOrth.eva_list"><code class="docutils literal notranslate"><span class="pre">BeamformerGridlessOrth.eva_list</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerGridlessOrth.n"><code class="docutils literal notranslate"><span class="pre">BeamformerGridlessOrth.n</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerGridlessOrth.bounds"><code class="docutils literal notranslate"><span class="pre">BeamformerGridlessOrth.bounds</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerGridlessOrth.shgo"><code class="docutils literal notranslate"><span class="pre">BeamformerGridlessOrth.shgo</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerGridlessOrth.r_diag_norm"><code class="docutils literal notranslate"><span class="pre">BeamformerGridlessOrth.r_diag_norm</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.BeamformerGridlessOrth.digest"><code class="docutils literal notranslate"><span class="pre">BeamformerGridlessOrth.digest</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.L_p"><code class="docutils literal notranslate"><span class="pre">L_p()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.fbeamform.integrate"><code class="docutils literal notranslate"><span class="pre">integrate()</span></code></a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  
+  <div class="tocsection editthispage">
+    <a href="https://github.com/acoular/acoular/edit/master/docs/source/api_ref/generated/acoular.fbeamform.rst">
+      <i class="fa-solid fa-pencil"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2026, Acoular Development Team.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

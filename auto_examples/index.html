@@ -1,0 +1,722 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Examples &#8212; Acoular 26.01 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/sphinx_gallery.css?v=f3715e10" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom_pydata_sphinx_theme.css?v=ac99e154" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/documentation_options.js?v=56098ba5"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=30646c52"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'auto_examples/index';</script>
+    <link rel="icon" href="../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Introductory examples" href="introductory_examples/index.html" />
+    <link rel="prev" title="Trajectory" href="../api_ref/generated/generated/acoular.trajectory.Trajectory.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="26.01" />
+    <meta name="docbuild:last-update" content="Feb 03, 2026"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+<aside class="bd-header-announcement" aria-label="Announcement">
+  <div class="bd-header-announcement__content">👁️📢 Please consider taking the <a href='https://www.soscisurvey.de/acoularsurvey'>Acoular User Survey</a>. ⏱️ It's only 2 minutes! 三三ᕕ( ᐛ )ᕗ</div>
+</aside>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/Acoular_logo.png" class="logo__image only-light" alt="Acoular - Home"/>
+    <img src="../_static/Acoular_logo.png" class="logo__image only-dark pst-js-only" alt="Acoular - Home"/>
+  
+  
+    <p class="title logo__title">Acoular</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../install/index.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api_ref/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../news/index.html">
+    What's new
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../contributing/index.html">
+    Contributing
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../literature/index.html">
+    Literature
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/acoular/acoular" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/acoular" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/pypi.svg" class="icon-link-image" alt="PyPI"/></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../install/index.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api_ref/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../news/index.html">
+    What's new
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contributing/index.html">
+    Contributing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../literature/index.html">
+    Literature
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/acoular/acoular" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/acoular" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/pypi.svg" class="icon-link-image" alt="PyPI"/></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="introductory_examples/index.html">Introductory examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="introductory_examples/example_three_sources.html">Three sources – Generate synthetic microphone array data.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introductory_examples/example_basic_beamforming.html">Basic Beamforming – Generate a map of three sources.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introductory_examples/example_3D_beamforming.html">3D Beamforming with CLEAN-SC deconvolution.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introductory_examples/example_grids.html">Grids</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="wind_tunnel_examples/index.html">Wind tunnel examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="wind_tunnel_examples/example_airfoil_in_open_jet_cmf.html">Airfoil in open jet – Covariance matrix fitting (CMF).</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind_tunnel_examples/example_airfoil_in_open_jet_steering_vectors.html">Airfoil in open jet – steering vectors.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind_tunnel_examples/example_airfoil_in_open_jet_freq_domain_methods.html">Airfoil in open jet – Frequency domain beamforming methods.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind_tunnel_examples/example_sectors_and_integration.html">Sector Integration Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wind_tunnel_examples/example_airfoil_in_open_jet_time_domain_methods.html">Airfoil in open jet – Time domain beamforming methods.</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="moving_sources_examples/index.html">Moving sources examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="moving_sources_examples/example_beamforming_with_moving_focus.html">Beamforming with moving focus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="moving_sources_examples/example_rotating_point_source.html">Rotating point source</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="io_and_signal_processing_examples/index.html">IO and signal processing examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="io_and_signal_processing_examples/example_filter.html">Show basic filtering capabilities.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="io_and_signal_processing_examples/example_power_spectra_import.html">Cross-spectral matrix import</a></li>
+<li class="toctree-l2"><a class="reference internal" href="io_and_signal_processing_examples/example_sample_splitter_multithreading.html">Parallel processing chains – Multithreading with the SampleSplitter.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="io_and_signal_processing_examples/example_sample_splitter_bufferhandling.html">Parallel processing chains – SampleSplitter buffer handling.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="io_and_signal_processing_examples/example_fft.html">Fast Fourier Transform (FFT) of multichannel time data.</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="tools/index.html">Tools</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="tools/example_tools.html">Tools – Demonstrates barspectrum tool of Acoular</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tools/example_evaluate.html">Evaluate source characterization performance.</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Examples</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="examples">
+<span id="id1"></span><h1>Examples<a class="headerlink" href="#examples" title="Link to this heading">#</a></h1>
+<p>A gallery of showcase examples suitable for first-time and advanced users.</p>
+<div class="sphx-glr-thumbnails"></div><section id="introductory-examples">
+<h2>Introductory examples<a class="headerlink" href="#introductory-examples" title="Link to this heading">#</a></h2>
+<p>Examples suitable for first-time users and beginners.</p>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="Generates a test data set for three sources."><img alt="" src="../_images/sphx_glr_example_three_sources_thumb.png" />
+<p><a class="reference internal" href="introductory_examples/example_three_sources.html#sphx-glr-auto-examples-introductory-examples-example-three-sources-py"><span class="std std-ref">Three sources – Generate synthetic microphone array data.</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Three sources -- Generate synthetic microphone array data.</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Loads the simulated signals from the three_sources.h5 file, analyzes them with Conventional Beamforming and generates a map of the three sources."><img alt="" src="../_images/sphx_glr_example_basic_beamforming_thumb.png" />
+<p><a class="reference internal" href="introductory_examples/example_basic_beamforming.html#sphx-glr-auto-examples-introductory-examples-example-basic-beamforming-py"><span class="std std-ref">Basic Beamforming – Generate a map of three sources.</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Basic Beamforming -- Generate a map of three sources.</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Demonstrates a 3D beamforming setup with simulated point sources. Simulates data on 64 channel array, subsequent beamforming with CLEAN-SC on 3D grid."><img alt="" src="../_images/sphx_glr_example_3D_beamforming_thumb.png" />
+<p><a class="reference internal" href="introductory_examples/example_3D_beamforming.html#sphx-glr-auto-examples-introductory-examples-example-3d-beamforming-py"><span class="std std-ref">3D Beamforming with CLEAN-SC deconvolution.</span></a></p>
+  <div class="sphx-glr-thumbnail-title">3D Beamforming with CLEAN-SC deconvolution.</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This example demonstrates the various grid types available in Acoular and their applications in beamforming. We will cover:"><img alt="" src="../_images/sphx_glr_example_grids_thumb.png" />
+<p><a class="reference internal" href="introductory_examples/example_grids.html#sphx-glr-auto-examples-introductory-examples-example-grids-py"><span class="std std-ref">Grids</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Grids</div>
+</div></div></section>
+<section id="wind-tunnel-examples">
+<h2>Wind tunnel examples<a class="headerlink" href="#wind-tunnel-examples" title="Link to this heading">#</a></h2>
+<p>Examples that show the application of advanced microphone array methods (frequency and time-domain).</p>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="Demonstrates the inverse CMF method with different solvers. Uses measured data in file example_data.h5, calibration in file example_calib.xml, microphone geometry in array_56.xml (part of Acoular)."><img alt="" src="../_images/sphx_glr_example_airfoil_in_open_jet_cmf_thumb.png" />
+<p><a class="reference internal" href="wind_tunnel_examples/example_airfoil_in_open_jet_cmf.html#sphx-glr-auto-examples-wind-tunnel-examples-example-airfoil-in-open-jet-cmf-py"><span class="std std-ref">Airfoil in open jet – Covariance matrix fitting (CMF).</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Airfoil in open jet -- Covariance matrix fitting (CMF).</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Demonstrates different steering vectors in Acoular and CSM diagonal removal. Uses measured data in file example_data.h5, calibration in file example_calib.xml, microphone geometry in array_56.xml (part of Acoular)."><img alt="" src="../_images/sphx_glr_example_airfoil_in_open_jet_steering_vectors_thumb.png" />
+<p><a class="reference internal" href="wind_tunnel_examples/example_airfoil_in_open_jet_steering_vectors.html#sphx-glr-auto-examples-wind-tunnel-examples-example-airfoil-in-open-jet-steering-vectors-py"><span class="std std-ref">Airfoil in open jet – steering vectors.</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Airfoil in open jet -- steering vectors.</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Demonstrates different microphone array methods operating in the frequency domain. Uses measured data in file example_data.h5, calibration in file example_calib.xml, microphone geometry in array_56.xml (part of Acoular)."><img alt="" src="../_images/sphx_glr_example_airfoil_in_open_jet_freq_domain_methods_thumb.png" />
+<p><a class="reference internal" href="wind_tunnel_examples/example_airfoil_in_open_jet_freq_domain_methods.html#sphx-glr-auto-examples-wind-tunnel-examples-example-airfoil-in-open-jet-freq-domain-methods-py"><span class="std std-ref">Airfoil in open jet – Frequency domain beamforming methods.</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Airfoil in open jet -- Frequency domain beamforming methods.</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Loads the example data set, sets diffrent Sectors for intergration. Shows Acoular&#x27;s Sector und Sound Pressure level Integration functionality."><img alt="" src="../_images/sphx_glr_example_sectors_and_integration_thumb.png" />
+<p><a class="reference internal" href="wind_tunnel_examples/example_sectors_and_integration.html#sphx-glr-auto-examples-wind-tunnel-examples-example-sectors-and-integration-py"><span class="std std-ref">Sector Integration Example</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Sector Integration Example</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Demonstrates different microphone array methods operating in the time domain. Uses measured data in file example_data.h5, calibration in file example_calib.xml, microphone geometry in array_56.xml (part of Acoular)."><img alt="" src="../_images/sphx_glr_example_airfoil_in_open_jet_time_domain_methods_thumb.png" />
+<p><a class="reference internal" href="wind_tunnel_examples/example_airfoil_in_open_jet_time_domain_methods.html#sphx-glr-auto-examples-wind-tunnel-examples-example-airfoil-in-open-jet-time-domain-methods-py"><span class="std std-ref">Airfoil in open jet – Time domain beamforming methods.</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Airfoil in open jet -- Time domain beamforming methods.</div>
+</div></div></section>
+<section id="moving-sources-examples">
+<h2>Moving sources examples<a class="headerlink" href="#moving-sources-examples" title="Link to this heading">#</a></h2>
+<p>Examples show the generation of synthetic data with moving sources and the application of advanced microphone array methods with moving (and fixed) focus.</p>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="This example demonstrates how to use Acoular to perform moving-focus beamforming with and without CLEANT-based deconvolution for moving sources."><img alt="" src="../_images/sphx_glr_example_beamforming_with_moving_focus_thumb.png" />
+<p><a class="reference internal" href="moving_sources_examples/example_beamforming_with_moving_focus.html#sphx-glr-auto-examples-moving-sources-examples-example-beamforming-with-moving-focus-py"><span class="std std-ref">Beamforming with moving focus</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Beamforming with moving focus</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Demonstrates the use of acoular for a point source moving on a circle trajectory. Uses synthesized data."><img alt="" src="../_images/sphx_glr_example_rotating_point_source_thumb.png" />
+<p><a class="reference internal" href="moving_sources_examples/example_rotating_point_source.html#sphx-glr-auto-examples-moving-sources-examples-example-rotating-point-source-py"><span class="std std-ref">Rotating point source</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Rotating point source</div>
+</div></div></section>
+<section id="io-and-signal-processing-examples">
+<h2>IO and signal processing examples<a class="headerlink" href="#io-and-signal-processing-examples" title="Link to this heading">#</a></h2>
+<p>Examples suitable for users who are familiar with the basics of Acoular and want to learn more about signal processing and input/output capabilities.</p>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="Demonstrates band pass filter characteristics and shows"><img alt="" src="../_images/sphx_glr_example_filter_thumb.png" />
+<p><a class="reference internal" href="io_and_signal_processing_examples/example_filter.html#sphx-glr-auto-examples-io-and-signal-processing-examples-example-filter-py"><span class="std std-ref">Show basic filtering capabilities.</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Show basic filtering capabilities.</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This example demonstrates how to import a cross-spectral matrix from a external source by means of the PowerSpectraImport class. The CSM is created numerically for a frequency of 8 kHz."><img alt="" src="../_images/sphx_glr_example_power_spectra_import_thumb.png" />
+<p><a class="reference internal" href="io_and_signal_processing_examples/example_power_spectra_import.html#sphx-glr-auto-examples-io-and-signal-processing-examples-example-power-spectra-import-py"><span class="std std-ref">Cross-spectral matrix import</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Cross-spectral matrix import</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This Examples shows how to use the SampleSplitter class in a multithreading (3 threads) scenario."><img alt="" src="../_images/sphx_glr_example_sample_splitter_multithreading_thumb.png" />
+<p><a class="reference internal" href="io_and_signal_processing_examples/example_sample_splitter_multithreading.html#sphx-glr-auto-examples-io-and-signal-processing-examples-example-sample-splitter-multithreading-py"><span class="std std-ref">Parallel processing chains – Multithreading with the SampleSplitter.</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Parallel processing chains -- Multithreading with the SampleSplitter.</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This example shows the different behaviour of SampleSplitter class when the maximum size of a block buffer is reached for one object obtaining data."><img alt="" src="../_images/sphx_glr_example_sample_splitter_bufferhandling_thumb.png" />
+<p><a class="reference internal" href="io_and_signal_processing_examples/example_sample_splitter_bufferhandling.html#sphx-glr-auto-examples-io-and-signal-processing-examples-example-sample-splitter-bufferhandling-py"><span class="std std-ref">Parallel processing chains – SampleSplitter buffer handling.</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Parallel processing chains -- SampleSplitter buffer handling.</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Demonstrates how to calculate the blockwise FFT and spectrogram of the signal."><img alt="" src="../_images/sphx_glr_example_fft_thumb.png" />
+<p><a class="reference internal" href="io_and_signal_processing_examples/example_fft.html#sphx-glr-auto-examples-io-and-signal-processing-examples-example-fft-py"><span class="std std-ref">Fast Fourier Transform (FFT) of multichannel time data.</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Fast Fourier Transform (FFT) of multichannel time data.</div>
+</div></div></section>
+<section id="tools">
+<h2>Tools<a class="headerlink" href="#tools" title="Link to this heading">#</a></h2>
+<p>Examples demonstrating the use of Acoular’s tools and helper functions.</p>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="A noise source emitting white noise is simulated. Its spectrum at a single microphone is plotted by using functions from acoular.tools."><img alt="" src="../_images/sphx_glr_example_tools_thumb.png" />
+<p><a class="reference internal" href="tools/example_tools.html#sphx-glr-auto-examples-tools-example-tools-py"><span class="std std-ref">Tools – Demonstrates barspectrum tool of Acoular</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Tools -- Demonstrates barspectrum tool of Acoular</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This example demonstrates how to evaluate the performance of a beamforming algorithm using the MetricEvaluator class to calculate the metrics introduced in Herold2017."><img alt="" src="../_images/sphx_glr_example_evaluate_thumb.png" />
+<p><a class="reference internal" href="tools/example_evaluate.html#sphx-glr-auto-examples-tools-example-evaluate-py"><span class="std std-ref">Evaluate source characterization performance.</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Evaluate source characterization performance.</div>
+</div></div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-footer sphx-glr-footer-gallery docutils container">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/07fcc19ba03226cd3d83d4e40ec44385/auto_examples_python.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">all</span> <span class="pre">examples</span> <span class="pre">in</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">auto_examples_python.zip</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/6f1e7a639e0699d6164445b55e6c116d/auto_examples_jupyter.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">all</span> <span class="pre">examples</span> <span class="pre">in</span> <span class="pre">Jupyter</span> <span class="pre">notebooks:</span> <span class="pre">auto_examples_jupyter.zip</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="../api_ref/generated/generated/acoular.trajectory.Trajectory.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">Trajectory</span></code></p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="introductory_examples/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Introductory examples</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introductory-examples">Introductory examples</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#wind-tunnel-examples">Wind tunnel examples</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#moving-sources-examples">Moving sources examples</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#io-and-signal-processing-examples">IO and signal processing examples</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tools">Tools</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  
+  <div class="tocsection editthispage">
+    <a href="https://github.com/acoular/acoular/edit/master/docs/source/auto_examples/index.rst">
+      <i class="fa-solid fa-pencil"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2026, Acoular Development Team.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

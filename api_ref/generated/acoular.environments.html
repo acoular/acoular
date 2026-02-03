@@ -1,0 +1,1568 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>environments &#8212; Acoular 26.01 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/sphinx_gallery.css?v=f3715e10" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom_pydata_sphinx_theme.css?v=ac99e154" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=56098ba5"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=30646c52"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api_ref/generated/acoular.environments';</script>
+    <link rel="icon" href="../../_static/acoular_logo.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Environment" href="generated/acoular.environments.Environment.html" />
+    <link rel="prev" title="deprecated_alias" href="generated/acoular.deprecation.deprecated_alias.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="26.01" />
+    <meta name="docbuild:last-update" content="Feb 03, 2026"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+<aside class="bd-header-announcement" aria-label="Announcement">
+  <div class="bd-header-announcement__content">👁️📢 Please consider taking the <a href='https://www.soscisurvey.de/acoularsurvey'>Acoular User Survey</a>. ⏱️ It's only 2 minutes! 三三ᕕ( ᐛ )ᕗ</div>
+</aside>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/Acoular_logo.png" class="logo__image only-light" alt="Acoular - Home"/>
+    <img src="../../_static/Acoular_logo.png" class="logo__image only-dark pst-js-only" alt="Acoular - Home"/>
+  
+  
+    <p class="title logo__title">Acoular</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../install/index.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../user_guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../news/index.html">
+    What's new
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../contributing/index.html">
+    Contributing
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../literature/index.html">
+    Literature
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/acoular/acoular" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/acoular" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/pypi.svg" class="icon-link-image" alt="PyPI"/></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../install/index.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../user_guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../news/index.html">
+    What's new
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../contributing/index.html">
+    Contributing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../literature/index.html">
+    Literature
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/acoular/acoular" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/acoular" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/pypi.svg" class="icon-link-image" alt="PyPI"/></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.aiaa.html"><code class="docutils literal notranslate"><span class="pre">aiaa</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/acoular.aiaa.aiaa.html"><code class="docutils literal notranslate"><span class="pre">aiaa</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.aiaa.aiaa.TimeSamplesAIAABenchmark.html"><code class="docutils literal notranslate"><span class="pre">TimeSamplesAIAABenchmark</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.aiaa.aiaa.TriggerAIAABenchmark.html"><code class="docutils literal notranslate"><span class="pre">TriggerAIAABenchmark</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.aiaa.aiaa.CsmAIAABenchmark.html"><code class="docutils literal notranslate"><span class="pre">CsmAIAABenchmark</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.aiaa.aiaa.MicAIAABenchmark.html"><code class="docutils literal notranslate"><span class="pre">MicAIAABenchmark</span></code></a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.base.html"><code class="docutils literal notranslate"><span class="pre">base</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.base.Generator.html"><code class="docutils literal notranslate"><span class="pre">Generator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.base.SamplesGenerator.html"><code class="docutils literal notranslate"><span class="pre">SamplesGenerator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.base.SpectraGenerator.html"><code class="docutils literal notranslate"><span class="pre">SpectraGenerator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.base.InOut.html"><code class="docutils literal notranslate"><span class="pre">InOut</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.base.TimeOut.html"><code class="docutils literal notranslate"><span class="pre">TimeOut</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.base.SpectraOut.html"><code class="docutils literal notranslate"><span class="pre">SpectraOut</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.calib.html"><code class="docutils literal notranslate"><span class="pre">calib</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.calib.Calib.html"><code class="docutils literal notranslate"><span class="pre">Calib</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.configuration.html"><code class="docutils literal notranslate"><span class="pre">configuration</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.configuration.Config.html"><code class="docutils literal notranslate"><span class="pre">Config</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.configuration.config.html"><code class="docutils literal notranslate"><span class="pre">config</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="acoular.demo.html"><code class="docutils literal notranslate"><span class="pre">demo</span></code></a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.deprecation.html"><code class="docutils literal notranslate"><span class="pre">deprecation</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.deprecation.deprecated_alias.html"><code class="docutils literal notranslate"><span class="pre">deprecated_alias</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">environments</span></code></a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.environments.Environment.html"><code class="docutils literal notranslate"><span class="pre">Environment</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.environments.UniformFlowEnvironment.html"><code class="docutils literal notranslate"><span class="pre">UniformFlowEnvironment</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.environments.GeneralFlowEnvironment.html"><code class="docutils literal notranslate"><span class="pre">GeneralFlowEnvironment</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.environments.FlowField.html"><code class="docutils literal notranslate"><span class="pre">FlowField</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.environments.OpenJet.html"><code class="docutils literal notranslate"><span class="pre">OpenJet</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.environments.RotatingFlow.html"><code class="docutils literal notranslate"><span class="pre">RotatingFlow</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.environments.SlotJet.html"><code class="docutils literal notranslate"><span class="pre">SlotJet</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.environments.dist_mat.html"><code class="docutils literal notranslate"><span class="pre">dist_mat</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.environments.cylToCart.html"><code class="docutils literal notranslate"><span class="pre">cylToCart</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.environments.cartToCyl.html"><code class="docutils literal notranslate"><span class="pre">cartToCyl</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.environments.spiral_sphere.html"><code class="docutils literal notranslate"><span class="pre">spiral_sphere</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.fbeamform.html"><code class="docutils literal notranslate"><span class="pre">fbeamform</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.SteeringVector.html"><code class="docutils literal notranslate"><span class="pre">SteeringVector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerBase.html"><code class="docutils literal notranslate"><span class="pre">BeamformerBase</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerFunctional.html"><code class="docutils literal notranslate"><span class="pre">BeamformerFunctional</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerCapon.html"><code class="docutils literal notranslate"><span class="pre">BeamformerCapon</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerEig.html"><code class="docutils literal notranslate"><span class="pre">BeamformerEig</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerMusic.html"><code class="docutils literal notranslate"><span class="pre">BeamformerMusic</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerClean.html"><code class="docutils literal notranslate"><span class="pre">BeamformerClean</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerDamas.html"><code class="docutils literal notranslate"><span class="pre">BeamformerDamas</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerDamasPlus.html"><code class="docutils literal notranslate"><span class="pre">BeamformerDamasPlus</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerOrth.html"><code class="docutils literal notranslate"><span class="pre">BeamformerOrth</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerCleansc.html"><code class="docutils literal notranslate"><span class="pre">BeamformerCleansc</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerCMF.html"><code class="docutils literal notranslate"><span class="pre">BeamformerCMF</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerSODIX.html"><code class="docutils literal notranslate"><span class="pre">BeamformerSODIX</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerGIB.html"><code class="docutils literal notranslate"><span class="pre">BeamformerGIB</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerAdaptiveGrid.html"><code class="docutils literal notranslate"><span class="pre">BeamformerAdaptiveGrid</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.BeamformerGridlessOrth.html"><code class="docutils literal notranslate"><span class="pre">BeamformerGridlessOrth</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.PointSpreadFunction.html"><code class="docutils literal notranslate"><span class="pre">PointSpreadFunction</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.L_p.html"><code class="docutils literal notranslate"><span class="pre">L_p</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fbeamform.integrate.html"><code class="docutils literal notranslate"><span class="pre">integrate</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.fprocess.html"><code class="docutils literal notranslate"><span class="pre">fprocess</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fprocess.RFFT.html"><code class="docutils literal notranslate"><span class="pre">RFFT</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fprocess.IRFFT.html"><code class="docutils literal notranslate"><span class="pre">IRFFT</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fprocess.AutoPowerSpectra.html"><code class="docutils literal notranslate"><span class="pre">AutoPowerSpectra</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.fprocess.CrossPowerSpectra.html"><code class="docutils literal notranslate"><span class="pre">CrossPowerSpectra</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.grids.html"><code class="docutils literal notranslate"><span class="pre">grids</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.Grid.html"><code class="docutils literal notranslate"><span class="pre">Grid</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.RectGrid.html"><code class="docutils literal notranslate"><span class="pre">RectGrid</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.RectGrid3D.html"><code class="docutils literal notranslate"><span class="pre">RectGrid3D</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.ImportGrid.html"><code class="docutils literal notranslate"><span class="pre">ImportGrid</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.LineGrid.html"><code class="docutils literal notranslate"><span class="pre">LineGrid</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.MergeGrid.html"><code class="docutils literal notranslate"><span class="pre">MergeGrid</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.Sector.html"><code class="docutils literal notranslate"><span class="pre">Sector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.SingleSector.html"><code class="docutils literal notranslate"><span class="pre">SingleSector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.RectSector.html"><code class="docutils literal notranslate"><span class="pre">RectSector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.RectSector3D.html"><code class="docutils literal notranslate"><span class="pre">RectSector3D</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.CircSector.html"><code class="docutils literal notranslate"><span class="pre">CircSector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.PolySector.html"><code class="docutils literal notranslate"><span class="pre">PolySector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.ConvexSector.html"><code class="docutils literal notranslate"><span class="pre">ConvexSector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.MultiSector.html"><code class="docutils literal notranslate"><span class="pre">MultiSector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.Polygon.html"><code class="docutils literal notranslate"><span class="pre">Polygon</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.grids.in_hull.html"><code class="docutils literal notranslate"><span class="pre">in_hull</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.microphones.html"><code class="docutils literal notranslate"><span class="pre">microphones</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.microphones.MicGeom.html"><code class="docutils literal notranslate"><span class="pre">MicGeom</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.process.html"><code class="docutils literal notranslate"><span class="pre">process</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.process.Average.html"><code class="docutils literal notranslate"><span class="pre">Average</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.process.Cache.html"><code class="docutils literal notranslate"><span class="pre">Cache</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.process.SampleSplitter.html"><code class="docutils literal notranslate"><span class="pre">SampleSplitter</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.process.SamplesBuffer.html"><code class="docutils literal notranslate"><span class="pre">SamplesBuffer</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.sdinput.html"><code class="docutils literal notranslate"><span class="pre">sdinput</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sdinput.SoundDeviceSamplesGenerator.html"><code class="docutils literal notranslate"><span class="pre">SoundDeviceSamplesGenerator</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.signals.html"><code class="docutils literal notranslate"><span class="pre">signals</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.signals.SignalGenerator.html"><code class="docutils literal notranslate"><span class="pre">SignalGenerator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.signals.PeriodicSignalGenerator.html"><code class="docutils literal notranslate"><span class="pre">PeriodicSignalGenerator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.signals.NoiseGenerator.html"><code class="docutils literal notranslate"><span class="pre">NoiseGenerator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.signals.WNoiseGenerator.html"><code class="docutils literal notranslate"><span class="pre">WNoiseGenerator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.signals.PNoiseGenerator.html"><code class="docutils literal notranslate"><span class="pre">PNoiseGenerator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.signals.FiltWNoiseGenerator.html"><code class="docutils literal notranslate"><span class="pre">FiltWNoiseGenerator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.signals.SineGenerator.html"><code class="docutils literal notranslate"><span class="pre">SineGenerator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.signals.GenericSignalGenerator.html"><code class="docutils literal notranslate"><span class="pre">GenericSignalGenerator</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.sources.html"><code class="docutils literal notranslate"><span class="pre">sources</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.TimeSamples.html"><code class="docutils literal notranslate"><span class="pre">TimeSamples</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.MaskedTimeSamples.html"><code class="docutils literal notranslate"><span class="pre">MaskedTimeSamples</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.PointSource.html"><code class="docutils literal notranslate"><span class="pre">PointSource</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.PointSourceDipole.html"><code class="docutils literal notranslate"><span class="pre">PointSourceDipole</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.SphericalHarmonicSource.html"><code class="docutils literal notranslate"><span class="pre">SphericalHarmonicSource</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.LineSource.html"><code class="docutils literal notranslate"><span class="pre">LineSource</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.MovingPointSource.html"><code class="docutils literal notranslate"><span class="pre">MovingPointSource</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.MovingPointSourceDipole.html"><code class="docutils literal notranslate"><span class="pre">MovingPointSourceDipole</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.MovingLineSource.html"><code class="docutils literal notranslate"><span class="pre">MovingLineSource</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.UncorrelatedNoiseSource.html"><code class="docutils literal notranslate"><span class="pre">UncorrelatedNoiseSource</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.SourceMixer.html"><code class="docutils literal notranslate"><span class="pre">SourceMixer</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.PointSourceConvolve.html"><code class="docutils literal notranslate"><span class="pre">PointSourceConvolve</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.spherical_hn1.html"><code class="docutils literal notranslate"><span class="pre">spherical_hn1</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.get_radiation_angles.html"><code class="docutils literal notranslate"><span class="pre">get_radiation_angles</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.sources.get_modes.html"><code class="docutils literal notranslate"><span class="pre">get_modes</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.spectra.html"><code class="docutils literal notranslate"><span class="pre">spectra</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.spectra.BaseSpectra.html"><code class="docutils literal notranslate"><span class="pre">BaseSpectra</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.spectra.PowerSpectra.html"><code class="docutils literal notranslate"><span class="pre">PowerSpectra</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.spectra.PowerSpectraImport.html"><code class="docutils literal notranslate"><span class="pre">PowerSpectraImport</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.tbeamform.html"><code class="docutils literal notranslate"><span class="pre">tbeamform</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tbeamform.BeamformerTime.html"><code class="docutils literal notranslate"><span class="pre">BeamformerTime</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tbeamform.BeamformerTimeTraj.html"><code class="docutils literal notranslate"><span class="pre">BeamformerTimeTraj</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tbeamform.BeamformerTimeSq.html"><code class="docutils literal notranslate"><span class="pre">BeamformerTimeSq</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tbeamform.BeamformerTimeSqTraj.html"><code class="docutils literal notranslate"><span class="pre">BeamformerTimeSqTraj</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tbeamform.BeamformerCleant.html"><code class="docutils literal notranslate"><span class="pre">BeamformerCleant</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tbeamform.BeamformerCleantTraj.html"><code class="docutils literal notranslate"><span class="pre">BeamformerCleantTraj</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tbeamform.BeamformerCleantSq.html"><code class="docutils literal notranslate"><span class="pre">BeamformerCleantSq</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tbeamform.BeamformerCleantSqTraj.html"><code class="docutils literal notranslate"><span class="pre">BeamformerCleantSqTraj</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tbeamform.IntegratorSectorTime.html"><code class="docutils literal notranslate"><span class="pre">IntegratorSectorTime</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.tools.html"><code class="docutils literal notranslate"><span class="pre">tools</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/acoular.tools.helpers.html"><code class="docutils literal notranslate"><span class="pre">helpers</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.tools.helpers.synthetic.html"><code class="docutils literal notranslate"><span class="pre">synthetic</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.tools.helpers.return_result.html"><code class="docutils literal notranslate"><span class="pre">return_result</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.tools.helpers.barspectrum.html"><code class="docutils literal notranslate"><span class="pre">barspectrum</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.tools.helpers.bardata.html"><code class="docutils literal notranslate"><span class="pre">bardata</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.tools.helpers.c_air.html"><code class="docutils literal notranslate"><span class="pre">c_air</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.tools.helpers.get_data_file.html"><code class="docutils literal notranslate"><span class="pre">get_data_file</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/acoular.tools.metrics.html"><code class="docutils literal notranslate"><span class="pre">metrics</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.tools.metrics.MetricEvaluator.html"><code class="docutils literal notranslate"><span class="pre">MetricEvaluator</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/acoular.tools.utils.html"><code class="docutils literal notranslate"><span class="pre">utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.tools.utils.get_file_basename.html"><code class="docutils literal notranslate"><span class="pre">get_file_basename</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.tools.utils.find_basename.html"><code class="docutils literal notranslate"><span class="pre">find_basename</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.tools.utils.mole_fraction_of_water_vapor.html"><code class="docutils literal notranslate"><span class="pre">mole_fraction_of_water_vapor</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/generated/acoular.tools.utils.Polygon.html"><code class="docutils literal notranslate"><span class="pre">Polygon</span></code></a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.tprocess.html"><code class="docutils literal notranslate"><span class="pre">tprocess</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.MaskedTimeOut.html"><code class="docutils literal notranslate"><span class="pre">MaskedTimeOut</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.Trigger.html"><code class="docutils literal notranslate"><span class="pre">Trigger</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.AngleTracker.html"><code class="docutils literal notranslate"><span class="pre">AngleTracker</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.ChannelMixer.html"><code class="docutils literal notranslate"><span class="pre">ChannelMixer</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.SpatialInterpolator.html"><code class="docutils literal notranslate"><span class="pre">SpatialInterpolator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.SpatialInterpolatorRotation.html"><code class="docutils literal notranslate"><span class="pre">SpatialInterpolatorRotation</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.SpatialInterpolatorConstantRotation.html"><code class="docutils literal notranslate"><span class="pre">SpatialInterpolatorConstantRotation</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.Mixer.html"><code class="docutils literal notranslate"><span class="pre">Mixer</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.TimePower.html"><code class="docutils literal notranslate"><span class="pre">TimePower</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.TimeCumAverage.html"><code class="docutils literal notranslate"><span class="pre">TimeCumAverage</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.TimeReverse.html"><code class="docutils literal notranslate"><span class="pre">TimeReverse</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.Filter.html"><code class="docutils literal notranslate"><span class="pre">Filter</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.FilterBank.html"><code class="docutils literal notranslate"><span class="pre">FilterBank</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.FiltFiltOctave.html"><code class="docutils literal notranslate"><span class="pre">FiltFiltOctave</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.FiltOctave.html"><code class="docutils literal notranslate"><span class="pre">FiltOctave</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.TimeExpAverage.html"><code class="docutils literal notranslate"><span class="pre">TimeExpAverage</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.FiltFreqWeight.html"><code class="docutils literal notranslate"><span class="pre">FiltFreqWeight</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.OctaveFilterBank.html"><code class="docutils literal notranslate"><span class="pre">OctaveFilterBank</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.WriteWAV.html"><code class="docutils literal notranslate"><span class="pre">WriteWAV</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.WriteH5.html"><code class="docutils literal notranslate"><span class="pre">WriteH5</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.tprocess.TimeConvolve.html"><code class="docutils literal notranslate"><span class="pre">TimeConvolve</span></code></a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="acoular.trajectory.html"><code class="docutils literal notranslate"><span class="pre">trajectory</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/acoular.trajectory.Trajectory.html"><code class="docutils literal notranslate"><span class="pre">Trajectory</span></code></a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Reference Manual</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis"><code class="docutils literal notranslate"><span class="pre">environments</span></code></span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="module-acoular.environments">
+<span id="environments"></span><h1><code class="docutils literal notranslate"><span class="pre">environments</span></code><a class="headerlink" href="#module-acoular.environments" title="Link to this heading">#</a></h1>
+<p>Implements acoustic environments with and without flow.</p>
+<div class="graphviz"><object data="../../_images/inheritance-c8954af4db92435a1cb9e44de1f06d68ef251c65.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of acoular.environments.Environment</p></object></div>
+<div class="graphviz"><object data="../../_images/inheritance-885efedfd694e6b8115356fa3bc160336e6e602b.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of acoular.environments.FlowField</p></object></div>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#acoular.environments.Environment" title="acoular.environments.Environment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Environment</span></code></a></p></td>
+<td><p>A simple acoustic environment without flow.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#acoular.environments.UniformFlowEnvironment" title="acoular.environments.UniformFlowEnvironment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">UniformFlowEnvironment</span></code></a></p></td>
+<td><p>An acoustic environment with uniform flow.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#acoular.environments.GeneralFlowEnvironment" title="acoular.environments.GeneralFlowEnvironment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralFlowEnvironment</span></code></a></p></td>
+<td><p>An acoustic environment with a generic flow field.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#acoular.environments.FlowField" title="acoular.environments.FlowField"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FlowField</span></code></a></p></td>
+<td><p>An abstract base class for a spatial flow field.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#acoular.environments.OpenJet" title="acoular.environments.OpenJet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OpenJet</span></code></a></p></td>
+<td><p>Analytical approximation of the flow field of an open jet.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#acoular.environments.RotatingFlow" title="acoular.environments.RotatingFlow"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RotatingFlow</span></code></a></p></td>
+<td><p>Analytical approximation of a rotating flow field with velocity component in z-direction.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#acoular.environments.SlotJet" title="acoular.environments.SlotJet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SlotJet</span></code></a></p></td>
+<td><p>Analytical approximation of the flow field of a slot jet.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#acoular.environments.dist_mat" title="acoular.environments.dist_mat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dist_mat</span></code></a>(gpos, mpos)</p></td>
+<td><p>Compute distance matrix.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#acoular.environments.cylToCart" title="acoular.environments.cylToCart"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cylToCart</span></code></a>(x[, Q])</p></td>
+<td><p>Return cartesian coordinate representation of an input array in cylindrical coordinate.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#acoular.environments.cartToCyl" title="acoular.environments.cartToCyl"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cartToCyl</span></code></a>(x[, Q])</p></td>
+<td><p>Return cylindrical coordinate representation of an input array in cartesian coordinate.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#acoular.environments.spiral_sphere" title="acoular.environments.spiral_sphere"><code class="xref py py-obj docutils literal notranslate"><span class="pre">spiral_sphere</span></code></a>(N[, Om, b])</p></td>
+<td><p>Generate unit vectors equally distributed over a sphere or a portion of it.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="acoular.environments.dist_mat">
+<span class="sig-prename descclassname"><span class="pre">acoular.environments.</span></span><span class="sig-name descname"><span class="pre">dist_mat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gpos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mpos</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.environments.dist_mat" title="Link to this definition">#</a></dt>
+<dd><p>Compute distance matrix. (accelerated with numba).</p>
+<p>Given an <cite>(3, N)</cite> array of the locations of points in the beamforming map grid in 3D cartesian
+coordinates and <cite>(3, M)</cite> array of the locations of microphones in 3D cartesian coordinates, the
+<cite>(N, M)</cite> matrix of the distances between each microphone and each point in the beamforming map
+grip.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>gpos</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floats</span></code></a></span></dt><dd><p>The locations of <cite>N</cite> points in the beamforming map grid in 3D cartesian coordinates,
+shape <cite>(3, N)</cite>.</p>
+</dd>
+<dt><strong>mpos</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floats</span></code></a></span></dt><dd><p>The locations of <cite>M</cite> microphones in 3D cartesian coordinates, shape <cite>(3, M)</cite>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floats</span></code></a></dt><dd><p>Matrix of the distances between each microphone and each point in the beamforming map grid,
+shape <cite>(N, M)</cite>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="acoular.environments.cartToCyl">
+<span class="sig-prename descclassname"><span class="pre">acoular.environments.</span></span><span class="sig-name descname"><span class="pre">cartToCyl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.environments.cartToCyl" title="Link to this definition">#</a></dt>
+<dd><p>Return cylindrical coordinate representation of an input array in cartesian coordinate.</p>
+<p>Return the cylindrical coordinate representation of an input position which was before
+transformed into a modified cartesian coordinate, which has flow into positive z direction.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>x</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floats</span></code></a></span></dt><dd><p>Cartesian coordinates of <cite>N</cite> points, shape <cite>(3, N)</cite>.</p>
+</dd>
+<dt><strong>Q</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floats</span></code></a>, optional</span></dt><dd><p>Orthogonal transformation matrix, shape <cite>(3, 3)</cite>. If provided, the positional vectors are
+transformed via <code class="docutils literal notranslate"><span class="pre">new_x</span> <span class="pre">=</span> <span class="pre">Q</span> <span class="pre">*</span> <span class="pre">x</span></code>, before transforming those modified coordinates into
+cylindrical ones. Default is the identity matrix.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floats</span></code></a></dt><dd><p>Cylindrical representation of given <cite>N</cite> points in cartesian coodrinates as
+an array of shape <cite>(3, N)</cite> with new coordinates <span class="math notranslate nohighlight">\((\phi, r, z)\)</span>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="acoular.environments.cylToCart">
+<span class="sig-prename descclassname"><span class="pre">acoular.environments.</span></span><span class="sig-name descname"><span class="pre">cylToCart</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.environments.cylToCart" title="Link to this definition">#</a></dt>
+<dd><p>Return cartesian coordinate representation of an input array in cylindrical coordinate.</p>
+<p>Return the cartesian coordinate representation of a input position which was before transformed
+into a cylindrical coordinate, which has flow into positive z direction.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>x</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floats</span></code></a></span></dt><dd><p>Cylindrical coordinates of <cite>N</cite> points, shape <cite>(3, N)</cite>.</p>
+</dd>
+<dt><strong>Q</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floats</span></code></a>, optional</span></dt><dd><p>Orthogonal transformation matrix, shape <cite>(3, 3)</cite>. If provided, the positional vectors are
+transformed via <code class="docutils literal notranslate"><span class="pre">new_x</span> <span class="pre">=</span> <span class="pre">Q</span> <span class="pre">*</span> <span class="pre">x</span></code> before transforming those modified coordinates into
+cartesian ones. Default is the identity matrix.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floats</span></code></a></dt><dd><p>Cartesian representation of given <cite>N</cite> points in cylindrical coodrinates as
+an array of shape <cite>(3, N)</cite> with coodinates <span class="math notranslate nohighlight">\((x, y, z)\)</span>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.environments.Environment">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.environments.</span></span><span class="sig-name descname"><span class="pre">Environment</span></span><a class="headerlink" href="#acoular.environments.Environment" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.enthought.com/traits/traits_api_reference/has_traits.html#traits.has_traits.HasStrictTraits" title="(in traits v7.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">HasStrictTraits</span></code></a></p>
+<p>A simple acoustic environment without flow.</p>
+<p>This class models an acoustic environment where the propagation of sound is considered to occur
+in a homogeneous medium without any flow effects (e.g., wind). It provides functionality for
+computing the travel time or distances between grid point locations and microphone locations.</p>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The <a class="reference internal" href="#acoular.environments.dist_mat" title="acoular.environments.dist_mat"><code class="xref py py-func docutils literal notranslate"><span class="pre">dist_mat()</span></code></a> function is used internally to compute the pairwise distances
+between grid points and microphone positions efficiently.</p></li>
+<li><p>This class assumes a static, homogeneous environment without accounting
+for factors like temperature gradients, humidity, or atmospheric turbulence.</p></li>
+</ul>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.Environment.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(depends_on=['c'])</span></em><a class="headerlink" href="#acoular.environments.Environment.digest" title="Link to this definition">#</a></dt>
+<dd><p>A unique identifier based on the environment properties. (read-only)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.Environment.c">
+<span class="sig-name descname"><span class="pre">c</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(343.0)</span></em><a class="headerlink" href="#acoular.environments.Environment.c" title="Link to this definition">#</a></dt>
+<dd><p>The speed of sound in the environment. Default is <code class="docutils literal notranslate"><span class="pre">343.0</span></code>, which corresponds to the
+approximate speed of sound at 20°C in dry air at sea level, if the unit is m/s.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.Environment.roi">
+<span class="sig-name descname"><span class="pre">roi</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Union(None,</span> <span class="pre">CArray)</span></em><a class="headerlink" href="#acoular.environments.Environment.roi" title="Link to this definition">#</a></dt>
+<dd><p>The region of interest (ROI) for calculations. (Not needed for most types of environment.)
+Default is <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.environments.UniformFlowEnvironment">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.environments.</span></span><span class="sig-name descname"><span class="pre">UniformFlowEnvironment</span></span><a class="headerlink" href="#acoular.environments.UniformFlowEnvironment" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#acoular.environments.Environment" title="acoular.environments.Environment"><code class="xref py py-class docutils literal notranslate"><span class="pre">Environment</span></code></a></p>
+<p>An acoustic environment with uniform flow.</p>
+<p>This class models an acoustic environment where sound propagates in a medium with uniform flow.
+It extends the <a class="reference internal" href="#acoular.environments.Environment" title="acoular.environments.Environment"><code class="xref py py-class docutils literal notranslate"><span class="pre">Environment</span></code></a> class to account for the effects of flow on sound
+propagation, such as changes in travel times and distances due to advection by the flow field.</p>
+<p>The flow is assumed to be uniform and steady, characterized by its Mach number (<a class="reference internal" href="#acoular.environments.UniformFlowEnvironment.ma" title="acoular.environments.UniformFlowEnvironment.ma"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ma</span></code></a>)
+and direction (<a class="reference internal" href="#acoular.environments.UniformFlowEnvironment.fdv" title="acoular.environments.UniformFlowEnvironment.fdv"><code class="xref py py-attr docutils literal notranslate"><span class="pre">fdv</span></code></a>).</p>
+<p class="rubric">Notes</p>
+<p>The effective distance is adjusted by solving a flow-dependent relationship that accounts
+for the cosine of the angle between the flow direction and the propagation path.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.UniformFlowEnvironment.ma">
+<span class="sig-name descname"><span class="pre">ma</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(0.0)</span></em><a class="headerlink" href="#acoular.environments.UniformFlowEnvironment.ma" title="Link to this definition">#</a></dt>
+<dd><p>The Mach number of the flow, defined as the ratio of the flow velocity to the speed of sound.
+Default is <code class="docutils literal notranslate"><span class="pre">0.0</span></code>, which corresponds to no flow.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.UniformFlowEnvironment.fdv">
+<span class="sig-name descname"><span class="pre">fdv</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CArray(dtype=np.float64,</span> <span class="pre">shape=(3,),</span> <span class="pre">value=np.array((1.0,</span> <span class="pre">0,</span> <span class="pre">0)))</span></em><a class="headerlink" href="#acoular.environments.UniformFlowEnvironment.fdv" title="Link to this definition">#</a></dt>
+<dd><p>A unit vector specifying the direction of the flow in 3D Cartesian coordinates.
+Default is <code class="docutils literal notranslate"><span class="pre">(1.0,</span> <span class="pre">0,</span> <span class="pre">0)</span></code>, which corresponds to flow in the x-direction.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.UniformFlowEnvironment.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.environments.UniformFlowEnvironment.digest" title="Link to this definition">#</a></dt>
+<dd><p>A unique identifier based on the environment properties. (read-only)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.environments.FlowField">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.environments.</span></span><span class="sig-name descname"><span class="pre">FlowField</span></span><a class="headerlink" href="#acoular.environments.FlowField" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.enthought.com/traits/traits_api_reference/has_traits.html#traits.has_traits.ABCHasStrictTraits" title="(in traits v7.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABCHasStrictTraits</span></code></a></p>
+<p>An abstract base class for a spatial flow field.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.FlowField.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property</span></em><a class="headerlink" href="#acoular.environments.FlowField.digest" title="Link to this definition">#</a></dt>
+<dd><p>A unique identifier based on the field properties. (read-only)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.environments.FlowField.v">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">v</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.environments.FlowField.v" title="Link to this definition">#</a></dt>
+<dd><p>Provide the flow field as a function of the location.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>xx</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floats</span></code></a></span></dt><dd><p>Location in the fluid for which to provide the data, shape (3,).</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.environments.SlotJet">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.environments.</span></span><span class="sig-name descname"><span class="pre">SlotJet</span></span><a class="headerlink" href="#acoular.environments.SlotJet" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#acoular.environments.FlowField" title="acoular.environments.FlowField"><code class="xref py py-class docutils literal notranslate"><span class="pre">FlowField</span></code></a></p>
+<p>Analytical approximation of the flow field of a slot jet.</p>
+<p>This class provides an analytical model of the velocity field for a slot jet,
+based on the description in <span id="id1">[<a class="reference internal" href="../../literature/index.html#id9" title="M. L. Albertson, Y. B. Dai, R. A. Jensen, and Hunter Rouse. Diffusion of submerged jets. Transactions of the American Society of Civil Engineers, 115(1):639-664, 1950. doi:10.1061/TACEAT.0006302.">1</a>]</span>. It describes the flow field
+originating from a slot nozzle, including the jet core and shear layer, and
+calculates the velocity field and its Jacobian matrix at a given location.</p>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The slot jet is divided into two regions: the jet core and the shear layer. The model
+distinguishes between these regions based on the non-dimensionalized distance from
+the slot exit plane.</p></li>
+<li><p>The flow field is aligned with the direction of the <a class="reference internal" href="#acoular.environments.SlotJet.flow" title="acoular.environments.SlotJet.flow"><code class="xref py py-attr docutils literal notranslate"><span class="pre">flow</span></code></a> vector,
+while the <a class="reference internal" href="#acoular.environments.SlotJet.plane" title="acoular.environments.SlotJet.plane"><code class="xref py py-attr docutils literal notranslate"><span class="pre">plane</span></code></a> vector helps define the orientation of the slot.</p></li>
+</ul>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.SlotJet.v0">
+<span class="sig-name descname"><span class="pre">v0</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(0.0)</span></em><a class="headerlink" href="#acoular.environments.SlotJet.v0" title="Link to this definition">#</a></dt>
+<dd><p>Exit velocity at the <a class="reference internal" href="#acoular.environments.SlotJet.origin" title="acoular.environments.SlotJet.origin"><code class="xref py py-attr docutils literal notranslate"><span class="pre">slot</span> <span class="pre">jet</span> <span class="pre">origin</span></code></a> (nozzle). Default is <code class="docutils literal notranslate"><span class="pre">0.0</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.SlotJet.origin">
+<span class="sig-name descname"><span class="pre">origin</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CArray(dtype=np.float64,</span> <span class="pre">shape=(3,),</span> <span class="pre">value=np.array((0.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0)))</span></em><a class="headerlink" href="#acoular.environments.SlotJet.origin" title="Link to this definition">#</a></dt>
+<dd><p>The location of the slot nozzle center. Default is <code class="docutils literal notranslate"><span class="pre">(0.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0)</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.SlotJet.flow">
+<span class="sig-name descname"><span class="pre">flow</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CArray(dtype=np.float64,</span> <span class="pre">shape=(3,),</span> <span class="pre">value=np.array((1.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0)))</span></em><a class="headerlink" href="#acoular.environments.SlotJet.flow" title="Link to this definition">#</a></dt>
+<dd><p>Unit vector representing the flow direction. Default is <code class="docutils literal notranslate"><span class="pre">(1.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0)</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.SlotJet.plane">
+<span class="sig-name descname"><span class="pre">plane</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CArray(dtype=np.float64,</span> <span class="pre">shape=(3,),</span> <span class="pre">value=np.array((0.0,</span> <span class="pre">1.0,</span> <span class="pre">0.0)))</span></em><a class="headerlink" href="#acoular.environments.SlotJet.plane" title="Link to this definition">#</a></dt>
+<dd><p>Unit vector parallel to the slot center plane, used to define the slot orientation.
+Default is <code class="docutils literal notranslate"><span class="pre">(0.0,</span> <span class="pre">1.0,</span> <span class="pre">0.0)</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.SlotJet.B">
+<span class="sig-name descname"><span class="pre">B</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(0.2)</span></em><a class="headerlink" href="#acoular.environments.SlotJet.B" title="Link to this definition">#</a></dt>
+<dd><p>Width of the slot (slot diameter). Default is <code class="docutils literal notranslate"><span class="pre">0.2</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.SlotJet.l">
+<span class="sig-name descname"><span class="pre">l</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(5.2)</span>&#160; <span class="pre">#</span> <span class="pre">noqa:</span> <span class="pre">E741</span></em><a class="headerlink" href="#acoular.environments.SlotJet.l" title="Link to this definition">#</a></dt>
+<dd><p>Non-dimensional length of the zone of flow establishment (jet core length).
+Default is <code class="docutils literal notranslate"><span class="pre">5.2</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.SlotJet.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.environments.SlotJet.digest" title="Link to this definition">#</a></dt>
+<dd><p>A unique identifier based on the field properties. (read-only)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.environments.SlotJet.v">
+<span class="sig-name descname"><span class="pre">v</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.environments.SlotJet.v" title="Link to this definition">#</a></dt>
+<dd><p>Compute the velocity field and its Jacobian matrix at a given location.</p>
+<p>This method provides the velocity vector and its Jacobian matrix at the given location
+<code class="docutils literal notranslate"><span class="pre">xx</span></code> in the fluid. The velocity is computed for the flow component in the direction
+of the slot jet, while the entrainment components are assumed to be zero.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>xx</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floats</span></code></a></span></dt><dd><p>The 3D Cartesian coordinates of the location in the fluid where the velocity field
+is to be computed, shape <cite>(3,)</cite>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>velocity_vector</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floats</span></code></a></span></dt><dd><p>The velocity vector at the given location, shape <cite>(3,)</cite>.</p>
+</dd>
+<dt><strong>jacobian_matrix</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floats</span></code></a></span></dt><dd><p>The Jacobian matrix of the velocity vector field at the given location, shape <cite>(3,)</cite>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The velocity field is computed using a local coordinate system aligned with the flow
+direction and the slot orientation.</p></li>
+<li><p>The velocity profile depends on whether the point lies within the jet core region or
+in the shear layer. In the jet core, the velocity is constant, while in the shear layer,
+it decays following a Gaussian distribution.</p></li>
+<li><p>The Jacobian matrix provides the partial derivatives of the velocity vector components
+with respect to the spatial coordinates.</p></li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.environments.OpenJet">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.environments.</span></span><span class="sig-name descname"><span class="pre">OpenJet</span></span><a class="headerlink" href="#acoular.environments.OpenJet" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#acoular.environments.FlowField" title="acoular.environments.FlowField"><code class="xref py py-class docutils literal notranslate"><span class="pre">FlowField</span></code></a></p>
+<p>Analytical approximation of the flow field of an open jet.</p>
+<p>This class provides a simplified analytical model of the velocity field for an open jet, based
+on the description in <span id="id2">[<a class="reference internal" href="../../literature/index.html#id9" title="M. L. Albertson, Y. B. Dai, R. A. Jensen, and Hunter Rouse. Diffusion of submerged jets. Transactions of the American Society of Civil Engineers, 115(1):639-664, 1950. doi:10.1061/TACEAT.0006302.">1</a>]</span>. It calculates the velocity vector and its
+Jacobian matrix at a given location in the fluid domain, assuming flow in the x-direction only.</p>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>This is not a fully generic implementation, and is limited to flow in the x-direction only.
+No other directions are possible at the moment and flow components in
+the other direction are zero.</p></li>
+<li><p>The flow field transitions from the jet core to the shear layer, with velocity decay
+modeled using a Gaussian profile in the shear layer.</p></li>
+</ul>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">acoular</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ac</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">jet</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">OpenJet</span><span class="p">(</span><span class="n">v0</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">D</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">l</span><span class="o">=</span><span class="mf">6.2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">velocity</span><span class="p">,</span> <span class="n">jacobian</span> <span class="o">=</span> <span class="n">jet</span><span class="o">.</span><span class="n">v</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">velocity</span>
+<span class="go">array([9.62413564, 0.        , 0.        ])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">jacobian</span>
+<span class="go">array([[ -1.92660591, -23.25619062, -23.25619062],</span>
+<span class="go">       [  0.        ,   0.        ,   0.        ],</span>
+<span class="go">       [  0.        ,   0.        ,   0.        ]])</span>
+</pre></div>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.OpenJet.v0">
+<span class="sig-name descname"><span class="pre">v0</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(0.0)</span></em><a class="headerlink" href="#acoular.environments.OpenJet.v0" title="Link to this definition">#</a></dt>
+<dd><p>Exit velocity at the jet origin (nozzle). Default is <code class="docutils literal notranslate"><span class="pre">0.0</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.OpenJet.origin">
+<span class="sig-name descname"><span class="pre">origin</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CArray(dtype=np.float64,</span> <span class="pre">shape=(3,),</span> <span class="pre">value=np.array((0.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0)))</span></em><a class="headerlink" href="#acoular.environments.OpenJet.origin" title="Link to this definition">#</a></dt>
+<dd><p>The location of the nozzle center. Default is <code class="docutils literal notranslate"><span class="pre">(0.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0)</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.OpenJet.D">
+<span class="sig-name descname"><span class="pre">D</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(0.2)</span></em><a class="headerlink" href="#acoular.environments.OpenJet.D" title="Link to this definition">#</a></dt>
+<dd><p>Diameter of the nozzle. Default is <code class="docutils literal notranslate"><span class="pre">0.2</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.OpenJet.l">
+<span class="sig-name descname"><span class="pre">l</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(6.2)</span>&#160; <span class="pre">#</span> <span class="pre">noqa:</span> <span class="pre">E741</span></em><a class="headerlink" href="#acoular.environments.OpenJet.l" title="Link to this definition">#</a></dt>
+<dd><p>Non-dimensional length of the zone of flow establishment (jet core length).
+Default is <code class="docutils literal notranslate"><span class="pre">6.2</span></code>. <span id="id3">[<a class="reference internal" href="../../literature/index.html#id9" title="M. L. Albertson, Y. B. Dai, R. A. Jensen, and Hunter Rouse. Diffusion of submerged jets. Transactions of the American Society of Civil Engineers, 115(1):639-664, 1950. doi:10.1061/TACEAT.0006302.">1</a>]</span></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.OpenJet.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.environments.OpenJet.digest" title="Link to this definition">#</a></dt>
+<dd><p>A unique identifier based on the field properties. (read-only)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.environments.OpenJet.v">
+<span class="sig-name descname"><span class="pre">v</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.environments.OpenJet.v" title="Link to this definition">#</a></dt>
+<dd><p>Compute the velocity field and its Jacobian matrix at a given location.</p>
+<p>This method calculates the velocity vector and its Jacobian matrix at the
+specified location <code class="docutils literal notranslate"><span class="pre">xx</span></code> in the fluid domain. The velocity is modeled only for the
+x-component of the flow, while the y- and z-components are assumed to be zero.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>xx</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floats</span></code></a></span></dt><dd><p>The 3D Cartesian coordinates of the location in the fluid where the velocity
+field is to be computed, shape <cite>(3,)</cite>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>velocity_vector</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floats</span></code></a></span></dt><dd><p>The velocity vector at the specified location <code class="docutils literal notranslate"><span class="pre">xx</span></code>, shape <cite>(3,)</cite>.</p>
+</dd>
+<dt><strong>jacobian_matrix</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floats</span></code></a></span></dt><dd><p>The Jacobian matrix of the velocity vector field at the specified location <code class="docutils literal notranslate"><span class="pre">xx</span></code>,
+shape <cite>(3, 3)</cite>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The velocity field is determined based on whether the location is within the jet core
+region or in the shear layer. Within the jet core, the velocity is constant and equal
+to <a class="reference internal" href="#acoular.environments.OpenJet.v0" title="acoular.environments.OpenJet.v0"><code class="xref py py-attr docutils literal notranslate"><span class="pre">v0</span></code></a>. In the shear layer, the velocity decays following a Gaussian distribution.</p></li>
+<li><p>The Jacobian matrix provides the partial derivatives of the velocity components
+with respect to the spatial coordinates.</p></li>
+<li><p>If the radial distance <cite>r</cite> from the jet axis is zero, the derivatives with respect
+to <cite>y</cite> and <cite>z</cite> are set to zero to avoid division by zero.</p></li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.environments.RotatingFlow">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.environments.</span></span><span class="sig-name descname"><span class="pre">RotatingFlow</span></span><a class="headerlink" href="#acoular.environments.RotatingFlow" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#acoular.environments.FlowField" title="acoular.environments.FlowField"><code class="xref py py-class docutils literal notranslate"><span class="pre">FlowField</span></code></a></p>
+<p>Analytical approximation of a rotating flow field with velocity component in z-direction.</p>
+<p>This class provides an analytical model for a fluid flow field with a
+rigid-body-like rotation about the z-axis. The flow combines rotational motion
+in the x-y plane and a constant velocity component in the z-direction.</p>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The rotation is assumed to be about the z-axis. The velocity components in the x-y plane are
+determined by the angular velocity <a class="reference internal" href="#acoular.environments.RotatingFlow.omega" title="acoular.environments.RotatingFlow.omega"><code class="xref py py-attr docutils literal notranslate"><span class="pre">omega</span></code></a>, while the z-component is constant
+and set by <a class="reference internal" href="#acoular.environments.RotatingFlow.v0" title="acoular.environments.RotatingFlow.v0"><code class="xref py py-attr docutils literal notranslate"><span class="pre">v0</span></code></a>.</p></li>
+<li><p>The angular velocity <a class="reference internal" href="#acoular.environments.RotatingFlow.omega" title="acoular.environments.RotatingFlow.omega"><code class="xref py py-attr docutils literal notranslate"><span class="pre">omega</span></code></a> is computed as: <code class="docutils literal notranslate"><span class="pre">omega</span> <span class="pre">=</span> <span class="pre">2</span> <span class="pre">*</span> <span class="pre">np.pi</span> <span class="pre">*</span> <span class="pre">rps</span></code>,
+with the <a class="reference internal" href="#acoular.environments.RotatingFlow.rps" title="acoular.environments.RotatingFlow.rps"><code class="xref py py-attr docutils literal notranslate"><span class="pre">rps</span></code></a> given in revolutions per second (i.e. Hz).</p></li>
+</ul>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">acoular</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ac</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">flow</span> <span class="o">=</span> <span class="n">RotatingFlow</span><span class="p">(</span><span class="n">rps</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">v0</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">velocity</span><span class="p">,</span> <span class="n">jacobian</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">v</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">velocity</span>
+<span class="go">array([-6.28318531,  6.28318531,  1.        ])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">jacobian</span>
+<span class="go">array([[ 0.        , -6.28318531,  0.        ],</span>
+<span class="go">       [ 6.28318531,  0.        ,  0.        ],</span>
+<span class="go">       [ 0.        ,  0.        ,  0.        ]])</span>
+</pre></div>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.RotatingFlow.rpm">
+<span class="sig-name descname"><span class="pre">rpm</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(transient=True)</span></em><a class="headerlink" href="#acoular.environments.RotatingFlow.rpm" title="Link to this definition">#</a></dt>
+<dd><p>Revolutions per minute (RPM). Default is <code class="docutils literal notranslate"><span class="pre">0.0</span></code>.
+Positive values indicate clockwise rotation of the flow.
+This is contrary to the usual definition of the direction of rotation.
+Deprecated! Please use the differently defined <a class="reference internal" href="#acoular.environments.RotatingFlow.rps" title="acoular.environments.RotatingFlow.rps"><code class="xref py py-attr docutils literal notranslate"><span class="pre">rps</span></code></a> attribute instead.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.RotatingFlow.rps">
+<span class="sig-name descname"><span class="pre">rps</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">2,</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.environments.RotatingFlow.rps" title="Link to this definition">#</a></dt>
+<dd><p>Rotational speed in revolutions per second. Negative values indicate clockwise
+rigid-body-like rotation of the flow. Default is <code class="docutils literal notranslate"><span class="pre">0.0</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.RotatingFlow.v0">
+<span class="sig-name descname"><span class="pre">v0</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(0.0)</span></em><a class="headerlink" href="#acoular.environments.RotatingFlow.v0" title="Link to this definition">#</a></dt>
+<dd><p>Constant flow velocity in the z-direction. Default is <code class="docutils literal notranslate"><span class="pre">0.0</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.RotatingFlow.origin">
+<span class="sig-name descname"><span class="pre">origin</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">CArray(dtype=np.float64,</span> <span class="pre">shape=(3,),</span> <span class="pre">value=np.array((0.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0)))</span></em><a class="headerlink" href="#acoular.environments.RotatingFlow.origin" title="Link to this definition">#</a></dt>
+<dd><p>The location of the center of rotation.
+Default is <code class="docutils literal notranslate"><span class="pre">(0.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0)</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.RotatingFlow.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.environments.RotatingFlow.digest" title="Link to this definition">#</a></dt>
+<dd><p>A unique identifier based on the field properties. (read-only)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.RotatingFlow.omega">
+<span class="sig-name descname"><span class="pre">omega</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.environments.RotatingFlow.omega" title="Link to this definition">#</a></dt>
+<dd><p>Angular velocity (in radians per second) of the rotation.
+This is a derived property based on <a class="reference internal" href="#acoular.environments.RotatingFlow.rps" title="acoular.environments.RotatingFlow.rps"><code class="xref py py-attr docutils literal notranslate"><span class="pre">rps</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.environments.RotatingFlow.v">
+<span class="sig-name descname"><span class="pre">v</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.environments.RotatingFlow.v" title="Link to this definition">#</a></dt>
+<dd><p>Compute the rotating flow field and its Jacobian matrix at a given location.</p>
+<p>This method calculates the velocity vector and its Jacobian matrix at the specified location
+<code class="docutils literal notranslate"><span class="pre">xx</span></code> in the fluid domain. The flow field consists of rotational components in the
+x-y plane and a constant velocity component in the z-direction.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>xx</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floats</span></code></a></span></dt><dd><p>The 3D Cartesian coordinates of the location in the fluid where the velocity
+field is to be computed, shape <cite>(3,)</cite>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>velocity_vector</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floats</span></code></a></span></dt><dd><dl class="simple">
+<dt>The velocity vector at the specified location <code class="docutils literal notranslate"><span class="pre">xx</span></code>, shape <cite>(3,)</cite>. The components are:</dt><dd><ul class="simple">
+<li><p>U: Velocity in the x-direction (dependent on y-coordinate and <a class="reference internal" href="#acoular.environments.RotatingFlow.omega" title="acoular.environments.RotatingFlow.omega"><code class="xref py py-attr docutils literal notranslate"><span class="pre">omega</span></code></a>).</p></li>
+<li><p>V: Velocity in the y-direction (dependent on x-coordinate and <a class="reference internal" href="#acoular.environments.RotatingFlow.omega" title="acoular.environments.RotatingFlow.omega"><code class="xref py py-attr docutils literal notranslate"><span class="pre">omega</span></code></a>).</p></li>
+<li><p>W: Constant velocity in the z-direction (set by <a class="reference internal" href="#acoular.environments.RotatingFlow.v0" title="acoular.environments.RotatingFlow.v0"><code class="xref py py-attr docutils literal notranslate"><span class="pre">v0</span></code></a>).</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+<dt><strong>jacobian_matrix</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floats</span></code></a></span></dt><dd><p>The Jacobian matrix of the velocity vector field at the specified location <code class="docutils literal notranslate"><span class="pre">xx</span></code>.
+The matrix contains partial derivatives of each velocity component with
+respect to the spatial coordinates <span class="math notranslate nohighlight">\((x, y, z)\)</span>, shape <cite>(3, 3)</cite>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The Jacobian matrix is constant for this flow field and represents the linear relationship
+between the velocity components and spatial coordinates in the x-y plane.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="acoular.environments.spiral_sphere">
+<span class="sig-prename descclassname"><span class="pre">acoular.environments.</span></span><span class="sig-name descname"><span class="pre">spiral_sphere</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Om</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.environments.spiral_sphere" title="Link to this definition">#</a></dt>
+<dd><p>Generate unit vectors equally distributed over a sphere or a portion of it.</p>
+<p>Internal helper function for the raycasting that returns an array of unit
+vectors of shape <cite>(N, 3)</cite> giving equally distributed directions on a part
+of sphere given by the center direction <code class="docutils literal notranslate"><span class="pre">b</span></code> and the solid angle <code class="docutils literal notranslate"><span class="pre">Om</span></code>.</p>
+<p>The function uses spherical coordinates to distribute the points, the converts them to Cartesian
+coordinates. It also applies a transformation to reflect the points about a plane so that the
+direction defined by the vector <code class="docutils literal notranslate"><span class="pre">b</span></code> points toward the center of the sphere.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>N</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></dt><dd><p>The number of points to generate on the sphere.</p>
+</dd>
+<dt><strong>Om</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, optional</span></dt><dd><p>The solid angle in steradians to cover on the sphere. Default is <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">*</span> <span class="pre">np.pi</span></code>,
+which corresponds to a hemisphere. Smaller values result in covering
+a smaller portion of the hemisphere.</p>
+</dd>
+<dt><strong>b</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floats</span></code></a>, optional</span></dt><dd><p>A 3D unit vector specifying the desired center direction of the distribution.
+Points are mirrored such that this vector points toward the center of the sphere.
+Default is <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">1]</span></code>, which corresponds to the z-axis.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floats</span></code></a></dt><dd><p>An array of unit vectors representing points on the sphere, shape <cite>(3, N)</cite>.
+Each column corresponds to a 3D Cartesian coordinate of a point.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The points are initially distributed using a spiral pattern in spherical coordinates.
+This ensures an approximately equal spacing between points over the specified portion
+of the sphere.</p></li>
+<li><p>If a vector <code class="docutils literal notranslate"><span class="pre">b</span></code> is provided, the function mirrors the distribution using a
+Householder reflection so that <code class="docutils literal notranslate"><span class="pre">b</span></code> points toward the center.</p></li>
+<li><p>The function avoids generating singularities at the poles by adjusting the spiral
+distribution formula.</p></li>
+</ul>
+<p class="rubric">Examples</p>
+<p>Generate 100 points over a hemisphere:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">acoular.environments</span><span class="w"> </span><span class="kn">import</span> <span class="n">spiral_sphere</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">points</span> <span class="o">=</span> <span class="n">spiral_sphere</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">points</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(3, 100)</span>
+</pre></div>
+</div>
+<p>Generate 50 points over half a hemisphere with the z-axis as the center direction:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">points</span> <span class="o">=</span> <span class="n">spiral_sphere</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="n">Om</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">points</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(3, 50)</span>
+</pre></div>
+</div>
+<p>Generate 200 points with a different direction vector:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">points</span> <span class="o">=</span> <span class="n">spiral_sphere</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">points</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(3, 200)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="acoular.environments.GeneralFlowEnvironment">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">acoular.environments.</span></span><span class="sig-name descname"><span class="pre">GeneralFlowEnvironment</span></span><a class="headerlink" href="#acoular.environments.GeneralFlowEnvironment" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#acoular.environments.Environment" title="acoular.environments.Environment"><code class="xref py py-class docutils literal notranslate"><span class="pre">Environment</span></code></a></p>
+<p>An acoustic environment with a generic flow field.</p>
+<p>This class provides the facilities to calculate the travel time (distances) between grid point
+locations and microphone locations in a generic flow field with non-uniform velocities that
+depend on the location. The algorithm for the calculation uses a ray-tracing approach that bases
+on rays cast from every microphone position in multiple directions and traced backwards in time.
+The result is interpolated within a tetrahedal grid spanned between these rays.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.LinearNDInterpolator.html#scipy.interpolate.LinearNDInterpolator" title="(in SciPy v1.17.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipy.interpolate.LinearNDInterpolator</span></code></a></dt><dd><p>Piecewise linear interpolator in N &gt; 1 dimensions.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">acoular</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ac</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Instantiate the flow field</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">flow_field</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">OpenJet</span><span class="p">(</span><span class="n">v0</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">D</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">l</span><span class="o">=</span><span class="mf">3.121</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create an instance of GeneralFlowEnvironment</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">environment</span> <span class="o">=</span> <span class="n">ac</span><span class="o">.</span><span class="n">GeneralFlowEnvironment</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">ff</span><span class="o">=</span><span class="n">flow_field</span><span class="p">,</span>  <span class="c1"># Use the custom flow field</span>
+<span class="gp">... </span>    <span class="n">N</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>  <span class="c1"># Number of rays</span>
+<span class="gp">... </span>    <span class="n">Om</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span>  <span class="c1"># Maximum solid angle</span>
+<span class="gp">... </span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.GeneralFlowEnvironment.ff">
+<span class="sig-name descname"><span class="pre">ff</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Instance(FlowField)</span></em><a class="headerlink" href="#acoular.environments.GeneralFlowEnvironment.ff" title="Link to this definition">#</a></dt>
+<dd><p>The flow field object describing the velocity field,
+which must be an instance of <a class="reference internal" href="#acoular.environments.FlowField" title="acoular.environments.FlowField"><code class="xref py py-class docutils literal notranslate"><span class="pre">FlowField</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.GeneralFlowEnvironment.N">
+<span class="sig-name descname"><span class="pre">N</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Int(200)</span></em><a class="headerlink" href="#acoular.environments.GeneralFlowEnvironment.N" title="Link to this definition">#</a></dt>
+<dd><p>The number of rays used per solid angle <span class="math notranslate nohighlight">\(\Omega\)</span>. Defaults to <code class="docutils literal notranslate"><span class="pre">200</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.GeneralFlowEnvironment.Om">
+<span class="sig-name descname"><span class="pre">Om</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Float(np.pi)</span></em><a class="headerlink" href="#acoular.environments.GeneralFlowEnvironment.Om" title="Link to this definition">#</a></dt>
+<dd><p>The maximum solid angle (in steradians) used in the ray-tracing algorithm.
+Default is <a class="reference external" href="https://numpy.org/doc/stable/reference/constants.html#numpy.pi" title="(in NumPy v2.4)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.pi</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.GeneralFlowEnvironment.digest">
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Property(</span> <span class="pre">…</span></em><a class="headerlink" href="#acoular.environments.GeneralFlowEnvironment.digest" title="Link to this definition">#</a></dt>
+<dd><p>A unique identifier based on the environment properties. (read-only)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="acoular.environments.GeneralFlowEnvironment.idict">
+<span class="sig-name descname"><span class="pre">idict</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">Dict</span></em><a class="headerlink" href="#acoular.environments.GeneralFlowEnvironment.idict" title="Link to this definition">#</a></dt>
+<dd><p>A dictionary for storing precomputed interpolators to optimize repeated calculations.
+(internal use)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="acoular.environments.GeneralFlowEnvironment.get_interpolator">
+<span class="sig-name descname"><span class="pre">get_interpolator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">roi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acoular.environments.GeneralFlowEnvironment.get_interpolator" title="Link to this definition">#</a></dt>
+<dd><p>Generate an interpolator for ray travel times based on a region of interest.</p>
+<p>This method computes the ray trajectories starting from a given microphone position (<code class="docutils literal notranslate"><span class="pre">x0</span></code>)
+through a region of interest (<code class="docutils literal notranslate"><span class="pre">roi</span></code>). The rays’ paths are integrated numerically using a
+system of differential equations, and the resulting points are used to construct a
+convex hull. A linear interpolator is then created to estimate travel times for arbitrary
+points within the region.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>roi</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floats</span></code></a></span></dt><dd><p>Array representing the region of interest (ROI), where each column corresponds
+to a point in the 3D space <span class="math notranslate nohighlight">\((x, y, z)\)</span>, shape <cite>(3, M)</cite>.</p>
+</dd>
+<dt><strong>x0</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floats</span></code></a></span></dt><dd><p>Array representing the location of the microphone in 3D Cartesian coordinates,
+shape <cite>(3,)</cite>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.LinearNDInterpolator.html#scipy.interpolate.LinearNDInterpolator" title="(in SciPy v1.17.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipy.interpolate.LinearNDInterpolator</span></code></a> object</dt><dd><p>A linear interpolator object for estimating travel times for 3D positions
+within the computed ray trajectories.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="generated/acoular.deprecation.deprecated_alias.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">deprecated_alias</span></code></p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="generated/acoular.environments.Environment.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">Environment</span></code></p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.dist_mat"><code class="docutils literal notranslate"><span class="pre">dist_mat()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.cartToCyl"><code class="docutils literal notranslate"><span class="pre">cartToCyl()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.cylToCart"><code class="docutils literal notranslate"><span class="pre">cylToCart()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.Environment"><code class="docutils literal notranslate"><span class="pre">Environment</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.Environment.digest"><code class="docutils literal notranslate"><span class="pre">Environment.digest</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.Environment.c"><code class="docutils literal notranslate"><span class="pre">Environment.c</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.Environment.roi"><code class="docutils literal notranslate"><span class="pre">Environment.roi</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.UniformFlowEnvironment"><code class="docutils literal notranslate"><span class="pre">UniformFlowEnvironment</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.UniformFlowEnvironment.ma"><code class="docutils literal notranslate"><span class="pre">UniformFlowEnvironment.ma</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.UniformFlowEnvironment.fdv"><code class="docutils literal notranslate"><span class="pre">UniformFlowEnvironment.fdv</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.UniformFlowEnvironment.digest"><code class="docutils literal notranslate"><span class="pre">UniformFlowEnvironment.digest</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.FlowField"><code class="docutils literal notranslate"><span class="pre">FlowField</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.FlowField.digest"><code class="docutils literal notranslate"><span class="pre">FlowField.digest</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.FlowField.v"><code class="docutils literal notranslate"><span class="pre">FlowField.v()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.SlotJet"><code class="docutils literal notranslate"><span class="pre">SlotJet</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.SlotJet.v0"><code class="docutils literal notranslate"><span class="pre">SlotJet.v0</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.SlotJet.origin"><code class="docutils literal notranslate"><span class="pre">SlotJet.origin</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.SlotJet.flow"><code class="docutils literal notranslate"><span class="pre">SlotJet.flow</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.SlotJet.plane"><code class="docutils literal notranslate"><span class="pre">SlotJet.plane</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.SlotJet.B"><code class="docutils literal notranslate"><span class="pre">SlotJet.B</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.SlotJet.l"><code class="docutils literal notranslate"><span class="pre">SlotJet.l</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.SlotJet.digest"><code class="docutils literal notranslate"><span class="pre">SlotJet.digest</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.SlotJet.v"><code class="docutils literal notranslate"><span class="pre">SlotJet.v()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.OpenJet"><code class="docutils literal notranslate"><span class="pre">OpenJet</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.OpenJet.v0"><code class="docutils literal notranslate"><span class="pre">OpenJet.v0</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.OpenJet.origin"><code class="docutils literal notranslate"><span class="pre">OpenJet.origin</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.OpenJet.D"><code class="docutils literal notranslate"><span class="pre">OpenJet.D</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.OpenJet.l"><code class="docutils literal notranslate"><span class="pre">OpenJet.l</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.OpenJet.digest"><code class="docutils literal notranslate"><span class="pre">OpenJet.digest</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.OpenJet.v"><code class="docutils literal notranslate"><span class="pre">OpenJet.v()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.RotatingFlow"><code class="docutils literal notranslate"><span class="pre">RotatingFlow</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.RotatingFlow.rpm"><code class="docutils literal notranslate"><span class="pre">RotatingFlow.rpm</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.RotatingFlow.rps"><code class="docutils literal notranslate"><span class="pre">RotatingFlow.rps</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.RotatingFlow.v0"><code class="docutils literal notranslate"><span class="pre">RotatingFlow.v0</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.RotatingFlow.origin"><code class="docutils literal notranslate"><span class="pre">RotatingFlow.origin</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.RotatingFlow.digest"><code class="docutils literal notranslate"><span class="pre">RotatingFlow.digest</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.RotatingFlow.omega"><code class="docutils literal notranslate"><span class="pre">RotatingFlow.omega</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.RotatingFlow.v"><code class="docutils literal notranslate"><span class="pre">RotatingFlow.v()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.spiral_sphere"><code class="docutils literal notranslate"><span class="pre">spiral_sphere()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.GeneralFlowEnvironment"><code class="docutils literal notranslate"><span class="pre">GeneralFlowEnvironment</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.GeneralFlowEnvironment.ff"><code class="docutils literal notranslate"><span class="pre">GeneralFlowEnvironment.ff</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.GeneralFlowEnvironment.N"><code class="docutils literal notranslate"><span class="pre">GeneralFlowEnvironment.N</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.GeneralFlowEnvironment.Om"><code class="docutils literal notranslate"><span class="pre">GeneralFlowEnvironment.Om</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.GeneralFlowEnvironment.digest"><code class="docutils literal notranslate"><span class="pre">GeneralFlowEnvironment.digest</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.GeneralFlowEnvironment.idict"><code class="docutils literal notranslate"><span class="pre">GeneralFlowEnvironment.idict</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#acoular.environments.GeneralFlowEnvironment.get_interpolator"><code class="docutils literal notranslate"><span class="pre">GeneralFlowEnvironment.get_interpolator()</span></code></a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  
+  <div class="tocsection editthispage">
+    <a href="https://github.com/acoular/acoular/edit/master/docs/source/api_ref/generated/acoular.environments.rst">
+      <i class="fa-solid fa-pencil"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2026, Acoular Development Team.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
