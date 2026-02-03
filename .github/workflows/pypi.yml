@@ -15,10 +15,25 @@ on:
           - pypi
 
 jobs:
-  build_and_deploy:
+  build:
     uses: acoular/ci/.github/workflows/pypi.yml@main
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
     permissions:
       id-token: write
-    with:
-      index: ${{ inputs.index }}
-      deploy: true
+    environment:
+      name: ${{ inputs.index }}
+    steps:
+      - name: Check out a copy of the repository
+        uses: actions/checkout@v6
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
+      - name: Download artifacts
+        uses: actions/download-artifact@v7
+        with:
+          name: package-build
+          path: dist/
+      - name: Publish distribution
+        run: uv publish --index ${{ inputs.index }}
