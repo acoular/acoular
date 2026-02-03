@@ -23,6 +23,7 @@ jobs:
 
   pypi_publish:
     needs: pypi_build
+    runs-on: ubuntu-latest
     permissions:
       id-token: write
     environment:
