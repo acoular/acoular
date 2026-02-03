@@ -39,4 +39,4 @@ jobs:
           name: package-build
           path: dist/
       - name: Publish distribution
-        run: uv publish --index ${{ inputs.index }}
+        run: uv publish --index pypi
