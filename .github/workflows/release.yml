@@ -13,11 +13,30 @@ jobs:
 
   docs:
     uses: acoular/ci/.github/workflows/docs.yml@main
+    permissions:
+      contents: write
     with:
       deploy: true
 
-  pypi:
+  pypi_build:
     uses: acoular/ci/.github/workflows/pypi.yml@main
-    with:
-      deploy: true
-      index: pypi
+
+  pypi_publish:
+    needs: pypi_build
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    environment:
+      name: pypi
+    steps:
+      - name: Check out a copy of the repository
+        uses: actions/checkout@v6
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
+      - name: Download artifacts
+        uses: actions/download-artifact@v7
+        with:
+          name: package-build
+          path: dist/
+      - name: Publish distribution
+        run: uv publish --index pypi
