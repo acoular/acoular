@@ -1,12 +1,31 @@
 name: "Manual: Docs 📝 Build 🛠️ & Deploy"
 run-name: Build Docs 🛠️ & Publish to GitHub Pages 📝
 permissions:
-  contents: write
+  contents: read
 on:
   workflow_dispatch:
 
 jobs:
-  build_and_deploy:
+  build:
     uses: acoular/ci/.github/workflows/docs.yml@main
-    with:
-      deploy: true
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v7
+        with:
+          name: build-docs
+          path: ./docs/build/html
+      - name: Upload docs to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          publish_branch: gh-pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/build/html
+          cname: www.acoular.org
+          force_orphan: true # This allows you to make your publish branch with only the latest commit.
+          enable_jekyll: false
