@@ -1,4 +1,4 @@
-name: Check package installation & Links
+name: Cron 🕑: Check Installation & Links
 permissions:
   contents: read
 on:
