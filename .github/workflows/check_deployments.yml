@@ -6,6 +6,7 @@ on:
     branches: [ master ]
   workflow_dispatch:
 
+
 jobs:
   install:
     uses: acoular/ci/.github/workflows/install.yml@main
