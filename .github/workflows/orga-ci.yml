@@ -24,6 +24,9 @@ jobs:
   linting:
     uses: acoular/ci/.github/workflows/linting.yml@main
 
+  links:
+    uses: acoular/ci/.github/workflows/links.yml@main
+
   pypi:
     uses: acoular/ci/.github/workflows/pypi.yml@main
 
