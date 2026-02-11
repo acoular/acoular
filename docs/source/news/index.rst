@@ -88,6 +88,7 @@ Upcoming Release
         * add `three_sources_1d.h5`, `three_sources_2d.h5`, and `three_sources_3d.h5`
         * add functions `_create_three_sources`, `create_three_sources_1d`, `create_three_sources_2d`, and `create_three_sources_3d` to create the test data
         * change `create_three_sources` function to an alias of `create_three_sources_2d`
+        * adds example for :class:`~acoular.grids.MultiSector`
         * removal of deprecated classes `TimeInOut`, `FFTSpectra`, `TimeAverage`, `TimeCache`, `MaskedTimeInOut` and the `beamformer` attribute of frequency domain beamformers
 
 25.04
