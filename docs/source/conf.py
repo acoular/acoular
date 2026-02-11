@@ -212,10 +212,11 @@ plot_html_show_formats = False
 # intersphinx extension settings
 
 intersphinx_mapping = {
-    "python": ("https://docs.python.org/{.major}".format(sys.version_info), None),
-    "numpy": ("https://numpy.org/doc/stable", None),
-    "scipy": ("https://docs.scipy.org/doc/scipy/", None),
-    "matplotlib": ("https://matplotlib.org/stable", None),
+    "acoular": ("https://acoular.org", None),
     "h5py": ("https://docs.h5py.org/en/stable/", None),
+    "matplotlib": ("https://matplotlib.org/stable", None),
+    "numpy": ("https://numpy.org/doc/stable", None),
+    "python": ("https://docs.python.org/{.major}".format(sys.version_info), None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/", None),
     "traits": ("https://docs.enthought.com/traits", None)
 }

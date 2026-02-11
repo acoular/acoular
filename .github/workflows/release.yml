@@ -1,0 +1,59 @@
+name: Release CI ✴️
+permissions:
+  contents: read
+on:
+  release:
+    types: [ published ]
+
+jobs:
+  conda:
+    uses: acoular/ci/.github/workflows/conda.yml@main
+    with:
+      deploy: true
+
+  docs_build:
+    uses: acoular/ci/.github/workflows/docs.yml@main
+
+  docs_publish:
+    needs: docs_build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v7
+        with:
+          name: build-docs
+          path: ./docs/build/html
+      - name: Upload docs to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          publish_branch: gh-pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/build/html
+          cname: www.acoular.org
+          force_orphan: true # This allows you to make your publish branch with only the latest commit.
+          enable_jekyll: false
+
+  pypi_build:
+    uses: acoular/ci/.github/workflows/pypi.yml@main
+
+  pypi_publish:
+    needs: pypi_build
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    environment:
+      name: pypi
+    steps:
+      - name: Check out a copy of the repository
+        uses: actions/checkout@v6
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
+      - name: Download artifacts
+        uses: actions/download-artifact@v7
+        with:
+          name: package-build
+          path: dist/
+      - name: Publish distribution
+        run: uv publish --index pypi

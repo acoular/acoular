@@ -2,7 +2,7 @@
 
 [![PyPI](https://img.shields.io/pypi/pyversions/acoular.svg)](https://pypi.org/project/acoular)
 [![PyPI](https://img.shields.io/pypi/v/acoular.svg)](https://pypi.org/project/acoular)
-[![Actions status](https://github.com/acoular/acoular/actions/workflows/tests.yml/badge.svg)](https://github.com/acoular/acoular/actions)
+[![Actions status](https://github.com/acoular/acoular/actions/workflows/orga-ci.yml/badge.svg)](https://github.com/acoular/acoular/actions)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/3690794.svg)](https://zenodo.org/doi/10.5281/zenodo.3690794)
 
 # Acoular

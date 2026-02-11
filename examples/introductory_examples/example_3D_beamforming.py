@@ -115,7 +115,7 @@ fig.colorbar(im3, ax=ax3)
 ax0 = fig.add_subplot(2, 2, 4, projection='3d')
 ax0.set_title('Setup (mic and source positions)')
 ax0.scatter(m.pos[0], m.pos[1], m.pos[2])
-source_locs = np.array([p1.loc, p2.loc, p3.loc]).T
+source_locs = np.hstack((p1.loc, p2.loc, p3.loc))
 ax0.scatter(source_locs[0], source_locs[1], source_locs[2])
 ax0.set_xlabel('x')
 ax0.set_ylabel('y')

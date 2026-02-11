@@ -3,6 +3,9 @@ What's new
 
 Upcoming Release
 ------------------------
+
+26.01
+------------------------
     **New features**
         * adds :attr:`~acoular.tprocess.TimeConvolve.extend_signal` property to control the result length
 
@@ -18,10 +21,18 @@ Upcoming Release
         * Restructured the :py:mod:`acoular.demo` module to allow an easier execution of the Acoular demo.
         * use ``uv`` for faster CI
         * revised CI workflow for tests and package build & publishing
-        * use strict tuple unpacking in ``zip``  
+        * use strict tuple unpacking in ``zip``
+        * move ``Polygon`` class to :mod:`acoular.tools.utils`
+        * change :meth:`~acoular.tools.utils.Polygon.is_inside` method to prevent deprecation warning
 
     **Bugfixes**
+        * fix the computation of convective amplification in :class:`~acoular.sources.MovingPointSource`
         * fix a typo in :class:`~acoular.tprocess.SpatialInterpolator` that lead to a property being incorrectly accessed
+
+    **Tests**
+        * add tests for :class:`~acoular.tools.utils.Polygon` class
+        * increases test coverage for :mod:`acoular.tprocess`
+        * adds a test for the caching behaviour of the :attr:`~acoular.sources.TimeSamples.file` attribute
 
 25.10
 ------------------------

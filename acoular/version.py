@@ -5,5 +5,5 @@
 """Dedicated file to determine the package version without importing acoular."""
 
 __author__ = 'Acoular Development Team'
-__date__ = '23 October 2025'
-__version__ = '25.10'
+__date__ = '28 January 2026'
+__version__ = '26.01'

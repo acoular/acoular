@@ -32,7 +32,8 @@ dependencies = [
     "numba",
     "numpy",
     "scikit-learn",
-    "scipy >= 1.1.0, != 1.16.*", # scipy 1.16 has a bug in signal that causes issues with Acoular
+    "scipy >= 1.15, != 1.16.0; python_version == '3.10'",  # 1.16.0 has a bug in tf2sos
+    "scipy >= 1.16.1; python_version > '3.10'",
     "tables",
     "traits >= 6.0",
 ]
@@ -73,6 +74,7 @@ lint = ["ruff==0.14.2"]
 
 test = [
     "h5py",
+    "diff_cover",
     "pylops",
     "pytest",
     "pytest-mock",
@@ -113,7 +115,7 @@ include = ["acoular"]
 [[tool.uv.index]]
 name = "pypi"
 url = "https://pypi.org/simple/"
-publish-url = "https://pypi.org/legacy/"
+publish-url = "https://upload.pypi.org/legacy/"
 explicit = true
 
 [[tool.uv.index]]
@@ -125,7 +127,7 @@ explicit = true
 
 [tool.pytest.ini_options]
 testpaths = "tests"
-addopts = "-v --durations=10 --cov-report=html --cov-report=term-missing --cov-report markdown-append:$GITHUB_STEP_SUMMARY"
+addopts = "-v --durations=10 --cov-report=html --cov-report=term-missing"
 filterwarnings = [
     "error", # treat warnings as errors
     "ignore::pluggy.PluggyTeardownRaisedWarning", # raised internally by pytest-regtest
@@ -134,7 +136,6 @@ filterwarnings = [
     "ignore:module 'sre_constants' is deprecated:DeprecationWarning", # raised internally by traits
     "ignore:The TBB threading layer requires TBB version:numba.core.errors.NumbaWarning", # raised internally by numba
     "ignore:FNV hashing is not implemented in Numba:UserWarning", # raised internally by numba
-    "ignore:`scipy.special.sph_harm` is deprecated*:DeprecationWarning", # raised by SciPy
     # Suppress warnings about unclosed files in tables at the end of the tests
     "ignore:Closing remaining open file*:tables.exceptions.UnclosedFileWarning",
 ]

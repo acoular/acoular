@@ -40,7 +40,7 @@ import numba as nb
 import numpy as np
 import scipy.linalg as spla
 from numpy.fft import fft, ifft
-from scipy.special import sph_harm, spherical_jn, spherical_yn
+from scipy.special import sph_harm_y, spherical_jn, spherical_yn
 from traits.api import (
     Any,
     Bool,
@@ -258,13 +258,13 @@ def get_modes(lOrder, direction, mpos, sourceposition=None):  # noqa: N803
     --------
     :func:`get_radiation_angles` :
         Computes azimuth and elevation angles between microphones and the source.
-    :obj:`scipy.special.sph_harm` : Computes spherical harmonic values.
+    :obj:`scipy.special.sph_harm_y` : Computes spherical harmonic values.
 
     Notes
     -----
     - The azimuth (``azi``) and elevation (``ele``) angles between the microphones and the source
       are calculated using the :func:`get_radiation_angles` function.
-    - Spherical harmonics (``sph_harm``) are computed for each mode ``(l, m)``, where ``l`` is the
+    - Spherical harmonics (``sph_harm_y``) are computed for each mode ``(l, m)``, where ``l`` is the
       degree (ranging from ``0`` to ``lOrder``) and ``m`` is the order
       (ranging from ``-l`` to ``+l``).
     - For negative orders (`m < 0`), the conjugate of the spherical harmonic is computed and scaled
@@ -290,7 +290,7 @@ def get_modes(lOrder, direction, mpos, sourceposition=None):  # noqa: N803
     i = 0
     for lidx in range(lOrder + 1):
         for m in range(-lidx, lidx + 1):
-            modes[:, i] = sph_harm(m, lidx, azi, ele)
+            modes[:, i] = sph_harm_y(m, lidx, ele, azi)
             if m < 0:
                 modes[:, i] = modes[:, i].conj() * 1j
             i += 1
@@ -720,9 +720,17 @@ class PointSource(SamplesGenerator):
     #: Instance of the :class:`~acoular.signals.SignalGenerator` class defining the emitted signal.
     signal = Instance(SignalGenerator)
 
-    #: Coordinates ``(x, y, z)`` of the source in a left-oriented system. Default is
-    #: ``(0.0, 0.0, 1.0)``.
-    loc = Tuple((0.0, 0.0, 1.0))
+    #: Coordinates ``(x, y, z)`` of the source. Default is ``np.array([[0.0], [0.0], [1.0]])``.
+    loc = Property(CArray, desc='source location')
+
+    _loc = CArray(shape=(3, 1), value=np.array([[0.0], [0.0], [1.0]]), dtype=float)
+
+    def _get_loc(self):
+        return self._loc
+
+    def _set_loc(self, value):
+        value = np.asarray(value, dtype=float).reshape((3, 1))
+        self._loc = value
 
     #: Number of output channels, automatically set based on the :attr:`microphone geometry<mics>`.
     num_channels = Delegate('mics', 'num_mics')
@@ -731,7 +739,7 @@ class PointSource(SamplesGenerator):
     mics = Instance(MicGeom)
 
     def _validate_locations(self):
-        dist = self.env._r(np.array(self.loc).reshape((3, 1)), self.mics.pos)
+        dist = self.env._r(self.loc, self.mics.pos)
         if np.any(dist < 1e-7):
             warn('Source and microphone locations are identical.', Warning, stacklevel=2)
 
@@ -815,7 +823,7 @@ class PointSource(SamplesGenerator):
         signal = self.signal.usignal(self.up)
         out = np.empty((num, self.num_channels))
         # distances
-        rm = self.env._r(np.array(self.loc).reshape((3, 1)), self.mics.pos).reshape(1, -1)
+        rm = self.env._r(self.loc, self.mics.pos).reshape(1, -1)
         # emission time relative to start_t (in samples) for first sample
         ind = (-rm / self.env.c - self.start_t + self.start) * self.sample_freq * self.up
 
@@ -966,7 +974,7 @@ class SphericalHarmonicSource(PointSource):
 
         signal = self.signal.usignal(self.up)
         # emission time relative to start_t (in samples) for first sample
-        rm = self.env._r(np.array(self.loc).reshape((3, 1)), self.mics.pos)
+        rm = self.env._r(self.loc, self.mics.pos)
         ind = (-rm / self.env.c - self.start_t + self.start) * self.sample_freq + np.pi / 30
         i = 0
         n = self.num_samples
@@ -1131,12 +1139,12 @@ class MovingPointSource(PointSource):
             # Newton-Rhapson iteration
             while abs(eps).max() > epslim and j < 100:
                 loc = np.array(tr.location(te.flatten())).reshape((3, num_mics, -1))
-                rm = loc - mpos  # distance vectors to microphones
-                rm = np.sqrt((rm * rm).sum(0))  # absolute distance
-                loc /= np.sqrt((loc * loc).sum(0))  # distance unit vector
                 der = np.array(tr.location(te.flatten(), der=1)).reshape((3, num_mics, -1))
-                Mr = (der * loc).sum(0) / c0  # radial Mach number
-                eps[:] = (te + rm / c0 - t) / (1 + Mr)  # discrepancy in time
+                dv = mpos - loc  # distance vectors from source to microphones
+                rm = np.sqrt((dv * dv).sum(0))  # absolute distance
+                dv /= rm  # just directions from source to microphones
+                Mr = (der * dv).sum(0) / c0  # radial Mach number
+                eps[:] = (te + rm / c0 - t) / (1 - Mr)  # discrepancy in time
                 te -= eps
                 j += 1  # iteration count
             t += num / self.sample_freq
@@ -1247,7 +1255,7 @@ class PointSourceDipole(PointSource):
 
         mpos = self.mics.pos
         # position of the dipole as (3,1) vector
-        loc = np.array(self.loc, dtype=float).reshape((3, 1))
+        loc = self.loc
         # direction vector from tuple
         direc = np.array(self.direction, dtype=float) * 1e-5
         direc_mag = np.sqrt(np.dot(direc, direc))
@@ -1583,7 +1591,7 @@ class LineSource(PointSource):
         out = np.zeros((num, self.num_channels))
 
         # distance from line start position to microphones
-        loc = np.array(self.loc, dtype=float).reshape((3, 1))
+        loc = self.loc
 
         # distances from monopoles in the line to microphones
         rms = np.empty((self.num_channels, self.num_sources))
@@ -2275,6 +2283,18 @@ class PointSourceConvolve(PointSource):
     #: based on microphone geometry, input signal, source location, and kernel. (read-only)
     digest = Property(depends_on=['mics.digest', 'signal.digest', 'loc', 'kernel'])
 
+    #: Controls whether to extend the output to include the full convolution result.
+    #:
+    #: - If ``False`` (default): Output length is :math:`\\max(L, M)`, where :math:`L` is the
+    #:   kernel length and :math:`M` is the signal length. This mode keeps the output length
+    #:   equal to the longest input (different from NumPy's ``mode='same'``, since it does not
+    #:   pad the output).
+    #: - If ``True``: Output length is :math:`L + M - 1`, returning the full convolution at
+    #:   each overlap point (similar to NumPy's ``mode='full'``).
+    #:
+    #: Default is ``False``.
+    extend_signal = Bool(False)
+
     @cached_property
     def _get_digest(self):
         return digest(self)
@@ -2316,5 +2336,6 @@ class PointSourceConvolve(PointSource):
         time_convolve = TimeConvolve(
             source=source,
             kernel=self.kernel,
+            extend_signal=self.extend_signal,
         )
         yield from time_convolve.result(num)
