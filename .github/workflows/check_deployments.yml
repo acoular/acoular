@@ -1,4 +1,4 @@
-name: "Cron 🕑: Check Installation & Links"
+name: "Cron 🕑: Check Installation"
 permissions:
   contents: read
 on:
