@@ -154,6 +154,9 @@ class MicGeom(HasStrictTraits):
     #: Default is ``[]``.
     invalid_channels = List(int)
 
+    #: Array of indices of valid microphones, i.e., those not listed in :attr:`invalid_channels`.
+    _valid_channels = Property(depends_on=['invalid_channels'], desc='list of valid channels')
+
     #: Number of valid microphones in the array. (read-only)
     num_mics = Property(depends_on=['pos'])
 
@@ -172,11 +175,14 @@ class MicGeom(HasStrictTraits):
         return digest(self)
 
     @cached_property
+    def _get__valid_channels(self):
+        return [i for i in range(self.pos_total.shape[-1]) if i not in self.invalid_channels]
+
+    @cached_property
     def _get_pos(self):
         if len(self.invalid_channels) == 0:
             return self.pos_total
-        allr = [i for i in range(self.pos_total.shape[-1]) if i not in self.invalid_channels]
-        return self.pos_total[:, np.array(allr)]
+        return self.pos_total[:, self._valid_channels]
 
     @cached_property
     def _get_num_mics(self):
