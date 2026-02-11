@@ -126,3 +126,53 @@ def test_filecache_created(case, file_cache_options):
         ac.config.global_caching = 'none'
         result_uncache = calc(obj2)
         np.testing.assert_allclose(result, result_uncache)
+
+
+def test_timesamples_file_change(tmp_path):
+    """Test that changing the file attribute of a TimeSamples object works correctly.
+
+    This test verifies the fix for issue #474, where changing the file attribute
+    of a TimeSamples object that already had a file set would throw a KeyError.
+    The bug was that _decrease_file_reference_counter expected a Path object but
+    received a string when the file reference counter was being decreased for a
+    cached object whose source's file changed.
+
+    Parameters
+    ----------
+    tmp_path : pytest.fixture
+        Temporary directory for cache files (built-in pytest fixture).
+    """
+    # Configure caching
+    ac.config.cache_dir = str(tmp_path)
+    ac.config.global_caching = 'all'
+
+    # Generate some random time data
+    file1, file2 = tmp_path / 'timesamples1.h5', tmp_path / 'timesamples2.h5'
+    ts1 = ac.TimeSamples(data=np.random.randn(1024, 4), sample_freq=51200)
+    ac.WriteH5(source=ts1, file=file1).save()
+    ts2 = ac.TimeSamples(data=np.random.randn(1024, 4), sample_freq=51200)
+    ac.WriteH5(source=ts2, file=file2).save()
+
+    ts = ac.TimeSamples(file=file1)
+    ps = ac.PowerSpectra(source=ts, cached=True, block_size=128)
+
+    # Trigger calculation to create initial cache file
+    _ = ps.csm[:]
+
+    # Verify cache file was created
+    assert ps.h5f is not None
+    first_cache_file = Path(ps.h5f.filename)
+    assert first_cache_file.exists()
+    ts.file = file2
+
+    # Trigger calculation again with the new file
+    # This should open a new cache file and properly decrease the reference counter for the old one
+    _ = ps.csm[:]
+
+    # Verify that a new cache file was created (different basename due to different source digest)
+    assert ps.h5f is not None
+    second_cache_file = Path(ps.h5f.filename)
+    assert second_cache_file.exists()
+
+    # The cache files should be different because the source digest changed
+    assert first_cache_file != second_cache_file, 'Cache file should have changed when source file changed'

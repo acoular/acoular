@@ -1,36 +1,39 @@
-name: PyPI 🐍 Build 🛠️ & Publish 📦
-
-on: 
-  workflow_dispatch
+name: "Manual: PyPI 📦 Build 🛠️ & Deploy"
+run-name: Build Pkg 🛠️ & Publish to ${{ case(inputs.index == 'pypi', 'PyPI', 'TestPyPI') }} 📦
+permissions:
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      index:
+        description: 'The package index to publish to:'
+        required: true
+        default: 'testpypi'
+        type: choice
+        options:
+          - testpypi
+          - pypi
 
 jobs:
-  build_and_publish_distribution:
-    name: Build and publish distribution 📦
+  build:
+    uses: acoular/ci/.github/workflows/pypi.yml@main
+
+  deploy:
+    needs: build
     runs-on: ubuntu-latest
-    environment:
-      name: pypi
     permissions:
       id-token: write
-      contents: read     
+    environment:
+      name: ${{ inputs.index }}
     steps:
-    - name: Check out a copy of the repository
-      uses: actions/checkout@v5
-    - name: Set up uv
-      uses: astral-sh/setup-uv@v7      
-    - name: Build a binary wheel and a source tarball
-      run: uv build
-    - name: Run smoke tests (wheel)
-      uses: ./.github/actions/smoke-tests
-      with:
-        command: uv run --isolated --no-project --with dist/*.whl
-    - name: Run smoke tests (sdist)
-      uses: ./.github/actions/smoke-tests
-      with:
-        command: uv run --isolated --no-project --with dist/*.tar.gz        
-    - name: Store the distribution packages 
-      uses: actions/upload-artifact@v4
-      with:
-        name: python-package-distributions
-        path: dist/        
-    - name: Publish distribution to PyPI
-      run: uv publish --index pypi
+      - name: Check out a copy of the repository
+        uses: actions/checkout@v6
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
+      - name: Download artifacts
+        uses: actions/download-artifact@v7
+        with:
+          name: package-build
+          path: dist/
+      - name: Publish distribution
+        run: uv publish --index ${{ inputs.index }}
