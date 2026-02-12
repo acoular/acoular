@@ -3,6 +3,8 @@ What's new
 
 Upcoming Release
 ------------------------
+    **Tests**
+        * increases test coverage for :func:`~acoular.fbeamform.integrate` function
 
 26.01
 ------------------------
@@ -28,9 +30,6 @@ Upcoming Release
     **Bugfixes**
         * fix the computation of convective amplification in :class:`~acoular.sources.MovingPointSource`
         * fix a typo in :class:`~acoular.tprocess.SpatialInterpolator` that lead to a property being incorrectly accessed
-    
-    **Tests**
-        * increases test coverage for :func:`~acoular.fbeamform.integrate` function
 
     **Tests**
         * add tests for :class:`~acoular.tools.utils.Polygon` class
