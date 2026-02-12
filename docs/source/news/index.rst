@@ -3,6 +3,8 @@ What's new
 
 Upcoming Release
 ------------------------
+    **Tests**
+        * increases test coverage for :func:`~acoular.fbeamform.integrate` function
 
 26.01
 ------------------------

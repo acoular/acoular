@@ -84,14 +84,38 @@ def test_sector_integration_functional(setup_beamformer_integrate, sector):
         Beamformer and grid objects (fixture)
     sector : numpy.ndarray
         Sector indices (non-empty cases from Sectors)
+
+    Test Cases
+    ----------
+    1. Single-dimensional integration:
+       - Tests ac.integrate() on single frequency data
+       - Verifies output shape is ()
+       - Confirms integrated value equals maximum beamformer result
+    2. Multi-dimensional integration:
+       - Tests ac.integrate() on multiple frequency bands
+       - Verifies output shape matches number of frequencies
+       - Validates integration by comparing against expected sum of
+         sector values for each frequency band
     """
     bf, grid = setup_beamformer_integrate
     skip_or_fail(grid, sector)
+
+    # One-dimensional data test
     f = bf.freq_data.frequencies
     bf_res = bf.synthetic(f)
     integration_res = ac.integrate(data=bf_res, sector=sector, grid=grid)
     assert integration_res.shape == ()
     assert integration_res == bf_res.max()
+
+    # Multidimensional data test
+    nfreqs = 3
+    multi_freq_data = np.random.rand(nfreqs, grid.size)
+    result = ac.integrate(data=multi_freq_data, sector=sector, grid=grid)
+    assert result.shape == (nfreqs,)
+    indices = grid.subdomain(sector) if isinstance(sector, ac.Sector) else grid.indices(*sector)
+    for i in range(nfreqs):
+        expected = multi_freq_data[i].reshape(grid.shape)[indices].sum()
+        assert np.isclose(result[i], expected)
 
 
 @parametrize_with_cases(
