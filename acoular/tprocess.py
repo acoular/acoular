@@ -131,28 +131,12 @@ class MaskedTimeOut(TimeOut):
     #: (read-only)
     num_samples = Property(depends_on=['start', 'stop', 'source.num_samples'])
 
-    #: The name of the cache file (without extension). It serves as an internal reference for data
-    #: caching and tracking processed files. (automatically generated)
-    basename = Property(depends_on=['source.digest'])
-
     #: A unique identifier for the object, based on its properties. (read-only)
     digest = Property(depends_on=['source.digest', 'start', 'stop', 'invalid_channels'])
 
     @cached_property
     def _get_digest(self):
         return digest(self)
-
-    @cached_property
-    def _get_basename(self):
-        warn(
-            (
-                f'The basename attribute of a {self.__class__.__name__} object is deprecated'
-                ' and will be removed in Acoular 26.01!'
-            ),
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return find_basename(self.source, alternative_basename=self.source.__class__.__name__ + self.source.digest)
 
     @cached_property
     def _get_channels(self):
@@ -2334,10 +2318,6 @@ class WriteWAV(TimeOut):
     #: generated from the source.
     file = File(filter=['*.wav'])
 
-    #: The name of the cache file (without extension). It serves as an internal reference for data
-    #: caching and tracking processed files. (automatically generated)
-    basename = Property(depends_on=['digest'])
-
     #: The list of channels to save. Can only contain one or two channels.
     channels = List(int)
 
@@ -2355,18 +2335,6 @@ class WriteWAV(TimeOut):
     @cached_property
     def _get_digest(self):
         return digest(self)
-
-    @cached_property
-    def _get_basename(self):
-        warn(
-            (
-                f'The basename attribute of a {self.__class__.__name__} object is deprecated'
-                ' and will be removed in Acoular 26.01!'
-            ),
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return find_basename(self.source)
 
     def _type_info(self):
         dtype = np.dtype(self.encoding)
@@ -2436,7 +2404,7 @@ class WriteWAV(TimeOut):
             warn(msg, Warning, stacklevel=1)
         dtype, _, dmax, sw = self._type_info()
         if self.file == '':
-            name = self.basename
+            name = find_basename(self.source)
             for nr in self.channels:
                 name += f'{nr:d}'
             name += '.wav'
