@@ -18,7 +18,7 @@ def pytest_sessionfinish(session):  # noqa ARG001
     This hook is called after the test session is finished and is used to get rid of the
     annoying UnclosedFile warnings from pytables that cannot be suppressed by filterwarnings.
     """
-    tb.file._open_files.close_all()
+    tb.file._open_files.close_all()  # noqa: SLF001
 
 
 @fixture(scope='session')
