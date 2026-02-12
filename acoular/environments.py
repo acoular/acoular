@@ -575,30 +575,6 @@ class RotatingFlow(FlowField):
            [ 0.        ,  0.        ,  0.        ]])
     """
 
-    #: Revolutions per minute (RPM). Default is ``0.0``.
-    #: Positive values indicate clockwise rotation of the flow.
-    #: This is contrary to the usual definition of the direction of rotation.
-    #: Deprecated! Please use the differently defined :attr:`rps` attribute instead.
-    rpm = Property(transient=True)
-
-    def _get_rpm(self):
-        warn(
-            'Deprecated use of "rpm" trait (will be removed in version 26.01). \
-            Please use the "rps" trait instead.',
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return -60 * self.rps
-
-    def _set_rpm(self, rpm):
-        warn(
-            'Deprecated use of "rpm" trait (will be removed in version 26.01). \
-            Please use the "rps" trait instead (divide rpm value by -60).',
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        self.rps = -rpm / 60
-
     #: Rotational speed in revolutions per second. Negative values indicate clockwise
     #: rigid-body-like rotation of the flow. Default is ``0.0``.
     rps = Float(0.0)
