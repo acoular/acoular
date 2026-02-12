@@ -191,44 +191,58 @@ class Environment(HasStrictTraits):
     def _get_digest(self):
         return digest(self)
 
-    def _r(self, gpos, mpos=0.0):
-        # Compute the distance between two sets of points.
-        #
-        # The distance for each of the `N` points in ``gpos`` in 3-D space to each of the `M` points
-        # in ``mpos``.
-        #
-        # See Also
-        # --------
-        # :func:`dist_mat`: Compute distance matrix.
-        #
-        # Parameters
-        # ----------
-        # gpos : :class:`numpy.ndarray` of :class:`floats<float>`
-        #     The coordinates of the first set of points. Should be of shape `(N, 3)`,
-        #     where `N` is the number of points.
-        #
-        # mpos : :class:`float` or :class:`numpy.ndarray` of :class:`floats<float>`, optional
-        #     The coordinates of the second set of points. If a scalar is provided,
-        #     it is treated as the origin ``(0, 0, 0)``. If an array is given,
-        #     it should have shape `(M, 3)`, where `M` is the number of points.
-        #
-        # Returns
-        # -------
-        # rm : :class:`numpy.ndarray` of :class:`floats<float>`
-        #     The distances between each point in ``gpos`` and ``mpos``.
-        #     The result is an array of
-        #
-        #         - shape `(N,)` if ``mpos`` is a single point, or
-        #         - shape `(N, M)` if ``mpos`` consists of multiple points.
+    def apparent_r(self, gpos, mpos=0.0):
+        """Compute the distances between two sets of points.
+
+        The distance for each of the `N` points in ``gpos`` in 3-D space to each of the `M` points
+        in ``mpos``.
+
+        See Also
+        --------
+        :func:`dist_mat`: Compute distance matrix.
+
+        Parameters
+        ----------
+        gpos : :class:`numpy.ndarray` of :class:`floats<float>`
+            The coordinates of the first set of points. Should be of shape `(N, 3)`, where `N` is
+            the number of points.
+
+        mpos : :class:`float` or :class:`numpy.ndarray` of :class:`floats<float>`, optional
+            The coordinates of the second set of points. If a scalar is provided, it is treated as
+            the origin ``(0, 0, 0)``. If an array is given, it should have shape `(M, 3)`, where `M`
+            is the number of points.
+
+        Returns
+        -------
+        rm : :class:`numpy.ndarray` of :class:`floats<float>`
+            The distances between each point in ``gpos`` and ``mpos``.
+            The result is an array of
+
+                - shape `(N,)` if ``mpos`` is a single point, or
+                - shape `(N, M)` if ``mpos`` consists of multiple points.
+        """
         if np.isscalar(mpos):
             mpos = np.array((0, 0, 0), dtype=np.float64)[:, np.newaxis]
         rm = dist_mat(np.ascontiguousarray(gpos), np.ascontiguousarray(mpos))
-        #        mpos = mpos[:, np.newaxis, :]
-        #        rmv = gpos[:, :, np.newaxis]-mpos
-        #        rm = np.sum(rmv*rmv, 0)**0.5
+
         if rm.shape[1] == 1:
             rm = rm[:, 0]
         return rm
+
+    def _r(self, gpos, mpos=0.0):
+        """Compute the apparent distances between two sets of points.
+
+        .. deprecated:: 26.04
+            This method has been renamed to :meth:`apparent_r` and will be removed in version 27.01.
+            Please use :meth:`apparent_r` instead.
+        """
+        warn(
+            "Deprecated use of '_r' method (will be removed in version 27.01). "
+            "Please use the 'apparent_r' method instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.apparent_r(gpos, mpos)
 
 
 class UniformFlowEnvironment(Environment):
@@ -265,31 +279,38 @@ class UniformFlowEnvironment(Environment):
     def _get_digest(self):
         return digest(self)
 
-    def _r(self, gpos, mpos=0.0):
-        # Compute the distance between two sets of points.
-        #
-        # This method calculates the distance between points ``gpos`` and ``mpos`` in a 3-D space,
-        # with an additional adjustment based on a mass term and force vector. The result is
-        # affected by the angle between the direction of movement and the force vector.
-        #
-        # Parameters
-        # ----------
-        # gpos : :class:`numpy.ndarray` of :class:`floats<float>`
-        #     The 3-D coordinates of the first set of points, shape `(N, 3)`.
-        #
-        # mpos : :class:`float` or :class:`numpy.ndarray` of :class:`floats<float>`, optional
-        #     The 3-D coordinates of the second set of points. If a scalar is provided, it is
-        #     treated as the origin ``(0, 0, 0)``. If an array is given, it should have shape
-        #     `(M, 3)`, where `M` is the number of points.
-        #
-        # Returns
-        # -------
-        # rm : :class:`numpy.ndarray` of :class:`floats<float>`
-        #     The distances between each point in ``gpos`` and ``mpos``.
-        #     The result is an array of
-        #
-        #         - shape `(N,)` if ``mpos`` is a single point, or
-        #         - shape `(N, M)` if ``mpos`` consists of multiple points.
+    def apparent_r(self, gpos, mpos=0.0):
+        """Compute the apparent distances between two sets of points.
+
+        This method calculates the distance between points ``gpos`` and ``mpos`` in a 3-D space,
+        with an additional adjustment based on a mass term and force vector. The result is affected
+        by the angle between the direction of movement and the force vector.
+
+        Parameters
+        ----------
+        gpos : :class:`numpy.ndarray` of :class:`floats<float>`
+            The 3-D coordinates of the first set of points, shape `(N, 3)`.
+
+        mpos : :class:`float` or :class:`numpy.ndarray` of :class:`floats<float>`, optional
+            The 3-D coordinates of the second set of points. If a scalar is provided, it is
+            treated as the origin ``(0, 0, 0)``. If an array is given, it should have shape
+            `(M, 3)`, where `M` is the number of points.
+
+        Returns
+        -------
+        rm : :class:`numpy.ndarray` of :class:`floats<float>`
+            The distances between each point in ``gpos`` and ``mpos``.
+            The result is an array of
+
+                - shape `(N,)` if ``mpos`` is a single point, or
+                - shape `(N, M)` if ``mpos`` consists of multiple points.
+
+        Notes
+        -----
+        The apparent distance accounts for the convection of sound by the uniform flow. The
+        adjustment depends on the Mach number :attr:`ma` and the angle between the propagation path
+        and the flow direction :attr:`fdv`.
+        """
         if np.isscalar(mpos):
             mpos = np.array((0, 0, 0), dtype=np.float32)[:, np.newaxis]
         fdv = self.fdv / np.sqrt((self.fdv * self.fdv).sum())
@@ -301,6 +322,21 @@ class UniformFlowEnvironment(Environment):
         if rm.shape[1] == 1:
             rm = rm[:, 0]
         return rm
+
+    def _r(self, gpos, mpos=0.0):
+        """Compute the apparent distances between two sets of points.
+
+        .. deprecated:: 26.04
+            This method has been renamed to :meth:`apparent_r` and will be removed in version 27.01.
+            Please use :meth:`apparent_r` instead.
+        """
+        warn(
+            "Deprecated use of '_r' method (will be removed in version 27.01). "
+            "Please use the 'apparent_r' method instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.apparent_r(gpos, mpos)
 
 
 class FlowField(ABCHasStrictTraits):
@@ -575,30 +611,6 @@ class RotatingFlow(FlowField):
            [ 0.        ,  0.        ,  0.        ]])
     """
 
-    #: Revolutions per minute (RPM). Default is ``0.0``.
-    #: Positive values indicate clockwise rotation of the flow.
-    #: This is contrary to the usual definition of the direction of rotation.
-    #: Deprecated! Please use the differently defined :attr:`rps` attribute instead.
-    rpm = Property(transient=True)
-
-    def _get_rpm(self):
-        warn(
-            'Deprecated use of "rpm" trait (will be removed in version 26.01). \
-            Please use the "rps" trait instead.',
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return -60 * self.rps
-
-    def _set_rpm(self, rpm):
-        warn(
-            'Deprecated use of "rpm" trait (will be removed in version 26.01). \
-            Please use the "rps" trait instead (divide rpm value by -60).',
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        self.rps = -rpm / 60
-
     #: Rotational speed in revolutions per second. Negative values indicate clockwise
     #: rigid-body-like rotation of the flow. Default is ``0.0``.
     rps = Float(0.0)
@@ -820,7 +832,39 @@ class GeneralFlowEnvironment(Environment):
     def _get_digest(self):
         return digest(self)
 
-    def _r(self, gpos, mpos=0.0):
+    def apparent_r(self, gpos, mpos=0.0):
+        """
+        Compute the apparent distance (sound travel path length) between two sets of points.
+
+        This method calculates the apparent distance (multiplied by the speed of sound) between
+        points ``gpos`` and ``mpos`` in a 3-D space with a generic flow field. The calculation
+        uses a ray-tracing approach to account for non-uniform flow effects on sound propagation.
+
+        Parameters
+        ----------
+        gpos : :class:`numpy.ndarray` of :class:`floats<float>`
+            The coordinates of the first set of points (e.g., grid points). Should be of shape
+            `(3, N)`, where `N` is the number of points and each row represents x, y, z coordinates.
+
+        mpos : :class:`float` or :class:`numpy.ndarray` of :class:`floats<float>`, optional
+            The coordinates of the second set of points (e.g., microphone positions). If a scalar
+            is provided, it is treated as the origin ``(0, 0, 0)``. If an array is given, it should
+            have shape `(3, M)`, where `M` is the number of points. Default is ``0.0``.
+
+        Returns
+        -------
+        :class:`numpy.ndarray` of :class:`floats<float>`
+            The apparent distances (sound travel path lengths) between each point in ``gpos`` and
+            ``mpos``. The result is an array of:
+
+                - shape `(N,)` if ``mpos`` is a single point, or
+                - shape `(N, M)` if ``mpos`` consists of multiple points.
+
+        Notes
+        -----
+        This method uses ray-tracing and interpolation to compute the apparent distances in a
+        non-uniform flow field. The results are scaled by the speed of sound :attr:`c`.
+        """
         c = self.c
 
         if np.isscalar(mpos):
@@ -843,6 +887,21 @@ class GeneralFlowEnvironment(Environment):
         if gt.shape[1] == 1:
             gt = gt[:, 0]
         return c * gt  # return distance along ray
+
+    def _r(self, gpos, mpos=0.0):
+        """Compute the apparent distances between two sets of points.
+
+        .. deprecated:: 26.04
+            This method has been renamed to :meth:`apparent_r` and will be removed in version 27.01.
+            Please use :meth:`apparent_r` instead.
+        """
+        warn(
+            "Deprecated use of '_r' method (will be removed in version 27.01). "
+            "Please use the 'apparent_r' method instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.apparent_r(gpos, mpos)
 
     def get_interpolator(self, roi, x0):
         """

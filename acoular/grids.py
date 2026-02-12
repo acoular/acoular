@@ -383,31 +383,6 @@ class RectGrid(Grid):
         # (-1.0, 1.0, -5.0, 5.0)
         return (self.x_min, self.x_max, self.y_min, self.y_max)
 
-    def extend(self):
-        """
-        Return the grid's extension in :obj:`matplotlib.pyplot.imshow` compatible form.
-
-        Returns
-        -------
-        :class:`tuple` of :class:`floats<float>`
-            (:attr:`x_min`, :attr:`x_max`, :attr:`y_min`, :attr:`y_max`) representing the grid's
-            extent.
-
-        Notes
-        -----
-        This method is deprecated. Use the :attr:`extent` property instead.
-        """
-        import warnings
-
-        msg = ' '.join(
-            [
-                "Deprecated use of 'extend' method (will be removed in version 26.04).",
-                "Please use the 'extent' trait instead.",
-            ]
-        )
-        warnings.warn(msg, DeprecationWarning, stacklevel=2)
-        return self.extent
-
     def index(self, x, y):
         """
         Find the indices of a grid point near a given coordinate.
