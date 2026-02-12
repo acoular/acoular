@@ -3,6 +3,9 @@ What's new
 
 Upcoming Release
 ------------------------
+   **Internal**
+       * Renamed :attr:`~acoular.environments.Environment._r` to :attr:`~acoular.environments.Environment.apparent_r`
+       * Removed deprecated traits :attr:`~acoular.environments.RotatingFlow.rpm`, :attr:`~acoular.grids.Grid.extend`, and :attr:`~acoular.tprocess.MaskedTimeOut.basename`.
 
 26.01
 ------------------------
