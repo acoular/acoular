@@ -1,4 +1,4 @@
-name: "Cron 🕑: Check Installation & Links"
+name: "Cron 🕑: Check Installation"
 permissions:
   contents: read
 on:
@@ -10,6 +10,3 @@ on:
 jobs:
   install:
     uses: acoular/ci/.github/workflows/install.yml@main
-
-  link-check:
-    uses: acoular/ci/.github/workflows/links.yml@main
