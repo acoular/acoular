@@ -67,6 +67,7 @@ Upcoming Release
         * generalizes data import in the airfoil examples using the :func:`~acoular.tools.helpers.get_data_file` helper function
         * add a new example for grids
         * changes all appearances of :meth:`~acoular.grids.RectGrid.extend` to :attr:`~acoular.grids.RectGrid.extent`
+        * adds example for sectors
         * introduces a deprecation policy in the contributing guidelines
         * adds new docstrings to submodule :mod:`acoular.tprocess`
         * adds new docstrings to submodule :mod:`acoular.h5cache` and :mod:`acoular.h5files`
