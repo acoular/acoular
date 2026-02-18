@@ -182,11 +182,13 @@ spl_sector = np.where(spl_sector > 0, spl_sector, 0)  # Keep positive entries on
 
 plt.figure(figsize=(8, 5))
 plt.semilogx(freqs, spl_sector)
+plt.xticks([4000, 5000, 6300, 8000, 10000], labels=['4', '5', '6.3', '8', '10'])
 
-plt.xlabel('Frequency / Hz')
+plt.xlabel('Frequency / kHz')
 plt.ylabel('$L_p$ / dB')
 plt.title('Integrated spectrum over sector')
-plt.grid()
+plt.grid(which='major', axis='x')
+plt.minorticks_off()
 plt.show()
 
 
@@ -205,10 +207,13 @@ plt.figure(figsize=(8, 5))
 plt.fill_between(f_borders, spl_bars)
 
 plt.xscale('log')
-plt.xlabel('Frequency / Hz')
+plt.xticks(f_center, labels=['4', '5', '6.3', '8'])
+
+plt.xlabel('Frequency / kHz')
 plt.ylabel('$L_p$ / dB')
 plt.title('Integrated spectrum over sector (third octave)')
-plt.grid()
+plt.grid(which='major', axis='x')
+plt.minorticks_off()
 plt.show()
 
 
