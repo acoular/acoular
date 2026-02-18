@@ -97,11 +97,11 @@ sector = ac.RectSector(x_min=-0.27, x_max=-0.1, y_min=-0.2, y_max=0.2)
 # sound field is calculated). This helps us see exactly what region we are integrating over later.
 
 plt.scatter(*grid.pos[0:2], c='lightgray', s=10, label='Grid Points')
-# Plot airfoil's edges as dashed lines (we is they are at x = -0.3 and x = -0.25)
+# Plot airfoil's edges as dashed lines (we assume they are at x = -0.3 and x = -0.25)
 plt.vlines([-0.33, -0.27], ymin=-0.3, ymax=0.3, linestyles='--', label='Airfoil edges')
 # Plot sector as a filled rectangle
 plt.fill_between([sector.x_min, sector.x_max], sector.y_min, sector.y_max, alpha=0.5, label='Sector')
-plt.imshow(spl_pm.T, vmin=0, origin='lower', extent=grid.extent, interpolation='bicubic')
+plt.imshow(spl_pm.T, vmin=0, origin='lower', extent=grid.extent)
 
 cbar = plt.colorbar()
 cbar.set_label('$L_p$ / dB')
@@ -143,7 +143,7 @@ mask = sector.contains(grid.pos)
 print('x: {}\ny: {}'.format(*grid.pos[:2, mask]))
 
 # %%
-# Now only the three points strictly inside the sector remain: ``(-0.2, -0.1)``,
+# Now, only three points are strictly inside the sector: ``(-0.2, -0.1)``,
 # ``(-0.2, 0.0)``, and ``(-0.2, 0.1)``.
 #
 # For sectors that contain no grid points (neither inside nor on the borders), the
@@ -162,8 +162,8 @@ print('x: {}\ny: {}'.format(*grid.pos[:2, mask]))
 #
 # Now for the main event: integrating the beamforming result over our sector. This step gives
 # us the total sound pressure level (SPL) coming from just our region of interest. We can use
-# the beamformer's :meth:`~acoular.fbeamform.BeamformerBase.integrate` method or Acoular's
-# :func:`~acoular.fbeamform.L_p` function to get the sector's SPL.
+# the beamformer's :meth:`~acoular.fbeamform.BeamformerBase.integrate` method and Acoular's
+# :func:`~acoular.fbeamform.L_p` function to get SPL associated with the sector.
 #
 # Calculation the result for all frequencies can be computationally expensive and highly
 # inefficient, especially for large datasets. Instead of using all FFT frequencies provided by the
