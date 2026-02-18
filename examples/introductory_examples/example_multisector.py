@@ -64,10 +64,10 @@ freqs = f.fftfreq()
 circsector = ac.CircSector(x=-0.4, y=0.0, r=0.07)
 
 # %%
-# Let us see how the two sectros look on the source map.
+# Let us see how the two sectors look on the source map.
 
 plt.figure(figsize=(8, 5))
-plt.imshow(spl_map.T, origin='lower', vmin=spl_map.max() - 10, extent=grid.extent, interpolation='bicubic')
+plt.imshow(spl_map.T, origin='lower', vmin=spl_map.max() - 10, extent=grid.extent)
 plt.fill_between([sector.x_min, sector.x_max], sector.y_min, sector.y_max, alpha=0.4, label='RectSector')
 circ = plt.Circle((circsector.x, circsector.y), circsector.r, color='orange', alpha=0.4, label='CircSector')
 plt.gca().add_patch(circ)
@@ -84,10 +84,10 @@ plt.show()
 multisector = ac.MultiSector(sectors=[sector, circsector])
 
 # %%
-# Note that this object does **not** have the attributes of the:class:`~acoular.grids.SingleSector`
+# Note that this object does **not** have the attributes of the :class:`~acoular.grids.SingleSector`
 # class: The :attr:`~acoular.grids.SingleSector.include_border`,
 # :attr:`~acoular.grids.SingleSector.abs_tol`, and
-# :attr:`~acoular.grids.SingleSector.default_nearest` attrubutes are **not** part of the
+# :attr:`~acoular.grids.SingleSector.default_nearest` attributes are **not** part of the
 # :class:`~acoular.grids.MultiSector` class.
 
 # %%
@@ -95,7 +95,7 @@ multisector = ac.MultiSector(sectors=[sector, circsector])
 # Integrate Over the MultiSector
 # ==============================
 #
-# Here, as in the sector example, we interagte once over all FFT frequencies and then also look at
+# Here, as in the sector example, we integrate once over all FFT frequencies and then also look at
 # the third-octova spectrum.
 
 
