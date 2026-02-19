@@ -2176,22 +2176,20 @@ class SourceMixer(SamplesGenerator):
         # check whether all sources fit together
         self.validate_sources()
 
-        gens = [i.result(num) for i in self.sources[1:]]
+        gens = [i.result(num) for i in self.sources]
         weights = self.weights.copy()
         if weights.size == 0:
             weights = np.array([1.0 for j in range(len(self.sources))])
         assert weights.shape[0] == len(self.sources)
-        for temp in self.sources[0].result(num):
-            temp *= weights[0]
-            sh = temp.shape[0]
-            for j, g in enumerate(gens):
-                temp1 = next(g) * weights[j + 1]
-                if temp.shape[0] > temp1.shape[0]:
-                    temp = temp[: temp1.shape[0]]
-                temp += temp1[: temp.shape[0]]
-            yield temp
-            if sh > temp.shape[0]:
-                break
+        while True:
+            temp = np.zeros((num, self.num_channels,), dtype=float)
+            for i, gen in enumerate(gens):
+                try:
+                    block = next(gen)
+                except StopIteration:
+                    return
+                temp[:block.shape[0]] += weights[i] * block
+            yield temp[:block.shape[0]]
 
 
 class PointSourceConvolve(PointSource):
