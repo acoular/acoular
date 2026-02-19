@@ -579,7 +579,8 @@ class MaskedTimeSamples(TimeSamples):
 
     @observe('_data')
     def _load_shapes(self, event):  # noqa ARG002
-        # Set :attr:`num_channels_total` and num_samples_total from :attr:`~acoular.sources.MaskedTimeSamples.data`.
+        # Set :attr:`num_channels_total` and num_samples_total from
+        # :attr:`~acoular.sources.MaskedTimeSamples.data`.
         if self.data is not None:
             self.num_samples_total, self.num_channels_total = self.data.shape
 
@@ -2182,14 +2183,20 @@ class SourceMixer(SamplesGenerator):
             weights = np.array([1.0 for j in range(len(self.sources))])
         assert weights.shape[0] == len(self.sources)
         while True:
-            temp = np.zeros((num, self.num_channels,), dtype=float)
+            temp = np.zeros(
+                (
+                    num,
+                    self.num_channels,
+                ),
+                dtype=float,
+            )
             for i, gen in enumerate(gens):
                 try:
                     block = next(gen)
                 except StopIteration:
                     return
-                temp[:block.shape[0]] += weights[i] * block
-            yield temp[:block.shape[0]]
+                temp[: block.shape[0]] += weights[i] * block
+            yield temp[: block.shape[0]]
 
 
 class PointSourceConvolve(PointSource):
