@@ -33,7 +33,6 @@ Measured multichannel data management and simulation of acoustic sources.
 # imports from other packages
 
 import contextlib
-from os import path
 from warnings import warn
 
 import numba as nb
