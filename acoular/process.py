@@ -245,7 +245,7 @@ class Cache(InOut):
 
     # The HDF5 cache file instance.
     # This is used to store or retrieve cached data in the Acoular cache directory.
-    h5f = Instance(H5CacheFileBase, transient=True)
+    _h5f = Instance(H5CacheFileBase, transient=True)
 
     #: A unique identifier based on the cache properties.
     digest = Property(depends_on=['source.digest'])
@@ -265,18 +265,18 @@ class Cache(InOut):
         nodename = 'tc_' + self.digest
         for i, data in enumerate(self.source.result(num)):
             if i == 0:
-                self.h5f.create_extendable_array(nodename, (0, data.shape[1]), data.dtype.name)
-                ac = self.h5f.get_data_by_reference(nodename)
-                self.h5f.set_node_attribute(ac, 'sample_freq', self.sample_freq)
-                self.h5f.set_node_attribute(ac, 'complete', False)
-            self.h5f.append_data(ac, data)
-            self.h5f.flush()
+                self._h5f.create_extendable_array(nodename, (0, data.shape[1]), data.dtype.name)
+                ac = self._h5f.get_data_by_reference(nodename)
+                self._h5f.set_node_attribute(ac, 'sample_freq', self.sample_freq)
+                self._h5f.set_node_attribute(ac, 'complete', False)
+            self._h5f.append_data(ac, data)
+            self._h5f.flush()
             yield data
-        self.h5f.set_node_attribute(ac, 'complete', True)
+        self._h5f.set_node_attribute(ac, 'complete', True)
 
     def _get_data_from_cache(self, num):
         nodename = 'tc_' + self.digest
-        ac = self.h5f.get_data_by_reference(nodename)
+        ac = self._h5f.get_data_by_reference(nodename)
         i = 0
         while i < ac.shape[0]:
             yield ac[i : i + num]
@@ -284,25 +284,25 @@ class Cache(InOut):
 
     def _get_data_from_incomplete_cache(self, num):
         nodename = 'tc_' + self.digest
-        ac = self.h5f.get_data_by_reference(nodename)
+        ac = self._h5f.get_data_by_reference(nodename)
         i = 0
         nblocks = 0
         while i + num <= ac.shape[0]:
             yield ac[i : i + num]
             nblocks += 1
             i += num
-        self.h5f.remove_data(nodename)
+        self._h5f.remove_data(nodename)
         for j, data in enumerate(self.source.result(num)):
             if j == 0:
-                self.h5f.create_extendable_array(nodename, (0, data.shape[1]), data.dtype.name)
-                ac = self.h5f.get_data_by_reference(nodename)
-                self.h5f.set_node_attribute(ac, 'sample_freq', self.sample_freq)
-                self.h5f.set_node_attribute(ac, 'complete', False)
-            self.h5f.append_data(ac, data)
+                self._h5f.create_extendable_array(nodename, (0, data.shape[1]), data.dtype.name)
+                ac = self._h5f.get_data_by_reference(nodename)
+                self._h5f.set_node_attribute(ac, 'sample_freq', self.sample_freq)
+                self._h5f.set_node_attribute(ac, 'complete', False)
+            self._h5f.append_data(ac, data)
             if j >= nblocks:
-                self.h5f.flush()
+                self._h5f.flush()
                 yield data
-        self.h5f.set_node_attribute(ac, 'complete', True)
+        self._h5f.set_node_attribute(ac, 'complete', True)
 
     # result generator: delivers input, possibly from cache
     def result(self, num):
@@ -346,19 +346,19 @@ class Cache(InOut):
         else:
             nodename = 'tc_' + self.digest
             H5cache.get_cache_file(self, self.basename)
-            if not self.h5f:
+            if not self._h5f:
                 generator = self._pass_data
-            elif self.h5f.is_cached(nodename):
+            elif self._h5f.is_cached(nodename):
                 generator = self._get_data_from_cache
                 if config.global_caching == 'overwrite':
-                    self.h5f.remove_data(nodename)
+                    self._h5f.remove_data(nodename)
                     generator = self._write_data_to_cache
-                elif not self.h5f.get_data_by_reference(nodename).attrs.__contains__('complete'):
+                elif not self._h5f.get_data_by_reference(nodename).attrs.__contains__('complete'):
                     if config.global_caching == 'readonly':
                         generator = self._pass_data
                     else:
                         generator = self._get_data_from_incomplete_cache
-                elif not self.h5f.get_data_by_reference(nodename).attrs['complete']:
+                elif not self._h5f.get_data_by_reference(nodename).attrs['complete']:
                     if config.global_caching == 'readonly':
                         warn(
                             f"Cache file is incomplete for nodename {nodename}. With config.global_caching='readonly', \
@@ -369,7 +369,7 @@ class Cache(InOut):
                         generator = self._pass_data
                     else:
                         generator = self._get_data_from_incomplete_cache
-            elif not self.h5f.is_cached(nodename):
+            elif not self._h5f.is_cached(nodename):
                 generator = self._write_data_to_cache
                 if config.global_caching == 'readonly':
                     generator = self._pass_data
