@@ -405,7 +405,7 @@ class TimeSamples(SamplesGenerator):
 
     def _load_timedata(self):
         # Loads timedata from :attr:`.h5 file<file>`. Only for internal use.
-        self._data = self._h5f.get_data_by_reference('time_data')
+        self.data = self._h5f.get_data_by_reference('time_data')
         self.sample_freq = self._h5f.get_node_attribute(self.data, 'sample_freq')
 
     def _load_metadata(self):
