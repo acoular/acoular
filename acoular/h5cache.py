@@ -55,9 +55,9 @@ class HDF5Cache(HasStrictTraits):
         # inspect all referrers to the file object
         gc.collect()  # clear garbage before collecting referrers
         for ref in gc.get_referrers(file):
-            # does the file object have a referrer that has a 'h5f'
+            # does the file object have a referrer that has a '_h5f'
             # attribute?
-            if isinstance(ref, dict) and 'h5f' in ref:
+            if isinstance(ref, dict) and '_h5f' in ref:
                 # file is still referred, must not be closed
                 exist_flag = True
                 break
@@ -85,19 +85,19 @@ class HDF5Cache(HasStrictTraits):
             print(list({str(k.name): v for k, v in self.open_file_reference.items()}.items()))
 
     def get_cache_file(self, obj, basename, mode='a'):
-        """Returns pytables .h5 file to h5f trait of calling object for caching."""
+        """Returns pytables .h5 file to _h5f trait of calling object for caching."""
         self._idle_if_busy()  #
         self.busy = True
         file_cls = _get_cachefile_class()
         filename = (Path(self.cache_dir) / (basename + '_cache.h5')).resolve()
 
         if config.global_caching == 'readonly' and not filename.exists():
-            obj.h5f = None
+            obj._h5f = None
             self.busy = False
             return  # cachefile is not created in readonly mode
 
-        if isinstance(obj.h5f, file_cls):
-            h5filename = Path(obj.h5f.filename).resolve()
+        if isinstance(obj._h5f, file_cls):
+            h5filename = Path(obj._h5f.filename).resolve()
             if h5filename == filename:
                 self.busy = False
                 return
@@ -109,7 +109,7 @@ class HDF5Cache(HasStrictTraits):
             file = file_cls(filename, mode)
             self.open_files[filename] = file
 
-        obj.h5f = self.open_files[filename]
+        obj._h5f = self.open_files[filename]
         self._increase_file_reference_counter(filename)
 
         # garbage collection

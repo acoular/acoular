@@ -110,16 +110,16 @@ def test_filecache_created(case, file_cache_options):
     # check if cache file is created
     exp_res = expected_result[(caching_flag, cached)]
     if exp_res is None:
-        assert obj1.h5f is None
+        assert obj1._h5f is None
     else:
-        assert obj1.h5f is not None
-        assert type(obj1.h5f) is exp_res
-        assert Path(obj1.h5f.filename).exists()
+        assert obj1._h5f is not None
+        assert type(obj1._h5f) is exp_res
+        assert Path(obj1._h5f.filename).exists()
 
     # create copy and check if it loads the cache file
     if not expected_error and exp_res is not None:
         calc(obj2)
-        assert Path(obj2.h5f.filename).samefile(Path(obj1.h5f.filename)), 'Not the same cache file loaded.'
+        assert Path(obj2._h5f.filename).samefile(Path(obj1._h5f.filename)), 'Not the same cache file loaded.'
 
     # disable cache and check if result matches uncached result
     if not expected_error and not isinstance(obj1, ac.Cache) and exp_res is not None:
@@ -160,8 +160,8 @@ def test_timesamples_file_change(tmp_path):
     _ = ps.csm[:]
 
     # Verify cache file was created
-    assert ps.h5f is not None
-    first_cache_file = Path(ps.h5f.filename)
+    assert ps._h5f is not None
+    first_cache_file = Path(ps._h5f.filename)
     assert first_cache_file.exists()
     ts.file = file2
 
@@ -170,8 +170,8 @@ def test_timesamples_file_change(tmp_path):
     _ = ps.csm[:]
 
     # Verify that a new cache file was created (different basename due to different source digest)
-    assert ps.h5f is not None
-    second_cache_file = Path(ps.h5f.filename)
+    assert ps._h5f is not None
+    second_cache_file = Path(ps._h5f.filename)
     assert second_cache_file.exists()
 
     # The cache files should be different because the source digest changed

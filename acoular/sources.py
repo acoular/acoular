@@ -33,7 +33,6 @@ Measured multichannel data management and simulation of acoustic sources.
 # imports from other packages
 
 import contextlib
-from os import path
 from warnings import warn
 
 import numba as nb
@@ -365,7 +364,7 @@ class TimeSamples(SamplesGenerator):
     data = Any(transient=True)
 
     #: HDF5 file object.
-    h5f = Instance(H5FileBase, transient=True)
+    _h5f = Instance(H5FileBase, transient=True)
 
     #: Metadata loaded from the HDF5 file, if available.
     metadata = Dict()
@@ -390,11 +389,11 @@ class TimeSamples(SamplesGenerator):
     @observe('basename')
     def _load_data(self, event):  # noqa ARG002
         # Open the .h5 file and set attributes.
-        if self.h5f is not None:
+        if self._h5f is not None:
             with contextlib.suppress(OSError):
-                self.h5f.close()
+                self._h5f.close()
         file = _get_h5file_class()
-        self.h5f = file(self.file)
+        self._h5f = file(self.file)
         self._load_timedata()
         self._load_metadata()
 
@@ -406,14 +405,14 @@ class TimeSamples(SamplesGenerator):
 
     def _load_timedata(self):
         # Loads timedata from :attr:`.h5 file<file>`. Only for internal use.
-        self.data = self.h5f.get_data_by_reference('time_data')
-        self.sample_freq = self.h5f.get_node_attribute(self.data, 'sample_freq')
+        self.data = self._h5f.get_data_by_reference('time_data')
+        self.sample_freq = self._h5f.get_node_attribute(self.data, 'sample_freq')
 
     def _load_metadata(self):
         # Loads :attr:`metadata` from :attr:`.h5 file<file>`. Only for internal use.
         self.metadata = {}
-        if '/metadata' in self.h5f:
-            self.metadata = self.h5f.node_to_dict('/metadata')
+        if '/metadata' in self._h5f:
+            self.metadata = self._h5f.node_to_dict('/metadata')
 
     def result(self, num=128):
         """
@@ -567,22 +566,6 @@ class MaskedTimeSamples(TimeSamples):
         sli = slice(self.start, self.stop).indices(self.num_samples_total)
         return sli[1] - sli[0]
 
-    @observe('basename')
-    def _load_data(self, event):  # noqa ARG002
-        # Open the .h5 file and set attributes.
-        if not path.isfile(self.file):
-            # no file there
-            self.sample_freq = 0
-            msg = f'No such file: {self.file}'
-            raise OSError(msg)
-        if self.h5f is not None:
-            with contextlib.suppress(OSError):
-                self.h5f.close()
-        file = _get_h5file_class()
-        self.h5f = file(self.file)
-        self._load_timedata()
-        self._load_metadata()
-
     @observe('data')
     def _load_shapes(self, event):  # noqa ARG002
         # Set :attr:`num_channels` and num_samples from :attr:`~acoular.sources.TimeSamples.data`.
@@ -590,9 +573,7 @@ class MaskedTimeSamples(TimeSamples):
             self.num_samples_total, self.num_channels_total = self.data.shape
 
     def _load_timedata(self):
-        # Loads timedata from .h5 file. Only for internal use.
-        self.data = self.h5f.get_data_by_reference('time_data')
-        self.sample_freq = self.h5f.get_node_attribute(self.data, 'sample_freq')
+        super()._load_timedata()
         (self.num_samples_total, self.num_channels_total) = self.data.shape
 
     def result(self, num=128):
