@@ -3,6 +3,8 @@ What's new
 
 Upcoming Release
 ------------------------
+    **Internal**
+        * improves inheritance and class structure of :class:`~acoular.sources.MaskedTimeSamples`.
 
 26.01
 ------------------------

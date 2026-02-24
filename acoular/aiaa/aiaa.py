@@ -57,15 +57,15 @@ class TimeSamplesAIAABenchmark(TimeSamples):
 
     def _load_timedata(self):
         """Loads timedata from .h5 file. Only for internal use."""
-        self.data = self.h5f.get_data_by_reference('MicrophoneData/microphoneDataPa')
-        self.sample_freq = self.h5f.get_node_attribute(self.data, 'sampleRateHz')
+        self.data = self._h5f.get_data_by_reference('MicrophoneData/microphoneDataPa')
+        self.sample_freq = self._h5f.get_node_attribute(self.data, 'sampleRateHz')
         (self.num_samples, self.num_channels) = self.data.shape
 
     def _load_metadata(self):
         """Loads metadata from .h5 file. Only for internal use."""
         self.metadata = {}
-        if '/MetaData' in self.h5f:
-            self.metadata = self.h5f.node_to_dict('/MetaData')
+        if '/MetaData' in self._h5f:
+            self.metadata = self._h5f.node_to_dict('/MetaData')
 
 
 class TriggerAIAABenchmark(TimeSamplesAIAABenchmark):
@@ -79,8 +79,8 @@ class TriggerAIAABenchmark(TimeSamplesAIAABenchmark):
 
     def _load_timedata(self):
         """Loads timedata from .h5 file. Only for internal use."""
-        self.data = self.h5f.get_data_by_reference('TachoData/tachoDataV')
-        self.sample_freq = self.h5f.get_node_attribute(self.data, 'sampleRateHz')
+        self.data = self._h5f.get_data_by_reference('TachoData/tachoDataV')
+        self.sample_freq = self._h5f.get_node_attribute(self.data, 'sampleRateHz')
         (self.num_samples, self.num_channels) = self.data.shape
 
 
@@ -100,7 +100,7 @@ class CsmAIAABenchmark(PowerSpectraImport):
     num_channels = Property()
 
     #: HDF5 file object
-    h5f = Instance(H5FileBase, transient=True)
+    _h5f = Instance(H5FileBase, transient=True)
 
     #: A unique identifier for the CSM importer, based on its properties. (read-only)
     digest = Property(depends_on=['basename', '_csmsum'])
@@ -116,11 +116,11 @@ class CsmAIAABenchmark(PowerSpectraImport):
     @observe('basename')
     def _load_data(self, event):  # noqa ARG002
         """Open the .h5 file and set attributes."""
-        if self.h5f is not None:
+        if self._h5f is not None:
             with contextlib.suppress(OSError):
-                self.h5f.close()
+                self._h5f.close()
         file = _get_h5file_class()
-        self.h5f = file(self.file)
+        self._h5f = file(self.file)
 
     # @property_depends_on( 'block_size, ind_low, ind_high' )
     def _get_indices(self):
@@ -132,18 +132,18 @@ class CsmAIAABenchmark(PowerSpectraImport):
     @property_depends_on(['digest'])
     def _get_num_channels(self):
         try:
-            attrs = self.h5f.get_data_by_reference('MetaData/ArrayAttributes')
-            return self.h5f.get_node_attribute(attrs, 'microphoneCount')
+            attrs = self._h5f.get_data_by_reference('MetaData/ArrayAttributes')
+            return self._h5f.get_node_attribute(attrs, 'microphoneCount')
         except IndexError:
             return 0
 
     @property_depends_on(['digest'])
     def _get_csm(self):
         """Loads cross spectral matrix from file."""
-        csmre = self.h5f.get_data_by_reference('/CsmData/csmReal')[:].transpose((2, 0, 1))
-        csmim = self.h5f.get_data_by_reference('/CsmData/csmImaginary')[:].transpose((2, 0, 1))
-        csmdatagroup = self.h5f.get_data_by_reference('/CsmData')
-        sign = self.h5f.get_node_attribute(csmdatagroup, 'fftSign')
+        csmre = self._h5f.get_data_by_reference('/CsmData/csmReal')[:].transpose((2, 0, 1))
+        csmim = self._h5f.get_data_by_reference('/CsmData/csmImaginary')[:].transpose((2, 0, 1))
+        csmdatagroup = self._h5f.get_data_by_reference('/CsmData')
+        sign = self._h5f.get_node_attribute(csmdatagroup, 'fftSign')
         return csmre + sign * 1j * csmim
 
     def fftfreq(self):
@@ -154,7 +154,7 @@ class CsmAIAABenchmark(PowerSpectraImport):
         ndarray
             Array of length *block_size/2+1* containing the sample frequencies.
         """
-        return np.array(self.h5f.get_data_by_reference('/CsmData/binCenterFrequenciesHz')[:].flatten(), dtype=float)
+        return np.array(self._h5f.get_data_by_reference('/CsmData/binCenterFrequenciesHz')[:].flatten(), dtype=float)
 
 
 class MicAIAABenchmark(MicGeom):

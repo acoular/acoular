@@ -269,8 +269,8 @@ class LazyBfResult:
         # calc if needed
         if missingind.size:
             self.bf._calc(missingind)
-            if self.bf.h5f:
-                self.bf.h5f.flush()
+            if self.bf._h5f:
+                self.bf._h5f.flush()
 
         return self.bf._ac.__getitem__(key)
 
@@ -307,7 +307,7 @@ class BeamformerBase(HasStrictTraits):
     cached = Bool(True)
 
     #: hdf5 cache file
-    h5f = Instance(H5CacheFileBase, transient=True)
+    _h5f = Instance(H5CacheFileBase, transient=True)
 
     #: The beamforming result as squared sound pressure values
     #: at all grid point locations (readonly).
@@ -340,45 +340,45 @@ class BeamformerBase(HasStrictTraits):
         """
         #        print("get cachefile:", self.freq_data.basename)
         H5cache.get_cache_file(self, self.freq_data.basename)
-        if not self.h5f:
+        if not self._h5f:
             #            print("no cachefile:", self.freq_data.basename)
             return (None, None, None)  # only happens in case of global caching readonly
 
         nodename = self.__class__.__name__ + self.digest
         #        print("collect filecache for nodename:",nodename)
-        if config.global_caching == 'overwrite' and self.h5f.is_cached(nodename):
+        if config.global_caching == 'overwrite' and self._h5f.is_cached(nodename):
             #            print("remove existing data for nodename",nodename)
-            self.h5f.remove_data(nodename)  # remove old data before writing in overwrite mode
+            self._h5f.remove_data(nodename)  # remove old data before writing in overwrite mode
 
-        if not self.h5f.is_cached(nodename):
+        if not self._h5f.is_cached(nodename):
             #            print("no data existent for nodename:", nodename)
             if config.global_caching == 'readonly':
                 return (None, None, None)
             numfreq = self.freq_data.fftfreq().shape[0]
-            group = self.h5f.create_new_group(nodename)
-            self.h5f.create_compressible_array(
+            group = self._h5f.create_new_group(nodename)
+            self._h5f.create_compressible_array(
                 'freqs',
                 (numfreq,),
                 'int8',  #'bool',
                 group,
             )
             if isinstance(self, BeamformerAdaptiveGrid):
-                self.h5f.create_compressible_array('gpos', (3, self.size), 'float64', group)
-                self.h5f.create_compressible_array('result', (numfreq, self.size), self.precision, group)
+                self._h5f.create_compressible_array('gpos', (3, self.size), 'float64', group)
+                self._h5f.create_compressible_array('result', (numfreq, self.size), self.precision, group)
             elif isinstance(self, BeamformerSODIX):
-                self.h5f.create_compressible_array(
+                self._h5f.create_compressible_array(
                     'result',
                     (numfreq, self.steer.grid.size * self.steer.mics.num_mics),
                     self.precision,
                     group,
                 )
             else:
-                self.h5f.create_compressible_array('result', (numfreq, self.steer.grid.size), self.precision, group)
+                self._h5f.create_compressible_array('result', (numfreq, self.steer.grid.size), self.precision, group)
 
-        ac = self.h5f.get_data_by_reference('result', '/' + nodename)
-        fr = self.h5f.get_data_by_reference('freqs', '/' + nodename)
+        ac = self._h5f.get_data_by_reference('result', '/' + nodename)
+        fr = self._h5f.get_data_by_reference('freqs', '/' + nodename)
         if isinstance(self, BeamformerAdaptiveGrid):
-            gpos = self.h5f.get_data_by_reference('gpos', '/' + nodename)
+            gpos = self._h5f.get_data_by_reference('gpos', '/' + nodename)
         else:
             gpos = None
         return (ac, fr, gpos)
@@ -977,7 +977,7 @@ class PointSpreadFunction(HasStrictTraits):
     freq = Float(1.0)
 
     # hdf5 cache file
-    h5f = Instance(H5CacheFileBase, transient=True)
+    _h5f = Instance(H5CacheFileBase, transient=True)
 
     #: A unique identifier for the object, based on its properties. (read-only)
     digest = Property(depends_on=['steer.digest', 'precision'], cached=True)
@@ -996,29 +996,29 @@ class PointSpreadFunction(HasStrictTraits):
         nodename = (f'Hz_{self.freq:.2f}').replace('.', '_')
         #        print("get cachefile:", filename)
         H5cache.get_cache_file(self, filename)
-        if not self.h5f:  # only happens in case of global caching readonly
+        if not self._h5f:  # only happens in case of global caching readonly
             #            print("no cachefile:", filename)
             return (None, None)  # only happens in case of global caching readonly
 
-        if config.global_caching == 'overwrite' and self.h5f.is_cached(nodename):
+        if config.global_caching == 'overwrite' and self._h5f.is_cached(nodename):
             #            print("remove existing data for nodename",nodename)
-            self.h5f.remove_data(nodename)  # remove old data before writing in overwrite mode
+            self._h5f.remove_data(nodename)  # remove old data before writing in overwrite mode
 
-        if not self.h5f.is_cached(nodename):
+        if not self._h5f.is_cached(nodename):
             #            print("no data existent for nodename:", nodename)
             if config.global_caching == 'readonly':
                 return (None, None)
             gs = self.steer.grid.size
-            group = self.h5f.create_new_group(nodename)
-            self.h5f.create_compressible_array('result', (gs, gs), self.precision, group)
-            self.h5f.create_compressible_array(
+            group = self._h5f.create_new_group(nodename)
+            self._h5f.create_compressible_array('result', (gs, gs), self.precision, group)
+            self._h5f.create_compressible_array(
                 'gridpts',
                 (gs,),
                 'int8',  #'bool',
                 group,
             )
-        ac = self.h5f.get_data_by_reference('result', '/' + nodename)
-        gp = self.h5f.get_data_by_reference('gridpts', '/' + nodename)
+        ac = self._h5f.get_data_by_reference('result', '/' + nodename)
+        gp = self._h5f.get_data_by_reference('gridpts', '/' + nodename)
         return (ac, gp)
 
     def _get_psf(self):
@@ -1046,7 +1046,7 @@ class PointSpreadFunction(HasStrictTraits):
                         self.calc_psf(ac, gp)
                         return ac[:, self.grid_indices]
                     self.calc_psf(ac, gp)
-                    self.h5f.flush()
+                    self._h5f.flush()
                     return ac[:, self.grid_indices]
                 #                else:
                 #                    print("cached results are complete! return.")
