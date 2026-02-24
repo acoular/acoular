@@ -16,6 +16,7 @@ Upcoming Release
         * new and revised contributor's documentation
         * fixes documentation of the ``steer`` traits in the :class:`~acoular.fbeamform.BeamformerBase`, :class:`~acoular.fbeamform.PointSpreadFunction`, and :class:`~acoular.tbeamform.BeamformerTime` classes
         * standardizes documentation of digest properties
+        * adds example for :class:`~acoular.grids.MultiSector`
 
     **Internal**
         * Restructured the :py:mod:`acoular.demo` module to allow an easier execution of the Acoular demo.
@@ -88,7 +89,6 @@ Upcoming Release
         * add `three_sources_1d.h5`, `three_sources_2d.h5`, and `three_sources_3d.h5`
         * add functions `_create_three_sources`, `create_three_sources_1d`, `create_three_sources_2d`, and `create_three_sources_3d` to create the test data
         * change `create_three_sources` function to an alias of `create_three_sources_2d`
-        * adds example for :class:`~acoular.grids.MultiSector`
         * removal of deprecated classes `TimeInOut`, `FFTSpectra`, `TimeAverage`, `TimeCache`, `MaskedTimeInOut` and the `beamformer` attribute of frequency domain beamformers
 
 25.04
