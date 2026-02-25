@@ -266,7 +266,7 @@ class PowerSpectra(BaseSpectra):
     )
 
     #: The HDF5 cache file used for storing the results if :attr:`cached` is set to ``True``.
-    h5f = Instance(H5CacheFileBase, transient=True)
+    _h5f = Instance(H5CacheFileBase, transient=True)
 
     @property_depends_on(['source.num_samples', 'block_size', 'overlap'])
     def _get_num_blocks(self):
@@ -495,25 +495,25 @@ class PowerSpectra(BaseSpectra):
             precision = self.precision
 
         H5cache.get_cache_file(self, self.basename)
-        if not self.h5f:  # in case of global caching readonly
+        if not self._h5f:  # in case of global caching readonly
             return func()
 
         nodename = traitname + '_' + self.digest
-        if config.global_caching == 'overwrite' and self.h5f.is_cached(nodename):
+        if config.global_caching == 'overwrite' and self._h5f.is_cached(nodename):
             # print("remove existing node",nodename)
-            self.h5f.remove_data(nodename)  # remove old data before writing in overwrite mode
+            self._h5f.remove_data(nodename)  # remove old data before writing in overwrite mode
 
-        if not self.h5f.is_cached(nodename):
+        if not self._h5f.is_cached(nodename):
             if config.global_caching == 'readonly':
                 return func()
             #            print("create array, data not cached for",nodename)
-            self.h5f.create_compressible_array(nodename, shape, precision)
+            self._h5f.create_compressible_array(nodename, shape, precision)
 
-        ac = self.h5f.get_data_by_reference(nodename)
+        ac = self._h5f.get_data_by_reference(nodename)
         if ac[:].sum() == 0:  # only initialized
             #            print("write {} to:".format(traitname),nodename)
             ac[:] = func()
-            self.h5f.flush()
+            self._h5f.flush()
         return ac
 
     @property_depends_on(['digest'])

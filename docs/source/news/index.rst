@@ -3,6 +3,11 @@ What's new
 
 Upcoming Release
 ------------------------
+    **Tests**
+        * increases test coverage for :func:`~acoular.fbeamform.integrate` function
+
+    **Internal**
+        * improves inheritance and class structure of :class:`~acoular.sources.MaskedTimeSamples`.
 
 26.01
 ------------------------
