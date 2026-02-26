@@ -6,7 +6,7 @@
 name = "acoular"
 dynamic = ["version"]
 description = "Python library for acoustic beamforming"
-requires-python = ">=3.10,<3.14"
+requires-python = ">=3.11,<3.14"
 authors = [
     {name = "Acoular Development Team", email = "info@acoular.org"},
 ]
@@ -34,7 +34,7 @@ dependencies = [
     "scikit-learn",
     "scipy >= 1.15, != 1.16.0; python_version == '3.10'",  # 1.16.0 has a bug in tf2sos
     "scipy >= 1.16.1; python_version > '3.10'",
-    "tables < 3.11",
+    "tables @ git+https://github.com/avalentino/PyTables@buigfix/issue-1305",
     "traits >= 6.0",
 ]
 maintainers = [
@@ -102,6 +102,9 @@ repository = "https://github.com/acoular/acoular"
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.hatch.version]
 path = "acoular/version.py"
