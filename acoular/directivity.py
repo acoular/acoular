@@ -202,7 +202,7 @@ class PointSourceDirectional(PointSource):
             # if sph_harm is the only directivity all coeffs are generated from that object:
             if self.mics.num_mics == 1 and isinstance(self.mics.directivities[0], SphericalHarmonicDirectivity):
                 sph_harm_calc = self.mics.directivities[0]
-                sph_harm_calc.target_directions = (src_pos - mic_pos[0]).reshape(3, 1)
+                sph_harm_calc.target_directions = (src_pos - mic_pos[:,0]).reshape(3, 1)
                 # create additional channels based on the spherical harmonics order
                 additional_channels = num_channels_for_sph_degree(sph_harm_calc.n) - 1
                 mic_coeffs = sph_harm_calc.coefficients.squeeze()
