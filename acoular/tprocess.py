@@ -143,18 +143,6 @@ class MaskedTimeOut(TimeOut):
         return digest(self)
 
     @cached_property
-    def _get_basename(self):
-        warn(
-            (
-                f'The basename attribute of a {self.__class__.__name__} object is deprecated'
-                ' and will be removed in Acoular 26.01!'
-            ),
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return find_basename(self.source, alternative_basename=self.source.__class__.__name__ + self.source.digest)
-
-    @cached_property
     def _get_channels(self):
         if len(self.invalid_channels) == 0:
             return slice(0, None, None)
@@ -2355,18 +2343,6 @@ class WriteWAV(TimeOut):
     @cached_property
     def _get_digest(self):
         return digest(self)
-
-    @cached_property
-    def _get_basename(self):
-        warn(
-            (
-                f'The basename attribute of a {self.__class__.__name__} object is deprecated'
-                ' and will be removed in Acoular 26.01!'
-            ),
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return find_basename(self.source)
 
     def _type_info(self):
         dtype = np.dtype(self.encoding)
