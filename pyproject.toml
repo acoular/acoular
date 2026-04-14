@@ -72,7 +72,7 @@ docs = [
 
 lint = ["ruff==0.14.2"]
 
-test = [
+tests = [
     "h5py",
     "diff_cover",
     "pylops",
@@ -91,7 +91,7 @@ test = [
 dev = [
     {include-group = "docs"},
     {include-group = "lint"},
-    {include-group = "test"},
+    {include-group = "tests"},
 ]
 
 [project.urls]
