@@ -34,7 +34,7 @@ dependencies = [
     "scikit-learn",
     "scipy >= 1.15, != 1.16.0; python_version == '3.10'",  # 1.16.0 has a bug in tf2sos
     "scipy >= 1.16.1; python_version > '3.10'",
-    "tables",
+    "tables < 3.11",
     "traits >= 6.0",
 ]
 maintainers = [
@@ -72,7 +72,7 @@ docs = [
 
 lint = ["ruff==0.14.2"]
 
-test = [
+tests = [
     "h5py",
     "diff_cover",
     "pylops",
@@ -91,7 +91,7 @@ test = [
 dev = [
     {include-group = "docs"},
     {include-group = "lint"},
-    {include-group = "test"},
+    {include-group = "tests"},
 ]
 
 [project.urls]
