@@ -35,7 +35,6 @@ Implements acoustic environments with and without flow.
 """
 
 from abc import abstractmethod
-from warnings import warn
 
 import numba as nb
 import numpy as np
