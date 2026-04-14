@@ -22,5 +22,5 @@ Again, thanks for contributing!
 - [ ] I have read the [Contributing](https://www.acoular.org/contributing/index.html) section.
 - [ ] My branch is up-to-date with the *master* branch of the [Acoular repository](https://github.com/acoular/acoular).
 - [ ] My changes fulfill the [Code Quality](https://www.acoular.org/contributing/quality.html) standards.
-- [ ] I have updated the [What's new](https://www.acoular.org/news/index.html) section the the [documentation](https://github.com/acoular/acoular/blob/master/docs/source/news/index.rst) explaining my changes.
+- [ ] I have updated the [What's new](https://github.com/acoular/acoular/blob/master/docs/source/news/index.rst) section explaining my changes.
 - [ ] I have appended myself to the [CITATION.cff](https://github.com/acoular/acoular/blob/master/CITATION.cff) file.
