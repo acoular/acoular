@@ -23,7 +23,6 @@ ignore = [
     "D401", # first line should be in imperative mood -> TBD
     # Others
     "T20", # will be fixed when logging is implemented
-    "SLF001", # should be fixed with issue: #225
 ]
 
 [lint.flake8-import-conventions]
@@ -55,8 +54,9 @@ docstring-code-line-length = 120
 "acoular/aiaa/__init__.py" = ["F401"]
 "acoular/environments.py" = ["N806"]
 "acoular/fastFuncs.py" = ["N802", "N803", "N806", "N999"] # allow different naming convention
-"acoular/fbeamform.py" = ["N806", "B023"]
+"acoular/fbeamform.py" = ["N806", "B023", "SLF001"]
 "acoular/sources.py" = ["N806"]
+"acoular/tbeamform.py" = ["SLF001"]
 "acoular/tools/helpers.py" = ["D205"]
 "acoular/tprocess.py" = ["N806"]
 "tests/cases/*" = ["N802"]
