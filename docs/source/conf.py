@@ -135,7 +135,7 @@ autodoc_default_options = {
     'members': True,
     'member-order': 'bysource',
     'exclude-members': 'trait_added,trait_modified',
-    #'inherited-members': 'ABCHasStrictTraits,HasStrictTraits,HasTraits,CHasTraits',
+    'inherited-members': 'ABCHasStrictTraits,HasStrictTraits,HasTraits,CHasTraits',
     'show-inheritance': True, # False does not work, need to delete this line to deactivate!
 }
 
