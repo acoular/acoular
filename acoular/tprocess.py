@@ -39,7 +39,7 @@ Implement blockwise processing in the time domain.
 # imports from other packages
 import wave
 from abc import abstractmethod
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from os import path
 from warnings import warn
 
@@ -2520,7 +2520,7 @@ class WriteH5(TimeOut):
         provided. If a filename is provided, it is used as the file name.
         """
         if self.file == '':
-            name = datetime.now(tz=timezone.utc).isoformat('_').replace(':', '-').replace('.', '_')
+            name = datetime.now(tz=UTC).isoformat('_').replace(':', '-').replace('.', '_')
             self.file = path.join(config.td_dir, name + '.h5')
 
     def get_initialized_file(self):
