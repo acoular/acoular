@@ -68,11 +68,12 @@ docs = [
     "sphinx-gallery",
     "sphinxcontrib-bibtex",
     "setuptools", # unfortunately still needed for sphinxcontrib-bibtex (https://github.com/mcmtroffaes/sphinxcontrib-bibtex/issues/345)
+    "traits",
 ]
 
 lint = ["ruff==0.14.2"]
 
-test = [
+tests = [
     "h5py",
     "diff_cover",
     "pylops",
@@ -91,7 +92,7 @@ test = [
 dev = [
     {include-group = "docs"},
     {include-group = "lint"},
-    {include-group = "test"},
+    {include-group = "tests"},
 ]
 
 [project.urls]
@@ -124,6 +125,8 @@ url = "https://test.pypi.org/simple/"
 publish-url = "https://test.pypi.org/legacy/"
 explicit = true
 
+[tool.uv.sources]
+traits = { git = "https://github.com/enthought/traits.git", branch = "main", group = "docs" }
 
 [tool.pytest.ini_options]
 testpaths = "tests"
