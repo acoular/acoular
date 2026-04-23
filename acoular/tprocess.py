@@ -1498,7 +1498,7 @@ class Mixer(TimeOut):
 
         .. note::
 
-            Yielding stops when one of the additionally provied signals ends; i.e. if one of the
+            Yielding stops when one of the additionally provided signals ends; i.e. if one of the
             additional sources holds a signal of shorter length than that of the
             :attr:`primary source<source>` that (shorter) signal forms the lower bound of the length
             of the mixed time signal yielded.
