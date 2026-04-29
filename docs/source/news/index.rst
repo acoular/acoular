@@ -5,6 +5,7 @@ Upcoming Release
 ------------------------
     **Documentation**
         * fixed an issue where inherited trait attributes were not shown in the API reference
+        * adds example for sectors
 
     **Tests**
         * increases test coverage for :func:`~acoular.fbeamform.integrate` function
@@ -76,7 +77,6 @@ Upcoming Release
         * generalizes data import in the airfoil examples using the :func:`~acoular.tools.helpers.get_data_file` helper function
         * add a new example for grids
         * changes all appearances of :meth:`~acoular.grids.RectGrid.extend` to :attr:`~acoular.grids.RectGrid.extent`
-        * adds example for sectors
         * introduces a deprecation policy in the contributing guidelines
         * adds new docstrings to submodule :mod:`acoular.tprocess`
         * adds new docstrings to submodule :mod:`acoular.h5cache` and :mod:`acoular.h5files`
