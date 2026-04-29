@@ -11,6 +11,7 @@ Upcoming Release
 
     **Internal**
         * improves inheritance and class structure of :class:`~acoular.sources.MaskedTimeSamples`.
+        * drops support for Python 3.10 and adds support for Python 3.14
 
 26.01
 ------------------------
