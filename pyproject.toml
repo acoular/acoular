@@ -6,7 +6,7 @@
 name = "acoular"
 dynamic = ["version"]
 description = "Python library for acoustic beamforming"
-requires-python = ">=3.11,<3.15"
+requires-python = ">=3.11,<3.15"  # remember to also change install/index.rst!
 authors = [
     {name = "Acoular Development Team", email = "info@acoular.org"},
 ]
