@@ -1,7 +1,7 @@
 What's new
 ============
 
-Upcoming Release
+26.04
 ------------------------
     **Documentation**
         * fixed an issue where inherited trait attributes were not shown in the API reference
