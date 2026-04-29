@@ -1389,7 +1389,8 @@ class SpatialInterpolatorConstantRotation(SpatialInterpolator):  # pragma: no co
     Performs spatial linear interpolation for sources undergoing constant rotation.
 
     .. deprecated::
-        :class:`SpatialInterpolatorConstantRotation` is deprecated and will be removed in version 27.01.
+        :class:`SpatialInterpolatorConstantRotation` is deprecated and will be removed in version
+        27.01.
 
     This class interpolates signals from a rotating sound source based on a constant rotational
     speed. It retrieves samples from the :attr:`source` and applies interpolation before
