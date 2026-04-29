@@ -5,6 +5,7 @@ Upcoming Release
 ------------------------
     **Documentation**
         * fixed an issue where inherited trait attributes were not shown in the API reference
+        * adds example for :class:`~acoular.grids.MultiSector`
 
     **Tests**
         * increases test coverage for :func:`~acoular.fbeamform.integrate` function
@@ -25,7 +26,6 @@ Upcoming Release
         * new and revised contributor's documentation
         * fixes documentation of the ``steer`` traits in the :class:`~acoular.fbeamform.BeamformerBase`, :class:`~acoular.fbeamform.PointSpreadFunction`, and :class:`~acoular.tbeamform.BeamformerTime` classes
         * standardizes documentation of digest properties
-        * adds example for :class:`~acoular.grids.MultiSector`
 
     **Internal**
         * Restructured the :py:mod:`acoular.demo` module to allow an easier execution of the Acoular demo.

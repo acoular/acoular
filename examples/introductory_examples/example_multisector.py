@@ -39,15 +39,15 @@ ts = ac.MaskedTimeSamples(
 )
 calib = ac.Calib(source=ts, file=calib_file, invalid_channels=[1, 7])
 mics = ac.MicGeom(file=Path(ac.__file__).parent / 'xml' / 'array_56.xml', invalid_channels=[1, 7])
-grid = ac.RectGrid(x_min=-0.6, x_max=0.0, y_min=-0.3, y_max=0.3, z=-0.68, increment=0.1)
+grid = ac.RectGrid(x_min=-0.6, x_max=0.0, y_min=-0.3, y_max=0.3, z=-0.68, increment=0.05)
 env = ac.Environment(c=346.04)
 st = ac.SteeringVector(grid=grid, mics=mics, env=env)
 f = ac.PowerSpectra(source=calib, window='Hanning', overlap='50%', block_size=128)
 bb = ac.BeamformerBase(freq_data=f, steer=st)
 
-sector = ac.RectSector(x_min=-0.3, x_max=-0.25, y_min=-0.05, y_max=0.05)
+sector = ac.RectSector(x_min=-0.275, x_max=-0.225, y_min=-0.20, y_max=0.15)
 
-map = bb.synthetic(4000)
+map = bb.synthetic(8000)
 spl_map = ac.L_p(map)
 
 freqs = f.fftfreq()
@@ -67,11 +67,11 @@ circsector = ac.CircSector(x=-0.4, y=0.0, r=0.07)
 # Let us see how the two sectors look on the source map.
 
 plt.figure(figsize=(8, 5))
-im = plt.imshow(spl_map.T, origin='lower', vmin=spl_map.max() - 10, extent=grid.extent)
-plt.fill_between([sector.x_min, sector.x_max], sector.y_min, sector.y_max, alpha=0.4, label='RectSector')
+im = plt.imshow(spl_map.T, origin='lower', vmin=spl_map.max() - 10, extent=grid.extent, cmap='hot_r')
+plt.fill_between([sector.x_min, sector.x_max], sector.y_min, sector.y_max, alpha=0.7, label='RectSector', color='gray')
 circ = plt.Circle((circsector.x, circsector.y), circsector.r, color='orange', alpha=0.4, label='CircSector')
 plt.gca().add_patch(circ)
-plt.scatter(*grid.pos[0:2], c='lightgray', s=10, label='Grid Points')
+plt.scatter(*grid.pos[0:2], c='lightgray', s=10, label='Grid Points', alpha=0.2)
 plt.xlabel('x / m')
 plt.ylabel('y / m')
 plt.title('RectSector and CircSector')
