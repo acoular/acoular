@@ -9,8 +9,8 @@ from sphinx_gallery.sorting import ExplicitOrder
 # see: https://www.sphinx-doc.org/en/master/usage/configuration.html for details
 
 project = 'Acoular'
-author = acoular.__author__
-project_copyright = f'{acoular.__date__.split(' ')[-1]}, {acoular.__author__}'
+author = 'Acoular Development Team'
+copyright = f'2015-%Y, {author}'
 version = release =  acoular.__version__
 
 #%%

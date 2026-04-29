@@ -132,3 +132,4 @@ from .tprocess import (
     WriteWAV,
 )
 from .trajectory import Trajectory
+from .version import __version__
