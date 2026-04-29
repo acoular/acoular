@@ -100,7 +100,7 @@ plt.scatter(*grid.pos[0:2], c='lightgray', s=10, label='Grid Points', alpha=0.2)
 # Plot airfoil's edges as dashed lines (we assume they are at x = -0.3 and x = -0.25)
 plt.vlines([-0.33, -0.27], ymin=-0.3, ymax=0.3, linestyles='--', label='Airfoil edges')
 # Plot sector as a filled rectangle
-plt.fill_between([sector.x_min, sector.x_max], sector.y_min, sector.y_max, alpha=0.5, label='Sector')
+plt.fill_between([sector.x_min, sector.x_max], sector.y_min, sector.y_max, alpha=0.5, label='Sector', color='C0')
 plt.imshow(spl_pm.T, vmax=spl_pm.max(), vmin=spl_pm.max()-15, origin='lower', extent=grid.extent, cmap='hot_r')
 
 cbar = plt.colorbar()
@@ -130,8 +130,8 @@ print('x: {}\ny: {}'.format(*grid.pos[:2, mask]))
 print(mask)
 
 # %%
-# We observe ten grid points marked as ``True`` in the mask: three points enclosed within
-# the sector and seven points located on its borders.
+# We observe 27 grid points marked as ``True`` in the mask: 7 points strictly inside
+# the sector and 20 additional points lying on its borders.
 # To exclude points on the border, we can set the sector's
 # :attr:`~acoular.grids.SingleSector.include_border` attribute to ``False``.
 #
@@ -143,8 +143,9 @@ mask = sector.contains(grid.pos)
 print('x: {}\ny: {}'.format(*grid.pos[:2, mask]))
 
 # %%
-# Now, only three points are strictly inside the sector: ``(-0.2, -0.1)``,
-# ``(-0.2, 0.0)``, and ``(-0.2, 0.1)``.
+# Now, only seven points are strictly inside the sector. They all lie on the
+# x-position ``-0.25``, with y-values ``-0.15``, ``-0.1``, ``-0.05``, ``0.0``,
+# ``0.05``, ``0.1``, and ``0.15``.
 #
 # For sectors that contain no grid points (neither inside nor on the borders), the
 # :attr:`~acoular.grids.SingleSector.default_nearest` attribute can be used. When set to ``True``,
@@ -181,7 +182,7 @@ spl_sector = ac.L_p(bf_sector)
 spl_sector = np.where(spl_sector > 0, spl_sector, 0)  # Keep positive entries only
 
 plt.figure(figsize=(8, 5))
-plt.semilogx(freqs, spl_sector)
+plt.semilogx(freqs, spl_sector, color='C0', linewidth=4)
 plt.xticks([4000, 5000, 6300, 8000, 10000], labels=['4', '5', '6.3', '8', '10'])
 
 plt.xlabel('Frequency / kHz')
@@ -204,8 +205,8 @@ f_borders, bars, f_center = barspectrum(bf_sector, freqs, 3, bar=True)
 spl_bars = ac.L_p(bars)
 
 plt.figure(figsize=(8, 5))
-plt.fill_between(f_borders, spl_bars)
-
+plt.plot(f_borders, spl_bars, color='C0', linewidth=4)
+plt.ylim(45, 55)
 plt.xscale('log')
 plt.xticks(f_center, labels=['4', '5', '6.3', '8'])
 
