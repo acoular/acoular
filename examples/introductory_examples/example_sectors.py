@@ -47,7 +47,7 @@ ts = ac.MaskedTimeSamples(
 )
 calib = ac.Calib(source=ts, file=calib_file, invalid_channels=invalid)
 mics = ac.MicGeom(file=Path(ac.__file__).parent / 'xml' / 'array_56.xml', invalid_channels=invalid)
-grid = ac.RectGrid(x_min=-0.6, x_max=0.0, y_min=-0.3, y_max=0.3, z=-0.68, increment=0.1)
+grid = ac.RectGrid(x_min=-0.6, x_max=0.0, y_min=-0.3, y_max=0.3, z=-0.68, increment=0.05)
 env = ac.Environment(c=346.04)
 st = ac.SteeringVector(grid=grid, mics=mics, env=env)
 f = ac.PowerSpectra(source=calib, window='Hanning', overlap='50%', block_size=128)
@@ -55,15 +55,15 @@ bb = ac.BeamformerCleansc(freq_data=f, steer=st)
 
 # %%
 # The microphone array captures the acoustic signature of an airfoil positioned in an open jet.
-# The resulting source map, computed via source mapping at 4 kHz, is displayed below.
+# The resulting source map, computed via source mapping at 8 kHz, is displayed below.
 
-# Calculate the power map for 4 kHz
-pm = bb.synthetic(4000)
+# Calculate the power map for 8 kHz
+pm = bb.synthetic(8000)
 spl_pm = ac.L_p(pm)
 
-# Display source mapping results for 4 kHz
-plt.scatter(*grid.pos[0:2], c='lightgray', s=10, label='Grid Points')
-plt.imshow(spl_pm.T, vmin=0, origin='lower', extent=grid.extent, interpolation='bicubic')
+# Display source mapping results for 8 kHz
+plt.scatter(*grid.pos[0:2], c='lightgray', s=10, label='Grid Points', alpha=0.2)
+plt.imshow(spl_pm.T, vmax=spl_pm.max(), vmin=spl_pm.max()-15, origin='lower', extent=grid.extent, cmap='hot_r')
 
 cbar = plt.colorbar()
 cbar.set_label('$L_p$ / dB')
@@ -89,19 +89,19 @@ plt.show()
 # of interest can be performed after calculating the full source map.
 # Here, we will create a rectangular sector that covers the trailing edge of the airfoil.
 
-sector = ac.RectSector(x_min=-0.27, x_max=-0.1, y_min=-0.2, y_max=0.2)
+sector = ac.RectSector(x_min=-0.3, x_max=-0.2, y_min=-0.2, y_max=0.2)
 
 # %%
 # To see how our sector and airfoil look together, we visulaize the airfoil's front and trailing
 # edges (as dashed lines), the sector (as a light blue rectangle), and the grid points (where the
 # sound field is calculated). This helps us see exactly what region we are integrating over later.
 
-plt.scatter(*grid.pos[0:2], c='lightgray', s=10, label='Grid Points')
+plt.scatter(*grid.pos[0:2], c='lightgray', s=10, label='Grid Points', alpha=0.2)
 # Plot airfoil's edges as dashed lines (we assume they are at x = -0.3 and x = -0.25)
 plt.vlines([-0.33, -0.27], ymin=-0.3, ymax=0.3, linestyles='--', label='Airfoil edges')
 # Plot sector as a filled rectangle
 plt.fill_between([sector.x_min, sector.x_max], sector.y_min, sector.y_max, alpha=0.5, label='Sector')
-plt.imshow(spl_pm.T, vmin=0, origin='lower', extent=grid.extent)
+plt.imshow(spl_pm.T, vmax=spl_pm.max(), vmin=spl_pm.max()-15, origin='lower', extent=grid.extent, cmap='hot_r')
 
 cbar = plt.colorbar()
 cbar.set_label('$L_p$ / dB')
