@@ -1,0 +1,167 @@
+<ns0:svg xmlns:ns0="http://www.w3.org/2000/svg" xmlns:ns1="http://www.w3.org/1999/xlink" width="722pt" height="120pt" viewBox="0.00 0.00 722.00 120.00">
+<ns0:g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 116)">
+<ns0:title>inheritance7857148e5a</ns0:title>
+
+<ns0:g id="node1" class="node">
+<ns0:title>BeamformerCleant</ns0:title>
+<ns0:g id="a_node1"><ns0:a ns1:href="../api_ref/generated/acoular.tbeamform.html#acoular.tbeamform.BeamformerCleant" ns1:title="CLEANT deconvolution method." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="366,-93 256,-93 256,-74 366,-74 366,-93" />
+<ns0:text text-anchor="middle" x="311" y="-81" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">BeamformerCleant</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node3" class="node">
+<ns0:title>BeamformerCleantSq</ns0:title>
+<ns0:g id="a_node3"><ns0:a ns1:href="../api_ref/generated/acoular.tbeamform.html#acoular.tbeamform.BeamformerCleantSq" ns1:title="CLEANT deconvolution method with optional removal of autocorrelation." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="534,-112 412,-112 412,-93 534,-93 534,-112" />
+<ns0:text text-anchor="middle" x="473" y="-100" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">BeamformerCleantSq</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge2" class="edge">
+<ns0:title>BeamformerCleant-&gt;BeamformerCleantSq</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M366.17,-89.93C379.13,-91.47 393.11,-93.13 406.53,-94.73" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="406.67,-96.5 411.84,-95.36 407.08,-93.03 406.67,-96.5" />
+</ns0:g>
+
+<ns0:g id="node5" class="node">
+<ns0:title>BeamformerCleantTraj</ns0:title>
+<ns0:g id="a_node5"><ns0:a ns1:href="../api_ref/generated/acoular.tbeamform.html#acoular.tbeamform.BeamformerCleantTraj" ns1:title="CLEANT deconvolution method." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="536.5,-75 409.5,-75 409.5,-56 536.5,-56 536.5,-75" />
+<ns0:text text-anchor="middle" x="473" y="-63" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">BeamformerCleantTraj</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge5" class="edge">
+<ns0:title>BeamformerCleant-&gt;BeamformerCleantTraj</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M366.17,-77.41C378.41,-76.03 391.56,-74.55 404.29,-73.12" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="404.56,-74.85 409.33,-72.55 404.17,-71.37 404.56,-74.85" />
+</ns0:g>
+
+<ns0:g id="node2" class="node">
+<ns0:title>BeamformerTime</ns0:title>
+<ns0:g id="a_node2"><ns0:a ns1:href="../api_ref/generated/acoular.tbeamform.html#acoular.tbeamform.BeamformerTime" ns1:title="Provides a basic time domain beamformer with time signal output." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="206.5,-56 103.5,-56 103.5,-37 206.5,-37 206.5,-56" />
+<ns0:text text-anchor="middle" x="155" y="-44" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">BeamformerTime</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge1" class="edge">
+<ns0:title>BeamformerTime-&gt;BeamformerCleant</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M195.66,-56.03C216.95,-61.14 243.27,-67.47 265.29,-72.76" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="264.94,-74.47 270.21,-73.94 265.76,-71.07 264.94,-74.47" />
+</ns0:g>
+
+<ns0:g id="node6" class="node">
+<ns0:title>BeamformerTimeSq</ns0:title>
+<ns0:g id="a_node6"><ns0:a ns1:href="../api_ref/generated/acoular.tbeamform.html#acoular.tbeamform.BeamformerTimeSq" ns1:title="Time domain beamformer with squared output and optional autopower removal." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="368.5,-19 253.5,-19 253.5,0 368.5,0 368.5,-19" />
+<ns0:text text-anchor="middle" x="311" y="-7" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">BeamformerTimeSq</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge8" class="edge">
+<ns0:title>BeamformerTime-&gt;BeamformerTimeSq</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M195.66,-36.97C216.95,-31.86 243.27,-25.53 265.29,-20.24" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="265.76,-21.93 270.21,-19.06 264.94,-18.53 265.76,-21.93" />
+</ns0:g>
+
+<ns0:g id="node7" class="node">
+<ns0:title>BeamformerTimeTraj</ns0:title>
+<ns0:g id="a_node7"><ns0:a ns1:href="../api_ref/generated/acoular.tbeamform.html#acoular.tbeamform.BeamformerTimeTraj" ns1:title="Provides a basic time domain beamformer with time signal output." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="371,-56 251,-56 251,-37 371,-37 371,-56" />
+<ns0:text text-anchor="middle" x="311" y="-44" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">BeamformerTimeTraj</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge11" class="edge">
+<ns0:title>BeamformerTime-&gt;BeamformerTimeTraj</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M206.85,-46.5C219.3,-46.5 232.79,-46.5 245.78,-46.5" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="245.92,-48.25 250.92,-46.5 245.92,-44.75 245.92,-48.25" />
+</ns0:g>
+
+<ns0:g id="node4" class="node">
+<ns0:title>BeamformerCleantSqTraj</ns0:title>
+<ns0:g id="a_node4"><ns0:a ns1:href="../api_ref/generated/acoular.tbeamform.html#acoular.tbeamform.BeamformerCleantSqTraj" ns1:title="CLEANT deconvolution method with optional removal of autocorrelation." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="714,-37 575,-37 575,-18 714,-18 714,-37" />
+<ns0:text text-anchor="middle" x="644.5" y="-25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">BeamformerCleantSqTraj</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge3" class="edge">
+<ns0:title>BeamformerCleantTraj-&gt;BeamformerCleantSqTraj</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M516.77,-55.91C540.95,-50.49 571.23,-43.7 596.13,-38.12" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="596.54,-39.82 601.04,-37.02 595.77,-36.41 596.54,-39.82" />
+</ns0:g>
+
+<ns0:g id="edge4" class="edge">
+<ns0:title>BeamformerTimeSq-&gt;BeamformerCleantSqTraj</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M368.55,-6.83C414.55,-5.3 481.08,-4.55 539,-9.5 556.7,-11.01 575.91,-13.94 592.97,-17.01" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="592.96,-18.79 598.2,-17.96 593.59,-15.34 592.96,-18.79" />
+</ns0:g>
+
+<ns0:g id="node9" class="node">
+<ns0:title>BeamformerTimeSqTraj</ns0:title>
+<ns0:g id="a_node9"><ns0:a ns1:href="../api_ref/generated/acoular.tbeamform.html#acoular.tbeamform.BeamformerTimeSqTraj" ns1:title="Time domain beamformer with squared output for a grid moving along a trajectory." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="539,-38 407,-38 407,-19 539,-19 539,-38" />
+<ns0:text text-anchor="middle" x="473" y="-26" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">BeamformerTimeSqTraj</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge9" class="edge">
+<ns0:title>BeamformerTimeSq-&gt;BeamformerTimeSqTraj</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M368.86,-16.25C379.53,-17.52 390.8,-18.86 401.82,-20.17" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="401.69,-21.91 406.87,-20.77 402.11,-18.44 401.69,-21.91" />
+</ns0:g>
+
+<ns0:g id="edge6" class="edge">
+<ns0:title>BeamformerTimeTraj-&gt;BeamformerCleantTraj</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M371.12,-53.52C381.93,-54.8 393.29,-56.15 404.32,-57.46" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="404.19,-59.21 409.36,-58.06 404.6,-55.73 404.19,-59.21" />
+</ns0:g>
+
+<ns0:g id="edge10" class="edge">
+<ns0:title>BeamformerTimeTraj-&gt;BeamformerTimeSqTraj</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M371.12,-39.85C381.15,-38.72 391.64,-37.54 401.91,-36.39" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="402.16,-38.12 406.93,-35.82 401.76,-34.64 402.16,-38.12" />
+</ns0:g>
+
+<ns0:g id="node8" class="node">
+<ns0:title>TimeOut</ns0:title>
+<ns0:g id="a_node8"><ns0:a ns1:href="../api_ref/generated/acoular.base.html#acoular.base.TimeOut" ns1:title="Abstract base class receiving from a :attr:`source` and returning time domain signals." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="59,-37 0,-37 0,-18 59,-18 59,-37" />
+<ns0:text text-anchor="middle" x="29.5" y="-25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">TimeOut</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge7" class="edge">
+<ns0:title>TimeOut-&gt;BeamformerTime</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M59.14,-31.91C70.82,-33.7 84.74,-35.84 98.27,-37.93" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="98.03,-39.66 103.23,-38.69 98.56,-36.2 98.03,-39.66" />
+</ns0:g>
+
+<ns0:g id="node10" class="node">
+<ns0:title>IntegratorSectorTime</ns0:title>
+<ns0:g id="a_node10"><ns0:a ns1:href="../api_ref/generated/acoular.tbeamform.html#acoular.tbeamform.IntegratorSectorTime" ns1:title="Provides an Integrator in the time domain." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="215,-19 95,-19 95,0 215,0 215,-19" />
+<ns0:text text-anchor="middle" x="155" y="-7" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">IntegratorSectorTime</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge12" class="edge">
+<ns0:title>TimeOut-&gt;IntegratorSectorTime</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M59.14,-23.33C68.41,-21.97 79.09,-20.42 89.87,-18.85" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="90.13,-20.58 94.83,-18.12 89.63,-17.11 90.13,-20.58" />
+</ns0:g>
+</ns0:g>
+</ns0:svg>

@@ -1,0 +1,44 @@
+<ns0:svg xmlns:ns0="http://www.w3.org/2000/svg" xmlns:ns1="http://www.w3.org/1999/xlink" width="356pt" height="27pt" viewBox="0.00 0.00 356.00 27.00">
+<ns0:g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 23)">
+<ns0:title>inheritance1c10ca78a2</ns0:title>
+
+<ns0:g id="node1" class="node">
+<ns0:title>BaseSpectra</ns0:title>
+<ns0:g id="a_node1"><ns0:a ns1:href="../api_ref/generated/acoular.spectra.html#acoular.spectra.BaseSpectra" ns1:title="Base class for handling spectral data in Acoular." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="77,-19 0,-19 0,0 77,0 77,-19" />
+<ns0:text text-anchor="middle" x="38.5" y="-7" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">BaseSpectra</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node2" class="node">
+<ns0:title>PowerSpectra</ns0:title>
+<ns0:g id="a_node2"><ns0:a ns1:href="../api_ref/generated/acoular.spectra.html#acoular.spectra.PowerSpectra" ns1:title="Provides the cross-spectral matrix of multichannel time-domain data and its eigen-decomposition." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="196,-19 113,-19 113,0 196,0 196,-19" />
+<ns0:text text-anchor="middle" x="154.5" y="-7" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">PowerSpectra</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge1" class="edge">
+<ns0:title>BaseSpectra-&gt;PowerSpectra</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M77.14,-9.5C86.86,-9.5 97.44,-9.5 107.53,-9.5" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="107.76,-11.25 112.76,-9.5 107.76,-7.75 107.76,-11.25" />
+</ns0:g>
+
+<ns0:g id="node3" class="node">
+<ns0:title>PowerSpectraImport</ns0:title>
+<ns0:g id="a_node3"><ns0:a ns1:href="../api_ref/generated/acoular.spectra.html#acoular.spectra.PowerSpectraImport" ns1:title="Provides a dummy class for using pre-calculated CSMs." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="348,-19 232,-19 232,0 348,0 348,-19" />
+<ns0:text text-anchor="middle" x="290" y="-7" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">PowerSpectraImport</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge2" class="edge">
+<ns0:title>PowerSpectra-&gt;PowerSpectraImport</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M196.28,-9.5C205.9,-9.5 216.37,-9.5 226.71,-9.5" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="226.76,-11.25 231.76,-9.5 226.76,-7.75 226.76,-11.25" />
+</ns0:g>
+</ns0:g>
+</ns0:svg>
