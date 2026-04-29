@@ -3,11 +3,15 @@ What's new
 
 Upcoming Release
 ------------------------
+    **Documentation**
+        * fixed an issue where inherited trait attributes were not shown in the API reference
+
     **Tests**
         * increases test coverage for :func:`~acoular.fbeamform.integrate` function
 
     **Internal**
         * improves inheritance and class structure of :class:`~acoular.sources.MaskedTimeSamples`.
+        * drops support for Python 3.10 and adds support for Python 3.14
 
 26.01
 ------------------------
