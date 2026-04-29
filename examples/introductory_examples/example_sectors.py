@@ -63,7 +63,7 @@ spl_pm = ac.L_p(pm)
 
 # Display source mapping results for 8 kHz
 plt.scatter(*grid.pos[0:2], c='lightgray', s=10, label='Grid Points', alpha=0.2)
-plt.imshow(spl_pm.T, vmax=spl_pm.max(), vmin=spl_pm.max()-15, origin='lower', extent=grid.extent, cmap='hot_r')
+plt.imshow(spl_pm.T, vmax=spl_pm.max(), vmin=spl_pm.max() - 15, origin='lower', extent=grid.extent, cmap='hot_r')
 
 cbar = plt.colorbar()
 cbar.set_label('$L_p$ / dB')
@@ -101,7 +101,7 @@ plt.scatter(*grid.pos[0:2], c='lightgray', s=10, label='Grid Points', alpha=0.2)
 plt.vlines([-0.33, -0.27], ymin=-0.3, ymax=0.3, linestyles='--', label='Airfoil edges')
 # Plot sector as a filled rectangle
 plt.fill_between([sector.x_min, sector.x_max], sector.y_min, sector.y_max, alpha=0.5, label='Sector', color='C0')
-plt.imshow(spl_pm.T, vmax=spl_pm.max(), vmin=spl_pm.max()-15, origin='lower', extent=grid.extent, cmap='hot_r')
+plt.imshow(spl_pm.T, vmax=spl_pm.max(), vmin=spl_pm.max() - 15, origin='lower', extent=grid.extent, cmap='hot_r')
 
 cbar = plt.colorbar()
 cbar.set_label('$L_p$ / dB')
