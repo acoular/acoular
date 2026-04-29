@@ -5,7 +5,7 @@ Upcoming Release
 ------------------------
     **Documentation**
         * fixed an issue where inherited trait attributes were not shown in the API reference
-        * adds example for sectors
+        * adds examples for :class:`~acoular.grids.Sector` and :class:`~acoular.grids.MultiSector`
 
     **Tests**
         * increases test coverage for :func:`~acoular.fbeamform.integrate` function
