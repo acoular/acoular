@@ -48,6 +48,8 @@ SKIP_DEFAULT = [
     ac.SampleSplitter,
     ac.SoundDeviceSamplesGenerator,
     ac.PointSourceConvolve,
+    ac.Trigger,
+    ac.AngleTracker,
     ac.SpatialInterpolator,
     ac.SpatialInterpolatorConstantRotation,
     ac.SpatialInterpolatorRotation,
@@ -187,7 +189,11 @@ class Generators:
 
     @parametrize('method', ['linear', 'spline', 'rbf-multiquadric', 'rbf-cubic', 'IDW', 'custom', 'sinc'])
     def case_SpatialInterpolator(self, moving_source_case, method):
-        return ac.SpatialInterpolator(mics=moving_source_case.mics, source=moving_source_case.source, method=method)
+        import warnings
+
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', DeprecationWarning)
+            return ac.SpatialInterpolator(mics=moving_source_case.mics, source=moving_source_case.source, method=method)
 
     def case_WriteH5(self, time_data_source, tmp_path):
         return ac.WriteH5(source=time_data_source, file=tmp_path / 'test.h5')

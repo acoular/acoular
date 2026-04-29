@@ -35,6 +35,7 @@ Implements acoustic environments with and without flow.
 """
 
 from abc import abstractmethod
+from warnings import warn
 
 import numba as nb
 import numpy as np
@@ -106,6 +107,9 @@ def cartToCyl(x, Q=None):  # noqa: N802, N803
     r"""
     Return cylindrical coordinate representation of an input array in cartesian coordinate.
 
+    .. deprecated::
+        :func:`cartToCyl` is deprecated and will be removed in version 27.01.
+
     Return the cylindrical coordinate representation of an input position which was before
     transformed into a modified cartesian coordinate, which has flow into positive z direction.
 
@@ -125,6 +129,7 @@ def cartToCyl(x, Q=None):  # noqa: N802, N803
         Cylindrical representation of given `N` points in cartesian coodrinates as
         an array of shape `(3, N)` with new coordinates :math:`(\phi, r, z)`.
     """
+    warn('cartToCyl is deprecated and will be removed in version 27.01.', DeprecationWarning, stacklevel=2)
     Q = np.identity(3) if Q is None else Q
     if not (Q == np.identity(3)).all():  # noqa: SIM300
         x = Q @ x  # modified position vector
@@ -134,6 +139,9 @@ def cartToCyl(x, Q=None):  # noqa: N802, N803
 def cylToCart(x, Q=None):  # noqa: N802, N803
     r"""
     Return cartesian coordinate representation of an input array in cylindrical coordinate.
+
+    .. deprecated::
+        :func:`cylToCart` is deprecated and will be removed in version 27.01.
 
     Return the cartesian coordinate representation of a input position which was before transformed
     into a cylindrical coordinate, which has flow into positive z direction.
@@ -154,6 +162,7 @@ def cylToCart(x, Q=None):  # noqa: N802, N803
         Cartesian representation of given `N` points in cylindrical coodrinates as
         an array of shape `(3, N)` with coodinates :math:`(x, y, z)`.
     """
+    warn('cylToCart is deprecated and will be removed in version 27.01.', DeprecationWarning, stacklevel=2)
     Q = np.identity(3) if Q is None else Q
     if not (Q == np.identity(3)).all():  # noqa: SIM300
         x = Q @ x  # modified position vector
