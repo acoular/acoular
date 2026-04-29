@@ -314,6 +314,9 @@ class Trigger(TimeOut):  # pragma: no cover
     """
     A signal processing class for detecting and analyzing trigger signals in time-series data.
 
+    .. deprecated::
+        :class:`Trigger` is deprecated and will be removed in version 27.01.
+
     The :class:`Trigger` class identifies trigger events in a single-channel signal provided by a
     :class:`~acoular.base.SamplesGenerator` source. The detection process involves:
 
@@ -407,13 +410,20 @@ class Trigger(TimeOut):  # pragma: no cover
         ],
     )
 
+    def __init__(self, *args, **kwargs):
+        warn(
+            'Trigger is deprecated and will be removed in version 27.01.',
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(*args, **kwargs)
+
     @cached_property
     def _get_digest(self):
         return digest(self)
 
     @cached_property
     def _get_trigger_data(self):
-        self._check_trigger_existence()
         triggerFunc = {'dirac': self._trigger_dirac, 'rect': self._trigger_rect}[self.trigger_type]
         num = 2048  # number samples for result-method of source
         threshold = self._threshold(num)
@@ -546,6 +556,9 @@ class AngleTracker(MaskedTimeOut):
     """
     Compute the rotational angle and RPM per sample from a trigger signal in the time domain.
 
+    .. deprecated::
+        :class:`AngleTracker` is deprecated and will be removed in version 27.01.
+
     This class retrieves samples from the specified :attr:`trigger` signal and interpolates angular
     position and rotational speed. The results are stored in the properties :attr:`angle` and
     :attr:`rpm`.
@@ -610,6 +623,14 @@ class AngleTracker(MaskedTimeOut):
 
     # Rotation angle in radians, internal use
     _angle = CArray()
+
+    def __init__(self, *args, **kwargs):
+        warn(
+            'AngleTracker is deprecated and will be removed in version 27.01.',
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(*args, **kwargs)
 
     @cached_property
     def _get_digest(self):
@@ -704,6 +725,9 @@ class AngleTracker(MaskedTimeOut):
 class SpatialInterpolator(TimeOut):  # pragma: no cover
     """
     Base class for spatial interpolation of microphone data.
+
+    .. deprecated::
+        :class:`SpatialInterpolator` is deprecated and will be removed in version 27.01.
 
     This class retrieves samples from a specified source and performs spatial interpolation to
     generate output at virtual microphone positions. The interpolation is executed using various
@@ -831,6 +855,14 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
             'interp_at_zero',
         ],
     )
+
+    def __init__(self, *args, **kwargs):
+        warn(
+            f'{self.__class__.__name__} is deprecated and will be removed in version 27.01.',
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(*args, **kwargs)
 
     def _get_num_channels(self):
         return self.mics_virtual.num_mics
@@ -1282,6 +1314,9 @@ class SpatialInterpolatorRotation(SpatialInterpolator):  # pragma: no cover
     """
     Spatial interpolation class for rotating sound sources.
 
+    .. deprecated::
+        :class:`SpatialInterpolatorRotation` is deprecated and will be removed in version 27.01.
+
     This class extends :attr:`SpatialInterpolator` to handle sources that undergo rotational
     movement. It retrieves samples from the :attr:`source` attribute and angle data from the
     :attr:`AngleTracker` instance (:attr:`angle_source`). Using these inputs, it computes
@@ -1352,6 +1387,10 @@ class SpatialInterpolatorRotation(SpatialInterpolator):  # pragma: no cover
 class SpatialInterpolatorConstantRotation(SpatialInterpolator):  # pragma: no cover
     """
     Performs spatial linear interpolation for sources undergoing constant rotation.
+
+    .. deprecated::
+        :class:`SpatialInterpolatorConstantRotation` is deprecated and will be removed in version
+        27.01.
 
     This class interpolates signals from a rotating sound source based on a constant rotational
     speed. It retrieves samples from the :attr:`source` and applies interpolation before
