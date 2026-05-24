@@ -359,11 +359,13 @@ class TimeSamples(SamplesGenerator):
     #: or :attr:`specified array<data>`.
     num_samples = CInt(0)
 
-    #: A 2D NumPy array containing the time-domain data, shape (:attr:`num_samples`,
-    #: :attr:`num_channels`).
-    data = Any(transient=True)
+    #: A read-only 2D NumPy array or a reference to an entry of a HDF5-file containing the
+    #: time-domain data, shape (:attr:`num_samples`, :attr:`num_channels`).
+    data = Property(depends_on=['file'])
 
-    #: HDF5 file object.
+    _data = Any(transient=True)
+
+    # HDF5 file object.
     _h5f = Instance(H5FileBase, transient=True)
 
     #: Metadata loaded from the HDF5 file, if available.
@@ -374,6 +376,15 @@ class TimeSamples(SamplesGenerator):
 
     #: A unique identifier for the samples, based on its properties. (read-only)
     digest = Property(depends_on=['basename', '_datachecksum', 'sample_freq', 'num_channels', 'num_samples'])
+
+    def _get_data(self):
+        return self._data
+
+    def _set_data(self, value):
+        assert isinstance(value, np.ndarray), 'data must be a NumPy array'
+        assert value.ndim == 2, 'data must be a two-dimensional'
+        value.setflags(write=False)  # make data read-only
+        self._data = value
 
     def _get__datachecksum(self):
         return self.data[0, :].sum()
@@ -397,7 +408,7 @@ class TimeSamples(SamplesGenerator):
         self._load_timedata()
         self._load_metadata()
 
-    @observe('data')
+    @observe('_data')
     def _load_shapes(self, event):  # noqa ARG002
         # Set :attr:`num_channels` and :attr:`num_samples` from data.
         if self.data is not None:
@@ -405,7 +416,7 @@ class TimeSamples(SamplesGenerator):
 
     def _load_timedata(self):
         # Loads timedata from :attr:`.h5 file<file>`. Only for internal use.
-        self.data = self._h5f.get_data_by_reference('time_data')
+        self._data = self._h5f.get_data_by_reference('time_data')
         self.sample_freq = self._h5f.get_node_attribute(self.data, 'sample_freq')
 
     def _load_metadata(self):
@@ -566,9 +577,10 @@ class MaskedTimeSamples(TimeSamples):
         sli = slice(self.start, self.stop).indices(self.num_samples_total)
         return sli[1] - sli[0]
 
-    @observe('data')
+    @observe('_data')
     def _load_shapes(self, event):  # noqa ARG002
-        # Set :attr:`num_channels` and num_samples from :attr:`~acoular.sources.TimeSamples.data`.
+        # Set :attr:`num_channels_total` and num_samples_total from
+        # :attr:`~acoular.sources.MaskedTimeSamples.data`.
         if self.data is not None:
             self.num_samples_total, self.num_channels_total = self.data.shape
 
@@ -2165,22 +2177,26 @@ class SourceMixer(SamplesGenerator):
         # check whether all sources fit together
         self.validate_sources()
 
-        gens = [i.result(num) for i in self.sources[1:]]
+        gens = [i.result(num) for i in self.sources]
         weights = self.weights.copy()
         if weights.size == 0:
             weights = np.array([1.0 for j in range(len(self.sources))])
         assert weights.shape[0] == len(self.sources)
-        for temp in self.sources[0].result(num):
-            temp *= weights[0]
-            sh = temp.shape[0]
-            for j, g in enumerate(gens):
-                temp1 = next(g) * weights[j + 1]
-                if temp.shape[0] > temp1.shape[0]:
-                    temp = temp[: temp1.shape[0]]
-                temp += temp1[: temp.shape[0]]
-            yield temp
-            if sh > temp.shape[0]:
-                break
+        while True:
+            temp = np.zeros(
+                (
+                    num,
+                    self.num_channels,
+                ),
+                dtype=float,
+            )
+            for i, gen in enumerate(gens):
+                try:
+                    block = next(gen)
+                except StopIteration:
+                    return
+                temp[: block.shape[0]] += weights[i] * block
+            yield temp[: block.shape[0]]
 
 
 class PointSourceConvolve(PointSource):
