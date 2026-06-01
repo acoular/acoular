@@ -17,43 +17,9 @@ from warnings import warn
 
 # WARNING: DO NOT ADD ANY IMPORTS HERE THAT MIGHT IMPORT NUMPY
 
-# When numpy is using OpenBLAS then it runs with OPENBLAS_NUM_THREADS which may lead to
-# overcommittment when called from within numba jitted function that run on
-# NUMBA_NUM_THREADS. If overcommitted, things get extremely! slow. Therefore we make an
-# attempt to avoid this situation. The main problem is that OPENBLAS_NUM_THREADS is
-# only respected once numpy starts. Later on, it cannot be changed.
-
-# we check if numpy already loaded
-if 'numpy' in sys.modules:
-    # numpy is loaded
-    # temporarily route stdout to string
-    import io
-
-    import numpy as np
-
-    orig_stdout = sys.stdout
-    temp_stdout = io.StringIO()
-    sys.stdout = temp_stdout
-    np.show_config()
-    sys.stdout = orig_stdout
-    # check if it uses OpenBLAS or another library
-    if 'openblas' in temp_stdout.getvalue().lower() and environ.get('OPENBLAS_NUM_THREADS') != '1':
-        # it's OpenBLAS, set numba threads=1 to avoid overcommittment
-        import numba as nb
-
-        nb.set_num_threads(1)
-        warn(
-            'We detected that Numpy is already loaded and uses OpenBLAS. Because '
-            'this conflicts with Numba parallel execution, we disable parallel '
-            'execution for now and processing might be slower. To speed up, '
-            'either import Numpy after Acoular or set environment variable '
-            'OPENBLAS_NUM_THREADS=1 before start of the program.',
-            UserWarning,
-            stacklevel=2,
-        )
-else:
-    # numpy is not loaded, make sure that OpenBLAS runs single threaded
-    environ['OPENBLAS_NUM_THREADS'] = '1'
+# Note: numpy environment configuration (OPENBLAS_NUM_THREADS, etc.) is now handled
+# proactively in numpy_config.py, which is imported before this module.
+# This ensures proper threading behavior regardless of import order.
 
 # this loads numpy, so we have to defer loading until OpenBLAS check is done
 from traits.api import Bool, Enum, HasStrictTraits, File, Property, cached_property  # noqa: I001

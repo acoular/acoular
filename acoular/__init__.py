@@ -6,6 +6,12 @@
 
 import os  # noqa: I001
 
+# numpy_config must be imported first to set environment variables before numpy import
+from .numpy_config import configure_numpy_environment
+
+# Configure numpy environment (sets OPENBLAS_NUM_THREADS=1, etc.)
+configure_numpy_environment()
+
 # config must be imported before any submodules containing numpy, see #322.
 from .configuration import config
 
