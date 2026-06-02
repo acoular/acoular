@@ -39,7 +39,6 @@ Implement support for multidimensional grids and integration sectors.
     PolySector
     ConvexSector
     MultiSector
-    Polygon
     in_hull
 """
 
@@ -91,8 +90,8 @@ def in_hull(p, hull, border=True, tol=0):
         computed.
 
     border : bool, optional
-        Points in :attr:`p` on the border of :attr:`hull` will be kept in the return if `True`. If
-        `False`, only points inside :attr:`hull` will be kept. Default is `True`.
+        Points in `p` on the border of `hull` will be kept in the return if `True`. If
+        `False`, only points inside `hull` will be kept. Default is `True`.
 
     tol : :class:`float`, optional
         Tolerance allowed in the :meth:`inside-triangle check<scipy.spatial.Delaunay.find_simplex>`.
@@ -189,11 +188,11 @@ class Grid(ABCHasStrictTraits):
         """
         Return the indices for a subdomain in the grid.
 
-        Allows arbitrary subdomains of type :class:`Sector`.
+        Allows arbitrary subdomains of type :class:`~acoular.grids.Sector`.
 
         Parameters
         ----------
-        sector : :class:`Sector` object
+        sector : :class:`~acoular.grids.Sector` object
             Sector describing the subdomain.
 
         Returns
@@ -219,7 +218,7 @@ class Grid(ABCHasStrictTraits):
         This method generates an XML file containing the positions of all grid points.
         Each point is represented by a ``<pos>`` element with ``Name``, ``x``, ``y``, and ``z``
         attributes. The generated XML is formatted to match the structure required for importing
-        into the :class:`ImportGrid` class.
+        into the :class:`~acoular.grids.ImportGrid` class.
 
         Parameters
         ----------
@@ -1012,7 +1011,7 @@ class Sector(ABCHasStrictTraits):
         """
         Check whether the given coordinates lie within the sector's bounds.
 
-        This method determines if each column of the input array :attr:`pos` corresponds to a point
+        This method determines if each column of the input array `pos` corresponds to a point
         that falls within the sector. For this base class, all points are considered within the
         sector.
 
@@ -1026,7 +1025,7 @@ class Sector(ABCHasStrictTraits):
         -------
         :class:`numpy.ndarray` of :class:`bools<bool>`
             A 1D array of length `N`, where each entry indicates whether the corresponding
-            column in :attr:`pos` lies within the sector's bounds.
+            column in `pos` lies within the sector's bounds.
 
         Examples
         --------
@@ -1320,7 +1319,7 @@ class PolySector(SingleSector):
 
     Notes
     -----
-    The polygon is specified by the :class:`Polygon` class.
+    The polygon is specified by the :class:`~acoular.tools.utils.Polygon` class.
 
     Examples
     --------

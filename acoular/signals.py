@@ -204,7 +204,7 @@ class WNoiseGenerator(NoiseGenerator):
     White noise signal generator.
 
     This class generates white noise signals with a specified
-    :attr:`root mean square (RMS)<SignalGenerator.rms>` amplitude,
+    root mean square (RMS) `rms` amplitude,
     :attr:`number of samples<SignalGenerator.num_samples>`, and
     :attr:`sampling frequency<SignalGenerator.sample_freq>`. The white noise is generated using a
     :obj:`random number generator<numpy.random.RandomState.standard_normal>` initialized with a
@@ -255,7 +255,7 @@ class WNoiseGenerator(NoiseGenerator):
         Generate and deliver the white noise signal.
 
         The signal is created using a Gaussian distribution with mean 0 and variance 1,
-        scaled by the :attr:`RMS<SignalGenerator.rms>` amplitude of the object.
+        scaled by the root mean square (RMS) `rms` amplitude of the object.
 
         Returns
         -------
@@ -309,7 +309,7 @@ class PNoiseGenerator(NoiseGenerator):
 
         The signal is computed using the Voss-McCartney algorithm, which generates noise
         with a :math:`1/f` power spectral density. The method ensures that the output has the
-        desired :attr:`RMS<SignalGenerator.rms>` amplitude and spectrum.
+        desired root mean square (RMS) `rms` amplitude and spectrum.
 
         Returns
         -------
@@ -591,7 +591,7 @@ class GenericSignalGenerator(SignalGenerator):
     """
 
     #: The data source from which the signal is fetched.
-    #: This can be any object derived from :class:`SamplesGenerator`.
+    #: This can be any object derived from :class:`~acoular.base.SamplesGenerator`.
     source = Instance(SamplesGenerator)
 
     #: Scaling factor applied to the generated signal. Defaults to ``1.0``.
@@ -634,7 +634,7 @@ class GenericSignalGenerator(SignalGenerator):
 
         Returns
         -------
-        :class:`numpy.array` of :class:`floats<float>`
+        :class:`numpy.ndarray` of :class:`floats<float>`
             The resulting signal, scaled by the :attr:`amplitude` attribute, with a length
             matching :attr:`~GenericSignalGenerator.num_samples`.
 
