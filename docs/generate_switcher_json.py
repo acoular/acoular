@@ -20,7 +20,7 @@ def version_key(tag):
 filtered_tags = [tag for tag in tags if re.match(r'^v\d+\.\d+$', tag)]
 filtered_tags.sort(key=version_key, reverse=True)
 
-MIN_VERSION = 'v25.01'
+MIN_VERSION = 'v26.01'
 
 # Build JSON structure
 versions = [{'name': 'latest', 'url': '/en/latest/', 'type': 'branch'}]
