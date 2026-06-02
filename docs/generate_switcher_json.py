@@ -31,7 +31,9 @@ for tag in filtered_tags:
         if latest_stable is None:
             # First matching tag is the latest stable release
             latest_stable = tag
-            versions.append({'name': f'{tag} (stable)', 'version': tag, 'url': f'/en/{tag}/', 'type': 'tag', 'preferred': True})
+            versions.append(
+                {'name': f'{tag} (stable)', 'version': tag, 'url': f'/en/{tag}/', 'type': 'tag', 'preferred': True}
+            )
         else:
             versions.append({'version': tag, 'url': f'/en/{tag}/', 'type': 'tag'})
 
