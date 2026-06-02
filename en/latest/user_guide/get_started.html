@@ -567,7 +567,7 @@ However, a working measurement set-up is required. Thus, we will use simulated d
 </div>
 <p>The ts object now provides access to the HDF5 file and information stored in it.</p>
 <div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [5]: </span><span class="n">ts</span>
-<span class="gh">Out[5]: </span><span class="go">&lt;acoular.sources.TimeSamples at 0x7ff8f5f08e90&gt;</span>
+<span class="gh">Out[5]: </span><span class="go">&lt;acoular.sources.TimeSamples at 0x7f9821d834d0&gt;</span>
 
 <span class="gp">In [6]: </span><span class="n">ts</span><span class="o">.</span><span class="n">sample_freq</span>
 <span class="gh">Out[6]: </span><span class="go">51200.0</span>
@@ -611,10 +611,10 @@ However, a working measurement set-up is required. Thus, we will use simulated d
 <div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [17]: </span><span class="kn">import</span><span class="w"> </span><span class="nn">pylab</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 
 <span class="gp">In [18]: </span><span class="n">plt</span><span class="o">.</span><span class="n">ion</span><span class="p">()</span> <span class="c1"># switch on interactive plotting mode</span>
-<span class="gh">Out[18]: </span><span class="go">&lt;contextlib.ExitStack at 0x7ff8f4685270&gt;</span>
+<span class="gh">Out[18]: </span><span class="go">&lt;contextlib.ExitStack at 0x7f98203c5d10&gt;</span>
 
 <span class="gp">In [19]: </span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">mg</span><span class="o">.</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">mg</span><span class="o">.</span><span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="s1">&#39;o&#39;</span><span class="p">)</span>
-<span class="gh">Out[19]: </span><span class="go">[&lt;matplotlib.lines.Line2D at 0x7ff8f46567b0&gt;]</span>
+<span class="gh">Out[19]: </span><span class="go">[&lt;matplotlib.lines.Line2D at 0x7f98203927b0&gt;]</span>
 </pre></div>
 </div>
 <figure class="align-center">
@@ -641,10 +641,10 @@ However, a working measurement set-up is required. Thus, we will use simulated d
 <span class="gh">Out[24]: </span><span class="go">&lt;Figure size 640x480 with 0 Axes&gt;</span>
 
 <span class="gp">In [25]: </span><span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span> <span class="n">Lm</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">Lm</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">rg</span><span class="o">.</span><span class="n">extent</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;bicubic&#39;</span><span class="p">)</span>
-<span class="gh">Out[25]: </span><span class="go">&lt;matplotlib.image.AxesImage at 0x7ff8f45dc050&gt;</span>
+<span class="gh">Out[25]: </span><span class="go">&lt;matplotlib.image.AxesImage at 0x7f9820118050&gt;</span>
 
 <span class="gp">In [26]: </span><span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
-<span class="gh">Out[26]: </span><span class="go">&lt;matplotlib.colorbar.Colorbar at 0x7ff8f442c590&gt;</span>
+<span class="gh">Out[26]: </span><span class="go">&lt;matplotlib.colorbar.Colorbar at 0x7f9820168590&gt;</span>
 </pre></div>
 </div>
 <p>which shows the following map, scaled to a range between the maximum value and 10 dB below it, and with the axes scales derived from the <a class="reference internal" href="../api_ref/generated/acoular.grids.html#acoular.grids.RectGrid" title="acoular.grids.RectGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">RectGrid</span></code></a> data object.</p>
