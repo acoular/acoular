@@ -1,13 +1,18 @@
-name: "Manual: Docs 📝 Build 🛠️ & Deploy"
-run-name: Build Docs 🛠️ & Publish to GitHub Pages 📝
+name: "Docs 📝 Build 🛠️ & Deploy (latest)"
+run-name: Build & Deploy docs → en/latest
 permissions:
   contents: read
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
   build:
     uses: acoular/ci/.github/workflows/docs.yml@main
+    with:
+      html_baseurl: "https://www.acoular.org/en/latest/"
 
   deploy:
     needs: build
@@ -15,17 +20,34 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Download artifacts
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0  # all tags needed for generate-switcher
+
+      - name: Download build artifact
         uses: actions/download-artifact@v7
         with:
           name: build-docs
           path: ./docs/build/html
-      - name: Upload docs to GitHub Pages
+
+      - name: Generate switcher.json
+        # Overwrites the shallow-checkout version baked in by the build job.
+        # Only this deploy has full tag history, so only this job produces the
+        # correct version list. All deployed versions fetch this file via json_url.
+        uses: acoular/ci/.github/actions/generate-switcher@main
+        with:
+          base-path: /en/
+          min-version: v25.01
+          output: docs/build/html/_static/switcher.json
+
+      - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           publish_branch: gh-pages
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs/build/html
+          destination_dir: en/latest
+          keep_files: true
           cname: www.acoular.org
-          force_orphan: true # This allows you to make your publish branch with only the latest commit.
           enable_jekyll: false
