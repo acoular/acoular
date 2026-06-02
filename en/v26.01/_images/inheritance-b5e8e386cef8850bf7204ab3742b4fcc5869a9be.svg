@@ -1,0 +1,29 @@
+<ns0:svg xmlns:ns0="http://www.w3.org/2000/svg" xmlns:ns1="http://www.w3.org/1999/xlink" width="152pt" height="29pt" viewBox="0.00 0.00 152.00 29.00">
+<ns0:g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 24.75)">
+<ns0:title>inheritancec89fd9f5c2</ns0:title>
+
+<ns0:g id="node1" class="node">
+<ns0:title>Calib</ns0:title>
+<ns0:g id="a_node1"><ns0:a ns1:href="../api_ref/generated/acoular.calib.html#acoular.calib.Calib" ns1:title="Processing block for handling calibration data in `*.xml` or NumPy format." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="144,-20.75 90,-20.75 90,0 144,0 144,-20.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="117" y="-7.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">Calib</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node2" class="node">
+<ns0:title>InOut</ns0:title>
+<ns0:g id="a_node2"><ns0:a ns1:href="../api_ref/generated/acoular.base.html#acoular.base.InOut" ns1:title="Abstract base class receiving from a :attr:`source` and returning signals in the same domain." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="54,-20.75 0,-20.75 0,0 54,0 54,-20.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="27" y="-7.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">InOut</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge1" class="edge">
+<ns0:title>InOut-&gt;Calib</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M54.4,-10.38C63.45,-10.38 73.69,-10.38 83.19,-10.38" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="83.86,-12.13 88.86,-10.38 83.86,-8.63 83.86,-12.13" />
+</ns0:g>
+</ns0:g>
+</ns0:svg>

@@ -1,0 +1,95 @@
+<ns0:svg xmlns:ns0="http://www.w3.org/2000/svg" xmlns:ns1="http://www.w3.org/1999/xlink" width="322pt" height="107pt" viewBox="0.00 0.00 322.00 107.00">
+<ns0:g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 102.75)">
+<ns0:title>inheritance3b6775efa9</ns0:title>
+
+<ns0:g id="node1" class="node">
+<ns0:title>Generator</ns0:title>
+<ns0:g id="a_node1"><ns0:a ns1:href="../api_ref/generated/acoular.base.html#acoular.base.Generator" ns1:title="Interface for any generating signal processing block." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="64.75,-58.75 0,-58.75 0,-38 64.75,-38 64.75,-58.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="32.38" y="-45.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">Generator</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node3" class="node">
+<ns0:title>SamplesGenerator</ns0:title>
+<ns0:g id="a_node3"><ns0:a ns1:href="../api_ref/generated/acoular.base.html#acoular.base.SamplesGenerator" ns1:title="Interface for any generating multi-channel time domain signal processing block." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="207.5,-78.75 100.75,-78.75 100.75,-58 207.5,-58 207.5,-78.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="154.12" y="-65.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">SamplesGenerator</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge3" class="edge">
+<ns0:title>Generator-&gt;SamplesGenerator</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M65.15,-53.68C74.1,-55.18 84.14,-56.85 94.14,-58.52" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="94.39,-60.34 99.61,-59.44 94.96,-56.89 94.39,-60.34" />
+</ns0:g>
+
+<ns0:g id="node4" class="node">
+<ns0:title>SpectraGenerator</ns0:title>
+<ns0:g id="a_node4"><ns0:a ns1:href="../api_ref/generated/acoular.base.html#acoular.base.SpectraGenerator" ns1:title="Interface for any generating multi-channel signal frequency domain processing block." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="204.88,-39.75 103.38,-39.75 103.38,-19 204.88,-19 204.88,-39.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="154.12" y="-26.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">SpectraGenerator</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge4" class="edge">
+<ns0:title>Generator-&gt;SpectraGenerator</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M65.15,-43.33C74.88,-41.79 85.89,-40.04 96.75,-38.32" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="97.7,-39.94 102.37,-37.43 97.16,-36.48 97.7,-39.94" />
+</ns0:g>
+
+<ns0:g id="node2" class="node">
+<ns0:title>InOut</ns0:title>
+<ns0:g id="a_node2"><ns0:a ns1:href="../api_ref/generated/acoular.base.html#acoular.base.InOut" ns1:title="Abstract base class receiving from a :attr:`source` and returning signals in the same domain." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="305.5,-59.75 251.5,-59.75 251.5,-39 305.5,-39 305.5,-59.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="278.5" y="-46.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">InOut</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge1" class="edge">
+<ns0:title>SamplesGenerator-&gt;InOut</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M207.73,-60.21C220.41,-58.24 233.6,-56.19 245.04,-54.41" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="245.79,-56.07 250.46,-53.57 245.25,-52.61 245.79,-56.07" />
+</ns0:g>
+
+<ns0:g id="node6" class="node">
+<ns0:title>TimeOut</ns0:title>
+<ns0:g id="a_node6"><ns0:a ns1:href="../api_ref/generated/acoular.base.html#acoular.base.TimeOut" ns1:title="Abstract base class receiving from a :attr:`source` and returning time domain signals." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="307.5,-98.75 249.5,-98.75 249.5,-78 307.5,-78 307.5,-98.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="278.5" y="-85.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">TimeOut</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge6" class="edge">
+<ns0:title>SamplesGenerator-&gt;TimeOut</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M207.73,-76.97C219.65,-78.92 232,-80.94 242.95,-82.73" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="243.25,-84.55 248.47,-83.63 243.81,-81.1 243.25,-84.55" />
+</ns0:g>
+
+<ns0:g id="edge2" class="edge">
+<ns0:title>SpectraGenerator-&gt;InOut</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M205.25,-37.57C218.63,-39.75 232.74,-42.06 244.9,-44.05" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="245.11,-45.85 250.32,-44.93 245.67,-42.4 245.11,-45.85" />
+</ns0:g>
+
+<ns0:g id="node5" class="node">
+<ns0:title>SpectraOut</ns0:title>
+<ns0:g id="a_node5"><ns0:a ns1:href="../api_ref/generated/acoular.base.html#acoular.base.SpectraOut" ns1:title="Abstract base class receiving from a :attr:`source` and returning frequency domain signals." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="313.5,-20.75 243.5,-20.75 243.5,0 313.5,0 313.5,-20.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="278.5" y="-7.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">SpectraOut</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge5" class="edge">
+<ns0:title>SpectraGenerator-&gt;SpectraOut</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M205.25,-21.59C215.86,-19.95 226.92,-18.23 237.11,-16.65" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="237.91,-18.29 242.58,-15.8 237.37,-14.83 237.91,-18.29" />
+</ns0:g>
+</ns0:g>
+</ns0:svg>

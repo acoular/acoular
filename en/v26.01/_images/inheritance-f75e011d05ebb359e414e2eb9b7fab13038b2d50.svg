@@ -1,0 +1,149 @@
+<ns0:svg xmlns:ns0="http://www.w3.org/2000/svg" xmlns:ns1="http://www.w3.org/1999/xlink" width="615pt" height="107pt" viewBox="0.00 0.00 615.00 107.00">
+<ns0:g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 102.75)">
+<ns0:title>inheritanceb8d7ca74cc</ns0:title>
+
+<ns0:g id="node1" class="node">
+<ns0:title>AutoPowerSpectra</ns0:title>
+<ns0:g id="a_node1"><ns0:a ns1:href="../api_ref/generated/acoular.fprocess.html#acoular.fprocess.AutoPowerSpectra" ns1:title="Compute the real-valued auto-power spectra from multi-channel frequency-domain data." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="461.5,-20.75 356.25,-20.75 356.25,0 461.5,0 461.5,-20.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="408.88" y="-7.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">AutoPowerSpectra</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node4" class="node">
+<ns0:title>CrossPowerSpectra</ns0:title>
+<ns0:g id="a_node4"><ns0:a ns1:href="../api_ref/generated/acoular.fprocess.html#acoular.fprocess.CrossPowerSpectra" ns1:title="Compute the complex-valued auto- and cross-power spectra from frequency-domain data." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="607.25,-20.75 497.5,-20.75 497.5,0 607.25,0 607.25,-20.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="552.38" y="-7.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">CrossPowerSpectra</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge2" class="edge">
+<ns0:title>AutoPowerSpectra-&gt;CrossPowerSpectra</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M461.76,-10.38C471.21,-10.38 481.14,-10.38 490.81,-10.38" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="491.36,-12.13 496.36,-10.38 491.36,-8.63 491.36,-12.13" />
+</ns0:g>
+
+<ns0:g id="node2" class="node">
+<ns0:title>SpectraOut</ns0:title>
+<ns0:g id="a_node2"><ns0:a ns1:href="../api_ref/generated/acoular.base.html#acoular.base.SpectraOut" ns1:title="Abstract base class receiving from a :attr:`source` and returning frequency domain signals." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="316.88,-20.75 246.88,-20.75 246.88,0 316.88,0 316.88,-20.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="281.88" y="-7.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">SpectraOut</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge1" class="edge">
+<ns0:title>SpectraOut-&gt;AutoPowerSpectra</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M317.36,-10.38C327.39,-10.38 338.63,-10.38 349.69,-10.38" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="350.41,-12.13 355.41,-10.38 350.41,-8.63 350.41,-12.13" />
+</ns0:g>
+
+<ns0:g id="node8" class="node">
+<ns0:title>RFFT</ns0:title>
+<ns0:g id="a_node8"><ns0:a ns1:href="../api_ref/generated/acoular.fprocess.html#acoular.fprocess.RFFT" ns1:title="Compute the one-sided Fast Fourier Transform (FFT) for real-valued multichannel time data." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="435.88,-59.75 381.88,-59.75 381.88,-39 435.88,-39 435.88,-59.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="408.88" y="-46.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">RFFT</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge5" class="edge">
+<ns0:title>SpectraOut-&gt;RFFT</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M317.36,-21.14C335.54,-26.81 357.71,-33.72 375.55,-39.29" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="375.41,-41.08 380.71,-40.9 376.45,-37.74 375.41,-41.08" />
+</ns0:g>
+
+<ns0:g id="node3" class="node">
+<ns0:title>BaseSpectra</ns0:title>
+<ns0:g id="a_node3"><ns0:a ns1:href="../api_ref/generated/acoular.spectra.html#acoular.spectra.BaseSpectra" ns1:title="Base class for handling spectral data in Acoular." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="320.25,-59.75 243.5,-59.75 243.5,-39 320.25,-39 320.25,-59.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="281.88" y="-46.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">BaseSpectra</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge4" class="edge">
+<ns0:title>BaseSpectra-&gt;RFFT</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M320.72,-49.38C338.1,-49.38 358.51,-49.38 375.21,-49.38" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="375.89,-51.13 380.89,-49.38 375.89,-47.63 375.89,-51.13" />
+</ns0:g>
+
+<ns0:g id="node5" class="node">
+<ns0:title>Generator</ns0:title>
+<ns0:g id="a_node5"><ns0:a ns1:href="../api_ref/generated/acoular.base.html#acoular.base.Generator" ns1:title="Interface for any generating signal processing block." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="64.75,-58.75 0,-58.75 0,-38 64.75,-38 64.75,-58.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="32.38" y="-45.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">Generator</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node9" class="node">
+<ns0:title>SamplesGenerator</ns0:title>
+<ns0:g id="a_node9"><ns0:a ns1:href="../api_ref/generated/acoular.base.html#acoular.base.SamplesGenerator" ns1:title="Interface for any generating multi-channel time domain signal processing block." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="207.5,-88.75 100.75,-88.75 100.75,-68 207.5,-68 207.5,-88.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="154.12" y="-75.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">SamplesGenerator</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge6" class="edge">
+<ns0:title>Generator-&gt;SamplesGenerator</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M65.15,-56.34C76.94,-59.29 90.61,-62.71 103.61,-65.97" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="103.92,-67.85 109.19,-67.37 104.77,-64.46 103.92,-67.85" />
+</ns0:g>
+
+<ns0:g id="node10" class="node">
+<ns0:title>SpectraGenerator</ns0:title>
+<ns0:g id="a_node10"><ns0:a ns1:href="../api_ref/generated/acoular.base.html#acoular.base.SpectraGenerator" ns1:title="Interface for any generating multi-channel signal frequency domain processing block." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="204.88,-39.75 103.38,-39.75 103.38,-19 204.88,-19 204.88,-39.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="154.12" y="-26.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">SpectraGenerator</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge7" class="edge">
+<ns0:title>Generator-&gt;SpectraGenerator</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M65.15,-43.33C74.88,-41.79 85.89,-40.04 96.75,-38.32" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="97.7,-39.94 102.37,-37.43 97.16,-36.48 97.7,-39.94" />
+</ns0:g>
+
+<ns0:g id="node6" class="node">
+<ns0:title>IRFFT</ns0:title>
+<ns0:g id="a_node6"><ns0:a ns1:href="../api_ref/generated/acoular.fprocess.html#acoular.fprocess.IRFFT" ns1:title="Perform the inverse Fast Fourier Transform (IFFT) for one-sided multi-channel spectra." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="435.88,-98.75 381.88,-98.75 381.88,-78 435.88,-78 435.88,-98.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="408.88" y="-85.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">IRFFT</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node7" class="node">
+<ns0:title>TimeOut</ns0:title>
+<ns0:g id="a_node7"><ns0:a ns1:href="../api_ref/generated/acoular.base.html#acoular.base.TimeOut" ns1:title="Abstract base class receiving from a :attr:`source` and returning time domain signals." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="310.88,-98.75 252.88,-98.75 252.88,-78 310.88,-78 310.88,-98.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="281.88" y="-85.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">TimeOut</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge3" class="edge">
+<ns0:title>TimeOut-&gt;IRFFT</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M311.24,-88.38C330.35,-88.38 355.6,-88.38 375.5,-88.38" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="376,-90.13 381,-88.38 376,-86.63 376,-90.13" />
+</ns0:g>
+
+<ns0:g id="edge9" class="edge">
+<ns0:title>SamplesGenerator-&gt;TimeOut</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M207.73,-82.56C220.67,-83.59 234.22,-84.66 246.08,-85.61" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="246.61,-87.41 251.73,-86.06 246.89,-83.92 246.61,-87.41" />
+</ns0:g>
+
+<ns0:g id="edge8" class="edge">
+<ns0:title>SpectraGenerator-&gt;SpectraOut</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M205.19,-21.81C216.75,-20.06 228.92,-18.22 240.04,-16.55" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="241.02,-18.17 245.7,-15.69 240.5,-14.71 241.02,-18.17" />
+</ns0:g>
+</ns0:g>
+</ns0:svg>

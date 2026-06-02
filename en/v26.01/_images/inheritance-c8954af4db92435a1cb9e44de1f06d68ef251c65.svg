@@ -1,0 +1,44 @@
+<ns0:svg xmlns:ns0="http://www.w3.org/2000/svg" xmlns:ns1="http://www.w3.org/1999/xlink" width="264pt" height="68pt" viewBox="0.00 0.00 264.00 68.00">
+<ns0:g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 63.75)">
+<ns0:title>inheritance993075399a</ns0:title>
+
+<ns0:g id="node1" class="node">
+<ns0:title>Environment</ns0:title>
+<ns0:g id="a_node1"><ns0:a ns1:href="../api_ref/generated/acoular.environments.html#acoular.environments.Environment" ns1:title="A simple acoustic environment without flow." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="78.25,-39.75 0,-39.75 0,-19 78.25,-19 78.25,-39.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="39.12" y="-26.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">Environment</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node2" class="node">
+<ns0:title>GeneralFlowEnvironment</ns0:title>
+<ns0:g id="a_node2"><ns0:a ns1:href="../api_ref/generated/acoular.environments.html#acoular.environments.GeneralFlowEnvironment" ns1:title="An acoustic environment with a generic flow field." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="254.75,-59.75 115,-59.75 115,-39 254.75,-39 254.75,-59.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="184.88" y="-46.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">GeneralFlowEnvironment</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge1" class="edge">
+<ns0:title>Environment-&gt;GeneralFlowEnvironment</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M78.65,-34.73C87.88,-36.02 98.05,-37.43 108.32,-38.86" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="108.78,-40.69 113.97,-39.65 109.26,-37.23 108.78,-40.69" />
+</ns0:g>
+
+<ns0:g id="node3" class="node">
+<ns0:title>UniformFlowEnvironment</ns0:title>
+<ns0:g id="a_node3"><ns0:a ns1:href="../api_ref/generated/acoular.environments.html#acoular.environments.UniformFlowEnvironment" ns1:title="An acoustic environment with uniform flow." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="255.5,-20.75 114.25,-20.75 114.25,0 255.5,0 255.5,-20.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="184.88" y="-7.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">UniformFlowEnvironment</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge2" class="edge">
+<ns0:title>Environment-&gt;UniformFlowEnvironment</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M78.65,-24.28C87.67,-23.09 97.59,-21.78 107.63,-20.45" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="108.41,-22.11 113.14,-19.72 107.95,-18.65 108.41,-22.11" />
+</ns0:g>
+</ns0:g>
+</ns0:svg>

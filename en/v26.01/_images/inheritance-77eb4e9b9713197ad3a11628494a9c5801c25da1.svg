@@ -1,0 +1,119 @@
+<ns0:svg xmlns:ns0="http://www.w3.org/2000/svg" xmlns:ns1="http://www.w3.org/1999/xlink" width="564pt" height="107pt" viewBox="0.00 0.00 564.00 107.00">
+<ns0:g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 102.75)">
+<ns0:title>inheritancef02241e6f0</ns0:title>
+
+<ns0:g id="node1" class="node">
+<ns0:title>FiltWNoiseGenerator</ns0:title>
+<ns0:g id="a_node1"><ns0:a ns1:href="../api_ref/generated/acoular.signals.html#acoular.signals.FiltWNoiseGenerator" ns1:title="Generate filtered white noise using an **AR**, **MA**, or **ARMA** process." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="556,-98.75 438.75,-98.75 438.75,-78 556,-78 556,-98.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="497.38" y="-85.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">FiltWNoiseGenerator</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node2" class="node">
+<ns0:title>WNoiseGenerator</ns0:title>
+<ns0:g id="a_node2"><ns0:a ns1:href="../api_ref/generated/acoular.signals.html#acoular.signals.WNoiseGenerator" ns1:title="White noise signal generator." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="402.75,-98.75 300.5,-98.75 300.5,-78 402.75,-78 402.75,-98.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="351.62" y="-85.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">WNoiseGenerator</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge1" class="edge">
+<ns0:title>WNoiseGenerator-&gt;FiltWNoiseGenerator</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M402.9,-88.38C412.33,-88.38 422.31,-88.38 432.1,-88.38" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="432.74,-90.13 437.74,-88.38 432.74,-86.63 432.74,-90.13" />
+</ns0:g>
+
+<ns0:g id="node3" class="node">
+<ns0:title>GenericSignalGenerator</ns0:title>
+<ns0:g id="a_node3"><ns0:a ns1:href="../api_ref/generated/acoular.signals.html#acoular.signals.GenericSignalGenerator" ns1:title="Generate signals from a :class:`~acoular.base.SamplesGenerator` or derived object." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="263.75,-98.75 131.5,-98.75 131.5,-78 263.75,-78 263.75,-98.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="197.62" y="-85.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">GenericSignalGenerator</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node4" class="node">
+<ns0:title>SignalGenerator</ns0:title>
+<ns0:g id="a_node4"><ns0:a ns1:href="../api_ref/generated/acoular.signals.html#acoular.signals.SignalGenerator" ns1:title="ABC for a simple one-channel signal generator." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="94.75,-59.75 0,-59.75 0,-39 94.75,-39 94.75,-59.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="47.38" y="-46.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">SignalGenerator</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge2" class="edge">
+<ns0:title>SignalGenerator-&gt;GenericSignalGenerator</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M89.67,-60.24C108.23,-65.12 130.22,-70.91 149.43,-75.96" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="149.28,-77.73 154.56,-77.31 150.17,-74.34 149.28,-77.73" />
+</ns0:g>
+
+<ns0:g id="node5" class="node">
+<ns0:title>NoiseGenerator</ns0:title>
+<ns0:g id="a_node5"><ns0:a ns1:href="../api_ref/generated/acoular.signals.html#acoular.signals.NoiseGenerator" ns1:title="Abstract base class for noise signal generators." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="243.88,-59.75 151.38,-59.75 151.38,-39 243.88,-39 243.88,-59.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="197.62" y="-46.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">NoiseGenerator</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge3" class="edge">
+<ns0:title>SignalGenerator-&gt;NoiseGenerator</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M94.88,-49.38C110.69,-49.38 128.47,-49.38 144.68,-49.38" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="145.29,-51.13 150.29,-49.38 145.29,-47.63 145.29,-51.13" />
+</ns0:g>
+
+<ns0:g id="node7" class="node">
+<ns0:title>PeriodicSignalGenerator</ns0:title>
+<ns0:g id="a_node7"><ns0:a ns1:href="../api_ref/generated/acoular.signals.html#acoular.signals.PeriodicSignalGenerator" ns1:title="Abstract base class for periodic signal generators." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="264.5,-20.75 130.75,-20.75 130.75,0 264.5,0 264.5,-20.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="197.62" y="-7.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">PeriodicSignalGenerator</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge5" class="edge">
+<ns0:title>SignalGenerator-&gt;PeriodicSignalGenerator</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M89.67,-38.51C108.23,-33.63 130.22,-27.84 149.43,-22.79" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="150.17,-24.41 154.56,-21.44 149.28,-21.02 150.17,-24.41" />
+</ns0:g>
+
+<ns0:g id="edge7" class="edge">
+<ns0:title>NoiseGenerator-&gt;WNoiseGenerator</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M240.97,-60.24C259.91,-65.1 282.35,-70.86 301.98,-75.89" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="302.24,-77.77 307.52,-77.31 303.11,-74.38 302.24,-77.77" />
+</ns0:g>
+
+<ns0:g id="node6" class="node">
+<ns0:title>PNoiseGenerator</ns0:title>
+<ns0:g id="a_node6"><ns0:a ns1:href="../api_ref/generated/acoular.signals.html#acoular.signals.PNoiseGenerator" ns1:title="Generate pink noise signal." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="400.88,-59.75 302.38,-59.75 302.38,-39 400.88,-39 400.88,-59.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="351.62" y="-46.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">PNoiseGenerator</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge4" class="edge">
+<ns0:title>NoiseGenerator-&gt;PNoiseGenerator</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M244.23,-49.38C260.43,-49.38 278.83,-49.38 295.73,-49.38" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="296.12,-51.13 301.12,-49.38 296.12,-47.63 296.12,-51.13" />
+</ns0:g>
+
+<ns0:g id="node8" class="node">
+<ns0:title>SineGenerator</ns0:title>
+<ns0:g id="a_node8"><ns0:a ns1:href="../api_ref/generated/acoular.signals.html#acoular.signals.SineGenerator" ns1:title="Generate a sine signal." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="394.5,-20.75 308.75,-20.75 308.75,0 394.5,0 394.5,-20.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="351.62" y="-7.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">SineGenerator</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge6" class="edge">
+<ns0:title>PeriodicSignalGenerator-&gt;SineGenerator</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M264.85,-10.38C277.41,-10.38 290.32,-10.38 302.2,-10.38" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="302.93,-12.13 307.93,-10.38 302.93,-8.63 302.93,-12.13" />
+</ns0:g>
+</ns0:g>
+</ns0:svg>

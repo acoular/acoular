@@ -1,0 +1,329 @@
+<ns0:svg xmlns:ns0="http://www.w3.org/2000/svg" xmlns:ns1="http://www.w3.org/1999/xlink" width="553pt" height="497pt" viewBox="0.00 0.00 553.00 497.00">
+<ns0:g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 492.75)">
+<ns0:title>inheritance81c622cbb8</ns0:title>
+
+<ns0:g id="node1" class="node">
+<ns0:title>AngleTracker</ns0:title>
+<ns0:g id="a_node1"><ns0:a ns1:href="../api_ref/generated/acoular.tprocess.html#acoular.tprocess.AngleTracker" ns1:title="Compute the rotational angle and RPM per sample from a trigger signal in the time domain." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="371.62,-488.75 293.38,-488.75 293.38,-468 371.62,-468 371.62,-488.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="332.5" y="-475.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">AngleTracker</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node2" class="node">
+<ns0:title>MaskedTimeOut</ns0:title>
+<ns0:g id="a_node2"><ns0:a ns1:href="../api_ref/generated/acoular.tprocess.html#acoular.tprocess.MaskedTimeOut" ns1:title="A signal processing block that allows for the selection of specific channels and time samples." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="195.12,-488.75 99.62,-488.75 99.62,-468 195.12,-468 195.12,-488.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="147.38" y="-475.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">MaskedTimeOut</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge1" class="edge">
+<ns0:title>MaskedTimeOut-&gt;AngleTracker</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M195.53,-478.38C223.59,-478.38 258.99,-478.38 286.64,-478.38" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="287.37,-480.13 292.37,-478.38 287.37,-476.63 287.37,-480.13" />
+</ns0:g>
+
+<ns0:g id="node3" class="node">
+<ns0:title>ChannelMixer</ns0:title>
+<ns0:g id="a_node3"><ns0:a ns1:href="../api_ref/generated/acoular.tprocess.html#acoular.tprocess.ChannelMixer" ns1:title="A signal processing block that mixes multiple input channels into a single output channel." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="188.75,-449.75 106,-449.75 106,-429 188.75,-429 188.75,-449.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="147.38" y="-436.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">ChannelMixer</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node4" class="node">
+<ns0:title>TimeOut</ns0:title>
+<ns0:g id="a_node4"><ns0:a ns1:href="../api_ref/generated/acoular.base.html#acoular.base.TimeOut" ns1:title="Abstract base class receiving from a :attr:`source` and returning time domain signals." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="58,-254.75 0,-254.75 0,-234 58,-234 58,-254.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="29" y="-241.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">TimeOut</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge8" class="edge">
+<ns0:title>TimeOut-&gt;MaskedTimeOut</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M30.04,-254.85C30.75,-288.88 37.54,-397.56 94,-458.38 96.04,-460.58 98.36,-462.54 100.85,-464.29" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="100.35,-466.04 105.52,-467.18 102.19,-463.06 100.35,-466.04" />
+</ns0:g>
+
+<ns0:g id="edge2" class="edge">
+<ns0:title>TimeOut-&gt;ChannelMixer</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M30.88,-255.04C33.91,-285.06 46.53,-371.23 94,-419.38 96.15,-421.56 98.56,-423.5 101.14,-425.24" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="100.8,-427.07 105.99,-428.13 102.59,-424.07 100.8,-427.07" />
+</ns0:g>
+
+<ns0:g id="node8" class="node">
+<ns0:title>Filter</ns0:title>
+<ns0:g id="a_node8"><ns0:a ns1:href="../api_ref/generated/acoular.tprocess.html#acoular.tprocess.Filter" ns1:title="Abstract base class for IIR filters using SciPy's :func:`~scipy.signal.lfilter`." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="174.38,-410.75 120.38,-410.75 120.38,-390 174.38,-390 174.38,-410.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="147.38" y="-397.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">Filter</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge6" class="edge">
+<ns0:title>TimeOut-&gt;Filter</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M32.18,-255.19C37.85,-280.58 55.35,-344.53 94,-380.38 99.63,-385.6 106.77,-389.5 113.94,-392.4" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="113.94,-394.27 119.24,-394.35 115.15,-390.98 113.94,-394.27" />
+</ns0:g>
+
+<ns0:g id="node9" class="node">
+<ns0:title>FilterBank</ns0:title>
+<ns0:g id="a_node9"><ns0:a ns1:href="../api_ref/generated/acoular.tprocess.html#acoular.tprocess.FilterBank" ns1:title="Abstract base class for IIR filter banks based on :mod:`scipy.signal.lfilter`." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="180.12,-371.75 114.62,-371.75 114.62,-351 180.12,-351 180.12,-371.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="147.38" y="-358.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">FilterBank</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge7" class="edge">
+<ns0:title>TimeOut-&gt;FilterBank</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M34.33,-254.99C42.89,-274.69 63.79,-317.13 94,-341.38 98.35,-344.86 103.37,-347.79 108.55,-350.24" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="108.24,-352.01 113.52,-352.4 109.63,-348.8 108.24,-352.01" />
+</ns0:g>
+
+<ns0:g id="node10" class="node">
+<ns0:title>Mixer</ns0:title>
+<ns0:g id="a_node10"><ns0:a ns1:href="../api_ref/generated/acoular.tprocess.html#acoular.tprocess.Mixer" ns1:title="Mix signals from multiple sources into a single output." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="174.38,-332.75 120.38,-332.75 120.38,-312 174.38,-312 174.38,-332.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="147.38" y="-319.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">Mixer</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge9" class="edge">
+<ns0:title>TimeOut-&gt;Mixer</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M39.46,-255.1C51.18,-267.84 72.27,-289.04 94,-302.38 100.22,-306.19 107.29,-309.49 114.18,-312.25" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="113.9,-314.01 119.2,-314.16 115.15,-310.74 113.9,-314.01" />
+</ns0:g>
+
+<ns0:g id="node12" class="node">
+<ns0:title>SpatialInterpolator</ns0:title>
+<ns0:g id="a_node12"><ns0:a ns1:href="../api_ref/generated/acoular.tprocess.html#acoular.tprocess.SpatialInterpolator" ns1:title="Base class for spatial interpolation of microphone data." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="200.75,-293.75 94,-293.75 94,-273 200.75,-273 200.75,-293.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="147.38" y="-280.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">SpatialInterpolator</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge11" class="edge">
+<ns0:title>TimeOut-&gt;SpatialInterpolator</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M58.47,-253.92C73.45,-258.94 92.03,-265.16 108.24,-270.59" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="108.08,-272.39 113.37,-272.32 109.19,-269.07 108.08,-272.39" />
+</ns0:g>
+
+<ns0:g id="node15" class="node">
+<ns0:title>TimeConvolve</ns0:title>
+<ns0:g id="a_node15"><ns0:a ns1:href="../api_ref/generated/acoular.tprocess.html#acoular.tprocess.TimeConvolve" ns1:title="Perform frequency domain convolution with the uniformly partitioned overlap-save (UPOLS) method." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="190.62,-254.75 104.12,-254.75 104.12,-234 190.62,-234 190.62,-254.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="147.38" y="-241.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">TimeConvolve</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge14" class="edge">
+<ns0:title>TimeOut-&gt;TimeConvolve</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M58.47,-244.38C70.15,-244.38 84.02,-244.38 97.24,-244.38" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="97.91,-246.13 102.91,-244.38 97.91,-242.63 97.91,-246.13" />
+</ns0:g>
+
+<ns0:g id="node16" class="node">
+<ns0:title>TimeCumAverage</ns0:title>
+<ns0:g id="a_node16"><ns0:a ns1:href="../api_ref/generated/acoular.tprocess.html#acoular.tprocess.TimeCumAverage" ns1:title="Calculates the cumulative average of the signal." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="198.88,-215.75 95.88,-215.75 95.88,-195 198.88,-195 198.88,-215.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="147.38" y="-202.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">TimeCumAverage</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge15" class="edge">
+<ns0:title>TimeOut-&gt;TimeCumAverage</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M58.47,-234.83C73.45,-229.81 92.03,-223.59 108.24,-218.16" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="109.19,-219.68 113.37,-216.43 108.08,-216.36 109.19,-219.68" />
+</ns0:g>
+
+<ns0:g id="node18" class="node">
+<ns0:title>TimePower</ns0:title>
+<ns0:g id="a_node18"><ns0:a ns1:href="../api_ref/generated/acoular.tprocess.html#acoular.tprocess.TimePower" ns1:title="Calculate the time-dependent power of a signal by squaring its samples." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="182.75,-176.75 112,-176.75 112,-156 182.75,-156 182.75,-176.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="147.38" y="-163.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">TimePower</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge17" class="edge">
+<ns0:title>TimeOut-&gt;TimePower</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M39.46,-233.65C51.18,-220.91 72.27,-199.71 94,-186.38 97.94,-183.96 102.21,-181.75 106.56,-179.76" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="107.94,-181.07 111.83,-177.48 106.55,-177.86 107.94,-181.07" />
+</ns0:g>
+
+<ns0:g id="node19" class="node">
+<ns0:title>TimeReverse</ns0:title>
+<ns0:g id="a_node19"><ns0:a ns1:href="../api_ref/generated/acoular.tprocess.html#acoular.tprocess.TimeReverse" ns1:title="Calculates the time-reversed signal of a source." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="187.62,-137.75 107.12,-137.75 107.12,-117 187.62,-117 187.62,-137.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="147.38" y="-124.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">TimeReverse</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge18" class="edge">
+<ns0:title>TimeOut-&gt;TimeReverse</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M34.33,-233.76C42.89,-214.06 63.79,-171.62 94,-147.38 96.99,-144.98 100.3,-142.84 103.76,-140.95" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="104.93,-142.32 108.62,-138.51 103.36,-139.19 104.93,-142.32" />
+</ns0:g>
+
+<ns0:g id="node20" class="node">
+<ns0:title>Trigger</ns0:title>
+<ns0:g id="a_node20"><ns0:a ns1:href="../api_ref/generated/acoular.tprocess.html#acoular.tprocess.Trigger" ns1:title="A signal processing class for detecting and analyzing trigger signals in time-series data." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="174.38,-98.75 120.38,-98.75 120.38,-78 174.38,-78 174.38,-98.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="147.38" y="-85.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">Trigger</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge19" class="edge">
+<ns0:title>TimeOut-&gt;Trigger</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M32.18,-233.56C37.85,-208.17 55.35,-144.22 94,-108.38 99.63,-103.15 106.77,-99.25 113.94,-96.35" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="115.15,-97.77 119.24,-94.4 113.94,-94.48 115.15,-97.77" />
+</ns0:g>
+
+<ns0:g id="node21" class="node">
+<ns0:title>WriteH5</ns0:title>
+<ns0:g id="a_node21"><ns0:a ns1:href="../api_ref/generated/acoular.tprocess.html#acoular.tprocess.WriteH5" ns1:title="Saves time signal data as a ``.h5`` (HDF5) file." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="175.25,-59.75 119.5,-59.75 119.5,-39 175.25,-39 175.25,-59.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="147.38" y="-46.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">WriteH5</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge20" class="edge">
+<ns0:title>TimeOut-&gt;WriteH5</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M30.88,-233.71C33.91,-203.69 46.53,-117.52 94,-69.38 99.29,-64.01 106.16,-60.07 113.18,-57.17" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="114.29,-58.62 118.36,-55.24 113.07,-55.34 114.29,-58.62" />
+</ns0:g>
+
+<ns0:g id="node22" class="node">
+<ns0:title>WriteWAV</ns0:title>
+<ns0:g id="a_node22"><ns0:a ns1:href="../api_ref/generated/acoular.tprocess.html#acoular.tprocess.WriteWAV" ns1:title="Saves time signal from one or more channels as mono, stereo, or multi-channel ``.wav`` file." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="179.38,-20.75 115.38,-20.75 115.38,0 179.38,0 179.38,-20.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="147.38" y="-7.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">WriteWAV</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge21" class="edge">
+<ns0:title>TimeOut-&gt;WriteWAV</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M30.04,-233.9C30.75,-199.87 37.54,-91.19 94,-30.38 98.22,-25.83 103.59,-22.31 109.27,-19.58" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="110.42,-20.99 114.33,-17.41 109.04,-17.77 110.42,-20.99" />
+</ns0:g>
+
+<ns0:g id="node5" class="node">
+<ns0:title>FiltFiltOctave</ns0:title>
+<ns0:g id="a_node5"><ns0:a ns1:href="../api_ref/generated/acoular.tprocess.html#acoular.tprocess.FiltFiltOctave" ns1:title="Octave or third-octave bandpass filter with zero-phase distortion." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="544.75,-449.75 464.25,-449.75 464.25,-429 544.75,-429 544.75,-449.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="504.5" y="-436.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">FiltFiltOctave</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node6" class="node">
+<ns0:title>FiltOctave</ns0:title>
+<ns0:g id="a_node6"><ns0:a ns1:href="../api_ref/generated/acoular.tprocess.html#acoular.tprocess.FiltOctave" ns1:title="Octave or third-octave bandpass filter (causal, with non-zero phase delay)." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="365.25,-449.75 299.75,-449.75 299.75,-429 365.25,-429 365.25,-449.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="332.5" y="-436.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">FiltOctave</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge3" class="edge">
+<ns0:title>FiltOctave-&gt;FiltFiltOctave</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M365.48,-439.38C391.41,-439.38 428.3,-439.38 457.42,-439.38" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="458.13,-441.13 463.13,-439.38 458.13,-437.63 458.13,-441.13" />
+</ns0:g>
+
+<ns0:g id="node7" class="node">
+<ns0:title>FiltFreqWeight</ns0:title>
+<ns0:g id="a_node7"><ns0:a ns1:href="../api_ref/generated/acoular.tprocess.html#acoular.tprocess.FiltFreqWeight" ns1:title="Apply frequency weighting according to IEC 61672-1." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="375.38,-410.75 289.62,-410.75 289.62,-390 375.38,-390 375.38,-410.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="332.5" y="-397.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">FiltFreqWeight</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge5" class="edge">
+<ns0:title>Filter-&gt;FiltOctave</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M174.67,-406.05C192.24,-409.84 215.88,-414.93 236.75,-419.38 255.35,-423.34 276.01,-427.7 293.28,-431.34" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="293.48,-433.17 298.74,-432.49 294.21,-429.75 293.48,-433.17" />
+</ns0:g>
+
+<ns0:g id="edge4" class="edge">
+<ns0:title>Filter-&gt;FiltFreqWeight</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M174.61,-400.38C202.82,-400.38 248.3,-400.38 283.04,-400.38" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="283.64,-402.13 288.64,-400.38 283.64,-398.63 283.64,-402.13" />
+</ns0:g>
+
+<ns0:g id="node17" class="node">
+<ns0:title>TimeExpAverage</ns0:title>
+<ns0:g id="a_node17"><ns0:a ns1:href="../api_ref/generated/acoular.tprocess.html#acoular.tprocess.TimeExpAverage" ns1:title="Compute an exponentially weighted moving average of the input signal." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="381.75,-371.75 283.25,-371.75 283.25,-351 381.75,-351 381.75,-371.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="332.5" y="-358.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">TimeExpAverage</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge16" class="edge">
+<ns0:title>Filter-&gt;TimeExpAverage</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M174.67,-394.7C192.24,-390.91 215.88,-385.82 236.75,-381.38 249.61,-378.64 263.45,-375.7 276.48,-372.95" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="277.53,-374.52 282.06,-371.77 276.81,-371.09 277.53,-374.52" />
+</ns0:g>
+
+<ns0:g id="node11" class="node">
+<ns0:title>OctaveFilterBank</ns0:title>
+<ns0:g id="a_node11"><ns0:a ns1:href="../api_ref/generated/acoular.tprocess.html#acoular.tprocess.OctaveFilterBank" ns1:title="Octave or third-octave filter bank." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="382.5,-332.75 282.5,-332.75 282.5,-312 382.5,-312 382.5,-332.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="332.5" y="-319.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">OctaveFilterBank</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge10" class="edge">
+<ns0:title>FilterBank-&gt;OctaveFilterBank</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M180.28,-354.49C197.08,-350.87 218.02,-346.36 236.75,-342.38 249.47,-339.67 263.15,-336.77 276.05,-334.04" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="277.04,-335.62 281.58,-332.88 276.32,-332.2 277.04,-335.62" />
+</ns0:g>
+
+<ns0:g id="node13" class="node">
+<ns0:title>SpatialInterpolatorConstantRotation</ns0:title>
+<ns0:g id="a_node13"><ns0:a ns1:href="../api_ref/generated/acoular.tprocess.html#acoular.tprocess.SpatialInterpolatorConstantRotation" ns1:title="Performs spatial linear interpolation for sources undergoing constant rotation." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="428.25,-293.75 236.75,-293.75 236.75,-273 428.25,-273 428.25,-293.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="332.5" y="-280.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">SpatialInterpolatorConstantRotation</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge12" class="edge">
+<ns0:title>SpatialInterpolator-&gt;SpatialInterpolatorConstantRotation</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M200.85,-283.38C210.13,-283.38 220.07,-283.38 230.16,-283.38" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="230.71,-285.13 235.71,-283.38 230.71,-281.63 230.71,-285.13" />
+</ns0:g>
+
+<ns0:g id="node14" class="node">
+<ns0:title>SpatialInterpolatorRotation</ns0:title>
+<ns0:g id="a_node14"><ns0:a ns1:href="../api_ref/generated/acoular.tprocess.html#acoular.tprocess.SpatialInterpolatorRotation" ns1:title="Spatial interpolation class for rotating sound sources." target="_top">
+<ns0:polygon fill="white" stroke="black" stroke-width="0.5" points="406.5,-254.75 258.5,-254.75 258.5,-234 406.5,-234 406.5,-254.75" />
+<ns0:text xml:space="preserve" text-anchor="middle" x="332.5" y="-241.25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">SpatialInterpolatorRotation</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge13" class="edge">
+<ns0:title>SpatialInterpolator-&gt;SpatialInterpolatorRotation</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M198.38,-272.59C210.9,-269.9 224.32,-267.02 236.75,-264.38 248.65,-261.84 261.4,-259.14 273.56,-256.57" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="274.59,-258.14 279.12,-255.4 273.86,-254.72 274.59,-258.14" />
+</ns0:g>
+</ns0:g>
+</ns0:svg>
