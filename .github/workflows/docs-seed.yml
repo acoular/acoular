@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       version_tag:
-        description: "Git tag to build and archive (e.g. v25.01)"
+        description: "Git tag to build and archive (e.g. v26.01)"
         required: true
         type: string
 

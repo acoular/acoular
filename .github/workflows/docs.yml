@@ -38,7 +38,7 @@ jobs:
         uses: acoular/ci/.github/actions/generate-switcher@main
         with:
           base-path: /en/
-          min-version: v25.01
+          min-version: v26.01
           output: docs/build/html/_static/switcher.json
 
       - name: Deploy to GitHub Pages

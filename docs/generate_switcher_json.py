@@ -20,10 +20,10 @@ def version_key(tag):
 filtered_tags = [tag for tag in tags if re.match(r'^v\d+\.\d+$', tag)]
 filtered_tags.sort(key=version_key, reverse=True)
 
-MIN_VERSION = 'v25.01'
+MIN_VERSION = 'v26.01'
 
 # Build JSON structure
-versions = [{'name': 'latest', 'url': '/en/latest/', 'type': 'branch'}]
+versions = [{'name': 'latest', 'version': 'vXX.XX', 'url': '/en/latest/', 'type': 'branch'}]
 
 latest_stable = None
 for tag in filtered_tags:
@@ -31,9 +31,11 @@ for tag in filtered_tags:
         if latest_stable is None:
             # First matching tag is the latest stable release
             latest_stable = tag
-            versions.append({'name': f'{tag} (stable)', 'url': f'/en/{tag}/', 'type': 'tag', 'preferred': True})
+            versions.append(
+                {'name': f'{tag} (stable)', 'version': tag, 'url': f'/en/{tag}/', 'type': 'tag', 'preferred': True}
+            )
         else:
-            versions.append({'name': tag, 'url': f'/en/{tag}/', 'type': 'tag'})
+            versions.append({'version': tag, 'url': f'/en/{tag}/', 'type': 'tag'})
 
 # Write JSON file
 with open('source/_static/switcher.json', 'w') as f:
