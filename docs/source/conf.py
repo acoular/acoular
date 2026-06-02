@@ -87,7 +87,7 @@ html_theme_options = {
         "version_match": version,
     },
     "show_version_warning_banner": True,
-    "navbar_center": ["version-switcher", "navbar-nav"],
+    "navbar_center": ["navbar-nav", "version-switcher"],
 }
 html_sidebars = {
     "install/*": [],
