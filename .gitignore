@@ -30,3 +30,4 @@ examples/benchmark/results/
 docs/source/sg_execution_times.rst
 docs/source/api_ref/generated/
 docs/source/auto_examples/**/*
+docs/source/_static/switcher.json

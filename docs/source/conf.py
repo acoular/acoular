@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 import sys
 import acoular
 from sphinx_gallery.sorting import ExplicitOrder
@@ -58,7 +59,6 @@ html_context = {
     "doc_path": "docs/source",
 }
 html_theme_options = {
-    "announcement": "👁️📢 Please consider taking the <a href='https://www.soscisurvey.de/acoularsurvey'>Acoular User Survey</a>. ⏱️ It's only 2 minutes! 三三ᕕ( ᐛ )ᕗ",
     "logo": {
         "alt_text": "Acoular - Home",
         "text": "Acoular",
@@ -82,6 +82,12 @@ html_theme_options = {
     "pygments_dark_style": "monokai",
     "header_links_before_dropdown": 5,
     "use_edit_page_button": True,
+    "switcher": {
+        "json_url": "https://www.acoular.org/en/latest/_static/switcher.json",
+        "version_match": version,
+    },
+    "show_version_warning_banner": True,
+    "navbar_center": ["version-switcher", "navbar-nav"],
 }
 html_sidebars = {
     "install/*": [],
@@ -90,6 +96,7 @@ html_sidebars = {
 }
 html_favicon = '_static/acoular_logo.ico'
 html_last_updated_fmt = '%b %d, %Y'
+html_baseurl = os.environ.get('DOCS_BASEURL', '')
 # If true, the reST sources are included in the HTML build as _sources/<name>.
 html_copy_source = False
 

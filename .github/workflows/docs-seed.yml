@@ -1,0 +1,101 @@
+name: "Manual: Docs 📝 Seed Old Version"
+run-name: Seed docs for ${{ inputs.version_tag }} → en/${{ inputs.version_tag }}
+permissions:
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      version_tag:
+        description: "Git tag to build and archive (e.g. v25.01)"
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out tag
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.version_tag }}
+          # fetch-depth: 0 not needed — archived switcher.json is never fetched by the widget
+
+      - name: Detect build environment
+        id: env
+        run: |
+          # Python version: .python-version file > requires-python minimum
+          if [ -f .python-version ]; then
+            PYTHON=$(cat .python-version)
+          else
+            PYTHON=$(grep 'requires-python' pyproject.toml | grep -oP '\d+\.\d+' | head -1)
+            PYTHON=${PYTHON:-3.10}
+          fi
+          echo "python=${PYTHON}" >> $GITHUB_OUTPUT
+
+          # --frozen only if uv.lock is present
+          if [ -f uv.lock ]; then
+            echo "frozen=--frozen --exact" >> $GITHUB_OUTPUT
+          else
+            echo "frozen=" >> $GITHUB_OUTPUT
+          fi
+
+          # docs deps: dependency-groups (--group) vs optional-dependencies (--extra)
+          if grep -q '\[dependency-groups\]' pyproject.toml; then
+            echo "docs-flag=--group docs" >> $GITHUB_OUTPUT
+          else
+            echo "docs-flag=--extra docs" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          python-version: ${{ steps.env.outputs.python }}
+
+      - name: Set up Pandoc
+        uses: acoular/ci/.github/actions/setup-pandoc@main
+        with:
+          os: ubuntu-latest
+
+      - name: Set up PortAudio
+        uses: acoular/ci/.github/actions/setup-portaudio@main
+        with:
+          os: ubuntu-latest
+
+      - name: Set up Graphviz
+        uses: acoular/ci/.github/actions/setup-graphviz@main
+        with:
+          os: ubuntu-latest
+
+      - name: Build docs
+        env:
+          DOCS_BASEURL: "https://www.acoular.org/en/${{ inputs.version_tag }}/"
+        run: uv run ${{ steps.env.outputs.frozen }} ${{ steps.env.outputs.docs-flag }} make -C docs html
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: build-docs-${{ inputs.version_tag }}
+          path: ./docs/build/html
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v7
+        with:
+          name: build-docs-${{ inputs.version_tag }}
+          path: ./docs/build/html
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          publish_branch: gh-pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/build/html
+          destination_dir: en/${{ inputs.version_tag }}
+          keep_files: true
+          cname: www.acoular.org
+          enable_jekyll: false
