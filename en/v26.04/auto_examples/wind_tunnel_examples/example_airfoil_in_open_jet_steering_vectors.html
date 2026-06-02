@@ -56,6 +56,13 @@
     <script src="../../_static/sg-tags.js?v=d80f6fa4"></script>
     <script src="../../_static/design-tabs.js?v=f930bc37"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'auto_examples/wind_tunnel_examples/example_airfoil_in_open_jet_steering_vectors';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.17.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://www.acoular.org/en/latest/_static/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '26.04';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            true;
+        </script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="icon" href="../../_static/acoular_logo.ico"/>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -109,9 +116,6 @@
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
 </div>
-<aside class="bd-header-announcement" aria-label="Announcement">
-  <div class="bd-header-announcement__content">👁️📢 Please consider taking the <a href='https://www.soscisurvey.de/acoularsurvey'>Acoular User Survey</a>. ⏱️ It's only 2 minutes! 三三ᕕ( ᐛ )ᕗ</div>
-</aside>
 
   
     <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
@@ -218,6 +222,26 @@
             
   </ul>
 </nav></div>
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
       
     </div>
     
@@ -366,6 +390,29 @@
 
   </ul>
 </nav></div>
+          
+        
+          
+          
+            <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
           
         
       </div>
@@ -562,8 +609,8 @@ only process the first 16000 samples of the time signals. Alternatively, we coul
 </pre></div>
 </div>
 <p>Calibration is usually needed and can be set as a separate processing block with the
-<code class="xref py py-class docutils literal notranslate"><span class="pre">Calib</span></code> object. Invalid channels can be set here as well, by setting the
-<code class="xref py py-attr docutils literal notranslate"><span class="pre">invalid_channels</span></code> attribute.</p>
+<a class="reference internal" href="../../api_ref/generated/acoular.calib.html#acoular.calib.Calib" title="acoular.calib.Calib"><code class="xref py py-class docutils literal notranslate"><span class="pre">Calib</span></code></a> object. Invalid channels can be set here as well, by setting the
+<cite>invalid_channels</cite> attribute.</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://www.acoular.org/api_ref/generated/acoular.calib.html#acoular.calib.Calib" title="acoular.calib.Calib" class="sphx-glr-backref-module-acoular-calib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">calib</span></a> <span class="o">=</span> <a href="https://www.acoular.org/api_ref/generated/acoular.calib.html#acoular.calib.Calib" title="acoular.calib.Calib" class="sphx-glr-backref-module-acoular-calib sphx-glr-backref-type-py-class"><span class="n">ac</span><span class="o">.</span><span class="n">Calib</span></a><span class="p">(</span><span class="n">source</span><span class="o">=</span><a href="https://www.acoular.org/api_ref/generated/acoular.sources.html#acoular.sources.MaskedTimeSamples" title="acoular.sources.MaskedTimeSamples" class="sphx-glr-backref-module-acoular-sources sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">t1</span></a><span class="p">,</span> <span class="n">file</span><span class="o">=</span><a href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">calib_file</span></a><span class="p">,</span> <span class="n">invalid_channels</span><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">invalid</span></a><span class="p">)</span>
 </pre></div>
 </div>
@@ -644,7 +691,7 @@ right: without diagonal removal).</p>
 <p><a class="reference internal" href="example_airfoil_in_open_jet_freq_domain_methods.html"><span class="doc">Airfoil in open jet – Frequency domain beamforming methods.</span></a> for an application of further frequency
 domain methods on the same data.</p>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 2.336 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 1.847 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-wind-tunnel-examples-example-airfoil-in-open-jet-steering-vectors-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/e9a0796bb062ad21e78e0981550336fc/example_airfoil_in_open_jet_steering_vectors.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">example_airfoil_in_open_jet_steering_vectors.ipynb</span></code></a></p>
@@ -748,7 +795,7 @@ domain methods on the same data.</p>
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.0.4.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
     <br/>
   </p>
 </div>

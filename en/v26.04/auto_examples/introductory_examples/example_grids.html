@@ -56,6 +56,13 @@
     <script src="../../_static/sg-tags.js?v=d80f6fa4"></script>
     <script src="../../_static/design-tabs.js?v=f930bc37"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'auto_examples/introductory_examples/example_grids';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.17.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://www.acoular.org/en/latest/_static/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '26.04';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            true;
+        </script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="icon" href="../../_static/acoular_logo.ico"/>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -109,9 +116,6 @@
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
 </div>
-<aside class="bd-header-announcement" aria-label="Announcement">
-  <div class="bd-header-announcement__content">👁️📢 Please consider taking the <a href='https://www.soscisurvey.de/acoularsurvey'>Acoular User Survey</a>. ⏱️ It's only 2 minutes! 三三ᕕ( ᐛ )ᕗ</div>
-</aside>
 
   
     <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
@@ -218,6 +222,26 @@
             
   </ul>
 </nav></div>
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
       
     </div>
     
@@ -366,6 +390,29 @@
 
   </ul>
 </nav></div>
+          
+        
+          
+          
+            <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
           
         
       </div>
@@ -697,8 +744,8 @@ This time, we’ll calculate it for a frequency of exactly 8 kHz.</p>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;3D beamforming output shape:&#39;</span><span class="p">,</span> <a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Lm</span><span class="o">.</span><span class="n">shape</span></a><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[(&#39;/home/runner/work/acoular/acoular/docs/source/auto_examples/cache/Mixer_7bd1c67c6bcacd9cee236ed9dbf6bdaa_cache.h5&#39;, 2), (&#39;/home/runner/work/acoular/acoular/docs/source/auto_examples/cache/Mixer_85dd1e5e0ed3372d6ae26b9714b5f01e_cache.h5&#39;, 1)]
-[(&#39;/home/runner/work/acoular/acoular/docs/source/auto_examples/cache/Mixer_7bd1c67c6bcacd9cee236ed9dbf6bdaa_cache.h5&#39;, 2), (&#39;/home/runner/work/acoular/acoular/docs/source/auto_examples/cache/Mixer_85dd1e5e0ed3372d6ae26b9714b5f01e_cache.h5&#39;, 2)]
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[(&#39;/home/pelling/projects/acoular/docs/source/auto_examples/cache/Mixer_7bd1c67c6bcacd9cee236ed9dbf6bdaa_cache.h5&#39;, 2), (&#39;/home/pelling/projects/acoular/docs/source/auto_examples/cache/Mixer_85dd1e5e0ed3372d6ae26b9714b5f01e_cache.h5&#39;, 1)]
+[(&#39;/home/pelling/projects/acoular/docs/source/auto_examples/cache/Mixer_7bd1c67c6bcacd9cee236ed9dbf6bdaa_cache.h5&#39;, 2), (&#39;/home/pelling/projects/acoular/docs/source/auto_examples/cache/Mixer_85dd1e5e0ed3372d6ae26b9714b5f01e_cache.h5&#39;, 2)]
 3D beamforming output shape: (14, 14, 8)
 </pre></div>
 </div>
@@ -798,9 +845,9 @@ First 5 grid positions:
     <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">results</span></a><span class="p">[</span><span class="s1">&#39;clean&#39;</span><span class="p">][</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">i</span></a><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <a href="https://www.acoular.org/api_ref/generated/acoular.fbeamform.html#acoular.fbeamform.BeamformerCleansc.synthetic" title="acoular.fbeamform.BeamformerCleansc.synthetic" class="sphx-glr-backref-module-acoular-fbeamform sphx-glr-backref-type-py-method"><span class="n">bs</span><span class="o">.</span><span class="n">synthetic</span></a><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float64" title="numpy.float64" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute"><span class="n">freq</span></a><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[(&#39;/home/runner/work/acoular/acoular/docs/source/auto_examples/cache/Mixer_85dd1e5e0ed3372d6ae26b9714b5f01e_cache.h5&#39;, 2), (&#39;/home/runner/work/acoular/acoular/docs/source/auto_examples/cache/Mixer_aa878eb07598abae010071be935c9f79_cache.h5&#39;, 1)]
-[(&#39;/home/runner/work/acoular/acoular/docs/source/auto_examples/cache/Mixer_85dd1e5e0ed3372d6ae26b9714b5f01e_cache.h5&#39;, 2), (&#39;/home/runner/work/acoular/acoular/docs/source/auto_examples/cache/Mixer_aa878eb07598abae010071be935c9f79_cache.h5&#39;, 2)]
-[(&#39;/home/runner/work/acoular/acoular/docs/source/auto_examples/cache/Mixer_85dd1e5e0ed3372d6ae26b9714b5f01e_cache.h5&#39;, 2), (&#39;/home/runner/work/acoular/acoular/docs/source/auto_examples/cache/Mixer_aa878eb07598abae010071be935c9f79_cache.h5&#39;, 3)]
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[(&#39;/home/pelling/projects/acoular/docs/source/auto_examples/cache/Mixer_85dd1e5e0ed3372d6ae26b9714b5f01e_cache.h5&#39;, 2), (&#39;/home/pelling/projects/acoular/docs/source/auto_examples/cache/Mixer_aa878eb07598abae010071be935c9f79_cache.h5&#39;, 1)]
+[(&#39;/home/pelling/projects/acoular/docs/source/auto_examples/cache/Mixer_85dd1e5e0ed3372d6ae26b9714b5f01e_cache.h5&#39;, 2), (&#39;/home/pelling/projects/acoular/docs/source/auto_examples/cache/Mixer_aa878eb07598abae010071be935c9f79_cache.h5&#39;, 2)]
+[(&#39;/home/pelling/projects/acoular/docs/source/auto_examples/cache/Mixer_85dd1e5e0ed3372d6ae26b9714b5f01e_cache.h5&#39;, 2), (&#39;/home/pelling/projects/acoular/docs/source/auto_examples/cache/Mixer_aa878eb07598abae010071be935c9f79_cache.h5&#39;, 3)]
 </pre></div>
 </div>
 <p><strong>Visualizing Line Grid Results</strong></p>
@@ -907,8 +954,8 @@ examples.</p>
 <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.show.html#matplotlib.pyplot.show" title="matplotlib.pyplot.show" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">show</span></a><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_example_grids_005.png" srcset="../../_images/sphx_glr_example_grids_005.png" alt="Beamforming Results on Merged Grid (Base Beamformer)" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[(&#39;/home/runner/work/acoular/acoular/docs/source/auto_examples/cache/Mixer_85dd1e5e0ed3372d6ae26b9714b5f01e_cache.h5&#39;, 2), (&#39;/home/runner/work/acoular/acoular/docs/source/auto_examples/cache/Mixer_aa878eb07598abae010071be935c9f79_cache.h5&#39;, 3), (&#39;/home/runner/work/acoular/acoular/docs/source/auto_examples/cache/Mixer_7bd1c67c6bcacd9cee236ed9dbf6bdaa_cache.h5&#39;, 1)]
-[(&#39;/home/runner/work/acoular/acoular/docs/source/auto_examples/cache/Mixer_85dd1e5e0ed3372d6ae26b9714b5f01e_cache.h5&#39;, 2), (&#39;/home/runner/work/acoular/acoular/docs/source/auto_examples/cache/Mixer_aa878eb07598abae010071be935c9f79_cache.h5&#39;, 3), (&#39;/home/runner/work/acoular/acoular/docs/source/auto_examples/cache/Mixer_7bd1c67c6bcacd9cee236ed9dbf6bdaa_cache.h5&#39;, 2)]
+<img src="../../_images/sphx_glr_example_grids_005.png" srcset="../../_images/sphx_glr_example_grids_005.png" alt="Beamforming Results on Merged Grid (Base Beamformer)" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[(&#39;/home/pelling/projects/acoular/docs/source/auto_examples/cache/Mixer_85dd1e5e0ed3372d6ae26b9714b5f01e_cache.h5&#39;, 2), (&#39;/home/pelling/projects/acoular/docs/source/auto_examples/cache/Mixer_aa878eb07598abae010071be935c9f79_cache.h5&#39;, 3), (&#39;/home/pelling/projects/acoular/docs/source/auto_examples/cache/Mixer_7bd1c67c6bcacd9cee236ed9dbf6bdaa_cache.h5&#39;, 1)]
+[(&#39;/home/pelling/projects/acoular/docs/source/auto_examples/cache/Mixer_85dd1e5e0ed3372d6ae26b9714b5f01e_cache.h5&#39;, 2), (&#39;/home/pelling/projects/acoular/docs/source/auto_examples/cache/Mixer_aa878eb07598abae010071be935c9f79_cache.h5&#39;, 3), (&#39;/home/pelling/projects/acoular/docs/source/auto_examples/cache/Mixer_7bd1c67c6bcacd9cee236ed9dbf6bdaa_cache.h5&#39;, 2)]
 </pre></div>
 </div>
 <p>We see that the sound pressure level is highest in the area between the microphones.</p>
@@ -923,7 +970,7 @@ For more advanced 3D beamforming applications</p></li>
 For working with grid sectors and integration</p></li>
 </ul>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 7.185 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 4.124 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-introductory-examples-example-grids-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/774eaa9a68e0daa90401d301f09c587f/example_grids.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">example_grids.ipynb</span></code></a></p>
@@ -1044,7 +1091,7 @@ For working with grid sectors and integration</p></li>
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.0.4.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
     <br/>
   </p>
 </div>

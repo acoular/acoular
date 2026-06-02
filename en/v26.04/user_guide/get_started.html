@@ -56,6 +56,13 @@
     <script src="../_static/sg-tags.js?v=d80f6fa4"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'user_guide/get_started';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.17.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://www.acoular.org/en/latest/_static/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '26.04';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            true;
+        </script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="icon" href="../_static/acoular_logo.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -109,9 +116,6 @@
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
 </div>
-<aside class="bd-header-announcement" aria-label="Announcement">
-  <div class="bd-header-announcement__content">👁️📢 Please consider taking the <a href='https://www.soscisurvey.de/acoularsurvey'>Acoular User Survey</a>. ⏱️ It's only 2 minutes! 三三ᕕ( ᐛ )ᕗ</div>
-</aside>
 
   
     <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
@@ -218,6 +222,26 @@
             
   </ul>
 </nav></div>
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
       
     </div>
     
@@ -366,6 +390,29 @@
 
   </ul>
 </nav></div>
+          
+        
+          
+          
+            <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
           
         
       </div>
@@ -519,7 +566,7 @@ However, a working measurement set-up is required. Thus, we will use simulated d
 </div>
 <p>The ts object now provides access to the HDF5 file and information stored in it.</p>
 <div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [5]: </span><span class="n">ts</span>
-<span class="gh">Out[5]: </span><span class="go">&lt;acoular.sources.TimeSamples at 0x7fa2055332e0&gt;</span>
+<span class="gh">Out[5]: </span><span class="go">&lt;acoular.sources.TimeSamples at 0x7ff25ffecdd0&gt;</span>
 
 <span class="gp">In [6]: </span><span class="n">ts</span><span class="o">.</span><span class="n">sample_freq</span>
 <span class="gh">Out[6]: </span><span class="go">51200.0</span>
@@ -563,10 +610,10 @@ However, a working measurement set-up is required. Thus, we will use simulated d
 <div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [17]: </span><span class="kn">import</span><span class="w"> </span><span class="nn">pylab</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 
 <span class="gp">In [18]: </span><span class="n">plt</span><span class="o">.</span><span class="n">ion</span><span class="p">()</span> <span class="c1"># switch on interactive plotting mode</span>
-<span class="gh">Out[18]: </span><span class="go">&lt;contextlib.ExitStack at 0x7fa204f9ce50&gt;</span>
+<span class="gh">Out[18]: </span><span class="go">&lt;contextlib.ExitStack at 0x7ff25ffe0410&gt;</span>
 
 <span class="gp">In [19]: </span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">mg</span><span class="o">.</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">mg</span><span class="o">.</span><span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="s1">&#39;o&#39;</span><span class="p">)</span>
-<span class="gh">Out[19]: </span><span class="go">[&lt;matplotlib.lines.Line2D at 0x7fa205391050&gt;]</span>
+<span class="gh">Out[19]: </span><span class="go">[&lt;matplotlib.lines.Line2D at 0x7ff25fea6d50&gt;]</span>
 </pre></div>
 </div>
 <figure class="align-center">
@@ -593,10 +640,10 @@ However, a working measurement set-up is required. Thus, we will use simulated d
 <span class="gh">Out[24]: </span><span class="go">&lt;Figure size 640x480 with 0 Axes&gt;</span>
 
 <span class="gp">In [25]: </span><span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span> <span class="n">Lm</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">Lm</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">rg</span><span class="o">.</span><span class="n">extent</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;bicubic&#39;</span><span class="p">)</span>
-<span class="gh">Out[25]: </span><span class="go">&lt;matplotlib.image.AxesImage at 0x7fa205554290&gt;</span>
+<span class="gh">Out[25]: </span><span class="go">&lt;matplotlib.image.AxesImage at 0x7ff25fe8a5d0&gt;</span>
 
 <span class="gp">In [26]: </span><span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
-<span class="gh">Out[26]: </span><span class="go">&lt;matplotlib.colorbar.Colorbar at 0x7fa20558f650&gt;</span>
+<span class="gh">Out[26]: </span><span class="go">&lt;matplotlib.colorbar.Colorbar at 0x7ff25d2b5090&gt;</span>
 </pre></div>
 </div>
 <p>which shows the following map, scaled to a range between the maximum value and 10 dB below it, and with the axes scales derived from the <a class="reference internal" href="../api_ref/generated/acoular.grids.html#acoular.grids.RectGrid" title="acoular.grids.RectGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">RectGrid</span></code></a> data object.</p>
@@ -833,7 +880,7 @@ However, a working measurement set-up is required. Thus, we will use simulated d
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.0.4.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
     <br/>
   </p>
 </div>

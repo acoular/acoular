@@ -56,6 +56,13 @@
     <script src="../../_static/sg-tags.js?v=d80f6fa4"></script>
     <script src="../../_static/design-tabs.js?v=f930bc37"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'auto_examples/introductory_examples/example_multisector';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.17.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://www.acoular.org/en/latest/_static/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '26.04';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            true;
+        </script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="icon" href="../../_static/acoular_logo.ico"/>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -109,9 +116,6 @@
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
 </div>
-<aside class="bd-header-announcement" aria-label="Announcement">
-  <div class="bd-header-announcement__content">👁️📢 Please consider taking the <a href='https://www.soscisurvey.de/acoularsurvey'>Acoular User Survey</a>. ⏱️ It's only 2 minutes! 三三ᕕ( ᐛ )ᕗ</div>
-</aside>
 
   
     <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
@@ -218,6 +222,26 @@
             
   </ul>
 </nav></div>
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
       
     </div>
     
@@ -366,6 +390,29 @@
 
   </ul>
 </nav></div>
+          
+        
+          
+          
+            <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
           
         
       </div>
@@ -651,11 +698,11 @@ the third-octova spectrum.</p>
 <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.show.html#matplotlib.pyplot.show" title="matplotlib.pyplot.show" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">show</span></a><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_example_multisector_002.png" srcset="../../_images/sphx_glr_example_multisector_002.png" alt="MultiSector Integration: Spectrum and Third-Octave Barspectrum" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/acoular/acoular/acoular/tools/helpers.py:213: Warning: Queried frequency band (445.449 to 561.231 Hz) does not include any discrete FFT sample frequencies. Returning zeros.
+<img src="../../_images/sphx_glr_example_multisector_002.png" srcset="../../_images/sphx_glr_example_multisector_002.png" alt="MultiSector Integration: Spectrum and Third-Octave Barspectrum" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/pelling/projects/acoular/acoular/tools/helpers.py:213: Warning: Queried frequency band (445.449 to 561.231 Hz) does not include any discrete FFT sample frequencies. Returning zeros.
   p = np.array([synthetic(data, fftfreqs, list(fc[i_low:i_high]), num)])
-/home/runner/work/acoular/acoular/acoular/tools/helpers.py:213: Warning: Queried frequency band (561.266 to 707.151 Hz) does not include any discrete FFT sample frequencies. Returning zeros.
+/home/pelling/projects/acoular/acoular/tools/helpers.py:213: Warning: Queried frequency band (561.266 to 707.151 Hz) does not include any discrete FFT sample frequencies. Returning zeros.
   p = np.array([synthetic(data, fftfreqs, list(fc[i_low:i_high]), num)])
-/home/runner/work/acoular/acoular/acoular/tools/helpers.py:213: Warning: Queried frequency band (890.899 to 1122.46 Hz) does not include any discrete FFT sample frequencies. Returning zeros.
+/home/pelling/projects/acoular/acoular/tools/helpers.py:213: Warning: Queried frequency band (890.899 to 1122.46 Hz) does not include any discrete FFT sample frequencies. Returning zeros.
   p = np.array([synthetic(data, fftfreqs, list(fc[i_low:i_high]), num)])
 </pre></div>
 </div>
@@ -663,7 +710,7 @@ the third-octova spectrum.</p>
 <a class="reference internal" href="../../api_ref/generated/acoular.grids.html#acoular.grids.RectSector" title="acoular.grids.RectSector"><code class="xref py py-class docutils literal notranslate"><span class="pre">RectSector</span></code></a>, <a class="reference internal" href="../../api_ref/generated/acoular.grids.html#acoular.grids.CircSector" title="acoular.grids.CircSector"><code class="xref py py-class docutils literal notranslate"><span class="pre">CircSector</span></code></a>, and
 <a class="reference internal" href="../../api_ref/generated/acoular.grids.html#acoular.grids.PolySector" title="acoular.grids.PolySector"><code class="xref py py-class docutils literal notranslate"><span class="pre">PolySector</span></code></a>.
 This makes it easy to analyze complex regions in your sound field.</p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 1.173 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 0.818 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-introductory-examples-example-multisector-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/d01e534c3acecd5c6ced89c8fc1e80b1/example_multisector.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">example_multisector.ipynb</span></code></a></p>
@@ -782,7 +829,7 @@ This makes it easy to analyze complex regions in your sound field.</p>
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.0.4.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
     <br/>
   </p>
 </div>
