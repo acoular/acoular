@@ -2469,7 +2469,9 @@ class BeamformerSBL(AutoPowerSpectra):
 
     options = Dict({
         'eps': 1e-3,
-        'n_iter': 500,   
+        'n_iter': 500,
+        'find_peaks': True,
+        'num_peaks': 10,
         })
 
     res = Dict()
@@ -2509,8 +2511,9 @@ class BeamformerSBL(AutoPowerSpectra):
     def estimate_noise_power(self, gamma, csm, a):
         # 
         nc = a.shape[0]
-        if False:
-            ga = self.find_peaks(gamma, 10)
+        if self.options.get('find_peaks', True): # TODO: without the Peak finder, the method performs worse.
+            num_peaks = self.options.get('num_peaks', 10)
+            ga = self.find_peaks(gamma, num_peaks)
         else:
             ga = gamma > 0
             ga_sum = ga.sum() # active set
@@ -2585,7 +2588,7 @@ class BeamformerSBL(AutoPowerSpectra):
         for spectra in self.source.result(num=all_snap):
             spectra = spectra.reshape(-1, nf, nm)* np.sqrt(self._get_scaling_value())
 
-            num_out = spectra.shape[0]//ns + 1
+            num_out = int(np.ceil(spectra.shape[0] / ns))
             gamma = np.zeros((num_out, self.num_freqs, self.steer.grid.size))
             ni = 0
             for i in range(num_out):
@@ -2596,5 +2599,6 @@ class BeamformerSBL(AutoPowerSpectra):
                 for j, f in enumerate(self.freqs):
                     print(f"Processing frequency {f} Hz") # test only one frequency for now
                     gamma[i] = self.calc(spectra_frame[:,j], csm[j], f)
+                ni = ni_stop
             yield gamma.reshape(-1, self.num_freqs*self.steer.grid.size)
         
