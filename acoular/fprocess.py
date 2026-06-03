@@ -22,7 +22,7 @@ Implements blockwise processing methods in the frequency domain.
 
 import numpy as np
 from scipy import fft
-from traits.api import Bool, CArray, Enum, Instance, Int, Property, Union, cached_property, List
+from traits.api import Bool, CArray, Enum, Instance, Int, Property, Union, cached_property
 
 # acoular imports
 from .base import SamplesGenerator, SpectraGenerator, SpectraOut, TimeOut
@@ -32,11 +32,9 @@ from .process import SamplesBuffer
 from .spectra import BaseSpectra
 from .tools.utils import synthetic_indices
 
-class MaskedFreqOut(SpectraOut):
-    """
-    Base class for frequency-domain output processes that apply a mask to the input spectra.
 
-    """
+class MaskedFreqOut(SpectraOut):
+    """Base class for frequency-domain output processes that apply a mask to the input spectra."""
 
     #: The data source providing the input spectra, implemented as an instance of
     # :class:`~acoular.base.SpectraGenerator` or a derived object.
@@ -48,7 +46,7 @@ class MaskedFreqOut(SpectraOut):
     num_freqs = Property()
 
     #: Controls the width of the frequency bands considered; defaults to
-    #: 0 (single frequency). 
+    #: 0 (single frequency).
     num = Int(0)
 
     #: A unique identifier based on the process properties.
@@ -78,7 +76,7 @@ class MaskedFreqOut(SpectraOut):
     @cached_property
     def _get_digest(self):
         return digest(self)
-    
+
     def result(self, num=1):
         """Python generator that processes the source data and yields the output block-wise.
 
@@ -93,14 +91,13 @@ class MaskedFreqOut(SpectraOut):
         numpy.ndarray
             A two-dimensional block of shape (num, num_channels * num_freqs).
         """
-
         if (self._freqs.size == self.source.num_freqs) and (self._freqs == self.source.freqs).all():
             yield from self.source.result(num)
         else:
             for temp in self.source.result(num):
-                yield temp.reshape(
-                    temp.shape[0], self.source.num_freqs, -1)[:, self._freq_indices, :].reshape(
-                        temp.shape[0], -1)
+                yield temp.reshape(temp.shape[0], self.source.num_freqs, -1)[:, self._freq_indices, :].reshape(
+                    temp.shape[0], -1
+                )
 
 
 class RFFT(BaseSpectra, SpectraOut):

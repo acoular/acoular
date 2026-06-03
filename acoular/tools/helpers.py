@@ -21,7 +21,6 @@ import numpy as np
 from acoular.tools.utils import mole_fraction_of_water_vapor, synthetic_indices
 
 
-
 def synthetic(data, freqs, f, num=3):
     """Returns synthesized frequency band values of spectral data.
 

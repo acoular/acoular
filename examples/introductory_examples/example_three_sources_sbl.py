@@ -27,10 +27,10 @@ Source Location        Level
 """
 
 from pathlib import Path
-import matplotlib.pyplot as plt
-import acoular as ac
-import numpy as np
 
+import acoular as ac
+import matplotlib.pyplot as plt
+import numpy as np
 
 sfreq = 51200
 block_size = 512
@@ -50,30 +50,23 @@ p = ac.Mixer(source=p1, sources=[p2, p3])
 fft = ac.RFFT(source=p, block_size=block_size, window='Rectangular')
 rg = ac.RectGrid(x_min=-0.2, x_max=0.2, y_min=-0.2, y_max=0.2, z=-0.3, increment=0.01)
 st = ac.SteeringVector(grid=rg, mics=m)
-mf = ac.MaskedFreqOut(source=fft, freqs=[200, 4000]) # only for 4 kHz
-sbl = ac.BeamformerSBL(
-    source=mf,
-    method="SBL1",
-    steer=st,
-    options={'n_iter':100}
-)
+mf = ac.MaskedFreqOut(source=fft, freqs=[200, 4000])  # only for 4 kHz
+sbl = ac.BeamformerSBL(source=mf, method='SBL1', steer=st, options={'n_iter': 100})
 
 out = next(sbl.result(num=1))
 maps = out.reshape(out.shape[0], sbl.num_freqs, rg.size)
 
 
 plt.figure(1)
-Lm = ac.L_p(maps[0,0].reshape(rg.shape))
-plt.title("200 Hz")
+Lm = ac.L_p(maps[0, 0].reshape(rg.shape))
+plt.title('200 Hz')
 plt.imshow(Lm.T, origin='lower', vmin=Lm.max() - 10, extent=rg.extent)
 plt.colorbar()
 plt.savefig('three_sources_sbl_200Hz.png', dpi=200, bbox_inches='tight')
 
 plt.figure(2)
-Lm = ac.L_p(maps[0,1].reshape(rg.shape))
-plt.title("4 kHz")
+Lm = ac.L_p(maps[0, 1].reshape(rg.shape))
+plt.title('4 kHz')
 plt.imshow(Lm.T, origin='lower', vmin=Lm.max() - 10, extent=rg.extent)
 plt.colorbar()
 plt.savefig('three_sources_sbl_4kHz.png', dpi=200, bbox_inches='tight')
-
-
