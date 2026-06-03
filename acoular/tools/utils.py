@@ -5,13 +5,77 @@
 
     get_file_basename
     find_basename
+    synthetic_indices
     mole_fraction_of_water_vapor
     Polygon
 """
 
 from pathlib import Path
+from warnings import warn
 
 import numpy as np
+
+
+def synthetic_indices(freqs, f, num):
+    """Return index ranges for synthesized frequency bands.
+
+    Parameters
+    ----------
+    freqs : array of floats
+        The frequencies that correspond to the input data.
+    f : float or list of floats
+        Band center frequency/frequencies.
+    num : integer
+        Controls the width of the frequency bands considered.
+
+    Returns
+    -------
+    list of tuple of int
+        Start and stop indices for each frequency band. Empty ranges indicate
+        that the band does not include any discrete FFT sample frequencies.
+    """
+    if np.isscalar(f):
+        f = (f,)
+
+    indices = []
+    if num == 0:
+        # single frequency lines
+        for i in f:
+            ind = np.searchsorted(freqs, i)
+            if ind >= len(freqs):
+                warn(
+                    f'Queried frequency ({i:g} Hz) not in resolved frequency range. Returning zeros.',
+                    Warning,
+                    stacklevel=2,
+                )
+                indices.append((ind, ind))
+            else:
+                if freqs[ind] != i:
+                    warn(
+                        f'Queried frequency ({i:g} Hz) not in set of '
+                        'discrete FFT sample frequencies. '
+                        f'Using frequency {freqs[ind]:g} Hz instead.',
+                        Warning,
+                        stacklevel=2,
+                    )
+                indices.append((ind, ind + 1))
+    else:
+        # fractional octave bands
+        for i in f:
+            f1 = i * 2.0 ** (-0.5 / num)
+            f2 = i * 2.0 ** (+0.5 / num)
+            ind1 = np.searchsorted(freqs, f1)
+            ind2 = np.searchsorted(freqs, f2)
+            if ind1 == ind2:
+                warn(
+                    f'Queried frequency band ({f1:g} to {f2:g} Hz) does not '
+                    'include any discrete FFT sample frequencies. '
+                    'Returning zeros.',
+                    Warning,
+                    stacklevel=2,
+                )
+            indices.append((ind1, ind2))
+    return indices
 
 
 def _det(xvert, yvert):

@@ -22,7 +22,7 @@ Implements blockwise processing methods in the frequency domain.
 
 import numpy as np
 from scipy import fft
-from traits.api import Bool, CArray, Enum, Instance, Int, Property, Union, cached_property
+from traits.api import Bool, CArray, Enum, Instance, Int, Property, Union, cached_property, List
 
 # acoular imports
 from .base import SamplesGenerator, SpectraGenerator, SpectraOut, TimeOut
@@ -30,6 +30,77 @@ from .fastFuncs import calcCSM
 from .internal import digest
 from .process import SamplesBuffer
 from .spectra import BaseSpectra
+from .tools.utils import synthetic_indices
+
+class MaskedFreqOut(SpectraOut):
+    """
+    Base class for frequency-domain output processes that apply a mask to the input spectra.
+
+    """
+
+    #: The data source providing the input spectra, implemented as an instance of
+    # :class:`~acoular.base.SpectraGenerator` or a derived object.
+    source = Instance(SpectraGenerator)
+
+    #: 1-D array of frequencies
+    freqs = Property()
+
+    num_freqs = Property()
+
+    #: Controls the width of the frequency bands considered; defaults to
+    #: 0 (single frequency). 
+    num = Int(0)
+
+    #: A unique identifier based on the process properties.
+    digest = Property(depends_on=['source.digest', 'freqs'])
+
+    # private traits
+    _freqs = CArray()
+    _freq_indices = CArray()
+
+    def _set_freqs(self, value):
+        freqs = np.asarray(value)
+        iranges = synthetic_indices(self.source.freqs, freqs, num=self.num)
+        freq_indices = []
+        for ii in iranges:
+            freq_indices += list(range(ii[0], ii[1]))
+        self._freq_indices = freq_indices
+        self._freqs = self.source.freqs[self._freq_indices]
+
+    def _get_freqs(self):
+        if self._freqs.size == 0:
+            return self.source.freqs
+        return self._freqs
+
+    def _get_num_freqs(self):
+        return self._freqs.size
+
+    @cached_property
+    def _get_digest(self):
+        return digest(self)
+    
+    def result(self, num=1):
+        """Python generator that processes the source data and yields the output block-wise.
+
+        This method needs to be implemented by the derived classes.
+
+        num : integer
+            This parameter defines the the number of snapshots to be yielded.
+            Defaults to 1.
+
+        Yields
+        ------
+        numpy.ndarray
+            A two-dimensional block of shape (num, num_channels * num_freqs).
+        """
+
+        if (self._freqs.size == self.source.num_freqs) and (self._freqs == self.source.freqs).all():
+            yield from self.source.result(num)
+        else:
+            for temp in self.source.result(num):
+                yield temp.reshape(
+                    temp.shape[0], self.source.num_freqs, -1)[:, self._freq_indices, :].reshape(
+                        temp.shape[0], -1)
 
 
 class RFFT(BaseSpectra, SpectraOut):

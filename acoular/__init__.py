@@ -46,13 +46,13 @@ from .fbeamform import (
     BeamformerMusic,
     BeamformerOrth,
     BeamformerSODIX,
-    SparseBayesianLearning,
+    BeamformerSBL,
     L_p,
     PointSpreadFunction,
     SteeringVector,
     integrate,
 )
-from .fprocess import IRFFT, RFFT, AutoPowerSpectra, CrossPowerSpectra
+from .fprocess import IRFFT, RFFT, AutoPowerSpectra, CrossPowerSpectra, MaskedFreqOut
 from .grids import (
     CircSector,
     ConvexSector,

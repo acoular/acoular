@@ -15,11 +15,11 @@
 """
 
 from pathlib import Path
-from warnings import warn
 
 import numpy as np
 
-from acoular.tools.utils import mole_fraction_of_water_vapor
+from acoular.tools.utils import mole_fraction_of_water_vapor, synthetic_indices
+
 
 
 def synthetic(data, freqs, f, num=3):
@@ -69,51 +69,8 @@ def synthetic(data, freqs, f, num=3):
         and used :attr:`FFT block size<acoular.spectra.PowerSpectra.block_size>`.
 
     """
-    if np.isscalar(f):
-        f = (f,)
-    if num == 0:
-        # single frequency lines
-        res = []
-        for i in f:
-            ind = np.searchsorted(freqs, i)
-            if ind >= len(freqs):
-                warn(
-                    f'Queried frequency ({i:g} Hz) not in resolved frequency range. Returning zeros.',
-                    Warning,
-                    stacklevel=2,
-                )
-                h = np.zeros_like(data[0])
-            else:
-                if freqs[ind] != i:
-                    warn(
-                        f'Queried frequency ({i:g} Hz) not in set of '
-                        'discrete FFT sample frequencies. '
-                        f'Using frequency {freqs[ind]:g} Hz instead.',
-                        Warning,
-                        stacklevel=2,
-                    )
-                h = data[ind]
-            res += [h]
-    else:
-        # fractional octave bands
-        res = []
-        for i in f:
-            f1 = i * 2.0 ** (-0.5 / num)
-            f2 = i * 2.0 ** (+0.5 / num)
-            ind1 = np.searchsorted(freqs, f1)
-            ind2 = np.searchsorted(freqs, f2)
-            if ind1 == ind2:
-                warn(
-                    f'Queried frequency band ({f1:g} to {f2:g} Hz) does not '
-                    'include any discrete FFT sample frequencies. '
-                    'Returning zeros.',
-                    Warning,
-                    stacklevel=2,
-                )
-                h = np.zeros_like(data[0])
-            else:
-                h = np.sum(data[ind1:ind2], 0)
-            res += [h]
+    indices = synthetic_indices(freqs, f, num)
+    res = [np.sum(data[i1:i2], 0) for i1, i2 in indices]
     return np.array(res)
 
 
