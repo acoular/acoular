@@ -46,6 +46,7 @@ from .fbeamform import (
     BeamformerMusic,
     BeamformerOrth,
     BeamformerSODIX,
+    SparseBayesianLearning,
     L_p,
     PointSpreadFunction,
     SteeringVector,

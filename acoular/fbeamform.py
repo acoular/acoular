@@ -73,6 +73,8 @@ from traits.api import (
 from traits.trait_errors import TraitError
 
 # acoular imports
+from .base import SpectraOut
+from .fprocess import AutoPowerSpectra
 from .configuration import config
 from .environments import Environment
 from .fastFuncs import beamformerFreq, calcPointSpreadFunction, calcTransfer, damasSolverGaussSeidel
@@ -262,7 +264,7 @@ class LazyBfResult:
     def __getitem__(self, key):
         """'intelligent' [] operator, checks if results are available and triggers calculation."""
         sl = np.index_exp[key][0]
-        if isinstance(sl, (int, np.integer)):
+        if isinstance(sl, int | np.integer):
             sl = slice(sl, sl + 1)
         # indices which are missing
         missingind = np.arange(*sl.indices(self.bf._numfreq))[self.bf._fr[sl] == 0]
@@ -2456,3 +2458,83 @@ def integrate(data, grid, sector):
         for i in range(data.shape[0]):
             h[i] = data[i].reshape(gshape)[ind].sum()
     return h
+
+
+class SparseBayesianLearning(AutoPowerSpectra):
+    #: TODO: either masked SpectraInOut freq as trait (see PowerSpectra)
+
+    #: Requires complex-valued spectra from a :class:`~acoular.base.SpectraGenerator` object.
+    source = Instance(SpectraOut)
+
+    steer = Instance(SteeringVector, args=())
+
+    n_iter = Int(1000, desc='maximum number of iterations')
+
+    num_snapshots = Int(-1, desc='number of snapshots to consider')
+
+    num_channels = Property()
+
+    digest = Property(
+        depends_on=['source.digest', 'steer.digest'],
+    )
+
+    def __get_transfer(self):
+        nfreqs = 1
+        trans = zeros((nfreqs, self.numchannels, self.steer.mics.num_mics), dtype=complex)
+        for v in range(nfreqs):
+            trans[v, :, :] = self.steer.transfer(self.freq)
+        return trans
+
+    def _get_digest(self):
+        return digest(self)
+
+    def _get_num_channels(self):
+        return self.steer.grid.size
+
+    def calc(self, spectra, csm, f):
+        # mainly follows the code of Peter Gerstoft
+        h = self.steer.transfer(f)
+        aha = np.einsum('dn,dm->dnm', np.conj(h), h, optimize=True)
+        nmics = self.steer.mics.num_mics
+        nsnap = aha.shape[0]
+        nfreq = csm.shape[0]
+        gamma = real(einsum('fnm,fdnm->d', csm, aha, optimize=True))
+        identity = eye(nmics)
+        sigc = real(trace(csm)) / nmics  # noise power initializtion
+
+        for _i in range(self.n_iter):
+            gamma.copy()
+            active = gamma > gamma.max() * 1e-4  # boolean mask for the active set
+            gamma_num = zeros((nfreq, len(active)))
+            gamma_denum = zeros((nfreq, len(active)))
+            for f in range(csm.shape[0]):
+                noise = sigc[f] * identity
+                aha_f = atleast_2d(aha[f, active, :])
+                # here, eq. 14 is directly calculated! more efficient then caculating the model based CSM in eq.13
+                ApSigmaYinv = conj(aha_f.T) @ inv(noise + aha_f @ (gamma[active][:, newaxis] * conj(aha_f.T)))
+                gamma_num[f] = (
+                    sum(abs(ApSigmaYinv @ spectra[:, f, :]) ** 2, axis=1) / nsnap
+                )  # Sum over snapshots and normalize, abs for roundoff errors
+                gamma_denum[f] = abs(
+                    sum(ApSigmaYinv.T * aha_f, axis=0)
+                )  # postive def quantity, abs for roundoff errors
+            gamma = (gamma_num.sum(0) / gamma_denum.sum(0)) ** (1 / 2)  # TODO: fixedpoint update
+
+    def result(self, num=1):
+        nm = self.steer.mics.num_mics
+        nf = self.source.num_freqs
+        if self.num_snapshots < 0:
+            ns = self.source.num_samples
+        else:
+            ns = self.num_snapshots
+
+        scale = self._get_scaling_value()
+        for spectra in self.source.result(num=ns):
+            spectra = spectra.reshape(-1, nf, nm)
+            ns = spectra.shape[0]
+            csm = np.einsum('sfn,sfm->fnm', spectra, np.conj(spectra), optimize=True) / ns * scale
+            for i, f in enumerate(self.freqs):
+                self.calc(spectra[:,i], csm[i], f)
+
+        trans = self.__get_transfer()
+        

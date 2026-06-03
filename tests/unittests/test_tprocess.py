@@ -28,7 +28,7 @@ def test_metadata(tmp_path, create_time_data_source, acoular_cls, h5library, dat
     h5.save()
     # load metadata from h5 file
     ts = acoular_cls(file=h5.file)
-    if isinstance(data, (float, int)):
+    if isinstance(data, float | int):
         assert ts.metadata['test'][()] == data
     if isinstance(data, str):
         assert ts.metadata['test'][()] == data.encode()

@@ -24,6 +24,7 @@ Implements beamformers in the time domain.
     IntegratorSectorTime
 """
 
+
 import numpy as np
 import scipy.linalg as spla
 from traits.api import Bool, CArray, Enum, Float, Instance, Int, List, Map, Property, Range, cached_property
@@ -37,8 +38,7 @@ from .internal import digest
 from .process import SamplesBuffer
 from .tfastfuncs import _delayandsum4, _delayandsum5, _delays
 from .trajectory import Trajectory
-from .base import SpectraOut
-from warnings import warn
+
 
 def const_power_weight(bf):
     """
@@ -832,100 +832,3 @@ class IntegratorSectorTime(TimeOut):
                 o[:ns, i] = h.reshape(h.shape[0], -1).sum(axis=1)
                 i += 1
             yield o[:ns]
-
-
-
-class SparseBayesianLearning(SpectraOut):
-
-    #: TODO: either masked SpectraInOut freq as trait (see PowerSpectra)
-
-    #: Requires complex-valued spectra from a :class:`~acoular.base.SpectraGenerator` object.
-    source = Instance(SpectraOut)
-
-    steer = Instance(SteeringVector, args=())
-
-    n_iter = Int(1000, desc='maximum number of iterations')
-
-    freq = Property()
-
-    _freq = Float(desc="frequency of interest")
-
-    num_channels = Property()
-
-    num_snapshots = Int(-1, desc='number of snapshots to consider')
-
-    digest = Property(
-        depends_on=['source.digest', 'steer.digest'],
-    )
-
-    def __get_transfer(self):
-        nfreqs = 1
-        trans = zeros(
-            (nfreqs, self.numchannels, self.steer.mics.num_mics), dtype = complex)
-        for v in range(nfreqs):
-            trans[v, :,:] = self.steer.transfer(self.freq)
-        return trans
-
-    def _get_freq(self):
-        return self._freq
-
-    def _set_freq(self, freq):
-        fftfreqs = self.fftfreq()
-        if self._freq not in fftfreqs:
-            fid = argmin(abs(fftfreqs - freq))
-            msg = f"Frequency {freq} not found in the source data. Using {fftfreqs[fid]} Hz instead."
-            warn(msg, stacklevel=2)
-            self._freq = fftfreqs[fid]
-        else:
-            self._freq = freq
-
-    def _get_digest(self):
-        return digest(self)
-
-    def _get_num_channels(self):
-        return self.steer.grid.size
-
-    def calc(self, spectra, csm, aha):
-        # mainly follows the code of Peter Gerstoft
-        nmics = self.steer.mics.num_mics
-        nsnap = aha.shape[0]
-        nfreq = csm.shape[0]
-        gsize = self.steer.grid.size
-        gamma = real(einsum('fnm,fdnm->d',csm,aha,optimize=True))
-        identity = eye(nmics)
-        sigc = real(trace(csm))/nmics # noise power initializtion
-
-        for i in range(self.n_iter):
-            gamma_prev = gamma.copy()
-            active = gamma > gamma.max() * 1e-4  # boolean mask for the active set
-            gamma_num = zeros((nfreq,len(active)))
-            gamma_denum = zeros((nfreq,len(active)))
-            for f in range(csm.shape[0]):
-                noise = sigc[f] * identity
-                aha_f = atleast_2d(aha[f, active, :])
-                # here, eq. 14 is directly calculated! more efficient then caculating the model based CSM in eq.13
-                ApSigmaYinv = conj(aha_f.T) @ inv(
-                    noise + aha_f @ (gamma[active][:,newaxis] * conj(aha_f.T)))
-                gamma_num[f] = sum(abs(ApSigmaYinv @ spectra[ :, f, :])**2 , axis = 1) / nsnap # Sum over snapshots and normalize, abs for roundoff errors
-                gamma_denum[f] = abs(sum(ApSigmaYinv.T * aha_f , axis = 0)) # postive def quantity, abs for roundoff errors
-            gamma = (gamma_num.sum(0) / gamma_denum.sum(0))**(1/2) # TODO: fixedpoint update
-
-    def result(self, num=1):
-        nfreqs = 1
-        # get index of freq in fftfreqs
-        fftfreqs = self.fftfreq()
-        fid = argmin(abs(fftfreqs - self.freq))
-
-        nmics = self.steer.mics.num_mics
-        trans = self.__get_transfer()
-        aha = einsum('fdn,fdm->fdnm',conj(trans),trans,optimize=True)
-
-        #spectra = zeros((nmics, self.num_snapshots, nfreqs), dtype=complex)
-        for spectra in self.source.result(num=self.num_snapshots):
-            nsnap = spectra.shape[0]
-            spectra = spectra.reshape(nsnap,self.source.num_freqs,nmics)[fid:fid+nfreqs]
-            csm = einsum('sfn,sfm->fnm',spectra,conj(spectra),optimize=True)/spectra.shape[0]
-            gamma = self.calc(spectra,csm,aha)
-
-
-
