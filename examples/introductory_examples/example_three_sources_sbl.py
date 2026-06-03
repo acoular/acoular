@@ -58,17 +58,19 @@ sbl = ac.BeamformerSBL(
     options={'n_iter':100}
 )
 
-map = next(sbl.result(num=1))
+out = next(sbl.result(num=1))
+maps = out.reshape(out.shape[0], sbl.num_freqs, rg.size)
+
 
 plt.figure(1)
-Lm = ac.L_p(map[0].reshape(rg.shape))
+Lm = ac.L_p(maps[0,0].reshape(rg.shape))
 plt.title("200 Hz")
 plt.imshow(Lm.T, origin='lower', vmin=Lm.max() - 10, extent=rg.extent)
 plt.colorbar()
 plt.savefig('three_sources_sbl_200Hz.png', dpi=200, bbox_inches='tight')
 
 plt.figure(2)
-Lm = ac.L_p(map[1].reshape(rg.shape))
+Lm = ac.L_p(maps[0,1].reshape(rg.shape))
 plt.title("4 kHz")
 plt.imshow(Lm.T, origin='lower', vmin=Lm.max() - 10, extent=rg.extent)
 plt.colorbar()

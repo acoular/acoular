@@ -2597,8 +2597,7 @@ class BeamformerSBL(AutoPowerSpectra):
                 csm = np.einsum(
                     'sfn,sfm->fnm', spectra_frame, np.conj(spectra_frame), optimize=True) / spectra_frame.shape[0]
                 for j, f in enumerate(self.freqs):
-                    print(f"Processing frequency {f} Hz") # test only one frequency for now
-                    gamma[i] = self.calc(spectra_frame[:,j], csm[j], f)
+                    gamma[i, j] = self.calc(spectra_frame[:, j], csm[j], f)
                 ni = ni_stop
             yield gamma.reshape(-1, self.num_freqs*self.steer.grid.size)
         
