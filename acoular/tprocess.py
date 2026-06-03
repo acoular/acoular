@@ -1739,7 +1739,7 @@ class TimeReverse(TimeOut):
 
 class Filter(TimeOut):
     """
-    Abstract base class for IIR filters using SciPy's `lfilter` function.
+    Abstract base class for IIR filters using SciPy's :func:`~scipy.signal.sosfilt`.
 
     This class implements a digital Infinite Impulse Response (IIR) filter that applies filtering to
     a given signal in a block-wise manner. The filter coefficients can be dynamically changed during
@@ -2166,7 +2166,7 @@ class FiltFreqWeight(Filter):
 
 class FilterBank(TimeOut):
     """
-    Abstract base class for IIR filter banks based on the scipy.signal.lfilter function.
+    Abstract base class for IIR filter banks based on :func:`~scipy.signal.sosfilt` and SOS coefficients.
 
     Implements a bank of parallel filters. This class should not be instantiated by itself.
 
