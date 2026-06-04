@@ -2091,7 +2091,8 @@ class FiltFreqWeight(Filter):
     weight = Enum('A', 'C', 'Z')
 
     #: Second-order sections (SOS) representation of the filter coefficients. This property is
-    #: dynamically computed based on :attr:`weight` and the :attr:`~acoular.tprocess.Filter.source`'s digest.
+    #: dynamically computed based on :attr:`weight` and the
+    #: :attr:`~acoular.tprocess.Filter.source`'s digest.
     sos = Property(depends_on=['weight', 'source.digest'])
 
     #: A unique identifier for the filter, based on its properties. (read-only)

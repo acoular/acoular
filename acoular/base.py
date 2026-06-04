@@ -4,8 +4,8 @@
 """Implements base classes for signal processing blocks in Acoular.
 
 The classes in this module are abstract base classes that provide a common interface for all classes
-that generate an output via the generator :meth:`~acoular.base.Generator.result` in block-wise manner. They are not intended
-to be used directly, but to be subclassed by classes that implement the actual signal processing.
+that generate an output via the `result` generator in block-wise manner. They are not intended to be
+used directly, but to be subclassed by classes that implement the actual signal processing.
 
 .. inheritance-diagram::
                 acoular.base
@@ -162,23 +162,23 @@ class SpectraGenerator(Generator):
 
 class TimeOut(SamplesGenerator):
     """
-    Abstract base class receiving from a :attr:`~acoular.base.TimeOut.source` and returning time domain signals.
+    Abstract base class receiving from a `source` and returning time domain signals.
 
     It provides a base class that can be used to create signal processing blocks that receive data
-    from any generating :attr:`~acoular.base.TimeOut.source` and generates a time signal output via the generator
-    :meth:`~acoular.base.Generator.result` in block-wise manner.
+    from any generating `source` and generates a time signal output via the `result` generator in
+    block-wise manner.
     """
 
     #: Data source; :class:`~acoular.base.Generator` or derived object.
     source = Instance(Generator)
 
-    #: Sampling frequency of output signal, as given by :attr:`~acoular.base.TimeOut.source`.
+    #: Sampling frequency of output signal, as given by `source`.
     sample_freq = Delegate('source')
 
-    #: Number of channels in output, as given by :attr:`~acoular.base.TimeOut.source`.
+    #: Number of channels in output, as given by `source`.
     num_channels = Delegate('source')
 
-    #: Number of samples in output, as given by :attr:`~acoular.base.TimeOut.source`.
+    #: Number of samples in output, as given by `source`.
     num_samples = Delegate('source')
 
     #: A unique identifier for the generator, based on its properties. (read-only)
@@ -219,19 +219,19 @@ class SpectraOut(SpectraGenerator):
     #: Data source; :class:`~acoular.base.Generator` or derived object.
     source = Instance(Generator)
 
-    #: Sampling frequency of output signal, as given by :attr:`~acoular.base.SpectraOut.source`.
+    #: Sampling frequency of output signal, as given `source`.
     sample_freq = Delegate('source')
 
-    #: Number of channels in output, as given by :attr:`~acoular.base.SpectraOut.source`.
+    #: Number of channels in output, as given by `source`.
     num_channels = Delegate('source')
 
-    #: Number of snapshots in output, as given by :attr:`~acoular.base.SpectraOut.source`.
+    #: Number of snapshots in output, as given by `source`.
     num_samples = Delegate('source')
 
-    #: Number of frequencies in output, as given by :attr:`~acoular.base.SpectraOut.source`.
+    #: Number of frequencies in output, as given by `source`.
     num_freqs = Delegate('source')
 
-    #: 1-D array of frequencies, as given by :attr:`~acoular.base.SpectraOut.source`.
+    #: 1-D array of frequencies, as given by `source`.
     freqs = Delegate('source')
 
     #: The size of the block used to calculate the spectra
@@ -273,16 +273,16 @@ class InOut(SamplesGenerator, SpectraGenerator):
     #: Data source; :class:`~acoular.base.Generator` or derived object.
     source = Instance(Generator)
 
-    #: Sampling frequency of output signal, as given by :attr:`~acoular.base.InOut.source`.
+    #: Sampling frequency of output signal, as given by `source`.
     sample_freq = Delegate('source')
 
-    #: Number of channels in output, as given by :attr:`~acoular.base.InOut.source`.
+    #: Number of channels in output, as given by `source`.
     num_channels = Delegate('source')
 
-    #: Number of frequencies in output, as given by :attr:`~acoular.base.InOut.source`.
+    #: Number of frequencies in output, as given by `source`.
     num_freqs = Delegate('source')
 
-    #: Number of samples / snapshots in output, as given by :attr:`~acoular.base.InOut.source`.
+    #: Number of samples / snapshots in output, as given by `source`.
     num_samples = Delegate('source')
 
     #: A unique identifier for the generator, based on its properties. (read-only)

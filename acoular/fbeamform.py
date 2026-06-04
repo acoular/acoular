@@ -959,9 +959,11 @@ class PointSpreadFunction(HasStrictTraits):
     #:
     #: * 'full': Calculate the full PSF (for all grid points) in one go (should be used if the PSF
     #:           at all grid points is needed, as with :class:`DAMAS<BeamformerDamas>`)
-    #: * 'single': Calculate the PSF for the grid points defined by :attr:`~acoular.fbeamform.PointSpreadFunction.grid_indices`, one by one
-    #:             (useful if not all PSFs are needed, as with :class:`CLEAN<BeamformerClean>`)
-    #: * 'block': Calculate the PSF for the grid points defined by :attr:`~acoular.fbeamform.PointSpreadFunction.grid_indices`, in one go
+    #: * 'single': Calculate the PSF for the grid points defined by
+    #:             :attr:`~acoular.fbeamform.PointSpreadFunction.grid_indices`, one by one :
+    #:             (useful if not all PSFs are needed, as with :class:`CLEAN<BeamformerClean>`):
+    #: * 'block': Calculate the PSF for the grid points defined by
+    #:            :attr:`~acoular.fbeamform.PointSpreadFunction.grid_indices`, in one go
     #:            (useful if not all PSFs are needed, as with :class:`CLEAN<BeamformerClean>`)
     #: * 'readonly': Do not attempt to calculate the PSF since it should already be cached (useful
     #:               if multiple processes have to access the cache file)
@@ -1138,9 +1140,11 @@ class BeamformerDamas(BeamformerBase):
     #:
     #: * 'full': Calculate the full PSF (for all grid points) in one go (should be used if the PSF
     #:           at all grid points is needed, as with :class:`DAMAS<BeamformerDamas>`)
-    #: * 'single': Calculate the PSF for the grid points defined by :attr:`~acoular.fbeamform.PointSpreadFunction.grid_indices`, one by one
+    #: * 'single': Calculate the PSF for the grid points defined by
+    #:             :attr:`~acoular.fbeamform.PointSpreadFunction.grid_indices`, one by one
     #:             (useful if not all PSFs are needed, as with :class:`CLEAN<BeamformerClean>`)
-    #: * 'block': Calculate the PSF for the grid points defined by :attr:`~acoular.fbeamform.PointSpreadFunction.grid_indices`, in one go
+    #: * 'block': Calculate the PSF for the grid points defined by
+    #:            :attr:`~acoular.fbeamform.PointSpreadFunction.grid_indices`, in one go
     #:            (useful if not all PSFs are needed, as with :class:`CLEAN<BeamformerClean>`)
     #: * 'readonly': Do not attempt to calculate the PSF since it should already be cached (useful
     #:               if multiple processes have to access the cache file)
@@ -1499,9 +1503,11 @@ class BeamformerClean(BeamformerBase):
     #:
     #: * 'full': Calculate the full PSF (for all grid points) in one go (should be used if the PSF
     #:           at all grid points is needed, as with :class:`DAMAS<BeamformerDamas>`)
-    #: * 'single': Calculate the PSF for the grid points defined by :attr:`~acoular.fbeamform.PointSpreadFunction.grid_indices`, one by one
+    #: * 'single': Calculate the PSF for the grid points defined by
+    #:             :attr:`~acoular.fbeamform.PointSpreadFunction.grid_indices`, one by one
     #:             (useful if not all PSFs are needed, as with :class:`CLEAN<BeamformerClean>`)
-    #: * 'block': Calculate the PSF for the grid points defined by :attr:`~acoular.fbeamform.PointSpreadFunction.grid_indices`, in one go
+    #: * 'block': Calculate the PSF for the grid points defined by
+    #:            :attr:`~acoular.fbeamform.PointSpreadFunction.grid_indices`, in one go
     #:            (useful if not all PSFs are needed, as with :class:`CLEAN<BeamformerClean>`)
     #: * 'readonly': Do not attempt to calculate the PSF since it should already be cached (useful
     #:               if multiple processes have to access the cache file)
