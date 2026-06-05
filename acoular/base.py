@@ -209,11 +209,11 @@ class TimeOut(SamplesGenerator):
 
 class SpectraOut(SpectraGenerator):
     """
-    Abstract base class receiving from a :attr:`~acoular.base.SpectraOut.source` and returning frequency domain signals.
+    Abstract base class receiving from a `source` and returning frequency domain signals.
 
     It provides a base class that can be used to create signal processing blocks that receive data
-    from any generating :attr:`~acoular.base.SpectraOut.source` domain and generates a frequency domain output via the
-    generator :meth:`~acoular.base.Generator.result` in block-wise manner.
+    from any generating `source` domain and generates a frequency domain output via the `result`
+    generator in block-wise manner.
     """
 
     #: Data source; :class:`~acoular.base.Generator` or derived object.
@@ -263,11 +263,11 @@ class SpectraOut(SpectraGenerator):
 
 class InOut(SamplesGenerator, SpectraGenerator):
     """
-    Abstract base class receiving from a :attr:`~acoular.base.InOut.source` and returning signals in the same domain.
+    Abstract base class receiving from a `source` and returning signals in the same domain.
 
     It provides a base class that can be used to create signal processing blocks that receive data
-    from any generating :attr:`~acoular.base.InOut.source` and generates an output via the generator :meth:`~acoular.base.Generator.result` in
-    block-wise manner.
+    from any generating `source` and generates an output via the `result` generator in block-wise
+    manner.
     """
 
     #: Data source; :class:`~acoular.base.Generator` or derived object.

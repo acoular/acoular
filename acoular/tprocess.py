@@ -2167,7 +2167,7 @@ class FiltFreqWeight(Filter):
 
 class FilterBank(TimeOut):
     """
-    Abstract base class for IIR filter banks based on :func:`~scipy.signal.sosfilt` and SOS coefficients.
+    Abstract base class for IIR filter banks based on SOS coefficients.
 
     Implements a bank of parallel filters. This class should not be instantiated by itself.
 
