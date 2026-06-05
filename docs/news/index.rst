@@ -1,6 +1,11 @@
 What's new
 ============
 
+Upcoming
+------------------------
+    **Internal**
+        * Fix several sphinx attribute links in the docstrings that lead to build warnings
+
 26.04
 ------------------------
     **Documentation**
