@@ -55,7 +55,7 @@ full = [
 [dependency-groups]
 docs = ["acoular-sphinx @ git+https://github.com/acoular/ci.git@sphinx-v1.1#subdirectory=packages/acoular-sphinx"]
 
-lint = ["ruff==0.14.2"]
+lint = ["acoular-ruff @ git+https://github.com/acoular/ci.git@ruff-v1.0"]
 
 tests = [
     "h5py",
@@ -109,6 +109,15 @@ url = "https://test.pypi.org/simple/"
 publish-url = "https://test.pypi.org/legacy/"
 explicit = true
 
+[tool.coverage.run]
+omit = [
+    "acoular/demo",
+    "acoular/base.py",
+    "acoular/tfastfuncs.py",
+    "acoular/fastFuncs.py",
+    "acoular/deprecation",
+]
+
 [tool.pytest.ini_options]
 testpaths = "tests"
 addopts = "-v --durations=10 --cov-report=html --cov-report=term-missing"
@@ -127,11 +136,21 @@ env = [
     "OPENBLAS_NUM_THREADS=1",
 ]
 
-[tool.coverage.run]
-omit = [
-    "acoular/demo",
-    "acoular/base.py",
-    "acoular/tfastfuncs.py",
-    "acoular/fastFuncs.py",
-    "acoular/deprecation",
-]
+[tool.ruff]
+extend = ".venv/share/ruff/ruff.acoular.toml"
+extend-exclude = ["docs/source", "tests/unsupported"]
+
+[tool.ruff.lint.per-file-ignores]
+"!acoular/*" = ["D"]
+"acoular/__init__.py" = ["F401"]
+"acoular/demo/__init__.py" = ["F401"]
+"acoular/tools/__init__.py" = ["F401"]
+"acoular/aiaa/__init__.py" = ["F401"]
+"acoular/environments.py" = ["N806"]
+"acoular/fastFuncs.py" = ["N802", "N803", "N806", "N999"] # allow different naming convention
+"acoular/fbeamform.py" = ["N806", "B023"]
+"acoular/sources.py" = ["N806"]
+"acoular/tools/helpers.py" = ["D205"]
+"acoular/tprocess.py" = ["N806"]
+"tests/cases/*" = ["N802"]
+"examples/*" = ["A001", "B007", "D4", "E4", "E701", "F4", "UP036", "SIM108", "SLF001", "INP001"]
