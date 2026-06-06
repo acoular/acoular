@@ -15,9 +15,10 @@ Shows Acoular's Sector und Sound Pressure level Integration functionality.
 from pathlib import Path
 
 import acoular as ac
+from acoular.tools.helpers import get_data_file
+
 import matplotlib.pyplot as plt
 import numpy as np
-from acoular.tools.helpers import get_data_file
 from matplotlib.patches import Polygon, Rectangle
 
 # %%

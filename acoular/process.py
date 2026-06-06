@@ -18,9 +18,6 @@ from collections import deque
 from inspect import currentframe
 from warnings import warn
 
-import numpy as np
-from traits.api import Any, Array, Bool, Dict, Enum, Instance, Int, Property, Union, cached_property, observe
-
 # acoular imports
 from .base import Generator, InOut
 from .configuration import config
@@ -28,6 +25,9 @@ from .h5cache import H5cache
 from .h5files import H5CacheFileBase
 from .internal import digest
 from .tools.utils import find_basename
+
+import numpy as np
+from traits.api import Any, Array, Bool, Dict, Enum, Instance, Int, Property, Union, cached_property, observe
 
 
 class LockedGenerator:

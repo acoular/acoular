@@ -35,6 +35,18 @@ Measured multichannel data management and simulation of acoustic sources.
 import contextlib
 from warnings import warn
 
+from .base import SamplesGenerator
+
+# acoular imports
+from .environments import Environment
+from .h5files import H5FileBase, _get_h5file_class
+from .internal import digest, ldigest
+from .microphones import MicGeom
+from .signals import NoiseGenerator, SignalGenerator
+from .tools.utils import get_file_basename
+from .tprocess import TimeConvolve
+from .trajectory import Trajectory
+
 import numba as nb
 import numpy as np
 import scipy.linalg as spla
@@ -60,18 +72,6 @@ from traits.api import (
     cached_property,
     observe,
 )
-
-from .base import SamplesGenerator
-
-# acoular imports
-from .environments import Environment
-from .h5files import H5FileBase, _get_h5file_class
-from .internal import digest, ldigest
-from .microphones import MicGeom
-from .signals import NoiseGenerator, SignalGenerator
-from .tools.utils import get_file_basename
-from .tprocess import TimeConvolve
-from .trajectory import Trajectory
 
 
 @nb.njit(cache=True, error_model='numpy')  # pragma: no cover

@@ -48,6 +48,10 @@ import xml.dom.minidom
 from abc import abstractmethod
 from pathlib import Path
 
+# acoular imports
+from .internal import digest, ldigest
+from .tools.utils import Polygon
+
 import numpy as np
 import scipy.linalg as spla
 
@@ -71,10 +75,6 @@ from traits.api import (
     property_depends_on,
 )
 from traits.trait_errors import TraitError
-
-# acoular imports
-from .internal import digest, ldigest
-from .tools.utils import Polygon
 
 
 def in_hull(p, hull, border=True, tol=0):

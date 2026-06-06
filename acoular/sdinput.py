@@ -9,12 +9,12 @@
     SoundDeviceSamplesGenerator
 """
 
-from traits.api import Any, Bool, Enum, Float, Int, Property, cached_property, observe
-
 # acoular imports
 from .base import SamplesGenerator
 from .configuration import config
 from .internal import digest
+
+from traits.api import Any, Bool, Enum, Float, Int, Property, cached_property, observe
 
 if config.have_sounddevice:
     import sounddevice as sd

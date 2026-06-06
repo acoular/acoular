@@ -3,9 +3,10 @@
 # ------------------------------------------------------------------------------
 """Test cases for all convolve classes."""
 
+from acoular import TimeConvolve, TimeSamples, tools
+
 import numpy as np
 import pytest
-from acoular import TimeConvolve, TimeSamples, tools
 from pytest_cases import parametrize
 
 

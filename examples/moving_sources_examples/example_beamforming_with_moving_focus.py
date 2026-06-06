@@ -31,6 +31,7 @@ is evaluated using three different beamforming approaches:
 from pathlib import Path
 
 import acoular as ac
+
 import matplotlib.pyplot as plt
 import numpy as np
 

@@ -7,6 +7,7 @@ from inspect import isabstract
 from pathlib import Path
 
 import acoular as ac
+
 import numpy as np
 import pytest
 from pytest_cases import get_case_id

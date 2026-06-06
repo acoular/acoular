@@ -18,6 +18,7 @@ import threading
 from time import sleep
 
 import acoular as ac
+
 import numpy as np
 
 # %%

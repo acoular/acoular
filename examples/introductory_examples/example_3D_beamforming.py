@@ -13,6 +13,7 @@ Simulates data on 64 channel array, subsequent beamforming with CLEAN-SC on 3D g
 from pathlib import Path
 
 import acoular as ac
+
 import matplotlib.pyplot as plt
 import numpy as np
 

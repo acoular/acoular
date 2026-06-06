@@ -18,12 +18,12 @@
 # imports from other packages
 import xml.dom.minidom
 
-import numpy as np
-from traits.api import CArray, CInt, File, List, Property, Union, cached_property, observe
-
 # acoular imports
 from .base import InOut, SamplesGenerator, SpectraGenerator
 from .internal import digest
+
+import numpy as np
+from traits.api import CArray, CInt, File, List, Property, Union, cached_property, observe
 
 
 class Calib(InOut):

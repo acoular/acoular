@@ -4,6 +4,7 @@
 """Unit tests for acoular.sdinput module."""
 
 import acoular as ac
+
 import pytest
 
 

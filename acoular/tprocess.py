@@ -43,6 +43,15 @@ from datetime import UTC, datetime
 from os import path
 from warnings import warn
 
+# acoular imports
+from .base import SamplesGenerator, TimeOut
+from .configuration import config
+from .environments import cartToCyl, cylToCart
+from .h5files import _get_h5file_class
+from .internal import digest, ldigest
+from .microphones import MicGeom
+from .process import Cache
+
 import numba as nb
 import numpy as np
 import scipy.linalg as spla
@@ -71,15 +80,6 @@ from traits.api import (
     cached_property,
     observe,
 )
-
-# acoular imports
-from .base import SamplesGenerator, TimeOut
-from .configuration import config
-from .environments import cartToCyl, cylToCart
-from .h5files import _get_h5file_class
-from .internal import digest, ldigest
-from .microphones import MicGeom
-from .process import Cache
 
 
 class MaskedTimeOut(TimeOut):

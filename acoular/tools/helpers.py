@@ -17,9 +17,9 @@
 from pathlib import Path
 from warnings import warn
 
-import numpy as np
-
 from acoular.tools.utils import mole_fraction_of_water_vapor
+
+import numpy as np
 
 
 def synthetic(data, freqs, f, num=3):

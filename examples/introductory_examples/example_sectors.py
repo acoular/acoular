@@ -23,10 +23,11 @@ third-octave spectra using the :func:`~acoular.tools.helpers.barspectrum` functi
 from pathlib import Path
 
 import acoular as ac
-import matplotlib.pyplot as plt
-import numpy as np
 from acoular.tools import barspectrum
 from acoular.tools.helpers import get_data_file
+
+import matplotlib.pyplot as plt
+import numpy as np
 
 # %%
 # Next, let's ensure we have the necessary example data available.

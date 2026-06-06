@@ -2,13 +2,14 @@ import pickle
 from pathlib import Path
 
 import acoular as ac
+
+from tests.utils import SetupMovingSourceCase, SetupStationarySourceCase, create_instance
+
 import numpy as np
 import pytest
 import sounddevice as sd
 import tables as tb
 from pytest_cases import fixture, parametrize
-
-from tests.utils import SetupMovingSourceCase, SetupStationarySourceCase, create_instance
 
 
 @pytest.hookimpl()

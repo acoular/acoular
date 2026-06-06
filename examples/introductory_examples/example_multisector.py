@@ -20,10 +20,11 @@ functions from the sectors example for convenience.
 from pathlib import Path
 
 import acoular as ac
-import matplotlib.pyplot as plt
-import numpy as np
 from acoular.tools import barspectrum
 from acoular.tools.helpers import get_data_file
+
+import matplotlib.pyplot as plt
+import numpy as np
 
 # Import Acoular objects and helper functions from the sectors example
 # from example_sectors import bb, freqs, grid, sector, spl_map

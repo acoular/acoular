@@ -4,10 +4,11 @@
 """Implementation of test cases for all grids and sectors."""
 
 import acoular as ac
-import numpy as np
-from pytest_cases import parametrize
 
 from tests.utils import get_subclasses
+
+import numpy as np
+from pytest_cases import parametrize
 
 SECTOR_SKIP_DEFAULT = [
     ac.Sector,

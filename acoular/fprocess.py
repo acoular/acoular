@@ -20,16 +20,16 @@ Implements blockwise processing methods in the frequency domain.
     CrossPowerSpectra
 """
 
-import numpy as np
-from scipy import fft
-from traits.api import Bool, CArray, Enum, Instance, Int, Property, Union, cached_property
-
 # acoular imports
 from .base import SamplesGenerator, SpectraGenerator, SpectraOut, TimeOut
 from .fastFuncs import calcCSM
 from .internal import digest
 from .process import SamplesBuffer
 from .spectra import BaseSpectra
+
+import numpy as np
+from scipy import fft
+from traits.api import Bool, CArray, Enum, Instance, Int, Property, Union, cached_property
 
 
 class RFFT(BaseSpectra, SpectraOut):

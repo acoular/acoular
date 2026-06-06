@@ -27,6 +27,13 @@ Examples
 
 import contextlib
 
+from acoular.h5files import H5FileBase, _get_h5file_class
+from acoular.internal import digest
+from acoular.microphones import MicGeom
+from acoular.sources import TimeSamples
+from acoular.spectra import PowerSpectraImport
+from acoular.tools.utils import get_file_basename
+
 import numpy as np
 from traits.api import (
     File,
@@ -37,13 +44,6 @@ from traits.api import (
     observe,
     property_depends_on,
 )
-
-from acoular.h5files import H5FileBase, _get_h5file_class
-from acoular.internal import digest
-from acoular.microphones import MicGeom
-from acoular.sources import TimeSamples
-from acoular.spectra import PowerSpectraImport
-from acoular.tools.utils import get_file_basename
 
 
 class TimeSamplesAIAABenchmark(TimeSamples):

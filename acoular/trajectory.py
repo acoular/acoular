@@ -10,12 +10,12 @@
 """
 
 # imports from other packages
+# acoular imports
+from .internal import digest
+
 import numpy as np
 from scipy.interpolate import splev, splprep
 from traits.api import Dict, Float, HasStrictTraits, Property, Tuple, cached_property, property_depends_on
-
-# acoular imports
-from .internal import digest
 
 
 class Trajectory(HasStrictTraits):

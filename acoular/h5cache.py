@@ -8,10 +8,10 @@ import gc
 from pathlib import Path
 from weakref import WeakValueDictionary
 
-from traits.api import Bool, Delegate, Dict, HasStrictTraits, Instance
-
 from .configuration import Config, config
 from .h5files import _get_cachefile_class
+
+from traits.api import Bool, Delegate, Dict, HasStrictTraits, Instance
 
 
 class HDF5Cache(HasStrictTraits):

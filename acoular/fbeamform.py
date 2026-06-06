@@ -44,6 +44,18 @@ Implements beamformers in the frequency domain.
 import warnings
 from warnings import warn
 
+# acoular imports
+from .configuration import config
+from .environments import Environment
+from .fastFuncs import beamformerFreq, calcPointSpreadFunction, calcTransfer, damasSolverGaussSeidel
+from .grids import Grid, Sector
+from .h5cache import H5cache
+from .h5files import H5CacheFileBase
+from .internal import digest
+from .microphones import MicGeom
+from .spectra import PowerSpectra
+from .tfastfuncs import _steer_I, _steer_II, _steer_III, _steer_IV
+
 import numpy as np
 import scipy.linalg as spla
 
@@ -71,18 +83,6 @@ from traits.api import (
     property_depends_on,
 )
 from traits.trait_errors import TraitError
-
-# acoular imports
-from .configuration import config
-from .environments import Environment
-from .fastFuncs import beamformerFreq, calcPointSpreadFunction, calcTransfer, damasSolverGaussSeidel
-from .grids import Grid, Sector
-from .h5cache import H5cache
-from .h5files import H5CacheFileBase
-from .internal import digest
-from .microphones import MicGeom
-from .spectra import PowerSpectra
-from .tfastfuncs import _steer_I, _steer_II, _steer_III, _steer_IV
 
 sklearn_ndict = {}
 if parse(sklearn.__version__) < parse('1.4'):
