@@ -804,7 +804,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
     sample_freq = Delegate('source', 'sample_freq')
 
     #: Number of channels in the output data. This corresponds to the number of virtual microphone
-    #: positions where interpolated pressure values are computed. The value is ´determined based on
+    #: positions where interpolated pressure values are computed. The value is determined based on
     #: the :attr:`mics_virtual` geometry.
     num_channels = Property()
 
