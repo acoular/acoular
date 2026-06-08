@@ -455,6 +455,7 @@ class BeamformerBase(HasStrictTraits):
 
             def param_steer_func(f):
                 return (self.steer.r0, self.steer.rm, 2 * np.pi * f / self.steer.env.c)
+
         else:
             param_type = 'custom'
             param_steer_func = self.steer.steer_vector

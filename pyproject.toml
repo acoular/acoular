@@ -137,8 +137,12 @@ env = [
 ]
 
 [tool.ruff]
-extend = ".venv/share/ruff/ruff.acoular.toml"
+#extend = ".venv/share/ruff/ruff.acoular.toml"
+extend = "../ci/ruff.acoular.toml"
 extend-exclude = ["docs/source", "tests/unsupported"]
+
+[tool.ruff.lint]
+extend-ignore = ["SLF001", "T20"]
 
 [tool.ruff.lint.per-file-ignores]
 "!acoular/*" = ["D"]
