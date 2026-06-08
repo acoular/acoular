@@ -334,14 +334,14 @@ class RectGrid(Grid):
     def _get_nxsteps(self):
         i = abs(self.increment)
         if i != 0:
-            return int(round((abs(self.x_max - self.x_min) + i) / i))
+            return round((abs(self.x_max - self.x_min) + i) / i)
         return 1
 
     @property_depends_on(['y_min', 'y_max', 'increment'])
     def _get_nysteps(self):
         i = abs(self.increment)
         if i != 0:
-            return int(round((abs(self.y_max - self.y_min) + i) / i))
+            return round((abs(self.y_max - self.y_min) + i) / i)
         return 1
 
     @cached_property
@@ -533,21 +533,21 @@ class RectGrid3D(RectGrid):
     def _get_nxsteps(self):
         i = abs(self.increment) if np.isscalar(self.increment) else abs(self.increment[0])
         if i != 0:
-            return int(round((abs(self.x_max - self.x_min) + i) / i))
+            return round((abs(self.x_max - self.x_min) + i) / i)
         return 1
 
     @property_depends_on(['y_min', 'y_max', '_increment'])
     def _get_nysteps(self):
         i = abs(self.increment) if np.isscalar(self.increment) else abs(self.increment[1])
         if i != 0:
-            return int(round((abs(self.y_max - self.y_min) + i) / i))
+            return round((abs(self.y_max - self.y_min) + i) / i)
         return 1
 
     @property_depends_on(['z_min', 'z_max', '_increment'])
     def _get_nzsteps(self):
         i = abs(self.increment) if np.isscalar(self.increment) else abs(self.increment[2])
         if i != 0:
-            return int(round((abs(self.z_max - self.z_min) + i) / i))
+            return round((abs(self.z_max - self.z_min) + i) / i)
         return 1
 
     @property_depends_on('digest')
@@ -612,9 +612,9 @@ class RectGrid3D(RectGrid):
             incx = incy = incz = self.increment
         else:
             incx, incy, incz = self.increment
-        xi = int(round((x - self.x_min) / incx))
-        yi = int(round((y - self.y_min) / incy))
-        zi = int(round((z - self.z_min) / incz))
+        xi = round((x - self.x_min) / incx)
+        yi = round((y - self.y_min) / incy)
+        zi = round((z - self.z_min) / incz)
         return xi, yi, zi
 
     def indices(self, x1, y1, z1, x2, y2, z2):

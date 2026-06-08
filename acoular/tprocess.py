@@ -2445,7 +2445,7 @@ class WriteWAV(TimeOut):
         if self.sample_freq.is_integer():
             fs = self.sample_freq
         else:
-            fs = int(round(self.sample_freq))
+            fs = round(self.sample_freq)
             msg = f'Sample frequency {self.sample_freq} is not a whole number. Proceeding with sampling frequency {fs}.'
             warn(msg, Warning, stacklevel=1)
         dtype, _, dmax, sw = self._type_info()
