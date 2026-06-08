@@ -7,6 +7,10 @@
     :toctree: generated/
 """
 
+from pathlib import Path
+
+import acoular as ac
+
 
 def create_three_sources(mg, h5savefile='three_sources.h5'):
     """
@@ -19,8 +23,6 @@ def create_three_sources(mg, h5savefile='three_sources.h5'):
 
 def _create_three_sources(mg, locs, h5savefile='', sfreq=51200, duration=1):
     """Create three noise sources with custom locations and return them as Mixer."""
-    import acoular as ac
-
     nsamples = duration * sfreq
 
     n1 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=nsamples, seed=1)
@@ -57,10 +59,6 @@ def create_three_sources_3d(mg, h5savefile='three_sources_3d.h5'):
 
 def run():
     """Run the Acoular demo."""
-    from pathlib import Path
-
-    import acoular as ac
-
     ac.config.global_caching = 'none'
 
     # set up microphone geometry

@@ -14,6 +14,7 @@
     get_data_file
 """
 
+import urllib.request
 from pathlib import Path
 from warnings import warn
 
@@ -413,8 +414,6 @@ def get_data_file(file):
     if not data_file.exists():
         data_file = Path().cwd() / file
         if not data_file.exists():
-            import urllib.request
-
             url = 'https://github.com/acoular/acoular/raw/master/examples/data/' + file
             urllib.request.urlretrieve(url, data_file)
         print(f'Calibration file location: {data_file}')
