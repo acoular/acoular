@@ -696,7 +696,7 @@ class AngleTracker(MaskedTimeOut):
 
     # reset calc flag if something has changed
     @observe('digest')
-    def _reset_calc_flag(self, event):  # noqa ARG002
+    def _reset_calc_flag(self, event):  # noqa: ARG002
         self._calc_flag = False
 
     # calc rpm from trigger data
@@ -872,7 +872,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
         return digest(self)
 
     @cached_property
-    def _get_virtNewCoord(self):  # noqa N802
+    def _get_virtNewCoord(self):  # noqa: N802
         return self._virtNewCoord_func(self.mics.pos, self.mics_virtual.pos, self.method, self.array_dimension)
 
     def sinc_mic(self, r):
@@ -897,7 +897,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
         """
         return np.sinc((r * self.mics_virtual.mpos.shape[1]) / (np.pi))
 
-    def _virtNewCoord_func(self, mpos, mpos_virt, method, array_dimension):  # noqa N802
+    def _virtNewCoord_func(self, mpos, mpos_virt, method, array_dimension):  # noqa: N802
         # Core functionality for getting the interpolation.
         #
         # Parameters
@@ -1494,7 +1494,7 @@ class Mixer(TimeOut):
     sdigest = Str()
 
     @observe('sources.items.digest')
-    def _set_sourcesdigest(self, event):  # noqa ARG002
+    def _set_sourcesdigest(self, event):  # noqa: ARG002
         self.sdigest = ldigest(self.sources)
 
     #: A unique identifier for the Mixer instance, based on the :attr:`primary source<source>` and

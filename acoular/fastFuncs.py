@@ -637,7 +637,7 @@ def calcPointSpreadFunction(steerVecType, distGridToArrayCenter, distGridToAllMi
     fastmath=FAST_OPTION,
 )
 def _psf_Formulation1AkaClassic(
-    distGridToArrayCenter,  # noqa ARG001
+    distGridToArrayCenter,  # noqa: ARG001
     distGridToAllMics,
     distSourcesToArrayCenter,
     distSourcesToAllMics,
@@ -749,7 +749,7 @@ def _psf_Formulation3AkaTrueLevel(
     fastmath=FAST_OPTION,
 )
 def _psf_Formulation4AkaTrueLocation(
-    distGridToArrayCenter,  # noqa ARG001
+    distGridToArrayCenter,  # noqa: ARG001
     distGridToAllMics,
     distSourcesToArrayCenter,
     distSourcesToAllMics,

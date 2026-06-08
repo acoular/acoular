@@ -387,7 +387,7 @@ class TimeSamples(SamplesGenerator):
         return get_file_basename(self.file)
 
     @observe('basename')
-    def _load_data(self, event):  # noqa ARG002
+    def _load_data(self, event):  # noqa: ARG002
         # Open the .h5 file and set attributes.
         if self._h5f is not None:
             with contextlib.suppress(OSError):
@@ -398,7 +398,7 @@ class TimeSamples(SamplesGenerator):
         self._load_metadata()
 
     @observe('data')
-    def _load_shapes(self, event):  # noqa ARG002
+    def _load_shapes(self, event):  # noqa: ARG002
         # Set :attr:`num_channels` and :attr:`num_samples` from data.
         if self.data is not None:
             self.num_samples, self.num_channels = self.data.shape
@@ -567,7 +567,7 @@ class MaskedTimeSamples(TimeSamples):
         return sli[1] - sli[0]
 
     @observe('data')
-    def _load_shapes(self, event):  # noqa ARG002
+    def _load_shapes(self, event):  # noqa: ARG002
         # Set :attr:`num_channels` and num_samples from :attr:`~acoular.sources.TimeSamples.data`.
         if self.data is not None:
             self.num_samples_total, self.num_channels_total = self.data.shape
@@ -2086,7 +2086,7 @@ class SourceMixer(SamplesGenerator):
     sdigest = Str()
 
     @observe('sources.items.digest')
-    def _set_sources_digest(self, event):  # noqa ARG002
+    def _set_sources_digest(self, event):  # noqa: ARG002
         self.sdigest = ldigest(self.sources)
 
     #: A unique identifier for the current state of the source,

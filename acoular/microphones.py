@@ -198,7 +198,7 @@ class MicGeom(HasStrictTraits):
         return None
 
     @observe('file')
-    def _import_mpos(self, event):  # noqa ARG002
+    def _import_mpos(self, event):  # noqa: ARG002
         # Import the microphone positions from an XML file.
         #
         # This method parses the XML file specified in :attr:`file` and extracts the ``x``, ``y``,

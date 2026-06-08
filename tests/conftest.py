@@ -13,7 +13,7 @@ from pytest_cases import fixture, parametrize
 
 
 @pytest.hookimpl()
-def pytest_sessionfinish(session):  # noqa ARG001
+def pytest_sessionfinish(session):  # noqa: ARG001
     """Close all open files after the test session.
 
     This hook is called after the test session is finished and is used to get rid of the

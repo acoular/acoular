@@ -120,7 +120,7 @@ def in_hull(p, hull, border=True, tol=0):
     >>> p = np.array([[0.5, 0.5], [2, 2]])
     >>> in_hull(p, hull)
     array([ True, False])
-    """  # noqa W505
+    """  # noqa: W505
     if not isinstance(hull, Delaunay):
         hull = Delaunay(hull)
 
@@ -705,7 +705,7 @@ class ImportGrid(Grid):
         self._gpos = pos
 
     @observe('file')
-    def _import_pos(self, event):  # noqa ARG002
+    def _import_pos(self, event):  # noqa: ARG002
         """
         Import the grid point locations and subgrid names from an XML file.
 
@@ -960,7 +960,7 @@ class MergeGrid(Grid):
         return digest(self)
 
     @observe('grids.items.digest')
-    def _set_sourcesdigest(self, event):  # noqa ARG002
+    def _set_sourcesdigest(self, event):  # noqa: ARG002
         self.grid_digest = ldigest(self.grids)
 
     @property_depends_on(['digest'])
