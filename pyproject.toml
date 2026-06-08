@@ -136,13 +136,31 @@ env = [
     "OPENBLAS_NUM_THREADS=1",
 ]
 
+
 [tool.ruff]
-#extend = ".venv/share/ruff/ruff.acoular.toml"
-extend = "../ci/ruff.acoular.toml"
+extend = ".venv/share/ruff/ruff.acoular.toml"
 extend-exclude = ["docs/source", "tests/unsupported"]
 
 [tool.ruff.lint]
-extend-ignore = ["SLF001", "T20"]
+extend-ignore = [
+  "FBT002",  # boolean positional argument
+  "NPY002",  # migrate NumPy RNG
+  "PERF4",  # list performance improvements
+  "PTH",  # migrate to Pathlib
+  "SLF001",  # private attr access
+  "T20",  # deactivate when logging is implemented
+  "FBT003",  # boolean-positional
+  "PLR2004",  # magic-value-comparison
+  "PLR091",  # too-many-arguments/statements
+  "PLW1510",  #  subprocess-run
+  "RUF005",  # needs carefull checking
+  "RUF059",  # unused-packed-variable
+  "PLW2901",  # overwritten loop variable
+  "PLR0912",  # too many branches
+]
+
+[tool.ruff.lint.flake8-tidy-imports]
+banned-module-level-imports = ["matplotlib", "pylops", "sounddevice"]
 
 [tool.ruff.lint.per-file-ignores]
 "!acoular/*" = ["D"]
@@ -156,5 +174,21 @@ extend-ignore = ["SLF001", "T20"]
 "acoular/sources.py" = ["N806"]
 "acoular/tools/helpers.py" = ["D205"]
 "acoular/tprocess.py" = ["N806"]
+"tests/*" = ["FIX", "PLC0415", "PT", "RUF", "S101", "TRY"]
 "tests/cases/*" = ["N802"]
-"examples/*" = ["A001", "B007", "D4", "E4", "E701", "F4", "UP036", "SIM108", "SLF001", "INP001"]
+"examples/*" = [
+  "A001",
+  "B007",
+  "D4",
+  "E4",
+  "E701",
+  "EXE",
+  "F4",
+  "UP036",
+  "S101",
+  "SIM108",
+  "SLF001",
+  "TID253",  # matplotlib imports are ok
+  "INP001"
+]
+"examples/benchmark/*" = ["S307", "S603", "S607"]
