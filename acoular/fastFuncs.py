@@ -244,7 +244,7 @@ def _freqBeamformer_FullCSM(
     # in order to gain speed improvements.
     nMics = csm.shape[0]
     st2 = steer_type == 2
-    st34 = steer_type == 3 or steer_type == 4
+    st34 = steer_type in {3, 4}
     helpNormalize = 0.0  # just a hint for the compiler
     for gi in nb.prange(distGridToArrayCenter.shape[0]):
         steerVec = np.empty((nMics), np.complex128)
@@ -341,7 +341,7 @@ def _freqBeamformer_EigValues(
     nMics = eigVec.shape[0]
     nEigs = len(eigVal)
     st2 = steer_type == 2
-    st34 = steer_type == 3 or steer_type == 4
+    st34 = steer_type in {3, 4}
     helpNormalize = 0.0  # just a hint for the compiler
     for gi in nb.prange(distGridToArrayCenter.shape[0]):
         steerVec = np.empty((nMics), np.complex128)

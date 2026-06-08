@@ -110,7 +110,7 @@ class RFFT(BaseSpectra, SpectraOut):
 
     def _scale(self, data, scaling_value):
         # Corrects the energy of the one-sided FFT data.
-        if self.scaling == 'amplitude' or self.scaling == 'energy':
+        if self.scaling in {'amplitude', 'energy'}:
             data[1:-1] *= 2.0
         data *= scaling_value
         return data
@@ -154,7 +154,7 @@ class RFFT(BaseSpectra, SpectraOut):
           the remaining spectra are padded or adjusted accordingly.
         """
         wind = self.window_(self.block_size)
-        if self.scaling == 'none' or self.scaling == 'energy':  # only compensate for the window
+        if self.scaling in {'none', 'energy'}:  # only compensate for the window
             svalue = 1 / np.sqrt(np.dot(wind, wind) / self.block_size)
         elif self.scaling == 'amplitude':  # compensates for the window and the energy loss
             svalue = 1 / wind.sum()

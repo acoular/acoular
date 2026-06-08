@@ -951,7 +951,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
         # empty mesh object
         mesh = []
 
-        if self.array_dimension == '1D' or self.array_dimension == 'ring':
+        if self.array_dimension in {'1D', 'ring'}:
             # get projections onto new coordinate, for real mics
             projectionOnNewAxis = cartToCyl(mpos, self.Q)[0]
             indReorderHelp = np.argsort(projectionOnNewAxis)
@@ -1089,7 +1089,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
         pHelp = p[:, meshList[0][1]]
 
         # Interpolation for 1D Arrays
-        if self.array_dimension == '1D' or self.array_dimension == 'ring':
+        if self.array_dimension in {'1D', 'ring'}:
             # for rotation add phi_delay
             if not np.array_equal(phi_delay, []):
                 xInterpHelp = np.tile(virtNewCoord[0, :], (nTime, 1)) + np.tile(phi_delay, (virtNewCoord.shape[1], 1)).T
