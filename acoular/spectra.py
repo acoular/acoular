@@ -177,9 +177,8 @@ class BaseSpectra(ABCHasStrictTraits):
             while pos + bs <= bs + ns:
                 yield temp[int(pos) : int(pos + bs)]
                 pos += posinc
-            else:
-                temp[0:bs] = temp[bs:]  # copy to left
-                pos -= bs
+            temp[0:bs] = temp[bs:]  # copy to left
+            pos -= bs
 
 
 class PowerSpectra(BaseSpectra):

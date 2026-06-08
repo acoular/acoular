@@ -1960,11 +1960,10 @@ class UncorrelatedNoiseSource(SamplesGenerator):
         while n <= self.num_samples:
             yield signal[n - num : n, :]
             n += num
+        if (n - num) < self.num_samples:
+            yield signal[n - num :, :]
         else:
-            if (n - num) < self.num_samples:
-                yield signal[n - num :, :]
-            else:
-                return
+            return
 
 
 class SourceMixer(SamplesGenerator):

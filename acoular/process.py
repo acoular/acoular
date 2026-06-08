@@ -494,7 +494,7 @@ class SampleSplitter(InOut):
     def _create_block_buffer(self, obj, buffer_size=None):
         if buffer_size is None:
             buffer_size = self.buffer_size if isinstance(self.buffer_size, int) else self.buffer_size[obj]
-        self.block_buffer[obj] = deque([], maxlen=buffer_size)
+        self.block_buffer[obj] = deque(maxlen=buffer_size)
 
     def _create_buffer_overflow_treatment(self, obj, buffer_overflow_treatment=None):
         if buffer_overflow_treatment is None:
@@ -665,9 +665,8 @@ class SampleSplitter(InOut):
                 except StopIteration:
                     self._source_generator_exist = False
                     return
-        else:
-            msg = 'Maximum size of block buffer is reached!'
-            raise OSError(msg)
+        msg = 'Maximum size of block buffer is reached!'
+        raise OSError(msg)
 
 
 class SamplesBuffer(InOut):
@@ -830,7 +829,7 @@ class SamplesBuffer(InOut):
             - ``'num'``: The index will shift by the number of samples requested (``num``).
         """
         rnum = num if self.result_num is None else self.result_num
-        rnum = rnum if self.level >= rnum else self.level
+        rnum = min(rnum, self.level)
         data = self._buffer[self._index : self._index + rnum]
         if self.shift_index_by == 'result_num':
             self._index += rnum

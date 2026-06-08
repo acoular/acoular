@@ -180,32 +180,31 @@ def beamformerFreq(steerVecType, boolRemovedDiagOfCSM, normFactor, inputTupleSte
             coreFunc(eigVal, eigVec, steerVec, normFactor, result, normalHelp)
         else:
             coreFunc(csm, steerVec, normFactor, result, normalHelp)
-    else:  # predefined beamformers (Formulation I - IV)
-        if boolIsEigValProb:
-            _freqBeamformer_EigValues(
-                eigVal,
-                np.ascontiguousarray(eigVec),
-                distGridToArrayCenter,
-                distGridToAllMics,
-                waveNumber[0],
-                normFactor,
-                boolRemovedDiagOfCSM,
-                sth[steerVecType],
-                result,
-                normalHelp,
-            )
-        else:
-            _freqBeamformer_FullCSM(
-                csm,
-                distGridToArrayCenter,
-                distGridToAllMics,
-                waveNumber[0],
-                normFactor,
-                boolRemovedDiagOfCSM,
-                sth[steerVecType],
-                result,
-                normalHelp,
-            )
+    elif boolIsEigValProb:
+        _freqBeamformer_EigValues(
+            eigVal,
+            np.ascontiguousarray(eigVec),
+            distGridToArrayCenter,
+            distGridToAllMics,
+            waveNumber[0],
+            normFactor,
+            boolRemovedDiagOfCSM,
+            sth[steerVecType],
+            result,
+            normalHelp,
+        )
+    else:
+        _freqBeamformer_FullCSM(
+            csm,
+            distGridToArrayCenter,
+            distGridToAllMics,
+            waveNumber[0],
+            normFactor,
+            boolRemovedDiagOfCSM,
+            sth[steerVecType],
+            result,
+            normalHelp,
+        )
     beamformOutput = result
     steerNormalizeOutput = normalHelp
     return beamformOutput, steerNormalizeOutput
@@ -644,7 +643,7 @@ def _psf_Formulation1AkaClassic(
     distSourcesToAllMics,
     waveNumber,
     result,
-):  # noqa ARG001
+):
     nMics = distGridToAllMics.shape[0]
     for cntSources in range(len(distSourcesToArrayCenter)):
         # see bottom of information header of 'calcPointSpreadFunction' for infos on the PSF
@@ -756,7 +755,7 @@ def _psf_Formulation4AkaTrueLocation(
     distSourcesToAllMics,
     waveNumber,
     result,
-):  # noqa ARG001
+):
     nMics = distGridToAllMics.shape[0]
     for cntSources in range(len(distSourcesToArrayCenter)):
         # see bottom of information header of 'calcPointSpreadFunction' for infos on the PSF

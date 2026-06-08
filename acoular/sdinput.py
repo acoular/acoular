@@ -136,4 +136,3 @@ class SoundDeviceSamplesGenerator(SamplesGenerator):
                     yield data[:anz]
                     samples_count += anz
         self.running = False
-        return
