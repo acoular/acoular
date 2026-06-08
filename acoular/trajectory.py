@@ -74,7 +74,7 @@ class Trajectory(HasStrictTraits):
     (np.float64(0.5), np.float64(-0.125), np.float64(0.0))
     (np.float64(1.0), np.float64(0.0), np.float64(0.0))
     (np.float64(1.5), np.float64(0.375), np.float64(0.0))
-    """  # noqa W505
+    """
 
     #: Dictionary mapping time instants (keys, as floats) to sampled ``(x, y, z)`` positions
     #: (values, as tuples of floats) along the trajectory.

@@ -974,7 +974,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
 
             # scipy delauney triangulation
             # Delaunay
-            tri = Delaunay(newCoord.T[:, :2], incremental=True)  #
+            tri = Delaunay(newCoord.T[:, :2], incremental=True)
 
             if self.interp_at_zero:
                 # add a point at zero

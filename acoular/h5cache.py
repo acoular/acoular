@@ -86,7 +86,7 @@ class HDF5Cache(HasStrictTraits):
 
     def get_cache_file(self, obj, basename, mode='a'):
         """Returns pytables .h5 file to _h5f trait of calling object for caching."""
-        self._idle_if_busy()  #
+        self._idle_if_busy()
         self.busy = True
         file_cls = _get_cachefile_class()
         filename = (Path(self.cache_dir) / (basename + '_cache.h5')).resolve()

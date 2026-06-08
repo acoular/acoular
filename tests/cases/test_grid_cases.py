@@ -72,7 +72,7 @@ class Grids:
 if len(GRIDS_DEFAULT) > 0:
 
     @parametrize('grid', GRIDS_DEFAULT)
-    def case_default(self, grid):  # noqa: ARG001
+    def case_default(self, grid):
         msg = f'Please write a test case for class {grid.__name__}'
         raise NotImplementedError(msg)
 
@@ -219,7 +219,7 @@ class Sectors:
 if len(SECTOR_DEFAULT) > 0:
 
     @parametrize('sector', SECTOR_DEFAULT)
-    def case_default(self, sector):  # noqa: ARG001
+    def case_default(self, sector):
         msg = f'Please write a test case for class {sector.__name__}'
         raise NotImplementedError(msg)
 

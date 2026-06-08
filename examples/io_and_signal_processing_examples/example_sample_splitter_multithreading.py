@@ -60,7 +60,7 @@ def print_number_of_blocks_in_block_buffers():
 
 def get_data_fast(obj):  # not time consuming function
     """Gets data fast (pause 0.03 seconds)"""
-    for _ in obj.result(2048):  #
+    for _ in obj.result(2048):
         print('tp1 calls sample splitter')
         print_number_of_blocks_in_block_buffers()
         sleep(0.03)
@@ -68,7 +68,7 @@ def get_data_fast(obj):  # not time consuming function
 
 def get_data_mid(obj):  # not time consuming function
     """Gets data mid speed (pause 0.05 seconds)"""
-    for i in obj.result(2048):  #
+    for i in obj.result(2048):
         print('tp2 calls sample splitter')
         print_number_of_blocks_in_block_buffers()
         sleep(0.05)
@@ -76,7 +76,7 @@ def get_data_mid(obj):  # not time consuming function
 
 def get_data_slow(obj):  # more time consuming function
     """Gets data slow (pause 0.07 seconds)"""
-    for i in obj.result(2048):  #
+    for i in obj.result(2048):
         print('tp3 calls sample splitter')
         print_number_of_blocks_in_block_buffers()
         sleep(0.07)

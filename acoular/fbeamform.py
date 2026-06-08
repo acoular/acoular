@@ -2356,7 +2356,7 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
                         normfactor,
                         (r0, rm, k),
                         (np.ones(1), eve[:, n : n + 1]),
-                    )[0][0]  # noqa: B023
+                    )[0][0]
 
                 # simplical global homotopy optimizer
                 oR = shgo(func, self.bounds, **shgo_opts)

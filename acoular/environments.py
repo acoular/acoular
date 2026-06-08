@@ -322,7 +322,7 @@ class FlowField(ABCHasStrictTraits):
         pass
 
     @abstractmethod
-    def v(self, xx):  # noqa: ARG002
+    def v(self, xx):
         """
         Provide the flow field as a function of the location.
 
