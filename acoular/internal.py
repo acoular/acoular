@@ -14,7 +14,7 @@ def digest(obj, name='digest'):
         vobj = obj
         try:
             for i in do_.split('.'):
-                vobj = list(vobj.trait_get(i.rstrip('[]')).values())[0]
+                vobj = next(iter(vobj.trait_get(i.rstrip('[]')).values()))
             str_.append(str(vobj).encode('UTF-8'))
         except:  # noqa: E722
             pass
