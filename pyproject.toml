@@ -54,6 +54,7 @@ full = [
 
 [dependency-groups]
 docs = [
+    "acoular-sphinx",
     "ipython",
     "graphviz",
     "matplotlib",
@@ -70,7 +71,7 @@ docs = [
     "traits",
 ]
 
-lint = ["ruff==0.14.2"]
+lint = ["acoular-ruff"]
 
 tests = [
     "h5py",
@@ -125,6 +126,8 @@ publish-url = "https://test.pypi.org/legacy/"
 explicit = true
 
 [tool.uv.sources]
+acoular-ruff = { git = "https://github.com/acoular/ci.git", branch = "feat/orga-docs-frame", subdirectory = "packages/acoular-ruff" }
+acoular-sphinx = { git = "https://github.com/acoular/ci.git", branch = "feat/orga-docs-frame", subdirectory = "packages/acoular-sphinx" }
 traits = { git = "https://github.com/enthought/traits.git", branch = "main", group = "docs" }
 
 [tool.pytest.ini_options]

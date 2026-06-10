@@ -2,6 +2,7 @@ from pathlib import Path
 import os
 import sys
 import acoular
+from acoular_sphinx import build_html_context, configure_theme_options
 from sphinx_gallery.sorting import ExplicitOrder
 
 #%%
@@ -12,7 +13,9 @@ from sphinx_gallery.sorting import ExplicitOrder
 project = 'Acoular'
 author = 'Acoular Development Team'
 copyright = f'2015-%Y, {author}'
-version = release =  acoular.__version__
+version = release = acoular.__version__
+docs_version_match = os.environ.get('DOCS_VERSION_MATCH', 'dev' if 'dev' in version else version)
+docs_switcher_json_url = os.environ.get('DOCS_SWITCHER_JSON_URL', '_static/switcher.json')
 
 #%%
 # General configuration
@@ -23,6 +26,7 @@ extensions = [
     'IPython.sphinxext.ipython_directive',
     'IPython.sphinxext.ipython_console_highlighting',
     'matplotlib.sphinxext.plot_directive',
+    'acoular_sphinx',
     'numpydoc',
     'sphinx_copybutton',
     'sphinx_design',
@@ -53,12 +57,18 @@ templates_path = ['_templates']
 html_theme = 'pydata_sphinx_theme'
 html_static_path = ['_static']
 html_context = {
+    **build_html_context(),
     "github_user": "acoular",
     "github_repo": "acoular",
     "github_version": "master",
     "doc_path": "docs/source",
 }
-html_theme_options = {
+html_theme_options = configure_theme_options(
+    use_edit_page_button=True,
+    switcher_json_url=docs_switcher_json_url,
+    version_match=docs_version_match,
+)
+html_theme_options.update({
     "logo": {
         "alt_text": "Acoular - Home",
         "text": "Acoular",
@@ -76,19 +86,11 @@ html_theme_options = {
             "url": "https://pypi.org/project/acoular",
             "icon": "_static/pypi.svg",
             "type": "local",
-        },        
+        },
     ],
     "pygments_light_style": "tango",
     "pygments_dark_style": "monokai",
-    "header_links_before_dropdown": 5,
-    "use_edit_page_button": True,
-    "switcher": {
-        "json_url": "https://www.acoular.org/en/latest/_static/switcher.json",
-        "version_match": version,
-    },
-    "show_version_warning_banner": True,
-    "navbar_center": ["navbar-nav", "version-switcher"],
-}
+})
 html_sidebars = {
     "install/*": [],
     "news/*": [],

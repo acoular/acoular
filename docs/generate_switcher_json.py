@@ -1,46 +1,79 @@
 #!/usr/bin/env python3
+from __future__ import annotations
+
 import json
 import re
 import subprocess
+from pathlib import Path
 
-# Get all version tags starting with 'v', sorted newest first
-result = subprocess.run(['git', 'tag', '--merged', 'HEAD', '--list', 'v*'], capture_output=True, text=True, cwd='..')
-tags = result.stdout.strip().split('\n') if result.stdout.strip() else []
+PACKAGE_ROOT = '/acoular'
+MIN_VERSION = 'v26.01'
+OUTPUT = Path('source/_static/switcher.json')
 
 
-# Filter and sort tags
-def version_key(tag):
-    # Extract version numbers for sorting
-    match = re.match(r'v(\d+)\.(\d+)', tag)
+def version_key(tag: str) -> tuple[int, int]:
+    match = re.match(r'v(\d+)\.(\d+)$', tag)
     if match:
         return (int(match.group(1)), int(match.group(2)))
     return (0, 0)
 
 
-filtered_tags = [tag for tag in tags if re.match(r'^v\d+\.\d+$', tag)]
-filtered_tags.sort(key=version_key, reverse=True)
+def normalize_version(tag: str) -> str:
+    return tag.removeprefix('v')
 
-MIN_VERSION = 'v26.01'
 
-# Build JSON structure
-versions = [{'name': 'latest', 'version': 'vXX.XX', 'url': '/en/latest/', 'type': 'branch'}]
+result = subprocess.run(
+    ['git', 'tag', '--merged', 'HEAD', '--list', 'v*'],
+    capture_output=True,
+    text=True,
+    cwd='..',
+    check=True,
+)
+tags = result.stdout.strip().split('\n') if result.stdout.strip() else []
+filtered_tags = sorted(
+    [tag for tag in tags if re.match(r'^v\d+\.\d+$', tag)],
+    key=version_key,
+    reverse=True,
+)
+
+versions: list[dict[str, str | bool]] = [
+    {
+        'name': 'dev',
+        'version': 'dev',
+        'url': f'{PACKAGE_ROOT}/dev/',
+        'type': 'branch',
+    }
+]
 
 latest_stable = None
 for tag in filtered_tags:
-    if version_key(tag) >= version_key(MIN_VERSION):  # semantic comparison, not lexicographic
-        if latest_stable is None:
-            # First matching tag is the latest stable release
-            latest_stable = tag
-            versions.append(
-                {'name': f'{tag} (stable)', 'version': tag, 'url': f'/en/{tag}/', 'type': 'tag', 'preferred': True}
-            )
-        else:
-            versions.append({'version': tag, 'url': f'/en/{tag}/', 'type': 'tag'})
+    if version_key(tag) < version_key(MIN_VERSION):
+        continue
+    if latest_stable is None:
+        latest_stable = tag
+        versions.insert(
+            0,
+            {
+                'name': 'stable',
+                'version': normalize_version(tag),
+                'url': f'{PACKAGE_ROOT}/',
+                'type': 'tag',
+                'preferred': True,
+            },
+        )
+    versions.append(
+        {
+            'name': tag,
+            'version': normalize_version(tag),
+            'url': f'{PACKAGE_ROOT}/{tag}/',
+            'type': 'tag',
+        }
+    )
 
-# Write JSON file
-with open('source/_static/switcher.json', 'w') as f:
-    json.dump(versions, f, indent=2)
+OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+with OUTPUT.open('w') as file_handle:
+    json.dump(versions, file_handle, indent=2)
 
-print(f'Generated switcher.json with {len(versions)} versions')
+print(f'Generated {OUTPUT} with {len(versions)} versions')
 if latest_stable:
     print(f'Latest stable release: {latest_stable}')

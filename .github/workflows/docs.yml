@@ -1,53 +1,69 @@
-name: "Docs 📝 Build 🛠️ & Deploy (latest)"
-run-name: Build & Deploy docs → en/latest
+name: Docs Build & Deploy (dev)
+run-name: Build & Deploy docs → acoular/dev
 permissions:
   contents: read
 on:
   push:
     branches:
-      - main
+      - master
   workflow_dispatch:
 
 jobs:
   build:
     uses: acoular/ci/.github/workflows/docs.yml@main
     with:
-      html_baseurl: "https://www.acoular.org/en/latest/"
+      artifact_name: build-docs-dev
+      html_baseurl: "https://acoular.org/acoular/dev/"
+      docs_version_match: "dev"
+      docs_switcher_json_url: "https://acoular.org/acoular/_static/switcher.json"
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
         with:
-          fetch-depth: 0  # all tags needed for generate-switcher
+          fetch-depth: 0
 
       - name: Download build artifact
         uses: actions/download-artifact@v7
         with:
-          name: build-docs
+          name: build-docs-dev
           path: ./docs/build/html
 
       - name: Generate switcher.json
-        # Overwrites the shallow-checkout version baked in by the build job.
-        # Only this deploy has full tag history, so only this job produces the
-        # correct version list. All deployed versions fetch this file via json_url.
         uses: acoular/ci/.github/actions/generate-switcher@main
         with:
-          base-path: /en/
+          package-path: /acoular
           min-version: v26.01
           output: docs/build/html/_static/switcher.json
 
-      - name: Deploy to GitHub Pages
+      - name: Prepare package-root switcher payload
+        run: |
+          mkdir -p switcher
+          cp docs/build/html/_static/switcher.json switcher/switcher.json
+
+      - name: Deploy dev docs to website gh-pages
         uses: peaceiris/actions-gh-pages@v4
         with:
+          external_repository: acoular/website
           publish_branch: gh-pages
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          personal_token: ${{ secrets.WEBSITE_GH_PAGES_TOKEN }}
           publish_dir: ./docs/build/html
-          destination_dir: en/latest
+          destination_dir: acoular/dev
           keep_files: true
-          cname: www.acoular.org
+          enable_jekyll: false
+
+      - name: Deploy package-root switcher
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          external_repository: acoular/website
+          publish_branch: gh-pages
+          personal_token: ${{ secrets.WEBSITE_GH_PAGES_TOKEN }}
+          publish_dir: ./switcher
+          destination_dir: acoular/_static
+          keep_files: true
           enable_jekyll: false
