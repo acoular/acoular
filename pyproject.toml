@@ -55,7 +55,7 @@ full = [
 [dependency-groups]
 docs = ["acoular-sphinx"]
 
-lint = ["acoular-ruff"]
+lint = ["ruff==0.14.2"]
 
 tests = [
     "h5py",
@@ -110,7 +110,6 @@ publish-url = "https://test.pypi.org/legacy/"
 explicit = true
 
 [tool.uv.sources]
-acoular-ruff = { git = "https://github.com/acoular/ci.git", branch = "main", subdirectory = "packages/acoular-ruff" }
 acoular-sphinx = { git = "https://github.com/acoular/ci.git", branch = "main", subdirectory = "packages/acoular-sphinx" }
 
 [tool.pytest.ini_options]

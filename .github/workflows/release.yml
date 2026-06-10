@@ -15,6 +15,7 @@ jobs:
     uses: acoular/ci/.github/workflows/docs.yml@main
     with:
       artifact_name: build-docs-versioned
+      artifact_path: ./docs/_build/html
       html_baseurl: "https://acoular.org/acoular/${{ github.ref_name }}/"
       docs_switcher_json_url: "https://acoular.org/acoular/_static/switcher.json"
 
@@ -22,6 +23,7 @@ jobs:
     uses: acoular/ci/.github/workflows/docs.yml@main
     with:
       artifact_name: build-docs-stable
+      artifact_path: ./docs/_build/html
       html_baseurl: "https://acoular.org/acoular/"
       docs_switcher_json_url: "https://acoular.org/acoular/_static/switcher.json"
 
@@ -30,7 +32,7 @@ jobs:
     uses: acoular/ci/.github/workflows/package-docs-deploy.yml@main
     with:
       artifact_name: build-docs-versioned
-      artifact_path: ./docs/build/versioned-html
+      artifact_path: ./docs/_build/versioned-html
       destination_dir: acoular/${{ github.ref_name }}
       package_path: /acoular
       min_version: v26.01
@@ -44,7 +46,7 @@ jobs:
     uses: acoular/ci/.github/workflows/package-docs-deploy.yml@main
     with:
       artifact_name: build-docs-stable
-      artifact_path: ./docs/build/stable-html
+      artifact_path: ./docs/_build/stable-html
       destination_dir: acoular
     secrets:
       website_gh_pages_token: ${{ secrets.WEBSITE_GH_PAGES_TOKEN }}

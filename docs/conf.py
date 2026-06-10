@@ -51,7 +51,7 @@ html_context = {
         github_user='acoular',
         github_repo='acoular',
         github_version='master',
-        doc_path='docs/source',
+        doc_path='docs',
     ),
 }
 html_theme_options = configure_package_theme_options(
@@ -149,19 +149,19 @@ sphinx_gallery_conf = {
     'gallery_dirs': 'auto_examples',  # path to where to save gallery generated output
     'example_extensions': {'.py'},
     'filename_pattern': '/example_',
-    'default_thumb_file': 'source/_static/Acoular_logo',
+    'default_thumb_file': str(Path(__file__).parent / '_static' / 'no_image.png'),
     'thumbnail_size': (250, 250),
     #'run_stale_examples': True,
     'reset_modules': (reset_cache_dir, 'matplotlib', 'seaborn'),
     'examples_dirs': [
-        '../../examples',
+        '../examples',
         ],   # path to your example scripts
     'subsection_order' : ExplicitOrder([
-        "../../examples/introductory_examples",
-        "../../examples/wind_tunnel_examples",
-        "../../examples/moving_sources_examples",
-        "../../examples/io_and_signal_processing_examples",
-        "../../examples/tools",
+        "../examples/introductory_examples",
+        "../examples/wind_tunnel_examples",
+        "../examples/moving_sources_examples",
+        "../examples/io_and_signal_processing_examples",
+        "../examples/tools",
     ]),
 }
 

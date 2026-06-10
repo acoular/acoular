@@ -72,14 +72,14 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: build-docs-${{ inputs.version_tag }}
-          path: ./docs/build/html
+          path: ./docs/_build/html
 
   deploy:
     needs: build
     uses: acoular/ci/.github/workflows/package-docs-deploy.yml@main
     with:
       artifact_name: build-docs-${{ inputs.version_tag }}
-      artifact_path: ./docs/build/html
+      artifact_path: ./docs/_build/html
       destination_dir: acoular/${{ inputs.version_tag }}
       package_path: /acoular
       min_version: v26.01

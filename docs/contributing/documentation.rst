@@ -1,20 +1,20 @@
 Documentation
 =============
 
-The package documentation is provided under ``acoular/docs/source``. This directory contains the ``index.rst`` file which serves as the root document (landing page) embedding several other subdocuments (sub-pages) written in  `reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_ format. 
+The package documentation is provided under ``acoular/docs``. This directory contains the ``index.rst`` file which serves as the root document (landing page) embedding several other subdocuments (sub-pages) written in  `reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_ format. 
 The full documentation is built using the `Sphinx <https://www.sphinx-doc.org/en/master/>`_ package. See :ref:`Documentation Compilation` for instructions on how to build the documentation locally.
 
 .. attention::
 
     Some of the subdirectories (sub-pages) are created automatically during the documentation build process. Therefore, the generated files should not be edited directly.
-    This mainly concerns the ``docs/source/api_ref/generated`` directory, which contains the API documentation generated from the source code, and the ``docs/source/auto_examples`` directory, which contains the auto-generated examples.
+    This mainly concerns the ``docs/api_ref/generated`` directory, which contains the API documentation generated from the source code, and the ``docs/auto_examples`` directory, which contains the auto-generated examples.
 
 .. _User Documentation:
 
 User Documentation
 ------------------
 
-This is the easiest way to contribute to the documentation. You can simply edit the corresponding ``.rst`` files in the ``acoular/docs/source`` directory which are not generated automatically. Make sure you are using the `reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_ format. If you want to add a new document, it should be referenced in the ``index.rst`` or any related file. We are happy about every fixed spelling mistake or improved explanation. 
+This is the easiest way to contribute to the documentation. You can simply edit the corresponding ``.rst`` files in the ``acoular/docs`` directory which are not generated automatically. Make sure you are using the `reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_ format. If you want to add a new document, it should be referenced in the ``index.rst`` or any related file. We are happy about every fixed spelling mistake or improved explanation. 
 
 .. _API Documentation:
 
@@ -24,7 +24,7 @@ Documenting the API
 There are several situations in which you want to change the API documentation. For example, when you add a new class, method, or function, or when you change the signature of an existing method. In some cases, you might also want to improve the existing documentation.
 
 The API documentation is generated from the documentation strings of the source code using the Sphinx `autosummary <https://www.sphinx-doc.org/en/master/usage/extensions/autosummary.html>`_ extension. The API documentation follows the `NumPy style <https://numpydoc.readthedocs.io/en/latest/format.html>`_.
-The generated API documentation can be found in the ``source/api_ref`` subdirectory of the documentation after compilation. 
+The generated API documentation can be found in the ``api_ref`` subdirectory of the documentation after compilation. 
 
 
 Documenting Classes, Methods and Functions
@@ -36,27 +36,27 @@ We will take a look at the :class:`~acoular.sources.TimeSamples` class as an exa
 
 Docstrings should first contain a short summary line, followed by an extended summary using `reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_ syntax. An extended summary is not always necessary, but it is recommended not only for complex implementations. Ideally, the extended summary provides a detailed explanation of the method's purpose, behaviour, and usage.
 
-.. literalinclude:: ../../../acoular/sources.py
+.. literalinclude:: ../../acoular/sources.py
     :pyobject: TimeSamples
     :end-before: See Also
 
 Cross-references can be included in the ``See Also`` section, which lists related classes or functions:
 
-.. literalinclude:: ../../../acoular/sources.py
+.. literalinclude:: ../../acoular/sources.py
     :pyobject: TimeSamples
     :start-at: See Also
     :end-before: Notes
 
 Additional information can be included in a dedicated ``Notes`` section. The ``Notes`` section can then also be cross-referenced in other parts of the documentation.
 
-.. literalinclude:: ../../../acoular/sources.py
+.. literalinclude:: ../../acoular/sources.py
     :pyobject: TimeSamples
     :start-at: Notes
     :end-before: Examples
 
 We welcome the addition of code examples to the docstrings of classes (and functions). The :class:`~acoular.sources.TimeSamples` class provides a short snippet with explanation in the docstring:
 
-.. literalinclude:: ../../../acoular/sources.py
+.. literalinclude:: ../../acoular/sources.py
     :pyobject: TimeSamples
     :start-at: Examples
     :end-at: """
@@ -71,7 +71,7 @@ One can use the following command to run the doctests locally:
 
 Acoular makes use of the `Traits <https://docs.enthought.com/traits/traits_user_manual/intro.html>`_ package, which allows for the definition of class attributes with type checking and default values. Most of the Acoular classes will directly define their attributes, and the corresponding ``__init__`` method will not be explicitly defined. It is recommended to document public class attributes using a comment line above the attribute definition starting with ``#:``. Sphinx will automatically detect these comments and include them in the API documentation.
 
-.. literalinclude:: ../../../acoular/sources.py
+.. literalinclude:: ../../acoular/sources.py
     :pyobject: TimeSamples
     :start-at: #:
     :end-at: metadata
@@ -84,7 +84,7 @@ Acoular makes use of the `Traits <https://docs.enthought.com/traits/traits_user_
 Similar to classes, public methods and functions need to have a docstring. In addition to the summary line, the arguments and return values should be documented in `NumPy style <https://numpydoc.readthedocs.io/en/latest/format.html>`_.
 See the :func:`~acoular.sources.TimeSamples.result` generator as an example:
 
-.. literalinclude:: ../../../acoular/sources.py
+.. literalinclude:: ../../acoular/sources.py
     :pyobject: TimeSamples.result
     :end-before: Examples
 
@@ -92,7 +92,7 @@ See the :func:`~acoular.sources.TimeSamples.result` generator as an example:
 
 To ensure that a new class, or function is included in the generated API documentation, it needs to be added to the ``.. autosummary::`` section at the top of the respective Python module file so that it can be recognized by Sphinx.
 
-.. literalinclude:: ../../../acoular/sources.py
+.. literalinclude:: ../../acoular/sources.py
     :start-at: .. autosummary::
     :end-before: """
 
@@ -103,7 +103,7 @@ Documenting Modules
 
 Module files need a Copyright header and should be documented with a module docstring at the beginning of the file. The docstring should contain a summary of the module's purpose. The docstring should be enclosed in triple quotes and should be placed at the beginning of the file, before any other code. It may contain ``.. inheritance-diagram::`` and ``.. autosummary::`` directives.
 
-.. literalinclude:: ../../../acoular/sources.py
+.. literalinclude:: ../../acoular/sources.py
     :start-at: #
     :end-at: get_modes
 
@@ -116,7 +116,7 @@ We are always looking for new examples that demonstrate the functionality of Aco
 
 We also encourage you to enhance the existing examples by adding more detailed explanations, improving the code, or adding new features.
 
-We use the `Sphinx-Gallery <https://sphinx-gallery.github.io/stable/index.html>`_ extension to automatically generate ``.rst`` files and downloadable Notebooks in ``.ipynb`` format from the Python examples. During the build process, the generated files will be written into the ``docs/source/auto_examples`` directory.
+We use the `Sphinx-Gallery <https://sphinx-gallery.github.io/stable/index.html>`_ extension to automatically generate ``.rst`` files and downloadable Notebooks in ``.ipynb`` format from the Python examples. During the build process, the generated files will be written into the ``docs/auto_examples`` directory.
 
 Adding new examples
 ~~~~~~~~~~~~~~~~~~~
@@ -124,18 +124,18 @@ Adding new examples
 To add a new example, create a new Python script in one of the subdirectories of the ``examples`` directory.
 If no subdirectory is suitable, you can create a new one. 
 The name of the script should start with ``example_`` followed by a short descriptive name.
-In case of the latter, make sure to add the new subdirectory in the ``acoular/docs/source/conf.py`` file to the ``sphinx_gallery_conf`` dictionary:
+In case of the latter, make sure to add the new subdirectory in the ``acoular/docs/conf.py`` file to the ``sphinx_gallery_conf`` dictionary:
 
 .. code-block:: python
 
     sphinx_gallery_conf = {
     ...
         'subsection_order' : ExplicitOrder([
-            "../../examples/introductory_examples",
-            "../../examples/wind_tunnel_examples",
-            "../../examples/moving_sources_examples",
-            "../../examples/io_and_signal_processing_examples",
-            "../../examples/tools",
+            "../examples/introductory_examples",
+            "../examples/wind_tunnel_examples",
+            "../examples/moving_sources_examples",
+            "../examples/io_and_signal_processing_examples",
+            "../examples/tools",
             "<ADD YOUR NEW SUBDIRECTORY HERE>"
         ]),
     }  
@@ -145,6 +145,6 @@ All examples are executed during the documentation build process to ensure that 
 Citing literature
 -----------------
 
-If you are adding a new feature or method that is based on scientific literature, please make sure to include the corresponding references as a bibtex entry in the ``acoular/docs/source/literature/literature.bib`` file. Details on the bibtex format can be found `here <https://ctan.org/pkg/bibtex>`_.
+If you are adding a new feature or method that is based on scientific literature, please make sure to include the corresponding references as a bibtex entry in the ``acoular/docs/literature/literature.bib`` file. Details on the bibtex format can be found `here <https://ctan.org/pkg/bibtex>`_.
 
 You can then cite the reference using the directive ``:cite:`<BIBTEX_KEY>``` directive in the documentation. Your citation will be automatically included in the bibliography section of the documentation. 

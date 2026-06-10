@@ -8,7 +8,7 @@ from pathlib import Path
 
 PACKAGE_ROOT = '/acoular'
 MIN_VERSION = 'v26.01'
-OUTPUT = Path('source/_static/switcher.json')
+OUTPUT = Path('_static/switcher.json')
 
 
 def version_key(tag: str) -> tuple[int, int]:

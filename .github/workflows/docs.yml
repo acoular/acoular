@@ -13,6 +13,7 @@ jobs:
     uses: acoular/ci/.github/workflows/docs.yml@main
     with:
       artifact_name: build-docs-dev
+      artifact_path: ./docs/_build/html
       html_baseurl: "https://acoular.org/acoular/dev/"
       docs_version_match: "dev"
       docs_switcher_json_url: "https://acoular.org/acoular/_static/switcher.json"
@@ -22,7 +23,7 @@ jobs:
     uses: acoular/ci/.github/workflows/package-docs-deploy.yml@main
     with:
       artifact_name: build-docs-dev
-      artifact_path: ./docs/build/html
+      artifact_path: ./docs/_build/html
       destination_dir: acoular/dev
       package_path: /acoular
       min_version: v26.01
