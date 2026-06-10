@@ -53,21 +53,7 @@ full = [
 ]
 
 [dependency-groups]
-docs = [
-    "acoular-sphinx",
-    "ipython",
-    "graphviz",
-    "matplotlib",
-    "numpydoc",
-    "pickleshare",
-    "sounddevice",
-    "sphinx",
-    "sphinx-copybutton",
-    "sphinx-gallery",
-    "sphinxcontrib-bibtex",
-    "setuptools", # unfortunately still needed for sphinxcontrib-bibtex (https://github.com/mcmtroffaes/sphinxcontrib-bibtex/issues/345)
-    "traits",
-]
+docs = ["acoular-sphinx"]
 
 lint = ["acoular-ruff"]
 
@@ -126,7 +112,6 @@ explicit = true
 [tool.uv.sources]
 acoular-ruff = { git = "https://github.com/acoular/ci.git", branch = "feat/orga-docs-frame", subdirectory = "packages/acoular-ruff" }
 acoular-sphinx = { git = "https://github.com/acoular/ci.git", branch = "feat/orga-docs-frame", subdirectory = "packages/acoular-sphinx" }
-traits = { git = "https://github.com/enthought/traits.git", branch = "main", group = "docs" }
 
 [tool.pytest.ini_options]
 testpaths = "tests"

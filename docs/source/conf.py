@@ -88,8 +88,6 @@ html_theme_options.update({
             "type": "local",
         },
     ],
-    "pygments_light_style": "tango",
-    "pygments_dark_style": "monokai",
 })
 html_sidebars = {
     "install/*": [],
