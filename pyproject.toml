@@ -60,11 +60,9 @@ docs = [
     "matplotlib",
     "numpydoc",
     "pickleshare",
-    "pydata-sphinx-theme",
     "sounddevice",
     "sphinx",
     "sphinx-copybutton",
-    "sphinx-design",
     "sphinx-gallery",
     "sphinxcontrib-bibtex",
     "setuptools", # unfortunately still needed for sphinxcontrib-bibtex (https://github.com/mcmtroffaes/sphinxcontrib-bibtex/issues/345)
