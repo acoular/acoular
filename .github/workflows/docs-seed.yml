@@ -1,4 +1,4 @@
-name: Manual: Seed release docs
+name: "Manual: Seed release docs"
 run-name: Seed docs for ${{ inputs.version_tag }} → acoular/${{ inputs.version_tag }}
 permissions:
   contents: read
@@ -76,51 +76,14 @@ jobs:
 
   deploy:
     needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Download build artifact
-        uses: actions/download-artifact@v7
-        with:
-          name: build-docs-${{ inputs.version_tag }}
-          path: ./docs/build/html
-
-      - name: Generate switcher.json
-        uses: acoular/ci/.github/actions/generate-switcher@main
-        with:
-          package-path: /acoular
-          min-version: v26.01
-          output: docs/build/html/_static/switcher.json
-
-      - name: Prepare package-root switcher payload
-        run: |
-          mkdir -p switcher
-          cp docs/build/html/_static/switcher.json switcher/switcher.json
-
-      - name: Deploy versioned docs to website gh-pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          external_repository: acoular/website
-          publish_branch: gh-pages
-          personal_token: ${{ secrets.WEBSITE_GH_PAGES_TOKEN }}
-          publish_dir: ./docs/build/html
-          destination_dir: acoular/${{ inputs.version_tag }}
-          keep_files: true
-          enable_jekyll: false
-
-      - name: Deploy package-root switcher
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          external_repository: acoular/website
-          publish_branch: gh-pages
-          personal_token: ${{ secrets.WEBSITE_GH_PAGES_TOKEN }}
-          publish_dir: ./switcher
-          destination_dir: acoular/_static
-          keep_files: true
-          enable_jekyll: false
+    uses: acoular/ci/.github/workflows/package-docs-deploy.yml@main
+    with:
+      artifact_name: build-docs-${{ inputs.version_tag }}
+      artifact_path: ./docs/build/html
+      destination_dir: acoular/${{ inputs.version_tag }}
+      package_path: /acoular
+      min_version: v26.01
+      deploy_switcher: true
+      switcher_destination_dir: acoular/_static
+    secrets:
+      website_gh_pages_token: ${{ secrets.WEBSITE_GH_PAGES_TOKEN }}

@@ -110,8 +110,8 @@ publish-url = "https://test.pypi.org/legacy/"
 explicit = true
 
 [tool.uv.sources]
-acoular-ruff = { git = "https://github.com/acoular/ci.git", branch = "feat/orga-docs-frame", subdirectory = "packages/acoular-ruff" }
-acoular-sphinx = { git = "https://github.com/acoular/ci.git", branch = "feat/orga-docs-frame", subdirectory = "packages/acoular-sphinx" }
+acoular-ruff = { git = "https://github.com/acoular/ci.git", branch = "main", subdirectory = "packages/acoular-ruff" }
+acoular-sphinx = { git = "https://github.com/acoular/ci.git", branch = "main", subdirectory = "packages/acoular-sphinx" }
 
 [tool.pytest.ini_options]
 testpaths = "tests"
