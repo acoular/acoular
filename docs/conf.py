@@ -1,7 +1,13 @@
 from pathlib import Path
-import os
 import sys
 import acoular
+from acoular_sphinx import (
+    PACKAGE_FRAME_EXTENSIONS,
+    build_github_context,
+    build_html_context,
+    configure_package_theme_options,
+    resolve_docs_build_config,
+)
 from sphinx_gallery.sorting import ExplicitOrder
 
 #%%
@@ -12,30 +18,17 @@ from sphinx_gallery.sorting import ExplicitOrder
 project = 'Acoular'
 author = 'Acoular Development Team'
 copyright = f'2015-%Y, {author}'
-version = release =  acoular.__version__
+version = release = acoular.__version__
+docs_build = resolve_docs_build_config(
+    default_version_match='dev' if 'dev' in version else version,
+)
 
 #%%
 # General configuration
 # ---------------------
 # see: https://www.sphinx-doc.org/en/master/usage/configuration.html for details
 
-extensions = [
-    'IPython.sphinxext.ipython_directive',
-    'IPython.sphinxext.ipython_console_highlighting',
-    'matplotlib.sphinxext.plot_directive',
-    'numpydoc',
-    'sphinx_copybutton',
-    'sphinx_design',
-    'sphinx_gallery.gen_gallery',
-    'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',
-    'sphinx.ext.duration',
-    'sphinx.ext.inheritance_diagram',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.mathjax',
-    'sphinxcontrib.bibtex',
-    'traits.util.trait_documenter',
-    ] # Sphinx extension modules
+extensions = PACKAGE_FRAME_EXTENSIONS  # Sphinx extension modules
 
 # the current time is formatted using time.strftime() and the format given in today_fmt.
 today_fmt = '%B %d, %Y'
@@ -53,50 +46,29 @@ templates_path = ['_templates']
 html_theme = 'pydata_sphinx_theme'
 html_static_path = ['_static']
 html_context = {
-    "github_user": "acoular",
-    "github_repo": "acoular",
-    "github_version": "master",
-    "doc_path": "docs/source",
+    **build_html_context(),
+    **build_github_context(
+        github_user='acoular',
+        github_repo='acoular',
+        github_version='master',
+        doc_path='docs',
+    ),
 }
-html_theme_options = {
-    "logo": {
-        "alt_text": "Acoular - Home",
-        "text": "Acoular",
-        "image_light": "_static/Acoular_logo.png",
-        "image_dark": "_static/Acoular_logo.png",
-    },
-    "icon_links": [
-        {
-            "name": "GitHub",
-            "url": "https://github.com/acoular/acoular",
-            "icon": "fa-brands fa-square-github",
-        },
-        {
-            "name": "PyPI",
-            "url": "https://pypi.org/project/acoular",
-            "icon": "_static/pypi.svg",
-            "type": "local",
-        },        
-    ],
-    "pygments_light_style": "tango",
-    "pygments_dark_style": "monokai",
-    "header_links_before_dropdown": 5,
-    "use_edit_page_button": True,
-    "switcher": {
-        "json_url": "https://www.acoular.org/en/latest/_static/switcher.json",
-        "version_match": version,
-    },
-    "show_version_warning_banner": True,
-    "navbar_center": ["navbar-nav", "version-switcher"],
-}
+html_theme_options = configure_package_theme_options(
+    package_name='Acoular',
+    github_url='https://github.com/acoular/acoular',
+    pypi_project='acoular',
+    use_edit_page_button=True,
+    switcher_json_url=docs_build['switcher_json_url'],
+    version_match=docs_build['version_match'],
+)
 html_sidebars = {
     "install/*": [],
     "news/*": [],
     "literature/*": [],
 }
-html_favicon = '_static/acoular_logo.ico'
 html_last_updated_fmt = '%b %d, %Y'
-html_baseurl = os.environ.get('DOCS_BASEURL', '')
+html_baseurl = docs_build['html_baseurl']
 # If true, the reST sources are included in the HTML build as _sources/<name>.
 html_copy_source = False
 
@@ -177,19 +149,19 @@ sphinx_gallery_conf = {
     'gallery_dirs': 'auto_examples',  # path to where to save gallery generated output
     'example_extensions': {'.py'},
     'filename_pattern': '/example_',
-    'default_thumb_file': 'source/_static/Acoular_logo',
+    'default_thumb_file': str(Path(__file__).parent / '_static' / 'no_image.png'),
     'thumbnail_size': (250, 250),
     #'run_stale_examples': True,
     'reset_modules': (reset_cache_dir, 'matplotlib', 'seaborn'),
     'examples_dirs': [
-        '../../examples',
+        '../examples',
         ],   # path to your example scripts
     'subsection_order' : ExplicitOrder([
-        "../../examples/introductory_examples",
-        "../../examples/wind_tunnel_examples",
-        "../../examples/moving_sources_examples",
-        "../../examples/io_and_signal_processing_examples",
-        "../../examples/tools",
+        "../examples/introductory_examples",
+        "../examples/wind_tunnel_examples",
+        "../examples/moving_sources_examples",
+        "../examples/io_and_signal_processing_examples",
+        "../examples/tools",
     ]),
 }
 

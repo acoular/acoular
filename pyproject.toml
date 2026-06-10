@@ -53,22 +53,7 @@ full = [
 ]
 
 [dependency-groups]
-docs = [
-    "ipython",
-    "graphviz",
-    "matplotlib",
-    "numpydoc",
-    "pickleshare",
-    "pydata-sphinx-theme",
-    "sounddevice",
-    "sphinx",
-    "sphinx-copybutton",
-    "sphinx-design",
-    "sphinx-gallery",
-    "sphinxcontrib-bibtex",
-    "setuptools", # unfortunately still needed for sphinxcontrib-bibtex (https://github.com/mcmtroffaes/sphinxcontrib-bibtex/issues/345)
-    "traits",
-]
+docs = ["acoular-sphinx @ git+https://github.com/acoular/ci.git@main#subdirectory=packages/acoular-sphinx"]
 
 lint = ["ruff==0.14.2"]
 
@@ -123,9 +108,6 @@ name = "testpypi"
 url = "https://test.pypi.org/simple/"
 publish-url = "https://test.pypi.org/legacy/"
 explicit = true
-
-[tool.uv.sources]
-traits = { git = "https://github.com/enthought/traits.git", branch = "main", group = "docs" }
 
 [tool.pytest.ini_options]
 testpaths = "tests"

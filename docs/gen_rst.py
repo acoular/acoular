@@ -18,6 +18,7 @@ import glob
 import sys
 import gzip
 import posixpath
+from pathlib import Path
 import subprocess
 import warnings
 from sklearn.externals import six
@@ -941,7 +942,7 @@ def generate_file_rst(fname, target_dir, src_dir, root_dir, plot_gallery):
 
     if not os.path.exists(thumb_file):
         # create something to replace the thumbnail
-        make_thumbnail('source/_static/no_image.png', thumb_file, 200, 140)
+        make_thumbnail(str(Path(__file__).parent / '_static' / 'no_image.png'), thumb_file, 200, 140)
 
     docstring, short_desc, end_row = extract_docstring(example_file)
 

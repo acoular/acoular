@@ -1,4 +1,4 @@
-![Acoular Logo](https://github.com/acoular/acoular/blob/master/docs/source/_static/Acoular_logo.png?raw=true)
+![Acoular Logo](https://acoular.org/_static/Acoular_logo.png)
 
 [![PyPI](https://img.shields.io/pypi/pyversions/acoular.svg)](https://pypi.org/project/acoular)
 [![PyPI](https://img.shields.io/pypi/v/acoular.svg)](https://pypi.org/project/acoular)
@@ -75,8 +75,8 @@ For more detailed installation instructions, see the [documentation](https://aco
 
 ## Documentation and help
 Documentation is available [here](https://acoular.org) with a
-[getting started](https://www.acoular.org/user_guide/get_started.html) section and
-[examples](https://acoular.org/auto_examples/index.html).
+[getting started](https://acoular.org/user_guide/get_started.html) section and
+[examples](https://acoular.org/auto_examples/).
 
 If you discover problems with the Acoular software, please report them using the [issue tracker](https://github.com/acoular/acoular/issues) on GitHub. Please use the [Acoular discussions forum](https://github.com/acoular/acoular/discussions) for practical questions, discussions, and demos.
 
@@ -125,5 +125,5 @@ plt.savefig('three_sources.png', dpi=300, bbox_inches='tight')
 plt.show()
 ```
 
-![result](https://github.com/acoular/acoular/blob/master/docs/source/user_guide/three_source_py3_colormap.png?raw=true)
+![result](https://acoular.org/user_guide/three_source_py3_colormap.png)
 

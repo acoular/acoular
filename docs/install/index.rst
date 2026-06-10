@@ -50,7 +50,7 @@ Package                                                           Needed for
 
 When installing Acoular from PyPI, Acoular and all optional dependencies can be installed with the ``full`` extra:
 
-.. literalinclude:: /../../pyproject.toml
+.. literalinclude:: /../pyproject.toml
     :start-at: [project.optional-dependencies]
     :end-before: [dependency-groups]
                  

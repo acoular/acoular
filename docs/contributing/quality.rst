@@ -35,7 +35,7 @@ The ``ruff`` configuration can be found in:
 
 .. dropdown::  ``.ruff.toml`` (click to expand)
 
-  .. literalinclude:: /../../.ruff.toml
+  .. literalinclude:: /../.ruff.toml
 
 .. _Documentation Compilation:
 

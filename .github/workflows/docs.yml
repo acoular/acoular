@@ -1,53 +1,33 @@
-name: "Docs 📝 Build 🛠️ & Deploy (latest)"
-run-name: Build & Deploy docs → en/latest
+name: Docs Build & Deploy (dev)
+run-name: Build & Deploy docs → acoular/dev
 permissions:
   contents: read
 on:
   push:
     branches:
-      - main
+      - master
   workflow_dispatch:
 
 jobs:
   build:
     uses: acoular/ci/.github/workflows/docs.yml@main
     with:
-      html_baseurl: "https://www.acoular.org/en/latest/"
+      artifact_name: build-docs-dev
+      artifact_path: ./docs/_build/html
+      html_baseurl: "https://acoular.org/acoular/dev/"
+      docs_version_match: "dev"
+      docs_switcher_json_url: "https://acoular.org/acoular/_static/switcher.json"
 
   deploy:
     needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0  # all tags needed for generate-switcher
-
-      - name: Download build artifact
-        uses: actions/download-artifact@v7
-        with:
-          name: build-docs
-          path: ./docs/build/html
-
-      - name: Generate switcher.json
-        # Overwrites the shallow-checkout version baked in by the build job.
-        # Only this deploy has full tag history, so only this job produces the
-        # correct version list. All deployed versions fetch this file via json_url.
-        uses: acoular/ci/.github/actions/generate-switcher@main
-        with:
-          base-path: /en/
-          min-version: v26.01
-          output: docs/build/html/_static/switcher.json
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          publish_branch: gh-pages
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs/build/html
-          destination_dir: en/latest
-          keep_files: true
-          cname: www.acoular.org
-          enable_jekyll: false
+    uses: acoular/ci/.github/workflows/package-docs-deploy.yml@main
+    with:
+      artifact_name: build-docs-dev
+      artifact_path: ./docs/_build/html
+      destination_dir: acoular/dev
+      package_path: /acoular
+      min_version: v26.01
+      deploy_switcher: true
+      switcher_destination_dir: acoular/_static
+    secrets:
+      website_gh_pages_token: ${{ secrets.WEBSITE_GH_PAGES_TOKEN }}

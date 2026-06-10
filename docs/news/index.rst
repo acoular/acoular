@@ -6,6 +6,8 @@ What's new
     **Documentation**
         * fixed an issue where inherited trait attributes were not shown in the API reference
         * adds examples for :class:`~acoular.grids.Sector` and :class:`~acoular.grids.MultiSector`
+        * flattens the documentation layout from ``docs/source`` to ``docs`` and aligns the build output with ``docs/_build``
+        * switches the shared documentation frame setup to the ``acoular-sphinx`` package
 
     **Tests**
         * increases test coverage for :func:`~acoular.fbeamform.integrate` function

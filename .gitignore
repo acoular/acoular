@@ -9,7 +9,7 @@ __pycache__/
 dist/
 cache/
 td/
-docs/build/
+docs/_build/
 **/cache/
 **/td/
 __pycache__/
@@ -27,7 +27,7 @@ examples/benchmark/results/
 **/three_sources_1d.h5
 **/three_sources_2d.h5
 **/three_sources_3d.h5
-docs/source/sg_execution_times.rst
-docs/source/api_ref/generated/
-docs/source/auto_examples/**/*
-docs/source/_static/switcher.json
+docs/sg_execution_times.rst
+docs/api_ref/generated/
+docs/auto_examples/**/*
+docs/_static/switcher.json
