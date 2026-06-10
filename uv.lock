@@ -130,7 +130,7 @@ tests = [
 [[package]]
 name = "acoular-ruff"
 version = "0.1.0"
-source = { git = "https://github.com/acoular/ci.git?subdirectory=packages%2Facoular-ruff&branch=main#bf2bd3379a9a00240a6120edb904c0fee41b266b" }
+source = { git = "https://github.com/acoular/ci.git?subdirectory=packages%2Facoular-ruff&branch=main#f75e9bf4fab8ed6c8d7177c352f9f80c8f9d9d69" }
 dependencies = [
     { name = "ruff" },
 ]
@@ -138,7 +138,7 @@ dependencies = [
 [[package]]
 name = "acoular-sphinx"
 version = "0.1.0"
-source = { git = "https://github.com/acoular/ci.git?subdirectory=packages%2Facoular-sphinx&branch=main#bf2bd3379a9a00240a6120edb904c0fee41b266b" }
+source = { git = "https://github.com/acoular/ci.git?subdirectory=packages%2Facoular-sphinx&branch=main#f75e9bf4fab8ed6c8d7177c352f9f80c8f9d9d69" }
 dependencies = [
     { name = "graphviz" },
     { name = "ipython" },
