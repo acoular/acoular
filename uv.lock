@@ -93,7 +93,7 @@ provides-extras = ["full"]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "acoular-sphinx", git = "https://github.com/acoular/ci.git?subdirectory=packages%2Facoular-sphinx&branch=main" },
+    { name = "acoular-sphinx", git = "https://github.com/acoular/ci.git?subdirectory=packages%2Facoular-sphinx&rev=sphinx-v1.0" },
     { name = "diff-cover" },
     { name = "h5py" },
     { name = "pylops" },
@@ -109,7 +109,7 @@ dev = [
     { name = "sounddevice" },
     { name = "traitsui" },
 ]
-docs = [{ name = "acoular-sphinx", git = "https://github.com/acoular/ci.git?subdirectory=packages%2Facoular-sphinx&branch=main" }]
+docs = [{ name = "acoular-sphinx", git = "https://github.com/acoular/ci.git?subdirectory=packages%2Facoular-sphinx&rev=sphinx-v1.0" }]
 lint = [{ name = "ruff", specifier = "==0.14.2" }]
 tests = [
     { name = "diff-cover" },
@@ -130,7 +130,7 @@ tests = [
 [[package]]
 name = "acoular-sphinx"
 version = "0.1.0"
-source = { git = "https://github.com/acoular/ci.git?subdirectory=packages%2Facoular-sphinx&branch=main#113d23f89eeba6d0cf5ee3a0294d0d05666b189b" }
+source = { git = "https://github.com/acoular/ci.git?subdirectory=packages%2Facoular-sphinx&rev=sphinx-v1.0#4afbfcafb8a2e7180ad4f0a17c36e21663f06cc7" }
 dependencies = [
     { name = "graphviz" },
     { name = "ipython" },

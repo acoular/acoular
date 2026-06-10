@@ -36,6 +36,7 @@ Contents:
 .. toctree::
     :hidden:
     
+    Overview <self>
     Installation <install/index>
     User Guide <user_guide/index>
     API Reference <api_ref/index>
