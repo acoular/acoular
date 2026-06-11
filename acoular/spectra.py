@@ -19,6 +19,15 @@
 
 from abc import abstractmethod
 
+# acoular imports
+from .base import SamplesGenerator
+from .configuration import config
+from .fastFuncs import calcCSM
+from .h5cache import H5cache
+from .h5files import H5CacheFileBase
+from .internal import digest
+from .tools.utils import find_basename
+
 import numpy as np
 from scipy import fft
 from traits.api import (
@@ -36,15 +45,6 @@ from traits.api import (
     cached_property,
     property_depends_on,
 )
-
-# acoular imports
-from .base import SamplesGenerator
-from .configuration import config
-from .fastFuncs import calcCSM
-from .h5cache import H5cache
-from .h5files import H5CacheFileBase
-from .internal import digest
-from .tools.utils import find_basename
 
 
 class BaseSpectra(ABCHasStrictTraits):
@@ -177,9 +177,8 @@ class BaseSpectra(ABCHasStrictTraits):
             while pos + bs <= bs + ns:
                 yield temp[int(pos) : int(pos + bs)]
                 pos += posinc
-            else:
-                temp[0:bs] = temp[bs:]  # copy to left
-                pos -= bs
+            temp[0:bs] = temp[bs:]  # copy to left
+            pos -= bs
 
 
 class PowerSpectra(BaseSpectra):

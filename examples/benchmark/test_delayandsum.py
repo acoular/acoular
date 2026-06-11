@@ -3,6 +3,7 @@
 # ------------------------------------------------------------------------------
 
 import acoular as ac
+
 import numpy as np
 
 # set_num_threads(1)

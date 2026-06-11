@@ -4,11 +4,12 @@
 """Implements snapshot testing of frequency beamformers."""
 
 import acoular as ac
+
+from tests.cases.test_fbeamform_cases import Beamformer
+
 import numpy as np
 import pytest
 from pytest_cases import parametrize_with_cases
-
-from tests.cases.test_fbeamform_cases import Beamformer
 
 TEST_PARAMS_F_NUM = [pytest.param(8000, 3, id='8kHz-3rd-oct')]
 

@@ -2,17 +2,18 @@ import pickle
 from pathlib import Path
 
 import acoular as ac
+
+from tests.utils import SetupMovingSourceCase, SetupStationarySourceCase, create_instance
+
 import numpy as np
 import pytest
 import sounddevice as sd
 import tables as tb
 from pytest_cases import fixture, parametrize
 
-from tests.utils import SetupMovingSourceCase, SetupStationarySourceCase, create_instance
-
 
 @pytest.hookimpl()
-def pytest_sessionfinish(session):  # noqa ARG001
+def pytest_sessionfinish(session):  # noqa: ARG001
     """Close all open files after the test session.
 
     This hook is called after the test session is finished and is used to get rid of the

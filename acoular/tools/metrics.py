@@ -11,12 +11,12 @@
 
 from copy import copy
 
+from acoular.fbeamform import L_p, integrate
+from acoular.grids import CircSector, Grid
+
 import numpy as np
 from scipy.spatial.distance import cdist
 from traits.api import Bool, CArray, HasStrictTraits, Instance, Property
-
-from acoular.fbeamform import L_p, integrate
-from acoular.grids import CircSector, Grid
 
 
 class MetricEvaluator(HasStrictTraits):

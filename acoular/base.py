@@ -26,6 +26,9 @@ to be used directly, but to be subclassed by classes that implement the actual s
 
 from abc import abstractmethod
 
+# acoular imports
+from .internal import digest
+
 from traits.api import (
     ABCHasStrictTraits,
     CArray,
@@ -36,9 +39,6 @@ from traits.api import (
     Property,
     cached_property,
 )
-
-# acoular imports
-from .internal import digest
 
 
 class Generator(ABCHasStrictTraits):

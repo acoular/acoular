@@ -180,32 +180,31 @@ def beamformerFreq(steerVecType, boolRemovedDiagOfCSM, normFactor, inputTupleSte
             coreFunc(eigVal, eigVec, steerVec, normFactor, result, normalHelp)
         else:
             coreFunc(csm, steerVec, normFactor, result, normalHelp)
-    else:  # predefined beamformers (Formulation I - IV)
-        if boolIsEigValProb:
-            _freqBeamformer_EigValues(
-                eigVal,
-                np.ascontiguousarray(eigVec),
-                distGridToArrayCenter,
-                distGridToAllMics,
-                waveNumber[0],
-                normFactor,
-                boolRemovedDiagOfCSM,
-                sth[steerVecType],
-                result,
-                normalHelp,
-            )
-        else:
-            _freqBeamformer_FullCSM(
-                csm,
-                distGridToArrayCenter,
-                distGridToAllMics,
-                waveNumber[0],
-                normFactor,
-                boolRemovedDiagOfCSM,
-                sth[steerVecType],
-                result,
-                normalHelp,
-            )
+    elif boolIsEigValProb:
+        _freqBeamformer_EigValues(
+            eigVal,
+            np.ascontiguousarray(eigVec),
+            distGridToArrayCenter,
+            distGridToAllMics,
+            waveNumber[0],
+            normFactor,
+            boolRemovedDiagOfCSM,
+            sth[steerVecType],
+            result,
+            normalHelp,
+        )
+    else:
+        _freqBeamformer_FullCSM(
+            csm,
+            distGridToArrayCenter,
+            distGridToAllMics,
+            waveNumber[0],
+            normFactor,
+            boolRemovedDiagOfCSM,
+            sth[steerVecType],
+            result,
+            normalHelp,
+        )
     beamformOutput = result
     steerNormalizeOutput = normalHelp
     return beamformOutput, steerNormalizeOutput
@@ -245,7 +244,7 @@ def _freqBeamformer_FullCSM(
     # in order to gain speed improvements.
     nMics = csm.shape[0]
     st2 = steer_type == 2
-    st34 = steer_type == 3 or steer_type == 4
+    st34 = steer_type in {3, 4}
     helpNormalize = 0.0  # just a hint for the compiler
     for gi in nb.prange(distGridToArrayCenter.shape[0]):
         steerVec = np.empty((nMics), np.complex128)
@@ -342,7 +341,7 @@ def _freqBeamformer_EigValues(
     nMics = eigVec.shape[0]
     nEigs = len(eigVal)
     st2 = steer_type == 2
-    st34 = steer_type == 3 or steer_type == 4
+    st34 = steer_type in {3, 4}
     helpNormalize = 0.0  # just a hint for the compiler
     for gi in nb.prange(distGridToArrayCenter.shape[0]):
         steerVec = np.empty((nMics), np.complex128)
@@ -638,13 +637,13 @@ def calcPointSpreadFunction(steerVecType, distGridToArrayCenter, distGridToAllMi
     fastmath=FAST_OPTION,
 )
 def _psf_Formulation1AkaClassic(
-    distGridToArrayCenter,  # noqa ARG001
+    distGridToArrayCenter,  # noqa: ARG001
     distGridToAllMics,
     distSourcesToArrayCenter,
     distSourcesToAllMics,
     waveNumber,
     result,
-):  # noqa ARG001
+):
     nMics = distGridToAllMics.shape[0]
     for cntSources in range(len(distSourcesToArrayCenter)):
         # see bottom of information header of 'calcPointSpreadFunction' for infos on the PSF
@@ -750,13 +749,13 @@ def _psf_Formulation3AkaTrueLevel(
     fastmath=FAST_OPTION,
 )
 def _psf_Formulation4AkaTrueLocation(
-    distGridToArrayCenter,  # noqa ARG001
+    distGridToArrayCenter,  # noqa: ARG001
     distGridToAllMics,
     distSourcesToArrayCenter,
     distSourcesToAllMics,
     waveNumber,
     result,
-):  # noqa ARG001
+):
     nMics = distGridToAllMics.shape[0]
     for cntSources in range(len(distSourcesToArrayCenter)):
         # see bottom of information header of 'calcPointSpreadFunction' for infos on the PSF

@@ -38,7 +38,7 @@ for testmodule in testmodules:
 
     testfunctions = tuple(
         filter(
-            lambda f: (f.startswith('test') and isinstance(module.__getattribute__(f), types.FunctionType)),
+            lambda f: f.startswith('test') and isinstance(module.__getattribute__(f), types.FunctionType),
             dir(module),
         ),
     )

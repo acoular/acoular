@@ -9,12 +9,12 @@
     SoundDeviceSamplesGenerator
 """
 
-from traits.api import Any, Bool, Enum, Float, Int, Property, cached_property, observe
-
 # acoular imports
 from .base import SamplesGenerator
 from .configuration import config
 from .internal import digest
+
+from traits.api import Any, Bool, Enum, Float, Int, Property, cached_property, observe
 
 if config.have_sounddevice:
     import sounddevice as sd
@@ -73,7 +73,7 @@ class SoundDeviceSamplesGenerator(SamplesGenerator):
 
     # checks that num_channels are not more than device can provide
     @observe('device, num_channels')
-    def _get_num_channels(self, event):  # noqa ARG002
+    def _get_num_channels(self, event):  # noqa: ARG002
         self.num_channels = min(self.num_channels, sd.query_devices(self.device)['max_input_channels'])
 
     def _get_sample_freq(self):
@@ -136,4 +136,3 @@ class SoundDeviceSamplesGenerator(SamplesGenerator):
                     yield data[:anz]
                     samples_count += anz
         self.running = False
-        return

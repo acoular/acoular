@@ -48,6 +48,10 @@ import xml.dom.minidom
 from abc import abstractmethod
 from pathlib import Path
 
+# acoular imports
+from .internal import digest, ldigest
+from .tools.utils import Polygon
+
 import numpy as np
 import scipy.linalg as spla
 
@@ -71,10 +75,6 @@ from traits.api import (
     property_depends_on,
 )
 from traits.trait_errors import TraitError
-
-# acoular imports
-from .internal import digest, ldigest
-from .tools.utils import Polygon
 
 
 def in_hull(p, hull, border=True, tol=0):
@@ -120,7 +120,7 @@ def in_hull(p, hull, border=True, tol=0):
     >>> p = np.array([[0.5, 0.5], [2, 2]])
     >>> in_hull(p, hull)
     array([ True, False])
-    """  # noqa W505
+    """  # noqa: W505
     if not isinstance(hull, Delaunay):
         hull = Delaunay(hull)
 
@@ -334,14 +334,14 @@ class RectGrid(Grid):
     def _get_nxsteps(self):
         i = abs(self.increment)
         if i != 0:
-            return int(round((abs(self.x_max - self.x_min) + i) / i))
+            return round((abs(self.x_max - self.x_min) + i) / i)
         return 1
 
     @property_depends_on(['y_min', 'y_max', 'increment'])
     def _get_nysteps(self):
         i = abs(self.increment)
         if i != 0:
-            return int(round((abs(self.y_max - self.y_min) + i) / i))
+            return round((abs(self.y_max - self.y_min) + i) / i)
         return 1
 
     @cached_property
@@ -533,21 +533,21 @@ class RectGrid3D(RectGrid):
     def _get_nxsteps(self):
         i = abs(self.increment) if np.isscalar(self.increment) else abs(self.increment[0])
         if i != 0:
-            return int(round((abs(self.x_max - self.x_min) + i) / i))
+            return round((abs(self.x_max - self.x_min) + i) / i)
         return 1
 
     @property_depends_on(['y_min', 'y_max', '_increment'])
     def _get_nysteps(self):
         i = abs(self.increment) if np.isscalar(self.increment) else abs(self.increment[1])
         if i != 0:
-            return int(round((abs(self.y_max - self.y_min) + i) / i))
+            return round((abs(self.y_max - self.y_min) + i) / i)
         return 1
 
     @property_depends_on(['z_min', 'z_max', '_increment'])
     def _get_nzsteps(self):
         i = abs(self.increment) if np.isscalar(self.increment) else abs(self.increment[2])
         if i != 0:
-            return int(round((abs(self.z_max - self.z_min) + i) / i))
+            return round((abs(self.z_max - self.z_min) + i) / i)
         return 1
 
     @property_depends_on('digest')
@@ -612,9 +612,9 @@ class RectGrid3D(RectGrid):
             incx = incy = incz = self.increment
         else:
             incx, incy, incz = self.increment
-        xi = int(round((x - self.x_min) / incx))
-        yi = int(round((y - self.y_min) / incy))
-        zi = int(round((z - self.z_min) / incz))
+        xi = round((x - self.x_min) / incx)
+        yi = round((y - self.y_min) / incy)
+        zi = round((z - self.z_min) / incz)
         return xi, yi, zi
 
     def indices(self, x1, y1, z1, x2, y2, z2):
@@ -705,7 +705,7 @@ class ImportGrid(Grid):
         self._gpos = pos
 
     @observe('file')
-    def _import_pos(self, event):  # noqa ARG002
+    def _import_pos(self, event):  # noqa: ARG002
         """
         Import the grid point locations and subgrid names from an XML file.
 
@@ -960,7 +960,7 @@ class MergeGrid(Grid):
         return digest(self)
 
     @observe('grids.items.digest')
-    def _set_sourcesdigest(self, event):  # noqa ARG002
+    def _set_sourcesdigest(self, event):  # noqa: ARG002
         self.grid_digest = ldigest(self.grids)
 
     @property_depends_on(['digest'])

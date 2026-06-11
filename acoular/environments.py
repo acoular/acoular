@@ -37,6 +37,8 @@ Implements acoustic environments with and without flow.
 from abc import abstractmethod
 from warnings import warn
 
+from .internal import digest
+
 import numba as nb
 import numpy as np
 import scipy.linalg as spla
@@ -55,8 +57,6 @@ from traits.api import (
     Union,
     cached_property,
 )
-
-from .internal import digest
 
 f64ro = nb.types.Array(nb.types.float64, 2, 'C', readonly=True)
 f32ro = nb.types.Array(nb.types.float32, 2, 'C', readonly=True)
@@ -322,7 +322,7 @@ class FlowField(ABCHasStrictTraits):
         pass
 
     @abstractmethod
-    def v(self, xx):  # noqa: ARG002
+    def v(self, xx):
         """
         Provide the flow field as a function of the location.
 
