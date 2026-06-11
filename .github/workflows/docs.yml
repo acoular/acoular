@@ -16,7 +16,6 @@ jobs:
       artifact_path: ./docs/_build/html
       html_baseurl: "https://acoular.org/acoular/dev/"
       docs_version_match: "dev"
-      docs_switcher_json_url: "https://acoular.org/acoular/_static/switcher.json"
 
   deploy:
     needs: build

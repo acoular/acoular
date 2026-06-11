@@ -17,7 +17,6 @@ jobs:
       artifact_name: build-docs-versioned
       artifact_path: ./docs/_build/html
       html_baseurl: "https://acoular.org/acoular/${{ github.ref_name }}/"
-      docs_switcher_json_url: "https://acoular.org/acoular/_static/switcher.json"
 
   docs_build_stable:
     uses: acoular/ci/.github/workflows/docs.yml@main
@@ -25,7 +24,6 @@ jobs:
       artifact_name: build-docs-stable
       artifact_path: ./docs/_build/html
       html_baseurl: "https://acoular.org/acoular/"
-      docs_switcher_json_url: "https://acoular.org/acoular/_static/switcher.json"
 
   docs_deploy_versioned:
     needs: docs_build_versioned

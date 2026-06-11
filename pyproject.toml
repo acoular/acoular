@@ -53,7 +53,7 @@ full = [
 ]
 
 [dependency-groups]
-docs = ["acoular-sphinx @ git+https://github.com/acoular/ci.git@sphinx-v1.2#subdirectory=packages/acoular-sphinx"]
+docs = ["acoular-sphinx @ git+https://github.com/acoular/ci.git@sphinx-v1.3#subdirectory=packages/acoular-sphinx"]
 
 lint = ["ruff==0.14.2"]
 
