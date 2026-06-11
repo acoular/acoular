@@ -63,9 +63,7 @@ html_theme_options = configure_package_theme_options(
     version_match=docs_build['version_match'],
 )
 html_sidebars = {
-    "install/*": [],
-    "news/*": [],
-    "literature/*": [],
+    "**": ["sidebar-nav-bs.html"],
 }
 html_last_updated_fmt = '%b %d, %Y'
 html_baseurl = docs_build['html_baseurl']
