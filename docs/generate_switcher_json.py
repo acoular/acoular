@@ -54,20 +54,21 @@ for tag in filtered_tags:
         versions.insert(
             0,
             {
-                'name': 'stable',
+                'name': f'{tag} (stable)',
                 'version': normalize_version(tag),
                 'url': f'{PACKAGE_ROOT}/',
                 'type': 'tag',
                 'preferred': True,
             },
         )
-    versions.append(
-        {
-            'name': tag,
-            'version': normalize_version(tag),
-            'url': f'{PACKAGE_ROOT}/{tag}/',
-            'type': 'tag',
-        }
+    else:
+        versions.append(
+            {
+                'name': tag,
+                'version': normalize_version(tag),
+                'url': f'{PACKAGE_ROOT}/{tag}/',
+                'type': 'tag',
+            }
     )
 
 OUTPUT.parent.mkdir(parents=True, exist_ok=True)
