@@ -87,7 +87,7 @@ class MaskedTimeOut(TimeOut):
     A signal processing block that allows for the selection of specific channels and time samples.
 
     The :class:`MaskedTimeOut` class is designed to filter data from a given
-    :class:`~acoular.sources.SamplesGenerator` (or a derived object) by defining valid time samples
+    :class:`~acoular.base.SamplesGenerator` (or a derived object) by defining valid time samples
     and excluding specific channels. It acts as an intermediary between the data source and
     subsequent processing steps, ensuring that only the selected portion of the data is passed
     along.
@@ -239,7 +239,7 @@ class ChannelMixer(TimeOut):
     A signal processing block that mixes multiple input channels into a single output channel.
 
     The :class:`ChannelMixer` class takes a multi-channel signal from a
-    :class:`~acoular.sources.SamplesGenerator` (or a derived object) and applies an optional set of
+    :class:`~acoular.base.SamplesGenerator` (or a derived object) and applies an optional set of
     amplitude weights to each channel. The resulting weighted sum is then output as a single-channel
     signal.
 
@@ -1739,7 +1739,7 @@ class TimeReverse(TimeOut):
 
 class Filter(TimeOut):
     """
-    Abstract base class for IIR filters using SciPy's :func:`~scipy.signal.lfilter`.
+    Abstract base class for IIR filters using SciPy's :func:`~scipy.signal.sosfilt`.
 
     This class implements a digital Infinite Impulse Response (IIR) filter that applies filtering to
     a given signal in a block-wise manner. The filter coefficients can be dynamically changed during
@@ -1747,13 +1747,10 @@ class Filter(TimeOut):
 
     See Also
     --------
-    :func:`scipy.signal.lfilter` :
-        Filter data along one-dimension with an IIR or FIR (finite impulse response) filter.
-    :func:`scipy.signal.sosfilt` :
-        Filter data along one dimension using cascaded second-order sections.
     :class:`FiltOctave` :
         Octave or third-octave bandpass filter (causal, with non-zero phase delay).
-    :class:`FiltFiltOctave` : Octave or third-octave bandpass filter with zero-phase distortion.
+    :class:`FiltFiltOctave` :
+        Octave or third-octave bandpass filter with zero-phase distortion.
     """
 
     #: The input data source. It must be an instance of a
@@ -2094,7 +2091,8 @@ class FiltFreqWeight(Filter):
     weight = Enum('A', 'C', 'Z')
 
     #: Second-order sections (SOS) representation of the filter coefficients. This property is
-    #: dynamically computed based on :attr:`weight` and the :attr:`Filter.source`'s digest.
+    #: dynamically computed based on :attr:`weight` and the
+    #: :attr:`~acoular.tprocess.Filter.source`'s digest.
     sos = Property(depends_on=['weight', 'source.digest'])
 
     #: A unique identifier for the filter, based on its properties. (read-only)
@@ -2169,7 +2167,7 @@ class FiltFreqWeight(Filter):
 
 class FilterBank(TimeOut):
     """
-    Abstract base class for IIR filter banks based on :mod:`scipy.signal.lfilter`.
+    Abstract base class for IIR filter banks based on SOS coefficients.
 
     Implements a bank of parallel filters. This class should not be instantiated by itself.
 
@@ -2518,8 +2516,6 @@ class WriteH5(TimeOut):
         ABC for signal processing blocks interacting with data from a source.
     :class:`~acoular.base.SamplesGenerator` :
         Interface for generating multi-channel time-domain signal processing blocks.
-    h5py :
-        Python library for reading and writing HDF5 files.
     """
 
     #: The input data source. It must be an instance of a
@@ -2571,7 +2567,7 @@ class WriteH5(TimeOut):
 
         Returns
         -------
-        :class:`h5py.File`
+        `h5py.File`
             The initialized HDF5 file object ready for data insertion.
         """
         file = _get_h5file_class()
@@ -2611,7 +2607,7 @@ class WriteH5(TimeOut):
 
         Parameters
         ----------
-        f5h : :obj:`h5py.File`
+        f5h : `h5py.File`
             The HDF5 file object to which metadata will be added.
         """
         nitems = len(self.metadata.items())

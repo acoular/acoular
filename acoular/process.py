@@ -97,7 +97,7 @@ class Average(InOut):
     1.9985200025816718
 
     Here, each evaluation of the generator created by the :meth:`result` method of the
-    :class:`Average` object via the :meth:`next` function returns :code:`num=1` average across a
+    :class:`Average` object via the `next` function returns :code:`num=1` average across a
     snapshot of 512 time samples.
 
     If the source is a frequency domain source, the average is calculated over a certain number
@@ -560,7 +560,7 @@ class SampleSplitter(InOut):
             The maximum number of data blocks each object's buffer can hold. If not specified,
             the default buffer size (100 blocks) is used, or a globally defined size if
             ``buffer_size`` is a dictionary.
-        buffer_overflow_treatment : :attr:`str`, optional
+        buffer_overflow_treatment : `str`, optional
             Defines the behavior when a buffer exceeds its maximum size. Options are:
 
             - ``'error'``: Raises an :obj:`IOError` when the buffer overflows.

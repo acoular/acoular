@@ -599,8 +599,8 @@ class BeamformerBase(HasStrictTraits):
             a tuple of (fmin,fmax) frequencies to include in the result if *num*==0,
             or band center frequency/frequencies for which to return the results
             if *num*>0; if None, then the frequency range is determined from
-            the settings of the :attr:`PowerSpectra.ind_low` and
-            :attr:`PowerSpectra.ind_high` of :attr:`freq_data`
+            the settings of the :attr:`~acoular.spectra.PowerSpectra.ind_low` and
+            :attr:`~acoular.spectra.PowerSpectra.ind_high` of :attr:`freq_data`
 
         num : integer
             Controls the width of the frequency bands considered; defaults to
@@ -959,9 +959,11 @@ class PointSpreadFunction(HasStrictTraits):
     #:
     #: * 'full': Calculate the full PSF (for all grid points) in one go (should be used if the PSF
     #:           at all grid points is needed, as with :class:`DAMAS<BeamformerDamas>`)
-    #: * 'single': Calculate the PSF for the grid points defined by :attr:`grid_indices`, one by one
-    #:             (useful if not all PSFs are needed, as with :class:`CLEAN<BeamformerClean>`)
-    #: * 'block': Calculate the PSF for the grid points defined by :attr:`grid_indices`, in one go
+    #: * 'single': Calculate the PSF for the grid points defined by
+    #:             :attr:`~acoular.fbeamform.PointSpreadFunction.grid_indices`, one by one :
+    #:             (useful if not all PSFs are needed, as with :class:`CLEAN<BeamformerClean>`):
+    #: * 'block': Calculate the PSF for the grid points defined by
+    #:            :attr:`~acoular.fbeamform.PointSpreadFunction.grid_indices`, in one go
     #:            (useful if not all PSFs are needed, as with :class:`CLEAN<BeamformerClean>`)
     #: * 'readonly': Do not attempt to calculate the PSF since it should already be cached (useful
     #:               if multiple processes have to access the cache file)
@@ -1138,9 +1140,11 @@ class BeamformerDamas(BeamformerBase):
     #:
     #: * 'full': Calculate the full PSF (for all grid points) in one go (should be used if the PSF
     #:           at all grid points is needed, as with :class:`DAMAS<BeamformerDamas>`)
-    #: * 'single': Calculate the PSF for the grid points defined by :attr:`grid_indices`, one by one
+    #: * 'single': Calculate the PSF for the grid points defined by
+    #:             :attr:`~acoular.fbeamform.PointSpreadFunction.grid_indices`, one by one
     #:             (useful if not all PSFs are needed, as with :class:`CLEAN<BeamformerClean>`)
-    #: * 'block': Calculate the PSF for the grid points defined by :attr:`grid_indices`, in one go
+    #: * 'block': Calculate the PSF for the grid points defined by
+    #:            :attr:`~acoular.fbeamform.PointSpreadFunction.grid_indices`, in one go
     #:            (useful if not all PSFs are needed, as with :class:`CLEAN<BeamformerClean>`)
     #: * 'readonly': Do not attempt to calculate the PSF since it should already be cached (useful
     #:               if multiple processes have to access the cache file)
@@ -1499,9 +1503,11 @@ class BeamformerClean(BeamformerBase):
     #:
     #: * 'full': Calculate the full PSF (for all grid points) in one go (should be used if the PSF
     #:           at all grid points is needed, as with :class:`DAMAS<BeamformerDamas>`)
-    #: * 'single': Calculate the PSF for the grid points defined by :attr:`grid_indices`, one by one
+    #: * 'single': Calculate the PSF for the grid points defined by
+    #:             :attr:`~acoular.fbeamform.PointSpreadFunction.grid_indices`, one by one
     #:             (useful if not all PSFs are needed, as with :class:`CLEAN<BeamformerClean>`)
-    #: * 'block': Calculate the PSF for the grid points defined by :attr:`grid_indices`, in one go
+    #: * 'block': Calculate the PSF for the grid points defined by
+    #:            :attr:`~acoular.fbeamform.PointSpreadFunction.grid_indices`, in one go
     #:            (useful if not all PSFs are needed, as with :class:`CLEAN<BeamformerClean>`)
     #: * 'readonly': Do not attempt to calculate the PSF since it should already be cached (useful
     #:               if multiple processes have to access the cache file)
@@ -2259,7 +2265,7 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
     n = Int(1)
 
     #: Geometrical bounds of the search domain to consider.
-    #: :attr:`bound` is a list that contains exactly three tuple of
+    #: `bounds` is a list that contains exactly three tuple of
     #: (min,max) for each of the coordinates x, y, z.
     #: Defaults to [(-1.,1.),(-1.,1.),(0.01,1.)]
     bounds = List(Tuple(Float, Float), minlen=3, maxlen=3, value=[(-1.0, 1.0), (-1.0, 1.0), (0.01, 1.0)])

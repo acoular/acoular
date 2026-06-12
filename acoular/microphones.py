@@ -51,8 +51,8 @@ class MicGeom(HasStrictTraits):
 
     Notes
     -----
-    - The microphone geometry as in :attr:`total_pos` is automatically changed if the :attr:`file`
-      attribute is updated.
+    - The microphone geometry as in :attr:`~acoular.microphones.MicGeom.pos_total` is automatically
+      changed if the :attr:`file` attribute is updated.
     - Small numerical values in the computed :attr:`center` are set to zero for numerical stability.
 
     Examples
@@ -241,7 +241,7 @@ class MicGeom(HasStrictTraits):
         This method generates an XML file containing the positions of all valid microphones in the
         array. Each microphone is represented by a ``<pos>`` element with ``Name``, ``x``, ``y``,
         and ``z`` attributes. The generated XML is formatted to match the structure required for
-        importing into the :class:`MicGeom` class.
+        importing into the :class:`~acoular.microphones.MicGeom` class.
 
         Parameters
         ----------
