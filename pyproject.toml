@@ -157,6 +157,8 @@ extend-ignore = [
   "RUF059",  # unused-packed-variable
   "PLW2901",  # overwritten loop variable
   "PLR0912",  # too many branches
+  "S318",  # ignore XML parser security rule globally for now
+  "S301",  # ignore pickle security rule globally for now
 ]
 
 [tool.ruff.lint.flake8-tidy-imports]
@@ -174,6 +176,10 @@ banned-module-level-imports = ["matplotlib", "pylops", "sounddevice"]
 "acoular/sources.py" = ["N806"]
 "acoular/tools/helpers.py" = ["D205"]
 "acoular/tprocess.py" = ["N806"]
+# "docs/generate_switcher_json.py" = ["S603"]
+"docs/plots/*" = [
+    "TID253",  # matplotlib imports are ok
+]
 "tests/*" = ["FIX", "PLC0415", "PT", "RUF", "S101", "TRY"]
 "tests/cases/*" = ["N802"]
 "examples/*" = [
