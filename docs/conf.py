@@ -2,6 +2,7 @@ import sys
 from pathlib import Path
 
 import acoular as ac
+from acoular import config
 
 from acoular_sphinx import (
     PACKAGE_FRAME_EXTENSIONS,
@@ -19,7 +20,8 @@ from sphinx_gallery.sorting import ExplicitOrder
 
 project = 'Acoular'
 author = 'Acoular Development Team'
-copyright = f'2015-%Y, {author}'
+copyright_text = f'2015-%Y, {author}'
+globals()['copyright'] = copyright_text
 version = release = ac.__version__
 docs_build = resolve_docs_build_config(
     default_version_match='dev' if 'dev' in version else version,
@@ -37,13 +39,15 @@ today_fmt = '%B %d, %Y'
 
 # Options for templates
 # ~~~~~~~~~~~~~~~~~~~~~~
-# A list of paths that contain extra templates (or templates that overwrite builtin/theme-specific templates).
+# A list of paths that contain extra templates
+# (or templates that overwrite builtin/theme-specific templates).
 templates_path = ['_templates']
 
 # %%
 # Options for HTML output
 # -----------------------
-# see https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output for details
+# see https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
+# for details
 
 html_theme = 'pydata_sphinx_theme'
 html_static_path = ['_static']
@@ -130,7 +134,7 @@ autodoc_default_options = {
 # ---------------------------------------------
 
 
-def reset_cache_dir(gallery_conf, fname):
+def reset_cache_dir(_gallery_conf, _fname):
     """
     Sphinx keeps the acoular module loaded during the whole documentation build.
     This can cause problems when the examples are located in subdirectories of the
@@ -138,15 +142,14 @@ def reset_cache_dir(gallery_conf, fname):
     directory. To make examples accross different directories reuse the cache, we
     reset the cache directory before every example run.
     """
-    from acoular import config
-
     config.cache_dir = str(Path(__file__).parent / 'auto_examples' / 'cache')
 
 
 suppress_warnings = [
     #   Sphinx 7.3.0: Suppressing the warning:
     # WARNING: cannot cache unpickable configuration value: 'sphinx_gallery_conf'
-    # (because it contains a function, class, or module object) -> warning through function reset_cache_dir
+    # (because it contains a function, class, or module object)
+    # -> warning through function reset_cache_dir
     'config.cache',
 ]
 
