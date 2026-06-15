@@ -7,7 +7,6 @@ from tests.utils import SetupMovingSourceCase, SetupStationarySourceCase, create
 
 import numpy as np
 import pytest
-import sounddevice as sd
 import tables as tb
 from pytest_cases import fixture, parametrize
 
@@ -125,6 +124,8 @@ def setup_sounddevice_mocks(mocker):
 @pytest.fixture
 def sounddevice_properties(setup_sounddevice_mocks):
     """Retrieve default device properties."""
+    import sounddevice as sd
+
     default_device = sd.query_devices(kind='input')
     num = setup_sounddevice_mocks
     return default_device['default_samplerate'], default_device['max_input_channels'], default_device['index'], num
