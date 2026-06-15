@@ -9,25 +9,29 @@ Files that generate images should start with 'plot'
 """
 
 import ast
+import contextlib
 import glob
 import gzip
 import http.client
+import importlib
 import os
 import posixpath
 import re
+import runpy
 import shutil
-import subprocess
 import sys
+import token
+import tokenize
 import traceback
-import warnings
 from pathlib import Path
 from time import time
 
-from sklearn.externals import six
+import numpy as np
+from sklearn.externals import joblib, six
 
 # Try Python 2 first, otherwise load from Python 3
 try:
-    import cPickle as pickle
+    import cPickle
     import urllib2 as urllib
     from StringIO import StringIO
     from urllib2 import HTTPError, URLError
@@ -35,30 +39,27 @@ except ImportError:
     import pickle
     import urllib.parse
     import urllib.request
-    from io import StringIO
+    from io import BytesIO as StringIO
     from urllib.error import HTTPError, URLError
+else:
+    pickle = cPickle
 
 
-try:
-    # Python 2 built-in
-    execfile
-except NameError:
+def execfile(filename, global_vars=None, local_vars=None):
+    if global_vars is None:
+        global_vars = {}
+    if local_vars is None:
+        local_vars = global_vars
 
-    def execfile(filename, global_vars=None, local_vars=None):
-        with open(filename, encoding='utf-8') as f:
-            code = compile(f.read(), filename, 'exec')
-            exec(code, global_vars, local_vars)
+    init_globals = dict(global_vars)
+    init_globals.setdefault('__file__', filename)
+    init_globals.setdefault('__name__', '__main__')
+    result_globals = runpy.run_path(filename, init_globals=init_globals)
+    global_vars.update(result_globals)
+    local_vars.update(result_globals)
 
 
-try:
-    basestring
-except NameError:
-    basestring = str
-
-import token
-import tokenize
-
-import numpy as np
+basestring = str
 
 try:
     # make sure that the Agg backend is set before importing any
@@ -70,11 +71,6 @@ except ImportError:
     # this script can be imported by nosetest to find tests to run: we should not
     # impose the matplotlib requirement in that case.
     pass
-
-
-import contextlib
-
-from sklearn.externals import joblib
 
 ###############################################################################
 # A tee object to redict streams to multiple outputs
@@ -444,7 +440,12 @@ carousel_thumbs = {
 
 def extract_docstring(filename, ignore_heading=False):
     """Extract a module-level docstring, if any"""
-    lines = open(filename).readlines() if six.PY2 else open(filename, encoding='utf-8').readlines()
+    if six.PY2:
+        with open(filename) as file_handle:
+            lines = file_handle.readlines()
+    else:
+        with open(filename, encoding='utf-8') as file_handle:
+            lines = file_handle.readlines()
     start_row = 0
     if lines[0].startswith('#!'):
         lines.pop(0)
@@ -453,7 +454,7 @@ def extract_docstring(filename, ignore_heading=False):
     first_par = ''
     line_iterator = iter(lines)
     tokens = tokenize.generate_tokens(lambda: next(line_iterator))
-    for tok_type, tok_content, _, (erow, _), _ in tokens:
+    for tok_type, tok_content, _, (_erow, _), _ in tokens:
         tok_type = token.tok_name[tok_type]
         if tok_type in ('NEWLINE', 'COMMENT', 'NL', 'INDENT', 'DEDENT'):
             continue
@@ -479,7 +480,7 @@ def extract_docstring(filename, ignore_heading=False):
                     first_par = paragraphs[0]
 
         break
-    return docstring, first_par, erow + 1 + start_row
+    return docstring, first_par, _erow + 1 + start_row
 
 
 def generate_example_rst(app):
@@ -502,10 +503,10 @@ def generate_example_rst(app):
         os.makedirs(generated_dir)
 
     # we create an index.rst with all examples
-    fhindex = open(os.path.join(root_dir, 'index.rst'), 'w')
-    # Note: The sidebar button has been removed from the examples page for now
-    #      due to how it messes up the layout. Will be fixed at a later point
-    fhindex.write("""\
+    with open(os.path.join(root_dir, 'index.rst'), 'w') as fhindex:
+        # Note: The sidebar button has been removed from the examples page for now
+        #      due to how it messes up the layout. Will be fixed at a later point
+        fhindex.write("""\
 
 
 
@@ -525,20 +526,24 @@ Examples
 ========
 
 """)
-    # Here we don't use an os.walk, but we recurse only twice: flat is
-    # better than nested.
-    seen_backrefs = set()
-    generate_dir_rst('.', fhindex, example_dir, root_dir, plot_gallery, seen_backrefs)
-    for directory in sorted(os.listdir(example_dir)):
-        if os.path.isdir(os.path.join(example_dir, directory)):
-            generate_dir_rst(directory, fhindex, example_dir, root_dir, plot_gallery, seen_backrefs)
-    fhindex.flush()
+        # Here we don't use an os.walk, but we recurse only twice: flat is
+        # better than nested.
+        seen_backrefs = set()
+        generate_dir_rst('.', fhindex, example_dir, root_dir, plot_gallery, seen_backrefs)
+        for directory in sorted(os.listdir(example_dir)):
+            if os.path.isdir(os.path.join(example_dir, directory)):
+                generate_dir_rst(directory, fhindex, example_dir, root_dir, plot_gallery, seen_backrefs)
 
 
 def extract_line_count(filename, target_dir):
     # Extract the line count of a file
     example_file = os.path.join(target_dir, filename)
-    lines = open(example_file).readlines() if six.PY2 else open(example_file, encoding='utf-8').readlines()
+    if six.PY2:
+        with open(example_file) as file_handle:
+            lines = file_handle.readlines()
+    else:
+        with open(example_file, encoding='utf-8') as file_handle:
+            lines = file_handle.readlines()
     start_row = 0
     if lines and lines[0].startswith('#!'):
         lines.pop(0)
@@ -547,14 +552,14 @@ def extract_line_count(filename, target_dir):
     tokens = tokenize.generate_tokens(lambda: next(line_iterator))
     check_docstring = True
     erow_docstring = 0
-    for tok_type, _, _, (erow, _), _ in tokens:
+    for tok_type, _, _, (_erow, _), _ in tokens:
         tok_type = token.tok_name[tok_type]
         if tok_type in ('NEWLINE', 'COMMENT', 'NL', 'INDENT', 'DEDENT'):
             continue
         if (tok_type == 'STRING') and check_docstring:
-            erow_docstring = erow
+            erow_docstring = _erow
             check_docstring = False
-    return erow_docstring + 1 + start_row, erow + 1 + start_row
+    return erow_docstring + 1 + start_row, _erow + 1 + start_row
 
 
 def line_count_sort(file_list, target_dir):
@@ -621,15 +626,16 @@ def generate_dir_rst(directory, fhindex, example_dir, root_dir, plot_gallery, se
         msg = f'Example directory {src_dir} does not have a README.txt'
         raise ValueError(msg)
 
-    fhindex.write(
-        """
+    with open(os.path.join(src_dir, 'README.txt')) as readme_file:
+        fhindex.write(
+            f"""
 
 
-{}
+{readme_file.read()}
 
 
-""".format(open(os.path.join(src_dir, 'README.txt')).read())
-    )
+"""
+        )
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
     sorted_listdir = line_count_sort(os.listdir(src_dir), src_dir)
@@ -681,10 +687,10 @@ def make_thumbnail(in_fname, out_fname, width, height):
     """
     # local import to avoid testing dependency on PIL:
     try:
-        from PIL import Image
+        image_module = importlib.import_module('PIL.Image')
     except ImportError:
-        import Image
-    img = Image.open(in_fname)
+        image_module = importlib.import_module('Image')
+    img = image_module.open(in_fname)
     width_in, height_in = img.size
     scale_w = width / float(width_in)
     scale_h = height / float(height_in)
@@ -695,21 +701,15 @@ def make_thumbnail(in_fname, out_fname, width, height):
     height_sc = round(scale * height_in)
 
     # resize the image
-    img.thumbnail((width_sc, height_sc), Image.ANTIALIAS)
+    img.thumbnail((width_sc, height_sc), image_module.ANTIALIAS)
 
     # insert centered
-    thumb = Image.new('RGB', (width, height), (255, 255, 255))
+    thumb = image_module.new('RGB', (width, height), (255, 255, 255))
     pos_insert = ((width - width_sc) // 2, (height - height_sc) // 2)
     thumb.paste(img, pos_insert)
 
-    thumb.save(out_fname)
-    # Use optipng to perform lossless compression on the resized image if
-    # software is installed
-    if os.environ.get('SKLEARN_DOC_OPTIPNG', False):
-        try:
-            subprocess.call(['optipng', '-quiet', '-o', '9', out_fname])
-        except Exception:
-            warnings.warn('Install optipng to reduce the size of the generated images', stacklevel=2)
+    save_kwargs = {'optimize': True} if os.environ.get('SKLEARN_DOC_OPTIPNG') else {}
+    thumb.save(out_fname, **save_kwargs)
 
 
 def get_short_module_name(module_name, obj_name):
@@ -719,8 +719,9 @@ def get_short_module_name(module_name, obj_name):
     for i in range(len(parts) - 1, 0, -1):
         short_name = '.'.join(parts[:i])
         try:
-            exec(f'from {short_name} import {obj_name}')
-        except ImportError:
+            imported_module = importlib.import_module(short_name)
+            getattr(imported_module, obj_name)
+        except (ImportError, AttributeError):
             # get the last working module name
             short_name = '.'.join(parts[: (i + 1)])
             break
@@ -841,9 +842,14 @@ def generate_file_rst(fname, target_dir, src_dir, root_dir, plot_gallery):
         # starts with plot and if it is more recent than an
         # existing image.
         first_image_file = image_path % 1
-        stdout = open(stdout_path).read() if os.path.exists(stdout_path) else ''
+        if os.path.exists(stdout_path):
+            with open(stdout_path) as stdout_file:
+                stdout = stdout_file.read()
+        else:
+            stdout = ''
         if os.path.exists(time_path):
-            time_elapsed = float(open(time_path).read())
+            with open(time_path) as time_file:
+                time_elapsed = float(time_file.read())
 
         if not os.path.exists(first_image_file) or os.stat(first_image_file).st_mtime <= os.stat(src_file).st_mtime:
             # We need to execute the code
@@ -874,8 +880,10 @@ def generate_file_rst(fname, target_dir, src_dir, root_dir, plot_gallery):
                 my_stdout = my_stdout.strip().expandtabs()
                 if my_stdout:
                     stdout = '**Script output**::\n\n  {}\n\n'.format('\n  '.join(my_stdout.split('\n')))
-                open(stdout_path, 'w').write(stdout)
-                open(time_path, 'w').write(f'{time_elapsed:f}')
+                with open(stdout_path, 'w') as stdout_file:
+                    stdout_file.write(stdout)
+                with open(time_path, 'w') as time_file:
+                    time_file.write(f'{time_elapsed:f}')
                 os.chdir(cwd)
 
                 # In order to save every figure we have two solutions :
@@ -899,7 +907,7 @@ def generate_file_rst(fname, target_dir, src_dir, root_dir, plot_gallery):
 
                     fig.savefig(image_path % fig_mngr.num, **kwargs)
                     figure_list.append(image_fname % fig_mngr.num)
-            except:
+            except (AttributeError, OSError, RuntimeError, TypeError, ValueError):
                 print(80 * '_')
                 print(f'{fname} is not compiling:')
                 traceback.print_exc()
@@ -918,15 +926,18 @@ def generate_file_rst(fname, target_dir, src_dir, root_dir, plot_gallery):
         car_thumb_path = os.path.join(os.path.split(root_dir)[0], '_build/html/stable/_images/')
         # Note: normaly, make_thumbnail is used to write to the path contained in `thumb_file`
         # which is within `auto_examples/../images/thumbs` depending on the example.
-        # Because the carousel has different dimensions than those of the examples gallery,
-        # I did not simply reuse them all as some contained whitespace due to their default gallery
-        # thumbnail size. Below, for a few cases, seperate thumbnails are created (the originals can't
-        # just be overwritten with the carousel dimensions as it messes up the examples gallery layout).
-        # The special carousel thumbnails are written directly to _build/html/stable/_images/,
-        # as for some reason unknown to me, Sphinx refuses to copy my 'extra' thumbnails from the
-        # auto examples gallery to the _build folder. This works fine as is, but it would be cleaner to
-        # have it happen with the rest. Ideally the should be written to 'thumb_file' as well, and then
-        # copied to the _images folder during the `Copying Downloadable Files` step like the rest.
+        # Because the carousel has different dimensions than those of the examples
+        # gallery, I did not simply reuse them all as some contained whitespace due
+        # to their default gallery thumbnail size. Below, for a few cases, seperate
+        # thumbnails are created (the originals can't just be overwritten with the
+        # carousel dimensions as it messes up the examples gallery layout).
+        # The special carousel thumbnails are written directly to
+        # _build/html/stable/_images/, as for some reason unknown to me, Sphinx
+        # refuses to copy my 'extra' thumbnails from the auto examples gallery to
+        # the _build folder. This works fine as is, but it would be cleaner to have
+        # it happen with the rest. Ideally the should be written to 'thumb_file' as
+        # well, and then copied to the _images folder during the `Copying
+        # Downloadable Files` step like the rest.
         if not os.path.exists(car_thumb_path):
             os.makedirs(car_thumb_path)
         if os.path.exists(first_image_file):
@@ -956,15 +967,16 @@ def generate_file_rst(fname, target_dir, src_dir, root_dir, plot_gallery):
             image_list += HLIST_IMAGE_TEMPLATE % figure_name.lstrip('/')
 
     time_m, time_s = divmod(time_elapsed, 60)
-    f = open(os.path.join(target_dir, base_image_name + '.rst'), 'w')
-    f.write(this_template % locals())
-    f.flush()
+    with open(os.path.join(target_dir, base_image_name + '.rst'), 'w') as file_handle:
+        file_handle.write(this_template % locals())
 
     # save variables so we can later add links to the documentation
     if six.PY2:
-        example_code_obj = identify_names(open(example_file).read())
+        with open(example_file) as example_code_file:
+            example_code_obj = identify_names(example_code_file.read())
     else:
-        example_code_obj = identify_names(open(example_file, encoding='utf-8').read())
+        with open(example_file, encoding='utf-8') as example_code_file:
+            example_code_obj = identify_names(example_code_file.read())
     if example_code_obj:
         codeobj_fname = example_file[:-3] + '_codeobj.pickle'
         with open(codeobj_fname, 'wb') as fid:
@@ -1060,8 +1072,8 @@ def embed_code_links(app, exception):
                     + '|'.join(re.escape(name) for name in names)
                 )
 
-                def substitute_link(match):
-                    return str_repl[match.group()]
+                def substitute_link(match, replacement_map=str_repl):
+                    return replacement_map[match.group()]
 
                 if len(str_repl) > 0:
                     with open(full_fname, 'rb') as fid:
@@ -1104,5 +1116,5 @@ def setup(app):
 
 
 def setup_module():
-    # HACK: Stop nosetests running setup() above
+    # Stop nosetests from running setup() above.
     pass
