@@ -65,7 +65,7 @@ html_theme_options = configure_package_theme_options(
     github_url='https://github.com/acoular/acoular',
     pypi_project='acoular',
     use_edit_page_button=True,
-    switcher_json_url=docs_build['switcher_json_url'],
+    switcher_json_url='https://acoular.org/acoular/_static/switcher.json',
     version_match=docs_build['version_match'],
 )
 html_sidebars = {

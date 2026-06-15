@@ -1,4 +1,4 @@
-name: "Manual: Seed release docs"
+name: "Manual: Seed release docs (run only for versions greater than 26.05)"
 run-name: Seed docs for ${{ inputs.version_tag }} → acoular/${{ inputs.version_tag }}
 permissions:
   contents: read
