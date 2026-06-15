@@ -458,7 +458,7 @@ def extract_docstring(filename, ignore_heading=False):
         if tok_type in ('NEWLINE', 'COMMENT', 'NL', 'INDENT', 'DEDENT'):
             continue
         if tok_type == 'STRING':
-            docstring = eval(tok_content)
+            docstring = ast.literal_eval(tok_content)
             # If the docstring is formatted with several paragraphs, extract
             # the first one:
             paragraphs = '\n'.join(line.rstrip() for line in docstring.split('\n')).split('\n\n')
