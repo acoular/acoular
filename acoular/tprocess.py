@@ -442,7 +442,7 @@ class Trigger(TimeOut):  # pragma: no cover
             x0 = triggerSignal[-1]
         if len(peakLoc) <= 1:
             msg = 'Not enough trigger info. Check *threshold* sign and value!'
-            raise Exception(msg)
+            raise ValueError(msg)
 
         peakDist = peakLoc[1:] - peakLoc[:-1]
         maxPeakDist = max(peakDist)  # approximate distance between the revolutions
@@ -519,7 +519,7 @@ class Trigger(TimeOut):  # pragma: no cover
         nChannels = self.source.num_channels
         if nChannels != 1:
             msg = f'Trigger signal must consist of ONE channel, instead {nChannels} channels are given!'
-            raise Exception(msg)
+            raise ValueError(msg)
         return 0
 
     def result(self, num):
@@ -897,7 +897,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
         """
         return np.sinc((r * self.mics_virtual.mpos.shape[1]) / (np.pi))
 
-    def _virtNewCoord_func(self, mpos, mpos_virt, method, array_dimension):  # noqa: N802
+    def _virtNewCoord_func(self, mpos, mpos_virt, _method, _array_dimension):  # noqa: N802
         # Core functionality for getting the interpolation.
         #
         # Parameters

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import re
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -22,8 +23,13 @@ def normalize_version(tag: str) -> str:
     return tag.removeprefix('v')
 
 
+git_executable = shutil.which('git')
+if git_executable is None:
+    msg = 'git executable not found'
+    raise FileNotFoundError(msg)
+
 result = subprocess.run(
-    ['git', 'tag', '--merged', 'HEAD', '--list', 'v*'],
+    [git_executable, 'tag', '--merged', 'HEAD', '--list', 'v*'],
     capture_output=True,
     text=True,
     cwd='..',

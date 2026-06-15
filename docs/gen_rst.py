@@ -253,9 +253,7 @@ class SphinxDocLinkResolver:
         if doc_url.startswith('http://'):
             if relative:
                 msg = 'Relative links are only supported for local URLs (doc_url cannot start with "http://)"'
-                raise ValueError(
-                    msg
-                )
+                raise ValueError(msg)
             searchindex_url = doc_url + '/' + searchindex
         else:
             searchindex_url = os.path.join(doc_url, searchindex)
@@ -471,9 +469,7 @@ def extract_docstring(filename, ignore_heading=False):
                             f' example file:\n {filename}\n and make sure'
                             " it's correct"
                         )
-                        raise ValueError(
-                            msg
-                        )
+                        raise ValueError(msg)
                 else:
                     first_par = paragraphs[0]
 

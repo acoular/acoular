@@ -2167,8 +2167,10 @@ class SourceMixer(SamplesGenerator):
         gens = [i.result(num) for i in self.sources[1:]]
         weights = self.weights.copy()
         if weights.size == 0:
-            weights = np.array([1.0 for j in range(len(self.sources))])
-        assert weights.shape[0] == len(self.sources)
+            weights = np.array([1.0 for _ in range(len(self.sources))])
+        if weights.shape[0] != len(self.sources):
+            msg = f'weights must match the number of sources ({len(self.sources)})'
+            raise ValueError(msg)
         for temp in self.sources[0].result(num):
             temp *= weights[0]
             sh = temp.shape[0]

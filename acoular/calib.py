@@ -18,7 +18,6 @@
 # imports from other packages
 import xml.dom.minidom
 
-# acoular imports
 from .base import InOut, SamplesGenerator, SpectraGenerator
 from .internal import digest
 
