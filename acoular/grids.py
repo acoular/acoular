@@ -903,8 +903,11 @@ class LineGrid(Grid):
 
     @property_depends_on(['num_points', 'length', 'direction', 'loc'])
     def _get_pos(self):
-        dist = self.length / (self.num_points - 1)
         loc = np.array(self.loc, dtype=float).reshape((3, 1))
+        if self.num_points <= 1:
+            return loc
+
+        dist = self.length / (self.num_points - 1)
         direc_n = np.array(self.direction) / spla.norm(self.direction)
         pos = np.zeros((self.num_points, 3))
         for s in range(self.num_points):

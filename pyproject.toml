@@ -61,7 +61,7 @@ tests = [
     "h5py",
     "diff_cover",
     "pylops",
-    "pytest",
+    "pytest<9.1",  # pytest-cases 3.10.1 breaks with pytest 9.1+
     "pytest-mock",
     "pytest-cov",
     "pytest-regtest",
