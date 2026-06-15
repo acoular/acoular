@@ -3,8 +3,6 @@ from __future__ import annotations
 
 import json
 import re
-import shutil
-import subprocess
 from pathlib import Path
 
 PACKAGE_ROOT = '/acoular'
@@ -23,19 +21,32 @@ def normalize_version(tag: str) -> str:
     return tag.removeprefix('v')
 
 
-git_executable = shutil.which('git')
-if git_executable is None:
-    msg = 'git executable not found'
-    raise FileNotFoundError(msg)
+def iter_git_tags(repo_root: Path) -> list[str]:
+    git_dir = repo_root / '.git'
+    refs_dir = git_dir / 'refs' / 'tags'
+    packed_refs = git_dir / 'packed-refs'
+    tags: set[str] = set()
 
-result = subprocess.run(
-    [git_executable, 'tag', '--merged', 'HEAD', '--list', 'v*'],
-    capture_output=True,
-    text=True,
-    cwd='..',
-    check=True,
-)
-tags = result.stdout.strip().split('\n') if result.stdout.strip() else []
+    if refs_dir.exists():
+        tags.update(path.relative_to(refs_dir).as_posix() for path in refs_dir.rglob('*') if path.is_file())
+
+    if packed_refs.exists():
+        with packed_refs.open(encoding='utf-8') as file_handle:
+            for line in file_handle:
+                if line.startswith(('#', '^')):
+                    continue
+                parts = line.strip().split(' ', maxsplit=1)
+                if len(parts) != 2:
+                    continue
+                ref_name = parts[1]
+                if ref_name.startswith('refs/tags/'):
+                    tags.add(ref_name.removeprefix('refs/tags/'))
+
+    return sorted(tags)
+
+
+repo_root = Path('..').resolve()
+tags = iter_git_tags(repo_root)
 filtered_tags = sorted(
     [tag for tag in tags if re.match(r'^v\d+\.\d+$', tag)],
     key=version_key,
