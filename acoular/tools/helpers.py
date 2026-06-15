@@ -14,7 +14,8 @@
     get_data_file
 """
 
-import urllib.request
+import http.client
+import urllib.parse
 from pathlib import Path
 from warnings import warn
 
@@ -414,8 +415,17 @@ def get_data_file(file):
     if not data_file.exists():
         data_file = Path().cwd() / file
         if not data_file.exists():
-            url = 'https://github.com/acoular/acoular/raw/master/examples/data/' + file
-            urllib.request.urlretrieve(url, data_file)
+            quoted_file = urllib.parse.quote(file)
+            connection = http.client.HTTPSConnection('raw.githubusercontent.com')
+            try:
+                connection.request('GET', f'/acoular/acoular/master/examples/data/{quoted_file}')
+                response = connection.getresponse()
+                if response.status != 200:
+                    msg = f'Failed to download data file {file!r}: HTTP {response.status}'
+                    raise OSError(msg)
+                data_file.write_bytes(response.read())
+            finally:
+                connection.close()
         print(f'Calibration file location: {data_file}')
 
     return data_file
