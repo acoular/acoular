@@ -4,7 +4,7 @@
 
 """Implements a digest function for caching of traits based on a unique identifier."""
 
-from hashlib import md5
+from hashlib import blake2b
 
 
 def digest(obj, name='digest'):
@@ -16,9 +16,9 @@ def digest(obj, name='digest'):
             for i in do_.split('.'):
                 vobj = next(iter(vobj.trait_get(i.rstrip('[]')).values()))
             str_.append(str(vobj).encode('UTF-8'))
-        except:  # noqa: E722
-            pass
-    return '_' + md5(b''.join(str_)).hexdigest()
+        except (AttributeError, KeyError, StopIteration, TypeError):
+            continue
+    return '_' + blake2b(b''.join(str_), digest_size=16).hexdigest()
 
 
 def ldigest(obj_list):
@@ -26,4 +26,4 @@ def ldigest(obj_list):
     str_ = []
     for i in obj_list:
         str_.append(str(i.digest).encode('UTF-8'))
-    return '_' + md5(b''.join(str_)).hexdigest()
+    return '_' + blake2b(b''.join(str_), digest_size=16).hexdigest()
