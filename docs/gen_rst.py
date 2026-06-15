@@ -11,6 +11,7 @@ Files that generate images should start with 'plot'
 import ast
 import glob
 import gzip
+import http.client
 import os
 import posixpath
 import re
@@ -98,16 +99,21 @@ class Tee:
 
 
 def _get_data(url):
-    """Helper function to get data over http or from a local file"""
-    if url.startswith('http://'):
-        # Try Python 2, use Python 3 on exception
+    """Helper function to get data over HTTP(S) or from a local file."""
+    parsed_url = urllib.parse.urlsplit(url)
+    if parsed_url.scheme in ('http', 'https'):
+        connection_class = http.client.HTTPSConnection if parsed_url.scheme == 'https' else http.client.HTTPConnection
+        path = parsed_url.path or '/'
+        if parsed_url.query:
+            path = f'{path}?{parsed_url.query}'
+        connection = connection_class(parsed_url.netloc)
         try:
-            resp = urllib.urlopen(url)
-            encoding = resp.headers.dict.get('content-encoding', 'plain')
-        except AttributeError:
-            resp = urllib.request.urlopen(url)
-            encoding = resp.headers.get('content-encoding', 'plain')
-        data = resp.read()
+            connection.request('GET', path)
+            resp = connection.getresponse()
+            encoding = resp.getheader('content-encoding', 'plain')
+            data = resp.read()
+        finally:
+            connection.close()
         if encoding == 'plain':
             pass
         elif encoding == 'gzip':
@@ -119,7 +125,6 @@ def _get_data(url):
     else:
         with open(url) as fid:
             data = fid.read()
-        fid.close()
 
     return data
 
