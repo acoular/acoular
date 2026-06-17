@@ -33,6 +33,7 @@ Implements beamformers in the frequency domain.
     BeamformerGIB
     BeamformerAdaptiveGrid
     BeamformerGridlessOrth
+    BeamformerSBL
 
     PointSpreadFunction
     L_p
@@ -73,9 +74,11 @@ from traits.api import (
 from traits.trait_errors import TraitError
 
 # acoular imports
+from .base import SpectraOut
 from .configuration import config
 from .environments import Environment
 from .fastFuncs import beamformerFreq, calcPointSpreadFunction, calcTransfer, damasSolverGaussSeidel
+from .fprocess import AutoPowerSpectra
 from .grids import Grid, Sector
 from .h5cache import H5cache
 from .h5files import H5CacheFileBase
@@ -83,6 +86,7 @@ from .internal import digest
 from .microphones import MicGeom
 from .spectra import PowerSpectra
 from .tfastfuncs import _steer_I, _steer_II, _steer_III, _steer_IV
+from .tools.utils import synthetic_indices
 
 sklearn_ndict = {}
 if parse(sklearn.__version__) < parse('1.4'):
@@ -262,7 +266,7 @@ class LazyBfResult:
     def __getitem__(self, key):
         """'intelligent' [] operator, checks if results are available and triggers calculation."""
         sl = np.index_exp[key][0]
-        if isinstance(sl, (int, np.integer)):
+        if isinstance(sl, int | np.integer):
             sl = slice(sl, sl + 1)
         # indices which are missing
         missingind = np.arange(*sl.indices(self.bf._numfreq))[self.bf._fr[sl] == 0]
@@ -533,34 +537,10 @@ class BeamformerBase(HasStrictTraits):
         if len(freq) == 0:
             return None
 
-        if num == 0:
-            # single frequency line
-            ind = np.searchsorted(freq, f)
-            if ind >= len(freq):
-                warn(
-                    f'Queried frequency ({f:g} Hz) not in resolved frequency range. Returning zeros.',
-                    Warning,
-                    stacklevel=2,
-                )
-                h = np.zeros_like(res[0])
-            else:
-                if freq[ind] != f:
-                    warn(
-                        f'Queried frequency ({f:g} Hz) not in set of '
-                        'discrete FFT sample frequencies. '
-                        f'Using frequency {freq[ind]:g} Hz instead.',
-                        Warning,
-                        stacklevel=2,
-                    )
-                h = res[ind]
-        else:
-            # fractional octave band
-            if isinstance(num, list):
-                f1 = num[0]
-                f2 = num[-1]
-            else:
-                f1 = f * 2.0 ** (-0.5 / num)
-                f2 = f * 2.0 ** (+0.5 / num)
+        if isinstance(num, list):
+            # explicit frequency band
+            f1 = num[0]
+            f2 = num[-1]
             ind1 = np.searchsorted(freq, f1)
             ind2 = np.searchsorted(freq, f2)
             if ind1 == ind2:
@@ -574,6 +554,10 @@ class BeamformerBase(HasStrictTraits):
                 h = np.zeros_like(res[0])
             else:
                 h = np.sum(res[ind1:ind2], 0)
+        else:
+            ind1, ind2 = synthetic_indices(freq, f, num)[0]
+            h = np.zeros_like(res[0]) if ind1 == ind2 else np.sum(res[ind1:ind2], 0)
+
         if isinstance(self, BeamformerAdaptiveGrid):
             return h
         if isinstance(self, BeamformerSODIX):
@@ -2456,3 +2440,232 @@ def integrate(data, grid, sector):
         for i in range(data.shape[0]):
             h[i] = data[i].reshape(gshape)[ind].sum()
     return h
+
+
+class BeamformerSBL(AutoPowerSpectra):
+    """
+    Multisnapshot sparse Bayesian learning beamformer.
+
+    Implements the frequency-domain SBL algorithm of Gerstoft et al. (2016)
+    for the linear array model ``Y = AX + N``. For each frequency, the input
+    spectra provide the snapshots ``Y`` and the transfer matrix from
+    :attr:`steer` provides ``A``.
+
+    The algorithm estimates the source-power hyperparameters ``gamma`` on the
+    steering grid. Nonzero entries of ``gamma`` define the active grid points
+    and form the sparse source map. The :attr:`method` trait selects one of
+    the update rules from the paper: ``'SBL1'``, ``'SBL'``, or ``'M-SBL'``.
+    Noise power is re-estimated from the active grid points during iteration.
+    """
+
+    #: Requires complex-valued spectra from a :class:`~acoular.fprocess.RFFT` object.
+    source = Instance(SpectraOut)
+
+    steer = Instance(SteeringVector, args=())
+
+    num_snapshots = Int(-1)
+
+    num_channels = Property()
+
+    method = Enum(
+        'SBL1',
+        'SBL',
+        'M-SBL',
+    )
+
+    options = Dict(
+        {
+            'eps': 1e-3,
+            'n_iter': 500,
+            'find_peaks': True,
+            'num_peaks': 10,
+        }
+    )
+
+    res = Dict()
+
+    digest = Property(
+        depends_on=['source.digest', 'steer.digest'],
+    )
+
+    def _get_digest(self):
+        return digest(self)
+
+    def _get_num_channels(self):
+        return self.steer.grid.size
+
+    def find_peaks(self, gamma, num_sources):
+        """
+        Find the strongest local maxima in source-power estimates.
+
+        Parameters
+        ----------
+        gamma : numpy.ndarray
+            Source-power estimates on the steering grid.
+        num_sources : int
+            Maximum number of peak locations to return.
+
+        Returns
+        -------
+        numpy.ndarray
+            Indices of the strongest local maxima.
+        """
+        pks = np.zeros(num_sources)
+        locs = np.zeros((num_sources), dtype=int)
+        Ntheta = len(gamma)
+        gamma = gamma.reshape(Ntheta)
+        gamma_new = np.zeros(Ntheta + 2)  # zero padding on the boundary
+        gamma_new[1 : Ntheta + 1] = gamma
+        Ilocs = np.flip(gamma.argsort(axis=0))
+        npeaks = 0  # current number of peaks found
+        local_patch = np.zeros(num_sources)
+        for ii in range(Ntheta):
+            local_patch = [gamma_new[(Ilocs[ii])], 0, gamma_new[(Ilocs[ii] + 2)]]
+            # zero the center
+            if sum(gamma[Ilocs[ii]] > local_patch) == 3:
+                pks[npeaks] = gamma[Ilocs[ii]]
+                locs[npeaks] = Ilocs[ii]
+                npeaks = npeaks + 1
+                # if found sufficient peaks, break
+                if npeaks == num_sources:
+                    break
+        return locs
+
+    def estimate_noise_power(self, gamma, csm, a):
+        """
+        Estimate the noise power from active grid points.
+
+        Parameters
+        ----------
+        gamma : numpy.ndarray
+            Source-power estimates on the steering grid.
+        csm : numpy.ndarray
+            Cross-spectral matrix.
+        a : numpy.ndarray
+            Transfer matrix for the current frequency.
+
+        Returns
+        -------
+        float
+            Estimated noise power.
+        """
+        #
+        nc = a.shape[0]
+        # Without peak selection, the noise-power estimate is less robust.
+        if self.options.get('find_peaks', True):
+            num_peaks = self.options.get('num_peaks', 10)
+            ga = self.find_peaks(gamma, num_peaks)
+        else:
+            ga = gamma > 0
+            ga_sum = ga.sum()  # active set
+            print(f'Active grid points: {ga_sum} out of {nc}')
+            if ga_sum > nc - 1:
+                # sort gamma and take the num_channels-1 largest values
+                sorted_indices = np.argsort(gamma)[::-1]
+                ga = np.zeros_like(gamma, dtype=bool)
+                ga[sorted_indices[: nc - 1]] = True
+        a_sub = a[:, ga]
+        P = a_sub @ np.linalg.solve(a_sub.conj().T @ a_sub, a_sub.conj().T)
+        return np.real(np.trace((np.eye(nc) - P) @ csm / (nc - a_sub.shape[1])))
+
+    def calc(self, spectra, csm, f):
+        """
+        Calculate source-power estimates for one frequency.
+
+        Parameters
+        ----------
+        spectra : numpy.ndarray
+            Complex-valued spectra for one frequency.
+        csm : numpy.ndarray
+            Cross-spectral matrix for one frequency.
+        f : float
+            Frequency to evaluate.
+
+        Returns
+        -------
+        numpy.ndarray
+            Source-power estimates on the steering grid.
+        """
+        # get solver options
+        eps = self.options.get('eps', 1e-4)
+        n_iter = self.options.get('n_iter', 500)
+
+        a = self.steer.transfer(f).T
+        gamma = np.einsum('mg,mn,ng->g', a.conj(), csm, a).real
+        gamma[gamma < 0] = 0
+        max_sig_sq = np.real(np.trace(csm)) / self.steer.mics.num_mics  # noise power initializtion
+        identity = np.eye(csm.shape[0])
+        L = spectra.shape[0]
+
+        # SBL uses sample cross-spectral matrix for the denominator (can be calculated once)
+        if self.method == 'SBL':
+            csm_inv_a_denum = spla.solve(csm, a, assume_a='her')
+            gamma_denum_full = np.abs(np.sum(np.conj(a) * csm_inv_a_denum, axis=0).real)
+
+        for i in range(n_iter):
+            sig_sq_est = np.minimum(self.estimate_noise_power(gamma, csm, a), max_sig_sq)
+            gamma_prev = gamma.copy()
+            ga = gamma > 0
+            gamma_sub = gamma[ga]
+            a_sub = a[:, ga]
+            csm_mod = (a_sub * gamma_sub[None, :]) @ a_sub.conj().T + sig_sq_est * identity
+            csm_inv_a = spla.solve(csm_mod, a_sub, assume_a='her')
+            gamma_num = np.linalg.norm(spectra.conj() @ csm_inv_a, axis=0) ** 2 / L
+            if self.method == 'SBL':
+                gamma_denum = gamma_denum_full[ga]
+            elif self.method == 'SBL1':
+                gamma_denum = np.abs(np.sum(np.conj(a_sub) * csm_inv_a, axis=0).real)
+
+            # calc gamma
+            if self.method == 'M-SBL':
+                A_matrix = 1 / sig_sq_est * a_sub.T.conj() @ a_sub + np.diag(1 / gamma_sub)
+                sigma_x_diag = np.linalg.solve(A_matrix, np.eye(A_matrix.shape[0])).diagonal()
+                gamma[ga] = (gamma[ga] ** 2) * gamma_num + sigma_x_diag
+            else:
+                gamma[ga] *= np.sqrt(gamma_num / gamma_denum)
+            if np.any(gamma < 0):
+                warn(f'Negative gamma values at iteration {i + 1}, setting to zero.', stacklevel=2)
+                gamma[gamma < 0] = 0
+            # checks convergence and displays status reports
+            errornorm = np.linalg.norm(gamma - gamma_prev, ord=1) / np.linalg.norm(gamma_prev, ord=1)
+            if errornorm < eps:
+                break
+            print(f'Iteration {i + 1}/{n_iter}, error norm: {errornorm:.2e}')
+        return gamma
+
+    def result(self, num=1):
+        """
+        Yield sparse Bayesian learning results.
+
+        Parameters
+        ----------
+        num : int, optional
+            Number of output blocks to combine per yielded result.
+
+        Yields
+        ------
+        numpy.ndarray
+            Sparse source-power estimates for all configured frequencies and grid points.
+        """
+        nm = self.steer.mics.num_mics
+        nf = self.source.num_freqs
+        ns = self.source.num_samples if self.num_snapshots < 0 else self.num_snapshots
+
+        all_snap = ns * num
+        for spectra in self.source.result(num=all_snap):
+            spectra = spectra.reshape(-1, nf, nm) * np.sqrt(self._get_scaling_value())
+
+            num_out = int(np.ceil(spectra.shape[0] / ns))
+            gamma = np.zeros((num_out, self.num_freqs, self.steer.grid.size))
+            ni = 0
+            for i in range(num_out):
+                ni_stop = min(ni + ns, spectra.shape[0])
+                spectra_frame = spectra[ni:ni_stop]
+                csm = (
+                    np.einsum('sfn,sfm->fnm', spectra_frame, np.conj(spectra_frame), optimize=True)
+                    / spectra_frame.shape[0]
+                )
+                for j, f in enumerate(self.freqs):
+                    gamma[i, j] = self.calc(spectra_frame[:, j], csm[j], f)
+                ni = ni_stop
+            yield gamma.reshape(-1, self.num_freqs * self.steer.grid.size)
