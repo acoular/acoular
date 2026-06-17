@@ -14,6 +14,9 @@ Implements support for array microphone arrangements.
 import xml.dom.minidom
 from pathlib import Path
 
+# acoular imports
+from .internal import digest
+
 import numpy as np
 from scipy.spatial.distance import cdist
 from traits.api import (
@@ -26,9 +29,6 @@ from traits.api import (
     cached_property,
     observe,
 )
-
-# acoular imports
-from .internal import digest
 
 
 class MicGeom(HasStrictTraits):
@@ -198,7 +198,7 @@ class MicGeom(HasStrictTraits):
         return None
 
     @observe('file')
-    def _import_mpos(self, event):  # noqa ARG002
+    def _import_mpos(self, event):  # noqa: ARG002
         # Import the microphone positions from an XML file.
         #
         # This method parses the XML file specified in :attr:`file` and extracts the ``x``, ``y``,

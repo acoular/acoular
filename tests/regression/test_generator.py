@@ -3,10 +3,10 @@
 # ------------------------------------------------------------------------------
 """Snapshot tests for all generators."""
 
-from pytest_cases import parametrize_with_cases
-
 from tests.cases.test_generator_cases import Generators
 from tests.utils import get_result
+
+from pytest_cases import parametrize_with_cases
 
 
 @parametrize_with_cases('obj', cases=Generators)

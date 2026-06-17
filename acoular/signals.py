@@ -27,6 +27,10 @@ Implements signal generators for the simulation of acoustic sources.
 from abc import abstractmethod
 from warnings import warn
 
+# acoular imports
+from .base import SamplesGenerator
+from .internal import digest
+
 import numpy as np
 from scipy.signal import resample, sosfilt, tf2sos
 from traits.api import (
@@ -41,10 +45,6 @@ from traits.api import (
     Property,
     cached_property,
 )
-
-# acoular imports
-from .base import SamplesGenerator
-from .internal import digest
 
 
 class SignalGenerator(ABCHasStrictTraits):

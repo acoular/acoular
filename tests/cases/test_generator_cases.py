@@ -6,12 +6,13 @@
 import warnings
 
 import acoular as ac
-import numpy as np
-import pytest
-from pytest_cases import case, get_case_id, parametrize, parametrize_with_cases
 
 from tests.cases.test_grid_cases import Sectors
 from tests.utils import get_subclasses
+
+import numpy as np
+import pytest
+from pytest_cases import case, get_case_id, parametrize, parametrize_with_cases
 
 SKIP_DEFAULT = [
     ac.Generator,

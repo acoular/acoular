@@ -27,6 +27,13 @@ Examples
 
 import contextlib
 
+from acoular.h5files import H5FileBase, _get_h5file_class
+from acoular.internal import digest
+from acoular.microphones import MicGeom
+from acoular.sources import TimeSamples
+from acoular.spectra import PowerSpectraImport
+from acoular.tools.utils import get_file_basename
+
 import numpy as np
 from traits.api import (
     File,
@@ -37,13 +44,6 @@ from traits.api import (
     observe,
     property_depends_on,
 )
-
-from acoular.h5files import H5FileBase, _get_h5file_class
-from acoular.internal import digest
-from acoular.microphones import MicGeom
-from acoular.sources import TimeSamples
-from acoular.spectra import PowerSpectraImport
-from acoular.tools.utils import get_file_basename
 
 
 class TimeSamplesAIAABenchmark(TimeSamples):
@@ -114,7 +114,7 @@ class CsmAIAABenchmark(PowerSpectraImport):
         return get_file_basename(self.file)
 
     @observe('basename')
-    def _load_data(self, event):  # noqa ARG002
+    def _load_data(self, event):  # noqa: ARG002
         """Open the .h5 file and set attributes."""
         if self._h5f is not None:
             with contextlib.suppress(OSError):
@@ -171,7 +171,7 @@ class MicAIAABenchmark(MicGeom):
     )
 
     @observe('file')
-    def _import_mpos(self, event):  # noqa ARG002
+    def _import_mpos(self, event):  # noqa: ARG002
         """
         Import the microphone positions from .h5 file.
 

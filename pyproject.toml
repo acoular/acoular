@@ -55,13 +55,13 @@ full = [
 [dependency-groups]
 docs = ["acoular-sphinx @ git+https://github.com/acoular/ci.git@sphinx-v1.3#subdirectory=packages/acoular-sphinx"]
 
-lint = ["ruff==0.14.2"]
+lint = ["acoular-ruff @ git+https://github.com/acoular/ci.git@ruff-v1.0"]
 
 tests = [
     "h5py",
     "diff_cover",
     "pylops",
-    "pytest",
+    "pytest<9.1",  # pytest-cases 3.10.1 breaks with pytest 9.1+
     "pytest-mock",
     "pytest-cov",
     "pytest-regtest",
@@ -109,6 +109,15 @@ url = "https://test.pypi.org/simple/"
 publish-url = "https://test.pypi.org/legacy/"
 explicit = true
 
+[tool.coverage.run]
+omit = [
+    "acoular/demo",
+    "acoular/base.py",
+    "acoular/tfastfuncs.py",
+    "acoular/fastFuncs.py",
+    "acoular/deprecation",
+]
+
 [tool.pytest.ini_options]
 testpaths = "tests"
 addopts = "-v --durations=10 --cov-report=html --cov-report=term-missing"
@@ -127,11 +136,65 @@ env = [
     "OPENBLAS_NUM_THREADS=1",
 ]
 
-[tool.coverage.run]
-omit = [
-    "acoular/demo",
-    "acoular/base.py",
-    "acoular/tfastfuncs.py",
-    "acoular/fastFuncs.py",
-    "acoular/deprecation",
+
+[tool.ruff]
+extend = ".venv/share/ruff/ruff.acoular.toml"
+extend-exclude = ["docs/source", "tests/unsupported"]
+
+[tool.ruff.lint]
+extend-ignore = [
+  "FBT002",  # boolean positional argument
+  "NPY002",  # migrate NumPy RNG
+  "PERF4",  # list performance improvements
+  "PTH",  # migrate to Pathlib
+  "SLF001",  # private attr access
+  "T20",  # deactivate when logging is implemented
+  "FBT003",  # boolean-positional
+  "PLR2004",  # magic-value-comparison
+  "PLR091",  # too-many-arguments/statements
+  "PLW1510",  #  subprocess-run
+  "RUF005",  # needs carefull checking
+  "RUF059",  # unused-packed-variable
+  "PLW2901",  # overwritten loop variable
+  "PLR0912",  # too many branches
+  "S318",  # ignore XML parser security rule globally for now
+  "S301",  # ignore pickle security rule globally for now
 ]
+
+[tool.ruff.lint.flake8-tidy-imports]
+banned-module-level-imports = ["matplotlib", "pylops", "sounddevice"]
+
+[tool.ruff.lint.per-file-ignores]
+"!acoular/*" = ["D"]
+"acoular/__init__.py" = ["F401"]
+"acoular/demo/__init__.py" = ["F401"]
+"acoular/tools/__init__.py" = ["F401"]
+"acoular/aiaa/__init__.py" = ["F401"]
+"acoular/environments.py" = ["N806"]
+"acoular/fastFuncs.py" = ["N802", "N803", "N806", "N999"] # allow different naming convention
+"acoular/fbeamform.py" = ["N806", "B023"]
+"acoular/sources.py" = ["N806"]
+"acoular/tools/helpers.py" = ["D205"]
+"acoular/tprocess.py" = ["N806"]
+# "docs/generate_switcher_json.py" = ["S603"]
+"docs/plots/*" = [
+    "TID253",  # matplotlib imports are ok
+]
+"tests/*" = ["FIX", "PLC0415", "PT", "RUF", "S101", "TRY"]
+"tests/cases/*" = ["N802"]
+"examples/*" = [
+  "A001",
+  "B007",
+  "D4",
+  "E4",
+  "E701",
+  "EXE",
+  "F4",
+  "UP036",
+  "S101",
+  "SIM108",
+  "SLF001",
+  "TID253",  # matplotlib imports are ok
+  "INP001"
+]
+"examples/benchmark/*" = ["S307", "S603", "S607"]

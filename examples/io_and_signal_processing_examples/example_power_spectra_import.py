@@ -14,6 +14,7 @@ frequency of 8 kHz.
 from pathlib import Path
 
 import acoular as ac
+
 import numpy as np
 
 # %%

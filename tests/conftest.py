@@ -2,17 +2,17 @@ import pickle
 from pathlib import Path
 
 import acoular as ac
-import numpy as np
-import pytest
-import sounddevice as sd
-import tables as tb
-from pytest_cases import fixture, parametrize
 
 from tests.utils import SetupMovingSourceCase, SetupStationarySourceCase, create_instance
 
+import numpy as np
+import pytest
+import tables as tb
+from pytest_cases import fixture, parametrize
+
 
 @pytest.hookimpl()
-def pytest_sessionfinish(session):  # noqa ARG001
+def pytest_sessionfinish(session):  # noqa: ARG001
     """Close all open files after the test session.
 
     This hook is called after the test session is finished and is used to get rid of the
@@ -124,6 +124,8 @@ def setup_sounddevice_mocks(mocker):
 @pytest.fixture
 def sounddevice_properties(setup_sounddevice_mocks):
     """Retrieve default device properties."""
+    import sounddevice as sd
+
     default_device = sd.query_devices(kind='input')
     num = setup_sounddevice_mocks
     return default_device['default_samplerate'], default_device['max_input_channels'], default_device['index'], num

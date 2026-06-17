@@ -35,6 +35,18 @@ Measured multichannel data management and simulation of acoustic sources.
 import contextlib
 from warnings import warn
 
+from .base import SamplesGenerator
+
+# acoular imports
+from .environments import Environment
+from .h5files import H5FileBase, _get_h5file_class
+from .internal import digest, ldigest
+from .microphones import MicGeom
+from .signals import NoiseGenerator, SignalGenerator
+from .tools.utils import get_file_basename
+from .tprocess import TimeConvolve
+from .trajectory import Trajectory
+
 import numba as nb
 import numpy as np
 import scipy.linalg as spla
@@ -60,18 +72,6 @@ from traits.api import (
     cached_property,
     observe,
 )
-
-from .base import SamplesGenerator
-
-# acoular imports
-from .environments import Environment
-from .h5files import H5FileBase, _get_h5file_class
-from .internal import digest, ldigest
-from .microphones import MicGeom
-from .signals import NoiseGenerator, SignalGenerator
-from .tools.utils import get_file_basename
-from .tprocess import TimeConvolve
-from .trajectory import Trajectory
 
 
 @nb.njit(cache=True, error_model='numpy')  # pragma: no cover
@@ -387,7 +387,7 @@ class TimeSamples(SamplesGenerator):
         return get_file_basename(self.file)
 
     @observe('basename')
-    def _load_data(self, event):  # noqa ARG002
+    def _load_data(self, event):  # noqa: ARG002
         # Open the .h5 file and set attributes.
         if self._h5f is not None:
             with contextlib.suppress(OSError):
@@ -398,7 +398,7 @@ class TimeSamples(SamplesGenerator):
         self._load_metadata()
 
     @observe('data')
-    def _load_shapes(self, event):  # noqa ARG002
+    def _load_shapes(self, event):  # noqa: ARG002
         # Set :attr:`num_channels` and :attr:`num_samples` from data.
         if self.data is not None:
             self.num_samples, self.num_channels = self.data.shape
@@ -567,7 +567,7 @@ class MaskedTimeSamples(TimeSamples):
         return sli[1] - sli[0]
 
     @observe('data')
-    def _load_shapes(self, event):  # noqa ARG002
+    def _load_shapes(self, event):  # noqa: ARG002
         # Set :attr:`num_channels` and num_samples from :attr:`~acoular.sources.TimeSamples.data`.
         if self.data is not None:
             self.num_samples_total, self.num_channels_total = self.data.shape
@@ -1960,11 +1960,10 @@ class UncorrelatedNoiseSource(SamplesGenerator):
         while n <= self.num_samples:
             yield signal[n - num : n, :]
             n += num
+        if (n - num) < self.num_samples:
+            yield signal[n - num :, :]
         else:
-            if (n - num) < self.num_samples:
-                yield signal[n - num :, :]
-            else:
-                return
+            return
 
 
 class SourceMixer(SamplesGenerator):
@@ -2087,7 +2086,7 @@ class SourceMixer(SamplesGenerator):
     sdigest = Str()
 
     @observe('sources.items.digest')
-    def _set_sources_digest(self, event):  # noqa ARG002
+    def _set_sources_digest(self, event):  # noqa: ARG002
         self.sdigest = ldigest(self.sources)
 
     #: A unique identifier for the current state of the source,
@@ -2168,8 +2167,10 @@ class SourceMixer(SamplesGenerator):
         gens = [i.result(num) for i in self.sources[1:]]
         weights = self.weights.copy()
         if weights.size == 0:
-            weights = np.array([1.0 for j in range(len(self.sources))])
-        assert weights.shape[0] == len(self.sources)
+            weights = np.array([1.0 for _ in range(len(self.sources))])
+        if weights.shape[0] != len(self.sources):
+            msg = f'weights must match the number of sources ({len(self.sources)})'
+            raise ValueError(msg)
         for temp in self.sources[0].result(num):
             temp *= weights[0]
             sh = temp.shape[0]
