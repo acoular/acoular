@@ -43,6 +43,15 @@ from datetime import UTC, datetime
 from os import path
 from warnings import warn
 
+# acoular imports
+from .base import SamplesGenerator, TimeOut
+from .configuration import config
+from .environments import cartToCyl, cylToCart
+from .h5files import _get_h5file_class
+from .internal import digest, ldigest
+from .microphones import MicGeom
+from .process import Cache
+
 import numba as nb
 import numpy as np
 import scipy.linalg as spla
@@ -71,15 +80,6 @@ from traits.api import (
     cached_property,
     observe,
 )
-
-# acoular imports
-from .base import SamplesGenerator, TimeOut
-from .configuration import config
-from .environments import cartToCyl, cylToCart
-from .h5files import _get_h5file_class
-from .internal import digest, ldigest
-from .microphones import MicGeom
-from .process import Cache
 
 
 class MaskedTimeOut(TimeOut):
@@ -442,7 +442,7 @@ class Trigger(TimeOut):  # pragma: no cover
             x0 = triggerSignal[-1]
         if len(peakLoc) <= 1:
             msg = 'Not enough trigger info. Check *threshold* sign and value!'
-            raise Exception(msg)
+            raise ValueError(msg)
 
         peakDist = peakLoc[1:] - peakLoc[:-1]
         maxPeakDist = max(peakDist)  # approximate distance between the revolutions
@@ -519,7 +519,7 @@ class Trigger(TimeOut):  # pragma: no cover
         nChannels = self.source.num_channels
         if nChannels != 1:
             msg = f'Trigger signal must consist of ONE channel, instead {nChannels} channels are given!'
-            raise Exception(msg)
+            raise ValueError(msg)
         return 0
 
     def result(self, num):
@@ -696,7 +696,7 @@ class AngleTracker(MaskedTimeOut):
 
     # reset calc flag if something has changed
     @observe('digest')
-    def _reset_calc_flag(self, event):  # noqa ARG002
+    def _reset_calc_flag(self, event):  # noqa: ARG002
         self._calc_flag = False
 
     # calc rpm from trigger data
@@ -804,7 +804,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
     sample_freq = Delegate('source', 'sample_freq')
 
     #: Number of channels in the output data. This corresponds to the number of virtual microphone
-    #: positions where interpolated pressure values are computed. The value is ´determined based on
+    #: positions where interpolated pressure values are computed. The value is determined based on
     #: the :attr:`mics_virtual` geometry.
     num_channels = Property()
 
@@ -872,7 +872,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
         return digest(self)
 
     @cached_property
-    def _get_virtNewCoord(self):  # noqa N802
+    def _get_virtNewCoord(self):  # noqa: N802
         return self._virtNewCoord_func(self.mics.pos, self.mics_virtual.pos, self.method, self.array_dimension)
 
     def sinc_mic(self, r):
@@ -897,7 +897,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
         """
         return np.sinc((r * self.mics_virtual.mpos.shape[1]) / (np.pi))
 
-    def _virtNewCoord_func(self, mpos, mpos_virt, method, array_dimension):  # noqa N802
+    def _virtNewCoord_func(self, mpos, mpos_virt, _method, _array_dimension):  # noqa: N802
         # Core functionality for getting the interpolation.
         #
         # Parameters
@@ -951,7 +951,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
         # empty mesh object
         mesh = []
 
-        if self.array_dimension == '1D' or self.array_dimension == 'ring':
+        if self.array_dimension in {'1D', 'ring'}:
             # get projections onto new coordinate, for real mics
             projectionOnNewAxis = cartToCyl(mpos, self.Q)[0]
             indReorderHelp = np.argsort(projectionOnNewAxis)
@@ -974,7 +974,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
 
             # scipy delauney triangulation
             # Delaunay
-            tri = Delaunay(newCoord.T[:, :2], incremental=True)  #
+            tri = Delaunay(newCoord.T[:, :2], incremental=True)
 
             if self.interp_at_zero:
                 # add a point at zero
@@ -1089,7 +1089,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
         pHelp = p[:, meshList[0][1]]
 
         # Interpolation for 1D Arrays
-        if self.array_dimension == '1D' or self.array_dimension == 'ring':
+        if self.array_dimension in {'1D', 'ring'}:
             # for rotation add phi_delay
             if not np.array_equal(phi_delay, []):
                 xInterpHelp = np.tile(virtNewCoord[0, :], (nTime, 1)) + np.tile(phi_delay, (virtNewCoord.shape[1], 1)).T
@@ -1494,7 +1494,7 @@ class Mixer(TimeOut):
     sdigest = Str()
 
     @observe('sources.items.digest')
-    def _set_sourcesdigest(self, event):  # noqa ARG002
+    def _set_sourcesdigest(self, event):  # noqa: ARG002
         self.sdigest = ldigest(self.sources)
 
     #: A unique identifier for the Mixer instance, based on the :attr:`primary source<source>` and
@@ -2445,7 +2445,7 @@ class WriteWAV(TimeOut):
         if self.sample_freq.is_integer():
             fs = self.sample_freq
         else:
-            fs = int(round(self.sample_freq))
+            fs = round(self.sample_freq)
             msg = f'Sample frequency {self.sample_freq} is not a whole number. Proceeding with sampling frequency {fs}.'
             warn(msg, Warning, stacklevel=1)
         dtype, _, dmax, sw = self._type_info()

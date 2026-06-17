@@ -4,6 +4,7 @@
 """Implements snapshot testing of spectra classes."""
 
 import acoular as ac
+
 import numpy as np
 import pytest
 

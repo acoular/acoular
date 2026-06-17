@@ -4,9 +4,10 @@
 """Test cases for all environments and flow fields."""
 
 import acoular as ac
-from pytest_cases import parametrize
 
 from tests.utils import get_subclasses
+
+from pytest_cases import parametrize
 
 ENV_SKIP_DEFAULT = [
     ac.UniformFlowEnvironment,

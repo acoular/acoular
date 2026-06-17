@@ -14,12 +14,14 @@
     get_data_file
 """
 
+import http.client
+import urllib.parse
 from pathlib import Path
 from warnings import warn
 
-import numpy as np
-
 from acoular.tools.utils import mole_fraction_of_water_vapor
+
+import numpy as np
 
 
 def synthetic(data, freqs, f, num=3):
@@ -413,10 +415,17 @@ def get_data_file(file):
     if not data_file.exists():
         data_file = Path().cwd() / file
         if not data_file.exists():
-            import urllib.request
-
-            url = 'https://github.com/acoular/acoular/raw/master/examples/data/' + file
-            urllib.request.urlretrieve(url, data_file)
+            quoted_file = urllib.parse.quote(file)
+            connection = http.client.HTTPSConnection('raw.githubusercontent.com')
+            try:
+                connection.request('GET', f'/acoular/acoular/master/examples/data/{quoted_file}')
+                response = connection.getresponse()
+                if response.status != 200:
+                    msg = f'Failed to download data file {file!r}: HTTP {response.status}'
+                    raise OSError(msg)
+                data_file.write_bytes(response.read())
+            finally:
+                connection.close()
         print(f'Calibration file location: {data_file}')
 
     return data_file

@@ -14,8 +14,9 @@ microphone geometry in array_56.xml (part of Acoular).
 from pathlib import Path
 
 import acoular as ac
-import numpy as np
 from acoular.tools.helpers import get_data_file
+
+import numpy as np
 
 # %%
 # The 4 kHz third-octave band is used for the example.

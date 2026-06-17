@@ -7,6 +7,7 @@ from inspect import isabstract
 from pathlib import Path
 
 import acoular as ac
+
 import numpy as np
 import pytest
 from pytest_cases import get_case_id
@@ -29,7 +30,10 @@ def get_subclasses(cls, include_abstract=False):
     classes = []
     for _, subcls in inspect.getmembers(ac):
         if all(
-            [inspect.isclass(subcls) and issubclass(subcls, cls), not inspect.isabstract(subcls) or include_abstract]
+            [
+                inspect.isclass(subcls) and issubclass(subcls, cls),
+                not inspect.isabstract(subcls) or include_abstract,
+            ]
         ):
             classes.append(subcls)
     return classes

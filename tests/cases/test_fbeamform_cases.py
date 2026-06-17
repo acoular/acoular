@@ -6,10 +6,11 @@
 from copy import deepcopy
 
 import acoular as ac
-import pytest
-from pytest_cases import case, parametrize
 
 from tests.utils import get_subclasses
+
+import pytest
+from pytest_cases import case, parametrize
 
 # skip beamformers that have a dedicated test case in the
 # Beamformer class and require additional parameters to work properly

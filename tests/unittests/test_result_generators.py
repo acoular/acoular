@@ -4,12 +4,13 @@
 """Tests for result generators."""
 
 import acoular as ac
-import numpy as np
-import pytest
-from pytest_cases import parametrize, parametrize_with_cases
 
 from tests.cases.test_generator_cases import Generators
 from tests.utils import get_result
+
+import numpy as np
+import pytest
+from pytest_cases import parametrize, parametrize_with_cases
 
 xfails = {
     ac.BeamformerTime: 'Issue #525',

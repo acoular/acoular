@@ -5,6 +5,7 @@ from os.path import join
 
 # acoular imports
 import acoular as ac
+
 import numpy as np
 
 ac.config.global_caching = 'none'  # to make sure that nothing is cached

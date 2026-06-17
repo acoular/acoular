@@ -9,6 +9,7 @@ Demonstrates how to calculate the blockwise FFT and spectrogram of the signal.
 # Imports
 
 import acoular as ac
+
 import numpy as np
 
 # %%

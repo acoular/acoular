@@ -44,6 +44,18 @@ Implements beamformers in the frequency domain.
 import warnings
 from warnings import warn
 
+# acoular imports
+from .configuration import config
+from .environments import Environment
+from .fastFuncs import beamformerFreq, calcPointSpreadFunction, calcTransfer, damasSolverGaussSeidel
+from .grids import Grid, Sector
+from .h5cache import H5cache
+from .h5files import H5CacheFileBase
+from .internal import digest
+from .microphones import MicGeom
+from .spectra import PowerSpectra
+from .tfastfuncs import _steer_I, _steer_II, _steer_III, _steer_IV
+
 import numpy as np
 import scipy.linalg as spla
 
@@ -71,18 +83,6 @@ from traits.api import (
     property_depends_on,
 )
 from traits.trait_errors import TraitError
-
-# acoular imports
-from .configuration import config
-from .environments import Environment
-from .fastFuncs import beamformerFreq, calcPointSpreadFunction, calcTransfer, damasSolverGaussSeidel
-from .grids import Grid, Sector
-from .h5cache import H5cache
-from .h5files import H5CacheFileBase
-from .internal import digest
-from .microphones import MicGeom
-from .spectra import PowerSpectra
-from .tfastfuncs import _steer_I, _steer_II, _steer_III, _steer_IV
 
 sklearn_ndict = {}
 if parse(sklearn.__version__) < parse('1.4'):
@@ -455,6 +455,7 @@ class BeamformerBase(HasStrictTraits):
 
             def param_steer_func(f):
                 return (self.steer.r0, self.steer.rm, 2 * np.pi * f / self.steer.env.c)
+
         else:
             param_type = 'custom'
             param_steer_func = self.steer.steer_vector
@@ -1342,7 +1343,7 @@ class BeamformerOrth(BeamformerBase):
         return digest(self)
 
     @observe('n')
-    def _update_eva_list(self, event):  # noqa ARG002
+    def _update_eva_list(self, event):  # noqa: ARG002
         """Sets the list of eigenvalues to consider."""
         self.eva_list = np.arange(-1, -1 - self.n, -1)
 
@@ -1643,7 +1644,7 @@ class BeamformerCMF(BeamformerBase):
         return digest(self)
 
     @observe('method')
-    def _validate(self, event):  # noqa ARG002
+    def _validate(self, event):  # noqa: ARG002
         if self.method in ['FISTA', 'Split_Bregman'] and not config.have_pylops:
             msg = (
                 'Cannot import Pylops package. No Pylops installed.'
@@ -2285,7 +2286,7 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
         return digest(self)
 
     @observe('n')
-    def _update_eva_list(self, event):  # noqa ARG002
+    def _update_eva_list(self, event):  # noqa: ARG002
         """Sets the list of eigenvalues to consider."""
         self.eva_list = np.arange(-1, -1 - self.n, -1)
 
@@ -2355,7 +2356,7 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
                         normfactor,
                         (r0, rm, k),
                         (np.ones(1), eve[:, n : n + 1]),
-                    )[0][0]  # noqa: B023
+                    )[0][0]
 
                 # simplical global homotopy optimizer
                 oR = shgo(func, self.bounds, **shgo_opts)
