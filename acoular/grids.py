@@ -89,9 +89,9 @@ def in_hull(p, hull, border=True, tol=0):
         Coordinates of `M` points in `K` dimensions for which Delaunay triangulation will be
         computed.
 
-    border : bool, optional
-        Points in `p` on the border of `hull` will be kept in the return if `True`. If
-        `False`, only points inside `hull` will be kept. Default is `True`.
+    border : :class:`bool`, optional
+        Points in ``p`` on the border of ``hull`` will be kept in the return if ``True``.
+        If ``False``, only points inside ``hull`` will be kept. Default is ``True``.
 
     tol : :class:`float`, optional
         Tolerance allowed in the :meth:`inside-triangle check<scipy.spatial.Delaunay.find_simplex>`.
@@ -1014,7 +1014,7 @@ class Sector(ABCHasStrictTraits):
         """
         Check whether the given coordinates lie within the sector's bounds.
 
-        This method determines if each column of the input array `pos` corresponds to a point
+        This method determines if each column of the input array ``pos`` corresponds to a point
         that falls within the sector. For this base class, all points are considered within the
         sector.
 
@@ -1028,7 +1028,7 @@ class Sector(ABCHasStrictTraits):
         -------
         :class:`numpy.ndarray` of :class:`bools<bool>`
             A 1D array of length `N`, where each entry indicates whether the corresponding
-            column in `pos` lies within the sector's bounds.
+            column in ``pos`` lies within the sector's bounds.
 
         Examples
         --------
@@ -1194,7 +1194,7 @@ class RectSector3D(RectSector):
         Returns
         -------
         :class:`numpy.ndarray` of :class:`bools<bool>`
-            A boolean array of shape shape ``(N,)`` indicating which of the given positions lie
+            A boolean array of shape shape `(N,)` indicating which of the given positions lie
             within the cuboid sector. ``True`` if the grid point is inside the cuboid,
             otherwise ``False``.
 

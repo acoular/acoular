@@ -2266,7 +2266,7 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
     n = Int(1)
 
     #: Geometrical bounds of the search domain to consider.
-    #: `bounds` is a list that contains exactly three tuple of
+    #: :attr:`bounds` is a list that contains exactly three tuple of
     #: (min,max) for each of the coordinates x, y, z.
     #: Defaults to [(-1.,1.),(-1.,1.),(0.01,1.)]
     bounds = List(Tuple(Float, Float), minlen=3, maxlen=3, value=[(-1.0, 1.0), (-1.0, 1.0), (0.01, 1.0)])
