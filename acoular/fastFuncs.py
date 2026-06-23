@@ -106,8 +106,8 @@ def beamformerFreq(steerVecType, boolRemovedDiagOfCSM, normFactor, inputTupleSte
     *steer normalization factor [nGridPoints]... contains the values the autopower needs to be
     multiplied with, in order to fulfill 'steer^H * steer = 1' as needed for functional beamforming.
 
-    Some Notes on the optimization of all subroutines
-    -------------------------------------------------
+    Notes
+    -----
     Reducing beamforming equation:
         Let the csm be C and the steering vector be h, than, using Linear Albegra, the conventional
         beamformer can be written as
@@ -572,8 +572,8 @@ def calcPointSpreadFunction(steerVecType, distGridToArrayCenter, distGridToAllMi
     -------
     Autopower spectrum PSF map : [nFreqs, nGridPoints, nSources]
 
-    Some Notes on the optimization of all subroutines
-    -------------------------------------------------
+    Notes
+    -----
     Reducing beamforming equation:
         Let the steering vector be h. Then, the PSF of a SourcePoint S would be
 
