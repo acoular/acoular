@@ -77,7 +77,7 @@ Acoular makes use of the `Traits <https://docs.enthought.com/traits/traits_user_
     :end-at: metadata
 
 .. note::
-   The :class:`traits.traits.Trait`-inherited classes have a :attr:`~traits.traits.Trait.desc` attribute for trait description. In order to avoid clutter, this attribute should not be used and the Sphinx comment docstring with ``#:`` should be used instead.
+   The :func:`~traits.traits.Trait`-based attributes have a ``desc`` parameter for trait descriptions. In order to avoid clutter, this parameter should not be used and the Sphinx comment docstring with ``#:`` should be used instead.
 
 **Documenting public methods and functions**:
 
