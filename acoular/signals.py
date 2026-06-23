@@ -25,7 +25,7 @@ Implements signal generators for the simulation of acoustic sources.
 
 # imports from other packages
 from abc import abstractmethod
-from warnings import warn
+from warnings import warn as _warn
 
 # acoular imports
 from .base import SamplesGenerator
@@ -644,7 +644,7 @@ class GenericSignalGenerator(SignalGenerator):
         """
         block = 1024
         if self.source.num_channels > 1:
-            warn(
+            _warn(
                 'Signal source has more than one channel. Only channel 0 will be used for signal.',
                 Warning,
                 stacklevel=2,

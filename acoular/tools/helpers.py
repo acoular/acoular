@@ -17,7 +17,7 @@
 import http.client
 import urllib.parse
 from pathlib import Path
-from warnings import warn
+from warnings import warn as _warn
 
 from acoular.tools.utils import mole_fraction_of_water_vapor
 
@@ -79,7 +79,7 @@ def synthetic(data, freqs, f, num=3):
         for i in f:
             ind = np.searchsorted(freqs, i)
             if ind >= len(freqs):
-                warn(
+                _warn(
                     f'Queried frequency ({i:g} Hz) not in resolved frequency range. Returning zeros.',
                     Warning,
                     stacklevel=2,
@@ -87,7 +87,7 @@ def synthetic(data, freqs, f, num=3):
                 h = np.zeros_like(data[0])
             else:
                 if freqs[ind] != i:
-                    warn(
+                    _warn(
                         f'Queried frequency ({i:g} Hz) not in set of '
                         'discrete FFT sample frequencies. '
                         f'Using frequency {freqs[ind]:g} Hz instead.',
@@ -105,7 +105,7 @@ def synthetic(data, freqs, f, num=3):
             ind1 = np.searchsorted(freqs, f1)
             ind2 = np.searchsorted(freqs, f2)
             if ind1 == ind2:
-                warn(
+                _warn(
                     f'Queried frequency band ({f1:g} to {f2:g} Hz) does not '
                     'include any discrete FFT sample frequencies. '
                     'Returning zeros.',

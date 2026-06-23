@@ -35,7 +35,7 @@ Implements acoustic environments with and without flow.
 """
 
 from abc import abstractmethod
-from warnings import warn
+from warnings import warn as _warn
 
 from .internal import digest
 
@@ -129,7 +129,7 @@ def cartToCyl(x, Q=None):  # noqa: N802, N803
         Cylindrical representation of given `N` points in cartesian coodrinates as
         an array of shape `(3, N)` with new coordinates :math:`(\phi, r, z)`.
     """
-    warn('cartToCyl is deprecated and will be removed in version 27.01.', DeprecationWarning, stacklevel=2)
+    _warn('cartToCyl is deprecated and will be removed in version 27.01.', DeprecationWarning, stacklevel=2)
     Q = np.identity(3) if Q is None else Q
     if not (Q == np.identity(3)).all():  # noqa: SIM300
         x = Q @ x  # modified position vector
@@ -162,7 +162,7 @@ def cylToCart(x, Q=None):  # noqa: N802, N803
         Cartesian representation of given `N` points in cylindrical coodrinates as
         an array of shape `(3, N)` with coodinates :math:`(x, y, z)`.
     """
-    warn('cylToCart is deprecated and will be removed in version 27.01.', DeprecationWarning, stacklevel=2)
+    _warn('cylToCart is deprecated and will be removed in version 27.01.', DeprecationWarning, stacklevel=2)
     Q = np.identity(3) if Q is None else Q
     if not (Q == np.identity(3)).all():  # noqa: SIM300
         x = Q @ x  # modified position vector

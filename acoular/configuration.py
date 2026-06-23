@@ -13,7 +13,7 @@
 import importlib.util
 import sys
 from os import environ, mkdir, path
-from warnings import warn
+from warnings import warn as _warn
 
 # WARNING: DO NOT ADD ANY IMPORTS HERE THAT MIGHT IMPORT NUMPY
 
@@ -42,7 +42,7 @@ if 'numpy' in sys.modules:
         import numba as nb
 
         nb.set_num_threads(1)
-        warn(
+        _warn(
             'We detected that Numpy is already loaded and uses OpenBLAS. Because '
             'this conflicts with Numba parallel execution, we disable parallel '
             'execution for now and processing might be slower. To speed up, '

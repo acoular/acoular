@@ -41,7 +41,7 @@ import wave
 from abc import abstractmethod
 from datetime import UTC, datetime
 from os import path
-from warnings import warn
+from warnings import warn as _warn
 
 # acoular imports
 from .base import SamplesGenerator, TimeOut
@@ -411,7 +411,7 @@ class Trigger(TimeOut):  # pragma: no cover
     )
 
     def __init__(self, *args, **kwargs):
-        warn(
+        _warn(
             'Trigger is deprecated and will be removed in version 27.01.',
             DeprecationWarning,
             stacklevel=2,
@@ -470,7 +470,7 @@ class Trigger(TimeOut):  # pragma: no cover
         diffDist = abs(peakDist - meanDist)
         faultyInd = np.flatnonzero(diffDist > self.max_variation_of_duration * meanDist)
         if faultyInd.size != 0:
-            warn(
+            _warn(
                 f'In Trigger-Identification: The distances between the peaks (and therefore the lengths of the \
                 revolutions) vary too much (check samples {peakLoc[faultyInd] + self.source.start}).',
                 Warning,
@@ -510,7 +510,7 @@ class Trigger(TimeOut):  # pragma: no cover
             maxTriggerHelp = [minVal, maxVal] - meanVal
             argInd = np.argmax(abs(maxTriggerHelp))
             thresh = maxTriggerHelp[argInd] * 0.75  # 0.75 for 75% of max trigger signal
-            warn(f'No threshold was passed. An estimated threshold of {thresh} is assumed.', Warning, stacklevel=2)
+            _warn(f'No threshold was passed. An estimated threshold of {thresh} is assumed.', Warning, stacklevel=2)
         else:  # take user defined  threshold
             thresh = self.threshold
         return thresh
@@ -548,7 +548,7 @@ class Trigger(TimeOut):  # pragma: no cover
         A warning is issued, indicating that data is passed unprocessed.
         """
         msg = 'result method not implemented yet! Data from source will be passed without transformation.'
-        warn(msg, Warning, stacklevel=2)
+        _warn(msg, Warning, stacklevel=2)
         yield from self.source.result(num)
 
 
@@ -625,7 +625,7 @@ class AngleTracker(MaskedTimeOut):
     _angle = CArray()
 
     def __init__(self, *args, **kwargs):
-        warn(
+        _warn(
             'AngleTracker is deprecated and will be removed in version 27.01.',
             DeprecationWarning,
             stacklevel=2,
@@ -857,7 +857,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
     )
 
     def __init__(self, *args, **kwargs):
-        warn(
+        _warn(
             f'{self.__class__.__name__} is deprecated and will be removed in version 27.01.',
             DeprecationWarning,
             stacklevel=2,
@@ -1306,7 +1306,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
             a multiple of ``num``.
         """
         msg = 'result method not implemented yet! Data from source will be passed without transformation.'
-        warn(msg, Warning, stacklevel=2)
+        _warn(msg, Warning, stacklevel=2)
         yield from self.source.result(num)
 
 
@@ -2394,7 +2394,7 @@ class WriteWAV(TimeOut):
             data *= -dmin
         data = np.round(data)
         if data.min() < dmin or data.max() > dmax:
-            warn(
+            _warn(
                 f'Clipping occurred in WAV export. Data type {dtype} cannot represent all values in data. \
             Consider raising max_val.',
                 stacklevel=1,
@@ -2439,13 +2439,13 @@ class WriteWAV(TimeOut):
             msg = 'No channels given for output.'
             raise ValueError(msg)
         elif nc > 2:
-            warn(f'More than two channels given for output, exported file will have {nc:d} channels', stacklevel=1)
+            _warn(f'More than two channels given for output, exported file will have {nc:d} channels', stacklevel=1)
         if self.sample_freq.is_integer():
             fs = self.sample_freq
         else:
             fs = round(self.sample_freq)
             msg = f'Sample frequency {self.sample_freq} is not a whole number. Proceeding with sampling frequency {fs}.'
-            warn(msg, Warning, stacklevel=1)
+            _warn(msg, Warning, stacklevel=1)
         dtype, _, dmax, sw = self._type_info()
         if self.file == '':
             name = self.basename
