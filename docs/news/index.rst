@@ -77,16 +77,16 @@ Upcoming
 ------------------------
     **New features**
         * add :meth:`~acoular.grids.Grid`.export_gpos` to :class:`~acoular.grids.Grid`
-        * deprecates :meth:`~acoular.grids.RectGrid.extend` method in favour of :attr:`~acoular.grids.RectGrid.extent` property
+        * deprecates ``RectGrid.extend`` in favour of the ``RectGrid.extent`` property
         * reworked ``WriteWAV`` class that now also supports ``uint8`` and ``int32`` encoding, adds a ``max_val`` attribute for normalization purposes, and avoids unnecessary double calculations
 
     **Documentation**
         * generalizes data import in the airfoil examples using the :func:`~acoular.tools.helpers.get_data_file` helper function
         * add a new example for grids
-        * changes all appearances of :meth:`~acoular.grids.RectGrid.extend` to :attr:`~acoular.grids.RectGrid.extent`
+        * changes all appearances of ``RectGrid.extend`` to ``RectGrid.extent``
         * introduces a deprecation policy in the contributing guidelines
         * adds new docstrings to submodule :mod:`acoular.tprocess`
-        * adds new docstrings to submodule :mod:`acoular.h5cache` and :mod:`acoular.h5files`
+        * adds new docstrings to submodules ``acoular.h5cache`` and ``acoular.h5files``
         * fix docstrings in submodule :mod:`acoular.fbeamform` to fulfill linting rules
 
     **Tests**
@@ -163,7 +163,7 @@ Upcoming
         * use `pytest-cases` to separate parameters from tests (cases are located under `tests/cases`)
         * full coverage of `sdinput.py` module through the use of `pytest-mock` (mocks the behavior of an `InputStream` object, which cannot be used for CI due to missing audio interfaces)
         * linting and formatting for tests directory
-        * refactor :class:`~acoular.h5cache.HDF5Cache` class due to a bug encountered with the new tests (`acoular` now can handle changing caching directories during a session. Previously, only the basename was observed which caused problems with changing cache directories)
+        * refactor ``acoular.h5cache.HDF5Cache`` due to a bug encountered with the new tests (`acoular` now can handle changing caching directories during a session. Previously, only the basename was observed which caused problems with changing cache directories)
         * tests now log the 10 slowest test runs
         * adds `profile` options to hatch test environment to profile test run via `hatch run tests:profile` and save a `graphviz` chart as SVG file
         * test AIAA benchmark classes with the benchmark data
@@ -193,15 +193,15 @@ Upcoming
             * Introduces new `acoular.base` module with abstract base classes :class:`~acoular.base.Generator`, :class:`~acoular.base.SpectraGenerator`, :class:`~acoular.base.InOut`, :class:`~acoular.base.TimeOut`, :class:`~acoular.base.SpectraOut`
             * Introduces new module `acoular.fprocess` including new frequency domain processing classes :class:`~acoular.fprocess.RFFT`, :class:`~acoular.fprocess.IRFFT`, :class:`~acoular.fprocess.AutoPowerSpectra` and :class:`~acoular.fprocess.CrossPowerSpectra`
             * Introduces new module `acoular.process` including the following classes for general purpose (domain invariant) processing: :class:`~acoular.process.Cache`, :class:`~acoular.process.Average`, :class:`~acoular.process.SampleSplitter`
-            * Rename :class:`~acoular.tprocess.MaskedTimeInOut` to :class:`~acoular.tprocess.MaskedTimeOut`
-            * Deprecates: :class:`~acoular.base.TimeInOut`, :class:`~acoular.fprocess.FFTSpectra`, :class:`~acoular.process.TimeAverage`, :class:`~acoular.tprocess.MaskedTimeInOut`, :class:`~acoular.process.TimeCache`
+            * Rename ``acoular.tprocess.MaskedTimeInOut`` to :class:`~acoular.tprocess.MaskedTimeOut`
+            * Deprecates: ``acoular.base.TimeInOut``, ``acoular.fprocess.FFTSpectra``, ``acoular.process.TimeAverage``, ``acoular.tprocess.MaskedTimeInOut``, ``acoular.process.TimeCache``
             * adds unittests `test_process.py`, `test_fprocess.py`
             * adds documentation example `example_fft.py`
                 * allow more platforms to build the docs files including Linux, MacOS, and Windows
             * move submodule `acoular.tools.aiaa` to `acoular.aiaa`
 
     **Bugfixes**
-        * flush file in :class:`~acoular.tprocess.TimeCache` to prevent data loss / corruption
+        * flush file in ``acoular.tprocess.TimeCache`` to prevent data loss / corruption
         * fixes use of already deprecated traits
         * fixes import order to avoid the deactivation of parallelization of numba
         * fixes numpy.matlib deprecation warning
@@ -288,7 +288,7 @@ Upcoming
         * speedups through the use of `numpy.einsum_path` together with `numpy.einsum`
         * changed start value `pgtol` for the optimization with `scipy.optimize.fmin_l_bfgs_b` solver
     * Bugfixes:
-        * fixes unrecognized sector arguments in :class:`~acoular.tools.MetricEvaluator`
+        * fixes unrecognized sector arguments in :class:`~acoular.tools.metrics.MetricEvaluator`
         * handles version-dependent default values for `normalize` attribute in sklearn solvers (relevant for :class:`~acoular.fbeamform.BeamformerCMF` )
         * fixes bug in :class:`~acoular.fbeamform.BeamformerOrth`: assigned strongest source at grid index 0 when instead of `eva_list` the trait `n` was given
         * fixes broken :class:`~acoular.tprocess.SpatialInterpolator`
@@ -302,7 +302,7 @@ Upcoming
 
 23.11
 ------------
-    * New class :class:`~acoular.tools.MetricEvaluator` to evaluate the performance of source mapping methods according to Herold and Sarradj (2017)
+    * New class :class:`~acoular.tools.metrics.MetricEvaluator` to evaluate the performance of source mapping methods according to Herold and Sarradj (2017)
     * New class :class:`~acoular.sources.PointSourceConvolve` to blockwise convolve an arbitrary source signal with a spatial room impulse response
     * All filter classes derived from :class:`~acoular.tprocess.Filter` use SOS filters now
     * No more version restrictions for scikit-learn
@@ -312,7 +312,7 @@ Upcoming
     * Some internal rework in grid and sector classes
     * Test coverage is improved
     * Bugfixes:
-        * minor bugfix for convective amplification in :class:`~acoular.tbeamform.BeamformerCleantTraj` and :class:`~acoular.tbeamform.BeamformerCleantTrajSq`
+        * minor bugfix for convective amplification in :class:`~acoular.tbeamform.BeamformerCleantTraj` and :class:`~acoular.tbeamform.BeamformerCleantSqTraj`
         * bugfix in some attributes of :class:`~acoular.grids.ImportGrid`
 
 23.6
@@ -325,7 +325,7 @@ Upcoming
     * Improved ray casting implementation for :class:`~acoular.environments.GeneralFlowEnvironment`
     * Improved handling of spectra calculation:
         * New base class :class:`~acoular.spectra.BaseSpectra`
-        * New class :class:`~acoular.fprocess.FFTSpectra` for time-frequency analysis
+        * New class ``acoular.fprocess.FFTSpectra`` for time-frequency analysis
         * New class :class:`~acoular.spectra.PowerSpectraImport` for cross spectral matrix import
     * :class:`~acoular.microphones.MicGeom` now has an aperture trait
     * Tests are improved
@@ -336,7 +336,7 @@ Upcoming
 
 22.3
 ------------
-    * New class :class:`~acoular.fbeamform.BeamformerSodix`
+    * New class :class:`~acoular.fbeamform.BeamformerSODIX`
     * New SplitBregman and FISTA solvers in :class:`~acoular.fbeamform.BeamformerCMF`
     * IDW is now available for virtual rotation
     * different steering vector formulations are now available for time beamformers as well
