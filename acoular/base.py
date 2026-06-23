@@ -4,8 +4,8 @@
 """Implements base classes for signal processing blocks in Acoular.
 
 The classes in this module are abstract base classes that provide a common interface for all classes
-that generate an output via the generator :meth:`result` in block-wise manner. They are not intended
-to be used directly, but to be subclassed by classes that implement the actual signal processing.
+that generate an output via the ``result`` generator in block-wise manner. They are not intended to
+be used directly, but to be subclassed by classes that implement the actual signal processing.
 
 .. inheritance-diagram::
                 acoular.base
@@ -162,11 +162,11 @@ class SpectraGenerator(Generator):
 
 class TimeOut(SamplesGenerator):
     """
-    Abstract base class receiving from a :attr:`source` and returning time domain signals.
+    Abstract base class receiving from a ``source`` and returning time domain signals.
 
     It provides a base class that can be used to create signal processing blocks that receive data
-    from any generating :attr:`source` and generates a time signal output via the generator
-    :meth:`result` in block-wise manner.
+    from any generating :attr:`source` and generates a time signal output via the :meth:`result`
+    generator in block-wise manner.
     """
 
     #: Data source; :class:`~acoular.base.Generator` or derived object.
@@ -209,11 +209,11 @@ class TimeOut(SamplesGenerator):
 
 class SpectraOut(SpectraGenerator):
     """
-    Abstract base class receiving from a :attr:`source` and returning frequency domain signals.
+    Abstract base class receiving from a ``source`` and returning frequency domain signals.
 
     It provides a base class that can be used to create signal processing blocks that receive data
     from any generating :attr:`source` domain and generates a frequency domain output via the
-    generator :meth:`result` in block-wise manner.
+    :meth:`result` generator in block-wise manner.
     """
 
     #: Data source; :class:`~acoular.base.Generator` or derived object.
@@ -263,10 +263,10 @@ class SpectraOut(SpectraGenerator):
 
 class InOut(SamplesGenerator, SpectraGenerator):
     """
-    Abstract base class receiving from a :attr:`source` and returning signals in the same domain.
+    Abstract base class receiving from a ``source`` and returning signals in the same domain.
 
     It provides a base class that can be used to create signal processing blocks that receive data
-    from any generating :attr:`source` and generates an output via the generator :meth:`result` in
+    from any generating :attr:`source` and generates an output via the :meth:`result` generator in
     block-wise manner.
     """
 

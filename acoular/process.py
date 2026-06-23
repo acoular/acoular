@@ -16,7 +16,7 @@ General purpose blockwise processing methods independent of the domain (time or 
 import threading
 from collections import deque
 from inspect import currentframe
-from warnings import warn
+from warnings import warn as _warn
 
 # acoular imports
 from .base import Generator, InOut
@@ -97,7 +97,7 @@ class Average(InOut):
     1.9985200025816718
 
     Here, each evaluation of the generator created by the :meth:`result` method of the
-    :class:`Average` object via the :meth:`next` function returns :code:`num=1` average across a
+    :class:`Average` object via the :func:`next` function returns :code:`num=1` average across a
     snapshot of 512 time samples.
 
     If the source is a frequency domain source, the average is calculated over a certain number
@@ -360,7 +360,7 @@ class Cache(InOut):
                         generator = self._get_data_from_incomplete_cache
                 elif not self._h5f.get_data_by_reference(nodename).attrs['complete']:
                     if config.global_caching == 'readonly':
-                        warn(
+                        _warn(
                             f"Cache file is incomplete for nodename {nodename}. With config.global_caching='readonly', \
                             the cache file will not be used!",
                             Warning,
@@ -524,7 +524,7 @@ class SampleSplitter(InOut):
                 if self.buffer_overflow_treatment[obj] == 'error':
                     self._buffer_overflow = True
                 elif self.buffer_overflow_treatment[obj] == 'warning':
-                    warn(f'overfilled buffer for object: {obj} data will get lost', UserWarning, stacklevel=1)
+                    _warn(f'overfilled buffer for object: {obj} data will get lost', UserWarning, stacklevel=1)
 
     def _create_source_generator(self, num):
         for obj in self.block_buffer:
@@ -560,7 +560,7 @@ class SampleSplitter(InOut):
             The maximum number of data blocks each object's buffer can hold. If not specified,
             the default buffer size (100 blocks) is used, or a globally defined size if
             ``buffer_size`` is a dictionary.
-        buffer_overflow_treatment : :attr:`str`, optional
+        buffer_overflow_treatment : :class:`str`, optional
             Defines the behavior when a buffer exceeds its maximum size. Options are:
 
             - ``'error'``: Raises an :obj:`IOError` when the buffer overflows.

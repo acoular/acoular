@@ -8,7 +8,7 @@ Acoular requires a high standard of code quality, and we test if these requireme
 Currently, three main checks are performed on the code:
 
 1. `Linting and Formatting`_: The code must be correctly formatted and free of linting errors.
-2. `Documentation Build`_: The documentation must be buildable without errors.
+2. `Documentation Compilation`_: The documentation must be buildable without errors.
 3. `Testing`_: The unit and regression tests must pass without errors.
 
 We recommend running these checks before submitting a pull request. This can be done locally or on a GitHub runner. 
@@ -31,11 +31,12 @@ In case there are any reported errors, you can either fix them manually or try t
 
 .. include:: ../commands/ruff-fix.rst
 
-The ``ruff`` configuration can be found in:
+The ``ruff`` configuration can be found in ``pyproject.toml``:
 
-.. dropdown::  ``.ruff.toml`` (click to expand)
+.. dropdown::  ``[tool.ruff]`` in ``pyproject.toml`` (click to expand)
 
-  .. literalinclude:: /../.ruff.toml
+  .. literalinclude:: /../pyproject.toml
+     :start-after: [tool.ruff]
 
 .. _Documentation Compilation:
 

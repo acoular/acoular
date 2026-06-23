@@ -41,7 +41,7 @@ import wave
 from abc import abstractmethod
 from datetime import UTC, datetime
 from os import path
-from warnings import warn
+from warnings import warn as _warn
 
 # acoular imports
 from .base import SamplesGenerator, TimeOut
@@ -87,7 +87,7 @@ class MaskedTimeOut(TimeOut):
     A signal processing block that allows for the selection of specific channels and time samples.
 
     The :class:`MaskedTimeOut` class is designed to filter data from a given
-    :class:`~acoular.sources.SamplesGenerator` (or a derived object) by defining valid time samples
+    :class:`~acoular.base.SamplesGenerator` (or a derived object) by defining valid time samples
     and excluding specific channels. It acts as an intermediary between the data source and
     subsequent processing steps, ensuring that only the selected portion of the data is passed
     along.
@@ -239,7 +239,7 @@ class ChannelMixer(TimeOut):
     A signal processing block that mixes multiple input channels into a single output channel.
 
     The :class:`ChannelMixer` class takes a multi-channel signal from a
-    :class:`~acoular.sources.SamplesGenerator` (or a derived object) and applies an optional set of
+    :class:`~acoular.base.SamplesGenerator` (or a derived object) and applies an optional set of
     amplitude weights to each channel. The resulting weighted sum is then output as a single-channel
     signal.
 
@@ -411,7 +411,7 @@ class Trigger(TimeOut):  # pragma: no cover
     )
 
     def __init__(self, *args, **kwargs):
-        warn(
+        _warn(
             'Trigger is deprecated and will be removed in version 27.01.',
             DeprecationWarning,
             stacklevel=2,
@@ -470,7 +470,7 @@ class Trigger(TimeOut):  # pragma: no cover
         diffDist = abs(peakDist - meanDist)
         faultyInd = np.flatnonzero(diffDist > self.max_variation_of_duration * meanDist)
         if faultyInd.size != 0:
-            warn(
+            _warn(
                 f'In Trigger-Identification: The distances between the peaks (and therefore the lengths of the \
                 revolutions) vary too much (check samples {peakLoc[faultyInd] + self.source.start}).',
                 Warning,
@@ -510,7 +510,7 @@ class Trigger(TimeOut):  # pragma: no cover
             maxTriggerHelp = [minVal, maxVal] - meanVal
             argInd = np.argmax(abs(maxTriggerHelp))
             thresh = maxTriggerHelp[argInd] * 0.75  # 0.75 for 75% of max trigger signal
-            warn(f'No threshold was passed. An estimated threshold of {thresh} is assumed.', Warning, stacklevel=2)
+            _warn(f'No threshold was passed. An estimated threshold of {thresh} is assumed.', Warning, stacklevel=2)
         else:  # take user defined  threshold
             thresh = self.threshold
         return thresh
@@ -548,7 +548,7 @@ class Trigger(TimeOut):  # pragma: no cover
         A warning is issued, indicating that data is passed unprocessed.
         """
         msg = 'result method not implemented yet! Data from source will be passed without transformation.'
-        warn(msg, Warning, stacklevel=2)
+        _warn(msg, Warning, stacklevel=2)
         yield from self.source.result(num)
 
 
@@ -625,7 +625,7 @@ class AngleTracker(MaskedTimeOut):
     _angle = CArray()
 
     def __init__(self, *args, **kwargs):
-        warn(
+        _warn(
             'AngleTracker is deprecated and will be removed in version 27.01.',
             DeprecationWarning,
             stacklevel=2,
@@ -857,7 +857,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
     )
 
     def __init__(self, *args, **kwargs):
-        warn(
+        _warn(
             f'{self.__class__.__name__} is deprecated and will be removed in version 27.01.',
             DeprecationWarning,
             stacklevel=2,
@@ -1306,7 +1306,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
             a multiple of ``num``.
         """
         msg = 'result method not implemented yet! Data from source will be passed without transformation.'
-        warn(msg, Warning, stacklevel=2)
+        _warn(msg, Warning, stacklevel=2)
         yield from self.source.result(num)
 
 
@@ -1739,7 +1739,7 @@ class TimeReverse(TimeOut):
 
 class Filter(TimeOut):
     """
-    Abstract base class for IIR filters using SciPy's :func:`~scipy.signal.lfilter`.
+    Abstract base class for IIR filters using SciPy's :func:`~scipy.signal.sosfilt`.
 
     This class implements a digital Infinite Impulse Response (IIR) filter that applies filtering to
     a given signal in a block-wise manner. The filter coefficients can be dynamically changed during
@@ -1747,13 +1747,10 @@ class Filter(TimeOut):
 
     See Also
     --------
-    :func:`scipy.signal.lfilter` :
-        Filter data along one-dimension with an IIR or FIR (finite impulse response) filter.
-    :func:`scipy.signal.sosfilt` :
-        Filter data along one dimension using cascaded second-order sections.
     :class:`FiltOctave` :
         Octave or third-octave bandpass filter (causal, with non-zero phase delay).
-    :class:`FiltFiltOctave` : Octave or third-octave bandpass filter with zero-phase distortion.
+    :class:`FiltFiltOctave` :
+        Octave or third-octave bandpass filter with zero-phase distortion.
     """
 
     #: The input data source. It must be an instance of a
@@ -2094,7 +2091,8 @@ class FiltFreqWeight(Filter):
     weight = Enum('A', 'C', 'Z')
 
     #: Second-order sections (SOS) representation of the filter coefficients. This property is
-    #: dynamically computed based on :attr:`weight` and the :attr:`Filter.source`'s digest.
+    #: dynamically computed based on :attr:`weight` and the
+    #: :attr:`~acoular.tprocess.Filter.source`'s digest.
     sos = Property(depends_on=['weight', 'source.digest'])
 
     #: A unique identifier for the filter, based on its properties. (read-only)
@@ -2169,7 +2167,7 @@ class FiltFreqWeight(Filter):
 
 class FilterBank(TimeOut):
     """
-    Abstract base class for IIR filter banks based on :mod:`scipy.signal.lfilter`.
+    Abstract base class for IIR filter banks based on SOS coefficients.
 
     Implements a bank of parallel filters. This class should not be instantiated by itself.
 
@@ -2396,7 +2394,7 @@ class WriteWAV(TimeOut):
             data *= -dmin
         data = np.round(data)
         if data.min() < dmin or data.max() > dmax:
-            warn(
+            _warn(
                 f'Clipping occurred in WAV export. Data type {dtype} cannot represent all values in data. \
             Consider raising max_val.',
                 stacklevel=1,
@@ -2441,13 +2439,13 @@ class WriteWAV(TimeOut):
             msg = 'No channels given for output.'
             raise ValueError(msg)
         elif nc > 2:
-            warn(f'More than two channels given for output, exported file will have {nc:d} channels', stacklevel=1)
+            _warn(f'More than two channels given for output, exported file will have {nc:d} channels', stacklevel=1)
         if self.sample_freq.is_integer():
             fs = self.sample_freq
         else:
             fs = round(self.sample_freq)
             msg = f'Sample frequency {self.sample_freq} is not a whole number. Proceeding with sampling frequency {fs}.'
-            warn(msg, Warning, stacklevel=1)
+            _warn(msg, Warning, stacklevel=1)
         dtype, _, dmax, sw = self._type_info()
         if self.file == '':
             name = self.basename
@@ -2518,8 +2516,6 @@ class WriteH5(TimeOut):
         ABC for signal processing blocks interacting with data from a source.
     :class:`~acoular.base.SamplesGenerator` :
         Interface for generating multi-channel time-domain signal processing blocks.
-    h5py :
-        Python library for reading and writing HDF5 files.
     """
 
     #: The input data source. It must be an instance of a
@@ -2571,7 +2567,7 @@ class WriteH5(TimeOut):
 
         Returns
         -------
-        :class:`h5py.File`
+        `h5py.File`
             The initialized HDF5 file object ready for data insertion.
         """
         file = _get_h5file_class()
@@ -2611,7 +2607,7 @@ class WriteH5(TimeOut):
 
         Parameters
         ----------
-        f5h : :obj:`h5py.File`
+        f5h : `h5py.File`
             The HDF5 file object to which metadata will be added.
         """
         nitems = len(self.metadata.items())

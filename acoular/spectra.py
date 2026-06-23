@@ -212,7 +212,7 @@ class PowerSpectra(BaseSpectra):
     ind_low = Property(_ind_low)
 
     #: Index of highest frequency line to compute. Default is ``-1``
-    #: (last possible line for default :attr:`~BaseSpectra.block_size`).
+    #: (last possible line for default :attr:`~acoular.spectra.BaseSpectra.block_size`).
     ind_high = Property(_ind_high)
 
     # Stores the set lower frequency, for internal use, should not be set directly.
@@ -230,7 +230,8 @@ class PowerSpectra(BaseSpectra):
     cached = Bool(True)
 
     #: The number of FFT blocks used for averaging. This is derived from the
-    #: :attr:`~BaseSpectra.block_size` and :attr:`~BaseSpectra.overlap` parameters. (read-only)
+    #: :attr:`~acoular.spectra.BaseSpectra.block_size` and
+    #: :attr:`~acoular.spectra.BaseSpectra.overlap` parameters. (read-only)
     num_blocks = Property()
 
     #: 2-element array with the lowest and highest frequency. If the higher frequency is larger than
@@ -247,7 +248,8 @@ class PowerSpectra(BaseSpectra):
     basename = Property(depends_on=['source.digest'])
 
     #: The cross-spectral matrix, represented as an array of shape ``(n, m, m)`` of complex values
-    #: for ``n`` frequencies and ``m`` channels as in :attr:`~BaseSpectra.num_channels`. (read-only)
+    #: for ``n`` frequencies and ``m`` channels as in
+    #: :attr:`~acoular.spectra.BaseSpectra.num_channels`. (read-only)
     csm = Property()
 
     #: The eigenvalues of the CSM, stored as an array of shape ``(n,)`` of floats for ``n``
@@ -255,8 +257,8 @@ class PowerSpectra(BaseSpectra):
     eva = Property()
 
     #: The eigenvectors of the cross spectral matrix, stored as an array of shape ``(n, m, m)`` of
-    #: floats for ``n`` frequencies and ``m`` channels as in :attr:`~BaseSpectra.num_channels`.
-    #: (read-only)
+    #: floats for ``n`` frequencies and ``m`` channels as in
+    #: :attr:`~acoular.spectra.BaseSpectra.num_channels`. (read-only)
     eve = Property()
 
     #: A unique identifier for the spectra, based on its properties.  (read-only)
@@ -350,7 +352,8 @@ class PowerSpectra(BaseSpectra):
         -------
         :obj:`numpy.ndarray`
             The computed cross spectral matrix as an array of shape ``(n, m, m)`` of complex values
-            for ``n`` frequencies and ``m`` channels as in :attr:`~BaseSpectra.num_channels`.
+            for ``n`` frequencies and ``m`` channels as in
+            :attr:`~acoular.spectra.BaseSpectra.num_channels`.
 
         Examples
         --------
@@ -404,9 +407,9 @@ class PowerSpectra(BaseSpectra):
 
         Notes
         -----
-        - The precision of the eigenvalues is determined by :attr:`~BaseSpectra.precision`
-          (``'float64'`` for ``complex128`` precision and ``'float32'`` for ``complex64``
-          precision).
+        - The precision of the eigenvalues is determined by
+          :attr:`~acoular.spectra.BaseSpectra.precision` (``'float64'`` for ``complex128`` precision
+          and ``'float32'`` for ``complex64`` precision).
         - This method assumes the CSM is already computed and accessible via :attr:`csm`.
 
         Examples
@@ -444,8 +447,9 @@ class PowerSpectra(BaseSpectra):
         -------
         :obj:`numpy.ndarray`
             A 2D array of shape ``(n, m)`` containing the eigenvalues for ``n`` frequencies and
-            ``m`` channels. The datatype depends on :attr:`~BaseSpectra.precision` (``'float64'``
-            for ``complex128`` precision and ``'float32'`` for ``complex64`` precision).
+            ``m`` channels. The datatype depends on :attr:`~acoular.spectra.BaseSpectra.precision`
+            (``'float64'`` for ``complex128`` precision and ``'float32'`` for ``complex64``
+            precision).
 
         Notes
         -----
@@ -464,8 +468,9 @@ class PowerSpectra(BaseSpectra):
         :obj:`numpy.ndarray`
             A 3D array of shape ``(n, m, m)`` containing the eigenvectors for ``n`` frequencies and
             ``m`` channels. Each slice ``eve[f]`` represents an ``(m, m)`` matrix of eigenvectors
-            for frequency ``f``. The datatype matches the :attr:`~BaseSpectra.precision` of the CSM
-            (``complex128`` or ``complex64``).
+            for frequency ``f``. The datatype matches the
+            :attr:`~acoular.spectra.BaseSpectra.precision` of the CSM (``complex128`` or
+            ``complex64``).
 
         Notes
         -----
@@ -620,7 +625,8 @@ class PowerSpectraImport(PowerSpectra):
     #: Number of time data channels, inferred from the shape of the CSM.
     num_channels = Property(depends_on=['digest'])
 
-    #: :class:`PowerSpectraImport` does not consume time data; source is always ``None``.
+    #: :class:`~acoular.spectra.PowerSpectraImport` does not consume time data;
+    #: source is always ``None``.
     source = Enum(None)
 
     #: Sampling frequency of the signal. Default is ``None``

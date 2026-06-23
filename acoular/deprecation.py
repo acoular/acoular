@@ -9,7 +9,7 @@
     deprecated_alias
 """
 
-from warnings import warn
+from warnings import warn as _warn
 
 from traits.api import Property
 
@@ -50,14 +50,14 @@ def deprecated_alias(old2new, read_only=False, removal_version=''):
             msg = f"Deprecated use of '{old}' trait{trait_removal_version}. Please use the '{new}' trait instead."
 
             def getter(cls):
-                warn(msg, DeprecationWarning, stacklevel=2)
+                _warn(msg, DeprecationWarning, stacklevel=2)
                 return getattr(cls, new)
 
             if trait_read_only:
                 return (getter,)
 
             def setter(cls, value):
-                warn(msg, DeprecationWarning, stacklevel=2)
+                _warn(msg, DeprecationWarning, stacklevel=2)
                 setattr(cls, new, value)
 
             return (getter, setter)

@@ -33,7 +33,7 @@ Measured multichannel data management and simulation of acoustic sources.
 # imports from other packages
 
 import contextlib
-from warnings import warn
+from warnings import warn as _warn
 
 from .base import SamplesGenerator
 
@@ -722,7 +722,7 @@ class PointSource(SamplesGenerator):
     def _validate_locations(self):
         dist = self.env._r(self.loc, self.mics.pos)
         if np.any(dist < 1e-7):
-            warn('Source and microphone locations are identical.', Warning, stacklevel=2)
+            _warn('Source and microphone locations are identical.', Warning, stacklevel=2)
 
     #: An :class:`~acoular.environments.Environment` or derived object providing sound propagation
     #: details, such as :attr:`speed of sound in the medium<acoular.environments.Environment.c>`.
@@ -898,8 +898,8 @@ class SphericalHarmonicSource(PointSource):
         Parameters
         ----------
         signals : :class:`numpy.ndarray`
-            Input signal array of shape (:attr:`~PointSouce.num_samples`,
-            :attr:`~PointSouce.num_channels`).
+            Input signal array of shape (:attr:`~acoular.sources.PointSource.num_samples`,
+            :attr:`~acoular.sources.PointSource.num_channels`).
 
         Returns
         -------
@@ -1028,7 +1028,7 @@ class MovingPointSource(PointSource):
 
         This method computes the updated direction vector for the moving source, considering both
         translation along the :attr:`~MovingPointSource.trajectory` and rotation defined by the
-        :attr:`reference vector<rvec>`. If the :attr:`reference vector<rvec>` is `(0, 0, 0)`, only
+        ``rvec`` attribute. If ``rvec`` is `(0, 0, 0)`, only
         translation is applied. Otherwise, the method incorporates rotation into the calculation.
 
         Parameters
@@ -1049,9 +1049,9 @@ class MovingPointSource(PointSource):
         -----
         - The method computes the translation direction vector based on the
           :attr:`~MovingPointSource.trajectory`'s velocity at the specified time.
-        - If the :attr:`reference vector<rvec>` is non-zero, the method constructs a rotation matrix
+        - If the ``rvec`` attribute is non-zero, the method constructs a rotation matrix
           to compute the new source direction based on the
-          :attr:`~MovingPointSource.trajectory`'s motion and the :attr:`reference vector<rvec>`.
+          :attr:`~MovingPointSource.trajectory`'s motion and the ``rvec`` attribute.
         - The rotation matrix ensures that the new orientation adheres to the right-hand rule and
           remains orthogonal.
         """
