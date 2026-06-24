@@ -73,7 +73,7 @@ Contents:
 
     * - :doc:`contributing/index`
 
-      - Information on how to contribute to the development of Acoular.
+      - Shared organization-level contribution guidance, plus Acoular-specific development notes.
 
     * - :doc:`literature/index` 
 
