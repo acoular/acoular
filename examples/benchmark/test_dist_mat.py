@@ -3,6 +3,7 @@
 # ------------------------------------------------------------------------------
 
 import acoular as ac
+
 import numpy as np
 
 # assume 64 microphones and 2048 grid points

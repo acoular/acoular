@@ -20,6 +20,7 @@ Four different methods are compared:
 """
 
 import acoular as ac
+
 import matplotlib.pyplot as plt
 import numpy as np
 

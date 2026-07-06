@@ -11,29 +11,43 @@ jobs:
     with:
       deploy: true
 
-  docs_build:
+  docs_build_versioned:
     uses: acoular/ci/.github/workflows/docs.yml@main
+    with:
+      artifact_name: build-docs-versioned
+      artifact_path: ./docs/_build/html
+      html_baseurl: "https://acoular.org/acoular/${{ github.ref_name }}/"
 
-  docs_publish:
-    needs: docs_build
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@v7
-        with:
-          name: build-docs
-          path: ./docs/build/html
-      - name: Upload docs to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          publish_branch: gh-pages
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs/build/html
-          cname: www.acoular.org
-          force_orphan: true # This allows you to make your publish branch with only the latest commit.
-          enable_jekyll: false
+  docs_build_stable:
+    uses: acoular/ci/.github/workflows/docs.yml@main
+    with:
+      artifact_name: build-docs-stable
+      artifact_path: ./docs/_build/html
+      html_baseurl: "https://acoular.org/acoular/"
+
+  docs_deploy_versioned:
+    needs: docs_build_versioned
+    uses: acoular/ci/.github/workflows/package-docs-deploy.yml@main
+    with:
+      artifact_name: build-docs-versioned
+      artifact_path: ./docs/_build/versioned-html
+      destination_dir: acoular/${{ github.ref_name }}
+      package_path: /acoular
+      min_version: v26.01
+      deploy_switcher: true
+      switcher_destination_dir: acoular/_static
+    secrets:
+      website_gh_pages_token: ${{ secrets.WEBSITE_GH_PAGES_TOKEN }}
+
+  docs_deploy_stable:
+    needs: docs_build_stable
+    uses: acoular/ci/.github/workflows/package-docs-deploy.yml@main
+    with:
+      artifact_name: build-docs-stable
+      artifact_path: ./docs/_build/stable-html
+      destination_dir: acoular
+    secrets:
+      website_gh_pages_token: ${{ secrets.WEBSITE_GH_PAGES_TOKEN }}
 
   pypi_build:
     uses: acoular/ci/.github/workflows/pypi.yml@main

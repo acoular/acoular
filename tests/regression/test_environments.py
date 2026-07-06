@@ -4,11 +4,12 @@
 """Implements testing of environments and flows."""
 
 import acoular as ac
+
+from tests.cases.test_environments_cases import Environments, Flows
+
 import numpy as np
 import pytest
 from pytest_cases import parametrize_with_cases
-
-from tests.cases.test_environments_cases import Environments, Flows
 
 GRID = ac.RectGrid3D(x_min=-0.2, x_max=0.2, y_min=-0.2, y_max=0.2, z_min=0.5, z_max=0.9, increment=0.2)
 MICS = ac.MicGeom(pos_total=((0.5, 0.5, 0), (0, 0, 0), (-0.5, -0.5, 0)))

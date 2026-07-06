@@ -4,6 +4,7 @@
 """Test cases for buffer utility."""
 
 import acoular as ac
+
 import numpy as np
 import pytest
 

@@ -6,12 +6,13 @@
 import warnings
 
 import acoular as ac
-import numpy as np
-import pytest
-from pytest_cases import case, get_case_id, parametrize, parametrize_with_cases
 
 from tests.cases.test_grid_cases import Sectors
 from tests.utils import get_subclasses
+
+import numpy as np
+import pytest
+from pytest_cases import case, get_case_id, parametrize, parametrize_with_cases
 
 SKIP_DEFAULT = [
     ac.Generator,
@@ -48,6 +49,8 @@ SKIP_DEFAULT = [
     ac.SampleSplitter,
     ac.SoundDeviceSamplesGenerator,
     ac.PointSourceConvolve,
+    ac.Trigger,
+    ac.AngleTracker,
     ac.SpatialInterpolator,
     ac.SpatialInterpolatorConstantRotation,
     ac.SpatialInterpolatorRotation,
@@ -187,7 +190,11 @@ class Generators:
 
     @parametrize('method', ['linear', 'spline', 'rbf-multiquadric', 'rbf-cubic', 'IDW', 'custom', 'sinc'])
     def case_SpatialInterpolator(self, moving_source_case, method):
-        return ac.SpatialInterpolator(mics=moving_source_case.mics, source=moving_source_case.source, method=method)
+        import warnings
+
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', DeprecationWarning)
+            return ac.SpatialInterpolator(mics=moving_source_case.mics, source=moving_source_case.source, method=method)
 
     def case_WriteH5(self, time_data_source, tmp_path):
         return ac.WriteH5(source=time_data_source, file=tmp_path / 'test.h5')

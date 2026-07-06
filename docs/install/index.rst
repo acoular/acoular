@@ -1,6 +1,6 @@
 Install Acoular
 ===============
-Acoular runs under 64-bit Linux, MacOS and Windows. It currently supports Python 3.10, 3.11, 3.12 and 3.13.
+Acoular runs under 64-bit Linux, MacOS and Windows. It currently supports Python 3.11, 3.12, 3.13 and 3.14.
 
 Tools
 -----
@@ -50,7 +50,7 @@ Package                                                           Needed for
 
 When installing Acoular from PyPI, Acoular and all optional dependencies can be installed with the ``full`` extra:
 
-.. literalinclude:: /../../pyproject.toml
+.. literalinclude:: /../pyproject.toml
     :start-at: [project.optional-dependencies]
     :end-before: [dependency-groups]
                  

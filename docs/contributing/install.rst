@@ -36,7 +36,7 @@ The ``--group dev`` argument is responsible for installing the corresponding dep
 
 .. dropdown:: ``pyproject.toml`` (click to expand)
 
-  .. literalinclude:: /../../pyproject.toml
+  .. literalinclude:: /../pyproject.toml
       :start-at: [dependency-groups]
       :end-before: [project.urls]
 

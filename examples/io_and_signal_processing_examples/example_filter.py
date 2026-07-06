@@ -13,6 +13,7 @@ Demonstrates band pass filter characteristics and shows
 """
 
 import acoular as ac
+
 import matplotlib.pyplot as plt
 import numpy as np
 

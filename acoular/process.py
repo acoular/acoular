@@ -16,10 +16,7 @@ General purpose blockwise processing methods independent of the domain (time or 
 import threading
 from collections import deque
 from inspect import currentframe
-from warnings import warn
-
-import numpy as np
-from traits.api import Any, Array, Bool, Dict, Enum, Instance, Int, Property, Union, cached_property, observe
+from warnings import warn as _warn
 
 # acoular imports
 from .base import Generator, InOut
@@ -28,6 +25,9 @@ from .h5cache import H5cache
 from .h5files import H5CacheFileBase
 from .internal import digest
 from .tools.utils import find_basename
+
+import numpy as np
+from traits.api import Any, Array, Bool, Dict, Enum, Instance, Int, Property, Union, cached_property, observe
 
 
 class LockedGenerator:
@@ -97,7 +97,7 @@ class Average(InOut):
     1.9985200025816718
 
     Here, each evaluation of the generator created by the :meth:`result` method of the
-    :class:`Average` object via the :meth:`next` function returns :code:`num=1` average across a
+    :class:`Average` object via the :func:`next` function returns :code:`num=1` average across a
     snapshot of 512 time samples.
 
     If the source is a frequency domain source, the average is calculated over a certain number
@@ -360,7 +360,7 @@ class Cache(InOut):
                         generator = self._get_data_from_incomplete_cache
                 elif not self._h5f.get_data_by_reference(nodename).attrs['complete']:
                     if config.global_caching == 'readonly':
-                        warn(
+                        _warn(
                             f"Cache file is incomplete for nodename {nodename}. With config.global_caching='readonly', \
                             the cache file will not be used!",
                             Warning,
@@ -494,7 +494,7 @@ class SampleSplitter(InOut):
     def _create_block_buffer(self, obj, buffer_size=None):
         if buffer_size is None:
             buffer_size = self.buffer_size if isinstance(self.buffer_size, int) else self.buffer_size[obj]
-        self.block_buffer[obj] = deque([], maxlen=buffer_size)
+        self.block_buffer[obj] = deque(maxlen=buffer_size)
 
     def _create_buffer_overflow_treatment(self, obj, buffer_overflow_treatment=None):
         if buffer_overflow_treatment is None:
@@ -524,7 +524,7 @@ class SampleSplitter(InOut):
                 if self.buffer_overflow_treatment[obj] == 'error':
                     self._buffer_overflow = True
                 elif self.buffer_overflow_treatment[obj] == 'warning':
-                    warn(f'overfilled buffer for object: {obj} data will get lost', UserWarning, stacklevel=1)
+                    _warn(f'overfilled buffer for object: {obj} data will get lost', UserWarning, stacklevel=1)
 
     def _create_source_generator(self, num):
         for obj in self.block_buffer:
@@ -560,7 +560,7 @@ class SampleSplitter(InOut):
             The maximum number of data blocks each object's buffer can hold. If not specified,
             the default buffer size (100 blocks) is used, or a globally defined size if
             ``buffer_size`` is a dictionary.
-        buffer_overflow_treatment : :attr:`str`, optional
+        buffer_overflow_treatment : :class:`str`, optional
             Defines the behavior when a buffer exceeds its maximum size. Options are:
 
             - ``'error'``: Raises an :obj:`IOError` when the buffer overflows.
@@ -665,9 +665,8 @@ class SampleSplitter(InOut):
                 except StopIteration:
                     self._source_generator_exist = False
                     return
-        else:
-            msg = 'Maximum size of block buffer is reached!'
-            raise OSError(msg)
+        msg = 'Maximum size of block buffer is reached!'
+        raise OSError(msg)
 
 
 class SamplesBuffer(InOut):
@@ -830,7 +829,7 @@ class SamplesBuffer(InOut):
             - ``'num'``: The index will shift by the number of samples requested (``num``).
         """
         rnum = num if self.result_num is None else self.result_num
-        rnum = rnum if self.level >= rnum else self.level
+        rnum = min(rnum, self.level)
         data = self._buffer[self._index : self._index + rnum]
         if self.shift_index_by == 'result_num':
             self._index += rnum

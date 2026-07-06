@@ -14,9 +14,10 @@ the :class:`~acoular.tools.metrics.MetricEvaluator` class to calculate the metri
 from pathlib import Path
 
 import acoular as ac
+from acoular.tools import MetricEvaluator
+
 import matplotlib.pyplot as plt
 import numpy as np
-from acoular.tools import MetricEvaluator
 
 # %%
 # Set up the parameters

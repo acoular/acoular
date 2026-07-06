@@ -1,4 +1,4 @@
-![Acoular Logo](https://github.com/acoular/acoular/blob/master/docs/source/_static/Acoular_logo.png?raw=true)
+![Acoular Logo](https://acoular.org/_static/Acoular_logo.png)
 
 [![PyPI](https://img.shields.io/pypi/pyversions/acoular.svg)](https://pypi.org/project/acoular)
 [![PyPI](https://img.shields.io/pypi/v/acoular.svg)](https://pypi.org/project/acoular)
@@ -75,8 +75,8 @@ For more detailed installation instructions, see the [documentation](https://aco
 
 ## Documentation and help
 Documentation is available [here](https://acoular.org) with a
-[getting started](https://www.acoular.org/user_guide/get_started.html) section and
-[examples](https://acoular.org/auto_examples/index.html).
+[getting started](https://acoular.org/user_guide/get_started.html) section and
+[examples](https://acoular.org/auto_examples/).
 
 If you discover problems with the Acoular software, please report them using the [issue tracker](https://github.com/acoular/acoular/issues) on GitHub. Please use the [Acoular discussions forum](https://github.com/acoular/acoular/discussions) for practical questions, discussions, and demos.
 
@@ -92,31 +92,29 @@ import matplotlib.pylab as plt
 # this file contains the microphone coordinates
 micgeofile = Path(ac.__file__).parent / 'xml' / 'array_64.xml'
 # set up object managing the microphone coordinates
-mg = ac.MicGeom( file=micgeofile )
+mg = ac.MicGeom(file=micgeofile)
 # generate test data, in real life this would come from an array measurement
 p = ac.demo.create_three_sources(mg, h5savefile='three_sources.h5')
 # set up object managing the microphone array data (usually from measurement)
-ts = ac.TimeSamples( file='three_sources.h5')
+ts = ac.TimeSamples(file='three_sources.h5')
 # set up object managing the cross spectral matrix computation
-ps = ac.PowerSpectra( source=ts, block_size=128, window='Hanning' )
+ps = ac.PowerSpectra(source=ts, block_size=128, window='Hanning')
 # alternatively, you can use the in-memory Mixer object directly:
 # ps = ac.PowerSpectra( source=p, block_size=128, window='Hanning' )
 # set up object managing the mapping grid
-rg = ac.RectGrid( x_min=-0.2, x_max=0.2, y_min=-0.2, y_max=0.2, z=-0.3, \
-increment=0.01 )
-# set up steering vector, implicitely contains also the standard quiescent 
+rg = ac.RectGrid(x_min=-0.2, x_max=0.2, y_min=-0.2, y_max=0.2, z=-0.3, increment=0.01)
+# set up steering vector, implicitely contains also the standard quiescent
 # environment with standard speed of sound
-st = ac.SteeringVector( grid = rg, mics=mg )
+st = ac.SteeringVector(grid=rg, mics=mg)
 # set up the object managing the delay & sum beamformer
-bb = ac.BeamformerBase( freq_data=ps, steer=st )
+bb = ac.BeamformerBase(freq_data=ps, steer=st)
 # request the result in the 8kHz third octave band from approriate FFT-Lines
 # this starts the actual computation (data intake, FFT, Welch CSM, beamforming)
-pm = bb.synthetic( 8000, 3 )
+pm = bb.synthetic(8000, 3)
 # compute the sound pressure level
-Lm = ac.L_p( pm )
+Lm = ac.L_p(pm)
 # plot the map
-plt.imshow( Lm.T, origin='lower', vmin=Lm.max()-10, extent=rg.extent, \
-interpolation='bicubic')
+plt.imshow(Lm.T, origin='lower', vmin=Lm.max() - 10, extent=rg.extent, interpolation='bicubic')
 plt.title('Beamformer (base) for 3 sources measured for 8000 Hz')
 plt.xlabel('x in m')
 plt.ylabel('y in m')
@@ -125,5 +123,5 @@ plt.savefig('three_sources.png', dpi=300, bbox_inches='tight')
 plt.show()
 ```
 
-![result](https://github.com/acoular/acoular/blob/master/docs/source/user_guide/three_source_py3_colormap.png?raw=true)
+![result](https://acoular.org/user_guide/three_source_py3_colormap.png)
 

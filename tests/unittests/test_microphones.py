@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import acoular as ac
+
 import numpy as np
 from pytest_cases import fixture, parametrize
 

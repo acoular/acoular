@@ -13,7 +13,7 @@
 import importlib.util
 import sys
 from os import environ, mkdir, path
-from warnings import warn
+from warnings import warn as _warn
 
 # WARNING: DO NOT ADD ANY IMPORTS HERE THAT MIGHT IMPORT NUMPY
 
@@ -42,7 +42,7 @@ if 'numpy' in sys.modules:
         import numba as nb
 
         nb.set_num_threads(1)
-        warn(
+        _warn(
             'We detected that Numpy is already loaded and uses OpenBLAS. Because '
             'this conflicts with Numba parallel execution, we disable parallel '
             'execution for now and processing might be slower. To speed up, '
@@ -219,7 +219,8 @@ config = Config()
 """
 This instance implements the global configuration of the Acoular package.
 
-General caching behaviour can be controlled by the :attr:`global_caching` attribute:
+General caching behaviour can be controlled by the
+:attr:`~acoular.configuration.Config.global_caching` attribute:
 * 'individual': Acoular classes handle caching behavior individually.
 * 'all': Acoular classes cache everything and read from cache if possible.
 * 'none': Acoular classes do not cache results. Cachefiles are not created.
@@ -227,15 +228,15 @@ General caching behaviour can be controlled by the :attr:`global_caching` attrib
 * 'overwrite': Acoular classes replace existing cachefile content with new data.
 
 The package used to read and write .h5 files can be specified
-by :attr:`h5library`:
+by :attr:`~acoular.configuration.Config.h5library`:
 * 'PyTables': Use 'tables' (or 'pytables', depending on python distribution).
 * 'H5py': Use 'h5py'.
 
-Some Acoular classes support GUI elements for usage with tools from the TraitsUI package.
-If desired, this package has to be installed manually, as it is not a prerequisite for
-installing Acoular.
-To enable the functionality, the flag attribute :attr:`use_traitsui` has to be set to True (default:
-False). Note: this is independent from the GUI tools implemented in the spectAcoular package.
+Some Acoular classes support GUI elements for usage with tools from the TraitsUI package. If
+desired, this package has to be installed manually, as it is not a prerequisite for installing
+Acoular. To enable the functionality, the flag attribute
+:attr:`~acoular.configuration.Config.use_traitsui` has to be set to True (default: False). Note:
+this is independent from the GUI tools implemented in the spectAcoular package.
 
 
 Example:

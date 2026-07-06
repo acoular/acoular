@@ -14,12 +14,14 @@
     get_data_file
 """
 
+import http.client
+import urllib.parse
 from pathlib import Path
-from warnings import warn
-
-import numpy as np
+from warnings import warn as _warn
 
 from acoular.tools.utils import mole_fraction_of_water_vapor
+
+import numpy as np
 
 
 def synthetic(data, freqs, f, num=3):
@@ -77,7 +79,7 @@ def synthetic(data, freqs, f, num=3):
         for i in f:
             ind = np.searchsorted(freqs, i)
             if ind >= len(freqs):
-                warn(
+                _warn(
                     f'Queried frequency ({i:g} Hz) not in resolved frequency range. Returning zeros.',
                     Warning,
                     stacklevel=2,
@@ -85,7 +87,7 @@ def synthetic(data, freqs, f, num=3):
                 h = np.zeros_like(data[0])
             else:
                 if freqs[ind] != i:
-                    warn(
+                    _warn(
                         f'Queried frequency ({i:g} Hz) not in set of '
                         'discrete FFT sample frequencies. '
                         f'Using frequency {freqs[ind]:g} Hz instead.',
@@ -103,7 +105,7 @@ def synthetic(data, freqs, f, num=3):
             ind1 = np.searchsorted(freqs, f1)
             ind2 = np.searchsorted(freqs, f2)
             if ind1 == ind2:
-                warn(
+                _warn(
                     f'Queried frequency band ({f1:g} to {f2:g} Hz) does not '
                     'include any discrete FFT sample frequencies. '
                     'Returning zeros.',
@@ -413,10 +415,17 @@ def get_data_file(file):
     if not data_file.exists():
         data_file = Path().cwd() / file
         if not data_file.exists():
-            import urllib.request
-
-            url = 'https://github.com/acoular/acoular/raw/master/examples/data/' + file
-            urllib.request.urlretrieve(url, data_file)
+            quoted_file = urllib.parse.quote(file)
+            connection = http.client.HTTPSConnection('raw.githubusercontent.com')
+            try:
+                connection.request('GET', f'/acoular/acoular/master/examples/data/{quoted_file}')
+                response = connection.getresponse()
+                if response.status != 200:
+                    msg = f'Failed to download data file {file!r}: HTTP {response.status}'
+                    raise OSError(msg)
+                data_file.write_bytes(response.read())
+            finally:
+                connection.close()
         print(f'Calibration file location: {data_file}')
 
     return data_file

@@ -4,6 +4,7 @@
 """Tests for classes contained in the fprocess module."""
 
 import acoular as ac
+
 import numpy as np
 import pytest
 

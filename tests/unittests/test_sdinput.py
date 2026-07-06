@@ -4,6 +4,7 @@
 """Unit tests for acoular.sdinput module."""
 
 import acoular as ac
+
 import pytest
 
 
@@ -53,7 +54,7 @@ def test_result_finite(sounddevice_samples_generator):
     assert not sdev.running
 
 
-def test_set_sample_freq(sounddevice_properties):  # noqa ARG001 (uses fixture from conftest.py)
+def test_set_sample_freq(sounddevice_properties):  # noqa: ARG001 (uses fixture from conftest.py)
     """Test that the sample frequency can be set.
 
     Parameters
@@ -68,7 +69,7 @@ def test_set_sample_freq(sounddevice_properties):  # noqa ARG001 (uses fixture f
     assert sdev.sample_freq == new_sample_freq
 
 
-def test_import_error(_mock_have_no_lib):  # noqa ARG001 (uses fixture from conftest.py)
+def test_import_error(_mock_have_no_lib):
     """Test that ac.SoundDeviceSamplesGenerator raises ImportError if sounddevice is not available.
 
     Parameters

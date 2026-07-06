@@ -24,10 +24,6 @@ Implements beamformers in the time domain.
     IntegratorSectorTime
 """
 
-import numpy as np
-import scipy.linalg as spla
-from traits.api import Bool, CArray, Enum, Float, Instance, Int, List, Map, Property, Range, cached_property
-
 from .base import SamplesGenerator, TimeOut
 from .fbeamform import SteeringVector
 from .grids import RectGrid
@@ -37,6 +33,10 @@ from .internal import digest
 from .process import SamplesBuffer
 from .tfastfuncs import _delayandsum4, _delayandsum5, _delays
 from .trajectory import Trajectory
+
+import numpy as np
+import scipy.linalg as spla
+from traits.api import Bool, CArray, Enum, Float, Instance, Int, List, Map, Property, Range, cached_property
 
 
 def const_power_weight(bf):

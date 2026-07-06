@@ -39,7 +39,6 @@ Implement support for multidimensional grids and integration sectors.
     PolySector
     ConvexSector
     MultiSector
-    Polygon
     in_hull
 """
 
@@ -47,6 +46,10 @@ Implement support for multidimensional grids and integration sectors.
 import xml.dom.minidom
 from abc import abstractmethod
 from pathlib import Path
+
+# acoular imports
+from .internal import digest, ldigest
+from .tools.utils import Polygon
 
 import numpy as np
 import scipy.linalg as spla
@@ -72,10 +75,6 @@ from traits.api import (
 )
 from traits.trait_errors import TraitError
 
-# acoular imports
-from .internal import digest, ldigest
-from .tools.utils import Polygon
-
 
 def in_hull(p, hull, border=True, tol=0):
     """
@@ -90,9 +89,9 @@ def in_hull(p, hull, border=True, tol=0):
         Coordinates of `M` points in `K` dimensions for which Delaunay triangulation will be
         computed.
 
-    border : bool, optional
-        Points in :attr:`p` on the border of :attr:`hull` will be kept in the return if `True`. If
-        `False`, only points inside :attr:`hull` will be kept. Default is `True`.
+    border : :class:`bool`, optional
+        Points in ``p`` on the border of ``hull`` will be kept in the return if ``True``.
+        If ``False``, only points inside ``hull`` will be kept. Default is ``True``.
 
     tol : :class:`float`, optional
         Tolerance allowed in the :meth:`inside-triangle check<scipy.spatial.Delaunay.find_simplex>`.
@@ -120,7 +119,7 @@ def in_hull(p, hull, border=True, tol=0):
     >>> p = np.array([[0.5, 0.5], [2, 2]])
     >>> in_hull(p, hull)
     array([ True, False])
-    """  # noqa W505
+    """  # noqa: W505
     if not isinstance(hull, Delaunay):
         hull = Delaunay(hull)
 
@@ -189,11 +188,11 @@ class Grid(ABCHasStrictTraits):
         """
         Return the indices for a subdomain in the grid.
 
-        Allows arbitrary subdomains of type :class:`Sector`.
+        Allows arbitrary subdomains of type :class:`~acoular.grids.Sector`.
 
         Parameters
         ----------
-        sector : :class:`Sector` object
+        sector : :class:`~acoular.grids.Sector` object
             Sector describing the subdomain.
 
         Returns
@@ -219,7 +218,7 @@ class Grid(ABCHasStrictTraits):
         This method generates an XML file containing the positions of all grid points.
         Each point is represented by a ``<pos>`` element with ``Name``, ``x``, ``y``, and ``z``
         attributes. The generated XML is formatted to match the structure required for importing
-        into the :class:`ImportGrid` class.
+        into the :class:`~acoular.grids.ImportGrid` class.
 
         Parameters
         ----------
@@ -334,14 +333,14 @@ class RectGrid(Grid):
     def _get_nxsteps(self):
         i = abs(self.increment)
         if i != 0:
-            return int(round((abs(self.x_max - self.x_min) + i) / i))
+            return round((abs(self.x_max - self.x_min) + i) / i)
         return 1
 
     @property_depends_on(['y_min', 'y_max', 'increment'])
     def _get_nysteps(self):
         i = abs(self.increment)
         if i != 0:
-            return int(round((abs(self.y_max - self.y_min) + i) / i))
+            return round((abs(self.y_max - self.y_min) + i) / i)
         return 1
 
     @cached_property
@@ -533,21 +532,21 @@ class RectGrid3D(RectGrid):
     def _get_nxsteps(self):
         i = abs(self.increment) if np.isscalar(self.increment) else abs(self.increment[0])
         if i != 0:
-            return int(round((abs(self.x_max - self.x_min) + i) / i))
+            return round((abs(self.x_max - self.x_min) + i) / i)
         return 1
 
     @property_depends_on(['y_min', 'y_max', '_increment'])
     def _get_nysteps(self):
         i = abs(self.increment) if np.isscalar(self.increment) else abs(self.increment[1])
         if i != 0:
-            return int(round((abs(self.y_max - self.y_min) + i) / i))
+            return round((abs(self.y_max - self.y_min) + i) / i)
         return 1
 
     @property_depends_on(['z_min', 'z_max', '_increment'])
     def _get_nzsteps(self):
         i = abs(self.increment) if np.isscalar(self.increment) else abs(self.increment[2])
         if i != 0:
-            return int(round((abs(self.z_max - self.z_min) + i) / i))
+            return round((abs(self.z_max - self.z_min) + i) / i)
         return 1
 
     @property_depends_on('digest')
@@ -612,9 +611,9 @@ class RectGrid3D(RectGrid):
             incx = incy = incz = self.increment
         else:
             incx, incy, incz = self.increment
-        xi = int(round((x - self.x_min) / incx))
-        yi = int(round((y - self.y_min) / incy))
-        zi = int(round((z - self.z_min) / incz))
+        xi = round((x - self.x_min) / incx)
+        yi = round((y - self.y_min) / incy)
+        zi = round((z - self.z_min) / incz)
         return xi, yi, zi
 
     def indices(self, x1, y1, z1, x2, y2, z2):
@@ -705,7 +704,7 @@ class ImportGrid(Grid):
         self._gpos = pos
 
     @observe('file')
-    def _import_pos(self, event):  # noqa ARG002
+    def _import_pos(self, event):  # noqa: ARG002
         """
         Import the grid point locations and subgrid names from an XML file.
 
@@ -903,8 +902,11 @@ class LineGrid(Grid):
 
     @property_depends_on(['num_points', 'length', 'direction', 'loc'])
     def _get_pos(self):
-        dist = self.length / (self.num_points - 1)
         loc = np.array(self.loc, dtype=float).reshape((3, 1))
+        if self.num_points <= 1:
+            return loc
+
+        dist = self.length / (self.num_points - 1)
         direc_n = np.array(self.direction) / spla.norm(self.direction)
         pos = np.zeros((self.num_points, 3))
         for s in range(self.num_points):
@@ -960,7 +962,7 @@ class MergeGrid(Grid):
         return digest(self)
 
     @observe('grids.items.digest')
-    def _set_sourcesdigest(self, event):  # noqa ARG002
+    def _set_sourcesdigest(self, event):  # noqa: ARG002
         self.grid_digest = ldigest(self.grids)
 
     @property_depends_on(['digest'])
@@ -1012,7 +1014,7 @@ class Sector(ABCHasStrictTraits):
         """
         Check whether the given coordinates lie within the sector's bounds.
 
-        This method determines if each column of the input array :attr:`pos` corresponds to a point
+        This method determines if each column of the input array ``pos`` corresponds to a point
         that falls within the sector. For this base class, all points are considered within the
         sector.
 
@@ -1026,7 +1028,7 @@ class Sector(ABCHasStrictTraits):
         -------
         :class:`numpy.ndarray` of :class:`bools<bool>`
             A 1D array of length `N`, where each entry indicates whether the corresponding
-            column in :attr:`pos` lies within the sector's bounds.
+            column in ``pos`` lies within the sector's bounds.
 
         Examples
         --------
@@ -1192,7 +1194,7 @@ class RectSector3D(RectSector):
         Returns
         -------
         :class:`numpy.ndarray` of :class:`bools<bool>`
-            A boolean array of shape shape ``(N,)`` indicating which of the given positions lie
+            A boolean array of shape shape `(N,)` indicating which of the given positions lie
             within the cuboid sector. ``True`` if the grid point is inside the cuboid,
             otherwise ``False``.
 
@@ -1320,7 +1322,7 @@ class PolySector(SingleSector):
 
     Notes
     -----
-    The polygon is specified by the :class:`Polygon` class.
+    The polygon is specified by the :class:`~acoular.tools.utils.Polygon` class.
 
     Examples
     --------

@@ -4,6 +4,7 @@
 """Cases for testing caching functionality of Acoular objects."""
 
 import acoular as ac
+
 import numpy as np
 from pytest_cases import parametrize
 

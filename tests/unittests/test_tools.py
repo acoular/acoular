@@ -1,9 +1,10 @@
 import re
 
 import acoular as ac
+from acoular.tools import c_air
+
 import numpy as np
 import pytest
-from acoular.tools import c_air
 from pytest_cases import parametrize
 
 

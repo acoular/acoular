@@ -4,10 +4,11 @@
 """Implementation of test cases for all grids and sectors."""
 
 import acoular as ac
-import numpy as np
-from pytest_cases import parametrize
 
 from tests.utils import get_subclasses
+
+import numpy as np
+from pytest_cases import parametrize
 
 SECTOR_SKIP_DEFAULT = [
     ac.Sector,
@@ -71,7 +72,7 @@ class Grids:
 if len(GRIDS_DEFAULT) > 0:
 
     @parametrize('grid', GRIDS_DEFAULT)
-    def case_default(self, grid):  # noqa: ARG001
+    def case_default(self, grid):
         msg = f'Please write a test case for class {grid.__name__}'
         raise NotImplementedError(msg)
 
@@ -218,7 +219,7 @@ class Sectors:
 if len(SECTOR_DEFAULT) > 0:
 
     @parametrize('sector', SECTOR_DEFAULT)
-    def case_default(self, sector):  # noqa: ARG001
+    def case_default(self, sector):
         msg = f'Please write a test case for class {sector.__name__}'
         raise NotImplementedError(msg)
 

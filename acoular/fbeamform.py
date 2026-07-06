@@ -42,7 +42,19 @@ Implements beamformers in the frequency domain.
 # imports from other packages
 
 import warnings
-from warnings import warn
+from warnings import warn as _warn
+
+# acoular imports
+from .configuration import config
+from .environments import Environment
+from .fastFuncs import beamformerFreq, calcPointSpreadFunction, calcTransfer, damasSolverGaussSeidel
+from .grids import Grid, Sector
+from .h5cache import H5cache
+from .h5files import H5CacheFileBase
+from .internal import digest
+from .microphones import MicGeom
+from .spectra import PowerSpectra
+from .tfastfuncs import _steer_I, _steer_II, _steer_III, _steer_IV
 
 import numpy as np
 import scipy.linalg as spla
@@ -71,18 +83,6 @@ from traits.api import (
     property_depends_on,
 )
 from traits.trait_errors import TraitError
-
-# acoular imports
-from .configuration import config
-from .environments import Environment
-from .fastFuncs import beamformerFreq, calcPointSpreadFunction, calcTransfer, damasSolverGaussSeidel
-from .grids import Grid, Sector
-from .h5cache import H5cache
-from .h5files import H5CacheFileBase
-from .internal import digest
-from .microphones import MicGeom
-from .spectra import PowerSpectra
-from .tfastfuncs import _steer_I, _steer_II, _steer_III, _steer_IV
 
 sklearn_ndict = {}
 if parse(sklearn.__version__) < parse('1.4'):
@@ -212,7 +212,7 @@ class SteeringVector(HasStrictTraits):
             array of shape (ngridpts, nmics) containing the transfer matrix for the given frequency
         """
         # if self.cached:
-        #    warn('Caching of transfer function is not yet supported!', Warning)
+        #    _warn('Caching of transfer function is not yet supported!', Warning)
         #    self.cached = False
 
         if ind is None:
@@ -455,6 +455,7 @@ class BeamformerBase(HasStrictTraits):
 
             def param_steer_func(f):
                 return (self.steer.r0, self.steer.rm, 2 * np.pi * f / self.steer.env.c)
+
         else:
             param_type = 'custom'
             param_steer_func = self.steer.steer_vector
@@ -537,7 +538,7 @@ class BeamformerBase(HasStrictTraits):
             # single frequency line
             ind = np.searchsorted(freq, f)
             if ind >= len(freq):
-                warn(
+                _warn(
                     f'Queried frequency ({f:g} Hz) not in resolved frequency range. Returning zeros.',
                     Warning,
                     stacklevel=2,
@@ -545,7 +546,7 @@ class BeamformerBase(HasStrictTraits):
                 h = np.zeros_like(res[0])
             else:
                 if freq[ind] != f:
-                    warn(
+                    _warn(
                         f'Queried frequency ({f:g} Hz) not in set of '
                         'discrete FFT sample frequencies. '
                         f'Using frequency {freq[ind]:g} Hz instead.',
@@ -564,7 +565,7 @@ class BeamformerBase(HasStrictTraits):
             ind1 = np.searchsorted(freq, f1)
             ind2 = np.searchsorted(freq, f2)
             if ind1 == ind2:
-                warn(
+                _warn(
                     f'Queried frequency band ({f1:g} to {f2:g} Hz) does not '
                     'include any discrete FFT sample frequencies. '
                     'Returning zeros.',
@@ -599,8 +600,8 @@ class BeamformerBase(HasStrictTraits):
             a tuple of (fmin,fmax) frequencies to include in the result if *num*==0,
             or band center frequency/frequencies for which to return the results
             if *num*>0; if None, then the frequency range is determined from
-            the settings of the :attr:`PowerSpectra.ind_low` and
-            :attr:`PowerSpectra.ind_high` of :attr:`freq_data`
+            the settings of the :attr:`~acoular.spectra.PowerSpectra.ind_low` and
+            :attr:`~acoular.spectra.PowerSpectra.ind_high` of :attr:`freq_data`
 
         num : integer
             Controls the width of the frequency bands considered; defaults to
@@ -959,9 +960,11 @@ class PointSpreadFunction(HasStrictTraits):
     #:
     #: * 'full': Calculate the full PSF (for all grid points) in one go (should be used if the PSF
     #:           at all grid points is needed, as with :class:`DAMAS<BeamformerDamas>`)
-    #: * 'single': Calculate the PSF for the grid points defined by :attr:`grid_indices`, one by one
-    #:             (useful if not all PSFs are needed, as with :class:`CLEAN<BeamformerClean>`)
-    #: * 'block': Calculate the PSF for the grid points defined by :attr:`grid_indices`, in one go
+    #: * 'single': Calculate the PSF for the grid points defined by
+    #:             :attr:`~acoular.fbeamform.PointSpreadFunction.grid_indices`, one by one :
+    #:             (useful if not all PSFs are needed, as with :class:`CLEAN<BeamformerClean>`):
+    #: * 'block': Calculate the PSF for the grid points defined by
+    #:            :attr:`~acoular.fbeamform.PointSpreadFunction.grid_indices`, in one go
     #:            (useful if not all PSFs are needed, as with :class:`CLEAN<BeamformerClean>`)
     #: * 'readonly': Do not attempt to calculate the PSF since it should already be cached (useful
     #:               if multiple processes have to access the cache file)
@@ -1138,9 +1141,11 @@ class BeamformerDamas(BeamformerBase):
     #:
     #: * 'full': Calculate the full PSF (for all grid points) in one go (should be used if the PSF
     #:           at all grid points is needed, as with :class:`DAMAS<BeamformerDamas>`)
-    #: * 'single': Calculate the PSF for the grid points defined by :attr:`grid_indices`, one by one
+    #: * 'single': Calculate the PSF for the grid points defined by
+    #:             :attr:`~acoular.fbeamform.PointSpreadFunction.grid_indices`, one by one
     #:             (useful if not all PSFs are needed, as with :class:`CLEAN<BeamformerClean>`)
-    #: * 'block': Calculate the PSF for the grid points defined by :attr:`grid_indices`, in one go
+    #: * 'block': Calculate the PSF for the grid points defined by
+    #:            :attr:`~acoular.fbeamform.PointSpreadFunction.grid_indices`, in one go
     #:            (useful if not all PSFs are needed, as with :class:`CLEAN<BeamformerClean>`)
     #: * 'readonly': Do not attempt to calculate the PSF since it should already be cached (useful
     #:               if multiple processes have to access the cache file)
@@ -1281,7 +1286,7 @@ class BeamformerDamasPlus(BeamformerDamas):
                 self._ac[i] = nnls(psf, y)[0] / unit
             elif self.method == 'LP':  # linear programming (Dougherty)
                 if self.r_diag:
-                    warn(
+                    _warn(
                         'Linear programming solver may fail when CSM main '
                         'diagonal is removed for delay-and-sum beamforming.',
                         Warning,
@@ -1342,7 +1347,7 @@ class BeamformerOrth(BeamformerBase):
         return digest(self)
 
     @observe('n')
-    def _update_eva_list(self, event):  # noqa ARG002
+    def _update_eva_list(self, event):  # noqa: ARG002
         """Sets the list of eigenvalues to consider."""
         self.eva_list = np.arange(-1, -1 - self.n, -1)
 
@@ -1499,9 +1504,11 @@ class BeamformerClean(BeamformerBase):
     #:
     #: * 'full': Calculate the full PSF (for all grid points) in one go (should be used if the PSF
     #:           at all grid points is needed, as with :class:`DAMAS<BeamformerDamas>`)
-    #: * 'single': Calculate the PSF for the grid points defined by :attr:`grid_indices`, one by one
+    #: * 'single': Calculate the PSF for the grid points defined by
+    #:             :attr:`~acoular.fbeamform.PointSpreadFunction.grid_indices`, one by one
     #:             (useful if not all PSFs are needed, as with :class:`CLEAN<BeamformerClean>`)
-    #: * 'block': Calculate the PSF for the grid points defined by :attr:`grid_indices`, in one go
+    #: * 'block': Calculate the PSF for the grid points defined by
+    #:            :attr:`~acoular.fbeamform.PointSpreadFunction.grid_indices`, in one go
     #:            (useful if not all PSFs are needed, as with :class:`CLEAN<BeamformerClean>`)
     #: * 'readonly': Do not attempt to calculate the PSF since it should already be cached (useful
     #:               if multiple processes have to access the cache file)
@@ -1538,7 +1545,7 @@ class BeamformerClean(BeamformerBase):
         normfactor = self.sig_loss_norm()
 
         if self.calcmode == 'full':
-            warn(
+            _warn(
                 "calcmode = 'full', possibly slow CLEAN performance. Better use 'block' or 'single'.",
                 Warning,
                 stacklevel=2,
@@ -1643,7 +1650,7 @@ class BeamformerCMF(BeamformerBase):
         return digest(self)
 
     @observe('method')
-    def _validate(self, event):  # noqa ARG002
+    def _validate(self, event):  # noqa: ARG002
         if self.method in ['FISTA', 'Split_Bregman'] and not config.have_pylops:
             msg = (
                 'Cannot import Pylops package. No Pylops installed.'
@@ -2185,7 +2192,7 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
                         # print(s,qi.size)
                         qi[s, locpoints] = qi_real + qi_imag * 1j
                 else:
-                    warn(
+                    _warn(
                         f'Eigenvalue {s:g} <= 0 for frequency index {i:g}. Will not be calculated!',
                         Warning,
                         stacklevel=2,
@@ -2259,7 +2266,7 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
     n = Int(1)
 
     #: Geometrical bounds of the search domain to consider.
-    #: :attr:`bound` is a list that contains exactly three tuple of
+    #: :attr:`bounds` is a list that contains exactly three tuple of
     #: (min,max) for each of the coordinates x, y, z.
     #: Defaults to [(-1.,1.),(-1.,1.),(0.01,1.)]
     bounds = List(Tuple(Float, Float), minlen=3, maxlen=3, value=[(-1.0, 1.0), (-1.0, 1.0), (0.01, 1.0)])
@@ -2285,7 +2292,7 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
         return digest(self)
 
     @observe('n')
-    def _update_eva_list(self, event):  # noqa ARG002
+    def _update_eva_list(self, event):  # noqa: ARG002
         """Sets the list of eigenvalues to consider."""
         self.eva_list = np.arange(-1, -1 - self.n, -1)
 
@@ -2355,7 +2362,7 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
                         normfactor,
                         (r0, rm, k),
                         (np.ones(1), eve[:, n : n + 1]),
-                    )[0][0]  # noqa: B023
+                    )[0][0]
 
                 # simplical global homotopy optimizer
                 oR = shgo(func, self.bounds, **shgo_opts)

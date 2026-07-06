@@ -24,6 +24,7 @@ and how to visualize them effectively.
 from pathlib import Path
 
 import acoular as ac
+
 import matplotlib.pyplot as plt
 import numpy as np
 

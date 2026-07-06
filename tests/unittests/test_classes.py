@@ -5,10 +5,10 @@
 
 import warnings
 
+from tests.utils import create_instance, get_all_classes
+
 import pytest
 from traits.api import Bool, Enum, Float, Int, Range, TraitEnum
-
-from tests.utils import create_instance, get_all_classes
 
 all_classes = get_all_classes()
 all_hastraits_classes = get_all_classes(hastraits_only=True)

@@ -14,6 +14,9 @@ Implements support for array microphone arrangements.
 import xml.dom.minidom
 from pathlib import Path
 
+# acoular imports
+from .internal import digest
+
 import numpy as np
 from scipy.spatial.distance import cdist
 from traits.api import (
@@ -26,9 +29,6 @@ from traits.api import (
     cached_property,
     observe,
 )
-
-# acoular imports
-from .internal import digest
 
 
 class MicGeom(HasStrictTraits):
@@ -51,8 +51,8 @@ class MicGeom(HasStrictTraits):
 
     Notes
     -----
-    - The microphone geometry as in :attr:`total_pos` is automatically changed if the :attr:`file`
-      attribute is updated.
+    - The microphone geometry as in :attr:`~acoular.microphones.MicGeom.pos_total` is automatically
+      changed if the :attr:`file` attribute is updated.
     - Small numerical values in the computed :attr:`center` are set to zero for numerical stability.
 
     Examples
@@ -198,7 +198,7 @@ class MicGeom(HasStrictTraits):
         return None
 
     @observe('file')
-    def _import_mpos(self, event):  # noqa ARG002
+    def _import_mpos(self, event):  # noqa: ARG002
         # Import the microphone positions from an XML file.
         #
         # This method parses the XML file specified in :attr:`file` and extracts the ``x``, ``y``,
@@ -241,7 +241,7 @@ class MicGeom(HasStrictTraits):
         This method generates an XML file containing the positions of all valid microphones in the
         array. Each microphone is represented by a ``<pos>`` element with ``Name``, ``x``, ``y``,
         and ``z`` attributes. The generated XML is formatted to match the structure required for
-        importing into the :class:`MicGeom` class.
+        importing into the :class:`~acoular.microphones.MicGeom` class.
 
         Parameters
         ----------

@@ -1,8 +1,8 @@
 import pickle
 
-import pytest
-
 from tests.utils import get_all_classes
+
+import pytest
 
 all_classes = get_all_classes()
 

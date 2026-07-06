@@ -11,8 +11,9 @@ microphone is plotted by using functions from acoular.tools.
 """
 
 import acoular as ac
-import numpy as np
 from acoular.tools import barspectrum
+
+import numpy as np
 
 #  Set up a single microphone at (0,0,0)
 m = ac.MicGeom(pos_total=np.array([[0, 0, 0]]).T)

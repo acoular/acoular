@@ -9,6 +9,7 @@ Demonstrates how to calculate the blockwise FFT and spectrogram of the signal.
 # Imports
 
 import acoular as ac
+
 import numpy as np
 
 # %%
@@ -71,8 +72,9 @@ print('reconstructed signal energy in time domain', np.round(np.sum(time_block_r
 # %%
 # Plot the spectrogram (time-frequency representation) of the signal. Here, we plot the amplitude
 # spectra for each time block. Therefore, we normalize the fft spectra by the number of samples in
-# the block by setting the :attr:`scaling` to :code:`'amplitude'`. It can be varified from the
-# spectrogram plot that the amplitude of the tones are correctly represented.
+# the block by setting the :attr:`~acoular.fprocess.RFFT.scaling` attribute to ``'amplitude'``.
+# It can be varified from the spectrogram plot that the amplitude of the tones are correctly
+# represented.
 
 import matplotlib.pyplot as plt
 

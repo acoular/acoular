@@ -39,9 +39,18 @@ Implement blockwise processing in the time domain.
 # imports from other packages
 import wave
 from abc import abstractmethod
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from os import path
-from warnings import warn
+from warnings import warn as _warn
+
+# acoular imports
+from .base import SamplesGenerator, TimeOut
+from .configuration import config
+from .environments import cartToCyl, cylToCart
+from .h5files import _get_h5file_class
+from .internal import digest, ldigest
+from .microphones import MicGeom
+from .process import Cache
 
 import numba as nb
 import numpy as np
@@ -72,23 +81,13 @@ from traits.api import (
     observe,
 )
 
-# acoular imports
-from .base import SamplesGenerator, TimeOut
-from .configuration import config
-from .environments import cartToCyl, cylToCart
-from .h5files import _get_h5file_class
-from .internal import digest, ldigest
-from .microphones import MicGeom
-from .process import Cache
-from .tools.utils import find_basename
-
 
 class MaskedTimeOut(TimeOut):
     """
     A signal processing block that allows for the selection of specific channels and time samples.
 
     The :class:`MaskedTimeOut` class is designed to filter data from a given
-    :class:`~acoular.sources.SamplesGenerator` (or a derived object) by defining valid time samples
+    :class:`~acoular.base.SamplesGenerator` (or a derived object) by defining valid time samples
     and excluding specific channels. It acts as an intermediary between the data source and
     subsequent processing steps, ensuring that only the selected portion of the data is passed
     along.
@@ -236,7 +235,7 @@ class ChannelMixer(TimeOut):
     A signal processing block that mixes multiple input channels into a single output channel.
 
     The :class:`ChannelMixer` class takes a multi-channel signal from a
-    :class:`~acoular.sources.SamplesGenerator` (or a derived object) and applies an optional set of
+    :class:`~acoular.base.SamplesGenerator` (or a derived object) and applies an optional set of
     amplitude weights to each channel. The resulting weighted sum is then output as a single-channel
     signal.
 
@@ -310,6 +309,9 @@ class ChannelMixer(TimeOut):
 class Trigger(TimeOut):  # pragma: no cover
     """
     A signal processing class for detecting and analyzing trigger signals in time-series data.
+
+    .. deprecated::
+        :class:`Trigger` is deprecated and will be removed in version 27.01.
 
     The :class:`Trigger` class identifies trigger events in a single-channel signal provided by a
     :class:`~acoular.base.SamplesGenerator` source. The detection process involves:
@@ -404,13 +406,20 @@ class Trigger(TimeOut):  # pragma: no cover
         ],
     )
 
+    def __init__(self, *args, **kwargs):
+        _warn(
+            'Trigger is deprecated and will be removed in version 27.01.',
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(*args, **kwargs)
+
     @cached_property
     def _get_digest(self):
         return digest(self)
 
     @cached_property
     def _get_trigger_data(self):
-        self._check_trigger_existence()
         triggerFunc = {'dirac': self._trigger_dirac, 'rect': self._trigger_rect}[self.trigger_type]
         num = 2048  # number samples for result-method of source
         threshold = self._threshold(num)
@@ -429,7 +438,7 @@ class Trigger(TimeOut):  # pragma: no cover
             x0 = triggerSignal[-1]
         if len(peakLoc) <= 1:
             msg = 'Not enough trigger info. Check *threshold* sign and value!'
-            raise Exception(msg)
+            raise ValueError(msg)
 
         peakDist = peakLoc[1:] - peakLoc[:-1]
         maxPeakDist = max(peakDist)  # approximate distance between the revolutions
@@ -457,7 +466,7 @@ class Trigger(TimeOut):  # pragma: no cover
         diffDist = abs(peakDist - meanDist)
         faultyInd = np.flatnonzero(diffDist > self.max_variation_of_duration * meanDist)
         if faultyInd.size != 0:
-            warn(
+            _warn(
                 f'In Trigger-Identification: The distances between the peaks (and therefore the lengths of the \
                 revolutions) vary too much (check samples {peakLoc[faultyInd] + self.source.start}).',
                 Warning,
@@ -497,7 +506,7 @@ class Trigger(TimeOut):  # pragma: no cover
             maxTriggerHelp = [minVal, maxVal] - meanVal
             argInd = np.argmax(abs(maxTriggerHelp))
             thresh = maxTriggerHelp[argInd] * 0.75  # 0.75 for 75% of max trigger signal
-            warn(f'No threshold was passed. An estimated threshold of {thresh} is assumed.', Warning, stacklevel=2)
+            _warn(f'No threshold was passed. An estimated threshold of {thresh} is assumed.', Warning, stacklevel=2)
         else:  # take user defined  threshold
             thresh = self.threshold
         return thresh
@@ -506,7 +515,7 @@ class Trigger(TimeOut):  # pragma: no cover
         nChannels = self.source.num_channels
         if nChannels != 1:
             msg = f'Trigger signal must consist of ONE channel, instead {nChannels} channels are given!'
-            raise Exception(msg)
+            raise ValueError(msg)
         return 0
 
     def result(self, num):
@@ -535,13 +544,16 @@ class Trigger(TimeOut):  # pragma: no cover
         A warning is issued, indicating that data is passed unprocessed.
         """
         msg = 'result method not implemented yet! Data from source will be passed without transformation.'
-        warn(msg, Warning, stacklevel=2)
+        _warn(msg, Warning, stacklevel=2)
         yield from self.source.result(num)
 
 
 class AngleTracker(MaskedTimeOut):
     """
     Compute the rotational angle and RPM per sample from a trigger signal in the time domain.
+
+    .. deprecated::
+        :class:`AngleTracker` is deprecated and will be removed in version 27.01.
 
     This class retrieves samples from the specified :attr:`trigger` signal and interpolates angular
     position and rotational speed. The results are stored in the properties :attr:`angle` and
@@ -608,6 +620,14 @@ class AngleTracker(MaskedTimeOut):
     # Rotation angle in radians, internal use
     _angle = CArray()
 
+    def __init__(self, *args, **kwargs):
+        _warn(
+            'AngleTracker is deprecated and will be removed in version 27.01.',
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(*args, **kwargs)
+
     @cached_property
     def _get_digest(self):
         return digest(self)
@@ -672,7 +692,7 @@ class AngleTracker(MaskedTimeOut):
 
     # reset calc flag if something has changed
     @observe('digest')
-    def _reset_calc_flag(self, event):  # noqa ARG002
+    def _reset_calc_flag(self, event):  # noqa: ARG002
         self._calc_flag = False
 
     # calc rpm from trigger data
@@ -701,6 +721,9 @@ class AngleTracker(MaskedTimeOut):
 class SpatialInterpolator(TimeOut):  # pragma: no cover
     """
     Base class for spatial interpolation of microphone data.
+
+    .. deprecated::
+        :class:`SpatialInterpolator` is deprecated and will be removed in version 27.01.
 
     This class retrieves samples from a specified source and performs spatial interpolation to
     generate output at virtual microphone positions. The interpolation is executed using various
@@ -777,7 +800,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
     sample_freq = Delegate('source', 'sample_freq')
 
     #: Number of channels in the output data. This corresponds to the number of virtual microphone
-    #: positions where interpolated pressure values are computed. The value is ´determined based on
+    #: positions where interpolated pressure values are computed. The value is determined based on
     #: the :attr:`mics_virtual` geometry.
     num_channels = Property()
 
@@ -829,6 +852,14 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
         ],
     )
 
+    def __init__(self, *args, **kwargs):
+        _warn(
+            f'{self.__class__.__name__} is deprecated and will be removed in version 27.01.',
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(*args, **kwargs)
+
     def _get_num_channels(self):
         return self.mics_virtual.num_mics
 
@@ -837,7 +868,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
         return digest(self)
 
     @cached_property
-    def _get_virtNewCoord(self):  # noqa N802
+    def _get_virtNewCoord(self):  # noqa: N802
         return self._virtNewCoord_func(self.mics.pos, self.mics_virtual.pos, self.method, self.array_dimension)
 
     def sinc_mic(self, r):
@@ -862,7 +893,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
         """
         return np.sinc((r * self.mics_virtual.mpos.shape[1]) / (np.pi))
 
-    def _virtNewCoord_func(self, mpos, mpos_virt, method, array_dimension):  # noqa N802
+    def _virtNewCoord_func(self, mpos, mpos_virt, _method, _array_dimension):  # noqa: N802
         # Core functionality for getting the interpolation.
         #
         # Parameters
@@ -916,7 +947,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
         # empty mesh object
         mesh = []
 
-        if self.array_dimension == '1D' or self.array_dimension == 'ring':
+        if self.array_dimension in {'1D', 'ring'}:
             # get projections onto new coordinate, for real mics
             projectionOnNewAxis = cartToCyl(mpos, self.Q)[0]
             indReorderHelp = np.argsort(projectionOnNewAxis)
@@ -939,7 +970,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
 
             # scipy delauney triangulation
             # Delaunay
-            tri = Delaunay(newCoord.T[:, :2], incremental=True)  #
+            tri = Delaunay(newCoord.T[:, :2], incremental=True)
 
             if self.interp_at_zero:
                 # add a point at zero
@@ -1054,7 +1085,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
         pHelp = p[:, meshList[0][1]]
 
         # Interpolation for 1D Arrays
-        if self.array_dimension == '1D' or self.array_dimension == 'ring':
+        if self.array_dimension in {'1D', 'ring'}:
             # for rotation add phi_delay
             if not np.array_equal(phi_delay, []):
                 xInterpHelp = np.tile(virtNewCoord[0, :], (nTime, 1)) + np.tile(phi_delay, (virtNewCoord.shape[1], 1)).T
@@ -1271,13 +1302,16 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
             a multiple of ``num``.
         """
         msg = 'result method not implemented yet! Data from source will be passed without transformation.'
-        warn(msg, Warning, stacklevel=2)
+        _warn(msg, Warning, stacklevel=2)
         yield from self.source.result(num)
 
 
 class SpatialInterpolatorRotation(SpatialInterpolator):  # pragma: no cover
     """
     Spatial interpolation class for rotating sound sources.
+
+    .. deprecated::
+        :class:`SpatialInterpolatorRotation` is deprecated and will be removed in version 27.01.
 
     This class extends :attr:`SpatialInterpolator` to handle sources that undergo rotational
     movement. It retrieves samples from the :attr:`source` attribute and angle data from the
@@ -1349,6 +1383,10 @@ class SpatialInterpolatorRotation(SpatialInterpolator):  # pragma: no cover
 class SpatialInterpolatorConstantRotation(SpatialInterpolator):  # pragma: no cover
     """
     Performs spatial linear interpolation for sources undergoing constant rotation.
+
+    .. deprecated::
+        :class:`SpatialInterpolatorConstantRotation` is deprecated and will be removed in version
+        27.01.
 
     This class interpolates signals from a rotating sound source based on a constant rotational
     speed. It retrieves samples from the :attr:`source` and applies interpolation before
@@ -1452,7 +1490,7 @@ class Mixer(TimeOut):
     sdigest = Str()
 
     @observe('sources.items.digest')
-    def _set_sourcesdigest(self, event):  # noqa ARG002
+    def _set_sourcesdigest(self, event):  # noqa: ARG002
         self.sdigest = ldigest(self.sources)
 
     #: A unique identifier for the Mixer instance, based on the :attr:`primary source<source>` and
@@ -1697,7 +1735,7 @@ class TimeReverse(TimeOut):
 
 class Filter(TimeOut):
     """
-    Abstract base class for IIR filters using SciPy's :func:`~scipy.signal.lfilter`.
+    Abstract base class for IIR filters using SciPy's :func:`~scipy.signal.sosfilt`.
 
     This class implements a digital Infinite Impulse Response (IIR) filter that applies filtering to
     a given signal in a block-wise manner. The filter coefficients can be dynamically changed during
@@ -1705,13 +1743,10 @@ class Filter(TimeOut):
 
     See Also
     --------
-    :func:`scipy.signal.lfilter` :
-        Filter data along one-dimension with an IIR or FIR (finite impulse response) filter.
-    :func:`scipy.signal.sosfilt` :
-        Filter data along one dimension using cascaded second-order sections.
     :class:`FiltOctave` :
         Octave or third-octave bandpass filter (causal, with non-zero phase delay).
-    :class:`FiltFiltOctave` : Octave or third-octave bandpass filter with zero-phase distortion.
+    :class:`FiltFiltOctave` :
+        Octave or third-octave bandpass filter with zero-phase distortion.
     """
 
     #: The input data source. It must be an instance of a
@@ -2052,7 +2087,8 @@ class FiltFreqWeight(Filter):
     weight = Enum('A', 'C', 'Z')
 
     #: Second-order sections (SOS) representation of the filter coefficients. This property is
-    #: dynamically computed based on :attr:`weight` and the :attr:`Filter.source`'s digest.
+    #: dynamically computed based on :attr:`weight` and the
+    #: :attr:`~acoular.tprocess.Filter.source`'s digest.
     sos = Property(depends_on=['weight', 'source.digest'])
 
     #: A unique identifier for the filter, based on its properties. (read-only)
@@ -2127,7 +2163,7 @@ class FiltFreqWeight(Filter):
 
 class FilterBank(TimeOut):
     """
-    Abstract base class for IIR filter banks based on :mod:`scipy.signal.lfilter`.
+    Abstract base class for IIR filter banks based on SOS coefficients.
 
     Implements a bank of parallel filters. This class should not be instantiated by itself.
 
@@ -2350,7 +2386,7 @@ class WriteWAV(TimeOut):
             data *= -dmin
         data = np.round(data)
         if data.min() < dmin or data.max() > dmax:
-            warn(
+            _warn(
                 f'Clipping occurred in WAV export. Data type {dtype} cannot represent all values in data. \
             Consider raising max_val.',
                 stacklevel=1,
@@ -2395,13 +2431,13 @@ class WriteWAV(TimeOut):
             msg = 'No channels given for output.'
             raise ValueError(msg)
         elif nc > 2:
-            warn(f'More than two channels given for output, exported file will have {nc:d} channels', stacklevel=1)
+            _warn(f'More than two channels given for output, exported file will have {nc:d} channels', stacklevel=1)
         if self.sample_freq.is_integer():
             fs = self.sample_freq
         else:
-            fs = int(round(self.sample_freq))
+            fs = round(self.sample_freq)
             msg = f'Sample frequency {self.sample_freq} is not a whole number. Proceeding with sampling frequency {fs}.'
-            warn(msg, Warning, stacklevel=1)
+            _warn(msg, Warning, stacklevel=1)
         dtype, _, dmax, sw = self._type_info()
         if self.file == '':
             name = find_basename(self.source)
@@ -2472,8 +2508,6 @@ class WriteH5(TimeOut):
         ABC for signal processing blocks interacting with data from a source.
     :class:`~acoular.base.SamplesGenerator` :
         Interface for generating multi-channel time-domain signal processing blocks.
-    h5py :
-        Python library for reading and writing HDF5 files.
     """
 
     #: The input data source. It must be an instance of a
@@ -2513,7 +2547,7 @@ class WriteH5(TimeOut):
         provided. If a filename is provided, it is used as the file name.
         """
         if self.file == '':
-            name = datetime.now(tz=timezone.utc).isoformat('_').replace(':', '-').replace('.', '_')
+            name = datetime.now(tz=UTC).isoformat('_').replace(':', '-').replace('.', '_')
             self.file = path.join(config.td_dir, name + '.h5')
 
     def get_initialized_file(self):
@@ -2525,7 +2559,7 @@ class WriteH5(TimeOut):
 
         Returns
         -------
-        :class:`h5py.File`
+        `h5py.File`
             The initialized HDF5 file object ready for data insertion.
         """
         file = _get_h5file_class()
@@ -2565,7 +2599,7 @@ class WriteH5(TimeOut):
 
         Parameters
         ----------
-        f5h : :obj:`h5py.File`
+        f5h : `h5py.File`
             The HDF5 file object to which metadata will be added.
         """
         nitems = len(self.metadata.items())

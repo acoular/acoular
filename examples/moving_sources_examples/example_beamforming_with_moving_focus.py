@@ -31,8 +31,8 @@ is evaluated using three different beamforming approaches:
 from pathlib import Path
 
 import acoular as ac
+
 import matplotlib.pyplot as plt
-import numpy as np
 
 # %%
 # We define the trajectory of the moving focus and the parameters for

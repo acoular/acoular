@@ -7,12 +7,13 @@ import re
 from pathlib import Path
 
 import acoular as ac
-import numpy as np
-import pytest
 from acoular.h5files import H5CacheFileH5py, H5CacheFileTables
-from pytest_cases import fixture, parametrize_with_cases
 
 from tests.cases.test_caching_cases import Caching
+
+import numpy as np
+import pytest
+from pytest_cases import fixture, parametrize_with_cases
 
 
 def delete_traits_cache(obj):

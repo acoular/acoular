@@ -1,4 +1,4 @@
-.. include:: ../../../CONTRIBUTING.rst
+.. include:: ../../CONTRIBUTING.rst
 
 .. _Contribution Guidelines:
 

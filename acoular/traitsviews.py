@@ -4,9 +4,6 @@
 """Implements separate traits_view definitions to lift the traitsui requirement for acoular."""
 
 # imports from other packages
-from traitsui.api import Item, View
-from traitsui.menu import OKCancelButtons
-
 from .base import TimeOut
 from .calib import Calib
 from .environments import GeneralFlowEnvironment, OpenJet, RotatingFlow, SlotJet, UniformFlowEnvironment
@@ -32,6 +29,9 @@ from .spectra import PowerSpectra
 from .tbeamform import BeamformerTime, BeamformerTimeSq, BeamformerTimeSqTraj, BeamformerTimeTraj, IntegratorSectorTime
 from .tprocess import FiltFiltOctave, WriteH5, WriteWAV
 from .trajectory import Trajectory
+
+from traitsui.api import Item, View
+from traitsui.menu import OKCancelButtons
 
 MicGeom.class_trait_view(
     'traits_view',

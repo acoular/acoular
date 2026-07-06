@@ -5,9 +5,10 @@
 
 from pathlib import Path
 
+from acoular import FiltWNoiseGenerator
+
 import numpy as np
 import pytest
-from acoular import FiltWNoiseGenerator
 
 data_path = Path(__file__).parent.parent / 'data'
 ma_coeff = np.load(data_path / 'ma_coeff.npy')
