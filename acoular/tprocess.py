@@ -51,6 +51,7 @@ from .h5files import _get_h5file_class
 from .internal import digest, ldigest
 from .microphones import MicGeom
 from .process import Cache
+from .tools.utils import find_basename
 
 import numba as nb
 import numpy as np

@@ -244,7 +244,7 @@ class Environment(HasStrictTraits):
             This method has been renamed to :meth:`apparent_r` and will be removed in version 27.01.
             Please use :meth:`apparent_r` instead.
         """
-        warn(
+        _warn(
             "Deprecated use of '_r' method (will be removed in version 27.01). "
             "Please use the 'apparent_r' method instead.",
             DeprecationWarning,
@@ -338,7 +338,7 @@ class UniformFlowEnvironment(Environment):
             This method has been renamed to :meth:`apparent_r` and will be removed in version 27.01.
             Please use :meth:`apparent_r` instead.
         """
-        warn(
+        _warn(
             "Deprecated use of '_r' method (will be removed in version 27.01). "
             "Please use the 'apparent_r' method instead.",
             DeprecationWarning,
@@ -903,7 +903,7 @@ class GeneralFlowEnvironment(Environment):
             This method has been renamed to :meth:`apparent_r` and will be removed in version 27.01.
             Please use :meth:`apparent_r` instead.
         """
-        warn(
+        _warn(
             "Deprecated use of '_r' method (will be removed in version 27.01). "
             "Please use the 'apparent_r' method instead.",
             DeprecationWarning,
