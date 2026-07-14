@@ -54,6 +54,7 @@ from .h5files import H5CacheFileBase
 from .internal import digest
 from .microphones import MicGeom
 from .spectra import PowerSpectra
+from .solvers import LeastSquaresSolver
 from .tfastfuncs import _steer_I, _steer_II, _steer_III, _steer_IV
 
 import numpy as np
@@ -78,11 +79,15 @@ from traits.api import (
     Property,
     Range,
     Tuple,
+    Union,
     cached_property,
     observe,
     property_depends_on,
 )
 from traits.trait_errors import TraitError
+
+if config.have_pylops:
+    from .solvers.pylops import PylopsLeastSquaresSolver
 
 sklearn_ndict = {}
 if parse(sklearn.__version__) < parse('1.4'):
@@ -1592,6 +1597,8 @@ class BeamformerCMF(BeamformerBase):
     See :cite:`Yardibi2008` for details.
     """
 
+    solver = Union(None, Instance(LeastSquaresSolver))  # for custom solvers, e.g., from PyLops
+
     #: Type of fit method to be used ('LassoLars', 'LassoLarsBIC',
     #: 'OMPCV' or 'NNLS', defaults to 'LassoLars').
     #: These methods are implemented in
@@ -1642,8 +1649,33 @@ class BeamformerCMF(BeamformerBase):
             'r_diag',
             'precision',
             'steer.inv_digest',
+            'solver',
         ],
     )
+
+    # private traits
+    msm_indices = Property(depends_on=['freq_data.num_channels', 'steer.digest', 'r_diag'])
+
+    @cached_property
+    def _get_msm_indices(self):
+        """
+        Get the indices for the reduced Kronecker product of the steering matrix.
+
+        These are the indices for the upper triangular part of the CSM, excluding the main diagonal if :attr:`r_diag` is True.
+        """
+        nc = self.freq_data.num_channels
+        # get indices for upper triangular matrices (use np.tril b/c transposed)
+        ind = np.reshape(np.tril(np.ones((nc, nc))), (nc * nc,)) > 0
+
+        ind_im0 = (np.reshape(np.eye(nc), (nc * nc,)) == 0)[ind]
+        if self.r_diag:
+            # omit main diagonal for noise reduction
+            ind_reim = np.hstack([ind_im0, ind_im0])
+        else:
+            # take all real parts -- also main diagonal
+            ind_reim = np.hstack([np.ones(np.size(ind_im0)) > 0, ind_im0])
+            ind_reim[0] = True  # why this ?
+        return ind, ind_reim
 
     @cached_property
     def _get_digest(self):
@@ -1657,6 +1689,181 @@ class BeamformerCMF(BeamformerBase):
                 f'Solver for {self.method} in BeamformerCMF not available.'
             )
             raise ImportError(msg)
+
+    def _calc_sensing_matrix(self, f):
+        ind, ind_reim = self.msm_indices
+        h = self.steer.transfer(f).T
+        nc = h.shape[0]
+        num_points = h.shape[1]
+
+        # reduced Kronecker product (only where solution matrix != 0)
+        Bc = (h[:, :, np.newaxis] * h.conjugate().T[np.newaxis, :, :]).transpose(2, 0, 1)
+        Ac = Bc.reshape(nc * nc, num_points)
+
+        A = Ac[ind, :]
+        A = np.vstack([A.real, A.imag])[ind_reim, :]
+        return A
+
+    def _vectorize_csm(self, csm):
+        ind, ind_reim = self.msm_indices
+        nc = csm.shape[-1]
+        R = np.reshape(csm.T, (nc * nc, 1))[ind, :]
+        R = np.vstack([R.real, R.imag])[ind_reim, :]
+        return R
+
+    def _calc_with_solver(self, i, A, R, x0, norms, unit):  # noqa: N803
+        """
+        Calculate result using a custom solver or auto-created PyLops solver.
+
+        Parameters
+        ----------
+        i : int
+            Frequency index.
+        A : array
+            Unnormalized sensing matrix.
+        R : array
+            Vectorized CSM (unscaled).
+        x0 : array
+            Initial guess.
+        norms : array
+            Normalization factors for columns of A.
+        unit : float
+            Unit multiplier.
+
+        Returns
+        -------
+        bool
+            True if solver was used, False otherwise.
+        """
+        solver = self.solver
+        if solver is None and self.method in ('FISTA', 'Split_Bregman') and config.have_pylops:
+            # Build options dict from BeamformerCMF traits
+            if self.method == 'FISTA':
+                options = {
+                    'show': self.show,
+                    'eps': self.alpha,
+                    'niter': self.n_iter,
+                    'alpha': None,  # explicit alpha=None as in original implementation
+                    'tol': 1e-10,
+                }
+            else:  # Split_Bregman
+                options = {
+                    'show': self.show,
+                    'alpha': self.alpha,
+                    'niter_outer': self.n_iter,
+                    'niter_inner': 5,
+                    'tol': 1e-10,
+                    'tau': 1.0,
+                    'mu': 1.0,
+                    'epsRL1s': [1],
+                }
+
+            solver = PylopsLeastSquaresSolver(method=self.method, options=options)
+
+        if solver is not None:
+            # Set solver's norms and unit for internal scaling
+            solver.norms = norms
+            solver.unit = unit
+            # Pass unnormalized A and unscaled R; solver handles normalization/scaling
+            self._ac[i] = solver.solve(A=A, y=R, x=x0, index=i)
+            self._fr[i] = 1
+            return True
+        return False
+
+    def _calc_default_sklearn(self, i, A, R, norms, unit):  # noqa: N803
+        """
+        Calculate result using sklearn-based methods.
+
+        Supports: LassoLars, LassoLarsBIC, OMPCV, NNLS.
+
+        Parameters
+        ----------
+        i : int
+            Frequency index.
+        A : array
+            Normalized sensing matrix.
+        R : array
+            Vectorized and scaled CSM.
+        norms : array
+            Normalization factors for columns of A.
+        unit : float
+            Unit multiplier.
+        """
+        # from sklearn 1.2, normalize=True does not work the same way anymore and the
+        # pipeline approach with StandardScaler does scale in a different way, thus we
+        # monkeypatch the code and normalize ourselves to make results the same over
+        # different sklearn versions
+
+        if self.method == 'LassoLars':
+            model = LassoLars(alpha=self.alpha * unit, max_iter=self.n_iter, positive=True, **sklearn_ndict)
+        elif self.method == 'LassoLarsBIC':
+            model = LassoLarsIC(criterion='bic', max_iter=self.n_iter, positive=True, **sklearn_ndict)
+        elif self.method == 'OMPCV':
+            model = OrthogonalMatchingPursuitCV(**sklearn_ndict)
+        elif self.method == 'NNLS':
+            model = LinearRegression(positive=True)
+
+        # get rid of sklearn warnings that appear for sklearn<1.2 despite any settings
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', category=FutureWarning)
+            # normalized A
+            model.fit(A, R[:, 0])
+        # recover normalization in the coef's
+        self._ac[i] = model.coef_[:] / norms / unit
+        self._fr[i] = 1
+
+    def _calc_default_fmin_l_bfgs_b(self, i, A, R, norms, unit):  # noqa: N803
+        """
+        Calculate result using scipy's fmin_l_bfgs_b optimizer.
+
+        Parameters
+        ----------
+        i : int
+            Frequency index.
+        A : array
+            Normalized sensing matrix.
+        R : array
+            Vectorized and scaled CSM.
+        norms : array
+            Normalization factors for columns of A.
+        unit : float
+            Unit multiplier.
+        """
+        num_points = self.steer.grid.size
+
+        # function to minimize
+        def function(x):
+            # function
+            func = x.T @ A.T @ A @ x - 2 * R.T @ A @ x + R.T @ R
+            # derivitaive
+            der = 2 * A.T @ A @ x.T[:, np.newaxis] - 2 * A.T @ R
+            return func[0].T, der[:, 0]
+
+        # initial guess
+        x0 = np.ones([num_points])
+        # boundaries - set to non negative
+        boundaries = np.tile((0, np.inf), (len(x0), 1))
+
+        # optimize
+        self._ac[i], yval, dicts = fmin_l_bfgs_b(
+            function,
+            x0,
+            fprime=None,
+            args=(),
+            approx_grad=0,
+            bounds=boundaries,
+            m=10,
+            factr=10000000.0,
+            pgtol=1e-05,
+            epsilon=1e-08,
+            maxfun=15000,
+            maxiter=self.n_iter,
+            callback=None,
+            maxls=20,
+        )
+
+        self._ac[i] /= unit * norms  # recover normalization and unit scaling
+        self._fr[i] = 1
 
     def _calc(self, ind):
         """
@@ -1677,134 +1884,28 @@ class BeamformerCMF(BeamformerBase):
         This method only returns values through :attr:`_ac` and :attr:`_fr`
         """
         f = self._f
-
-        # function to repack complex matrices to deal with them in real number space
-        def realify(matrix):
-            return np.vstack([matrix.real, matrix.imag])
-
-        # prepare calculation
-        nc = self.freq_data.num_channels
         num_points = self.steer.grid.size
         unit = self.unit_mult
 
         for i in ind:
             csm = np.array(self.freq_data.csm[i], dtype='complex128', copy=True)
+            A = self._calc_sensing_matrix(f[i])
+            R = self._vectorize_csm(csm)
+            x0 = np.zeros((num_points,))
+            norms = spla.norm(A, axis=0)
 
-            h = self.steer.transfer(f[i]).T
+            # Dispatch to solver (passes unnormalized A and unscaled R)
+            if self._calc_with_solver(i, A, R, x0, norms, unit):
+                continue
 
-            # reduced Kronecker product (only where solution matrix != 0)
-            Bc = (h[:, :, np.newaxis] * h.conjugate().T[np.newaxis, :, :]).transpose(2, 0, 1)
-            Ac = Bc.reshape(nc * nc, num_points)
+            # For non-solver methods, apply normalization and scaling
+            A_normalized = A / norms
+            R_scaled = R * unit
 
-            # get indices for upper triangular matrices (use np.tril b/c transposed)
-            ind = np.reshape(np.tril(np.ones((nc, nc))), (nc * nc,)) > 0
-
-            ind_im0 = (np.reshape(np.eye(nc), (nc * nc,)) == 0)[ind]
-            if self.r_diag:
-                # omit main diagonal for noise reduction
-                ind_reim = np.hstack([ind_im0, ind_im0])
+            if self.method == 'fmin_l_bfgs_b':
+                self._calc_default_fmin_l_bfgs_b(i, A_normalized, R_scaled, norms, unit)
             else:
-                # take all real parts -- also main diagonal
-                ind_reim = np.hstack([np.ones(np.size(ind_im0)) > 0, ind_im0])
-                ind_reim[0] = True  # why this ?
-
-            A = realify(Ac[ind, :])[ind_reim, :]
-            # use csm.T for column stacking reshape!
-            R = realify(np.reshape(csm.T, (nc * nc, 1))[ind, :])[ind_reim, :] * unit
-            # choose method
-            if self.method == 'LassoLars':
-                model = LassoLars(alpha=self.alpha * unit, max_iter=self.n_iter, positive=True, **sklearn_ndict)
-            elif self.method == 'LassoLarsBIC':
-                model = LassoLarsIC(criterion='bic', max_iter=self.n_iter, positive=True, **sklearn_ndict)
-            elif self.method == 'OMPCV':
-                model = OrthogonalMatchingPursuitCV(**sklearn_ndict)
-            elif self.method == 'NNLS':
-                model = LinearRegression(positive=True)
-
-            if self.method == 'Split_Bregman' and config.have_pylops:
-                from pylops import Identity, MatrixMult
-                from pylops.optimization.sparsity import splitbregman
-
-                Oop = MatrixMult(A)  # transfer operator
-                Iop = self.alpha * Identity(num_points)  # regularisation
-                self._ac[i], iterations, cost = splitbregman(
-                    Op=Oop,
-                    RegsL1=[Iop],
-                    y=R[:, 0],
-                    niter_outer=self.n_iter,
-                    niter_inner=5,
-                    RegsL2=None,
-                    dataregsL2=None,
-                    mu=1.0,
-                    epsRL1s=[1],
-                    tol=1e-10,
-                    tau=1.0,
-                    show=self.show,
-                )
-                self._ac[i] /= unit
-
-            elif self.method == 'FISTA' and config.have_pylops:
-                from pylops import MatrixMult
-                from pylops.optimization.sparsity import fista
-
-                Oop = MatrixMult(A)  # transfer operator
-                self._ac[i], iterations, cost = fista(
-                    Op=Oop,
-                    y=R[:, 0],
-                    niter=self.n_iter,
-                    eps=self.alpha,
-                    alpha=None,
-                    tol=1e-10,
-                    show=self.show,
-                )
-                self._ac[i] /= unit
-            elif self.method == 'fmin_l_bfgs_b':
-                # function to minimize
-                def function(x):
-                    # function
-                    func = x.T @ A.T @ A @ x - 2 * R.T @ A @ x + R.T @ R
-                    # derivitaive
-                    der = 2 * A.T @ A @ x.T[:, np.newaxis] - 2 * A.T @ R
-                    return func[0].T, der[:, 0]
-
-                # initial guess
-                x0 = np.ones([num_points])
-                # boundaries - set to non negative
-                boundaries = np.tile((0, np.inf), (len(x0), 1))
-
-                # optimize
-                self._ac[i], yval, dicts = fmin_l_bfgs_b(
-                    function,
-                    x0,
-                    fprime=None,
-                    args=(),
-                    approx_grad=0,
-                    bounds=boundaries,
-                    m=10,
-                    factr=10000000.0,
-                    pgtol=1e-05,
-                    epsilon=1e-08,
-                    maxfun=15000,
-                    maxiter=self.n_iter,
-                    callback=None,
-                    maxls=20,
-                )
-
-                self._ac[i] /= unit
-            else:
-                # from sklearn 1.2, normalize=True does not work the same way anymore and the
-                # pipeline approach with StandardScaler does scale in a different way, thus we
-                # monkeypatch the code and normalize ourselves to make results the same over
-                # different sklearn versions
-                norms = spla.norm(A, axis=0)
-                # get rid of sklearn warnings that appear for sklearn<1.2 despite any settings
-                with warnings.catch_warnings():
-                    warnings.simplefilter('ignore', category=FutureWarning)
-                    # normalized A
-                    model.fit(A / norms, R[:, 0])
-                # recover normalization in the coef's
-                self._ac[i] = model.coef_[:] / norms / unit
-            self._fr[i] = 1
+                self._calc_default_sklearn(i, A_normalized, R_scaled, norms, unit)
 
 
 class BeamformerSODIX(BeamformerBase):
