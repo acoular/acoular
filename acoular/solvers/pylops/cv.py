@@ -132,7 +132,17 @@ if config.have_pylops:
         def solve(self, A, y, x, index):  # noqa: N803
             """Solve one inverse problem after cross-validating regularization."""
             self._validate_solver_method()
-            reg_max = np.max(np.abs(np.asarray(A).T @ np.asarray(y).ravel()))
+            A_array = np.asarray(A)
+            y_array = np.asarray(y).ravel()
+
+            norms = np.asarray(self.norms, dtype=float).ravel()
+            if norms.size == 1:
+                norms = np.full(A_array.shape[1], norms.item())
+
+            A_normalized = A_array / norms
+            y_scaled = y_array * self.unit
+
+            reg_max = np.max(np.abs(A_normalized.T @ y_scaled))
             reg_values = np.geomspace(reg_max, reg_max * self.reg_ratio, self.num_grid)
             reg_best, losses = self.grid_search(A, y, x, reg_values)
 
