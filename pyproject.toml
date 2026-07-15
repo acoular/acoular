@@ -183,6 +183,8 @@ banned-module-level-imports = ["matplotlib", "pylops", "sounddevice"]
 ]
 "tests/*" = ["FIX", "PLC0415", "PT", "RUF", "S101", "TRY"]
 "tests/cases/*" = ["N802"]
+# ported notch-filter tests: DSP naming (N806) and assert-message style only
+"tests/unittests/notch/*" = ["ARG001", "ARG002", "B905", "C408", "E501", "ISC002", "N806", "UP028"]
 "examples/*" = [
   "A001",
   "B007",

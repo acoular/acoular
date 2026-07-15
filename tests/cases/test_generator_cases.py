@@ -57,6 +57,7 @@ SKIP_DEFAULT = [
     ac.WriteH5,
     ac.WriteWAV,
     ac.Calib,
+    ac.ZeroPhaseNotchFilter,
 ]
 
 DEFAULT = [cls for cls in get_subclasses(ac.Generator) if cls not in SKIP_DEFAULT]
@@ -198,6 +199,11 @@ class Generators:
 
     def case_WriteH5(self, time_data_source, tmp_path):
         return ac.WriteH5(source=time_data_source, file=tmp_path / 'test.h5')
+
+    def case_ZeroPhaseNotchFilter(self, time_data_source):
+        # batch_mode avoids the streaming settling-time warning on the short
+        # (50-sample) test signal; forward-backward filtering is non-causal.
+        return ac.ZeroPhaseNotchFilter(source=time_data_source, f_notch=100.0, batch_mode=True)
 
     def case_WriteWAV(self, time_data_source, tmp_path):
         return ac.WriteWAV(source=time_data_source, file=tmp_path / 'test.wav', channels=[0])
