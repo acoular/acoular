@@ -86,9 +86,6 @@ from traits.api import (
 )
 from traits.trait_errors import TraitError
 
-if config.have_pylops:
-    from .solvers.pylops import PylopsLeastSquaresSolver
-
 sklearn_ndict = {}
 if parse(sklearn.__version__) < parse('1.4'):
     sklearn_ndict['normalize'] = False  # pragma: no cover
@@ -1597,7 +1594,7 @@ class BeamformerCMF(BeamformerBase):
     See :cite:`Yardibi2008` for details.
     """
 
-    solver = Union(None, Instance(LeastSquaresSolver))  # for custom solvers, e.g., from PyLops
+    solver = Union(None, Instance(LeastSquaresSolver))
 
     output = Any()
 
@@ -1715,7 +1712,7 @@ class BeamformerCMF(BeamformerBase):
 
     def _calc_with_solver(self, i, A, R, x0, norms, unit):  # noqa: N803
         """
-        Calculate result using a custom solver or auto-created PyLops solver.
+        Calculate result using a custom solver.
 
         Parameters
         ----------
@@ -1738,30 +1735,6 @@ class BeamformerCMF(BeamformerBase):
             True if solver was used, False otherwise.
         """
         solver = self.solver
-        if solver is None and self.method in ('FISTA', 'Split_Bregman') and config.have_pylops:
-            # Build options dict from BeamformerCMF traits
-            if self.method == 'FISTA':
-                options = {
-                    'show': self.show,
-                    'eps': self.alpha,
-                    'niter': self.n_iter,
-                    'alpha': None,  # explicit alpha=None as in original implementation
-                    'tol': 1e-10,
-                }
-            else:  # Split_Bregman
-                options = {
-                    'show': self.show,
-                    'alpha': self.alpha,
-                    'niter_outer': self.n_iter,
-                    'niter_inner': 5,
-                    'tol': 1e-10,
-                    'tau': 1.0,
-                    'mu': 1.0,
-                    'epsRL1s': [1],
-                }
-
-            solver = PylopsLeastSquaresSolver(method=self.method, options=options)
-
         if solver is not None:
             # Set solver's norms and unit for internal scaling
             solver.norms = norms
@@ -1817,7 +1790,7 @@ class BeamformerCMF(BeamformerBase):
         if self.method in ['LassoLars', 'LassoLarsBIC']:
             self.output = model.alpha_ * A.shape[0]
 
-    def _calc_default_fmin_l_bfgs_b(self, i, A, R, norms, unit):  # noqa: N803
+    def _calc_default_fmin_l_bfgs_b(self, i, A, R, unit):  # noqa: N803
         """
         Calculate result using scipy's fmin_l_bfgs_b optimizer.
 
@@ -1826,11 +1799,9 @@ class BeamformerCMF(BeamformerBase):
         i : int
             Frequency index.
         A : array
-            Normalized sensing matrix.
+            Sensing matrix.
         R : array
             Vectorized and scaled CSM.
-        norms : array
-            Normalization factors for columns of A.
         unit : float
             Unit multiplier.
         """
@@ -1867,7 +1838,7 @@ class BeamformerCMF(BeamformerBase):
             maxls=20,
         )
 
-        self._ac[i] /= unit * norms  # recover normalization and unit scaling
+        self._ac[i] /= unit
         self._fr[i] = 1
 
     def _calc(self, ind):
@@ -1903,13 +1874,50 @@ class BeamformerCMF(BeamformerBase):
             if self._calc_with_solver(i, A, R, x0, norms, unit):
                 continue
 
-            # For non-solver methods, apply normalization and scaling
-            A_normalized = A / norms
             R_scaled = R * unit
 
-            if self.method == 'fmin_l_bfgs_b':
-                self._calc_default_fmin_l_bfgs_b(i, A_normalized, R_scaled, norms, unit)
+            if self.method == 'Split_Bregman' and config.have_pylops:
+                from pylops import Identity, MatrixMult
+                from pylops.optimization.sparsity import splitbregman
+
+                Oop = MatrixMult(A)  # transfer operator
+                Iop = self.alpha * Identity(num_points)  # regularisation
+                self._ac[i], iterations, cost = splitbregman(
+                    Op=Oop,
+                    RegsL1=[Iop],
+                    y=R_scaled[:, 0],
+                    niter_outer=self.n_iter,
+                    niter_inner=5,
+                    RegsL2=None,
+                    dataregsL2=None,
+                    mu=1.0,
+                    epsRL1s=[1],
+                    tol=1e-10,
+                    tau=1.0,
+                    show=self.show,
+                )
+                self._ac[i] /= unit
+                self._fr[i] = 1
+            elif self.method == 'FISTA' and config.have_pylops:
+                from pylops import MatrixMult
+                from pylops.optimization.sparsity import fista
+
+                Oop = MatrixMult(A)  # transfer operator
+                self._ac[i], iterations, cost = fista(
+                    Op=Oop,
+                    y=R_scaled[:, 0],
+                    niter=self.n_iter,
+                    eps=self.alpha,
+                    alpha=None,
+                    tol=1e-10,
+                    show=self.show,
+                )
+                self._ac[i] /= unit
+                self._fr[i] = 1
+            elif self.method == 'fmin_l_bfgs_b':
+                self._calc_default_fmin_l_bfgs_b(i, A, R_scaled, unit)
             else:
+                A_normalized = A / norms
                 self._calc_default_sklearn(i, A_normalized, R_scaled, norms, unit)
 
 
