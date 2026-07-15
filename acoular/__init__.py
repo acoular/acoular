@@ -109,7 +109,9 @@ from .tbeamform import (
     IntegratorSectorTime,
 )
 from .tprocess import (
+    AdaptiveNotchFilter,
     AngleTracker,
+    CascadeNotchFilter,
     ChannelMixer,
     Filter,
     FilterBank,
@@ -118,6 +120,7 @@ from .tprocess import (
     FiltOctave,
     MaskedTimeOut,
     Mixer,
+    NotchFilter,
     OctaveFilterBank,
     SpatialInterpolator,
     SpatialInterpolatorConstantRotation,
@@ -130,6 +133,7 @@ from .tprocess import (
     Trigger,
     WriteH5,
     WriteWAV,
+    ZeroPhaseNotchFilter,
 )
 from .trajectory import Trajectory
 from .version import __version__
