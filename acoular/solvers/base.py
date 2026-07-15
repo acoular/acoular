@@ -16,7 +16,7 @@ methods such as :class:`acoular.fbeamform.BeamformerCMF`.
 from abc import abstractmethod
 
 import numpy as np
-from traits.api import ABCHasStrictTraits, Any, Array, Dict, Float, Property, cached_property
+from traits.api import ABCHasStrictTraits, Array, Dict, Float, Property, cached_property
 
 from acoular.internal import digest
 
@@ -27,12 +27,8 @@ class SolverBase(ABCHasStrictTraits):
     Notes
     -----
     Solver instances are intended to be passed to inverse beamformers via their
-    ``solver`` trait. Implementations must provide the :meth:`solve` method and
-    may store additional run diagnostics in :attr:`output`.
+    ``solver`` trait. Implementations must provide the :meth:`solve` method.
     """
-
-    #: Optional container for solver output and diagnostics.
-    output = Any
 
     #: Keyword options forwarded to the underlying backend solver.
     options = Dict
