@@ -162,7 +162,7 @@ class SpectraGenerator(Generator):
             block may contain fewer than ``num`` snapshots.
 
             The second axis stores the spectra in frequency-major order with channels
-            interlaced for each frequency bin. Reshagping a block with
+            interlaced for each frequency bin. Reshaping a block with
             ``block.reshape(n, num_freqs, num_channels)`` gives direct access to the
             data by snapshot, frequency, and channel.
         """
