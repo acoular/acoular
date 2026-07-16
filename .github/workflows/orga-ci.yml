@@ -18,9 +18,6 @@ jobs:
   docs:
     uses: acoular/ci/.github/workflows/docs.yml@main
 
-  github:
-    uses: acoular/ci/.github/workflows/github.yml@main
-
   linting:
     uses: acoular/ci/.github/workflows/linting.yml@main
 
