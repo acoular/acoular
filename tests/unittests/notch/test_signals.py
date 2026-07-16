@@ -15,11 +15,7 @@ class TestGenerateTonalSignal:
         num_channels = 1
 
         signal = generate_tonal_signal(
-            f0=100,
-            harmonics=[1, 2, 3],
-            duration=duration,
-            sample_freq=sample_freq,
-            num_channels=num_channels
+            f0=100, harmonics=[1, 2, 3], duration=duration, sample_freq=sample_freq, num_channels=num_channels
         )
 
         expected_samples = int(duration * sample_freq)
@@ -33,11 +29,7 @@ class TestGenerateTonalSignal:
         num_channels = 4
 
         signal = generate_tonal_signal(
-            f0=200,
-            harmonics=[1],
-            duration=duration,
-            sample_freq=sample_freq,
-            num_channels=num_channels
+            f0=200, harmonics=[1], duration=duration, sample_freq=sample_freq, num_channels=num_channels
         )
 
         expected_samples = int(duration * sample_freq)
@@ -56,12 +48,12 @@ class TestGenerateTonalSignal:
             duration=duration,
             sample_freq=sample_freq,
             num_channels=1,
-            snr_db=40  # High SNR for clear peak
+            snr_db=40,  # High SNR for clear peak
         )
 
         # Compute FFT
         fft = np.fft.rfft(signal[:, 0])
-        freqs = np.fft.rfftfreq(len(signal), 1/sample_freq)
+        freqs = np.fft.rfftfreq(len(signal), 1 / sample_freq)
         magnitude = np.abs(fft)
 
         # Find peak frequency
@@ -84,12 +76,12 @@ class TestGenerateTonalSignal:
             duration=duration,
             sample_freq=sample_freq,
             num_channels=1,
-            snr_db=40  # High SNR for clear peaks
+            snr_db=40,  # High SNR for clear peaks
         )
 
         # Compute FFT
         fft = np.fft.rfft(signal[:, 0])
-        freqs = np.fft.rfftfreq(len(signal), 1/sample_freq)
+        freqs = np.fft.rfftfreq(len(signal), 1 / sample_freq)
         magnitude = np.abs(fft)
 
         # Check for peaks at each harmonic frequency
@@ -115,17 +107,12 @@ class TestGenerateTonalSignal:
         target_snr_db = 20
 
         signal = generate_tonal_signal(
-            f0=f0,
-            harmonics=harmonics,
-            duration=duration,
-            sample_freq=sample_freq,
-            num_channels=1,
-            snr_db=target_snr_db
+            f0=f0, harmonics=harmonics, duration=duration, sample_freq=sample_freq, num_channels=1, snr_db=target_snr_db
         )
 
         # Compute FFT
         fft = np.fft.rfft(signal[:, 0])
-        freqs = np.fft.rfftfreq(len(signal), 1/sample_freq)
+        freqs = np.fft.rfftfreq(len(signal), 1 / sample_freq)
         magnitude_squared = np.abs(fft) ** 2
 
         # Identify signal bins (harmonics) and noise bins
@@ -151,14 +138,7 @@ class TestGenerateTonalSignal:
 
     def test_edge_case_no_harmonics(self):
         """Test with empty harmonics list (pure noise)."""
-        signal = generate_tonal_signal(
-            f0=100,
-            harmonics=[],
-            duration=0.5,
-            sample_freq=8000,
-            num_channels=1,
-            snr_db=20
-        )
+        signal = generate_tonal_signal(f0=100, harmonics=[], duration=0.5, sample_freq=8000, num_channels=1, snr_db=20)
 
         expected_samples = int(0.5 * 8000)
         assert signal.shape == (expected_samples, 1)
@@ -175,12 +155,7 @@ class TestGenerateTonalSignal:
     def test_edge_case_infinite_snr(self):
         """Test with infinite SNR (no noise)."""
         signal = generate_tonal_signal(
-            f0=100,
-            harmonics=[1],
-            duration=1.0,
-            sample_freq=16000,
-            num_channels=1,
-            snr_db=np.inf
+            f0=100, harmonics=[1], duration=1.0, sample_freq=16000, num_channels=1, snr_db=np.inf
         )
 
         # Should have a pure sinusoid
@@ -195,18 +170,13 @@ class TestGenerateTonalSignal:
     def test_multi_channel_consistency(self):
         """Test that all channels have same signal (different noise)."""
         signal = generate_tonal_signal(
-            f0=100,
-            harmonics=[1, 2],
-            duration=1.0,
-            sample_freq=16000,
-            num_channels=3,
-            snr_db=30
+            f0=100, harmonics=[1, 2], duration=1.0, sample_freq=16000, num_channels=3, snr_db=30
         )
 
         # All channels should have same frequency content
         for ch in range(3):
             fft = np.fft.rfft(signal[:, ch])
-            freqs = np.fft.rfftfreq(len(signal), 1/16000)
+            freqs = np.fft.rfftfreq(len(signal), 1 / 16000)
             magnitude = np.abs(fft)
 
             # Check for peak at 100 Hz

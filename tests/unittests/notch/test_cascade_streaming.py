@@ -17,8 +17,8 @@ from numpy.testing import assert_allclose
 # Helpers
 # ---------------------------------------------------------------------------
 
-def _build_cascade(signal, sample_freq, frequencies, block_size=4096,
-                   mode=None, freq_source=None):
+
+def _build_cascade(signal, sample_freq, frequencies, block_size=4096, mode=None, freq_source=None):
     """Build a CascadeNotchFilter with zero_phase=True."""
     source = MockSamplesGenerator(signal, sample_freq)
     S, M = frequencies.shape
@@ -38,23 +38,21 @@ def _build_cascade(signal, sample_freq, frequencies, block_size=4096,
     return CascadeNotchFilter(**kwargs)
 
 
-def _batch_output(signal, sample_freq, frequencies, block_size=4096,
-                  mode=None, freq_source=None):
+def _batch_output(signal, sample_freq, frequencies, block_size=4096, mode=None, freq_source=None):
     """Run the batch zero-phase path and return the full output array."""
-    filt = _build_cascade(signal, sample_freq, frequencies, block_size,
-                          mode, freq_source)
+    filt = _build_cascade(signal, sample_freq, frequencies, block_size, mode, freq_source)
     return np.vstack(list(filt.result(block_size)))
 
 
-def _streaming_output(signal, sample_freq, frequencies, block_size=4096,
-                      mode=None, freq_source=None, freq_data=None):
+def _streaming_output(signal, sample_freq, frequencies, block_size=4096, mode=None, freq_source=None, freq_data=None):
     """Run the streaming zero-phase path and return the full output array.
 
     *freq_data* is the full (num_samples, S*M) array; it is sliced into
     blocks internally so the same data feeds both batch and streaming paths.
     """
-    filt = _build_cascade(signal, sample_freq, frequencies, block_size,
-                          mode, freq_source=None)  # freq_source unused in streaming
+    filt = _build_cascade(
+        signal, sample_freq, frequencies, block_size, mode, freq_source=None
+    )  # freq_source unused in streaming
     filt._reset_streaming()
 
     num_samples = signal.shape[0]
@@ -79,6 +77,7 @@ def _streaming_output(signal, sample_freq, frequencies, block_size=4096,
 # Tests
 # ---------------------------------------------------------------------------
 
+
 class TestCascadeStreamingBasic:
     """Basic streaming API behaviour."""
 
@@ -95,7 +94,7 @@ class TestCascadeStreamingBasic:
             zero_phase=False,
             source=source,
         )
-        with pytest.raises(RuntimeError, match="zero_phase"):
+        with pytest.raises(RuntimeError, match='zero_phase'):
             filt._reset_streaming()
 
     def test_pipeline_latency_default(self, standard_params):
@@ -108,7 +107,8 @@ class TestCascadeStreamingBasic:
         signal = np.random.randn(num_samples, 1)
 
         filt = _build_cascade(
-            signal, sample_freq,
+            signal,
+            sample_freq,
             frequencies=np.array([[100, 200, 300], [150, 300, 450]], dtype=float),
             block_size=block_size,
         )
@@ -117,15 +117,15 @@ class TestCascadeStreamingBasic:
         results = []
         for i in range(num_blocks):
             start = i * block_size
-            out = filt._filter_block_streaming(signal[start:start + block_size])
+            out = filt._filter_block_streaming(signal[start : start + block_size])
             results.append(out)
 
         # Only the first call returns None (1-block lookahead)
-        assert results[0] is None, "Block 0 should be None (buffering)"
+        assert results[0] is None, 'Block 0 should be None (buffering)'
 
         # All subsequent calls should produce output
         for i in range(1, num_blocks):
-            assert results[i] is not None, f"Block {i} should produce output"
+            assert results[i] is not None, f'Block {i} should produce output'
             assert results[i].shape == (block_size, 1)
 
     def test_pipeline_latency_multi_lookahead(self, standard_params):
@@ -138,7 +138,8 @@ class TestCascadeStreamingBasic:
         signal = np.random.randn(num_samples, 1)
 
         filt = _build_cascade(
-            signal, sample_freq,
+            signal,
+            sample_freq,
             frequencies=np.array([[100, 200, 300]], dtype=float),
             block_size=block_size,
         )
@@ -148,16 +149,16 @@ class TestCascadeStreamingBasic:
         results = []
         for i in range(num_blocks):
             start = i * block_size
-            out = filt._filter_block_streaming(signal[start:start + block_size])
+            out = filt._filter_block_streaming(signal[start : start + block_size])
             results.append(out)
 
         # First L calls return None
         for i in range(L):
-            assert results[i] is None, f"Block {i} should be None (filling)"
+            assert results[i] is None, f'Block {i} should be None (filling)'
 
         # After that, output flows
         for i in range(L, num_blocks):
-            assert results[i] is not None, f"Block {i} should produce output"
+            assert results[i] is not None, f'Block {i} should produce output'
             assert results[i].shape == (block_size, 1)
 
     def test_flush_returns_remaining_blocks(self, standard_params):
@@ -171,7 +172,8 @@ class TestCascadeStreamingBasic:
         signal = np.random.randn(num_samples, 1)
 
         filt = _build_cascade(
-            signal, sample_freq,
+            signal,
+            sample_freq,
             frequencies=np.array([[100.0, 200.0]]),
             block_size=block_size,
         )
@@ -180,10 +182,10 @@ class TestCascadeStreamingBasic:
 
         for i in range(num_blocks):
             start = i * block_size
-            filt._filter_block_streaming(signal[start:start + block_size])
+            filt._filter_block_streaming(signal[start : start + block_size])
 
         tail = filt._flush_streaming()
-        assert len(tail) == L, f"flush should return {L} block(s)"
+        assert len(tail) == L, f'flush should return {L} block(s)'
         for blk in tail:
             assert blk.shape == (block_size, 1)
 
@@ -197,7 +199,8 @@ class TestCascadeStreamingBasic:
         signal = np.random.randn(num_samples, 1)
 
         filt = _build_cascade(
-            signal, sample_freq,
+            signal,
+            sample_freq,
             frequencies=np.array([[100.0, 200.0]]),
             block_size=block_size,
         )
@@ -206,10 +209,10 @@ class TestCascadeStreamingBasic:
 
         for i in range(num_blocks):
             start = i * block_size
-            filt._filter_block_streaming(signal[start:start + block_size])
+            filt._filter_block_streaming(signal[start : start + block_size])
 
         tail = filt._flush_streaming()
-        assert len(tail) == L, f"flush should return {L} blocks"
+        assert len(tail) == L, f'flush should return {L} blocks'
 
 
 class TestCascadeStreamingVsBatch:
@@ -223,8 +226,12 @@ class TestCascadeStreamingVsBatch:
         int(duration * sample_freq)
 
         signal = generate_tonal_signal(
-            f0=200, harmonics=[1], duration=duration,
-            sample_freq=sample_freq, num_channels=2, snr_db=30,
+            f0=200,
+            harmonics=[1],
+            duration=duration,
+            sample_freq=sample_freq,
+            num_channels=2,
+            snr_db=30,
         )
         frequencies = np.array([[200.0]])
 
@@ -237,9 +244,11 @@ class TestCascadeStreamingVsBatch:
         inner = slice(block_size, n - block_size)
 
         assert_allclose(
-            stream[inner], batch[inner],
-            atol=0.05, rtol=0.01,
-            err_msg="Streaming and batch static outputs diverge in interior",
+            stream[inner],
+            batch[inner],
+            atol=0.05,
+            rtol=0.01,
+            err_msg='Streaming and batch static outputs diverge in interior',
         )
 
     def test_static_mode_multi_filter(self, standard_params):
@@ -249,8 +258,12 @@ class TestCascadeStreamingVsBatch:
         duration = 1.0
 
         signal = generate_tonal_signal(
-            f0=100, harmonics=[1, 2, 3], duration=duration,
-            sample_freq=sample_freq, num_channels=1, snr_db=30,
+            f0=100,
+            harmonics=[1, 2, 3],
+            duration=duration,
+            sample_freq=sample_freq,
+            num_channels=1,
+            snr_db=30,
         )
         frequencies = np.array([[100.0, 200.0, 300.0]])
 
@@ -262,9 +275,11 @@ class TestCascadeStreamingVsBatch:
         inner = slice(block_size, n - block_size)
         if inner.start < inner.stop:
             assert_allclose(
-                stream[inner], batch[inner],
-                atol=0.1, rtol=0.02,
-                err_msg="Streaming and batch multi-filter static outputs diverge",
+                stream[inner],
+                batch[inner],
+                atol=0.1,
+                rtol=0.02,
+                err_msg='Streaming and batch multi-filter static outputs diverge',
             )
 
     def test_external_mode(self, standard_params):
@@ -287,13 +302,19 @@ class TestCascadeStreamingVsBatch:
 
         # Batch path needs a freq_source
         batch = _batch_output(
-            signal, sample_freq, frequencies, block_size,
+            signal,
+            sample_freq,
+            frequencies,
+            block_size,
             mode='external',
             freq_source=MockFreqSource(freq_data),
         )
         # Streaming path uses freq_data sliced per block
         stream = _streaming_output(
-            signal, sample_freq, frequencies, block_size,
+            signal,
+            sample_freq,
+            frequencies,
+            block_size,
             mode='external',
             freq_data=freq_data,
         )
@@ -303,9 +324,11 @@ class TestCascadeStreamingVsBatch:
         inner = slice(block_size, n - block_size)
         if inner.start < inner.stop:
             assert_allclose(
-                stream[inner], batch[inner],
-                atol=0.15, rtol=0.05,
-                err_msg="Streaming and batch external-mode outputs diverge",
+                stream[inner],
+                batch[inner],
+                atol=0.15,
+                rtol=0.05,
+                err_msg='Streaming and batch external-mode outputs diverge',
             )
 
 
@@ -319,8 +342,12 @@ class TestCascadeStreamingSuppression:
         duration = 1.0
 
         signal = generate_tonal_signal(
-            f0=150, harmonics=[1, 2], duration=duration,
-            sample_freq=sample_freq, num_channels=1, snr_db=30,
+            f0=150,
+            harmonics=[1, 2],
+            duration=duration,
+            sample_freq=sample_freq,
+            num_channels=1,
+            snr_db=30,
         )
         frequencies = np.array([[150.0, 300.0]])
 
@@ -341,8 +368,7 @@ class TestCascadeStreamingSuppression:
             if power_in > 0 and power_out > 0:
                 suppression_db = 10 * np.log10(power_in / power_out)
                 assert suppression_db > 15, (
-                    f"Streaming cascade should suppress {freq} Hz by >15 dB, "
-                    f"got {suppression_db:.1f} dB"
+                    f'Streaming cascade should suppress {freq} Hz by >15 dB, got {suppression_db:.1f} dB'
                 )
 
     def test_multi_channel_streaming(self, standard_params):
@@ -353,8 +379,12 @@ class TestCascadeStreamingSuppression:
         num_channels = 3
 
         signal = generate_tonal_signal(
-            f0=200, harmonics=[1], duration=duration,
-            sample_freq=sample_freq, num_channels=num_channels, snr_db=30,
+            f0=200,
+            harmonics=[1],
+            duration=duration,
+            sample_freq=sample_freq,
+            num_channels=num_channels,
+            snr_db=30,
         )
         frequencies = np.array([[200.0]])
 

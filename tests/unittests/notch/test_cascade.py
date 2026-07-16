@@ -32,19 +32,14 @@ class TestCascadeNotchFilterBasics:
 
         # Generate 2-channel signal
         signal = generate_tonal_signal(
-            f0=440, harmonics=[1], duration=1.0,
-            sample_freq=sample_freq, num_channels=num_channels, snr_db=np.inf
+            f0=440, harmonics=[1], duration=1.0, sample_freq=sample_freq, num_channels=num_channels, snr_db=np.inf
         )
         source = MockSamplesGenerator(signal, sample_freq)
 
         # Create cascade filter: 1 source × 1 harmonic
         frequencies = np.array([[440.0]])  # Shape (S=1, M=1)
         filter_obj = CascadeNotchFilter(
-            num_sources=1,
-            harmonics_per_source=1,
-            frequencies=frequencies,
-            pole_radius=0.95,
-            source=source
+            num_sources=1, harmonics_per_source=1, frequencies=frequencies, pole_radius=0.95, source=source
         )
 
         # Verify traits are set
@@ -58,23 +53,20 @@ class TestCascadeNotchFilterBasics:
         sample_freq = standard_params['sample_freq']
 
         signal = generate_tonal_signal(
-            f0=100, harmonics=[1], duration=1.0,
-            sample_freq=sample_freq, num_channels=1, snr_db=np.inf
+            f0=100, harmonics=[1], duration=1.0, sample_freq=sample_freq, num_channels=1, snr_db=np.inf
         )
         source = MockSamplesGenerator(signal, sample_freq)
 
         # 2 sources × 3 harmonics = 6 total filters
-        frequencies = np.array([
-            [100.0, 200.0, 300.0],  # Source 0: harmonics 1, 2, 3
-            [150.0, 300.0, 450.0]   # Source 1: harmonics 1, 2, 3
-        ])
+        frequencies = np.array(
+            [
+                [100.0, 200.0, 300.0],  # Source 0: harmonics 1, 2, 3
+                [150.0, 300.0, 450.0],  # Source 1: harmonics 1, 2, 3
+            ]
+        )
 
         filter_obj = CascadeNotchFilter(
-            num_sources=2,
-            harmonics_per_source=3,
-            frequencies=frequencies,
-            pole_radius=0.95,
-            source=source
+            num_sources=2, harmonics_per_source=3, frequencies=frequencies, pole_radius=0.95, source=source
         )
 
         assert filter_obj.num_sources == 2
@@ -100,19 +92,14 @@ class TestCascadeMultiChannelCorrectness:
         # Generate 3-channel signal with same tone in each channel
         # (but independent noise to verify independence)
         signal = generate_tonal_signal(
-            f0=f_notch, harmonics=[1], duration=1.0,
-            sample_freq=sample_freq, num_channels=num_channels, snr_db=20
+            f0=f_notch, harmonics=[1], duration=1.0, sample_freq=sample_freq, num_channels=num_channels, snr_db=20
         )
         source = MockSamplesGenerator(signal, sample_freq)
 
         # Single source, single harmonic
         frequencies = np.array([[f_notch]])
         filter_obj = CascadeNotchFilter(
-            num_sources=1,
-            harmonics_per_source=1,
-            frequencies=frequencies,
-            pole_radius=0.95,
-            source=source
+            num_sources=1, harmonics_per_source=1, frequencies=frequencies, pole_radius=0.95, source=source
         )
 
         # Collect filtered output
@@ -120,8 +107,7 @@ class TestCascadeMultiChannelCorrectness:
         output = np.vstack(output_blocks)
 
         # Verify output shape
-        assert output.shape == signal.shape, \
-            f"Output shape {output.shape} should match input shape {signal.shape}"
+        assert output.shape == signal.shape, f'Output shape {output.shape} should match input shape {signal.shape}'
 
         # Verify suppression in each channel independently
         for ch in range(num_channels):
@@ -129,8 +115,7 @@ class TestCascadeMultiChannelCorrectness:
             output_power_db = compute_fft_power_db(output[:, ch], sample_freq, f_notch)
             suppression_db = input_power_db - output_power_db
 
-            assert suppression_db > 20, \
-                f"Channel {ch}: Expected >20 dB suppression, got {suppression_db:.1f} dB"
+            assert suppression_db > 20, f'Channel {ch}: Expected >20 dB suppression, got {suppression_db:.1f} dB'
 
 
 class TestCascadeSerialMode:
@@ -149,19 +134,14 @@ class TestCascadeSerialMode:
 
         # Generate signal with 3 harmonics
         signal = generate_tonal_signal(
-            f0=f0, harmonics=[1, 2, 3], duration=1.0,
-            sample_freq=sample_freq, num_channels=1, snr_db=np.inf
+            f0=f0, harmonics=[1, 2, 3], duration=1.0, sample_freq=sample_freq, num_channels=1, snr_db=np.inf
         )
         source = MockSamplesGenerator(signal, sample_freq)
 
         # Configure 1 source × 3 harmonics
         frequencies = np.array([[100.0, 200.0, 300.0]])
         filter_obj = CascadeNotchFilter(
-            num_sources=1,
-            harmonics_per_source=3,
-            frequencies=frequencies,
-            pole_radius=0.95,
-            source=source
+            num_sources=1, harmonics_per_source=3, frequencies=frequencies, pole_radius=0.95, source=source
         )
 
         # Collect filtered output
@@ -175,8 +155,7 @@ class TestCascadeSerialMode:
             output_power = compute_fft_power_db(output, sample_freq, freq)
             suppression = input_power - output_power
 
-            assert suppression > 20, \
-                f"Harmonic {h} ({freq} Hz): Expected >20 dB suppression, got {suppression:.1f} dB"
+            assert suppression > 20, f'Harmonic {h} ({freq} Hz): Expected >20 dB suppression, got {suppression:.1f} dB'
 
     def test_serial_cascade_multi_source(self, standard_params):
         """Test serial mode with multiple sources.
@@ -198,17 +177,15 @@ class TestCascadeSerialMode:
         source = MockSamplesGenerator(signal, sample_freq)
 
         # 2 sources × 2 harmonics
-        frequencies = np.array([
-            [100.0, 200.0],  # Source 0
-            [150.0, 300.0]   # Source 1
-        ])
+        frequencies = np.array(
+            [
+                [100.0, 200.0],  # Source 0
+                [150.0, 300.0],  # Source 1
+            ]
+        )
 
         filter_obj = CascadeNotchFilter(
-            num_sources=2,
-            harmonics_per_source=2,
-            frequencies=frequencies,
-            pole_radius=0.95,
-            source=source
+            num_sources=2, harmonics_per_source=2, frequencies=frequencies, pole_radius=0.95, source=source
         )
 
         # Collect filtered output
@@ -222,8 +199,7 @@ class TestCascadeSerialMode:
             output_power = compute_fft_power_db(output, sample_freq, freq)
             suppression = input_power - output_power
 
-            assert suppression > 20, \
-                f"{freq} Hz: Expected >20 dB suppression, got {suppression:.1f} dB"
+            assert suppression > 20, f'{freq} Hz: Expected >20 dB suppression, got {suppression:.1f} dB'
 
 
 class TestCascadeStatePreservation:
@@ -243,19 +219,14 @@ class TestCascadeStatePreservation:
         # Generate signal with multiple harmonics (deterministic - no noise)
         # This way we have measurable signal after filtering the notch frequency
         signal = generate_tonal_signal(
-            f0=f0, harmonics=[1, 2, 3, 4, 5], duration=2.0,
-            sample_freq=sample_freq, num_channels=1, snr_db=np.inf
+            f0=f0, harmonics=[1, 2, 3, 4, 5], duration=2.0, sample_freq=sample_freq, num_channels=1, snr_db=np.inf
         )
         source = MockSamplesGenerator(signal, sample_freq)
 
         # Notch out only the 3rd harmonic (300 Hz)
         frequencies = np.array([[f_notch]])
         filter_obj = CascadeNotchFilter(
-            num_sources=1,
-            harmonics_per_source=1,
-            frequencies=frequencies,
-            pole_radius=0.95,
-            source=source
+            num_sources=1, harmonics_per_source=1, frequencies=frequencies, pole_radius=0.95, source=source
         )
 
         # Collect output in small blocks
@@ -276,13 +247,14 @@ class TestCascadeStatePreservation:
                 jump = abs(sample_after - sample_before)
 
                 # Also check the typical variation within a block for comparison
-                block_diffs = np.abs(np.diff(output[boundary_idx-10:boundary_idx+10]))
+                block_diffs = np.abs(np.diff(output[boundary_idx - 10 : boundary_idx + 10]))
                 typical_variation = np.median(block_diffs)
 
                 # Jump at boundary should not be much larger than typical variation
-                assert jump < 5 * typical_variation, \
-                    f"Block boundary discontinuity at sample {boundary_idx}: " \
-                    f"jump={jump:.6f}, typical={typical_variation:.6f}"
+                assert jump < 5 * typical_variation, (
+                    f'Block boundary discontinuity at sample {boundary_idx}: '
+                    f'jump={jump:.6f}, typical={typical_variation:.6f}'
+                )
 
     def test_multi_channel_independent_states(self, standard_params):
         """Test that K channels maintain independent filter states.
@@ -304,11 +276,7 @@ class TestCascadeStatePreservation:
 
         frequencies = np.array([[440.0]])
         filter_obj = CascadeNotchFilter(
-            num_sources=1,
-            harmonics_per_source=1,
-            frequencies=frequencies,
-            pole_radius=0.95,
-            source=source
+            num_sources=1, harmonics_per_source=1, frequencies=frequencies, pole_radius=0.95, source=source
         )
 
         # Collect output
@@ -320,12 +288,11 @@ class TestCascadeStatePreservation:
         output_power_ch0 = compute_fft_power_db(output[:, 0], sample_freq, 440.0)
         suppression_ch0 = input_power_ch0 - output_power_ch0
 
-        assert suppression_ch0 > 20, \
-            f"Channel 0: Expected >20 dB suppression, got {suppression_ch0:.1f} dB"
+        assert suppression_ch0 > 20, f'Channel 0: Expected >20 dB suppression, got {suppression_ch0:.1f} dB'
 
         # Channel 1 should be relatively unchanged (no tone to suppress)
         # Just verify it doesn't crash and output is reasonable
-        assert np.all(np.isfinite(output[:, 1])), "Channel 1 output should be finite"
+        assert np.all(np.isfinite(output[:, 1])), 'Channel 1 output should be finite'
 
 
 class TestCascadeFullMIMO:
@@ -355,17 +322,15 @@ class TestCascadeFullMIMO:
         source = MockSamplesGenerator(signal, sample_freq)
 
         # 2 sources × 2 harmonics
-        frequencies = np.array([
-            [100.0, 200.0],  # Source 0
-            [150.0, 300.0]   # Source 1
-        ])
+        frequencies = np.array(
+            [
+                [100.0, 200.0],  # Source 0
+                [150.0, 300.0],  # Source 1
+            ]
+        )
 
         filter_obj = CascadeNotchFilter(
-            num_sources=2,
-            harmonics_per_source=2,
-            frequencies=frequencies,
-            pole_radius=0.95,
-            source=source
+            num_sources=2, harmonics_per_source=2, frequencies=frequencies, pole_radius=0.95, source=source
         )
 
         # Collect output
@@ -382,8 +347,7 @@ class TestCascadeFullMIMO:
             output_power = compute_fft_power_db(output[:, 0], sample_freq, freq)
             suppression = input_power - output_power
 
-            assert suppression > 20, \
-                f"MIMO - {freq} Hz: Expected >20 dB suppression, got {suppression:.1f} dB"
+            assert suppression > 20, f'MIMO - {freq} Hz: Expected >20 dB suppression, got {suppression:.1f} dB'
 
 
 class TestCascadeNotchFilterMultiChannelValidation:
@@ -443,11 +407,7 @@ class TestCascadeNotchFilterMultiChannelValidation:
         frequencies = np.array([[440.0, 880.0, 1320.0]])  # Shape (S=1, M=3)
 
         filter_obj = CascadeNotchFilter(
-            num_sources=1,
-            harmonics_per_source=3,
-            frequencies=frequencies,
-            pole_radius=0.95,
-            source=source
+            num_sources=1, harmonics_per_source=3, frequencies=frequencies, pole_radius=0.95, source=source
         )
 
         # Collect filtered output
@@ -486,20 +446,26 @@ class TestCascadeNotchFilterMultiChannelValidation:
         suppression_880_ch2 = input_power_880_ch2 - output_power_880_ch2
 
         # Assertions: Target frequencies suppressed, weak tones minimally affected
-        assert suppression_440_ch0 > 20, \
-            f"Channel 0: 440 Hz (strong) should be suppressed >20 dB, got {suppression_440_ch0:.1f} dB"
-        assert suppression_880_ch0 > 20, \
-            f"Channel 0: 880 Hz (weak) also suppressed by 880 Hz filter (>20 dB), got {suppression_880_ch0:.1f} dB"
+        assert suppression_440_ch0 > 20, (
+            f'Channel 0: 440 Hz (strong) should be suppressed >20 dB, got {suppression_440_ch0:.1f} dB'
+        )
+        assert suppression_880_ch0 > 20, (
+            f'Channel 0: 880 Hz (weak) also suppressed by 880 Hz filter (>20 dB), got {suppression_880_ch0:.1f} dB'
+        )
 
-        assert suppression_880_ch1 > 20, \
-            f"Channel 1: 880 Hz (strong) should be suppressed >20 dB, got {suppression_880_ch1:.1f} dB"
-        assert suppression_440_ch1 > 20, \
-            f"Channel 1: 440 Hz (weak) also suppressed by 440 Hz filter (>20 dB), got {suppression_440_ch1:.1f} dB"
+        assert suppression_880_ch1 > 20, (
+            f'Channel 1: 880 Hz (strong) should be suppressed >20 dB, got {suppression_880_ch1:.1f} dB'
+        )
+        assert suppression_440_ch1 > 20, (
+            f'Channel 1: 440 Hz (weak) also suppressed by 440 Hz filter (>20 dB), got {suppression_440_ch1:.1f} dB'
+        )
 
-        assert suppression_1320_ch2 > 20, \
-            f"Channel 2: 1320 Hz (strong) should be suppressed >20 dB, got {suppression_1320_ch2:.1f} dB"
-        assert suppression_880_ch2 > 20, \
-            f"Channel 2: 880 Hz (weak) also suppressed by 880 Hz filter (>20 dB), got {suppression_880_ch2:.1f} dB"
+        assert suppression_1320_ch2 > 20, (
+            f'Channel 2: 1320 Hz (strong) should be suppressed >20 dB, got {suppression_1320_ch2:.1f} dB'
+        )
+        assert suppression_880_ch2 > 20, (
+            f'Channel 2: 880 Hz (weak) also suppressed by 880 Hz filter (>20 dB), got {suppression_880_ch2:.1f} dB'
+        )
 
         # The key validation: all channels independently suppress ALL target frequencies
         # This proves no cross-channel interference - each channel processes independently
@@ -557,8 +523,12 @@ class TestCascadeNotchFilterPerformance:
                 freq = frequencies[s, m]
                 # Generate this harmonic and add to all channels
                 harmonic_signal = generate_tonal_signal(
-                    f0=freq, harmonics=[1], duration=signal_duration,
-                    sample_freq=sample_freq, num_channels=num_channels, snr_db=20
+                    f0=freq,
+                    harmonics=[1],
+                    duration=signal_duration,
+                    sample_freq=sample_freq,
+                    num_channels=num_channels,
+                    snr_db=20,
                 )
                 signal += harmonic_signal * 0.1  # Scale down to avoid clipping
 
@@ -566,6 +536,7 @@ class TestCascadeNotchFilterPerformance:
 
         # Create cascade filter with full S=6, M=10, K=16 configuration
         import time
+
         start_time = time.time()
 
         filter_obj = CascadeNotchFilter(
@@ -573,7 +544,7 @@ class TestCascadeNotchFilterPerformance:
             harmonics_per_source=num_harmonics,
             frequencies=frequencies,
             pole_radius=0.95,
-            source=source
+            source=source,
         )
 
         # Process signal
@@ -584,8 +555,7 @@ class TestCascadeNotchFilterPerformance:
         processing_time = end_time - start_time
 
         # Verify processing time is reasonable (<10s for 1-second signal)
-        assert processing_time < 10.0, \
-            f"Processing time should be <10s for 1-second signal, got {processing_time:.2f}s"
+        assert processing_time < 10.0, f'Processing time should be <10s for 1-second signal, got {processing_time:.2f}s'
 
         # Verify all 60 target frequencies achieve >25 dB suppression
         # Test on first channel (all channels should behave similarly)
@@ -606,32 +576,28 @@ class TestCascadeNotchFilterPerformance:
             input_power = compute_fft_power_db(signal[:, test_channel], sample_freq, freq)
             output_power = compute_fft_power_db(output[:, test_channel], sample_freq, freq)
             suppression = input_power - output_power
-            suppression_results[f"S{s}_H{m+1}_{freq:.1f}Hz"] = suppression
+            suppression_results[f'S{s}_H{m + 1}_{freq:.1f}Hz'] = suppression
 
-            assert suppression > 25, \
-                f"Source {s}, Harmonic {m+1} ({freq:.1f} Hz): " \
-                f"Expected >25 dB suppression (PROJECT.md requirement), got {suppression:.1f} dB"
+            assert suppression > 25, (
+                f'Source {s}, Harmonic {m + 1} ({freq:.1f} Hz): '
+                f'Expected >25 dB suppression (PROJECT.md requirement), got {suppression:.1f} dB'
+            )
 
         # Report performance metrics for visibility
-        print("\nSerial cascade - Performance at realistic hexacopter scale:")
-        print(f"  Configuration: {num_sources} sources × {num_harmonics} harmonics × {num_channels} channels")
-        print(f"  Total filters: {num_sources * num_harmonics * num_channels}")
-        print(f"  Processing time: {processing_time:.3f}s for {signal_duration}s signal")
-        print("  Suppression achieved:")
+        print('\nSerial cascade - Performance at realistic hexacopter scale:')
+        print(f'  Configuration: {num_sources} sources × {num_harmonics} harmonics × {num_channels} channels')
+        print(f'  Total filters: {num_sources * num_harmonics * num_channels}')
+        print(f'  Processing time: {processing_time:.3f}s for {signal_duration}s signal')
+        print('  Suppression achieved:')
         for key, value in list(suppression_results.items())[:5]:
-            print(f"    {key}: {value:.1f} dB")
+            print(f'    {key}: {value:.1f} dB')
         if len(suppression_results) > 5:
-            print(f"    ... and {len(suppression_results) - 5} more frequencies")
+            print(f'    ... and {len(suppression_results) - 5} more frequencies')
 
 
 # Helper function for adaptive cascade tests
 def generate_swept_tonal_signal(
-    f_start: float,
-    f_end: float,
-    duration: float,
-    sample_freq: float,
-    num_channels: int = 1,
-    snr_db: float = 20
+    f_start: float, f_end: float, duration: float, sample_freq: float, num_channels: int = 1, snr_db: float = 20
 ) -> tuple[np.ndarray, np.ndarray]:
     """Generate tonal signal with linearly swept frequency.
 
@@ -668,7 +634,7 @@ def generate_swept_tonal_signal(
     signal = np.sin(phase)
 
     # Calculate signal power
-    signal_power = float(np.mean(signal ** 2))
+    signal_power = float(np.mean(signal**2))
 
     # Add noise
     if not np.isinf(snr_db):
@@ -707,7 +673,7 @@ class TestCascadeAdaptiveExternalMode:
 
         # Combine signals and add noise
         combined = signal1 + signal2
-        signal_power = float(np.mean(combined ** 2))
+        signal_power = float(np.mean(combined**2))
         snr_linear = 10 ** (20 / 10.0)
         noise_power = signal_power / snr_linear
         noise = np.random.randn(num_samples, 1) * np.sqrt(noise_power)
@@ -730,7 +696,7 @@ class TestCascadeAdaptiveExternalMode:
             freq_source=MockFreqSource(freq_trajectories.T),
             pole_radius=0.95,
             mode='external',
-            source=source
+            source=source,
         )
 
         # Process signal
@@ -741,22 +707,20 @@ class TestCascadeAdaptiveExternalMode:
         start = int(0.4 * sample_freq)
         length = int(0.2 * sample_freq)
 
-        orig_segment = signal[start:start+length, 0]
-        filt_segment = filtered[start:start+length, 0]
+        orig_segment = signal[start : start + length, 0]
+        filt_segment = filtered[start : start + length, 0]
 
         # First harmonic should be at ~110 Hz
         orig_power1 = compute_fft_power_db(orig_segment, sample_freq, 110.0)
         filt_power1 = compute_fft_power_db(filt_segment, sample_freq, 110.0)
         suppression1 = orig_power1 - filt_power1
-        assert suppression1 > 25, \
-            f"Harmonic 1 suppression: {suppression1:.1f} dB (expected >25 dB)"
+        assert suppression1 > 25, f'Harmonic 1 suppression: {suppression1:.1f} dB (expected >25 dB)'
 
         # Second harmonic should be at ~220 Hz
         orig_power2 = compute_fft_power_db(orig_segment, sample_freq, 220.0)
         filt_power2 = compute_fft_power_db(filt_segment, sample_freq, 220.0)
         suppression2 = orig_power2 - filt_power2
-        assert suppression2 > 25, \
-            f"Harmonic 2 suppression: {suppression2:.1f} dB (expected >25 dB)"
+        assert suppression2 > 25, f'Harmonic 2 suppression: {suppression2:.1f} dB (expected >25 dB)'
 
     def test_multi_source_tracking(self, standard_params):
         """Test multi-source with different sweep rates.
@@ -779,7 +743,7 @@ class TestCascadeAdaptiveExternalMode:
 
         # Combine and add noise
         combined = signal1 + signal2
-        signal_power = float(np.mean(combined ** 2))
+        signal_power = float(np.mean(combined**2))
         snr_linear = 10 ** (20 / 10.0)
         noise_power = signal_power / snr_linear
         noise = np.random.randn(num_samples, 1) * np.sqrt(noise_power)
@@ -789,16 +753,20 @@ class TestCascadeAdaptiveExternalMode:
         source = MockSamplesGenerator(signal, sample_freq)
 
         # Initial frequencies: 2 sources × 1 harmonic each
-        frequencies = np.array([
-            [100.0],  # Source 0
-            [200.0]   # Source 1
-        ])
+        frequencies = np.array(
+            [
+                [100.0],  # Source 0
+                [200.0],  # Source 1
+            ]
+        )
 
         # Frequency trajectories (S*M, num_samples)
-        freq_trajectories = np.vstack([
-            freq_traj1,  # Source 0, harmonic 0
-            freq_traj2   # Source 1, harmonic 0
-        ])
+        freq_trajectories = np.vstack(
+            [
+                freq_traj1,  # Source 0, harmonic 0
+                freq_traj2,  # Source 1, harmonic 0
+            ]
+        )
 
         # Create adaptive cascade filter (freq_source yields (num_samples, S*M) blocks)
         filter_obj = CascadeNotchFilter(
@@ -808,7 +776,7 @@ class TestCascadeAdaptiveExternalMode:
             freq_source=MockFreqSource(freq_trajectories.T),
             pole_radius=0.95,
             mode='external',
-            source=source
+            source=source,
         )
 
         # Process signal
@@ -819,42 +787,38 @@ class TestCascadeAdaptiveExternalMode:
         start = int(0.1 * sample_freq)
         length = int(0.2 * sample_freq)
 
-        orig_segment = signal[start:start+length, 0]
-        filt_segment = filtered[start:start+length, 0]
+        orig_segment = signal[start : start + length, 0]
+        filt_segment = filtered[start : start + length, 0]
 
         # Source 1 at ~101 Hz
         orig_power1 = compute_fft_power_db(orig_segment, sample_freq, 101.0)
         filt_power1 = compute_fft_power_db(filt_segment, sample_freq, 101.0)
         suppression1 = orig_power1 - filt_power1
-        assert suppression1 > 25, \
-            f"Early: Source 1 suppression {suppression1:.1f} dB (expected >25 dB)"
+        assert suppression1 > 25, f'Early: Source 1 suppression {suppression1:.1f} dB (expected >25 dB)'
 
         # Source 2 at ~204 Hz
         orig_power2 = compute_fft_power_db(orig_segment, sample_freq, 204.0)
         filt_power2 = compute_fft_power_db(filt_segment, sample_freq, 204.0)
         suppression2 = orig_power2 - filt_power2
-        assert suppression2 > 25, \
-            f"Early: Source 2 suppression {suppression2:.1f} dB (expected >25 dB)"
+        assert suppression2 > 25, f'Early: Source 2 suppression {suppression2:.1f} dB (expected >25 dB)'
 
         # Late segment (t=0.8s): Source 1 at ~108 Hz, Source 2 at ~232 Hz
         start = int(0.8 * sample_freq)
 
-        orig_segment = signal[start:start+length, 0]
-        filt_segment = filtered[start:start+length, 0]
+        orig_segment = signal[start : start + length, 0]
+        filt_segment = filtered[start : start + length, 0]
 
         # Source 1 at ~108 Hz
         orig_power1 = compute_fft_power_db(orig_segment, sample_freq, 108.0)
         filt_power1 = compute_fft_power_db(filt_segment, sample_freq, 108.0)
         suppression1 = orig_power1 - filt_power1
-        assert suppression1 > 25, \
-            f"Late: Source 1 suppression {suppression1:.1f} dB (expected >25 dB)"
+        assert suppression1 > 25, f'Late: Source 1 suppression {suppression1:.1f} dB (expected >25 dB)'
 
         # Source 2 at ~232 Hz
         orig_power2 = compute_fft_power_db(orig_segment, sample_freq, 232.0)
         filt_power2 = compute_fft_power_db(filt_segment, sample_freq, 232.0)
         suppression2 = orig_power2 - filt_power2
-        assert suppression2 > 25, \
-            f"Late: Source 2 suppression {suppression2:.1f} dB (expected >25 dB)"
+        assert suppression2 > 25, f'Late: Source 2 suppression {suppression2:.1f} dB (expected >25 dB)'
 
 
 class TestCascadeAdaptiveAutoMode:
@@ -872,13 +836,11 @@ class TestCascadeAdaptiveAutoMode:
 
         # Generate three harmonics: 100 Hz, 200 Hz, 300 Hz (all static)
         signal = (
-            np.sin(2 * np.pi * 100.0 * t) +
-            0.7 * np.sin(2 * np.pi * 200.0 * t) +
-            0.5 * np.sin(2 * np.pi * 300.0 * t)
+            np.sin(2 * np.pi * 100.0 * t) + 0.7 * np.sin(2 * np.pi * 200.0 * t) + 0.5 * np.sin(2 * np.pi * 300.0 * t)
         )
 
         # Add noise
-        signal_power = float(np.mean(signal ** 2))
+        signal_power = float(np.mean(signal**2))
         snr_linear = 10 ** (20 / 10.0)
         noise_power = signal_power / snr_linear
         noise = np.random.randn(num_samples, 1) * np.sqrt(noise_power)
@@ -899,7 +861,7 @@ class TestCascadeAdaptiveAutoMode:
             mode='auto',
             mu=[0.001, 0.0015, 0.002],  # Increasing step sizes through cascade
             smooth_window=25,
-            source=source
+            source=source,
         )
 
         # Process entire signal
@@ -909,8 +871,8 @@ class TestCascadeAdaptiveAutoMode:
         start = int(1.5 * sample_freq)
         length = int(0.4 * sample_freq)
 
-        orig_segment = signal_multi[start:start+length, 0]
-        filt_segment = filtered[start:start+length, 0]
+        orig_segment = signal_multi[start : start + length, 0]
+        filt_segment = filtered[start : start + length, 0]
 
         # Verify all three harmonics are suppressed
         expected_freqs = [100.0, 200.0, 300.0]
@@ -919,8 +881,7 @@ class TestCascadeAdaptiveAutoMode:
             filt_power = compute_fft_power_db(filt_segment, sample_freq, freq)
             suppression = orig_power - filt_power
 
-            assert suppression > 20, \
-                f"Harmonic at {freq} Hz: suppression {suppression:.1f} dB (expected >20 dB)"
+            assert suppression > 20, f'Harmonic at {freq} Hz: suppression {suppression:.1f} dB (expected >20 dB)'
 
 
 class TestCascadeHarveyBenchmark:
@@ -949,7 +910,7 @@ class TestCascadeHarveyBenchmark:
             signal += np.sin(2 * np.pi * freq * t)
 
         # Add realistic noise (SNR = 15 dB, typical drone environment per Harvey)
-        signal_power = float(np.mean(signal ** 2))
+        signal_power = float(np.mean(signal**2))
         snr_linear = 10 ** (15 / 10.0)
         noise_power = signal_power / snr_linear
         noise = np.random.randn(num_samples, 1) * np.sqrt(noise_power)
@@ -962,11 +923,9 @@ class TestCascadeHarveyBenchmark:
         frequencies = np.array([[100.0, 200.0, 300.0]])
 
         # Static frequency trajectories (known frequencies)
-        freq_trajectories = np.array([
-            np.full(num_samples, 100.0),
-            np.full(num_samples, 200.0),
-            np.full(num_samples, 300.0)
-        ])
+        freq_trajectories = np.array(
+            [np.full(num_samples, 100.0), np.full(num_samples, 200.0), np.full(num_samples, 300.0)]
+        )
 
         # Create cascade filter with external mode (freq_source yields (num_samples, S*M) blocks)
         filter_obj = CascadeNotchFilter(
@@ -976,7 +935,7 @@ class TestCascadeHarveyBenchmark:
             freq_source=MockFreqSource(freq_trajectories.T),
             pole_radius=0.95,
             mode='external',
-            source=source
+            source=source,
         )
 
         # Process signal
@@ -986,8 +945,8 @@ class TestCascadeHarveyBenchmark:
         late_start = int(0.5 * sample_freq)
         late_length = int(1.0 * sample_freq)
 
-        orig_segment = signal_with_noise[late_start:late_start+late_length, 0]
-        filt_segment = filtered[late_start:late_start+late_length, 0]
+        orig_segment = signal_with_noise[late_start : late_start + late_length, 0]
+        filt_segment = filtered[late_start : late_start + late_length, 0]
 
         suppressions = []
         for freq in harmonic_freqs:
@@ -996,17 +955,19 @@ class TestCascadeHarveyBenchmark:
             suppression = orig_power - filt_power
             suppressions.append(suppression)
 
-            assert suppression > 25, \
-                f"Harmonic {freq} Hz: suppression {suppression:.1f} dB " \
-                f"(expected >25 dB, Harvey achieved 25-30 dB)"
+            assert suppression > 25, (
+                f'Harmonic {freq} Hz: suppression {suppression:.1f} dB (expected >25 dB, Harvey achieved 25-30 dB)'
+            )
 
         avg_suppression = np.mean(suppressions)
 
-        print("\n=== Harvey Benchmark (External Mode) ===")
-        print(f"Avg suppression: {avg_suppression:.1f} dB (target: >25 dB)")
-        print(f"Per-harmonic: {[f'{s:.1f}' for s in suppressions]} dB")
+        print('\n=== Harvey Benchmark (External Mode) ===')
+        print(f'Avg suppression: {avg_suppression:.1f} dB (target: >25 dB)')
+        print(f'Per-harmonic: {[f"{s:.1f}" for s in suppressions]} dB')
 
-    @pytest.mark.xfail(reason="Multi-harmonic cascade LMS adaptation is challenging due to filter interaction. External mode is the primary use case for drone applications.")
+    @pytest.mark.xfail(
+        reason='Multi-harmonic cascade LMS adaptation is challenging due to filter interaction. External mode is the primary use case for drone applications.'
+    )
     def test_harvey_benchmark_auto_mode(self, standard_params):
         """Test auto mode LMS adaptation for multi-harmonic signals.
 
@@ -1026,7 +987,7 @@ class TestCascadeHarveyBenchmark:
             signal += np.sin(2 * np.pi * freq * t)
 
         # Add noise (SNR = 20 dB for auto mode stability)
-        signal_power = float(np.mean(signal ** 2))
+        signal_power = float(np.mean(signal**2))
         snr_linear = 10 ** (20 / 10.0)
         noise_power = signal_power / snr_linear
         noise = np.random.randn(num_samples, 1) * np.sqrt(noise_power)
@@ -1047,7 +1008,7 @@ class TestCascadeHarveyBenchmark:
             mode='auto',
             mu=[0.001, 0.0015, 0.002],
             smooth_window=25,
-            source=source
+            source=source,
         )
 
         # Process signal
@@ -1057,8 +1018,8 @@ class TestCascadeHarveyBenchmark:
         late_start = int(2.0 * sample_freq)
         late_length = int(0.8 * sample_freq)
 
-        orig_segment = signal_with_noise[late_start:late_start+late_length, 0]
-        filt_segment = filtered[late_start:late_start+late_length, 0]
+        orig_segment = signal_with_noise[late_start : late_start + late_length, 0]
+        filt_segment = filtered[late_start : late_start + late_length, 0]
 
         # Relaxed requirement: >18 dB suppression for auto mode
         suppressions = []
@@ -1068,21 +1029,22 @@ class TestCascadeHarveyBenchmark:
             suppression = orig_power - filt_power
             suppressions.append(suppression)
 
-            assert suppression > 18, \
-                f"Auto mode - Harmonic {freq} Hz: suppression {suppression:.1f} dB " \
-                f"(expected >18 dB for multi-harmonic LMS)"
+            assert suppression > 18, (
+                f'Auto mode - Harmonic {freq} Hz: suppression {suppression:.1f} dB '
+                f'(expected >18 dB for multi-harmonic LMS)'
+            )
 
         avg_suppression = np.mean(suppressions)
 
-        print("\n=== Harvey Benchmark (Auto Mode) ===")
-        print(f"Avg suppression: {avg_suppression:.1f} dB (target: >18 dB)")
-        print(f"Per-harmonic: {[f'{s:.1f}' for s in suppressions]} dB")
+        print('\n=== Harvey Benchmark (Auto Mode) ===')
+        print(f'Avg suppression: {avg_suppression:.1f} dB (target: >18 dB)')
+        print(f'Per-harmonic: {[f"{s:.1f}" for s in suppressions]} dB')
 
 
 class TestCascadeMIMORealisticScale:
     """Full MIMO cascade integration at realistic scale."""
 
-    @pytest.mark.parametrize("mode", ['external'])
+    @pytest.mark.parametrize('mode', ['external'])
     def test_adaptive_mimo_cascade_realistic_scale(self, standard_params, mode):
         """Validate adaptive tracking with full MIMO architecture at realistic scale.
 
@@ -1102,7 +1064,7 @@ class TestCascadeMIMORealisticScale:
 
         # Define 3 independent rotor sweeps with well-separated frequencies
         rotor_sweeps = [
-            (80.0, 90.0),    # Rotor 0: 80 → 90 Hz BPF
+            (80.0, 90.0),  # Rotor 0: 80 → 90 Hz BPF
             (110.0, 120.0),  # Rotor 1: 110 → 120 Hz BPF
             (150.0, 160.0),  # Rotor 2: 150 → 160 Hz BPF
         ]
@@ -1135,11 +1097,11 @@ class TestCascadeMIMORealisticScale:
                 # Add to all channels with varying amplitudes
                 for ch in range(num_channels):
                     amplitude = 0.5 + 0.5 * np.sin(source_idx * ch)  # 0.5 to 1.0
-                    harmonic_decay = 1.0 / (harmonic_num ** 0.5)
+                    harmonic_decay = 1.0 / (harmonic_num**0.5)
                     signal[:, ch] += amplitude * harmonic_decay * harmonic_signal
 
         # Add per-channel independent noise
-        signal_power = float(np.mean(signal ** 2))
+        signal_power = float(np.mean(signal**2))
         snr_linear = 10 ** (20 / 10.0)
         noise_power = signal_power / snr_linear
         for ch in range(num_channels):
@@ -1154,6 +1116,7 @@ class TestCascadeMIMORealisticScale:
 
         # Create adaptive cascade filter
         import time
+
         start_time = time.time()
 
         filter_obj = CascadeNotchFilter(
@@ -1163,18 +1126,20 @@ class TestCascadeMIMORealisticScale:
             freq_source=MockFreqSource(freq_trajectories.T),
             pole_radius=0.95,
             mode='external',
-            source=source
+            source=source,
         )
 
         # Process signal
         filtered = np.vstack(list(filter_obj.result(1024)))
         processing_time = time.time() - start_time
 
-        print("\n=== MIMO Cascade Performance ===")
-        print(f"Filters: {num_sources * harmonics_per_source * num_channels} " \
-              f"({num_sources}×{harmonics_per_source}×{num_channels})")
-        print(f"Processing time: {processing_time:.2f}s for {duration}s signal")
-        print(f"Real-time factor: {processing_time/duration:.2f}x")
+        print('\n=== MIMO Cascade Performance ===')
+        print(
+            f'Filters: {num_sources * harmonics_per_source * num_channels} '
+            f'({num_sources}×{harmonics_per_source}×{num_channels})'
+        )
+        print(f'Processing time: {processing_time:.2f}s for {duration}s signal')
+        print(f'Real-time factor: {processing_time / duration:.2f}x')
 
         # Validate suppression across harmonics
         start_idx = int(0.5 * sample_freq)
@@ -1186,12 +1151,12 @@ class TestCascadeMIMORealisticScale:
 
         suppressions = []
         for ch in test_channels:
-            orig_segment = signal[start_idx:start_idx+segment_length, ch]
-            filt_segment = filtered[start_idx:start_idx+segment_length, ch]
+            orig_segment = signal[start_idx : start_idx + segment_length, ch]
+            filt_segment = filtered[start_idx : start_idx + segment_length, ch]
 
             for harm_idx in test_harmonic_indices:
                 # Get frequency for middle of segment
-                mid_freq = freq_trajectories[harm_idx, start_idx + segment_length//2]
+                mid_freq = freq_trajectories[harm_idx, start_idx + segment_length // 2]
 
                 orig_power = compute_fft_power_db(orig_segment, sample_freq, mid_freq)
                 filt_power = compute_fft_power_db(filt_segment, sample_freq, mid_freq)
@@ -1203,25 +1168,28 @@ class TestCascadeMIMORealisticScale:
 
         min_target = 25
 
-        assert min_suppression > min_target, \
-            f"Minimum suppression: {min_suppression:.1f} dB (expected >{min_target} dB) [{mode}]"
+        assert min_suppression > min_target, (
+            f'Minimum suppression: {min_suppression:.1f} dB (expected >{min_target} dB) [{mode}]'
+        )
 
-        print(f"Suppression - avg: {avg_suppression:.1f} dB, min: {min_suppression:.1f} dB")
-        print(f"All {len(test_channels) * len(test_harmonic_indices)} tested " \
-              f"harmonic-channel pairs suppressed >{min_target} dB")
+        print(f'Suppression - avg: {avg_suppression:.1f} dB, min: {min_suppression:.1f} dB')
+        print(
+            f'All {len(test_channels) * len(test_harmonic_indices)} tested '
+            f'harmonic-channel pairs suppressed >{min_target} dB'
+        )
 
         # Validate multi-channel independence
-        ch0_filt = filtered[start_idx:start_idx+segment_length, 0]
-        ch7_filt = filtered[start_idx:start_idx+segment_length, 7]
+        ch0_filt = filtered[start_idx : start_idx + segment_length, 0]
+        ch7_filt = filtered[start_idx : start_idx + segment_length, 7]
 
         correlation = np.corrcoef(ch0_filt, ch7_filt)[0, 1]
 
-        assert abs(correlation) < 0.5, \
-            f"Cross-channel correlation: {correlation:.3f} (expected <0.5, " \
-            f"indicating independent processing)"
+        assert abs(correlation) < 0.5, (
+            f'Cross-channel correlation: {correlation:.3f} (expected <0.5, indicating independent processing)'
+        )
 
-        print(f"Cross-channel correlation: {abs(correlation):.3f} (independent: <0.5)")
-        print("\nFull MIMO cascade operational with adaptive tracking!")
+        print(f'Cross-channel correlation: {abs(correlation):.3f} (independent: <0.5)')
+        print('\nFull MIMO cascade operational with adaptive tracking!')
 
 
 class TestCascadeFreqSourceStreaming:
@@ -1244,10 +1212,10 @@ class TestCascadeFreqSourceStreaming:
             freq_source=MockFreqSource(short_freq),
             pole_radius=0.95,
             mode='external',
-            source=source
+            source=source,
         )
 
-        with pytest.raises(ValueError, match="exhausted"):
+        with pytest.raises(ValueError, match='exhausted'):
             list(filter_obj.result(1024))
 
 
@@ -1260,8 +1228,7 @@ class TestCascadePerStagePoleRadius:
         return CascadeNotchFilter(
             num_sources=sources,
             harmonics_per_source=harmonics,
-            frequencies=np.array([[100.0 * (m + 1) for m in range(harmonics)]
-                                   for _ in range(sources)]),
+            frequencies=np.array([[100.0 * (m + 1) for m in range(harmonics)] for _ in range(sources)]),
             pole_radius=pole_radius,
             mode=None,
             source=MockSamplesGenerator(signal, sample_freq),
@@ -1282,8 +1249,7 @@ class TestCascadePerStagePoleRadius:
             assert np.allclose(r[s, :], sched)
 
     def test_full_per_stage_array(self, standard_params):
-        sched = np.array([[0.990, 0.980, 0.970],
-                          [0.995, 0.985, 0.975]])
+        sched = np.array([[0.990, 0.980, 0.970], [0.995, 0.985, 0.975]])
         cas = self._make(sched, standard_params)
         r = cas._pole_radii()
         assert np.allclose(r, sched)
@@ -1291,15 +1257,14 @@ class TestCascadePerStagePoleRadius:
     def test_wrong_shape_raises(self, standard_params):
         bad = np.array([0.99, 0.98])  # wrong length
         cas = self._make(bad, standard_params, harmonics=3, sources=2)
-        with pytest.raises(ValueError, match="does not match"):
+        with pytest.raises(ValueError, match='does not match'):
             cas._pole_radii()
 
     def test_child_filters_receive_per_stage_radius(self, standard_params):
         """Each child AdaptiveNotchFilter should be instantiated with its
         assigned stage pole radius — the core correctness property that
         makes per-stage r actually take effect."""
-        sched = np.array([[0.990, 0.980, 0.970],
-                          [0.995, 0.985, 0.975]])
+        sched = np.array([[0.990, 0.980, 0.970], [0.995, 0.985, 0.975]])
         cas = self._make(sched, standard_params)
         cas._initialize_filters()
         assert len(cas._filters) == 6
@@ -1318,8 +1283,12 @@ class TestCascadePerStagePoleRadius:
         f0 = 150.0
         harmonics = [1, 2, 3]
         signal = generate_tonal_signal(
-            f0=f0, harmonics=harmonics, duration=duration,
-            sample_freq=sample_freq, num_channels=1, snr_db=40,
+            f0=f0,
+            harmonics=harmonics,
+            duration=duration,
+            sample_freq=sample_freq,
+            num_channels=1,
+            snr_db=40,
         )
         n = signal.shape[0]
         traj = np.tile(np.array([f0, 2 * f0, 3 * f0])[np.newaxis, :], (n, 1))
@@ -1328,10 +1297,14 @@ class TestCascadePerStagePoleRadius:
             src = MockSamplesGenerator(signal, sample_freq)
             fs = MockFreqSource(traj)
             cas = CascadeNotchFilter(
-                num_sources=1, harmonics_per_source=3,
+                num_sources=1,
+                harmonics_per_source=3,
                 frequencies=np.array([[f0, 2 * f0, 3 * f0]]),
-                pole_radius=r_array, mode='external', zero_phase=True,
-                source=src, freq_source=fs,
+                pole_radius=r_array,
+                mode='external',
+                zero_phase=True,
+                source=src,
+                freq_source=fs,
             )
             return np.vstack(list(cas.result(1024)))[:, 0]
 
@@ -1341,7 +1314,7 @@ class TestCascadePerStagePoleRadius:
         # Wider notches should attenuate the tones more deeply (lower RMS)
         # than narrower ones — but must *both* attenuate vs unfiltered.
         rms_in = float(np.sqrt(np.mean(signal[:, 0] ** 2)))
-        rms_narrow = float(np.sqrt(np.mean(narrow ** 2)))
-        rms_wide = float(np.sqrt(np.mean(wide ** 2)))
+        rms_narrow = float(np.sqrt(np.mean(narrow**2)))
+        rms_wide = float(np.sqrt(np.mean(wide**2)))
         assert rms_narrow < rms_in
         assert rms_wide < rms_narrow

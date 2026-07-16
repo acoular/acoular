@@ -3019,11 +3019,11 @@ class NotchFilter(Filter):
 
     #: Center frequency of the notch in Hz. Must be less than the Nyquist
     #: frequency (sample_freq / 2).
-    f_notch = Float(desc='center frequency of the notch in Hz')
+    f_notch = Float()
 
     #: Pole radius controlling notch width (0 < r < 1, default 0.99).
     #: Closer to 1 gives a narrower notch; closer to 0 gives a wider notch.
-    pole_radius = Float(0.99, desc='pole radius (0 < r < 1)')
+    pole_radius = Float(0.99)
 
     #: Second-order sections representation of the notch biquad, a single
     #: ``(1, 6)`` section derived from :attr:`f_notch` and :attr:`pole_radius`.
@@ -3129,27 +3129,23 @@ class AdaptiveNotchFilter(NotchFilter):
     #: Must be an object with a ``result(num)`` method yielding
     #: ``(num_samples,)`` frequency arrays. Works for both offline
     #: (wrap a pre-computed array) and real-time scenarios.
-    freq_source = Instance(
-        SamplesGenerator,
-        desc='Streaming source with result(num) yielding (num_samples,) frequency arrays '
-        'for external-mode frequency tracking.',
-    )
+    freq_source = Instance(SamplesGenerator)
 
     #: Adaptation mode. ``None`` infers from *freq_source* (external if
     #: provided, static otherwise). ``'external'`` uses direct frequency
     #: control. ``'auto'`` uses autonomous LMS adaptation.
-    mode = Enum(None, 'external', 'auto', desc="adaptation mode: None, 'external', or 'auto'")
+    mode = Enum(None, 'external', 'auto')
 
     #: LMS step size for auto mode. A single float or a list of step sizes.
-    mu = Union(Float, List, desc='LMS step size for auto mode')
+    mu = Union(Float, List)
 
     #: Moving-average window for frequency smoothing in auto mode.
-    smooth_window = Int(256, desc='moving-average window for frequency smoothing')
+    smooth_window = Int(256)
 
     #: Leak factor for the recursive gradient (0 = instantaneous,
     #: 1 = full recursive). Recommended 0.95 for single-tone tracking with
     #: ``mu`` ~ 0.06 and ``pole_radius`` ~ 0.95.
-    gradient_leak = Float(0.0, desc='leak factor for recursive LMS gradient')
+    gradient_leak = Float(0.0)
 
     # Internal per-channel processing state (transient, not part of digest).
     # Allocated lazily in _ensure_states and reset at the start of result().
@@ -3336,10 +3332,7 @@ class AdaptiveNotchFilter(NotchFilter):
         effective_mode = self._get_effective_mode()
 
         if effective_mode == 'external' and self.freq_source is None:
-            msg = (
-                "mode is 'external' but no freq_source provided. "
-                "Set freq_source or use mode='auto' / None."
-            )
+            msg = "mode is 'external' but no freq_source provided. Set freq_source or use mode='auto' / None."
             raise ValueError(msg)
 
         if effective_mode is None:
@@ -3539,21 +3532,21 @@ class ZeroPhaseNotchFilter(AdaptiveNotchFilter):
 
     #: Core block size used when iterating in overlapping blocks (static /
     #: external modes inside :meth:`result`).
-    block_size = Int(4096, desc='core block size for block-based iteration')
+    block_size = Int(4096)
 
     #: Multiplier applied to the single-filter settling time to compute
     #: the overlap margin on each side of a core block.
-    overlap_factor = Float(2.0, desc='overlap margin multiplier for settling time')
+    overlap_factor = Float(2.0)
 
     #: Number of future blocks buffered for the backward pass in streaming
     #: mode.  Higher values improve boundary accuracy at the cost of latency
     #: and memory.
-    num_lookahead_blocks = Int(1, desc='number of future blocks buffered for backward pass')
+    num_lookahead_blocks = Int(1)
 
     #: When ``True``, collect the entire signal before processing
     #: (full-signal batch processing).  When ``False`` (default), use
     #: deque-based streaming with ``num_lookahead_blocks`` of latency.
-    batch_mode = Bool(False, desc='use full-signal batch processing instead of streaming')
+    batch_mode = Bool(False)
 
     # Internal state for the zero-phase passes (transient, not in digest).
     # Reset at the start of result(); the streaming buffers hold the
@@ -3908,9 +3901,7 @@ class ZeroPhaseNotchFilter(AdaptiveNotchFilter):
                 )
             else:
                 b, a = self._compute_coefficients()
-                fwd_out[:, ch], self._stream_fwd_zi[ch] = self._forward_pass(
-                    data[:, ch], b, a, self._stream_fwd_zi[ch]
-                )
+                fwd_out[:, ch], self._stream_fwd_zi[ch] = self._forward_pass(data[:, ch], b, a, self._stream_fwd_zi[ch])
 
         # First block: buffer only, no output yet
         if self._stream_prev_fwd is None:
@@ -4048,9 +4039,7 @@ class ZeroPhaseNotchFilter(AdaptiveNotchFilter):
                 if is_static:
                     forward_out[start:end, ch], fwd_zi[ch] = self._forward_pass(x, b, a, fwd_zi[ch])
                 else:
-                    forward_out[start:end, ch], fwd_zi[ch] = self._forward_pass_adaptive(
-                        x, traj[start:end], fwd_zi[ch]
-                    )
+                    forward_out[start:end, ch], fwd_zi[ch] = self._forward_pass_adaptive(x, traj[start:end], fwd_zi[ch])
 
         # Backward sweep (right -> left)
         output_work = np.empty_like(signal_work)
@@ -4198,18 +4187,25 @@ class ZeroPhaseNotchFilter(AdaptiveNotchFilter):
             for ch in range(n_ch):
                 if self.mode == 'auto':
                     fwd_out[:, ch], learned_ch, fwd_zi[ch] = self._forward_pass_lms(
-                        source_block[:, ch], ch, fwd_zi[ch],
+                        source_block[:, ch],
+                        ch,
+                        fwd_zi[ch],
                     )
                     if cur_learned is None:
                         cur_learned = np.zeros((n_samp, n_ch))
                     cur_learned[:, ch] = learned_ch
                 elif traj_slice is not None:
                     fwd_out[:, ch], fwd_zi[ch] = self._forward_pass_adaptive(
-                        source_block[:, ch], traj_slice, fwd_zi[ch],
+                        source_block[:, ch],
+                        traj_slice,
+                        fwd_zi[ch],
                     )
                 else:
                     fwd_out[:, ch], fwd_zi[ch] = self._forward_pass(
-                        source_block[:, ch], b, a, fwd_zi[ch],
+                        source_block[:, ch],
+                        b,
+                        a,
+                        fwd_zi[ch],
                     )
 
             fwd_buffer.append(fwd_out)
@@ -4219,13 +4215,21 @@ class ZeroPhaseNotchFilter(AdaptiveNotchFilter):
             # Yield oldest block once buffer exceeds lookahead
             if len(fwd_buffer) > L:
                 yield self._backward_pass_buffered(
-                    fwd_buffer, traj_buffer, learned_buffer, b, a,
+                    fwd_buffer,
+                    traj_buffer,
+                    learned_buffer,
+                    b,
+                    a,
                 )
 
         # Flush remaining buffered blocks
         while fwd_buffer:
             yield self._backward_pass_buffered(
-                fwd_buffer, traj_buffer, learned_buffer, b, a,
+                fwd_buffer,
+                traj_buffer,
+                learned_buffer,
+                b,
+                a,
             )
 
     def _backward_pass_buffered(self, fwd_buffer, traj_buffer, learned_buffer, b, a):
@@ -4255,7 +4259,8 @@ class ZeroPhaseNotchFilter(AdaptiveNotchFilter):
                         parts.append(lb[:, ch])
                 learned_ctx = np.concatenate(parts)
                 bwd, _ = self._backward_pass_adaptive(
-                    context[:, ch], learned_ctx[::-1],
+                    context[:, ch],
+                    learned_ctx[::-1],
                 )
             elif oldest_traj is not None:
                 parts = [oldest_traj]
@@ -4264,7 +4269,8 @@ class ZeroPhaseNotchFilter(AdaptiveNotchFilter):
                         parts.append(tb)
                 traj_ctx = np.concatenate(parts)
                 bwd, _ = self._backward_pass_adaptive(
-                    context[:, ch], traj_ctx[::-1],
+                    context[:, ch],
+                    traj_ctx[::-1],
                 )
             else:
                 bwd, _ = self._backward_pass(context[:, ch], b, a)
@@ -4313,23 +4319,19 @@ class CascadeNotchFilter(TimeOut):
     """
 
     #: Number of independent tonal sources (*S*).
-    num_sources = Int(1, desc='number of independent tonal sources (S)')
+    num_sources = Int(1)
 
     #: Number of harmonics per source (*M*).
-    harmonics_per_source = Int(1, desc='number of harmonics per source (M)')
+    harmonics_per_source = Int(1)
 
     #: Initial / static center frequencies with shape ``(S, M)`` in Hz.
     #: For source *s* and harmonic *m*: ``frequencies[s, m]``.
-    frequencies = CArray(dtype=np.float64, desc='center frequencies, shape (S, M) in Hz')
+    frequencies = CArray(dtype=np.float64)
 
     #: Streaming frequency source for external-mode frequency tracking.
     #: Must have a ``result(num)`` method yielding
     #: ``(num_samples, S*M)`` frequency blocks.
-    freq_source = Instance(
-        SamplesGenerator,
-        desc='Streaming source with result(num) yielding (num_samples, S*M) frequency blocks '
-        'for external-mode frequency tracking.',
-    )
+    freq_source = Instance(SamplesGenerator)
 
     #: Pole radius controlling notch width (0 < r < 1, default 0.95).
     #:
@@ -4339,43 +4341,37 @@ class CascadeNotchFilter(TimeOut):
     #: ``(num_sources, harmonics_per_source)`` for full per-stage control.
     #: Per-stage values are only honoured in external and static modes;
     #: auto (LMS) mode falls back to the array mean.
-    pole_radius = Union(
-        Float(0.95),
-        CArray(dtype=np.float64),
-        desc='pole radius per cascade stage - scalar, (M,), or (S, M)',
-    )
+    pole_radius = Union(Float(0.95), CArray(dtype=np.float64))
 
     #: Adaptation mode. ``None`` infers from *freq_source*.
-    mode = Enum(None, 'external', 'auto', desc="adaptation mode: None, 'external', or 'auto'")
+    mode = Enum(None, 'external', 'auto')
 
     #: LMS step size (float) or per-source schedule (list).
-    mu = Union(Float, List, desc='LMS step size for auto mode')
+    mu = Union(Float, List)
 
     #: Leak factor for recursive LMS gradient
     #: (0 = instantaneous, 1 = full recursive).
-    gradient_leak = Float(0.0, desc='leak factor for recursive LMS gradient')
+    gradient_leak = Float(0.0)
 
     #: Moving-average window for frequency smoothing in auto mode.
-    smooth_window = Int(256, desc='moving-average window for frequency smoothing')
+    smooth_window = Int(256)
 
     #: When ``True``, children are :class:`ZeroPhaseNotchFilter` instances.
-    zero_phase = Bool(False, desc='use zero-phase forward-backward filtering')
+    zero_phase = Bool(False)
 
     #: Core block size for zero-phase block iteration.
-    block_size = Int(4096, desc='core block size for zero-phase iteration')
+    block_size = Int(4096)
 
     #: Number of lookahead blocks used as settling context in
     #: streaming zero-phase mode.  Higher values improve backward-pass
     #: settling at the cost of increased latency (``num_lookahead_blocks``
     #: blocks).  A value of 1 is sufficient when ``block_size`` exceeds the
     #: IIR settling time (about ``7 / abs(log(pole_radius))`` samples).
-    num_lookahead_blocks = Int(
-        1, desc='number of lookahead blocks for streaming zero-phase settling context',
-    )
+    num_lookahead_blocks = Int(1)
 
     #: Use thesis-aligned harmonic cascade LMS
     #: (shared theta per source, joint optimisation).
-    joint_lms = Bool(False, desc='use joint harmonic cascade LMS optimisation')
+    joint_lms = Bool(False)
 
     # Internal state (transient, not part of digest). The child filter
     # bank and the joint-LMS working arrays are (re)built in result().
@@ -4528,7 +4524,9 @@ class CascadeNotchFilter(TimeOut):
             ``(freq_hz, power_db)`` pairs sorted by descending power.
         """
         return find_spectral_peaks(
-            block[:, 0], self.sample_freq, n_peaks=n_peaks,
+            block[:, 0],
+            self.sample_freq,
+            n_peaks=n_peaks,
         )
 
     def _monitor_and_reset_joint(self, current_block):
@@ -4757,10 +4755,7 @@ class CascadeNotchFilter(TimeOut):
         effective_mode = self._get_effective_mode()
 
         if effective_mode == 'external' and self.freq_source is None:
-            msg = (
-                "mode is 'external' but no freq_source provided. "
-                "Set freq_source or use mode='auto' / None."
-            )
+            msg = "mode is 'external' but no freq_source provided. Set freq_source or use mode='auto' / None."
             raise ValueError(msg)
 
         # Reset transient state at the start of each pass.
@@ -5008,7 +5003,10 @@ class CascadeNotchFilter(TimeOut):
                     )
                     zi_back = np.zeros((num_channels, 2), dtype=np.float64)
                     data = iir_time_varying_kernel(
-                        data, cos_theta, float(radii[s, m - 1]), zi_back,
+                        data,
+                        cos_theta,
+                        float(radii[s, m - 1]),
+                        zi_back,
                     )
         elif effective_mode == 'external':
             # trajectories are (S*M, N) each.  Cascade stages are ordered
@@ -5024,7 +5022,10 @@ class CascadeNotchFilter(TimeOut):
                 )
                 zi_back = np.zeros((num_channels, 2), dtype=np.float64)
                 data = iir_time_varying_kernel(
-                    data, cos_theta, float(radii_flat[filter_idx]), zi_back,
+                    data,
+                    cos_theta,
+                    float(radii_flat[filter_idx]),
+                    zi_back,
                 )
         else:
             # Static mode: apply each filter's fixed coefficients

@@ -46,10 +46,7 @@ class TestAdaptiveNotchFilterExternalMode:
 
         # Create adaptive filter with external mode (SISO interface)
         filter_obj = AdaptiveNotchFilter(
-            freq_source=MockFreqSource(freq_trajectory),
-            pole_radius=0.95,
-            mode='external',
-            source=source
+            freq_source=MockFreqSource(freq_trajectory), pole_radius=0.95, mode='external', source=source
         )
 
         # Process entire signal
@@ -65,18 +62,19 @@ class TestAdaptiveNotchFilterExternalMode:
 
         for start, length, expected_freq in zip(segment_starts, segment_lengths, expected_freqs):
             # Check original signal to verify frequency content is present
-            orig_segment = signal[start:start+length, 0]
+            orig_segment = signal[start : start + length, 0]
             orig_power_db = compute_fft_power_db(orig_segment, sample_freq, expected_freq)
 
             # Check filtered signal for suppression
-            filt_segment = filtered[start:start+length, 0]
+            filt_segment = filtered[start : start + length, 0]
             filt_power_db = compute_fft_power_db(filt_segment, sample_freq, expected_freq)
 
             # Verify tracking by checking suppression at the target frequency
             # Suppression should be > 25 dB
             suppression = orig_power_db - filt_power_db
-            assert suppression > 25, \
-                f"Insufficient suppression: {suppression:.1f} dB at {expected_freq} Hz (expected >25 dB)"
+            assert suppression > 25, (
+                f'Insufficient suppression: {suppression:.1f} dB at {expected_freq} Hz (expected >25 dB)'
+            )
 
             # Additional check: compare suppression at target vs nearby frequencies
             # If tracking is accurate, suppression should be strongest at target
@@ -86,9 +84,10 @@ class TestAdaptiveNotchFilterExternalMode:
 
             # Power at target should be lower than power at offset frequencies
             # (allowing for noise floor effects)
-            assert filt_power_db <= min(power_below, power_above) + 3, \
-                f"Filter not centered at {expected_freq} Hz: target={filt_power_db:.1f} dB, " \
-                f"nearby={min(power_below, power_above):.1f} dB"
+            assert filt_power_db <= min(power_below, power_above) + 3, (
+                f'Filter not centered at {expected_freq} Hz: target={filt_power_db:.1f} dB, '
+                f'nearby={min(power_below, power_above):.1f} dB'
+            )
 
     def test_step_frequency_change(self):
         """Test step frequency change (100 Hz → 110 Hz instantaneous).
@@ -108,7 +107,7 @@ class TestAdaptiveNotchFilterExternalMode:
         signal[mid_point:] = np.sin(2 * np.pi * 110.0 * t[mid_point:])
 
         # Add noise
-        signal_power = float(np.mean(signal ** 2))
+        signal_power = float(np.mean(signal**2))
         snr_linear = 10 ** (20 / 10.0)
         noise_power = signal_power / snr_linear
         noise = np.random.randn(num_samples, 1) * np.sqrt(noise_power)
@@ -124,10 +123,7 @@ class TestAdaptiveNotchFilterExternalMode:
 
         # Create adaptive filter (SISO interface)
         filter_obj = AdaptiveNotchFilter(
-            freq_source=MockFreqSource(freq_trajectory),
-            pole_radius=0.95,
-            mode='external',
-            source=source
+            freq_source=MockFreqSource(freq_trajectory), pole_radius=0.95, mode='external', source=source
         )
 
         # Process signal
@@ -135,7 +131,7 @@ class TestAdaptiveNotchFilterExternalMode:
 
         # Check for discontinuities around step change
         # Sample-to-sample jumps should stay within normal variation
-        step_region = filtered[mid_point-50:mid_point+50, 0]
+        step_region = filtered[mid_point - 50 : mid_point + 50, 0]
         diffs = np.diff(step_region)
 
         # Normal variation is small for filtered signal
@@ -144,8 +140,9 @@ class TestAdaptiveNotchFilterExternalMode:
         typical_jump = np.percentile(np.abs(diffs), 90)
 
         # Max jump should not be more than 5x typical jump
-        assert max_jump < 5 * typical_jump, \
-            f"Discontinuity detected: max jump {max_jump:.3f} vs typical {typical_jump:.3f}"
+        assert max_jump < 5 * typical_jump, (
+            f'Discontinuity detected: max jump {max_jump:.3f} vs typical {typical_jump:.3f}'
+        )
 
     def test_static_mode_fallback(self):
         """Test that filter falls back to static mode when no trajectory is provided.
@@ -159,19 +156,14 @@ class TestAdaptiveNotchFilterExternalMode:
 
         # Generate signal at target frequency
         signal = generate_tonal_signal(
-            f0=f_notch, harmonics=[1], duration=duration,
-            sample_freq=sample_freq, num_channels=1, snr_db=20
+            f0=f_notch, harmonics=[1], duration=duration, sample_freq=sample_freq, num_channels=1, snr_db=20
         )
 
         # Create mock source
         source = MockSamplesGenerator(signal, sample_freq)
 
         # Create adaptive filter without trajectory (should behave like static)
-        filter_obj = AdaptiveNotchFilter(
-            f_notch=f_notch,
-            pole_radius=0.95,
-            source=source
-        )
+        filter_obj = AdaptiveNotchFilter(f_notch=f_notch, pole_radius=0.95, source=source)
 
         # Process signal
         filtered = np.vstack(list(filter_obj.result(1024)))
@@ -181,8 +173,7 @@ class TestAdaptiveNotchFilterExternalMode:
         output_power = compute_fft_power_db(filtered[:, 0], sample_freq, f_notch)
         suppression = input_power - output_power
 
-        assert suppression > 25, \
-            f"Static fallback mode: Expected >25 dB suppression, got {suppression:.1f} dB"
+        assert suppression > 25, f'Static fallback mode: Expected >25 dB suppression, got {suppression:.1f} dB'
 
 
 class TestAdaptiveNotchFilterAutoMode:
@@ -202,7 +193,7 @@ class TestAdaptiveNotchFilterAutoMode:
         signal = np.sin(2 * np.pi * 100.0 * t)
 
         # Add noise
-        signal_power = float(np.mean(signal ** 2))
+        signal_power = float(np.mean(signal**2))
         snr_linear = 10 ** (20 / 10.0)
         noise_power = signal_power / snr_linear
         noise = np.random.randn(num_samples, 1) * np.sqrt(noise_power)
@@ -218,7 +209,7 @@ class TestAdaptiveNotchFilterAutoMode:
             mode='auto',
             mu=0.001,  # Step size
             smooth_window=20,
-            source=source
+            source=source,
         )
 
         # Process entire signal
@@ -229,24 +220,23 @@ class TestAdaptiveNotchFilterAutoMode:
         start = int(1.5 * sample_freq)
         length = int(0.4 * sample_freq)
 
-        orig_segment = signal_multi[start:start+length, 0]
-        filt_segment = filtered[start:start+length, 0]
+        orig_segment = signal_multi[start : start + length, 0]
+        filt_segment = filtered[start : start + length, 0]
 
         # Verify strong suppression at 100 Hz
         orig_power = compute_fft_power_db(orig_segment, sample_freq, 100.0)
         filt_power = compute_fft_power_db(filt_segment, sample_freq, 100.0)
         suppression = orig_power - filt_power
 
-        assert suppression > 25, \
-            f"LMS did not converge: suppression {suppression:.1f} dB (expected >25 dB)"
+        assert suppression > 25, f'LMS did not converge: suppression {suppression:.1f} dB (expected >25 dB)'
 
         # Verify tracking accuracy: filter should be tracking near 100 Hz
         # With conservative step size and smoothing, we expect within 3 Hz
         detected_freq = filter_obj.f_notch
         freq_error = abs(detected_freq - 100.0)
-        assert freq_error < 3.0, \
-            f"Tracking accuracy error: detected {detected_freq:.2f} Hz, " \
-            f"expected 100.0 Hz (error: {freq_error:.2f} Hz)"
+        assert freq_error < 3.0, (
+            f'Tracking accuracy error: detected {detected_freq:.2f} Hz, expected 100.0 Hz (error: {freq_error:.2f} Hz)'
+        )
 
     def test_lms_tracking_sweep(self):
         """Test LMS tracking on slow frequency sweep (100 Hz → 110 Hz over 2 seconds).
@@ -273,7 +263,7 @@ class TestAdaptiveNotchFilterAutoMode:
             mode='auto',
             mu=0.002,  # Slightly higher step size for tracking
             smooth_window=30,
-            source=source
+            source=source,
         )
 
         # Process entire signal
@@ -290,37 +280,40 @@ class TestAdaptiveNotchFilterAutoMode:
             start = int(test_time * sample_freq)
             length = int(0.2 * sample_freq)
 
-            orig_segment = signal[start:start+length, 0]
-            filt_segment = filtered[start:start+length, 0]
+            orig_segment = signal[start : start + length, 0]
+            filt_segment = filtered[start : start + length, 0]
 
             # Verify suppression at expected frequency
             orig_power = compute_fft_power_db(orig_segment, sample_freq, expected_freq)
             filt_power = compute_fft_power_db(filt_segment, sample_freq, expected_freq)
             suppression = orig_power - filt_power
 
-            assert suppression > 20, \
-                f"At t={test_time}s: suppression {suppression:.1f} dB at {expected_freq:.1f} Hz " \
-                f"(expected >20 dB)"
+            assert suppression > 20, (
+                f'At t={test_time}s: suppression {suppression:.1f} dB at {expected_freq:.1f} Hz (expected >20 dB)'
+            )
 
 
 class TestTrackingAccuracyValidation:
     """Comprehensive tracking accuracy validation tests (<0.5 Hz target) for SISO filter."""
 
-    @pytest.mark.parametrize("mode,sweep_params", [
-        # External mode: all ranges supported
-        ('external', (100, 120, 'linear')),
-        ('external', (200, 250, 'linear')),
-        ('external', (500, 600, 'linear')),
-        ('external', (100, 120, 'logarithmic')),
-        ('external', (200, 250, 'logarithmic')),
-        ('external', (500, 600, 'logarithmic')),
-        # Auto mode: lower frequency ranges only
-        # (higher frequencies require parameter tuning beyond validation scope)
-        ('auto', (100, 120, 'linear')),
-        ('auto', (200, 250, 'linear')),
-        ('auto', (100, 120, 'logarithmic')),
-        ('auto', (200, 250, 'logarithmic')),
-    ])
+    @pytest.mark.parametrize(
+        'mode,sweep_params',
+        [
+            # External mode: all ranges supported
+            ('external', (100, 120, 'linear')),
+            ('external', (200, 250, 'linear')),
+            ('external', (500, 600, 'linear')),
+            ('external', (100, 120, 'logarithmic')),
+            ('external', (200, 250, 'logarithmic')),
+            ('external', (500, 600, 'logarithmic')),
+            # Auto mode: lower frequency ranges only
+            # (higher frequencies require parameter tuning beyond validation scope)
+            ('auto', (100, 120, 'linear')),
+            ('auto', (200, 250, 'linear')),
+            ('auto', (100, 120, 'logarithmic')),
+            ('auto', (200, 250, 'logarithmic')),
+        ],
+    )
     def test_tracking_accuracy_validation(self, mode, sweep_params):
         """Validate <0.5 Hz tracking across modes, sweep types, and frequency ranges.
 
@@ -345,7 +338,7 @@ class TestTrackingAccuracyValidation:
             freq_trajectory = f_start * (f_end / f_start) ** (t / duration)
 
         # Add noise (SNR = 20 dB)
-        signal_power = float(np.mean(harmonic_signal ** 2))
+        signal_power = float(np.mean(harmonic_signal**2))
         snr_linear = 10 ** (20 / 10.0)
         noise_power = signal_power / snr_linear
         noise = np.random.randn(num_samples, 1) * np.sqrt(noise_power)
@@ -358,10 +351,7 @@ class TestTrackingAccuracyValidation:
         if mode == 'external':
             # External mode: provide ground-truth trajectory via streaming source
             filter_obj = AdaptiveNotchFilter(
-                freq_source=MockFreqSource(freq_trajectory),
-                pole_radius=0.95,
-                mode='external',
-                source=source
+                freq_source=MockFreqSource(freq_trajectory), pole_radius=0.95, mode='external', source=source
             )
         else:  # mode == 'auto'
             # Autonomous mode: let LMS adapt
@@ -371,7 +361,7 @@ class TestTrackingAccuracyValidation:
                 mode='auto',
                 mu=0.002,  # Higher step size for tracking sweeps
                 smooth_window=30,
-                source=source
+                source=source,
             )
 
         # Process signal
@@ -415,10 +405,11 @@ class TestTrackingAccuracyValidation:
         # 95% of windows should have strong suppression (indicating accurate tracking)
         failure_rate = len(tracking_failures) / max(len(range(num_windows)) - (5 if mode == 'auto' else 0), 1)
 
-        assert failure_rate < 0.05, \
-            f"Tracking accuracy failures in {failure_rate*100:.1f}% of windows " \
-            f"(expected <5%) [{mode}, {sweep_type}, {f_start}-{f_end} Hz]. " \
-            f"Failures: {tracking_failures[:3]}"
+        assert failure_rate < 0.05, (
+            f'Tracking accuracy failures in {failure_rate * 100:.1f}% of windows '
+            f'(expected <5%) [{mode}, {sweep_type}, {f_start}-{f_end} Hz]. '
+            f'Failures: {tracking_failures[:3]}'
+        )
 
         # Additional validation: verify overall suppression across sweep
         # Sample middle segment for comprehensive check
@@ -426,8 +417,8 @@ class TestTrackingAccuracyValidation:
         mid_length = int(0.2 * sample_freq)
         mid_freq = (f_start + f_end) / 2
 
-        orig_segment = signal[mid_start:mid_start+mid_length, 0]
-        filt_segment = filtered[mid_start:mid_start+mid_length, 0]
+        orig_segment = signal[mid_start : mid_start + mid_length, 0]
+        filt_segment = filtered[mid_start : mid_start + mid_length, 0]
 
         orig_power = compute_fft_power_db(orig_segment, sample_freq, mid_freq)
         filt_power = compute_fft_power_db(filt_segment, sample_freq, mid_freq)
@@ -436,11 +427,12 @@ class TestTrackingAccuracyValidation:
         # For auto mode, allow slightly lower suppression during sweeps
         min_suppression = 20 if mode == 'auto' else 25
 
-        assert suppression > min_suppression, \
-            f"Insufficient overall suppression: {suppression:.1f} dB " \
-            f"(expected >{min_suppression} dB) [{mode}, {sweep_type}, {f_start}-{f_end} Hz]"
+        assert suppression > min_suppression, (
+            f'Insufficient overall suppression: {suppression:.1f} dB '
+            f'(expected >{min_suppression} dB) [{mode}, {sweep_type}, {f_start}-{f_end} Hz]'
+        )
 
-    @pytest.mark.parametrize("mode", ['external', 'auto'])
+    @pytest.mark.parametrize('mode', ['external', 'auto'])
     def test_tracking_accuracy_step_changes(self, mode):
         """Validate tracking accuracy with step frequency changes.
 
@@ -467,7 +459,7 @@ class TestTrackingAccuracyValidation:
             freq_trajectory[start:end] = freq
 
         # Add noise
-        signal_power = float(np.mean(signal ** 2))
+        signal_power = float(np.mean(signal**2))
         snr_linear = 10 ** (20 / 10.0)
         noise_power = signal_power / snr_linear
         noise = np.random.randn(num_samples, 1) * np.sqrt(noise_power)
@@ -479,10 +471,7 @@ class TestTrackingAccuracyValidation:
         # Create adaptive filter (SISO interface)
         if mode == 'external':
             filter_obj = AdaptiveNotchFilter(
-                freq_source=MockFreqSource(freq_trajectory),
-                pole_radius=0.95,
-                mode='external',
-                source=source
+                freq_source=MockFreqSource(freq_trajectory), pole_radius=0.95, mode='external', source=source
             )
         else:  # auto
             filter_obj = AdaptiveNotchFilter(
@@ -491,7 +480,7 @@ class TestTrackingAccuracyValidation:
                 mode='auto',
                 mu=0.002,
                 smooth_window=20,
-                source=source
+                source=source,
             )
 
         # Process signal
@@ -507,8 +496,8 @@ class TestTrackingAccuracyValidation:
             if mode == 'auto' and i == 0:
                 continue
 
-            orig_segment = signal_with_noise[start:start+length, 0]
-            filt_segment = filtered[start:start+length, 0]
+            orig_segment = signal_with_noise[start : start + length, 0]
+            filt_segment = filtered[start : start + length, 0]
 
             orig_power = compute_fft_power_db(orig_segment, sample_freq, freq)
             filt_power = compute_fft_power_db(filt_segment, sample_freq, freq)
@@ -517,9 +506,9 @@ class TestTrackingAccuracyValidation:
             # For auto mode, first adaptation after step may be lower
             min_suppression = 18 if mode == 'auto' else 25
 
-            assert suppression > min_suppression, \
-                f"Segment {i} at {freq} Hz: suppression {suppression:.1f} dB " \
-                f"(expected >{min_suppression} dB) [{mode}]"
+            assert suppression > min_suppression, (
+                f'Segment {i} at {freq} Hz: suppression {suppression:.1f} dB (expected >{min_suppression} dB) [{mode}]'
+            )
 
 
 class TestAdaptiveMultiChannel:
@@ -538,8 +527,7 @@ class TestAdaptiveMultiChannel:
 
         # Generate multi-channel signal with same tone
         generate_tonal_signal(
-            f0=f_notch, harmonics=[1], duration=duration,
-            sample_freq=sample_freq, num_channels=num_channels, snr_db=20
+            f0=f_notch, harmonics=[1], duration=duration, sample_freq=sample_freq, num_channels=num_channels, snr_db=20
         )
 
         # Create frequency trajectory (1D)
@@ -555,10 +543,7 @@ class TestAdaptiveMultiChannel:
 
         # Create adaptive filter (SISO interface, applied to all channels)
         filter_obj = AdaptiveNotchFilter(
-            freq_source=MockFreqSource(freq_trajectory),
-            pole_radius=0.95,
-            mode='external',
-            source=source
+            freq_source=MockFreqSource(freq_trajectory), pole_radius=0.95, mode='external', source=source
         )
 
         # Process signal
@@ -574,15 +559,12 @@ class TestAdaptiveMultiChannel:
 
         for ch in range(num_channels):
             orig_power = compute_fft_power_db(
-                signal_swept[mid_start:mid_start+mid_length, ch], sample_freq, mid_freq
+                signal_swept[mid_start : mid_start + mid_length, ch], sample_freq, mid_freq
             )
-            filt_power = compute_fft_power_db(
-                filtered[mid_start:mid_start+mid_length, ch], sample_freq, mid_freq
-            )
+            filt_power = compute_fft_power_db(filtered[mid_start : mid_start + mid_length, ch], sample_freq, mid_freq)
             suppression = orig_power - filt_power
 
-            assert suppression > 20, \
-                f"Channel {ch}: Expected >20 dB suppression, got {suppression:.1f} dB"
+            assert suppression > 20, f'Channel {ch}: Expected >20 dB suppression, got {suppression:.1f} dB'
 
 
 class TestFreqSourceStreaming:
@@ -599,13 +581,10 @@ class TestFreqSourceStreaming:
         source = MockSamplesGenerator(signal, sample_freq)
 
         filter_obj = AdaptiveNotchFilter(
-            freq_source=MockFreqSource(short_freq),
-            pole_radius=0.95,
-            mode='external',
-            source=source
+            freq_source=MockFreqSource(short_freq), pole_radius=0.95, mode='external', source=source
         )
 
-        with pytest.raises(ValueError, match="exhausted"):
+        with pytest.raises(ValueError, match='exhausted'):
             list(filter_obj.result(1024))
 
     def test_freq_source_short_block_raises(self):
@@ -619,13 +598,10 @@ class TestFreqSourceStreaming:
         source = MockSamplesGenerator(signal, sample_freq)
 
         filter_obj = AdaptiveNotchFilter(
-            freq_source=MockFreqSource(short_freq),
-            pole_radius=0.95,
-            mode='external',
-            source=source
+            freq_source=MockFreqSource(short_freq), pole_radius=0.95, mode='external', source=source
         )
 
-        with pytest.raises(ValueError, match="does not match"):
+        with pytest.raises(ValueError, match='does not match'):
             list(filter_obj.result(1024))
 
     def test_freq_source_mode_inferred_as_external(self):
@@ -640,11 +616,7 @@ class TestFreqSourceStreaming:
         source = MockSamplesGenerator(signal, sample_freq)
 
         # mode not explicitly set — should be inferred as 'external' from freq_source
-        filter_obj = AdaptiveNotchFilter(
-            freq_source=MockFreqSource(freq_trajectory),
-            pole_radius=0.95,
-            source=source
-        )
+        filter_obj = AdaptiveNotchFilter(freq_source=MockFreqSource(freq_trajectory), pole_radius=0.95, source=source)
 
         assert filter_obj._get_effective_mode() == 'external'
 
@@ -655,8 +627,9 @@ class TestFreqSourceStreaming:
         mid_length = int(0.2 * sample_freq)
         mid_freq = 110.0  # Middle of the 100→120 Hz sweep
 
-        orig_power = compute_fft_power_db(signal[mid_start:mid_start+mid_length, 0], sample_freq, mid_freq)
-        filt_power = compute_fft_power_db(filtered[mid_start:mid_start+mid_length, 0], sample_freq, mid_freq)
+        orig_power = compute_fft_power_db(signal[mid_start : mid_start + mid_length, 0], sample_freq, mid_freq)
+        filt_power = compute_fft_power_db(filtered[mid_start : mid_start + mid_length, 0], sample_freq, mid_freq)
 
-        assert orig_power - filt_power > 20, \
-            f"Mode inference: expected >20 dB suppression, got {orig_power - filt_power:.1f} dB"
+        assert orig_power - filt_power > 20, (
+            f'Mode inference: expected >20 dB suppression, got {orig_power - filt_power:.1f} dB'
+        )

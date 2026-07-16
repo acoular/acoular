@@ -440,9 +440,7 @@ def iir_lms_kernel(
             #          + lambda*(2r*cos(theta)*g[n-1] - r^2*g[n-2])
             # lambda = gradient_leak controls recursion depth (0 = instantaneous,
             # 1 = full IIR gradient). bst0 = x[n-1], bst1 = y[n-1].
-            g_n = 2.0 * st * (bst0 - r * bst1) + lk * (
-                2.0 * r * ct * g_prev - r2 * g_prev2
-            )
+            g_n = 2.0 * st * (bst0 - r * bst1) + lk * (2.0 * r * ct * g_prev - r2 * g_prev2)
             g_prev2 = g_prev
             g_prev = g_n
 

@@ -54,7 +54,7 @@ class TestNotchFilterBaseIntegration:
             duration=standard_params['duration'],
             sample_freq=standard_params['sample_freq'],
             num_channels=1,
-            snr_db=np.inf  # No noise for simpler test
+            snr_db=np.inf,  # No noise for simpler test
         )
 
         # Create mock source with signal
@@ -85,7 +85,7 @@ class TestNotchFilterBaseIntegration:
             duration=standard_params['duration'],
             sample_freq=standard_params['sample_freq'],
             num_channels=num_channels,
-            snr_db=np.inf
+            snr_db=np.inf,
         )
 
         # Create mock source
@@ -121,8 +121,8 @@ class TestNotchFilterBaseIntegration:
             TimeOut(source=mock)
 
         # Verify the error message mentions the abstract method
-        assert "abstract" in str(exc_info.value).lower()
-        assert "result" in str(exc_info.value).lower()
+        assert 'abstract' in str(exc_info.value).lower()
+        assert 'result' in str(exc_info.value).lower()
 
     def test_source_update_propagates(self, standard_params):
         """Test that changing source properties updates base properties.
@@ -132,12 +132,7 @@ class TestNotchFilterBaseIntegration:
         """
         # Create initial signal
         signal1 = generate_tonal_signal(
-            f0=100,
-            harmonics=[1],
-            duration=1.0,
-            sample_freq=16000,
-            num_channels=2,
-            snr_db=np.inf
+            f0=100, harmonics=[1], duration=1.0, sample_freq=16000, num_channels=2, snr_db=np.inf
         )
 
         mock = MockSamplesGenerator()
@@ -155,12 +150,7 @@ class TestNotchFilterBaseIntegration:
 
         # Update source with new signal
         signal2 = generate_tonal_signal(
-            f0=100,
-            harmonics=[1],
-            duration=0.5,
-            sample_freq=16000,
-            num_channels=3,
-            snr_db=np.inf
+            f0=100, harmonics=[1], duration=0.5, sample_freq=16000, num_channels=3, snr_db=np.inf
         )
 
         mock.set_signal(signal2)
@@ -173,12 +163,7 @@ class TestNotchFilterBaseIntegration:
         """Test that different sample frequencies are handled correctly."""
         for sample_freq in [8000, 16000, 44100, 48000]:
             signal = generate_tonal_signal(
-                f0=100,
-                harmonics=[1],
-                duration=0.1,
-                sample_freq=sample_freq,
-                num_channels=1,
-                snr_db=np.inf
+                f0=100, harmonics=[1], duration=0.1, sample_freq=sample_freq, num_channels=1, snr_db=np.inf
             )
 
             mock = MockSamplesGenerator()
