@@ -471,6 +471,87 @@ class RectGrid(Grid):
         return np.array(xis), np.array(yis)
         # return np.arange(self.size)[inds]
 
+#===============================================================================================#
+class CircGrid(Grid):
+    """
+    Provides a circular 2D grid for the beamforming results.
+
+    The grid has circular-sector-like cells with four corners and
+    is on a plane perpendicular to the z-axis.
+    It is defined by lower and upper r- and  phi-limits and the
+    z co-ordinate, and the increments in r and phi direction respectively.
+    """
+
+    #: Inner radius of the grid; defaults to 0.1.
+    r_min = Float(0.1)
+
+    #: Outer radius of the grid; defaults to 1.
+    r_max = Float(1.0)
+
+    #: Minimum/starting angle of the grid; defaults to 0.0.
+    phi_min = Float(0.0)
+
+    #: Maximum angle of the grid; defaults to 360.
+    phi_max = Float(360.0)
+
+    #: Position on z-axis; defaults to 1.0.
+    z = Float(1.0)
+
+    #: Increment in r-direction, defaults to 0.1.
+    dr = Float(0.1)
+
+    #: Increment in phi-direction, defaults to 4.0.
+    dphi = Float(4.0)
+
+    #: Number of grid points along r; is set automatically. (read only)
+    nrsteps = Property()
+
+    #: Number of grid points along phi; is set automatically. (read only)
+    nphisteps = Property()
+
+    # is the extent property needed later ?????
+
+    #: A unique identifier for the grid, based on its properties. (read-only)
+    digest = Property(
+        depends_on=['r_min', 'r_max', 'phi_min', 'phi_max', 'z', 'dr', 'dphi']
+        )
+
+    @property_depends_on('nrsteps, nphisteps')
+    def _get_size(self):
+        return self.nrsteps * self.nphisteps
+
+    @property_depends_on('nrsteps, nphisteps')
+    def _get_shape(self):
+        return (self.nrsteps, self.nphisteps)
+
+    @property_depends_on('r_min, r_max, dr')
+    def _get_nrsteps(self):
+        i = abs(self.dr)
+        if i != 0:
+            return int(round((abs(self.r_max - self.r_min) + i) / i))
+        return 1
+
+    @property_depends_on('phi_min, phi_max, dphi')
+    def _get_nphisteps(self):
+        diff = self.phi_max - self.phi_min
+        i = abs(self.dphi)
+        if diff == 360.0:
+            diff -= i
+        else:
+            diff = diff % 360
+
+        if i != 0:
+            return int(round((diff % 360.0 + i) / i))
+        return 1
+
+    @cached_property
+    def _get_digest(self):
+        return digest(self)
+
+
+#===============================================================================================#
+
+
 
 class RectGrid3D(RectGrid):
     """
