@@ -5,7 +5,7 @@ Upcoming
 ------------------------
     **Internal**
         * Fix several sphinx attribute links in the docstrings that lead to build warnings
-        * Renamed :attr:`~acoular.environments.Environment._r` to :attr:`~acoular.environments.Environment.apparent_r`
+        * Renamed :meth:`~acoular.environments.Environment._r` to :meth:`~acoular.environments.Environment.apparent_r`
 
 26.04
 ------------------------

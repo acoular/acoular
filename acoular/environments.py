@@ -212,13 +212,13 @@ class Environment(HasStrictTraits):
         Parameters
         ----------
         gpos : :class:`numpy.ndarray` of :class:`floats<float>`
-            The coordinates of the first set of points. Should be of shape `(N, 3)`, where `N` is
-            the number of points.
+            The coordinates of the first set of points. Should be of shape ``(3, N)``, where `N` is
+            the number of points (x, y, z in rows).
 
         mpos : :class:`float` or :class:`numpy.ndarray` of :class:`floats<float>`, optional
             The coordinates of the second set of points. If a scalar is provided, it is treated as
-            the origin ``(0, 0, 0)``. If an array is given, it should have shape `(M, 3)`, where `M`
-            is the number of points.
+            the origin ``(0, 0, 0)``. If an array is given, it should have shape ``(3, M)``, where
+            `M` is the number of points.
 
         Returns
         -------
@@ -297,12 +297,12 @@ class UniformFlowEnvironment(Environment):
         Parameters
         ----------
         gpos : :class:`numpy.ndarray` of :class:`floats<float>`
-            The 3-D coordinates of the first set of points, shape `(N, 3)`.
+            The 3-D coordinates of the first set of points, shape ``(3, N)``.
 
         mpos : :class:`float` or :class:`numpy.ndarray` of :class:`floats<float>`, optional
             The 3-D coordinates of the second set of points. If a scalar is provided, it is
             treated as the origin ``(0, 0, 0)``. If an array is given, it should have shape
-            `(M, 3)`, where `M` is the number of points.
+            ``(3, M)``, where `M` is the number of points.
 
         Returns
         -------
