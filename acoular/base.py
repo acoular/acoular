@@ -257,7 +257,10 @@ class SpectraOut(SpectraGenerator):
         Yields
         ------
         numpy.ndarray
-            A two-dimensional block of shape (num, num_channels * num_freqs).
+            A two-dimensional array shape (num, :attr:`num_freqs` ``*`` :attr:`num_channels`).
+            Spectra for the individual channels are interlaced in the second dimension so that 
+            ``reshape(num, num_freqs, num_channels)`` would produce a three-dimensional array with 
+            access to individual channel data.
         """
 
 

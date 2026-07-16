@@ -142,9 +142,13 @@ class RFFT(BaseSpectra, SpectraOut):
         Yields
         ------
         :class:`numpy.ndarray`
-            A block of FFT spectra with shape (num, :attr:`num_channels` ``*`` :attr:`num_freqs`).
+            A two-dimensional array with shape (num, :attr:`num_freqs` ``*`` :attr:`num_channels`). 
+            Spectra for the individual channels are interlaced in the second dimension so that 
+            ``reshape(num, num_freqs, num_channels)`` would produce a three-dimensional array with 
+            access to individual channel data.
+
             The final block may contain fewer than ``num`` spectra if the input data is insufficient
-            to fill the last block.
+            to fill the last block.           
 
         Notes
         -----
@@ -336,7 +340,11 @@ class AutoPowerSpectra(SpectraOut):
         Yields
         ------
         :class:`numpy.ndarray`
-            (num, :attr:`num_channels` ``*`` :attr:`num_freqs`). The last block may contain fewer
+            A two-dimensional array with shape (num, :attr:`num_freqs` ``*`` :attr:`num_channels`). 
+            Spectra for the individual channels are interlaced in the second dimension so that 
+            ``reshape(num, num_freqs, num_channels)`` would produce a three-dimensional array with 
+            access to individual channel data.        
+            The last block may contain fewer
             snapshots if the input data does not completely fill the requested block size.
 
         Notes
